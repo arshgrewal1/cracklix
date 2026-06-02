@@ -1,15 +1,15 @@
 
 "use client"
 
-import { useState, useEffect } from "react"
-import { SAMPLE_MOCK } from "@/lib/mock-data"
+import { useState, useEffect, useMemo } from "react"
+import { useParams, useRouter } from "next/navigation"
+import { EXAMS, SAMPLE_MOCK } from "@/lib/mock-data"
 import Timer from "@/components/mocks/Timer"
 import QuestionPalette from "@/components/mocks/QuestionPalette"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { ChevronLeft, ChevronRight, Flag, ShieldCheck, AlertCircle } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { ChevronLeft, ChevronRight, Flag, ShieldCheck, AlertCircle, Trash2 } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,37 +23,49 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function MockAttempt() {
+  const params = useParams()
   const router = useRouter()
+  const mockId = params.id as string
+  
+  // In a real app, we'd fetch this. For now, we use our sample or find by ID if possible.
+  const mockData = useMemo(() => {
+    return SAMPLE_MOCK.id === mockId ? SAMPLE_MOCK : SAMPLE_MOCK
+  }, [mockId])
+
   const [currentIdx, setCurrentIdx] = useState(0)
   const [answers, setAnswers] = useState<Record<number, number>>({})
   const [flagged, setFlagged] = useState<number[]>([])
   const [isMounted, setIsMounted] = useState(false)
   
-  const question = SAMPLE_MOCK.questions[currentIdx]
+  const question = mockData.questions[currentIdx]
 
   useEffect(() => {
     setIsMounted(true)
-    const saved = localStorage.getItem(`mock_progress_${SAMPLE_MOCK.id}`)
+    const saved = localStorage.getItem(`mock_progress_${mockId}`)
     if (saved) {
-      const { answers: savedAnswers, flagged: savedFlagged, currentIdx: savedIdx } = JSON.parse(saved)
-      setAnswers(savedAnswers || {})
-      setFlagged(savedFlagged || [])
-      setCurrentIdx(savedIdx || 0)
+      try {
+        const { answers: savedAnswers, flagged: savedFlagged, currentIdx: savedIdx } = JSON.parse(saved)
+        setAnswers(savedAnswers || {})
+        setFlagged(savedFlagged || [])
+        setCurrentIdx(savedIdx || 0)
+      } catch (e) {
+        console.error("Failed to load progress")
+      }
     }
-  }, [])
+  }, [mockId])
 
   useEffect(() => {
     if (isMounted) {
-      localStorage.setItem(`mock_progress_${SAMPLE_MOCK.id}`, JSON.stringify({
+      localStorage.setItem(`mock_progress_${mockId}`, JSON.stringify({
         answers,
         flagged,
         currentIdx
       }))
     }
-  }, [answers, flagged, currentIdx, isMounted])
+  }, [answers, flagged, currentIdx, isMounted, mockId])
 
   const handleNext = () => {
-    if (currentIdx < SAMPLE_MOCK.questions.length - 1) {
+    if (currentIdx < mockData.questions.length - 1) {
       setCurrentIdx(currentIdx + 1)
     }
   }
@@ -71,14 +83,19 @@ export default function MockAttempt() {
     )
   }
 
+  const clearResponse = () => {
+    const newAnswers = { ...answers }
+    delete newAnswers[currentIdx]
+    setAnswers(newAnswers)
+  }
+
   const submitMock = () => {
-    const correctCount = SAMPLE_MOCK.questions.reduce((acc, q, idx) => {
+    const correctCount = mockData.questions.reduce((acc, q, idx) => {
       return answers[idx] === q.correctAnswer ? acc + 1 : acc
     }, 0)
     
-    // Identify weak topics (any topic where accuracy < 70%)
     const topicStats: Record<string, { total: number; correct: number }> = {}
-    SAMPLE_MOCK.questions.forEach((q, idx) => {
+    mockData.questions.forEach((q, idx) => {
       if (!topicStats[q.topic]) topicStats[q.topic] = { total: 0, correct: 0 }
       topicStats[q.topic].total++
       if (answers[idx] === q.correctAnswer) topicStats[q.topic].correct++
@@ -89,7 +106,7 @@ export default function MockAttempt() {
       .map(([topic]) => topic)
     
     const resultData = {
-      mockId: SAMPLE_MOCK.id,
+      mockId: mockData.id,
       userId: "guest",
       answers,
       score: correctCount,
@@ -98,13 +115,13 @@ export default function MockAttempt() {
       weakTopics,
       correctCount,
       incorrectCount: Object.keys(answers).length - correctCount,
-      totalQuestions: SAMPLE_MOCK.questions.length,
+      totalQuestions: mockData.questions.length,
       timestamp: new Date().toISOString()
     }
     
-    localStorage.setItem(`last_result_${SAMPLE_MOCK.id}`, JSON.stringify(resultData))
-    localStorage.removeItem(`mock_progress_${SAMPLE_MOCK.id}`)
-    router.push(`/results/${SAMPLE_MOCK.id}`)
+    localStorage.setItem(`last_result_${mockId}`, JSON.stringify(resultData))
+    localStorage.removeItem(`mock_progress_${mockId}`)
+    router.push(`/results/${mockId}`)
   }
 
   if (!isMounted) return null
@@ -118,13 +135,13 @@ export default function MockAttempt() {
           </div>
           <div>
             <h1 className="font-headline font-bold text-sm sm:text-lg truncate max-w-[200px] sm:max-w-md">
-              {SAMPLE_MOCK.title}
+              {mockData.title}
             </h1>
           </div>
         </div>
         
         <div className="flex items-center gap-4 sm:gap-6">
-          <Timer initialMinutes={SAMPLE_MOCK.durationInMinutes} onTimeUp={submitMock} />
+          <Timer initialMinutes={mockData.durationInMinutes} onTimeUp={submitMock} />
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" className="font-bold">Submit Exam</Button>
@@ -133,7 +150,7 @@ export default function MockAttempt() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Ready to submit?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  You have attempted {Object.keys(answers).length} out of {SAMPLE_MOCK.questions.length} questions.
+                  You have attempted {Object.keys(answers).length} out of {mockData.questions.length} questions.
                   Submission is final and results will be calculated immediately.
                 </AlertDialogDescription>
               </AlertDialogHeader>
@@ -150,7 +167,7 @@ export default function MockAttempt() {
 
       <main className="flex flex-1 overflow-hidden">
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar bg-slate-50/30">
-          <div className="max-w-3xl mx-auto space-y-8">
+          <div className="max-w-3xl mx-auto space-y-8 pb-20">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-black text-primary bg-primary/5 px-3 py-1.5 rounded-lg border border-primary/10 tracking-widest uppercase">
@@ -204,25 +221,37 @@ export default function MockAttempt() {
                 <Button variant="outline" size="lg" className="flex-1 sm:flex-none font-bold" onClick={handlePrev} disabled={currentIdx === 0}>
                   <ChevronLeft className="mr-2 h-4 w-4" /> Previous
                 </Button>
-                <Button variant="outline" size="lg" className="flex-1 sm:flex-none font-bold" onClick={handleNext} disabled={currentIdx === SAMPLE_MOCK.questions.length - 1}>
+                <Button variant="outline" size="lg" className="flex-1 sm:flex-none font-bold" onClick={handleNext} disabled={currentIdx === mockData.questions.length - 1}>
                   Next <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
               </div>
-              <Button 
-                variant="ghost" 
-                className={`w-full sm:w-auto font-black uppercase tracking-widest text-[10px] transition-all h-12 rounded-xl border-2 ${flagged.includes(currentIdx) ? "text-accent bg-accent/5 border-accent/20" : "border-transparent"}`} 
-                onClick={toggleFlag}
-              >
-                <Flag className={`mr-2 h-4 w-4 ${flagged.includes(currentIdx) ? "fill-current" : ""}`} />
-                {flagged.includes(currentIdx) ? "Review Marked" : "Mark for Review"}
-              </Button>
+              
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  className="text-muted-foreground hover:text-destructive gap-2"
+                  onClick={clearResponse}
+                  disabled={answers[currentIdx] === undefined}
+                >
+                  <Trash2 className="h-4 w-4" /> Clear
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className={`flex-1 sm:flex-none font-black uppercase tracking-widest text-[10px] transition-all h-12 rounded-xl border-2 ${flagged.includes(currentIdx) ? "text-accent bg-accent/5 border-accent/20" : "border-transparent"}`} 
+                  onClick={toggleFlag}
+                >
+                  <Flag className={`mr-2 h-4 w-4 ${flagged.includes(currentIdx) ? "fill-current" : ""}`} />
+                  {flagged.includes(currentIdx) ? "Review Marked" : "Mark for Review"}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
 
         <aside className="w-80 border-l bg-card overflow-y-auto hidden lg:block p-8">
           <QuestionPalette 
-            totalQuestions={SAMPLE_MOCK.questions.length}
+            totalQuestions={mockData.questions.length}
             currentIndex={currentIdx}
             answeredIndices={Object.keys(answers).map(Number)}
             flaggedIndices={flagged}
