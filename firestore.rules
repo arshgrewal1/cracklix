@@ -2,7 +2,7 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // FORCE DEPLOYMENT ID: CRACKLIX_RESOLVE_V118
+    // FORCE DEPLOYMENT ID: CRACKLIX_RESOLVE_V120
     // AUTHOR: Arsh Grewal Management
     // PURPOSE: Explicitly allow public read access for all content collections to fix permission denied errors.
 
