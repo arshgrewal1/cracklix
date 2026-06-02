@@ -24,13 +24,12 @@ import {
 export default function MockAttempt() {
   const router = useRouter()
   const [currentIdx, setCurrentIdx] = useState(0)
-  const [answers, setAnswers] = useState<Record<number, string>>({})
+  const [answers, setAnswers] = useState<Record<number, number>>({})
   const [flagged, setFlagged] = useState<number[]>([])
   const [isMounted, setIsMounted] = useState(false)
   
   const question = SAMPLE_MOCK.questions[currentIdx]
 
-  // Initialize and check for existing progress
   useEffect(() => {
     setIsMounted(true)
     const saved = localStorage.getItem(`mock_progress_${SAMPLE_MOCK.id}`)
@@ -42,7 +41,6 @@ export default function MockAttempt() {
     }
   }, [])
 
-  // Auto-save progress
   useEffect(() => {
     if (isMounted) {
       localStorage.setItem(`mock_progress_${SAMPLE_MOCK.id}`, JSON.stringify({
@@ -73,14 +71,30 @@ export default function MockAttempt() {
   }
 
   const submitMock = () => {
-    // Calculate final stats
     const correctCount = SAMPLE_MOCK.questions.reduce((acc, q, idx) => {
       return answers[idx] === q.correctAnswer ? acc + 1 : acc
     }, 0)
     
+    // Identify weak topics (any topic where a question was missed)
+    const topicStats: Record<string, { total: number; correct: number }> = {}
+    SAMPLE_MOCK.questions.forEach((q, idx) => {
+      if (!topicStats[q.topic]) topicStats[q.topic] = { total: 0, correct: 0 }
+      topicStats[q.topic].total++
+      if (answers[idx] === q.correctAnswer) topicStats[q.topic].correct++
+    })
+
+    const weakTopics = Object.entries(topicStats)
+      .filter(([topic, stats]) => (stats.correct / stats.total) < 0.7)
+      .map(([topic]) => topic)
+    
     const resultData = {
       mockId: SAMPLE_MOCK.id,
+      userId: "guest",
       answers,
+      score: correctCount,
+      accuracy: Math.round((correctCount / (Object.keys(answers).length || 1)) * 100),
+      rank: Math.floor(Math.random() * 500) + 1, // Mock rank
+      weakTopics,
       correctCount,
       incorrectCount: Object.keys(answers).length - correctCount,
       totalQuestions: SAMPLE_MOCK.questions.length,
@@ -96,7 +110,6 @@ export default function MockAttempt() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background">
-      {/* Header */}
       <header className="h-16 border-b flex items-center justify-between px-6 bg-card shrink-0">
         <div className="flex items-center gap-3">
           <div className="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
@@ -134,9 +147,7 @@ export default function MockAttempt() {
         </div>
       </header>
 
-      {/* Main Content Area */}
       <main className="flex flex-1 overflow-hidden">
-        {/* Left Side: Question Area */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar">
           <div className="max-w-3xl mx-auto space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -151,30 +162,30 @@ export default function MockAttempt() {
               <div className="flex items-center gap-2 px-3 py-1 bg-secondary/10 border border-secondary/20 rounded-lg">
                 <AlertCircle className="h-3 w-3 text-secondary" />
                 <span className="text-xs font-bold text-secondary uppercase tracking-widest">
-                  Subject: {question.subject}
+                  Topic: {question.topic}
                 </span>
               </div>
             </div>
 
             <div className="space-y-6">
               <h2 className="text-xl sm:text-2xl font-medium leading-relaxed text-foreground/90">
-                {question.text}
+                {question.question}
               </h2>
 
               <RadioGroup 
-                value={answers[currentIdx] || ""} 
-                onValueChange={(val) => setAnswers(prev => ({ ...prev, [currentIdx]: val }))}
+                value={answers[currentIdx]?.toString() || ""} 
+                onValueChange={(val) => setAnswers(prev => ({ ...prev, [currentIdx]: parseInt(val) }))}
                 className="space-y-4"
               >
                 {question.options.map((opt, i) => {
-                  const isSelected = answers[currentIdx] === opt
+                  const isSelected = answers[currentIdx] === i
                   return (
                     <div 
                       key={i} 
-                      onClick={() => setAnswers(prev => ({ ...prev, [currentIdx]: opt }))}
+                      onClick={() => setAnswers(prev => ({ ...prev, [currentIdx]: i }))}
                       className={`flex items-center space-x-3 p-5 border-2 rounded-2xl transition-all cursor-pointer hover:border-primary/40 ${isSelected ? 'border-primary bg-primary/5 ring-4 ring-primary/5' : 'border-border bg-card/50'}`}
                     >
-                      <RadioGroupItem value={opt} id={`opt-${i}`} className="text-primary border-primary shrink-0" />
+                      <RadioGroupItem value={i.toString()} id={`opt-${i}`} className="text-primary border-primary shrink-0" />
                       <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer text-base font-medium select-none">
                         <span className="mr-4 text-muted-foreground font-headline font-bold">
                           {String.fromCharCode(65 + i)}.
@@ -187,7 +198,6 @@ export default function MockAttempt() {
               </RadioGroup>
             </div>
 
-            {/* Controls */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-12 border-t">
               <div className="flex gap-4 w-full sm:w-auto">
                 <Button variant="outline" size="lg" className="flex-1 sm:flex-none" onClick={handlePrev} disabled={currentIdx === 0}>
@@ -209,7 +219,6 @@ export default function MockAttempt() {
           </div>
         </div>
 
-        {/* Right Side: Palette/Meta */}
         <aside className="w-80 border-l bg-card/50 overflow-y-auto hidden lg:block p-6">
           <QuestionPalette 
             totalQuestions={SAMPLE_MOCK.questions.length}
@@ -218,27 +227,8 @@ export default function MockAttempt() {
             flaggedIndices={flagged}
             onSelect={setCurrentIdx}
           />
-          
-          <div className="mt-8 p-6 border rounded-2xl bg-card space-y-6">
-            <h4 className="text-xs font-black uppercase text-muted-foreground tracking-widest">Exam Guidance</h4>
-            <div className="space-y-4">
-              <GuidelineItem text="Correct answer earns 1 mark." />
-              <GuidelineItem text="No negative marking applies." />
-              <GuidelineItem text="Palette helps track progress." />
-              <GuidelineItem text="Auto-saves your progress." />
-            </div>
-          </div>
         </aside>
       </main>
-    </div>
-  )
-}
-
-function GuidelineItem({ text }: { text: string }) {
-  return (
-    <div className="flex items-start gap-3">
-      <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
-      <span className="text-xs text-muted-foreground font-medium leading-relaxed">{text}</span>
     </div>
   )
 }

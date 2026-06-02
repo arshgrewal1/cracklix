@@ -1,24 +1,26 @@
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
+export type ExamCategory = 'Police' | 'Clerk' | 'Teaching' | 'Banking' | 'General';
 
 export interface Question {
   id: string;
-  text: string;
+  question: string;
   options: string[];
-  correctAnswer: string;
-  explanation?: string;
-  subject: string;
+  correctAnswer: number; // 0-indexed index
+  explanation: string;
+  topic: string;
   difficulty: Difficulty;
-  category?: string;
 }
 
 export interface Exam {
   id: string;
-  title: string;
-  description: string;
-  category: string;
-  thumbnail: string;
-  totalMocks: number;
-  activeQuestions: number;
+  name: string;
+  category: ExamCategory;
+  totalQuestions: number;
+  duration: number; // minutes
+  description?: string;
+  thumbnail?: string;
+  totalMocks?: number;
+  activeQuestions?: number;
 }
 
 export interface Mock {
@@ -27,22 +29,22 @@ export interface Mock {
   title: string;
   durationInMinutes: number;
   questions: Question[];
-  totalMarks: number;
+  totalMarks?: number;
   attempts?: number;
 }
 
 export interface AttemptResult {
-  id: string;
-  mockId: string;
   userId: string;
+  mockId: string;
   score: number;
-  totalScore: number;
-  correctCount: number;
-  incorrectCount: number;
-  unansweredCount: number;
-  timeTakenInSeconds: number;
-  answers: Record<string, string>;
-  timestamp: string;
+  accuracy: number;
+  rank: number;
+  weakTopics: string[];
+  correctCount?: number;
+  incorrectCount?: number;
+  totalQuestions?: number;
+  timestamp?: string;
+  answers?: Record<number, number>; // questionIdx -> selectedOptionIdx
 }
 
 export interface CurrentAffair {
@@ -60,4 +62,13 @@ export interface Notification {
   time: string;
   isRead: boolean;
   type: 'alert' | 'update' | 'result';
+}
+
+export interface User {
+  id: string;
+  name: string;
+  phone: string;
+  state: 'Punjab';
+  targetExam: string;
+  createdAt: string;
 }
