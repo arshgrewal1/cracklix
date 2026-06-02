@@ -11,11 +11,11 @@ export default function QuestionBank() {
     <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-headline font-bold">Question Bank</h1>
+          <h1 className="text-3xl font-headline font-bold text-primary">Question Bank</h1>
           <p className="text-muted-foreground">Manage 2,450 questions across all Punjab exam categories.</p>
         </div>
         <div className="flex gap-4">
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2 border-primary/20 text-primary">
             <FileText className="h-4 w-4" /> Import CSV
           </Button>
           <Button className="bg-primary hover:bg-primary/90 gap-2">
@@ -35,7 +35,6 @@ export default function QuestionBank() {
               <Button variant="outline" size="sm" className="gap-2">
                 <Filter className="h-4 w-4" /> Filter
               </Button>
-              <Button variant="ghost" size="sm">Export</Button>
             </div>
           </div>
         </CardHeader>
@@ -55,7 +54,7 @@ export default function QuestionBank() {
                 <TableRow key={q.id}>
                   <TableCell className="font-mono text-xs text-muted-foreground uppercase">{q.id}</TableCell>
                   <TableCell className="max-w-[400px]">
-                    <p className="truncate font-medium">{q.text}</p>
+                    <p className="truncate font-medium text-primary">{q.question}</p>
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="bg-secondary/10 text-secondary border-none">

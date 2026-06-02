@@ -25,7 +25,6 @@ export default function Home() {
 
       {/* 1. HERO SECTION */}
       <section className="relative pt-20 pb-32 overflow-hidden trust-gradient">
-        {/* Subtle Map Watermark */}
         <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
            <svg viewBox="0 0 100 100" className="w-[800px] h-[800px] text-white">
              <path d="M40 35 L55 40 L60 60 L45 70 L35 55 Z" fill="currentColor" />
@@ -36,19 +35,19 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
               <div className="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/20">
-                <ShieldCheck className="h-4 w-4 text-[#F59E0B]" />
+                <ShieldCheck className="h-4 w-4 text-accent" />
                 Punjab’s Most Trusted Exam Platform
               </div>
               <h1 className="text-5xl md:text-7xl font-headline font-bold text-white leading-[1.05]">
                 Prepare Smarter.<br />
-                <span className="text-[#F59E0B]">Score Higher.</span>
+                <span className="text-accent">Score Higher.</span>
               </h1>
               <p className="text-xl text-blue-100/70 max-w-xl leading-relaxed font-medium">
                 Punjab Government Exams di Complete Preparation ik hi Platform te. Structured mocks based on latest recruitment trends.
               </p>
               
               <div className="flex flex-wrap gap-4 pt-4">
-                <Button asChild size="lg" className="h-16 px-10 bg-[#F59E0B] hover:bg-[#F59E0B]/90 text-white font-bold rounded-2xl gap-2 shadow-xl shadow-[#F59E0B]/20">
+                <Button asChild size="lg" className="h-16 px-10 bg-accent hover:bg-accent/90 text-white font-bold rounded-2xl gap-2 shadow-xl shadow-accent/20">
                   <Link href="/mocks">Start Free Mock <ArrowRight className="h-5 w-5" /></Link>
                 </Button>
                 <Button variant="outline" asChild size="lg" className="h-16 px-10 border-white/20 text-white hover:bg-white/10 rounded-2xl font-bold bg-white/5 backdrop-blur-sm">
@@ -57,16 +56,16 @@ export default function Home() {
               </div>
 
               <div className="flex flex-wrap items-center gap-8 pt-6 text-[10px] font-black text-white/50 uppercase tracking-widest">
-                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#F59E0B]" /> 10,000+ Questions</div>
-                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#F59E0B]" /> 500+ Mocks</div>
-                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#F59E0B]" /> 50+ Exams</div>
-                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-[#F59E0B]" /> Detailed Analytics</div>
+                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> 10,000+ Questions</div>
+                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> 500+ Mocks</div>
+                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> 50+ Exams</div>
+                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> Detailed Analytics</div>
               </div>
             </div>
 
             {/* DASHBOARD PREVIEW */}
             <div className="relative group lg:ml-auto">
-              <div className="absolute -inset-4 bg-gradient-to-r from-[#F59E0B]/20 to-transparent blur-2xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute -inset-4 bg-gradient-to-r from-accent/20 to-transparent blur-2xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
               <div className="dashboard-card relative p-10 space-y-8 border-2">
                 <div className="flex justify-between items-center border-b pb-6">
                    <div>
@@ -79,9 +78,18 @@ export default function Home() {
                 </div>
 
                 <div className="grid grid-cols-3 gap-8 text-center">
-                  <DashboardStat label="Score" value="72/100" />
-                  <DashboardStat label="Rank" value="128/4500" color="text-secondary" />
-                  <DashboardStat label="Accuracy" value="81%" />
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Score</p>
+                    <p className="text-3xl font-headline font-black text-primary">72/100</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Rank</p>
+                    <p className="text-3xl font-headline font-black text-secondary">128/4500</p>
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Accuracy</p>
+                    <p className="text-3xl font-headline font-black text-primary">81%</p>
+                  </div>
                 </div>
 
                 <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
@@ -135,7 +143,30 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {EXAMS.slice(0, 8).map(exam => (
-              <ExamCard key={exam.id} exam={exam} />
+              <Link href={`/exams/${exam.id}`} key={exam.id}>
+                <Card className="hover:shadow-xl transition-all duration-300 border-slate-100 rounded-[1.5rem] bg-white group h-full flex flex-col">
+                  <CardContent className="p-8 space-y-6 flex-1 flex flex-col">
+                     <div className="flex justify-between items-start">
+                       <span className="text-[9px] font-black text-secondary bg-secondary/5 px-3 py-1.5 rounded-lg border border-secondary/10 uppercase tracking-widest">
+                         {exam.board}
+                       </span>
+                       <Trophy className="h-4 w-4 text-slate-200 group-hover:text-secondary transition-colors" />
+                     </div>
+                     <div>
+                       <h3 className="text-xl font-headline font-bold text-primary mb-2 line-clamp-1 group-hover:text-secondary transition-colors">{exam.name}</h3>
+                       <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em]">{exam.category}</p>
+                     </div>
+                     <div className="pt-6 border-t mt-auto flex items-center justify-between">
+                       <div className="flex gap-4">
+                          <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase">
+                             <BookOpen className="h-3 w-3" /> {exam.totalMocks} Mocks
+                          </div>
+                       </div>
+                       <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-secondary group-hover:translate-x-1 transition-all" />
+                     </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
@@ -151,80 +182,32 @@ export default function Home() {
            
            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {[1, 2, 3].map(i => (
-                <MockCard key={i} />
+                <Card key={i} className="border-slate-100 rounded-2xl bg-white hover:border-secondary/30 transition-all overflow-hidden">
+                  <div className="bg-slate-50 p-4 flex justify-between items-center border-b">
+                    <span className="text-[9px] font-black text-primary bg-primary/5 px-2 py-1 rounded">LATEST PATTERN</span>
+                    <span className="text-[9px] font-bold text-muted-foreground uppercase">1.2k Attempts</span>
+                  </div>
+                  <CardContent className="p-6 space-y-6">
+                    <h3 className="text-lg font-headline font-bold text-primary">Full Length Assessment #01</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
+                        <Clock className="h-4 w-4 text-secondary" /> 120 Mins
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
+                        <BookOpen className="h-4 w-4 text-secondary" /> 100 Qs
+                      </div>
+                    </div>
+                    <Button asChild className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl">
+                       <Link href={`/mocks/${SAMPLE_MOCK.id}`}>Start Free Test</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
               ))}
            </div>
         </div>
       </section>
 
-      {/* 5. FEATURES SECTION */}
-      <section className="section-spacing bg-primary text-white">
-        <div className="container mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
-            <FeatureItem 
-              icon={<ShieldCheck className="text-[#F59E0B]" />} 
-              title="Pattern Based Mocks" 
-              desc="Every mock test is designed based on actual recruitment board history." 
-            />
-            <FeatureItem 
-              icon={<Trophy className="text-[#F59E0B]" />} 
-              title="Detailed Solutions" 
-              desc="Bilingual explanations with step-by-step logic and shortcuts." 
-            />
-            <FeatureItem 
-              icon={<BarChart3 className="text-[#F59E0B]" />} 
-              title="Performance Analytics" 
-              desc="Track speed, accuracy and get rank prediction in real-time." 
-            />
-            <FeatureItem 
-              icon={<Smartphone className="text-[#F59E0B]" />} 
-              title="Study Anytime" 
-              desc="Access your mocks on web or our mobile app seamlessly." 
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* 6. MOBILE APP PREVIEW */}
-      <section className="section-spacing bg-slate-50 overflow-hidden">
-        <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
-             <div className="space-y-8">
-                <h2 className="text-5xl font-headline font-bold text-primary leading-tight">
-                   The Most Powerful<br />
-                   <span className="text-secondary">Prep System</span> in Your Pocket
-                </h2>
-                <p className="text-lg text-muted-foreground leading-relaxed">
-                   Experience distraction-free preparation. Our mobile app is optimized for rapid practice and real-time alerts for new notifications.
-                </p>
-                <div className="flex gap-4">
-                   <div className="h-14 w-40 bg-black rounded-xl flex items-center justify-center border border-white/10">
-                      <span className="text-white text-[10px] font-bold uppercase tracking-widest">App Store</span>
-                   </div>
-                   <div className="h-14 w-40 bg-black rounded-xl flex items-center justify-center border border-white/10">
-                      <span className="text-white text-[10px] font-bold uppercase tracking-widest">Google Play</span>
-                   </div>
-                </div>
-             </div>
-             
-             <div className="relative flex justify-center">
-                <div className="relative w-[300px] h-[600px] bg-primary rounded-[3rem] border-8 border-slate-900 shadow-2xl overflow-hidden">
-                   <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-slate-900 rounded-b-2xl z-20" />
-                   <Image 
-                     src="https://picsum.photos/seed/app-preview/400/800" 
-                     alt="Mobile App" 
-                     fill 
-                     className="object-cover opacity-80" 
-                     data-ai-hint="smartphone screen"
-                   />
-                </div>
-                <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-secondary/10 rounded-full blur-3xl -z-10" />
-             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. FOOTER */}
+      {/* 5. FOOTER */}
       <footer className="py-20 bg-white border-t">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
@@ -251,96 +234,13 @@ export default function Home() {
               </ul>
             </div>
           </div>
-          <div className="pt-12 border-t flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="pt-12 border-t text-center">
             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
               © 2026 CRACKLIX • THE AUTHORITATIVE PREPARATION SYSTEM
             </p>
-            <div className="flex gap-6">
-              <div className="h-5 w-5 bg-slate-100 rounded-full" />
-              <div className="h-5 w-5 bg-slate-100 rounded-full" />
-              <div className="h-5 w-5 bg-slate-100 rounded-full" />
-            </div>
           </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-function DashboardStat({ label, value, color = "text-primary" }: { label: string, value: string, color?: string }) {
-  return (
-    <div className="space-y-1">
-      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">{label}</p>
-      <p className={`text-3xl font-headline font-black tracking-tight ${color}`}>{value}</p>
-    </div>
-  );
-}
-
-function ExamCard({ exam }: { exam: any }) {
-  return (
-    <Link href={`/exams/${exam.id}`}>
-      <Card className="hover:shadow-xl transition-all duration-300 border-slate-100 rounded-[1.5rem] bg-white group h-full flex flex-col">
-        <CardContent className="p-8 space-y-6 flex-1 flex flex-col">
-           <div className="flex justify-between items-start">
-             <span className="text-[9px] font-black text-secondary bg-secondary/5 px-3 py-1.5 rounded-lg border border-secondary/10 uppercase tracking-widest">
-               {exam.board}
-             </span>
-             <Trophy className="h-4 w-4 text-slate-200 group-hover:text-secondary transition-colors" />
-           </div>
-           <div>
-             <h3 className="text-xl font-headline font-bold text-primary mb-2 line-clamp-1 group-hover:text-secondary transition-colors">{exam.name}</h3>
-             <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em]">{exam.category}</p>
-           </div>
-           <div className="pt-6 border-t mt-auto flex items-center justify-between">
-             <div className="flex gap-4">
-                <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase">
-                   <BookOpen className="h-3 w-3" /> {exam.totalMocks} Mocks
-                </div>
-                <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase">
-                   <Target className="h-3 w-3" /> {exam.activeQuestions}+ MCQs
-                </div>
-             </div>
-             <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-secondary group-hover:translate-x-1 transition-all" />
-           </div>
-        </CardContent>
-      </Card>
-    </Link>
-  );
-}
-
-function MockCard() {
-  return (
-    <Card className="border-slate-100 rounded-2xl bg-white hover:border-secondary/30 transition-all overflow-hidden">
-      <div className="bg-slate-50 p-4 flex justify-between items-center border-b">
-        <span className="text-[9px] font-black text-primary bg-primary/5 px-2 py-1 rounded">LATEST PATTERN</span>
-        <span className="text-[9px] font-bold text-muted-foreground uppercase">1.2k Attempts</span>
-      </div>
-      <CardContent className="p-6 space-y-6">
-        <h3 className="text-lg font-headline font-bold text-primary">Full Length Assessment #01</h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
-            <Clock className="h-4 w-4 text-secondary" /> 120 Mins
-          </div>
-          <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
-            <BookOpen className="h-4 w-4 text-secondary" /> 100 Qs
-          </div>
-        </div>
-        <Button asChild className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl">
-           <Link href={`/mocks/${SAMPLE_MOCK.id}`}>Start Free Test</Link>
-        </Button>
-      </CardContent>
-    </Card>
-  );
-}
-
-function FeatureItem({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
-  return (
-    <div className="space-y-6">
-      <div className="h-14 w-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10">
-        {icon}
-      </div>
-      <h4 className="text-xl font-headline font-bold">{title}</h4>
-      <p className="text-blue-100/60 leading-relaxed font-medium text-sm">{desc}</p>
     </div>
   );
 }

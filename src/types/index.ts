@@ -9,6 +9,7 @@ export interface Question {
   explanation: string;
   topic: string;
   difficulty: Difficulty;
+  subject?: string;
 }
 
 export interface Exam {
@@ -45,7 +46,7 @@ export interface AttemptResult {
   incorrectCount?: number;
   totalQuestions?: number;
   timestamp?: string;
-  answers?: Record<number, number>; // questionIdx -> selectedOptionIdx
+  answers?: Record<number, number>; 
 }
 
 export interface CurrentAffair {
@@ -72,4 +73,5 @@ export interface User {
   state: 'Punjab';
   targetExam: string;
   createdAt: string;
+  status: 'Pro' | 'Free';
 }

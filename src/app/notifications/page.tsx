@@ -10,8 +10,8 @@ export default function NotificationsPage() {
       <main className="container mx-auto px-4 py-12">
         <div className="max-w-2xl mx-auto">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-headline font-bold">Notifications</h1>
-            <button className="text-sm text-primary font-bold hover:underline">Mark all as read</button>
+            <h1 className="text-2xl font-headline font-bold text-primary">Notifications</h1>
+            <button className="text-sm text-secondary font-bold hover:underline">Mark all as read</button>
           </div>
 
           <div className="space-y-4">
@@ -26,7 +26,7 @@ export default function NotificationsPage() {
                      n.type === 'alert' ? <AlertCircle className="h-5 w-5" /> : <Bell className="h-5 w-5" />}
                   </div>
                   <div className="space-y-1">
-                    <h4 className="font-bold text-sm">{n.title}</h4>
+                    <h4 className="font-bold text-sm text-primary">{n.title}</h4>
                     <p className="text-sm text-muted-foreground leading-relaxed">{n.message}</p>
                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{n.time}</p>
                   </div>

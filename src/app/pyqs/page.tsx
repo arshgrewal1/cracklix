@@ -10,7 +10,7 @@ export default function PYQPage() {
       <Navbar />
       <main className="container mx-auto px-4 py-12">
         <div className="mb-12 text-center">
-          <h1 className="text-3xl font-headline font-bold mb-2">Previous Year Papers</h1>
+          <h1 className="text-3xl font-headline font-bold text-primary mb-2">Previous Year Papers</h1>
           <p className="text-muted-foreground">Authentic exam papers with verified official answer keys.</p>
         </div>
 
@@ -22,14 +22,14 @@ export default function PYQPage() {
                   <FileText className="h-6 w-6 text-secondary" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-bold">{exam.title} Papers</CardTitle>
-                  <p className="text-xs text-muted-foreground">{exam.category} Series</p>
+                  <CardTitle className="text-lg font-bold text-primary">{exam.name} Papers</CardTitle>
+                  <p className="text-xs text-muted-foreground">{exam.board} Series</p>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 {[2025, 2024, 2023].map((year) => (
                   <div key={year} className="flex items-center justify-between p-3 rounded-lg bg-background border border-foreground/5">
-                    <span className="text-sm font-medium">{exam.title} ({year})</span>
+                    <span className="text-sm font-medium">{exam.name} ({year})</span>
                     <div className="flex gap-2">
                       <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
                         <Eye className="h-3 w-3 mr-1" /> View

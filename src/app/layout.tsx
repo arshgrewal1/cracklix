@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'PrepStation | Competitive Exam Excellence',
-  description: 'Advanced platform for proctored mocks and AI-powered exam rationalization.',
+  title: 'Cracklix | Punjab Exam Authority',
+  description: 'Most trusted platform for Punjab Government Exam Preparation. PSSSB, PPSC, Punjab Police, and more.',
 };
 
 export default function RootLayout({

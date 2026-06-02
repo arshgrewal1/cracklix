@@ -10,7 +10,7 @@ export default function AdminDashboard() {
     <div className="space-y-12">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-headline font-bold">Admin Portal</h1>
+          <h1 className="text-3xl font-headline font-bold text-primary">Admin Portal</h1>
           <p className="text-muted-foreground">Welcome back, Master Access. Here's what's happening today.</p>
         </div>
         <div className="flex gap-4">
@@ -21,7 +21,6 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <AdminStatCard icon={<Database className="text-primary" />} label="Questions Bank" value="2,450" trend="+12 today" />
         <AdminStatCard icon={<Users className="text-secondary" />} label="Total Aspirants" value="15,248" trend="+84 today" />
@@ -30,7 +29,6 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Exam Management Table */}
         <Card className="lg:col-span-2 border-foreground/5 bg-card/50">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -74,7 +72,6 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Activity Feed */}
         <Card className="border-foreground/5 bg-card/50">
           <CardHeader>
             <CardTitle className="font-headline">Live Activity</CardTitle>

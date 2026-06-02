@@ -1,5 +1,5 @@
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell } from "lucide-react"
+import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 
@@ -51,7 +51,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <div className="h-4 w-[1px] bg-foreground/10 mx-2" />
-              <span className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Cracklix Management System</span>
+              <div className="flex items-center gap-2">
+                 <ShieldCheck className="h-4 w-4 text-primary" />
+                 <span className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Cracklix Management System</span>
+              </div>
             </div>
             <div className="flex items-center gap-6">
               <button className="relative text-muted-foreground hover:text-foreground transition-colors">
