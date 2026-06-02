@@ -1,18 +1,19 @@
+
 'use client';
 
 import { motion } from "framer-motion";
-import { BookOpen, ClipboardList, ShieldCheck, BarChart3 } from "lucide-react";
+import { BookOpen, ClipboardList, ShieldCheck, PieChart } from "lucide-react";
 
 const stats = [
   { icon: <BookOpen />, value: "10,000+", label: "Practice Questions" },
   { icon: <ClipboardList />, value: "500+", label: "Mock Tests" },
   { icon: <ShieldCheck />, value: "50+", label: "Exams Covered" },
-  { icon: <BarChart3 />, value: "Detailed", label: "Analytics" },
+  { icon: <PieChart />, value: "Detailed", label: "Analytics" },
 ];
 
 export default function Stats() {
   return (
-    <section className="-mt-12 relative z-20">
+    <section className="-mt-16 lg:-mt-24 relative z-20 pb-12">
       <div className="container mx-auto px-6">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
           {stats.map((item, idx) => (
@@ -24,7 +25,7 @@ export default function Stats() {
               viewport={{ once: true }}
               className="bg-[#0B1D3F]/90 backdrop-blur-xl text-white p-6 lg:p-8 rounded-3xl border border-white/10 shadow-2xl hover:-translate-y-2 transition-all duration-300"
             >
-              <div className="mb-4 text-[#F97316]">
+              <div className="mb-4 text-[#F97316] h-10 w-10 bg-white/5 rounded-xl flex items-center justify-center">
                 {item.icon}
               </div>
               <h3 className="text-3xl font-headline font-black mb-1">

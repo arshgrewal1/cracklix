@@ -1,28 +1,21 @@
+
 'use client';
 
 import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ChevronRight, FileText, MonitorCheck } from "lucide-react";
 import Link from "next/link";
 import { 
   PsssbIcon, 
   PpscIcon, 
   PoliceIcon, 
-  TeachingIcon, 
-  JusticeIcon, 
-  PowerIcon, 
-  MedIcon, 
-  BankIcon 
+  TeachingIcon
 } from "@/lib/exam-icons";
 
 const exams = [
   { name: "PSSSB", desc: "Subordinate Services Selection Board", exams: 12, mocks: 256, Icon: PsssbIcon },
   { name: "PPSC", desc: "Punjab Public Service Commission", exams: 9, mocks: 198, Icon: PpscIcon },
   { name: "Punjab Police", desc: "Punjab Police Recruitment", exams: 7, mocks: 145, Icon: PoliceIcon },
-  { name: "Teaching Exams", desc: "ETT, Master Cadre, PSTET", exams: 15, mocks: 320, Icon: TeachingIcon },
-  { name: "High Court", desc: "Punjab & Haryana High Court", exams: 6, mocks: 108, Icon: JusticeIcon },
-  { name: "PSPCL & PSTCL", desc: "Power Sector Recruitment", exams: 8, mocks: 162, Icon: PowerIcon },
-  { name: "BFUHS", desc: "Baba Farid University (Health)", exams: 4, mocks: 86, Icon: MedIcon },
-  { name: "Banking", desc: "Cooperative & State Banks", exams: 10, mocks: 210, Icon: BankIcon },
+  { name: "Teaching Exams", desc: "ETT, Master Cadre, Lecturer", exams: 15, mocks: 320, Icon: TeachingIcon },
 ];
 
 export default function PopularExams() {
@@ -35,12 +28,12 @@ export default function PopularExams() {
               Popular Exams
             </h2>
             <p className="text-gray-500 mt-2 text-lg">
-              Complete preparation for major Punjab government recruitment boards.
+              Complete preparation for all major Punjab government exams
             </p>
           </div>
 
           <Link href="/exams" className="text-[#F97316] font-bold text-sm uppercase tracking-widest flex items-center group">
-            View All Exams <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            View All Exams <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
 
@@ -70,8 +63,8 @@ export default function PopularExams() {
                   </p>
 
                   <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-50 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A]">
-                    <span className="bg-blue-50 px-3 py-1 rounded-full">{exam.exams} Exams</span>
-                    <span className="bg-blue-50 px-3 py-1 rounded-full">{exam.mocks} Mocks</span>
+                    <span className="flex items-center gap-1.5"><FileText className="h-3.5 w-3.5" /> {exam.exams} Exams</span>
+                    <span className="flex items-center gap-1.5"><MonitorCheck className="h-3.5 w-3.5" /> {exam.mocks} Mocks</span>
                   </div>
                 </div>
               </Link>

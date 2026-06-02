@@ -1,14 +1,15 @@
+
 'use client';
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, ShieldCheck } from "lucide-react";
+import { ArrowRight, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section className="relative pt-20 pb-32 lg:pt-32 lg:pb-48 overflow-hidden bg-gradient-to-br from-[#08152D] via-[#0F172A] to-[#08152D]">
+    <header className="relative pt-20 pb-40 lg:pt-32 lg:pb-56 overflow-hidden bg-gradient-to-br from-[#08152D] via-[#0F172A] to-[#08152D] text-white">
       {/* Punjab Map Watermark */}
       <div className="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center">
         <svg viewBox="0 0 100 100" className="w-[1000px] h-[1000px] text-white fill-current">
@@ -17,25 +18,25 @@ export default function Hero() {
       </div>
 
       <div className="container mx-auto px-6 relative z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="max-w-4xl mx-auto text-center lg:text-left">
           <motion.div 
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="space-y-8 text-center lg:text-left"
+            className="space-y-8"
           >
             <div className="inline-flex items-center gap-2 bg-[#F97316]/20 text-[#F97316] px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border border-[#F97316]/30">
-              <ShieldCheck className="h-4 w-4" />
+              <Star className="h-4 w-4 fill-current" />
               #1 Punjab Exam Preparation Platform
             </div>
             
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-headline font-bold text-white leading-[1.1]">
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-headline font-bold leading-[1.1]">
               Prepare Smarter.<br />
               <span className="text-[#F97316]">Score Higher.</span>
             </h1>
             
             <p className="text-xl text-white/70 max-w-xl mx-auto lg:mx-0 leading-relaxed font-medium">
-              Punjab Government Exams di Complete Preparation ik hi Platform te. Trust Cracklix for your career success.
+              Punjab Government Exams di Complete Preparation ik hi Platform te.
             </p>
             
             <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
@@ -47,34 +48,8 @@ export default function Hero() {
               </Button>
             </div>
           </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            className="relative lg:ml-auto w-full max-w-[600px] aspect-[4/3] group"
-          >
-            <div className="absolute inset-0 bg-[#F97316]/20 blur-3xl rounded-full opacity-50 group-hover:opacity-80 transition-opacity" />
-            <div className="relative h-full w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white/10">
-              <Image 
-                src="https://picsum.photos/seed/punjab-hero/1200/800"
-                alt="Golden Temple at Night"
-                fill
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                priority
-                data-ai-hint="golden temple"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent opacity-80" />
-              <div className="absolute bottom-10 left-10">
-                <div className="bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/20">
-                  <p className="text-white/60 text-[10px] font-black uppercase tracking-widest mb-1">Success Guaranteed</p>
-                  <p className="text-white text-2xl font-bold">15,000+ Aspirants</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
         </div>
       </div>
-    </section>
+    </header>
   );
 }
