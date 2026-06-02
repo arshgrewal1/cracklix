@@ -29,15 +29,15 @@ export interface Subject {
 export interface Question {
   id: string;
   subjectId: string;
+  boardId?: string;
+  examId?: string;
   text: string;
   options: string[];
   correctAnswer: number;
   explanation: string;
   difficulty: Difficulty;
   topic: string;
-  // Legacy fields for compatibility
-  question?: string;
-  subject?: string;
+  createdAt?: any;
 }
 
 export interface MockTest {
@@ -48,10 +48,9 @@ export interface MockTest {
   totalQuestions: number;
   questionIds: string[];
   attempts: number;
-  // Legacy fields
-  durationInMinutes?: number;
-  questions?: Question[];
-  totalMarks?: number;
+  difficulty?: Difficulty;
+  type?: string;
+  createdAt?: any;
 }
 
 export interface AttemptResult {

@@ -74,12 +74,15 @@
       "properties": {
         "id": { "type": "string" },
         "subjectId": { "type": "string" },
+        "boardId": { "type": "string" },
+        "examId": { "type": "string" },
         "text": { "type": "string" },
         "options": { "type": "array", "items": { "type": "string" } },
         "correctAnswer": { "type": "number" },
         "explanation": { "type": "string" },
         "difficulty": { "type": "string", "enum": ["Easy", "Medium", "Hard"] },
-        "topic": { "type": "string" }
+        "topic": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
       }
     },
     "AttemptResult": {
