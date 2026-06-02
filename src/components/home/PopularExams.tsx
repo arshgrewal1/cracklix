@@ -2,65 +2,112 @@
 'use client';
 
 import { motion } from "framer-motion"
-import { Card, CardContent } from "@/components/ui/card"
-import { EXAMS } from "@/lib/mock-data"
-import { ShieldCheck, ArrowRight, BookOpen, Clock } from "lucide-react"
+import { ShieldCheck, ArrowRight } from "lucide-react"
 import Link from "next/link"
+
+const exams = [
+  {
+    name: "PSSSB",
+    desc: "Subordinate Services Selection Board",
+    exams: 12,
+    mocks: 256,
+  },
+  {
+    name: "PPSC",
+    desc: "Punjab Public Service Commission",
+    exams: 9,
+    mocks: 198,
+  },
+  {
+    name: "Punjab Police",
+    desc: "Punjab Police Recruitment",
+    exams: 7,
+    mocks: 145,
+  },
+  {
+    name: "Teaching Exams",
+    desc: "ETT, Master Cadre, PSTET",
+    exams: 15,
+    mocks: 320,
+  },
+  {
+    name: "High Court",
+    desc: "Punjab & Haryana High Court",
+    exams: 6,
+    mocks: 108,
+  },
+  {
+    name: "PSPCL & PSTCL",
+    desc: "Power Sector Recruitment",
+    exams: 8,
+    mocks: 162,
+  },
+  {
+    name: "BFUHS",
+    desc: "Baba Farid University (Health)",
+    exams: 4,
+    mocks: 86,
+  },
+  {
+    name: "Banking",
+    desc: "Cooperative & State Banks",
+    exams: 10,
+    mocks: 210,
+  },
+];
 
 export default function PopularExams() {
   return (
-    <section className="py-24 bg-white">
-      <div className="container mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6 mb-16">
+    <section className="py-24 bg-[#f8fafc]">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
           <div>
-            <motion.h2 
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="text-4xl md:text-5xl font-headline font-bold text-[#0F172A]"
-            >
+            <h2 className="text-4xl md:text-5xl font-headline font-bold text-[#0F172A]">
               Popular Exams
-            </motion.h2>
-            <p className="text-muted-foreground mt-4 text-lg">Complete preparation for all major Punjab recruitment boards.</p>
+            </h2>
+            <p className="text-gray-500 mt-2 text-lg">
+              Complete preparation for major Punjab government recruitment boards.
+            </p>
           </div>
-          <Link href="/exams" className="text-[#F97316] font-bold text-sm uppercase tracking-widest flex items-center hover:underline group">
-            View All Exams <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+
+          <Link href="/exams" className="text-[#F97316] font-bold text-sm uppercase tracking-widest flex items-center group">
+            View All Exams <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Link>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {EXAMS.map((exam, idx) => (
+          {exams.map((exam, idx) => (
             <motion.div
-              key={exam.id}
+              key={exam.name}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
               viewport={{ once: true }}
             >
-              <Link href={`/exams/${exam.id}`}>
-                <Card className="hover:shadow-2xl transition-all duration-300 border-gray-100 rounded-[2rem] bg-white group h-full flex flex-col p-8 border custom-shadow overflow-hidden">
-                  <div className="flex justify-between items-start mb-8">
-                    <div className="h-16 w-16 rounded-2xl bg-[#F8FAFC] border flex items-center justify-center group-hover:bg-[#1E3A8A] transition-colors">
-                       <ShieldCheck className="h-8 w-8 text-[#0F172A] group-hover:text-white" />
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{exam.board}</span>
+              <Link href="/exams">
+                <div className="bg-white rounded-[2rem] border border-gray-100 p-8 hover:shadow-2xl hover:border-[#F97316]/20 transition-all duration-300 group h-full flex flex-col">
+                  <div className="w-16 h-16 rounded-2xl bg-[#f8fafc] mb-6 flex items-center justify-center group-hover:bg-[#0F172A] transition-colors duration-300">
+                    <ShieldCheck className="h-8 w-8 text-[#0F172A] group-hover:text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-2xl font-headline font-bold text-[#0F172A] mb-2 group-hover:text-[#F97316] transition-colors">{exam.name}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed mb-8 line-clamp-2">{exam.description}</p>
+
+                  <h3 className="font-headline font-bold text-2xl text-[#0F172A] group-hover:text-[#F97316] transition-colors">
+                    {exam.name}
+                  </h3>
+
+                  <p className="text-sm text-gray-500 mt-3 leading-relaxed flex-1">
+                    {exam.desc}
+                  </p>
+
+                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-50 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A]">
+                    <span className="bg-blue-50 px-3 py-1 rounded-full">{exam.exams} Exams</span>
+                    <span className="bg-blue-50 px-3 py-1 rounded-full">{exam.mocks} Mocks</span>
                   </div>
-                  <div className="mt-auto flex flex-col gap-3 pt-6 border-t border-gray-50">
-                    <div className="flex items-center justify-between text-[10px] font-bold text-[#1E3A8A] uppercase tracking-widest">
-                       <span className="flex items-center gap-2"><BookOpen className="h-3.5 w-3.5" /> {exam.totalMocks} Series</span>
-                       <span className="flex items-center gap-2"><Clock className="h-3.5 w-3.5" /> {exam.duration} Min</span>
-                    </div>
-                  </div>
-                </Card>
+                </div>
               </Link>
             </motion.div>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }
