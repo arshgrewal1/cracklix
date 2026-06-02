@@ -19,6 +19,7 @@ export interface Exam {
   description: string;
   totalMocks: number;
   activeQuestions: number;
+  duration?: number;
 }
 
 export interface Subject {
@@ -122,6 +123,7 @@ export interface Notification {
   important: boolean;
   pdfUrl?: string;
   createdAt: any;
+  type?: 'alert' | 'result' | 'vacancy'; // for visual mapping
 }
 
 export interface AttemptResult {
