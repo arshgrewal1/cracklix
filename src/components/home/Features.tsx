@@ -40,7 +40,7 @@ export default function Features() {
           viewport={{ once: true }}
           className="text-[32px] font-bold mb-[40px]"
         >
-          Why Choose <span className="text-[#ff7a00]">CRACKLIX?</span>
+          Why Choose <span className="text-[#ff7a00]">Cracklix?</span>
         </motion.h2>
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-5">

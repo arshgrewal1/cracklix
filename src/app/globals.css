@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%; /* #f8fafc */
-    --foreground: 222 47% 11%; /* #0c1527 */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
@@ -59,7 +59,7 @@
 }
 
 .hero-gradient {
-  background: linear-gradient(rgba(12, 21, 39, 0.8), rgba(12, 21, 39, 0.95));
+  background-image: linear-gradient(rgba(12, 21, 39, 0.8), rgba(12, 21, 39, 0.95));
 }
 
 .glass-stats {
