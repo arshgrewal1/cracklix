@@ -170,6 +170,10 @@
     "/results/{resultId}": {
       "schema": { "$ref": "#/backend/entities/AttemptResult" },
       "description": "User test results."
+    },
+    "/settings/{settingId}": {
+      "schema": "object",
+      "description": "Global platform configurations."
     }
   }
 }
