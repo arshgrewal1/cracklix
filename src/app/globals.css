@@ -23,7 +23,7 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 224 100% 56%;
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 
   .dark {
@@ -54,18 +54,25 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-body antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
+    @apply font-headline font-bold tracking-tight;
   }
-}
-
-.dashboard-preview-card {
-  @apply bg-white border border-gray-100 shadow-xl shadow-black/5 rounded-2xl overflow-hidden;
 }
 
 .trust-gradient {
-  background: radial-gradient(circle at top right, rgba(30, 94, 255, 0.05), transparent),
-              radial-gradient(circle at bottom left, rgba(11, 31, 58, 0.03), transparent);
+  background: linear-gradient(135deg, #0B1F3A 0%, #1e3a8a 100%);
+}
+
+.glass-card {
+  @apply bg-white/10 backdrop-blur-md border border-white/20;
+}
+
+.dashboard-card {
+  @apply bg-white border border-gray-100 shadow-2xl shadow-black/5 rounded-3xl overflow-hidden;
+}
+
+.section-spacing {
+  @apply py-24 px-6;
 }
