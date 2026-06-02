@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -12,7 +11,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   
   const links = [
-    { label: "Home", href: "/" },
+    { label: "Home", href: "/", active: true },
     { label: "Exams", href: "/exams" },
     { label: "Mocks", href: "/mocks" },
     { label: "PYQs", href: "/pyqs" },
@@ -20,34 +19,30 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-[#0F172A] border-b border-white/5 py-4 px-6">
-      <div className="container mx-auto flex items-center justify-between">
+    <nav className="sticky top-0 z-[1000] w-full bg-[#0c1527] border-b border-white/10 py-4">
+      <div className="container mx-auto max-w-[85%] flex items-center justify-between">
         <Logo variant="light" />
 
         {/* Desktop Links */}
-        <div className="hidden lg:flex items-center gap-8 text-[12px] font-bold uppercase tracking-widest text-white/70">
+        <div className="hidden lg:flex items-center gap-[30px] text-[15px] font-medium text-[#cbd5e1]">
           {links.map(link => (
             <Link 
               key={link.label} 
               href={link.href} 
-              className="hover:text-[#F97316] transition-colors relative group"
+              className={`transition-colors hover:text-[#ff7a00] ${link.active ? 'text-[#ff7a00]' : ''}`}
             >
               {link.label}
-              <motion.span 
-                className="absolute -bottom-1 left-0 w-0 h-0.5 bg-[#F97316]"
-                whileHover={{ width: "100%" }}
-              />
             </Link>
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
-          <button className="text-white/70 hover:text-white transition-colors relative p-2">
+        <div className="flex items-center gap-5">
+          <button className="relative text-white hover:text-[#ff7a00] transition-colors p-1">
             <Bell className="h-5 w-5" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-[#F97316]" />
+            <span className="absolute -top-1 -right-2 bg-[#ff7a00] text-[10px] px-1.5 py-0.5 rounded-full font-bold">3</span>
           </button>
           
-          <Button asChild className="bg-[#F97316] hover:bg-[#EA580C] text-white font-bold px-6 rounded-lg h-10 hidden sm:flex">
+          <Button asChild className="bg-[#ff7a00] hover:bg-[#ff7a00]/90 text-white font-bold px-6 rounded-md h-10 hidden sm:flex border-none cursor-pointer">
             <Link href="/login">Login</Link>
           </Button>
           
@@ -67,19 +62,19 @@ export default function Navbar() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="absolute top-full left-0 w-full bg-[#0F172A] border-b border-white/10 lg:hidden flex flex-col p-6 gap-4"
+            className="absolute top-full left-0 w-full bg-[#0c1527] border-b border-white/10 lg:hidden flex flex-col p-6 gap-4"
           >
             {links.map(link => (
               <Link 
                 key={link.label} 
                 href={link.href} 
-                className="text-white/70 hover:text-[#F97316] font-bold uppercase tracking-widest text-sm"
+                className="text-[#cbd5e1] hover:text-[#ff7a00] font-bold text-sm uppercase tracking-widest"
                 onClick={() => setIsOpen(false)}
               >
                 {link.label}
               </Link>
             ))}
-            <Button asChild className="bg-[#F97316] hover:bg-[#EA580C] text-white font-bold w-full h-12">
+            <Button asChild className="bg-[#ff7a00] hover:bg-[#ff7a00]/90 text-white font-bold w-full h-12">
               <Link href="/login" onClick={() => setIsOpen(false)}>Login</Link>
             </Button>
           </motion.div>

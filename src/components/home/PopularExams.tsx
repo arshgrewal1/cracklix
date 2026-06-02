@@ -1,4 +1,3 @@
-
 'use client';
 
 import { motion } from "framer-motion";
@@ -20,57 +19,53 @@ const exams = [
 
 export default function PopularExams() {
   return (
-    <section className="py-24 bg-[#F8FAFC]">
-      <div className="container mx-auto px-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
-          <div>
-            <h2 className="text-4xl md:text-5xl font-headline font-bold text-[#0F172A]">
-              Popular Exams
-            </h2>
-            <p className="text-gray-500 mt-2 text-lg">
-              Complete preparation for all major Punjab government exams
-            </p>
-          </div>
-
-          <Link href="/exams" className="text-[#F97316] font-bold text-sm uppercase tracking-widest flex items-center group">
-            View All Exams <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </Link>
+    <section className="mt-[120px] mb-[60px] container mx-auto max-w-[85%]">
+      <div className="flex justify-between items-end mb-[30px]">
+        <div>
+          <h2 className="text-[28px] font-bold text-[#0c1527]">
+            Popular Exams
+          </h2>
+          <p className="text-[#64748b] mt-1">
+            Complete preparation for all major Punjab government exams
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {exams.map((exam, idx) => (
-            <motion.div
-              key={exam.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.05 }}
-              viewport={{ once: true }}
-            >
-              <Link href="/exams">
-                <div className="bg-white rounded-[2rem] border border-gray-100 p-8 hover:shadow-2xl hover:border-[#F97316]/20 transition-all duration-300 group h-full flex flex-col">
-                  <div className="w-16 h-16 rounded-2xl bg-[#F8FAFC] mb-6 flex items-center justify-center group-hover:bg-[#0F172A] transition-colors duration-300">
-                    <div className="text-[#0F172A] group-hover:text-white transition-colors">
-                      <exam.Icon />
-                    </div>
-                  </div>
+        <Link href="/exams" className="text-[#ff7a00] font-bold text-sm no-underline flex items-center group">
+          View All Exams <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+        </Link>
+      </div>
 
-                  <h3 className="font-headline font-bold text-2xl text-[#0F172A] group-hover:text-[#F97316] transition-colors">
-                    {exam.name}
-                  </h3>
-
-                  <p className="text-sm text-gray-500 mt-3 leading-relaxed flex-1">
-                    {exam.desc}
-                  </p>
-
-                  <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-50 text-[10px] font-black uppercase tracking-widest text-[#1E3A8A]">
-                    <span className="flex items-center gap-1.5"><FileText className="h-3.5 w-3.5" /> {exam.exams} Exams</span>
-                    <span className="flex items-center gap-1.5"><MonitorCheck className="h-3.5 w-3.5" /> {exam.mocks} Mocks</span>
-                  </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+        {exams.map((exam, idx) => (
+          <motion.div
+            key={exam.name}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            viewport={{ once: true }}
+          >
+            <Link href="/exams">
+              <div className="bg-white rounded-[10px] border border-[#e2e8f0] p-[25px] text-center shadow-[0_4px_6px_rgba(0,0,0,0.02)] hover:-translate-y-[5px] transition-transform duration-200 group h-full flex flex-col">
+                <div className="mx-auto mb-[15px] flex items-center justify-center text-[#0c1527] h-[60px] w-[60px]">
+                  <exam.Icon />
                 </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+
+                <h3 className="text-[18px] font-bold text-[#0c1527] group-hover:text-[#ff7a00] transition-colors">
+                  {exam.name}
+                </h3>
+
+                <p className="text-[13px] text-[#64748b] mt-1.5 mb-[15px] leading-relaxed min-h-[38px]">
+                  {exam.desc}
+                </p>
+
+                <div className="mt-auto pt-[15px] border-t border-[#f1f5f9] flex justify-between text-[13px] text-[#475569]">
+                  <span className="flex items-center gap-1.5"><FileText className="h-3.5 w-3.5" /> {exam.exams} Exams</span>
+                  <span className="flex items-center gap-1.5"><MonitorCheck className="h-3.5 w-3.5" /> {exam.mocks} Mocks</span>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+        ))}
       </div>
     </section>
   );
