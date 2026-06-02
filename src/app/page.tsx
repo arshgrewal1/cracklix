@@ -1,6 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, BarChart3, Target, ShieldCheck, Trophy } from "lucide-react";
+import { ArrowRight, CheckCircle2, BarChart3, Target, ShieldCheck, Trophy, ArrowUpRight } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { EXAMS } from "@/lib/mock-data";
@@ -40,7 +40,7 @@ export default function Home() {
               <div className="flex items-center gap-8 pt-6 text-xs font-bold text-gray-400 uppercase tracking-widest">
                 <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> 50,000+ Questions</div>
                 <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> 1000+ Mocks</div>
-                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> 8+ Boards</div>
+                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> 8+ Boards Covered</div>
               </div>
             </div>
 
