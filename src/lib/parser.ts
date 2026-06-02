@@ -37,7 +37,7 @@ export function parseBulkQuestions(rawText: string, metadata: { subjectId: strin
         return null;
       }
 
-      const options = [
+      const optionsEn = [
         aMatch[1].trim(),
         bMatch[1].trim(),
         cMatch[1].trim(),
@@ -48,10 +48,10 @@ export function parseBulkQuestions(rawText: string, metadata: { subjectId: strin
       const correctAnswer = ['A', 'B', 'C', 'D'].indexOf(answerChar);
 
       return {
-        text: textMatch[1].trim(),
-        options,
+        textEn: textMatch[1].trim(),
+        optionsEn,
         correctAnswer,
-        explanation: explanationMatch ? explanationMatch[1].trim() : "Detailed logic based on latest recruitment pattern.",
+        explanationEn: explanationMatch ? explanationMatch[1].trim() : "Detailed logic based on latest recruitment pattern.",
         subjectId: metadata.subjectId || "general",
         difficulty: metadata.difficulty,
         topic: "Institutional Bulk Import",

@@ -32,17 +32,18 @@ export interface Question {
   subjectId: string;
   boardId?: string;
   examId?: string;
-  text: string; 
+  textEn: string; 
   textPa?: string; 
-  options: string[]; 
+  optionsEn: string[]; 
   optionsPa?: string[]; 
-  correctAnswer: number;
-  explanation: string; 
+  correctAnswer: number; // 0, 1, 2, 3
+  explanationEn: string; 
   explanationPa?: string; 
   difficulty: Difficulty;
   topic: string;
   createdAt?: any;
   author?: string;
+  lastModified?: any;
 }
 
 export interface MockTest {
