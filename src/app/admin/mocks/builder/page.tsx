@@ -52,7 +52,7 @@ export default function MockBuilderPage() {
 
   const [smartConfig, setSmartConfig] = useState({ 
     count: 100, 
-    difficulty: "medium",
+    difficulty: "all",
     subjectId: "all"
   })
 
@@ -148,7 +148,7 @@ export default function MockBuilderPage() {
       (q.questionEn || "").toLowerCase().includes(bankSearch.toLowerCase()) || 
       (q.id || "").includes(bankSearch)
     )
-  }, [questionBank, bankSearch])
+  }, [bankSearch, questionBank])
 
   return (
     <div className="space-y-10 pb-20 max-w-7xl mx-auto">
@@ -282,7 +282,7 @@ export default function MockBuilderPage() {
                              </div>
                              <div className="space-y-4">
                                 <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Audit Level</Label>
-                                <Select onValueChange={val => setSmartConfig({...smartConfig, difficulty: val})} defaultValue="medium">
+                                <Select onValueChange={val => setSmartConfig({...smartConfig, difficulty: val})} defaultValue="all">
                                    <SelectTrigger className="h-16 rounded-2xl bg-slate-50 border-none shadow-inner text-base font-bold"><SelectValue /></SelectTrigger>
                                    <SelectContent><SelectItem value="all">Any Level</SelectItem><SelectItem value="easy">Easy Level</SelectItem><SelectItem value="medium">Medium Level</SelectItem><SelectItem value="hard">Hard Level</SelectItem></SelectContent>
                                 </Select>

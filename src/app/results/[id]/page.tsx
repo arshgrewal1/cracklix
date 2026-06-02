@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, XCircle, BrainCircuit, ChevronRight, HelpCircle, Trophy, Target, Zap, Share2, Sparkles, BarChart3, Clock, LayoutDashboard, Bookmark } from "lucide-react"
 import { rationalizeMockQuestion, RationalizeMockQuestionOutput } from "@/ai/flows/rationalize-mock-question"
 import { useFirestore } from "@/firebase"
-import { doc, getDocs, query, collection, where, addDoc, serverTimestamp } from "firebase/firestore"
+import { doc, getDocs, query, collection, where, addDoc } from "firebase/firestore"
 import Link from "next/link"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell, Tooltip } from "recharts"
 import { useToast } from "@/hooks/use-toast"
@@ -22,7 +22,7 @@ export default function ResultPage() {
   const { toast } = useToast()
 
   const [rationalizing, setRationalizing] = useState<string | null>(null)
-  const [results, setResults] = useState<Record<string, RationalizeMockQuestionOutput>>({})
+  const [aiResults, setAiResults] = useState<Record<string, RationalizeMockQuestionOutput>>({})
   const [sessionData, setSessionData] = useState<any>(null)
   const [questions, setQuestions] = useState<any[]>([])
 
@@ -34,7 +34,8 @@ export default function ResultPage() {
       
       if (db && data.mockId) {
         const fetchQs = async () => {
-          const mockSnap = await getDocs(query(collection(db, "mocks"), where("id", "==", data.mockId)))
+          const mocksRef = collection(db, "mocks")
+          const mockSnap = await getDocs(query(mocksRef, where("id", "==", data.mockId)))
           const mockData = mockSnap.docs[0]?.data()
           if (mockData?.questionIds) {
              const qData: any[] = []
@@ -59,7 +60,7 @@ export default function ResultPage() {
         correctAnswer: options[correct],
         userAnswer: userAns !== undefined ? options[userAns] : "No answer provided"
       })
-      setResults(prev => ({ ...prev, [qId]: result }))
+      setAiResults(prev => ({ ...prev, [qId]: result }))
     } catch (error) {
       toast({ variant: "destructive", title: "AI Sync Error", description: "Could not retrieve tutor logic." })
     } finally {
@@ -309,7 +310,7 @@ export default function ResultPage() {
                        </div>
 
                        <div className="pt-4">
-                          {results[q.id] ? (
+                          {aiResults[q.id] ? (
                              <div className="bg-[#0F172A] border-none rounded-[3rem] p-12 md:p-16 animate-in fade-in slide-in-from-bottom-8 duration-700 relative overflow-hidden text-white">
                                <div className="absolute top-0 right-0 p-10 opacity-5"><Sparkles className="h-40 w-40" /></div>
                                <div className="flex items-center gap-5 mb-10 text-primary relative z-10">
@@ -322,12 +323,12 @@ export default function ResultPage() {
                                  </div>
                                </div>
                                <p className="text-xl leading-relaxed mb-12 text-slate-300 whitespace-pre-wrap font-medium relative z-10 antialiased">
-                                 {results[q.id].rationalization}
+                                 {aiResults[q.id].rationalization}
                                </p>
                                <div className="space-y-6 relative z-10">
                                  <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Key Learning Points</p>
                                  <div className="flex flex-wrap gap-4">
-                                   {results[q.id].keyLearningPoints.map((point, pi) => (
+                                   {aiResults[q.id].keyLearningPoints.map((point, pi) => (
                                      <div key={pi} className="bg-white/5 border border-white/10 text-slate-200 px-6 py-3 rounded-2xl text-sm font-bold shadow-2xl backdrop-blur-md">
                                        {point}
                                      </div>

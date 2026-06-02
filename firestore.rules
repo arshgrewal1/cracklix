@@ -2,8 +2,8 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // FORCE DEPLOYMENT ID: CRACKLIX_PRO_HARDENING_V220
-    // AUTHOR: Arsh Grewal Management
+    // FORCE DEPLOYMENT ID: CRACKLIX_PRODUCTION_HARDENING_V3
+    // AUTHOR: Arsh Grewal Institutional Management
 
     function isAuthenticated() {
       return request.auth != null;
@@ -13,10 +13,14 @@ service cloud.firestore {
       return request.auth.uid == userId;
     }
 
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
     function isAdmin() {
       return isAuthenticated() && (
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN' ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'SUPER_ADMIN'
+        getUserData().role == 'ADMIN' ||
+        getUserData().role == 'SUPER_ADMIN'
       );
     }
 
@@ -51,13 +55,13 @@ service cloud.firestore {
     }
 
     match /results/{resultId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isAuthenticated();
       allow delete, update: if isAdmin();
     }
 
     match /test_sessions/{sessionId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if isAuthenticated() && (request.auth.uid in sessionId || isAdmin());
     }
 
     match /current_affairs/{docId} {
