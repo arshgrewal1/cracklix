@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, XCircle, BrainCircuit, ChevronRight, HelpCircle, Trophy, Timer, Target } from "lucide-react"
+import { CheckCircle2, XCircle, BrainCircuit, ChevronRight, HelpCircle, Trophy, Timer, Target, Zap } from "lucide-react"
 import { MOCK_QUESTIONS } from "@/lib/mock-data"
 import { rationalizeMockQuestion, RationalizeMockQuestionOutput } from "@/ai/flows/rationalize-mock-question"
 import Link from "next/link"
@@ -93,26 +93,26 @@ export default function ResultPage() {
           <Card className="border-secondary/20 bg-secondary/5">
             <CardHeader>
               <CardTitle className="font-headline text-xl flex items-center gap-2">
-                <Timer className="h-5 w-5 text-secondary" />
-                Recommendations
+                <Zap className="h-5 w-5 text-secondary" />
+                Expert Recommendation
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               <p className="text-sm text-muted-foreground leading-relaxed">
-                Based on your attempt, focus on your <span className="text-primary font-bold">Weak Areas</span> to boost your rank.
+                Platform analytics suggest focusing on your <span className="text-primary font-bold">Weak Areas</span> to improve rank.
               </p>
               <div className="space-y-3">
                 {weakTopics.length > 0 ? (
                   weakTopics.map((topic: string) => (
-                    <RecommendationItem key={topic} text={`Strengthen concept in ${topic}`} />
+                    <RecommendationItem key={topic} text={`Practice 20+ MCQs in ${topic} daily.`} />
                   ))
                 ) : (
-                  <RecommendationItem text="Keep practicing to maintain consistency!" />
+                  <RecommendationItem text="Maintain your consistent accuracy score." />
                 )}
               </div>
               <div className="pt-4 flex flex-col gap-3">
                 <Button className="w-full bg-secondary hover:bg-secondary/90 text-white font-bold h-12">
-                  Retake Mock Test
+                  View Detailed Heatmap
                 </Button>
               </div>
             </CardContent>

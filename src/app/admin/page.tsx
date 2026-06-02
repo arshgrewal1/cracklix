@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus, Database, Users, Calendar, BarChart3, Edit, Trash2, ArrowRight, UserCheck, MessageSquare } from "lucide-react"
+import { Plus, Database, Users, Calendar, BarChart3, Edit, Trash2, ArrowRight, UserCheck, MessageSquare, ArrowUpRight } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { EXAMS } from "@/lib/mock-data"
 import Link from "next/link"
@@ -54,7 +54,7 @@ export default function AdminDashboard() {
               <TableBody>
                 {EXAMS.slice(0, 5).map((exam) => (
                   <TableRow key={exam.id} className="border-foreground/5 hover:bg-white/5">
-                    <TableCell className="font-bold text-sm">{exam.title}</TableCell>
+                    <TableCell className="font-bold text-sm">{exam.name}</TableCell>
                     <TableCell className="text-xs text-muted-foreground font-medium">{exam.category}</TableCell>
                     <TableCell className="text-xs font-headline font-bold">{exam.totalMocks}</TableCell>
                     <TableCell className="text-right">

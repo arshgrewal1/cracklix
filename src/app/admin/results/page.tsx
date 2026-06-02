@@ -1,7 +1,7 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { TrendingUp, Target, Users, Clock, ArrowUpRight, ArrowDownRight } from "lucide-react"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
 
 const chartData = [
