@@ -2,10 +2,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // FORCE DEPLOYMENT ID: CRACKLIX_RESOLVE_V112
+    // FORCE DEPLOYMENT ID: CRACKLIX_RESOLVE_V115
     // AUTHOR: Arsh Grewal Management
-    // TIMESTAMP: 2024-06-03T10:20:00Z
-    // PURPOSE: Resolve 'list' operation permissions for current_affairs and notifications via recursive wildcards.
+    // TIMESTAMP: 2024-06-03T11:00:00Z
+    // PURPOSE: Explicitly resolve 'get' and 'list' operations for settings, current_affairs and notifications.
 
     // 1. Content Collections: Broad public read access (Required for Homepage feeds)
     match /notifications/{allPaths=**} {
@@ -44,7 +44,7 @@ service cloud.firestore {
     }
 
     // 2. Platform Settings: Publicly readable for dynamic Hero/Branding
-    match /settings/{settingId} {
+    match /settings/{allPaths=**} {
       allow read: if true;
       allow write: if request.auth != null;
     }
