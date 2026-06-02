@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Search, Menu, User, Bell } from "lucide-react"
+import { Search, User, Bell, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Logo from "@/components/brand/Logo"
 import {
@@ -22,16 +22,16 @@ export default function Navbar() {
         <Logo variant="light" />
 
         <div className="hidden lg:flex items-center gap-8 text-sm font-bold text-white/70">
-          <Link href="/" className="hover:text-primary transition-colors text-primary">Home</Link>
+          <Link href="/" className="hover:text-primary transition-colors text-primary border-b-2 border-primary pb-1">Home</Link>
           
           <DropdownMenu>
             <DropdownMenuTrigger className="hover:text-primary transition-colors flex items-center gap-1 outline-none">
               Exams Categories
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-[#0F172A] border-white/10 text-white min-w-[200px]">
+            <DropdownMenuContent className="bg-[#0F172A] border-white/10 text-white min-w-[200px] mt-2">
               {boards.map(board => (
                 <DropdownMenuItem key={board} asChild>
-                  <Link href="/exams" className="cursor-pointer hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary">
+                  <Link href={`/exams?board=${encodeURIComponent(board)}`} className="cursor-pointer hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary py-2.5 px-4 font-bold text-xs uppercase tracking-wider">
                     {board}
                   </Link>
                 </DropdownMenuItem>
@@ -42,7 +42,6 @@ export default function Navbar() {
           <Link href="/mocks" className="hover:text-primary transition-colors">Mocks</Link>
           <Link href="/pyqs" className="hover:text-primary transition-colors">PYQs</Link>
           <Link href="/current-affairs" className="hover:text-primary transition-colors">Current Affairs</Link>
-          <Link href="/admin" className="hover:text-primary transition-colors text-white/40">Portal</Link>
         </div>
 
         <div className="flex items-center gap-4">
