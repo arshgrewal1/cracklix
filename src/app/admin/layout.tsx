@@ -93,19 +93,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         
         <SidebarInset className="flex flex-col bg-background/95">
           <header className="h-16 border-b border-foreground/5 flex items-center px-6 justify-between bg-card/30 backdrop-blur-sm sticky top-0 z-40">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 min-w-0">
               <SidebarTrigger />
-              <div className="h-4 w-[1px] bg-foreground/10 mx-2" />
-              <div className="flex items-center gap-2">
-                 <ShieldCheck className="h-4 w-4 text-primary" />
-                 <span className="text-xs font-black uppercase tracking-[0.2em] text-muted-foreground">Cracklix Management System</span>
+              <div className="h-4 w-[1px] bg-foreground/10 mx-2 hidden sm:block" />
+              <div className="flex items-center gap-2 truncate">
+                 <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground truncate">Management System</span>
               </div>
             </div>
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-6 shrink-0">
               <div className="flex items-center gap-4">
-                <div className="text-right hidden sm:block">
-                  <p className="text-sm font-bold leading-none">{profile?.name || 'System Admin'}</p>
-                  <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">
+                <div className="text-right hidden md:block">
+                  <p className="text-xs font-bold leading-none truncate max-w-[150px]">{profile?.name || 'System Admin'}</p>
+                  <p className="text-[9px] text-muted-foreground uppercase font-black tracking-widest mt-1">
                     {profile?.role === 'SUPER_ADMIN' || user?.email === 'arshdeepgrewal1122@gmail.com' ? 'Founder & Lead' : 'Content Admin'}
                   </p>
                 </div>

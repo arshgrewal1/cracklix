@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Image as ImageIcon, Trash2 } from "lucide-react"
+import { Plus, Edit, Image as ImageIcon, Trash2, Save, Globe } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
 import Image from "next/image"
 import { useCollection, useFirestore } from "@/firebase"
@@ -21,18 +21,16 @@ export default function ExamManagement() {
   const { toast } = useToast()
   const { data: boards, loading } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const [editingBoard, setEditingBoard] = useState<any>(null)
-  const [previewIcon, setPreviewIcon] = useState<string | null>(null)
 
   const handleSave = () => {
     if (!db || !editingBoard) return
     const boardRef = doc(db, "boards", editingBoard.id || `board-${Date.now()}`)
-    const payload = { ...editingBoard, id: boardRef.id, iconUrl: previewIcon || editingBoard.iconUrl || "" }
+    const payload = { ...editingBoard, id: boardRef.id }
     
     setDoc(boardRef, payload, { merge: true })
       .then(() => {
-        toast({ title: "Success", description: "Board information updated." })
+        toast({ title: "Audit Success", description: "Recruitment board configuration updated in global registry." })
         setEditingBoard(null)
-        setPreviewIcon(null)
       })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
@@ -45,11 +43,11 @@ export default function ExamManagement() {
   }
 
   const handleDelete = (id: string) => {
-    if (!confirm("Delete this recruitment board?")) return
+    if (!confirm("Permanently remove this authority from the institutional database?")) return
     const boardRef = doc(db, "boards", id)
     deleteDoc(boardRef)
       .then(() => {
-        toast({ title: "Deleted", description: "Board removed." })
+        toast({ title: "Authority Deleted", description: "Board removed from cloud repository." })
       })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
@@ -62,57 +60,56 @@ export default function ExamManagement() {
 
   return (
     <div className="space-y-12">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-          <h1 className="text-3xl font-headline font-bold text-primary">Board Management</h1>
-          <p className="text-muted-foreground">Arsh Grewal Access: Manage official recruitment authorities.</p>
+           <div className="flex items-center gap-3 mb-2">
+              <Globe className="h-5 w-5 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Official Board Registry</span>
+           </div>
+          <h1 className="text-4xl font-headline font-black text-primary uppercase tracking-tight">Authority Hub</h1>
+          <p className="text-muted-foreground mt-1">Manage official Punjab Government recruitment boards and their visual identity.</p>
         </div>
-        <Dialog open={editingBoard && !editingBoard.id} onOpenChange={(open) => !open && setEditingBoard(null)}>
-          <DialogTrigger asChild>
-            <Button className="bg-primary hover:bg-primary/90" onClick={() => setEditingBoard({ abbreviation: "", name: "", description: "" })}>
-              <Plus className="mr-2 h-4 w-4" /> Create Board
-            </Button>
-          </DialogTrigger>
-          <BoardDialogContent editingBoard={editingBoard} setEditingBoard={setEditingBoard} handleSave={handleSave} previewIcon={previewIcon} setPreviewIcon={setPreviewIcon} />
-        </Dialog>
+        <Button className="bg-primary hover:bg-primary/90 h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl shadow-primary/20 gap-3" onClick={() => setEditingBoard({ abbreviation: "", name: "", description: "", iconUrl: "" })}>
+          <Plus className="h-5 w-5" /> Add Authority
+        </Button>
       </div>
 
-      <Card className="border-foreground/5 bg-card/50">
+      <Card className="border-none shadow-3xl shadow-slate-900/5 bg-card/50 rounded-[3rem] overflow-hidden">
         <CardContent className="p-0">
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Icon</TableHead>
-                <TableHead>Board</TableHead>
-                <TableHead>Full Name</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+            <TableHeader className="bg-muted/30">
+              <TableRow className="border-white/5 h-16">
+                <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Identity</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authority</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Full Name</TableHead>
+                <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Management</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => (
-                  <TableRow key={i}><TableCell colSpan={4}><Skeleton className="h-10 w-full" /></TableCell></TableRow>
+                  <TableRow key={i} className="border-white/5"><TableCell colSpan={4} className="px-10 py-5"><Skeleton className="h-14 w-full rounded-2xl bg-white/5" /></TableCell></TableRow>
                 ))
               ) : boards?.map((board: any) => (
-                <TableRow key={board.id}>
-                  <TableCell>
-                    <div className="h-10 w-10 rounded-lg bg-background border flex items-center justify-center overflow-hidden relative">
+                <TableRow key={board.id} className="hover:bg-white/5 group border-white/5 transition-all">
+                  <TableCell className="px-10 py-6">
+                    <div className="h-14 w-14 rounded-2xl bg-white border border-white/10 flex items-center justify-center overflow-hidden relative shadow-inner group-hover:scale-110 transition-transform">
                       {board.iconUrl ? (
-                        <Image src={board.iconUrl} alt={board.abbreviation || 'Board'} fill className="object-contain p-1" />
+                        <Image src={board.iconUrl} alt={board.abbreviation || 'Board'} fill className="object-contain p-2" />
                       ) : (
-                        <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                        <ImageIcon className="h-6 w-6 text-slate-700" />
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="font-bold text-primary">{board.abbreviation}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{board.name}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                       <Button variant="ghost" size="icon" className="h-8 w-8 hover:text-primary" onClick={() => setEditingBoard(board)}>
-                        <Edit className="h-4 w-4" />
+                  <TableCell className="font-headline font-black text-primary text-lg tracking-tighter uppercase">{board.abbreviation}</TableCell>
+                  <TableCell className="text-sm font-bold text-slate-300 leading-tight max-w-xs">{board.name}</TableCell>
+                  <TableCell className="text-right px-10">
+                    <div className="flex justify-end gap-2 opacity-30 group-hover:opacity-100 transition-all">
+                       <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white/5" onClick={() => setEditingBoard(board)}>
+                        <Edit className="h-5 w-5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive/50 hover:text-destructive" onClick={() => handleDelete(board.id)}>
-                        <Trash2 className="h-4 w-4" />
+                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-rose-500/10 hover:text-rose-500" onClick={() => handleDelete(board.id)}>
+                        <Trash2 className="h-5 w-5" />
                       </Button>
                     </div>
                   </TableCell>
@@ -123,37 +120,49 @@ export default function ExamManagement() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!(editingBoard && editingBoard.id)} onOpenChange={(open) => !open && setEditingBoard(null)}>
-        <BoardDialogContent editingBoard={editingBoard} setEditingBoard={setEditingBoard} handleSave={handleSave} previewIcon={previewIcon} setPreviewIcon={setPreviewIcon} />
+      <Dialog open={!!editingBoard} onOpenChange={(open) => !open && setEditingBoard(null)}>
+        <DialogContent className="sm:max-w-md rounded-[3rem] bg-[#0F172A] text-white border-white/10 shadow-4xl p-0 overflow-hidden">
+          <div className="h-2 w-full bg-primary" />
+          <DialogHeader className="p-10 pb-0">
+            <DialogTitle className="text-3xl font-black font-headline uppercase">{editingBoard?.id ? "Update Authority" : "New Recruitment Board"}</DialogTitle>
+          </DialogHeader>
+          <div className="p-10 space-y-8">
+            <div className="flex justify-center">
+              <div className="h-24 w-24 rounded-3xl bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center relative overflow-hidden group">
+                 {editingBoard?.iconUrl ? (
+                    <img src={editingBoard.iconUrl} className="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform" />
+                 ) : (
+                    <ImageIcon className="h-8 w-8 text-slate-500" />
+                 )}
+              </div>
+            </div>
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Icon Reference URL</Label>
+                <Input value={editingBoard?.iconUrl || ""} onChange={e => setEditingBoard({...editingBoard, iconUrl: e.target.value})} className="bg-white/5 border-white/10 rounded-xl h-12" placeholder="Unsplash/Picsum/Storage URL..." />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Abbreviation (e.g. PSSSB)</Label>
+                <Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value})} className="bg-white/5 border-white/10 rounded-xl h-12 font-black uppercase" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Full Authority Name</Label>
+                <Input value={editingBoard?.name || ""} onChange={e => setEditingBoard({...editingBoard, name: e.target.value})} className="bg-white/5 border-white/10 rounded-xl h-12 font-bold" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Description</Label>
+                <Input value={editingBoard?.description || ""} onChange={e => setEditingBoard({...editingBoard, description: e.target.value})} className="bg-white/5 border-white/10 rounded-xl h-12 text-sm" />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="p-10 pt-0 flex gap-4">
+            <Button variant="ghost" onClick={() => setEditingBoard(null)} className="rounded-xl h-12 px-6 font-bold text-slate-400 hover:text-white">Cancel</Button>
+            <Button className="bg-primary hover:bg-primary/90 rounded-xl h-12 px-10 font-black uppercase tracking-widest text-xs shadow-2xl" onClick={handleSave}>
+              <Save className="h-4 w-4 mr-3" /> {editingBoard?.id ? "Sync Configuration" : "Initialize Board"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
-  )
-}
-
-function BoardDialogContent({ editingBoard, setEditingBoard, handleSave }: any) {
-  return (
-    <DialogContent className="sm:max-w-md">
-      <DialogHeader>
-        <DialogTitle>{editingBoard?.id ? "Edit Board" : "New Recruitment Board"}</DialogTitle>
-      </DialogHeader>
-      <div className="space-y-4 py-4">
-        <div className="space-y-2">
-          <Label>Abbreviation (e.g. PSSSB)</Label>
-          <Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value})} />
-        </div>
-        <div className="space-y-2">
-          <Label>Full Name</Label>
-          <Input value={editingBoard?.name || ""} onChange={e => setEditingBoard({...editingBoard, name: e.target.value})} />
-        </div>
-        <div className="space-y-2">
-          <Label>Description</Label>
-          <Input value={editingBoard?.description || ""} onChange={e => setEditingBoard({...editingBoard, description: e.target.value})} />
-        </div>
-      </div>
-      <DialogFooter>
-        <Button variant="ghost" onClick={() => setEditingBoard(null)}>Cancel</Button>
-        <Button className="bg-primary hover:bg-primary/90" onClick={handleSave}>Save Authority</Button>
-      </DialogFooter>
-    </DialogContent>
   )
 }
