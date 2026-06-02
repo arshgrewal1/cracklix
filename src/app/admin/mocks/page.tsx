@@ -13,6 +13,8 @@ import { collection, query, orderBy, deleteDoc, doc } from "firebase/firestore"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 
 export default function MockManagement() {
   const db = useFirestore()
@@ -27,12 +29,18 @@ export default function MockManagement() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this mock?")) return
-    try {
-      await deleteDoc(doc(db, "mocks", id))
-      toast({ title: "Deleted", description: "Mock test removed successfully." })
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Error", description: e.message })
-    }
+    const mockRef = doc(db, "mocks", id)
+    deleteDoc(mockRef)
+      .then(() => {
+        toast({ title: "Deleted", description: "Mock test removed successfully." })
+      })
+      .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: mockRef.path,
+          operation: 'delete',
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
   }
 
   return (
@@ -95,7 +103,7 @@ export default function MockManagement() {
                         </div>
                         <div>
                           <p className="font-bold text-[#0F172A] text-base">{mock.title}</p>
-                          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">{mock.type || 'Standard'}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">{mock.mockType || 'Standard'}</p>
                         </div>
                       </div>
                     </TableCell>
@@ -110,14 +118,22 @@ export default function MockManagement() {
                     <TableCell className="font-headline font-black text-slate-600">{mock.totalQuestions}</TableCell>
                     <TableCell>
                        <div className="flex items-center gap-2">
-                          <div className="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-                          <span className="text-xs font-black uppercase tracking-widest text-slate-400">Published</span>
+                          <div className={`h-2 w-2 rounded-full ${mock.published ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-300'}`} />
+                          <span className="text-xs font-black uppercase tracking-widest text-slate-400">{mock.published ? 'Published' : 'Draft'}</span>
                        </div>
                     </TableCell>
                     <TableCell className="text-right px-8">
                       <div className="flex justify-end gap-2 opacity-30 group-hover:opacity-100 transition-opacity">
-                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100 hover:text-primary"><Eye className="h-5 w-5" /></Button>
-                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100 hover:text-primary"><Edit className="h-5 w-5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100 hover:text-primary" asChild>
+                          <Link href={`/mocks/${mock.id}`}>
+                            <Eye className="h-5 w-5" />
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100 hover:text-primary" asChild>
+                          <Link href={`/admin/mocks/builder?id=${mock.id}`}>
+                            <Edit className="h-5 w-5" />
+                          </Link>
+                        </Button>
                         <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-rose-50 hover:text-rose-500" onClick={() => handleDelete(mock.id)}><Trash2 className="h-5 w-5" /></Button>
                       </div>
                     </TableCell>
