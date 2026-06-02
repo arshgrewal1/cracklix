@@ -5,41 +5,41 @@ import { motion } from "framer-motion";
 
 interface LogoProps {
   className?: string;
-  variant?: 'light' | 'dark';
+  variant?: 'light' | 'dark'; // 'light' means light text for dark backgrounds, 'dark' means dark text for light backgrounds
   showTagline?: boolean;
 }
 
 export default function Logo({ className = "", variant = 'light', showTagline = true }: LogoProps) {
-  const isLight = variant === 'light'; // variant 'light' means it's on a dark background (text should be light)
+  const isDarkBackground = variant === 'light'; 
   
   return (
-    <Link href="/" className={`flex items-center gap-3 group ${className}`}>
-      {/* SaaS Style Icon: Punjab Map + Checkmark */}
+    <Link href="/" className={`flex items-center gap-3.5 group ${className}`}>
+      {/* Premium SaaS Icon: Punjab Map + Integrated Checkmark */}
       <motion.div 
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="relative w-11 h-11 flex items-center justify-center bg-[#F97316] rounded-xl shadow-lg shadow-orange-500/20 shrink-0 overflow-hidden"
+        className="relative w-12 h-12 flex items-center justify-center bg-[#F97316] rounded-xl shadow-xl shadow-orange-500/20 shrink-0 overflow-hidden"
       >
         <svg 
           viewBox="0 0 100 100" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg" 
-          className="w-7 h-7"
+          className="w-8 h-8"
         >
-          {/* Simplified Geometric Punjab Map Outline */}
+          {/* Geometric Punjab Map Silhouette */}
           <path 
-            d="M30 20 L70 15 L85 40 L80 75 L45 85 L20 65 L15 35 Z" 
+            d="M28 22 L72 18 L88 42 L82 78 L48 88 L22 68 L18 38 Z" 
             fill="white" 
-            fillOpacity="0.2"
+            fillOpacity="0.15"
           />
           {/* Clean Integrated Checkmark */}
           <motion.path 
             initial={{ pathLength: 0 }}
             animate={{ pathLength: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            d="M35 52 L48 65 L72 38" 
+            transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+            d="M34 54 L48 68 L74 36" 
             stroke="white" 
-            strokeWidth="10" 
+            strokeWidth="11" 
             strokeLinecap="round" 
             strokeLinejoin="round" 
           />
@@ -47,16 +47,16 @@ export default function Logo({ className = "", variant = 'light', showTagline = 
       </motion.div>
 
       <div className="flex flex-col">
-        <div className="flex items-baseline">
-          <span className={`text-2xl font-black tracking-tighter ${isLight ? 'text-white' : 'text-[#0F172A]'}`}>
+        <div className="flex items-baseline leading-none">
+          <span className={`text-[26px] font-black tracking-tighter ${isDarkBackground ? 'text-white' : 'text-[#0F172A]'}`}>
             Crack
           </span>
-          <span className="text-[#F97316] text-2xl font-black tracking-tighter">
+          <span className="text-[#F97316] text-[26px] font-black tracking-tighter">
             lix
           </span>
         </div>
         {showTagline && (
-          <span className={`text-[9px] font-bold uppercase tracking-[0.2em] -mt-1 ${isLight ? 'text-white/40' : 'text-[#0F172A]/40'}`}>
+          <span className={`text-[10px] font-black uppercase tracking-[0.25em] mt-1.5 ${isDarkBackground ? 'text-white/40' : 'text-[#0F172A]/40'}`}>
             Punjab Exam Preparation
           </span>
         )}
