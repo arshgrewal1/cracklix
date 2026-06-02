@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,9 +9,22 @@ import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { Globe, Database, Shield, Bell, Layout, Upload, Image as ImageIcon } from "lucide-react"
+import { Globe, Database, Shield, Layout, Upload, Image as ImageIcon } from "lucide-react"
+import { useDoc, useFirestore } from '@/firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { useToast } from "@/hooks/use-toast";
 
 export default function AdminSettings() {
+  const db = useFirestore();
+  const { toast } = useToast();
+  
+  const settingsRef = useMemo(() => {
+    if (!db) return null;
+    return doc(db, 'settings', 'global');
+  }, [db]);
+
+  const { data: remoteSettings, loading } = useDoc(settingsRef);
+
   const [heroData, setHeroData] = useState({
     line1: "Prepare Smarter.",
     line2: "Score Higher.",
@@ -20,7 +32,60 @@ export default function AdminSettings() {
     primaryBtn: "Start Free Mock",
     secondaryBtn: "Explore Exams",
     imageUrl: ""
-  })
+  });
+
+  useEffect(() => {
+    if (remoteSettings) {
+      setHeroData({
+        line1: remoteSettings.heroLine1 || "Prepare Smarter.",
+        line2: remoteSettings.heroLine2 || "Score Higher.",
+        description: remoteSettings.heroDescription || "Complete your Punjab Government Exam preparation on a single platform. Trust Cracklix for your professional success.",
+        primaryBtn: remoteSettings.heroPrimaryBtn || "Start Free Mock",
+        secondaryBtn: remoteSettings.heroSecondaryBtn || "Explore Exams",
+        imageUrl: remoteSettings.heroImageUrl || ""
+      });
+    }
+  }, [remoteSettings]);
+
+  const handlePublish = () => {
+    if (!db) return;
+    
+    const settingsDoc = doc(db, 'settings', 'global');
+    setDoc(settingsDoc, {
+      heroLine1: heroData.line1,
+      heroLine2: heroData.line2,
+      heroDescription: heroData.description,
+      heroPrimaryBtn: heroData.primaryBtn,
+      heroSecondaryBtn: heroData.secondaryBtn,
+      heroImageUrl: heroData.imageUrl
+    }, { merge: true })
+    .then(() => {
+      toast({
+        title: "Platform Updated",
+        description: "Your changes are now live for all users.",
+      });
+    })
+    .catch((error) => {
+      toast({
+        variant: "destructive",
+        title: "Update Failed",
+        description: error.message || "Could not publish changes.",
+      });
+    });
+  };
+
+  const handleReset = () => {
+    if (remoteSettings) {
+      setHeroData({
+        line1: remoteSettings.heroLine1 || "",
+        line2: remoteSettings.heroLine2 || "",
+        description: remoteSettings.heroDescription || "",
+        primaryBtn: remoteSettings.heroPrimaryBtn || "",
+        secondaryBtn: remoteSettings.heroSecondaryBtn || "",
+        imageUrl: remoteSettings.heroImageUrl || ""
+      });
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -86,17 +151,21 @@ export default function AdminSettings() {
 
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Hero Background Image</Label>
-                    <div className="h-40 w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center bg-muted/20 relative overflow-hidden group">
-                      {heroData.imageUrl ? (
-                         <img src={heroData.imageUrl} className="absolute inset-0 object-cover w-full h-full opacity-50" />
-                      ) : (
-                        <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
-                      )}
-                      <Button variant="secondary" size="sm" className="relative z-10 gap-2">
-                        <Upload className="h-4 w-4" /> Change Image
-                      </Button>
-                      <input type="file" className="absolute inset-0 opacity-0 cursor-pointer z-20" />
+                    <Label>Hero Background Image (URL)</Label>
+                    <div className="space-y-4">
+                      <Input 
+                        value={heroData.imageUrl} 
+                        onChange={(e) => setHeroData({...heroData, imageUrl: e.target.value})}
+                        placeholder="Paste image URL here..."
+                      />
+                      <div className="h-40 w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center bg-muted/20 relative overflow-hidden group">
+                        {heroData.imageUrl ? (
+                           <img src={heroData.imageUrl} className="absolute inset-0 object-cover w-full h-full opacity-50" />
+                        ) : (
+                          <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
+                        )}
+                        <p className="text-xs text-muted-foreground z-10">Image Preview</p>
+                      </div>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
@@ -119,8 +188,8 @@ export default function AdminSettings() {
               </div>
               <Separator />
               <div className="flex justify-end gap-4">
-                <Button variant="outline">Reset Changes</Button>
-                <Button className="bg-primary hover:bg-primary/90 px-8 font-bold">Publish Live</Button>
+                <Button variant="outline" onClick={handleReset}>Reset Changes</Button>
+                <Button className="bg-primary hover:bg-primary/90 px-8 font-bold" onClick={handlePublish}>Publish Live</Button>
               </div>
             </CardContent>
           </Card>

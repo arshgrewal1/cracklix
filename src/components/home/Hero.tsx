@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from "next/image";
@@ -6,23 +5,38 @@ import Link from "next/link";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, TrendingUp, Trophy, Target, ShieldCheck } from "lucide-react";
+import { ArrowRight, Trophy, Target, TrendingUp } from "lucide-react";
+import { useDoc, useFirestore } from '@/firebase';
+import { doc } from 'firebase/firestore';
+import { useMemo } from 'react';
 
 export default function Hero() {
-  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-punjab')?.imageUrl || "https://picsum.photos/seed/punjab-hero/1200/800";
+  const db = useFirestore();
+  const settingsRef = useMemo(() => {
+    if (!db) return null;
+    return doc(db, 'settings', 'global');
+  }, [db]);
+
+  const { data: settings, loading } = useDoc(settingsRef);
+
+  const heroImage = settings?.heroImageUrl || PlaceHolderImages.find(img => img.id === 'hero-punjab')?.imageUrl || "https://picsum.photos/seed/punjab-hero/1200/800";
+
+  const content = {
+    line1: settings?.heroLine1 || "Prepare Smarter.",
+    line2: settings?.heroLine2 || "Score Higher.",
+    description: settings?.heroDescription || "Punjab Government Exams di Complete Preparation ik hi Platform te. Trust Cracklix for your professional success.",
+    primaryBtn: settings?.heroPrimaryBtn || "Start Free Mock",
+    secondaryBtn: settings?.heroSecondaryBtn || "Explore Exams"
+  };
 
   return (
     <header className="relative pt-20 pb-20 lg:pt-28 lg:pb-32 bg-[#08152D] overflow-hidden border-b border-white/5">
-      {/* Background Decorative Elements */}
       <div className="absolute inset-0 z-0">
-        {/* Punjab Map Watermark */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.03] pointer-events-none">
           <svg viewBox="0 0 100 100" className="w-full h-full object-contain fill-white">
              <path d="M40 35 L55 40 L60 60 L45 70 L35 55 Z" />
           </svg>
         </div>
-        
-        {/* Subtle Glowing Accents */}
         <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full" />
       </div>
@@ -30,14 +44,12 @@ export default function Hero() {
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-24 items-center">
           
-          {/* Left Column: Content */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
             className="space-y-8"
           >
-            {/* Small SaaS Badge */}
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -50,32 +62,29 @@ export default function Hero() {
               </span>
             </motion.div>
 
-            {/* Main SaaS Headline */}
             <div className="space-y-2">
               <h1 className="text-[3.5rem] lg:text-[5.5rem] font-extrabold leading-[1.05] tracking-tight text-white font-headline">
-                Prepare Smarter.<br />
+                {content.line1}<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-orange-400 to-amber-500">
-                  Score Higher.
+                  {content.line2}
                 </span>
               </h1>
               <p className="text-lg lg:text-xl text-[#7A8B9E] leading-relaxed max-w-xl font-body">
-                Punjab Government Exams di Complete Preparation ik hi Platform te.
+                {content.description}
               </p>
             </div>
 
-            {/* CTA Buttons */}
             <div className="flex flex-wrap gap-4 pt-2">
               <Button asChild className="h-14 px-8 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl gap-2 shadow-2xl shadow-primary/20 transition-all hover:-translate-y-1 active:scale-95">
                 <Link href="/mocks">
-                  Start Free Mock <ArrowRight className="h-4 w-4" />
+                  {content.primaryBtn} <ArrowRight className="h-4 w-4" />
                 </Link>
               </Button>
               <Button variant="outline" asChild className="h-14 px-8 border-white/10 text-white hover:bg-white/5 bg-transparent backdrop-blur-sm rounded-xl font-bold transition-all">
-                <Link href="/exams">Explore Exams</Link>
+                <Link href="/exams">{content.secondaryBtn}</Link>
               </Button>
             </div>
 
-            {/* Trust Bar */}
             <div className="pt-6 border-t border-white/5 inline-block">
                <p className="text-xs lg:text-sm font-black text-white/40 uppercase tracking-[0.1em] flex items-center gap-3">
                  <span>10,000+ Questions</span>
@@ -87,14 +96,12 @@ export default function Hero() {
             </div>
           </motion.div>
 
-          {/* Right Column: Premium Visuals */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, ease: "easeOut" }}
             className="relative lg:block"
           >
-            {/* Main Visual Container */}
             <div className="relative aspect-[4/5] sm:aspect-square w-full rounded-[40px] overflow-hidden border border-white/10 shadow-2xl group">
               <Image
                 src={heroImage}
@@ -106,7 +113,6 @@ export default function Hero() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#08152D] via-transparent to-transparent opacity-60" />
               
-              {/* Internal Dashboard Mock Overlay */}
               <div className="absolute bottom-6 left-6 right-6 p-6 rounded-3xl bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl">
                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -127,7 +133,6 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* Floating Card: Rank */}
             <FloatingCard 
               delay={0.6} 
               className="top-[-5%] right-[-5%] bg-emerald-500/10 border-emerald-500/20"
@@ -137,7 +142,6 @@ export default function Hero() {
               subValue="+12 Up This Week"
             />
 
-            {/* Floating Card: Score */}
             <FloatingCard 
               delay={0.8} 
               className="top-[40%] left-[-10%] bg-primary/10 border-primary/20"
@@ -147,7 +151,6 @@ export default function Hero() {
               subValue="Sectional Pro"
             />
           </motion.div>
-
         </div>
       </div>
     </header>

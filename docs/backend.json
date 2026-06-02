@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "UserProfile": {
@@ -70,6 +69,19 @@
         "rank": { "type": "number" },
         "weakTopics": { "type": "array", "items": { "type": "string" } }
       }
+    },
+    "SiteSettings": {
+      "title": "Site Settings",
+      "description": "Global website configuration including Hero content.",
+      "type": "object",
+      "properties": {
+        "heroLine1": { "type": "string" },
+        "heroLine2": { "type": "string" },
+        "heroDescription": { "type": "string" },
+        "heroPrimaryBtn": { "type": "string" },
+        "heroSecondaryBtn": { "type": "string" },
+        "heroImageUrl": { "type": "string" }
+      }
     }
   },
   "auth": {
@@ -77,20 +89,24 @@
   },
   "firestore": {
     "/users/{userId}": {
-      "schema": "#/backend/entities/UserProfile",
+      "schema": { "$ref": "#/backend/entities/UserProfile" },
       "description": "User profile data."
     },
     "/exams/{examId}": {
-      "schema": "#/backend/entities/Exam",
+      "schema": { "$ref": "#/backend/entities/Exam" },
       "description": "Exam boards and categories."
     },
     "/exams/{examId}/mocks/{mockId}": {
-      "schema": "#/backend/entities/MockTest",
+      "schema": { "$ref": "#/backend/entities/MockTest" },
       "description": "Mock tests within an exam."
     },
     "/attempts/{attemptId}": {
-      "schema": "#/backend/entities/AttemptResult",
+      "schema": { "$ref": "#/backend/entities/AttemptResult" },
       "description": "Global log of mock test attempts."
+    },
+    "/settings/global": {
+      "schema": { "$ref": "#/backend/entities/SiteSettings" },
+      "description": "Global site settings document."
     }
   }
 }
