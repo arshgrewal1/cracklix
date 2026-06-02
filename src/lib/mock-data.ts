@@ -5,7 +5,7 @@ export const EXAMS: Exam[] = [
     id: "psssb-patwari",
     name: "Revenue Patwari",
     board: "PSSSB",
-    description: "Revenue Patwari, Canal Patwari and Ziladar recruitment for Punjab.",
+    description: "Prepare for Revenue Patwari, Canal Patwari and Ziladar recruitment for Punjab Government departments.",
     category: "Revenue",
     thumbnail: "exam-psssb",
     totalMocks: 45,
@@ -17,7 +17,7 @@ export const EXAMS: Exam[] = [
     id: "psssb-clerk",
     name: "Clerk (General/IT/Accounts)",
     board: "PSSSB",
-    description: "Multi-departmental clerk recruitment exams.",
+    description: "Multi-departmental clerk recruitment exams with Punjabi qualifying sections.",
     category: "Clerical",
     thumbnail: "exam-psssb",
     totalMocks: 60,
@@ -29,7 +29,7 @@ export const EXAMS: Exam[] = [
     id: "ppsc-pcs",
     name: "Punjab Civil Services (PCS)",
     board: "PPSC",
-    description: "Executive, DSP, Tehsildar and Higher Class A/B services.",
+    description: "Higher Class A & B services including Executive, DSP, and Tehsildar posts.",
     category: "Executive",
     thumbnail: "exam-ppsc",
     totalMocks: 20,
@@ -41,7 +41,7 @@ export const EXAMS: Exam[] = [
     id: "police-constable",
     name: "Punjab Police Constable",
     board: "Punjab Police",
-    description: "District and Armed Cadre recruitment.",
+    description: "District and Armed Cadre recruitment for the year 2026.",
     category: "Police",
     thumbnail: "exam-police",
     totalMocks: 50,
@@ -53,7 +53,7 @@ export const EXAMS: Exam[] = [
     id: "pstet",
     name: "PSTET (Paper 1 & 2)",
     board: "Education",
-    description: "Punjab State Teacher Eligibility Test.",
+    description: "Punjab State Teacher Eligibility Test for Master Cadre and ETT recruitment.",
     category: "Teaching",
     thumbnail: "exam-teaching",
     totalMocks: 40,
@@ -65,7 +65,7 @@ export const EXAMS: Exam[] = [
     id: "hc-clerk",
     name: "High Court Clerk (SSSC)",
     board: "High Court",
-    description: "Clerical recruitment for Subordinate Courts.",
+    description: "Clerical recruitment for Subordinate Courts of Punjab and Haryana.",
     category: "Judicial",
     thumbnail: "exam-hc",
     totalMocks: 25,
@@ -77,7 +77,7 @@ export const EXAMS: Exam[] = [
     id: "pspcl-alm",
     name: "Assistant Lineman (ALM)",
     board: "Power Sector",
-    description: "Technical recruitment for PSPCL.",
+    description: "Technical recruitment for PSPCL and PSTCL power utilities.",
     category: "Technical",
     thumbnail: "exam-pspcl",
     totalMocks: 20,
@@ -89,7 +89,7 @@ export const EXAMS: Exam[] = [
     id: "coop-bank-clerk",
     name: "Cooperative Bank Clerk",
     board: "Cooperative",
-    description: "Management and Data Entry Operator posts.",
+    description: "Management and Data Entry Operator posts for Punjab State Cooperative Banks.",
     category: "Banking",
     thumbnail: "exam-pspcl",
     totalMocks: 30,
@@ -139,6 +139,16 @@ export const MOCK_QUESTIONS: Question[] = [
     correctAnswer: 0,
     difficulty: "Easy",
     explanation: "Guru Nanak Dev Ji was the founder of Sikhism and the first Guru."
+  },
+  {
+    id: "q5",
+    topic: "Punjab GK",
+    subject: "General Knowledge",
+    question: "Which river is known as the 'Backbone of Punjab'?",
+    options: ["Sutlej", "Beas", "Ravi", "Chenab"],
+    correctAnswer: 0,
+    difficulty: "Easy",
+    explanation: "The Sutlej river is the longest of the five rivers that flow through the historic crossroads region of Punjab."
   }
 ];
 
@@ -166,6 +176,13 @@ export const CURRENT_AFFAIRS: CurrentAffair[] = [
     date: "Oct 22, 2026",
     category: "Environment",
     summary: "A 50-crore conservation project announced to protect migratory birds at Harike Wetland."
+  },
+  {
+    id: "ca3",
+    title: "Punjab Police Academy Phillaur wins National Award",
+    date: "Oct 20, 2026",
+    category: "Achievement",
+    summary: "The historic academy at Phillaur was recognized for excellence in training SI and Constable ranks."
   }
 ];
 

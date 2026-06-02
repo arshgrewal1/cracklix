@@ -1,10 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+"use client"
+
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Plus, Search, Filter, Edit, Trash2, FileText } from "lucide-react"
 import { MOCK_QUESTIONS } from "@/lib/mock-data"
 import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
 
 export default function QuestionBank() {
   return (
@@ -18,8 +21,10 @@ export default function QuestionBank() {
           <Button variant="outline" className="gap-2 border-primary/20 text-primary">
             <FileText className="h-4 w-4" /> Import CSV
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 gap-2">
-            <Plus className="h-4 w-4" /> Add Question
+          <Button asChild className="bg-primary hover:bg-primary/90 gap-2">
+            <Link href="/admin/questions/add">
+              <Plus className="h-4 w-4" /> Add Question
+            </Link>
           </Button>
         </div>
       </div>
