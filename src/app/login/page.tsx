@@ -18,7 +18,7 @@ import {
   sendPasswordResetEmail,
   updateProfile
 } from "firebase/auth"
-import { doc, setDoc, serverTimestamp } from "firebase/firestore"
+import { doc, setDoc, serverTimestamp, getDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
 import Link from "next/link"
@@ -30,6 +30,7 @@ export default function LoginPage() {
   const [phone, setPhone] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [resetEmail, setResetEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
@@ -41,8 +42,12 @@ export default function LoginPage() {
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email || !password || (mode === 'register' && (!name || !phone))) return
     
+    if (mode === 'register' && password !== confirmPassword) {
+      toast({ variant: "destructive", title: "Passwords match error", description: "Ensure passwords match." })
+      return
+    }
+
     setLoading(true)
     try {
       if (mode === 'login') {
@@ -55,17 +60,21 @@ export default function LoginPage() {
         
         await updateProfile(user, { displayName: name })
         
-        // Save to Firestore immediately
-        await setDoc(doc(db, 'users', user.uid), {
+        const isSuperAdmin = email.toLowerCase() === 'arshdeepgrewal1122@gmail.com';
+        
+        const profileData = {
           id: user.uid,
           name: name,
           email: email,
           phone: `+91 ${phone}`,
+          role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
           state: "Punjab",
-          targetExam: "", // To be filled in profile-setup
-          createdAt: serverTimestamp(),
+          targetExam: "",
+          createdAt: new Date().toISOString(),
           status: 'Free'
-        }, { merge: true })
+        };
+
+        await setDoc(doc(db, 'users', user.uid), profileData)
 
         toast({ title: "Account created!", description: `Welcome, ${name}!` })
         router.push("/profile-setup")
@@ -84,9 +93,30 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider()
     try {
-      await signInWithPopup(auth, provider)
+      const result = await signInWithPopup(auth, provider)
+      const user = result.user
+      
+      const userRef = doc(db, 'users', user.uid)
+      const userSnap = await getDoc(userRef)
+
+      if (!userSnap.exists()) {
+        const isSuperAdmin = user.email?.toLowerCase() === 'arshdeepgrewal1122@gmail.com';
+        await setDoc(userRef, {
+          id: user.uid,
+          name: user.displayName || "Aspirant",
+          email: user.email,
+          phone: "",
+          role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
+          state: "Punjab",
+          targetExam: "",
+          createdAt: new Date().toISOString(),
+          status: 'Free'
+        })
+        router.push("/profile-setup")
+      } else {
+        router.push("/")
+      }
       toast({ title: "Success", description: "Signed in with Google." })
-      router.push("/")
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -112,15 +142,10 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#020817] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Background Decorative Orbs */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 blur-[120px] rounded-full" />
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="z-10 w-full max-w-md"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="z-10 w-full max-w-md">
         <div className="flex flex-col items-center mb-10">
           <Logo variant="light" className="scale-110" />
         </div>
@@ -143,129 +168,67 @@ export default function LoginPage() {
               {mode === 'register' && (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-slate-300 text-xs font-black uppercase tracking-widest">Full Name</Label>
+                    <Label className="text-slate-300 text-xs font-black uppercase tracking-widest">Full Name</Label>
                     <div className="relative">
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                      <Input 
-                        id="name" 
-                        type="text"
-                        className="pl-12 h-13 bg-white/[0.05] border-white/10 text-white rounded-xl focus:ring-primary/50" 
-                        placeholder="Arsh Grewal"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                      />
+                      <Input value={name} onChange={(e) => setName(e.target.value)} required className="pl-12 h-13 bg-white/[0.05] border-white/10 text-white rounded-xl" placeholder="Arsh Grewal" />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-slate-300 text-xs font-black uppercase tracking-widest">Mobile Number</Label>
+                    <Label className="text-slate-300 text-xs font-black uppercase tracking-widest">Mobile Number</Label>
                     <div className="relative">
                       <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
                         <Phone className="h-4 w-4 text-slate-500" />
                         <span className="text-slate-400 text-sm font-bold border-r border-white/10 pr-2">+91</span>
                       </div>
-                      <Input 
-                        id="phone" 
-                        type="tel"
-                        className="pl-24 h-13 bg-white/[0.05] border-white/10 text-white rounded-xl focus:ring-primary/50" 
-                        placeholder="98XXX XXXXX"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        required
-                        maxLength={10}
-                      />
+                      <Input value={phone} onChange={(e) => setPhone(e.target.value)} required maxLength={10} className="pl-24 h-13 bg-white/[0.05] border-white/10 text-white rounded-xl" placeholder="98XXX XXXXX" />
                     </div>
                   </div>
                 </>
               )}
               
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-slate-300 text-xs font-black uppercase tracking-widest">Email Address</Label>
+                <Label className="text-slate-300 text-xs font-black uppercase tracking-widest">Email Address</Label>
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                  <Input 
-                    id="email" 
-                    type="email"
-                    className="pl-12 h-13 bg-white/[0.05] border-white/10 text-white rounded-xl focus:ring-primary/50" 
-                    placeholder="name@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
+                  <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="pl-12 h-13 bg-white/[0.05] border-white/10 text-white rounded-xl" placeholder="name@example.com" />
                 </div>
               </div>
               
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label htmlFor="password" name="password" className="text-slate-300 text-xs font-black uppercase tracking-widest">Password</Label>
+                  <Label className="text-slate-300 text-xs font-black uppercase tracking-widest">Password</Label>
                   {mode === 'login' && (
-                    <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-                      <DialogTrigger asChild>
-                        <button type="button" className="text-[10px] text-primary font-black uppercase tracking-widest hover:underline">Forgot?</button>
-                      </DialogTrigger>
-                      <DialogContent className="bg-[#0B1528] border-white/10 text-white rounded-3xl">
-                        <DialogHeader>
-                          <DialogTitle className="font-headline font-black text-2xl">Reset Password</DialogTitle>
-                          <DialogDescription className="text-slate-400">
-                            Enter your email and we'll send a recovery link.
-                          </DialogDescription>
-                        </DialogHeader>
-                        <div className="py-6 space-y-4">
-                          <div className="space-y-2">
-                            <Label className="text-xs uppercase font-black tracking-widest">Email Address</Label>
-                            <Input 
-                              value={resetEmail} 
-                              onChange={(e) => setResetEmail(e.target.value)}
-                              placeholder="your@email.com"
-                              className="h-12 bg-white/5 border-white/10 rounded-xl"
-                            />
-                          </div>
-                        </div>
-                        <DialogFooter>
-                          <Button variant="outline" className="rounded-xl" onClick={() => setIsResetDialogOpen(false)}>Cancel</Button>
-                          <Button onClick={handleForgotPassword} className="bg-primary hover:bg-primary/90 rounded-xl px-6 font-bold">Send Link</Button>
-                        </DialogFooter>
-                      </DialogContent>
-                    </Dialog>
+                    <button type="button" onClick={() => setIsResetDialogOpen(true)} className="text-[10px] text-primary font-black uppercase tracking-widest hover:underline">Forgot?</button>
                   )}
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                  <Input 
-                    id="password" 
-                    type="password"
-                    className="pl-12 h-13 bg-white/[0.05] border-white/10 text-white rounded-xl focus:ring-primary/50" 
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                  />
+                  <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="pl-12 h-13 bg-white/[0.05] border-white/10 text-white rounded-xl" placeholder="••••••••" />
                 </div>
               </div>
 
-              <Button 
-                type="submit"
-                className="w-full h-14 bg-primary hover:bg-primary/90 font-black uppercase tracking-[0.2em] text-xs text-white shadow-xl shadow-primary/20 rounded-xl transition-all hover:-translate-y-1"
-                disabled={loading}
-              >
+              {mode === 'register' && (
+                <div className="space-y-2">
+                   <Label className="text-slate-300 text-xs font-black uppercase tracking-widest">Confirm Password</Label>
+                   <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                    <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="pl-12 h-13 bg-white/[0.05] border-white/10 text-white rounded-xl" placeholder="••••••••" />
+                  </div>
+                </div>
+              )}
+
+              <Button type="submit" className="w-full h-14 bg-primary hover:bg-primary/90 font-black uppercase tracking-[0.2em] text-xs text-white shadow-xl shadow-primary/20 rounded-xl" disabled={loading}>
                 {loading ? "Authenticating..." : (mode === 'login' ? "Login to Dashboard" : "Create Free Account")}
               </Button>
             </form>
 
             <div className="relative py-2">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-white/5" />
-              </div>
-              <div className="relative flex justify-center text-[10px] uppercase font-black tracking-[0.2em]">
-                <span className="bg-[#020817] px-4 text-slate-500">Or continue with</span>
-              </div>
+              <div className="absolute inset-0 flex items-center"><span className="w-full border-t border-white/5" /></div>
+              <div className="relative flex justify-center text-[10px] uppercase font-black tracking-[0.2em]"><span className="bg-[#020817] px-4 text-slate-500">Or continue with</span></div>
             </div>
 
-            <Button 
-              variant="outline" 
-              className="w-full h-14 border-white/10 bg-white/[0.03] hover:bg-white/[0.08] text-white gap-3 rounded-xl font-bold transition-all"
-              onClick={handleGoogleSignIn}
-            >
+            <Button variant="outline" className="w-full h-14 border-white/10 bg-white/[0.03] hover:bg-white/[0.08] text-white gap-3 rounded-xl font-bold" onClick={handleGoogleSignIn}>
               <svg viewBox="0 0 24 24" className="h-5 w-5">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
                 <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
@@ -285,16 +248,30 @@ export default function LoginPage() {
           </CardContent>
         </Card>
 
+        <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+          <DialogContent className="bg-[#0B1528] border-white/10 text-white rounded-3xl">
+            <DialogHeader>
+              <DialogTitle className="font-headline font-black text-2xl">Reset Password</DialogTitle>
+              <DialogDescription className="text-slate-400">Enter your email and we'll send a recovery link.</DialogDescription>
+            </DialogHeader>
+            <div className="py-6 space-y-4">
+              <Label className="text-xs uppercase font-black tracking-widest">Email Address</Label>
+              <Input value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="your@email.com" className="h-12 bg-white/5 border-white/10 rounded-xl" />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" className="rounded-xl" onClick={() => setIsResetDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleForgotPassword} className="bg-primary hover:bg-primary/90 rounded-xl px-6 font-bold">Send Link</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         <div className="mt-8 flex items-center justify-center gap-2 text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
-          <ShieldCheck className="h-4 w-4 text-primary" />
-          Institutional Grade Security
+          <ShieldCheck className="h-4 w-4 text-primary" /> Institutional Grade Security
         </div>
         
         <div className="mt-12 text-center">
            <Button variant="ghost" asChild className="text-slate-500 hover:text-white gap-2">
-             <Link href="/">
-                <ChevronLeft className="h-4 w-4" /> Back to Home
-             </Link>
+             <Link href="/"><ChevronLeft className="h-4 w-4" /> Back to Home</Link>
            </Button>
         </div>
       </motion.div>

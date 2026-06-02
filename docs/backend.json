@@ -3,19 +3,20 @@
   "entities": {
     "UserProfile": {
       "title": "User Profile",
-      "description": "User account information and membership status.",
+      "description": "User account information and role-based status.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "name": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "phone": { "type": "string" },
+        "role": { "type": "string", "enum": ["SUPER_ADMIN", "ADMIN", "STUDENT"] },
         "state": { "type": "string", "enum": ["Punjab"] },
         "targetExam": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "status": { "type": "string", "enum": ["Pro", "Free"] }
       },
-      "required": ["id", "name", "email"]
+      "required": ["id", "name", "email", "role"]
     },
     "Board": {
       "title": "Recruitment Board",
@@ -79,13 +80,10 @@
         "subjectId": { "type": "string" },
         "boardId": { "type": "string" },
         "examId": { "type": "string" },
-        "textEn": { "type": "string" },
-        "textPa": { "type": "string" },
-        "optionsEn": { "type": "array", "items": { "type": "string" } },
-        "optionsPa": { "type": "array", "items": { "type": "string" } },
+        "text": { "type": "string" },
+        "options": { "type": "array", "items": { "type": "string" } },
         "correctAnswer": { "type": "number" },
-        "explanationEn": { "type": "string" },
-        "explanationPa": { "type": "string" },
+        "explanation": { "type": "string" },
         "difficulty": { "type": "string", "enum": ["Easy", "Medium", "Hard"] },
         "topic": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
@@ -125,7 +123,7 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/UserProfile" },
-      "description": "Student profiles."
+      "description": "Student and Admin profiles."
     },
     "/boards/{boardId}": {
       "schema": { "$ref": "#/backend/entities/Board" },

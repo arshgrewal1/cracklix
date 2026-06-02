@@ -1,5 +1,6 @@
 
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'STUDENT';
 export type BoardCategory = 'PSSSB' | 'PPSC' | 'Punjab Police' | 'Education' | 'High Court' | 'Power Sector' | 'Health' | 'Cooperative';
 
 export interface Board {
@@ -31,13 +32,13 @@ export interface Question {
   subjectId: string;
   boardId?: string;
   examId?: string;
-  text: string; // Default or English
-  textPa?: string; // Punjabi version
-  options: string[]; // Default or English
-  optionsPa?: string[]; // Punjabi options
+  text: string; 
+  textPa?: string; 
+  options: string[]; 
+  optionsPa?: string[]; 
   correctAnswer: number;
-  explanation: string; // Default or English
-  explanationPa?: string; // Punjabi explanation
+  explanation: string; 
+  explanationPa?: string; 
   difficulty: Difficulty;
   topic: string;
   createdAt?: any;
@@ -90,6 +91,7 @@ export interface UserProfile {
   name: string;
   email: string;
   phone: string;
+  role: UserRole;
   state: 'Punjab';
   targetExam: string;
   createdAt: any;
