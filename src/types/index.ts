@@ -100,6 +100,16 @@ export interface TestSession {
   updatedAt: any;
 }
 
+export interface ContentReport {
+  id: string;
+  questionId: string;
+  userId: string;
+  type: 'WRONG_ANS' | 'TYPO' | 'DUPLICATE' | 'OTHER';
+  comment: string;
+  status: 'PENDING' | 'RESOLVED';
+  timestamp: any;
+}
+
 export interface CurrentAffair {
   id: string;
   title: string;
@@ -123,7 +133,7 @@ export interface Notification {
   important: boolean;
   pdfUrl?: string;
   createdAt: any;
-  type?: 'alert' | 'result' | 'vacancy'; // for visual mapping
+  type?: 'alert' | 'result' | 'vacancy';
 }
 
 export interface AttemptResult {

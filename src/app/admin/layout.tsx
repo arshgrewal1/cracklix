@@ -2,14 +2,13 @@
 "use client"
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, Lock } from "lucide-react"
+import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 import { useUser, useAuth } from "@/firebase"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { signOut } from "firebase/auth"
-import { Skeleton } from "@/components/ui/skeleton"
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser()
@@ -40,12 +39,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20">High Speed Data</SidebarGroupLabel>
+              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20">Data Operations</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
+                  <AdminNavItem icon={<Database />} label="MCQ Bank" href="/admin/questions" />
                   <AdminNavItem icon={<Zap className="text-primary" />} label="Bulk Import" href="/admin/questions/bulk" />
-                  <AdminNavItem icon={<Database />} label="Question Bank" href="/admin/questions" />
                   <AdminNavItem icon={<ClipboardList />} label="Mock Builder" href="/admin/mocks" />
+                  <AdminNavItem icon={<AlertTriangle className="text-rose-400" />} label="Error Reports" href="/admin/reports" />
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -54,8 +54,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20">Content Engine</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <AdminNavItem icon={<Newspaper className="text-emerald-400" />} label="Current Affairs" href="/admin/current-affairs" />
-                  <AdminNavItem icon={<AlertCircle className="text-orange-400" />} label="Exam Alerts" href="/admin/notifications" />
+                  <AdminNavItem icon={<Newspaper className="text-emerald-400" />} label="Daily Analysis" href="/admin/current-affairs" />
+                  <AdminNavItem icon={<AlertCircle className="text-orange-400" />} label="Exam Gazette" href="/admin/notifications" />
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -64,18 +64,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20">Core Management</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <AdminNavItem icon={<LayoutDashboard />} label="Overview" href="/admin" />
+                  <AdminNavItem icon={<LayoutDashboard />} label="Command Center" href="/admin" />
                   <AdminNavItem icon={<GraduationCap />} label="Exams & Boards" href="/admin/exams" />
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup className="mt-4">
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20">Performance</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <AdminNavItem icon={<TrendingUp />} label="Result Analytics" href="/admin/results" />
-                  {profile.role === 'SUPER_ADMIN' && <AdminNavItem icon={<Users />} label="User Authority" href="/admin/users" />}
+                  <AdminNavItem icon={<TrendingUp />} label="Analytics Engine" href="/admin/analytics" />
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
