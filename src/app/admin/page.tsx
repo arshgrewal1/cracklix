@@ -78,7 +78,7 @@ export default function AdminDashboard() {
             <CardDescription>Real-time platform events.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <ActivityItem icon={<UserCheck className="text-green-500" />} title="New Enrollment" desc="Amandeep Singh (PSSSB Pro)" time="2m ago" />
+            <ActivityItem icon={<UserCheck className="text-green-500" />} title="New Enrollment" desc="Arsh Grewal (PSSSB Pro)" time="2m ago" />
             <ActivityItem icon={<Database className="text-primary" />} title="Mock Published" desc="PPSC PCS Prelims Set 04" time="15m ago" />
             <ActivityItem icon={<MessageSquare className="text-secondary" />} title="Support Query" desc="Ticket #2401: Timer issue" time="1h ago" />
             <ActivityItem icon={<UserCheck className="text-green-500" />} title="New Enrollment" desc="Gurpreet Kaur (PPSC Free)" time="2h ago" />

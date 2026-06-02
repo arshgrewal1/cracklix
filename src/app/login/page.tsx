@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState } from "react"
@@ -132,7 +131,7 @@ export default function LoginPage() {
                       id="name" 
                       type="text"
                       className="pl-12 h-13 bg-white/[0.05] border-white/10 text-white rounded-xl focus:ring-primary/50" 
-                      placeholder="Amandeep Singh"
+                      placeholder="Arsh Grewal"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required

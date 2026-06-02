@@ -98,7 +98,7 @@ export default function ProfileSetup() {
             <div className="relative">
               <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input 
-                placeholder="Amandeep Singh" 
+                placeholder="Arsh Grewal" 
                 className="pl-12 h-12 rounded-xl border-slate-200 bg-slate-50/50"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
