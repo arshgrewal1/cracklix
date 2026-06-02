@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link";
@@ -52,12 +53,12 @@ export default function Navbar() {
 
   return (
     <div className="sticky top-0 z-[1000] w-full">
-      {/* Phase 41: Announcement Bar */}
+      {/* Phase 41: Shimmering Announcement Bar */}
       {settings?.showAnnouncement && (
-        <div className="bg-primary text-white py-2 px-6 flex items-center justify-center gap-3 overflow-hidden shadow-2xl relative">
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-[shimmer_2s_infinite]" />
-          <Megaphone className="h-4 w-4 shrink-0" />
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap animate-marquee">
+        <div className="bg-primary text-white py-2.5 px-6 flex items-center justify-center gap-3 overflow-hidden shadow-2xl relative">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2.5s_infinite] pointer-events-none" />
+          <Megaphone className="h-4 w-4 shrink-0 animate-bounce" />
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] whitespace-nowrap">
             {settings.announcement}
           </p>
         </div>
@@ -90,11 +91,6 @@ export default function Navbar() {
               <Skeleton className="h-10 w-24 rounded-lg bg-white/5" />
             ) : user ? (
               <div className="flex items-center gap-4">
-                <button className="relative text-white hover:text-orange-500 transition-colors p-2 hidden sm:block">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-orange-500 border-2 border-[#0B1528]" />
-                </button>
-                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-10 flex items-center gap-2 px-2 hover:bg-white/5 rounded-xl border border-white/5">
@@ -121,7 +117,7 @@ export default function Navbar() {
                     {isAdmin && (
                       <>
                         <DropdownMenuSeparator className="bg-white/5 my-2" />
-                        <DropdownNavItem href="/admin" icon={<ShieldCheck />} label="Admin Command Center" className="text-primary font-black" />
+                        <DropdownNavItem href="/admin" icon={<ShieldCheck className="text-primary" />} label="Command Center" className="text-primary font-black" />
                       </>
                     )}
                     <DropdownMenuSeparator className="bg-white/5 my-2" />
@@ -178,6 +174,12 @@ export default function Navbar() {
           )}
         </AnimatePresence>
       </nav>
+      <style jsx global>{`
+        @keyframes shimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
+        }
+      `}</style>
     </div>
   );
 }

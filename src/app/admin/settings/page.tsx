@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { Globe, Database, Shield, Layout, Image as ImageIcon, Bell, Save, RefreshCw, Share2, Facebook, Twitter, Instagram, Mail } from "lucide-react"
+import { Globe, Database, Shield, Layout, Image as ImageIcon, Bell, Save, RefreshCw, Share2, Facebook, Twitter, Instagram, Mail, Phone } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
@@ -17,7 +17,7 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
- * @fileOverview Final Production-Grade Site Settings & CMS.
+ * @fileOverview Phase 40-42: Site Settings & Dynamic CMS.
  * Manages Hero, Announcements, Identity, and Social Presence.
  */
 
@@ -26,12 +26,12 @@ export default function AdminSettings() {
   const { toast } = useToast();
   
   const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
-  const { data: remoteSettings, loading } = useDoc(settingsRef);
+  const { data: remoteSettings, loading } = useDoc<any>(settingsRef);
 
   const [formData, setFormData] = useState({
     heroLine1: "Prepare Smarter.",
     heroLine2: "Score Higher.",
-    heroDescription: "Complete your Punjab Government Exam preparation on a single platform. Trust Cracklix for your professional success.",
+    heroDescription: "Complete your Punjab Government Exam preparation on a single platform. Trust Cracklix for professional success.",
     heroImageUrl: "https://picsum.photos/seed/punjab/1200/800",
     announcement: "🔥 Punjab Police Recruitment 2026 Applications Open",
     showAnnouncement: true,
@@ -65,7 +65,7 @@ export default function AdminSettings() {
       .then(() => {
         toast({ title: "System Synced", description: "Global configuration is now live for all users." });
       })
-      .catch(async (error) => {
+      .catch(async () => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
           path: '/settings/global',
           operation: 'write',
@@ -74,7 +74,12 @@ export default function AdminSettings() {
       });
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-[#0F172A]"><RefreshCw className="h-10 w-10 text-primary animate-spin" /></div>
+  if (loading) return (
+    <div className="h-screen flex flex-col items-center justify-center bg-[#0F172A] space-y-4">
+      <RefreshCw className="h-10 w-10 text-primary animate-spin" />
+      <p className="text-xs font-black uppercase text-slate-500 tracking-widest">Accessing Portal CMS...</p>
+    </div>
+  )
 
   return (
     <div className="space-y-12 pb-20">
@@ -120,7 +125,7 @@ export default function AdminSettings() {
                 </div>
                 <div className="space-y-6">
                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase text-slate-500">Hero Image URL (Picsum/Unsplash)</Label>
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Hero Image URL</Label>
                       <Input value={formData.heroImageUrl} onChange={e => setFormData({...formData, heroImageUrl: e.target.value})} className="h-14 rounded-xl bg-background border-none shadow-inner" />
                    </div>
                    <div className="h-64 w-full rounded-[2.5rem] bg-background border-2 border-dashed border-white/5 relative overflow-hidden group">
@@ -204,8 +209,8 @@ export default function AdminSettings() {
           <Card className="border-none bg-card/50 shadow-3xl rounded-[3rem]">
              <CardContent className="p-12 space-y-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                   <ConfigToggle label="Negative Marking" desc="Enforce -1.0 penalty for mismatched audit selections." checked={formData.negativeMarking} onChange={val => setFormData({...formData, negativeMarking: val})} />
-                   <ConfigToggle label="AI Tutor Logic" desc="Enable Gemini-powered step-by-step rationalizations." checked={formData.aiRationalization} onChange={val => setFormData({...formData, aiRationalization: val})} />
+                   <ConfigToggle label="Negative Marking" desc="Enforce -1.0 penalty for mismatched audit selections." checked={formData.negativeMarking} onChange={(val: boolean) => setFormData({...formData, negativeMarking: val})} />
+                   <ConfigToggle label="AI Tutor Logic" desc="Enable Gemini-powered step-by-step rationalizations." checked={formData.aiRationalization} onChange={(val: boolean) => setFormData({...formData, aiRationalization: val})} />
                 </div>
              </CardContent>
           </Card>
@@ -226,4 +231,3 @@ function ConfigToggle({ label, desc, checked, onChange }: any) {
     </div>
   )
 }
-

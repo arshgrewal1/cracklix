@@ -33,7 +33,7 @@ import { seedInitialData } from "@/services/seed-data"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Final Admin Command Center with Launch Metrics & Backup.
+ * @fileOverview Final Admin Command Center with Backup System.
  */
 
 export default function AdminDashboard() {
@@ -42,17 +42,18 @@ export default function AdminDashboard() {
   const { toast } = useToast()
   const [seeding, setSeeding] = useState(false)
 
-  const { data: users, loading: uLoading } = useCollection(useMemo(() => (db ? collection(db, "users") : null), [db]))
-  const { data: mocks, loading: mLoading } = useCollection(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
-  const { data: questions, loading: qLoading } = useCollection(useMemo(() => (db ? collection(db, "questions") : null), [db]))
-  const { data: results, loading: rLoading } = useCollection(useMemo(() => (db ? collection(db, "results") : null), [db]))
+  const { data: users, loading: uLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "users") : null), [db]))
+  const { data: mocks, loading: mLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
+  const { data: questions, loading: qLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]))
+  const { data: results, loading: rLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "results") : null), [db]))
 
   const handleSeed = async () => {
     if (!db || seeding) return
+    if (!confirm("This will populate all 13 core collections with sample data. Continue?")) return
     setSeeding(true)
     try {
       await seedInitialData(db)
-      toast({ title: "Global Sync Complete", description: "Institutional collections initialized with verified content." })
+      toast({ title: "Global Sync Complete", description: "Institutional collections initialized." })
     } catch (e: any) {
       toast({ variant: "destructive", title: "Sync Failed", description: e.message })
     } finally {
@@ -61,14 +62,21 @@ export default function AdminDashboard() {
   }
 
   const exportData = () => {
-    const data = { users, mocks, questions, results, timestamp: new Date().toISOString() }
+    const data = { 
+      users, 
+      mocks, 
+      questions, 
+      results, 
+      exportedAt: new Date().toISOString(),
+      platform: "Cracklix Production"
+    }
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
     link.download = `cracklix-backup-${new Date().toISOString().split('T')[0]}.json`
     link.click()
-    toast({ title: "Institutional Backup Ready", description: "JSON archive has been generated for off-site storage." })
+    toast({ title: "Backup Successful", description: "JSON archive generated for off-site storage." })
   }
 
   const topMocks = useMemo(() => {
@@ -76,8 +84,8 @@ export default function AdminDashboard() {
     const counts: any = {}
     results.forEach((r: any) => counts[r.mockId] = (counts[r.mockId] || 0) + 1)
     return mocks
-      .map(m => ({ ...m, attempts: counts[m.id] || 0 }))
-      .sort((a, b) => b.attempts - a.attempts)
+      .map((m: any) => ({ ...m, attempts: counts[m.id] || 0 }))
+      .sort((a: any, b: any) => b.attempts - a.attempts)
       .slice(0, 3)
   }, [mocks, results])
 
@@ -87,10 +95,10 @@ export default function AdminDashboard() {
         <div>
            <div className="flex items-center gap-3 mb-2">
               <ShieldCheck className="h-5 w-5 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Arsh Grewal Executive Portal</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Executive Portal CMS</span>
            </div>
           <h1 className="text-5xl font-headline font-black text-primary uppercase tracking-tight">Command Center</h1>
-          <p className="text-muted-foreground mt-2 text-lg">Platform Health: Monitoring growth across {users?.length || 0} registered aspirants.</p>
+          <p className="text-muted-foreground mt-2 text-lg">Aspirant Registry: Monitoring growth across {users?.length || 0} registered nodes.</p>
         </div>
         <div className="flex flex-wrap gap-4">
           <Button 
@@ -187,7 +195,7 @@ export default function AdminDashboard() {
               <div className="relative z-10 space-y-6">
                  <h3 className="text-xl font-headline font-black text-white uppercase leading-none">Popularity Audit</h3>
                  <div className="space-y-6">
-                    {topMocks.length > 0 ? topMocks.map(m => (
+                    {topMocks.length > 0 ? topMocks.map((m: any) => (
                        <div key={m.id} className="flex justify-between items-center border-b border-white/5 pb-4 last:border-0">
                           <div className="space-y-1">
                              <p className="text-xs font-black text-slate-200 uppercase tracking-tight truncate max-w-[150px]">{m.title}</p>

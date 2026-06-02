@@ -22,21 +22,21 @@ const exams = [
   { name: "Teaching Exams", desc: "ETT, Master Cadre, Lecturer", exams: 15, mocks: 320, Icon: TeachingIcon },
   { name: "High Court", desc: "Punjab & Haryana High Court", exams: 6, mocks: 108, Icon: JusticeIcon },
   { name: "PSPCL & PSTCL", desc: "PSPCL, PSTCL & PSEB Exams", exams: 8, mocks: 162, Icon: PowerIcon },
-  { name: "BFUHS", desc: "Baba Farid University of Health Sciences", exams: 4, mocks: 86, Icon: MedIcon },
-  { name: "Banking & Cooperative", desc: "Banking & Cooperative Exams", exams: 10, mocks: 210, Icon: BankIcon },
+  { name: "BFUHS", desc: "Baba Farid University", exams: 4, mocks: 86, Icon: MedIcon },
+  { name: "Banking & Coop", desc: "Banking & Cooperative Exams", exams: 10, mocks: 210, Icon: BankIcon },
 ];
 
 export default function PopularExams() {
   return (
     <section className="py-16 bg-[#F8FAFC]">
-      <div className="container mx-auto px-6 max-w-[1280px]">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
+      <div className="container mx-auto px-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
           <div className="text-left">
-            <h2 className="text-[32px] font-bold text-[#0B1F3A] font-headline tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-bold text-[#0B1F3A] font-headline tracking-tight">
               Popular Exams
             </h2>
             <p className="text-[#64748B] text-lg font-medium mt-1">
-              Complete preparation for all major Punjab government exams
+              Complete preparation for all major Punjab recruitment boards.
             </p>
           </div>
 
@@ -45,7 +45,7 @@ export default function PopularExams() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {exams.map((exam, idx) => (
             <motion.div
               key={exam.name}
@@ -60,23 +60,23 @@ export default function PopularExams() {
                     <div className="shrink-0 h-16 w-16 flex items-center justify-center transition-transform group-hover:scale-110 duration-300">
                       <exam.Icon />
                     </div>
-                    <div className="text-left min-w-0">
+                    <div className="text-left min-w-0 flex-1">
                       <h3 className="text-xl font-bold text-[#0B1F3A] group-hover:text-[#F97316] transition-colors leading-tight truncate">
                         {exam.name}
                       </h3>
-                      <p className="text-[13px] text-[#64748B] mt-1 font-medium leading-tight line-clamp-2">
+                      <p className="text-[13px] text-[#64748B] mt-1 font-medium leading-snug line-clamp-2">
                         {exam.desc}
                       </p>
                     </div>
                   </div>
 
-                  <div className="mt-auto px-6 py-4 border-t border-[#F1F5F9] flex justify-between items-center text-[13px] font-bold text-[#1E3A8A]">
-                    <span className="flex items-center gap-2">
-                      <BookOpen className="h-4 w-4 text-[#1E3A8A]/50" /> 
+                  <div className="mt-auto px-6 py-4 border-t border-[#F1F5F9] flex justify-between items-center text-[11px] font-black uppercase tracking-widest text-[#1E3A8A]">
+                    <span className="flex items-center gap-2 bg-blue-50/50 px-3 py-1 rounded-lg">
+                      <BookOpen className="h-3.5 w-3.5" /> 
                       {exam.exams} Exams
                     </span>
-                    <span className="flex items-center gap-2">
-                      <MonitorCheck className="h-4 w-4 text-[#1E3A8A]/50" /> 
+                    <span className="flex items-center gap-2 bg-blue-50/50 px-3 py-1 rounded-lg">
+                      <MonitorCheck className="h-3.5 w-3.5" /> 
                       {exam.mocks} Mocks
                     </span>
                   </div>
