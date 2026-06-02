@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Input } from "@/components/ui/input"
@@ -9,9 +8,27 @@ import { Search as SearchIcon, Zap, BookOpen, Newspaper, Bell, ChevronRight, Spa
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
+import { useCollection, useFirestore } from "@/firebase"
+import { collection } from "firebase/firestore"
 
 export default function SearchPage() {
+  const db = useFirestore()
   const [query, setQuery] = useState("")
+
+  const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
+  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
+  const { data: ca } = useCollection<any>(useMemo(() => (db ? collection(db, "current_affairs") : null), [db]))
+
+  const results = useMemo(() => {
+    if (query.length < 2) return []
+    const term = query.toLowerCase()
+    
+    const examMatches = exams?.filter(e => e.name.toLowerCase().includes(term)).map(e => ({ ...e, type: "Exam", href: `/exams/${e.id}`, icon: <ShieldIcon /> })) || []
+    const mockMatches = mocks?.filter(m => m.title.toLowerCase().includes(term)).map(m => ({ ...m, type: "Mock Test", href: `/mocks/${m.id}`, icon: <BookOpen className="text-primary" /> })) || []
+    const caMatches = ca?.filter(c => c.title.toLowerCase().includes(term)).map(c => ({ ...c, type: "Analysis", href: `/current-affairs`, icon: <Newspaper className="text-emerald-500" /> })) || []
+
+    return [...examMatches, ...mockMatches, ...caMatches]
+  }, [query, exams, mocks, ca])
 
   return (
     <div className="min-h-screen bg-slate-50/50">
@@ -38,9 +55,11 @@ export default function SearchPage() {
               <div className="space-y-8">
                  <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Search Results for "{query}"</h3>
                  <div className="grid grid-cols-1 gap-4">
-                    <SearchResultItem icon={<BookOpen className="text-primary" />} title="PSSSB Patwari Mock 01" category="Mock Test" href="/mocks" />
-                    <SearchResultItem icon={<Newspaper className="text-emerald-500" />} title="Punjab Solar Policy 2026 Analysis" category="Current Affair" href="/current-affairs" />
-                    <SearchResultItem icon={<Bell className="text-orange-500" />} title="Punjab Police SI Result 2025" category="Alert" href="/notifications" />
+                    {results.length > 0 ? results.map((res, i) => (
+                      <SearchResultItem key={i} icon={res.icon} title={res.title || res.name} category={res.type} href={res.href} />
+                    )) : (
+                      <div className="text-center py-20 opacity-30 italic">No matches found in official database.</div>
+                    )}
                  </div>
               </div>
            ) : (
@@ -48,10 +67,10 @@ export default function SearchPage() {
                  <Card className="border-none shadow-xl rounded-[2.5rem] p-10 bg-[#0B1528] text-white">
                     <h4 className="font-headline font-black text-xl mb-4">Trending Searches</h4>
                     <ul className="space-y-4">
-                       <TrendingItem text="PSSSB Senior Assistant Syllabus" />
-                       <TrendingItem text="Punjab Police SI 2026 Cutoff" />
+                       <TrendingItem text="PSSSB Patwari 2026 Mock" />
+                       <TrendingItem text="Punjab Police SI Syllabus" />
                        <TrendingItem text="Daily Punjab GK MCQ" />
-                       <TrendingItem text="Current Affairs PDF June" />
+                       <TrendingItem text="Current Affairs PDF" />
                     </ul>
                  </Card>
                  <Card className="border-none shadow-xl rounded-[2.5rem] p-10 bg-white">
@@ -97,4 +116,8 @@ function TrendingItem({ text }: { text: string }) {
          <Sparkles className="h-4 w-4 text-primary" /> {text}
       </li>
    )
+}
+
+function ShieldIcon() {
+  return <div className="h-5 w-5 bg-orange-100 rounded flex items-center justify-center text-primary"><Zap className="h-3 w-3" /></div>
 }

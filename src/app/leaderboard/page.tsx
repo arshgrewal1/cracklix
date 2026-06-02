@@ -1,23 +1,38 @@
-
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, orderBy, limit } from "firebase/firestore"
+import { collection, query, orderBy, limit, where } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
-import { Trophy, Medal, Star, Target, Zap, ShieldCheck, Search } from "lucide-react"
+import { Trophy, ShieldCheck, Search, Zap, Target } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 
 export default function LeaderboardPage() {
   const db = useFirestore()
+  const [boardFilter, setBoardFilter] = useState("Overall")
+  const [searchTerm, setSearchTerm] = useState("")
   
-  const leaderboardQuery = useMemo(() => (db ? query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50)) : null), [db])
+  const leaderboardQuery = useMemo(() => {
+    if (!db) return null
+    let q = query(collection(db, "users"), orderBy("createdAt", "desc"), limit(50))
+    if (boardFilter !== "Overall") {
+       q = query(collection(db, "users"), where("targetExam", "==", boardFilter), limit(50))
+    }
+    return q
+  }, [db, boardFilter])
+
   const { data: users, loading } = useCollection<any>(leaderboardQuery)
+
+  const filteredUsers = useMemo(() => {
+    if (!users) return []
+    return users.filter(u => u.name?.toLowerCase().includes(searchTerm.toLowerCase()))
+  }, [users, searchTerm])
 
   return (
     <div className="min-h-screen bg-slate-50/30">
@@ -40,8 +55,26 @@ export default function LeaderboardPage() {
             </div>
             <div className="relative w-full md:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input className="pl-12 h-14 rounded-2xl bg-white border-none shadow-xl shadow-slate-200/50" placeholder="Search aspirant..." />
+              <Input 
+                className="pl-12 h-14 rounded-2xl bg-white border-none shadow-xl shadow-slate-200/50" 
+                placeholder="Search aspirant..." 
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
             </div>
+          </div>
+
+          <div className="flex gap-3 overflow-x-auto pb-4 custom-scrollbar">
+             {["Overall", "PSSSB", "PPSC", "Punjab Police", "Education", "High Court"].map(board => (
+               <Button 
+                key={board} 
+                onClick={() => setBoardFilter(board)}
+                variant={boardFilter === board ? "default" : "outline"}
+                className={`rounded-xl px-6 h-10 font-bold border-none transition-all ${boardFilter === board ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-white text-slate-500 shadow-sm'}`}
+               >
+                 {board}
+               </Button>
+             ))}
           </div>
 
           {/* Podium */}
@@ -70,7 +103,7 @@ export default function LeaderboardPage() {
                            <Skeleton className="h-6 w-full rounded-md col-span-2" />
                         </div>
                      ))
-                   ) : users?.map((user, idx) => (
+                   ) : filteredUsers?.map((user, idx) => (
                       <div key={user.id} className="p-8 grid grid-cols-12 items-center hover:bg-slate-50 transition-colors group cursor-pointer">
                          <div className="col-span-1 font-headline font-black text-slate-300 group-hover:text-primary transition-colors">#{idx + 4}</div>
                          <div className="col-span-7 flex items-center gap-4">

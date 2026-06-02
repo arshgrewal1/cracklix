@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo } from "react"
@@ -19,7 +18,6 @@ import {
   Database, 
   Save, 
   GripVertical,
-  AlertCircle,
   CheckCircle2
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
@@ -47,7 +45,7 @@ export default function MockBuilderPage() {
     examId: "",
     duration: 120,
     difficulty: "Medium",
-    type: "Full Length",
+    mockType: "FULL",
     language: "Punjabi/English",
     description: ""
   })
@@ -79,24 +77,26 @@ export default function MockBuilderPage() {
     const mockId = `mock-${Date.now()}`
     const mockRef = doc(db, "mocks", mockId)
 
-    // Strictly adhering to backend.json properties + metadata
+    // Strictly adhering to backend.json entities + mock schema
     const payload = {
       id: mockId,
-      examId: mockData.examId,
       title: mockData.title,
+      boardId: mockData.boardId,
+      examId: mockData.examId,
       duration: mockData.duration,
+      mockType: mockData.mockType,
       totalQuestions: selectedQuestions.length,
       questionIds: selectedQuestions.map(q => q.id),
+      difficulty: mockData.difficulty,
+      published: true,
       attempts: 0,
       createdAt: serverTimestamp(),
-      difficulty: mockData.difficulty,
-      type: mockData.type,
       publishedBy: "Arsh Grewal"
     }
 
     setDoc(mockRef, payload)
       .then(() => {
-        toast({ title: "Success", description: "Mock Test published successfully!" })
+        toast({ title: "Series Live", description: "Official Mock Test has been published to all aspirants." })
         router.push("/admin/mocks")
       })
       .catch(async (error) => {
@@ -113,7 +113,7 @@ export default function MockBuilderPage() {
   const filteredBank = useMemo(() => {
     if (!questionBank) return []
     return questionBank.filter(q => 
-      q.text?.toLowerCase().includes(bankSearch.toLowerCase()) || 
+      q.questionEn?.toLowerCase().includes(bankSearch.toLowerCase()) || 
       q.topic?.toLowerCase().includes(bankSearch.toLowerCase())
     )
   }, [questionBank, bankSearch])
@@ -126,20 +126,20 @@ export default function MockBuilderPage() {
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-2xl font-black font-headline text-primary">Mock Test Builder</h1>
-            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Arsh Grewal Access / Professional Hub</p>
+            <h1 className="text-2xl font-black font-headline text-primary">Mock Assembly Portal</h1>
+            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Arsh Grewal Access / Institutional Builder</p>
           </div>
         </div>
         <div className="flex gap-3">
           <Button variant="outline" className="gap-2 font-bold rounded-xl border-foreground/5 shadow-sm">
-            <Eye className="h-4 w-4" /> Preview Draft
+            <Eye className="h-4 w-4" /> View Draft
           </Button>
           <Button 
             className="bg-primary hover:bg-primary/90 gap-2 font-bold px-8 shadow-xl shadow-primary/20 rounded-xl"
             onClick={handlePublish}
             disabled={isPublishing}
           >
-            <Save className="h-4 w-4" /> {isPublishing ? "Publishing..." : "Publish Series"}
+            <Save className="h-4 w-4" /> {isPublishing ? "Syncing..." : "Commit Series"}
           </Button>
         </div>
       </div>
@@ -150,14 +150,14 @@ export default function MockBuilderPage() {
           <Card className="border-foreground/5 bg-card/50 shadow-2xl rounded-[2rem] overflow-hidden">
             <div className="h-1.5 w-full bg-primary" />
             <CardHeader>
-              <CardTitle className="text-lg font-bold font-headline">Test Metadata</CardTitle>
-              <CardDescription>Core settings for the mock series.</CardDescription>
+              <CardTitle className="text-lg font-bold font-headline">Test Configuration</CardTitle>
+              <CardDescription>Core parameters for the recruitment mock.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label className="text-xs uppercase font-black tracking-widest opacity-60">Series Title</Label>
                 <Input 
-                  placeholder="e.g. PSSSB Patwari Set 01" 
+                  placeholder="e.g. PSSSB Clerk Set 04" 
                   value={mockData.title}
                   onChange={e => setMockData({...mockData, title: e.target.value})}
                   className="rounded-xl bg-background/50"
@@ -166,7 +166,7 @@ export default function MockBuilderPage() {
 
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-xs uppercase font-black tracking-widest opacity-60">Recruitment Board</Label>
+                  <Label className="text-xs uppercase font-black tracking-widest opacity-60">Board Authority</Label>
                   <Select onValueChange={val => setMockData({...mockData, boardId: val})}>
                     <SelectTrigger className="rounded-xl bg-background/50">
                       <SelectValue placeholder="Select Authority" />
@@ -179,10 +179,10 @@ export default function MockBuilderPage() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-xs uppercase font-black tracking-widest opacity-60">Exam Category</Label>
+                  <Label className="text-xs uppercase font-black tracking-widest opacity-60">Exam Vertical</Label>
                   <Select onValueChange={val => setMockData({...mockData, examId: val})}>
                     <SelectTrigger className="rounded-xl bg-background/50">
-                      <SelectValue placeholder="Select Exam" />
+                      <SelectValue placeholder="Select Vertical" />
                     </SelectTrigger>
                     <SelectContent>
                       {exams?.filter(e => e.boardId === mockData.boardId).map(e => (
@@ -210,22 +210,12 @@ export default function MockBuilderPage() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Easy">Easy</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="Hard">Hard</SelectItem>
+                      <SelectItem value="Easy">Easy Level</SelectItem>
+                      <SelectItem value="Medium">Medium Level</SelectItem>
+                      <SelectItem value="Hard">Hard Level</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label className="text-xs uppercase font-black tracking-widest opacity-60">Description</Label>
-                <Textarea 
-                  placeholder="Instructions for students..."
-                  className="min-h-[100px] rounded-xl bg-background/50"
-                  value={mockData.description}
-                  onChange={e => setMockData({...mockData, description: e.target.value})}
-                />
               </div>
             </CardContent>
           </Card>
@@ -251,17 +241,17 @@ export default function MockBuilderPage() {
               <Dialog>
                 <DialogTrigger asChild>
                   <Button variant="outline" className="gap-2 border-primary/20 text-primary hover:bg-primary/5 rounded-xl font-bold">
-                    <Database className="h-4 w-4" /> Global Bank
+                    <Database className="h-4 w-4" /> Global MCQ Bank
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="sm:max-w-[750px] max-h-[85vh] flex flex-col p-0 overflow-hidden rounded-[2.5rem] border-none shadow-2xl">
                   <DialogHeader className="p-8 pb-4">
-                    <DialogTitle className="font-headline text-2xl font-black">Search Question Bank</DialogTitle>
+                    <DialogTitle className="font-headline text-2xl font-black">Audit Question Bank</DialogTitle>
                     <div className="relative mt-6">
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                       <Input 
                         className="pl-12 h-14 rounded-2xl bg-muted/50 border-none text-lg" 
-                        placeholder="Search topics or question text..." 
+                        placeholder="Search topics or question statements..." 
                         value={bankSearch}
                         onChange={e => setBankSearch(e.target.value)}
                       />
@@ -273,10 +263,10 @@ export default function MockBuilderPage() {
                       return (
                         <div key={q.id} className="p-5 rounded-2xl border border-foreground/5 bg-slate-50/50 flex items-center justify-between group hover:border-primary/30 transition-all">
                           <div className="space-y-1 pr-8">
-                            <p className="font-bold text-sm line-clamp-1 text-slate-700">{q.text}</p>
+                            <p className="font-bold text-sm line-clamp-1 text-slate-700">{q.questionEn}</p>
                             <div className="flex gap-2">
-                              <Badge variant="outline" className="text-[10px] bg-white border-slate-200">{q.topic}</Badge>
-                              <Badge variant="secondary" className="text-[10px] font-bold">{q.difficulty}</Badge>
+                              <Badge variant="outline" className="text-[10px] bg-white border-slate-200">{q.topic || 'General'}</Badge>
+                              <Badge variant="secondary" className="text-[10px] font-bold uppercase">{q.difficulty}</Badge>
                             </div>
                           </div>
                           <Button 
@@ -292,9 +282,6 @@ export default function MockBuilderPage() {
                   </div>
                 </DialogContent>
               </Dialog>
-              <Button className="gap-2 rounded-xl font-bold" onClick={() => router.push("/admin/questions/add")}>
-                <Plus className="h-4 w-4" /> Manual Entry
-              </Button>
             </div>
           </div>
 
@@ -305,7 +292,7 @@ export default function MockBuilderPage() {
                   <Plus className="h-8 w-8 opacity-40" />
                 </div>
                 <p className="font-black font-headline text-lg">Empty Draft</p>
-                <p className="text-xs uppercase tracking-widest font-black opacity-50 mt-1">Add items from the bank to begin assembly.</p>
+                <p className="text-xs uppercase tracking-widest font-black opacity-50 mt-1">Select MCQs from the institutional bank.</p>
               </div>
             ) : (
               selectedQuestions.map((q, idx) => (
@@ -320,24 +307,22 @@ export default function MockBuilderPage() {
                           {idx + 1}
                         </div>
                         <div className="space-y-1">
-                          <p className="font-bold text-sm line-clamp-1 text-[#0F172A]">{q.text}</p>
+                          <p className="font-bold text-sm line-clamp-1 text-[#0F172A]">{q.questionEn}</p>
                           <div className="flex items-center gap-2">
-                             <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{q.topic}</span>
+                             <span className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">{q.topic || 'General'}</span>
                              <div className="h-1 w-1 rounded-full bg-slate-300" />
-                             <span className="text-[10px] font-bold text-slate-400">{q.difficulty}</span>
+                             <span className="text-[10px] font-bold text-slate-400 uppercase">{q.difficulty}</span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-2">
-                         <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-9 w-9 text-destructive hover:bg-destructive/10 rounded-xl"
-                          onClick={() => handleRemoveQuestion(q.id)}
-                         >
-                           <Trash2 className="h-4 w-4" />
-                         </Button>
-                      </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-9 w-9 text-destructive hover:bg-destructive/10 rounded-xl"
+                        onClick={() => handleRemoveQuestion(q.id)}
+                       >
+                         <Trash2 className="h-4 w-4" />
+                       </Button>
                     </div>
                   </CardContent>
                 </Card>
