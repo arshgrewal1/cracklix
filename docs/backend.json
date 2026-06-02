@@ -1,0 +1,78 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "User account information and membership status.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "membership": { "type": "string", "enum": ["free", "pro"] },
+        "targetExams": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Exam": {
+      "title": "Exam Board",
+      "description": "Primary recruitment boards like PSSSB, PPSC, etc.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "totalMocks": { "type": "number" },
+        "activeQuestions": { "type": "number" }
+      }
+    },
+    "MockTest": {
+      "title": "Mock Test",
+      "description": "A specific full-length or sectional mock test.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "examId": { "type": "string" },
+        "title": { "type": "string" },
+        "durationMinutes": { "type": "number" },
+        "totalQuestions": { "type": "number" },
+        "difficulty": { "type": "string", "enum": ["Easy", "Medium", "Hard"] }
+      }
+    },
+    "Attempt": {
+      "title": "Mock Attempt",
+      "description": "A student's attempt at a mock test.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "mockId": { "type": "string" },
+        "score": { "type": "number" },
+        "accuracy": { "type": "number" },
+        "rank": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "auth": {
+    "providers": ["email", "google", "phone"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "#/backend/entities/UserProfile",
+      "description": "User profile data."
+    },
+    "/exams/{examId}": {
+      "schema": "#/backend/entities/Exam",
+      "description": "Exam boards and categories."
+    },
+    "/exams/{examId}/mocks/{mockId}": {
+      "schema": "#/backend/entities/MockTest",
+      "description": "Mock tests within an exam board."
+    },
+    "/attempts/{attemptId}": {
+      "schema": "#/backend/entities/Attempt",
+      "description": "Global log of mock test attempts."
+    }
+  }
+}

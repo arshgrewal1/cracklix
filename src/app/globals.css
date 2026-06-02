@@ -10,13 +10,13 @@
     --card-foreground: 222 47% 11%;
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary: 215 57% 14%; /* Trust Navy #0B1F3A */
+    --primary: 217 58% 14%; /* Trust Navy #0B1F3A */
     --primary-foreground: 210 40% 98%;
     --secondary: 224 100% 56%; /* Trust Blue #1E5EFF */
     --secondary-foreground: 0 0% 100%;
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 38 92% 50%; /* #F59E0B Success/Accent */
+    --accent: 38 92% 50%; /* Success/Highlight #F59E0B */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
@@ -33,7 +33,7 @@
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
-    --primary: 215 57% 14%;
+    --primary: 217 58% 14%;
     --primary-foreground: 210 40% 98%;
     --secondary: 224 100% 56%;
     --secondary-foreground: 210 40% 98%;
@@ -54,22 +54,18 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-body antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline tracking-tight font-semibold;
+    @apply font-semibold tracking-tight;
   }
 }
 
-.trust-card {
-  @apply bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow;
+.dashboard-preview-card {
+  @apply bg-white border border-gray-100 shadow-xl shadow-black/5 rounded-2xl overflow-hidden;
 }
 
-.dashboard-preview-glow {
-  box-shadow: 0 20px 50px -12px rgba(11, 31, 58, 0.1);
-}
-
-.hero-gradient {
+.trust-gradient {
   background: radial-gradient(circle at top right, rgba(30, 94, 255, 0.05), transparent),
               radial-gradient(circle at bottom left, rgba(11, 31, 58, 0.03), transparent);
 }
