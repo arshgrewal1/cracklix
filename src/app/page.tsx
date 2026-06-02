@@ -1,32 +1,23 @@
 import Navbar from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, CheckCircle2, BarChart3, ShieldCheck, Trophy, Landmark, Smartphone, BookOpen, Clock, Target } from "lucide-react";
+import { ArrowRight, CheckCircle2, ShieldCheck, Trophy, BookOpen, Clock, Target, Download, Apple, Play } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { EXAMS, SAMPLE_MOCK } from "@/lib/mock-data";
 import Logo from "@/components/brand/Logo";
 import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 
 export default function Home() {
-  const boards = [
-    { name: "PSSSB", sub: "Group B & C" },
-    { name: "PPSC", sub: "PCS & A/B" },
-    { name: "Punjab Police", sub: "Constable/SI" },
-    { name: "Education", sub: "TET/Masters" },
-    { name: "High Court", sub: "Judicial" },
-    { name: "Power Sector", sub: "Technical" },
-    { name: "Health", sub: "Medical" },
-    { name: "Cooperative", sub: "Banking" }
-  ];
-
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-white">
       <Navbar />
 
       {/* 1. HERO SECTION */}
-      <section className="relative pt-20 pb-32 overflow-hidden trust-gradient">
-        <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
-           <svg viewBox="0 0 100 100" className="w-[800px] h-[800px] text-white">
+      <section className="relative pt-24 pb-40 overflow-hidden hero-gradient">
+        {/* Punjab Map Watermark */}
+        <div className="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center">
+           <svg viewBox="0 0 100 100" className="w-[1000px] h-[1000px] text-white">
              <path d="M40 35 L55 40 L60 60 L45 70 L35 55 Z" fill="currentColor" />
            </svg>
         </div>
@@ -34,74 +25,49 @@ export default function Home() {
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 bg-white/10 text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/20">
-                <ShieldCheck className="h-4 w-4 text-accent" />
-                Punjab’s Most Trusted Exam Platform
+              <div className="inline-flex items-center gap-2 bg-[#F97316]/20 text-[#F97316] px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest border border-[#F97316]/30">
+                <ShieldCheck className="h-4 w-4" />
+                #1 Punjab Exam Preparation Platform
               </div>
-              <h1 className="text-5xl md:text-7xl font-headline font-bold text-white leading-[1.05]">
+              <h1 className="text-6xl md:text-8xl font-headline font-bold text-white leading-[1.05]">
                 Prepare Smarter.<br />
-                <span className="text-accent">Score Higher.</span>
+                <span className="text-[#F97316]">Score Higher.</span>
               </h1>
-              <p className="text-xl text-blue-100/70 max-w-xl leading-relaxed font-medium">
-                Punjab Government Exams di Complete Preparation ik hi Platform te. Structured mocks based on latest recruitment trends.
+              <p className="text-xl text-white/70 max-w-xl leading-relaxed font-medium">
+                Punjab Government Exams di Complete Preparation ik hi Platform te.
               </p>
               
               <div className="flex flex-wrap gap-4 pt-4">
-                <Button asChild size="lg" className="h-16 px-10 bg-accent hover:bg-accent/90 text-white font-bold rounded-2xl gap-2 shadow-xl shadow-accent/20">
+                <Button asChild size="lg" className="h-14 px-10 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold rounded-lg gap-2 shadow-xl shadow-[#F97316]/20">
                   <Link href="/mocks">Start Free Mock <ArrowRight className="h-5 w-5" /></Link>
                 </Button>
-                <Button variant="outline" asChild size="lg" className="h-16 px-10 border-white/20 text-white hover:bg-white/10 rounded-2xl font-bold bg-white/5 backdrop-blur-sm">
-                  <Link href="/exams">Explore Catalog</Link>
+                <Button variant="outline" asChild size="lg" className="h-14 px-10 border-white/20 text-white hover:bg-white/10 rounded-lg font-bold bg-transparent">
+                  <Link href="/exams">Explore Exams</Link>
                 </Button>
               </div>
 
-              <div className="flex flex-wrap items-center gap-8 pt-6 text-[10px] font-black text-white/50 uppercase tracking-widest">
-                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> 10,000+ Questions</div>
-                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> 500+ Mocks</div>
-                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> 50+ Exams</div>
-                <div className="flex items-center gap-2"><CheckCircle2 className="h-4 w-4 text-accent" /> Detailed Analytics</div>
+              {/* Statistics Row */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-12">
+                <StatCard icon={<BookOpen className="text-[#F97316]" />} value="10,000+" label="Practice Questions" />
+                <StatCard icon={<Clock className="text-[#F97316]" />} value="500+" label="Mock Tests" />
+                <StatCard icon={<ShieldCheck className="text-[#F97316]" />} value="50+" label="Exams Covered" />
+                <StatCard icon={<Target className="text-[#F97316]" />} value="Detailed" label="Analytics" />
               </div>
             </div>
 
-            {/* DASHBOARD PREVIEW */}
+            {/* Hero Image / Golden Temple */}
             <div className="relative group lg:ml-auto">
-              <div className="absolute -inset-4 bg-gradient-to-r from-accent/20 to-transparent blur-2xl rounded-full opacity-50 group-hover:opacity-100 transition-opacity" />
-              <div className="dashboard-card relative p-10 space-y-8 border-2">
-                <div className="flex justify-between items-center border-b pb-6">
-                   <div>
-                     <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest mb-1">Latest Attempt Analysis</p>
-                     <h3 className="text-xl font-headline font-bold text-primary">PSSSB Patwari Mock #01</h3>
-                   </div>
-                   <div className="h-14 w-14 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary border border-secondary/10">
-                     <BarChart3 className="h-7 w-7" />
-                   </div>
-                </div>
-
-                <div className="grid grid-cols-3 gap-8 text-center">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Score</p>
-                    <p className="text-3xl font-headline font-black text-primary">72/100</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Rank</p>
-                    <p className="text-3xl font-headline font-black text-secondary">128/4500</p>
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Accuracy</p>
-                    <p className="text-3xl font-headline font-black text-primary">81%</p>
-                  </div>
-                </div>
-
-                <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100">
-                   <div className="flex items-center justify-between mb-4">
-                     <span className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Weak Area Alert</span>
-                     <span className="text-[10px] font-black text-red-500 bg-red-50 px-2 py-1 rounded">Critical</span>
-                   </div>
-                   <div className="flex flex-wrap gap-2">
-                     {['Punjabi Grammar', 'Reasoning'].map(t => (
-                       <span key={t} className="text-[10px] font-black px-3 py-1 bg-white border rounded-lg text-primary uppercase">{t}</span>
-                     ))}
-                   </div>
+              <div className="relative h-[500px] w-full max-w-[600px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/10">
+                <Image 
+                  src="https://picsum.photos/seed/punjab-hero/1200/800" 
+                  alt="Golden Temple" 
+                  fill 
+                  className="object-cover"
+                  data-ai-hint="golden temple"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent opacity-80" />
+                <div className="absolute bottom-8 left-8">
+                  <Logo variant="light" className="scale-125 origin-left" />
                 </div>
               </div>
             </div>
@@ -109,62 +75,40 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 2. AUTHORITY STRIP */}
-      <section className="py-12 bg-white border-y">
+      {/* 2. POPULAR EXAMS SECTION */}
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
-          <p className="text-muted-foreground text-[10px] font-black uppercase tracking-[0.4em] text-center mb-10">
-            Trusted by Punjab Aspirants for Official Recruitment Boards
-          </p>
-          <div className="flex flex-wrap justify-center gap-x-12 gap-y-8 text-primary/80 text-sm font-bold uppercase tracking-widest">
-            {boards.slice(0, 4).map(board => (
-              <div key={board.name} className="flex flex-col items-center">
-                <span className="text-primary font-black">{board.name}</span>
-                <span className="text-[8px] text-muted-foreground mt-1">{board.sub}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 3. POPULAR EXAMS SECTION */}
-      <section className="section-spacing bg-slate-50/50">
-        <div className="container mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-            <div className="max-w-xl">
-              <h2 className="text-4xl font-headline font-bold text-primary mb-4">Popular Government Exams</h2>
-              <p className="text-muted-foreground font-medium text-lg">
-                High-fidelity test series for Punjab's most sought-after recruitments.
-              </p>
+          <div className="flex justify-between items-end mb-12">
+            <div>
+              <h2 className="text-4xl font-headline font-bold text-[#0F172A]">Popular Exams</h2>
+              <p className="text-muted-foreground mt-2">Complete preparation for all major Punjab government exams</p>
             </div>
-            <Link href="/exams" className="text-secondary font-black text-xs uppercase tracking-widest flex items-center hover:underline group">
-              View All 50+ Exams <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            <Link href="/exams" className="text-[#F97316] font-bold text-sm uppercase tracking-widest flex items-center hover:underline group">
+              View All Exams <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {EXAMS.slice(0, 8).map(exam => (
+            {EXAMS.map(exam => (
               <Link href={`/exams/${exam.id}`} key={exam.id}>
-                <Card className="hover:shadow-xl transition-all duration-300 border-slate-100 rounded-[1.5rem] bg-white group h-full flex flex-col">
-                  <CardContent className="p-8 space-y-6 flex-1 flex flex-col">
-                     <div className="flex justify-between items-start">
-                       <span className="text-[9px] font-black text-secondary bg-secondary/5 px-3 py-1.5 rounded-lg border border-secondary/10 uppercase tracking-widest">
-                         {exam.board}
-                       </span>
-                       <Trophy className="h-4 w-4 text-slate-200 group-hover:text-secondary transition-colors" />
-                     </div>
-                     <div>
-                       <h3 className="text-xl font-headline font-bold text-primary mb-2 line-clamp-1 group-hover:text-secondary transition-colors">{exam.name}</h3>
-                       <p className="text-[9px] text-muted-foreground font-black uppercase tracking-[0.2em]">{exam.category}</p>
-                     </div>
-                     <div className="pt-6 border-t mt-auto flex items-center justify-between">
-                       <div className="flex gap-4">
-                          <div className="flex items-center gap-1.5 text-[9px] font-black text-slate-400 uppercase">
-                             <BookOpen className="h-3 w-3" /> {exam.totalMocks} Mocks
-                          </div>
-                       </div>
-                       <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-secondary group-hover:translate-x-1 transition-all" />
-                     </div>
-                  </CardContent>
+                <Card className="hover:shadow-2xl transition-all duration-300 border-gray-100 rounded-xl bg-white group h-full flex flex-col p-6 border custom-shadow">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className="h-14 w-14 rounded-lg bg-gray-50 border flex items-center justify-center">
+                       <ShieldCheck className="h-8 w-8 text-[#0F172A]" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-headline font-bold text-[#0F172A] mb-1 group-hover:text-[#F97316] transition-colors">{exam.board}</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed mb-6">{exam.description?.slice(0, 60)}...</p>
+                  </div>
+                  <div className="mt-auto flex items-center gap-4 pt-4 border-t">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#1E3A8A] uppercase tracking-wider">
+                       <BookOpen className="h-3 w-3" /> {exam.totalMocks} Exams
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-[#1E3A8A] uppercase tracking-wider">
+                       <Clock className="h-3 w-3" /> {exam.activeQuestions} Mocks
+                    </div>
+                  </div>
                 </Card>
               </Link>
             ))}
@@ -172,75 +116,203 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 4. LATEST MOCK TESTS */}
-      <section className="section-spacing bg-white">
-        <div className="container mx-auto">
-           <div className="text-center max-w-2xl mx-auto mb-16">
-              <h2 className="text-4xl font-headline font-bold text-primary mb-4">Latest Mock Tests</h2>
-              <p className="text-muted-foreground font-medium">Practice with the most recent patterns released by boards.</p>
-           </div>
-           
-           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {[1, 2, 3].map(i => (
-                <Card key={i} className="border-slate-100 rounded-2xl bg-white hover:border-secondary/30 transition-all overflow-hidden">
-                  <div className="bg-slate-50 p-4 flex justify-between items-center border-b">
-                    <span className="text-[9px] font-black text-primary bg-primary/5 px-2 py-1 rounded">LATEST PATTERN</span>
-                    <span className="text-[9px] font-bold text-muted-foreground uppercase">1.2k Attempts</span>
+      {/* 3. LATEST MOCK TESTS */}
+      <section className="py-24 bg-[#F8FAFC]">
+        <div className="container mx-auto px-6">
+          <div className="flex justify-between items-end mb-12">
+            <h2 className="text-4xl font-headline font-bold text-[#0F172A]">Latest Mock Tests</h2>
+            <Link href="/mocks" className="text-[#F97316] font-bold text-sm uppercase tracking-widest hover:underline">View All</Link>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {EXAMS.slice(0, 5).map((exam, i) => (
+              <Card key={i} className="border-gray-100 rounded-xl bg-white hover:shadow-xl transition-all overflow-hidden flex flex-col h-full border custom-shadow">
+                <CardContent className="p-6 flex-1 flex flex-col">
+                  <div className="flex justify-center mb-6">
+                    <ShieldCheck className="h-10 w-10 text-[#0F172A]" />
                   </div>
-                  <CardContent className="p-6 space-y-6">
-                    <h3 className="text-lg font-headline font-bold text-primary">Full Length Assessment #01</h3>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
-                        <Clock className="h-4 w-4 text-secondary" /> 120 Mins
-                      </div>
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground uppercase">
-                        <BookOpen className="h-4 w-4 text-secondary" /> 100 Qs
-                      </div>
+                  <div className="text-center mb-6">
+                    <h3 className="font-bold text-sm text-[#0F172A] mb-1">{exam.board} Clerk</h3>
+                    <p className="text-xs text-muted-foreground">Full Length Mock 1</p>
+                  </div>
+                  
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground uppercase font-bold">
+                       <span className="flex items-center gap-1"><BookOpen className="h-3.5 w-3.5" /> 100 Questions</span>
+                       <span className="flex items-center gap-1"><Clock className="h-3.5 w-3.5" /> 90 min</span>
                     </div>
-                    <Button asChild className="w-full bg-primary hover:bg-primary/90 text-white font-bold h-12 rounded-xl">
-                       <Link href={`/mocks/${SAMPLE_MOCK.id}`}>Start Free Test</Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ))}
-           </div>
+                    <div className="flex justify-center">
+                       <Badge variant="outline" className="text-[10px] border-[#F97316]/30 text-[#F97316] bg-[#F97316]/5">Medium</Badge>
+                    </div>
+                  </div>
+
+                  <Button asChild className="w-full bg-white border border-[#1E3A8A] text-[#1E3A8A] hover:bg-[#1E3A8A]/5 font-bold h-10 rounded-lg text-xs">
+                    <Link href={`/mocks/${SAMPLE_MOCK.id}`}>Attempt Now</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* 5. FOOTER */}
-      <footer className="py-20 bg-white border-t">
+      {/* 4. WHY CHOOSE CRACKLIX SECTION */}
+      <section className="py-24 bg-[#0F172A]">
+        <div className="container mx-auto px-6 text-center">
+          <h2 className="text-4xl font-headline font-bold text-white mb-16">
+            Why Choose <span className="text-[#F97316]">Cracklix</span>?
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <FeatureCard 
+              icon={<ShieldCheck className="h-8 w-8 text-[#F97316]" />}
+              title="Real Exam Pattern Based Mocks"
+              desc="Mocks designed exactly as per the latest exam pattern and syllabus."
+            />
+            <FeatureCard 
+              icon={<Target className="h-8 w-8 text-[#F97316]" />}
+              title="Detailed Solutions"
+              desc="Step-by-step solutions with concept explanation to clear your doubts."
+            />
+            <FeatureCard 
+              icon={<Trophy className="h-8 w-8 text-[#F97316]" />}
+              title="Performance Analytics"
+              desc="Track your progress with in-depth analytics and performance insights."
+            />
+            <FeatureCard 
+              icon={<Clock className="h-8 w-8 text-[#F97316]" />}
+              title="Study Anytime Anywhere"
+              desc="Learn on the go with our mobile app. Anytime, anywhere."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* 5. MOBILE APP SECTION */}
+      <section className="py-32 bg-white overflow-hidden">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-1 md:col-span-2 space-y-6">
-              <Logo />
-              <p className="text-sm text-muted-foreground max-w-sm leading-relaxed">
-                Cracklix is Punjab's dedicated institutional preparation system for government exams. We focus on results, not distractions.
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div className="space-y-8">
+              <Badge className="bg-[#1E3A8A]/10 text-[#1E3A8A] border-none px-4 py-1.5 rounded-lg font-bold">
+                Learn. Practice. Succeed.
+              </Badge>
+              <h2 className="text-5xl font-headline font-bold text-[#0F172A]">
+                Cracklix in Your <br />
+                <span className="text-[#F97316]">Pocket</span>
+              </h2>
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-lg">
+                India's most trusted Punjab exam preparation app. Download now and start your preparation journey.
+              </p>
+              
+              <div className="flex flex-wrap gap-4 pt-4">
+                <Button className="h-14 px-8 bg-[#0F172A] hover:bg-[#1E3A8A] text-white rounded-xl flex items-center gap-3">
+                  <Apple className="h-7 w-7" />
+                  <div className="text-left">
+                    <p className="text-[10px] uppercase font-bold leading-none opacity-70">Download on the</p>
+                    <p className="text-xl font-bold leading-none mt-1">App Store</p>
+                  </div>
+                </Button>
+                <Button className="h-14 px-8 bg-[#0F172A] hover:bg-[#1E3A8A] text-white rounded-xl flex items-center gap-3">
+                  <Play className="h-7 w-7" />
+                  <div className="text-left">
+                    <p className="text-[10px] uppercase font-bold leading-none opacity-70">GET IT ON</p>
+                    <p className="text-xl font-bold leading-none mt-1">Google Play</p>
+                  </div>
+                </Button>
+              </div>
+            </div>
+
+            <div className="relative flex justify-center items-center gap-6">
+               {/* iPhone Mockups */}
+               <div className="relative h-[450px] w-[220px] rounded-[2.5rem] border-[6px] border-[#0F172A] bg-white overflow-hidden shadow-2xl">
+                 <Image src="https://picsum.photos/seed/app1/400/800" fill alt="App Screen" className="object-cover" />
+               </div>
+               <div className="relative h-[500px] w-[250px] rounded-[3rem] border-[8px] border-[#0F172A] bg-white overflow-hidden shadow-2xl -mt-12">
+                 <Image src="https://picsum.photos/seed/app2/400/800" fill alt="App Screen" className="object-cover" />
+               </div>
+               <div className="relative h-[450px] w-[220px] rounded-[2.5rem] border-[6px] border-[#0F172A] bg-white overflow-hidden shadow-2xl">
+                 <Image src="https://picsum.photos/seed/app3/400/800" fill alt="App Screen" className="object-cover" />
+               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. FOOTER */}
+      <footer className="py-24 bg-[#0F172A] text-white/70 border-t border-white/5">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-16 mb-20">
+            <div className="col-span-1 md:col-span-1 space-y-6">
+              <Logo variant="light" />
+              <p className="text-sm leading-relaxed">
+                Your one-stop platform for complete preparation of all Punjab Government Exams. Prepare smarter and achieve your dreams.
               </p>
             </div>
             <div>
-              <h4 className="font-headline font-bold text-sm uppercase tracking-widest mb-6">Resources</h4>
-              <ul className="space-y-4 text-sm text-muted-foreground font-medium">
-                <li><Link href="/exams" className="hover:text-primary transition-colors">Exam Catalog</Link></li>
-                <li><Link href="/mocks" className="hover:text-primary transition-colors">Free Mock Tests</Link></li>
-                <li><Link href="/pyqs" className="hover:text-primary transition-colors">Previous Year Papers</Link></li>
+              <h4 className="font-headline font-bold text-white text-sm uppercase tracking-widest mb-8">Quick Links</h4>
+              <ul className="space-y-4 text-sm font-bold uppercase tracking-tight">
+                <li><Link href="/" className="hover:text-[#F97316] transition-colors">Home</Link></li>
+                <li><Link href="/exams" className="hover:text-[#F97316] transition-colors">Exams</Link></li>
+                <li><Link href="/mocks" className="hover:text-[#F97316] transition-colors">Mocks</Link></li>
+                <li><Link href="/pyqs" className="hover:text-[#F97316] transition-colors">PYQs</Link></li>
+                <li><Link href="/current-affairs" className="hover:text-[#F97316] transition-colors">Current Affairs</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-headline font-bold text-sm uppercase tracking-widest mb-6">Institutional</h4>
-              <ul className="space-y-4 text-sm text-muted-foreground font-medium">
-                <li><Link href="/about" className="hover:text-primary transition-colors">About Us</Link></li>
-                <li><Link href="/terms" className="hover:text-primary transition-colors">Terms of Service</Link></li>
-                <li><Link href="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+              <h4 className="font-headline font-bold text-white text-sm uppercase tracking-widest mb-8">Company</h4>
+              <ul className="space-y-4 text-sm font-bold uppercase tracking-tight">
+                <li><Link href="/about" className="hover:text-[#F97316] transition-colors">About Us</Link></li>
+                <li><Link href="/contact" className="hover:text-[#F97316] transition-colors">Contact Us</Link></li>
+                <li><Link href="/careers" className="hover:text-[#F97316] transition-colors">Careers</Link></li>
+                <li><Link href="/blog" className="hover:text-[#F97316] transition-colors">Blog</Link></li>
+                <li><Link href="/stories" className="hover:text-[#F97316] transition-colors">Success Stories</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-headline font-bold text-white text-sm uppercase tracking-widest mb-8">Legal</h4>
+              <ul className="space-y-4 text-sm font-bold uppercase tracking-tight">
+                <li><Link href="/privacy" className="hover:text-[#F97316] transition-colors">Privacy Policy</Link></li>
+                <li><Link href="/terms" className="hover:text-[#F97316] transition-colors">Terms & Conditions</Link></li>
+                <li><Link href="/refund" className="hover:text-[#F97316] transition-colors">Refund Policy</Link></li>
+                <li><Link href="/disclaimer" className="hover:text-[#F97316] transition-colors">Disclaimer</Link></li>
               </ul>
             </div>
           </div>
-          <div className="pt-12 border-t text-center">
-            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.4em]">
-              © 2026 CRACKLIX • THE AUTHORITATIVE PREPARATION SYSTEM
+          
+          <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+            <p className="text-[11px] font-bold uppercase tracking-widest">
+              © 2024 Cracklix. All rights reserved.
+            </p>
+            <p className="text-[11px] font-bold uppercase tracking-widest flex items-center gap-2">
+              Made with <span className="text-red-500">❤️</span> for Punjab Aspirants
             </p>
           </div>
         </div>
       </footer>
     </div>
   );
+}
+
+function StatCard({ icon, value, label }: { icon: React.ReactNode, value: string, label: string }) {
+  return (
+    <div className="glass-card p-6 rounded-xl flex flex-col items-center text-center space-y-2">
+      <div className="h-10 w-10 flex items-center justify-center mb-2">
+        {icon}
+      </div>
+      <p className="text-2xl font-black text-white">{value}</p>
+      <p className="text-[10px] text-white/50 font-black uppercase tracking-widest">{label}</p>
+    </div>
+  )
+}
+
+function FeatureCard({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
+  return (
+    <div className="glass-card p-10 rounded-2xl space-y-4 text-left border-white/5 hover:border-[#F97316]/30 transition-all group">
+      <div className="h-14 w-14 rounded-xl bg-white/5 flex items-center justify-center group-hover:bg-[#F97316]/10 transition-colors">
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold text-white">{title}</h3>
+      <p className="text-sm text-white/50 leading-relaxed">{desc}</p>
+    </div>
+  )
 }
