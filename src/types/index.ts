@@ -8,6 +8,7 @@ export interface Question {
   explanation?: string;
   subject: string;
   difficulty: Difficulty;
+  category?: string;
 }
 
 export interface Exam {
@@ -17,6 +18,7 @@ export interface Exam {
   category: string;
   thumbnail: string;
   totalMocks: number;
+  activeQuestions: number;
 }
 
 export interface Mock {
@@ -26,6 +28,7 @@ export interface Mock {
   durationInMinutes: number;
   questions: Question[];
   totalMarks: number;
+  attempts?: number;
 }
 
 export interface AttemptResult {
@@ -38,10 +41,23 @@ export interface AttemptResult {
   incorrectCount: number;
   unansweredCount: number;
   timeTakenInSeconds: number;
-  answers: {
-    questionId: string;
-    userAnswer: string;
-    isCorrect: boolean;
-  }[];
+  answers: Record<string, string>;
   timestamp: string;
+}
+
+export interface CurrentAffair {
+  id: string;
+  title: string;
+  date: string;
+  category: string;
+  summary: string;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  time: string;
+  isRead: boolean;
+  type: 'alert' | 'update' | 'result';
 }
