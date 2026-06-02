@@ -7,6 +7,10 @@ service cloud.firestore {
       return request.auth != null;
     }
 
+    function isFounder() {
+      return isAuthenticated() && request.auth.token.email == 'arshdeepgrewal1122@gmail.com';
+    }
+
     function getUserData() {
       return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data 
@@ -15,7 +19,7 @@ service cloud.firestore {
 
     function isAdmin() {
       let data = getUserData();
-      return data != null && (data.role == 'ADMIN' || data.role == 'SUPER_ADMIN');
+      return isFounder() || (data != null && (data.role == 'ADMIN' || data.role == 'SUPER_ADMIN'));
     }
 
     function isOwner(userId) {
@@ -31,7 +35,7 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      allow create: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      allow create: if isAuthenticated();
       allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
       allow delete: if isAdmin();
     }

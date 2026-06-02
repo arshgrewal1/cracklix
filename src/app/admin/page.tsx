@@ -39,7 +39,7 @@ import { useToast } from "@/hooks/use-toast"
 
 export default function AdminDashboard() {
   const db = useFirestore()
-  const { profile } = useUser()
+  const { user, profile } = useUser()
   const { toast } = useToast()
   const [seeding, setSeeding] = useState(false)
 
@@ -47,6 +47,10 @@ export default function AdminDashboard() {
   const { data: mocks, loading: mLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
   const { data: questions, loading: qLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]))
   const { data: results, loading: rLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "results") : null), [db]))
+
+  // Force access for founder email
+  const isFounder = user?.email === 'arshdeepgrewal1122@gmail.com';
+  const isSuperAdmin = profile?.role === 'SUPER_ADMIN' || isFounder;
 
   const handleSeed = async () => {
     if (!db || seeding) return
@@ -57,7 +61,7 @@ export default function AdminDashboard() {
       toast({ title: "Global Sync Complete", description: "Institutional collections initialized and visible in Console." })
     } catch (e: any) {
       console.error(e)
-      toast({ variant: "destructive", title: "Sync Failed", description: "Permissions check failed. Ensure you are logged in as arshdeepgrewal1122@gmail.com" })
+      toast({ variant: "destructive", title: "Sync Failed", description: "Permissions check failed. Ensure security rules allow founder access." })
     } finally {
       setSeeding(false)
     }
@@ -110,7 +114,7 @@ export default function AdminDashboard() {
           >
             <FileJson className="h-4 w-4 text-emerald-400" /> Export JSON Archive
           </Button>
-          {profile?.role === 'SUPER_ADMIN' && (
+          {isSuperAdmin && (
             <Button 
               onClick={handleSeed} 
               disabled={seeding}
