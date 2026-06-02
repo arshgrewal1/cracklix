@@ -12,69 +12,92 @@
         "phone": { "type": "string" },
         "state": { "type": "string", "enum": ["Punjab"] },
         "targetExam": { "type": "string" },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "createdAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["Pro", "Free"] }
       },
       "required": ["id", "name", "email"]
     },
-    "Exam": {
-      "title": "Exam",
-      "description": "Primary recruitment exam metadata.",
+    "Board": {
+      "title": "Recruitment Board",
+      "description": "Official government boards (e.g., PSSSB, PPSC).",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "name": { "type": "string" },
-        "board": { "type": "string" },
+        "abbreviation": { "type": "string" },
+        "description": { "type": "string" },
+        "iconUrl": { "type": "string" }
+      }
+    },
+    "Exam": {
+      "title": "Exam Category",
+      "description": "Specific recruitment exams like Patwari or Constable.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "boardId": { "type": "string" },
+        "name": { "type": "string" },
         "category": { "type": "string" },
         "description": { "type": "string" },
-        "iconUrl": { "type": "string" },
-        "totalQuestions": { "type": "number" },
-        "duration": { "type": "number" }
+        "totalMocks": { "type": "number" },
+        "activeQuestions": { "type": "number" }
+      }
+    },
+    "Subject": {
+      "title": "Subject",
+      "description": "Study subjects like Punjab GK, Reasoning, etc.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" }
       }
     },
     "MockTest": {
       "title": "Mock Test",
-      "description": "A specific mock test belonging to an exam.",
+      "description": "A full-length or sectional practice test.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "examId": { "type": "string" },
         "title": { "type": "string" },
-        "questions": {
-          "type": "array",
-          "items": { "$ref": "#/backend/entities/MockQuestion" }
-        }
+        "duration": { "type": "number" },
+        "totalQuestions": { "type": "number" },
+        "questionIds": { "type": "array", "items": { "type": "string" } },
+        "attempts": { "type": "number" }
       }
     },
-    "MockQuestion": {
-      "title": "Mock Question",
-      "description": "Individual exam question.",
+    "Question": {
+      "title": "Question Bank",
+      "description": "Individual MCQ for the database.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "question": { "type": "string" },
+        "subjectId": { "type": "string" },
+        "text": { "type": "string" },
         "options": { "type": "array", "items": { "type": "string" } },
-        "correctAnswer": { "type": "number", "description": "0-indexed index of the correct option" },
+        "correctAnswer": { "type": "number" },
         "explanation": { "type": "string" },
-        "topic": { "type": "string" },
-        "difficulty": { "type": "string", "enum": ["Easy", "Medium", "Hard"] }
+        "difficulty": { "type": "string", "enum": ["Easy", "Medium", "Hard"] },
+        "topic": { "type": "string" }
       }
     },
     "AttemptResult": {
       "title": "Attempt Result",
-      "description": "Analytics from a user's mock attempt.",
+      "description": "User results and analytics for a mock attempt.",
       "type": "object",
       "properties": {
         "userId": { "type": "string" },
         "mockId": { "type": "string" },
         "score": { "type": "number" },
         "accuracy": { "type": "number" },
-        "rank": { "type": "number" },
-        "weakTopics": { "type": "array", "items": { "type": "string" } }
+        "weakTopics": { "type": "array", "items": { "type": "string" } },
+        "timestamp": { "type": "string", "format": "date-time" }
       }
     },
     "SiteSettings": {
       "title": "Site Settings",
-      "description": "Global website configuration including Hero content.",
+      "description": "Global website configuration.",
       "type": "object",
       "properties": {
         "heroLine1": { "type": "string" },
@@ -92,23 +115,35 @@
   "firestore": {
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/UserProfile" },
-      "description": "User profile data."
+      "description": "Student profiles."
+    },
+    "/boards/{boardId}": {
+      "schema": { "$ref": "#/backend/entities/Board" },
+      "description": "Recruitment boards."
     },
     "/exams/{examId}": {
       "schema": { "$ref": "#/backend/entities/Exam" },
-      "description": "Exam boards and categories."
+      "description": "Exam categories."
     },
-    "/exams/{examId}/mocks/{mockId}": {
+    "/subjects/{subjectId}": {
+      "schema": { "$ref": "#/backend/entities/Subject" },
+      "description": "Exam subjects."
+    },
+    "/questions/{questionId}": {
+      "schema": { "$ref": "#/backend/entities/Question" },
+      "description": "Global question bank."
+    },
+    "/mocks/{mockId}": {
       "schema": { "$ref": "#/backend/entities/MockTest" },
-      "description": "Mock tests within an exam."
+      "description": "Mock tests series."
     },
-    "/attempts/{attemptId}": {
+    "/results/{resultId}": {
       "schema": { "$ref": "#/backend/entities/AttemptResult" },
-      "description": "Global log of mock test attempts."
+      "description": "User test results."
     },
     "/settings/global": {
       "schema": { "$ref": "#/backend/entities/SiteSettings" },
-      "description": "Global site settings document."
+      "description": "Global site settings."
     }
   }
 }

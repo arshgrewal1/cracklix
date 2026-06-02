@@ -1,77 +1,90 @@
+
 export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export type BoardCategory = 'PSSSB' | 'PPSC' | 'Punjab Police' | 'Education' | 'High Court' | 'Power Sector' | 'Health' | 'Cooperative';
 
-export interface Question {
+export interface Board {
   id: string;
-  question: string;
-  options: string[];
-  correctAnswer: number; // 0-indexed index
-  explanation: string;
-  topic: string;
-  difficulty: Difficulty;
-  subject?: string;
+  name: string;
+  abbreviation: string;
+  description: string;
+  iconUrl?: string;
 }
 
 export interface Exam {
   id: string;
+  boardId: string;
   name: string;
-  board: BoardCategory;
   category: string;
-  totalQuestions: number;
-  duration: number; // minutes
-  description?: string;
-  thumbnail?: string;
-  totalMocks?: number;
-  activeQuestions?: number;
+  description: string;
+  totalMocks: number;
+  activeQuestions: number;
 }
 
-export interface Mock {
+export interface Subject {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export interface Question {
+  id: string;
+  subjectId: string;
+  text: string;
+  options: string[];
+  correctAnswer: number;
+  explanation: string;
+  difficulty: Difficulty;
+  topic: string;
+  // Legacy fields for compatibility
+  question?: string;
+  subject?: string;
+}
+
+export interface MockTest {
   id: string;
   examId: string;
   title: string;
-  durationInMinutes: number;
-  questions: Question[];
+  duration: number;
+  totalQuestions: number;
+  questionIds: string[];
+  attempts: number;
+  // Legacy fields
+  durationInMinutes?: number;
+  questions?: Question[];
   totalMarks?: number;
-  attempts?: number;
 }
 
 export interface AttemptResult {
+  id?: string;
   userId: string;
   mockId: string;
   score: number;
   accuracy: number;
-  rank: number;
+  rank?: number;
   weakTopics: string[];
   correctCount?: number;
   incorrectCount?: number;
   totalQuestions?: number;
   timestamp?: string;
-  answers?: Record<number, number>; 
+  answers?: Record<number, number>;
 }
 
-export interface CurrentAffair {
-  id: string;
-  title: string;
-  date: string;
-  category: string;
-  summary: string;
-}
-
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  time: string;
-  isRead: boolean;
-  type: 'alert' | 'update' | 'result';
-}
-
-export interface User {
+export interface UserProfile {
   id: string;
   name: string;
+  email: string;
   phone: string;
   state: 'Punjab';
   targetExam: string;
-  createdAt: string;
+  createdAt: any;
   status: 'Pro' | 'Free';
+}
+
+export interface SiteSettings {
+  heroLine1: string;
+  heroLine2: string;
+  heroDescription: string;
+  heroPrimaryBtn: string;
+  heroSecondaryBtn: string;
+  heroImageUrl: string;
 }
