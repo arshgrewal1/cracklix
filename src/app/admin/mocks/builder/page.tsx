@@ -15,17 +15,15 @@ import {
   Plus, 
   Search, 
   Trash2, 
-  Eye, 
   Database, 
   Save, 
-  GripVertical,
-  CheckCircle2,
   Zap,
-  Sparkles
+  Sparkles,
+  Settings,
+  Filter
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
@@ -35,34 +33,68 @@ export default function MockBuilderPage() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  // --- Data ---
+  // --- Data Fetching ---
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
   const { data: questionBank } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]))
+  const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
 
   // --- State ---
   const [isPublishing, setIsPublishing] = useState(false)
   const [mockData, setMockData] = useState({
-    title: "", boardId: "", examId: "", duration: 120, difficulty: "Medium", mockType: "FULL"
+    title: "", boardId: "", examId: "", duration: 120, difficulty: "Medium", mockType: "FULL" as any
   })
 
   const [selectedQuestions, setSelectedQuestions] = useState<any[]>([])
   const [bankSearch, setBankSearch] = useState("")
 
-  const [smartConfig, setSmartConfig] = useState({ count: 50, difficulty: "medium" })
+  const [smartConfig, setSmartConfig] = useState({ 
+    count: 100, 
+    difficulty: "medium",
+    subjectId: "all"
+  })
 
   // --- Handlers ---
   const handleAutoPick = () => {
-    if (!questionBank || questionBank.length === 0) return
-    const filtered = questionBank.filter(q => q.difficulty === smartConfig.difficulty)
-    const shuffled = [...filtered].sort(() => 0.5 - Math.random())
+    if (!questionBank || questionBank.length === 0) {
+      toast({ variant: "destructive", title: "Bank Empty", description: "No questions available in the repository." })
+      return
+    }
+
+    let pool = [...questionBank]
+    
+    // Apply filters
+    if (smartConfig.difficulty !== 'all') {
+      pool = pool.filter(q => q.difficulty === smartConfig.difficulty)
+    }
+    if (smartConfig.subjectId !== 'all') {
+      pool = pool.filter(q => q.subjectId === smartConfig.subjectId)
+    }
+
+    if (pool.length < smartConfig.count) {
+      toast({ 
+        variant: "destructive", 
+        title: "Insufficient Data", 
+        description: `Only ${pool.length} questions match these criteria. Required: ${smartConfig.count}` 
+      })
+      return
+    }
+
+    const shuffled = pool.sort(() => 0.5 - Math.random())
     const selected = shuffled.slice(0, smartConfig.count)
     setSelectedQuestions(selected)
-    toast({ title: "Smart Build Success", description: `Assembled ${selected.length} questions automatically.` })
+    
+    toast({ 
+      title: "Smart Assembly Complete", 
+      description: `Assembled ${selected.length} high-fidelity questions automatically.` 
+    })
   }
 
   const handleAddFromBank = (q: any) => {
-    if (selectedQuestions.find(item => item.id === q.id)) return
+    if (selectedQuestions.find(item => item.id === q.id)) {
+      toast({ title: "Already Added", description: "This question is already in the selection." })
+      return
+    }
     setSelectedQuestions([...selectedQuestions, q])
   }
 
@@ -72,7 +104,11 @@ export default function MockBuilderPage() {
 
   const handlePublish = () => {
     if (!mockData.title || !mockData.examId || selectedQuestions.length === 0) {
-      toast({ variant: "destructive", title: "Missing Data", description: "Title, Exam and at least 1 question required." })
+      toast({ 
+        variant: "destructive", 
+        title: "Audit Failed", 
+        description: "Series Title, Exam Hub and at least 1 MCQ required." 
+      })
       return
     }
 
@@ -86,16 +122,20 @@ export default function MockBuilderPage() {
       questionIds: selectedQuestions.map(q => q.id),
       published: true,
       createdAt: serverTimestamp(),
-      author: "Arsh Grewal"
+      author: "Arsh Grewal Management"
     }
 
     setDoc(mockRef, payload)
       .then(() => {
-        toast({ title: "Live", description: "Mock series published successfully." })
+        toast({ title: "Series Live", description: "Institutional practice series published to cloud." })
         router.push("/admin/mocks")
       })
       .catch(async () => {
-        errorEmitter.emit("permission-error", new FirestorePermissionError({ path: mockRef.path, operation: 'create', requestResourceData: payload }))
+        errorEmitter.emit("permission-error", new FirestorePermissionError({ 
+          path: mockRef.path, 
+          operation: 'create', 
+          requestResourceData: payload 
+        }))
       })
       .finally(() => setIsPublishing(false))
   }
@@ -109,110 +149,178 @@ export default function MockBuilderPage() {
   }, [questionBank, bankSearch])
 
   return (
-    <div className="space-y-8 pb-20">
+    <div className="space-y-8 pb-20 max-w-7xl mx-auto">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-xl border border-foreground/5 bg-card/30"><ChevronLeft className="h-5 w-5" /></Button>
+        <div className="flex items-center gap-6">
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-2xl h-12 w-12 border border-foreground/5 bg-card/30">
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
           <div>
-            <h1 className="text-2xl font-black font-headline text-primary uppercase">Series Assembly</h1>
-            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest mt-1">Institutional Mode: Arsh Grewal</p>
+            <h1 className="text-3xl font-black font-headline text-primary uppercase tracking-tight">Series Builder</h1>
+            <p className="text-[10px] text-muted-foreground uppercase font-black tracking-[0.2em] mt-1">Audit Mode: Arsh Grewal</p>
           </div>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 gap-2 font-black px-8 h-12 shadow-xl shadow-primary/20 rounded-xl" onClick={handlePublish} disabled={isPublishing}>
-          <Save className="h-4 w-4" /> {isPublishing ? "Syncing..." : "Commit Series"}
-        </Button>
+        <div className="flex gap-4">
+           <Button variant="outline" className="border-foreground/10 h-14 px-8 rounded-2xl font-bold gap-2">
+              <Settings className="h-4 w-4" /> Config
+           </Button>
+           <Button className="bg-primary hover:bg-primary/90 gap-3 font-black px-10 h-14 shadow-2xl shadow-primary/20 rounded-2xl" onClick={handlePublish} disabled={isPublishing}>
+            <Save className="h-4 w-4" /> {isPublishing ? "Publishing..." : "Commit Series"}
+          </Button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Configuration */}
-        <div className="lg:col-span-4 space-y-6">
-          <Card className="border-foreground/5 bg-card/50 shadow-2xl rounded-[2.5rem]">
-            <CardHeader><CardTitle className="text-lg font-bold uppercase tracking-widest">Metadata</CardTitle></CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-slate-500">Series Title</Label><Input placeholder="e.g. PSSSB Patwari Set 12" value={mockData.title} onChange={e => setMockData({...mockData, title: e.target.value})} className="rounded-xl bg-background/50 border-none" /></div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Metadata Sidebar */}
+        <div className="lg:col-span-4 space-y-8">
+          <Card className="border-foreground/5 bg-card/50 shadow-2xl rounded-[2.5rem] overflow-hidden">
+            <div className="h-2 w-full bg-primary" />
+            <CardHeader className="p-8">
+               <CardTitle className="text-xl font-headline font-black uppercase">Series Profile</CardTitle>
+               <CardDescription>Define target board and assessment type.</CardDescription>
+            </CardHeader>
+            <CardContent className="px-8 pb-8 space-y-6">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Headline</Label>
+                <Input placeholder="e.g. PSSSB Clerk Full Mock 01" value={mockData.title} onChange={e => setMockData({...mockData, title: e.target.value})} className="rounded-xl h-12 bg-background border-none shadow-inner" />
+              </div>
+              
               <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-500">Authority</Label>
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Recruitment Board</Label>
                   <Select onValueChange={val => setMockData({...mockData, boardId: val})}>
-                    <SelectTrigger className="rounded-xl bg-background/50 border-none"><SelectValue placeholder="Select Board" /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-12 bg-background border-none shadow-inner"><SelectValue placeholder="Select Authority" /></SelectTrigger>
                     <SelectContent>{boards?.map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-500">Exam Hub</Label>
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Exam Hub</Label>
                   <Select onValueChange={val => setMockData({...mockData, examId: val})}>
-                    <SelectTrigger className="rounded-xl bg-background/50 border-none"><SelectValue placeholder="Select Exam" /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-12 bg-background border-none shadow-inner"><SelectValue placeholder="Select Category" /></SelectTrigger>
                     <SelectContent>{exams?.filter(e => e.boardId === mockData.boardId).map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Duration (Min)</Label>
+                  <Input type="number" value={mockData.duration} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value)})} className="rounded-xl h-12 bg-background border-none" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Mock Type</Label>
+                  <Select onValueChange={val => setMockData({...mockData, mockType: val as any})} defaultValue="FULL">
+                    <SelectTrigger className="rounded-xl h-12 bg-background border-none"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="FULL">Full Length</SelectItem>
+                      <SelectItem value="SECTIONAL">Sectional</SelectItem>
+                      <SelectItem value="SUBJECT">Subject Wise</SelectItem>
+                      <SelectItem value="PYQ">Previous Paper</SelectItem>
+                    </SelectContent>
                   </Select>
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="border-none bg-primary/5 rounded-[2rem] p-8 space-y-4">
-             <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary"><Database className="h-6 w-6" /></div>
-                <div><p className="text-2xl font-black font-headline leading-none">{selectedQuestions.length}</p><p className="text-[9px] font-black uppercase tracking-widest text-slate-500 mt-1">Audit Ready MCQs</p></div>
+          <Card className="border-none bg-primary/5 rounded-[2.5rem] p-10 space-y-4">
+             <div className="flex items-center gap-6">
+                <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-xl shadow-primary/5"><Database className="h-7 w-7" /></div>
+                <div>
+                   <p className="text-4xl font-black font-headline leading-none text-slate-200">{selectedQuestions.length}</p>
+                   <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mt-2">Verified MCQs Linked</p>
+                </div>
              </div>
+             {selectedQuestions.length > 0 && (
+                <div className="pt-6 border-t border-primary/10">
+                   <Button variant="ghost" onClick={() => setSelectedQuestions([])} className="w-full text-rose-500 font-black uppercase text-[10px] tracking-widest hover:bg-rose-500/5">Reset Selection</Button>
+                </div>
+             )}
           </Card>
         </div>
 
         {/* Assembly Line */}
         <div className="lg:col-span-8">
-           <Tabs defaultValue="manual" className="space-y-6">
-              <TabsList className="bg-slate-100 rounded-2xl p-1 h-14">
-                 <TabsTrigger value="manual" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Database className="h-3 w-3" /> Manual Selection</TabsTrigger>
-                 <TabsTrigger value="smart" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 text-primary"><Sparkles className="h-3 w-3" /> Smart Generation</TabsTrigger>
+           <Tabs defaultValue="smart" className="space-y-8">
+              <TabsList className="bg-slate-100/50 rounded-2xl p-1 h-16 border border-white/5">
+                 <TabsTrigger value="smart" className="rounded-xl h-full px-10 font-black uppercase text-[10px] gap-2 text-primary data-[state=active]:bg-white data-[state=active]:shadow-lg"><Sparkles className="h-4 w-4" /> Smart Generation</TabsTrigger>
+                 <TabsTrigger value="manual" className="rounded-xl h-full px-10 font-black uppercase text-[10px] gap-2 data-[state=active]:bg-white data-[state=active]:shadow-lg"><Database className="h-4 w-4" /> Manual Selection</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="manual" className="space-y-6">
-                 <div className="flex items-center justify-between bg-white p-6 rounded-[2rem] shadow-lg">
-                    <div className="relative w-full max-w-md">
-                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
-                       <Input className="pl-12 h-12 rounded-xl bg-slate-50 border-none" placeholder="Search global bank..." value={bankSearch} onChange={e => setBankSearch(e.target.value)} />
+              <TabsContent value="smart" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                 <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-16 text-center space-y-10">
+                    <div className="max-w-md mx-auto space-y-8">
+                       <div className="h-24 w-24 bg-primary/10 rounded-[2.5rem] flex items-center justify-center mx-auto text-primary shadow-2xl shadow-primary/10"><Sparkles className="h-12 w-12" /></div>
+                       <div className="space-y-2">
+                          <h3 className="text-3xl font-headline font-black text-slate-800 uppercase">Operational Builder</h3>
+                          <p className="text-slate-500 font-medium text-base">Assembles test series instantly based on subject weighting and verified quality.</p>
+                       </div>
+                       
+                       <div className="grid grid-cols-1 gap-6 text-left">
+                          <div className="space-y-3">
+                             <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Target Subject Weighting</Label>
+                             <Select onValueChange={val => setSmartConfig({...smartConfig, subjectId: val})} defaultValue="all">
+                                <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none shadow-inner"><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                   <SelectItem value="all">Across All Subjects</SelectItem>
+                                   {subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                                </SelectContent>
+                             </Select>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-6">
+                             <div className="space-y-3">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Total MCQs</Label>
+                                <Input type="number" value={smartConfig.count} onChange={e => setSmartConfig({...smartConfig, count: parseInt(e.target.value)})} className="h-14 rounded-2xl bg-slate-50 border-none shadow-inner text-lg font-black" />
+                             </div>
+                             <div className="space-y-3">
+                                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Audit Level</Label>
+                                <Select onValueChange={val => setSmartConfig({...smartConfig, difficulty: val})} defaultValue="medium">
+                                   <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none shadow-inner"><SelectValue /></SelectTrigger>
+                                   <SelectContent><SelectItem value="all">Any Difficulty</SelectItem><SelectItem value="easy">Easy Level</SelectItem><SelectItem value="medium">Medium Level</SelectItem><SelectItem value="hard">Hard Level</SelectItem></SelectContent>
+                                </Select>
+                             </div>
+                          </div>
+                       </div>
+
+                       <Button onClick={handleAutoPick} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-xs rounded-2xl gap-4 shadow-3xl shadow-slate-200">
+                          <Zap className="h-5 w-5 text-primary" /> Run Extraction Engine
+                       </Button>
                     </div>
-                    <Button variant="ghost" className="text-primary font-black uppercase text-xs">Refresh Bank</Button>
+                 </Card>
+              </TabsContent>
+
+              <TabsContent value="manual" className="space-y-8 animate-in fade-in duration-500">
+                 <div className="flex items-center justify-between bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-50">
+                    <div className="relative w-full max-w-lg">
+                       <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
+                       <Input className="pl-14 h-14 rounded-2xl bg-slate-50 border-none shadow-inner" placeholder="Search global MCQ bank..." value={bankSearch} onChange={e => setBankSearch(e.target.value)} />
+                    </div>
+                    <Button variant="ghost" className="text-primary font-black uppercase text-[10px] tracking-widest px-6 gap-2"><Filter className="h-4 w-4" /> Filter Bank</Button>
                  </div>
 
-                 <div className="grid grid-cols-1 gap-4 max-h-[600px] overflow-y-auto custom-scrollbar pr-2">
-                    {filteredBank.slice(0, 20).map(q => {
+                 <div className="grid grid-cols-1 gap-4 max-h-[650px] overflow-y-auto custom-scrollbar pr-4">
+                    {filteredBank.slice(0, 50).map(q => {
                       const isAdded = selectedQuestions.find(s => s.id === q.id)
                       return (
-                        <div key={q.id} className="p-5 rounded-2xl border border-slate-100 bg-white flex items-center justify-between group hover:border-primary/30 transition-all">
-                           <div className="space-y-1"><p className="font-bold text-sm text-slate-700 line-clamp-1">{q.questionEn}</p><div className="flex gap-2"><Badge variant="outline" className="text-[8px] uppercase">{q.topic || 'General'}</Badge><Badge className="text-[8px] uppercase bg-slate-100 text-slate-500 border-none">{q.difficulty}</Badge></div></div>
-                           <Button size="sm" onClick={() => handleAddFromBank(q)} className={`rounded-xl h-10 px-6 ${isAdded ? 'bg-emerald-500' : 'bg-slate-900'}`}>{isAdded ? 'Added' : 'Add'}</Button>
+                        <div key={q.id} className="p-6 rounded-3xl border border-slate-100 bg-white flex items-center justify-between group hover:border-primary/40 transition-all shadow-sm hover:shadow-xl">
+                           <div className="space-y-2 flex-1 pr-10">
+                              <p className="font-bold text-base text-slate-700 line-clamp-1 leading-snug">{q.questionEn}</p>
+                              <div className="flex gap-3">
+                                 <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-slate-100 text-slate-400">{q.subjectId || 'GK'}</Badge>
+                                 <Badge className={`text-[9px] font-black uppercase tracking-widest border-none ${q.difficulty === 'hard' ? 'bg-rose-50 text-rose-500' : 'bg-orange-50 text-orange-500'}`}>{q.difficulty}</Badge>
+                              </div>
+                           </div>
+                           <Button 
+                            onClick={() => isAdded ? handleRemoveQuestion(q.id) : handleAddFromBank(q)} 
+                            className={`rounded-xl h-11 px-8 font-black uppercase text-[10px] tracking-widest transition-all ${isAdded ? 'bg-emerald-500 hover:bg-emerald-600 text-white' : 'bg-[#0F172A] hover:bg-black text-white'}`}
+                           >
+                             {isAdded ? 'Linked' : 'Add MCQ'}
+                           </Button>
                         </div>
                       )
                     })}
                  </div>
-              </TabsContent>
-
-              <TabsContent value="smart">
-                 <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-12 text-center space-y-8">
-                    <div className="max-w-md mx-auto space-y-6">
-                       <div className="h-20 w-20 bg-primary/10 rounded-[2rem] flex items-center justify-center mx-auto text-primary"><Sparkles className="h-10 w-10" /></div>
-                       <h3 className="text-2xl font-headline font-black text-slate-800">Operational Smart Builder</h3>
-                       <p className="text-slate-500 font-medium">Assembles high-fidelity mocks instantly based on your global verified question bank.</p>
-                       
-                       <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2 text-left">
-                             <Label className="text-[10px] font-black uppercase ml-1">Quantity</Label>
-                             <Input type="number" value={smartConfig.count} onChange={e => setSmartConfig({...smartConfig, count: parseInt(e.target.value)})} className="h-12 rounded-xl bg-slate-50" />
-                          </div>
-                          <div className="space-y-2 text-left">
-                             <Label className="text-[10px] font-black uppercase ml-1">Target Difficulty</Label>
-                             <Select onValueChange={val => setSmartConfig({...smartConfig, difficulty: val})} defaultValue="medium">
-                                <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none"><SelectValue /></SelectTrigger>
-                                <SelectContent><SelectItem value="easy">Easy</SelectItem><SelectItem value="medium">Medium</SelectItem><SelectItem value="hard">Hard</SelectItem></SelectContent>
-                             </Select>
-                          </div>
-                       </div>
-
-                       <Button onClick={handleAutoPick} className="w-full h-14 bg-slate-900 hover:bg-black text-white font-black uppercase tracking-widest rounded-2xl gap-3">
-                          <Zap className="h-5 w-5 text-primary" /> Run Smart Build
-                       </Button>
-                    </div>
-                 </Card>
               </TabsContent>
            </Tabs>
         </div>

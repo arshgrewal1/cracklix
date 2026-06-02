@@ -2,64 +2,86 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // FORCE DEPLOYMENT ID: CRACKLIX_ENGINE_V180
+    // FORCE DEPLOYMENT ID: CRACKLIX_PRO_HARDENING_V220
     // AUTHOR: Arsh Grewal Management
 
-    match /notifications/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+    function isAuthenticated() {
+      return request.auth != null;
     }
 
-    match /current_affairs/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN' ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'SUPER_ADMIN'
+      );
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(userId) || isAdmin();
     }
 
     match /boards/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     match /exams/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     match /subjects/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
     }
 
     match /questions/{docId} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
     }
 
     match /mocks/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    match /results/{resultId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow delete, update: if isAdmin();
+    }
+
+    match /test_sessions/{sessionId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /current_affairs/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /notifications/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /reports/{docId} {
+      allow create: if isAuthenticated();
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /bookmarks/{docId} {
+      allow read, write: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || resource.data.userId == request.auth.uid);
     }
 
     match /settings/{docId} {
       allow read: if true;
-      allow write: if request.auth != null;
-    }
-
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    match /results/{resultId} {
-      allow read, create: if request.auth != null;
-      allow list: if request.auth != null;
-    }
-
-    match /test_sessions/{sessionId} {
-      allow read, write: if request.auth != null;
-    }
-
-    match /bookmarks/{bookmarkId} {
-      allow read, write: if request.auth != null;
+      allow write: if isAdmin();
     }
   }
 }

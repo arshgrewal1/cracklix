@@ -14,7 +14,7 @@ import { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, FileText, Bell, ChevronRight, Trophy, Zap, Star, GraduationCap, CheckCircle2, ShieldCheck, TrendingUp, Landmark } from "lucide-react";
+import { Calendar, FileText, Bell, ChevronRight, Trophy, Zap, Star, GraduationCap, CheckCircle2, ShieldCheck, TrendingUp, Landmark, BrainCircuit, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -32,47 +32,66 @@ export default function HomePage() {
       <Navbar />
       <Hero />
       
-      {/* 1. Official Alert Hub */}
+      {/* 1. Official Alert Hub & Daily Challenge */}
       <section className="py-12 bg-[#F8FAFC] -mt-10 relative z-20">
          <div className="container mx-auto px-6 max-w-7xl">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-               <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+               
+               <div className="lg:col-span-8">
                   <PopularExams />
                </div>
-               <div className="pt-16">
-                  <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white p-8 overflow-hidden relative">
-                     <div className="absolute top-0 right-0 p-4 opacity-5"><Bell className="h-20 w-20" /></div>
+
+               <div className="lg:col-span-4 space-y-8 pt-16">
+                  {/* Daily Question Engagement */}
+                  <Card className="rounded-[2.5rem] border-none bg-[#0F172A] text-white p-10 overflow-hidden relative shadow-3xl">
+                     <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12"><Sparkles className="h-32 w-32" /></div>
+                     <div className="relative z-10 space-y-6">
+                        <div className="flex items-center gap-3">
+                           <div className="h-10 w-10 bg-primary rounded-xl flex items-center justify-center shadow-lg"><BrainCircuit className="h-5 w-5 text-white" /></div>
+                           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Daily Mastery</span>
+                        </div>
+                        <h4 className="text-2xl font-headline font-black leading-tight">Question of the Day</h4>
+                        <p className="text-slate-400 text-sm leading-relaxed font-medium">Which historical event marked the beginning of modern education in Punjab?</p>
+                        <Button asChild className="w-full bg-white text-[#0F172A] hover:bg-slate-100 h-14 rounded-2xl font-black uppercase tracking-widest text-[10px]">
+                           <Link href="/dashboard">Submit & Earn XP</Link>
+                        </Button>
+                     </div>
+                  </Card>
+
+                  {/* Official Notification Registry */}
+                  <Card className="rounded-[2.5rem] border-none shadow-2xl bg-white p-10 overflow-hidden relative">
+                     <div className="absolute top-0 right-0 p-6 opacity-5"><Bell className="h-20 w-20" /></div>
                      <div className="flex items-center justify-between mb-8 relative z-10">
                         <h3 className="font-headline font-black text-xl flex items-center gap-3">
                            <Bell className="h-5 w-5 text-primary" /> Official Feed
                         </h3>
                         <div className="flex items-center gap-2">
-                           <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                           <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
                            <span className="text-[10px] font-black uppercase text-emerald-600 tracking-widest">Live Updates</span>
                         </div>
                      </div>
                      <div className="space-y-6 relative z-10">
                         {notices && notices.length > 0 ? notices.map((n: any) => (
-                           <Link key={n.id} href="/notifications" className="flex gap-4 group cursor-pointer border-b border-slate-50 pb-4 last:border-0 last:pb-0">
-                              <div className={`h-11 w-11 rounded-xl flex items-center justify-center shrink-0 transition-all ${
+                           <Link key={n.id} href="/notifications" className="flex gap-5 group cursor-pointer border-b border-slate-50 pb-6 last:border-0 last:pb-0">
+                              <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 ${
                                 n.category === 'Result' ? 'bg-emerald-50 text-emerald-500' : 
-                                'bg-slate-50 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary'
+                                'bg-slate-50 text-slate-400 group-hover:bg-primary/10 group-hover:text-primary shadow-sm'
                               }`}>
-                                 <Zap className="h-5 w-5" />
+                                 <Zap className="h-6 w-6" />
                               </div>
                               <div className="space-y-1">
-                                 <p className="text-sm font-bold leading-snug group-hover:text-primary transition-colors line-clamp-1">{n.title}</p>
-                                 <div className="flex items-center gap-3">
+                                 <p className="text-sm font-bold leading-snug group-hover:text-primary transition-colors line-clamp-1 text-[#0F172A]">{n.title}</p>
+                                 <div className="flex items-center gap-4">
                                     <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{n.time}</span>
-                                    <Badge variant="outline" className="border-slate-100 text-[8px] font-bold px-2 py-0 uppercase">{n.board}</Badge>
+                                    <Badge variant="outline" className="border-slate-100 text-[9px] font-black px-2 py-0 uppercase text-slate-400">{n.board}</Badge>
                                  </div>
                               </div>
                            </Link>
                         )) : (
-                          <p className="text-xs text-slate-400 italic">Checking official gazette feeds...</p>
+                          <p className="text-xs text-slate-400 italic">Syncing with official board gazettes...</p>
                         )}
-                        <Button asChild variant="ghost" className="w-full pt-4 text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:bg-primary/5 rounded-xl">
-                           <Link href="/notifications">View Full Gazette <ChevronRight className="ml-2 h-3 w-3" /></Link>
+                        <Button asChild variant="ghost" className="w-full pt-6 text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:bg-primary/5 rounded-2xl border-2 border-dashed border-primary/10 h-16">
+                           <Link href="/notifications">View Full Gazette <ChevronRight className="ml-2 h-4 w-4" /></Link>
                         </Button>
                      </div>
                   </Card>
@@ -84,10 +103,10 @@ export default function HomePage() {
       {/* 2. Success Hall of Fame */}
       <section className="py-24 bg-white">
          <div className="container mx-auto px-6 max-w-7xl">
-            <div className="text-center space-y-4 mb-16">
-               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black uppercase tracking-[0.2em] text-[10px]">Alumni Spotlight</Badge>
-               <h2 className="text-4xl md:text-6xl font-headline font-black text-[#0F172A] uppercase leading-tight">Elite <span className="text-primary">Rankers</span></h2>
-               <p className="text-slate-500 font-medium max-w-2xl mx-auto text-lg italic">"I trusted the institutional rationalizations of Cracklix to clear my PPSC Executive exam."</p>
+            <div className="text-center space-y-4 mb-20">
+               <Badge className="bg-primary/10 text-primary border-none px-6 py-2 rounded-full font-black uppercase tracking-[0.3em] text-[10px]">Alumni Spotlight</Badge>
+               <h2 className="text-5xl md:text-7xl font-headline font-black text-[#0F172A] uppercase leading-[0.9] tracking-tight">Elite <br/><span className="text-primary">Rankers</span></h2>
+               <p className="text-slate-500 font-medium max-w-2xl mx-auto text-lg italic mt-6">"I trusted the institutional rationalizations of Cracklix to clear my PPSC Executive exam."</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
@@ -97,29 +116,29 @@ export default function HomePage() {
                <RankerCard name="Navneet Kaur" exam="Master Cadre" rank="SST Merit" year="2024" />
             </div>
 
-            <div className="mt-20 bg-[#0B1528] rounded-[4rem] p-10 md:p-24 text-white relative overflow-hidden shadow-3xl">
+            <div className="mt-24 bg-[#0B1528] rounded-[4rem] p-10 md:p-24 text-white relative overflow-hidden shadow-3xl">
                <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[150%] bg-primary/10 blur-[120px] rounded-full" />
-               <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
-                  <div className="space-y-10">
-                     <div className="flex gap-1.5 text-amber-500">
-                        {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="fill-current h-6 w-6" />)}
+               <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center relative z-10">
+                  <div className="space-y-12">
+                     <div className="flex gap-2 text-amber-500">
+                        {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="fill-current h-8 w-8" />)}
                      </div>
-                     <blockquote className="text-3xl md:text-5xl font-headline font-medium italic leading-[1.1] tracking-tight">
-                        "The Punjab GK and Punjabi qualifying sections on Cracklix are exactly like the real board exams. The accuracy of the rationalizations is institutional grade."
+                     <blockquote className="text-4xl md:text-6xl font-headline font-medium italic leading-[1] tracking-tight">
+                        "The Punjab GK and Punjabi qualifying sections on Cracklix are exactly like the real board exams."
                      </blockquote>
-                     <div className="flex items-center gap-6">
-                        <div className="h-16 w-16 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10">
-                           <ShieldCheck className="h-8 w-8 text-primary" />
+                     <div className="flex items-center gap-8">
+                        <div className="h-20 w-20 rounded-[2rem] bg-white/10 flex items-center justify-center border border-white/10 shadow-2xl">
+                           <ShieldCheck className="h-10 w-10 text-primary" />
                         </div>
                         <div>
-                           <p className="text-2xl font-black uppercase tracking-tight">Harmanjit Singh</p>
-                           <p className="text-primary font-bold uppercase tracking-widest text-xs mt-1">Revenue Patwari, Bathinda Batch 2025</p>
+                           <p className="text-3xl font-black uppercase tracking-tight leading-none">Harmanjit Singh</p>
+                           <p className="text-primary font-bold uppercase tracking-widest text-xs mt-3">Revenue Patwari, Bathinda Batch 2025</p>
                         </div>
                      </div>
                   </div>
                   <div className="hidden lg:block">
-                     <div className="relative h-[550px] w-full bg-slate-800 rounded-[3.5rem] overflow-hidden border-[12px] border-white/5 shadow-2xl">
-                        <Image src="https://picsum.photos/seed/patwari/800/1000" fill alt="Success Story" className="object-cover grayscale hover:grayscale-0 transition-all duration-700" />
+                     <div className="relative h-[600px] w-full bg-slate-800 rounded-[4rem] overflow-hidden border-[16px] border-white/5 shadow-3xl">
+                        <Image src="https://picsum.photos/seed/patwari/800/1000" fill alt="Success Story" className="object-cover grayscale hover:grayscale-0 transition-all duration-1000" />
                         <div className="absolute inset-0 bg-gradient-to-t from-[#0B1528] via-transparent to-transparent opacity-60" />
                      </div>
                   </div>
@@ -131,47 +150,47 @@ export default function HomePage() {
       <LatestMocks />
 
       {/* 3. Daily Content Engine */}
-      <section className="py-24 bg-[#0B1528] text-white overflow-hidden">
+      <section className="py-32 bg-[#0B1528] text-white overflow-hidden border-y border-white/5">
          <div className="container mx-auto px-6 max-w-7xl relative">
-            <div className="absolute top-0 right-0 p-20 opacity-[0.02] -rotate-12"><Landmark className="h-96 w-96" /></div>
+            <div className="absolute top-0 right-0 p-20 opacity-[0.02] -rotate-12 pointer-events-none"><Landmark className="h-96 w-96" /></div>
             
-            <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-10 relative z-10">
+            <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-10 relative z-10">
                <div className="space-y-6">
                   <div className="flex items-center gap-3">
                      <TrendingUp className="text-primary h-6 w-6" />
-                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Live Content Engine</span>
+                     <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Deep Analysis Hub</span>
                   </div>
-                  <h2 className="text-5xl md:text-7xl font-headline font-black tracking-tight uppercase leading-[0.9]">Punjab Daily <br/> <span className="text-primary">Analysis</span></h2>
-                  <p className="text-slate-400 text-xl max-w-xl font-medium leading-relaxed">Critical insights into state governance and historical facts tailored for the official recruitment boards.</p>
+                  <h2 className="text-6xl md:text-8xl font-headline font-black tracking-tight uppercase leading-[0.9]">Strategic <br/> <span className="text-primary">Insights</span></h2>
+                  <p className="text-slate-400 text-xl max-w-xl font-medium leading-relaxed mt-4">Critical insights into state governance and historical facts tailored for official recruitment boards.</p>
                </div>
-               <Button asChild className="bg-white/5 border border-white/10 h-16 px-12 rounded-[1.5rem] font-black uppercase text-xs tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all shadow-2xl flex items-center gap-4">
-                  <Link href="/current-affairs">Deep Dive Newsroom <ChevronRight className="h-5 w-5" /></Link>
+               <Button asChild className="bg-white/5 border border-white/10 h-20 px-16 rounded-[2rem] font-black uppercase text-xs tracking-widest hover:bg-primary hover:text-white hover:border-primary transition-all shadow-3xl flex items-center gap-4 group">
+                  <Link href="/current-affairs">Deep Dive Newsroom <ChevronRight className="h-5 w-5 group-hover:translate-x-2 transition-transform" /></Link>
                </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 relative z-10">
                {latestCA && latestCA.length > 0 ? latestCA.map((ca: any) => (
-                  <Card key={ca.id} className="bg-white/5 border-white/10 rounded-[3rem] overflow-hidden hover:bg-white/[0.08] transition-all group cursor-pointer border border-transparent hover:border-primary/20 shadow-2xl">
+                  <Card key={ca.id} className="bg-white/5 border-white/10 rounded-[3.5rem] overflow-hidden hover:bg-white/[0.08] transition-all duration-500 group cursor-pointer border border-transparent hover:border-primary/30 shadow-2xl">
                      <CardContent className="p-12 space-y-8">
                         <div className="flex justify-between items-center">
-                           <Badge className="bg-primary text-white border-none px-4 py-1.5 font-black uppercase text-[10px] tracking-widest rounded-xl">
+                           <Badge className="bg-primary text-white border-none px-5 py-2 font-black uppercase text-[10px] tracking-widest rounded-xl">
                               {ca.category}
                            </Badge>
                            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-3">
                               <Calendar className="h-4 w-4" /> {ca.date}
                            </span>
                         </div>
-                        <h4 className="text-2xl font-bold leading-tight group-hover:text-primary transition-colors">{ca.title}</h4>
+                        <h4 className="text-2xl font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2">{ca.title}</h4>
                         <p className="text-base text-slate-400 line-clamp-3 leading-relaxed font-medium">{ca.summary}</p>
-                        <div className="pt-6 border-t border-white/5 flex items-center justify-between text-primary font-black uppercase tracking-widest text-[10px]">
-                           <span>Start Deep Analysis</span>
-                           <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                        <div className="pt-8 border-t border-white/5 flex items-center justify-between text-primary font-black uppercase tracking-widest text-[10px]">
+                           <span>Start Analysis</span>
+                           <ChevronRight className="h-5 w-5 group-hover:translate-x-2 transition-transform" />
                         </div>
                      </CardContent>
                   </Card>
                )) : (
                  Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="h-80 rounded-[3rem] bg-white/5 animate-pulse" />
+                    <div key={i} className="h-96 rounded-[3.5rem] bg-white/5 animate-pulse" />
                  ))
                )}
             </div>
@@ -179,17 +198,18 @@ export default function HomePage() {
       </section>
 
       {/* 4. Upcoming Notifications Grid */}
-      <section className="py-24 bg-white">
+      <section className="py-32 bg-white">
          <div className="container mx-auto px-6 max-w-7xl">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-16">
-               <h2 className="text-4xl font-headline font-black text-[#0F172A] uppercase flex items-center gap-4">
-                  <GraduationCap className="h-10 w-10 text-primary" /> 2026 Recruitment Calendar
+            <div className="flex flex-col md:flex-row items-center justify-between gap-10 mb-20">
+               <h2 className="text-5xl font-headline font-black text-[#0F172A] uppercase flex items-center gap-6 leading-none">
+                  <div className="h-16 w-16 bg-primary/10 rounded-[1.5rem] flex items-center justify-center"><GraduationCap className="h-8 w-8 text-primary" /></div>
+                  2026 Recruitment Calendar
                </h2>
-               <div className="px-6 py-2 rounded-full border border-slate-100 bg-slate-50 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                  Updated as per Latest Cabinet Decisions
+               <div className="px-8 py-3 rounded-full border border-slate-100 bg-slate-50 text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 shadow-sm">
+                  Verified as per Official Cabinet Notifications
                </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                <UpcomingExamCard board="PSSSB" name="Senior Assistant (CBT)" date="March 2026" vacancies="120+" />
                <UpcomingExamCard board="Police" name="Sub-Inspector 2026" date="April 2026" vacancies="500+" />
                <UpcomingExamCard board="PPSC" name="ADO Recruitment" date="Feb 2026" vacancies="200+" />
@@ -206,18 +226,18 @@ export default function HomePage() {
 
 function RankerCard({ name, exam, rank, year }: any) {
    return (
-      <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-[2.5rem] bg-white overflow-hidden group">
-         <div className="h-48 w-full bg-slate-100 relative overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-700">
-            <Image src={`https://picsum.photos/seed/${name}/400/500`} fill alt={name} className="object-cover transition-transform group-hover:scale-110" />
-            <div className="absolute top-4 right-4 h-11 w-11 bg-white rounded-xl shadow-xl flex items-center justify-center">
+      <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-[3rem] bg-white overflow-hidden group hover:translate-y-[-8px] transition-all duration-500">
+         <div className="h-56 w-full bg-slate-100 relative overflow-hidden grayscale group-hover:grayscale-0 transition-all duration-1000">
+            <Image src={`https://picsum.photos/seed/${name}/400/500`} fill alt={name} className="object-cover transition-transform duration-1000 group-hover:scale-110" />
+            <div className="absolute top-6 right-6 h-12 w-12 bg-white rounded-2xl shadow-2xl flex items-center justify-center border border-slate-100">
                <Trophy className="text-amber-500 h-6 w-6" />
             </div>
          </div>
-         <CardContent className="p-8 text-center space-y-2">
-            <p className="text-lg font-black text-[#0F172A] uppercase tracking-tight">{name}</p>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{exam}</p>
-            <div className="pt-4">
-               <Badge className="bg-emerald-500/10 text-emerald-600 border-none text-[10px] font-black px-4 py-1 rounded-lg">{rank} • {year}</Badge>
+         <CardContent className="p-10 text-center space-y-3">
+            <p className="text-xl font-black text-[#0F172A] uppercase tracking-tight">{name}</p>
+            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">{exam}</p>
+            <div className="pt-6">
+               <Badge className="bg-emerald-500/10 text-emerald-600 border-none text-[11px] font-black px-5 py-1.5 rounded-xl">{rank} • {year}</Badge>
             </div>
          </CardContent>
       </Card>
@@ -226,17 +246,17 @@ function RankerCard({ name, exam, rank, year }: any) {
 
 function UpcomingExamCard({ board, name, date, vacancies }: any) {
    return (
-      <div className="p-10 rounded-[2.5rem] bg-[#F8FAFC] border border-slate-100 flex items-center justify-between hover:bg-white hover:shadow-3xl hover:translate-y-[-4px] transition-all cursor-pointer group shadow-sm">
-         <div className="space-y-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-primary/5 px-3 py-1 rounded-lg">{board} Official</span>
-            <h4 className="text-xl font-headline font-black text-[#0F172A] group-hover:text-primary transition-colors">{name}</h4>
-            <div className="flex items-center gap-5 text-[10px] font-bold text-slate-400">
+      <div className="p-12 rounded-[3.5rem] bg-[#F8FAFC] border border-slate-100 flex items-center justify-between hover:bg-white hover:shadow-3xl hover:translate-y-[-6px] transition-all cursor-pointer group shadow-sm duration-500">
+         <div className="space-y-4">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary bg-primary/10 px-4 py-1.5 rounded-xl">{board} Official</span>
+            <h4 className="text-2xl font-headline font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight">{name}</h4>
+            <div className="flex items-center gap-6 text-[10px] font-bold text-slate-400">
                <span className="flex items-center gap-2 text-slate-500"><Calendar className="h-4 w-4" /> {date}</span>
                <span className="flex items-center gap-2 text-emerald-600"><CheckCircle2 className="h-4 w-4" /> {vacancies} Vacancies</span>
             </div>
          </div>
-         <div className="h-12 w-12 rounded-2xl border border-slate-200 flex items-center justify-center group-hover:bg-primary group-hover:border-primary group-hover:shadow-xl group-hover:shadow-primary/20 transition-all">
-            <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-white" />
+         <div className="h-14 w-14 rounded-[1.5rem] border border-slate-200 flex items-center justify-center group-hover:bg-primary group-hover:border-primary group-hover:shadow-2xl group-hover:shadow-primary/30 transition-all duration-300">
+            <ChevronRight className="h-6 w-6 text-slate-300 group-hover:text-white" />
          </div>
       </div>
    )
