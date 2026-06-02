@@ -77,6 +77,16 @@ export interface MockTest {
   author?: string;
 }
 
+export interface PreviousPaper {
+  id: string;
+  title: string;
+  examId: string;
+  boardId: string;
+  year: number;
+  pdfUrl: string;
+  createdAt: any;
+}
+
 export interface UserProfile {
   id: string;
   name: string;

@@ -89,45 +89,17 @@
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },
-    "CurrentAffair": {
-      "title": "Current Affair",
-      "description": "Daily or monthly news updates.",
+    "PreviousPaper": {
+      "title": "Previous Year Paper",
+      "description": "Historical recruitment papers for reference.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "title": { "type": "string" },
-        "category": { "type": "string" },
-        "date": { "type": "string" },
-        "content": { "type": "string" },
-        "summary": { "type": "string" },
-        "imageUrl": { "type": "string" }
-      }
-    },
-    "Notification": {
-      "title": "Notification",
-      "description": "Exam alerts and result broadcasts.",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "message": { "type": "string" },
-        "time": { "type": "string" },
-        "type": { "type": "string", "enum": ["alert", "result", "vacancy"] },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "AttemptResult": {
-      "title": "Attempt Result",
-      "description": "User results and analytics for a mock attempt.",
-      "type": "object",
-      "properties": {
-        "userId": { "type": "string" },
-        "mockId": { "type": "string" },
-        "score": { "type": "number" },
-        "accuracy": { "type": "number" },
-        "weakTopics": { "type": "array", "items": { "type": "string" } },
-        "timestamp": { "type": "string", "format": "date-time" },
-        "answers": { "type": "object" }
+        "examId": { "type": "string" },
+        "boardId": { "type": "string" },
+        "year": { "type": "number" },
+        "pdfUrl": { "type": "string" }
       }
     }
   },
@@ -159,21 +131,21 @@
       "schema": { "$ref": "#/backend/entities/MockTest" },
       "description": "Mock tests series."
     },
+    "/pyqs/{pyqId}": {
+      "schema": { "$ref": "#/backend/entities/PreviousPaper" },
+      "description": "Archived previous year papers."
+    },
     "/current_affairs/{caId}": {
-      "schema": { "$ref": "#/backend/entities/CurrentAffair" },
+      "schema": "object",
       "description": "Daily news updates."
     },
     "/notifications/{notificationId}": {
-      "schema": { "$ref": "#/backend/entities/Notification" },
+      "schema": "object",
       "description": "Global exam alerts."
     },
     "/results/{resultId}": {
-      "schema": { "$ref": "#/backend/entities/AttemptResult" },
-      "description": "User test results."
-    },
-    "/settings/{settingId}": {
       "schema": "object",
-      "description": "Global platform configurations."
+      "description": "User test results."
     }
   }
 }
