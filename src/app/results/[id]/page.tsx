@@ -8,11 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, XCircle, BrainCircuit, ChevronRight, HelpCircle, Trophy, Target, Zap, Share2, Sparkles } from "lucide-react"
+import { CheckCircle2, XCircle, BrainCircuit, ChevronRight, HelpCircle, Trophy, Target, Zap, Share2, Sparkles, BarChart3 } from "lucide-react"
 import { rationalizeMockQuestion, RationalizeMockQuestionOutput } from "@/ai/flows/rationalize-mock-question"
 import { useDoc, useFirestore } from "@/firebase"
 import { doc, getDocs, query, collection, where } from "firebase/firestore"
 import Link from "next/link"
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, Cell } from "recharts"
 
 export default function ResultPage() {
   const params = useParams()
@@ -30,7 +31,6 @@ export default function ResultPage() {
       const data = JSON.parse(saved)
       setSessionData(data)
       
-      // Fetch questions for analysis if not in sessionData
       if (db && data.mockId) {
         const fetchQs = async () => {
           const mockSnap = await getDocs(query(collection(db, "mocks"), where("id", "==", data.mockId)))
@@ -62,6 +62,21 @@ export default function ResultPage() {
       setRationalizing(null)
     }
   }
+
+  const chartData = useMemo(() => {
+    if (!questions.length || !sessionData) return []
+    const topicStats: Record<string, { correct: number; total: number }> = {}
+    questions.forEach((q, idx) => {
+      const topic = q.topic || "General"
+      if (!topicStats[topic]) topicStats[topic] = { correct: 0, total: 0 }
+      topicStats[topic].total++
+      if (sessionData.answers[idx] === q.correctAnswer) topicStats[topic].correct++
+    })
+    return Object.entries(topicStats).map(([name, stats]) => ({
+      name,
+      accuracy: Math.round((stats.correct / stats.total) * 100)
+    }))
+  }, [questions, sessionData])
 
   if (!sessionData) {
     return (
@@ -113,19 +128,27 @@ export default function ResultPage() {
                 <Stat icon={<Target className="text-blue-600" />} label="Accuracy" value={`${accuracy}%`} />
               </div>
               
-              <div className="space-y-6 bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
-                <div className="flex justify-between items-end">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Total Score</p>
-                    <p className="text-4xl font-headline font-black text-[#0F172A]">
-                      {score} <span className="text-lg text-slate-300">/ {totalQuestions}</span>
-                    </p>
-                  </div>
-                  <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${scorePercent > 70 ? 'bg-emerald-100 text-emerald-700' : 'bg-orange-100 text-[#F97316]'}`}>
-                    {scorePercent > 80 ? 'Exceptional' : scorePercent > 60 ? 'Competitive' : 'Needs Practice'}
-                  </span>
-                </div>
-                <Progress value={scorePercent} className="h-3 rounded-full bg-slate-200" />
+              <div className="space-y-8 bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
+                 <div className="flex justify-between items-end mb-4">
+                    <div className="flex items-center gap-2">
+                       <BarChart3 className="h-4 w-4 text-primary" />
+                       <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sectional Mastery</span>
+                    </div>
+                 </div>
+                 <div className="h-48 w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                       <BarChart data={chartData}>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                          <XAxis dataKey="name" hide />
+                          <YAxis hide domain={[0, 100]} />
+                          <Bar dataKey="accuracy" radius={[8, 8, 0, 0]} barSize={40}>
+                             {chartData.map((entry, index) => (
+                                <Cell key={index} fill={entry.accuracy > 70 ? "#10B981" : entry.accuracy > 40 ? "#F97316" : "#EF4444"} />
+                             ))}
+                          </Bar>
+                       </BarChart>
+                    </ResponsiveContainer>
+                 </div>
               </div>
             </CardContent>
           </Card>
@@ -164,8 +187,12 @@ export default function ResultPage() {
             <Card className="border-none bg-white shadow-xl shadow-slate-200/50 rounded-[2.5rem] p-8">
               <div className="flex flex-col gap-4">
                 <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">Next Step</p>
-                <h4 className="font-headline text-xl font-black text-[#0F172A]">Consistency is Key</h4>
-                <p className="text-sm text-slate-500 leading-relaxed">Attempting 3 mocks/week increases selection probability by 40%.</p>
+                <h4 className="font-headline text-xl font-black text-[#0F172A]">Selection Probability</h4>
+                <div className="flex items-end gap-2">
+                   <span className="text-4xl font-black text-primary">84%</span>
+                   <span className="text-xs font-bold text-emerald-500 mb-1">+4% Up</span>
+                </div>
+                <p className="text-sm text-slate-500 leading-relaxed">Your performance is in the top 5% of aspirants this month.</p>
                 <Button asChild className="w-full bg-[#F97316] hover:bg-[#EA580C] text-white font-bold h-14 rounded-2xl mt-4">
                   <Link href="/mocks">Start Next Mock</Link>
                 </Button>

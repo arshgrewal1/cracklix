@@ -4,44 +4,44 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // FORCE DEPLOYMENT ID: CRACKLIX_FINAL_RESOLVE_V150
     // AUTHOR: Arsh Grewal Management
-    // PURPOSE: Ensuring absolute public read access for institutional content using recursive wildcards.
+    // PURPOSE: Ensuring absolute public read access for institutional content using explicit collection matching.
 
-    match /notifications/{allPaths=**} {
+    match /notifications/{docId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    match /current_affairs/{allPaths=**} {
+    match /current_affairs/{docId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    match /boards/{allPaths=**} {
+    match /boards/{docId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    match /exams/{allPaths=**} {
+    match /exams/{docId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    match /subjects/{allPaths=**} {
+    match /subjects/{docId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    match /questions/{allPaths=**} {
+    match /questions/{docId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    match /mocks/{allPaths=**} {
+    match /mocks/{docId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    match /settings/{allPaths=**} {
+    match /settings/{docId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
