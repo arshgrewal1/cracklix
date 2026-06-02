@@ -2,7 +2,7 @@
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle, FileText, Activity } from "lucide-react"
+import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle, FileText, Activity, ShieldAlert } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 import { useUser, useAuth } from "@/firebase"
@@ -51,6 +51,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <AdminNavItem icon={<Database />} label="MCQ Bank" href="/admin/questions" active={pathname === "/admin/questions"} />
                   <AdminNavItem icon={<Zap className="text-primary fill-primary/20" />} label="Bulk Import" href="/admin/questions/bulk" active={pathname === "/admin/questions/bulk"} />
                   <AdminNavItem icon={<ClipboardList />} label="Mock Builder" href="/admin/mocks" active={pathname === "/admin/mocks"} />
+                  <AdminNavItem icon={<ShieldAlert className="text-rose-500" />} label="Integrity QA" href="/admin/qa" active={pathname === "/admin/qa"} />
                   <AdminNavItem icon={<AlertTriangle className="text-rose-400" />} label="Error Reports" href="/admin/reports" active={pathname === "/admin/reports"} />
                 </SidebarMenu>
               </SidebarGroupContent>

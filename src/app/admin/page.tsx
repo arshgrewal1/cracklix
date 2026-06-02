@@ -13,12 +13,13 @@ import {
   Layers,
   FileJson,
   Download,
-  AlertTriangle
+  AlertTriangle,
+  ShieldAlert
 } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import Link from "next/link"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection } from "firebase/firestore"
+import { collection, query, orderBy, limit } from "firebase/firestore"
 import { useMemo, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
@@ -27,7 +28,7 @@ import { useToast } from "@/hooks/use-toast"
 
 /**
  * @fileOverview Final Admin Command Center.
- * Includes Institutional Seeding, Backup (JSON Export), and Dashboard Metrics.
+ * Includes Institutional Seeding, Backup (JSON Export), and QA Health Metrics.
  */
 
 export default function AdminDashboard() {
@@ -86,7 +87,7 @@ export default function AdminDashboard() {
               <Rocket className={`h-4 w-4 ${seeding ? 'animate-spin' : ''}`} /> Initialize Global Repo
             </Button>
           )}
-          <Button onClick={handleExport} variant="outline" className="border-foreground/10 h-14 px-8 rounded-2xl font-black text-xs uppercase tracking-widest gap-3">
+          <Button onClick={handleExport} variant="outline" className="border-foreground/10 h-14 px-8 rounded-2xl font-black text-xs uppercase tracking-widest text-xs gap-3">
              <FileJson className="h-4 w-4" /> JSON Export
           </Button>
           <Button asChild className="bg-primary hover:bg-primary/90 rounded-2xl h-14 px-10 font-black shadow-2xl shadow-primary/20 uppercase tracking-widest text-xs">
@@ -144,10 +145,11 @@ export default function AdminDashboard() {
         </Card>
 
         <div className="lg:col-span-4 space-y-8">
-           <Card className="border-none bg-[#0F172A] rounded-[3rem] shadow-3xl p-10 space-y-8 relative overflow-hidden">
+           <Card className="border-none bg-[#0F172A] rounded-[3rem] shadow-3xl p-10 space-y-8 relative overflow-hidden group">
               <div className="relative z-10 space-y-6">
                  <h3 className="text-xl font-headline font-black text-white uppercase">Operational Tools</h3>
                  <div className="space-y-4">
+                    <ToolkitLink href="/admin/qa" label="System Integrity Scan" icon={<ShieldAlert className="h-4 w-4 text-rose-500" />} />
                     <ToolkitLink href="/admin/questions/bulk" label="Bulk Extraction" icon={<Database className="h-4 w-4" />} />
                     <ToolkitLink href="/admin/mocks" label="Mock Registry" icon={<Layers className="h-4 w-4" />} />
                     <ToolkitLink href="/admin/settings" label="Site CMS" icon={<ShieldCheck className="h-4 w-4" />} />
@@ -160,7 +162,7 @@ export default function AdminDashboard() {
               <div className="relative z-10 space-y-4">
                  <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">System Stability</p>
                  <h4 className="text-3xl font-headline font-black leading-tight">Institutional Ready</h4>
-                 <p className="text-xs font-bold opacity-80">All 13 core collections are active and synced with official boards.</p>
+                 <p className="text-xs font-bold opacity-80">All 13 core collections are active and scanned for pattern integrity.</p>
               </div>
            </Card>
         </div>

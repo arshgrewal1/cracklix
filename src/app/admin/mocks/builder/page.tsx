@@ -20,7 +20,8 @@ import {
   CheckCircle2,
   Filter,
   Layers,
-  AlertTriangle
+  AlertTriangle,
+  FileWarning
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore"
@@ -29,9 +30,8 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 /**
- * @fileOverview Final Smart Mock Builder.
- * Features: Blueprint-driven Auto-Assembly & Manual Library Selection.
- * Supports: Creation and Editing of existing mocks.
+ * @fileOverview Phase 55: Smart Mock Builder with Strict Validation.
+ * Features: Blueprint-driven Auto-Assembly & Structural Content Audit.
  */
 
 export default function MockBuilderPage() {
@@ -63,7 +63,19 @@ export default function MockBuilderPage() {
     subjectId: "all"
   })
 
-  // Sync existing mock data if editing
+  // Validation Logic
+  const validation = useMemo(() => {
+    const errors = []
+    if (!mockData.title) errors.push("Series title is mandatory.")
+    if (!mockData.examId) errors.push("Target exam vertical must be defined.")
+    if (selectedQuestions.length === 0) errors.push("No MCQs linked to this series.")
+    if (selectedQuestions.length > 0 && selectedQuestions.length < 10) errors.push("Institutional mocks require at least 10 items.")
+    return {
+      isValid: errors.length === 0,
+      errors
+    }
+  }, [mockData, selectedQuestions])
+
   useEffect(() => {
     if (existingMock) {
       setMockData({
@@ -77,7 +89,6 @@ export default function MockBuilderPage() {
     }
   }, [existingMock])
 
-  // Sync selected questions when questionBank and existingMock are both available
   useEffect(() => {
     if (existingMock && questionBank && existingMock.questionIds) {
       const selected = questionBank.filter((q: any) => existingMock.questionIds.includes(q.id))
@@ -93,7 +104,6 @@ export default function MockBuilderPage() {
 
     let pool = [...questionBank]
     
-    // Filtering based on institutional blueprint
     if (smartConfig.difficulty !== 'all') {
       pool = pool.filter(q => q.difficulty === smartConfig.difficulty)
     }
@@ -110,7 +120,6 @@ export default function MockBuilderPage() {
       return
     }
 
-    // Shuffle and extraction
     const selected = pool.sort(() => 0.5 - Math.random()).slice(0, smartConfig.count)
     setSelectedQuestions(selected)
     
@@ -121,8 +130,8 @@ export default function MockBuilderPage() {
   }
 
   const handlePublish = () => {
-    if (!mockData.title || !mockData.examId || selectedQuestions.length === 0) {
-      toast({ variant: "destructive", title: "Audit Failed", description: "Title, Exam hub, and linked Questions are mandatory." })
+    if (!validation.isValid) {
+      toast({ variant: "destructive", title: "Audit Failed", description: validation.errors[0] })
       return
     }
 
@@ -171,12 +180,20 @@ export default function MockBuilderPage() {
           </Button>
           <div>
             <h1 className="text-4xl font-black font-headline text-primary uppercase tracking-tight">{isEditing ? "Audit Assembler" : "Smart Assembler"}</h1>
-            <p className="text-muted-foreground mt-1">Institutional Hub: Blueprint-driven mock generation.</p>
+            <p className="text-muted-foreground mt-1">Institutional Hub: Content audit and series generation.</p>
           </div>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 gap-3 font-black px-12 h-16 shadow-3xl rounded-2xl uppercase tracking-widest text-[10px]" onClick={handlePublish} disabled={isPublishing}>
-          <ClipboardCheck className="h-5 w-5" /> {isPublishing ? "Processing..." : (isEditing ? "Update Series" : "Publish Series")}
-        </Button>
+        <div className="flex items-center gap-4">
+           {!validation.isValid && (
+              <div className="hidden md:flex items-center gap-3 text-rose-500 bg-rose-500/10 px-6 py-3 rounded-2xl border border-rose-500/20">
+                 <AlertTriangle className="h-5 w-5" />
+                 <span className="text-[10px] font-black uppercase tracking-widest">Structural Audit Pending</span>
+              </div>
+           )}
+           <Button className="bg-primary hover:bg-primary/90 gap-3 font-black px-12 h-16 shadow-3xl rounded-2xl uppercase tracking-widest text-[10px]" onClick={handlePublish} disabled={isPublishing || !validation.isValid}>
+            <ClipboardCheck className="h-5 w-5" /> {isPublishing ? "Processing..." : (isEditing ? "Update Series" : "Publish Series")}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -226,7 +243,23 @@ export default function MockBuilderPage() {
             </CardContent>
           </Card>
 
-          <Card className="border-none bg-primary/5 rounded-[2.5rem] p-10 space-y-4 text-center border border-primary/10">
+          {validation.errors.length > 0 && (
+             <Card className="border-none bg-rose-500/5 rounded-[2.5rem] p-10 space-y-4 border border-rose-500/10 shadow-xl">
+                <div className="flex items-center gap-3 text-rose-500 mb-4">
+                   <FileWarning className="h-6 w-6" />
+                   <h4 className="font-headline font-black uppercase text-sm">Audit Findings</h4>
+                </div>
+                <ul className="space-y-3">
+                   {validation.errors.map((err, i) => (
+                      <li key={i} className="flex gap-3 items-start text-xs font-bold text-slate-400">
+                         <div className="h-1.5 w-1.5 rounded-full bg-rose-500 mt-1 shrink-0" /> {err}
+                      </li>
+                   ))}
+                </ul>
+             </Card>
+          )}
+
+          <Card className="border-none bg-primary/5 rounded-[2.5rem] p-10 space-y-4 text-center border border-primary/10 shadow-2xl">
              <Database className="h-10 w-10 text-primary mx-auto opacity-40" />
              <div>
                 <p className="text-6xl font-black font-headline text-slate-100 tracking-tighter">{selectedQuestions.length}</p>
@@ -237,7 +270,7 @@ export default function MockBuilderPage() {
 
         <div className="lg:col-span-8">
            <Tabs defaultValue="manual" className="space-y-8">
-              <TabsList className="bg-white/5 border border-white/5 rounded-2xl p-1.5 h-16 w-fit">
+              <TabsList className="bg-white/5 border border-white/5 rounded-2xl p-1.5 h-16 w-fit shadow-xl">
                  <TabsTrigger value="smart" className="rounded-xl h-full px-8 font-black uppercase text-[10px] gap-3 data-[state=active]:bg-primary data-[state=active]:text-white"><Sparkles className="h-4 w-4" /> Auto Assembler</TabsTrigger>
                  <TabsTrigger value="manual" className="rounded-xl h-full px-8 font-black uppercase text-[10px] gap-3 data-[state=active]:bg-primary data-[state=active]:text-white"><Database className="h-4 w-4" /> Library Selector</TabsTrigger>
               </TabsList>
