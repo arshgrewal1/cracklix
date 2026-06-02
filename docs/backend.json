@@ -1,4 +1,3 @@
-
 {
   "entities": {
     "UserProfile": {
@@ -146,6 +145,18 @@
     "/results/{resultId}": {
       "schema": "object",
       "description": "User test results."
+    },
+    "/audit_logs/{logId}": {
+      "schema": "object",
+      "description": "Institutional action trail."
+    },
+    "/bookmarks/{bookmarkId}": {
+      "schema": "object",
+      "description": "Saved aspirant resources."
+    },
+    "/test_sessions/{sessionId}": {
+      "schema": "object",
+      "description": "Active CBT checkpoints."
     }
   }
 }
