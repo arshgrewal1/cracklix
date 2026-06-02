@@ -9,255 +9,191 @@ import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { Globe, Database, Shield, Layout, Upload, Image as ImageIcon } from "lucide-react"
+import { Globe, Database, Shield, Layout, Upload, Image as ImageIcon, Bell, Save, RefreshCw } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError } from "@/firebase/errors";
+
+/**
+ * @fileOverview Phase 40: Site Settings & Dynamic CMS.
+ * Allows Super Admins to manage Hero, Announcements, and Global Logic.
+ */
 
 export default function AdminSettings() {
   const db = useFirestore();
   const { toast } = useToast();
   
-  const settingsRef = useMemo(() => {
-    if (!db) return null;
-    return doc(db, 'settings', 'global');
-  }, [db]);
-
+  const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
   const { data: remoteSettings, loading } = useDoc(settingsRef);
 
-  const [heroData, setHeroData] = useState({
-    line1: "Prepare Smarter.",
-    line2: "Score Higher.",
-    description: "Complete your Punjab Government Exam preparation on a single platform. Trust Cracklix for your professional success.",
-    primaryBtn: "Start Free Mock",
-    secondaryBtn: "Explore Exams",
-    imageUrl: ""
+  const [formData, setFormData] = useState({
+    heroLine1: "Prepare Smarter.",
+    heroLine2: "Score Higher.",
+    heroDescription: "Complete your Punjab Government Exam preparation on a single platform. Trust Cracklix for your professional success.",
+    heroImageUrl: "https://picsum.photos/seed/punjab/1200/800",
+    announcement: "🔥 Punjab Police Recruitment 2026 Applications Open",
+    showAnnouncement: true,
+    platformName: "Cracklix",
+    supportEmail: "cracklixhelp@gmail.com",
+    negativeMarking: true,
+    aiRationalization: true
   });
 
   useEffect(() => {
     if (remoteSettings) {
-      setHeroData({
-        line1: remoteSettings.heroLine1 || "Prepare Smarter.",
-        line2: remoteSettings.heroLine2 || "Score Higher.",
-        description: remoteSettings.heroDescription || "Complete your Punjab Government Exam preparation on a single platform. Trust Cracklix for your professional success.",
-        primaryBtn: remoteSettings.heroPrimaryBtn || "Start Free Mock",
-        secondaryBtn: remoteSettings.heroSecondaryBtn || "Explore Exams",
-        imageUrl: remoteSettings.heroImageUrl || ""
-      });
+      setFormData(prev => ({ ...prev, ...remoteSettings }));
     }
   }, [remoteSettings]);
 
-  const handlePublish = () => {
+  const handleSave = () => {
     if (!db) return;
     
-    const settingsDoc = doc(db, 'settings', 'global');
-    setDoc(settingsDoc, {
-      heroLine1: heroData.line1,
-      heroLine2: heroData.line2,
-      heroDescription: heroData.description,
-      heroPrimaryBtn: heroData.primaryBtn,
-      heroSecondaryBtn: heroData.secondaryBtn,
-      heroImageUrl: heroData.imageUrl
-    }, { merge: true })
-    .then(() => {
-      toast({
-        title: "Platform Updated",
-        description: "Your changes are now live for all users.",
+    const payload = {
+      ...formData,
+      updatedAt: serverTimestamp(),
+      updatedBy: "Super Admin"
+    };
+
+    setDoc(doc(db, 'settings', 'global'), payload, { merge: true })
+      .then(() => {
+        toast({ title: "Configuration Synced", description: "All changes are now live for aspirants." });
+      })
+      .catch(async (error) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({
+          path: '/settings/global',
+          operation: 'write',
+          requestResourceData: payload,
+        }));
       });
-    })
-    .catch((error) => {
-      toast({
-        variant: "destructive",
-        title: "Update Failed",
-        description: error.message || "Could not publish changes.",
-      });
-    });
   };
 
-  const handleReset = () => {
-    if (remoteSettings) {
-      setHeroData({
-        line1: remoteSettings.heroLine1 || "",
-        line2: remoteSettings.heroLine2 || "",
-        description: remoteSettings.heroDescription || "",
-        primaryBtn: remoteSettings.heroPrimaryBtn || "",
-        secondaryBtn: remoteSettings.heroSecondaryBtn || "",
-        imageUrl: remoteSettings.heroImageUrl || ""
-      });
-    }
-  };
+  if (loading) return <div className="h-96 flex items-center justify-center"><RefreshCw className="h-10 w-10 text-primary animate-spin" /></div>
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-headline font-bold text-primary">Portal Settings</h1>
-        <p className="text-muted-foreground">Configure global platform parameters, Hero section, and security rules.</p>
+    <div className="space-y-12 pb-20">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+        <div>
+          <h1 className="text-5xl font-headline font-black text-primary uppercase tracking-tight">Site Configuration</h1>
+          <p className="text-muted-foreground mt-2 text-lg">Manage dynamic CMS, announcement bars, and platform-wide logic.</p>
+        </div>
+        <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 h-16 px-12 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl shadow-primary/20 gap-3">
+          <Save className="h-5 w-5" /> Publish Configuration
+        </Button>
       </div>
 
-      <Tabs defaultValue="hero" className="space-y-6">
-        <TabsList className="bg-card/50 border border-foreground/5 p-1">
-          <TabsTrigger value="hero" className="gap-2">
-            <Layout className="h-4 w-4" /> Hero Section
-          </TabsTrigger>
-          <TabsTrigger value="general" className="gap-2">
-            <Globe className="h-4 w-4" /> General
-          </TabsTrigger>
-          <TabsTrigger value="exams" className="gap-2">
-            <Database className="h-4 w-4" /> Exam Logic
-          </TabsTrigger>
-          <TabsTrigger value="security" className="gap-2">
-            <Shield className="h-4 w-4" /> Security
-          </TabsTrigger>
+      <Tabs defaultValue="hero" className="space-y-8">
+        <TabsList className="bg-white/5 border border-white/5 p-1.5 h-16 rounded-2xl">
+          <TabsTrigger value="hero" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Layout className="h-4 w-4" /> Hero CMS</TabsTrigger>
+          <TabsTrigger value="alerts" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Bell className="h-4 w-4" /> Announcements</TabsTrigger>
+          <TabsTrigger value="identity" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Globe className="h-4 w-4" /> Identity</TabsTrigger>
+          <TabsTrigger value="logic" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Database className="h-4 w-4" /> Core Logic</TabsTrigger>
         </TabsList>
 
         <TabsContent value="hero">
-          <Card className="border-foreground/5 bg-card/50">
-            <CardHeader>
-              <CardTitle className="text-primary flex items-center gap-2">
-                <Layout className="h-5 w-5" /> Live Hero Management
-              </CardTitle>
-              <CardDescription>Edit the main landing page hero content and visuals.</CardDescription>
+          <Card className="border-none bg-card/50 shadow-3xl rounded-[3rem] overflow-hidden">
+            <CardHeader className="p-10 border-b border-white/5">
+              <CardTitle className="text-2xl font-headline font-black uppercase">Homepage Hero Management</CardTitle>
+              <CardDescription>Edit the primary value proposition seen by new visitors.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <CardContent className="p-10 space-y-10">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <Label>Heading Line 1 (White)</Label>
-                    <Input 
-                      value={heroData.line1} 
-                      onChange={(e) => setHeroData({...heroData, line1: e.target.value})}
-                      placeholder="e.g. Prepare Smarter."
-                    />
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Headline Line 1</Label>
+                    <Input value={formData.heroLine1} onChange={e => setFormData({...formData, heroLine1: e.target.value})} className="h-14 rounded-xl bg-background border-none shadow-inner" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Heading Line 2 (Orange Highlight)</Label>
-                    <Input 
-                      value={heroData.line2} 
-                      onChange={(e) => setHeroData({...heroData, line2: e.target.value})}
-                      placeholder="e.g. Score Higher."
-                      className="border-primary/30 text-primary font-bold"
-                    />
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary">Headline Line 2 (Highlight)</Label>
+                    <Input value={formData.heroLine2} onChange={e => setFormData({...formData, heroLine2: e.target.value})} className="h-14 rounded-xl bg-background border-none shadow-inner text-primary font-black" />
                   </div>
                   <div className="space-y-2">
-                    <Label>Sub-description</Label>
-                    <Textarea 
-                      value={heroData.description} 
-                      onChange={(e) => setHeroData({...heroData, description: e.target.value})}
-                      placeholder="Describe the platform value..."
-                      className="min-h-[100px]"
-                    />
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Sub-Description Statement</Label>
+                    <Textarea value={formData.heroDescription} onChange={e => setFormData({...formData, heroDescription: e.target.value})} className="min-h-[120px] rounded-2xl bg-background border-none p-6 leading-relaxed" />
                   </div>
                 </div>
-
                 <div className="space-y-6">
-                  <div className="space-y-2">
-                    <Label>Hero Background Image (URL)</Label>
-                    <div className="space-y-4">
-                      <Input 
-                        value={heroData.imageUrl} 
-                        onChange={(e) => setHeroData({...heroData, imageUrl: e.target.value})}
-                        placeholder="Paste image URL here..."
-                      />
-                      <div className="h-40 w-full rounded-xl border-2 border-dashed flex flex-col items-center justify-center bg-muted/20 relative overflow-hidden group">
-                        {heroData.imageUrl ? (
-                           <img src={heroData.imageUrl} className="absolute inset-0 object-cover w-full h-full opacity-50" />
-                        ) : (
-                          <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
-                        )}
-                        <p className="text-xs text-muted-foreground z-10">Image Preview</p>
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Hero Visual URI</Label>
+                      <Input value={formData.heroImageUrl} onChange={e => setFormData({...formData, heroImageUrl: e.target.value})} className="h-14 rounded-xl bg-background border-none shadow-inner" />
+                   </div>
+                   <div className="h-64 w-full rounded-[2.5rem] bg-background border-2 border-dashed border-white/5 relative overflow-hidden group">
+                      {formData.heroImageUrl ? (
+                        <img src={formData.heroImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform" />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-slate-500 italic">No image reference</div>
+                      )}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center z-10">
+                        <ImageIcon className="h-8 w-8 text-primary/40 mb-2" />
+                        <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Visual Preview</span>
                       </div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>Primary Button</Label>
-                      <Input 
-                        value={heroData.primaryBtn} 
-                        onChange={(e) => setHeroData({...heroData, primaryBtn: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Secondary Button</Label>
-                      <Input 
-                        value={heroData.secondaryBtn} 
-                        onChange={(e) => setHeroData({...heroData, secondaryBtn: e.target.value})}
-                      />
-                    </div>
-                  </div>
+                   </div>
                 </div>
-              </div>
-              <Separator />
-              <div className="flex justify-end gap-4">
-                <Button variant="outline" onClick={handleReset}>Reset Changes</Button>
-                <Button className="bg-primary hover:bg-primary/90 px-8 font-bold" onClick={handlePublish}>Publish Live</Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="general">
-          <Card className="border-foreground/5 bg-card/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5 text-primary" /> Platform Identity
-              </CardTitle>
-              <CardDescription>Public branding and meta information.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label>Platform Name</Label>
-                  <Input defaultValue="Cracklix" />
+        <TabsContent value="alerts">
+          <Card className="border-none bg-card/50 shadow-3xl rounded-[3rem]">
+             <CardContent className="p-12 space-y-12">
+                <div className="flex items-center justify-between p-10 bg-primary/5 rounded-[2.5rem] border border-primary/10">
+                   <div className="space-y-1">
+                      <h4 className="text-xl font-headline font-black uppercase text-primary">Announcement Bar</h4>
+                      <p className="text-sm text-slate-400 font-medium">Toggle a site-wide high-priority alert banner.</p>
+                   </div>
+                   <Switch checked={formData.showAnnouncement} onCheckedChange={val => setFormData({...formData, showAnnouncement: val})} />
                 </div>
-                <div className="space-y-2">
-                  <Label>Support Email</Label>
-                  <Input defaultValue="cracklixhelp@gmail.com" />
+                
+                <div className="space-y-4">
+                   <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Banner Message</Label>
+                   <Input value={formData.announcement} onChange={e => setFormData({...formData, announcement: e.target.value})} className="h-16 rounded-2xl bg-background border-none text-lg font-bold shadow-inner" placeholder="Enter marquee text..." />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Platform Tagline</Label>
-                <Input defaultValue="Punjab's Smartest Government Exam Platform" />
-              </div>
-              <Button className="bg-primary hover:bg-primary/90">Save General Changes</Button>
-            </CardContent>
+             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="exams">
-          <Card className="border-foreground/5 bg-card/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Database className="h-5 w-5 text-secondary" /> Test Engine Configuration
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Negative Marking (Global)</Label>
-                  <p className="text-xs text-muted-foreground">Apply 0.25 penalty by default.</p>
+        <TabsContent value="identity">
+          <Card className="border-none bg-card/50 shadow-3xl rounded-[3rem]">
+             <CardContent className="p-12 space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Platform Brand Name</Label>
+                      <Input value={formData.platformName} onChange={e => setFormData({...formData, platformName: e.target.value})} className="h-14 rounded-xl bg-background border-none" />
+                   </div>
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Institutional Support Email</Label>
+                      <Input value={formData.supportEmail} onChange={e => setFormData({...formData, supportEmail: e.target.value})} className="h-14 rounded-xl bg-background border-none" />
+                   </div>
                 </div>
-                <Switch />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>AI Rationalization</Label>
-                  <p className="text-xs text-muted-foreground">Enable LLM-powered solutions on results page.</p>
+             </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="logic">
+          <Card className="border-none bg-card/50 shadow-3xl rounded-[3rem]">
+             <CardContent className="p-12 space-y-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                   <ConfigToggle label="Negative Marking" desc="Apply -1.0 penalty for wrong choices by default." checked={formData.negativeMarking} onChange={val => setFormData({...formData, negativeMarking: val})} />
+                   <ConfigToggle label="AI Rationalization" desc="Enable Gemini-powered step-by-step solutions." checked={formData.aiRationalization} onChange={val => setFormData({...formData, aiRationalization: val})} />
                 </div>
-                <Switch defaultChecked />
-              </div>
-              <Separator />
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label>Leaderboard Visibility</Label>
-                  <p className="text-xs text-muted-foreground">Show ranks to all students.</p>
-                </div>
-                <Switch defaultChecked />
-              </div>
-            </CardContent>
+             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
+    </div>
+  )
+}
+
+function ConfigToggle({ label, desc, checked, onChange }: any) {
+  return (
+    <div className="flex items-center justify-between p-8 bg-white/5 rounded-3xl border border-white/5">
+       <div className="space-y-1">
+          <p className="font-black text-xs uppercase tracking-widest text-slate-100">{label}</p>
+          <p className="text-[10px] text-slate-500 uppercase font-bold">{desc}</p>
+       </div>
+       <Switch checked={checked} onCheckedChange={onChange} />
     </div>
   )
 }

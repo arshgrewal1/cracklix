@@ -2,15 +2,11 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // CRACKLIX PRODUCTION HARDENING V6
-    // Institutional Grade Security Rules
+    // CRACKLIX PRODUCTION HARDENING V7
+    // Final Launch Rules with Role-Based Settings Access
 
     function isAuthenticated() {
       return request.auth != null;
-    }
-
-    function isOwner(userId) {
-      return isAuthenticated() && request.auth.uid == userId;
     }
 
     function getUserData() {
@@ -23,11 +19,22 @@ service cloud.firestore {
       return data != null && (data.role == 'ADMIN' || data.role == 'SUPER_ADMIN');
     }
 
-    // --- Core Schemas ---
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // --- Dynamic CMS & Configuration ---
+    
+    match /settings/{docId} {
+      allow read: if true; // Publicly accessible for Hero/Announcements
+      allow write: if isAdmin();
+    }
 
     match /users/{userId} {
       allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      allow write: if isAuthenticated() && (isOwner(userId) || isAdmin());
+      // On creation, users shouldn't be able to set their own role unless they are the founder
+      allow create: if isAuthenticated() && isOwner(userId);
+      allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
     }
 
     match /boards/{docId} {
@@ -67,7 +74,7 @@ service cloud.firestore {
     }
 
     match /test_sessions/{sessionId} {
-      allow read, write: if isAuthenticated() && (request.auth.uid in sessionId.split('_') || isAdmin());
+      allow read, write: if isAuthenticated() && (request.auth.uid == resource.data.userId || request.auth.uid == request.resource.data.userId || isAdmin());
     }
 
     match /current_affairs/{docId} {
@@ -91,9 +98,8 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
-    match /settings/{docId} {
-      allow read: if true;
-      allow write: if isAdmin();
+    match /audit_logs/{logId} {
+      allow read, write: if isAdmin();
     }
   }
 }

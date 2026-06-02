@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from "next/image";
@@ -9,6 +8,11 @@ import { ArrowRight, Sparkles, TrendingUp, ShieldCheck, MapPin } from "lucide-re
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useMemo } from 'react';
+
+/**
+ * @fileOverview Final Dynamic Hero Module.
+ * Integrates with Site Settings CMS for non-technical management.
+ */
 
 export default function Hero() {
   const db = useFirestore();

@@ -3,8 +3,8 @@
 import { useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useUser, useCollection, useFirestore } from "@/firebase"
-import { collection, query, where, orderBy, limit } from "firebase/firestore"
+import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
+import { collection, query, where, orderBy, limit, doc } from "firebase/firestore"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -23,13 +23,19 @@ import {
   BrainCircuit,
   ArrowUpRight,
   ShieldCheck,
-  Sparkles
+  Sparkles,
+  PlayCircle
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import Link from "next/link"
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from "recharts"
+
+/**
+ * @fileOverview Final Personalized Student Dashboard.
+ * Features: "Continue Last Mock", Subject Mastery, Selection Probability.
+ */
 
 export default function StudentDashboard() {
   const { user, profile, loading } = useUser()
@@ -45,14 +51,20 @@ export default function StudentDashboard() {
     return query(collection(db, "results"), where("userId", "==", user.uid), orderBy("timestamp", "desc"), limit(20))
   }, [db, user])
 
+  const sessionQuery = useMemo(() => {
+    if (!db || !user) return null
+    return query(collection(db, "test_sessions"), where("userId", "==", user.uid), where("status", "==", "IN_PROGRESS"), limit(1))
+  }, [db, user])
+
   const { data: results, loading: resultsLoading } = useCollection<any>(resultsQuery)
+  const { data: activeSessions } = useCollection<any>(sessionQuery)
+  const lastSession = activeSessions?.[0]
 
   const analytics = useMemo(() => {
     if (!results || results.length === 0) return { total: 0, avgAccuracy: 0, rank: "N/A", subjectData: [], selectionProb: 45 }
     
     const avgAcc = Math.round(results.reduce((acc: number, r: any) => acc + (r.accuracy || 0), 0) / results.length)
     
-    // Aggregating real subject mastery from all results
     const subjectMap: Record<string, { correct: number; total: number }> = {}
     results.forEach((res: any) => {
       if (res.subjectStats) {
@@ -74,7 +86,7 @@ export default function StudentDashboard() {
       avgAccuracy: avgAcc, 
       rank: "Top 12%", 
       subjectData,
-      selectionProb: Math.min(96, Math.max(30, avgAcc + 10))
+      selectionProb: Math.min(96, Math.max(30, avgAcc + 12))
     }
   }, [results])
 
@@ -108,6 +120,21 @@ export default function StudentDashboard() {
                   </div>
                </CardContent>
             </Card>
+
+            {/* Launch Metric: Continue Last Mock */}
+            {lastSession && (
+              <Card className="border-none bg-emerald-600 text-white p-10 rounded-[3rem] shadow-3xl shadow-emerald-900/20 relative overflow-hidden group cursor-pointer" onClick={() => router.push(`/mocks/${lastSession.mockId}/attempt`)}>
+                 <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><PlayCircle className="h-32 w-32" /></div>
+                 <div className="relative z-10 space-y-4">
+                    <div className="flex items-center gap-3">
+                       <PlayCircle className="h-5 w-5 text-emerald-200" />
+                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-100">Resume Last Session</span>
+                    </div>
+                    <h3 className="text-2xl font-headline font-black leading-tight uppercase">Back to Practice</h3>
+                    <p className="text-emerald-50 text-sm font-medium opacity-80">You were {Math.round((lastSession.currentIdx / 100) * 100)}% through your patwari mock.</p>
+                 </div>
+              </Card>
+            )}
 
             <div className="grid grid-cols-2 gap-6">
                <Metric icon={<ClipboardList className="text-blue-500" />} label="Attempted" value={analytics.total} />
