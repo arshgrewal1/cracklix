@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 interface LogoProps {
   className?: string;
-  variant?: 'light' | 'dark'; // 'light' means light text for dark backgrounds, 'dark' means dark text for light backgrounds
+  variant?: 'light' | 'dark'; // 'light' for dark backgrounds (white text), 'dark' for light backgrounds (navy text)
   showTagline?: boolean;
 }
 
@@ -13,56 +13,48 @@ export default function Logo({ className = "", variant = 'light', showTagline = 
   const isLightVariant = variant === 'light'; 
   
   return (
-    <Link href="/" className={`flex items-center gap-[12px] group ${className}`}>
-      {/* Premium Circular C-Tick Icon */}
+    <Link href="/" className={`flex items-center gap-3 group ${className}`}>
+      {/* Premium Minimalist Icon: Geometric C + Checkmark */}
       <motion.div 
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="relative w-12 h-12 flex items-center justify-center shrink-0"
+        className="relative w-10 h-10 flex items-center justify-center shrink-0"
       >
-        <svg width="52" height="52" viewBox="0 0 52 52" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-          {/* Orange Circle */}
-          <circle cx="26" cy="26" r="24" stroke="#F97316" strokeWidth="3"/>
-
-          {/* C Shape - Color adjusts based on variant */}
-          <motion.path
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            d="M34 14 C22 10, 12 18, 12 26 C12 34, 22 42, 34 38"
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+          {/* Main geometric C shape */}
+          <path
+            d="M32 10C29.5 7.5 25.5 6 21 6C12.7157 6 6 12.7157 6 21C6 29.2843 12.7157 36 21 36C25.5 36 29.5 34.5 32 32"
             stroke={isLightVariant ? "#FFFFFF" : "#0F172A"}
             strokeWidth="5"
             strokeLinecap="round"
-            fill="none"
           />
-
-          {/* Tick */}
+          
+          {/* Integrated Qualification Checkmark */}
           <motion.path
-            initial={{ pathLength: 0 }}
-            animate={{ pathLength: 1 }}
-            transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
-            d="M18 27 L24 33 L36 20"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.3, ease: "easeOut" }}
+            d="M16 21L20 25L30 15"
             stroke="#F97316"
-            strokeWidth="4"
+            strokeWidth="5"
             strokeLinecap="round"
             strokeLinejoin="round"
-            fill="none"
           />
         </svg>
       </motion.div>
 
       <div className="flex flex-col">
         <div className="flex items-baseline leading-none">
-          <span className={`text-[32px] font-extrabold tracking-tighter ${isLightVariant ? 'text-white' : 'text-[#0F172A]'}`}>
+          <span className={`text-2xl font-extrabold tracking-tighter ${isLightVariant ? 'text-white' : 'text-[#0F172A]'}`}>
             Crack
           </span>
-          <span className="text-[#F97316] text-[32px] font-extrabold tracking-tighter">
+          <span className="text-[#F97316] text-2xl font-extrabold tracking-tighter">
             lix
           </span>
         </div>
         {showTagline && (
-          <span className={`text-[10px] font-black uppercase tracking-[0.2em] mt-1 ${isLightVariant ? 'text-white/40' : 'text-[#0F172A]/40'}`}>
-            MOCK TEST DA NETFLIX
+          <span className={`text-[10px] font-bold uppercase tracking-[0.2em] mt-0.5 ${isLightVariant ? 'text-white/40' : 'text-[#0F172A]/40'}`}>
+            Punjab Exam Preparation
           </span>
         )}
       </div>
