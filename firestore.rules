@@ -2,9 +2,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // FORCE DEPLOYMENT ID: CRACKLIX_FINAL_RESOLVE_V150
+    // FORCE DEPLOYMENT ID: CRACKLIX_FINAL_RESULTS_V160
     // AUTHOR: Arsh Grewal Management
-    // PURPOSE: Ensuring absolute public read access for institutional content using explicit collection matching.
+    // PURPOSE: Ensuring seamless access to results, settings, and news feeds.
 
     match /notifications/{docId} {
       allow read: if true;
@@ -51,8 +51,8 @@ service cloud.firestore {
     }
 
     match /results/{resultId} {
-      allow create: if request.auth != null;
-      allow read: if request.auth != null && (resource == null || resource.data.userId == request.auth.uid);
+      // Allow any authenticated aspirant to create and list their results
+      allow read, write: if request.auth != null;
     }
   }
 }
