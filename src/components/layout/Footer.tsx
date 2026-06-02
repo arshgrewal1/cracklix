@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -66,7 +65,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-white/10 mt-12 pt-6 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
-          <div>© 2026 CRACKLIX. All rights reserved.</div>
+          <div>© 2026 Cracklix. All rights reserved.</div>
           <div className="flex items-center gap-2">Made with <Heart className="h-3 w-3 text-red-500 fill-current" /> for Punjab Aspirants</div>
         </div>
       </div>
