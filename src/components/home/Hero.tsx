@@ -1,3 +1,4 @@
+
 'use client';
 
 import { motion } from "framer-motion";
@@ -13,6 +14,13 @@ export default function Hero() {
 
   return (
     <header className="relative pt-[100px] pb-[160px] text-white overflow-hidden bg-[#0c1527]">
+      {/* Punjab Map Watermark - Restored */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none">
+        <svg viewBox="0 0 100 100" className="w-full h-full object-contain text-white/20 fill-current p-20">
+          <path d="M40 35 L55 40 L60 60 L45 70 L35 55 Z" />
+        </svg>
+      </div>
+
       <div className="container mx-auto px-6 relative z-10">
         <div className="flex flex-col lg:flex-row items-center justify-between gap-16">
           <motion.div 
@@ -21,12 +29,14 @@ export default function Hero() {
             transition={{ duration: 0.6 }}
             className="flex-1 text-left"
           >
+            {/* Star Tagline removed as requested */}
+            
             <h1 className="text-[52px] font-bold leading-[1.2] mt-5">
               Prepare Smarter.<br />
               <span className="text-[#ff7a00]">Score Higher.</span>
             </h1>
             
-            <p className="text-[18px] text-[#94a3b8] mt-5 mb-10 max-w-xl">
+            <p className="text-[18px] text-[#94a3b8] mt-5 mb-10 max-w-xl font-body">
               Punjab Government Exams di Complete Preparation ik hi Platform te.
             </p>
             
