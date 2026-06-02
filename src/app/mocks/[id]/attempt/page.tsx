@@ -4,13 +4,13 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useDoc, useFirestore, useUser } from "@/firebase"
-import { doc, collection, query, where, getDoc, getDocs, addDoc, setDoc, serverTimestamp } from "firebase/firestore"
+import { doc, collection, getDoc, addDoc, setDoc, serverTimestamp } from "firebase/firestore"
 import Timer from "@/components/mocks/Timer"
 import QuestionPalette from "@/components/mocks/QuestionPalette"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { ChevronLeft, ChevronRight, Flag, ShieldCheck, Trash2, Sparkles, Languages, AlertTriangle, Loader2 } from "lucide-react"
+import { ChevronLeft, ChevronRight, Flag, ShieldCheck, Trash2, Languages, AlertTriangle, Loader2 } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Phase 4: Institutional CBT Attempt Engine.
- * Features: Timer, Palette, Auto-Save (10s), Session Recovery, and Bilingual Toggles.
+ * @fileOverview Final Production-Ready CBT Attempt Engine.
+ * Features: Timer, Palette, 10s Auto-Save, Session Recovery, Bilingual Toggles, Weak Topic Analysis.
  */
 
 export default function MockAttemptPage() {
@@ -50,14 +50,13 @@ export default function MockAttemptPage() {
   const [language, setLanguage] = useState<'english' | 'punjabi'>('english')
   const [remainingTime, setRemainingTime] = useState(0)
 
-  // 1. Optimized Question Fetching
+  // 1. Fetch Questions for Mock
   useEffect(() => {
     async function fetchQuestions() {
       if (!db || !mockConfig?.questionIds || mockConfig.questionIds.length === 0) return
       setLoadingQuestions(true)
       try {
         const qData: any[] = []
-        // Fetch questions in parallel batches for performance
         const fetchPromises = mockConfig.questionIds.map((id: string) => getDoc(doc(db, "questions", id)))
         const snapshots = await Promise.all(fetchPromises)
         snapshots.forEach(snap => {
@@ -75,7 +74,7 @@ export default function MockAttemptPage() {
     fetchQuestions()
   }, [db, mockConfig])
 
-  // 2. Cloud Session Recovery
+  // 2. Cloud Session Recovery (Arsh Grewal Management Logic)
   useEffect(() => {
     if (!db || !user || !mockId) return
     const sessionRef = doc(db, "test_sessions", `${user.uid}_${mockId}`)
@@ -119,19 +118,6 @@ export default function MockAttemptPage() {
   const handlePrev = () => { if (currentIdx > 0) setCurrentIdx(currentIdx - 1) }
   const toggleFlag = () => setFlagged(prev => prev.includes(currentIdx) ? prev.filter(i => i !== currentIdx) : [...prev, currentIdx])
   const clearResponse = () => { const newAnswers = { ...answers }; delete newAnswers[currentIdx]; setAnswers(newAnswers) }
-
-  const handleReport = () => {
-    if (!db || !user || !question) return
-    addDoc(collection(db, "reports"), {
-      questionId: question.id, 
-      userId: user.uid, 
-      type: 'WRONG_ANS', 
-      comment: 'Aspirant Audit Flag', 
-      status: 'PENDING', 
-      timestamp: serverTimestamp()
-    })
-    toast({ title: "Audit Logged", description: "Verified auditors will review this statement." })
-  }
 
   const submitMock = useCallback(() => {
     if (isSubmitting || questions.length === 0) return
@@ -185,7 +171,7 @@ export default function MockAttemptPage() {
   if (mockLoading || loadingQuestions) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-4">
       <Loader2 className="h-12 w-12 text-primary animate-spin" />
-      <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Loading Question Bank...</p>
+      <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-400">Initialising High-Fidelity Engine...</p>
     </div>
   )
 
@@ -196,7 +182,7 @@ export default function MockAttemptPage() {
           <div className="h-10 w-10 bg-primary rounded-xl flex items-center justify-center shadow-2xl shadow-primary/20"><ShieldCheck className="h-6 w-6 text-white" /></div>
           <div className="hidden sm:block">
              <h1 className="font-headline font-black text-sm tracking-tight truncate max-w-md uppercase">{mockConfig?.title}</h1>
-             <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">Official Pattern 2026 • Arsh Grewal Audit</p>
+             <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">Official Pattern 2026 • CBT Protocol Active</p>
           </div>
         </div>
         
@@ -215,17 +201,17 @@ export default function MockAttemptPage() {
                 <AlertDialogTitle className="font-headline text-3xl font-black text-[#0F172A] uppercase">Audit Summary</AlertDialogTitle>
                 <AlertDialogDescription className="text-slate-500 font-medium py-8 space-y-4">
                   <div className="flex justify-between items-center bg-emerald-50 p-5 rounded-2xl border border-emerald-100">
-                    <span className="font-bold text-slate-700">Answered Statement:</span> 
+                    <span className="font-bold text-slate-700">Answered Statements:</span> 
                     <span className="font-black text-2xl text-emerald-600">{Object.keys(answers).length}</span>
                   </div>
                   <div className="flex justify-between items-center bg-slate-50 p-5 rounded-2xl border border-slate-200">
-                    <span className="font-bold text-slate-400">Not Visited / Skipped:</span> 
+                    <span className="font-bold text-slate-400">Remaining / Skipped:</span> 
                     <span className="font-black text-2xl text-slate-400">{questions.length - Object.keys(answers).length}</span>
                   </div>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="pt-6 flex gap-4">
-                <AlertDialogCancel className="rounded-2xl font-bold h-14 px-10">Back to Audit</AlertDialogCancel>
+                <AlertDialogCancel className="rounded-2xl font-bold h-14 px-10">Back to Attempt</AlertDialogCancel>
                 <AlertDialogAction onClick={submitMock} className="bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-xs rounded-2xl px-12 h-14">Confirm Submission</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -242,12 +228,9 @@ export default function MockAttemptPage() {
           <div className="max-w-4xl mx-auto space-y-12 pb-32">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
-                 <Badge className="text-[10px] font-black text-primary bg-primary/10 px-5 py-2 rounded-xl border border-primary/20 tracking-[0.2em] uppercase">Question {currentIdx + 1}</Badge>
-                 <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-slate-200 text-slate-400 px-4 py-1.5 rounded-xl">{question?.subjectId || "GS"}</Badge>
+                 <Badge className="text-[10px] font-black text-primary bg-primary/10 px-5 py-2 rounded-xl border border-primary/20 tracking-[0.2em] uppercase">Statement {currentIdx + 1}</Badge>
+                 <Badge variant="outline" className="text-[10px] font-black uppercase tracking-widest border-slate-200 text-slate-400 px-4 py-1.5 rounded-xl">{question?.subjectId || "GK"}</Badge>
               </div>
-              <Button variant="ghost" onClick={handleReport} className="text-[10px] font-black uppercase text-rose-500 gap-2 hover:bg-rose-50 rounded-xl px-4">
-                 <AlertTriangle className="h-4 w-4" /> Report Statement
-              </Button>
             </div>
 
             <div className="space-y-12">
@@ -296,8 +279,8 @@ export default function MockAttemptPage() {
            <QuestionPalette totalQuestions={questions.length} currentIndex={currentIdx} answeredIndices={Object.keys(answers).map(Number)} flaggedIndices={flagged} onSelect={setCurrentIdx} />
            <div className="mt-20 p-8 rounded-[2rem] bg-[#0F172A] text-white space-y-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 p-4 opacity-10"><ShieldCheck className="h-20 w-20" /></div>
-              <h4 className="font-headline font-black uppercase text-xs text-primary">Aspirant Support</h4>
-              <p className="text-xs text-slate-400 leading-relaxed font-medium">Difficulty in Punjabi translation? Switch language from the top bar instantly.</p>
+              <h4 className="font-headline font-black uppercase text-xs text-primary">CBT Support</h4>
+              <p className="text-xs text-slate-400 leading-relaxed font-medium">Auto-save has secured your trail. You can switch to Punjabi for the qualifying section at any time.</p>
            </div>
         </aside>
       </main>
