@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link";
@@ -48,7 +49,7 @@ export default function Footer() {
             <h3 className="font-bold text-base mb-6">Contact</h3>
             <div className="space-y-4 text-sm text-gray-400">
               <p className="flex items-center gap-3"><Mail className="h-4 w-4 text-[#ff7a00]" /> support@cracklix.com</p>
-              <p className="flex items-center gap-3"><Phone className="h-4 w-4 text-[#ff7a00]" /> +91 98765 43210</p>
+              <p className="flex items-center gap-3"><Phone className="h-4 w-4 text-[#ff7a00]" /> +91 98881 88602</p>
               <div className="pt-4 flex gap-4">
                  <div className="h-9 w-9 rounded-md bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#ff7a00] transition-colors cursor-pointer group">
                     <Twitter className="h-4 w-4 text-white group-hover:text-white" />
