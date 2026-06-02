@@ -2,9 +2,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // FORCE DEPLOYMENT ID: CRACKLIX_SYNC_v102
-    // TRIGGERED BY: Arsh Grewal Management
-    // TIMESTAMP: 2024-06-02T19:10:00Z
+    // FORCE DEPLOYMENT ID: CRACKLIX_SYNC_v105
+    // AUTHOR: Arsh Grewal Management
+    // TIMESTAMP: 2024-06-02T20:15:00Z
 
     // Helper to check if user is authenticated
     function isAuthenticated() {
@@ -17,7 +17,7 @@ service cloud.firestore {
     }
 
     // Content Collections: Explicitly allowing global READ (get and list) 
-    // for all public-facing content using recursive wildcards.
+    // for all public-facing content.
     
     match /boards/{document=**} { allow read: if true; allow write: if isAuthenticated(); }
     match /exams/{document=**} { allow read: if true; allow write: if isAuthenticated(); }
@@ -31,7 +31,7 @@ service cloud.firestore {
     // Results: Users can only read/write their own results
     match /results/{id} {
       allow create: if isAuthenticated();
-      allow read: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid);
+      allow read: if isAuthenticated() && (resource == null || (resource.data != null && resource.data.userId == request.auth.uid));
     }
   }
 }
