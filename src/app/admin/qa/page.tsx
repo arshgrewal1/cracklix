@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -102,7 +101,7 @@ export default function QADashboard() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
          <QAStatCard label="Critical Errors" value={issues.stats.critical} color="text-rose-500" desc="Questions missing core metadata" />
          <QAStatCard label="Broken Mocks" value={issues.brokenMocks.length} color="text-orange-500" desc="Mocks with missing references" />
-         <QAStatCard label="Overall Health" value={`${questions ? Math.round(((questions.length - issues.stats.critical) / questions.length) * 100) : 0}%`} color="text-emerald-500" desc="Repository content integrity score" />
+         <QAStatCard label="Overall Health" value={`${questions && questions.length > 0 ? Math.round(((questions.length - issues.stats.critical) / questions.length) * 100) : 100}%`} color="text-emerald-500" desc="Repository content integrity score" />
       </div>
 
       <div className="space-y-10">
