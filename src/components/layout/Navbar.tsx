@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { Menu, X, User, LogOut, ShieldCheck, ChevronDown, Bell } from "lucide-react";
+import { Menu, X, User, LogOut, ShieldCheck, ChevronDown, Bell, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import { useState } from "react";
@@ -98,10 +98,13 @@ export default function Navbar() {
                   <DropdownMenuLabel className="font-headline font-bold px-3 py-2 text-slate-400 text-[10px] uppercase tracking-widest">Account Info</DropdownMenuLabel>
                   <DropdownMenuSeparator className="bg-white/5" />
                   <DropdownMenuItem asChild className="focus:bg-white/5 rounded-xl px-3 py-2.5 cursor-pointer transition-colors">
+                    <Link href="/dashboard" className="flex items-center gap-2 w-full"><LayoutDashboard className="h-4 w-4" /> Dashboard</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild className="focus:bg-white/5 rounded-xl px-3 py-2.5 cursor-pointer transition-colors">
                     <Link href="/profile" className="flex items-center gap-2 w-full"><User className="h-4 w-4" /> My Profile</Link>
                   </DropdownMenuItem>
                   {isAdmin && (
-                    <DropdownMenuItem asChild className="focus:bg-primary/10 focus:text-primary rounded-xl px-3 py-2.5 cursor-pointer transition-colors">
+                    <DropdownMenuItem asChild className="focus:bg-primary/10 focus:text-primary rounded-xl px-3 py-2.5 cursor-pointer transition-colors text-primary font-bold">
                       <Link href="/admin" className="flex items-center gap-2 w-full"><ShieldCheck className="h-4 w-4" /> Admin Portal</Link>
                     </DropdownMenuItem>
                   )}

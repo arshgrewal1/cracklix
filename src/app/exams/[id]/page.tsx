@@ -1,141 +1,242 @@
+"use client"
+
 import Navbar from "@/components/layout/Navbar"
-import { EXAMS, SAMPLE_MOCK } from "@/lib/mock-data"
+import Footer from "@/components/layout/Footer"
+import { useDoc, useCollection, useFirestore } from "@/firebase"
+import { doc, collection, query, where } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
-import { Clock, BookOpen, Trophy, ArrowRight, ShieldCheck, Map } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { 
+  Clock, 
+  BookOpen, 
+  ArrowRight, 
+  ShieldCheck, 
+  Map, 
+  Info,
+  Calendar,
+  GraduationCap,
+  FileText,
+  CheckCircle2,
+  Lock,
+  ChevronRight
+} from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
-import { notFound } from "next/navigation"
+import { useParams } from "next/navigation"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useMemo } from "react"
+import { Skeleton } from "@/components/ui/skeleton"
 
-export default function ExamDetails({ params }: { params: { id: string } }) {
-  const exam = EXAMS.find(e => e.id === params.id)
-  if (!exam) return notFound()
+export default function ExamDetails() {
+  const params = useParams()
+  const db = useFirestore()
+  const examId = params.id as string
 
-  const placeholder = PlaceHolderImages.find(p => p.id === exam.thumbnail)
+  const { data: exam, loading } = useDoc<any>(useMemo(() => (db ? doc(db, "exams", examId) : null), [db, examId]))
+  const { data: board } = useDoc<any>(useMemo(() => (db && exam ? doc(db, "boards", exam.boardId) : null), [db, exam]))
+  
+  const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("examId", "==", examId)) : null), [db, examId])
+  const { data: mocks } = useCollection<any>(mocksQuery)
+
+  if (loading) return <div className="h-screen flex items-center justify-center"><Skeleton className="h-20 w-20 rounded-full" /></div>
+  if (!exam) return <div className="h-screen flex items-center justify-center text-slate-400 font-bold">Exam module not found.</div>
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-slate-50/30">
       <Navbar />
-      <main className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-16">
-          {/* Left: Exam Info */}
-          <div className="lg:col-span-2 space-y-8">
-            <div className="flex items-center gap-3">
-              <Badge className="bg-primary text-white px-4 py-1.5 rounded-lg border-none uppercase tracking-widest text-[10px] font-black">
-                {exam.board} Official
-              </Badge>
-              <Badge variant="outline" className="border-secondary/20 text-secondary font-bold">
-                {exam.category} Series
-              </Badge>
-            </div>
-            <h1 className="text-4xl md:text-6xl font-headline font-bold text-primary">
-              {exam.name}
-            </h1>
-            <p className="text-xl text-muted-foreground leading-relaxed max-w-2xl">
-              {exam.description}
-            </p>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 py-8 border-y border-border/50">
-              <InfoPill icon={<Clock className="h-5 w-5 text-secondary" />} title="Duration" desc={`${exam.duration} Minutes`} />
-              <InfoPill icon={<BookOpen className="h-5 w-5 text-secondary" />} title="Questions" desc={`${exam.totalQuestions} Pattern Based`} />
-              <InfoPill icon={<ShieldCheck className="h-5 w-5 text-secondary" />} title="Board" desc={exam.board} />
-            </div>
-
-            <div className="bg-secondary/5 rounded-2xl p-8 border border-secondary/10 space-y-4">
-              <div className="flex items-center gap-3 text-secondary font-black uppercase tracking-widest text-xs">
-                <Map className="h-4 w-4" /> Syllabus & Exam Pattern
+      <main className="container mx-auto px-6 py-12 max-w-7xl">
+        
+        {/* Header Section */}
+        <section className="mb-16">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-8 space-y-8">
+              <div className="flex flex-wrap items-center gap-4">
+                <Badge className="bg-primary text-white border-none px-4 py-1.5 rounded-xl font-black uppercase text-[10px] tracking-[0.2em]">
+                  {board?.abbreviation || "Official"} Verified
+                </Badge>
+                <Badge variant="outline" className="border-slate-200 text-slate-500 font-bold px-4 py-1.5 rounded-xl text-[10px] uppercase tracking-widest">
+                  {exam.category} Series
+                </Badge>
               </div>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                The {exam.name} exam follows the latest notification issued by {exam.board}. Mocks include dedicated sections for Punjabi Language (Qualifying), Punjab GK, Reasoning, and Quantitative Aptitude.
+              <h1 className="text-5xl md:text-7xl font-headline font-black text-[#0F172A] leading-[0.95] tracking-tight uppercase">
+                {exam.name}
+              </h1>
+              <p className="text-xl text-slate-500 font-medium leading-relaxed max-w-3xl">
+                {exam.description} Trust Cracklix's institutional grade mock series for high-fidelity preparation.
               </p>
-            </div>
-          </div>
-
-          {/* Right: Featured Card */}
-          <div className="space-y-6">
-            <div className="relative h-64 rounded-3xl overflow-hidden shadow-2xl">
-              <Image
-                src={placeholder?.imageUrl || "https://picsum.photos/seed/punjab-edu/600/400"}
-                alt={exam.name}
-                fill
-                className="object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent flex items-end p-8">
-                <div className="text-white">
-                  <p className="text-[10px] font-black uppercase tracking-widest opacity-70">Published By</p>
-                  <p className="text-xl font-bold">Cracklix Trust System</p>
-                </div>
+              
+              <div className="flex flex-wrap gap-8 py-10 border-y border-slate-100">
+                <InfoStat icon={<Clock className="text-primary" />} label="Duration" value={`${exam.duration || 120} Min`} />
+                <InfoStat icon={<BookOpen className="text-primary" />} label="Bank Size" value={`${exam.activeQuestions || 1000}+ MCQs`} />
+                <InfoStat icon={<ShieldCheck className="text-primary" />} label="Board" value={board?.abbreviation || "PSSSB"} />
               </div>
             </div>
-            
-            <Card className="border-primary/10 bg-primary/5">
-              <CardContent className="p-8 text-center space-y-6">
-                <div className="space-y-2">
-                  <p className="text-xs font-black uppercase tracking-widest text-muted-foreground">Series Status</p>
-                  <p className="text-4xl font-black text-primary">{exam.totalMocks}</p>
-                  <p className="text-sm font-bold text-secondary">Active Mock Series</p>
-                </div>
-                <Button asChild className="w-full h-14 bg-secondary hover:bg-secondary/90 text-white font-bold text-lg rounded-2xl shadow-xl shadow-blue-200">
-                   <Link href={`/mocks/${SAMPLE_MOCK.id}`}>Start First Mock Now</Link>
-                </Button>
-              </CardContent>
-            </Card>
+
+            <div className="lg:col-span-4">
+               <Card className="border-none shadow-2xl shadow-slate-200 rounded-[3rem] overflow-hidden bg-white">
+                  <div className="p-10 space-y-8">
+                     <div className="space-y-2 text-center">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Preparation Series Status</p>
+                        <p className="text-6xl font-headline font-black text-primary">{exam.totalMocks || 0}</p>
+                        <p className="text-sm font-bold text-[#0F172A]">Active Mock Tests</p>
+                     </div>
+                     <div className="space-y-4">
+                        <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-slate-800 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-xl shadow-slate-200">
+                           <Link href="/mocks">Start Preparation <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                        </Button>
+                        <p className="text-[10px] text-center text-slate-400 font-bold uppercase">Includes Punjabi Qualifying Section</p>
+                     </div>
+                  </div>
+               </Card>
+            </div>
           </div>
-        </div>
+        </section>
 
-        <div className="mb-12">
-          <h2 className="text-3xl font-headline font-bold text-primary mb-2">Available Practice Tests</h2>
-          <p className="text-muted-foreground">High-fidelity mocks based on {exam.board} recruitment history.</p>
-        </div>
+        {/* Detailed Tabs (SEO Traffic Generator) */}
+        <section className="mb-20">
+           <Tabs defaultValue="overview" className="space-y-10">
+              <TabsList className="bg-white/50 border border-slate-100 p-1 rounded-2xl h-14 w-full md:w-auto overflow-x-auto overflow-y-hidden custom-scrollbar">
+                 <TabsTrigger value="overview" className="rounded-xl px-8 font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-lg">Overview</TabsTrigger>
+                 <TabsTrigger value="syllabus" className="rounded-xl px-8 font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-lg">Syllabus</TabsTrigger>
+                 <TabsTrigger value="pattern" className="rounded-xl px-8 font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-lg">Exam Pattern</TabsTrigger>
+                 <TabsTrigger value="eligibility" className="rounded-xl px-8 font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-lg">Eligibility</TabsTrigger>
+              </TabsList>
 
-        <div className="grid gap-6">
-          {[1, 2, 3, 4, 5].map((num) => (
-            <Card key={num} className="hover:border-secondary/50 transition-all group border-gray-100 bg-white/50">
-              <CardContent className="p-6 flex flex-col sm:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-8">
-                  <div className="h-16 w-16 rounded-2xl bg-primary/5 border flex items-center justify-center font-headline text-2xl font-black text-primary group-hover:bg-secondary/10 transition-colors">
-                    {num}
-                  </div>
-                  <div>
-                    <h3 className="font-headline font-bold text-xl group-hover:text-secondary transition-colors">
-                      Full Length Assessment #{num}
-                    </h3>
-                    <div className="flex items-center gap-4 mt-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1">
-                        <Clock className="h-3 w-3" /> {exam.duration}m
-                      </span>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground flex items-center gap-1">
-                        <BookOpen className="h-3 w-3" /> {exam.totalQuestions} Questions
-                      </span>
+              <TabsContent value="overview">
+                 <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[2.5rem] bg-white p-12 space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                       <div className="space-y-6">
+                          <h3 className="text-3xl font-headline font-black text-[#0F172A] flex items-center gap-3">
+                             <Info className="text-primary h-7 w-7" /> Selection Process
+                          </h3>
+                          <div className="space-y-4">
+                             <TimelineItem step="01" title="Written Examination" desc="OMR based or Computer Based Test (CBT) covering multiple subjects." />
+                             <TimelineItem step="02" title="Counseling / Document Verification" desc="Verification of educational certificates and identity proof." />
+                             <TimelineItem step="03" title="Final Merit List" desc="Based on marks obtained in the written exam and qualifying sections." />
+                          </div>
+                       </div>
+                       <div className="bg-slate-50 rounded-[2rem] p-10 space-y-6 border border-slate-100">
+                          <h4 className="text-xl font-headline font-black text-[#0F172A]">Official Resources</h4>
+                          <ul className="space-y-4">
+                             <ResourceLink label="Latest Notification PDF" />
+                             <ResourceLink label="Official Answer Key 2025" />
+                             <ResourceLink label="Apply Online Link" />
+                             <ResourceLink label="Syllabus PDF Download" />
+                          </ul>
+                       </div>
                     </div>
-                  </div>
+                 </Card>
+              </TabsContent>
+
+              <TabsContent value="syllabus">
+                 <Card className="border-none shadow-xl shadow-slate-200/50 rounded-[2.5rem] bg-white p-12">
+                    <div className="space-y-8">
+                       <h3 className="text-3xl font-headline font-black text-[#0F172A]">Detailed Subject Breakdown</h3>
+                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <SyllabusCard title="General Knowledge" topics={["Punjab History & Culture", "Geography of Punjab", "Current Affairs (States & National)", "Science & Tech"]} />
+                          <SyllabusCard title="Bilingual Language" topics={["Punjabi Grammar (Qualifying)", "English Comprehension", "Basic Punjabi Literature", "Vocabulary & Idioms"]} />
+                          <SyllabusCard title="Aptitude & Logic" topics={["Numerical Ability", "Logical Reasoning", "Mental Ability", "Data Interpretation"]} />
+                       </div>
+                    </div>
+                 </Card>
+              </TabsContent>
+           </Tabs>
+        </section>
+
+        {/* Practice Section */}
+        <section className="space-y-8">
+           <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-headline font-black text-[#0F172A]">Mock Assessment Series</h2>
+              <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest hidden sm:block">Updated as per {new Date().getFullYear()} Notification</p>
+           </div>
+           
+           <div className="grid grid-cols-1 gap-6">
+              {mocks && mocks.length > 0 ? (
+                mocks.map((mock: any, idx: number) => (
+                  <Card key={mock.id} className="border-none shadow-xl shadow-slate-200/30 hover:shadow-2xl transition-all duration-300 rounded-[2rem] bg-white group">
+                     <CardContent className="p-8 flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div className="flex items-center gap-8">
+                           <div className="h-16 w-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center font-headline font-black text-2xl text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                              {idx + 1}
+                           </div>
+                           <div>
+                              <h3 className="text-xl font-headline font-black text-[#0F172A] group-hover:text-primary transition-colors">{mock.title}</h3>
+                              <div className="flex items-center gap-5 mt-2">
+                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><Clock className="h-3 w-3" /> {mock.duration} Min</span>
+                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><BookOpen className="h-3 w-3" /> {mock.totalQuestions} Questions</span>
+                                 <Badge className="bg-emerald-500/10 text-emerald-600 border-none text-[8px] font-black uppercase py-0.5">Free Access</Badge>
+                              </div>
+                           </div>
+                        </div>
+                        <Button asChild className="w-full md:w-auto bg-[#0F172A] hover:bg-slate-800 text-white font-black uppercase tracking-widest text-[10px] h-12 px-10 rounded-xl gap-2">
+                           <Link href={`/mocks/${mock.id}`}>Attempt Mock <ChevronRight className="h-4 w-4" /></Link>
+                        </Button>
+                     </CardContent>
+                  </Card>
+                ))
+              ) : (
+                <div className="p-20 text-center text-slate-400 border-2 border-dashed rounded-[3rem] space-y-4 bg-white/50">
+                   <Lock className="h-12 w-12 mx-auto opacity-10" />
+                   <p className="font-bold">New mock series for this exam is under audit by Arsh Grewal.</p>
+                   <Button variant="link" className="text-primary font-black uppercase text-[10px]">Notify Me on Launch</Button>
                 </div>
-                <Button asChild className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-white font-bold px-8 h-12 rounded-xl">
-                  <Link href={`/mocks/${SAMPLE_MOCK.id}`}>
-                    Start Mock <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+              )}
+           </div>
+        </section>
+
       </main>
+      <Footer />
     </div>
   )
 }
 
-function InfoPill({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
+function InfoStat({ icon, label, value }: any) {
   return (
-    <div className="flex items-center gap-4">
-      <div className="h-12 w-12 rounded-xl bg-background border flex items-center justify-center shrink-0">
-        {icon}
+    <div className="flex items-center gap-5">
+      <div className="h-14 w-14 rounded-2xl bg-white shadow-xl shadow-slate-100 flex items-center justify-center border border-slate-50 shrink-0">
+         {icon}
       </div>
       <div>
-        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{title}</p>
-        <p className="text-base font-bold text-primary">{desc}</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</p>
+        <p className="text-lg font-headline font-black text-[#0F172A]">{value}</p>
       </div>
     </div>
   )
+}
+
+function TimelineItem({ step, title, desc }: any) {
+  return (
+    <div className="flex gap-6 group">
+       <div className="text-2xl font-headline font-black text-primary/20 group-hover:text-primary transition-colors">{step}</div>
+       <div className="space-y-1">
+          <h4 className="font-bold text-[#0F172A]">{title}</h4>
+          <p className="text-sm text-slate-500 leading-relaxed font-medium">{desc}</p>
+       </div>
+    </div>
+  )
+}
+
+function ResourceLink({ label }: any) {
+   return (
+      <li className="flex items-center justify-between group cursor-pointer hover:bg-white p-3 rounded-xl transition-all border border-transparent hover:border-slate-100 hover:shadow-lg">
+         <span className="text-sm font-bold text-slate-700">{label}</span>
+         <FileText className="h-4 w-4 text-slate-300 group-hover:text-primary transition-colors" />
+      </li>
+   )
+}
+
+function SyllabusCard({ title, topics }: any) {
+   return (
+      <div className="bg-slate-50 rounded-2xl p-6 border border-slate-100 space-y-4">
+         <h4 className="font-headline font-black text-[#0F172A] uppercase text-xs tracking-widest border-b border-slate-200 pb-4">{title}</h4>
+         <ul className="space-y-3">
+            {topics.map((t: any) => (
+               <li key={t} className="flex items-center gap-3 text-xs font-bold text-slate-600">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" /> {t}
+               </li>
+            ))}
+         </ul>
+      </div>
+   )
 }
