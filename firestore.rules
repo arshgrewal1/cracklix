@@ -2,16 +2,17 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // CRACKLIX PRODUCTION HARDENING V7
-    // Final Launch Rules with Role-Based Settings Access
+    // CRACKLIX PRODUCTION HARDENING V8
+    // Optimized for Role-Based Access and Query Performance
 
     function isAuthenticated() {
       return request.auth != null;
     }
 
     function getUserData() {
-      let path = /databases/$(database)/documents/users/$(request.auth.uid);
-      return exists(path) ? get(path).data : null;
+      return isAuthenticated() && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        ? get(/databases/$(database)/documents/users/$(request.auth.uid)).data 
+        : null;
     }
 
     function isAdmin() {
@@ -32,7 +33,6 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow read: if isAuthenticated() && (isOwner(userId) || isAdmin());
-      // On creation, users shouldn't be able to set their own role unless they are the founder
       allow create: if isAuthenticated() && isOwner(userId);
       allow update: if isAuthenticated() && (isOwner(userId) || isAdmin());
     }
@@ -74,7 +74,11 @@ service cloud.firestore {
     }
 
     match /test_sessions/{sessionId} {
-      allow read, write: if isAuthenticated() && (request.auth.uid == resource.data.userId || request.auth.uid == request.resource.data.userId || isAdmin());
+      // Split read and write to prevent crashes on missing request.resource
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
     match /current_affairs/{docId} {
