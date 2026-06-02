@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from "react"
@@ -17,7 +18,7 @@ import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/e
 
 /**
  * @fileOverview Final Production-Ready Bulk Import Engine.
- * Features: Regex-based extraction, high-speed batch commits, and metadata validation.
+ * Optimized for Official Punjab Recruitment Board hierarchies.
  */
 
 export default function BulkImportPage() {
@@ -39,10 +40,15 @@ export default function BulkImportPage() {
   const [parsedQuestions, setParsedQuestions] = useState<any[]>([])
   const [isImporting, setIsImporting] = useState(false)
 
+  const filteredExams = useMemo(() => {
+    if (!exams || !metadata.boardId) return []
+    return exams.filter(e => e.boardId === metadata.boardId)
+  }, [exams, metadata.boardId])
+
   const handleParse = () => {
     if (!rawText.trim()) return
     if (!metadata.boardId || !metadata.examId || !metadata.subjectId) {
-      toast({ variant: "destructive", title: "Audit Error", description: "Define classification metadata (Board/Exam/Subject) first." })
+      toast({ variant: "destructive", title: "Audit Error", description: "Define classification (Board/Exam/Subject) first." })
       return
     }
     const results = parseBulkQuestions(rawText, metadata)
@@ -50,7 +56,7 @@ export default function BulkImportPage() {
     if (results.length > 0) {
       toast({ title: "Extraction Complete", description: `Structured ${results.length} institutional-grade MCQs.` })
     } else {
-      toast({ variant: "destructive", title: "Extraction Failed", description: "Invalid format. Use: Q1. [Text] A. [Op] B. [Op] C. [Op] D. [Op] Answer: [A/B/C/D]" })
+      toast({ variant: "destructive", title: "Extraction Failed", description: "Invalid format. Check pattern instructions." })
     }
   }
 
@@ -71,7 +77,7 @@ export default function BulkImportPage() {
 
     batch.commit()
       .then(() => {
-        toast({ title: "Repository Synced", description: `${parsedQuestions.length} MCQs committed to official global bank.` })
+        toast({ title: "Repository Synced", description: `${parsedQuestions.length} MCQs committed to official bank.` })
         router.push("/admin/questions")
       })
       .catch(async () => {
@@ -92,14 +98,9 @@ export default function BulkImportPage() {
             <ChevronLeft className="h-6 w-6" />
           </Button>
           <div>
-            <h1 className="text-3xl font-black font-headline text-primary uppercase tracking-tight">Bulk Extraction Engine</h1>
-            <p className="text-muted-foreground">High-speed structured content entry for Arsh Grewal Management.</p>
+            <h1 className="text-3xl font-black font-headline text-primary uppercase tracking-tight">Extraction Engine</h1>
+            <p className="text-muted-foreground">Arsh Grewal: Batch content entry for Punjab verticals.</p>
           </div>
-        </div>
-        <div className="flex gap-4">
-           <Button variant="outline" className="h-12 rounded-xl border-white/5 font-bold gap-2" onClick={() => { setRawText(""); setParsedQuestions([]); }}>
-              <Trash2 className="h-4 w-4" /> Clear All
-           </Button>
         </div>
       </div>
 
@@ -107,39 +108,48 @@ export default function BulkImportPage() {
         <div className="lg:col-span-7 space-y-6">
           <Card className="border-foreground/5 bg-card/50 shadow-2xl rounded-[2.5rem] overflow-hidden">
             <div className="h-2 w-full bg-primary" />
-            <CardHeader className="p-8">
+            <CardHeader className="p-8 pb-4">
               <CardTitle className="font-headline text-xl">Operational MCQ Paste</CardTitle>
-              <CardDescription>
-                Paste raw text from official gazettes. Format: Q1. [Text] A. [Op] B. [Op] C. [Op] D. [Op] Answer: [A/B/C/D]
-              </CardDescription>
+              <CardDescription>Format: Q1. [Text] A. [Op] B. [Op] C. [Op] D. [Op] Answer: [A/B/C/D]</CardDescription>
             </CardHeader>
-            <CardContent className="p-8 pt-0 space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+            <CardContent className="p-8 pt-0 space-y-8">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground ml-1">Board Registry</p>
+                  <p className="text-[10px] font-black uppercase text-slate-500 ml-1">Board Registry</p>
                   <Select onValueChange={val => setMetadata({...metadata, boardId: val})}>
-                    <SelectTrigger className="rounded-xl bg-background border-none shadow-sm h-11"><SelectValue placeholder="Select Authority" /></SelectTrigger>
-                    <SelectContent>{boards?.map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
+                    <SelectTrigger className="rounded-xl bg-background border-none shadow-sm h-12"><SelectValue placeholder="Select Authority" /></SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {boards?.sort((a, b) => a.abbreviation.localeCompare(b.abbreviation)).map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}
+                    </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground ml-1">Source Exam</p>
-                  <Select onValueChange={val => setMetadata({...metadata, examId: val})}>
-                    <SelectTrigger className="rounded-xl bg-background border-none shadow-sm h-11"><SelectValue placeholder="Select Exam" /></SelectTrigger>
-                    <SelectContent>{exams?.filter(e => e.boardId === metadata.boardId).map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+                  <p className="text-[10px] font-black uppercase text-slate-500 ml-1">Source Exam</p>
+                  <Select 
+                    disabled={!metadata.boardId} 
+                    onValueChange={val => setMetadata({...metadata, examId: val})}
+                  >
+                    <SelectTrigger className="rounded-xl bg-background border-none shadow-sm h-12">
+                      <SelectValue placeholder={metadata.boardId ? "Select Exam" : "Select Board First"} />
+                    </SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {filteredExams?.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
+                    </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground ml-1">Thematic Subject</p>
+                  <p className="text-[10px] font-black uppercase text-slate-500 ml-1">Thematic Subject</p>
                   <Select onValueChange={val => setMetadata({...metadata, subjectId: val})}>
-                    <SelectTrigger className="rounded-xl bg-background border-none shadow-sm h-11"><SelectValue placeholder="Select Subject" /></SelectTrigger>
-                    <SelectContent>{subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                    <SelectTrigger className="rounded-xl bg-background border-none shadow-sm h-12"><SelectValue placeholder="Select Subject" /></SelectTrigger>
+                    <SelectContent className="max-h-[300px]">
+                      {subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                    </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <p className="text-[10px] font-black uppercase text-muted-foreground ml-1">Difficulty Level</p>
+                  <p className="text-[10px] font-black uppercase text-slate-500 ml-1">Difficulty Level</p>
                   <Select onValueChange={val => setMetadata({...metadata, difficulty: val})} defaultValue="medium">
-                    <SelectTrigger className="rounded-xl bg-background border-none shadow-sm h-11"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl bg-background border-none shadow-sm h-12"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="easy">Easy Level</SelectItem>
                       <SelectItem value="medium">Medium Level</SelectItem>
@@ -156,26 +166,26 @@ export default function BulkImportPage() {
                 onChange={e => setRawText(e.target.value)}
               />
               
-              <Button onClick={handleParse} className="w-full h-14 bg-primary hover:bg-primary/90 font-black uppercase tracking-widest gap-2 rounded-2xl shadow-xl">
-                <Zap className="h-5 w-5" /> Run Extraction Engine
+              <Button onClick={handleParse} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] gap-3 rounded-2xl shadow-xl transition-all">
+                <Zap className="h-5 w-5 text-primary" /> Run Extraction Engine
               </Button>
             </CardContent>
           </Card>
         </div>
 
-        <div className="lg:col-span-5 space-y-6">
-          <Card className="border-foreground/5 bg-card/30 backdrop-blur-sm shadow-2xl rounded-[2.5rem] h-full flex flex-col">
-            <CardHeader className="p-8">
+        <div className="lg:col-span-5">
+          <Card className="border-foreground/5 bg-card/30 backdrop-blur-sm shadow-2xl rounded-[2.5rem] h-full flex flex-col overflow-hidden">
+            <CardHeader className="p-8 bg-muted/10 border-b border-white/5">
               <CardTitle className="font-headline text-xl flex items-center gap-3">
-                <Database className="h-5 w-5 text-primary" /> Validated Results
+                <Database className="h-5 w-5 text-primary" /> Validated Buffer
               </CardTitle>
-              <CardDescription>{parsedQuestions.length} Items successfully structured for global bank.</CardDescription>
+              <CardDescription>{parsedQuestions.length} Items extracted for official bank.</CardDescription>
             </CardHeader>
-            <CardContent className="p-8 pt-0 flex-1 overflow-y-auto custom-scrollbar space-y-4">
+            <CardContent className="p-8 flex-1 overflow-y-auto custom-scrollbar space-y-4">
               {parsedQuestions.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-muted-foreground opacity-30 py-20">
                   <AlertCircle className="h-16 w-16 mb-4" />
-                  <p className="font-black uppercase tracking-widest text-xs">Waiting for Audit Input</p>
+                  <p className="font-black uppercase tracking-widest text-[10px]">Waiting for Audit Input</p>
                 </div>
               ) : (
                 parsedQuestions.map((q, idx) => (
@@ -185,16 +195,12 @@ export default function BulkImportPage() {
                        <span className="text-[10px] font-black text-slate-500 font-mono">KEY: {q.correctAnswer}</span>
                     </div>
                     <p className="text-xs font-bold leading-relaxed line-clamp-3 text-slate-200">{q.questionEn}</p>
-                    <div className="flex gap-2">
-                       <Badge variant="outline" className="text-[8px] border-slate-700 text-slate-500">{metadata.subjectId}</Badge>
-                       <Badge variant="outline" className="text-[8px] border-slate-700 text-slate-500">{metadata.difficulty}</Badge>
-                    </div>
                   </div>
                 ))
               )}
             </CardContent>
             {parsedQuestions.length > 0 && (
-               <div className="p-8 border-t border-white/5">
+               <div className="p-8 border-t border-white/5 bg-muted/20">
                   <Button 
                     className="w-full h-16 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] gap-3 rounded-2xl shadow-3xl shadow-emerald-900/40"
                     onClick={handleImport}
