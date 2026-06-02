@@ -1,3 +1,4 @@
+
 'use client';
 
 import { motion } from "framer-motion";
@@ -29,7 +30,7 @@ export default function PopularExams() {
   return (
     <section className="py-16 bg-[#F8FAFC]">
       <div className="container mx-auto px-6 max-w-[1280px]">
-        <div className="flex justify-between items-end mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
           <div className="text-left">
             <h2 className="text-[32px] font-bold text-[#0B1F3A] font-headline tracking-tight">
               Popular Exams
@@ -44,7 +45,7 @@ export default function PopularExams() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {exams.map((exam, idx) => (
             <motion.div
               key={exam.name}
@@ -59,11 +60,11 @@ export default function PopularExams() {
                     <div className="shrink-0 h-16 w-16 flex items-center justify-center transition-transform group-hover:scale-110 duration-300">
                       <exam.Icon />
                     </div>
-                    <div className="text-left">
-                      <h3 className="text-xl font-bold text-[#0B1F3A] group-hover:text-[#F97316] transition-colors leading-tight">
+                    <div className="text-left min-w-0">
+                      <h3 className="text-xl font-bold text-[#0B1F3A] group-hover:text-[#F97316] transition-colors leading-tight truncate">
                         {exam.name}
                       </h3>
-                      <p className="text-[13px] text-[#64748B] mt-1 font-medium leading-tight">
+                      <p className="text-[13px] text-[#64748B] mt-1 font-medium leading-tight line-clamp-2">
                         {exam.desc}
                       </p>
                     </div>
