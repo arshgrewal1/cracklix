@@ -99,6 +99,7 @@
         "category": { "type": "string" },
         "date": { "type": "string" },
         "content": { "type": "string" },
+        "summary": { "type": "string" },
         "imageUrl": { "type": "string" }
       }
     },

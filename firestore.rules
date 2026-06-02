@@ -12,7 +12,7 @@ service cloud.firestore {
       allow read, write: if isAuthenticated() && request.auth.uid == userId;
     }
 
-    // Public content: Anyone can read, only authenticated users (admins) can write
+    // Public content: Anyone can read (get/list), only authenticated users (admins) can write
     match /boards/{id} { allow read: if true; allow write: if isAuthenticated(); }
     match /exams/{id} { allow read: if true; allow write: if isAuthenticated(); }
     match /subjects/{id} { allow read: if true; allow write: if isAuthenticated(); }
@@ -28,6 +28,7 @@ service cloud.firestore {
       allow read: if isAuthenticated() && (resource == null || resource.data.userId == request.auth.uid);
     }
     
-    // Deployment trigger: Ensure rules are updated for notifications list operation
+    // Deployment trigger: Ensure rules are updated for current_affairs and notifications list operations
+    // Triggered at: 2024-05-20T10:00:00Z
   }
 }
