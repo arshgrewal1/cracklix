@@ -1,10 +1,11 @@
+
 "use client"
 
 import { useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
-import { collection, query, where, orderBy, limit, doc } from "firebase/firestore"
+import { useUser, useCollection, useFirestore } from "@/firebase"
+import { collection, query, where, orderBy, limit } from "firebase/firestore"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -33,8 +34,8 @@ import Link from "next/link"
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from "recharts"
 
 /**
- * @fileOverview Final Personalized Student Dashboard.
- * Features: "Continue Last Mock", Subject Mastery, Selection Probability.
+ * @fileOverview Final Student Performance Dashboard.
+ * Features: "Continue Last Session", Mastery Charts, and Selection Forecasting.
  */
 
 export default function StudentDashboard() {
@@ -48,12 +49,12 @@ export default function StudentDashboard() {
 
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
-    return query(collection(db, "results"), where("userId", "==", user.uid), orderBy("timestamp", "desc"), limit(20))
+    return query(collection(db, "results"), where("userId", "==", user.uid), orderBy("timestamp", "desc"), limit(10))
   }, [db, user])
 
   const sessionQuery = useMemo(() => {
     if (!db || !user) return null
-    return query(collection(db, "test_sessions"), where("userId", "==", user.uid), where("status", "==", "IN_PROGRESS"), limit(1))
+    return query(collection(db, "test_sessions"), where("userId", "==", user.uid), where("status", "==", "IN_PROGRESS"), orderBy("updatedAt", "desc"), limit(1))
   }, [db, user])
 
   const { data: results, loading: resultsLoading } = useCollection<any>(resultsQuery)
@@ -90,10 +91,10 @@ export default function StudentDashboard() {
     }
   }, [results])
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-white"><Sparkles className="h-14 w-14 text-primary animate-pulse" /></div>
+  if (loading) return <div className="h-screen flex items-center justify-center bg-[#0F172A]"><Sparkles className="h-12 w-12 text-primary animate-pulse" /></div>
 
   return (
-    <div className="min-h-screen bg-slate-50/50 font-body">
+    <div className="min-h-screen bg-slate-50/50">
       <Navbar />
       <main className="container mx-auto px-6 py-16 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -121,26 +122,25 @@ export default function StudentDashboard() {
                </CardContent>
             </Card>
 
-            {/* Launch Metric: Continue Last Mock */}
             {lastSession && (
               <Card className="border-none bg-emerald-600 text-white p-10 rounded-[3rem] shadow-3xl shadow-emerald-900/20 relative overflow-hidden group cursor-pointer" onClick={() => router.push(`/mocks/${lastSession.mockId}/attempt`)}>
                  <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><PlayCircle className="h-32 w-32" /></div>
                  <div className="relative z-10 space-y-4">
                     <div className="flex items-center gap-3">
                        <PlayCircle className="h-5 w-5 text-emerald-200" />
-                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-100">Resume Last Session</span>
+                       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-100">Resume Live Session</span>
                     </div>
-                    <h3 className="text-2xl font-headline font-black leading-tight uppercase">Back to Practice</h3>
-                    <p className="text-emerald-50 text-sm font-medium opacity-80">You were {Math.round((lastSession.currentIdx / 100) * 100)}% through your patwari mock.</p>
+                    <h3 className="text-2xl font-headline font-black leading-tight uppercase">Continue Mock</h3>
+                    <p className="text-emerald-50 text-sm font-medium opacity-80">You have {Object.keys(lastSession.answers || {}).length} questions saved. Ready to finish?</p>
                  </div>
               </Card>
             )}
 
             <div className="grid grid-cols-2 gap-6">
-               <Metric icon={<ClipboardList className="text-blue-500" />} label="Attempted" value={analytics.total} />
-               <Metric icon={<Target className="text-primary" />} label="Precision" value={`${analytics.avgAccuracy}%`} />
-               <Metric icon={<TrendingUp className="text-emerald-500" />} label="Aspirant Rank" value={analytics.rank} />
-               <Metric icon={<Star className="text-amber-500" />} label="Prep Streak" value="5 Days" />
+               <Metric icon={<ClipboardList className="text-blue-500" />} label="Attempts" value={analytics.total} />
+               <Metric icon={<Target className="text-primary" />} label="Avg Precision" value={`${analytics.avgAccuracy}%`} />
+               <Metric icon={<TrendingUp className="text-emerald-500" />} label="Punjab Rank" value={analytics.rank} />
+               <Metric icon={<Star className="text-amber-500" />} label="Active Streak" value="5 Days" />
             </div>
 
             <Card className="border-none shadow-3xl shadow-slate-900/10 rounded-[3rem] bg-[#0F172A] text-white p-10 space-y-8 relative overflow-hidden">
@@ -153,11 +153,11 @@ export default function StudentDashboard() {
                </div>
                <p className="text-slate-400 text-base leading-relaxed font-medium relative z-10">
                   {analytics.total > 0 
-                    ? `Institutional audit suggests proficiency in common segments. High-fidelity focus on your weak sections could push selection probability above 95%.`
+                    ? `Institutional audit suggests proficiency in common segments. High-fidelity focus on Quantitative sections could push selection probability above 95%.`
                     : "The preparation hub is initialized. Attempt your first mock to generate AI-driven performance insights and subject mastery analytics."}
                </p>
                <Button asChild className="w-full bg-white text-[#0F172A] hover:bg-slate-100 font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl h-14 relative z-10 shadow-2xl">
-                  <Link href="/mocks">Audit Weak Subjects</Link>
+                  <Link href="/mocks">Start Practice Session</Link>
                </Button>
             </Card>
           </div>
@@ -170,7 +170,7 @@ export default function StudentDashboard() {
                </div>
                <div className="flex gap-4">
                  <Button asChild variant="outline" className="rounded-2xl border-slate-200 font-black text-[10px] uppercase tracking-widest h-12 px-8 gap-3 bg-white shadow-sm">
-                    <Link href="/leaderboard"><Trophy className="h-4 w-4 text-amber-500" /> Global Rank</Link>
+                    <Link href="/leaderboard"><Trophy className="h-4 w-4 text-amber-500" /> Hall of Fame</Link>
                  </Button>
                  <Button asChild variant="outline" className="rounded-2xl border-slate-200 font-black text-[10px] uppercase tracking-widest h-12 px-8 gap-3 bg-white shadow-sm">
                     <Link href="/bookmarks"><Bookmark className="h-4 w-4 text-primary" /> Saved MCQs</Link>
@@ -183,7 +183,7 @@ export default function StudentDashboard() {
                   <div className="flex items-center justify-between mb-10">
                     <div className="space-y-1">
                        <h3 className="font-headline font-black text-2xl text-[#0F172A]">Subject Mastery</h3>
-                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Institutional Accuracy %</p>
+                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Institutional Accuracy Index</p>
                     </div>
                     <BarChart3 className="h-10 w-10 text-primary opacity-20" />
                   </div>
@@ -219,14 +219,14 @@ export default function StudentDashboard() {
                <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[3.5rem] bg-white p-12 flex flex-col justify-center text-center space-y-8 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-125 transition-transform"><TrendingUp className="h-40 w-40" /></div>
                   <div className="space-y-2 relative z-10">
-                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Probable Selection Status</p>
+                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Selection Probability</p>
                      <p className="text-8xl font-headline font-black text-primary tracking-tighter">{analytics.selectionProb}%</p>
                      <div className="flex items-center justify-center gap-3 text-emerald-500 font-black text-[10px] uppercase tracking-widest">
-                        <ArrowUpRight className="h-5 w-5" /> {analytics.total > 1 ? "Positive Trend Detected" : "Benchmark Established"}
+                        <ArrowUpRight className="h-5 w-5" /> {analytics.total > 1 ? "Target Threshold Met" : "Initial Benchmark"}
                      </div>
                   </div>
                   <p className="text-base text-slate-500 leading-relaxed font-medium px-8 relative z-10">
-                     Your accuracy matches official 2026 recruitment patterns. High-fidelity focus on Quantitative sections is recommended tonight.
+                     Your accuracy matches official 2026 recruitment patterns. High-fidelity focus on current analysis is recommended.
                   </p>
                </Card>
             </div>
@@ -235,10 +235,10 @@ export default function StudentDashboard() {
                <CardHeader className="p-12 border-b border-slate-50 flex flex-row items-center justify-between">
                   <div className="space-y-1">
                     <CardTitle className="font-headline text-2xl font-black text-[#0F172A] uppercase">Attempt Registry</CardTitle>
-                    <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Audit your high-fidelity mock history</CardDescription>
+                    <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Deep audit of your high-fidelity results</CardDescription>
                   </div>
                   <Button asChild variant="ghost" className="text-primary font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-primary/5 h-12 px-8">
-                     <Link href="/profile">Registry Audit <ChevronRight className="ml-2 h-4 w-4" /></Link>
+                     <Link href="/profile">View All <ChevronRight className="ml-2 h-4 w-4" /></Link>
                   </Button>
                </CardHeader>
                <CardContent className="p-0">
@@ -264,7 +264,7 @@ export default function StudentDashboard() {
                                    <p className="text-3xl font-headline font-black text-[#0F172A] tracking-tighter leading-none">{r.score}<span className="text-slate-300 text-lg">/{r.totalQuestions}</span></p>
                                    <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${r.accuracy > 70 ? 'text-emerald-500' : 'text-orange-500'}`}>{r.accuracy}% Precision</p>
                                 </div>
-                                <Button asChild variant="ghost" size="icon" className="rounded-2xl h-14 w-14 hover:bg-white text-slate-200 hover:text-primary border-2 border-transparent hover:border-slate-100 hover:shadow-2xl transition-all">
+                                <Button asChild variant="ghost" size="icon" className="rounded-2xl h-14 w-14 hover:bg-white text-slate-200 hover:text-primary border-2 border-transparent hover:border-slate-100 transition-all">
                                    <Link href={`/results/${r.mockId}`}><ChevronRight className="h-6 w-6" /></Link>
                                 </Button>
                              </div>

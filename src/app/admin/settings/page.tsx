@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -6,10 +7,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { Globe, Database, Shield, Layout, Upload, Image as ImageIcon, Bell, Save, RefreshCw } from "lucide-react"
+import { Globe, Database, Shield, Layout, Image as ImageIcon, Bell, Save, RefreshCw, Share2, Facebook, Twitter, Instagram, Mail } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
@@ -17,8 +17,8 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
- * @fileOverview Phase 40: Site Settings & Dynamic CMS.
- * Allows Super Admins to manage Hero, Announcements, and Global Logic.
+ * @fileOverview Final Production-Grade Site Settings & CMS.
+ * Manages Hero, Announcements, Identity, and Social Presence.
  */
 
 export default function AdminSettings() {
@@ -37,6 +37,11 @@ export default function AdminSettings() {
     showAnnouncement: true,
     platformName: "Cracklix",
     supportEmail: "cracklixhelp@gmail.com",
+    supportPhone: "+91 98881 88602",
+    facebookUrl: "https://facebook.com/cracklix",
+    instagramUrl: "https://instagram.com/cracklix",
+    twitterUrl: "https://twitter.com/cracklix",
+    footerText: "Punjab's most advanced government exam portal. Designed for aspirants, built with integrity.",
     negativeMarking: true,
     aiRationalization: true
   });
@@ -58,7 +63,7 @@ export default function AdminSettings() {
 
     setDoc(doc(db, 'settings', 'global'), payload, { merge: true })
       .then(() => {
-        toast({ title: "Configuration Synced", description: "All changes are now live for aspirants." });
+        toast({ title: "System Synced", description: "Global configuration is now live for all users." });
       })
       .catch(async (error) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({
@@ -69,58 +74,58 @@ export default function AdminSettings() {
       });
   };
 
-  if (loading) return <div className="h-96 flex items-center justify-center"><RefreshCw className="h-10 w-10 text-primary animate-spin" /></div>
+  if (loading) return <div className="h-screen flex items-center justify-center bg-[#0F172A]"><RefreshCw className="h-10 w-10 text-primary animate-spin" /></div>
 
   return (
     <div className="space-y-12 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div>
-          <h1 className="text-5xl font-headline font-black text-primary uppercase tracking-tight">Site Configuration</h1>
-          <p className="text-muted-foreground mt-2 text-lg">Manage dynamic CMS, announcement bars, and platform-wide logic.</p>
+          <h1 className="text-5xl font-headline font-black text-primary uppercase tracking-tight">System Portal</h1>
+          <p className="text-muted-foreground mt-2 text-lg">Super Admin: Dynamic CMS, Announcement Engine, and Core Logic.</p>
         </div>
         <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 h-16 px-12 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl shadow-primary/20 gap-3">
-          <Save className="h-5 w-5" /> Publish Configuration
+          <Save className="h-5 w-5" /> Commit Changes
         </Button>
       </div>
 
       <Tabs defaultValue="hero" className="space-y-8">
         <TabsList className="bg-white/5 border border-white/5 p-1.5 h-16 rounded-2xl">
-          <TabsTrigger value="hero" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Layout className="h-4 w-4" /> Hero CMS</TabsTrigger>
-          <TabsTrigger value="alerts" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Bell className="h-4 w-4" /> Announcements</TabsTrigger>
+          <TabsTrigger value="hero" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Layout className="h-4 w-4" /> Homepage CMS</TabsTrigger>
+          <TabsTrigger value="alerts" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Bell className="h-4 w-4" /> Broadcasts</TabsTrigger>
           <TabsTrigger value="identity" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Globe className="h-4 w-4" /> Identity</TabsTrigger>
-          <TabsTrigger value="logic" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Database className="h-4 w-4" /> Core Logic</TabsTrigger>
+          <TabsTrigger value="logic" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2"><Shield className="h-4 w-4" /> Logic</TabsTrigger>
         </TabsList>
 
         <TabsContent value="hero">
           <Card className="border-none bg-card/50 shadow-3xl rounded-[3rem] overflow-hidden">
             <CardHeader className="p-10 border-b border-white/5">
-              <CardTitle className="text-2xl font-headline font-black uppercase">Homepage Hero Management</CardTitle>
-              <CardDescription>Edit the primary value proposition seen by new visitors.</CardDescription>
+              <CardTitle className="text-2xl font-headline font-black uppercase">Hero Section Management</CardTitle>
+              <CardDescription>Customize the first impression for Punjab aspirants.</CardDescription>
             </CardHeader>
             <CardContent className="p-10 space-y-10">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
                 <div className="space-y-6">
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Headline Line 1</Label>
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Headline 01</Label>
                     <Input value={formData.heroLine1} onChange={e => setFormData({...formData, heroLine1: e.target.value})} className="h-14 rounded-xl bg-background border-none shadow-inner" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary">Headline Line 2 (Highlight)</Label>
+                    <Label className="text-[10px] font-black uppercase text-primary">Headline 02 (Highlight)</Label>
                     <Input value={formData.heroLine2} onChange={e => setFormData({...formData, heroLine2: e.target.value})} className="h-14 rounded-xl bg-background border-none shadow-inner text-primary font-black" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Sub-Description Statement</Label>
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Primary Sub-Description</Label>
                     <Textarea value={formData.heroDescription} onChange={e => setFormData({...formData, heroDescription: e.target.value})} className="min-h-[120px] rounded-2xl bg-background border-none p-6 leading-relaxed" />
                   </div>
                 </div>
                 <div className="space-y-6">
                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Hero Visual URI</Label>
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Hero Image URL (Picsum/Unsplash)</Label>
                       <Input value={formData.heroImageUrl} onChange={e => setFormData({...formData, heroImageUrl: e.target.value})} className="h-14 rounded-xl bg-background border-none shadow-inner" />
                    </div>
                    <div className="h-64 w-full rounded-[2.5rem] bg-background border-2 border-dashed border-white/5 relative overflow-hidden group">
                       {formData.heroImageUrl ? (
-                        <img src={formData.heroImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform" />
+                        <img src={formData.heroImageUrl} className="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform" />
                       ) : (
                         <div className="absolute inset-0 flex items-center justify-center text-slate-500 italic">No image reference</div>
                       )}
@@ -140,15 +145,15 @@ export default function AdminSettings() {
              <CardContent className="p-12 space-y-12">
                 <div className="flex items-center justify-between p-10 bg-primary/5 rounded-[2.5rem] border border-primary/10">
                    <div className="space-y-1">
-                      <h4 className="text-xl font-headline font-black uppercase text-primary">Announcement Bar</h4>
-                      <p className="text-sm text-slate-400 font-medium">Toggle a site-wide high-priority alert banner.</p>
+                      <h4 className="text-xl font-headline font-black uppercase text-primary">Global Announcement Bar</h4>
+                      <p className="text-sm text-slate-400 font-medium">Toggle high-priority alerts across the entire platform.</p>
                    </div>
                    <Switch checked={formData.showAnnouncement} onCheckedChange={val => setFormData({...formData, showAnnouncement: val})} />
                 </div>
                 
                 <div className="space-y-4">
-                   <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Banner Message</Label>
-                   <Input value={formData.announcement} onChange={e => setFormData({...formData, announcement: e.target.value})} className="h-16 rounded-2xl bg-background border-none text-lg font-bold shadow-inner" placeholder="Enter marquee text..." />
+                   <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 ml-2">Marquee Content</Label>
+                   <Input value={formData.announcement} onChange={e => setFormData({...formData, announcement: e.target.value})} className="h-16 rounded-2xl bg-background border-none text-lg font-bold shadow-inner" placeholder="e.g. 🔥 Punjab Police SI Results Live" />
                 </div>
              </CardContent>
           </Card>
@@ -156,15 +161,39 @@ export default function AdminSettings() {
 
         <TabsContent value="identity">
           <Card className="border-none bg-card/50 shadow-3xl rounded-[3rem]">
-             <CardContent className="p-12 space-y-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+             <CardContent className="p-12 space-y-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Platform Brand Name</Label>
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Platform Brand</Label>
                       <Input value={formData.platformName} onChange={e => setFormData({...formData, platformName: e.target.value})} className="h-14 rounded-xl bg-background border-none" />
                    </div>
                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">Institutional Support Email</Label>
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Support Email</Label>
                       <Input value={formData.supportEmail} onChange={e => setFormData({...formData, supportEmail: e.target.value})} className="h-14 rounded-xl bg-background border-none" />
+                   </div>
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Support Hotline</Label>
+                      <Input value={formData.supportPhone} onChange={e => setFormData({...formData, supportPhone: e.target.value})} className="h-14 rounded-xl bg-background border-none" />
+                   </div>
+                </div>
+
+                <div className="space-y-2">
+                   <Label className="text-[10px] font-black uppercase text-slate-500">Footer Abstract</Label>
+                   <Textarea value={formData.footerText} onChange={e => setFormData({...formData, footerText: e.target.value})} className="min-h-[100px] rounded-2xl bg-background border-none" />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-white/5">
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Facebook URL</Label>
+                      <Input value={formData.facebookUrl} onChange={e => setFormData({...formData, facebookUrl: e.target.value})} className="h-12 rounded-xl bg-background border-none" />
+                   </div>
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Instagram URL</Label>
+                      <Input value={formData.instagramUrl} onChange={e => setFormData({...formData, instagramUrl: e.target.value})} className="h-12 rounded-xl bg-background border-none" />
+                   </div>
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-500">Twitter URL</Label>
+                      <Input value={formData.twitterUrl} onChange={e => setFormData({...formData, twitterUrl: e.target.value})} className="h-12 rounded-xl bg-background border-none" />
                    </div>
                 </div>
              </CardContent>
@@ -175,8 +204,8 @@ export default function AdminSettings() {
           <Card className="border-none bg-card/50 shadow-3xl rounded-[3rem]">
              <CardContent className="p-12 space-y-10">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                   <ConfigToggle label="Negative Marking" desc="Apply -1.0 penalty for wrong choices by default." checked={formData.negativeMarking} onChange={val => setFormData({...formData, negativeMarking: val})} />
-                   <ConfigToggle label="AI Rationalization" desc="Enable Gemini-powered step-by-step solutions." checked={formData.aiRationalization} onChange={val => setFormData({...formData, aiRationalization: val})} />
+                   <ConfigToggle label="Negative Marking" desc="Enforce -1.0 penalty for mismatched audit selections." checked={formData.negativeMarking} onChange={val => setFormData({...formData, negativeMarking: val})} />
+                   <ConfigToggle label="AI Tutor Logic" desc="Enable Gemini-powered step-by-step rationalizations." checked={formData.aiRationalization} onChange={val => setFormData({...formData, aiRationalization: val})} />
                 </div>
              </CardContent>
           </Card>
@@ -197,3 +226,4 @@ function ConfigToggle({ label, desc, checked, onChange }: any) {
     </div>
   )
 }
+
