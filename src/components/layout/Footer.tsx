@@ -1,17 +1,19 @@
+
 'use client';
 
 import Link from "next/link";
 import Logo from "@/components/brand/Logo";
+import { Twitter, Facebook, Instagram, Mail, Phone } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-r from-[#08152d] via-[#0b1d3f] to-[#08152d] text-white pt-24 pb-12 border-t border-white/5">
-      <div className="max-w-7xl mx-auto px-6">
+    <footer className="bg-gradient-to-r from-[#0F172A] via-[#1E3A8A] to-[#0F172A] text-white pt-24 pb-12 border-t border-white/5">
+      <div className="container mx-auto px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8">
           <div className="lg:col-span-1">
             <Logo variant="light" className="scale-90 origin-left" />
             <p className="text-white/50 mt-6 text-sm leading-relaxed max-w-xs">
-              Punjab&apos;s smartest platform for Government Recruitment preparation. Built with integrity for future officers.
+              Punjab's smartest platform for Government Recruitment preparation. Built with integrity for future officers.
             </p>
           </div>
 
@@ -24,6 +26,7 @@ export default function Footer() {
               <li><Link href="/exams" className="text-white/70 hover:text-[#F97316] transition-colors">Exams</Link></li>
               <li><Link href="/mocks" className="text-white/70 hover:text-[#F97316] transition-colors">Mocks</Link></li>
               <li><Link href="/pyqs" className="text-white/70 hover:text-[#F97316] transition-colors">PYQs</Link></li>
+              <li><Link href="/current-affairs" className="text-white/70 hover:text-[#F97316] transition-colors">Current Affairs</Link></li>
             </ul>
           </div>
 
@@ -55,18 +58,21 @@ export default function Footer() {
               Contact Support
             </h3>
             <div className="space-y-4 text-sm font-medium">
-              <p className="text-white/70 flex items-center gap-2">
-                <span className="text-[#F97316]">E:</span> support@cracklix.com
+              <p className="text-white/70 flex items-center gap-3">
+                <Mail className="h-4 w-4 text-[#F97316]" /> support@cracklix.com
               </p>
-              <p className="text-white/70 flex items-center gap-2">
-                <span className="text-[#F97316]">P:</span> +91 98765 43210
+              <p className="text-white/70 flex items-center gap-3">
+                <Phone className="h-4 w-4 text-[#F97316]" /> +91 98765 43210
               </p>
               <div className="pt-4 flex gap-4">
-                 <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#F97316] transition-colors cursor-pointer">
-                    <span className="font-black text-xs">𝕏</span>
+                 <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#F97316] transition-colors cursor-pointer group">
+                    <Twitter className="h-4 w-4 text-white/70 group-hover:text-white" />
                  </div>
-                 <div className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#F97316] transition-colors cursor-pointer">
-                    <span className="font-black text-xs">fb</span>
+                 <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#F97316] transition-colors cursor-pointer group">
+                    <Facebook className="h-4 w-4 text-white/70 group-hover:text-white" />
+                 </div>
+                 <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-[#F97316] transition-colors cursor-pointer group">
+                    <Instagram className="h-4 w-4 text-white/70 group-hover:text-white" />
                  </div>
               </div>
             </div>

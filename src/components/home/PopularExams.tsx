@@ -1,65 +1,25 @@
 
 'use client';
 
-import { motion } from "framer-motion"
-import { ShieldCheck, ArrowRight } from "lucide-react"
-import Link from "next/link"
+import { motion } from "framer-motion";
+import { ShieldCheck, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const exams = [
-  {
-    name: "PSSSB",
-    desc: "Subordinate Services Selection Board",
-    exams: 12,
-    mocks: 256,
-  },
-  {
-    name: "PPSC",
-    desc: "Punjab Public Service Commission",
-    exams: 9,
-    mocks: 198,
-  },
-  {
-    name: "Punjab Police",
-    desc: "Punjab Police Recruitment",
-    exams: 7,
-    mocks: 145,
-  },
-  {
-    name: "Teaching Exams",
-    desc: "ETT, Master Cadre, PSTET",
-    exams: 15,
-    mocks: 320,
-  },
-  {
-    name: "High Court",
-    desc: "Punjab & Haryana High Court",
-    exams: 6,
-    mocks: 108,
-  },
-  {
-    name: "PSPCL & PSTCL",
-    desc: "Power Sector Recruitment",
-    exams: 8,
-    mocks: 162,
-  },
-  {
-    name: "BFUHS",
-    desc: "Baba Farid University (Health)",
-    exams: 4,
-    mocks: 86,
-  },
-  {
-    name: "Banking",
-    desc: "Cooperative & State Banks",
-    exams: 10,
-    mocks: 210,
-  },
+  { name: "PSSSB", desc: "Subordinate Services Selection Board", exams: 12, mocks: 256 },
+  { name: "PPSC", desc: "Punjab Public Service Commission", exams: 9, mocks: 198 },
+  { name: "Punjab Police", desc: "Punjab Police Recruitment", exams: 7, mocks: 145 },
+  { name: "Teaching Exams", desc: "ETT, Master Cadre, PSTET", exams: 15, mocks: 320 },
+  { name: "High Court", desc: "Punjab & Haryana High Court", exams: 6, mocks: 108 },
+  { name: "PSPCL & PSTCL", desc: "Power Sector Recruitment", exams: 8, mocks: 162 },
+  { name: "BFUHS", desc: "Baba Farid University (Health)", exams: 4, mocks: 86 },
+  { name: "Banking", desc: "Cooperative & State Banks", exams: 10, mocks: 210 },
 ];
 
 export default function PopularExams() {
   return (
-    <section className="py-24 bg-[#f8fafc]">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-24 bg-[#F8FAFC]">
+      <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
           <div>
             <h2 className="text-4xl md:text-5xl font-headline font-bold text-[#0F172A]">
@@ -86,7 +46,7 @@ export default function PopularExams() {
             >
               <Link href="/exams">
                 <div className="bg-white rounded-[2rem] border border-gray-100 p-8 hover:shadow-2xl hover:border-[#F97316]/20 transition-all duration-300 group h-full flex flex-col">
-                  <div className="w-16 h-16 rounded-2xl bg-[#f8fafc] mb-6 flex items-center justify-center group-hover:bg-[#0F172A] transition-colors duration-300">
+                  <div className="w-16 h-16 rounded-2xl bg-[#F8FAFC] mb-6 flex items-center justify-center group-hover:bg-[#0F172A] transition-colors duration-300">
                     <ShieldCheck className="h-8 w-8 text-[#0F172A] group-hover:text-white" />
                   </div>
 

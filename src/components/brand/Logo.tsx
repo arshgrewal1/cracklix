@@ -1,6 +1,7 @@
+
 'use client';
 
-import Link from "next/link"
+import Link from "next/link";
 
 interface LogoProps {
   className?: string;
@@ -28,5 +29,5 @@ export default function Logo({ className = "", variant = 'light' }: LogoProps) {
         </p>
       </div>
     </Link>
-  )
+  );
 }

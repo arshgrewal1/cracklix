@@ -1,22 +1,22 @@
 
 'use client';
 
-import Link from "next/link"
-import { Bell, Menu, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import Logo from "@/components/brand/Logo"
-import { useState } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import Link from "next/link";
+import { Bell, Menu, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import Logo from "@/components/brand/Logo";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
+  const [isOpen, setIsOpen] = useState(false);
   const links = [
     { label: "Home", href: "/" },
     { label: "Exams", href: "/exams" },
     { label: "Mocks", href: "/mocks" },
     { label: "PYQs", href: "/pyqs" },
     { label: "Current Affairs", href: "/current-affairs" },
-  ]
+  ];
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-[#0F172A] border-b border-white/5 py-4 px-6">
@@ -85,5 +85,5 @@ export default function Navbar() {
         )}
       </AnimatePresence>
     </nav>
-  )
+  );
 }

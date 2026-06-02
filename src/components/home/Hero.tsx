@@ -1,22 +1,22 @@
 
 'use client';
 
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { ArrowRight, ShieldCheck } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
-import { PlaceHolderImages } from "@/lib/placeholder-images"
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, ShieldCheck } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 export default function Hero() {
-  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-punjab')?.imageUrl || "https://picsum.photos/seed/punjab-hero/1200/800"
+  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-punjab')?.imageUrl || "https://picsum.photos/seed/punjab-hero/1200/800";
 
   return (
-    <section className="relative pt-20 pb-32 lg:pt-32 lg:pb-48 overflow-hidden hero-gradient">
+    <section className="relative pt-20 pb-32 lg:pt-32 lg:pb-48 overflow-hidden bg-gradient-to-br from-[#0F172A] via-[#1E3A8A] to-[#0F172A]">
       {/* Punjab Map Watermark */}
       <div className="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center">
-        <svg viewBox="0 0 100 100" className="w-[1000px] h-[1000px] text-white">
-          <path d="M40 35 L55 40 L60 60 L45 70 L35 55 Z" fill="currentColor" />
+        <svg viewBox="0 0 100 100" className="w-[1000px] h-[1000px] text-white fill-current">
+          <path d="M40 35 L55 40 L60 60 L45 70 L35 55 Z" />
         </svg>
       </div>
 
@@ -43,10 +43,10 @@ export default function Hero() {
             </p>
             
             <div className="flex flex-wrap justify-center lg:justify-start gap-4 pt-4">
-              <Button asChild size="lg" className="h-14 px-10 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold rounded-xl gap-2 shadow-2xl shadow-[#F97316]/20">
+              <Button asChild size="lg" className="h-14 px-10 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold rounded-xl gap-2 shadow-2xl shadow-[#F97316]/20 transition-all hover:scale-105 active:scale-95">
                 <Link href="/mocks">Start Free Mock <ArrowRight className="h-5 w-5" /></Link>
               </Button>
-              <Button variant="outline" asChild size="lg" className="h-14 px-10 border-white/20 text-white hover:bg-white/10 rounded-xl font-bold bg-transparent">
+              <Button variant="outline" asChild size="lg" className="h-14 px-10 border-white/20 text-white hover:bg-white/10 rounded-xl font-bold bg-white/5 backdrop-blur-sm transition-all active:scale-95">
                 <Link href="/exams">Explore Exams</Link>
               </Button>
             </div>
@@ -58,14 +58,16 @@ export default function Hero() {
             transition={{ duration: 0.8 }}
             className="relative lg:ml-auto w-full max-w-[600px] aspect-[4/3] group"
           >
-            <div className="absolute inset-0 bg-blue-500/20 blur-3xl rounded-full" />
+            {/* Soft Glow Effect */}
+            <div className="absolute inset-0 bg-[#F97316]/20 blur-3xl rounded-full opacity-50 group-hover:opacity-80 transition-opacity" />
             <div className="relative h-full w-full rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white/10">
               <Image 
                 src={heroImage}
                 alt="Golden Temple at Night"
                 fill
-                className="object-cover"
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
                 data-ai-hint="golden temple"
+                priority
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A] via-transparent to-transparent opacity-80" />
               <div className="absolute bottom-10 left-10">
@@ -79,5 +81,5 @@ export default function Hero() {
         </div>
       </div>
     </section>
-  )
+  );
 }
