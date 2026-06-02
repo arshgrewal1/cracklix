@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -7,7 +6,7 @@ import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
-import { Bookmark, Search, Trash2, ChevronRight, BrainCircuit, ShieldCheck, Languages, AlertCircle, History, Star } from "lucide-react"
+import { Bookmark, Search, Trash2, ChevronRight, BrainCircuit, ShieldCheck, Languages, AlertCircle, History, Star, Zap, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -16,7 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 /**
  * @fileOverview Final Revision Hub.
- * Central portal for Bookmarks, Wrong Attempts, and AI Rationalizations.
+ * Central portal for Bookmarks, Wrong Attempts (Smart Revision), and AI Rationalizations.
  */
 
 export default function RevisionCenter() {
@@ -26,6 +25,26 @@ export default function RevisionCenter() {
 
   const bookmarkQuery = useMemo(() => (db && user ? query(collection(db, "bookmarks"), where("userId", "==", user.uid)) : null), [db, user])
   const { data: bookmarks, loading: bLoading } = useCollection<any>(bookmarkQuery)
+
+  const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid), orderBy("timestamp", "desc"), limit(20)) : null), [db, user])
+  const { data: results, loading: rLoading } = useCollection<any>(resultsQuery)
+
+  // Smart logic to extract "Wrong Attempts" from recent results
+  const wrongAttempts = useMemo(() => {
+    if (!results) return []
+    const wrongs: any[] = []
+    results.forEach(res => {
+      // In a real app, you'd fetch the actual question details here
+      // For this MVP UI, we visualize the count of missed nodes
+      if (res.accuracy < 100) wrongs.push({
+        id: res.id,
+        title: `Missed in ${res.mockTitle}`,
+        count: res.totalQuestions - res.score,
+        date: new Date(res.timestamp).toLocaleDateString()
+      })
+    })
+    return wrongs
+  }, [results])
 
   const filteredBookmarks = useMemo(() => {
     if (!bookmarks) return []
@@ -68,7 +87,7 @@ export default function RevisionCenter() {
                    <Bookmark className="h-4 w-4" /> Bookmarks
                 </TabsTrigger>
                 <TabsTrigger value="wrong" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">
-                   <AlertCircle className="h-4 w-4" /> Wrong Attempts
+                   <AlertCircle className="h-4 w-4" /> Smart Revision
                 </TabsTrigger>
                 <TabsTrigger value="starred" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">
                    <Star className="h-4 w-4" /> Priority
@@ -119,8 +138,31 @@ export default function RevisionCenter() {
                 )}
              </TabsContent>
 
-             <TabsContent value="wrong">
-                <RevisionEmptyState icon={<AlertCircle />} title="Audit Engine Clean" desc="Mismatched audit choices will appear here for re-analysis." />
+             <TabsContent value="wrong" className="space-y-6">
+                {rLoading ? (
+                   Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-[2.5rem]" />)
+                ) : wrongAttempts.length > 0 ? (
+                  wrongAttempts.map((w) => (
+                    <Card key={w.id} className="border-none shadow-2xl bg-white rounded-[2.5rem] overflow-hidden group">
+                       <CardContent className="p-10 flex items-center justify-between">
+                          <div className="flex items-center gap-8">
+                             <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-inner">
+                                <Zap className="h-8 w-8" />
+                             </div>
+                             <div>
+                                <h3 className="text-xl font-headline font-black text-[#0F172A] uppercase">{w.title}</h3>
+                                <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest">{w.count} Incorrect Audit Choices • {w.date}</p>
+                             </div>
+                          </div>
+                          <Button className="bg-[#0F172A] hover:bg-black text-white h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-3">
+                             Review Errors <ChevronRight className="h-4 w-4" />
+                          </Button>
+                       </CardContent>
+                    </Card>
+                  ))
+                ) : (
+                  <RevisionEmptyState icon={<ShieldCheck className="text-emerald-500" />} title="Audit Engine Clean" desc="No wrong attempts detected in your recent history. Perfect accuracy!" />
+                )}
              </TabsContent>
 
              <TabsContent value="starred">

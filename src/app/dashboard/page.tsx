@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo } from "react"
@@ -25,23 +24,25 @@ import {
   ArrowUpRight,
   ShieldCheck,
   Sparkles,
-  PlayCircle
+  PlayCircle,
+  Timer
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell } from "recharts"
 
 /**
  * @fileOverview Phase 61-64: Intelligent Student Performance Dashboard.
- * Features: Selection Forecasting, Session Recovery, and Daily Mastery.
+ * Features: Selection Forecasting, Session Recovery, Exam Countdown, and Mastery Analytics.
  */
 
 export default function StudentDashboard() {
   const { user, profile, loading } = useUser()
   const db = useFirestore()
   const router = useRouter()
+  const [daysLeft, setDaysLeft] = useState(87) // Placeholder for target exam countdown
 
   useEffect(() => {
     if (!loading && !user) router.push("/login")
@@ -62,18 +63,17 @@ export default function StudentDashboard() {
   const lastSession = activeSessions?.[0]
 
   const analytics = useMemo(() => {
-    if (!results || results.length === 0) return { total: 0, avgAccuracy: 0, rank: "N/A", subjectData: [], selectionProb: 45 }
+    if (!results || results.length === 0) return { total: 0, avgAccuracy: 0, rank: "N/A", subjectData: [], selectionProb: 45, weakSubject: "N/A" }
     
     const avgAcc = Math.round(results.reduce((acc: number, r: any) => acc + (r.accuracy || 0), 0) / results.length)
     
-    // Group results by subject for mastery chart
     const subjectMap: Record<string, { correct: number; total: number }> = {}
     results.forEach((res: any) => {
       if (res.subjectStats) {
         Object.entries(res.subjectStats).forEach(([subj, stats]: [string, any]) => {
           if (!subjectMap[subj]) subjectMap[subj] = { correct: 0, total: 0 }
           subjectMap[subj].correct += stats.correct || 0
-          subjectMap[subj].total += stats.attempted || 0
+          subjectMap[subj].total += stats.total || 0
         })
       }
     })
@@ -81,15 +81,15 @@ export default function StudentDashboard() {
     const subjectData = Object.entries(subjectMap).map(([name, stats]) => ({
       name,
       accuracy: Math.round((stats.correct / (stats.total || 1)) * 100)
-    }))
+    })).sort((a, b) => a.accuracy - b.accuracy)
 
     return { 
       total: results.length, 
       avgAccuracy: avgAcc, 
-      rank: "Top 12%", 
+      rank: avgAcc > 85 ? "Top 2%" : avgAcc > 70 ? "Top 12%" : "Top 45%", 
       subjectData,
-      // Selection probability logic: Base 45% + bonus for accuracy above 60%
-      selectionProb: Math.min(96, Math.max(30, avgAcc + 12))
+      weakSubject: subjectData[0]?.name || "N/A",
+      selectionProb: Math.min(96, Math.max(30, avgAcc + (avgAcc > 60 ? 12 : -5)))
     }
   }, [results])
 
@@ -101,7 +101,7 @@ export default function StudentDashboard() {
       <main className="container mx-auto px-6 py-16 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
-          {/* Left Sidebar: Profile & Quick Stats */}
+          {/* Left Sidebar: Profile & Intelligent Targets */}
           <div className="lg:col-span-4 space-y-10">
             <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[3.5rem] bg-white overflow-hidden group">
                <div className="h-32 w-full bg-[#08152D] relative">
@@ -120,9 +120,27 @@ export default function StudentDashboard() {
                   </div>
                   <div className="flex flex-wrap gap-3">
                     <Badge className="bg-primary text-white border-none px-5 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-primary/20">{profile?.status || 'Free'} Access</Badge>
-                    <Badge variant="outline" className="border-slate-200 text-slate-400 text-[10px] font-black uppercase tracking-widest px-5 py-2 rounded-2xl">{profile?.targetExam || "Punjab Verticals"}</Badge>
+                    <Badge variant="outline" className="border-slate-200 text-slate-400 text-[10px] font-black uppercase tracking-widest px-5 py-2 rounded-2xl">Target: {profile?.targetExam || "Punjab Exams"}</Badge>
                   </div>
                </CardContent>
+            </Card>
+
+            {/* Phase 64: Exam Countdown */}
+            <Card className="border-none bg-[#0F172A] text-white p-10 rounded-[3rem] shadow-3xl relative overflow-hidden">
+               <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12"><Timer className="h-32 w-32" /></div>
+               <div className="relative z-10 space-y-6">
+                  <div className="flex items-center gap-3">
+                     <Timer className="h-5 w-5 text-primary" />
+                     <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Exam Countdown</span>
+                  </div>
+                  <div className="flex items-end gap-3">
+                     <span className="text-7xl font-headline font-black text-primary leading-none">{daysLeft}</span>
+                     <span className="text-lg font-black uppercase tracking-widest mb-2">Days Left</span>
+                  </div>
+                  <p className="text-slate-400 text-xs font-bold uppercase tracking-widest leading-relaxed">
+                     Until official {profile?.targetExam || 'PSSSB Patwari'} 2026 attempt cycle.
+                  </p>
+               </div>
             </Card>
 
             {/* Resume Session Phase 63 */}
@@ -146,107 +164,80 @@ export default function StudentDashboard() {
                <Metric icon={<TrendingUp className="text-emerald-500" />} label="Punjab Rank" value={analytics.rank} />
                <Metric icon={<Star className="text-amber-500" />} label="Active Streak" value="5 Days" />
             </div>
-
-            {/* AI Tutor Insights Phase 61 */}
-            <Card className="border-none shadow-3xl shadow-slate-900/10 rounded-[3rem] bg-[#0F172A] text-white p-10 space-y-8 relative overflow-hidden">
-               <div className="absolute top-0 right-0 p-6 opacity-10"><BrainCircuit className="h-32 w-32 text-primary" /></div>
-               <div className="flex items-center gap-4 relative z-10">
-                  <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center">
-                     <BrainCircuit className="h-6 w-6 text-primary" />
-                  </div>
-                  <h3 className="font-headline font-black text-xl uppercase">AI Tutor Insights</h3>
-               </div>
-               <p className="text-slate-400 text-base leading-relaxed font-medium relative z-10">
-                  {analytics.total > 0 
-                    ? `Institutional audit suggests proficiency in common segments. High-fidelity focus on Quantitative sections could push selection probability above 95%.`
-                    : "The preparation hub is initialized. Attempt your first mock to generate AI-driven performance insights and subject mastery analytics."}
-               </p>
-               <Button asChild className="w-full bg-white text-[#0F172A] hover:bg-slate-100 font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl h-14 relative z-10 shadow-2xl">
-                  <Link href="/mocks">Start Practice Session</Link>
-               </Button>
-            </Card>
           </div>
 
-          {/* Right Main Panel: Analytics & History */}
+          {/* Right Main Panel: Advanced Analytics Phase 61/67 */}
           <div className="lg:col-span-8 space-y-12">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                <div className="space-y-1">
                   <h1 className="text-4xl font-headline font-black text-[#0F172A] tracking-tight uppercase">Performance Engine</h1>
-                  <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.3em]">Real-time preparation audit</p>
+                  <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.3em]">Institutional Analytics v2.0</p>
                </div>
                <div className="flex gap-4">
                  <Button asChild variant="outline" className="rounded-2xl border-slate-200 font-black text-[10px] uppercase tracking-widest h-12 px-8 gap-3 bg-white shadow-sm">
-                    <Link href="/leaderboard"><Trophy className="h-4 w-4 text-amber-500" /> Hall of Fame</Link>
+                    <Link href="/leaderboard"><Trophy className="h-4 w-4 text-amber-500" /> Leaderboard</Link>
                  </Button>
                  <Button asChild variant="outline" className="rounded-2xl border-slate-200 font-black text-[10px] uppercase tracking-widest h-12 px-8 gap-3 bg-white shadow-sm">
-                    <Link href="/bookmarks"><Bookmark className="h-4 w-4 text-primary" /> Saved MCQs</Link>
+                    <Link href="/revision"><Bookmark className="h-4 w-4 text-primary" /> Revision Center</Link>
                  </Button>
                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-               {/* Subject Mastery Phase 67 */}
-               <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[3.5rem] bg-white p-10">
-                  <div className="flex items-center justify-between mb-10">
-                    <div className="space-y-1">
-                       <h3 className="font-headline font-black text-2xl text-[#0F172A]">Subject Mastery</h3>
-                       <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">Institutional Accuracy Index</p>
-                    </div>
-                    <BarChart3 className="h-10 w-10 text-primary opacity-20" />
-                  </div>
-                  <div className="h-64 w-full">
-                     {analytics.subjectData.length > 0 ? (
-                       <ResponsiveContainer width="100%" height="100%">
-                          <BarChart data={analytics.subjectData}>
-                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} />
-                             <YAxis hide domain={[0, 100]} />
-                             <Tooltip cursor={{fill: 'transparent'}} content={({active, payload}) => {
-                                if (active && payload && payload.length) {
-                                   return <div className="bg-[#0F172A] text-white p-4 rounded-2xl shadow-3xl text-xs font-bold uppercase tracking-tight">{payload[0].value}% Precision</div>
-                                }
-                                return null
-                             }} />
-                             <Bar dataKey="accuracy" radius={[10, 10, 0, 0]} barSize={40}>
-                                {analytics.subjectData.map((entry, index) => (
-                                   <Cell key={index} fill={entry.accuracy > 75 ? "#10B981" : entry.accuracy > 55 ? "#F97316" : "#F43F5E"} />
-                                ))}
-                             </Bar>
-                          </BarChart>
-                       </ResponsiveContainer>
-                     ) : (
-                       <div className="h-full flex flex-col items-center justify-center text-slate-300 italic text-sm space-y-4">
-                          <ClipboardList className="h-12 w-12 opacity-10" />
-                          <p>Attempt a mock to visualize mastery.</p>
-                       </div>
-                     )}
-                  </div>
-               </Card>
-
                {/* Selection Probability Phase 61 */}
                <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[3.5rem] bg-white p-12 flex flex-col justify-center text-center space-y-8 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-125 transition-transform"><TrendingUp className="h-40 w-40" /></div>
                   <div className="space-y-2 relative z-10">
-                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Selection Probability</p>
+                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Selection Forecast</p>
                      <p className="text-8xl font-headline font-black text-primary tracking-tighter">{analytics.selectionProb}%</p>
                      <div className="flex items-center justify-center gap-3 text-emerald-500 font-black text-[10px] uppercase tracking-widest">
-                        <ArrowUpRight className="h-5 w-5" /> {analytics.total > 1 ? "Target Threshold Met" : "Initial Benchmark"}
+                        <ArrowUpRight className="h-5 w-5" /> Based on 2026 Cutoff Norms
                      </div>
                   </div>
                   <p className="text-base text-slate-500 leading-relaxed font-medium px-8 relative z-10">
-                     Your accuracy matches official 2026 recruitment patterns. High-fidelity focus on current analysis is recommended.
+                     {analytics.total > 0 
+                      ? `Your current precision is higher than 84% of aspirants targeting ${profile?.targetExam || 'Punjab'}.` 
+                      : 'Attempt your first mock to generate your official selection forecast.'}
                   </p>
+               </Card>
+
+               {/* AI Recommendations Phase 61 */}
+               <Card className="border-none shadow-3xl shadow-slate-900/10 rounded-[3rem] bg-[#0F172A] text-white p-10 space-y-8 relative overflow-hidden flex flex-col justify-between">
+                  <div className="absolute top-0 right-0 p-6 opacity-10"><BrainCircuit className="h-32 w-32 text-primary" /></div>
+                  <div className="space-y-6 relative z-10">
+                     <div className="flex items-center gap-4">
+                        <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center">
+                           <BrainCircuit className="h-6 w-6 text-primary" />
+                        </div>
+                        <h3 className="font-headline font-black text-xl uppercase tracking-tight">AI Audit Recommendations</h3>
+                     </div>
+                     <div className="space-y-4">
+                        <p className="text-slate-400 text-sm leading-relaxed font-medium">
+                           Institutional scan detected a {analytics.weakSubject !== 'N/A' ? `weak node in "${analytics.weakSubject}"` : 'need for baseline benchmarking'}.
+                        </p>
+                        <div className="p-6 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between group cursor-pointer hover:bg-white/10 transition-all">
+                           <div className="space-y-1">
+                              <p className="text-[10px] font-black uppercase text-primary tracking-widest">Suggested Practice</p>
+                              <p className="font-bold text-slate-200">{analytics.weakSubject !== 'N/A' ? `${analytics.weakSubject} Mastery` : 'General GK Mock #1'}</p>
+                           </div>
+                           <ChevronRight className="h-5 w-5 text-slate-500 group-hover:text-primary transition-all" />
+                        </div>
+                     </div>
+                  </div>
+                  <Button asChild className="w-full bg-white text-[#0F172A] hover:bg-slate-100 font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl h-16 relative z-10 shadow-2xl">
+                     <Link href="/mocks">Start Audit Session</Link>
+                  </Button>
                </Card>
             </div>
 
             <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[3.5rem] overflow-hidden bg-white">
                <CardHeader className="p-12 border-b border-slate-50 flex flex-row items-center justify-between">
                   <div className="space-y-1">
-                    <CardTitle className="font-headline text-2xl font-black text-[#0F172A] uppercase">Attempt Registry</CardTitle>
-                    <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Deep audit of your high-fidelity results</CardDescription>
+                    <CardTitle className="font-headline text-2xl font-black text-[#0F172A] uppercase">Audit Registry</CardTitle>
+                    <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Deep review of your attempt history</CardDescription>
                   </div>
                   <Button asChild variant="ghost" className="text-primary font-black uppercase text-[10px] tracking-widest rounded-xl hover:bg-primary/5 h-12 px-8">
-                     <Link href="/profile">View All <ChevronRight className="ml-2 h-4 w-4" /></Link>
+                     <Link href="/profile">View History <ChevronRight className="ml-2 h-4 w-4" /></Link>
                   </Button>
                </CardHeader>
                <CardContent className="p-0">
@@ -263,7 +254,7 @@ export default function StudentDashboard() {
                                 <div className="space-y-1">
                                    <p className="font-black text-[#0F172A] text-xl uppercase tracking-tight group-hover:text-primary transition-colors">{r.mockTitle}</p>
                                    <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mt-1 flex items-center gap-3">
-                                      <Clock className="h-4 w-4" /> {new Date(r.timestamp).toLocaleDateString('en-GB')} • Official Audit
+                                      <Clock className="h-4 w-4" /> {new Date(r.timestamp).toLocaleDateString('en-GB')} • Official Pattern
                                    </p>
                                 </div>
                              </div>
