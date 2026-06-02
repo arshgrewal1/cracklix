@@ -19,7 +19,7 @@ export default function Hero() {
   const heroImage = PlaceHolderImages.find(img => img.id === 'hero-punjab')?.imageUrl || "https://picsum.photos/seed/punjab-hero/1200/800";
 
   return (
-    <header className="relative min-h-[900px] flex items-center pt-20 pb-[500px] lg:pb-[550px] bg-[#0c1527]">
+    <header className="relative min-h-[700px] flex items-center pt-20 pb-32 lg:pb-40 bg-[#0c1527] overflow-visible">
       {/* Background Image (Right Aligned) */}
       <div className="absolute right-0 top-0 w-full lg:w-[60%] h-full z-0 overflow-hidden">
         <Image 
@@ -70,8 +70,8 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* Floating Stats Bar - Moved further down to prevent overlap */}
-        <div className="absolute bottom-[-280px] lg:bottom-[-260px] left-0 w-full hidden md:block">
+        {/* Floating Stats Bar - Positioned to bridge the hero and next section */}
+        <div className="absolute bottom-[-60px] lg:bottom-[-80px] left-0 w-full hidden md:block">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 max-w-7xl mx-auto px-6">
             {stats.map((stat, idx) => (
               <motion.div
@@ -79,7 +79,7 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 + idx * 0.1 }}
-                className="bg-[#111e38]/90 backdrop-blur-xl border border-white/10 p-6 rounded-[24px] flex items-center gap-4 shadow-2xl overflow-hidden"
+                className="bg-[#111e38]/95 backdrop-blur-xl border border-white/10 p-6 rounded-[24px] flex items-center gap-4 shadow-2xl overflow-hidden"
               >
                 <div className="shrink-0 p-4 rounded-2xl bg-white/5 border border-white/5">
                   {stat.icon}
