@@ -71,7 +71,6 @@ export default function MockAttemptPage() {
   }, [db, mock, toast])
 
   const currentSection = useMemo(() => {
-    // Paper A Override: 1-50 questions are strictly Punjabi Qualifying
     if (currentIdx < 50) return { name: "PUNJABI LANGUAGE & GRAMMAR", paper: "PAPER A" }
     
     if (!activePattern || !questions.length) return { name: "General Assessment", paper: "PAPER B" }
@@ -247,8 +246,8 @@ export default function MockAttemptPage() {
              </div>
              
              <div className="flex items-center gap-3">
-                <Button variant="outline" className={cn("h-12 px-6 text-[10px] font-black uppercase tracking-widest rounded-xl", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white" : "text-amber-600")} onClick={() => { if(!flagged.includes(currentIdx)) setFlagged(p=>[...p, currentIdx]); if(currentIdx < questions.length-1) { setCurrentIdx(currentIdx+1); if(!visited.includes(currentIdx+1)) setVisited(v=>[...v, currentIdx+1])} }}>Review & Next</Button>
-                <Button className="bg-[#0B1528] hover:bg-black text-white h-12 px-10 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl" onClick={() => { if(currentIdx < questions.length-1) { setCurrentIdx(currentIdx+1); if(!visited.includes(currentIdx+1)) setVisited(v=>[...v, currentIdx+1])} else { toast({ title: "End of Series", description: "Review your answers and finish audit." }) } }}>Save & Next</Button>
+                <Button variant="outline" className={cn("h-12 px-6 text-[10px] font-black uppercase tracking-widest rounded-xl", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white" : "text-amber-600")} onClick={() => { if(!flagged.includes(currentIdx)) setFlagged(p=>[...p, currentIdx]); if(currentIdx < questions.length-1) { const next = currentIdx + 1; setCurrentIdx(next); if(!visited.includes(next)) setVisited(v=>[...v, next])} }}>Review & Next</Button>
+                <Button className="bg-[#0B1528] hover:bg-black text-white h-12 px-10 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl" onClick={() => { if(currentIdx < questions.length-1) { const next = currentIdx + 1; setCurrentIdx(next); if(!visited.includes(next)) setVisited(v=>[...v, next])} else { toast({ title: "End of Series", description: "Review your answers and finish audit." }) } }}>Save & Next</Button>
              </div>
           </footer>
         </div>
