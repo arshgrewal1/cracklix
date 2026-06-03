@@ -11,9 +11,14 @@ import { useFirestore, useCollection } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions } from "@/lib/parser"
-import { FileText, Zap, CheckCircle2, Database, ChevronLeft, AlertCircle, Trash2, Languages, Info, BookOpen, Layers, Clock, Trophy } from "lucide-react"
+import { FileText, Zap, CheckCircle2, Database, ChevronLeft, AlertCircle, Trash2, Languages, Info, BookOpen, Layers, Clock, Trophy, LayoutGrid, ClipboardList } from "lucide-react"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+
+/**
+ * @fileOverview Enhanced Bulk Import with Mock Category and Subject selection.
+ * Optimized for importing Full Mocks, Sectional Mocks, and PYQs.
+ */
 
 export default function BulkImportPage() {
   const router = useRouter()
@@ -28,6 +33,7 @@ export default function BulkImportPage() {
   const [metadata, setMetadata] = useState({
     boardId: "",
     examId: "",
+    mockType: "FULL",
     subjectId: "",
     difficulty: "medium" as any
   })
@@ -93,7 +99,7 @@ export default function BulkImportPage() {
             <ChevronLeft className="h-6 w-6 text-[#0F172A]" />
           </Button>
           <div className="text-left">
-            <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Full Mock Extraction</h1>
+            <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Mock Extraction Node</h1>
             <p className="text-slate-500 font-medium">Batch multi-subject entry for Punjab verticals.</p>
           </div>
         </div>
@@ -104,34 +110,20 @@ export default function BulkImportPage() {
           <Card className="border-slate-100 bg-white shadow-2xl rounded-[3rem] overflow-hidden">
             <div className="h-2 w-full bg-primary" />
             <CardHeader className="p-10 pb-4">
-              <CardTitle className="font-headline font-black text-2xl uppercase">Full Mock Paste Node</CardTitle>
-              <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Pasting an entire paper? The engine will auto-detect subjects and metadata.</CardDescription>
+              <CardTitle className="font-headline font-black text-2xl uppercase">Test Import Controls</CardTitle>
+              <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Define the mock category and paste your content below.</CardDescription>
             </CardHeader>
             <CardContent className="p-10 pt-4 space-y-10">
-              <div className="bg-blue-50 p-8 rounded-3xl border border-blue-100 space-y-4">
-                 <h4 className="font-black text-[10px] uppercase text-blue-600 flex items-center gap-2 tracking-widest"><Info className="h-4 w-4" /> Extraction Protocol</h4>
-                 <div className="space-y-3">
-                   <p className="text-xs text-blue-800 leading-relaxed font-bold">
-                     Use headers like 'PART-A:', 'Section:' or 'Subject:' to split subjects in one go.
-                   </p>
-                   <code className="block p-4 bg-white/50 rounded-xl text-[11px] text-blue-900 leading-relaxed border border-blue-100 font-mono">
-                     PSSSB EXCISE MOCK TEST<br/>
-                     Time Allowed: 150 Minutes<br/>
-                     Subject: Punjab GK<br/>
-                     Q1. Text... Ans: A Explanation: Solved...
-                   </code>
-                 </div>
-              </div>
-
               <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-3">
-                  <p className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Languages className="h-3 w-3" /> Target Node</p>
-                  <Select value={targetLang} onValueChange={(v: any) => setTargetLang(v)}>
+                  <p className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Layers className="h-3 w-3" /> Mock Category</p>
+                  <Select value={metadata.mockType} onValueChange={(v) => setMetadata({...metadata, mockType: v})}>
                     <SelectTrigger className="rounded-xl bg-slate-50 border-slate-100 shadow-inner h-12 font-bold text-[#0F172A]"><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="En">English Node</SelectItem>
-                      <SelectItem value="Pa">Punjabi Node</SelectItem>
-                      <SelectItem value="Hi">Hindi Node</SelectItem>
+                      <SelectItem value="FULL">Full Length Mock</SelectItem>
+                      <SelectItem value="SECTIONAL">Sectional Mock</SelectItem>
+                      <SelectItem value="SUBJECT">Subject-wise Mock</SelectItem>
+                      <SelectItem value="PYQ">Previous Year (PYQ)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -146,15 +138,47 @@ export default function BulkImportPage() {
                 </div>
               </div>
 
+              {(metadata.mockType === 'SUBJECT' || metadata.mockType === 'SECTIONAL') && (
+                <div className="space-y-3">
+                   <p className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><BookOpen className="h-3 w-3" /> Primary Subject Node</p>
+                   <Select value={metadata.subjectId} onValueChange={val => setMetadata({...metadata, subjectId: val})}>
+                     <SelectTrigger className="rounded-xl bg-slate-50 border-slate-100 shadow-inner h-14 font-bold text-[#0F172A]"><SelectValue placeholder="Select Target Subject" /></SelectTrigger>
+                     <SelectContent className="max-h-[300px]">
+                        {subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                     </SelectContent>
+                   </Select>
+                   <p className="text-[9px] text-slate-400 italic">This will be the default subject for all questions unless headers like 'Subject:' are detected in text.</p>
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <p className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Languages className="h-3 w-3" /> Content Language</p>
+                <Select value={targetLang} onValueChange={(v: any) => setTargetLang(v)}>
+                  <SelectTrigger className="rounded-xl bg-slate-50 border-slate-100 shadow-inner h-12 font-bold text-[#0F172A]"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="En">English Node</SelectItem>
+                    <SelectItem value="Pa">Punjabi Node</SelectItem>
+                    <SelectItem value="Hi">Hindi Node</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="bg-blue-50 p-8 rounded-3xl border border-blue-100 space-y-4">
+                 <h4 className="font-black text-[10px] uppercase text-blue-600 flex items-center gap-2 tracking-widest"><Info className="h-4 w-4" /> Multi-Subject Protocol</h4>
+                 <p className="text-xs text-blue-800 leading-relaxed font-bold">
+                   For Full Mocks, use headers like 'PART-A:', 'Section:' or 'Subject: Punjab GK' to split subjects automatically.
+                 </p>
+              </div>
+
               <Textarea 
-                placeholder="Paste the Full Mock Test here..."
+                placeholder="Paste the entire test content here..."
                 className="min-h-[400px] rounded-[2rem] bg-slate-50 border-slate-100 p-8 text-sm font-mono leading-relaxed shadow-inner text-[#0F172A]"
                 value={rawText}
                 onChange={e => setRawText(e.target.value)}
               />
               
               <Button onClick={handleParse} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] gap-3 rounded-2xl shadow-xl transition-all">
-                <Zap className="h-5 w-5 text-primary" /> Run Multi-Subject Engine
+                <Zap className="h-5 w-5 text-primary" /> Run Extraction Engine
               </Button>
             </CardContent>
           </Card>
@@ -173,7 +197,7 @@ export default function BulkImportPage() {
                 <div className="p-8 bg-primary/5 border border-primary/10 rounded-3xl space-y-4 mb-6">
                    <div className="flex items-center gap-3">
                       <Trophy className="h-5 w-5 text-primary" />
-                      <span className="text-[10px] font-black uppercase text-primary tracking-widest">Mock Metadata Detected</span>
+                      <span className="text-[10px] font-black uppercase text-primary tracking-widest">Metadata Detected</span>
                    </div>
                    <p className="text-xl font-black text-[#0F172A] leading-tight">{detectedMock.title || "Unknown Series"}</p>
                    <div className="flex items-center gap-6 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
@@ -185,7 +209,7 @@ export default function BulkImportPage() {
 
               {parsedQuestions.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-slate-300 opacity-20 py-40">
-                  <AlertCircle className="h-20 w-20 mb-6" />
+                  <ClipboardList className="h-20 w-20 mb-6" />
                   <p className="font-black uppercase tracking-[0.3em] text-sm">Awaiting Mock Input</p>
                 </div>
               ) : (
