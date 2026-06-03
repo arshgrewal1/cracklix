@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Final Enterprise CMS (Phase 115).
+ * @fileOverview Final Enterprise CMS (Phase 162).
  * Enhanced with Rules Preview and Deployment Audit Node.
  */
 
@@ -51,7 +51,13 @@ export default function AdminSettings() {
   const institutionalRules = `rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 14 Core Rules Structured
+    
+    // Global Access (Dev Mode)
+    match /{document=**} {
+      allow read, write: if true;
+    }
+
+    // 14 Core Rules Explicitly Structured
     match /mocks/{id} { allow read, list, write: if true; }
     match /test_sessions/{id} { allow read, list, write: if true; }
     match /results/{id} { allow read, list, write: if true; }
@@ -83,7 +89,7 @@ service cloud.firestore {
       setIsDeploying(false);
       toast({ 
         title: "14 Rules Deployed", 
-        description: "Firestore Security Rules have been synced with the institutional repository.",
+        description: "Firestore Security Rules (Phase 162) have been synced with the institutional repository.",
         variant: "default"
       });
     }, 1500);
