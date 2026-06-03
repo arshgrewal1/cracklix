@@ -16,8 +16,8 @@ interface QuestionPaletteProps {
 }
 
 /**
- * @fileOverview Refined Dense Exam Palette (Final Audit Grid).
- * Strictly showing 25 numbers in a single view with state mapping.
+ * @fileOverview Refined 25-Node CBT Palette.
+ * Strict 5x5 grid with official range selection and progress summaries.
  */
 
 export default function QuestionPalette({
@@ -41,47 +41,53 @@ export default function QuestionPalette({
   const endIdx = Math.min(startIdx + PAGE_SIZE, totalQuestions)
   const currentRange = Array.from({ length: endIdx - startIdx }, (_, i) => startIdx + i)
 
-  const summary = useMemo(() => ({
-    answered: answeredIndices.length,
-    notAnswered: visitedIndices.length - answeredIndices.length,
-    marked: flaggedIndices.length,
-    notVisited: totalQuestions - visitedIndices.length
-  }), [totalQuestions, answeredIndices, flaggedIndices, visitedIndices])
+  const summary = useMemo(() => {
+    const answeredCount = answeredIndices.length
+    const reviewCount = flaggedIndices.length
+    const visitedCount = visitedIndices.length
+    
+    return {
+      answered: answeredCount,
+      marked: reviewCount,
+      notVisited: totalQuestions - visitedCount,
+      notAnswered: visitedCount - answeredCount
+    }
+  }, [totalQuestions, answeredIndices, flaggedIndices, visitedIndices])
 
   return (
-    <div className="space-y-4 flex flex-col h-full text-left overflow-hidden">
-      {/* Live Stats Summary - Compact Grid */}
-      <div className="grid grid-cols-2 gap-2 shrink-0">
-         <SummaryNode count={summary.answered} label="Ans" color="bg-emerald-600" />
-         <SummaryNode count={summary.marked} label="Rev" color="bg-amber-500" />
-         <SummaryNode count={summary.notVisited} label="NV" color="bg-slate-100" textColor="text-slate-400" />
-         <SummaryNode count={summary.notAnswered} label="NA" color="bg-rose-500" />
+    <div className="space-y-6 flex flex-col h-full text-left overflow-hidden">
+      {/* Live Stats Summary Grid */}
+      <div className="grid grid-cols-2 gap-3 shrink-0">
+         <SummaryBox count={summary.answered} label="Answered" color="bg-emerald-600" />
+         <SummaryBox count={summary.marked} label="Review" color="bg-amber-500" />
+         <SummaryBox count={summary.notAnswered} label="Not Ans" color="bg-rose-500" />
+         <SummaryBox count={summary.notVisited} label="Not Vis" color="bg-slate-100" textColor="text-slate-400" />
       </div>
 
-      <div className="space-y-3 flex-1 flex flex-col">
-         {/* Navigation Range Selector */}
-         <div className="flex items-center justify-between bg-slate-50 p-1 rounded-lg border border-slate-100 shrink-0">
+      <div className="space-y-4 flex-1 flex flex-col">
+         {/* Institutional Range Selector */}
+         <div className="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-100 shrink-0">
             <button 
                onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
                disabled={currentPage === 0}
-               className="h-6 w-6 rounded flex items-center justify-center hover:bg-white disabled:opacity-10"
+               className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-white disabled:opacity-10 transition-all"
             >
-               <ChevronLeft className="h-3 w-3" />
+               <ChevronLeft className="h-5 w-5" />
             </button>
-            <p className="text-[9px] font-black uppercase text-[#0B1528] tracking-widest">
-               {startIdx + 1} - {endIdx}
+            <p className="text-[10px] font-black uppercase text-[#0B1528] tracking-widest">
+               Questions {startIdx + 1} - {endIdx}
             </p>
             <button 
                onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
                disabled={currentPage === totalPages - 1}
-               className="h-6 w-6 rounded flex items-center justify-center hover:bg-white disabled:opacity-10"
+               className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-white disabled:opacity-10 transition-all"
             >
-               <ChevronRight className="h-3 w-3" />
+               <ChevronRight className="h-5 w-5" />
             </button>
          </div>
 
-         {/* 5x5 Grid for exactly 25 items */}
-         <div className="grid grid-cols-5 gap-1.5">
+         {/* 5x5 Grid Protocol */}
+         <div className="grid grid-cols-5 gap-2 px-1">
             {currentRange.map((idx) => {
                const isCurrent = currentIndex === idx
                const isAnswered = answeredIndices.includes(idx)
@@ -94,8 +100,8 @@ export default function QuestionPalette({
                      key={idx}
                      onClick={() => onSelect(idx)}
                      className={cn(
-                        "h-9 w-9 rounded-md text-[10px] font-black transition-all border flex items-center justify-center",
-                        isCurrent ? "bg-blue-600 border-blue-600 text-white z-10 shadow-lg scale-105" : "border-transparent",
+                        "h-11 w-11 rounded-xl text-[11px] font-black transition-all border flex items-center justify-center",
+                        isCurrent ? "bg-blue-600 border-blue-600 text-white z-10 shadow-xl scale-110" : "border-transparent",
                         !isCurrent && isBoth && "bg-purple-600 text-white",
                         !isCurrent && isAnswered && !isFlagged && "bg-emerald-600 text-white",
                         !isCurrent && isFlagged && !isAnswered && "bg-amber-500 text-white",
@@ -109,8 +115,8 @@ export default function QuestionPalette({
             })}
          </div>
 
-         {/* Legend - Compact */}
-         <div className="pt-3 border-t border-slate-100 space-y-1.5">
+         {/* High-Fidelity Legend */}
+         <div className="pt-6 border-t border-slate-100 space-y-2.5">
             <LegendRow color="bg-emerald-600" label="Answered" />
             <LegendRow color="bg-rose-500" label="Not Answered" />
             <LegendRow color="bg-amber-500" label="Marked for Review" />
@@ -122,22 +128,22 @@ export default function QuestionPalette({
   )
 }
 
-function SummaryNode({ count, label, color, textColor, className }: any) {
+function SummaryBox({ count, label, color, textColor }: any) {
   return (
-    <div className={cn("p-1.5 rounded-lg bg-white border border-slate-100 flex items-center gap-2 shadow-sm", className)}>
-       <div className={cn("h-5 w-5 rounded flex items-center justify-center text-[9px] font-black text-white", color, textColor)}>
+    <div className="p-3 rounded-2xl bg-white border border-slate-100 flex items-center gap-3 shadow-sm">
+       <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center text-[10px] font-black text-white", color, textColor)}>
           {count}
        </div>
-       <span className="text-[7px] font-black uppercase text-slate-400 tracking-wider">{label}</span>
+       <span className="text-[8px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
     </div>
   )
 }
 
 function LegendRow({ color, label }: any) {
   return (
-    <div className="flex items-center gap-2">
-       <div className={cn("h-2.5 w-2.5 rounded shrink-0", color)} />
-       <span className="text-[8px] font-bold uppercase text-slate-500 tracking-wider">{label}</span>
+    <div className="flex items-center gap-3">
+       <div className={cn("h-3 w-3 rounded-md shrink-0", color)} />
+       <span className="text-[9px] font-bold uppercase text-slate-500 tracking-[0.1em]">{label}</span>
     </div>
   )
 }
