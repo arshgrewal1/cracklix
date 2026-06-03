@@ -17,7 +17,7 @@ service cloud.firestore {
 
     // Full Development Access
     // DEV MODE: Unrestricted access to facilitate rapid content seeding and testing.
-    // Deployment ID: 2026-06-03-T08:05:00Z
+    // Deployment ID: 2026-06-03-T08:20:00Z
     match /{document=**} {
       allow read, write: if true;
     }
