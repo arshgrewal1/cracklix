@@ -94,10 +94,10 @@ export default function MockOverviewPage() {
                  </CardHeader>
                  <CardContent className="p-12 space-y-12">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                       <InstructionCard icon={<Clock className="text-primary" />} title="Duration" value={`${mock.duration} Minutes`} desc="Fixed timer as per official notification." />
-                       <InstructionCard icon={<BookOpen className="text-blue-500" />} title="Structure" value={`${mock.totalQuestions} Questions`} desc="Includes bilingual Punjabi qualifying segment." />
-                       <InstructionCard icon={<Award className="text-emerald-500" />} title="Marking" value="4 Marks / Question" desc="Institutional scoring matrix applied." />
-                       <InstructionCard icon={<AlertTriangle className="text-rose-500" />} title="Negative" value="-1.0 Penalty" desc="Applied for every mismatched audit choice." />
+                       <InstructionCard icon={<Clock className="text-primary" />} title="Duration" value={`${mock.duration || 150} Minutes`} desc="Fixed timer as per official notification." />
+                       <InstructionCard icon={<BookOpen className="text-blue-500" />} title="Structure" value={`${mock.totalQuestions || 150} Questions`} desc="50 Qs (Paper A - Qualifying) + 100 Qs (Paper B)." />
+                       <InstructionCard icon={<Award className="text-emerald-500" />} title="Marking" value="1 Mark / Question" desc="Standard marking for official Punjab exams." />
+                       <InstructionCard icon={<AlertTriangle className="text-rose-500" />} title="Negative" value="-0.25 Penalty" desc="Applied for every mismatched audit choice." />
                     </div>
 
                     <div className="bg-slate-50 rounded-[2.5rem] p-10 space-y-6">
@@ -105,10 +105,10 @@ export default function MockOverviewPage() {
                           <Info className="h-4 w-4 text-primary" /> Core Guidelines
                        </h4>
                        <ul className="space-y-4">
+                          <GuidelineItem text="Paper A (50 Questions) is mandatory qualifying. You must score 50% to qualify for Paper B evaluation." />
                           <GuidelineItem text="The clock will start automatically upon initializing the test engine." />
-                          <GuidelineItem text="Bilingual language switch is available on the top-bar for every question." />
-                          <GuidelineItem text="Auto-save will checkpoint your progress every 10 seconds to the cloud." />
-                          <GuidelineItem text="Final submission is required to generate the high-fidelity results report." />
+                          <GuidelineItem text="Bilingual language switch (English/Punjabi) is available on the top-bar for every question." />
+                          <GuidelineItem text="Final submission is required to generate your All Punjab Rank and accuracy report." />
                        </ul>
                     </div>
                  </CardContent>
@@ -142,10 +142,10 @@ export default function MockOverviewPage() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Verified Pattern Check</p>
                  </div>
                  <div className="space-y-3 pt-4">
-                    <WeightingItem label="Punjab GK" value="20%" />
-                    <WeightingItem label="Punjabi (Qualifying)" value="25%" />
-                    <WeightingItem label="Quant & Reasoning" value="35%" />
-                    <WeightingItem label="General Awareness" value="20%" />
+                    <WeightingItem label="Paper A: Punjabi (Qualifying)" value="50 Questions" />
+                    <WeightingItem label="Paper B: GS & Punjab GK" value="50 Questions" />
+                    <WeightingItem label="Paper B: Quant & Reasoning" value="30 Questions" />
+                    <WeightingItem label="Paper B: English & ICT" value="20 Questions" />
                  </div>
               </Card>
            </div>
