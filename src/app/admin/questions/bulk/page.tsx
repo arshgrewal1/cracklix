@@ -18,7 +18,7 @@ import { FirestorePermissionError } from "@/firebase/errors"
 
 /**
  * @fileOverview Final Mock Extraction Node.
- * Optimized for dense text blocks and dual-language previews.
+ * Optimized for fused bilingual text formats and repeated option markers.
  */
 
 export default function BulkImportPage() {
@@ -87,7 +87,7 @@ export default function BulkImportPage() {
     setParsedQuestions(results.questions)
     
     if (results.questions.length > 0) {
-      toast({ title: "Extraction Complete", description: `Structured ${results.questions.length} nodes with bilingual awareness.` })
+      toast({ title: "Extraction Complete", description: `Structured ${results.questions.length} nodes with script transition detection.` })
     } else {
       toast({ variant: "destructive", title: "Extraction Failed", description: "No questions detected. Please check format." })
     }
@@ -158,18 +158,18 @@ export default function BulkImportPage() {
           </Button>
           <div className="text-left">
             <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Bulk Extraction Hub</h1>
-            <p className="text-slate-500 font-medium italic">High-fidelity parsing for densely packed fused MCQs.</p>
+            <p className="text-slate-500 font-medium italic">High-fidelity parsing for fused scripts and repeated option markers.</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <div className="lg:col-span-6 space-y-8 text-left">
+        <div className="lg:col-span-5 space-y-8 text-left">
           <Card className="border-slate-100 bg-white shadow-2xl rounded-[3rem] overflow-hidden">
             <div className="h-2 w-full bg-primary" />
             <CardHeader className="p-10 pb-4">
               <CardTitle className="font-headline font-black text-2xl uppercase flex items-center gap-3">
-                <Settings2 className="h-6 w-6 text-primary" /> Configuration Matrix
+                <Settings2 className="h-6 w-6 text-primary" /> Configuration
               </CardTitle>
             </CardHeader>
             <CardContent className="p-10 pt-4 space-y-8">
@@ -182,7 +182,6 @@ export default function BulkImportPage() {
                       <SelectItem value="FULL">Full Length Mock</SelectItem>
                       <SelectItem value="SECTIONAL">Sectional Test</SelectItem>
                       <SelectItem value="SUBJECT">Subject-wise Mock</SelectItem>
-                      <SelectItem value="PYQ">Previous Year (PYQ)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -225,7 +224,7 @@ export default function BulkImportPage() {
               </div>
 
               <Textarea 
-                placeholder="Paste fused text here. Parser will auto-split fused En/Pa strings and repeated options (A... A...)."
+                placeholder="Paste fused text here. Parser will auto-split fused EN/PA and repeated markers (A... A...)."
                 className="min-h-[400px] rounded-[2rem] bg-slate-50 border-slate-100 p-8 text-sm font-mono leading-relaxed shadow-inner"
                 value={rawText}
                 onChange={e => setRawText(e.target.value)}
@@ -238,38 +237,41 @@ export default function BulkImportPage() {
           </Card>
         </div>
 
-        <div className="lg:col-span-6 text-left">
+        <div className="lg:col-span-7 text-left">
           <Card className="border-slate-100 bg-white shadow-2xl rounded-[3rem] h-full flex flex-col overflow-hidden">
             <CardHeader className="p-10 bg-slate-50/50 border-b border-slate-50">
               <CardTitle className="font-headline font-black text-2xl uppercase flex items-center gap-3">
-                <Globe className="h-6 w-6 text-primary" /> Dual-Language Buffer
+                <Globe className="h-6 w-6 text-primary" /> Extraction Buffer
               </CardTitle>
               <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">{parsedQuestions.length} Bilingual Nodes Ready.</CardDescription>
             </CardHeader>
-            <CardContent className="p-10 flex-1 overflow-y-auto custom-scrollbar space-y-6">
+            <CardContent className="p-10 flex-1 overflow-y-auto custom-scrollbar space-y-8">
               {parsedQuestions.length > 0 ? (
                 parsedQuestions.map((q, idx) => (
-                  <div key={idx} className="p-8 rounded-3xl bg-slate-50 border border-slate-100 space-y-6">
-                    <div className="flex justify-between items-center">
+                  <div key={idx} className="p-10 rounded-[2.5rem] bg-slate-50 border border-slate-100 space-y-8 relative overflow-hidden group">
+                    <div className="flex justify-between items-center relative z-10">
                        <div className="flex gap-2">
                           <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase px-3 py-1 rounded-lg">EN</Badge>
                           <Badge className="bg-blue-500/10 text-blue-600 border-none text-[9px] font-black uppercase px-3 py-1 rounded-lg">PA</Badge>
                        </div>
                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">KEY: {q.correctAnswer}</span>
                     </div>
-                    <div className="space-y-4">
-                       <p className="text-sm font-bold text-[#0F172A] line-clamp-2">{q.questionEn}</p>
-                       <p className="text-sm font-medium text-slate-500 line-clamp-2 italic border-t border-slate-200 pt-4">{q.questionPa}</p>
+                    
+                    <div className="space-y-6 relative z-10">
+                       <p className="text-lg font-bold text-[#0F172A] leading-tight">{q.questionEn}</p>
+                       {q.questionPa && q.questionPa !== q.questionEn && (
+                         <p className="text-lg font-medium text-slate-500 leading-tight italic border-t border-slate-200 pt-6">{q.questionPa}</p>
+                       )}
                     </div>
-                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200">
-                       <div className="space-y-1">
-                          <span className="text-[8px] font-black text-slate-400 uppercase">Option A (EN)</span>
-                          <p className="text-[11px] font-bold truncate">{q.optionAEn}</p>
-                       </div>
-                       <div className="space-y-1">
-                          <span className="text-[8px] font-black text-slate-400 uppercase">Option A (PA)</span>
-                          <p className="text-[11px] font-medium truncate text-slate-500">{q.optionAPa}</p>
-                       </div>
+
+                    <div className="grid grid-cols-2 gap-8 pt-8 border-t border-slate-200 relative z-10">
+                       {['A', 'B', 'C', 'D'].map(l => (
+                          <div key={l} className="space-y-2">
+                             <span className="text-[9px] font-black text-slate-400 uppercase">Option {l} (EN/PA)</span>
+                             <p className="text-sm font-bold text-[#0F172A] truncate">{q[`option${l}En`]}</p>
+                             <p className="text-sm font-medium text-slate-500 truncate">{q[`option${l}Pa`]}</p>
+                          </div>
+                       ))}
                     </div>
                   </div>
                 ))

@@ -1,6 +1,6 @@
 /**
- * @fileOverview Hardened Trilingual Bulk MCQ Extraction Engine.
- * Optimized for "Densely Packed" formats where English and Punjabi are fused.
+ * @fileOverview Hardened Institutional Bulk MCQ Extraction Engine.
+ * Optimized for "Densely Fused" formats where EN/PA script and markers are bunched.
  */
 
 import { Question, Difficulty } from "@/types";
@@ -19,33 +19,24 @@ export function parseBulkQuestions(
   metadata: { boardId: string; examId: string; subjectId: string; difficulty: Difficulty }
 ): ParsedResults {
   // 1. Normalize and clean input
-  let cleanedText = rawText.replace(/\r\n/g, '\n');
+  const cleanedText = rawText.replace(/\r\n/g, '\n');
   
-  // 2. Aggressive splitting by question markers (e.g., Q101, Question 1, 101.)
-  // Handles clumping like "Ability (Bilingual)Q101. A train..."
+  // 2. Aggressive splitting by question markers
   const questionsSplitRegex = /(?=Q\s*\d+[\.\:\)]|Question\s*\d+[\.\:\)]|Q\.\s*\d+[\.\:\)]|(?:\s|^)\d{1,3}[\.\:\)])/i;
   const rawBlocks = cleanedText.split(questionsSplitRegex);
   
   const parsedQuestions: Partial<Question>[] = [];
   let currentActiveSubjectId = metadata.subjectId;
-  let detectedTitle = "";
   let detectedDuration = metadata.duration;
 
-  const enRegex = /[a-zA-Z]{2,}/;
   const paRegex = /[\u0A00-\u0A7F]/;
 
   rawBlocks.forEach((block) => {
     let text = block.trim();
     if (!text) return;
 
-    // Check for global metadata in the first block if it's not a question
-    if (!text.match(/^(Q\s*\d+|Question|Q\.)/i) && text.includes('Section')) {
-      const durationMatch = text.match(/(\d+)\s*(?:min|minute|minutes)/i);
-      if (durationMatch) detectedDuration = parseInt(durationMatch[1]);
-    }
-
-    // Identify and handle Section/Subject headers within clumped text
-    const sectionMatch = text.match(/(?:Section|Subject|PART)\s*(\d+|\w+)?\s*[\:\-]\s*([^\nQ1-9]+)/i);
+    // Detect Section/Subject headers within clumped text
+    const sectionMatch = text.match(/(?:Section|Subject|PART)\s*(\d+|\w+)?\s*[\:\-]\s*([^\nQ1-9\(\)]+)/i);
     if (sectionMatch) {
        const sectionName = sectionMatch[2].toLowerCase();
        if (sectionName.includes('punjabi')) currentActiveSubjectId = 'punjabi-qualifying';
@@ -60,23 +51,24 @@ export function parseBulkQuestions(
 
     // --- DEEP PARSING LOGIC ---
     
-    // Split by markers: Answers, Explanations, Options
+    // 1. Extract Answer Key (Look for specific markers)
     const answerSplitRegex = /(?=Correct Answer|Ans|Key|ਸਹੀ ਉੱਤਰ)/i;
     const explanationSplitRegex = /(?=Explanation|Solution|ਵਿਆਖਿਆ)/i;
-    // Split options even if repeated (A... A...)
-    const optionSplitRegex = /(?=\s[A-D][\)\.\:\-\s]|[A-D][\)\.]\s)/;
 
     const parts = text.split(answerSplitRegex);
     const questionAndOptions = parts[0];
     const rest = parts.slice(1).join(' ');
 
     const answerAndExplanation = rest.split(explanationSplitRegex);
-    const answerPart = answerAndExplanation[0];
-    const explanationPart = answerAndExplanation.slice(1).join(' ');
+    const answerPart = answerAndExplanation[0] || "";
+    const explanationPart = answerAndExplanation.slice(1).join(' ') || "";
 
-    // 1. Separate Question Statement from Options
+    // 2. Extract Options (Handles Fused A) En A) Pa)
+    // We split by [A-D] followed by common delimiters
+    const optionSplitRegex = /(?=[A-D][\)\.\:\-\s])/;
     const qAndOptBlocks = questionAndOptions.split(optionSplitRegex);
-    // Remove the numeric marker (e.g. Q101.)
+    
+    // The first block is the Question Statement (English + Punjabi clumped)
     const rawQuestionFull = qAndOptBlocks[0].replace(/^(Q\s*\d+|Question\s*\d+|Q\.\s*\d+|\d+)[\.\:\)]\s*/i, '').trim();
     const optionBlocks = qAndOptBlocks.slice(1);
 
@@ -96,10 +88,8 @@ export function parseBulkQuestions(
       explanationEn: "", explanationPa: ""
     };
 
-    // 2. Handle Fused En/Pa Question Clump
-    // Logic: Find the transition point between English and Punjabi script
-    if (paRegex.test(rawQuestionFull) && enRegex.test(rawQuestionFull)) {
-      // Find index of first Punjabi char
+    // Split fused Question Statement
+    if (paRegex.test(rawQuestionFull)) {
       const paStartIdx = rawQuestionFull.search(/[\u0A00-\u0A7F]/);
       if (paStartIdx !== -1) {
         question.questionEn = rawQuestionFull.substring(0, paStartIdx).trim();
@@ -110,65 +100,66 @@ export function parseBulkQuestions(
       }
     } else {
       question.questionEn = rawQuestionFull;
-      question.questionPa = rawQuestionFull;
     }
 
-    // 3. Process Options (Handles A) En A) Pa fused format)
+    // Assign Options (Pairing EN/PA based on repeat count)
+    const optionCount: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
     optionBlocks.forEach(optBlock => {
       const match = optBlock.trim().match(/^([A-D])[\)\.\:\-\s]\s*(.*)/i);
       if (match) {
-        const char = match[1].toUpperCase();
-        const val = match[2].trim();
+        const letter = match[1].toUpperCase();
+        const value = match[2].trim();
+        optionCount[letter]++;
         
-        // If this option contains both En and Pa fused together
-        if (paRegex.test(val) && enRegex.test(val)) {
-           const paStartIdx = val.search(/[\u0A00-\u0A7F]/);
-           if (paStartIdx !== -1) {
-              const enPart = val.substring(0, paStartIdx).trim();
-              const paPart = val.substring(paStartIdx).trim();
-              // Assign to En if En field empty, else Pa
-              if (!question[`option${char}En`]) question[`option${char}En`] = enPart;
-              if (!question[`option${char}Pa`]) question[`option${char}Pa`] = paPart;
-           }
-        } else if (paRegex.test(val)) {
-           // Pure Punjabi option block
-           question[`option${char}Pa`] = val;
+        if (optionCount[letter] === 1) {
+          question[`option${letter}En`] = value;
         } else {
-           // Pure English option block
-           question[`option${char}En`] = val;
+          question[`option${letter}Pa`] = value;
         }
       }
     });
 
-    // 4. Extract Key
+    // Cleanup: If PA option is empty but EN contains fused ENPA
+    ['A','B','C','D'].forEach(l => {
+       const val = question[`option${l}En`];
+       if (!question[`option${l}Pa`] && paRegex.test(val)) {
+          const paIdx = val.search(/[\u0A00-\u0A7F]/);
+          if (paIdx !== -1) {
+             question[`option${l}Pa`] = val.substring(paIdx).trim();
+             question[`option${l}En`] = val.substring(0, paIdx).trim();
+          }
+       }
+       // Fallback
+       if (!question[`option${l}Pa`]) question[`option${l}Pa`] = question[`option${l}En`];
+    });
+
+    // 3. Extract Correct Answer Letter
     const ansKeyMatch = answerPart.match(/[A-D]/i);
     if (ansKeyMatch) question.correctAnswer = ansKeyMatch[0].toUpperCase();
 
-    // 5. Extract Explanation
-    const expText = explanationPart.replace(/^(Explanation|Solution|ਵਿਆਖਿਆ)[\:\-\s\(\w\)]*/i, '').trim();
-    if (paRegex.test(expText) && enRegex.test(expText)) {
+    // 4. Extract & Split Explanation
+    const expText = explanationPart.replace(/^(Explanation|Solution|ਵਿਆਖਿਆ|English|Punjabi)[\:\-\s\(\w\)]*/gi, '').trim();
+    if (paRegex.test(expText)) {
        const paStartIdx = expText.search(/[\u0A00-\u0A7F]/);
-       question.explanationEn = expText.substring(0, paStartIdx).trim();
-       question.explanationPa = expText.substring(paStartIdx).trim();
+       if (paStartIdx !== -1) {
+          question.explanationEn = expText.substring(0, paStartIdx).trim();
+          question.explanationPa = expText.substring(paStartIdx).trim();
+       } else {
+          question.explanationPa = expText;
+       }
     } else {
        question.explanationEn = expText;
-       question.explanationPa = expText;
     }
 
-    // Validation & Fallbacks
-    if (!question.questionPa) question.questionPa = question.questionEn;
-    ['A','B','C','D'].forEach(c => {
-       if (!question[`option${c}Pa`]) question[`option${c}Pa`] = question[`option${c}En`];
-       if (!question[`option${c}En`]) question[`option${c}En`] = question[`option${c}Pa`];
-    });
-
+    // Remove fluff words
+    question.questionEn = question.questionEn.replace(/\(Bilingual\)/gi, '').trim();
+    
     parsedQuestions.push(question);
   });
 
   return {
     questions: parsedQuestions,
     mockMetadata: {
-      title: detectedTitle,
       duration: detectedDuration,
       totalQuestions: parsedQuestions.length
     }
