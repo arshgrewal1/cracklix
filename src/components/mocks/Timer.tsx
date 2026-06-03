@@ -12,6 +12,11 @@ interface TimerProps {
   isPaused?: boolean
 }
 
+/**
+ * @fileOverview Institutional Timer Node.
+ * Features: High-contrast blinking during last 10 minutes.
+ */
+
 export default function Timer({ onTimeUp, initialSeconds, onTick, isPaused }: TimerProps) {
   const [timeLeft, setTimeLeft] = useState(initialSeconds)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -55,11 +60,11 @@ export default function Timer({ onTimeUp, initialSeconds, onTick, isPaused }: Ti
 
   return (
     <div className={cn(
-      "flex items-center gap-2 px-3 py-1 rounded-lg font-black text-sm border transition-all duration-300 tabular-nums",
-      isLowTime ? "bg-rose-50 border-rose-200 text-rose-600 animate-pulse" : "bg-white/5 border-white/10 text-white"
+      "flex items-center gap-3 px-5 py-2 rounded-xl font-black text-base border transition-all duration-500 tabular-nums shadow-xl",
+      isLowTime ? "bg-rose-600 border-rose-500 text-white animate-pulse" : "bg-white/5 border-white/10 text-white"
     )}>
-      <Clock className={cn("h-3.5 w-3.5", isLowTime ? "text-rose-500" : "text-primary")} />
-      <span className="tracking-widest">{formatTime(timeLeft)}</span>
+      <Clock className={cn("h-4 w-4", isLowTime ? "text-white" : "text-primary")} />
+      <span className="tracking-[0.1em]">{formatTime(timeLeft)}</span>
     </div>
   )
 }
