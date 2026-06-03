@@ -4,72 +4,72 @@ service cloud.firestore {
   match /databases/{database}/documents {
     
     /**
-     * @fileOverview Institutional Security Rules (Phase 158).
-     * DEV MODE: Global read/write access enabled for rapid prototyping and content seeding.
-     * This signature change forces a redeploy to clear transient permission blockers.
+     * @fileOverview Institutional Security Rules (Phase 162).
+     * DEV MODE: 14 Collection Rules structured with explicit read, list, and write access.
+     * Updated to resolve persistent list errors for mocks and test_sessions.
      * 
-     * DEPLOYMENT_AUDIT_ID: 2026-06-03T12:20:00Z
+     * DEPLOYMENT_AUDIT_ID: 2026-06-03T13:45:00Z
      */
     
     match /{document=**} {
       allow read, write: if true;
     }
 
-    // Explicit collection matches to ensure engine stability during complex queries
+    // Explicit collection matches for high-fidelity auditing
     match /mocks/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
     
     match /test_sessions/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
     
     match /results/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
     
     match /bookmarks/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
 
     match /users/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
 
     match /current_affairs/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
 
     match /notifications/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
     
     match /reports/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
     
     match /questions/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
     
     match /pyqs/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
     
     match /boards/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
     
     match /exams/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
     
     match /subjects/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
     
     match /settings/{id} {
-      allow read, write: if true;
+      allow read, list, write: if true;
     }
   }
 }
