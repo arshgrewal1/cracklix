@@ -14,12 +14,13 @@ interface TimerProps {
 
 /**
  * @fileOverview Institutional Timer Node.
- * Features: High-contrast blinking during last 10 minutes.
+ * Features: High-contrast blinking during last 10 minutes and reliable auto-submit trigger.
  */
 
 export default function Timer({ onTimeUp, initialSeconds, onTick, isPaused }: TimerProps) {
   const [timeLeft, setTimeLeft] = useState(initialSeconds)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
+  const hasSubmitted = useRef(false)
 
   useEffect(() => {
     setTimeLeft(initialSeconds)
@@ -31,7 +32,8 @@ export default function Timer({ onTimeUp, initialSeconds, onTick, isPaused }: Ti
        return
     }
 
-    if (timeLeft <= 0) {
+    if (timeLeft <= 0 && !hasSubmitted.current) {
+      hasSubmitted.current = true
       onTimeUp()
       return
     }
@@ -50,9 +52,10 @@ export default function Timer({ onTimeUp, initialSeconds, onTick, isPaused }: Ti
   }, [timeLeft, onTimeUp, onTick, isPaused])
 
   const formatTime = (seconds: number) => {
-    const h = Math.floor(seconds / 3600)
-    const m = Math.floor((seconds % 3600) / 60)
-    const s = seconds % 60
+    const safeSecs = Math.max(0, seconds)
+    const h = Math.floor(safeSecs / 3600)
+    const m = Math.floor((safeSecs % 3600) / 60)
+    const s = safeSecs % 60
     return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
   }
 

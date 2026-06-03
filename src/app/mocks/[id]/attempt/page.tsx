@@ -4,7 +4,7 @@
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useDoc, useFirestore, useUser } from "@/firebase"
-import { doc, getDoc, addDoc, setDoc, serverTimestamp } from "firebase/firestore"
+import { doc, getDoc, addDoc, setDoc, serverTimestamp, collection } from "firebase/firestore"
 import Timer from "@/components/mocks/Timer"
 import QuestionPalette from "@/components/mocks/QuestionPalette"
 import { Button } from "@/components/ui/button"
@@ -23,7 +23,8 @@ import {
   Monitor,
   CheckCircle2,
   Bookmark,
-  Trash2
+  Trash2,
+  Settings
 } from "lucide-react"
 import {
   AlertDialog,
@@ -45,6 +46,8 @@ import {
 } from "@/components/ui/sheet"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { errorEmitter } from "@/firebase/error-emitter"
+import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 
 type LangMode = 'en' | 'pa' | 'bilingual'
 
@@ -160,7 +163,7 @@ export default function MockAttemptPage() {
   }
 
   const submitMock = useCallback(() => {
-    if (isSubmitting || questions.length === 0) return
+    if (isSubmitting || questions.length === 0 || !user || !db) return
     setIsSubmitting(true)
 
     const correctMap: Record<string, number> = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 }
@@ -180,23 +183,43 @@ export default function MockAttemptPage() {
     })
 
     const resultData = {
-      mockId, mockTitle: mockConfig?.title, userId: user?.uid,
-      score: correctCount, totalQuestions: questions.length,
+      mockId, 
+      mockTitle: mockConfig?.title || "Mock Test Attempt", 
+      userId: user.uid,
+      score: correctCount, 
+      totalQuestions: questions.length,
       accuracy: Math.round((correctCount / (Object.keys(answers).length || 1)) * 100),
-      timestamp: new Date().toISOString(), subjectStats, answers
+      timestamp: new Date().toISOString(), 
+      subjectStats, 
+      answers
     }
 
-    addDoc(collection(db, "results"), { ...resultData, createdAt: serverTimestamp() }).then(() => {
-      setDoc(doc(db, "test_sessions", `${user?.uid}_${mockId}`), { status: 'SUBMITTED' }, { merge: true })
-      router.push(`/results/${mockId}`)
-    })
-  }, [isSubmitting, questions, answers, mockId, mockConfig, user, db, router])
+    const resultsRef = collection(db, "results")
+    addDoc(resultsRef, { ...resultData, createdAt: serverTimestamp() })
+      .then(() => {
+        const sessionRef = doc(db, "test_sessions", `${user.uid}_${mockId}`)
+        return setDoc(sessionRef, { status: 'SUBMITTED', updatedAt: serverTimestamp() }, { merge: true })
+      })
+      .then(() => {
+        toast({ title: "Mock Submitted", description: "Your results have been synchronized." })
+        router.push(`/results/${mockId}`)
+      })
+      .catch(async (serverError) => {
+        setIsSubmitting(false)
+        const permissionError = new FirestorePermissionError({
+          path: 'results',
+          operation: 'create',
+          requestResourceData: resultData,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
+  }, [isSubmitting, questions, answers, mockId, mockConfig, user, db, router, toast])
 
   const toggleFullScreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
+      document.documentElement.requestFullscreen().catch(() => {});
     } else {
-      if (document.exitFullscreen) document.exitFullscreen();
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
     }
   }
 
@@ -208,8 +231,8 @@ export default function MockAttemptPage() {
   )
 
   const q = questions[currentIdx]
-  const currentPaper = q?.paper || ((currentIdx + 1) <= 50 ? "PAPER A: PUNJABI QUALIFYING" : "PAPER B: MAIN EXAM");
-  const currentSection = q?.section || q?.subjectId || "General Awareness";
+  const activePaper = q?.paper || (currentIdx < 50 ? "PAPER A: PUNJABI QUALIFYING" : "PAPER B: MAIN EXAM");
+  const activeSection = q?.section || q?.subjectId || "General Test";
 
   const renderOptionContent = (key: string) => {
     const en = q[`option${key}En`];
@@ -221,9 +244,9 @@ export default function MockAttemptPage() {
         <div className="flex flex-col text-left py-1">
           <span className="text-sm text-slate-500 font-medium leading-tight">{en}</span>
           {hasValidPa ? (
-            <span className="text-base text-[#0B1528] font-bold block mt-0.5 leading-snug">{pa}</span>
+            <span className="text-base text-[#0B1528] font-bold block mt-0.5">{pa}</span>
           ) : (
-            <span className="text-[10px] text-rose-500 italic block mt-0.5">(Pa Translation Pending)</span>
+            <span className="text-[10px] text-rose-500 italic block mt-0.5">(No Punjabi Translation)</span>
           )}
         </div>
       );
@@ -255,18 +278,20 @@ export default function MockAttemptPage() {
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button size="sm" className="bg-emerald-600 h-9 hover:bg-emerald-700 text-white font-black uppercase text-[10px] px-6 rounded-lg shadow-lg">Submit</Button>
+              <Button size="sm" className="bg-emerald-600 h-9 hover:bg-emerald-700 text-white font-black uppercase text-[10px] px-6 rounded-lg shadow-lg">
+                {isSubmitting ? "Submitting..." : "Submit"}
+              </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className="rounded-3xl p-10">
               <AlertDialogHeader className="space-y-4">
-                <AlertDialogTitle className="text-2xl font-black uppercase text-[#0F172A]">Submit Mock Test?</AlertDialogTitle>
+                <AlertDialogTitle className="text-2xl font-black uppercase text-[#0F172A]">Final Submission</AlertDialogTitle>
                 <AlertDialogDescription className="text-slate-500 font-medium">
-                  You have attempted {Object.keys(answers).length} questions. Are you sure you want to finish the audit?
+                  You have attempted {Object.keys(answers).length} of {questions.length} questions. Are you sure you want to end your exam?
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="mt-8 gap-4">
                 <AlertDialogCancel className="rounded-xl h-12 font-bold border-slate-200">Review Questions</AlertDialogCancel>
-                <AlertDialogAction onClick={submitMock} className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-12 font-bold">Yes, Submit Now</AlertDialogAction>
+                <AlertDialogAction onClick={submitMock} className="bg-[#0B1528] hover:bg-black text-white rounded-xl h-12 font-bold">Yes, Submit Now</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -278,10 +303,10 @@ export default function MockAttemptPage() {
            <div className="absolute inset-0 z-[100] bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-300">
               <PauseCircle className="h-16 w-16 text-primary" />
               <div className="text-center space-y-2">
-                 <h2 className="text-3xl font-black uppercase text-[#0B1528]">Test Paused</h2>
-                 <p className="text-slate-500 font-medium">Your attempt state is secured. Resume when ready.</p>
+                 <h2 className="text-3xl font-black uppercase text-[#0B1528]">Audit Paused</h2>
+                 <p className="text-slate-500 font-medium">Timer and attempt trail secured. Resume when ready.</p>
               </div>
-              <Button onClick={() => setIsPaused(false)} className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-2xl">
+              <Button onClick={() => setIsPaused(false)} className="h-16 px-12 bg-[#0B1528] hover:bg-black text-white font-black uppercase text-xs tracking-widest rounded-2xl shadow-2xl">
                  Resume Attempt
               </Button>
            </div>
@@ -291,8 +316,8 @@ export default function MockAttemptPage() {
           <div className="px-6 py-4 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
              <div className="flex items-center gap-6">
                 <div className="flex flex-col text-left">
-                   <span className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em]">{currentPaper}</span>
-                   <p className="text-xs font-bold text-slate-700 uppercase tracking-wide">{currentSection}</p>
+                   <span className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em]">{activePaper}</span>
+                   <h2 className="text-xs font-bold text-slate-700 uppercase tracking-wide">{activeSection}</h2>
                 </div>
                 <div className="h-8 w-px bg-slate-100" />
                 <span className="text-xs font-black text-[#0B1528] uppercase tracking-tight">Question {currentIdx + 1} <span className="text-slate-300 font-medium mx-1">of</span> {questions.length}</span>
@@ -303,13 +328,13 @@ export default function MockAttemptPage() {
              <div className="max-w-4xl mx-auto space-y-12">
                 <div className="space-y-6 text-left">
                    {(language === 'en' || language === 'bilingual') && (
-                      <p className="text-xl md:text-2xl lg:text-3xl font-bold leading-relaxed text-[#0F172A] antialiased whitespace-pre-line">
+                      <p className="text-xl md:text-2xl lg:text-3xl font-bold leading-relaxed text-[#0F172A] whitespace-pre-line antialiased">
                          {q.questionEn}
                       </p>
                    )}
                    {language === 'bilingual' && <div className="h-px w-20 bg-slate-100" />}
                    {(language === 'pa' || language === 'bilingual') && (
-                      <p className="text-xl md:text-2xl lg:text-3xl font-bold leading-relaxed text-[#0F172A] antialiased whitespace-pre-line">
+                      <p className="text-xl md:text-2xl lg:text-3xl font-bold leading-relaxed text-[#0F172A] whitespace-pre-line antialiased">
                          {q.questionPa || q.questionEn}
                       </p>
                    )}
@@ -380,7 +405,7 @@ export default function MockAttemptPage() {
                    </SheetContent>
                 </Sheet>
                 <Button className="bg-[#0B1528] hover:bg-black text-white h-14 px-10 rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-2xl" onClick={handleNext}>
-                  {currentIdx === questions.length - 1 ? 'Finish' : 'Save & Next'}
+                  {currentIdx === questions.length - 1 ? 'Review' : 'Save & Next'}
                 </Button>
              </div>
           </footer>
