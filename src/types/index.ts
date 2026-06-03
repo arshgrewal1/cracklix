@@ -40,9 +40,10 @@ export interface Question {
   topic?: string;
   status: ContentStatus;
 
-  // Bilingual Content
+  // Trilingual Content
   questionEn: string;
   questionPa: string;
+  questionHi: string;
 
   // Options Mapping - English
   optionAEn: string;
@@ -56,9 +57,16 @@ export interface Question {
   optionCPa: string;
   optionDPa: string;
 
+  // Options Mapping - Hindi
+  optionAHi: string;
+  optionBHi: string;
+  optionCHi: string;
+  optionDHi: string;
+
   correctAnswer: 'A' | 'B' | 'C' | 'D';
   explanationEn: string;
   explanationPa: string;
+  explanationHi: string;
 
   // Quality Analytics
   attempts?: number;
@@ -100,8 +108,8 @@ export interface UserProfile {
   status: 'Pro' | 'Free';
   planId?: string;
   referralCount: number;
-  subscriptions?: string[]; // Array of board IDs subscribed for alerts
-  badges?: string[]; // Earned achievement IDs
+  subscriptions?: string[]; 
+  badges?: string[]; 
 }
 
 export interface ContentReport {
