@@ -11,14 +11,15 @@ import { Badge } from "@/components/ui/badge"
 import { useFirestore, useCollection } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { parseBulkQuestions } from "@/lib/parser"
-import { Zap, Database, ChevronLeft, Rocket, ShieldCheck, ClipboardList, Layers, Settings2, Globe, Languages, AlertTriangle, FileWarning, CheckCircle2 } from "lucide-react"
+import { parseBulkQuestions, ImportFormat } from "@/lib/parser"
+import { Zap, Database, ChevronLeft, Rocket, ShieldCheck, ClipboardList, Layers, Settings2, Globe, Languages, AlertTriangle, FileWarning, CheckCircle2, LayoutList } from "lucide-react"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
  * @fileOverview Final Strict Template Extraction Node.
- * Replaced AI guessing with strict position-based validation.
+ * Replaced AI guessing with strict position-based validation and Format Selection.
  */
 
 export default function BulkImportPage() {
@@ -32,6 +33,7 @@ export default function BulkImportPage() {
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
 
   const [rawText, setRawText] = useState("")
+  const [importFormat, setImportFormat] = useState<ImportFormat>("BILINGUAL_MCQ")
   const [metadata, setMetadata] = useState({
     boardId: "",
     examId: "",
@@ -70,7 +72,7 @@ export default function BulkImportPage() {
       return
     }
     
-    const results = parseBulkQuestions(rawText, { ...metadata })
+    const results = parseBulkQuestions(rawText, importFormat, { ...metadata })
     
     if (results.errors.length > 0) {
       setParseErrors(results.errors)
@@ -79,7 +81,7 @@ export default function BulkImportPage() {
     } else {
       setParseErrors([])
       setParsedQuestions(results.questions)
-      toast({ title: "Extraction Success", description: `${results.questions.length} nodes structured using strict template.` })
+      toast({ title: "Extraction Success", description: `${results.questions.length} nodes structured using strict ${importFormat} template.` })
     }
   }
 
@@ -147,7 +149,7 @@ export default function BulkImportPage() {
           </Button>
           <div className="text-left">
             <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Institutional Importer</h1>
-            <p className="text-slate-500 font-medium italic">Strict Template System v2.0 - Position-Based Script Splitting</p>
+            <p className="text-slate-500 font-medium italic">Strict Position-Based Parsing Engine v3.0</p>
           </div>
         </div>
       </div>
@@ -190,8 +192,26 @@ export default function BulkImportPage() {
                 </Select>
               </div>
 
+              <div className="space-y-3">
+                <p className="text-[10px] font-black uppercase text-primary ml-1 flex items-center gap-2">
+                  <LayoutList className="h-3 w-3" /> Import Template Format
+                </p>
+                <Select value={importFormat} onValueChange={(val: any) => setImportFormat(val)}>
+                  <SelectTrigger className="rounded-xl bg-primary/5 border-primary/20 h-14 font-black uppercase text-[10px] tracking-widest">
+                    <SelectValue placeholder="Select Format" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="STANDARD_MCQ">Standard MCQ (English Only)</SelectItem>
+                    <SelectItem value="BILINGUAL_MCQ">Bilingual MCQ (Line 1: EN, Line 2: PA)</SelectItem>
+                    <SelectItem value="DI_SET">DI Set (Table / Chart Data)</SelectItem>
+                    <SelectItem value="REASONING_DIAGRAM">Reasoning Diagram</SelectItem>
+                    <SelectItem value="PASSAGE_BASED">Passage Based (Shared Context)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <Textarea 
-                placeholder="Paste content following the Q1. [EN] \n [PA] template..."
+                placeholder={`Paste content for ${importFormat}...`}
                 className="min-h-[500px] rounded-[2rem] bg-slate-50 border-slate-100 p-8 text-sm font-mono leading-relaxed shadow-inner"
                 value={rawText}
                 onChange={e => setRawText(e.target.value)}
@@ -245,10 +265,7 @@ export default function BulkImportPage() {
                           <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Key: {q.correctAnswer}</span>
                        </div>
 
-                       <div className="space-y-4">
-                          <p className="text-xl font-bold text-[#0F172A] leading-tight">{q.questionEn}</p>
-                          <p className="text-xl font-medium text-slate-500 leading-tight italic">{q.questionPa}</p>
-                       </div>
+                       <QuestionRenderer language="en" question={q} />
 
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {['A','B','C','D'].map(l => (
@@ -258,7 +275,7 @@ export default function BulkImportPage() {
                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Option Node</span>
                                 </div>
                                 <p className="text-sm font-bold text-[#0F172A] mb-1">{q[`option${l}En`]}</p>
-                                <p className="text-sm font-medium text-slate-500">{q[`option${l}Pa`]}</p>
+                                <p className="text-sm font-medium text-slate-500 italic">{q[`option${l}Pa`]}</p>
                              </div>
                           ))}
                        </div>
@@ -272,7 +289,7 @@ export default function BulkImportPage() {
                           </div>
                           <div className="space-y-4">
                              <p className="text-sm font-medium text-slate-300 leading-relaxed"><span className="text-white font-black">EN:</span> {q.explanationEn}</p>
-                             <p className="text-sm font-medium text-slate-400 leading-relaxed italic border-t border-white/5 pt-4"><span className="text-white font-black">PA:</span> {q.explanationPa}</p>
+                             {q.explanationPa && <p className="text-sm font-medium text-slate-400 leading-relaxed italic border-t border-white/5 pt-4"><span className="text-white font-black">PA:</span> {q.explanationPa}</p>}
                           </div>
                        </div>
                     </div>
