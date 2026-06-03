@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo } from "react"
 import { cn } from "@/lib/utils"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, CheckCircle2, RotateCcw, HelpCircle, AlertCircle } from "lucide-react"
 
 interface QuestionPaletteProps {
   totalQuestions: number
@@ -12,13 +12,7 @@ interface QuestionPaletteProps {
   flaggedIndices: number[]
   visitedIndices: number[]
   onSelect: (index: number) => void
-  questions: any[]
 }
-
-/**
- * @fileOverview Refined 25-Node CBT Palette.
- * Strict 5x5 grid with official range selection and progress summaries.
- */
 
 export default function QuestionPalette({
   totalQuestions,
@@ -35,59 +29,48 @@ export default function QuestionPalette({
   useEffect(() => {
     const targetPage = Math.floor(currentIndex / PAGE_SIZE)
     if (targetPage !== currentPage) setCurrentPage(targetPage)
-  }, [currentIndex, totalQuestions])
+  }, [currentIndex, totalQuestions, currentPage])
 
   const startIdx = currentPage * PAGE_SIZE
   const endIdx = Math.min(startIdx + PAGE_SIZE, totalQuestions)
   const currentRange = Array.from({ length: endIdx - startIdx }, (_, i) => startIdx + i)
 
   const summary = useMemo(() => {
-    const answeredCount = answeredIndices.length
-    const reviewCount = flaggedIndices.length
-    const visitedCount = visitedIndices.length
+    const answered = answeredIndices.length
+    const review = flaggedIndices.length
+    const visited = visitedIndices.length
+    const answeredAndReview = flaggedIndices.filter(idx => answeredIndices.includes(idx)).length
     
     return {
-      answered: answeredCount,
-      marked: reviewCount,
-      notVisited: totalQuestions - visitedCount,
-      notAnswered: visitedCount - answeredCount
+      answered: answered - answeredAndReview,
+      review: review - answeredAndReview,
+      notVisited: totalQuestions - visited,
+      notAnswered: visited - answered,
+      answeredAndReview
     }
   }, [totalQuestions, answeredIndices, flaggedIndices, visitedIndices])
 
   return (
-    <div className="space-y-6 flex flex-col h-full text-left overflow-hidden">
-      {/* Live Stats Summary Grid */}
-      <div className="grid grid-cols-2 gap-3 shrink-0">
-         <SummaryBox count={summary.answered} label="Answered" color="bg-emerald-600" />
-         <SummaryBox count={summary.marked} label="Review" color="bg-amber-500" />
-         <SummaryBox count={summary.notAnswered} label="Not Ans" color="bg-rose-500" />
-         <SummaryBox count={summary.notVisited} label="Not Vis" color="bg-slate-100" textColor="text-slate-400" />
+    <div className="space-y-6 flex flex-col h-full text-left">
+      {/* Stats Legend Grid */}
+      <div className="grid grid-cols-2 gap-2">
+         <PaletteStat count={summary.answered} label="Answered" color="bg-emerald-600" />
+         <PaletteStat count={summary.notAnswered} label="Not Answered" color="bg-rose-500" />
+         <PaletteStat count={summary.notVisited} label="Not Visited" color="bg-slate-100" textColor="text-slate-500" />
+         <PaletteStat count={summary.review} label="Review" color="bg-amber-500" />
+         <PaletteStat count={summary.answeredAndReview} label="Ans & Review" color="bg-purple-600" />
       </div>
 
-      <div className="space-y-4 flex-1 flex flex-col">
-         {/* Institutional Range Selector */}
-         <div className="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-100 shrink-0">
-            <button 
-               onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
-               disabled={currentPage === 0}
-               className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-white disabled:opacity-10 transition-all"
-            >
-               <ChevronLeft className="h-5 w-5" />
-            </button>
-            <p className="text-[10px] font-black uppercase text-[#0B1528] tracking-widest">
-               Questions {startIdx + 1} - {endIdx}
-            </p>
-            <button 
-               onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
-               disabled={currentPage === totalPages - 1}
-               className="h-10 w-10 rounded-lg flex items-center justify-center hover:bg-white disabled:opacity-10 transition-all"
-            >
-               <ChevronRight className="h-5 w-5" />
-            </button>
+      <div className="space-y-4 pt-4 border-t border-slate-100">
+         <div className="flex items-center justify-between px-1">
+            <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Question Palette</h4>
+            <div className="flex gap-2">
+               <button onClick={() => setCurrentPage(p => Math.max(0, p - 1))} disabled={currentPage === 0} className="p-1 hover:bg-slate-100 rounded disabled:opacity-10"><ChevronLeft className="h-4 w-4" /></button>
+               <button onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))} disabled={currentPage === totalPages - 1} className="p-1 hover:bg-slate-100 rounded disabled:opacity-10"><ChevronRight className="h-4 w-4" /></button>
+            </div>
          </div>
 
-         {/* 5x5 Grid Protocol */}
-         <div className="grid grid-cols-5 gap-2 px-1">
+         <div className="grid grid-cols-5 gap-2 pb-6">
             {currentRange.map((idx) => {
                const isCurrent = currentIndex === idx
                const isAnswered = answeredIndices.includes(idx)
@@ -100,13 +83,14 @@ export default function QuestionPalette({
                      key={idx}
                      onClick={() => onSelect(idx)}
                      className={cn(
-                        "h-11 w-11 rounded-xl text-[11px] font-black transition-all border flex items-center justify-center",
-                        isCurrent ? "bg-blue-600 border-blue-600 text-white z-10 shadow-xl scale-110" : "border-transparent",
-                        !isCurrent && isBoth && "bg-purple-600 text-white",
-                        !isCurrent && isAnswered && !isFlagged && "bg-emerald-600 text-white",
-                        !isCurrent && isFlagged && !isAnswered && "bg-amber-500 text-white",
-                        !isCurrent && isVisited && !isAnswered && !isFlagged && "bg-rose-500 text-white",
-                        !isCurrent && !isVisited && "bg-slate-100 text-slate-400"
+                        "h-10 w-10 rounded-lg text-xs font-black transition-all border flex items-center justify-center relative",
+                        isCurrent ? "ring-2 ring-blue-600 ring-offset-2 scale-110 z-10" : "",
+                        !isCurrent && isBoth && "bg-purple-600 text-white border-purple-600",
+                        !isCurrent && isAnswered && !isFlagged && "bg-emerald-600 text-white border-emerald-600",
+                        !isCurrent && isFlagged && !isAnswered && "bg-amber-500 text-white border-amber-500",
+                        !isCurrent && isVisited && !isAnswered && !isFlagged && "bg-rose-500 text-white border-rose-500",
+                        !isCurrent && !isVisited && "bg-slate-100 text-slate-400 border-transparent",
+                        isCurrent && !isVisited && "bg-white border-blue-600 text-blue-600"
                      )}
                   >
                      {idx + 1}
@@ -114,36 +98,18 @@ export default function QuestionPalette({
                )
             })}
          </div>
-
-         {/* High-Fidelity Legend */}
-         <div className="pt-6 border-t border-slate-100 space-y-2.5">
-            <LegendRow color="bg-emerald-600" label="Answered" />
-            <LegendRow color="bg-rose-500" label="Not Answered" />
-            <LegendRow color="bg-amber-500" label="Marked for Review" />
-            <LegendRow color="bg-purple-600" label="Answered & Review" />
-            <LegendRow color="bg-slate-100" label="Not Visited" />
-         </div>
       </div>
     </div>
   )
 }
 
-function SummaryBox({ count, label, color, textColor }: any) {
+function PaletteStat({ count, label, color, textColor = "text-white" }: any) {
   return (
-    <div className="p-3 rounded-2xl bg-white border border-slate-100 flex items-center gap-3 shadow-sm">
-       <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center text-[10px] font-black text-white", color, textColor)}>
+    <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-100 bg-white shadow-sm">
+       <div className={cn("h-6 w-6 rounded-md flex items-center justify-center text-[10px] font-black shrink-0", color, textColor)}>
           {count}
        </div>
-       <span className="text-[8px] font-black uppercase text-slate-400 tracking-widest">{label}</span>
-    </div>
-  )
-}
-
-function LegendRow({ color, label }: any) {
-  return (
-    <div className="flex items-center gap-3">
-       <div className={cn("h-3 w-3 rounded-md shrink-0", color)} />
-       <span className="text-[9px] font-bold uppercase text-slate-500 tracking-[0.1em]">{label}</span>
+       <span className="text-[8px] font-black uppercase text-slate-400 leading-none">{label}</span>
     </div>
   )
 }

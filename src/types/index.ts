@@ -1,8 +1,9 @@
 
 export type Difficulty = 'easy' | 'medium' | 'hard';
-export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'QUESTION_REVIEWER' | 'SUPPORT_AGENT' | 'CURRENT_AFFAIRS_EDITOR' | 'MARKETING_MANAGER' | 'STUDENT';
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ';
 export type ContentStatus = 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'ARCHIVED';
+export type ExamType = 'punjab' | 'central';
 
 export interface Board {
   id: string;
@@ -25,12 +26,6 @@ export interface Exam {
   pattern?: string;
 }
 
-export interface Subject {
-  id: string;
-  name: string;
-  description: string;
-}
-
 export interface Question {
   id: string;
   boardId: string;
@@ -39,6 +34,8 @@ export interface Question {
   difficulty: Difficulty;
   topic?: string;
   status: ContentStatus;
+  paper?: string;
+  section?: string;
 
   // Trilingual Content
   questionEn: string;
@@ -68,15 +65,8 @@ export interface Question {
   explanationPa: string;
   explanationHi: string;
 
-  // Quality Analytics
-  attempts?: number;
-  correctAttempts?: number;
-  avgTimeSeconds?: number;
-
   createdAt: any;
   updatedAt?: any;
-  author?: string;
-  reviewedBy?: string;
   isStandalone?: boolean;
 }
 
@@ -86,13 +76,13 @@ export interface MockTest {
   boardId: string;
   examId: string;
   mockType: MockType;
+  examType: ExamType;
   duration: number;
   totalQuestions: number;
   questionIds: string[];
   difficulty: string;
   published: boolean;
   status: ContentStatus;
-  hasHindi?: boolean; // New institutional field for Central vs State exams
   createdAt: any;
   updatedAt?: any;
   author?: string;
@@ -108,18 +98,5 @@ export interface UserProfile {
   targetExam: string;
   createdAt: any;
   status: 'Pro' | 'Free';
-  planId?: string;
-  referralCount: number;
   subscriptions?: string[]; 
-  badges?: string[]; 
-}
-
-export interface ContentReport {
-  id: string;
-  userId: string;
-  questionId: string;
-  type: 'WRONG_ANS' | 'TYPO' | 'MISSING_DATA' | 'OTHER';
-  comment: string;
-  status: 'PENDING' | 'RESOLVED' | 'IGNORED';
-  timestamp: any;
 }
