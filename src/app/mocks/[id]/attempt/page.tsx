@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { useDoc, useFirestore, useUser } from "@/firebase"
+import { useDoc, useFirestore, useUser, useCollection } from "@/firebase"
 import { doc, getDoc, setDoc, serverTimestamp, collection, addDoc } from "firebase/firestore"
 import Timer from "@/components/mocks/Timer"
 import QuestionPalette from "@/components/mocks/QuestionPalette"
@@ -17,7 +17,8 @@ import {
   Languages,
   Loader2,
   Trash2,
-  Monitor
+  Monitor,
+  Target
 } from "lucide-react"
 import {
   Sheet,
@@ -29,11 +30,6 @@ import { cn } from "@/lib/utils"
 
 type LangMode = 'en' | 'reg' | 'bilingual'
 
-/**
- * @fileOverview Final Testbook-Style CBT Engine.
- * Features: Fixed state warnings, auto-paginating palette, and strictly locked Paper A metadata.
- */
-
 export default function MockAttemptPage() {
   const params = useParams()
   const router = useRouter()
@@ -43,6 +39,7 @@ export default function MockAttemptPage() {
   const mockId = params.id as string
   
   const { data: mock, loading: mockLoading } = useDoc<any>(useMemo(() => (db ? doc(db, "mocks", mockId) : null), [db, mockId]))
+  const { data: allPatterns } = useCollection<any>(useMemo(() => (db ? collection(db, "exam_patterns") : null), [db]))
   
   const [questions, setQuestions] = useState<any[]>([])
   const [currentIdx, setCurrentIdx] = useState(0)
@@ -54,6 +51,11 @@ export default function MockAttemptPage() {
   const [remainingTime, setRemainingTime] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [loadingQs, setLoadingQs] = useState(true)
+
+  const activePattern = useMemo(() => {
+    if (!allPatterns || !mock?.examId) return null
+    return allPatterns.find(p => p.examId === mock.examId)
+  }, [allPatterns, mock?.examId])
 
   useEffect(() => {
     async function init() {
@@ -76,45 +78,21 @@ export default function MockAttemptPage() {
     init()
   }, [db, mock, toast])
 
-  useEffect(() => {
-    if (!db || !user || !mockId) return
-    const sessionRef = doc(db, "test_sessions", `${user.uid}_${mockId}`)
-    getDoc(sessionRef).then(snap => {
-      if (snap.exists() && snap.data().status === 'IN_PROGRESS') {
-        const d = snap.data()
-        setAnswers(d.answers || {})
-        setFlagged(d.flagged || [])
-        setVisited(d.visited || [0])
-        setCurrentIdx(d.currentIdx || 0)
-        setRemainingTime(d.remainingTime || remainingTime)
+  const currentSection = useMemo(() => {
+    if (!activePattern || !questions.length) return { name: "General Assessment", paper: "PAPER B" }
+    
+    let cumulative = 0
+    for (const section of activePattern.sections) {
+      cumulative += section.count
+      if (currentIdx < cumulative) {
+        return { 
+          name: section.name, 
+          paper: section.name.includes("Qualifying") || section.name.includes("Paper A") ? "PAPER A" : "PAPER B" 
+        }
       }
-    })
-  }, [db, user, mockId])
-
-  const handleNext = () => {
-    if (currentIdx < questions.length - 1) {
-      const n = currentIdx + 1
-      setCurrentIdx(n)
-      if (!visited.includes(n)) setVisited(prev => [...prev, n])
     }
-  }
-
-  const handlePrev = () => {
-    if (currentIdx > 0) setCurrentIdx(currentIdx - 1)
-  }
-
-  const markForReview = () => {
-    if (!flagged.includes(currentIdx)) setFlagged(prev => [...prev, currentIdx])
-    handleNext()
-  }
-
-  const clearResponse = () => {
-    setAnswers(prev => {
-      const next = { ...prev }
-      delete next[currentIdx]
-      return next
-    })
-  }
+    return { name: "General Assessment", paper: "PAPER B" }
+  }, [activePattern, currentIdx, questions])
 
   const submitMock = useCallback(async () => {
     if (isSubmitting || questions.length === 0 || !user || !db) return
@@ -122,24 +100,39 @@ export default function MockAttemptPage() {
 
     const correctMap: Record<string, number> = { 'A': 0, 'B': 1, 'C': 2, 'D': 3 }
     let score = 0
+    
+    // Subject stats tracking
+    const subjectStats: Record<string, { correct: number; total: number; attempted: number }> = {}
+
     questions.forEach((q, idx) => {
-      if (answers[idx] !== undefined && answers[idx] === correctMap[q.correctAnswer]) score++
+      const subj = q.subjectId || 'general'
+      if (!subjectStats[subj]) subjectStats[subj] = { correct: 0, total: 0, attempted: 0 }
+      subjectStats[subj].total++
+
+      if (answers[idx] !== undefined) {
+        subjectStats[subj].attempted++
+        if (answers[idx] === correctMap[q.correctAnswer]) {
+          score++
+          subjectStats[subj].correct++
+        }
+      }
     })
 
     const payload = {
       mockId, userId: user.uid, score, totalQuestions: questions.length,
       accuracy: Math.round((score / (Object.keys(answers).length || 1)) * 100),
       timestamp: new Date().toISOString(), answers, createdAt: serverTimestamp(),
-      mockTitle: mock?.title || "Mock Test"
+      mockTitle: mock?.title || "Mock Test",
+      subjectStats
     }
 
     try {
       await addDoc(collection(db, "results"), payload)
       await setDoc(doc(db, "test_sessions", `${user.uid}_${mockId}`), { status: 'SUBMITTED', updatedAt: serverTimestamp() }, { merge: true })
-      toast({ title: "Submission Success", description: "Mock finalized successfully." })
+      toast({ title: "Audit Success", description: "Exam results finalized." })
       router.push(`/results/${mockId}`)
     } catch (e) {
-      toast({ variant: "destructive", title: "Audit Failed", description: "Submission failed." })
+      toast({ variant: "destructive", title: "Submission Failed", description: "Audit trail interrupted." })
       setIsSubmitting(false)
     }
   }, [isSubmitting, questions, answers, mock, user, db, router, mockId, toast])
@@ -147,21 +140,13 @@ export default function MockAttemptPage() {
   if (mockLoading || loadingQs) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-4">
       <Loader2 className="h-10 w-10 text-primary animate-spin" />
-      <p className="font-black uppercase text-[10px] tracking-widest text-slate-400 italic">Syncing Question Hub...</p>
+      <p className="font-black uppercase text-[10px] tracking-widest text-slate-400">Institutional Sync...</p>
     </div>
   )
 
   const q = questions[currentIdx]
   const regLabel = mock?.examType === 'central' ? 'हिन्दी' : 'ਪੰਜਾਬੀ'
   const regKey = mock?.examType === 'central' ? 'Hi' : 'Pa'
-
-  const isPaperA = currentIdx < 50;
-  const activePaper = isPaperA ? "PAPER A: PUNJABI QUALIFYING" : (q?.paper || "PAPER B: MAIN EXAM")
-  const activeSection = isPaperA ? "Punjabi Language & Grammar" : (q?.section || "General Assessment")
-
-  const qEn = (q?.questionEn || "").trim()
-  const qPa = (q?.[`question${regKey}`] || "").trim()
-  const isDuplicate = qEn === qPa
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white text-[#0F172A]">
@@ -177,35 +162,38 @@ export default function MockAttemptPage() {
           <Button variant="ghost" size="icon" onClick={() => setIsPaused(!isPaused)} className="h-9 w-9 text-slate-400 hover:text-white">
             {isPaused ? <PlayCircle className="h-5 w-5" /> : <PauseCircle className="h-5 w-5" />}
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => document.documentElement.requestFullscreen()} className="h-9 w-9 text-slate-400 hover:text-white hidden md:flex">
-             <Monitor className="h-5 w-5" />
-          </Button>
-          <Button onClick={submitMock} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] h-9 px-6 rounded-xl shadow-lg transition-all active:scale-95">Submit Test</Button>
+          <Button onClick={submitMock} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] h-9 px-6 rounded-xl shadow-lg">Finish Audit</Button>
         </div>
       </header>
 
-      <main className="flex flex-1 overflow-hidden relative">
+      <main className="flex flex-1 overflow-hidden">
         <div className="flex-1 flex flex-col overflow-hidden bg-[#F8FAFC]">
-          <div className="px-6 py-2 border-b border-slate-200 bg-white flex items-center justify-between shrink-0 shadow-sm">
+          <div className="px-6 py-3 border-b border-slate-200 bg-white flex items-center justify-between shrink-0 shadow-sm">
              <div className="flex items-center gap-4 text-left">
                 <div className="space-y-0.5">
-                   <p className="text-[9px] font-black text-orange-600 uppercase tracking-widest leading-none">{activePaper}</p>
-                   <h2 className="text-[11px] font-bold text-slate-700 uppercase tracking-tight">{activeSection}</h2>
+                   <p className="text-[9px] font-black text-orange-600 uppercase tracking-widest">{currentSection.paper}</p>
+                   <h2 className="text-xs font-black text-slate-800 uppercase flex items-center gap-2">
+                     <Target className="h-3 w-3 text-primary" /> {currentSection.name}
+                   </h2>
                 </div>
-                <div className="h-6 w-px bg-slate-100" />
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-tighter">Question {currentIdx + 1} of {questions.length}</span>
+                <div className="h-8 w-px bg-slate-100" />
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Question {currentIdx + 1} / {questions.length}</span>
              </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
-             <div className="max-w-4xl mx-auto space-y-6">
-                <div className="space-y-4 text-left">
-                   {language === 'en' && <p className="text-lg md:text-xl font-bold leading-snug text-[#0B1528]">{qEn}</p>}
-                   {language === 'reg' && <p className="text-lg md:text-xl font-bold leading-snug text-[#0B1528]">{qPa || qEn}</p>}
+          <div className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar">
+             <div className="max-w-4xl mx-auto space-y-10">
+                <div className="space-y-6 text-left">
+                   {language === 'en' && <p className="text-xl md:text-2xl font-bold leading-snug text-[#0B1528]">{q?.questionEn}</p>}
+                   {language === 'reg' && <p className="text-xl md:text-2xl font-bold leading-snug text-[#0B1528]">{q?.[`question${regKey}`] || q?.questionEn}</p>}
                    {language === 'bilingual' && (
-                      <div className="space-y-3">
-                         <p className="text-lg md:text-xl font-bold leading-snug text-[#0B1528]">{qEn}</p>
-                         {!isDuplicate && qPa && <p className="text-lg md:text-xl font-bold leading-snug text-[#0B1528] border-t border-slate-100 pt-3">{qPa}</p>}
+                      <div className="space-y-6">
+                         <p className="text-xl md:text-2xl font-bold leading-snug text-[#0B1528]">{q?.questionEn}</p>
+                         {(q?.[`question${regKey}`]?.trim() !== q?.questionEn?.trim()) && q?.[`question${regKey}`] && (
+                            <div className="pt-6 border-t border-slate-200">
+                               <p className="text-xl md:text-2xl font-bold leading-snug text-[#0B1528]">{q?.[`question${regKey}`]}</p>
+                            </div>
+                         )}
                       </div>
                    )}
                 </div>
@@ -213,31 +201,30 @@ export default function MockAttemptPage() {
                 <RadioGroup 
                   value={answers[currentIdx]?.toString() || ""} 
                   onValueChange={(v) => setAnswers(prev => ({ ...prev, [currentIdx]: parseInt(v) }))} 
-                  className="grid grid-cols-1 gap-2.5"
+                  className="grid grid-cols-1 gap-3"
                 >
                   {['A', 'B', 'C', 'D'].map((k, i) => {
                     const isSelected = answers[currentIdx] === i
-                    const optEn = (q?.[`option${k}En`] || "").trim()
-                    const optPa = (q?.[`option${k}${regKey}`] || "").trim()
-                    const isOptDuplicate = optEn === optPa
+                    const optEn = q?.[`option${k}En`] || ""
+                    const optPa = q?.[`option${k}${regKey}`] || ""
 
                     return (
                       <div key={i} onClick={() => setAnswers(prev => ({ ...prev, [currentIdx]: i }))} className={cn(
-                        "flex items-center space-x-3 p-3 md:p-4 border rounded-xl transition-all cursor-pointer bg-white shadow-sm hover:border-primary/30",
-                        isSelected ? 'border-primary ring-1 ring-primary/20 bg-primary/[0.02]' : 'border-slate-200'
+                        "flex items-center space-x-4 p-4 md:p-6 border rounded-2xl transition-all cursor-pointer bg-white shadow-sm hover:border-primary/40",
+                        isSelected ? 'border-primary ring-2 ring-primary/10 bg-primary/[0.01]' : 'border-slate-200'
                       )}>
                          <RadioGroupItem value={i.toString()} id={`opt-${i}`} className="text-primary" />
-                         <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer select-none text-sm md:text-base font-bold text-[#0B1528] flex flex-col gap-0.5">
+                         <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer select-none text-base md:text-lg font-bold text-[#0B1528] flex flex-col gap-1">
                             {language === 'bilingual' ? (
                                <>
                                   <span className="leading-tight">{optEn}</span>
-                                  {!isOptDuplicate && optPa && <span className="leading-tight pt-1 opacity-80">{optPa}</span>}
+                                  {optPa?.trim() !== optEn?.trim() && optPa && <span className="leading-tight opacity-70 border-t border-slate-50 pt-1 mt-1">{optPa}</span>}
                                </>
                             ) : (
                                <span>{language === 'en' ? optEn : (optPa || optEn)}</span>
                             )}
                          </Label>
-                         <span className="text-[10px] font-black text-slate-300">{k}</span>
+                         <span className="text-xs font-black text-slate-300">{k}</span>
                       </div>
                     )
                   })}
@@ -245,23 +232,21 @@ export default function MockAttemptPage() {
              </div>
           </div>
 
-          <footer className="h-16 border-t border-slate-200 bg-white px-6 flex items-center justify-between shrink-0 z-50">
-             <div className="flex gap-2">
-                <Button variant="outline" className="h-10 px-4 text-[10px] font-black uppercase tracking-widest" onClick={handlePrev} disabled={currentIdx === 0}>Previous</Button>
-                <Button variant="outline" className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-slate-400" onClick={clearResponse}><Trash2 className="h-3.5 w-3.5 mr-1" /> Clear</Button>
+          <footer className="h-20 border-t border-slate-200 bg-white px-8 flex items-center justify-between shrink-0 z-50 shadow-inner">
+             <div className="flex gap-3">
+                <Button variant="outline" className="h-12 px-6 text-[10px] font-black uppercase tracking-widest rounded-xl" onClick={() => currentIdx > 0 && setCurrentIdx(currentIdx - 1)} disabled={currentIdx === 0}>Previous</Button>
+                <Button variant="ghost" className="h-12 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400 rounded-xl" onClick={() => setAnswers(p => { const n={...p}; delete n[currentIdx]; return n; })}><Trash2 className="h-4 w-4 mr-2" /> Clear</Button>
              </div>
              
-             <div className="flex items-center gap-2">
-                <Button variant="outline" className={cn("h-10 px-4 text-[10px] font-black uppercase tracking-widest", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white" : "text-amber-600")} onClick={markForReview}>Review & Next</Button>
-                <Button className="bg-[#0B1528] hover:bg-black text-white h-10 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest" onClick={handleNext}>
-                  {currentIdx === questions.length - 1 ? 'Finish' : 'Save & Next'}
-                </Button>
+             <div className="flex items-center gap-3">
+                <Button variant="outline" className={cn("h-12 px-6 text-[10px] font-black uppercase tracking-widest rounded-xl", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white" : "text-amber-600")} onClick={() => { if(!flagged.includes(currentIdx)) setFlagged(p=>[...p, currentIdx]); if(currentIdx < questions.length-1) { setCurrentIdx(currentIdx+1); if(!visited.includes(currentIdx+1)) setVisited(v=>[...v, currentIdx+1])} }}>Review & Next</Button>
+                <Button className="bg-[#0B1528] hover:bg-black text-white h-12 px-10 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] shadow-xl" onClick={() => { if(currentIdx < questions.length-1) { setCurrentIdx(currentIdx+1); if(!visited.includes(currentIdx+1)) setVisited(v=>[...v, currentIdx+1])} else { toast({ title: "End of Series", description: "Review your answers and finish audit." }) } }}>Save & Next</Button>
              </div>
           </footer>
         </div>
 
-        <aside className="w-[300px] border-l border-slate-200 bg-white p-5 hidden lg:flex flex-col overflow-hidden shrink-0">
-           <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <aside className="w-[320px] border-l border-slate-200 bg-white hidden lg:flex flex-col shrink-0">
+           <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
               <QuestionPalette 
                 totalQuestions={questions.length} currentIndex={currentIdx} 
                 answeredIndices={Object.keys(answers).map(Number)} 
@@ -270,28 +255,13 @@ export default function MockAttemptPage() {
               />
            </div>
         </aside>
-
-        <div className="lg:hidden fixed bottom-20 right-4 z-[80]">
-           <Sheet>
-              <SheetTrigger asChild><Button className="h-12 w-12 rounded-full bg-[#0B1528] text-white shadow-2xl"><LayoutGrid className="h-5 w-5" /></Button></SheetTrigger>
-              <SheetContent side="bottom" className="h-[70vh] p-6 rounded-t-[3rem] border-t-4 border-primary">
-                 <QuestionPalette totalQuestions={questions.length} currentIndex={currentIdx} answeredIndices={Object.keys(answers).map(Number)} flaggedIndices={flagged} visitedIndices={visited} onSelect={setCurrentIdx} />
-              </SheetContent>
-           </Sheet>
-        </div>
       </main>
-
-      {isPaused && <div className="fixed inset-0 z-[200] bg-[#0B1528]/95 backdrop-blur-xl flex flex-col items-center justify-center space-y-6">
-         <div className="h-16 w-16 bg-primary/20 rounded-2xl flex items-center justify-center"><PauseCircle className="h-8 w-8 text-primary" /></div>
-         <h2 className="text-2xl font-black uppercase text-white">Audit Paused</h2>
-         <Button onClick={() => setIsPaused(false)} className="h-14 px-12 bg-white text-[#0B1528] font-black uppercase text-xs rounded-2xl shadow-3xl">Resume Audit</Button>
-      </div>}
     </div>
   )
 }
 
 function LangTab({ label, active, onClick }: any) {
   return (
-    <button onClick={onClick} className={cn("px-2.5 py-1 rounded text-[10px] font-black tracking-widest transition-all", active ? "bg-white text-[#0B1528] shadow-sm" : "text-white/40 hover:text-white")}>{label}</button>
+    <button onClick={onClick} className={cn("px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest transition-all", active ? "bg-white text-[#0B1528] shadow-lg scale-105" : "text-white/40 hover:text-white")}>{label}</button>
   )
 }

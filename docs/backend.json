@@ -45,6 +45,29 @@
         "status": { "type": "string", "enum": ["pending", "success", "failed"] },
         "createdAt": { "type": "string", "format": "date-time" }
       }
+    },
+    "ExamPattern": {
+      "title": "Exam Pattern",
+      "description": "Official question distribution and duration for a specific exam type.",
+      "type": "object",
+      "properties": {
+        "examId": { "type": "string" },
+        "examName": { "type": "string" },
+        "totalQuestions": { "type": "number" },
+        "duration": { "type": "number" },
+        "negativeMarking": { "type": "boolean" },
+        "sections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "count": { "type": "number" },
+              "subjectId": { "type": "string" }
+            }
+          }
+        }
+      }
     }
   },
   "auth": {
@@ -62,6 +85,10 @@
     "/orders/{orderId}": {
       "schema": { "$ref": "#/backend/entities/Order" },
       "description": "Transaction ledger."
+    },
+    "/exam_patterns/{patternId}": {
+      "schema": { "$ref": "#/backend/entities/ExamPattern" },
+      "description": "Official question distribution blueprints."
     },
     "/boards/{boardId}": { "schema": "object", "description": "Recruitment boards." },
     "/exams/{examId}": { "schema": "object", "description": "Official exam verticals." },

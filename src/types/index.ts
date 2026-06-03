@@ -23,8 +23,22 @@ export interface Exam {
   totalMocks: number;
   activeQuestions: number;
   duration?: number;
-  syllabus?: { topic: string; weight: string; status: string }[];
-  pattern?: string;
+}
+
+export interface PatternSection {
+  name: string;
+  count: number;
+  subjectId: string;
+}
+
+export interface ExamPattern {
+  id: string;
+  examId: string;
+  examName: string;
+  totalQuestions: number;
+  duration: number;
+  negativeMarking: boolean;
+  sections: PatternSection[];
 }
 
 export interface Question {
@@ -91,33 +105,4 @@ export interface UserProfile {
   createdAt: any;
   status: SubscriptionTier;
   subscriptions?: string[]; 
-}
-
-export interface Subscription {
-  id?: string;
-  userId: string;
-  planId: string;
-  status: 'active' | 'expired' | 'cancelled';
-  startDate: any;
-  expiryDate: any;
-}
-
-export interface Order {
-  id?: string;
-  userId: string;
-  planId: string;
-  amount: number;
-  currency: string;
-  status: 'pending' | 'success' | 'failed';
-  createdAt: any;
-}
-
-export interface Plan {
-  id: string;
-  name: string;
-  price: number;
-  durationDays: number;
-  features: string[];
-  recommended?: boolean;
-  tier: SubscriptionTier;
 }
