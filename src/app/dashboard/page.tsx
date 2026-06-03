@@ -32,7 +32,9 @@ import {
   Flame,
   Lightbulb,
   UserPlus,
-  MessageSquare
+  MessageSquare,
+  Medal,
+  Award
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
@@ -40,8 +42,8 @@ import { useEffect, useState } from "react"
 import Link from "next/link"
 
 /**
- * @fileOverview Final Advanced Selection Dashboard (Phase 81-107).
- * Features: Streak System, Daily Fact Feed, Readiness Score, Referral Tracker, Feedback trigger.
+ * @fileOverview Final Advanced Selection Dashboard (Phase 152).
+ * Features: Badge System, Daily Quiz Trigger, Readiness Score, Referral Tracker.
  */
 
 export default function StudentDashboard() {
@@ -56,7 +58,7 @@ export default function StudentDashboard() {
 
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
-    return query(collection(db, "results"), where("userId", "==", user.uid), orderBy("timestamp", "desc"), limit(20))
+    return query(collection(db, "results"), where("userId", "==", user.uid), orderBy("createdAt", "desc"), limit(20))
   }, [db, user])
 
   const sessionQuery = useMemo(() => {
@@ -129,7 +131,7 @@ export default function StudentDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           
           <div className="lg:col-span-4 space-y-10">
-            {/* Profile Overview with Streak (Phase 88) */}
+            {/* Profile Overview with Streak */}
             <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[3.5rem] bg-white overflow-hidden group">
                <div className="h-32 w-full bg-[#08152D] relative">
                   <div className="absolute top-0 right-0 p-6 flex items-center gap-2 bg-primary/20 rounded-bl-[2rem]">
@@ -155,26 +157,26 @@ export default function StudentDashboard() {
                </CardContent>
             </Card>
 
-            {/* Referral Tracker (Phase 104) */}
-            <Card className="border-none bg-[#0F172A] text-white p-10 rounded-[3rem] shadow-3xl space-y-8 relative overflow-hidden group">
-               <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:scale-110 transition-transform"><UserPlus className="h-32 w-32 text-primary" /></div>
-               <div className="space-y-1 relative z-10">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-primary">Aspirant Network</p>
-                  <h3 className="text-2xl font-headline font-black">Referral Nodes</h3>
-               </div>
-               <div className="flex items-center gap-6 relative z-10">
-                  <div className="text-6xl font-black text-white leading-none">{profile?.referralCount || 0}</div>
+            {/* Achievement Badges (Phase 152) */}
+            <Card className="border-none bg-white p-10 rounded-[3rem] shadow-3xl space-y-8">
+               <div className="flex items-center justify-between">
                   <div className="space-y-1">
-                     <p className="text-xs font-bold text-slate-400 uppercase">Invited Friends</p>
-                     <p className="text-[10px] font-black text-primary uppercase tracking-widest">Invite 5 for Pro Access</p>
+                     <p className="text-[10px] font-black uppercase tracking-widest text-primary">Milestone Hub</p>
+                     <h3 className="text-2xl font-headline font-black text-[#0F172A]">Aspirant Badges</h3>
                   </div>
+                  <Medal className="h-8 w-8 text-primary opacity-20" />
                </div>
-               <Button className="w-full bg-white text-black hover:bg-slate-100 font-black uppercase text-[10px] tracking-widest rounded-2xl h-14 relative z-10 shadow-2xl">
-                  Share Referral Link
-               </Button>
+               <div className="grid grid-cols-3 gap-4">
+                  <BadgeIcon icon={<Award />} label="Early Bird" active={analytics.total > 0} />
+                  <BadgeIcon icon={<Zap />} label="Quick Learner" active={analytics.total > 5} />
+                  <BadgeIcon icon={<Target />} label="Sniper" active={analytics.avgAccuracy > 80} />
+                  <BadgeIcon icon={<Flame />} label="Hot Streak" active={analytics.streak >= 7} />
+                  <BadgeIcon icon={<ShieldCheck />} label="Verified" active={true} />
+                  <BadgeIcon icon={<Star />} label="Pro Node" active={profile?.status === 'Pro'} />
+               </div>
             </Card>
 
-            {/* Daily Punjab GK Feed (Phase 82) */}
+            {/* Daily Punjab GK Feed */}
             <Card className="border-none bg-emerald-600 text-white p-10 rounded-[3rem] shadow-3xl relative overflow-hidden">
                <div className="absolute top-0 right-0 p-6 opacity-10"><Lightbulb className="h-32 w-32" /></div>
                <div className="relative z-10 space-y-6">
@@ -186,11 +188,6 @@ export default function StudentDashboard() {
                   <p className="text-emerald-50 text-xs font-bold uppercase tracking-widest opacity-70">Knowledge Node #42 • Official Pattern</p>
                </div>
             </Card>
-
-            {/* Feedback trigger (Phase 105) */}
-            <Button asChild variant="ghost" className="w-full h-16 rounded-[2.5rem] bg-white border-2 border-dashed border-slate-200 text-slate-400 font-black uppercase text-[10px] tracking-widest gap-3 shadow-inner hover:bg-slate-50 hover:text-primary transition-all">
-               <Link href="/contact"><MessageSquare className="h-4 w-4" /> Share Launch Feedback</Link>
-            </Button>
           </div>
 
           <div className="lg:col-span-8 space-y-12">
@@ -200,11 +197,8 @@ export default function StudentDashboard() {
                   <p className="text-slate-400 text-xs font-bold uppercase tracking-[0.3em]">Institutional Readiness Audit</p>
                </div>
                <div className="flex gap-4">
-                 <Button asChild variant="outline" className="rounded-2xl border-slate-200 font-black text-[10px] uppercase tracking-widest h-12 px-8 gap-3 bg-white shadow-sm hover:border-primary">
-                    <Link href="/notes"><Zap className="h-4 w-4 text-emerald-500" /> Notes Library</Link>
-                 </Button>
-                 <Button asChild variant="outline" className="rounded-2xl border-slate-200 font-black text-[10px] uppercase tracking-widest h-12 px-8 gap-3 bg-white shadow-sm hover:border-primary">
-                    <Link href="/revision"><Bookmark className="h-4 w-4 text-primary" /> Revision Hub</Link>
+                 <Button asChild className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-[10px] uppercase tracking-widest h-14 px-10 gap-3 shadow-xl">
+                    <Link href="/current-affairs"><Zap className="h-4 w-4 fill-current" /> Daily Quiz Node</Link>
                  </Button>
                </div>
             </div>
@@ -242,7 +236,7 @@ export default function StudentDashboard() {
                   </div>
                </Card>
 
-               {/* Selection Probability (Phase 61) */}
+               {/* Selection Probability */}
                <Card className="border-none shadow-3xl shadow-slate-900/10 rounded-[3rem] bg-[#0F172A] text-white p-10 space-y-8 relative overflow-hidden flex flex-col justify-between">
                   <div className="absolute top-0 right-0 p-6 opacity-10"><BrainCircuit className="h-32 w-32 text-primary" /></div>
                   <div className="space-y-6 relative z-10">
@@ -276,41 +270,21 @@ export default function StudentDashboard() {
                   </div>
                </Card>
             </div>
-
-            {/* Subject Matrix */}
-            <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[3.5rem] bg-white overflow-hidden">
-               <CardHeader className="p-12 border-b border-slate-50">
-                  <div className="space-y-1">
-                    <CardTitle className="font-headline text-2xl font-black text-[#0F172A] uppercase">Subject Precision Matrix</CardTitle>
-                    <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sectional accuracy audit based on attempt nodes</CardDescription>
-                  </div>
-               </CardHeader>
-               <CardContent className="p-12">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                     <div className="space-y-10">
-                        {analytics.subjectData.slice(0, 3).map((s: any) => (
-                           <SubjectProgress key={s.name} label={s.name} value={s.accuracy} />
-                        ))}
-                     </div>
-                     <div className="space-y-10">
-                        {analytics.subjectData.slice(3).map((s: any) => (
-                           <SubjectProgress key={s.name} label={s.name} value={s.accuracy} />
-                        ))}
-                        {analytics.subjectData.length === 0 && (
-                           <div className="h-full flex items-center justify-center text-slate-300 italic text-sm">
-                              Begin your first mock to generate precision nodes.
-                           </div>
-                        )}
-                     </div>
-                  </div>
-               </CardContent>
-            </Card>
           </div>
         </div>
       </main>
       <Footer />
     </div>
   )
+}
+
+function BadgeIcon({ icon, label, active }: { icon: React.ReactNode, label: string, active: boolean }) {
+   return (
+      <div className={`flex flex-col items-center gap-2 p-4 rounded-2xl border transition-all ${active ? 'bg-primary/5 border-primary/20 text-primary' : 'bg-slate-50 border-slate-100 text-slate-300 grayscale opacity-40'}`}>
+         <div className="h-8 w-8">{icon}</div>
+         <span className="text-[8px] font-black uppercase tracking-widest text-center">{label}</span>
+      </div>
+   )
 }
 
 function SubjectProgress({ label, value }: { label: string, value: number }) {

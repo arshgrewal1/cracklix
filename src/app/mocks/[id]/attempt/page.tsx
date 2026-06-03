@@ -10,7 +10,7 @@ import QuestionPalette from "@/components/mocks/QuestionPalette"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { ChevronLeft, ChevronRight, Flag, ShieldCheck, Trash2, Languages, Loader2, AlertTriangle, MessageSquare } from "lucide-react"
+import { ChevronLeft, ChevronRight, Flag, ShieldCheck, Trash2, Languages, Loader2, AlertTriangle, MessageSquare, Bookmark } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,8 +38,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /**
- * @fileOverview Institutional CBT Engine with Resume Capability and Feedback Loop.
- * Features: 10s Heartbeat Sync, Session Recovery, Bilingual Toggle, Audit Trace, Report Question.
+ * @fileOverview Institutional CBT Engine with Bookmark System (Phase 148).
  */
 
 export default function MockAttemptPage() {
@@ -61,6 +60,9 @@ export default function MockAttemptPage() {
   const [language, setLanguage] = useState<'english' | 'punjabi'>('english')
   const [remainingTime, setRemainingTime] = useState(0)
   const [sessionRecovered, setSessionRecovered] = useState(false)
+
+  // Bookmark Logic
+  const [isBookmarking, setIsBookmarking] = useState(false)
 
   // Report Logic
   const [reportData, setReportData] = useState({ type: "WRONG_ANS", comment: "" })
@@ -152,6 +154,25 @@ export default function MockAttemptPage() {
     })
   }, [isSubmitting, questions, answers, mockId, mockConfig, user, db, router])
 
+  const handleBookmark = () => {
+    if (!db || !user || !questions[currentIdx]) return
+    setIsBookmarking(true)
+    const q = questions[currentIdx]
+    const bookmarkRef = doc(collection(db, "bookmarks"))
+    
+    setDoc(bookmarkRef, {
+      id: bookmarkRef.id,
+      userId: user.uid,
+      questionId: q.id,
+      questionText: q.questionEn,
+      subjectId: q.subjectId,
+      timestamp: new Date().toISOString(),
+      createdAt: serverTimestamp()
+    }).then(() => {
+      toast({ title: "MCQ Saved", description: "This question has been added to your study repository." })
+    }).finally(() => setIsBookmarking(false))
+  }
+
   const handleReport = () => {
     if (!db || !user || !questions[currentIdx]) return
     setIsReporting(true)
@@ -221,42 +242,53 @@ export default function MockAttemptPage() {
                 <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-lg font-black uppercase text-[10px]">MCQ {currentIdx + 1}</Badge>
                 <Badge variant="outline" className="text-[10px] font-bold border-slate-200 uppercase">{q?.subjectId || "GK"}</Badge>
               </div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-slate-400 hover:text-rose-500 gap-2 text-[10px] font-black uppercase tracking-widest">
-                    <AlertTriangle className="h-3.5 w-3.5" /> Report Issue
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="rounded-[2rem] bg-[#0F172A] text-white border-white/10 p-10">
-                  <DialogHeader>
-                    <DialogTitle className="text-2xl font-black uppercase">Audit Feedback</DialogTitle>
-                    <DialogDescription className="text-slate-400">Help us maintain institutional accuracy. What is wrong with this question?</DialogDescription>
-                  </DialogHeader>
-                  <div className="space-y-6 py-6">
-                    <div className="space-y-2">
-                       <Label className="text-[10px] font-black uppercase text-slate-500">Issue Type</Label>
-                       <Select value={reportData.type} onValueChange={(v) => setReportData({...reportData, type: v})}>
-                         <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12"><SelectValue /></SelectTrigger>
-                         <SelectContent>
-                           <SelectItem value="WRONG_ANS">Incorrect Answer Key</SelectItem>
-                           <SelectItem value="TYPO">Typo / Language Error</SelectItem>
-                           <SelectItem value="MISSING_DATA">Missing Options/Images</SelectItem>
-                           <SelectItem value="OTHER">Other Issue</SelectItem>
-                         </SelectContent>
-                       </Select>
-                    </div>
-                    <div className="space-y-2">
-                       <Label className="text-[10px] font-black uppercase text-slate-500">Comments</Label>
-                       <Textarea value={reportData.comment} onChange={(e) => setReportData({...reportData, comment: e.target.value})} className="bg-white/5 border-white/10 rounded-xl min-h-[100px]" placeholder="Provide details..." />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button onClick={handleReport} disabled={isReporting} className="w-full bg-primary hover:bg-primary/90 rounded-xl h-12 font-black uppercase text-xs">
-                      Submit Audit Report
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
+              <div className="flex items-center gap-4">
+                 <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-slate-400 hover:text-primary gap-2 text-[10px] font-black uppercase tracking-widest"
+                    onClick={handleBookmark}
+                    disabled={isBookmarking}
+                 >
+                    <Bookmark className="h-3.5 w-3.5" /> Save Question
+                 </Button>
+                 <Dialog>
+                   <DialogTrigger asChild>
+                     <Button variant="ghost" size="sm" className="text-slate-400 hover:text-rose-500 gap-2 text-[10px] font-black uppercase tracking-widest">
+                       <AlertTriangle className="h-3.5 w-3.5" /> Report Issue
+                     </Button>
+                   </DialogTrigger>
+                   <DialogContent className="rounded-[2rem] bg-[#0F172A] text-white border-white/10 p-10">
+                     <DialogHeader>
+                       <DialogTitle className="text-2xl font-black uppercase">Audit Feedback</DialogTitle>
+                       <DialogDescription className="text-slate-400">Help us maintain institutional accuracy. What is wrong with this question?</DialogDescription>
+                     </DialogHeader>
+                     <div className="space-y-6 py-6">
+                       <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-slate-500">Issue Type</Label>
+                          <Select value={reportData.type} onValueChange={(v) => setReportData({...reportData, type: v})}>
+                            <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12"><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="WRONG_ANS">Incorrect Answer Key</SelectItem>
+                              <SelectItem value="TYPO">Typo / Language Error</SelectItem>
+                              <SelectItem value="MISSING_DATA">Missing Options/Images</SelectItem>
+                              <SelectItem value="OTHER">Other Issue</SelectItem>
+                            </SelectContent>
+                          </Select>
+                       </div>
+                       <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-slate-500">Comments</Label>
+                          <Textarea value={reportData.comment} onChange={(e) => setReportData({...reportData, comment: e.target.value})} className="bg-white/5 border-white/10 rounded-xl min-h-[100px]" placeholder="Provide details..." />
+                       </div>
+                     </div>
+                     <DialogFooter>
+                       <Button onClick={handleReport} disabled={isReporting} className="w-full bg-primary hover:bg-primary/90 rounded-xl h-12 font-black uppercase text-xs">
+                         Submit Audit Report
+                       </Button>
+                     </DialogFooter>
+                   </DialogContent>
+                 </Dialog>
+              </div>
             </div>
 
             <h2 className="text-2xl sm:text-3xl font-bold leading-relaxed text-[#0F172A]">

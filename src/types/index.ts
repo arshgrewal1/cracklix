@@ -101,6 +101,7 @@ export interface UserProfile {
   planId?: string;
   referralCount: number;
   subscriptions?: string[]; // Array of board IDs subscribed for alerts
+  badges?: string[]; // Earned achievement IDs
 }
 
 export interface ContentReport {
