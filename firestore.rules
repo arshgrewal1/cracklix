@@ -2,18 +2,17 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     /**
-     * @fileOverview TOTAL AUTHORITY NODE (SYNC 400).
-     * This rule set explicitly grants global read/write access to all 16 institutional collections
-     * to ensure total synchronization with the Management Portal and CBT Engine.
+     * @fileOverview TOTAL AUTHORITY NODE (SYNC 500).
+     * This rule set explicitly grants global access to all 16 institutional collections.
      * 
-     * DEPLOYMENT_ID: 2026-06-03T17:00:00Z
+     * DEPLOYMENT_ID: 2026-06-03T18:30:00Z
      */
     
     match /{document=**} {
       allow read, write: if true;
     }
 
-    // Explicit Paths for Audit Node Visibility
+    // Explicit Paths for Audit Node Visibility & List Operations
     match /users/{id} { allow read, write: if true; }
     match /boards/{id} { allow read, write: if true; }
     match /exams/{id} { allow read, write: if true; }
