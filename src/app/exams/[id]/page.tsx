@@ -10,32 +10,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { 
   Clock, 
   BookOpen, 
-  ArrowRight, 
   ShieldCheck, 
-  Info,
-  Calendar,
-  GraduationCap,
-  FileText,
-  CheckCircle2,
-  Lock,
   ChevronRight,
   TrendingUp,
-  MapPin,
-  HelpCircle,
   Trophy,
   History,
-  Target
+  Target,
+  CheckCircle2,
+  Lock
 } from "lucide-react"
 import Link from "next/link"
 import { useParams } from "next/navigation"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useMemo, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Progress } from "@/components/ui/progress"
-
-/**
- * @fileOverview Phase 137: Institutional Exam Hub with Cutoff DB and Syllabus Tracker.
- */
 
 const SYLLABUS = [
   { topic: "Punjab History (Sikh Gurus)", weight: "15 Qs", status: "Completed" },

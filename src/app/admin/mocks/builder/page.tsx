@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   ChevronLeft, 
   Database, 
@@ -28,12 +28,15 @@ import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
-/**
- * @fileOverview Phase 138: Smart Mock Assembler with One-Click Generation.
- * Features: Blueprint-driven Auto-Assembly & Structural Content Audit.
- */
-
 export default function MockBuilderPage() {
+  return (
+    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+      <MockBuilderContent />
+    </Suspense>
+  )
+}
+
+function MockBuilderContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const db = useFirestore()
@@ -62,7 +65,6 @@ export default function MockBuilderPage() {
     subjectId: "all"
   })
 
-  // Validation Logic
   const validation = useMemo(() => {
     const errors = []
     if (!mockData.title) errors.push("Series title is mandatory.")

@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -18,11 +17,15 @@ import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
-/**
- * @fileOverview Question Entry with Review Workflow Selector.
- */
-
 export default function QuestionEntryPage() {
+  return (
+    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+      <QuestionEntryContent />
+    </Suspense>
+  )
+}
+
+function QuestionEntryContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const db = useFirestore()
@@ -33,7 +36,7 @@ export default function QuestionEntryPage() {
   const questionId = searchParams.get("id")
   const isEditing = !!questionId
 
-  const { data: existingData } = useDoc(useMemo(() => (db && questionId ? doc(db, "questions", questionId) : null), [db, questionId]))
+  const { data: existingData } = useDoc<any>(useMemo(() => (db && questionId ? doc(db, "questions", questionId) : null), [db, questionId]))
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
@@ -124,7 +127,18 @@ export default function QuestionEntryPage() {
                 <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-slate-400">Detailed Rationale (EN)</Label><Textarea value={formData.explanationEn} onChange={e => setFormData({...formData, explanationEn: e.target.value})} className="rounded-2xl bg-slate-50 border-none p-6" /></div>
               </Card>
             </TabsContent>
-            {/* PA Content Mirroring same structure... */}
+
+            <TabsContent value="punjabi" className="space-y-6">
+              <Card className="border-none bg-white shadow-2xl rounded-[3rem] p-10 space-y-8">
+                <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-slate-400">Question Statement (PA)</Label><Textarea value={formData.questionPa} onChange={e => setFormData({...formData, questionPa: e.target.value})} className="min-h-[120px] rounded-2xl bg-slate-50 border-none p-6 text-lg font-medium" /></div>
+                <div className="grid grid-cols-2 gap-6">
+                  {['A','B','C','D'].map(opt => (
+                    <div key={opt} className="space-y-2"><Label className="text-[10px] font-black uppercase text-slate-400">Option {opt} (PA)</Label><Input value={(formData as any)[`option${opt}Pa`]} onChange={e => setFormData({...formData, [`option${opt}Pa`]: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" /></div>
+                  ))}
+                </div>
+                <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-slate-400">Detailed Rationale (PA)</Label><Textarea value={formData.explanationPa} onChange={e => setFormData({...formData, explanationPa: e.target.value})} className="rounded-2xl bg-slate-50 border-none p-6" /></div>
+              </Card>
+            </TabsContent>
           </Tabs>
         </div>
 
