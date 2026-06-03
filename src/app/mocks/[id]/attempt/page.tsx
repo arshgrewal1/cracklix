@@ -47,6 +47,11 @@ import { cn } from "@/lib/utils"
 
 type LangMode = 'en' | 'pa' | 'bilingual'
 
+/**
+ * @fileOverview Final Testbook-Style CBT Engine.
+ * Optimized for trilingual stacking (EN/PA/HI) and zero-scroll visibility.
+ */
+
 export default function MockAttemptPage() {
   const params = useParams()
   const router = useRouter()
@@ -64,7 +69,7 @@ export default function MockAttemptPage() {
   const [flagged, setFlagged] = useState<number[]>([])
   const [visited, setVisited] = useState<Set<number>>(new Set([0]))
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [language, setLanguage] = useState<LangMode>('bilingual') 
+  const [language, setLanguage] = useState<LangMode>('en') 
   const [remainingTime, setRemainingTime] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const [sessionRecovered, setSessionRecovered] = useState(false)
@@ -76,6 +81,7 @@ export default function MockAttemptPage() {
       setLoadingQuestions(true)
       try {
         const qData: any[] = []
+        // High-speed parallel fetch
         const fetchPromises = mockConfig.questionIds.map((id: string) => getDoc(doc(db, "questions", id)))
         const snapshots = await Promise.all(fetchPromises)
         snapshots.forEach(snap => { if (snap.exists()) qData.push({ ...snap.data(), id: snap.id }) })
@@ -153,17 +159,13 @@ export default function MockAttemptPage() {
     handleNext()
   }
 
-  // Keyboard Shortcuts
+  // Keyboard Shortcuts (Phase 150)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (isPaused || isSubmitting) return;
-      if (e.key === "ArrowRight") {
-        handleNext()
-      } else if (e.key === "ArrowLeft") {
-        handlePrev()
-      } else if (['1', '2', '3', '4'].includes(e.key)) {
-        setAnswers(prev => ({ ...prev, [currentIdx]: parseInt(e.key) - 1 }));
-      }
+      if (e.key === "ArrowRight") handleNext()
+      else if (e.key === "ArrowLeft") handlePrev()
+      else if (['1', '2', '3', '4'].includes(e.key)) setAnswers(prev => ({ ...prev, [currentIdx]: parseInt(e.key) - 1 }));
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
@@ -213,7 +215,7 @@ export default function MockAttemptPage() {
   if (mockLoading || loadingQuestions) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
        <Loader2 className="h-10 w-10 text-primary animate-spin" />
-       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Exam Hub...</p>
+       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Initializing Secure Hub...</p>
     </div>
   )
 
@@ -248,14 +250,14 @@ export default function MockAttemptPage() {
                 </AlertDialogTrigger>
                 <AlertDialogContent className="rounded-2xl p-8 max-w-md">
                   <AlertDialogHeader className="text-left space-y-3">
-                    <AlertDialogTitle className="text-xl font-black uppercase">Finish Test?</AlertDialogTitle>
+                    <AlertDialogTitle className="text-xl font-black uppercase">Finish Audit?</AlertDialogTitle>
                     <AlertDialogDescription className="text-sm font-medium text-slate-500">
-                      You've attempted {Object.keys(answers).length} questions. Are you ready to audit your performance?
+                      You've attempted {Object.keys(answers).length} questions. Are you ready to generate your high-fidelity report?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter className="flex gap-2 pt-4">
                     <AlertDialogCancel className="rounded-lg font-bold h-11 flex-1">Review</AlertDialogCancel>
-                    <AlertDialogAction onClick={submitMock} className="bg-[#0F172A] hover:bg-black text-white rounded-lg h-11 font-bold flex-1">Submit</AlertDialogAction>
+                    <AlertDialogAction onClick={submitMock} className="bg-[#0F172A] hover:bg-black text-white rounded-lg h-11 font-bold flex-1">Confirm</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
              </AlertDialog>
@@ -268,8 +270,8 @@ export default function MockAttemptPage() {
            <div className="absolute inset-0 z-[100] bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-300">
               <PauseCircle className="h-16 w-16 text-primary" />
               <div className="text-center">
-                 <h2 className="text-2xl font-black uppercase">Test Paused</h2>
-                 <p className="text-slate-500 text-sm">Your state is secured on the Cracklix repository.</p>
+                 <h2 className="text-2xl font-black uppercase">Audit Interrupted</h2>
+                 <p className="text-slate-500 text-sm">Your state is secured on the Cracklix cloud node.</p>
               </div>
               <Button onClick={() => setIsPaused(false)} className="h-12 px-8 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-xs tracking-widest rounded-lg shadow-xl">
                  Resume Now
@@ -277,7 +279,6 @@ export default function MockAttemptPage() {
            </div>
         )}
 
-        {/* Question Area (75% on Desktop) */}
         <div className="flex-1 flex flex-col overflow-hidden bg-[#F8FAFC]">
           <div className="px-6 py-3 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
              <div className="flex items-center gap-4">
@@ -291,9 +292,8 @@ export default function MockAttemptPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar">
-             <div className="max-w-4xl mx-auto space-y-8">
-                {/* Question Statement Stacking */}
-                <div className="space-y-6 text-left">
+             <div className="max-w-4xl mx-auto space-y-10">
+                <div className="space-y-8 text-left">
                    {(language === 'en' || language === 'bilingual') && (
                       <p className="text-[20px] md:text-[24px] lg:text-[28px] font-bold leading-relaxed text-[#0F172A] antialiased whitespace-pre-line">
                          {q.questionEn}
@@ -306,7 +306,6 @@ export default function MockAttemptPage() {
                    )}
                 </div>
 
-                {/* Option Cards Stacking */}
                 <RadioGroup 
                   value={answers[currentIdx]?.toString() || ""} 
                   onValueChange={(val) => setAnswers(prev => ({ ...prev, [currentIdx]: parseInt(val) }))} 
@@ -339,7 +338,6 @@ export default function MockAttemptPage() {
              </div>
           </div>
 
-          {/* Testbook Style Footer Actions */}
           <footer className="h-16 border-t border-slate-200 bg-white px-4 md:px-6 flex items-center justify-between shrink-0 z-50 shadow-inner">
              <div className="flex gap-2">
                 <Button variant="outline" className="rounded-lg h-10 px-4 font-black uppercase text-[10px] tracking-widest border-slate-200 hidden md:flex" onClick={handlePrev} disabled={currentIdx === 0}>Previous</Button>
@@ -380,7 +378,6 @@ export default function MockAttemptPage() {
           </footer>
         </div>
 
-        {/* Desktop Sidebar (25% on Desktop) */}
         <aside className="w-[320px] border-l border-slate-200 bg-white p-6 hidden lg:flex flex-col overflow-hidden">
            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
               <QuestionPalette 

@@ -41,7 +41,7 @@ export default function QuestionPalette({
   useEffect(() => {
     const targetPage = Math.floor(currentIndex / PAGE_SIZE)
     if (targetPage !== currentPage) setCurrentPage(targetPage)
-  }, [currentIndex, currentPage])
+  }, [currentIndex, totalQuestions])
 
   const startIdx = currentPage * PAGE_SIZE
   const endIdx = Math.min(startIdx + PAGE_SIZE, totalQuestions)
@@ -49,20 +49,20 @@ export default function QuestionPalette({
 
   const summary = useMemo(() => ({
     answered: answeredIndices.length,
-    notAnswered: visitedIndices.size - answeredIndices.length,
+    notAnswered: visitedIndices.length - answeredIndices.length,
     marked: flaggedIndices.filter(idx => !answeredIndices.includes(idx)).length,
     ansAndMarked: flaggedIndices.filter(idx => answeredIndices.includes(idx)).length,
-    notVisited: totalQuestions - visitedIndices.size
+    notVisited: totalQuestions - visitedIndices.length
   }), [totalQuestions, answeredIndices, flaggedIndices, visitedIndices])
 
   return (
     <div className="space-y-8 flex flex-col h-full">
       {/* Live Stats Summary */}
       <div className="grid grid-cols-2 gap-2 shrink-0">
-         <SummaryNode count={answeredIndices.length} label="Answered" color="bg-emerald-600" />
+         <SummaryNode count={summary.answered} label="Answered" color="bg-emerald-600" />
          <SummaryNode count={flaggedIndices.length} label="Review" color="bg-amber-500" />
-         <SummaryNode count={totalQuestions - visitedIndices.size} label="Not Visited" color="bg-slate-100" textColor="text-slate-400" />
-         <SummaryNode count={visitedIndices.size - answeredIndices.length} label="Not Answered" color="bg-rose-500" />
+         <SummaryNode count={summary.notVisited} label="Not Visited" color="bg-slate-100" textColor="text-slate-400" />
+         <SummaryNode count={summary.notAnswered} label="Not Answered" color="bg-rose-500" />
       </div>
 
       <div className="space-y-4 flex-1 flex flex-col overflow-hidden">
@@ -91,7 +91,7 @@ export default function QuestionPalette({
                const isCurrent = currentIndex === idx
                const isAnswered = answeredIndices.includes(idx)
                const isFlagged = flaggedIndices.includes(idx)
-               const isVisited = visitedIndices.has(idx)
+               const isVisited = visitedIndices.includes(idx)
                const isBoth = isAnswered && isFlagged
 
                return (
