@@ -1,3 +1,4 @@
+
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -5,6 +6,7 @@ import { HeartPulse, Database, Zap, Activity, Clock, ShieldCheck, Search, HardDr
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 
 const healthData = [
   { time: "00:00", latency: 120, reads: 450 },
@@ -17,8 +19,8 @@ const healthData = [
 ]
 
 /**
- * @fileOverview Final Operational Node Monitor (Phase 110).
- * Real-time monitoring of system latency, database node activity, and operational stability.
+ * @fileOverview Final Operational Node Monitor.
+ * Standardised to high-contrast Navy/White theme for readability.
  */
 
 export default function PlatformHealth() {
@@ -33,38 +35,38 @@ export default function PlatformHealth() {
   }
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-12 pb-20 text-[#0F172A]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div>
            <div className="flex items-center gap-3 mb-2">
               <HeartPulse className="h-6 w-6 text-rose-500" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Platform Stability Monitor</span>
            </div>
-          <h1 className="text-5xl font-black font-headline text-primary uppercase tracking-tight">System Health</h1>
-          <p className="text-muted-foreground mt-2 text-lg">Real-time telemetry for institutional node performance and latency.</p>
+          <h1 className="text-5xl font-black font-headline text-[#0F172A] uppercase tracking-tight">System Health</h1>
+          <p className="text-slate-500 mt-2 text-lg font-medium">Real-time telemetry for institutional node performance and latency.</p>
         </div>
         <div className="flex items-center gap-4">
            <div className="text-right">
               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Last Signal Sync</p>
-              <p className="text-sm font-bold text-emerald-500">{lastSync}</p>
+              <p className="text-sm font-bold text-emerald-600">{lastSync}</p>
            </div>
-           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-white/5 bg-white/5" onClick={handleRefresh}>
+           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-slate-200 bg-white" onClick={handleRefresh}>
               <RefreshCw className="h-5 w-5 text-slate-400" />
            </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-         <HealthCard label="API Latency" value="142ms" status="OPTIMAL" color="text-emerald-500" icon={<Zap />} />
-         <HealthCard label="Storage Node" value="2.4GB / 5GB" status="STABLE" color="text-blue-500" icon={<HardDrive />} />
-         <HealthCard label="Auth Gateway" status="ONLINE" value="99.9%" color="text-emerald-500" icon={<ShieldCheck />} />
-         <HealthCard label="Compute Load" status="BALANCED" value="18%" color="text-emerald-500" icon={<Activity />} />
+         <HealthCard label="API Latency" value="142ms" status="OPTIMAL" color="text-emerald-600" icon={<Zap className="text-primary" />} />
+         <HealthCard label="Storage Node" value="2.4GB / 5GB" status="STABLE" color="text-blue-600" icon={<HardDrive className="text-blue-500" />} />
+         <HealthCard label="Auth Gateway" status="ONLINE" value="99.9%" color="text-emerald-600" icon={<ShieldCheck className="text-emerald-500" />} />
+         <HealthCard label="Compute Load" status="BALANCED" value="18%" color="text-emerald-600" icon={<Activity className="text-rose-500" />} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-         <Card className="border-none shadow-3xl bg-card/50 rounded-[3rem] overflow-hidden">
-            <CardHeader className="p-10 border-b border-white/5">
-               <CardTitle className="text-2xl font-headline font-black uppercase">Database Read Volume</CardTitle>
+         <Card className="border-slate-100 shadow-3xl bg-white rounded-[3rem] overflow-hidden">
+            <CardHeader className="p-10 border-b border-slate-50 bg-slate-50/50">
+               <CardTitle className="text-2xl font-headline font-black uppercase text-[#0F172A]">Database Read Volume</CardTitle>
                <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Institutional extraction nodes per 24h cycle</CardDescription>
             </CardHeader>
             <CardContent className="p-10">
@@ -77,10 +79,10 @@ export default function PlatformHealth() {
                               <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                            </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                         <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} />
                         <YAxis hide />
-                        <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: 'none', borderRadius: '12px' }} />
+                        <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: 'none', borderRadius: '12px', color: 'white' }} />
                         <Area type="monotone" dataKey="reads" stroke="hsl(var(--primary))" strokeWidth={4} fillOpacity={1} fill="url(#colorReads)" />
                      </AreaChart>
                   </ResponsiveContainer>
@@ -88,9 +90,9 @@ export default function PlatformHealth() {
             </CardContent>
          </Card>
 
-         <Card className="border-none shadow-3xl bg-card/50 rounded-[3rem] overflow-hidden">
-            <CardHeader className="p-10 border-b border-white/5">
-               <CardTitle className="text-2xl font-headline font-black uppercase">System Latency (ms)</CardTitle>
+         <Card className="border-slate-100 shadow-3xl bg-white rounded-[3rem] overflow-hidden">
+            <CardHeader className="p-10 border-b border-slate-50 bg-slate-50/50">
+               <CardTitle className="text-2xl font-headline font-black uppercase text-[#0F172A]">System Latency (ms)</CardTitle>
                <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Real-time response trail for CBT engine</CardDescription>
             </CardHeader>
             <CardContent className="p-10">
@@ -103,7 +105,7 @@ export default function PlatformHealth() {
                               <stop offset="95%" stopColor="#F43F5E" stopOpacity={0}/>
                            </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                         <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} />
                         <YAxis hide />
                         <Area type="monotone" dataKey="latency" stroke="#F43F5E" strokeWidth={4} fillOpacity={1} fill="url(#colorLatency)" />
@@ -114,10 +116,10 @@ export default function PlatformHealth() {
          </Card>
       </div>
 
-      <div className="bg-primary/5 border border-primary/10 rounded-[3.5rem] p-12 text-center space-y-4">
-         <ShieldCheck className="h-12 w-12 text-primary mx-auto mb-4 opacity-50" />
-         <h4 className="text-3xl font-headline font-black uppercase text-white">Institutional Security High</h4>
-         <p className="text-slate-400 max-w-xl mx-auto">Zero anomalies detected in the last 72 hours. All extraction nodes are operating within official performance parameters.</p>
+      <div className="bg-emerald-50 border border-emerald-100 rounded-[3.5rem] p-12 text-center space-y-4 shadow-sm">
+         <ShieldCheck className="h-12 w-12 text-emerald-600 mx-auto mb-4 opacity-50" />
+         <h4 className="text-3xl font-headline font-black uppercase text-[#0F172A]">Institutional Security High</h4>
+         <p className="text-slate-500 max-w-xl mx-auto font-medium">Zero anomalies detected in the last 72 hours. All extraction nodes are operating within official performance parameters.</p>
       </div>
     </div>
   )
@@ -125,12 +127,12 @@ export default function PlatformHealth() {
 
 function HealthCard({ label, value, status, icon, color }: any) {
    return (
-      <Card className="border-none shadow-2xl bg-card/50 p-10 rounded-[2.5rem] relative overflow-hidden group">
+      <Card className="border-slate-100 shadow-xl bg-white p-10 rounded-[2.5rem] relative overflow-hidden group">
          <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform">{icon}</div>
-         <div className="space-y-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{label}</p>
-            <p className="text-4xl font-headline font-black text-white">{value}</p>
-            <Badge className={`border-none text-[8px] font-black px-2 py-0.5 rounded-lg bg-emerald-500/10 text-emerald-500 uppercase tracking-widest`}>
+         <div className="space-y-4 relative z-10 text-left">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</p>
+            <p className="text-4xl font-headline font-black text-[#0F172A]">{value}</p>
+            <Badge className={`border-none text-[8px] font-black px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-600 uppercase tracking-widest`}>
                {status}
             </Badge>
          </div>

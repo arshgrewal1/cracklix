@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo } from "react"
@@ -13,15 +14,14 @@ import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Institutional Support Center (Phase 109).
- * Handles aspirant inquiries, technical tickets, and feedback nodes.
+ * @fileOverview Institutional Support Center.
+ * Standardised to high-contrast Navy/White theme for readability.
  */
 
 export default function SupportHub() {
   const db = useFirestore()
   const { toast } = useToast()
   
-  // Note: Standard institutional messages are stored in 'support_tickets'
   const { data: tickets, loading } = useCollection<any>(useMemo(() => (db ? query(collection(db, "support_tickets"), orderBy("timestamp", "desc")) : null), [db]))
 
   const handleResolve = async (id: string) => {
@@ -30,83 +30,83 @@ export default function SupportHub() {
   }
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-12 pb-20 text-[#0F172A]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div>
            <div className="flex items-center gap-3 mb-2">
               <HelpCircle className="h-6 w-6 text-blue-500" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Aspirant Support Gateway</span>
            </div>
-          <h1 className="text-5xl font-black font-headline text-primary uppercase tracking-tight">Support Hub</h1>
-          <p className="text-muted-foreground mt-2 text-lg">Manage institutional inquiries and technical support requests.</p>
+          <h1 className="text-5xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Support Hub</h1>
+          <p className="text-slate-500 mt-2 text-lg font-medium">Manage institutional inquiries and technical support requests.</p>
         </div>
         <div className="flex gap-4">
-           <Card className="border-none bg-white/5 rounded-2xl px-8 py-4 flex items-center gap-4 shadow-xl">
-              <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+           <Card className="border-slate-100 bg-white rounded-2xl px-8 py-4 flex items-center gap-4 shadow-xl">
+              <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner">
                  <MessageSquare className="h-5 w-5" />
               </div>
-              <div className="space-y-0.5">
-                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Active Tickets</p>
-                 <p className="text-2xl font-headline font-black text-white">{tickets?.filter((t:any) => t.status !== 'RESOLVED').length || 0}</p>
+              <div className="space-y-0.5 text-left">
+                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest text-left">Active Tickets</p>
+                 <p className="text-2xl font-headline font-black text-[#0F172A]">{tickets?.filter((t:any) => t.status !== 'RESOLVED').length || 0}</p>
               </div>
            </Card>
         </div>
       </div>
 
       <div className="relative group">
-         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500 group-hover:text-primary transition-colors" />
-         <Input className="pl-16 h-16 rounded-[1.5rem] bg-card/50 border-none shadow-2xl text-lg font-medium" placeholder="Search support repository..." />
+         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-hover:text-primary transition-colors" />
+         <Input className="pl-16 h-16 rounded-[1.5rem] bg-white border-slate-100 shadow-2xl text-lg font-medium text-[#0F172A]" placeholder="Search support repository..." />
       </div>
 
-      <Card className="border-none shadow-3xl bg-card/50 rounded-[3rem] overflow-hidden">
-        <CardContent className="p-0">
+      <Card className="border-slate-100 shadow-3xl bg-white rounded-[3rem] overflow-hidden">
+        <CardContent className="p-0 text-left">
           <Table>
-            <TableHeader className="bg-muted/30">
-              <TableRow className="border-white/5 h-20">
-                <TableHead className="px-12 text-[10px] font-black uppercase tracking-[0.3em]">Aspirant Node</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-[0.3em]">Inquiry Context</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-[0.3em]">Status</TableHead>
-                <TableHead className="text-right px-12 text-[10px] font-black uppercase tracking-[0.3em]">Audit</TableHead>
+            <TableHeader className="bg-slate-50/50">
+              <TableRow className="border-slate-50 h-20">
+                <TableHead className="px-12 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Aspirant Node</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Inquiry Context</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Status</TableHead>
+                <TableHead className="text-right px-12 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Audit</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}><TableCell colSpan={4} className="px-12 py-10"><Skeleton className="h-16 w-full rounded-2xl bg-white/5" /></TableCell></TableRow>
+                  <TableRow key={i}><TableCell colSpan={4} className="px-12 py-10"><Skeleton className="h-16 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
                 ))
               ) : tickets && tickets.length > 0 ? (
                 tickets.map((ticket: any) => (
-                  <TableRow key={ticket.id} className="hover:bg-white/5 group border-white/5 transition-all">
+                  <TableRow key={ticket.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                     <TableCell className="px-12 py-10">
                        <div className="flex items-center gap-6">
                           <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary font-black uppercase text-xs">
                              {ticket.name?.[0] || 'A'}
                           </div>
                           <div className="space-y-1">
-                             <p className="font-bold text-slate-100">{ticket.name}</p>
-                             <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{ticket.email}</p>
+                             <p className="font-bold text-[#0F172A]">{ticket.name}</p>
+                             <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{ticket.email}</p>
                           </div>
                        </div>
                     </TableCell>
                     <TableCell className="max-w-md">
                        <div className="space-y-2">
-                          <p className="font-bold text-slate-300 line-clamp-1">{ticket.subject || 'Institutional Inquiry'}</p>
-                          <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">{ticket.message}</p>
+                          <p className="font-bold text-slate-600 line-clamp-1">{ticket.subject || 'Institutional Inquiry'}</p>
+                          <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">{ticket.message}</p>
                        </div>
                     </TableCell>
                     <TableCell>
                        <Badge className={`border-none text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg ${
-                         ticket.status === 'RESOLVED' ? 'bg-emerald-500/10 text-emerald-500' : 'bg-orange-500/10 text-orange-500'
+                         ticket.status === 'RESOLVED' ? 'bg-emerald-50 text-emerald-600' : 'bg-orange-50 text-orange-600'
                        }`}>
                          {ticket.status || 'PENDING'}
                        </Badge>
                     </TableCell>
                     <TableCell className="text-right px-12">
                        <div className="flex justify-end gap-3 opacity-20 group-hover:opacity-100 transition-opacity">
-                          <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl text-emerald-500 hover:bg-emerald-500/10" onClick={() => handleResolve(ticket.id)}>
+                          <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl text-emerald-600 hover:bg-emerald-50" onClick={() => handleResolve(ticket.id)}>
                              <CheckCircle2 className="h-6 w-6" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl text-rose-500 hover:bg-rose-500/10">
+                          <Button variant="ghost" size="icon" className="h-12 w-12 rounded-2xl text-rose-500 hover:bg-rose-50">
                              <Trash2 className="h-6 w-6" />
                           </Button>
                        </div>
@@ -116,9 +116,9 @@ export default function SupportHub() {
               ) : (
                 <TableRow>
                    <TableCell colSpan={4} className="h-80 text-center">
-                      <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
-                         <MessageSquare className="h-24 w-24" />
-                         <p className="font-black font-headline text-2xl uppercase tracking-[0.2em]">Support Queue Empty</p>
+                      <div className="flex flex-col items-center justify-center opacity-10 space-y-6 text-center">
+                         <MessageSquare className="h-24 w-24 text-slate-400" />
+                         <p className="font-black font-headline text-2xl uppercase tracking-[0.2em] text-slate-500">Support Queue Empty</p>
                       </div>
                    </TableCell>
                 </TableRow>

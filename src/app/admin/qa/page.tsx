@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState } from "react"
@@ -24,8 +25,8 @@ import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Phase 55: Institutional QA & Testing Dashboard.
- * Scans for broken links, missing content, and data quality issues.
+ * @fileOverview Institutional QA & Testing Dashboard.
+ * Standardised to high-contrast Navy/White theme for readability.
  */
 
 export default function QADashboard() {
@@ -44,7 +45,7 @@ export default function QADashboard() {
       !q.questionEn || 
       !q.optionAEn || 
       !q.explanationEn ||
-      (q.questionPa && !q.optionAPa) // Partial bilingual check
+      (q.questionPa && !q.optionAPa) 
     )
 
     const brokenMocks = mocks.filter((m: any) => 
@@ -79,15 +80,15 @@ export default function QADashboard() {
   }
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-12 pb-20 text-[#0F172A]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div>
            <div className="flex items-center gap-3 mb-2">
               <ShieldAlert className="h-6 w-6 text-rose-500" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Quality Assurance Engine</span>
            </div>
-          <h1 className="text-5xl font-black font-headline text-primary uppercase tracking-tight">Audit Console</h1>
-          <p className="text-muted-foreground mt-2 text-lg">Systematic scan for broken MCQs, incomplete mocks, and pattern mismatches.</p>
+          <h1 className="text-5xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Audit Console</h1>
+          <p className="text-slate-500 mt-2 text-lg font-medium">Systematic scan for broken MCQs, incomplete mocks, and pattern mismatches.</p>
         </div>
         <Button 
           onClick={handleRunScan} 
@@ -99,48 +100,48 @@ export default function QADashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-         <QAStatCard label="Critical Errors" value={issues.stats.critical} color="text-rose-500" desc="Questions missing core metadata" />
-         <QAStatCard label="Broken Mocks" value={issues.brokenMocks.length} color="text-orange-500" desc="Mocks with missing references" />
-         <QAStatCard label="Overall Health" value={`${questions && questions.length > 0 ? Math.round(((questions.length - issues.stats.critical) / questions.length) * 100) : 100}%`} color="text-emerald-500" desc="Repository content integrity score" />
+         <QAStatCard label="Critical Errors" value={issues.stats.critical} color="text-rose-600" desc="Questions missing core metadata" />
+         <QAStatCard label="Broken Mocks" value={issues.brokenMocks.length} color="text-orange-600" desc="Mocks with missing references" />
+         <QAStatCard label="Overall Health" value={`${questions && questions.length > 0 ? Math.round(((questions.length - issues.stats.critical) / questions.length) * 100) : 100}%`} color="text-emerald-600" desc="Repository content integrity score" />
       </div>
 
       <div className="space-y-10">
          <section className="space-y-6">
-            <h3 className="text-2xl font-headline font-black uppercase flex items-center gap-4">
-               <AlertTriangle className="h-6 w-6 text-rose-500" /> Broken Question Node
+            <h3 className="text-2xl font-headline font-black uppercase flex items-center gap-4 text-[#0F172A]">
+               <AlertTriangle className="h-6 w-6 text-rose-600" /> Broken Question Node
             </h3>
-            <Card className="border-none shadow-3xl bg-card/50 rounded-[2.5rem] overflow-hidden">
+            <Card className="border-slate-100 shadow-3xl bg-white rounded-[2.5rem] overflow-hidden text-left">
                <Table>
-                  <TableHeader className="bg-muted/30">
-                     <TableRow className="border-white/5 h-16">
-                        <TableHead className="px-10 text-[10px] font-black uppercase">Question Statement</TableHead>
-                        <TableHead className="text-[10px] font-black uppercase text-center">Missing Data</TableHead>
-                        <TableHead className="text-right px-10 text-[10px] font-black uppercase">Action</TableHead>
+                  <TableHeader className="bg-slate-50/50">
+                     <TableRow className="border-slate-50 h-16">
+                        <TableHead className="px-10 text-[10px] font-black uppercase text-slate-500">Question Statement</TableHead>
+                        <TableHead className="text-[10px] font-black uppercase text-center text-slate-500">Missing Data</TableHead>
+                        <TableHead className="text-right px-10 text-[10px] font-black uppercase text-slate-500">Action</TableHead>
                      </TableRow>
                   </TableHeader>
                   <TableBody>
                      {qLoading ? (
-                        <TableRow><TableCell colSpan={3} className="p-10"><Skeleton className="h-12 w-full rounded-xl bg-white/5" /></TableCell></TableRow>
+                        <TableRow><TableCell colSpan={3} className="p-10"><Skeleton className="h-12 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>
                      ) : issues.brokenQuestions.length > 0 ? (
                         issues.brokenQuestions.map((q: any) => (
-                           <TableRow key={q.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                           <TableRow key={q.id} className="border-slate-50 hover:bg-slate-50 transition-colors">
                               <TableCell className="px-10 py-6 max-w-md">
-                                 <p className="font-bold text-slate-100 line-clamp-1">{q.questionEn || "Untitled Content"}</p>
-                                 <code className="text-[9px] text-slate-500 font-mono">UUID: {q.id}</code>
+                                 <p className="font-bold text-[#0F172A] line-clamp-1">{q.questionEn || "Untitled Content"}</p>
+                                 <code className="text-[9px] text-slate-400 font-mono">UUID: {q.id}</code>
                               </TableCell>
                               <TableCell className="text-center">
                                  <div className="flex flex-wrap justify-center gap-2">
-                                    {!q.correctAnswer && <Badge className="bg-rose-500/10 text-rose-500 border-none text-[8px]">No Answer</Badge>}
-                                    {!q.explanationEn && <Badge className="bg-orange-500/10 text-orange-500 border-none text-[8px]">No Rationale</Badge>}
-                                    {!q.questionPa && <Badge className="bg-blue-500/10 text-blue-500 border-none text-[8px]">No Punjabi</Badge>}
+                                    {!q.correctAnswer && <Badge className="bg-rose-50 text-rose-600 border-none text-[8px]">No Answer</Badge>}
+                                    {!q.explanationEn && <Badge className="bg-orange-50 text-orange-600 border-none text-[8px]">No Rationale</Badge>}
+                                    {!q.questionPa && <Badge className="bg-blue-50 text-blue-600 border-none text-[8px]">No Punjabi</Badge>}
                                  </div>
                               </TableCell>
                               <TableCell className="text-right px-10">
                                  <div className="flex justify-end gap-2">
-                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white/5" asChild>
+                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100" asChild>
                                        <Link href={`/admin/questions/add?id=${q.id}`}><Edit className="h-4 w-4" /></Link>
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-rose-500/10 hover:text-rose-500" onClick={() => handleDelete('questions', q.id)}>
+                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-rose-50 text-rose-600" onClick={() => handleDelete('questions', q.id)}>
                                        <Trash2 className="h-4 w-4" />
                                     </Button>
                                  </div>
@@ -148,7 +149,7 @@ export default function QADashboard() {
                            </TableRow>
                         ))
                      ) : (
-                        <TableRow><TableCell colSpan={3} className="h-40 text-center opacity-30 italic">No broken questions detected in registry.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={3} className="h-40 text-center opacity-30 italic text-slate-400">No broken questions detected in registry.</TableCell></TableRow>
                      )}
                   </TableBody>
                </Table>
@@ -156,39 +157,39 @@ export default function QADashboard() {
          </section>
 
          <section className="space-y-6">
-            <h3 className="text-2xl font-headline font-black uppercase flex items-center gap-4">
-               <FileWarning className="h-6 w-6 text-orange-500" /> Series Pattern Failures
+            <h3 className="text-2xl font-headline font-black uppercase flex items-center gap-4 text-[#0F172A]">
+               <FileWarning className="h-6 w-6 text-orange-600" /> Series Pattern Failures
             </h3>
-            <Card className="border-none shadow-3xl bg-card/50 rounded-[2.5rem] overflow-hidden">
+            <Card className="border-slate-100 shadow-3xl bg-white rounded-[2.5rem] overflow-hidden text-left">
                <Table>
-                  <TableHeader className="bg-muted/30">
-                     <TableRow className="border-white/5 h-16">
-                        <TableHead className="px-10 text-[10px] font-black uppercase">Series Title</TableHead>
-                        <TableHead className="text-[10px] font-black uppercase text-center">Audit Result</TableHead>
-                        <TableHead className="text-right px-10 text-[10px] font-black uppercase">Action</TableHead>
+                  <TableHeader className="bg-slate-50/50">
+                     <TableRow className="border-slate-50 h-16">
+                        <TableHead className="px-10 text-[10px] font-black uppercase text-slate-500">Series Title</TableHead>
+                        <TableHead className="text-[10px] font-black uppercase text-center text-slate-500">Audit Result</TableHead>
+                        <TableHead className="text-right px-10 text-[10px] font-black uppercase text-slate-500">Action</TableHead>
                      </TableRow>
                   </TableHeader>
                   <TableBody>
                      {mLoading ? (
-                        <TableRow><TableCell colSpan={3} className="p-10"><Skeleton className="h-12 w-full rounded-xl bg-white/5" /></TableCell></TableRow>
+                        <TableRow><TableCell colSpan={3} className="p-10"><Skeleton className="h-12 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>
                      ) : issues.brokenMocks.length > 0 ? (
                         issues.brokenMocks.map((m: any) => (
-                           <TableRow key={m.id} className="border-white/5 hover:bg-white/5 transition-colors">
+                           <TableRow key={m.id} className="border-slate-50 hover:bg-slate-50 transition-colors">
                               <TableCell className="px-10 py-6">
-                                 <p className="font-bold text-slate-100">{m.title}</p>
-                                 <code className="text-[9px] text-slate-500 font-mono">{m.boardId} • {m.examId}</code>
+                                 <p className="font-bold text-[#0F172A]">{m.title}</p>
+                                 <code className="text-[9px] text-slate-400 font-mono">{m.boardId} • {m.examId}</code>
                               </TableCell>
                               <TableCell className="text-center">
-                                 <Badge className="bg-rose-500/20 text-rose-500 border-none px-4 py-1 text-[9px] uppercase font-black">
+                                 <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 text-[9px] uppercase font-black">
                                     {m.questionIds?.length || 0} / {m.totalQuestions} Questions Linked
                                  </Badge>
                               </TableCell>
                               <TableCell className="text-right px-10">
                                  <div className="flex justify-end gap-2">
-                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white/5" asChild>
+                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100" asChild>
                                        <Link href={`/admin/mocks/builder?id=${m.id}`}><Edit className="h-4 w-4" /></Link>
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-rose-500/10 hover:text-rose-500" onClick={() => handleDelete('mocks', m.id)}>
+                                    <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-rose-50 text-rose-600" onClick={() => handleDelete('mocks', m.id)}>
                                        <Trash2 className="h-4 w-4" />
                                     </Button>
                                  </div>
@@ -196,7 +197,7 @@ export default function QADashboard() {
                            </TableRow>
                         ))
                      ) : (
-                        <TableRow><TableCell colSpan={3} className="h-40 text-center opacity-30 italic">All mock series passed the structural audit.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={3} className="h-40 text-center opacity-30 italic text-slate-400">All mock series passed the structural audit.</TableCell></TableRow>
                      )}
                   </TableBody>
                </Table>
@@ -209,10 +210,10 @@ export default function QADashboard() {
 
 function QAStatCard({ label, value, color, desc }: any) {
    return (
-      <Card className="border-none bg-card/40 rounded-[2.5rem] p-10 shadow-2xl">
-         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-6">{label}</p>
-         <h4 className={`text-6xl font-headline font-black tracking-tighter ${color} leading-none`}>{value}</h4>
-         <p className="text-xs font-bold text-slate-400 mt-5 leading-relaxed">{desc}</p>
+      <Card className="border-slate-100 bg-white rounded-[2.5rem] p-10 shadow-2xl text-left">
+         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 text-left">{label}</p>
+         <h4 className={`text-6xl font-headline font-black tracking-tighter ${color} leading-none text-left`}>{value}</h4>
+         <p className="text-xs font-bold text-slate-500 mt-5 leading-relaxed text-left">{desc}</p>
       </Card>
    )
 }
