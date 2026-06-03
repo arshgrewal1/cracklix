@@ -12,13 +12,13 @@ import { useFirestore, useCollection } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions } from "@/lib/parser"
-import { Zap, Database, ChevronLeft, Rocket, ShieldCheck, ClipboardList, Layers, Settings2 } from "lucide-react"
+import { Zap, Database, ChevronLeft, Rocket, ShieldCheck, ClipboardList, Layers, Settings2, Globe, Languages } from "lucide-react"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 /**
  * @fileOverview Final Mock Extraction Node.
- * Optimized for dense text blocks and pattern-aware subject selection.
+ * Optimized for dense text blocks and dual-language previews.
  */
 
 export default function BulkImportPage() {
@@ -32,7 +32,6 @@ export default function BulkImportPage() {
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
 
   const [rawText, setRawText] = useState("")
-  const [targetLang, setTargetLang] = useState<"En" | "Pa" | "Hi">("En")
   const [metadata, setMetadata] = useState({
     boardId: "",
     examId: "",
@@ -43,7 +42,6 @@ export default function BulkImportPage() {
   })
   
   const [parsedQuestions, setParsedQuestions] = useState<any[]>([])
-  const [detectedMock, setDetectedMock] = useState<any>(null)
   const [isImporting, setIsImporting] = useState(false)
 
   // Auto-set duration and subject based on pattern
@@ -85,12 +83,11 @@ export default function BulkImportPage() {
       return
     }
     
-    const results = parseBulkQuestions(rawText, { ...metadata, targetLang })
+    const results = parseBulkQuestions(rawText, { ...metadata })
     setParsedQuestions(results.questions)
-    setDetectedMock(results.mockMetadata)
     
     if (results.questions.length > 0) {
-      toast({ title: "Extraction Complete", description: `Structured ${results.questions.length} nodes successfully.` })
+      toast({ title: "Extraction Complete", description: `Structured ${results.questions.length} nodes with bilingual awareness.` })
     } else {
       toast({ variant: "destructive", title: "Extraction Failed", description: "No questions detected. Please check format." })
     }
@@ -125,11 +122,11 @@ export default function BulkImportPage() {
     
     const mockPayload = {
       id: mockId,
-      title: detectedMock?.title || `${metadata.boardId} ${metadata.mockType} Series`,
+      title: `${metadata.boardId} ${metadata.mockType} Series ${new Date().toLocaleDateString()}`,
       boardId: metadata.boardId,
       examId: metadata.examId,
       mockType: metadata.mockType,
-      duration: metadata.duration || detectedMock?.duration || 120,
+      duration: metadata.duration || 120,
       totalQuestions: parsedQuestions.length,
       questionIds: questionIds,
       published: true,
@@ -161,13 +158,13 @@ export default function BulkImportPage() {
           </Button>
           <div className="text-left">
             <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Bulk Extraction Hub</h1>
-            <p className="text-slate-500 font-medium italic">High-fidelity parsing for densely packed bilingual MCQs.</p>
+            <p className="text-slate-500 font-medium italic">High-fidelity parsing for densely packed fused MCQs.</p>
           </div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <div className="lg:col-span-7 space-y-8 text-left">
+        <div className="lg:col-span-6 space-y-8 text-left">
           <Card className="border-slate-100 bg-white shadow-2xl rounded-[3rem] overflow-hidden">
             <div className="h-2 w-full bg-primary" />
             <CardHeader className="p-10 pb-4">
@@ -175,8 +172,8 @@ export default function BulkImportPage() {
                 <Settings2 className="h-6 w-6 text-primary" /> Configuration Matrix
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-10 pt-4 space-y-10">
-              <div className="grid grid-cols-2 gap-8">
+            <CardContent className="p-10 pt-4 space-y-8">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <p className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Type</p>
                   <Select value={metadata.mockType} onValueChange={(v) => setMetadata({...metadata, mockType: v})}>
@@ -193,14 +190,14 @@ export default function BulkImportPage() {
                   <p className="text-[10px] font-black uppercase text-slate-500 ml-1">Duration (Min)</p>
                   <Input 
                     type="number" 
-                    value={metadata.duration || 0} 
+                    value={metadata.duration || ""} 
                     onChange={e => setMetadata({...metadata, duration: parseInt(e.target.value) || 0})} 
                     className="rounded-xl bg-slate-50 border-slate-100 h-12 font-black"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-8">
+              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-3">
                   <p className="text-[10px] font-black uppercase text-slate-500 ml-1">Board Authority</p>
                   <Select value={metadata.boardId} onValueChange={val => setMetadata({...metadata, boardId: val})}>
@@ -228,39 +225,51 @@ export default function BulkImportPage() {
               </div>
 
               <Textarea 
-                placeholder="Paste clumped text here. Parser will split En/Pa and auto-detect Questions/Options."
+                placeholder="Paste fused text here. Parser will auto-split fused En/Pa strings and repeated options (A... A...)."
                 className="min-h-[400px] rounded-[2rem] bg-slate-50 border-slate-100 p-8 text-sm font-mono leading-relaxed shadow-inner"
                 value={rawText}
                 onChange={e => setRawText(e.target.value)}
               />
               
               <Button onClick={handleParse} className="w-full h-20 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] gap-3 rounded-2xl shadow-xl transition-all">
-                <Zap className="h-5 w-5 text-primary" /> Parse Content
+                <Zap className="h-5 w-5 text-primary" /> Parse Content Batch
               </Button>
             </CardContent>
           </Card>
         </div>
 
-        <div className="lg:col-span-5 text-left">
+        <div className="lg:col-span-6 text-left">
           <Card className="border-slate-100 bg-white shadow-2xl rounded-[3rem] h-full flex flex-col overflow-hidden">
             <CardHeader className="p-10 bg-slate-50/50 border-b border-slate-50">
               <CardTitle className="font-headline font-black text-2xl uppercase flex items-center gap-3">
-                <Database className="h-6 w-6 text-primary" /> Extraction Buffer
+                <Globe className="h-6 w-6 text-primary" /> Dual-Language Buffer
               </CardTitle>
-              <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">{parsedQuestions.length} Validated Nodes.</CardDescription>
+              <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">{parsedQuestions.length} Bilingual Nodes Ready.</CardDescription>
             </CardHeader>
             <CardContent className="p-10 flex-1 overflow-y-auto custom-scrollbar space-y-6">
               {parsedQuestions.length > 0 ? (
                 parsedQuestions.map((q, idx) => (
-                  <div key={idx} className="p-8 rounded-3xl bg-slate-50 border border-slate-100 space-y-4">
+                  <div key={idx} className="p-8 rounded-3xl bg-slate-50 border border-slate-100 space-y-6">
                     <div className="flex justify-between items-center">
-                       <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase px-4 py-1.5 rounded-xl">{q.subjectId}</Badge>
-                       <span className="text-[11px] font-black">KEY: {q.correctAnswer}</span>
+                       <div className="flex gap-2">
+                          <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase px-3 py-1 rounded-lg">EN</Badge>
+                          <Badge className="bg-blue-500/10 text-blue-600 border-none text-[9px] font-black uppercase px-3 py-1 rounded-lg">PA</Badge>
+                       </div>
+                       <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">KEY: {q.correctAnswer}</span>
                     </div>
-                    <p className="text-sm font-bold leading-relaxed text-slate-600 line-clamp-3">{q.questionEn || q.questionPa}</p>
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
-                       <span className="text-[9px] font-bold text-slate-400 truncate">A: {q.optionAEn}</span>
-                       <span className="text-[9px] font-bold text-slate-400 truncate">B: {q.optionBEn}</span>
+                    <div className="space-y-4">
+                       <p className="text-sm font-bold text-[#0F172A] line-clamp-2">{q.questionEn}</p>
+                       <p className="text-sm font-medium text-slate-500 line-clamp-2 italic border-t border-slate-200 pt-4">{q.questionPa}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-200">
+                       <div className="space-y-1">
+                          <span className="text-[8px] font-black text-slate-400 uppercase">Option A (EN)</span>
+                          <p className="text-[11px] font-bold truncate">{q.optionAEn}</p>
+                       </div>
+                       <div className="space-y-1">
+                          <span className="text-[8px] font-black text-slate-400 uppercase">Option A (PA)</span>
+                          <p className="text-[11px] font-medium truncate text-slate-500">{q.optionAPa}</p>
+                       </div>
                     </div>
                   </div>
                 ))
@@ -278,7 +287,7 @@ export default function BulkImportPage() {
                     onClick={handleDirectDeployMock}
                     disabled={isImporting}
                   >
-                    <Rocket className="h-5 w-5 text-primary" /> Deploy Series ({metadata.duration}m)
+                    <Rocket className="h-5 w-5 text-primary" /> Deploy Institutional Series
                   </Button>
                </div>
             )}
