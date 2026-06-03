@@ -27,7 +27,6 @@ export function parseBulkQuestions(
   
   const parsedQuestions: Partial<Question>[] = [];
   let currentActiveSubjectId = metadata.subjectId;
-  let detectedDuration = metadata.duration;
 
   const paRegex = /[\u0A00-\u0A7F]/;
 
@@ -35,15 +34,18 @@ export function parseBulkQuestions(
     let text = block.trim();
     if (!text) return;
 
-    // Detect Section/Subject headers within clumped text
+    // --- SECTION HEADER DETECTION ---
+    // Detect "Section X:", "Subject:", or "PART X:" headers within clumped text
     const sectionMatch = text.match(/(?:Section|Subject|PART)\s*(\d+|\w+)?\s*[\:\-]\s*([^\nQ1-9\(\)]+)/i);
     if (sectionMatch) {
        const sectionName = sectionMatch[2].toLowerCase();
        if (sectionName.includes('punjabi')) currentActiveSubjectId = 'punjabi-qualifying';
-       else if (sectionName.includes('gk') || sectionName.includes('history')) currentActiveSubjectId = 'punjab-history';
-       else if (sectionName.includes('math') || sectionName.includes('quant')) currentActiveSubjectId = 'math';
+       else if (sectionName.includes('gk') || sectionName.includes('history') || sectionName.includes('culture')) currentActiveSubjectId = 'punjab-history';
+       else if ((sectionName.includes('math') || sectionName.includes('quant')) && (sectionName.includes('reasoning') || sectionName.includes('mental'))) currentActiveSubjectId = 'math-reasoning';
+       else if (sectionName.includes('math') || sectionName.includes('quant') || sectionName.includes('numerical')) currentActiveSubjectId = 'math';
        else if (sectionName.includes('reasoning') || sectionName.includes('mental')) currentActiveSubjectId = 'reasoning';
        else if (sectionName.includes('it') || sectionName.includes('computer')) currentActiveSubjectId = 'ict';
+       else if (sectionName.includes('english')) currentActiveSubjectId = 'english';
     }
 
     // Skip if not a question block
@@ -51,7 +53,7 @@ export function parseBulkQuestions(
 
     // --- DEEP PARSING LOGIC ---
     
-    // 1. Extract Answer Key (Look for specific markers)
+    // 1. Extract Answer Key & Explanation
     const answerSplitRegex = /(?=Correct Answer|Ans|Key|ਸਹੀ ਉੱਤਰ)/i;
     const explanationSplitRegex = /(?=Explanation|Solution|ਵਿਆਖਿਆ)/i;
 
@@ -64,11 +66,11 @@ export function parseBulkQuestions(
     const explanationPart = answerAndExplanation.slice(1).join(' ') || "";
 
     // 2. Extract Options (Handles Fused A) En A) Pa)
-    // We split by [A-D] followed by common delimiters
-    const optionSplitRegex = /(?=[A-D][\)\.\:\-\s])/;
+    // Aggressive split for clumped letters
+    const optionSplitRegex = /(?=[A-D][\)\.\:\-\s]+)/;
     const qAndOptBlocks = questionAndOptions.split(optionSplitRegex);
     
-    // The first block is the Question Statement (English + Punjabi clumped)
+    // The first block is the Question Statement
     const rawQuestionFull = qAndOptBlocks[0].replace(/^(Q\s*\d+|Question\s*\d+|Q\.\s*\d+|\d+)[\.\:\)]\s*/i, '').trim();
     const optionBlocks = qAndOptBlocks.slice(1);
 
@@ -88,12 +90,19 @@ export function parseBulkQuestions(
       explanationEn: "", explanationPa: ""
     };
 
-    // Split fused Question Statement
+    // Split fused Question Statement using Script Transition
     if (paRegex.test(rawQuestionFull)) {
       const paStartIdx = rawQuestionFull.search(/[\u0A00-\u0A7F]/);
       if (paStartIdx !== -1) {
-        question.questionEn = rawQuestionFull.substring(0, paStartIdx).trim();
-        question.questionPa = rawQuestionFull.substring(paStartIdx).trim();
+        // Look back for leading digits/symbols belonging to Punjabi
+        let splitAt = paStartIdx;
+        const prefix = rawQuestionFull.substring(0, paStartIdx);
+        const match = prefix.match(/[\d\.\s]+$/);
+        if (match && match.index !== undefined) {
+           splitAt = match.index;
+        }
+        question.questionEn = rawQuestionFull.substring(0, splitAt).trim();
+        question.questionPa = rawQuestionFull.substring(splitAt).trim();
       } else {
         question.questionEn = rawQuestionFull;
         question.questionPa = rawQuestionFull;
@@ -105,7 +114,7 @@ export function parseBulkQuestions(
     // Assign Options (Pairing EN/PA based on repeat count)
     const optionCount: Record<string, number> = { A: 0, B: 0, C: 0, D: 0 };
     optionBlocks.forEach(optBlock => {
-      const match = optBlock.trim().match(/^([A-D])[\)\.\:\-\s]\s*(.*)/i);
+      const match = optBlock.trim().match(/^([A-D])[\)\.\:\-\s]+\s*(.*)/i);
       if (match) {
         const letter = match[1].toUpperCase();
         const value = match[2].trim();
@@ -119,25 +128,28 @@ export function parseBulkQuestions(
       }
     });
 
-    // Cleanup: If PA option is empty but EN contains fused ENPA
+    // Cleanup bunched options if only one instance found but contains fused ENPA
     ['A','B','C','D'].forEach(l => {
        const val = question[`option${l}En`];
        if (!question[`option${l}Pa`] && paRegex.test(val)) {
           const paIdx = val.search(/[\u0A00-\u0A7F]/);
           if (paIdx !== -1) {
-             question[`option${l}Pa`] = val.substring(paIdx).trim();
-             question[`option${l}En`] = val.substring(0, paIdx).trim();
+             let splitAt = paIdx;
+             const match = val.substring(0, paIdx).match(/[\d\.\s]+$/);
+             if (match && match.index !== undefined) splitAt = match.index;
+             
+             question[`option${l}Pa`] = val.substring(splitAt).trim();
+             question[`option${l}En`] = val.substring(0, splitAt).trim();
           }
        }
-       // Fallback
        if (!question[`option${l}Pa`]) question[`option${l}Pa`] = question[`option${l}En`];
     });
 
-    // 3. Extract Correct Answer Letter
+    // 3. Extract Correct Answer
     const ansKeyMatch = answerPart.match(/[A-D]/i);
     if (ansKeyMatch) question.correctAnswer = ansKeyMatch[0].toUpperCase();
 
-    // 4. Extract & Split Explanation
+    // 4. Extract Explanation
     const expText = explanationPart.replace(/^(Explanation|Solution|ਵਿਆਖਿਆ|English|Punjabi)[\:\-\s\(\w\)]*/gi, '').trim();
     if (paRegex.test(expText)) {
        const paStartIdx = expText.search(/[\u0A00-\u0A7F]/);
@@ -151,17 +163,8 @@ export function parseBulkQuestions(
        question.explanationEn = expText;
     }
 
-    // Remove fluff words
-    question.questionEn = question.questionEn.replace(/\(Bilingual\)/gi, '').trim();
-    
     parsedQuestions.push(question);
   });
 
-  return {
-    questions: parsedQuestions,
-    mockMetadata: {
-      duration: detectedDuration,
-      totalQuestions: parsedQuestions.length
-    }
-  };
+  return { questions: parsedQuestions };
 }
