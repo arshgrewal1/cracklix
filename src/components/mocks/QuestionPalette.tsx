@@ -61,7 +61,7 @@ export default function QuestionPalette({
     <div className="space-y-6 flex flex-col h-full text-left">
       <div className="grid grid-cols-2 gap-3">
          <PaletteStat count={summary.answered} label="Answered" color="bg-emerald-600" />
-         <PaletteStat count={summary.notAnswered} label="Wrong" color="bg-rose-500" />
+         <PaletteStat count={summary.notAnswered} label="Not Answered" color="bg-rose-500" />
          <PaletteStat count={summary.notVisited} label="Not Visited" color="bg-slate-100" textColor="text-slate-400" />
          <PaletteStat count={summary.review} label="Review" color="bg-amber-500" />
       </div>
