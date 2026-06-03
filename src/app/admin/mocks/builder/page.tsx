@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect, Suspense } from "react"
@@ -25,13 +24,15 @@ import {
   LayoutGrid,
   Edit,
   Languages,
-  Globe
+  Globe,
+  Loader2
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 export default function MockBuilderPage() {
@@ -215,7 +216,11 @@ function MockBuilderContent() {
                       return (
                         <div key={q.id} className="p-8 rounded-[2rem] border border-slate-100 bg-white flex items-center justify-between group hover:border-primary/30 transition-all shadow-xl">
                            <p className="font-bold text-[#0F172A] line-clamp-2 text-left flex-1 pr-8">{q.questionEn || q.questionPa}</p>
-                           <Button onClick={() => isAdded ? setSelectedQuestions(selectedQuestions.filter(s => s.id !== q.id)) : setSelectedQuestions([...selectedQuestions, q])} variant={isAdded ? "default" : "outline"} className={cn("rounded-xl h-12 px-8 font-black uppercase text-[10px]", isAdded ? 'bg-emerald-600 border-emerald-600 text-white' : 'text-slate-400')}>
+                           <Button 
+                              onClick={() => isAdded ? setSelectedQuestions(selectedQuestions.filter(s => s.id !== q.id)) : setSelectedQuestions([...selectedQuestions, q])} 
+                              variant={isAdded ? "default" : "outline"} 
+                              className={cn("rounded-xl h-12 px-8 font-black uppercase text-[10px]", isAdded ? 'bg-emerald-600 border-emerald-600 text-white' : 'text-slate-400')}
+                            >
                              {isAdded ? <CheckCircle2 className="h-4 w-4 mr-2" /> : ''} {isAdded ? 'Linked' : 'Link MCQ'}
                            </Button>
                         </div>
@@ -228,8 +233,4 @@ function MockBuilderContent() {
       </div>
     </div>
   )
-}
-
-function Loader2({ className }: any) {
-  return <Loader2 className={cn("animate-spin", className)} />
 }

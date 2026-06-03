@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo } from "react"
@@ -158,8 +157,8 @@ export default function BulkImportPage() {
                   <p className="text-[10px] font-black uppercase text-slate-500 ml-1">Duration (Minutes)</p>
                   <Input 
                     type="number" 
-                    value={metadata.duration} 
-                    onChange={e => setMetadata({...metadata, duration: parseInt(e.target.value)})} 
+                    value={metadata.duration || ""} 
+                    onChange={e => setMetadata({...metadata, duration: parseInt(e.target.value) || 0})} 
                     className="rounded-xl bg-slate-50 border-slate-100 h-12 font-black text-[#0F172A]"
                   />
                 </div>
