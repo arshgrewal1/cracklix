@@ -5,11 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, GraduationCap, Zap, Gem, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 /**
  * @fileOverview Premium Bottom Navigation Node for Mobile.
- * Features safe-area support and active-state glowing indicators.
+ * Features exactly 5 items: Home, Exams, Mocks, Pass, Profile.
+ * Fixed: Home as first item and corrected AnimatePresence import.
  */
 
 export default function MobileNav() {
@@ -24,7 +25,7 @@ export default function MobileNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[1000] bg-[#0F172A] border-t border-white/5 pb-safe md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-[1000] bg-[#0F172A] border-t border-white/5 pb-safe md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
       <div className="flex items-center justify-around h-16 px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -33,9 +34,12 @@ export default function MobileNav() {
           return (
             <Link key={item.href} href={item.href} className="flex-1">
               <div className="relative flex flex-col items-center justify-center gap-1 py-1">
-                <AnimatePresence mode="wait">
+                <AnimatePresence>
                   {isActive && (
                     <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 10 }}
                       layoutId="active-nav"
                       className="absolute -top-1 w-12 h-1 bg-[#F97316] rounded-full shadow-[0_0_12px_rgba(249,115,22,0.6)]"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
@@ -64,5 +68,3 @@ export default function MobileNav() {
     </nav>
   );
 }
-
-import { AnimatePresence } from "framer-motion";
