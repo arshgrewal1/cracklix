@@ -14,19 +14,15 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Flag, 
-  ShieldCheck, 
-  Languages, 
   Loader2, 
   Maximize, 
   PauseCircle, 
   PlayCircle,
   LayoutGrid,
-  Info,
+  RotateCcw,
+  Monitor,
   CheckCircle2,
-  HelpCircle,
-  XCircle,
-  Circle,
-  Monitor
+  Bookmark
 } from "lucide-react"
 import {
   AlertDialog,
@@ -47,7 +43,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { useToast } from "@/hooks/use-toast"
-import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 type LangMode = 'en' | 'pa' | 'bilingual'
@@ -145,6 +140,19 @@ export default function MockAttemptPage() {
     setVisited(prev => new Set([...Array.from(prev), idx]))
   }
 
+  const clearResponse = () => {
+    const newAnswers = { ...answers }
+    delete newAnswers[currentIdx]
+    setAnswers(newAnswers)
+  }
+
+  const markForReview = () => {
+    if (!flagged.includes(currentIdx)) {
+      setFlagged([...flagged, currentIdx])
+    }
+    handleNext()
+  }
+
   // Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -205,7 +213,7 @@ export default function MockAttemptPage() {
   if (mockLoading || loadingQuestions) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
        <Loader2 className="h-10 w-10 text-primary animate-spin" />
-       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Initializing Exam Environment...</p>
+       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Loading Exam Hub...</p>
     </div>
   )
 
@@ -214,41 +222,40 @@ export default function MockAttemptPage() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white text-[#0F172A] font-body selection:bg-primary/20">
-      {/* Testbook Style Header */}
-      <header className="h-16 border-b flex items-center justify-between px-4 md:px-8 bg-[#0B1528] text-white shrink-0 z-[60] shadow-md">
-        <div className="flex items-center gap-6">
-          <Logo variant="light" className="scale-75 origin-left" />
-          <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
+      {/* Testbook Style Compact Header */}
+      <header className="h-14 border-b flex items-center justify-between px-4 md:px-6 bg-[#0B1528] text-white shrink-0 z-[60] shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 bg-white/5 p-1 rounded-lg border border-white/10 scale-90 origin-left">
              <LangTab label="ENGLISH" active={language === 'en'} onClick={() => setLanguage('en')} />
              <LangTab label="ਪੰਜਾਬੀ" active={language === 'pa'} onClick={() => setLanguage('pa')} />
              <LangTab label="BILINGUAL" active={language === 'bilingual'} onClick={() => setLanguage('bilingual')} />
           </div>
         </div>
         
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-3">
           <Timer onTimeUp={submitMock} initialSeconds={remainingTime} onTick={setRemainingTime} isPaused={isPaused} />
 
-          <div className="flex items-center gap-3">
-             <Button variant="ghost" size="sm" onClick={() => setIsPaused(!isPaused)} className="h-10 px-4 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-black uppercase text-[10px] tracking-widest gap-2">
-                {isPaused ? <PlayCircle className="h-4 w-4" /> : <PauseCircle className="h-4 w-4" />} {isPaused ? 'Resume' : 'Pause'}
+          <div className="flex items-center gap-2">
+             <Button variant="ghost" size="sm" onClick={() => setIsPaused(!isPaused)} className="h-9 px-3 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 font-black uppercase text-[9px] tracking-widest gap-2">
+                {isPaused ? <PlayCircle className="h-3.5 w-3.5" /> : <PauseCircle className="h-3.5 w-3.5" />} {isPaused ? 'Resume' : 'Pause'}
              </Button>
-             <Button variant="ghost" size="icon" onClick={toggleFullScreen} className="h-10 w-10 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 hidden md:flex">
-                <Maximize className="h-4 w-4" />
+             <Button variant="ghost" size="icon" onClick={toggleFullScreen} className="h-9 w-9 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 hidden md:flex">
+                <Maximize className="h-3.5 w-3.5" />
              </Button>
              <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button size="sm" className="bg-emerald-600 h-10 hover:bg-emerald-700 text-white font-black uppercase text-[10px] px-6 rounded-xl shadow-lg ml-2">Submit</Button>
+                  <Button size="sm" className="bg-emerald-600 h-9 hover:bg-emerald-700 text-white font-black uppercase text-[9px] px-5 rounded-lg shadow-lg ml-2">Submit</Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="rounded-3xl p-10 max-w-md">
-                  <AlertDialogHeader className="text-left space-y-4">
-                    <AlertDialogTitle className="text-2xl font-black font-headline uppercase">Submit Assessment?</AlertDialogTitle>
+                <AlertDialogContent className="rounded-2xl p-8 max-w-md">
+                  <AlertDialogHeader className="text-left space-y-3">
+                    <AlertDialogTitle className="text-xl font-black uppercase">Finish Test?</AlertDialogTitle>
                     <AlertDialogDescription className="text-sm font-medium text-slate-500">
-                      You have attempted {Object.keys(answers).length} questions. Are you sure you want to finish the test?
+                      You've attempted {Object.keys(answers).length} questions. Are you ready to audit your performance?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter className="flex gap-3 pt-6">
-                    <AlertDialogCancel className="rounded-xl font-bold h-12 flex-1">Review</AlertDialogCancel>
-                    <AlertDialogAction onClick={submitMock} className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-12 font-bold flex-1">Submit</AlertDialogAction>
+                  <AlertDialogFooter className="flex gap-2 pt-4">
+                    <AlertDialogCancel className="rounded-lg font-bold h-11 flex-1">Review</AlertDialogCancel>
+                    <AlertDialogAction onClick={submitMock} className="bg-[#0F172A] hover:bg-black text-white rounded-lg h-11 font-bold flex-1">Submit</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
              </AlertDialog>
@@ -261,79 +268,69 @@ export default function MockAttemptPage() {
            <div className="absolute inset-0 z-[100] bg-white/95 backdrop-blur-xl flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-300">
               <PauseCircle className="h-16 w-16 text-primary" />
               <div className="text-center">
-                 <h2 className="text-3xl font-headline font-black uppercase text-[#0F172A]">Test Paused</h2>
-                 <p className="text-slate-500 font-medium">Your attempt progress is secured on the Cracklix Cloud.</p>
+                 <h2 className="text-2xl font-black uppercase">Test Paused</h2>
+                 <p className="text-slate-500 text-sm">Your state is secured on the Cracklix repository.</p>
               </div>
-              <Button onClick={() => setIsPaused(false)} className="h-14 px-10 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest rounded-xl shadow-2xl">
-                 Resume Audit Now
+              <Button onClick={() => setIsPaused(false)} className="h-12 px-8 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-xs tracking-widest rounded-lg shadow-xl">
+                 Resume Now
               </Button>
            </div>
         )}
 
-        <div className="flex-1 flex flex-col overflow-hidden bg-slate-50/20">
-          {/* Subheader */}
-          <div className="px-8 py-4 border-b border-slate-100 bg-white flex items-center justify-between shrink-0">
-             <div className="flex items-center gap-6">
+        {/* Question Area (75% on Desktop) */}
+        <div className="flex-1 flex flex-col overflow-hidden bg-[#F8FAFC]">
+          <div className="px-6 py-3 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
+             <div className="flex items-center gap-4">
                 <div className="flex flex-col">
-                   <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{currentPaper}</span>
-                   <p className="text-xs font-bold text-slate-500 uppercase truncate max-w-[300px]">{q?.subjectId || 'General Awareness'}</p>
+                   <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">{currentPaper}</span>
+                   <p className="text-[11px] font-bold text-slate-500 uppercase truncate max-w-[300px]">{q?.subjectId || 'General Awareness'}</p>
                 </div>
-                <div className="h-8 w-px bg-slate-100" />
-                <span className="text-sm font-black text-[#0F172A] uppercase tracking-tight">Question {currentIdx + 1} <span className="text-slate-300 font-medium mx-1">of</span> {questions.length}</span>
+                <div className="h-6 w-px bg-slate-200" />
+                <span className="text-xs font-black text-[#0F172A] uppercase tracking-tight">Question {currentIdx + 1} <span className="text-slate-300 font-medium mx-1">of</span> {questions.length}</span>
              </div>
           </div>
 
-          {/* Question Display Node */}
-          <div className="flex-1 overflow-y-auto p-8 md:p-12 custom-scrollbar">
-             <div className="max-w-4xl mx-auto space-y-10 pb-20">
-                <div className="space-y-10 text-left">
+          <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar">
+             <div className="max-w-4xl mx-auto space-y-8">
+                {/* Question Statement Stacking */}
+                <div className="space-y-6 text-left">
                    {(language === 'en' || language === 'bilingual') && (
-                      <div className="space-y-4">
-                         {language === 'bilingual' && <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.2em]">English</p>}
-                         <p className="text-[24px] md:text-[28px] font-bold leading-relaxed text-[#0F172A] antialiased whitespace-pre-line">
-                            {q.questionEn}
-                         </p>
-                      </div>
+                      <p className="text-[20px] md:text-[24px] lg:text-[28px] font-bold leading-relaxed text-[#0F172A] antialiased whitespace-pre-line">
+                         {q.questionEn}
+                      </p>
                    )}
-                   
-                   {language === 'bilingual' && <div className="h-px w-full bg-slate-50" />}
-
                    {(language === 'pa' || language === 'bilingual') && (
-                      <div className="space-y-4">
-                         {language === 'bilingual' && <p className="text-[10px] font-black uppercase text-primary tracking-[0.2em]">ਪੰਜਾਬੀ (Punjabi)</p>}
-                         <p className="text-[24px] md:text-[28px] font-bold leading-relaxed text-[#0F172A] antialiased whitespace-pre-line">
-                            {q.questionPa}
-                         </p>
-                      </div>
+                      <p className="text-[20px] md:text-[24px] lg:text-[28px] font-bold leading-relaxed text-[#0F172A] antialiased whitespace-pre-line">
+                         {q.questionPa}
+                      </p>
                    )}
                 </div>
 
+                {/* Option Cards Stacking */}
                 <RadioGroup 
                   value={answers[currentIdx]?.toString() || ""} 
                   onValueChange={(val) => setAnswers(prev => ({ ...prev, [currentIdx]: parseInt(val) }))} 
-                  className="grid grid-cols-1 gap-4 pt-10"
+                  className="grid grid-cols-1 gap-3 pt-6"
                 >
                   {['A', 'B', 'C', 'D'].map((key, i) => {
                     const isSelected = answers[currentIdx] === i
                     return (
                       <div key={i} onClick={() => setAnswers(prev => ({ ...prev, [currentIdx]: i }))} className={cn(
-                        "flex items-center space-x-5 p-5 border-2 rounded-2xl transition-all cursor-pointer bg-white shadow-sm hover:translate-x-1 duration-200",
-                        isSelected ? 'border-primary bg-primary/5' : 'border-slate-100 hover:border-slate-200'
+                        "flex items-center space-x-4 p-4 border rounded-xl transition-all cursor-pointer bg-white shadow-sm",
+                        isSelected ? 'border-primary ring-1 ring-primary/50' : 'border-slate-200 hover:border-slate-300'
                       )}>
-                         <RadioGroupItem value={i.toString()} id={`opt-${i}`} className="text-primary border-slate-300 shrink-0 h-5 w-5" />
-                         <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer select-none text-[#0F172A] flex flex-col text-left space-y-2">
-                            {language === 'bilingual' ? (
-                               <>
-                                  <p className="text-sm font-medium text-slate-400">{q[`option${key}En`]}</p>
-                                  <p className="text-[18px] md:text-[20px] font-bold">{q[`option${key}Pa`]}</p>
-                               </>
-                            ) : (
-                               <span className="text-[18px] md:text-[20px] font-bold">{language === 'en' ? q[`option${key}En`] : q[`option${key}Pa`]}</span>
+                         <RadioGroupItem value={i.toString()} id={`opt-${i}`} className="text-primary border-slate-300 shrink-0 h-4 w-4" />
+                         <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer select-none text-[#0F172A] space-y-1.5 py-1">
+                            {(language === 'en' || language === 'bilingual') && (
+                               <p className="text-[14px] md:text-[16px] lg:text-[18px] font-medium text-slate-500">{q[`option${key}En`]}</p>
+                            )}
+                            {(language === 'pa' || language === 'bilingual') && (
+                               <p className="text-[16px] md:text-[18px] lg:text-[20px] font-bold">{q[`option${key}Pa`] || q[`option${key}En`]}</p>
                             )}
                          </Label>
                          <div className={cn(
-                          "h-10 w-10 shrink-0 rounded-xl flex items-center justify-center text-[11px] font-black transition-all",
-                          isSelected ? 'bg-primary text-white shadow-lg' : 'bg-slate-50 text-slate-300'
+                          "h-8 w-8 shrink-0 rounded-lg flex items-center justify-center text-[10px] font-black transition-all",
+                          isSelected ? 'bg-primary text-white shadow-lg' : 'bg-slate-50 text-slate-400'
                         )}>{key}</div>
                       </div>
                     )
@@ -342,25 +339,26 @@ export default function MockAttemptPage() {
              </div>
           </div>
 
-          {/* Footer Actions */}
-          <footer className="h-20 border-t border-slate-100 bg-white px-8 flex items-center justify-between shrink-0 z-50 shadow-inner">
-             <div className="flex gap-3">
-                <Button variant="outline" className="rounded-xl h-12 px-8 font-black uppercase text-[10px] tracking-widest border-slate-200" onClick={handlePrev} disabled={currentIdx === 0}>Previous</Button>
-                <Button variant="outline" className={cn("rounded-xl h-12 px-8 font-black uppercase text-[10px] tracking-widest transition-all", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white shadow-lg" : "border-slate-200 text-slate-400")} onClick={() => setFlagged(prev => prev.includes(currentIdx) ? prev.filter(f => f !== currentIdx) : [...prev, currentIdx])}>
-                   {flagged.includes(currentIdx) ? 'Marked for Review' : 'Mark for Review'}
+          {/* Testbook Style Footer Actions */}
+          <footer className="h-16 border-t border-slate-200 bg-white px-4 md:px-6 flex items-center justify-between shrink-0 z-50 shadow-inner">
+             <div className="flex gap-2">
+                <Button variant="outline" className="rounded-lg h-10 px-4 font-black uppercase text-[10px] tracking-widest border-slate-200 hidden md:flex" onClick={handlePrev} disabled={currentIdx === 0}>Previous</Button>
+                <Button variant="outline" className="rounded-lg h-10 px-4 font-black uppercase text-[10px] tracking-widest border-slate-200 text-slate-400" onClick={clearResponse}>Clear</Button>
+                <Button variant="outline" className={cn("rounded-lg h-10 px-4 font-black uppercase text-[10px] tracking-widest transition-all", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white" : "border-slate-200 text-amber-600")} onClick={markForReview}>
+                   Mark for Review
                 </Button>
              </div>
              
-             <div className="flex items-center gap-4">
+             <div className="flex items-center gap-2">
                 <Sheet>
                    <SheetTrigger asChild>
-                      <Button variant="ghost" className="h-12 px-6 rounded-xl text-slate-400 font-black uppercase text-[10px] tracking-widest gap-3 hover:bg-slate-50 lg:hidden">
-                         <LayoutGrid className="h-4 w-4" /> Audit Map
+                      <Button variant="ghost" className="h-10 px-3 rounded-lg text-slate-400 font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-slate-50 lg:hidden">
+                         <LayoutGrid className="h-4 w-4" /> Palette
                       </Button>
                    </SheetTrigger>
-                   <SheetContent side="right" className="w-[320px] sm:w-[450px] p-8 flex flex-col">
-                      <SheetHeader className="mb-8">
-                         <SheetTitle className="text-2xl font-black font-headline uppercase text-left">Exam Palette</SheetTitle>
+                   <SheetContent side="bottom" className="h-[80vh] p-6 flex flex-col rounded-t-[2rem]">
+                      <SheetHeader className="mb-4">
+                         <SheetTitle className="text-lg font-black uppercase text-left">Exam Palette</SheetTitle>
                       </SheetHeader>
                       <div className="flex-1 overflow-y-auto custom-scrollbar">
                          <QuestionPalette 
@@ -375,15 +373,15 @@ export default function MockAttemptPage() {
                       </div>
                    </SheetContent>
                 </Sheet>
-                <Button className="bg-[#0F172A] hover:bg-black text-white h-12 px-12 rounded-xl font-black uppercase text-[11px] tracking-[0.2em] shadow-2xl shadow-slate-300" onClick={handleNext}>
-                  {currentIdx === questions.length - 1 ? 'Last Question' : 'Save & Next'}
+                <Button className="bg-[#0F172A] hover:bg-black text-white h-10 px-8 rounded-lg font-black uppercase text-[10px] tracking-widest shadow-lg" onClick={handleNext}>
+                  {currentIdx === questions.length - 1 ? 'Finish' : 'Save & Next'}
                 </Button>
              </div>
           </footer>
         </div>
 
-        {/* Desktop Sidebar Palette */}
-        <aside className="w-[320px] border-l border-slate-100 bg-white p-8 hidden lg:flex flex-col overflow-hidden">
+        {/* Desktop Sidebar (25% on Desktop) */}
+        <aside className="w-[320px] border-l border-slate-200 bg-white p-6 hidden lg:flex flex-col overflow-hidden">
            <div className="flex-1 overflow-y-auto custom-scrollbar pr-2">
               <QuestionPalette 
                 totalQuestions={questions.length} 
@@ -406,20 +404,11 @@ function LangTab({ label, active, onClick }: { label: string, active: boolean, o
       <button 
         onClick={onClick}
         className={cn(
-          "px-5 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300",
-          active ? "bg-white text-[#0F172A] shadow-xl" : "text-white/40 hover:text-white"
+          "px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all duration-300",
+          active ? "bg-white text-[#0B1528] shadow-md" : "text-white/40 hover:text-white"
         )}
       >
         {label}
       </button>
    )
-}
-
-function Logo({ variant, className }: any) {
-  return (
-    <div className={cn("flex items-center gap-3", className)}>
-       <div className="h-10 w-10 bg-primary rounded-xl flex items-center justify-center font-black text-white text-lg">C</div>
-       <span className="font-headline font-black text-2xl tracking-tighter text-white">Crack<span className="text-primary">lix</span></span>
-    </div>
-  )
 }
