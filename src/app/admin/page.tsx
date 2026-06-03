@@ -108,7 +108,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Founder's Launch Metrics */}
+      {/* Founder's Launch Metrics (Phase 90) */}
       {isFounder && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
            <Card className="border-none bg-[#08152D] text-white p-10 rounded-[3rem] shadow-4xl relative overflow-hidden group">

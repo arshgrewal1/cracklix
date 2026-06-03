@@ -11,7 +11,6 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.token.email == 'arshdeepgrewal1122@gmail.com';
     }
 
-    // Hardened Admin check: Prevents rule crashes if user document is missing
     function isAdmin() {
       return isFounder() || (
         isAuthenticated() && 
@@ -25,7 +24,6 @@ service cloud.firestore {
     }
 
     // --- Public Institutional Data ---
-    // Unified read permissions for public browsing
     match /boards/{docId} { allow read: if true; allow write: if isAdmin(); }
     match /exams/{docId} { allow read: if true; allow write: if isAdmin(); }
     match /subjects/{docId} { allow read: if true; allow write: if isAdmin(); }
@@ -34,6 +32,7 @@ service cloud.firestore {
     match /current_affairs/{docId} { allow read: if true; allow write: if isAdmin(); }
     match /notifications/{docId} { allow read: if true; allow write: if isAdmin(); }
     match /pyqs/{docId} { allow read: if true; allow write: if isAdmin(); }
+    match /notes/{docId} { allow read: if true; allow write: if isAdmin(); }
 
     // --- Protected Aspirant Data ---
     match /users/{userId} {
@@ -75,7 +74,6 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // --- Global Founder Bypass ---
     match /{document=**} {
       allow read, write: if isFounder();
     }
