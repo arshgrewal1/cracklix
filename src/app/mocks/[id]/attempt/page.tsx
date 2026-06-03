@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
@@ -44,8 +45,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Final Mobile-Optimized CBT Engine.
- * Optimized for single-page view. Standardized Bilingual Styling (Same color/size).
+ * @fileOverview Final Official Punjab CBT Engine.
+ * Optimized for English-Punjabi pairing. Centered Bilingual Toggle. 
+ * Standardized font sizes/colors for both languages.
  */
 
 type LangMode = 'english' | 'punjabi' | 'hindi'
@@ -67,7 +69,7 @@ export default function MockAttemptPage() {
   const [flagged, setFlagged] = useState<number[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [language, setLanguage] = useState<LangMode>('english')
-  const [isBilingual, setIsBilingual] = useState(false)
+  const [isBilingual, setIsBilingual] = useState(true) // Default to Bilingual for Punjab Exams
   const [remainingTime, setRemainingTime] = useState(0)
   const [sessionRecovered, setSessionRecovered] = useState(false)
 
@@ -210,7 +212,7 @@ export default function MockAttemptPage() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white text-[#0F172A]">
-      {/* Optimized Fixed Header */}
+      {/* Optimized Fixed Header with Centered Bilingual Switch */}
       <header className="h-14 border-b flex items-center justify-between px-4 md:px-8 bg-[#0B1528] text-white shrink-0 z-50">
         <div className="flex items-center gap-3">
           <ShieldCheck className="h-4 w-4 text-primary" />
@@ -218,14 +220,34 @@ export default function MockAttemptPage() {
         </div>
         
         <div className="flex items-center gap-2 md:gap-4">
-          <Timer initialMinutes={mockConfig?.duration || 120} onTimeUp={submitMock} initialSeconds={remainingTime} onTick={setRemainingTime} />
-          
-          <div className="hidden lg:flex items-center gap-1.5 bg-white/5 p-1 rounded-lg border border-white/10">
-             <button onClick={() => { setLanguage('english'); setIsBilingual(false); }} className={cn("px-3 py-1 rounded-md text-[9px] font-black uppercase transition-all", language === 'english' && !isBilingual ? "bg-primary text-white" : "text-slate-400 hover:text-white")}>EN</button>
-             <button onClick={() => { setLanguage('punjabi'); setIsBilingual(false); }} className={cn("px-3 py-1 rounded-md text-[9px] font-black uppercase transition-all", language === 'punjabi' && !isBilingual ? "bg-primary text-white" : "text-slate-400 hover:text-white")}>PA</button>
-             <button onClick={() => { setLanguage('hindi'); setIsBilingual(false); }} className={cn("px-3 py-1 rounded-md text-[9px] font-black uppercase transition-all", language === 'hindi' && !isBilingual ? "bg-primary text-white" : "text-slate-400 hover:text-white")}>HI</button>
-             <button onClick={() => setIsBilingual(!isBilingual)} className={cn("px-3 py-1 rounded-md text-[9px] font-black uppercase transition-all", isBilingual ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white")}>Bilingual</button>
+          <div className="hidden lg:flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
+             <button 
+                onClick={() => { setLanguage('english'); setIsBilingual(false); }} 
+                className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", language === 'english' && !isBilingual ? "bg-primary text-white" : "text-slate-400 hover:text-white")}
+             >
+                EN
+             </button>
+             <button 
+                onClick={() => setIsBilingual(!isBilingual)} 
+                className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all flex items-center gap-2", isBilingual ? "bg-emerald-600 text-white" : "text-slate-400 hover:text-white")}
+             >
+                <Languages className="h-3 w-3" /> Bilingual
+             </button>
+             <button 
+                onClick={() => { setLanguage('punjabi'); setIsBilingual(false); }} 
+                className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", language === 'punjabi' && !isBilingual ? "bg-primary text-white" : "text-slate-400 hover:text-white")}
+             >
+                PA
+             </button>
+             <button 
+                onClick={() => { setLanguage('hindi'); setIsBilingual(false); }} 
+                className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", language === 'hindi' && !isBilingual ? "bg-primary text-white" : "text-slate-400 hover:text-white")}
+             >
+                HI
+             </button>
           </div>
+
+          <Timer initialMinutes={mockConfig?.duration || 120} onTimeUp={submitMock} initialSeconds={remainingTime} onTick={setRemainingTime} />
 
           <AlertDialog>
             <AlertDialogTrigger asChild><Button size="sm" className="bg-emerald-600 h-9 hover:bg-emerald-700 text-white font-black uppercase text-[9px] px-4 rounded-lg shadow-lg">Submit</Button></AlertDialogTrigger>
@@ -282,6 +304,7 @@ export default function MockAttemptPage() {
                 </Dialog>
                 <div className="lg:hidden flex items-center gap-2 ml-2 border-l border-slate-100 pl-3">
                    <button onClick={() => { setIsBilingual(false); setLanguage(l => l === 'english' ? 'punjabi' : l === 'punjabi' ? 'hindi' : 'english') }} className="h-7 w-7 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-[8px] font-black uppercase">{language === 'english' ? 'EN' : language === 'punjabi' ? 'PA' : 'HI'}</button>
+                   <button onClick={() => setIsBilingual(!isBilingual)} className={cn("h-7 w-7 rounded-lg border border-slate-200 flex items-center justify-center text-[8px] font-black uppercase", isBilingual ? "bg-emerald-600 text-white" : "bg-slate-50 text-slate-400")}><Languages className="h-3 w-3" /></button>
                 </div>
              </div>
           </div>
@@ -290,49 +313,60 @@ export default function MockAttemptPage() {
           <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
              <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
                 
-                {/* Standardized Bilingual Display */}
-                <div className="space-y-4 text-left">
-                   {isBilingual && (
-                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-3 mb-2">
-                         <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest border-b border-slate-200 pb-1 mb-1">Primary: English</p>
-                         <p className="text-base md:text-xl font-bold leading-relaxed whitespace-pre-line text-[#0F172A]">{getQuestionText('english')}</p>
-                      </div>
-                   )}
-                   <div className="space-y-2">
-                      {isBilingual && <p className="text-[8px] uppercase text-primary/60 font-black tracking-widest">Regional Translation</p>}
-                      <p className={cn("text-base md:text-xl font-black leading-tight whitespace-pre-line text-[#0F172A]")}>
-                         {getQuestionText(language)}
+                {/* Official Bilingual Stacking: English + Regional (Matched Style) */}
+                <div className="space-y-8 text-left">
+                   {isBilingual ? (
+                      <>
+                        <div className="space-y-2">
+                           <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.2em] mb-4">English</p>
+                           <p className="text-xl md:text-2xl font-bold leading-relaxed whitespace-pre-line text-[#0F172A] antialiased">
+                              {getQuestionText('english')}
+                           </p>
+                        </div>
+                        <div className="h-px w-full bg-slate-100" />
+                        <div className="space-y-2">
+                           <p className="text-[10px] font-black uppercase text-primary tracking-[0.2em] mb-4">
+                              {language === 'punjabi' ? 'ਪੰਜਾਬੀ (Punjabi)' : 'हिन्दी (Hindi)'}
+                           </p>
+                           <p className="text-xl md:text-2xl font-bold leading-relaxed whitespace-pre-line text-[#0F172A] antialiased">
+                              {getQuestionText(language)}
+                           </p>
+                        </div>
+                      </>
+                   ) : (
+                      <p className="text-xl md:text-2xl font-bold leading-relaxed whitespace-pre-line text-[#0F172A] antialiased">
+                        {getQuestionText(language)}
                       </p>
-                   </div>
+                   )}
                 </div>
 
                 {/* Options Grid */}
                 <RadioGroup 
                   value={answers[currentIdx]?.toString() || ""} 
                   onValueChange={(val) => setAnswers(prev => ({ ...prev, [currentIdx]: parseInt(val) }))} 
-                  className="grid grid-cols-1 gap-2.5"
+                  className="grid grid-cols-1 gap-3 pt-8"
                 >
                   {['A', 'B', 'C', 'D'].map((key, i) => {
                     const isSelected = answers[currentIdx] === i
                     return (
                       <div key={i} onClick={() => setAnswers(prev => ({ ...prev, [currentIdx]: i }))} className={cn(
-                        "flex items-center space-x-3 p-3 md:p-4 border-2 rounded-xl transition-all cursor-pointer bg-white group shadow-sm",
+                        "flex items-center space-x-4 p-4 md:p-5 border-2 rounded-2xl transition-all cursor-pointer bg-white group shadow-sm",
                         isSelected ? 'border-primary bg-primary/5' : 'border-transparent hover:border-slate-200'
                       )}>
                          <RadioGroupItem value={i.toString()} id={`opt-${i}`} className="text-primary border-slate-300 shrink-0" />
-                         <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer text-sm md:text-base font-bold select-none text-slate-700 flex flex-col text-left leading-snug">
+                         <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer text-base md:text-lg font-bold select-none text-slate-700 flex flex-col text-left leading-snug">
                             {isBilingual ? (
                                <div className="space-y-1">
-                                  <p className="text-[11px] md:text-xs font-medium text-slate-400">{getOptionText(key as any, 'english')}</p>
-                                  <p className="text-sm md:text-base font-black text-[#0F172A]">{getOptionText(key as any, language)}</p>
+                                  <p className="text-xs font-medium text-slate-400">{getOptionText(key as any, 'english')}</p>
+                                  <p className="text-base md:text-lg font-bold text-[#0F172A]">{getOptionText(key as any, language)}</p>
                                </div>
                             ) : (
                                <span className="whitespace-pre-line">{getOptionText(key as any, language)}</span>
                             )}
                          </Label>
                          <span className={cn(
-                          "h-7 w-7 shrink-0 rounded-lg flex items-center justify-center text-[10px] font-black transition-all",
-                          isSelected ? 'bg-primary text-white' : 'bg-slate-50 text-slate-300'
+                          "h-8 w-8 shrink-0 rounded-xl flex items-center justify-center text-xs font-black transition-all",
+                          isSelected ? 'bg-primary text-white shadow-lg' : 'bg-slate-50 text-slate-300'
                         )}>{key}</span>
                       </div>
                     )
@@ -344,8 +378,8 @@ export default function MockAttemptPage() {
           {/* Fixed Footer Controller */}
           <footer className="h-16 border-t border-slate-100 bg-white px-4 md:px-8 flex items-center justify-between shrink-0 shadow-2xl">
              <div className="flex gap-2">
-                <Button variant="outline" size="lg" className="rounded-lg h-10 md:h-12 px-4 font-black uppercase text-[9px] border-slate-100" onClick={() => currentIdx > 0 && setCurrentIdx(currentIdx - 1)} disabled={currentIdx === 0}><ChevronLeft className="h-4 w-4 mr-1" /> Prev</Button>
-                <Button variant="outline" size="icon" className={cn("h-10 w-10 md:h-12 md:w-12 rounded-lg border-2 transition-all", flagged.includes(currentIdx) ? "text-amber-600 bg-amber-50 border-amber-300" : "border-slate-100 text-slate-300")} onClick={() => setFlagged(prev => prev.includes(currentIdx) ? prev.filter(f => f !== currentIdx) : [...prev, currentIdx])}>
+                <Button variant="outline" size="lg" className="rounded-xl h-10 md:h-12 px-5 font-black uppercase text-[10px] border-slate-100" onClick={() => currentIdx > 0 && setCurrentIdx(currentIdx - 1)} disabled={currentIdx === 0}><ChevronLeft className="h-4 w-4 mr-1" /> Previous</Button>
+                <Button variant="outline" size="icon" className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl border-2 transition-all", flagged.includes(currentIdx) ? "text-amber-600 bg-amber-50 border-amber-300 shadow-inner" : "border-slate-100 text-slate-300")} onClick={() => setFlagged(prev => prev.includes(currentIdx) ? prev.filter(f => f !== currentIdx) : [...prev, currentIdx])}>
                    <Flag className="h-4 w-4" />
                 </Button>
              </div>
@@ -353,30 +387,33 @@ export default function MockAttemptPage() {
              <div className="flex items-center gap-2">
                 <Sheet>
                    <SheetTrigger asChild>
-                      <Button variant="ghost" className="h-10 px-3 md:h-12 md:px-5 rounded-lg text-slate-400 font-black uppercase text-[9px] gap-2">
+                      <Button variant="ghost" className="h-10 px-3 md:h-12 md:px-5 rounded-xl text-slate-400 font-black uppercase text-[10px] gap-2 hover:bg-slate-50">
                          <LayoutGrid className="h-4 w-4" /> <span className="hidden sm:inline">Palette</span>
                       </Button>
                    </SheetTrigger>
-                   <SheetContent side="bottom" className="rounded-t-[3rem] h-[65vh] px-8 pt-10">
-                      <SheetHeader className="mb-6">
-                         <SheetTitle className="text-xl font-black uppercase tracking-tight text-center">Institutional Trail</SheetTitle>
+                   <SheetContent side="bottom" className="rounded-t-[3.5rem] h-[65vh] px-10 pt-12">
+                      <SheetHeader className="mb-10">
+                         <SheetTitle className="text-2xl font-black uppercase tracking-tight text-center">Institutional Audit Trail</SheetTitle>
                       </SheetHeader>
                       <div className="overflow-y-auto max-h-full pb-20 custom-scrollbar">
                          <QuestionPalette totalQuestions={questions.length} currentIndex={currentIdx} answeredIndices={Object.keys(answers).map(Number)} flaggedIndices={flagged} onSelect={(idx) => { setCurrentIdx(idx); }} />
                       </div>
                    </SheetContent>
                 </Sheet>
-                <Button className="flex-1 md:flex-none bg-[#0F172A] hover:bg-black text-white h-10 md:h-12 px-6 md:px-10 rounded-lg font-black uppercase text-[9px] tracking-widest shadow-xl" onClick={() => currentIdx < questions.length - 1 && setCurrentIdx(currentIdx + 1)} disabled={currentIdx === questions.length - 1}>Save & Next <ChevronRight className="h-4 w-4 ml-1" /></Button>
+                <Button className="flex-1 md:flex-none bg-[#0F172A] hover:bg-black text-white h-10 md:h-12 px-8 md:px-12 rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl" onClick={() => currentIdx < questions.length - 1 && setCurrentIdx(currentIdx + 1)} disabled={currentIdx === questions.length - 1}>Save & Next <ChevronRight className="h-4 w-4 ml-1" /></Button>
              </div>
           </footer>
         </div>
 
         {/* Sidebar Palette (Desktop Only) */}
-        <aside className="w-80 border-l border-slate-100 bg-white p-6 hidden xl:block overflow-y-auto custom-scrollbar">
+        <aside className="w-80 border-l border-slate-100 bg-white p-8 hidden xl:block overflow-y-auto custom-scrollbar">
            <QuestionPalette totalQuestions={questions.length} currentIndex={currentIdx} answeredIndices={Object.keys(answers).map(Number)} flaggedIndices={flagged} onSelect={setCurrentIdx} />
-           <div className="mt-12 p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-3 text-left">
-              <ShieldCheck className="h-5 w-5 text-primary" />
-              <p className="text-[9px] text-slate-400 font-bold leading-relaxed uppercase">Institutional Integrity monitors active attempt trails. Data synced with central node.</p>
+           <div className="mt-12 p-8 bg-[#0F172A] rounded-[2rem] space-y-4 text-left shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 p-4 opacity-5"><ShieldCheck className="h-20 w-20 text-white" /></div>
+              <ShieldCheck className="h-6 w-6 text-primary relative z-10" />
+              <p className="text-[10px] text-slate-400 font-black leading-relaxed uppercase tracking-widest relative z-10">
+                Institutional Integrity monitors active attempt trails. All audit nodes are synchronized with the central repository.
+              </p>
            </div>
         </aside>
       </main>
