@@ -12,13 +12,13 @@ import { useFirestore, useCollection } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions } from "@/lib/parser"
-import { FileText, Zap, CheckCircle2, Database, ChevronLeft, AlertCircle, Trash2, Languages, Info } from "lucide-react"
+import { FileText, Zap, CheckCircle2, Database, ChevronLeft, AlertCircle, Trash2, Languages, Info, BookOpen } from "lucide-react"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 
 /**
  * @fileOverview Trilingual Bulk Import Engine.
- * Supports multi-subject pastes using the "Subject:" tag.
+ * Supports multi-subject pastes and automatic explanation extraction.
  */
 
 export default function BulkImportPage() {
@@ -112,9 +112,9 @@ export default function BulkImportPage() {
             </CardHeader>
             <CardContent className="p-10 pt-4 space-y-10">
               <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100 space-y-3">
-                 <h4 className="font-black text-[10px] uppercase text-blue-600 flex items-center gap-2"><Info className="h-3 w-3" /> Multi-Subject Logic</h4>
+                 <h4 className="font-black text-[10px] uppercase text-blue-600 flex items-center gap-2"><Info className="h-3 w-3" /> Input Protocol</h4>
                  <p className="text-xs text-blue-800 leading-relaxed font-medium">
-                   Paste multiple subjects in one go by adding <code>Subject: [Name]</code> above each question block. If no tag is found, the global selection below is used.
+                   Format: <code>Q1. Text... A. Opt... B. Opt... Ans: A Explanation: Why it is correct. Subject: Name</code>.
                  </p>
               </div>
 
@@ -162,7 +162,7 @@ export default function BulkImportPage() {
               </div>
 
               <Textarea 
-                placeholder="Q1. Text... A. Opt... B. Opt... Ans: A Subject: Punjab GK"
+                placeholder="Q1. Text... A. Opt... B. Opt... Ans: A Explanation: Detailed reasoning here... Subject: Punjab GK"
                 className="min-h-[400px] rounded-[2rem] bg-slate-50 border-slate-100 p-8 text-sm font-mono leading-relaxed shadow-inner"
                 value={rawText}
                 onChange={e => setRawText(e.target.value)}
@@ -197,6 +197,12 @@ export default function BulkImportPage() {
                        <span className="text-[11px] font-black text-[#0F172A] font-mono">KEY: {q.correctAnswer}</span>
                     </div>
                     <p className="text-sm font-bold leading-relaxed text-slate-600 line-clamp-3">{(q as any)[`question${targetLang}`]}</p>
+                    
+                    {/* Audit Preview for Explanation */}
+                    <div className="pt-4 border-t border-slate-200">
+                       <p className="text-[9px] font-black uppercase text-slate-400 mb-2 flex items-center gap-2"><BookOpen className="h-3 w-3" /> Audit Rationale</p>
+                       <p className="text-[11px] text-slate-500 italic line-clamp-2">{(q as any)[`explanation${targetLang}`]}</p>
+                    </div>
                   </div>
                 ))
               )}

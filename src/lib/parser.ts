@@ -35,7 +35,7 @@ export function parseBulkQuestions(
       // 4. Extract Explanation/Rationale
       const explanationMatch = block.match(/(?:Explanation|Solution|Rationale|Details)[:\-]?\s*([\s\S]*?)(?=(?:Subject|S:)|$)/im);
 
-      // 5. NEW: Extract inline Subject override (e.g. "Subject: Reasoning" or "S: Punjab GK")
+      // 5. Extract inline Subject override (e.g. "Subject: Reasoning" or "S: Punjab GK")
       const subjectMatch = block.match(/(?:Subject|S:)[:\-]?\s*([^\n]*)/im);
       const inlineSubject = subjectMatch ? subjectMatch[1].trim() : null;
 
@@ -47,7 +47,7 @@ export function parseBulkQuestions(
       const q: any = {
         boardId: metadata.boardId,
         examId: metadata.examId,
-        subjectId: inlineSubject || metadata.subjectId, // Use inline tag if present
+        subjectId: inlineSubject || metadata.subjectId, 
         difficulty: metadata.difficulty,
         correctAnswer: answerMatch[1].toUpperCase() as 'A' | 'B' | 'C' | 'D',
         createdAt: new Date().toISOString()
@@ -58,7 +58,10 @@ export function parseBulkQuestions(
       q[`optionB${lang}`] = bMatch[1].trim();
       q[`optionC${lang}`] = cMatch[1].trim();
       q[`optionD${lang}`] = dMatch[1].trim();
-      q[`explanation${lang}`] = explanationMatch ? explanationMatch[1].trim() : "Verified institutional answer key.";
+      
+      // Map explanation to the correct language node
+      const explanationText = explanationMatch ? explanationMatch[1].trim() : "Verified institutional answer key.";
+      q[`explanation${lang}`] = explanationText;
 
       return q;
     } catch (e) {
