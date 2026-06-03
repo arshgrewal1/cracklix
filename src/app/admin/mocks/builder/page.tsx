@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Switch } from "@/components/ui/switch"
 import { 
   ChevronLeft, 
   Database, 
@@ -27,7 +28,8 @@ import {
   BookOpen,
   LayoutGrid,
   ExternalLink,
-  Edit
+  Edit,
+  Languages
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore"
@@ -66,7 +68,8 @@ function MockBuilderContent() {
     examId: "", 
     duration: 120, 
     difficulty: "Medium", 
-    mockType: "FULL"
+    mockType: "FULL",
+    hasHindi: false
   })
 
   const [selectedQuestions, setSelectedQuestions] = useState<any[]>([])
@@ -92,7 +95,8 @@ function MockBuilderContent() {
         examId: existingMock.examId || "",
         duration: existingMock.duration || 120,
         difficulty: existingMock.difficulty || "Medium",
-        mockType: existingMock.mockType || "FULL"
+        mockType: existingMock.mockType || "FULL",
+        hasHindi: existingMock.hasHindi || false
       })
     }
   }, [existingMock])
@@ -173,7 +177,7 @@ function MockBuilderContent() {
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-2xl h-14 w-14 border border-slate-200 bg-white shadow-sm">
             <ChevronLeft className="h-7 w-7 text-[#0F172A]" />
           </Button>
-          <div>
+          <div className="text-left">
             <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">{isEditing ? "Audit Assembler" : "Mock Assembler"}</h1>
             <p className="text-slate-500 mt-1 font-medium">Syllabus-Aligned Workflow active.</p>
           </div>
@@ -201,7 +205,7 @@ function MockBuilderContent() {
 
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Mock Category</Label>
-                <Select value={mockData.mockType} onValueChange={val => setMockData({...mockData, mockType: val})}>
+                <Select value={mockData.mockType} onValueChange={val => setMockData({...mockData, mockType: val as any})}>
                   <SelectTrigger className="rounded-xl h-12 bg-slate-50 border-none shadow-sm font-bold"><SelectValue placeholder="Select Type" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="FULL">Full Length Mock</SelectItem>
@@ -210,6 +214,22 @@ function MockBuilderContent() {
                     <SelectItem value="PYQ">Previous Year Paper (PYQ)</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              {/* Institutional Language Switch */}
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
+                 <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                       <p className="font-black text-xs uppercase tracking-widest text-[#0F172A] flex items-center gap-2">
+                          <Languages className="h-4 w-4 text-primary" /> Hindi Node
+                       </p>
+                       <p className="text-[9px] text-slate-400 font-bold uppercase">Required for Central Exams</p>
+                    </div>
+                    <Switch 
+                      checked={mockData.hasHindi} 
+                      onCheckedChange={(val) => setMockData({...mockData, hasHindi: val})} 
+                    />
+                 </div>
               </div>
               
               <div className="grid grid-cols-1 gap-6">
@@ -243,14 +263,6 @@ function MockBuilderContent() {
                 </div>
               </div>
             </CardContent>
-          </Card>
-
-          <Card className="border-none bg-primary/5 rounded-[2.5rem] p-10 space-y-4 text-center border border-primary/10 shadow-2xl">
-             <Database className="h-10 w-10 text-primary mx-auto opacity-40" />
-             <div>
-                <p className="text-6xl font-black font-headline text-[#0F172A] tracking-tighter">{selectedQuestions.length}</p>
-                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 mt-2">Total Questions Linked</p>
-             </div>
           </Card>
         </div>
 
@@ -343,7 +355,7 @@ function MockBuilderContent() {
 
               <TabsContent value="manual" className="space-y-8">
                  <div className="relative group">
-                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-500 group-hover:text-primary transition-colors" />
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 group-hover:text-primary transition-colors" />
                     <Input className="pl-16 h-16 rounded-[1.5rem] bg-white border-none shadow-2xl text-xl font-medium" placeholder="Search institutional library..." value={bankSearch} onChange={e => setBankSearch(e.target.value)} />
                  </div>
 

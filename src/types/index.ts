@@ -77,6 +77,7 @@ export interface Question {
   updatedAt?: any;
   author?: string;
   reviewedBy?: string;
+  isStandalone?: boolean;
 }
 
 export interface MockTest {
@@ -91,6 +92,7 @@ export interface MockTest {
   difficulty: string;
   published: boolean;
   status: ContentStatus;
+  hasHindi?: boolean; // New institutional field for Central vs State exams
   createdAt: any;
   updatedAt?: any;
   author?: string;

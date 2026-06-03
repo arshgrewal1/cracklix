@@ -47,7 +47,7 @@ import { cn } from "@/lib/utils"
 /**
  * @fileOverview Final Official Punjab CBT Engine.
  * Optimized for English-Punjabi pairing. Centered Bilingual Toggle. 
- * Standardized font sizes/colors for both languages.
+ * Standardized font sizes/colors for both languages (Institutional Navy).
  */
 
 type LangMode = 'english' | 'punjabi' | 'hindi'
@@ -68,8 +68,8 @@ export default function MockAttemptPage() {
   const [answers, setAnswers] = useState<Record<number, number>>({})
   const [flagged, setFlagged] = useState<number[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [language, setLanguage] = useState<LangMode>('english')
-  const [isBilingual, setIsBilingual] = useState(true) // Default to Bilingual for Punjab Exams
+  const [language, setLanguage] = useState<LangMode>('punjabi') // Standard state exams default to regional
+  const [isBilingual, setIsBilingual] = useState(true) // Always true by default for Punjab Exams
   const [remainingTime, setRemainingTime] = useState(0)
   const [sessionRecovered, setSessionRecovered] = useState(false)
 
@@ -212,7 +212,7 @@ export default function MockAttemptPage() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white text-[#0F172A]">
-      {/* Optimized Fixed Header with Centered Bilingual Switch */}
+      {/* Optimized Header with Institutional Language Toggles */}
       <header className="h-14 border-b flex items-center justify-between px-4 md:px-8 bg-[#0B1528] text-white shrink-0 z-50">
         <div className="flex items-center gap-3">
           <ShieldCheck className="h-4 w-4 text-primary" />
@@ -239,12 +239,14 @@ export default function MockAttemptPage() {
              >
                 PA
              </button>
-             <button 
-                onClick={() => { setLanguage('hindi'); setIsBilingual(false); }} 
-                className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", language === 'hindi' && !isBilingual ? "bg-primary text-white" : "text-slate-400 hover:text-white")}
-             >
-                HI
-             </button>
+             {mockConfig?.hasHindi && (
+                <button 
+                  onClick={() => { setLanguage('hindi'); setIsBilingual(false); }} 
+                  className={cn("px-4 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all", language === 'hindi' && !isBilingual ? "bg-primary text-white" : "text-slate-400 hover:text-white")}
+                >
+                  HI
+                </button>
+             )}
           </div>
 
           <Timer initialMinutes={mockConfig?.duration || 120} onTimeUp={submitMock} initialSeconds={remainingTime} onTick={setRemainingTime} />
@@ -302,45 +304,41 @@ export default function MockAttemptPage() {
                       <Button onClick={handleReport} className="w-full h-12 rounded-xl font-black uppercase text-[10px]">Log Report</Button>
                    </DialogContent>
                 </Dialog>
-                <div className="lg:hidden flex items-center gap-2 ml-2 border-l border-slate-100 pl-3">
-                   <button onClick={() => { setIsBilingual(false); setLanguage(l => l === 'english' ? 'punjabi' : l === 'punjabi' ? 'hindi' : 'english') }} className="h-7 w-7 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-[8px] font-black uppercase">{language === 'english' ? 'EN' : language === 'punjabi' ? 'PA' : 'HI'}</button>
-                   <button onClick={() => setIsBilingual(!isBilingual)} className={cn("h-7 w-7 rounded-lg border border-slate-200 flex items-center justify-center text-[8px] font-black uppercase", isBilingual ? "bg-emerald-600 text-white" : "bg-slate-50 text-slate-400")}><Languages className="h-3 w-3" /></button>
-                </div>
              </div>
           </div>
 
-          {/* Question Content Area */}
+          {/* Question Content Area - Identical Styling for Bilingual pairing */}
           <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
              <div className="max-w-4xl mx-auto space-y-4 md:space-y-6">
                 
-                {/* Official Bilingual Stacking: English + Regional (Matched Style) */}
+                {/* Official Bilingual Stacking: Both use 2xl, Navy, Bold */}
                 <div className="space-y-8 text-left">
                    {isBilingual ? (
                       <>
-                        <div className="space-y-2">
-                           <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.2em] mb-4">English</p>
-                           <p className="text-xl md:text-2xl font-bold leading-relaxed whitespace-pre-line text-[#0F172A] antialiased">
+                        <div className="space-y-4">
+                           <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.2em]">ENGLISH</p>
+                           <p className="text-2xl md:text-3xl font-bold leading-relaxed whitespace-pre-line text-[#0F172A] antialiased">
                               {getQuestionText('english')}
                            </p>
                         </div>
                         <div className="h-px w-full bg-slate-100" />
-                        <div className="space-y-2">
-                           <p className="text-[10px] font-black uppercase text-primary tracking-[0.2em] mb-4">
-                              {language === 'punjabi' ? 'ਪੰਜਾਬੀ (Punjabi)' : 'हिन्दी (Hindi)'}
+                        <div className="space-y-4">
+                           <p className="text-[10px] font-black uppercase text-primary tracking-[0.2em]">
+                              {language === 'punjabi' ? 'ਪੰਜਾਬੀ (PUNJABI)' : 'हिन्दी (HINDI)'}
                            </p>
-                           <p className="text-xl md:text-2xl font-bold leading-relaxed whitespace-pre-line text-[#0F172A] antialiased">
+                           <p className="text-2xl md:text-3xl font-bold leading-relaxed whitespace-pre-line text-[#0F172A] antialiased">
                               {getQuestionText(language)}
                            </p>
                         </div>
                       </>
                    ) : (
-                      <p className="text-xl md:text-2xl font-bold leading-relaxed whitespace-pre-line text-[#0F172A] antialiased">
+                      <p className="text-2xl md:text-3xl font-bold leading-relaxed whitespace-pre-line text-[#0F172A] antialiased">
                         {getQuestionText(language)}
                       </p>
                    )}
                 </div>
 
-                {/* Options Grid */}
+                {/* Options Grid - Mobile Optimized Vertical Stack */}
                 <RadioGroup 
                   value={answers[currentIdx]?.toString() || ""} 
                   onValueChange={(val) => setAnswers(prev => ({ ...prev, [currentIdx]: parseInt(val) }))} 
@@ -354,14 +352,14 @@ export default function MockAttemptPage() {
                         isSelected ? 'border-primary bg-primary/5' : 'border-transparent hover:border-slate-200'
                       )}>
                          <RadioGroupItem value={i.toString()} id={`opt-${i}`} className="text-primary border-slate-300 shrink-0" />
-                         <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer text-base md:text-lg font-bold select-none text-slate-700 flex flex-col text-left leading-snug">
+                         <Label htmlFor={`opt-${i}`} className="flex-1 cursor-pointer select-none text-[#0F172A] flex flex-col text-left leading-snug">
                             {isBilingual ? (
                                <div className="space-y-1">
                                   <p className="text-xs font-medium text-slate-400">{getOptionText(key as any, 'english')}</p>
-                                  <p className="text-base md:text-lg font-bold text-[#0F172A]">{getOptionText(key as any, language)}</p>
+                                  <p className="text-lg font-bold">{getOptionText(key as any, language)}</p>
                                </div>
                             ) : (
-                               <span className="whitespace-pre-line">{getOptionText(key as any, language)}</span>
+                               <span className="text-lg font-bold whitespace-pre-line">{getOptionText(key as any, language)}</span>
                             )}
                          </Label>
                          <span className={cn(
