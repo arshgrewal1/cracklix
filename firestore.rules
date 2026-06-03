@@ -3,8 +3,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // DEV MODE: Full open access to unblock development and data seeding.
-    // This ensures all features (mocks, sessions, analysis, etc.) work without permission errors.
+    // DEV MODE: Unrestricted access to all collections to facilitate rapid development and content seeding.
+    // This resolves permission errors for current_affairs, notifications, mocks, etc.
     match /{document=**} {
       allow read, write: if true;
     }

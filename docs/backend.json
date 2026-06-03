@@ -15,7 +15,8 @@
         "targetExam": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "status": { "type": "string", "enum": ["Pro", "Free"] },
-        "referralCount": { "type": "number" }
+        "referralCount": { "type": "number" },
+        "subscriptions": { "type": "array", "items": { "type": "string" } }
       },
       "required": ["id", "name", "email", "role"]
     },
@@ -46,6 +47,14 @@
       "schema": "object",
       "description": "Recruitment boards."
     },
+    "/exams/{examId}": {
+      "schema": "object",
+      "description": "Official exam verticals (Patwari, SI, etc)."
+    },
+    "/subjects/{subjectId}": {
+      "schema": "object",
+      "description": "Subject categories for MCQs."
+    },
     "/mocks/{mockId}": {
       "schema": "object",
       "description": "Practice tests."
@@ -53,6 +62,14 @@
     "/questions/{questionId}": {
       "schema": "object",
       "description": "MCQ bank."
+    },
+    "/current_affairs/{id}": {
+      "schema": "object",
+      "description": "Daily Punjab and National analysis articles."
+    },
+    "/notifications/{id}": {
+      "schema": "object",
+      "description": "Official recruitment alerts and gazeete notifications."
     },
     "/reports/{reportId}": {
       "schema": { "$ref": "#/backend/entities/ContentReport" },
@@ -69,6 +86,22 @@
     "/settings/{id}": {
       "schema": "object",
       "description": "System config."
+    },
+    "/bookmarks/{id}": {
+      "schema": "object",
+      "description": "User saved questions."
+    },
+    "/pyqs/{id}": {
+      "schema": "object",
+      "description": "Previous year paper archives."
+    },
+    "/support_tickets/{id}": {
+      "schema": "object",
+      "description": "Institutional support inquiries."
+    },
+    "/audit_logs/{id}": {
+      "schema": "object",
+      "description": "Admin activity ledger."
     }
   }
 }
