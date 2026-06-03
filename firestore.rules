@@ -3,22 +3,32 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Institutional Read-Only Access (Public)
-    // These rules ensure that aspirants can list and view exams, mocks, and current affairs.
-    match /current_affairs/{id} { allow read: if true; }
-    match /notifications/{id} { allow read: if true; }
-    match /mocks/{id} { allow read: if true; }
-    match /exams/{id} { allow read: if true; }
-    match /boards/{id} { allow read: if true; }
-    match /subjects/{id} { allow read: if true; }
-    match /questions/{id} { allow read: if true; }
-    match /pyqs/{id} { allow read: if true; }
-    match /settings/{id} { allow read: if true; }
-
-    // Full Development Access
-    // DEV MODE: Unrestricted access to facilitate rapid content seeding and testing.
-    // Deployment Audit ID: 2026-06-03-T08:25:00Z (Triggered by Admin Portal)
+    /**
+     * @fileOverview Institutional Security Rules (Phase 155).
+     * DEV MODE: Global read/write access enabled for rapid prototyping and content seeding.
+     * Ensure these are hardened before moving to a public production environment.
+     * 
+     * DEPLOYMENT_AUDIT_ID: 2026-06-03T09:05:00Z
+     */
+    
     match /{document=**} {
+      allow read, write: if true;
+    }
+
+    // Explicit collection access for visibility in logs
+    match /mocks/{id} {
+      allow read, write: if true;
+    }
+    
+    match /users/{id} {
+      allow read, write: if true;
+    }
+
+    match /current_affairs/{id} {
+      allow read, write: if true;
+    }
+
+    match /notifications/{id} {
       allow read, write: if true;
     }
   }

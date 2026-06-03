@@ -91,10 +91,10 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-         <StatCard label="Aspirant Nodes" value={users?.length || 0} icon={<Users />} />
-         <StatCard label="Database Status" value="Connected" icon={<Database />} color="text-emerald-500" />
-         <StatCard label="Attempts Logged" value={results?.length || 0} icon={<Activity />} />
-         <StatCard label="Audit Flags" value={reports?.filter((r:any) => r.status === 'PENDING').length || 0} icon={<ShieldAlert />} color="text-rose-500" />
+         <StatCard label="Aspirant Nodes" value={users?.length || 0} icon={<Users className="text-blue-400" />} />
+         <StatCard label="Database Status" value="Connected" icon={<Database className="text-emerald-500" />} color="text-emerald-500" />
+         <StatCard label="Attempts Logged" value={results?.length || 0} icon={<Activity className="text-primary" />} />
+         <StatCard label="Audit Flags" value={reports?.filter((r:any) => r.status === 'PENDING').length || 0} icon={<ShieldAlert className="text-rose-500" />} color="text-rose-500" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
@@ -236,7 +236,7 @@ function LaunchMetric({ label, current, target }: { label: string, current: numb
    return (
       <div className="space-y-4">
          <div className="flex justify-between items-end">
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{label}</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</span>
             <span className="text-[10px] font-black text-primary">{current} / {target} ({perc}%)</span>
          </div>
          <Progress value={perc} className="h-1.5 bg-white/5" />
