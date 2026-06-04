@@ -82,9 +82,10 @@ export interface Question {
   }; 
   chartConfig?: any;
 
-  // Meta for CA
+  // Meta for CA/PYQ
   date?: string;
   category?: string;
+  year?: number;
 
   isStandalone?: boolean;
   createdAt: any;

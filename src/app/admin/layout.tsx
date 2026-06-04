@@ -1,7 +1,7 @@
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle, FileText, Activity, ShieldAlert, HeartPulse, HelpCircle, Upload } from "lucide-react"
+import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle, FileText, Activity, ShieldAlert, HeartPulse, HelpCircle, Upload, Layers } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 import { useUser, useAuth } from "@/firebase"
@@ -44,19 +44,28 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </SidebarHeader>
           <SidebarContent className="custom-scrollbar overflow-x-hidden">
             <SidebarGroup>
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20">Data Operations</SidebarGroupLabel>
+              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Atomic Bank Operations</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <AdminNavItem icon={<LayoutDashboard />} label="Dashboard" href="/admin" active={pathname === "/admin"} />
-                  <AdminNavItem icon={<Database />} label="Question Bank" href="/admin/questions" active={pathname === "/admin/questions"} />
-                  <AdminNavItem icon={<Upload className="text-primary" />} label="Bulk Import" href="/admin/bulk-import" active={pathname === "/admin/bulk-import"} />
-                  <AdminNavItem icon={<ClipboardList />} label="Mock Builder" href="/admin/mocks" active={pathname === "/admin/mocks"} />
+                  <AdminNavItem icon={<Database />} label="Atomic Bank" href="/admin/questions" active={pathname === "/admin/questions"} />
+                  <AdminNavItem icon={<Upload className="text-primary" />} label="Bulk Ingestion" href="/admin/bulk-import" active={pathname === "/admin/bulk-import"} />
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
 
             <SidebarGroup className="mt-4">
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20">Content Engine</SidebarGroupLabel>
+              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Modular Architect</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <AdminNavItem icon={<Layers className="text-emerald-400" />} label="Test Assembly" href="/admin/mocks" active={pathname === "/admin/mocks"} />
+                  <AdminNavItem icon={<ClipboardList />} label="Mock Blueprints" href="/admin/mocks/builder" active={pathname === "/admin/mocks/builder"} />
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup className="mt-4">
+              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Content Engine</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <AdminNavItem icon={<Newspaper className="text-emerald-400" />} label="Daily Analysis" href="/admin/current-affairs" active={pathname === "/admin/current-affairs"} />
@@ -67,7 +76,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarGroup>
 
             <SidebarGroup className="mt-4">
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20">System Control</SidebarGroupLabel>
+              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">System Control</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <AdminNavItem icon={<HeartPulse className="text-rose-400" />} label="Platform Health" href="/admin/health" active={pathname === "/admin/health"} />
@@ -130,11 +139,11 @@ function AdminNavItem({ icon, label, href, active }: { icon: React.ReactNode, la
         isActive={active}
         className={`px-6 transition-all font-medium h-11 group ${active ? 'bg-white/5 text-primary' : 'hover:bg-white/5 hover:text-primary text-white/60'}`}
       >
-        <Link href={href} className="flex items-center gap-3 w-full">
+        <Link href={href} className="flex items-center gap-3 w-full text-left">
           <div className="shrink-0 flex items-center justify-center size-4">
             {icon}
           </div>
-          <span className="font-bold tracking-tight truncate">{label}</span>
+          <span className="font-bold tracking-tight truncate text-left">{label}</span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
