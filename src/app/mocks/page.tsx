@@ -25,7 +25,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * @fileOverview Final Exam Gateway Node.
- * Re-engineered to prevent overlapping stats and match high-fidelity Testbook aesthetics.
+ * Re-engineered to use high-fidelity Wikimedia logos for PSSSB/PPSC.
  */
 
 export default function MocksGatewayPage() {
@@ -43,6 +43,8 @@ export default function MocksGatewayPage() {
 
   const { data: exams, loading: examsLoading } = useCollection<any>(examsQuery)
   const { data: boards } = useCollection<any>(boardsQuery)
+
+  const psssbLogo = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body">
@@ -68,22 +70,20 @@ export default function MocksGatewayPage() {
              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[450px] w-full rounded-[3.5rem]" />)
            ) : exams?.sort((a: any, b: any) => (b.totalMocks || 0) - (a.totalMocks || 0)).map((exam: any) => {
              const board = boards?.find(b => b.id === exam.boardId)
+             const isPSSSB = board?.abbreviation === 'PSSSB' || exam.boardId === 'psssb';
+
              return (
                 <Link key={exam.id} href={`/exams/${exam.id}`}>
                    <Card className="border-none shadow-xl hover:shadow-4xl hover:-translate-y-2 transition-all duration-500 rounded-[3.5rem] bg-white group overflow-hidden text-left h-full flex flex-col border border-slate-50">
                       <CardContent className="p-10 flex flex-col h-full">
                          <div className="flex justify-between items-start mb-10">
                             <div className="h-20 w-20 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center transition-all group-hover:shadow-xl shadow-inner relative overflow-hidden shrink-0">
-                               {board?.iconUrl || board?.id === 'psssb' ? (
-                                 <img 
-                                    src={board?.iconUrl || 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png'} 
-                                    referrerPolicy="no-referrer"
-                                    alt={board?.abbreviation} 
-                                    className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-110" 
-                                 />
-                               ) : (
-                                 <GraduationCap className="h-10 w-10 text-primary" />
-                               )}
+                               <img 
+                                  src={isPSSSB ? psssbLogo : (board?.iconUrl || psssbLogo)} 
+                                  referrerPolicy="no-referrer"
+                                  alt={board?.abbreviation || 'Board'} 
+                                  className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-110" 
+                               />
                             </div>
                             <Badge className="bg-primary/5 text-primary border-none text-[10px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-xl shadow-sm">
                                {board?.abbreviation || 'PSSSB'} BOARD
@@ -99,7 +99,6 @@ export default function MocksGatewayPage() {
                             </p>
                          </div>
 
-                         {/* Structured Stat Grid - No Overlap */}
                          <div className="mt-12 pt-8 border-t border-slate-50 grid grid-cols-2 gap-4">
                             <InventoryNode icon={<Zap className="text-primary h-3.5 w-3.5" />} count={exam.totalMocks || 0} label="Full Mocks" />
                             <InventoryNode icon={<BookOpen className="text-blue-500 h-3.5 w-3.5" />} count={Math.round((exam.totalMocks || 1) * 3.5)} label="Subject" />
@@ -119,7 +118,6 @@ export default function MocksGatewayPage() {
            })}
         </div>
 
-        {/* Global Achievement Node */}
         <div className="mt-32 p-16 md:p-24 rounded-[5rem] bg-[#0F172A] text-white relative overflow-hidden shadow-4xl group">
            <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Sparkles className="h-96 w-96" /></div>
            <div className="grid lg:grid-cols-2 gap-20 items-center relative z-10 text-left">

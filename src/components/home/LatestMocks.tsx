@@ -36,6 +36,8 @@ export default function LatestMocks() {
     }).slice(0, 5)
   }, [rawMocks])
 
+  const psssbLogo = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
+
   return (
     <section className="py-24 bg-white">
       <div className="max-w-7xl mx-auto px-6">
@@ -74,10 +76,10 @@ export default function LatestMocks() {
               >
                 <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-500 group h-full flex flex-col p-6">
                   <div className="flex justify-between items-start mb-6">
-                    <div className="h-14 w-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center relative overflow-hidden group-hover:shadow-lg transition-all">
-                       {mock.boardId === 'psssb' ? (
+                    <div className="h-14 w-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center relative overflow-hidden group-hover:shadow-lg transition-all shadow-inner">
+                       {mock.boardId?.toLowerCase().includes('psssb') ? (
                           <img 
-                            src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png" 
+                            src={psssbLogo} 
                             referrerPolicy="no-referrer"
                             className="w-full h-full object-contain p-2" 
                             alt="PSSSB" 

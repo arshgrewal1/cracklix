@@ -31,7 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * @fileOverview Final Exam-Specific Mastery Hub.
- * Optimized for Testbook Aesthetic: Absolute black typography and modular practice nodes.
+ * Optimized for Testbook Aesthetic with high-fidelity Wikimedia logos.
  */
 
 export default function ExamHubPage() {
@@ -52,6 +52,8 @@ export default function ExamHubPage() {
   }, [db, examId]);
 
   const { data: rawMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
+
+  const psssbLogo = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
 
   const groupedMocks = useMemo(() => {
     if (!rawMocks) return { FULL: [], SUBJECT: [], SECTIONAL: [], PYQ: [], CA_QUIZ: [], CHAPTER: [] };
@@ -124,27 +126,27 @@ export default function ExamHubPage() {
             </div>
 
             <TabsContent value="FULL" className="space-y-6">
-               <HubGrid mocks={groupedMocks.FULL} emptyLabel="No Full-Length Mocks structured for this exam." />
+               <HubGrid mocks={groupedMocks.FULL} emptyLabel="No Full-Length Mocks structured for this exam." logo={psssbLogo} />
             </TabsContent>
 
             <TabsContent value="SUBJECT" className="space-y-6">
-               <HubGrid mocks={groupedMocks.SUBJECT} emptyLabel="Subject mastery tests are being audited for this hub." />
+               <HubGrid mocks={groupedMocks.SUBJECT} emptyLabel="Subject mastery tests are being audited for this hub." logo={psssbLogo} />
             </TabsContent>
 
             <TabsContent value="SECTIONAL" className="space-y-6">
-               <HubGrid mocks={groupedMocks.SECTIONAL} emptyLabel="No Sectional nodes linked to this recruitment." />
+               <HubGrid mocks={groupedMocks.SECTIONAL} emptyLabel="No Sectional nodes linked to this recruitment." logo={psssbLogo} />
             </TabsContent>
 
             <TabsContent value="CHAPTER" className="space-y-6">
-               <HubGrid mocks={groupedMocks.CHAPTER} emptyLabel="Chapter-wise preparation nodes pending registry." />
+               <HubGrid mocks={groupedMocks.CHAPTER} emptyLabel="Chapter-wise preparation nodes pending registry." logo={psssbLogo} />
             </TabsContent>
 
             <TabsContent value="PYQ" className="space-y-6">
-               <HubGrid mocks={groupedMocks.PYQ} emptyLabel="Official previous papers for this vertical are in registry." />
+               <HubGrid mocks={groupedMocks.PYQ} emptyLabel="Official previous papers for this vertical are in registry." logo={psssbLogo} />
             </TabsContent>
 
             <TabsContent value="CA_QUIZ" className="space-y-6">
-               <HubGrid mocks={groupedMocks.CA_QUIZ} emptyLabel="Daily current affairs quizzes for this board." />
+               <HubGrid mocks={groupedMocks.CA_QUIZ} emptyLabel="Daily current affairs quizzes for this board." logo={psssbLogo} />
             </TabsContent>
          </Tabs>
       </main>
@@ -167,27 +169,23 @@ function TabTrigger({ value, icon, label, count }: any) {
    )
 }
 
-function HubGrid({ mocks, emptyLabel }: { mocks: any[], emptyLabel: string }) {
+function HubGrid({ mocks, emptyLabel, logo }: { mocks: any[], emptyLabel: string, logo: string }) {
    if (mocks.length === 0) return <EmptyState label={emptyLabel} />;
    return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-         {mocks.map((mock) => <MockCard key={mock.id} mock={mock} />)}
+         {mocks.map((mock) => <MockCard key={mock.id} mock={mock} logo={logo} />)}
       </div>
    )
 }
 
-function MockCard({ mock }: { mock: any }) {
+function MockCard({ mock, logo }: { mock: any, logo: string }) {
   return (
     <Card className="border-none shadow-xl hover:shadow-3xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden text-left flex flex-col h-full border border-slate-50">
       <CardContent className="p-0 flex-1 flex flex-col h-full">
          <div className="p-8 pb-4 space-y-6 flex-1">
             <div className="flex justify-between items-start">
-               <div className="h-16 w-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center relative overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-500">
-                  {mock.boardId === 'psssb' ? (
-                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png" className="w-full h-full object-contain p-2" alt="PSSSB" />
-                  ) : (
-                     <ShieldCheck className="h-8 w-8 text-primary opacity-20" />
-                  )}
+               <div className="h-16 w-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center relative overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-500 shadow-inner">
+                  <img src={logo} referrerPolicy="no-referrer" className="w-full h-full object-contain p-2" alt="Board" />
                </div>
                <div className="text-right space-y-1">
                   <Badge className="bg-orange-50 text-primary border-none text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg">
