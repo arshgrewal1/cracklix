@@ -13,7 +13,7 @@ import { useFirestore, useCollection } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions, ImportFormat } from "@/lib/parser"
-import { Zap, Database, ChevronLeft, Rocket, ShieldCheck, ClipboardList, Layers, Settings2, Globe, Languages, AlertTriangle, FileWarning, CheckCircle2, LayoutList, DatabaseBackup } from "lucide-react"
+import { Zap, Database, ChevronLeft, Rocket, ShieldCheck, ClipboardList, Layers, Settings2, Globe, Languages, AlertTriangle, FileWarning, CheckCircle2, LayoutList, DatabaseBackup, Eye } from "lucide-react"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
@@ -54,13 +54,13 @@ export default function BulkImportPage() {
       return
     }
     
-    // Position-based parser with metadata wrapper
+    // Position-based parser with metadata injection
     const results = parseBulkQuestions(rawText, importFormat, { ...metadata })
     
     if (results.errors.length > 0) {
       setParseErrors(results.errors)
       setParsedQuestions([])
-      toast({ variant: "destructive", title: "Template Match Failed", description: "Position-based audit failed. Correct markers." })
+      toast({ variant: "destructive", title: "Template Match Failed", description: "Audit failed. Correct markers in the text." })
     } else {
       setParseErrors([])
       setParsedQuestions(results.questions)
@@ -78,10 +78,10 @@ export default function BulkImportPage() {
       batch.set(newRef, {
         ...q,
         id: newRef.id,
-        isStandalone: true, // Default to bank asset
+        isStandalone: true, 
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-        author: "Management Ingestion Hub"
+        author: "Lead Authority Ingestion"
       })
     })
 
@@ -105,7 +105,7 @@ export default function BulkImportPage() {
           </Button>
           <div className="text-left">
             <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Institutional Ingestion</h1>
-            <p className="text-slate-500 font-medium">Bulk Ingest 10-500 Questions with automatic metadata injection.</p>
+            <p className="text-slate-500 font-medium">Bulk Ingest 10-500 Questions with strict metadata injection.</p>
           </div>
         </div>
         <div className="flex gap-4">
@@ -221,7 +221,6 @@ export default function BulkImportPage() {
                   </div>
                 ))}
               </div>
-              <p className="text-[10px] text-rose-400 font-black uppercase tracking-widest text-center">Correct the position-based markers in the paste box and retry.</p>
             </Card>
           ) : parsedQuestions.length > 0 ? (
             <Card className="border-none bg-white shadow-4xl rounded-[4rem] h-full flex flex-col overflow-hidden">
@@ -233,7 +232,7 @@ export default function BulkImportPage() {
                     <CardDescription className="text-xs font-black uppercase tracking-[0.3em] text-slate-400 mt-2">{parsedQuestions.length} Institutional Nodes Mapped Successfully.</CardDescription>
                  </div>
                  <div className="flex gap-4">
-                    <Button variant="outline" className="rounded-2xl h-14 border-slate-200 bg-white font-black uppercase text-[10px] tracking-widest shadow-sm">Audit JSON</Button>
+                    <Badge className="bg-primary/10 text-primary border-none text-[11px] font-black uppercase tracking-widest px-6 py-2 rounded-xl">Bilingual Audit View</Badge>
                  </div>
                </CardHeader>
                <CardContent className="p-16 flex-1 overflow-y-auto custom-scrollbar space-y-16">
@@ -244,10 +243,11 @@ export default function BulkImportPage() {
                              <Badge className="bg-primary/10 text-primary border-none text-[11px] font-black uppercase tracking-widest px-4 py-1 rounded-lg">Audit Node {idx + 1}</Badge>
                              <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">• {metadata.subjectId}</span>
                           </div>
-                          <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-lg">Key: {q.correctAnswer}</span>
+                          <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest bg-emerald-50 px-3 py-1 rounded-lg">Correct Key: {q.correctAnswer}</span>
                        </div>
 
-                       <QuestionRenderer language="en" question={q} />
+                       {/* Preview matches student view: Bilingual */}
+                       <QuestionRenderer language="bilingual" question={q} />
 
                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                           {['A','B','C','D'].map(l => (
@@ -260,28 +260,6 @@ export default function BulkImportPage() {
                                 {q[`option${l}Pa`] && <p className="text-sm font-medium text-slate-500 italic border-t border-slate-200/50 pt-2 mt-2">{q[`option${l}Pa`]}</p>}
                              </div>
                           ))}
-                       </div>
-
-                       <div className="bg-[#0F172A] p-10 rounded-[3rem] space-y-8 relative overflow-hidden">
-                          <div className="absolute top-0 right-0 p-8 opacity-5"><Languages className="h-32 w-32" /></div>
-                          <div className="flex items-center gap-4 relative z-10">
-                             <div className="h-10 w-10 rounded-2xl bg-primary/20 flex items-center justify-center">
-                                <Languages className="h-5 w-5 text-primary" />
-                             </div>
-                             <p className="text-[11px] font-black uppercase text-primary tracking-[0.2em]">Institutional Rationale</p>
-                          </div>
-                          <div className="space-y-6 relative z-10">
-                             <div className="space-y-2">
-                                <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest">English Rationale</p>
-                                <p className="text-base font-medium text-slate-300 leading-relaxed antialiased">{q.explanationEn}</p>
-                             </div>
-                             {q.explanationPa && (
-                                <div className="space-y-2 border-t border-white/5 pt-6">
-                                   <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</p>
-                                   <p className="text-base font-medium text-slate-400 leading-relaxed italic">{q.explanationPa}</p>
-                                </div>
-                             )}
-                          </div>
                        </div>
                     </div>
                   ))}

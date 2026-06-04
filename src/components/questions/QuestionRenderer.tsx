@@ -19,22 +19,23 @@ import {
   Line 
 } from 'recharts';
 import Image from 'next/image';
+import { cn } from '@/lib/utils';
 
 interface QuestionRendererProps {
   question: Partial<Question>;
-  language: 'en' | 'pa';
+  language: 'en' | 'pa' | 'bilingual';
 }
 
 const COLORS = ['#F97316', '#3B82F6', '#10B981', '#EF4444', '#8B5CF6'];
 
 /**
  * @fileOverview Final Enterprise Question Renderer.
- * Hardened for strict bilingual support and complex DI nodes.
+ * Hardened for strict trilingual support and complex DI nodes.
  */
 
 export default function QuestionRenderer({ question, language }: QuestionRendererProps) {
-  const isEn = language === 'en';
-  const isPa = language === 'pa';
+  const showEn = language === 'en' || language === 'bilingual';
+  const showPa = language === 'pa' || language === 'bilingual';
   
   // Safe Fallback for Language Data
   const questionEn = question.questionEn || "";
@@ -53,8 +54,8 @@ export default function QuestionRenderer({ question, language }: QuestionRendere
         <div className="bg-blue-50/50 border-l-4 border-blue-500 p-6 rounded-r-2xl">
           <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-2">Institutional Instruction</p>
           <div className="space-y-1">
-             {(isEn || !isPa) && <p className="text-sm font-bold text-blue-900 leading-tight">{instructionEn}</p>}
-             {(isPa || !isEn) && <p className="text-sm font-medium text-blue-800 leading-tight italic">{instructionPa}</p>}
+             {showEn && <p className="text-sm font-bold text-blue-900 leading-tight">{instructionEn}</p>}
+             {showPa && <p className={cn("text-sm font-medium text-blue-800 leading-tight", language === 'bilingual' ? "italic opacity-70 mt-1" : "")}>{instructionPa}</p>}
           </div>
         </div>
       )}
@@ -62,10 +63,10 @@ export default function QuestionRenderer({ question, language }: QuestionRendere
       {/* 2. Passage Node (Reading Comprehension / Caselet) */}
       {(passageEn || passagePa) && (
         <div className="bg-slate-50 border border-slate-100 p-8 rounded-[2.5rem] shadow-inner">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Read the following passage carefully:</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Read the following context carefully:</p>
           <div className="space-y-6">
-             {(isEn || !isPa) && <div className="text-lg leading-relaxed text-slate-700 whitespace-pre-wrap font-medium">{passageEn}</div>}
-             {(isPa || !isEn) && <div className="text-lg leading-relaxed text-slate-600 whitespace-pre-wrap font-medium italic border-t border-slate-200 pt-6">{passagePa}</div>}
+             {showEn && <div className="text-lg leading-relaxed text-slate-700 whitespace-pre-wrap font-medium">{passageEn}</div>}
+             {showPa && <div className={cn("text-lg leading-relaxed text-slate-600 whitespace-pre-wrap font-medium", language === 'bilingual' ? "italic border-t border-slate-200 pt-6 mt-6" : "")}>{passagePa}</div>}
           </div>
         </div>
       )}
@@ -147,11 +148,11 @@ export default function QuestionRenderer({ question, language }: QuestionRendere
       <div className="space-y-5">
         <div className="flex items-center gap-3">
            <div className="h-6 w-1 bg-primary rounded-full" />
-           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Statement Node</span>
+           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Question Node</span>
         </div>
         <div className="space-y-4">
-           {(isEn || !isPa) && <p className="text-2xl font-black leading-snug text-[#0B1528] tracking-tight">{questionEn}</p>}
-           {(isPa || !isEn) && <p className="text-2xl font-bold leading-snug text-slate-500 tracking-tight italic">{questionPa}</p>}
+           {showEn && <p className="text-2xl font-black leading-snug text-[#0B1528] tracking-tight">{questionEn}</p>}
+           {showPa && <p className={cn("text-2xl font-bold leading-snug text-slate-500 tracking-tight", language === 'bilingual' ? "italic opacity-70" : "")}>{questionPa}</p>}
         </div>
       </div>
     </div>

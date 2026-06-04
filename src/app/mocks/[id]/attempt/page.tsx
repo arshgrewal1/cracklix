@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
@@ -26,7 +25,7 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
-type LangMode = 'en' | 'reg' | 'bilingual'
+type LangMode = 'en' | 'pa' | 'bilingual'
 
 export default function MockAttemptPage() {
   const params = useParams()
@@ -137,11 +136,11 @@ export default function MockAttemptPage() {
       <header className="h-14 border-b flex items-center justify-between px-4 bg-[#0B1528] text-white shrink-0 z-[60]">
         <div className="flex items-center gap-1.5 bg-white/5 p-1 rounded-lg">
            <LangTab label="EN" active={language === 'en'} onClick={() => setLanguage('en')} />
-           <LangTab label="ਪੰਜਾਬੀ" active={language === 'reg'} onClick={() => setLanguage('reg')} />
+           <LangTab label="ਪੰਜਾਬੀ" active={language === 'pa'} onClick={() => setLanguage('pa')} />
            <LangTab label="BI" active={language === 'bilingual'} onClick={() => setLanguage('bilingual')} />
         </div>
         <div className="flex items-center gap-3">
-          <Timer onTimeUp={submitMock} initialSeconds={(mock?.duration || 120) * 60} onTick={setRemainingTime} isPaused={isPaused} />
+          <Timer onTimeUp={submitMock} initialSeconds={remainingTime || (mock?.duration || 120) * 60} onTick={setRemainingTime} isPaused={isPaused} />
           <Button onClick={submitMock} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] h-9 px-6 rounded-xl shadow-lg">
              Finish Audit
           </Button>
@@ -186,7 +185,7 @@ export default function MockAttemptPage() {
           <div className="flex-1 overflow-y-auto p-4 md:p-10 custom-scrollbar">
              <div className="max-w-4xl mx-auto space-y-12">
                 <QuestionRenderer 
-                   language={isPunjabiOnlyNode ? 'pa' : (language === 'reg' ? 'pa' : 'en')}
+                   language={isPunjabiOnlyNode ? 'pa' : language}
                    question={q}
                 />
                 <RadioGroup 
