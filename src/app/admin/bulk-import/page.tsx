@@ -25,17 +25,18 @@ import {
   Layers,
   Save,
   FileCode,
-  DatabaseBackup
+  DatabaseBackup,
+  FileText
 } from "lucide-react"
 import { useFirestore, useCollection } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions } from "@/lib/parser"
-import { Difficulty, MockType, Question, ContentStatus } from "@/types"
+import { Difficulty, Question, ContentStatus } from "@/types"
 
 /**
- * @fileOverview Institutional Bank Ingestion Node.
- * Imports structured questions into the global reusable bank.
+ * @fileOverview Institutional Hybrid Bank Ingestion Node.
+ * Supports Simple (Q1, A, B, C, D) and Tagged formats automatically.
  */
 
 export default function BulkImportPage() {
@@ -46,7 +47,6 @@ export default function BulkImportPage() {
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
 
-  // 1. Config State
   const [metadata, setMetadata] = useState({
     boardId: "",
     examId: "",
@@ -56,12 +56,10 @@ export default function BulkImportPage() {
     status: "PUBLISHED" as ContentStatus,
   })
 
-  // 2. Buffer State
   const [rawText, setRawText] = useState("")
   const [parsedQuestions, setParsedQuestions] = useState<Partial<Question>[]>([])
   const [parseErrors, setParseErrors] = useState<string[]>([])
   const [confidence, setConfidence] = useState(0)
-  
   const [isSyncing, setIsSyncing] = useState(false)
 
   const handleAnalyze = () => {
@@ -77,9 +75,9 @@ export default function BulkImportPage() {
     setConfidence(conf)
 
     if (errors.length > 0) {
-      toast({ variant: "destructive", title: "Format Mismatch", description: `Found ${errors.length} errors in text structure.` })
+      toast({ variant: "destructive", title: "Partial Format Mismatch", description: `Parsed ${questions.length} blocks, but found ${errors.length} errors.` })
     } else {
-      toast({ title: "Audit Complete", description: `${questions.length} reusable nodes structured with ${conf}% confidence.` })
+      toast({ title: "Hybrid Audit Complete", description: `${questions.length} nodes structured with ${conf}% confidence.` })
     }
   }
 
@@ -120,8 +118,8 @@ export default function BulkImportPage() {
             <ChevronLeft className="h-6 w-6" />
           </Button>
           <div>
-            <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Atomic Bank Ingestion</h1>
-            <p className="text-slate-500 font-medium text-left">Group content by subject/chapter for maximum reuse across mocks.</p>
+            <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Hybrid Bank Ingestion</h1>
+            <p className="text-slate-500 font-medium text-left">Supports both Tagged and Simple (Q1, A, B, C, D) content formats.</p>
           </div>
         </div>
         <div className="flex gap-4">
@@ -180,13 +178,12 @@ export default function BulkImportPage() {
               </div>
 
               <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><FileCode className="h-3 w-3" /> ULTIMATE FORMAT TAGS</p>
-                 <ul className="text-[9px] font-bold text-slate-600 space-y-2">
-                    <li>• QUESTION_TYPE: MCQ | MATCHING | DI_SET | PASSAGE</li>
-                    <li>• QUESTION_EN / QUESTION_PA</li>
-                    <li>• OPTION_A_EN / OPTION_A_PA (up to D)</li>
-                    <li>• DI_SET_ID / PASSAGE_ID (for linkage)</li>
-                    <li>• TABLE_DATA: Header | Header (Use | )</li>
+                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><FileCode className="h-3 w-3" /> PROTOCOL MODES</p>
+                 <ul className="text-[9px] font-bold text-slate-600 space-y-3">
+                    <li>• <span className="text-primary">SIMPLE MODE:</span> Q1. Question text -> A. Option A -> Answer: B</li>
+                    <li>• <span className="text-primary">TAGGED MODE:</span> QUESTION_EN: -> OPTION_A_EN: -> ANSWER:</li>
+                    <li>• <span className="text-primary">IMAGE MODE:</span> IMAGE_URL: [Link] -> QUESTION_EN: ...</li>
+                    <li>• Use <span className="font-black text-[#0F172A]">===</span> between questions for best results.</li>
                  </ul>
               </div>
             </CardContent>
@@ -195,15 +192,15 @@ export default function BulkImportPage() {
 
         <div className="lg:col-span-8 space-y-8">
            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Ingestion Buffer (Atomic Mode)</Label>
+              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Ingestion Buffer (Hybrid Mode)</Label>
               <Textarea 
                 value={rawText}
                 onChange={e => setRawText(e.target.value)}
-                placeholder="Paste Subject/Chapter specific content using ULTIMATE tags..."
+                placeholder="Paste Q1. A. B. C. D. Answer: format or Tagged format here..."
                 className="min-h-[500px] rounded-[3.5rem] bg-white border-none p-12 text-sm font-mono shadow-4xl custom-scrollbar text-[#0F172A]"
               />
               <Button onClick={handleAnalyze} className="w-full h-20 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] rounded-[2.5rem] shadow-4xl mt-6 gap-4">
-                 <Zap className="h-6 w-6 fill-current" /> Structure & Audit Nodes
+                 <Zap className="h-6 w-6 fill-current" /> Structure & Audit Batch
               </Button>
            </div>
 
@@ -211,19 +208,19 @@ export default function BulkImportPage() {
              <Card className="border-none shadow-4xl rounded-[4rem] bg-white overflow-hidden text-left">
                 <CardHeader className="p-16 border-b border-slate-50 bg-slate-50/30 flex flex-row justify-between items-center">
                    <div className="space-y-2 text-left">
-                      <CardTitle className="font-headline font-black text-3xl uppercase">Bank Preview ({parsedQuestions.length})</CardTitle>
-                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest text-left">Confidence: {confidence}% • Tag: {metadata.subjectId} / {metadata.chapterId}</p>
+                      <CardTitle className="font-headline font-black text-3xl uppercase">Extraction Matrix ({parsedQuestions.length})</CardTitle>
+                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest text-left">Confidence: {confidence}% • Mode: Hybrid</p>
                    </div>
-                   <Badge className="bg-emerald-100 text-emerald-600 border-none font-black px-6 py-2 rounded-xl text-xs uppercase tracking-widest">READY FOR BANK</Badge>
+                   <Badge className="bg-emerald-100 text-emerald-600 border-none font-black px-6 py-2 rounded-xl text-xs uppercase tracking-widest">VALIDATED NODES</Badge>
                 </CardHeader>
                 <CardContent className="p-0">
                    <Table>
                       <TableHeader className="bg-slate-50">
                          <TableRow className="h-20 border-slate-50">
                             <TableHead className="px-12 text-[10px] font-black uppercase text-left">Node</TableHead>
-                            <TableHead className="text-[10px] font-black uppercase text-left">Type & Statement</TableHead>
+                            <TableHead className="text-[10px] font-black uppercase text-left">Statement Summary</TableHead>
                             <TableHead className="text-center text-[10px] font-black uppercase">Logic</TableHead>
-                            <TableHead className="text-right px-12 text-[10px] font-black uppercase">Control</TableHead>
+                            <TableHead className="text-right px-12 text-[10px] font-black uppercase">Audit</TableHead>
                          </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -231,13 +228,13 @@ export default function BulkImportPage() {
                            <TableRow key={idx} className="group hover:bg-slate-50/50 border-slate-50 transition-colors">
                               <TableCell className="px-12 py-10 font-black text-slate-300 text-left">#{idx + 1}</TableCell>
                               <TableCell className="py-10 max-w-lg text-left">
-                                 <div className="space-y-3">
-                                    <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black uppercase px-2">{q.questionType}</Badge>
+                                 <div className="space-y-2">
                                     <p className="font-bold text-[#0F172A] line-clamp-1">{q.questionEn}</p>
+                                    <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black uppercase px-2">{q.questionType}</Badge>
                                  </div>
                               </TableCell>
                               <TableCell className="text-center">
-                                 <div className="h-8 w-8 rounded-lg bg-emerald-50 text-emerald-600 font-black text-xs flex items-center justify-center mx-auto">{q.correctAnswer}</div>
+                                 <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-600 font-black text-sm flex items-center justify-center mx-auto border border-emerald-100">{q.correctAnswer}</div>
                               </TableCell>
                               <TableCell className="text-right px-12">
                                  <div className="flex justify-end gap-3 opacity-20 group-hover:opacity-100 transition-opacity">
@@ -261,7 +258,7 @@ export default function BulkImportPage() {
              <Card className="border-rose-100 bg-rose-50/50 p-16 rounded-[4rem] shadow-4xl text-left">
                 <div className="flex items-center gap-6 text-rose-600 mb-10 text-left">
                    <AlertCircle className="h-12 w-12" />
-                   <h4 className="font-headline font-black text-3xl uppercase tracking-tight">Extraction Failures</h4>
+                   <h4 className="font-headline font-black text-3xl uppercase tracking-tight">Audit Flags</h4>
                 </div>
                 <div className="space-y-4">
                    {parseErrors.map((err, i) => (
