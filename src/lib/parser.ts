@@ -25,12 +25,14 @@ export function parseBulkQuestions(
     chapterId?: string;
     difficulty: Difficulty;
     status: any;
+    languagePreference?: string;
   }
 ): ParsedResults {
   const cleanedText = rawText.replace(/\r\n/g, '\n');
   const blocks = cleanedText.split(/\[BLOCK_ID:.*?\]/g).filter(b => b.trim().length > 20);
   
-  if (blocks.length === 0 && format !== 'STANDARD_MCQ') {
+  if (blocks.length === 0) {
+    // Attempt parsing even without BLOCK_ID if it's standard format, but for Cracklix, tagged is preferred.
     return { questions: [], errors: ["No valid [BLOCK_ID] markers found. Please use the tagged format."] };
   }
 
@@ -54,8 +56,9 @@ export function parseBulkQuestions(
 
     const splitOpts = (raw: string) => {
       if (!raw) return [];
+      // Handle pipe separators or newlines
       if (raw.includes('|')) return raw.split('|').map(s => s.trim().replace(/^[A-D][\.\)]\s*/i, ''));
-      return raw.split(/\n/).map(s => s.trim().replace(/^[A-D][\.\)]\s*/i, ''));
+      return raw.split(/\n/).filter(s => s.trim().length > 0).map(s => s.trim().replace(/^[A-D][\.\)]\s*/i, ''));
     };
 
     const optsEn = splitOpts(rawOptEn);
@@ -73,7 +76,7 @@ export function parseBulkQuestions(
       return;
     }
     if (optsEn.length < 4 && optsPa.length < 4) {
-      errors.push(`Block ${index + 1}: Missing Options (Found ${Math.max(optsEn.length, optsPa.length)})`);
+      errors.push(`Block ${index + 1}: Missing Options (Found EN:${optsEn.length}, PA:${optsPa.length})`);
       return;
     }
     if (!ans) {
@@ -84,13 +87,17 @@ export function parseBulkQuestions(
     let diagType: DiagramType = 'none';
     let tableData = undefined;
     if (rawTable) {
-      try { tableData = JSON.parse(rawTable); diagType = 'table'; } catch(e) {}
+      try { 
+        tableData = JSON.parse(rawTable); 
+        diagType = 'table'; 
+      } catch(e) {
+        errors.push(`Block ${index + 1}: Invalid TABLE_DATA JSON`);
+      }
     }
     if (imgUrl) diagType = 'image';
 
     parsedQuestions.push({
       ...metadata,
-      id: `node-${Date.now()}-${index}`,
       questionEn: qEn,
       questionPa: qPa,
       optionAEn: optsEn[0] || "",
@@ -108,8 +115,7 @@ export function parseBulkQuestions(
       imageUrl: imgUrl,
       tableData,
       status: metadata.status || 'PUBLISHED',
-      questionType: (qPa && qEn) ? 'BILINGUAL_MCQ' : 'MCQ',
-      isStandalone: true
+      questionType: (qPa && qEn) ? 'BILINGUAL_MCQ' : 'MCQ'
     });
   });
 

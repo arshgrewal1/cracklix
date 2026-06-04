@@ -12,7 +12,7 @@ import { useFirestore, useCollection } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions, ImportFormat } from "@/lib/parser"
-import { Zap, Database, ChevronLeft, Rocket, CheckCircle2, FileWarning, AlertTriangle, Settings2, DatabaseBackup } from "lucide-react"
+import { Zap, Database, ChevronLeft, Rocket, CheckCircle2, FileWarning, AlertTriangle, Settings2, DatabaseBackup, Layers, Globe, GraduationCap } from "lucide-react"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
@@ -34,7 +34,8 @@ export default function BulkImportPage() {
     subjectId: "",
     chapterId: "",
     difficulty: "Medium" as any,
-    status: "PUBLISHED" as any
+    status: "PUBLISHED" as any,
+    languagePreference: "bilingual" as any
   })
   
   const [parsedQuestions, setParsedQuestions] = useState<any[]>([])
@@ -73,6 +74,7 @@ export default function BulkImportPage() {
         id: newRef.id,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
+        isStandalone: true
       })
     })
 
@@ -88,17 +90,17 @@ export default function BulkImportPage() {
   }
 
   const placeholderText = `[BLOCK_ID: Q71]
-ENG_Q: Under which provision does the President seek advice?
-PUN_Q: ਰਾਸ਼ਟਰਪਤੀ ਕਿਸ ਉਪਬੰਧ ਦੇ ਤਹਿਤ ਸਲਾਹ ਲੈਂਦਾ ਹੈ?
-ENG_OPT: A. Art 131 | B. Art 143 | C. Art 144 | D. Art 136
-PUN_OPT: A. ਅਨੁਛੇਦ 131 | B. ਅਨੁਛੇਦ 143 | C. ਅਨੁਛੇਦ 144 | D. ਅਨੁਛੇਦ 136
+ENG_Q: Question in English?
+PUN_Q: ਸਵਾਲ ਪੰਜਾਬੀ ਵਿੱਚ?
+ENG_OPT: A. Option 1 | B. Option 2 | C. Option 3 | D. Option 4
+PUN_OPT: A. ਵਿਕਲਪ 1 | B. ਵਿਕਲਪ 2 | C. ਵਿਕਲਪ 3 | D. ਵਿਕਲਪ 4
 ENG_ANS: B
-ENG_EXP: Detailed explanation in English.
-PUN_EXP: ਪੰਜਾਬੀ ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਵਿਆਖਿਆ.`;
+ENG_EXP: Explanation in English.
+PUN_EXP: ਵਿਆਖਿਆ ਪੰਜਾਬੀ ਵਿੱਚ.`;
 
   return (
-    <div className="space-y-10 pb-20 max-w-7xl mx-auto text-[#0F172A]">
-      <div className="flex items-center justify-between">
+    <div className="space-y-10 pb-20 max-w-[1600px] mx-auto text-[#0F172A]">
+      <div className="flex items-center justify-between px-4">
         <div className="flex items-center gap-6">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-2xl border border-slate-200 bg-white h-14 w-14 shadow-sm">
             <ChevronLeft className="h-8 w-8 text-[#0F172A]" />
@@ -118,7 +120,7 @@ PUN_EXP: ਪੰਜਾਬੀ ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਵਿਆਖ�
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 px-4">
         <div className="lg:col-span-5 space-y-8 text-left">
           <Card className="border-none bg-white shadow-3xl rounded-[3rem] overflow-hidden">
             <div className="h-2 w-full bg-primary" />
@@ -129,18 +131,62 @@ PUN_EXP: ਪੰਜਾਬੀ ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਵਿਆਖ�
             </CardHeader>
             <CardContent className="p-10 pt-4 space-y-8">
               <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-3">
-                  <p className="text-[10px] font-black uppercase text-slate-500 ml-1">Board</p>
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Recruiting Board</Label>
                   <Select value={metadata.boardId} onValueChange={val => setMetadata({...metadata, boardId: val})}>
                     <SelectTrigger className="rounded-xl bg-slate-50 border-none h-14 font-bold text-sm text-[#0F172A]"><SelectValue placeholder="Select Board" /></SelectTrigger>
                     <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-3">
-                   <p className="text-[10px] font-black uppercase text-slate-500 ml-1">Subject</p>
+                <div className="space-y-2">
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Exam</Label>
+                   <Select value={metadata.examId} onValueChange={val => setMetadata({...metadata, examId: val})}>
+                     <SelectTrigger className="rounded-xl bg-slate-50 border-none h-14 font-bold text-sm text-[#0F172A]"><SelectValue placeholder="Select Exam" /></SelectTrigger>
+                     <SelectContent>{exams?.filter((e: any) => e.boardId === metadata.boardId).map((e: any) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+                   </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Subject</Label>
                    <Select value={metadata.subjectId} onValueChange={val => setMetadata({...metadata, subjectId: val})}>
                      <SelectTrigger className="rounded-xl bg-slate-50 border-none h-14 font-bold text-sm text-[#0F172A]"><SelectValue placeholder="Select Subject" /></SelectTrigger>
                      <SelectContent>{subjects?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                   </Select>
+                </div>
+                <div className="space-y-2">
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Topic / Chapter</Label>
+                   <Input 
+                      placeholder="e.g. Blood Relations" 
+                      className="rounded-xl bg-slate-50 border-none h-14 font-bold text-sm"
+                      value={metadata.chapterId}
+                      onChange={(e) => setMetadata({...metadata, chapterId: e.target.value})}
+                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Difficulty</Label>
+                   <Select value={metadata.difficulty} onValueChange={val => setMetadata({...metadata, difficulty: val})}>
+                     <SelectTrigger className="rounded-xl bg-slate-50 border-none h-14 font-bold text-sm text-[#0F172A]"><SelectValue /></SelectTrigger>
+                     <SelectContent>
+                        <SelectItem value="Easy">Aspirant (Easy)</SelectItem>
+                        <SelectItem value="Medium">Standard (Medium)</SelectItem>
+                        <SelectItem value="Hard">Advanced (Hard)</SelectItem>
+                     </SelectContent>
+                   </Select>
+                </div>
+                <div className="space-y-2">
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Primary Language</Label>
+                   <Select value={metadata.languagePreference} onValueChange={val => setMetadata({...metadata, languagePreference: val})}>
+                     <SelectTrigger className="rounded-xl bg-slate-50 border-none h-14 font-bold text-sm text-[#0F172A]"><SelectValue /></SelectTrigger>
+                     <SelectContent>
+                        <SelectItem value="bilingual">Bilingual (Both)</SelectItem>
+                        <SelectItem value="en">English Only</SelectItem>
+                        <SelectItem value="pa">Punjabi Only</SelectItem>
+                     </SelectContent>
                    </Select>
                 </div>
               </div>
@@ -182,13 +228,19 @@ PUN_EXP: ਪੰਜਾਬੀ ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਵਿਆਖ�
             <Card className="border-none bg-white shadow-4xl rounded-[4rem] h-full flex flex-col overflow-hidden">
                <CardHeader className="p-16 bg-slate-50/50 border-b border-slate-50">
                   <CardTitle className="font-headline font-black text-3xl uppercase flex items-center gap-4 text-[#0F172A]">
-                    <CheckCircle2 className="h-8 w-8 text-emerald-600" /> Structure Ready
+                    <CheckCircle2 className="h-8 w-8 text-emerald-600" /> Structure Ready ({parsedQuestions.length})
                   </CardTitle>
                </CardHeader>
                <CardContent className="p-16 flex-1 overflow-y-auto custom-scrollbar space-y-16">
                   {parsedQuestions.map((q, idx) => (
                     <div key={idx} className="space-y-10 pb-16 border-b border-slate-100 last:border-0 last:pb-0">
-                       <Badge className="bg-primary/10 text-primary border-none text-[11px] font-black uppercase tracking-widest px-4 py-1 rounded-lg">Audit Node {idx + 1}</Badge>
+                       <div className="flex items-center justify-between">
+                          <Badge className="bg-primary/10 text-primary border-none text-[11px] font-black uppercase tracking-widest px-4 py-1 rounded-lg">Audit Node {idx + 1}</Badge>
+                          <div className="flex gap-4">
+                             <Badge variant="outline" className="text-[10px] font-bold uppercase">{q.difficulty}</Badge>
+                             <Badge variant="outline" className="text-[10px] font-bold uppercase">{q.subjectId}</Badge>
+                          </div>
+                       </div>
                        <QuestionRenderer language="bilingual" question={q} />
                     </div>
                   ))}
@@ -197,7 +249,7 @@ PUN_EXP: ਪੰਜਾਬੀ ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਵਿਆਖ�
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-slate-300 opacity-20 py-60">
               <Database className="h-32 w-32 mb-8" />
-              <p className="font-headline font-black uppercase tracking-[0.4em] text-xl">Awaiting Ingestion Input</p>
+              <p className="font-headline font-black uppercase tracking-[0.4em] text-xl text-center px-10">Awaiting Ingestion Input<br/><span className="text-sm">Metadata must be selected before structuring.</span></p>
             </div>
           )}
         </div>
