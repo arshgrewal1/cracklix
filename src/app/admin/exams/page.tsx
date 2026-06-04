@@ -1,26 +1,36 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Image as ImageIcon, Trash2, Save, Globe } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog"
+import { Plus, Edit, Image as ImageIcon, Trash2, Save, Globe, Upload, Loader2 } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import Image from "next/image"
-import { useCollection, useFirestore } from "@/firebase"
+import { useCollection, useFirestore, useStorage } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc } from "firebase/firestore"
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 
+/**
+ * @fileOverview Authority Hub - Recruitment Board Management.
+ * Updated: Direct File Upload to Firebase Storage and CORS/Referrer Fixes for Wikimedia logos.
+ */
+
 export default function ExamManagement() {
   const db = useFirestore()
+  const storage = useStorage()
   const { toast } = useToast()
   const { data: boards, loading } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
+  
   const [editingBoard, setEditingBoard] = useState<any>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleSave = () => {
     if (!db || !editingBoard) return
@@ -44,7 +54,7 @@ export default function ExamManagement() {
 
   const handleDelete = (id: string) => {
     if (!confirm("Permanently remove this authority from the institutional database?")) return
-    const boardRef = doc(db, "boards", id)
+    const boardRef = doc(db!, "boards", id)
     deleteDoc(boardRef)
       .then(() => {
         toast({ title: "Authority Deleted", description: "Board removed from cloud repository." })
@@ -56,6 +66,25 @@ export default function ExamManagement() {
         } satisfies SecurityRuleContext);
         errorEmitter.emit('permission-error', permissionError);
       });
+  }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file || !storage) return
+
+    setIsUploading(true)
+    const storageRef = ref(storage, `authority_logos/${Date.now()}_${file.name}`)
+
+    try {
+      const snapshot = await uploadBytes(storageRef, file)
+      const downloadURL = await getDownloadURL(snapshot.ref)
+      setEditingBoard({ ...editingBoard, iconUrl: downloadURL })
+      toast({ title: "Upload Complete", description: "Logo successfully synchronized with institutional storage." })
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Upload Failed", description: error.message })
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   return (
@@ -95,12 +124,12 @@ export default function ExamManagement() {
                   <TableCell className="px-10 py-6">
                     <div className="h-14 w-14 rounded-2xl bg-white border border-white/10 flex items-center justify-center overflow-hidden relative shadow-inner group-hover:scale-110 transition-transform">
                       {board.iconUrl ? (
-                        <Image 
+                        <img 
                           src={board.iconUrl} 
                           alt={board.abbreviation || 'Board'} 
-                          fill 
-                          unoptimized={board.iconUrl.includes('punjab.gov.in')}
-                          className="object-contain p-2" 
+                          className="h-full w-full object-contain p-2" 
+                          crossOrigin="anonymous"
+                          referrerPolicy="no-referrer"
                         />
                       ) : (
                         <ImageIcon className="h-6 w-6 text-slate-700" />
@@ -133,28 +162,53 @@ export default function ExamManagement() {
             <DialogTitle className="text-3xl font-black font-headline uppercase">{editingBoard?.id ? "Update Authority" : "New Recruitment Board"}</DialogTitle>
           </DialogHeader>
           <div className="p-10 space-y-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
-            <div className="flex justify-center">
-              <div className="h-24 w-24 rounded-3xl bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center relative overflow-hidden group">
+            <div className="flex flex-col items-center gap-6">
+              <div className="h-32 w-32 rounded-[2rem] bg-white/5 border-2 border-dashed border-white/10 flex items-center justify-center relative overflow-hidden group shadow-inner">
                  {editingBoard?.iconUrl ? (
                     <img 
                       src={editingBoard.iconUrl} 
                       referrerPolicy="no-referrer"
+                      crossOrigin="anonymous"
                       className="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform" 
                       alt="Preview"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "https://placehold.co/200x200?text=Invalid+URL";
+                      }}
                     />
                  ) : (
-                    <ImageIcon className="h-8 w-8 text-slate-500" />
+                    <ImageIcon className="h-10 w-10 text-slate-500" />
                  )}
               </div>
+              
+              <div className="flex gap-3 w-full">
+                 <Button 
+                    variant="outline" 
+                    className="flex-1 h-12 rounded-xl border-white/10 bg-white/5 font-black uppercase text-[10px] tracking-widest gap-2"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                 >
+                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    {isUploading ? "Syncing..." : "Upload Logo"}
+                 </Button>
+                 <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleFileUpload} 
+                 />
+              </div>
             </div>
+
             <div className="space-y-6">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Icon Reference URL</Label>
-                <Input value={editingBoard?.iconUrl || ""} onChange={e => setEditingBoard({...editingBoard, iconUrl: e.target.value})} className="bg-white/5 border-white/10 rounded-xl h-12" placeholder="Unsplash/Picsum/Storage URL..." />
+                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Icon Reference URL (Auto-filled on upload)</Label>
+                <Input value={editingBoard?.iconUrl || ""} onChange={e => setEditingBoard({...editingBoard, iconUrl: e.target.value})} className="bg-white/5 border-white/10 rounded-xl h-12 text-xs font-mono text-slate-400" placeholder="External URL or direct link..." />
               </div>
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Abbreviation (e.g. PSSSB)</Label>
-                <Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value})} className="bg-white/5 border-white/10 rounded-xl h-12 font-black uppercase" />
+                <Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value.toUpperCase()})} className="bg-white/5 border-white/10 rounded-xl h-12 font-black uppercase" />
               </div>
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Full Authority Name</Label>
