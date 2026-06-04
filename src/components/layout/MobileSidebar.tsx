@@ -1,3 +1,4 @@
+
 'use client';
 
 import { 
@@ -15,7 +16,8 @@ import {
   Zap,
   GraduationCap,
   LayoutDashboard,
-  BarChart3
+  BarChart3,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@/firebase";
@@ -26,7 +28,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 /**
  * @fileOverview High-Fidelity Mobile Sidebar.
  * Refined Sequence: Profile -> Primary Preparation -> CTA -> Secondary Support -> Footer.
- * Optimized height (64px) for mobile nodes.
+ * Fixed: Top overlap issue using safe-area-inset-top.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
@@ -51,9 +53,9 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-[#0F172A] text-white">
+    <div className="flex flex-col h-full bg-[#0F172A] text-white pt-[env(safe-area-inset-top)]">
       {/* Header Profile Section */}
-      <div className="p-8 bg-gradient-to-br from-[#0B1528] to-[#0F172A] border-b border-white/5">
+      <div className="p-6 bg-gradient-to-br from-[#0B1528] to-[#0F172A] border-b border-white/5 relative">
         <div className="flex items-center gap-4">
           <Avatar className="h-14 w-14 border-2 border-[#F97316] rounded-2xl shadow-xl">
             <AvatarImage src={user?.photoURL || ""} />
@@ -61,7 +63,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
               {profile?.name?.[0] || 'A'}
             </AvatarFallback>
           </Avatar>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="font-headline font-black text-lg truncate uppercase">{profile?.name || "Aspirant"}</p>
             <div className="flex items-center gap-2">
                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{profile?.role || "STUDENT"}</span>
@@ -69,6 +71,12 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
                <span className="text-[10px] font-black text-primary uppercase tracking-widest">{profile?.status || "FREE"}</span>
             </div>
           </div>
+          <button 
+            onClick={onClose}
+            className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 transition-colors"
+          >
+            <X className="h-5 w-5 text-slate-400" />
+          </button>
         </div>
       </div>
 
