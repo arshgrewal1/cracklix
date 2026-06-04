@@ -1,9 +1,10 @@
-export type Difficulty = 'easy' | 'medium' | 'hard';
+export type Difficulty = 'Easy' | 'Medium' | 'Hard';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
-export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ';
+export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ';
 export type ContentStatus = 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'ARCHIVED';
 export type ExamType = 'punjab' | 'central';
 export type SubscriptionTier = 'Free' | 'Silver' | 'Gold' | 'Premium';
+export type CAQuizType = 'DAILY' | 'WEEKLY' | 'MONTHLY';
 
 export type QuestionType = 
   | 'MCQ' 
@@ -23,7 +24,10 @@ export type DiagramType =
   | 'barGraph' 
   | 'lineGraph' 
   | 'vennDiagram' 
-  | 'seatingArrangement';
+  | 'seatingArrangement'
+  | 'flowchart'
+  | 'logicalDiagram'
+  | 'map';
 
 export interface Board {
   id: string;
@@ -65,6 +69,7 @@ export interface Question {
   boardId: string;
   examId: string;
   subjectId: string;
+  topicId?: string;
   difficulty: Difficulty;
   topic?: string;
   subtopic?: string;
@@ -108,7 +113,7 @@ export interface Question {
     labels: string[];
     values: number[];
   };
-  diagramConfig?: any; // For Venn, Seating, etc.
+  diagramConfig?: any; 
   
   imageUrl?: string;
   imageAlt?: string;
@@ -137,6 +142,14 @@ export interface MockTest {
   createdAt: any;
   updatedAt?: any;
   author?: string;
+  
+  // New CMS Fields
+  subjectId?: string;
+  topicId?: string;
+  year?: number;
+  caCategory?: string;
+  caQuizType?: CAQuizType;
+  paperName?: string;
 }
 
 export interface UserProfile {
