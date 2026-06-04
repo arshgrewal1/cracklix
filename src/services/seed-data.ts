@@ -3,16 +3,41 @@ import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 /**
  * @fileOverview Final Institutional Seeding Engine for Cracklix.
  * Restores the complete PSSSB catalog: Clerk, Patwari, VDO, Jail Warder, etc.
+ * Updated: Official Government Logos.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('Initializing Final Structured Punjab Repository Sync...');
 
   // 1. Official Recruiting Boards
   const boards = [
-    { id: 'psssb', abbreviation: 'PSSSB', name: 'Punjab Subordinate Services Selection Board', description: 'Handles Group B, C, and D non-gazetted positions.', iconUrl: 'https://picsum.photos/seed/psssb/200/200' },
-    { id: 'ppsc', abbreviation: 'PPSC', name: 'Punjab Public Service Commission', description: 'Handles Group A and B gazetted administrative posts.', iconUrl: 'https://picsum.photos/seed/ppsc/200/200' },
-    { id: 'police', abbreviation: 'Police', name: 'Punjab Police Recruitment Board', description: 'Dedicated law enforcement cadre recruitment.', iconUrl: 'https://picsum.photos/seed/police/200/200' },
-    { id: 'education', abbreviation: 'Education', name: 'Punjab Education Department', description: 'Teaching hierarchy including PSTET and Master Cadre.', iconUrl: 'https://picsum.photos/seed/teaching/200/200' },
+    { 
+      id: 'psssb', 
+      abbreviation: 'PSSSB', 
+      name: 'Punjab Subordinate Services Selection Board', 
+      description: 'Handles Group B, C, and D non-gazetted positions.', 
+      iconUrl: 'https://sssb.punjab.gov.in/images/logo.png' 
+    },
+    { 
+      id: 'ppsc', 
+      abbreviation: 'PPSC', 
+      name: 'Punjab Public Service Commission', 
+      description: 'Handles Group A and B gazetted administrative posts.', 
+      iconUrl: 'https://picsum.photos/seed/ppsc/200/200' 
+    },
+    { 
+      id: 'police', 
+      abbreviation: 'Police', 
+      name: 'Punjab Police Recruitment Board', 
+      description: 'Dedicated law enforcement cadre recruitment.', 
+      iconUrl: 'https://picsum.photos/seed/police/200/200' 
+    },
+    { 
+      id: 'education', 
+      abbreviation: 'Education', 
+      name: 'Punjab Education Department', 
+      description: 'Teaching hierarchy including PSTET and Master Cadre.', 
+      iconUrl: 'https://picsum.photos/seed/teaching/200/200' 
+    },
   ];
   for (const b of boards) await setDoc(doc(db, 'boards', b.id), b);
 

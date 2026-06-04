@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo } from "react"
@@ -8,9 +7,11 @@ import { useCollection, useFirestore } from "@/firebase"
 import { collection, query } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { ShieldCheck, ChevronRight, GraduationCap, MapPin, Target, Sparkles } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
+import Image from "next/image"
 
 /**
  * @fileOverview Final Exam Gateway Node.
@@ -60,8 +61,12 @@ export default function MocksGatewayPage() {
                    <Card className="border-none shadow-3xl shadow-slate-900/5 hover:shadow-4xl hover:-translate-y-2 transition-all duration-500 rounded-[3rem] bg-white group overflow-hidden text-left h-full flex flex-col border border-slate-50">
                       <CardContent className="p-10 flex flex-col h-full">
                          <div className="flex justify-between items-start mb-10">
-                            <div className="h-16 w-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center group-hover:bg-primary/10 transition-all shadow-inner">
-                               <GraduationCap className="h-8 w-8 text-primary" />
+                            <div className="h-16 w-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center group-hover:shadow-xl transition-all shadow-inner relative overflow-hidden">
+                               {board?.iconUrl ? (
+                                 <Image src={board.iconUrl} alt={board.abbreviation} fill className="object-contain p-2" />
+                               ) : (
+                                 <GraduationCap className="h-8 w-8 text-primary" />
+                               )}
                             </div>
                             <Badge className="bg-primary/5 text-primary border-none text-[9px] font-black uppercase tracking-widest px-3 py-1">
                                {board?.abbreviation || 'PSSSB'} BOARD
