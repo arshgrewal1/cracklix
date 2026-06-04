@@ -21,7 +21,9 @@ import {
   Settings2,
   Clock,
   BookOpen,
-  Target
+  Target,
+  Calendar,
+  Zap
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore"
@@ -50,7 +52,6 @@ function MockBuilderContent() {
 
   const { data: existingMock } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
-  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
   const { data: questionBank } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]))
 
@@ -139,7 +140,7 @@ function MockBuilderContent() {
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-2xl h-14 w-14 border border-slate-200 bg-white"><ChevronLeft className="h-7 w-7 text-[#0F172A]" /></Button>
           <div className="text-left">
             <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase">Test Management</h1>
-            <p className="text-slate-500 mt-1 font-medium">Create Full Mocks, Subject Tests, Sectionals, and PYQs.</p>
+            <p className="text-slate-500 mt-1 font-medium">Create Full Mocks, Subject Tests, Sectionals, PYQs, and CA Quizzes.</p>
           </div>
         </div>
         <Button className="bg-primary hover:bg-primary/90 gap-3 font-black px-12 h-16 shadow-2xl rounded-2xl uppercase tracking-widest text-[10px]" onClick={handlePublish} disabled={isPublishing}>
@@ -152,7 +153,7 @@ function MockBuilderContent() {
           <Card className="border-none shadow-2xl rounded-[3rem] bg-white overflow-hidden">
             <div className="h-2 w-full bg-primary" />
             <CardHeader className="p-10 border-b border-slate-50">
-               <CardTitle className="text-xl font-headline font-black uppercase flex items-center gap-3"><Settings2 className="h-5 w-5 text-primary" /> Configuration</CardTitle>
+               <CardTitle className="text-xl font-headline font-black uppercase flex items-center gap-3"><Settings2 className="h-5 w-5 text-primary" /> Configuration Hub</CardTitle>
             </CardHeader>
             <CardContent className="p-10 space-y-8">
               <div className="space-y-3">
@@ -190,12 +191,39 @@ function MockBuilderContent() {
               {mockData.mockType === 'PYQ' && (
                 <div className="grid grid-cols-2 gap-6 p-6 bg-slate-50 rounded-2xl border border-slate-100">
                    <div className="space-y-3">
-                      <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Year</Label>
+                      <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Exam Year</Label>
                       <Input type="number" value={mockData.year} onChange={e => setMockData({...mockData, year: parseInt(e.target.value)})} className="rounded-xl bg-white border-none font-black" />
                    </div>
                    <div className="space-y-3">
-                      <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Shift/Paper</Label>
+                      <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Paper/Shift Name</Label>
                       <Input placeholder="e.g. Morning Shift" value={mockData.paperName} onChange={e => setMockData({...mockData, paperName: e.target.value})} className="rounded-xl bg-white border-none font-bold" />
+                   </div>
+                </div>
+              )}
+
+              {mockData.mockType === 'CA_QUIZ' && (
+                <div className="grid grid-cols-2 gap-6 p-6 bg-orange-50 rounded-2xl border border-orange-100">
+                   <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase text-primary tracking-widest">CA Category</Label>
+                      <Select value={mockData.caCategory} onValueChange={v => setMockData({...mockData, caCategory: v})}>
+                        <SelectTrigger className="rounded-xl bg-white border-none font-bold"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Punjab">Punjab Current Affairs</SelectItem>
+                          <SelectItem value="India">India Current Affairs</SelectItem>
+                          <SelectItem value="Economy">Economy & Policy</SelectItem>
+                        </SelectContent>
+                      </Select>
+                   </div>
+                   <div className="space-y-3">
+                      <Label className="text-[10px] font-black uppercase text-primary tracking-widest">Quiz Cycle</Label>
+                      <Select value={mockData.caQuizType} onValueChange={(v: CAQuizType) => setMockData({...mockData, caQuizType: v})}>
+                        <SelectTrigger className="rounded-xl bg-white border-none font-bold"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="DAILY">Daily Quiz</SelectItem>
+                          <SelectItem value="WEEKLY">Weekly Round-up</SelectItem>
+                          <SelectItem value="MONTHLY">Monthly Capsule</SelectItem>
+                        </SelectContent>
+                      </Select>
                    </div>
                 </div>
               )}
@@ -209,7 +237,7 @@ function MockBuilderContent() {
                   </Select>
                 </div>
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Duration (Mins)</Label>
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Manual Duration (Mins)</Label>
                   <Input type="number" value={mockData.duration} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value) || 0})} className="rounded-xl h-12 bg-slate-50 border-none font-black text-lg" />
                 </div>
               </div>
@@ -235,7 +263,10 @@ function MockBuilderContent() {
                         <div key={q.id} className="p-8 rounded-[2.5rem] border border-slate-100 bg-white flex items-center justify-between group hover:border-primary/30 transition-all shadow-xl">
                            <div className="flex-1 pr-8 text-left space-y-2">
                              <p className="font-bold text-[#0F172A] line-clamp-2 text-lg leading-tight">{q.questionEn}</p>
-                             <span className="text-[10px] font-black text-primary uppercase tracking-widest">{q.subjectId}</span>
+                             <div className="flex items-center gap-4">
+                                <span className="text-[10px] font-black text-primary uppercase tracking-widest">{q.subjectId}</span>
+                                <Badge className="bg-slate-50 text-slate-400 border-none text-[8px]">{q.difficulty}</Badge>
+                             </div>
                            </div>
                            <Button 
                               onClick={() => isAdded ? setSelectedQuestions(selectedQuestions.filter(s => s.id !== q.id)) : setSelectedQuestions([...selectedQuestions, q])} 

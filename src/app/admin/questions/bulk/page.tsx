@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
@@ -13,15 +13,10 @@ import { useFirestore, useCollection } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions, ImportFormat } from "@/lib/parser"
-import { Zap, Database, ChevronLeft, Rocket, CheckCircle2, FileWarning, AlertTriangle, LayoutList, Settings2, Eye, DatabaseBackup } from "lucide-react"
+import { Zap, Database, ChevronLeft, Rocket, CheckCircle2, FileWarning, AlertTriangle, LayoutList, Settings2, DatabaseBackup } from "lucide-react"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
-
-/**
- * @fileOverview Institutional Content Extraction Engine.
- * Supports Tagged Bilingual (ENG_Q, PUN_Q) and OCR formats.
- */
 
 export default function BulkImportPage() {
   const router = useRouter()
@@ -94,13 +89,13 @@ export default function BulkImportPage() {
   }
 
   const placeholderText = `[BLOCK_ID: Q71]
-ENG_Q: Enter English Question Here?
-PUN_Q: ਪੰਜਾਬੀ ਸਵਾਲ ਇੱਥੇ ਦਰਜ ਕਰੋ?
-ENG_OPT: A. Opt 1 | B. Opt 2 | C. Opt 3 | D. Opt 4
-PUN_OPT: A. ਵਿਕਲਪ 1 | B. ਵਿਕਲਪ 2 | C. ਵਿਕਲਪ 3 | D. ਵਿਕਲਪ 4
+ENG_Q: Under which provision does the President seek advice?
+PUN_Q: ਰਾਸ਼ਟਰਪਤੀ ਕਿਸ ਉਪਬੰਧ ਦੇ ਤਹਿਤ ਸਲਾਹ ਲੈਂਦਾ ਹੈ?
+ENG_OPT: A. Art 131 | B. Art 143 | C. Art 144 | D. Art 136
+PUN_OPT: A. ਅਨੁਛੇਦ 131 | B. ਅਨੁਛੇਦ 143 | C. ਅਨੁਛੇਦ 144 | D. ਅਨੁਛੇਦ 136
 ENG_ANS: B
-ENG_EXP: Detailed explanation here.
-PUN_EXP: ਵਿਸਤ੍ਰਿਤ ਵਿਆਖਿਆ ਇੱਥੇ.`;
+ENG_EXP: Detailed explanation in English.
+PUN_EXP: ਪੰਜਾਬੀ ਵਿੱਚ ਵਿਸਤ੍ਰਿਤ ਵਿਆਖਿਆ.`;
 
   return (
     <div className="space-y-10 pb-20 max-w-7xl mx-auto text-[#0F172A]">
@@ -111,7 +106,7 @@ PUN_EXP: ਵਿਸਤ੍ਰਿਤ ਵਿਆਖਿਆ ਇੱਥੇ.`;
           </Button>
           <div className="text-left">
             <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Bulk Ingestion</h1>
-            <p className="text-slate-500 font-medium">Tagged Bilingual (ENG_Q, PUN_Q) and OCR Support.</p>
+            <p className="text-slate-500 font-medium">Inject metadata and parse tagged institutional content.</p>
           </div>
         </div>
         <div className="flex gap-4">
@@ -130,7 +125,7 @@ PUN_EXP: ਵਿਸਤ੍ਰਿਤ ਵਿਆਖਿਆ ਇੱਥੇ.`;
             <div className="h-2 w-full bg-primary" />
             <CardHeader className="p-10 pb-4">
               <CardTitle className="font-headline font-black text-2xl uppercase flex items-center gap-4">
-                <Settings2 className="h-6 w-6 text-primary" /> Protocol
+                <Settings2 className="h-6 w-6 text-primary" /> Protocol & Metadata
               </CardTitle>
             </CardHeader>
             <CardContent className="p-10 pt-4 space-y-8">
@@ -157,15 +152,14 @@ PUN_EXP: ਵਿਸਤ੍ਰਿਤ ਵਿਆਖਿਆ ਇੱਥੇ.`;
                   <SelectTrigger className="rounded-xl bg-primary/5 border-primary/20 h-14 font-black uppercase text-[10px] tracking-widest"><SelectValue placeholder="Select Format" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="BILINGUAL_MCQ">Line-Based / Tagged (ENG_Q/PUN_Q)</SelectItem>
-                    <SelectItem value="OCR_COLUMNAR">OCR Columnar (Layout-Aware)</SelectItem>
-                    <SelectItem value="STANDARD_MCQ">Standard Text (Q1, 1.)</SelectItem>
-                    <SelectItem value="STRUCTURED_JSON">API JSON Format</SelectItem>
+                    <SelectItem value="OCR_COLUMNAR">OCR Columnar Layout</SelectItem>
+                    <SelectItem value="STANDARD_MCQ">Standard MCQ (Q1, 1.)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Paste Content (Tagged Format Recommended)</Label>
+                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Paste Institutional Content (Batch 10–500)</Label>
                 <Textarea 
                   placeholder={placeholderText}
                   className="min-h-[500px] rounded-[2.5rem] bg-slate-50 border-none p-10 text-sm font-mono leading-relaxed shadow-inner custom-scrollbar"
@@ -213,8 +207,8 @@ PUN_EXP: ਵਿਸਤ੍ਰਿਤ ਵਿਆਖਿਆ ਇੱਥੇ.`;
                        <Badge className="bg-primary/10 text-primary border-none text-[11px] font-black uppercase tracking-widest px-4 py-1 rounded-lg">Audit Node {idx + 1}</Badge>
                        <QuestionRenderer language="bilingual" question={q} />
                        <div className="p-6 bg-emerald-50 rounded-2xl border border-emerald-100">
-                          <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest">Logic Output</p>
-                          <p className="font-bold text-emerald-900 mt-1">Answer: {q.correctAnswer}</p>
+                          <p className="text-[10px] font-black uppercase text-emerald-600 tracking-widest">Metadata Verify</p>
+                          <p className="font-bold text-emerald-900 mt-1">Ans: {q.correctAnswer} | Board: {q.boardId} | Subject: {q.subjectId}</p>
                        </div>
                     </div>
                   ))}

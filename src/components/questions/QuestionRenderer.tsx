@@ -28,12 +28,6 @@ interface QuestionRendererProps {
 
 const COLORS = ['#F97316', '#3B82F6', '#10B981', '#EF4444', '#8B5CF6'];
 
-/**
- * @fileOverview Final Enterprise Question Renderer.
- * Hardened for strict trilingual support and complex DI nodes.
- * Features: Absolute language gating (EN vs PA vs Bilingual).
- */
-
 export default function QuestionRenderer({ question, language }: QuestionRendererProps) {
   const showEn = language === 'en' || language === 'bilingual';
   const showPa = language === 'pa' || language === 'bilingual';
@@ -63,7 +57,7 @@ export default function QuestionRenderer({ question, language }: QuestionRendere
       {/* 2. Passage Node (Reading Comprehension / Caselet) */}
       {(passageEn || passagePa) && (
         <div className="bg-slate-50 border border-slate-100 p-8 rounded-[2.5rem] shadow-inner">
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Read the following context carefully:</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Case Context:</p>
           <div className="space-y-6">
              {showEn && <div className="text-lg leading-relaxed text-slate-700 whitespace-pre-wrap font-medium">{passageEn}</div>}
              {showPa && <div className={cn("text-lg leading-relaxed text-slate-600 whitespace-pre-wrap font-medium", language === 'bilingual' ? "italic border-t border-slate-200 pt-6 mt-6" : "")}>{passagePa}</div>}

@@ -1,6 +1,6 @@
 /**
  * @fileOverview Institutional Multi-Format Ingestion Engine.
- * Supports: Columnar OCR, Tagged/Line-Based Bilingual, Structured JSON, and DI/Image nodes.
+ * Supports: Tagged/Line-Based Bilingual, Columnar OCR, and DI/Image nodes.
  */
 
 import { Question, Difficulty, QuestionType, DiagramType } from "@/types";
@@ -48,8 +48,7 @@ export function parseBulkQuestions(
   const errors: string[] = [];
 
   blocks.forEach((block, index) => {
-    const lines = block.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    const fullText = block;
+    const fullText = block.trim();
 
     let qEn = "", qPa = "";
     let optAEn = "", optAPa = "";
@@ -62,10 +61,10 @@ export function parseBulkQuestions(
     let tableData: any = undefined;
     let imgUrl: string = "";
 
-    // 1. TAGGED EXTRACTION (Robust for your provided format)
+    // 1. TAGGED EXTRACTION
     if (fullText.includes('ENG_Q:')) {
       const getTagValue = (tag: string, endTags: string[]) => {
-        const regex = new RegExp(`${tag}\\s*(.*?)(?=${endTags.join('|')}|$)`, 'is');
+        const regex = new RegExp(`${tag}\\s*(.*?)(?=${endTags.map(t => '\\n?' + t.replace(/[\[\]]/g, '\\$&')).join('|')}|$)`, 'is');
         const match = fullText.match(regex);
         return match ? match[1].trim() : "";
       };
@@ -78,7 +77,6 @@ export function parseBulkQuestions(
       const rawOptEn = getTagValue('ENG_OPT:', tags);
       const rawOptPa = getTagValue('PUN_OPT:', tags);
 
-      // Handle pipe separator or newlines for options
       const splitOpts = (raw: string) => {
         if (raw.includes('|')) return raw.split('|').map(s => s.trim().replace(/^[A-D][\.\)]\s*/i, ''));
         return raw.split(/\n/).map(s => s.trim().replace(/^[A-D][\.\)]\s*/i, ''));
@@ -103,9 +101,8 @@ export function parseBulkQuestions(
     } 
     // 2. STANDARD/OCR EXTRACTION
     else {
-      // (Standard marker logic omitted for brevity but preserved in full implementation)
       const statementMatch = fullText.match(/(?:(?:Q|Question)\s*\d+[\.\:\)]|^\d+[\.\)])\s*(.*?)(?=A[\.\)])/is);
-      qEn = statementMatch ? statementMatch[1].trim() : lines[0];
+      qEn = statementMatch ? statementMatch[1].trim() : fullText.split('\n')[0];
       qPa = qEn;
 
       const extractOpt = (letter: string, nextLetter: string | null) => {
@@ -117,7 +114,7 @@ export function parseBulkQuestions(
       optAEn = extractOpt('A', 'B'); optBEn = extractOpt('B', 'C'); optCEn = extractOpt('C', 'D'); optDEn = extractOpt('D', null);
       optAPa = optAEn; optBPa = optBEn; optCPa = optCEn; optDPa = optDEn;
 
-      const ansMatch = fullText.match(/(?:Correct Answer|ਸਹੀ ਉੱਤਰ|ANS)[\.\:\s]*([A-D])/i);
+      const ansMatch = fullText.match(/(?:Correct Answer|ਸਹੀ ਉੱਤਰ|ANS|ENG_ANS)[\.\:\s]*([A-D])/i);
       ans = ansMatch ? ansMatch[1].toUpperCase() : "";
     }
 
