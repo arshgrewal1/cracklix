@@ -100,7 +100,7 @@ export default function MockOverviewPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
               <div className="space-y-4 max-w-2xl text-left">
                  <div className="flex flex-wrap items-center gap-3">
-                    <Badge className="bg-orange-500 text-white border-none px-3 py-1 rounded-lg font-black uppercase text-[9px] tracking-widest">
+                    <Badge className="bg-orange-50 text-white border-none px-3 py-1 rounded-lg font-black uppercase text-[9px] tracking-widest">
                        {mock.boardId || "PSSSB"} OFFICIAL
                     </Badge>
                     <div className="flex items-center gap-1.5 text-emerald-600">
