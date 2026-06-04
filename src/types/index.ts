@@ -3,7 +3,6 @@ export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'CHAPTER' | 'PYQ' | 'CA_QUIZ';
 export type ContentStatus = 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'ARCHIVED';
-export type SubscriptionTier = 'Free' | 'Silver' | 'Gold' | 'Premium' | 'Platinum';
 export type Gender = 'Male' | 'Female' | 'Other';
 
 export type QuestionType = 
@@ -26,115 +25,18 @@ export type DiagramType =
   | 'lineGraph' 
   | 'map';
 
-export interface MockSection {
+export interface Pass {
   id: string;
   name: string;
-  subjectId: string;
-  questionCount: number;
-  duration: number; // in minutes
-  marksPerQuestion: number;
-}
-
-export interface Board {
-  id: string;
-  abbreviation: string;
-  name: string;
-  description: string;
-  iconUrl?: string;
-}
-
-export interface Exam {
-  id: string;
-  boardId: string;
-  name: string;
-  category: string;
-  description: string;
-  totalMocks: number;
-  activeQuestions: number;
-}
-
-export interface Subject {
-  id: string;
-  name: string;
-  description: string;
-}
-
-export interface Question {
-  id: string;
-  boardId: string;
-  examId: string;
-  subjectId: string;
-  chapterId: string;
-  difficulty: Difficulty;
-  status: ContentStatus;
-  questionType: QuestionType;
-  diagramType: DiagramType;
-  diSetId?: string;
-  passageId?: string;
-  questionEn: string;
-  optionAEn: string;
-  optionBEn: string;
-  optionCEn: string;
-  optionDEn: string;
-  explanationEn: string;
-  instructionEn?: string;
-  passageEn?: string;
-  titleEn?: string;
-  descriptionEn?: string;
-  questionPa: string;
-  optionAPa: string;
-  optionBPa: string;
-  optionCPa: string;
-  optionDPa: string;
-  explanationPa: string;
-  instructionPa?: string;
-  passagePa?: string;
-  titlePa?: string;
-  descriptionPa?: string;
-  correctAnswer: 'A' | 'B' | 'C' | 'D';
-  imageUrl?: string;
-  tableData?: {
-    headers: string[];
-    rows: any[][];
-  }; 
-  chartConfig?: any;
-  date?: string;
-  category?: string;
-  year?: number;
-  usageCount: number;
-  usedInMocks: string[];
-  isStandalone?: boolean;
-  createdAt: any;
-  updatedAt: any;
-  author?: string;
-}
-
-export interface MockTest {
-  id: string;
-  title: string;
-  boardId: string;
-  examId: string;
-  mockType: MockType;
-  requiredPass: SubscriptionTier;
-  duration: number;
-  totalQuestions: number;
-  questionIds: string[];
-  difficulty: string;
-  published: boolean;
-  isPremium?: boolean;
-  passingMarks?: number;
-  negativeMarking?: number;
-  instructions?: string;
-  language?: string;
-  sections?: MockSection[];
-  subjectId?: string;
-  chapterId?: string;
-  year?: number;
-  caCategory?: string;
-  caPeriod?: string;
-  paperName?: string;
-  createdAt: any;
-  updatedAt: any;
+  price: number;
+  durationDays: number;
+  features: string[];
+  active: boolean;
+  displayOrder: number;
+  recommended?: boolean;
+  type: 'FREE' | 'PREMIUM';
+  description?: string;
+  updatedAt?: any;
 }
 
 export interface UserProfile {
@@ -147,7 +49,24 @@ export interface UserProfile {
   state: 'Punjab';
   targetExam: string;
   createdAt: any;
-  status: SubscriptionTier;
+  status: string; // Dynamic Pass ID or "Free"
   subscriptions?: string[]; 
   passExpiryDate?: string;
+}
+
+export interface MockTest {
+  id: string;
+  title: string;
+  boardId: string;
+  examId: string;
+  mockType: MockType;
+  requiredPass: string; // Dynamic Pass ID
+  duration: number;
+  totalQuestions: number;
+  questionIds: string[];
+  difficulty: string;
+  published: boolean;
+  isPremium?: boolean;
+  createdAt: any;
+  updatedAt: any;
 }

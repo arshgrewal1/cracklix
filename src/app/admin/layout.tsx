@@ -2,7 +2,7 @@
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle, FileText, Activity, ShieldAlert, HeartPulse, HelpCircle, Upload, Layers, CheckCircle2 } from "lucide-react"
+import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle, FileText, Activity, ShieldAlert, HeartPulse, HelpCircle, Upload, Layers, CheckCircle2, Gem } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 import { useUser, useAuth } from "@/firebase"
@@ -56,9 +56,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarGroup>
 
             <SidebarGroup className="mt-4">
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Financial Audit</SidebarGroupLabel>
+              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Monetization Hub</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
+                  <AdminNavItem icon={<Gem className="text-amber-400" />} label="Pass Management" href="/admin/passes" active={pathname === "/admin/passes"} />
                   <AdminNavItem icon={<CheckCircle2 className="text-emerald-400" />} label="Verify Payments" href="/admin/payments/verify" active={pathname === "/admin/payments/verify"} />
                   <AdminNavItem icon={<Zap />} label="Gross Revenue" href="/admin/payments" active={pathname === "/admin/payments"} />
                 </SidebarMenu>
@@ -76,33 +77,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarGroup>
 
             <SidebarGroup className="mt-4">
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Content Engine</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <AdminNavItem icon={<Newspaper className="text-emerald-400" />} label="Daily Analysis" href="/admin/current-affairs" active={pathname === "/admin/current-affairs"} />
-                  <AdminNavItem icon={<AlertCircle className="text-orange-400" />} label="Exam Gazette" href="/admin/notifications" active={pathname === "/admin/notifications"} />
-                  <AdminNavItem icon={<FileText className="text-blue-400" />} label="PYQ Archives" href="/admin/pyqs" active={pathname === "/admin/pyqs"} />
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup className="mt-4">
               <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">System Control</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <AdminNavItem icon={<HeartPulse className="text-rose-400" />} label="Platform Health" href="/admin/health" active={pathname === "/admin/health"} />
-                  <AdminNavItem icon={<GraduationCap />} label="Exams & Boards" href="/admin/exams" active={pathname === "/admin/exams"} />
                   <AdminNavItem icon={<Users />} label="Aspirant Registry" href="/admin/users" active={pathname === "/admin/users"} />
-                  <AdminNavItem icon={<TrendingUp />} label="Result Analytics" href="/admin/analytics" active={pathname === "/admin/analytics"} />
+                  <AdminNavItem icon={<Settings />} label="System Settings" href="/admin/settings" active={pathname === "/admin/settings"} />
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
 
             <SidebarGroup className="mt-auto pb-8">
               <SidebarMenu>
-                {(profile?.role === 'SUPER_ADMIN' || isFounder) && (
-                  <AdminNavItem icon={<Settings />} label="Global Settings" href="/admin/settings" active={pathname === "/admin/settings"} />
-                )}
                 <SidebarMenuItem>
                    <SidebarMenuButton onClick={handleLogout} className="px-6 text-destructive/70 hover:bg-destructive/10 hover:text-destructive transition-colors h-11">
                     <LogOut className="size-4 mr-3 shrink-0" /> <span className="font-bold">Logout Portal</span>
@@ -124,10 +109,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
             </div>
             <div className="flex items-center gap-4">
-               <div className="text-right hidden md:block">
-                  <p className="text-xs font-black leading-none truncate max-w-[150px] text-[#0F172A] uppercase">{displayName}</p>
-                  <p className="text-[9px] text-slate-500 uppercase font-black tracking-widest mt-1">Lead Authority</p>
-               </div>
                <div className="h-9 w-9 rounded-xl bg-[#0F172A] flex items-center justify-center border border-[#0F172A]">
                   <span className="font-black text-white text-xs">{displayName.split(' ').map(n => n[0]).join('')}</span>
                </div>

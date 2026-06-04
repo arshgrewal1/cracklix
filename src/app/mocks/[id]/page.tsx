@@ -19,11 +19,7 @@ import {
   ArrowRight, 
   ChevronLeft,
   Info,
-  Layers,
-  Award,
   Lock,
-  Users,
-  Sparkles,
   Edit,
   ShieldAlert
 } from "lucide-react"
@@ -31,7 +27,7 @@ import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Mock Overview Node with Pass Gating.
+ * @fileOverview Mock Overview Node with Dynamic Pass Gating.
  * Optimized for SUPER_ADMIN bypass and tiered unlocking.
  */
 
@@ -42,7 +38,8 @@ export default function MockOverviewPage() {
   const { user, profile } = useUser()
   const mockId = params.id as string
   
-  const { data: mock, loading } = useDoc<any>(useMemo(() => (db ? doc(db, "mocks", mockId) : null), [db, mockId]))
+  const { data: mock, loading: mockLoading } = useDoc<any>(useMemo(() => (db ? doc(db, "mocks", mockId) : null), [db, mockId]))
+  const { data: requiredPassData, loading: passLoading } = useDoc<any>(useMemo(() => (db && mock?.requiredPass ? doc(db, "passes", mock.requiredPass) : null), [db, mock]))
 
   const isAuthority = useMemo(() => {
     if (!profile) return false;
@@ -50,24 +47,26 @@ export default function MockOverviewPage() {
     return profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN' || isFounder;
   }, [profile, user])
 
-  // Strict Institutional Gating
   const isLocked = useMemo(() => {
     if (!mock || !profile) return true;
     if (isAuthority) return false;
 
-    const tier = profile.status || 'Free';
-    const req = mock.requiredPass || 'Free';
+    const userPassId = profile.status || 'aspirant_free';
+    const requiredPassId = mock.requiredPass || 'aspirant_free';
 
-    if (req === 'Free') return false;
-    if (req === 'Silver' && ['Silver', 'Gold', 'Premium', 'Platinum'].includes(tier)) return false;
-    if (req === 'Gold' && ['Gold', 'Premium', 'Platinum'].includes(tier)) return false;
-    if (req === 'Premium' && ['Premium', 'Platinum'].includes(tier)) return false;
-    if (req === 'Platinum' && tier === 'Platinum') return false;
+    // Free mocks are open to all
+    if (requiredPassId === 'aspirant_free') return false;
+    
+    // Exact match for premium passes
+    if (userPassId === requiredPassId) return false;
+
+    // Platinum users unlock everything
+    if (userPassId === 'platinum_pass') return false;
 
     return true;
   }, [mock, profile, isAuthority])
 
-  if (loading) return <div className="h-screen flex items-center justify-center bg-white"><Skeleton className="h-20 w-20 rounded-full" /></div>
+  if (mockLoading || passLoading) return <div className="h-screen flex items-center justify-center bg-white"><Skeleton className="h-20 w-20 rounded-full" /></div>
   if (!mock) return <div className="h-screen flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest">Mock not found.</div>
 
   return (
@@ -77,15 +76,11 @@ export default function MockOverviewPage() {
       {isAuthority && (
          <div className="bg-[#0F172A] border-b border-white/5 py-3 px-6 flex items-center justify-between shadow-2xl relative z-50">
             <div className="flex items-center gap-4">
-               <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary shadow-inner">
-                  <ShieldAlert className="h-4 w-4" />
-               </div>
-               <p className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Authority Bypass Active <span className="text-primary opacity-50 ml-2">Content Auditing</span></p>
+               <ShieldAlert className="h-4 w-4 text-primary" />
+               <p className="text-[10px] font-black text-white uppercase tracking-[0.3em]">Authority Audit Active</p>
             </div>
             <Button asChild size="sm" className="bg-primary hover:bg-orange-600 text-white rounded-xl h-10 px-6 font-black uppercase text-[9px] tracking-widest gap-2 shadow-xl">
-               <Link href={`/admin/mocks/builder?id=${mockId}`}>
-                  <Edit className="h-3.5 w-3.5" /> Modify Blueprint
-               </Link>
+               <Link href={`/admin/mocks/builder?id=${mockId}`}><Edit className="h-3.5 w-3.5" /> Modify Blueprint</Link>
             </Button>
          </div>
       )}
@@ -100,50 +95,34 @@ export default function MockOverviewPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
               <div className="space-y-4 max-w-2xl text-left">
                  <div className="flex flex-wrap items-center gap-3">
-                    <Badge className="bg-orange-50 text-white border-none px-3 py-1 rounded-lg font-black uppercase text-[9px] tracking-widest">
+                    <Badge className="bg-orange-50 text-primary border-none px-3 py-1 rounded-lg font-black uppercase text-[9px] tracking-widest">
                        {mock.boardId || "PSSSB"} OFFICIAL
                     </Badge>
-                    <div className="flex items-center gap-1.5 text-emerald-600">
-                       <ShieldCheck className="h-3.5 w-3.5" />
-                       <span className="text-[9px] font-black uppercase tracking-widest">Verified Pattern</span>
-                    </div>
                     {isLocked && (
                       <Badge className="bg-amber-100 text-amber-600 border-none px-3 py-1 rounded-lg font-black uppercase text-[9px] tracking-widest flex items-center gap-1.5">
-                         <Lock className="h-3 w-3" /> {mock.requiredPass} Pass Required
+                         <Lock className="h-3 w-3" /> {requiredPassData?.name || 'PREMIUM'} REQUIRED
                       </Badge>
                     )}
                  </div>
 
-                 <div className="space-y-1">
-                    <h1 className="text-3xl md:text-5xl font-headline font-black text-[#000000] uppercase leading-tight tracking-tight">
-                      {mock.title}
-                    </h1>
-                 </div>
+                 <h1 className="text-3xl md:text-5xl font-headline font-black text-[#000000] uppercase leading-tight tracking-tight">
+                   {mock.title}
+                 </h1>
 
                  <div className="flex flex-wrap items-center gap-6 pt-2">
-                    <div className="flex items-center gap-2 text-slate-500">
-                       <Clock className="h-4 w-4 text-primary" />
-                       <span className="text-xs font-bold">{mock.duration || 120} Mins</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-500">
-                       <BookOpen className="h-4 w-4 text-primary" />
-                       <span className="text-xs font-bold">{mock.totalQuestions || 150} Questions</span>
-                    </div>
+                    <div className="flex items-center gap-2 text-slate-500"><Clock className="h-4 w-4 text-primary" /><span className="text-xs font-bold">{mock.duration || 120} Mins</span></div>
+                    <div className="flex items-center gap-2 text-slate-500"><BookOpen className="h-4 w-4 text-primary" /><span className="text-xs font-bold">{mock.totalQuestions || 150} Questions</span></div>
                  </div>
               </div>
 
               <div className="w-full md:w-auto">
                  {isLocked ? (
                     <Button asChild className="w-full h-16 md:h-20 md:px-12 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-2xl shadow-amber-900/20 gap-4">
-                      <Link href="/pass">
-                        <Lock className="h-5 w-5" /> Get {mock.requiredPass} Pass
-                      </Link>
+                      <Link href="/pass"><Lock className="h-5 w-5" /> Get {requiredPassData?.name || 'Pass'}</Link>
                     </Button>
                  ) : (
                     <Button asChild className="w-full h-16 md:h-20 md:px-12 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-2xl shadow-slate-300 gap-4 group">
-                      <Link href={`/mocks/${mockId}/attempt`}>
-                        Start Practice <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                      </Link>
+                      <Link href={`/mocks/${mockId}/attempt`}>Start Practice <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" /></Link>
                     </Button>
                  )}
               </div>
@@ -153,19 +132,16 @@ export default function MockOverviewPage() {
 
         <div className="container mx-auto px-6 py-12 max-w-6xl">
            <div className="bg-slate-50 rounded-3xl p-10 border border-slate-100 text-left space-y-8">
-              <h3 className="text-xl font-headline font-black uppercase text-[#0F172A] flex items-center gap-4">
-                 <Info className="h-6 w-6 text-primary" /> Institutional Guidelines
-              </h3>
+              <h3 className="text-xl font-headline font-black uppercase text-[#0F172A] flex items-center gap-4"><Info className="h-6 w-6 text-primary" /> Institutional Guidelines</h3>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-6">
                  <Guideline text="Ensure stable connectivity throughout the attempt node." />
                  <Guideline text="Bilingual toggle available inside the CBT engine." />
                  <Guideline text="Audit results generated instantly after submission." />
-                 <Guideline text={`Required Tier: ${mock.requiredPass || 'Free'} or above.`} />
+                 <Guideline text={`Required Tier: ${requiredPassData?.name || 'Free Entry'}`} />
               </ul>
            </div>
         </div>
       </main>
-
       <Footer />
     </div>
   )

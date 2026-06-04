@@ -15,11 +15,29 @@
         "state": { "type": "string", "enum": ["Punjab"] },
         "targetExam": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
-        "status": { "type": "string", "enum": ["Pro", "Free", "Silver", "Gold", "Premium"] },
+        "status": { "type": "string", "description": "The ID of the active pass or 'Free'" },
+        "passExpiryDate": { "type": "string", "format": "date-time" },
         "referralCount": { "type": "number" },
         "subscriptions": { "type": "array", "items": { "type": "string" } }
       },
       "required": ["id", "name", "email", "role"]
+    },
+    "Pass": {
+      "title": "Institutional Pass",
+      "description": "A dynamic access tier created by admin.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "durationDays": { "type": "number" },
+        "features": { "type": "array", "items": { "type": "string" } },
+        "active": { "type": "boolean" },
+        "displayOrder": { "type": "number" },
+        "recommended": { "type": "boolean" },
+        "type": { "type": "string", "enum": ["FREE", "PREMIUM"] },
+        "description": { "type": "string" }
+      }
     },
     "Subscription": {
       "title": "Aspirant Subscription",
@@ -27,7 +45,7 @@
       "type": "object",
       "properties": {
         "userId": { "type": "string" },
-        "planId": { "type": "string" },
+        "passId": { "type": "string" },
         "status": { "type": "string", "enum": ["active", "expired", "cancelled"] },
         "startDate": { "type": "string", "format": "date-time" },
         "expiryDate": { "type": "string", "format": "date-time" }
@@ -49,20 +67,6 @@
         "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED"] },
         "createdAt": { "type": "string", "format": "date-time" }
       }
-    },
-    "Order": {
-      "title": "Payment Order",
-      "description": "Internal transaction logs before verification.",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "planId": { "type": "string" },
-        "amount": { "type": "number" },
-        "currency": { "type": "string" },
-        "status": { "type": "string", "enum": ["pending", "success", "failed"] },
-        "createdAt": { "type": "string", "format": "date-time" }
-      }
     }
   },
   "auth": {
@@ -73,6 +77,10 @@
       "schema": { "$ref": "#/backend/entities/UserProfile" },
       "description": "Student and Admin profiles."
     },
+    "/passes/{passId}": {
+      "schema": { "$ref": "#/backend/entities/Pass" },
+      "description": "Dynamic pricing tiers."
+    },
     "/subscriptions/{subId}": {
       "schema": { "$ref": "#/backend/entities/Subscription" },
       "description": "Active pass records."
@@ -80,29 +88,6 @@
     "/payment_requests/{reqId}": {
       "schema": { "$ref": "#/backend/entities/PaymentRequest" },
       "description": "Pending UPI verifications."
-    },
-    "/orders/{orderId}": {
-      "schema": { "$ref": "#/backend/entities/Order" },
-      "description": "Transaction ledger."
-    },
-    "/exam_patterns/{patternId}": {
-      "schema": "object",
-      "description": "Official question distribution blueprints."
-    },
-    "/boards/{boardId}": { "schema": "object", "description": "Recruitment boards." },
-    "/exams/{examId}": { "schema": "object", "description": "Official exam verticals." },
-    "/subjects/{subjectId}": { "schema": "object", "description": "Subject categories." },
-    "/mocks/{mockId}": { "schema": "object", "description": "Practice tests." },
-    "/questions/{questionId}": { "schema": "object", "description": "MCQ bank." },
-    "/current_affairs/{id}": { "schema": "object", "description": "Daily Punjab analysis." },
-    "/notifications/{id}": { "schema": "object", "description": "Official recruitment alerts." },
-    "/reports/{reportId}": { "schema": "object", "description": "Error reports." },
-    "/results/{resultId}": { "schema": "object", "description": "Completed mock outcomes." },
-    "/settings/{id}": { "schema": "object", "description": "System config." },
-    "/bookmarks/{id}": { "schema": "object", "description": "User saved questions." },
-    "/pyqs/{id}": { "schema": "object", "description": "Previous year papers." },
-    "/support_tickets/{id}": { "schema": "object", "description": "Support inquiries." },
-    "/audit_logs/{id}": { "schema": "object", "description": "Admin activity ledger." },
-    "/test_sessions/{sessionId}": { "schema": "object", "description": "Active in-progress mock attempts." }
+    }
   }
 }
