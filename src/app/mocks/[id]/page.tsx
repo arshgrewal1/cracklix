@@ -30,25 +30,39 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * @fileOverview Redesigned Mock Overview Page (Phase 160).
- * Replaced technical jargon with "Start Mock" and optimized for mobile visibility.
- * Fixed: Hard gating logic for premium access.
+ * Features: Institutional Access Control (Membership Gating).
  */
 
 export default function MockOverviewPage() {
   const params = useParams()
   const router = useRouter()
   const db = useFirestore()
-  const { profile } = useUser()
+  const { user, profile } = useUser()
   const mockId = params.id as string
   
   const { data: mock, loading } = useDoc<any>(useMemo(() => (db ? doc(db, "mocks", mockId) : null), [db, mockId]))
 
+  // Strict Membership Gating Logic
   const isLocked = useMemo(() => {
-    if (!mock?.isPremium) return false;
-    // Allow access if user has Silver, Gold, or Premium pass
-    if (['Silver', 'Gold', 'Premium'].includes(profile?.status || '')) return false;
+    if (!mock || !profile) return true;
+    
+    // Founder/Super Admin Bypass
+    const isFounder = user?.email === 'arshdeepgrewal1122@gmail.com';
+    if (profile.role === 'SUPER_ADMIN' || isFounder) return false;
+
+    // Plan-based Permission Check
+    const tier = profile.status || 'Free';
+    const type = mock.mockType;
+
+    if (type === 'FULL') return tier !== 'Premium';
+    if (type === 'SECTIONAL') return !['Gold', 'Premium'].includes(tier);
+    if (type === 'SUBJECT' || type === 'PYQ' || type === 'CA_QUIZ') return !['Silver', 'Gold', 'Premium'].includes(tier);
+
+    // Free access for 3 daily mocks or specific non-premium nodes
+    if (!mock.isPremium) return false;
+
     return true;
-  }, [mock, profile])
+  }, [mock, profile, user])
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-white"><Skeleton className="h-20 w-20 rounded-full" /></div>
   if (!mock) return <div className="h-screen flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest">Mock not found.</div>
@@ -58,7 +72,6 @@ export default function MockOverviewPage() {
       <Navbar />
       
       <main className="flex-1">
-        {/* Compact Hero Section - Reduced Height by 40% */}
         <section className="bg-slate-50 border-b border-slate-100 py-10 md:py-16">
           <div className="container mx-auto px-6 max-w-6xl">
             <Button variant="ghost" onClick={() => router.back()} className="rounded-xl text-slate-400 hover:text-[#0F172A] gap-2 mb-6 p-0 h-auto">
@@ -66,7 +79,7 @@ export default function MockOverviewPage() {
             </Button>
             
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-              <div className="space-y-4 max-w-2xl">
+              <div className="space-y-4 max-w-2xl text-left">
                  <div className="flex flex-wrap items-center gap-3">
                     <Badge className="bg-orange-500 text-white border-none px-3 py-1 rounded-lg font-black uppercase text-[9px] tracking-widest">
                        {mock.boardId || "PSSSB"} OFFICIAL
@@ -75,9 +88,9 @@ export default function MockOverviewPage() {
                        <ShieldCheck className="h-3.5 w-3.5" />
                        <span className="text-[9px] font-black uppercase tracking-widest">Verified Pattern</span>
                     </div>
-                    {mock.isPremium && (
+                    {isLocked && (
                       <Badge className="bg-amber-100 text-amber-600 border-none px-3 py-1 rounded-lg font-black uppercase text-[9px] tracking-widest flex items-center gap-1.5">
-                         <Lock className="h-3 w-3" /> Premium
+                         <Lock className="h-3 w-3" /> Membership Required
                       </Badge>
                     )}
                  </div>
@@ -87,7 +100,7 @@ export default function MockOverviewPage() {
                       {mock.title}
                     </h1>
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      Updated: {new Date(mock.updatedAt?.seconds * 1000 || Date.now()).toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' })}
+                      Institutional Audit Version 2.4 • Updated: {new Date().toLocaleDateString('en-GB')}
                     </p>
                  </div>
 
@@ -110,7 +123,7 @@ export default function MockOverviewPage() {
               <div className="w-full md:w-auto">
                  {isLocked ? (
                     <Button asChild className="w-full h-16 md:h-20 md:px-12 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-xs rounded-2xl shadow-2xl shadow-amber-900/20 gap-4">
-                      <Link href="/pricing">
+                      <Link href="/pass">
                         <Lock className="h-5 w-5" /> Get Pass to Unlock
                       </Link>
                     </Button>
@@ -130,7 +143,7 @@ export default function MockOverviewPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
              <div className="lg:col-span-8 space-y-12">
                 <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[2.5rem] bg-white overflow-hidden">
-                   <CardHeader className="p-10 border-b border-slate-50">
+                   <CardHeader className="p-10 border-b border-slate-50 text-left">
                       <CardTitle className="font-headline text-2xl font-black text-[#0F172A] uppercase">Test Instructions</CardTitle>
                       <CardDescription className="text-slate-400 font-bold uppercase tracking-widest text-[9px] mt-1">Please read carefully before starting the exam.</CardDescription>
                    </CardHeader>
@@ -175,7 +188,7 @@ export default function MockOverviewPage() {
                    </div>
                 </Card>
 
-                <div className="bg-emerald-50 border border-emerald-100 p-8 rounded-[2.5rem] flex items-start gap-4">
+                <div className="bg-emerald-50 border border-emerald-100 p-8 rounded-[2.5rem] flex items-start gap-4 text-left">
                    <ShieldCheck className="h-6 w-6 text-emerald-600 shrink-0" />
                    <div className="space-y-1">
                       <p className="text-xs font-black text-emerald-800 uppercase tracking-widest">Instant Results</p>

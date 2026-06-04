@@ -180,10 +180,10 @@ export default function AdminDashboard() {
                </div>
                <h4 className="text-2xl font-headline font-black text-[#0F172A] uppercase leading-tight text-left">Monetization Active</h4>
                <p className="text-slate-600 text-sm font-medium leading-relaxed text-left">
-                  The Pass System is now live in the architectural node. Users can select plans at /pricing.
+                  The Pass System is now live in the architectural node. Users can select plans at /pass.
                </p>
                <Button asChild className="w-full bg-primary hover:bg-primary/90 h-14 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl">
-                  <Link href="/pricing">Audit Pricing Hub</Link>
+                  <Link href="/pass">Audit Pricing Hub</Link>
                </Button>
             </Card>
          </div>

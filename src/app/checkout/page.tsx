@@ -36,6 +36,7 @@ function CheckoutContent() {
   }, [user, loading, router])
 
   const planData = {
+    free: { id: 'free', name: "Aspirant Free", price: 0, tier: 'Free' },
     silver: { id: 'silver', name: "Silver Pass", price: 99, tier: 'Silver' },
     gold: { id: 'gold', name: "Gold Pass", price: 199, tier: 'Gold' },
     premium: { id: 'premium', name: "Elite Pass", price: 499, tier: 'Premium' }
@@ -102,7 +103,7 @@ function CheckoutContent() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 text-left">
            <div className="lg:col-span-7 space-y-8">
               <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[3rem] bg-white overflow-hidden">
-                 <CardHeader className="p-12 border-b border-slate-50 bg-slate-50/50">
+                 <CardHeader className="p-12 border-b border-slate-50 bg-slate-50/50 text-left">
                     <CardTitle className="font-headline font-black text-2xl text-[#0F172A] uppercase flex items-center gap-4">
                        <CreditCard className="h-6 w-6 text-primary" /> Payment Method
                     </CardTitle>

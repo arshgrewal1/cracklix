@@ -27,17 +27,18 @@ import {
   Zap,
   Clock,
   Sparkles,
-  Bell
+  Bell,
+  CreditCard
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { useToast } from "@/hooks/use-toast"
+import Link from "next/link"
 
 /**
  * @fileOverview Final Aspirant Profile Node (Phase 120).
- * Features: Exam Alert Subscriptions and Membership Status.
- * Fixed: Removed orderBy on results to avoid index errors.
+ * Features: Membership Status and Pass Management.
  */
 
 export default function ProfilePage() {
@@ -124,11 +125,11 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div className="flex-1 pb-6 space-y-3">
+            <div className="flex-1 pb-6 space-y-3 text-left">
               <div className="flex flex-wrap items-center gap-4">
                 <h1 className="text-5xl font-headline font-black text-[#0F172A] tracking-tight">{profile.name}</h1>
-                <Badge className={profile.status === 'Pro' ? "bg-primary text-white border-none px-6 py-2 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-primary/20" : "bg-slate-200 text-slate-500 border-none px-6 py-2 rounded-2xl font-black uppercase text-[10px] tracking-widest"}>
-                  {profile.status} Member
+                <Badge className={profile.status === 'Free' ? "bg-slate-200 text-slate-500 border-none px-6 py-2 rounded-2xl font-black uppercase text-[10px] tracking-widest" : "bg-amber-100 text-amber-600 border-none px-6 py-2 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl"}>
+                  {profile.status} Pass Active
                 </Badge>
               </div>
               <div className="flex flex-wrap items-center gap-8 text-slate-500 font-bold uppercase tracking-widest text-[10px]">
@@ -138,14 +139,14 @@ export default function ProfilePage() {
             </div>
 
             <div className="pb-8">
-               <Button className="bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl h-16 px-12 shadow-3xl">
-                 Update Profile
+               <Button asChild className="bg-primary hover:bg-orange-600 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl h-16 px-12 shadow-3xl gap-3">
+                 <Link href="/pass"><CreditCard className="h-4 w-4" /> Manage Pass</Link>
                </Button>
             </div>
           </div>
         </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 text-left">
           <div className="lg:col-span-8 space-y-12">
             
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
@@ -154,12 +155,11 @@ export default function ProfilePage() {
               <MetricCard icon={<Trophy className="text-emerald-500" />} label="Punjab Ranking" value={stats.rank} footer="Monthly Benchmark" />
             </div>
 
-            {/* Exam Alert Subscription (Phase 120) */}
             <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[3.5rem] bg-white overflow-hidden">
-               <CardHeader className="p-12 border-b border-slate-50">
+               <CardHeader className="p-12 border-b border-slate-50 text-left">
                   <div className="flex items-center gap-4">
                      <Bell className="h-6 w-6 text-primary" />
-                     <CardTitle className="font-headline text-2xl font-black text-[#0F172A] uppercase">Exam Alert Subscriptions</CardTitle>
+                     <CardTitle className="font-headline text-2xl font-black text-[#0F172A] uppercase">Exam Alert Hub</CardTitle>
                   </div>
                   <CardDescription className="text-slate-400 font-medium">Receive high-priority recruitment notifications for specific boards.</CardDescription>
                </CardHeader>
@@ -180,15 +180,12 @@ export default function ProfilePage() {
             </Card>
 
             <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[3.5rem] overflow-hidden bg-white">
-               <CardHeader className="p-12 border-b border-slate-50">
+               <CardHeader className="p-12 border-b border-slate-50 text-left">
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <CardTitle className="font-headline text-2xl font-black text-[#0F172A] uppercase">Preparation History</CardTitle>
                       <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Deep audit of your high-fidelity results</CardDescription>
                     </div>
-                    <Button variant="ghost" className="text-primary font-black text-[10px] uppercase tracking-[0.2em] gap-3 hover:bg-primary/5 rounded-xl h-12 px-6">
-                       View Registry <ChevronRight className="h-4 w-4" />
-                    </Button>
                   </div>
                </CardHeader>
                <CardContent className="p-0">
@@ -234,16 +231,16 @@ export default function ProfilePage() {
                </div>
             </Card>
 
-            <Card className="border-none bg-primary text-white shadow-3xl rounded-[3.5rem] p-12 overflow-hidden relative group cursor-pointer">
+            <Card className="border-none bg-[#0F172A] text-white shadow-3xl rounded-[3.5rem] p-12 overflow-hidden relative group cursor-pointer">
                <div className="absolute top-0 right-0 p-10 opacity-20 group-hover:scale-110 transition-transform">
-                  <Sparkles className="h-32 w-32" />
+                  <Sparkles className="h-32 w-32 text-primary" />
                </div>
-               <div className="relative z-10 space-y-6">
-                  <Badge className="bg-white text-primary border-none uppercase text-[10px] font-black px-6 py-2 rounded-2xl shadow-xl">Upgrade To Pro</Badge>
-                  <h4 className="text-3xl font-headline font-black leading-tight">Access 500+ <br/>Premium Series</h4>
-                  <p className="text-white/80 text-base leading-relaxed font-medium">Unlock AI rationalizations and Arsh Grewal's strategic analysis.</p>
-                  <Button className="w-full bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-[0.2em] h-16 rounded-[1.5rem] mt-6 shadow-2xl">
-                    Unlock Portal
+               <div className="relative z-10 space-y-6 text-left">
+                  <Badge className="bg-primary text-white border-none uppercase text-[10px] font-black px-6 py-2 rounded-2xl shadow-xl">Audit Active</Badge>
+                  <h4 className="text-3xl font-headline font-black leading-tight uppercase">Elite Access <br/>Enabled</h4>
+                  <p className="text-slate-400 text-base leading-relaxed font-medium">Your account is fully synchronized with Arsh Grewal's management repository.</p>
+                  <Button asChild className="w-full bg-white text-[#0F172A] hover:bg-slate-200 font-black uppercase text-[10px] tracking-[0.2em] h-16 rounded-[1.5rem] mt-6 shadow-2xl">
+                    <Link href="/mocks">Explore All Series</Link>
                   </Button>
                </div>
             </Card>
@@ -277,7 +274,7 @@ function AccountInfo({ icon, label, value }: any) {
       <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 text-slate-300 group-hover:bg-primary/5 group-hover:text-primary transition-all">
         {icon}
       </div>
-      <div>
+      <div className="text-left">
         <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 mb-1">{label}</p>
         <p className="text-base font-bold text-slate-800">{value}</p>
       </div>
