@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState } from "react"
@@ -8,15 +9,15 @@ import { collection, query } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Clock, BookOpen, Trophy, ArrowRight, Filter, ShieldCheck, Zap, Layers, Sparkles, AlertCircle, FileText, Newspaper, Target } from "lucide-react"
+import { Clock, BookOpen, Filter, ShieldCheck, Zap, Layers, FileText, Newspaper, Target, ArrowRight } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 /**
- * @fileOverview Final Mock Hub (Modular Classification).
- * Categorized sections for Full, Subject, Sectional, Chapter, PYQ, and CA.
+ * @fileOverview Mobile-Optimized Mock Hub.
+ * Features: High-density cards, small typography, and absolute black text.
  */
 
 export default function MocksPage() {
@@ -52,92 +53,92 @@ export default function MocksPage() {
   }, [mocks, activeTab])
 
   const categories = [
-    { id: "FULL", label: "Full Mocks", icon: <Zap /> },
-    { id: "SUBJECT", label: "Subject Tests", icon: <Layers /> },
-    { id: "SECTIONAL", label: "Sectionals", icon: <Target /> },
-    { id: "CHAPTER", label: "Chapter Wise", icon: <ShieldCheck /> },
-    { id: "PYQ", label: "PYQ Papers", icon: <FileText /> },
-    { id: "CA_QUIZ", label: "CA Quizzes", icon: <Newspaper /> },
+    { id: "FULL", label: "Full", icon: <Zap className="h-3 w-3" /> },
+    { id: "SUBJECT", label: "Subject", icon: <Layers className="h-3 w-3" /> },
+    { id: "SECTIONAL", label: "Section", icon: <Target className="h-3 w-3" /> },
+    { id: "PYQ", label: "PYQs", icon: <FileText className="h-3 w-3" /> },
+    { id: "CA_QUIZ", label: "CA", icon: <Newspaper className="h-3 w-3" /> },
   ]
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50/30 font-body">
+    <div className="flex flex-col min-h-screen bg-white font-body">
       <Navbar />
-      <main className="container mx-auto px-6 py-12 max-w-7xl">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 mb-16">
-          <div className="space-y-2 text-left">
-            <div className="flex items-center gap-3">
-               <ShieldCheck className="h-5 w-5 text-primary" />
-               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Institutional Practice Hub</span>
+      <main className="container mx-auto px-4 py-6 md:py-12 max-w-7xl">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 md:mb-16">
+          <div className="space-y-1 text-left">
+            <div className="flex items-center gap-2">
+               <ShieldCheck className="h-3 w-3 text-primary" />
+               <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Institutional Hub</span>
             </div>
-            <h1 className="text-5xl md:text-6xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Mock <span className="text-primary">Series</span></h1>
-            <p className="text-slate-500 font-medium text-lg">Modular assessments audited for the 2026 recruitment cycle.</p>
+            <h1 className="text-3xl md:text-6xl font-headline font-black text-[#000000] uppercase tracking-tight leading-none">Mock <span className="text-primary">Series</span></h1>
+            <p className="text-slate-500 font-medium text-xs md:text-lg">Modular assessments for 2026 cycle.</p>
           </div>
-          <div className="flex gap-4">
-             <Button variant="outline" className="rounded-2xl h-14 px-8 border-slate-200 bg-white font-bold gap-3 shadow-sm">
-                <Filter className="h-5 w-5 text-slate-400" /> Filter Authority
+          <div className="flex gap-2">
+             <Button variant="outline" className="rounded-xl h-10 px-4 border-slate-100 bg-white font-bold gap-2 text-[10px] shadow-sm">
+                <Filter className="h-3 w-3 text-slate-400" /> Filter Authority
              </Button>
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-12">
-           <div className="bg-white p-2 rounded-[2.5rem] shadow-xl border border-slate-100 flex items-center overflow-x-auto custom-scrollbar no-scrollbar">
-              <TabsList className="bg-transparent border-none p-0 flex gap-2 h-auto">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6 md:space-y-12">
+           <div className="bg-slate-50 p-1 rounded-xl shadow-inner border border-slate-100 flex items-center overflow-x-auto no-scrollbar">
+              <TabsList className="bg-transparent border-none p-0 flex gap-1 h-auto">
                  {categories.map(cat => (
                     <TabsTrigger 
                        key={cat.id} 
                        value={cat.id} 
-                       className="rounded-2xl px-8 h-14 font-black uppercase text-[10px] tracking-widest data-[state=active]:bg-[#0F172A] data-[state=active]:text-white flex items-center gap-3 shrink-0"
+                       className="rounded-lg px-4 md:px-8 h-10 md:h-14 font-black uppercase text-[9px] md:text-[10px] tracking-widest data-[state=active]:bg-[#0F172A] data-[state=active]:text-white flex items-center gap-2 shrink-0 transition-all"
                     >
-                       <span className="h-4 w-4 shrink-0">{cat.icon}</span>
+                       {cat.icon}
                        {cat.label}
-                       <Badge className="ml-2 bg-primary/10 text-primary border-none text-[8px]">{mocks.filter(m => m.mockType === cat.id).length}</Badge>
+                       <span className="ml-1 text-[8px] opacity-50">({mocks.filter(m => m.mockType === cat.id).length})</span>
                     </TabsTrigger>
                  ))}
               </TabsList>
            </div>
 
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 pt-8">
+           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-12">
              {mocksLoading ? (
-               Array.from({ length: 6 }).map((_, i) => (
-                 <Skeleton key={i} className="h-[400px] w-full rounded-[3.5rem]" />
+               Array.from({ length: 4 }).map((_, i) => (
+                 <Skeleton key={i} className="h-48 md:h-[400px] w-full rounded-2xl" />
                ))
              ) : filteredMocks.length > 0 ? (
                filteredMocks.map((mock: any) => {
                  const board = boards?.find(b => b.id === mock.boardId)
                  return (
-                   <Card key={mock.id} className="border-none shadow-2xl shadow-slate-200/40 hover:shadow-4xl hover:translate-y-[-10px] transition-all duration-500 group rounded-[3.5rem] overflow-hidden bg-white flex flex-col text-center">
-                     <CardContent className="p-12 space-y-8 flex-1 flex flex-col items-center">
-                       <div className="h-24 w-24 rounded-[2.5rem] bg-[#0F172A] flex items-center justify-center relative overflow-hidden shadow-2xl group-hover:scale-110 transition-transform duration-500">
-                         {board?.iconUrl ? (
-                            <Image src={board.iconUrl} fill alt={board.abbreviation} className="object-contain p-6" />
-                         ) : (
-                            <Zap className="h-10 w-10 text-primary fill-current" />
-                         )}
-                       </div>
-                       
-                       <div className="space-y-4">
-                          <p className="text-[10px] font-black uppercase text-primary tracking-[0.2em]">{board?.abbreviation || 'PSSSB'} {activeTab}</p>
-                          <h3 className="font-headline text-2xl font-black text-[#0F172A] leading-tight px-4 line-clamp-2 uppercase">
-                           {mock.title}
-                          </h3>
-                       </div>
-
-                       <div className="flex items-center justify-center gap-10 pt-4">
-                          <div className="flex items-center gap-2.5 text-slate-400">
-                             <BookOpen className="h-4 w-4" />
-                             <span className="text-[11px] font-black uppercase tracking-widest">{mock.totalQuestions} Qs</span>
+                   <Card key={mock.id} className="border border-slate-100 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl overflow-hidden bg-white flex flex-col group">
+                     <CardContent className="p-5 md:p-12 space-y-4 md:space-y-8 flex-1 flex flex-col items-center md:items-center">
+                       <div className="flex items-center gap-4 w-full md:flex-col md:items-center md:gap-8">
+                          <div className="h-12 w-12 md:h-24 md:w-24 rounded-xl md:rounded-[2.5rem] bg-[#0F172A] flex items-center justify-center relative overflow-hidden shadow-lg shrink-0">
+                            {board?.iconUrl ? (
+                                <Image src={board.iconUrl} fill alt={board.abbreviation} className="object-contain p-2 md:p-6" />
+                            ) : (
+                                <Zap className="h-6 w-6 md:h-10 md:w-10 text-primary fill-current" />
+                            )}
                           </div>
-                          <div className="flex items-center gap-2.5 text-slate-400">
-                             <Clock className="h-4 w-4" />
-                             <span className="text-[11px] font-black uppercase tracking-widest">{mock.duration}m</span>
+                          <div className="text-left md:text-center space-y-1 md:space-y-4 flex-1 min-w-0">
+                             <p className="text-[8px] md:text-[10px] font-black uppercase text-primary tracking-widest">{board?.abbreviation || 'PSSSB'} {activeTab}</p>
+                             <h3 className="font-headline text-sm md:text-2xl font-black text-[#000000] leading-tight uppercase truncate md:whitespace-normal md:line-clamp-2">
+                              {mock.title}
+                             </h3>
                           </div>
                        </div>
 
-                       <div className="w-full pt-6">
-                         <Button asChild className="w-full h-16 bg-[#0B1528] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-[1.5rem] shadow-3xl shadow-slate-300 transition-all active:scale-95">
+                       <div className="flex items-center justify-center gap-6 md:gap-10 w-full pt-1 md:pt-4 border-t md:border-none border-slate-50 mt-auto">
+                          <div className="flex items-center gap-1.5 text-slate-400">
+                             <BookOpen className="h-3 w-3" />
+                             <span className="text-[9px] md:text-[11px] font-black uppercase tracking-widest">{mock.totalQuestions} Qs</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-slate-400">
+                             <Clock className="h-3 w-3" />
+                             <span className="text-[9px] md:text-[11px] font-black uppercase tracking-widest">{mock.duration}m</span>
+                          </div>
+                       </div>
+
+                       <div className="w-full pt-2 md:pt-6">
+                         <Button asChild className="w-full h-10 md:h-16 bg-[#0B1528] hover:bg-black text-white font-black uppercase tracking-widest text-[9px] md:text-[10px] rounded-xl md:rounded-[1.5rem] shadow-md transition-all active:scale-95">
                            <Link href={`/mocks/${mock.id}`}>
-                             Start Series <ArrowRight className="h-4 w-4 ml-2" />
+                             Start <ArrowRight className="h-3 w-3 ml-2" />
                            </Link>
                          </Button>
                        </div>
@@ -146,12 +147,9 @@ export default function MocksPage() {
                  )
                })
              ) : (
-               <div className="col-span-full py-40 text-center space-y-6 bg-white/50 rounded-[4rem] border-2 border-dashed border-slate-200">
-                  <ShieldCheck className="h-20 w-20 text-slate-200 mx-auto" />
-                  <div className="space-y-1 text-center">
-                     <p className="font-headline font-black text-2xl text-slate-300 uppercase">Category Node Empty</p>
-                     <p className="text-slate-400 font-medium">No published series found for {activeTab} yet.</p>
-                  </div>
+               <div className="col-span-full py-20 text-center space-y-4 bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-100">
+                  <ShieldCheck className="h-10 w-10 text-slate-200 mx-auto" />
+                  <p className="font-headline font-black text-sm text-slate-400 uppercase tracking-widest">No Series Available</p>
                </div>
              )}
            </div>

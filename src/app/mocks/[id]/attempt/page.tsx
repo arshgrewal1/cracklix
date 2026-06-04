@@ -11,16 +11,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Button } from "@/components/ui/button"
 import { RadioGroup } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { 
-  Loader2,
-  Target,
-  LayoutGrid,
-  ChevronRight,
-  ChevronLeft,
-  ShieldCheck,
-  Pause,
-  Play
-} from "lucide-react"
+import { Loader2, Target, LayoutGrid, ChevronRight, ChevronLeft, ShieldCheck, Pause, Play } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
@@ -28,8 +19,8 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 type LangMode = 'en' | 'pa' | 'bilingual'
 
 /**
- * @fileOverview Testbook-Style Optimized CBT Engine.
- * Optimized for zero-scroll on mobile and unlimited palette visibility.
+ * @fileOverview Testbook-Style Ultra-Compressed CBT Engine.
+ * Optimized for zero-scroll on small screens with absolute black text.
  */
 
 export default function MockAttemptPage() {
@@ -65,7 +56,7 @@ export default function MockAttemptPage() {
         setQuestions(qData)
         setRemainingTime((mock.duration || 120) * 60)
       } catch (err) {
-        toast({ variant: "destructive", title: "Audit Sync Error", description: "Could not fetch question nodes." })
+        toast({ variant: "destructive", title: "Audit Sync Error", description: "Could not fetch nodes." })
       } finally {
         setLoadingQs(false)
       }
@@ -118,94 +109,78 @@ export default function MockAttemptPage() {
 
     try {
       await addDoc(collection(db, "results"), payload)
-      await setDoc(doc(db, "test_sessions", `${user.uid}_${mockId}`), { status: 'SUBMITTED', updatedAt: serverTimestamp() }, { merge: true })
       router.push(`/results/${mockId}`)
     } catch (e) {
-      toast({ variant: "destructive", title: "Submission Failed", description: "Database transaction rejected." })
+      toast({ variant: "destructive", title: "Submission Failed", description: "Database rejection." })
       setIsSubmitting(false)
     }
   }, [isSubmitting, questions, answers, mock, user, db, router, mockId, toast, remainingTime])
 
   if (mockLoading || loadingQs) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-white space-y-4">
-      <Loader2 className="h-10 w-10 text-primary animate-spin" />
-      <p className="font-black uppercase text-[10px] tracking-widest text-slate-400">Syncing Audit Registry...</p>
+    <div className="h-screen flex flex-col items-center justify-center bg-white space-y-2">
+      <Loader2 className="h-8 w-8 text-primary animate-spin" />
+      <p className="font-black uppercase text-[8px] tracking-widest text-slate-400">Loading Nodes...</p>
     </div>
   )
 
   const q = questions[currentIdx]
-  const isPunjabiOnlyNode = q?.subjectId === "punjabi-qualifying";
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white text-black">
-      <header className="h-12 border-b flex items-center justify-between px-3 bg-[#0B1528] text-white shrink-0 z-[100] shadow-md">
-        <div className="flex items-center gap-3">
-           <div className="flex items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[120px] md:max-w-none">
-                 {mock?.title || "Audit Gate"}
-              </span>
-           </div>
-           <div className="flex items-center gap-0.5 bg-white/5 p-0.5 rounded-lg ml-2">
+      <header className="h-10 md:h-12 border-b flex items-center justify-between px-2 md:px-4 bg-[#0B1528] text-white shrink-0 z-[100]">
+        <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
+           <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+           <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest truncate max-w-[100px] md:max-w-none">
+              {mock?.title || "Audit Gate"}
+           </span>
+           <div className="hidden sm:flex items-center gap-0.5 bg-white/5 p-0.5 rounded-lg">
               <LangTab label="EN" active={language === 'en'} onClick={() => setLanguage('en')} />
-              <LangTab label="ਪੰਜਾਬੀ" active={language === 'pa'} onClick={() => setLanguage('pa')} />
+              <LangTab label="PA" active={language === 'pa'} onClick={() => setLanguage('pa')} />
               <LangTab label="BI" active={language === 'bilingual'} onClick={() => setLanguage('bilingual')} />
            </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 md:gap-2">
           <Timer onTimeUp={submitMock} initialSeconds={remainingTime} onTick={setRemainingTime} isPaused={isPaused} />
-          
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => setIsPaused(!isPaused)} 
-            className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 text-white"
-          >
+          <Button variant="ghost" size="icon" onClick={() => setIsPaused(!isPaused)} className="h-7 w-7 rounded-lg bg-white/5 text-white">
             {isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
           </Button>
-
-          <Button onClick={submitMock} disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[9px] tracking-widest h-8 px-3 rounded-lg shadow-lg">
+          <Button onClick={submitMock} disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[8px] tracking-widest h-7 px-2 rounded-lg">
              SUBMIT
           </Button>
         </div>
       </header>
 
       <main className="flex-1 flex overflow-hidden relative">
-        {/* Pause Overlay */}
         {isPaused && (
-           <div className="absolute inset-0 z-[200] bg-[#0B1528]/95 backdrop-blur-md flex flex-col items-center justify-center text-white p-6">
-              <Pause className="h-10 w-10 text-primary mb-4" />
-              <h2 className="text-xl font-black uppercase tracking-tight mb-2">Audit Paused</h2>
-              <Button onClick={() => setIsPaused(false)} className="bg-primary text-white font-black h-12 px-10 rounded-xl uppercase text-[10px]">
-                 Resume Test
-              </Button>
+           <div className="absolute inset-0 z-[200] bg-[#0B1528]/95 backdrop-blur-md flex flex-col items-center justify-center text-white">
+              <Pause className="h-8 w-8 text-primary mb-2" />
+              <h2 className="text-lg font-black uppercase mb-4">Audit Paused</h2>
+              <Button onClick={() => setIsPaused(false)} className="bg-primary text-white font-black h-10 px-8 rounded-xl uppercase text-[9px]">Resume</Button>
            </div>
         )}
 
         <div className="flex-1 flex flex-col overflow-hidden bg-white">
-          <div className="px-3 py-1.5 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
-             <div className="flex items-center gap-4">
+          <div className="px-3 py-1 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
+             <div className="flex items-center gap-3">
                 <div className="text-left">
-                   <p className="text-[7px] font-black text-primary uppercase tracking-widest leading-none">{currentSection.paper}</p>
-                   <h2 className="text-[10px] font-black text-black uppercase flex items-center gap-1 mt-0.5">
-                     <Target className="h-3 w-3 text-primary" /> {currentSection.name}
+                   <p className="text-[6px] font-black text-primary uppercase tracking-widest leading-none">{currentSection.paper}</p>
+                   <h2 className="text-[9px] font-black text-black uppercase flex items-center gap-1 mt-0.5 truncate max-w-[120px]">
+                     <Target className="h-2.5 w-2.5 text-primary" /> {currentSection.name}
                    </h2>
                 </div>
-                <div className="h-6 w-px bg-slate-200" />
+                <div className="h-4 w-px bg-slate-200" />
                 <div className="space-y-0 text-center">
-                   <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest">Question</p>
-                   <span className="text-[10px] font-black text-black leading-none">{currentIdx + 1}/{questions.length}</span>
+                   <span className="text-[9px] font-black text-black leading-none">{currentIdx + 1}/{questions.length}</span>
                 </div>
              </div>
              <Sheet>
                <SheetTrigger asChild>
-                 <Button variant="outline" className="lg:hidden rounded-lg h-7 px-2 gap-1 font-black text-[8px] uppercase border-slate-200 bg-white">
-                    <LayoutGrid className="h-3 w-3" /> Map
+                 <Button variant="outline" className="lg:hidden rounded-lg h-6 px-2 gap-1 font-black text-[7px] uppercase border-slate-200 bg-white">
+                    <LayoutGrid className="h-2.5 w-2.5" /> Map
                  </Button>
                </SheetTrigger>
-               <SheetContent side="right" className="p-0 border-none w-[280px]">
-                  <SheetHeader className="sr-only"><SheetTitle>Audit Map</SheetTitle></SheetHeader>
-                  <div className="p-6 h-full overflow-y-auto bg-white pt-16">
+               <SheetContent side="right" className="p-0 border-none w-[260px]">
+                  <div className="p-4 h-full overflow-y-auto bg-white pt-12">
                      <QuestionPalette 
                         totalQuestions={questions.length} currentIndex={currentIdx} 
                         answeredIndices={Object.keys(answers).map(Number)} 
@@ -218,37 +193,36 @@ export default function MockAttemptPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto p-3 md:p-8 custom-scrollbar">
-             <div className="max-w-3xl mx-auto pb-20">
+             <div className="max-w-2xl mx-auto pb-10">
                 <QuestionRenderer 
-                   language={isPunjabiOnlyNode ? 'pa' : language}
+                   language={q?.subjectId === "punjabi-qualifying" ? 'pa' : language}
                    question={q}
                 />
                 
-                <div className="mt-4 space-y-2">
+                <div className="mt-4 space-y-1.5">
                    <RadioGroup 
                      value={answers[currentIdx]?.toString() || ""} 
                      onValueChange={(v) => setAnswers(prev => ({ ...prev, [currentIdx]: parseInt(v) }))} 
-                     className="grid grid-cols-1 gap-2"
+                     className="grid grid-cols-1 gap-1.5"
                    >
                      {['A', 'B', 'C', 'D'].map((k, i) => {
                        const isSelected = answers[currentIdx] === i;
                        const optEn = q?.[`option${k}En`] || "";
                        const optPa = q?.[`option${k}Pa`] || "";
-                       
                        const displayVal = (language === 'en' || (language === 'bilingual' && optEn && !optPa)) ? optEn : optPa;
 
                        return (
                          <div key={i} className={cn(
-                           "flex items-center space-x-3 p-3 md:p-4 border-2 rounded-xl transition-all cursor-pointer group",
-                           isSelected ? 'border-primary bg-primary/5' : 'border-slate-50 bg-white hover:border-slate-100'
+                           "flex items-center space-x-3 p-2.5 md:p-4 border-[1.5px] rounded-lg transition-all cursor-pointer",
+                           isSelected ? 'border-primary bg-primary/5' : 'border-slate-100 bg-white'
                          )} onClick={() => setAnswers(prev => ({ ...prev, [currentIdx]: i }))}>
                             <div className={cn(
-                               "h-6 w-6 md:h-7 md:w-7 rounded-full border-2 flex items-center justify-center font-black text-[9px] md:text-xs transition-all",
+                               "h-5 w-5 md:h-7 md:w-7 rounded-full border-[1.5px] flex items-center justify-center font-black text-[8px] md:text-xs shrink-0 transition-all",
                                isSelected ? "bg-primary border-primary text-white" : "border-slate-200 text-slate-300"
                             )}>
                                {k}
                             </div>
-                            <Label className="flex-1 cursor-pointer select-none text-[15px] md:text-[17px] font-bold text-black text-left leading-tight">
+                            <Label className="flex-1 cursor-pointer select-none text-[14px] md:text-[16px] font-bold text-[#000000] text-left leading-tight">
                                {displayVal || optEn}
                             </Label>
                          </div>
@@ -259,28 +233,26 @@ export default function MockAttemptPage() {
              </div>
           </div>
 
-          <footer className="h-14 md:h-20 border-t border-slate-100 bg-white px-3 md:px-8 flex items-center justify-between shrink-0 shadow-sm">
-             <div className="flex gap-2">
-                <Button variant="outline" className="h-9 md:h-12 px-3 md:px-6 text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-lg" onClick={() => currentIdx > 0 && setCurrentIdx(currentIdx - 1)} disabled={currentIdx === 0}>
+          <footer className="h-12 md:h-16 border-t border-slate-100 bg-white px-2 md:px-4 flex items-center justify-between shrink-0 shadow-sm">
+             <div className="flex gap-1.5">
+                <Button variant="outline" className="h-8 md:h-10 px-3 text-[8px] md:text-[10px] font-black uppercase rounded-lg" onClick={() => currentIdx > 0 && setCurrentIdx(currentIdx - 1)} disabled={currentIdx === 0}>
                    <ChevronLeft className="h-3 w-3 mr-1" /> Prev
                 </Button>
-                <Button variant="ghost" className="h-9 md:h-12 px-3 md:px-6 text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 rounded-lg hidden sm:flex" onClick={() => setAnswers(p => { const n={...p}; delete n[currentIdx]; return n; })}>
-                   Clear
-                </Button>
+                <Button variant="ghost" className="h-8 md:h-10 px-2 text-[8px] font-black uppercase text-slate-300 rounded-lg hidden sm:flex" onClick={() => setAnswers(p => { const n={...p}; delete n[currentIdx]; return n; })}>Clear</Button>
              </div>
-             <div className="flex gap-2">
-                <Button variant="outline" className={cn("h-9 md:h-12 px-3 md:px-6 text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-lg shadow-sm", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white" : "text-amber-600 border-amber-200")} onClick={() => { if(!flagged.includes(currentIdx)) setFlagged(p=>[...p, currentIdx]); else setFlagged(p=>p.filter(idx=>idx!==currentIdx)); }}>
+             <div className="flex gap-1.5">
+                <Button variant="outline" className={cn("h-8 md:h-10 px-3 text-[8px] font-black uppercase rounded-lg", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white" : "text-amber-500 border-amber-100")} onClick={() => { if(!flagged.includes(currentIdx)) setFlagged(p=>[...p, currentIdx]); else setFlagged(p=>p.filter(idx=>idx!==currentIdx)); }}>
                    Review
                 </Button>
-                <Button className="bg-black hover:bg-slate-900 text-white h-9 md:h-12 px-4 md:px-10 rounded-lg font-black uppercase text-[8px] md:text-[10px] tracking-widest shadow-lg" onClick={() => { if(currentIdx < questions.length-1) { const next = currentIdx + 1; setCurrentIdx(next); if(!visited.includes(next)) setVisited(v=>[...v, next])} }}>
+                <Button className="bg-black hover:bg-slate-900 text-white h-8 md:h-10 px-6 rounded-lg font-black uppercase text-[8px] md:text-[10px] tracking-widest shadow-lg" onClick={() => { if(currentIdx < questions.length-1) { const next = currentIdx + 1; setCurrentIdx(next); if(!visited.includes(next)) setVisited(v=>[...v, next])} }}>
                    Next <ChevronRight className="h-3 w-3 ml-1" />
                 </Button>
              </div>
           </footer>
         </div>
 
-        <aside className="w-[300px] border-l border-slate-100 bg-white hidden lg:flex flex-col shrink-0 overflow-hidden">
-           <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
+        <aside className="w-[280px] border-l border-slate-50 bg-white hidden lg:flex flex-col shrink-0 overflow-hidden">
+           <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
               <QuestionPalette 
                 totalQuestions={questions.length} currentIndex={currentIdx} 
                 answeredIndices={Object.keys(answers).map(Number)} 
@@ -296,6 +268,6 @@ export default function MockAttemptPage() {
 
 function LangTab({ label, active, onClick }: any) {
   return (
-    <button onClick={onClick} className={cn("px-2 py-1 rounded-md text-[8px] font-black tracking-widest transition-all", active ? "bg-white text-black shadow-sm" : "text-white/40 hover:text-white")}>{label}</button>
+    <button onClick={onClick} className={cn("px-2 py-0.5 rounded-md text-[7px] font-black tracking-widest transition-all", active ? "bg-white text-black shadow-sm" : "text-white/30 hover:text-white")}>{label}</button>
   )
 }
