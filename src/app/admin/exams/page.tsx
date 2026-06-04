@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Plus, Edit, Image as ImageIcon, Trash2, Save, Globe, Upload, Loader2 } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import Image from "next/image"
 import { useCollection, useFirestore, useStorage } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc } from "firebase/firestore"
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
@@ -30,42 +29,46 @@ export default function ExamManagement() {
   
   const [editingBoard, setEditingBoard] = useState<any>(null)
   const [isUploading, setIsUploading] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!db || !editingBoard) return
-    const boardRef = doc(db, "boards", editingBoard.id || `board-${Date.now()}`)
-    const payload = { ...editingBoard, id: boardRef.id }
+    setIsSaving(true)
+
+    const boardId = editingBoard.id || `board-${Date.now()}`
+    const boardRef = doc(db, "boards", boardId)
+    const payload = { ...editingBoard, id: boardId }
     
-    setDoc(boardRef, payload, { merge: true })
-      .then(() => {
-        toast({ title: "Audit Success", description: "Recruitment board configuration updated in global registry." })
-        setEditingBoard(null)
-      })
-      .catch(async (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: boardRef.path,
-          operation: 'write',
-          requestResourceData: payload,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
+    try {
+      await setDoc(boardRef, payload, { merge: true })
+      toast({ title: "Audit Success", description: "Recruitment board configuration updated in global registry." })
+      setEditingBoard(null)
+    } catch (serverError: any) {
+      const permissionError = new FirestorePermissionError({
+        path: boardRef.path,
+        operation: 'write',
+        requestResourceData: payload,
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("Permanently remove this authority from the institutional database?")) return
     const boardRef = doc(db!, "boards", id)
-    deleteDoc(boardRef)
-      .then(() => {
-        toast({ title: "Authority Deleted", description: "Board removed from cloud repository." })
-      })
-      .catch(async (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: boardRef.path,
-          operation: 'delete',
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
+    try {
+      await deleteDoc(boardRef)
+      toast({ title: "Authority Deleted", description: "Board removed from cloud repository." })
+    } catch (serverError: any) {
+      const permissionError = new FirestorePermissionError({
+        path: boardRef.path,
+        operation: 'delete',
+      } satisfies SecurityRuleContext);
+      errorEmitter.emit('permission-error', permissionError);
+    }
   }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,6 +87,8 @@ export default function ExamManagement() {
       toast({ variant: "destructive", title: "Upload Failed", description: error.message })
     } finally {
       setIsUploading(false)
+      // Reset the input so the same file can be uploaded again if needed
+      if (fileInputRef.current) fileInputRef.current.value = ""
     }
   }
 
@@ -155,7 +160,7 @@ export default function ExamManagement() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!editingBoard} onOpenChange={(open) => !open && setEditingBoard(null)}>
+      <Dialog open={!!editingBoard} onOpenChange={(open) => !open && !isSaving && !isUploading && setEditingBoard(null)}>
         <DialogContent className="sm:max-w-md rounded-[3rem] bg-[#0F172A] text-white border-white/10 shadow-4xl p-0 overflow-hidden">
           <div className="h-2 w-full bg-primary" />
           <DialogHeader className="p-10 pb-0">
@@ -186,7 +191,7 @@ export default function ExamManagement() {
                     variant="outline" 
                     className="flex-1 h-12 rounded-xl border-white/10 bg-white/5 font-black uppercase text-[10px] tracking-widest gap-2"
                     onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading}
+                    disabled={isUploading || isSaving}
                  >
                     {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                     {isUploading ? "Syncing..." : "Upload Logo"}
@@ -221,9 +226,10 @@ export default function ExamManagement() {
             </div>
           </div>
           <DialogFooter className="p-10 pt-0 flex gap-4 border-t border-white/5 pt-6">
-            <Button variant="ghost" onClick={() => setEditingBoard(null)} className="rounded-xl h-12 px-6 font-bold text-slate-400 hover:text-white">Cancel</Button>
-            <Button className="bg-primary hover:bg-primary/90 rounded-xl h-12 px-10 font-black uppercase tracking-widest text-xs shadow-2xl" onClick={handleSave}>
-              <Save className="h-4 w-4 mr-3" /> {editingBoard?.id ? "Sync Configuration" : "Initialize Board"}
+            <Button variant="ghost" onClick={() => setEditingBoard(null)} disabled={isSaving || isUploading} className="rounded-xl h-12 px-6 font-bold text-slate-400 hover:text-white">Cancel</Button>
+            <Button className="bg-primary hover:bg-primary/90 rounded-xl h-12 px-10 font-black uppercase tracking-widest text-xs shadow-2xl gap-2" onClick={handleSave} disabled={isSaving || isUploading}>
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {isSaving ? "Syncing..." : (editingBoard?.id ? "Sync Configuration" : "Initialize Board")}
             </Button>
           </DialogFooter>
         </DialogContent>

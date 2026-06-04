@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from "react"
@@ -81,6 +80,7 @@ export default function LatestMocks() {
                           <img 
                             src={psssbLogo} 
                             referrerPolicy="no-referrer"
+                            crossOrigin="anonymous"
                             className="w-full h-full object-contain p-2" 
                             alt="PSSSB" 
                           />
