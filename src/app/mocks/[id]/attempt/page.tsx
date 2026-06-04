@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo, useCallback } from "react"
@@ -23,7 +24,7 @@ import {
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 
 type LangMode = 'en' | 'reg' | 'bilingual'
 
@@ -147,8 +148,8 @@ export default function MockAttemptPage() {
         </div>
       </header>
 
-      <main className="flex flex-1 overflow-hidden">
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#F8FAFC]">
+      <main className="flex-1 overflow-hidden">
+        <div className="flex-1 flex flex-col overflow-hidden bg-[#F8FAFC] h-full">
           <div className="px-6 py-3 border-b border-slate-200 bg-white flex items-center justify-between shrink-0">
              <div className="flex items-center gap-4 text-left">
                 <div className="space-y-0.5">
@@ -167,6 +168,9 @@ export default function MockAttemptPage() {
                  </Button>
                </SheetTrigger>
                <SheetContent side="right" className="p-0 border-none w-[300px]">
+                  <SheetHeader className="sr-only">
+                    <SheetTitle>Question Audit Map</SheetTitle>
+                  </SheetHeader>
                   <div className="p-6 h-full overflow-y-auto bg-white pt-16 text-left">
                      <QuestionPalette 
                         totalQuestions={questions.length} currentIndex={currentIdx} 

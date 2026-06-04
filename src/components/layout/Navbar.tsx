@@ -21,7 +21,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { doc } from "firebase/firestore";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import MobileSidebar from "./MobileSidebar";
 
 /**
@@ -79,6 +79,9 @@ export default function Navbar() {
                    </button>
                  </SheetTrigger>
                  <SheetContent side="left" className="p-0 border-none w-[280px] max-w-[80vw]">
+                   <SheetHeader className="sr-only">
+                     <SheetTitle>Navigation Menu</SheetTitle>
+                   </SheetHeader>
                    <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
                  </SheetContent>
                </Sheet>
