@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -8,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { Globe, Shield, Layout, Bell, Save, RefreshCw, Smartphone, TrendingUp, Zap, CalendarDays, ShieldCheck, Lock, CloudLightning, FileCode, CheckCircle2 } from "lucide-react"
+import { Globe, Shield, Layout, Bell, Save, RefreshCw, ShieldCheck, Lock, CloudLightning, FileCode } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
@@ -51,25 +52,10 @@ export default function AdminSettings() {
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Explicit 16-Collection Audit Node
-    match /{document=**} { allow read, write: if true; }
-
-    match /mocks/{id} { allow read, list, write: if true; }
-    match /test_sessions/{id} { allow read, list, write: if true; }
-    match /results/{id} { allow read, list, write: if true; }
-    match /users/{id} { allow read, list, write: if true; }
-    match /questions/{id} { allow read, list, write: if true; }
-    match /current_affairs/{id} { allow read, list, write: if true; }
-    match /notifications/{id} { allow read, list, write: if true; }
-    match /bookmarks/{id} { allow read, list, write: if true; }
-    match /reports/{id} { allow read, list, write: if true; }
-    match /pyqs/{id} { allow read, list, write: if true; }
-    match /boards/{id} { allow read, list, write: if true; }
-    match /exams/{id} { allow read, list, write: if true; }
-    match /subjects/{id} { allow read, list, write: if true; }
-    match /settings/{id} { allow read, list, write: if true; }
-    match /support_tickets/{id} { allow read, list, write: if true; }
-    match /audit_logs/{id} { allow read, list, write: if true; }
+    // Explicit Institutional Permissive Access
+    match /{document=**} { 
+      allow read, write: if true; 
+    }
   }
 }`;
 
@@ -86,7 +72,7 @@ service cloud.firestore {
       setIsDeploying(false);
       toast({ 
         title: "Rules Sync Initiated", 
-        description: "16 Institutional Rules have been pushed to the deployment cycle. Permission errors will clear shortly.",
+        description: "Institutional Rules have been pushed to the deployment cycle. Permission errors will clear shortly.",
       });
     }, 1500);
   };
@@ -114,7 +100,6 @@ service cloud.firestore {
           <TabsTrigger value="homepage" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white"><Layout className="h-4 w-4" /> Global CMS</TabsTrigger>
           <TabsTrigger value="logic" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white"><Shield className="h-4 w-4" /> Logic Engines</TabsTrigger>
           <TabsTrigger value="security" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full whitespace-nowrap text-rose-600 data-[state=active]:bg-rose-600 data-[state=active]:text-white"><Lock className="h-4 w-4" /> Security Node</TabsTrigger>
-          <TabsTrigger value="seasonal" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white"><CalendarDays className="h-4 w-4" /> Seasonal</TabsTrigger>
         </TabsList>
 
         <TabsContent value="homepage">
@@ -139,8 +124,8 @@ service cloud.firestore {
         <TabsContent value="logic">
           <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <ConfigCard icon={<Shield className="text-rose-600" />} label="Negative Marking" desc="Apply -1.0 penalty for mismatched choices." checked={formData.negativeMarking} onChange={(v: boolean) => setFormData({...formData, negativeMarking: v})} />
-                <ConfigCard icon={<Zap className="text-emerald-600" />} label="AI Tutors" desc="Generate Gemini rationalizations for attempts." checked={formData.aiRationalization} onChange={(v: boolean) => setFormData({...formData, aiRationalization: v})} />
+                <ConfigCard icon={<Shield className="text-rose-600" />} label="Negative Marking" desc="Apply penalty for mismatched choices." checked={formData.negativeMarking} onChange={(v: boolean) => setFormData({...formData, negativeMarking: v})} />
+                <ConfigCard icon={<Zap className="text-emerald-600" />} label="AI Tutors" desc="Generate AI rationalizations for attempts." checked={formData.aiRationalization} onChange={(v: boolean) => setFormData({...formData, aiRationalization: v})} />
              </div>
           </Card>
         </TabsContent>
@@ -153,9 +138,9 @@ service cloud.firestore {
                       <div className="h-12 w-12 rounded-2xl bg-rose-600 flex items-center justify-center text-white shadow-xl">
                          <FileCode className="h-6 w-6" />
                       </div>
-                      <div>
+                      <div className="text-left">
                          <CardTitle className="text-2xl font-headline font-black uppercase text-[#0F172A]">Institutional Rules Audit</CardTitle>
-                         <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-rose-600">16 Active Rules Structured for Deployment.</CardDescription>
+                         <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-rose-600">Global Permissive Mode Active.</CardDescription>
                       </div>
                    </div>
                 </CardHeader>
@@ -165,7 +150,7 @@ service cloud.firestore {
                       <Textarea 
                         readOnly 
                         value={institutionalRules} 
-                        className="min-h-[400px] bg-slate-950 border-none p-8 font-mono text-xs leading-relaxed text-emerald-400 custom-scrollbar shadow-inner outline-none focus-visible:ring-0" 
+                        className="min-h-[300px] bg-slate-950 border-none p-8 font-mono text-xs leading-relaxed text-emerald-400 custom-scrollbar shadow-inner outline-none focus-visible:ring-0" 
                       />
                    </div>
                    <Button 
@@ -179,13 +164,12 @@ service cloud.firestore {
                 </CardContent>
              </Card>
 
-             <div className="lg:col-span-5 space-y-8">
+             <div className="lg:col-span-5 space-y-8 text-left">
                 <Card className="border-slate-100 bg-white p-10 rounded-[3rem] space-y-6 shadow-xl">
                    <h3 className="font-headline font-black text-xl uppercase text-[#0F172A] flex items-center gap-3">
                       <ShieldCheck className="h-6 w-6 text-emerald-600" /> Operational Status
                    </h3>
                    <div className="space-y-4">
-                      <StatusRow label="Rules Count" value="16 Collections" />
                       <StatusRow label="Access Mode" value="Institutional Permissive" color="text-emerald-600" />
                       <StatusRow label="Sync Status" value="Online" color="text-emerald-600" />
                    </div>
@@ -197,7 +181,7 @@ service cloud.firestore {
                    </div>
                    <p className="text-sm font-black text-amber-600 uppercase">Audit Notification</p>
                    <p className="text-xs text-amber-800 leading-relaxed font-medium">
-                      The "Deploy" button above will re-sync your firestore.rules file with the central management repository. This fixes persistent "Missing Permissions" errors by ensuring explicit list/read access for all core collections.
+                      The security node has been set to global permissive mode to resolve permission errors during the current preparation cycle.
                    </p>
                 </Card>
              </div>
@@ -213,7 +197,7 @@ function ConfigCard({ icon, label, desc, checked, onChange }: any) {
     <div className="flex items-center justify-between p-8 bg-slate-50 rounded-[2rem] border border-slate-100 group hover:border-primary/20 transition-all shadow-sm">
        <div className="flex items-center gap-6">
           <div className="h-14 w-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center shadow-sm">{icon}</div>
-          <div className="space-y-1">
+          <div className="space-y-1 text-left">
              <p className="font-black text-xs uppercase tracking-widest text-[#0F172A]">{label}</p>
              <p className="text-[10px] text-slate-500 uppercase font-bold">{desc}</p>
           </div>
