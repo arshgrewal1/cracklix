@@ -18,7 +18,9 @@ import {
   Target,
   Trophy,
   History,
-  Layout
+  Layout,
+  Info,
+  ChevronLeft
 } from "lucide-react"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
@@ -28,11 +30,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * @fileOverview Final Exam-Specific Mastery Hub.
- * Optimized for Testbook Aesthetic: Absolute black typography and metadata strips.
+ * Optimized for Testbook Aesthetic: Absolute black typography and modular practice nodes.
  */
 
 export default function ExamHubPage() {
   const params = useParams()
+  const router = useRouter()
   const db = useFirestore()
   const examId = params.id as string
 
@@ -80,6 +83,9 @@ export default function ExamHubPage() {
          <div className="container mx-auto px-6 max-w-7xl relative z-10 text-left">
             <div className="max-w-4xl space-y-6">
                <div className="flex flex-wrap items-center gap-3">
+                  <button onClick={() => router.back()} className="mr-4 text-slate-400 hover:text-white transition-colors flex items-center gap-2 font-black uppercase text-[10px] tracking-widest">
+                     <ChevronLeft className="h-4 w-4" /> Back to Registry
+                  </button>
                   <Badge className="bg-primary text-white border-none px-4 py-1.5 rounded-lg font-black uppercase text-[10px] tracking-[0.2em]">
                      Official {exam.boardId?.toUpperCase() || "State"} Hub
                   </Badge>
@@ -108,9 +114,11 @@ export default function ExamHubPage() {
             <div className="bg-white p-1.5 rounded-2xl md:rounded-3xl shadow-2xl border border-slate-100 flex items-center overflow-x-auto no-scrollbar">
                <TabsList className="bg-transparent border-none p-0 flex gap-1 h-auto">
                   <TabTrigger value="FULL" icon={<Zap />} label="Full Mocks" count={groupedMocks.FULL.length} />
-                  <TabTrigger value="SUBJECT" icon={<Layers />} label="Subject" count={groupedMocks.SUBJECT.length} />
-                  <TabTrigger value="SECTIONAL" icon={<Target />} label="Sectional" count={groupedMocks.SECTIONAL.length} />
+                  <TabTrigger value="SUBJECT" icon={<Layers />} label="Subject Mastery" count={groupedMocks.SUBJECT.length} />
+                  <TabTrigger value="SECTIONAL" icon={<Target />} label="Sectionals" count={groupedMocks.SECTIONAL.length} />
+                  <TabTrigger value="CHAPTER" icon={<History />} label="Chapter Wise" count={groupedMocks.CHAPTER.length} />
                   <TabTrigger value="PYQ" icon={<FileText />} label="PYQs" count={groupedMocks.PYQ.length} />
+                  <TabTrigger value="CA_QUIZ" icon={<Sparkles />} label="CA Quizzes" count={groupedMocks.CA_QUIZ.length} />
                </TabsList>
             </div>
 
@@ -126,8 +134,16 @@ export default function ExamHubPage() {
                <HubGrid mocks={groupedMocks.SECTIONAL} emptyLabel="No Sectional nodes linked to this recruitment." />
             </TabsContent>
 
+            <TabsContent value="CHAPTER" className="space-y-6">
+               <HubGrid mocks={groupedMocks.CHAPTER} emptyLabel="Chapter-wise preparation nodes pending registry." />
+            </TabsContent>
+
             <TabsContent value="PYQ" className="space-y-6">
                <HubGrid mocks={groupedMocks.PYQ} emptyLabel="Official previous papers for this vertical are in registry." />
+            </TabsContent>
+
+            <TabsContent value="CA_QUIZ" className="space-y-6">
+               <HubGrid mocks={groupedMocks.CA_QUIZ} emptyLabel="Daily current affairs quizzes for this board." />
             </TabsContent>
          </Tabs>
       </main>
@@ -141,9 +157,9 @@ function TabTrigger({ value, icon, label, count }: any) {
    return (
       <TabsTrigger 
          value={value} 
-         className="rounded-xl px-4 md:px-8 h-12 md:h-14 font-black uppercase text-[9px] md:text-[11px] tracking-widest data-[state=active]:bg-[#0F172A] data-[state=active]:text-white flex items-center gap-2 md:gap-3 transition-all"
+         className="rounded-xl px-4 md:px-8 h-12 md:h-14 font-black uppercase text-[9px] md:text-[11px] tracking-widest data-[state=active]:bg-[#0F172A] data-[state=active]:text-white flex items-center gap-2 md:gap-3 transition-all group"
       >
-         <span className="shrink-0">{icon}</span>
+         <span className="shrink-0 group-data-[state=active]:text-primary">{icon}</span>
          <span className="whitespace-nowrap">{label}</span>
          <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black group-data-[state=active]:bg-white/10 group-data-[state=active]:text-white ml-1">{count}</Badge>
       </TabsTrigger>
@@ -185,14 +201,13 @@ function MockCard({ mock }: { mock: any }) {
                 {mock.title}
                </h3>
                <div className="space-y-2.5 pt-3 border-t border-slate-50">
-                  <div className="flex items-center gap-2 text-slate-400 font-bold uppercase text-[9px] tracking-tight">
-                     <BookOpen className="h-3.5 w-3.5 text-primary" /> {mock.totalQuestions} Questions
+                  <div className="flex items-center justify-between text-slate-400 font-bold uppercase text-[9px] tracking-tight">
+                     <span className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" /> {mock.totalQuestions} Questions</span>
+                     <span className="text-[#0F172A]">{mock.totalQuestions} Marks</span>
                   </div>
-                  <div className="flex items-center gap-2 text-slate-400 font-bold uppercase text-[9px] tracking-tight">
-                     <Clock className="h-3.5 w-3.5 text-primary" /> {mock.duration} Minutes
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-400 font-bold uppercase text-[9px] tracking-tight">
-                     <FileText className="h-3.5 w-3.5 text-primary" /> {mock.totalQuestions} Marks
+                  <div className="flex items-center justify-between text-slate-400 font-bold uppercase text-[9px] tracking-tight">
+                     <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-primary" /> {mock.duration} Minutes</span>
+                     <span className="text-[#0F172A]">{mock.language || 'Bilingual'}</span>
                   </div>
                </div>
             </div>

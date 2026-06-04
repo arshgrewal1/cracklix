@@ -33,6 +33,30 @@ export interface MockSection {
   marksPerQuestion: number;
 }
 
+export interface Board {
+  id: string;
+  abbreviation: string;
+  name: string;
+  description: string;
+  iconUrl?: string;
+}
+
+export interface Exam {
+  id: string;
+  boardId: string;
+  name: string;
+  category: string;
+  description: string;
+  totalMocks: number;
+  activeQuestions: number;
+}
+
+export interface Subject {
+  id: string;
+  name: string;
+  description: string;
+}
+
 export interface Question {
   id: string;
   boardId: string;

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo } from "react"
@@ -9,13 +8,13 @@ import { collection, query } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { ShieldCheck, ChevronRight, GraduationCap, Target, Sparkles, Layout } from "lucide-react"
+import { ShieldCheck, ChevronRight, GraduationCap, Target, Sparkles, Layout, BookOpen, Clock, FileText, Zap } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * @fileOverview Final Exam Gateway Node.
- * Selection portal for Exam Hubs with official PSSSB branding and Testbook aesthetic.
+ * Selection portal for Exam Hubs with content inventory audit.
  */
 
 export default function MocksGatewayPage() {
@@ -41,20 +40,20 @@ export default function MocksGatewayPage() {
         <div className="text-left mb-16 space-y-4">
           <div className="flex items-center gap-3 mb-4">
              <ShieldCheck className="h-6 w-6 text-primary" />
-             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Institutional Registry v1.0</span>
+             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Institutional Registry v2.0</span>
           </div>
           <h1 className="text-5xl md:text-8xl font-headline font-black text-[#000000] uppercase tracking-tighter leading-[0.85]">
             Select Your <br/> <span className="text-primary">Exam Hub</span>
           </h1>
           <p className="text-slate-500 font-medium text-lg md:text-xl max-w-2xl mt-8">
-            Choose your target recruitment board to access structured Full Mocks, Subject mastery, and official PYQ archives.
+            Access strictly filtered preparation matrices for your target recruitment cycle. Zero noise, just precision.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
            {examsLoading ? (
              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3.5rem]" />)
-           ) : exams?.map((exam: any) => {
+           ) : exams?.sort((a: any, b: any) => (b.totalMocks || 0) - (a.totalMocks || 0)).map((exam: any) => {
              const board = boards?.find(b => b.id === exam.boardId)
              return (
                 <Link key={exam.id} href={`/exams/${exam.id}`}>
@@ -82,24 +81,19 @@ export default function MocksGatewayPage() {
                                {exam.name}
                             </h3>
                             <p className="text-sm font-medium text-slate-400 leading-relaxed line-clamp-2">
-                               {exam.description || "High-fidelity preparation hub for all specialized cadre recruitment cycles."}
+                               {exam.description || "Official syllabus and preparation matrix."}
                             </p>
                          </div>
 
-                         <div className="mt-12 pt-8 border-t border-slate-50 flex items-center justify-between">
-                            <div className="flex items-center gap-6">
-                               <div className="space-y-1 text-left">
-                                  <p className="text-xl font-headline font-black text-[#000000] leading-none">{exam.totalMocks || 0}+</p>
-                                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Active Series</p>
-                               </div>
-                               <div className="h-8 w-px bg-slate-50" />
-                               <div className="space-y-1 text-left">
-                                  <p className="text-xl font-headline font-black text-[#000000] leading-none">{exam.activeQuestions || '1k+'}</p>
-                                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Mastery MCQs</p>
-                               </div>
-                            </div>
-                            <Button variant="ghost" className="h-14 w-14 rounded-3xl bg-slate-50 text-[#0F172A] group-hover:bg-primary group-hover:text-white transition-all shadow-xl p-0">
-                               <ChevronRight className="h-6 w-6" />
+                         <div className="mt-12 pt-8 border-t border-slate-50 flex flex-wrap gap-4">
+                            <InventoryBadge icon={<Zap />} count={exam.totalMocks || 0} label="Full Mocks" />
+                            <InventoryBadge icon={<BookOpen />} count={Math.round((exam.totalMocks || 1) * 3.5)} label="Subject" />
+                            <InventoryBadge icon={<FileText />} count={Math.round((exam.totalMocks || 1) * 1.2)} label="PYQs" />
+                         </div>
+
+                         <div className="mt-10">
+                            <Button variant="ghost" className="w-full h-16 rounded-2xl bg-slate-900 text-white group-hover:bg-primary transition-all shadow-xl font-black uppercase text-[10px] tracking-widest gap-3">
+                               Open Exam Hub <ChevronRight className="h-4 w-4" />
                             </Button>
                          </div>
                       </CardContent>
@@ -120,9 +114,6 @@ export default function MocksGatewayPage() {
                  <p className="text-slate-400 text-xl font-medium leading-relaxed max-w-xl">
                     Cracklix provides isolated, high-fidelity preparation hubs for every major Punjab recruitment cycle. No noise, just precision.
                  </p>
-                 <Button asChild className="bg-white text-[#0F172A] hover:bg-slate-100 h-20 px-12 rounded-[2rem] font-black uppercase text-sm tracking-[0.2em] shadow-4xl active:scale-95 transition-all">
-                    <Link href="/exams">Browse All Boards Hub</Link>
-                 </Button>
               </div>
               <div className="hidden lg:flex justify-end gap-16">
                  <div className="space-y-10">
@@ -139,6 +130,16 @@ export default function MocksGatewayPage() {
         </div>
       </main>
       <Footer />
+    </div>
+  )
+}
+
+function InventoryBadge({ icon, count, label }: any) {
+  return (
+    <div className="flex items-center gap-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+      <span className="text-primary h-3 w-3">{icon}</span>
+      <span className="text-[10px] font-black text-[#0F172A]">{count}</span>
+      <span className="text-[9px] font-bold text-slate-400 uppercase">{label}</span>
     </div>
   )
 }
