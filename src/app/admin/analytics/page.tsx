@@ -10,11 +10,13 @@ import {
   BarChart3, 
   ShieldCheck, 
   Target,
+  CreditCard,
   TrendingUp,
-  ArrowUpRight
+  ArrowUpRight,
+  Activity
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection } from "firebase/firestore"
+import { collection, query, limit } from "firebase/firestore"
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Cell } from "recharts"
 
 const chartData = [
@@ -28,8 +30,8 @@ const chartData = [
 ]
 
 /**
- * @fileOverview Final Institutional Analytics Portal.
- * Tracks growth metrics, attempt precision, and authority popularity.
+ * @fileOverview Final Administrative Control Center.
+ * Features growth metrics, pass distribution, and institutional performance monitoring.
  */
 
 export default function AdminAnalytics() {
@@ -39,36 +41,38 @@ export default function AdminAnalytics() {
   const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
   const { data: results } = useCollection<any>(useMemo(() => (db ? collection(db, "results") : null), [db]))
 
+  const proUsers = useMemo(() => users?.filter((u: any) => u.status && u.status !== 'Free') || [], [users]);
+
   const avgAccuracy = useMemo(() => {
     if (!results || results.length === 0) return 64
     return Math.round(results.reduce((acc, r: any) => acc + (r.accuracy || 0), 0) / results.length)
   }, [results])
 
   return (
-    <div className="space-y-12 pb-20">
+    <div className="space-y-12 pb-20 text-left">
       <div className="flex justify-between items-center">
         <div>
            <div className="flex items-center gap-3 mb-2">
               <BarChart3 className="h-5 w-5 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Operational Growth Monitor</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Institutional Governance Monitor</span>
            </div>
-          <h1 className="text-5xl font-black font-headline text-primary uppercase tracking-tight">System Analytics</h1>
-          <p className="text-[#0F172A] mt-2 text-lg font-medium">Institutional monitoring for growth and aspirant participation.</p>
+          <h1 className="text-5xl font-black font-headline text-primary uppercase tracking-tight">Ecosystem Insights</h1>
+          <p className="text-[#0F172A] mt-2 text-lg font-medium">Tracking student growth and preparation precision across all Punjab verticals.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
          <MetricCard label="Total Aspirants" value={users?.length || "0"} trend="+24%" icon={<Users className="text-blue-400" />} />
+         <MetricCard label="Pro Pass Holders" value={proUsers.length} trend="+12%" icon={<CreditCard className="text-emerald-400" />} />
          <MetricCard label="Audit Attempts" value={results?.length || "0"} trend="+15%" icon={<Zap className="text-primary" />} />
-         <MetricCard label="Active Series" value={mocks?.length || "0"} trend="Live Repo" icon={<Calendar className="text-emerald-400" />} />
-         <MetricCard label="Avg. Precision" value={`${avgAccuracy}%`} trend="Target 70%" icon={<Target className="text-rose-400" />} />
+         <MetricCard label="Avg. Accuracy" value={`${avgAccuracy}%`} trend="Target 70%" icon={<Target className="text-rose-400" />} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
          <Card className="lg:col-span-8 border-none shadow-3xl shadow-slate-900/10 rounded-[3.5rem] bg-white overflow-hidden">
             <CardHeader className="p-12 border-b border-slate-50">
-               <CardTitle className="font-headline font-black text-3xl text-[#0F172A] uppercase">Participation Trend</CardTitle>
-               <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Daily active nodes across Punjab verticals.</CardDescription>
+               <CardTitle className="font-headline font-black text-3xl text-[#0F172A] uppercase">Active User Flow</CardTitle>
+               <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Daily active nodes across the Cracklix ecosystem.</CardDescription>
             </CardHeader>
             <CardContent className="p-12">
                <div className="h-[400px] w-full">
@@ -86,7 +90,7 @@ export default function AdminAnalytics() {
                         <Tooltip content={({active, payload}) => {
                            if (active && payload && payload.length) {
                               return <div className="bg-[#0F172A] text-white p-6 rounded-[1.5rem] shadow-4xl text-sm font-bold uppercase tracking-tight">
-                                <span className="text-primary mr-3">{payload[0].value}</span> Registrations
+                                <span className="text-primary mr-3">{payload[0].value}</span> Sessions
                               </div>
                            }
                            return null
@@ -98,22 +102,22 @@ export default function AdminAnalytics() {
             </CardContent>
          </Card>
 
-         <Card className="lg:col-span-4 border-none shadow-3xl shadow-slate-900/10 rounded-[3.5rem] bg-[#0F172A] text-white p-12 space-y-12">
-            <div className="space-y-2">
+         <Card className="lg:col-span-4 border-none shadow-3xl shadow-slate-900/10 rounded-[3.5rem] bg-[#0F172A] text-white p-12 space-y-12 overflow-hidden relative">
+            <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><ShieldCheck className="h-64 w-64" /></div>
+            <div className="space-y-2 relative z-10">
                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Authority Distribution</p>
-               <h3 className="font-headline font-black text-3xl uppercase leading-none">Market Share</h3>
+               <h3 className="font-headline font-black text-3xl uppercase leading-none">Exam Popularity</h3>
             </div>
-            <div className="space-y-8">
+            <div className="space-y-8 relative z-10">
                <BoardProgress label="PSSSB Verticals" value={78} />
                <BoardProgress label="Punjab Police" value={92} />
                <BoardProgress label="PPSC Gazetted" value={45} />
-               <BoardProgress label="Teaching Cadre" value={65} />
-               <BoardProgress label="High Court SSSC" value={32} />
+               <BoardProgress label="High Court Clerk" value={32} />
             </div>
-            <div className="pt-10 border-t border-white/5">
+            <div className="pt-10 border-t border-white/5 relative z-10">
                <div className="flex items-center gap-4 text-emerald-500">
-                  <ShieldCheck className="h-6 w-6" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Institutional Integrity Verified</span>
+                  <Activity className="h-6 w-6" />
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Institutional Engine Online</span>
                </div>
             </div>
          </Card>
@@ -144,7 +148,7 @@ function BoardProgress({ label, value }: any) {
       <div className="space-y-3">
          <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
             <span>{label}</span>
-            <span className="text-primary">{value}% Active</span>
+            <span className="text-primary">{value}%</span>
          </div>
          <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden shadow-inner">
             <div className="h-full bg-primary shadow-3xl shadow-primary/40 transition-all duration-1000" style={{ width: `${value}%` }} />
