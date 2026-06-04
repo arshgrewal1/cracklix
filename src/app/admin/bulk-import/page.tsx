@@ -26,7 +26,8 @@ import {
   Languages,
   ShieldCheck,
   ClipboardCheck,
-  Plus
+  Plus,
+  Copy
 } from "lucide-react"
 import { useFirestore, useCollection } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, setDoc } from "firebase/firestore"
@@ -34,11 +35,10 @@ import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions } from "@/lib/parser"
 import { Difficulty, MockType, Question, ContentStatus } from "@/types"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
-import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Mandatory Production Bulk Import Module.
- * Integrates Ingestion, Staging, and Direct Mock Publishing.
+ * @fileOverview Final Enterprise Bulk Import Hub.
+ * Features: High-volume extraction, Preview Editing, and Direct Deployment.
  */
 
 export default function BulkImportPage() {
@@ -61,7 +61,8 @@ export default function BulkImportPage() {
     mockType: "FULL" as MockType,
     status: "PUBLISHED" as ContentStatus,
     duration: 120,
-    questionCount: 0
+    questionCount: 0,
+    title: ""
   })
 
   // 2. Buffer State
@@ -139,7 +140,7 @@ export default function BulkImportPage() {
     
     const payload = {
       id: mockId,
-      title: mockSettings.title || `${metadata.boardId} ${metadata.mockType} - ${new Date().toLocaleDateString()}`,
+      title: mockSettings.title || metadata.title || `${metadata.boardId} ${metadata.mockType} - ${new Date().toLocaleDateString()}`,
       boardId: metadata.boardId,
       examId: metadata.examId,
       mockType: metadata.mockType,
@@ -221,19 +222,20 @@ export default function BulkImportPage() {
                  <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Subject</Label>
                     <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
-                       <SelectTrigger className="rounded-xl h-14 bg-slate-50 border-none font-bold"><SelectValue /></SelectTrigger>
+                       <SelectTrigger className="rounded-xl h-14 bg-slate-50 border-none font-bold"><SelectValue placeholder="Select" /></SelectTrigger>
                        <SelectContent>{subjects?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                     </Select>
                  </div>
                  <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Mock Type</Label>
                     <Select value={metadata.mockType} onValueChange={(v: any) => setMetadata({...metadata, mockType: v})}>
-                       <SelectTrigger className="rounded-xl h-14 bg-slate-50 border-none font-bold"><SelectValue /></SelectTrigger>
+                       <SelectTrigger className="rounded-xl h-14 bg-slate-50 border-none font-bold"><SelectValue placeholder="Select" /></SelectTrigger>
                        <SelectContent>
                           <SelectItem value="FULL">Full Mock</SelectItem>
                           <SelectItem value="SUBJECT">Subject Test</SelectItem>
                           <SelectItem value="SECTIONAL">Sectional</SelectItem>
                           <SelectItem value="PYQ">PYQ Archive</SelectItem>
+                          <SelectItem value="CA_QUIZ">Current Affairs</SelectItem>
                        </SelectContent>
                     </Select>
                  </div>
@@ -242,12 +244,17 @@ export default function BulkImportPage() {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Duration (Min)</Label>
-                  <Input type="number" value={metadata.duration} onChange={e => setMetadata({...metadata, duration: parseInt(e.target.value)})} className="h-14 rounded-xl bg-slate-50 border-none font-black text-lg" />
+                  <Input 
+                    type="number" 
+                    value={metadata.duration.toString()} 
+                    onChange={e => setMetadata({...metadata, duration: parseInt(e.target.value) || 0})} 
+                    className="h-14 rounded-xl bg-slate-50 border-none font-black text-lg" 
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Difficulty</Label>
                   <Select value={metadata.difficulty} onValueChange={(v: Difficulty) => setMetadata({...metadata, difficulty: v})}>
-                    <SelectTrigger className="rounded-xl h-14 bg-slate-50 border-none font-bold"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-14 bg-slate-50 border-none font-bold"><SelectValue placeholder="Select" /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="Easy">Easy</SelectItem>
                       <SelectItem value="Medium">Medium</SelectItem>
@@ -265,14 +272,13 @@ export default function BulkImportPage() {
              <div className="relative z-10 space-y-6">
                 <div className="flex items-center gap-4">
                    <Languages className="h-6 w-6 text-primary" />
-                   <h4 className="font-headline font-black uppercase text-sm tracking-widest">Bilingual Protocol</h4>
+                   <h4 className="font-headline font-black uppercase text-sm tracking-widest">Ingestion Protocol</h4>
                 </div>
                 <ul className="space-y-3 text-[11px] font-medium text-slate-400 leading-relaxed">
-                   <li>• Use <code className="text-primary">Q1 EN:</code> and <code className="text-primary">Q1 PA:</code> tags.</li>
-                   <li>• Options must start with <code className="text-primary">A EN:</code>, <code className="text-primary">A PA:</code> etc.</li>
-                   <li>• Use <code className="text-primary">Answer: B</code> for correct audit key.</li>
-                   <li>• Supports <code className="text-primary">Image: [URL]</code> for visual nodes.</li>
-                   <li>• Supports <code className="text-primary">Explanation EN:</code> for solutions.</li>
+                   <li>• Format 1: Q1. [Text] -> Options A-D -> Answer: [A-D]</li>
+                   <li>• Format 2: Question EN: -> Question PA: -> Answer: [A-D]</li>
+                   <li>• Image Question: Image: [URL] -> Question: [Text]</li>
+                   <li>• Current Affairs: Date: -> Category: -> Question:</li>
                 </ul>
              </div>
           </Card>
@@ -281,7 +287,7 @@ export default function BulkImportPage() {
         {/* Text Area & Preview */}
         <div className="lg:col-span-8 space-y-8">
            <div className="space-y-3">
-              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Ingestion Buffer</Label>
+              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Ingestion Buffer (Max 1000)</Label>
               <Textarea 
                 value={rawText}
                 onChange={e => setRawText(e.target.value)}
@@ -329,8 +335,12 @@ export default function BulkImportPage() {
                               </TableCell>
                               <TableCell className="text-right px-12">
                                  <div className="flex justify-end gap-3 opacity-20 group-hover:opacity-100 transition-opacity">
-                                    <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-white shadow-sm border-transparent hover:border-slate-100"><Edit className="h-5 w-5" /></Button>
-                                    <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl text-rose-500 hover:bg-rose-50"><Trash2 className="h-5 w-5" /></Button>
+                                    <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-white shadow-sm border-transparent hover:border-slate-100" onClick={() => {
+                                       const dup = [...parsedQuestions];
+                                       dup.splice(idx, 0, {...q});
+                                       setParsedQuestions(dup);
+                                    }}><Copy className="h-5 w-5" /></Button>
+                                    <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl text-rose-500 hover:bg-rose-50" onClick={() => setParsedQuestions(parsedQuestions.filter((_, i) => i !== idx))}><Trash2 className="h-5 w-5" /></Button>
                                  </div>
                               </TableCell>
                            </TableRow>
@@ -381,11 +391,11 @@ export default function BulkImportPage() {
                <div className="grid grid-cols-2 gap-8">
                   <div className="space-y-3">
                      <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">Passing Marks (%)</Label>
-                     <Input type="number" value={mockSettings.passingMarks} onChange={e => setMockSettings({...mockSettings, passingMarks: parseInt(e.target.value)})} className="h-14 bg-white/5 border-white/10 rounded-xl font-black text-primary" />
+                     <Input type="number" value={mockSettings.passingMarks.toString()} onChange={e => setMockSettings({...mockSettings, passingMarks: parseInt(e.target.value) || 0})} className="h-14 bg-white/5 border-white/10 rounded-xl font-black text-primary" />
                   </div>
                   <div className="space-y-3">
                      <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">Negative Marking</Label>
-                     <Input type="number" step="0.25" value={mockSettings.negativeMarking} onChange={e => setMockSettings({...mockSettings, negativeMarking: parseFloat(e.target.value)})} className="h-14 bg-white/5 border-white/10 rounded-xl font-black text-rose-500" />
+                     <Input type="number" step="0.25" value={mockSettings.negativeMarking.toString()} onChange={e => setMockSettings({...mockSettings, negativeMarking: parseFloat(e.target.value) || 0})} className="h-14 bg-white/5 border-white/10 rounded-xl font-black text-rose-500" />
                   </div>
                </div>
             </div>

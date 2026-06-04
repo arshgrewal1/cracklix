@@ -30,7 +30,7 @@ export function parseBulkQuestions(
   const text = rawText.replace(/\r\n/g, '\n').trim();
   
   // Split by [BLOCK_ID: or Q1. style markers
-  const questionBlocks = text.split(/\[BLOCK_ID:.*?\]|Q\d+[:.]|Question \d+[:.]/i).filter(b => b.trim().length > 0);
+  const questionBlocks = text.split(/\[BLOCK_ID:.*?\]|Q\d+[:.]|Question \d+[:.]|\[Q\d+\]/i).filter(b => b.trim().length > 0);
 
   if (questionBlocks.length === 0) {
     return { questions: [], errors: ["No valid block markers detected. Use [BLOCK_ID: Q1] or Q1. format."], confidence: 0 };
@@ -49,19 +49,20 @@ export function parseBulkQuestions(
       let explanationPa = "";
       let imageUrl = "";
 
-      // Logic to detect format and extract fields
-      // Format 2 Detection (Bilingual Tags)
-      const hasBilingualTags = block.includes("ENG_Q:") || block.includes("Question EN:");
+      // Format Detection
+      const isFormat2 = block.includes("Question EN:") || block.includes("ENG_Q:");
+      const isFormat4 = block.includes("Date:") && block.includes("Category:");
 
-      if (hasBilingualTags) {
+      if (isFormat2) {
+        // Format 2: Strict Bilingual Tags
         const getTagContent = (tag: string) => {
-          const regex = new RegExp(`${tag}:?\\s*([\\s\\S]*?)(?=\\n[A-Z_\\d]+:?|$)`, 'i');
+          const regex = new RegExp(`${tag}:?\\s*([\\s\\S]*?)(?=\\n[A-Z_\\d\\s]+:?|$)`, 'i');
           const match = block.match(regex);
           return match ? match[1].trim() : "";
         };
 
-        questionEn = getTagContent("ENG_Q") || getTagContent("Question EN");
-        questionPa = getTagContent("PUN_Q") || getTagContent("Question PA");
+        questionEn = getTagContent("Question EN") || getTagContent("ENG_Q");
+        questionPa = getTagContent("Question PA") || getTagContent("PUN_Q");
         
         optionAEn = getTagContent("A EN") || getTagContent("ENG_OPT A");
         optionAPa = getTagContent("A PA") || getTagContent("PUN_OPT A");
@@ -78,8 +79,22 @@ export function parseBulkQuestions(
         explanationEn = getTagContent("Explanation EN") || getTagContent("ENG_EXP");
         explanationPa = getTagContent("Explanation PA") || getTagContent("PUN_EXP");
         imageUrl = getTagContent("Image");
+      } else if (isFormat4) {
+        // Format 4: Current Affairs
+        const getTagContent = (tag: string) => {
+          const regex = new RegExp(`${tag}:?\\s*([\\s\\S]*?)(?=\\n[A-Z_\\d\\s]+:?|$)`, 'i');
+          const match = block.match(regex);
+          return match ? match[1].trim() : "";
+        };
+        questionEn = getTagContent("Question");
+        const ansRaw = getTagContent("Answer");
+        correctAnswer = ansRaw.match(/[A-D]/i)?.[0].toUpperCase() as any;
+        explanationEn = getTagContent("Explanation");
+        // For CA, set fields same for now
+        questionPa = questionEn;
+        optionAEn = "A"; optionBEn = "B"; optionCEn = "C"; optionDEn = "D"; // CA usually has custom options, need more parsing if options present
       } else {
-        // Format 1: Standard Sequential
+        // Format 1 & 3: Standard / Image Sequential
         let currentField = "QUESTION";
         lines.forEach(line => {
           if (line.match(/^A\./i)) { optionAEn = line.replace(/^A\.\s*/i, ''); currentField = "OPT_A"; }
@@ -99,26 +114,34 @@ export function parseBulkQuestions(
         });
       }
 
+      // Final mappings for mixed types
+      if (!questionPa) questionPa = questionEn;
+      if (!optionAPa) optionAPa = optionAEn;
+      if (!optionBPa) optionBPa = optionBEn;
+      if (!optionCPa) optionCPa = optionCEn;
+      if (!optionDPa) optionDPa = optionDEn;
+      if (!explanationPa) explanationPa = explanationEn;
+
       // Validations
-      if (!questionEn && !questionPa) throw new Error("Empty question statement.");
+      if (!questionEn) throw new Error("Empty question statement.");
       if (!correctAnswer) throw new Error("Correct answer marker (A-D) not found.");
-      if (!optionAEn && !optionAPa) throw new Error("Options missing. Format: A. [text] or A EN: [text]");
+      if (!optionAEn && !isFormat4) throw new Error("Options missing.");
 
       questions.push({
         ...metadata,
         questionEn,
-        questionPa: questionPa || questionEn,
+        questionPa,
         optionAEn,
-        optionAPa: optionAPa || optionAEn,
+        optionAPa,
         optionBEn,
-        optionBPa: optionBPa || optionBEn,
+        optionBPa,
         optionCEn,
-        optionCPa: optionCPa || optionCEn,
+        optionCPa,
         optionDEn,
-        optionDPa: optionDPa || optionDEn,
+        optionDPa,
         correctAnswer: correctAnswer as any,
-        explanationEn: explanationEn || "Self-explanatory.",
-        explanationPa: explanationPa || explanationEn || "ਸਵੈ-ਵਿਆਖਿਆਤਮਕ।",
+        explanationEn,
+        explanationPa,
         imageUrl,
         isStandalone: true,
         status: metadata.status
