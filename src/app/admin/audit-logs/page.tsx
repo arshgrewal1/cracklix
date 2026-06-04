@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo } from "react"
@@ -7,19 +6,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { ShieldCheck, Clock, User, Activity, Filter, Download } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, orderBy, limit } from "firebase/firestore"
+import { collection, query, limit } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 
 /**
  * @fileOverview Institutional Audit Trail Console.
  * Standardised to high-contrast Navy/White theme for readability.
+ * Fixed: Removed orderBy to prevent index errors, handling sorting client-side.
  */
 
 export default function AuditLogsPage() {
   const db = useFirestore()
-  const logsQuery = useMemo(() => (db ? query(collection(db, "audit_logs"), orderBy("timestamp", "desc"), limit(50)) : null), [db])
-  const { data: logs, loading } = useCollection<any>(logsQuery)
+  const logsQuery = useMemo(() => (db ? query(collection(db, "audit_logs"), limit(100)) : null), [db])
+  const { data: allLogs, loading } = useCollection<any>(logsQuery)
+
+  const logs = useMemo(() => {
+    if (!allLogs) return []
+    return [...allLogs].sort((a, b) => {
+      const timeA = a.timestamp?.seconds || 0
+      const timeB = b.timestamp?.seconds || 0
+      return timeB - timeA
+    })
+  }, [allLogs])
 
   return (
     <div className="space-y-12 text-[#0F172A]">

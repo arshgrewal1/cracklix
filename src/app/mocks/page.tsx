@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, orderBy } from "firebase/firestore"
+import { collection, query } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -16,6 +16,7 @@ import Image from "next/image"
 /**
  * @fileOverview Final Mock Hub (Testbook Style Overhaul).
  * Features: Squircle icons, centered layout, and institutional typography.
+ * Fixed: Removed orderBy to prevent index errors, handling sorting client-side.
  */
 
 export default function MocksPage() {
@@ -23,7 +24,7 @@ export default function MocksPage() {
   
   const mocksQuery = useMemo(() => {
     if (!db) return null
-    return query(collection(db, "mocks"), orderBy("createdAt", "desc"))
+    return query(collection(db, "mocks"))
   }, [db])
 
   const boardsQuery = useMemo(() => {
@@ -36,7 +37,13 @@ export default function MocksPage() {
 
   const mocks = useMemo(() => {
     if (!allMocks) return []
-    return allMocks.filter(m => m.published === true)
+    return [...allMocks]
+      .filter(m => m.published === true)
+      .sort((a, b) => {
+        const dateA = a.createdAt?.seconds || 0
+        const dateB = b.createdAt?.seconds || 0
+        return dateB - dateA
+      })
   }, [allMocks])
 
   return (
@@ -80,7 +87,6 @@ export default function MocksPage() {
               return (
                 <Card key={mock.id} className="border-none shadow-2xl shadow-slate-200/40 hover:shadow-4xl hover:translate-y-[-10px] transition-all duration-500 group rounded-[3.5rem] overflow-hidden bg-white flex flex-col text-center">
                   <CardContent className="p-12 space-y-8 flex-1 flex flex-col items-center">
-                    {/* Testbook Style Squircle Icon */}
                     <div className="h-24 w-24 rounded-[2.5rem] bg-[#0F172A] flex items-center justify-center relative overflow-hidden shadow-2xl group-hover:scale-110 transition-transform duration-500">
                       {board?.iconUrl ? (
                          <Image src={board.iconUrl} fill alt={board.abbreviation} className="object-contain p-6" />

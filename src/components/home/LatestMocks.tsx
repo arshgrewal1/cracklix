@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Clock, BookOpen, ShieldCheck, ArrowRight, Zap } from "lucide-react";
 import Link from "next/link";
 import { useCollection, useFirestore } from "@/firebase";
-import { collection, query, orderBy, limit } from "firebase/firestore";
+import { collection, query, limit } from "firebase/firestore";
 import { useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
@@ -17,7 +17,8 @@ export default function LatestMocks() {
   
   const mocksQuery = useMemo(() => {
     if (!db) return null;
-    return query(collection(db, "mocks"), orderBy("createdAt", "desc"), limit(10));
+    // Removed orderBy to prevent mandatory index errors during startup
+    return query(collection(db, "mocks"), limit(20));
   }, [db]);
 
   const boardsQuery = useMemo(() => {
@@ -30,7 +31,15 @@ export default function LatestMocks() {
 
   const mocks = useMemo(() => {
     if (!allMocks) return [];
-    return allMocks.filter(m => m.published === true).slice(0, 5);
+    // Handle sorting client-side for immediate performance
+    return [...allMocks]
+      .filter(m => m.published === true)
+      .sort((a, b) => {
+        const dateA = a.createdAt?.seconds || 0;
+        const dateB = b.createdAt?.seconds || 0;
+        return dateB - dateA;
+      })
+      .slice(0, 5);
   }, [allMocks]);
 
   return (
@@ -79,7 +88,6 @@ export default function LatestMocks() {
                 >
                   <Card className="border-none rounded-[3.5rem] bg-white shadow-2xl shadow-slate-200/40 hover:shadow-4xl hover:translate-y-[-10px] transition-all duration-500 overflow-hidden flex flex-col h-full group text-center">
                     <CardContent className="p-10 flex-1 flex flex-col items-center space-y-8">
-                      {/* Testbook Style Squircle Icon */}
                       <div className="h-20 w-20 rounded-[2rem] bg-[#0F172A] flex items-center justify-center relative overflow-hidden shadow-xl group-hover:scale-110 transition-transform">
                         {board?.iconUrl ? (
                           <Image src={board.iconUrl} fill alt={board.abbreviation} className="object-contain p-5" />

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo } from "react"
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { HelpCircle, Mail, MessageSquare, Clock, User, CheckCircle2, Trash2, ArrowUpRight, Search } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore"
+import { collection, query, doc, updateDoc, deleteDoc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/hooks/use-toast"
@@ -16,13 +15,24 @@ import { useToast } from "@/hooks/use-toast"
 /**
  * @fileOverview Institutional Support Center.
  * Standardised to high-contrast Navy/White theme for readability.
+ * Fixed: Removed orderBy to prevent index errors, handling sorting client-side.
  */
 
 export default function SupportHub() {
   const db = useFirestore()
   const { toast } = useToast()
   
-  const { data: tickets, loading } = useCollection<any>(useMemo(() => (db ? query(collection(db, "support_tickets"), orderBy("timestamp", "desc")) : null), [db]))
+  const supportQuery = useMemo(() => (db ? query(collection(db, "support_tickets")) : null), [db])
+  const { data: allTickets, loading } = useCollection<any>(supportQuery)
+
+  const tickets = useMemo(() => {
+    if (!allTickets) return []
+    return [...allTickets].sort((a, b) => {
+      const timeA = a.timestamp?.seconds || 0
+      const timeB = b.timestamp?.seconds || 0
+      return timeB - timeA
+    })
+  }, [allTickets])
 
   const handleResolve = async (id: string) => {
     await updateDoc(doc(db!, "support_tickets", id), { status: 'RESOLVED' })
@@ -64,7 +74,7 @@ export default function SupportHub() {
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-slate-50 h-20">
                 <TableHead className="px-12 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Aspirant Node</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Inquiry Context</TableHead>
+                <TableHead className="text-[10px) font-black uppercase tracking-[0.3em] text-slate-500">Inquiry Context</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Status</TableHead>
                 <TableHead className="text-right px-12 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Audit</TableHead>
               </TableRow>

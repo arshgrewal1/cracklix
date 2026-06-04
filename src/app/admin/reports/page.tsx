@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo } from "react"
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { AlertTriangle, CheckCircle2, ExternalLink, Trash2, ShieldAlert, Clock, User, Layers } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore"
+import { collection, query, doc, updateDoc, deleteDoc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
@@ -16,14 +15,24 @@ import { useToast } from "@/hooks/use-toast"
 /**
  * @fileOverview Institutional Content Audit Node.
  * Standardised to high-contrast Navy/White theme for readability.
+ * Fixed: Removed orderBy to prevent index errors, handling sorting client-side.
  */
 
 export default function AdminReports() {
   const db = useFirestore()
   const { toast } = useToast()
   
-  const reportsQuery = useMemo(() => (db ? query(collection(db, "reports"), orderBy("timestamp", "desc")) : null), [db])
-  const { data: reports, loading } = useCollection<any>(reportsQuery)
+  const reportsQuery = useMemo(() => (db ? query(collection(db, "reports")) : null), [db])
+  const { data: allReports, loading } = useCollection<any>(reportsQuery)
+
+  const reports = useMemo(() => {
+    if (!allReports) return []
+    return [...allReports].sort((a, b) => {
+      const timeA = a.timestamp?.seconds || 0
+      const timeB = b.timestamp?.seconds || 0
+      return timeB - timeA
+    })
+  }, [allReports])
 
   const handleResolve = async (id: string) => {
     if (!db) return
