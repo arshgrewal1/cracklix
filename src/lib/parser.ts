@@ -81,8 +81,8 @@ export function parseBulkQuestions(
       const explanationEn = getTagContent("ENG_EXP") || getTagContent("Explanation EN") || getTagContent("Explanation");
       const explanationPa = getTagContent("PUN_EXP") || getTagContent("Explanation PA");
 
-      // 4. Complex DI/Diagram Tags
-      const imageUrl = getTagContent("IMAGE_URL") || getTagContent("Image");
+      // 4. Visual/Complex DI/Diagram Tags
+      const imageUrl = getTagContent("IMAGE_URL") || getTagContent("Image") || getTagContent("DIAGRAM");
       const instructionEn = getTagContent("INSTRUCTION_EN") || getTagContent("Instruction");
       const instructionPa = getTagContent("INSTRUCTION_PA");
       const passageEn = getTagContent("PASSAGE_EN") || getTagContent("Passage");
@@ -102,7 +102,7 @@ export function parseBulkQuestions(
       if (tableData) { qType = 'DI_TABLE'; dType = 'table'; }
 
       // Final Defaults
-      if (!questionEn) throw new Error("Empty question statement.");
+      if (!questionEn && !passageEn) throw new Error("Empty question statement.");
       if (!correctAnswer) throw new Error("Correct answer marker (A-D) not found.");
 
       questions.push({

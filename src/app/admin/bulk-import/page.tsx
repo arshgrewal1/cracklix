@@ -25,7 +25,8 @@ import {
   Plus,
   Copy,
   Layers,
-  Save
+  Save,
+  ImageIcon
 } from "lucide-react"
 import { useFirestore, useCollection } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, setDoc } from "firebase/firestore"
@@ -35,8 +36,7 @@ import { Difficulty, MockType, Question, ContentStatus, MockSection } from "@/ty
 
 /**
  * @fileOverview Enterprise Bulk Import & Publishing Hub.
- * Features: Multi-section builder for Full Mocks, Direct Deployment, and Metadata Injection.
- * Fixed: Section Builder UI adjusted for better visibility of numeric inputs.
+ * Features: High-fidelity image rendering, quad-format parser, and direct deployment.
  */
 
 export default function BulkImportPage() {
@@ -354,6 +354,16 @@ export default function BulkImportPage() {
                     <p className="text-3xl font-headline font-black text-blue-900 mt-1">{totalCalc.duration}m</p>
                  </div>
               </div>
+
+              <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Ingestion Protocol</p>
+                 <ul className="text-[10px] font-bold text-slate-600 space-y-2">
+                    <li>• Format 1: Q1. -&gt; A. -&gt; B. -&gt; Answer:</li>
+                    <li>• Format 2: Question EN: -&gt; Question PA: -&gt; Answer: [A-D]</li>
+                    <li>• Image Question: Image: [URL] -&gt; Question: [Text]</li>
+                    <li>• Data Table: TABLE_DATA: [JSON]</li>
+                 </ul>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -397,9 +407,16 @@ export default function BulkImportPage() {
                            <TableRow key={idx} className="group hover:bg-slate-50/50 border-slate-50 transition-colors">
                               <TableCell className="px-12 py-10 font-black text-slate-300">#{idx + 1}</TableCell>
                               <TableCell className="py-10 max-w-lg">
-                                 <div className="space-y-2 text-left">
-                                    <p className="font-bold text-[#0F172A] line-clamp-1">{q.questionEn}</p>
-                                    <p className="text-[11px] text-slate-400 italic line-clamp-1 font-medium">{q.questionPa}</p>
+                                 <div className="space-y-4 text-left">
+                                    {q.imageUrl && (
+                                       <div className="h-20 w-32 relative rounded-lg overflow-hidden border border-slate-200">
+                                          <img src={q.imageUrl} className="object-cover w-full h-full" alt="Preview" />
+                                       </div>
+                                    )}
+                                    <div className="space-y-1">
+                                       <p className="font-bold text-[#0F172A] line-clamp-1">{q.questionEn}</p>
+                                       <p className="text-[11px] text-slate-400 italic line-clamp-1 font-medium">{q.questionPa}</p>
+                                    </div>
                                  </div>
                               </TableCell>
                               <TableCell className="text-center">
