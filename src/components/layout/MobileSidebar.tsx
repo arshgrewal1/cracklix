@@ -1,4 +1,3 @@
-
 'use client';
 
 import { 
@@ -17,7 +16,8 @@ import {
   GraduationCap,
   LayoutDashboard,
   BarChart3,
-  X
+  X,
+  Home
 } from "lucide-react";
 import Link from "next/link";
 import { useUser } from "@/firebase";
@@ -28,28 +28,29 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 /**
  * @fileOverview High-Fidelity Mobile Sidebar.
  * Refined Sequence: Profile -> Primary Preparation -> CTA -> Secondary Support -> Footer.
- * Fixed: Top overlap issue using safe-area-inset-top.
+ * Fixed: Top overlap issue using safe-area-inset-top and added prominent Home button.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const { user, profile } = useUser();
 
   const mainPrepItems = [
-    { label: "My Mocks", href: "/mocks", icon: Zap, color: "text-primary" },
+    { label: "Home Hub", href: "/", icon: Home, color: "text-primary" },
+    { label: "My Mocks", href: "/mocks", icon: Zap, color: "text-orange-500" },
     { label: "Exam Hubs", href: "/exams", icon: GraduationCap, color: "text-blue-500" },
     { label: "Study Notes", href: "/notes", icon: FileText, color: "text-emerald-500" },
-    { label: "Results Registry", href: "/dashboard", icon: BarChart3, color: "text-orange-500" },
-    { label: "Hall of Rankers", href: "/leaderboard", icon: Trophy, color: "text-amber-500" },
-    { label: "PYQ Archives", href: "/pyqs", icon: FileStack, color: "text-indigo-500" },
+    { label: "Results Registry", href: "/dashboard", icon: BarChart3, color: "text-amber-500" },
+    { label: "Hall of Rankers", href: "/leaderboard", icon: Trophy, color: "text-indigo-500" },
+    { label: "PYQ Archives", href: "/pyqs", icon: FileStack, color: "text-slate-400" },
   ];
 
   const secondaryItems = [
-    { label: "Daily Analysis", href: "/current-affairs", icon: Newspaper, color: "text-slate-400" },
-    { label: "Exam Calendar", href: "/exam-calendar", icon: CalendarDays, color: "text-slate-400" },
-    { label: "Notifications", href: "/notifications", icon: Bell, color: "text-slate-400" },
-    { label: "Profile Settings", href: "/profile", icon: Settings, color: "text-slate-400" },
-    { label: "Institutional Contact", href: "/contact", icon: Phone, color: "text-slate-400" },
-    { label: "Privacy Protocol", href: "/privacy", icon: Shield, color: "text-slate-400" },
+    { label: "Daily Analysis", href: "/current-affairs", icon: Newspaper, color: "text-slate-500" },
+    { label: "Exam Calendar", href: "/exam-calendar", icon: CalendarDays, color: "text-slate-500" },
+    { label: "Notifications", href: "/notifications", icon: Bell, color: "text-slate-500" },
+    { label: "Profile Settings", href: "/profile", icon: Settings, color: "text-slate-500" },
+    { label: "Institutional Contact", href: "/contact", icon: Phone, color: "text-slate-500" },
+    { label: "Privacy Protocol", href: "/privacy", icon: Shield, color: "text-slate-500" },
   ];
 
   return (

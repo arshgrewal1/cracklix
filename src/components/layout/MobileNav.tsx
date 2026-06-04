@@ -1,23 +1,22 @@
-
 'use client';
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, GraduationCap, Zap, Gem, User } from "lucide-react";
+import { GraduationCap, Zap, Gem, User, Home } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
  * @fileOverview Premium Bottom Navigation Node for Mobile.
  * Features exactly 5 items: Home, Exams, Mocks, Pass, Profile.
- * Fixed: Safe-area support and vertical centering for all mobile devices.
+ * Fixed: Robust safe-area support and recognizable Home icon for students.
  */
 
 export default function MobileNav() {
   const pathname = usePathname();
 
   const navItems = [
-    { label: "Home", href: "/", icon: LayoutDashboard },
+    { label: "Home", href: "/", icon: Home },
     { label: "Exams", href: "/exams", icon: GraduationCap },
     { label: "Mocks", href: "/mocks", icon: Zap },
     { label: "Pass", href: "/pass", icon: Gem },
@@ -26,7 +25,7 @@ export default function MobileNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[1000] bg-[#0F172A] border-t border-white/5 pb-[env(safe-area-inset-bottom)] md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.3)]">
-      <div className="flex items-center justify-around h-[68px] px-2">
+      <div className="flex items-center justify-around h-[72px] px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -55,7 +54,7 @@ export default function MobileNav() {
                 />
                 
                 <span className={cn(
-                  "text-[9px] font-black uppercase tracking-tight transition-colors duration-300",
+                  "text-[10px] font-black uppercase tracking-tight transition-colors duration-300",
                   isActive ? "text-white" : "text-[#7A8B9E]"
                 )}>
                   {item.label}
