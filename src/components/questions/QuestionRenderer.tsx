@@ -5,7 +5,7 @@ import { Question } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, LayoutGrid, FileText } from 'lucide-react';
+import { CheckCircle2, LayoutGrid } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -30,8 +30,10 @@ interface QuestionRendererProps {
 const COLORS = ['#F97316', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
 export default function QuestionRenderer({ question, language, showSolution = false }: QuestionRendererProps) {
-  const showEn = language === 'en' || language === 'bilingual';
-  const showPa = language === 'pa' || language === 'bilingual';
+  // Logic: Only show one language at a time even in BI mode to save space, 
+  // BI mode will default to English if available, else Punjabi.
+  const showEn = language === 'en' || (language === 'bilingual' && !!question.questionEn);
+  const showPa = language === 'pa' || (language === 'bilingual' && !question.questionEn);
   
   const questionType = question.questionType || 'MCQ';
   const diagramType = question.diagramType || 'none';
@@ -39,26 +41,26 @@ export default function QuestionRenderer({ question, language, showSolution = fa
   const hasContext = !!(question.instructionEn || question.instructionPa || question.passageEn || question.passagePa);
 
   return (
-    <div className="space-y-4 md:space-y-10 w-full text-left font-body animate-in fade-in duration-500">
-      {/* 1. Context Container */}
+    <div className="space-y-3 md:space-y-6 w-full text-left font-body animate-in fade-in duration-500">
+      {/* 1. Context Container (Compact) */}
       {hasContext && (
-        <div className="bg-slate-50 border border-slate-100 p-4 md:p-8 rounded-2xl md:rounded-[2.5rem] shadow-inner space-y-3 md:space-y-6 relative overflow-hidden">
-           <div className="flex items-center gap-2 relative z-10">
+        <div className="bg-slate-50 border border-slate-100 p-3 md:p-5 rounded-xl md:rounded-2xl shadow-inner space-y-2 relative overflow-hidden">
+           <div className="flex items-center gap-1.5 relative z-10">
               <LayoutGrid className="h-3 w-3 text-primary" />
-              <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Reference Node</span>
+              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Reference</span>
            </div>
            
            {(question.instructionEn || question.instructionPa) && (
-             <div className="space-y-1 md:space-y-2 relative z-10">
-                {showEn && question.instructionEn && <p className="text-xs md:text-sm font-bold text-slate-800 leading-relaxed">{question.instructionEn}</p>}
-                {showPa && question.instructionPa && <p className="text-xs md:text-sm font-medium text-slate-600 leading-relaxed">{question.instructionPa}</p>}
+             <div className="space-y-1 relative z-10">
+                {showEn && question.instructionEn && <p className="text-[13px] md:text-sm font-bold text-black leading-tight">{question.instructionEn}</p>}
+                {showPa && question.instructionPa && <p className="text-[13px] md:text-sm font-bold text-black leading-tight">{question.instructionPa}</p>}
              </div>
            )}
 
            {(question.passageEn || question.passagePa) && (
-             <div className="space-y-4 md:space-y-6 border-t border-slate-200 pt-4 md:pt-6 relative z-10">
-                {showEn && question.passageEn && <div className="text-sm md:text-base leading-relaxed text-slate-700 whitespace-pre-wrap font-medium">{question.passageEn}</div>}
-                {showPa && question.passagePa && <div className={cn("text-sm md:text-base leading-relaxed text-slate-600 whitespace-pre-wrap font-medium", showEn ? "border-t border-slate-100 pt-4 mt-4" : "")}>{question.passagePa}</div>}
+             <div className="space-y-3 border-t border-slate-200 pt-3 relative z-10">
+                {showEn && question.passageEn && <div className="text-sm md:text-base leading-snug text-black font-medium whitespace-pre-wrap">{question.passageEn}</div>}
+                {showPa && question.passagePa && <div className="text-sm md:text-base leading-snug text-black font-medium whitespace-pre-wrap">{question.passagePa}</div>}
              </div>
            )}
         </div>
@@ -66,34 +68,34 @@ export default function QuestionRenderer({ question, language, showSolution = fa
 
       {/* 2. Visual Node */}
       {(question.imageUrl || question.tableData || question.chartConfig) && (
-        <div className="space-y-4 md:space-y-8">
+        <div className="space-y-3">
            {question.imageUrl && (
-             <div className="relative w-full aspect-video rounded-xl md:rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-xl bg-white group">
+             <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-100 shadow-sm bg-white">
                <Image 
                  src={question.imageUrl} 
                  fill 
                  alt="Diagram" 
-                 className="object-contain p-2 md:p-6 transition-transform duration-700 group-hover:scale-105" 
+                 className="object-contain p-2" 
                  unoptimized 
                />
              </div>
            )}
 
            {question.tableData && (
-             <div className="overflow-hidden rounded-xl md:rounded-[2.5rem] border border-slate-200 shadow-xl bg-white scale-[0.9] md:scale-100 origin-top">
+             <div className="overflow-hidden rounded-xl border border-slate-200 shadow-sm bg-white scale-[0.9] md:scale-100 origin-top">
                <Table>
                  <TableHeader className="bg-slate-50">
                    <TableRow>
                      {question.tableData.headers?.map((header: string, i: number) => (
-                       <TableHead key={i} className="text-center font-black uppercase text-[8px] md:text-[10px] tracking-widest text-[#0B1528] h-10 md:h-14">{header}</TableHead>
+                       <TableHead key={i} className="text-center font-black uppercase text-[8px] md:text-[10px] text-black h-8 md:h-10">{header}</TableHead>
                      ))}
                    </TableRow>
                  </TableHeader>
                  <TableBody>
                    {question.tableData.rows?.map((row: any[], i: number) => (
-                     <TableRow key={i} className="hover:bg-slate-50 transition-colors">
+                     <TableRow key={i}>
                        {row.map((cell, j) => (
-                         <TableCell key={j} className="text-center font-bold text-slate-600 border-r border-slate-50 last:border-0 py-2 md:py-4 text-[10px] md:text-sm">{cell}</TableCell>
+                         <TableCell key={j} className="text-center font-bold text-black border-r border-slate-50 last:border-0 py-1.5 md:py-2 text-[10px] md:text-xs">{cell}</TableCell>
                        ))}
                      </TableRow>
                    ))}
@@ -103,32 +105,23 @@ export default function QuestionRenderer({ question, language, showSolution = fa
            )}
 
            {question.chartConfig && (
-              <div className="h-[200px] md:h-[300px] w-full bg-white p-4 md:p-8 rounded-xl md:rounded-[2.5rem] border border-slate-100 shadow-lg">
+              <div className="h-[150px] md:h-[250px] w-full bg-white p-2 md:p-4 rounded-xl border border-slate-100">
                  <ResponsiveContainer width="100%" height="100%">
                     {diagramType === 'barGraph' ? (
                        <BarChart data={question.chartConfig.data}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 8}} />
-                          <YAxis axisLine={false} tickLine={false} tick={{fill: '#64748B', fontSize: 8}} />
-                          <Tooltip cursor={{fill: '#F8FAFC'}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 20px 40px rgba(0,0,0,0.1)', fontSize: '10px' }} />
-                          <Bar dataKey="value" fill="#F97316" radius={[2, 2, 0, 0]} />
-                       </BarChart>
-                    ) : diagramType === 'pieChart' ? (
-                       <PieChart>
-                          <Pie data={question.chartConfig.data} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} label={{ fontSize: 8 }}>
-                             {question.chartConfig.data.map((_: any, index: number) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                             ))}
-                          </Pie>
+                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#000', fontSize: 8}} />
+                          <YAxis axisLine={false} tickLine={false} tick={{fill: '#000', fontSize: 8}} />
                           <Tooltip />
-                       </PieChart>
+                          <Bar dataKey="value" fill="#000" radius={[2, 2, 0, 0]} />
+                       </BarChart>
                     ) : (
                        <LineChart data={question.chartConfig.data}>
                           <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                          <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 8 }} />
-                          <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 8 }} />
+                          <XAxis dataKey="name" tick={{ fontSize: 8, fill: '#000' }} />
+                          <YAxis tick={{ fontSize: 8, fill: '#000' }} />
                           <Tooltip />
-                          <Line type="monotone" dataKey="value" stroke="#F97316" strokeWidth={2} dot={{ r: 3, fill: '#F97316' }} />
+                          <Line type="monotone" dataKey="value" stroke="#000" strokeWidth={2} />
                        </LineChart>
                     )}
                  </ResponsiveContainer>
@@ -137,57 +130,47 @@ export default function QuestionRenderer({ question, language, showSolution = fa
         </div>
       )}
 
-      {/* 3. Question Statement Hub */}
-      <div className="space-y-3 md:space-y-6">
-        <div className="flex items-center gap-2">
-           <div className={cn(
-             "h-4 md:h-6 w-1 rounded-full", 
-             questionType === 'ASSERTION_REASON' ? "bg-rose-500" : 
-             questionType === 'MATCHING' ? "bg-blue-500" : "bg-primary"
-           )} />
-           <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Statement</span>
+      {/* 3. Question Statement Hub (Compact & Black) */}
+      <div className="space-y-1.5 md:space-y-3">
+        <div className="flex items-center gap-1.5">
+           <div className={cn("h-4 w-1 rounded-full", questionType === 'ASSERTION_REASON' ? "bg-rose-500" : "bg-black")} />
+           <span className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">Statement</span>
         </div>
         
-        <div className="space-y-4 md:space-y-6">
+        <div className="space-y-2">
            {showEn && question.questionEn && (
-              <div className="text-xl md:text-3xl font-black leading-tight text-[#0B1528] tracking-tight whitespace-pre-wrap">
+              <div className="text-base md:text-xl font-bold leading-snug text-black tracking-tight whitespace-pre-wrap">
                  {question.questionEn}
               </div>
            )}
            {showPa && question.questionPa && (
-              <div className={cn(
-                "text-xl md:text-3xl font-black leading-tight text-[#0B1528] tracking-tight whitespace-pre-wrap", 
-                showEn ? "border-t border-slate-100 pt-4 md:pt-6" : ""
-              )}>
+              <div className="text-base md:text-xl font-bold leading-snug text-black tracking-tight whitespace-pre-wrap">
                  {question.questionPa}
               </div>
            )}
         </div>
       </div>
 
-      {/* 4. Solution Review Hub */}
+      {/* 4. Solution Review Hub (Black text) */}
       {showSolution && (
-        <div className="mt-8 md:mt-20 p-6 md:p-12 bg-emerald-50 rounded-2xl md:rounded-[4rem] border border-emerald-100 space-y-6 md:space-y-10 shadow-inner">
-           <div className="flex items-center gap-4 md:gap-6">
-              <div className="h-10 w-10 md:h-16 md:w-16 bg-emerald-600 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-xl">
-                 <CheckCircle2 className="h-6 w-6 md:h-10 md:w-10" />
+        <div className="mt-4 md:mt-10 p-4 md:p-8 bg-emerald-50 rounded-xl md:rounded-2xl border border-emerald-100 space-y-3 shadow-inner">
+           <div className="flex items-center gap-3">
+              <div className="h-8 w-8 md:h-12 md:w-12 bg-black rounded-lg flex items-center justify-center text-white">
+                 <CheckCircle2 className="h-4 w-4 md:h-6 md:w-6" />
               </div>
               <div className="text-left">
-                 <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-emerald-600 mb-0.5 md:mb-1">Audit Rationale</p>
-                 <h4 className="font-headline font-black text-lg md:text-3xl text-emerald-900 uppercase">Correct Audit: Option {question.correctAnswer}</h4>
+                 <p className="text-[8px] font-black uppercase tracking-[0.3em] text-emerald-700">Solution</p>
+                 <h4 className="text-sm md:text-lg text-black font-bold uppercase">Correct Option: {question.correctAnswer}</h4>
               </div>
            </div>
-           <div className="space-y-4 md:space-y-8 pt-6 md:pt-10 border-t border-emerald-100/60">
+           <div className="pt-3 border-t border-emerald-100/60">
               {showEn && question.explanationEn && (
-                <div className="text-sm md:text-lg text-emerald-800 leading-relaxed font-medium whitespace-pre-wrap">
+                <div className="text-xs md:text-base text-black leading-relaxed font-medium whitespace-pre-wrap">
                   {question.explanationEn}
                 </div>
               )}
               {showPa && question.explanationPa && (
-                <div className={cn(
-                  "text-sm md:text-lg text-emerald-700 leading-relaxed font-medium whitespace-pre-wrap", 
-                  showEn ? "pt-4 md:pt-8 mt-4 md:mt-8 border-t border-emerald-100/40" : ""
-                )}>
+                <div className="text-xs md:text-base text-black leading-relaxed font-medium whitespace-pre-wrap">
                   {question.explanationPa}
                 </div>
               )}

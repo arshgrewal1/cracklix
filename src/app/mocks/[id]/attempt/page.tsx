@@ -80,7 +80,7 @@ export default function MockAttemptPage() {
           };
        }
     }
-    return { name: "GENERAL AUDIT", paper: "CORE" }
+    return { name: "GENERAL KNOWLEDGE", paper: "CORE" }
   }, [currentIdx, questions, subjects])
 
   const submitMock = useCallback(async () => {
@@ -126,7 +126,7 @@ export default function MockAttemptPage() {
   if (mockLoading || loadingQs) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-4">
       <Loader2 className="h-10 w-10 text-primary animate-spin" />
-      <p className="font-black uppercase text-[10px] tracking-widest text-slate-400">Syncing Question Bank...</p>
+      <p className="font-black uppercase text-[10px] tracking-widest text-slate-400">Syncing Bank...</p>
     </div>
   )
 
@@ -134,38 +134,36 @@ export default function MockAttemptPage() {
   const isPunjabiOnlyNode = q?.subjectId === "punjabi-qualifying";
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-white text-[#0F172A]">
-      <header className="h-16 border-b flex items-center justify-between px-4 md:px-6 bg-[#0B1528] text-white shrink-0 z-[100] shadow-xl">
-        <div className="flex items-center gap-4 md:gap-6">
-           <div className="flex flex-col text-left">
-              <div className="flex items-center gap-2">
-                 <ShieldCheck className="h-4 w-4 text-primary" />
-                 <span className="text-[10px] md:text-xs font-black uppercase tracking-widest truncate max-w-[120px] md:max-w-none">
-                    {mock?.title || "Audit Gate"}
-                 </span>
-              </div>
+    <div className="flex flex-col h-screen overflow-hidden bg-white text-black">
+      <header className="h-14 border-b flex items-center justify-between px-4 bg-[#0B1528] text-white shrink-0 z-[100] shadow-md">
+        <div className="flex items-center gap-3">
+           <div className="flex items-center gap-1.5">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-widest truncate max-w-[150px] md:max-w-none">
+                 {mock?.title || "Audit Gate"}
+              </span>
            </div>
-           <div className="h-6 w-px bg-white/10 hidden sm:block" />
-           <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl">
+           <div className="h-4 w-px bg-white/10 hidden sm:block" />
+           <div className="flex items-center gap-1 bg-white/5 p-0.5 rounded-lg">
               <LangTab label="EN" active={language === 'en'} onClick={() => setLanguage('en')} />
               <LangTab label="ਪੰਜਾਬੀ" active={language === 'pa'} onClick={() => setLanguage('pa')} />
               <LangTab label="BI" active={language === 'bilingual'} onClick={() => setLanguage('bilingual')} />
            </div>
         </div>
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2">
           <Timer onTimeUp={submitMock} initialSeconds={remainingTime} onTick={setRemainingTime} isPaused={isPaused} />
           
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={() => setIsPaused(!isPaused)} 
-            className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 text-white hover:bg-white/10"
+            className="h-8 w-8 rounded-lg bg-white/5 border border-white/10 text-white"
           >
-            {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+            {isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />}
           </Button>
 
-          <Button onClick={submitMock} disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[9px] md:text-[10px] tracking-widest h-10 px-4 md:px-8 rounded-xl shadow-2xl transition-all active:scale-95">
-             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : "Submit Test"}
+          <Button onClick={submitMock} disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[9px] tracking-widest h-8 px-4 rounded-lg shadow-lg">
+             {isSubmitting ? <Loader2 className="h-3 w-3 animate-spin" /> : "Submit Test"}
           </Button>
         </div>
       </header>
@@ -173,42 +171,39 @@ export default function MockAttemptPage() {
       <main className="flex-1 flex overflow-hidden relative">
         {/* Pause Overlay */}
         {isPaused && (
-           <div className="absolute inset-0 z-[200] bg-[#0B1528]/95 backdrop-blur-xl flex flex-col items-center justify-center text-white p-6">
-              <div className="h-20 w-20 rounded-[2.5rem] bg-primary/20 flex items-center justify-center text-primary mb-8 shadow-2xl">
-                 <Pause className="h-10 w-10 fill-current" />
-              </div>
-              <h2 className="text-3xl font-headline font-black uppercase tracking-tight mb-2">Test Paused</h2>
-              <p className="text-slate-400 font-medium mb-10">Institutional integrity active. Question content is hidden.</p>
-              <Button onClick={() => setIsPaused(false)} className="bg-primary hover:bg-orange-600 text-white font-black h-16 px-12 rounded-2xl uppercase tracking-widest gap-3 shadow-xl">
-                 <Play className="h-5 w-5" /> Resume Audit
+           <div className="absolute inset-0 z-[200] bg-[#0B1528]/95 backdrop-blur-md flex flex-col items-center justify-center text-white p-6">
+              <Pause className="h-10 w-10 text-primary mb-4" />
+              <h2 className="text-xl font-black uppercase tracking-tight mb-2">Audit Paused</h2>
+              <Button onClick={() => setIsPaused(false)} className="bg-primary text-white font-black h-12 px-10 rounded-xl uppercase text-[10px]">
+                 Resume Test
               </Button>
            </div>
         )}
 
-        <div className="flex-1 flex flex-col overflow-hidden bg-[#F8FAFC]">
-          <div className="px-6 md:px-8 py-3 md:py-4 border-b border-slate-200 bg-white flex items-center justify-between shrink-0 shadow-sm">
-             <div className="flex items-center gap-4 md:gap-6">
+        <div className="flex-1 flex flex-col overflow-hidden bg-white">
+          <div className="px-4 py-2 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
+             <div className="flex items-center gap-4">
                 <div className="text-left">
-                   <p className="text-[8px] md:text-[9px] font-black text-primary uppercase tracking-widest leading-none">{currentSection.paper}</p>
-                   <h2 className="text-xs md:text-sm font-black text-[#0F172A] uppercase flex items-center gap-2 mt-1">
-                     <Target className="h-3 w-3 md:h-4 md:w-4 text-primary" /> {currentSection.name}
+                   <p className="text-[7px] font-black text-primary uppercase tracking-widest leading-none">{currentSection.paper}</p>
+                   <h2 className="text-[11px] font-black text-black uppercase flex items-center gap-1.5 mt-0.5">
+                     <Target className="h-3 w-3 text-primary" /> {currentSection.name}
                    </h2>
                 </div>
-                <div className="h-8 md:h-10 w-px bg-slate-100" />
-                <div className="space-y-0.5 md:space-y-1">
-                   <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Question Matrix</p>
-                   <span className="text-[10px] md:text-xs font-black text-slate-800">Q {currentIdx + 1} of {questions.length}</span>
+                <div className="h-6 w-px bg-slate-200" />
+                <div className="space-y-0">
+                   <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest">Question</p>
+                   <span className="text-[11px] font-black text-black leading-none">{currentIdx + 1} / {questions.length}</span>
                 </div>
              </div>
              <Sheet>
                <SheetTrigger asChild>
-                 <Button variant="outline" className="lg:hidden rounded-xl h-9 px-3 gap-2 font-black text-[9px] uppercase border-slate-200 bg-white shadow-sm">
-                    <LayoutGrid className="h-3.5 w-3.5" /> View Map
+                 <Button variant="outline" className="lg:hidden rounded-lg h-7 px-2 gap-1 font-black text-[8px] uppercase border-slate-200 bg-white">
+                    <LayoutGrid className="h-3 w-3" /> Map
                  </Button>
                </SheetTrigger>
-               <SheetContent side="right" className="p-0 border-none w-[320px] max-w-[85vw]">
-                  <SheetHeader className="sr-only"><SheetTitle>Audit Map</SheetTitle></SheetHeader>
-                  <div className="p-8 h-full overflow-y-auto bg-white pt-20">
+               <SheetContent side="right" className="p-0 border-none w-[280px]">
+                  <SheetHeader className="sr-only"><SheetTitle>Map</SheetTitle></SheetHeader>
+                  <div className="p-6 h-full overflow-y-auto bg-white pt-16">
                      <QuestionPalette 
                         totalQuestions={questions.length} currentIndex={currentIdx} 
                         answeredIndices={Object.keys(answers).map(Number)} 
@@ -220,47 +215,44 @@ export default function MockAttemptPage() {
              </Sheet>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 md:p-12 custom-scrollbar">
-             <div className="max-w-4xl mx-auto space-y-8 md:space-y-16 pb-20">
+          <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+             <div className="max-w-3xl mx-auto space-y-6 md:space-y-10 pb-20">
                 <QuestionRenderer 
                    language={isPunjabiOnlyNode ? 'pa' : language}
                    question={q}
                 />
                 
-                <div className="space-y-4 md:space-y-6">
-                   <div className="flex items-center gap-2 border-b border-slate-100 pb-2 md:pb-4 mb-4 md:mb-6">
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
-                      <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Select Audit Response</span>
+                <div className="space-y-3 md:space-y-4">
+                   <div className="flex items-center gap-1.5 border-b border-slate-50 pb-1.5 mb-2">
+                      <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Options</span>
                    </div>
                    <RadioGroup 
                      value={answers[currentIdx]?.toString() || ""} 
                      onValueChange={(v) => setAnswers(prev => ({ ...prev, [currentIdx]: parseInt(v) }))} 
-                     className="grid grid-cols-1 gap-3 md:gap-4"
+                     className="grid grid-cols-1 gap-2 md:gap-3"
                    >
                      {['A', 'B', 'C', 'D'].map((k, i) => {
                        const isSelected = answers[currentIdx] === i;
                        const optEn = q?.[`option${k}En`] || "";
                        const optPa = q?.[`option${k}Pa`] || "";
                        
-                       const showOptEn = !isPunjabiOnlyNode && (language === 'en' || language === 'bilingual');
-                       const showOptPa = isPunjabiOnlyNode || (language === 'pa' || language === 'bilingual');
+                       // Single language logic in attempt view
+                       const displayVal = (language === 'en' || (language === 'bilingual' && optEn)) ? optEn : optPa;
 
                        return (
                          <div key={i} className={cn(
-                           "flex items-center space-x-3 md:space-x-5 p-4 md:p-8 border-2 rounded-2xl md:rounded-[2rem] transition-all cursor-pointer group relative overflow-hidden",
-                           isSelected ? 'border-primary bg-primary/5 ring-4 ring-primary/10' : 'border-slate-100 bg-white hover:border-slate-200'
+                           "flex items-center space-x-3 p-3 md:p-5 border-2 rounded-xl md:rounded-2xl transition-all cursor-pointer group relative",
+                           isSelected ? 'border-primary bg-primary/5' : 'border-slate-50 bg-white hover:border-slate-100'
                          )} onClick={() => setAnswers(prev => ({ ...prev, [currentIdx]: i }))}>
                             <div className={cn(
-                               "h-6 w-6 md:h-8 md:w-8 rounded-full border-2 flex items-center justify-center font-black text-[10px] md:text-xs transition-all",
-                               isSelected ? "bg-primary border-primary text-white" : "border-slate-200 text-slate-300 group-hover:border-slate-300"
+                               "h-6 w-6 md:h-7 md:w-7 rounded-full border-2 flex items-center justify-center font-black text-[9px] md:text-xs transition-all",
+                               isSelected ? "bg-primary border-primary text-white" : "border-slate-200 text-slate-300"
                             )}>
                                {k}
                             </div>
-                            <Label className="flex-1 cursor-pointer select-none text-base md:text-xl font-black text-[#0B1528] flex flex-col gap-1 text-left">
-                               {showOptEn && <span className="leading-snug">{optEn}</span>}
-                               {showOptPa && <span className={cn("leading-snug", (showOptEn && language === 'bilingual') ? "border-t border-slate-100 pt-2 mt-1" : "")}>{optPa || optEn}</span>}
+                            <Label className="flex-1 cursor-pointer select-none text-sm md:text-lg font-bold text-black text-left leading-snug">
+                               {displayVal || optEn}
                             </Label>
-                            {isSelected && <CheckCircle2 className="h-5 w-5 text-primary shrink-0 animate-in zoom-in" />}
                          </div>
                        )
                      })}
@@ -269,28 +261,28 @@ export default function MockAttemptPage() {
              </div>
           </div>
 
-          <footer className="h-20 md:h-24 border-t border-slate-200 bg-white px-4 md:px-10 flex items-center justify-between shrink-0 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-             <div className="flex gap-2 md:gap-4">
-                <Button variant="outline" className="h-10 md:h-14 px-3 md:px-8 text-[9px] md:text-[11px] font-black uppercase tracking-widest rounded-xl md:rounded-2xl border-slate-200 hover:bg-slate-50 shadow-sm" onClick={() => currentIdx > 0 && setCurrentIdx(currentIdx - 1)} disabled={currentIdx === 0}>
-                   <ChevronLeft className="mr-1 md:mr-2 h-3.5 w-3.5 md:h-4 md:w-4" /> Prev
+          <footer className="h-16 md:h-20 border-t border-slate-100 bg-white px-4 md:px-8 flex items-center justify-between shrink-0 shadow-sm">
+             <div className="flex gap-2">
+                <Button variant="outline" className="h-9 md:h-12 px-3 md:px-6 text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-lg md:rounded-xl" onClick={() => currentIdx > 0 && setCurrentIdx(currentIdx - 1)} disabled={currentIdx === 0}>
+                   <ChevronLeft className="h-3 w-3 mr-1" /> Prev
                 </Button>
-                <Button variant="ghost" className="h-10 md:h-14 px-3 md:px-8 text-[9px] md:text-[11px] font-black uppercase tracking-widest text-slate-400 rounded-xl md:rounded-2xl hover:bg-slate-50 hidden sm:flex" onClick={() => setAnswers(p => { const n={...p}; delete n[currentIdx]; return n; })}>
+                <Button variant="ghost" className="h-9 md:h-12 px-3 md:px-6 text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 rounded-lg md:rounded-xl hidden sm:flex" onClick={() => setAnswers(p => { const n={...p}; delete n[currentIdx]; return n; })}>
                    Clear
                 </Button>
              </div>
-             <div className="flex gap-2 md:gap-4">
-                <Button variant="outline" className={cn("h-10 md:h-14 px-3 md:px-8 text-[9px] md:text-[11px] font-black uppercase tracking-widest rounded-xl md:rounded-2xl shadow-sm transition-all", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white shadow-amber-200" : "text-amber-600 border-amber-200 hover:bg-amber-50")} onClick={() => { if(!flagged.includes(currentIdx)) setFlagged(p=>[...p, currentIdx]); else setFlagged(p=>p.filter(idx=>idx!==currentIdx)); }}>
+             <div className="flex gap-2">
+                <Button variant="outline" className={cn("h-9 md:h-12 px-3 md:px-6 text-[8px] md:text-[10px] font-black uppercase tracking-widest rounded-lg md:rounded-xl shadow-sm", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white" : "text-amber-600 border-amber-200")} onClick={() => { if(!flagged.includes(currentIdx)) setFlagged(p=>[...p, currentIdx]); else setFlagged(p=>p.filter(idx=>idx!==currentIdx)); }}>
                    Review
                 </Button>
-                <Button className="bg-[#0B1528] hover:bg-black text-white h-10 md:h-14 px-4 md:px-12 rounded-xl md:rounded-2xl font-black uppercase text-[9px] md:text-[11px] tracking-[0.1em] md:tracking-[0.2em] shadow-2xl transition-all active:scale-95 group" onClick={() => { if(currentIdx < questions.length-1) { const next = currentIdx + 1; setCurrentIdx(next); if(!visited.includes(next)) setVisited(v=>[...v, next])} else { toast({ title: "Audit Terminus", description: "Review and submit your final results." }) } }}>
-                   Next <ChevronRight className="ml-1 md:ml-2 h-3.5 w-3.5 md:h-4 md:w-4 group-hover:translate-x-1 transition-transform" />
+                <Button className="bg-black hover:bg-slate-900 text-white h-9 md:h-12 px-4 md:px-10 rounded-lg md:rounded-xl font-black uppercase text-[8px] md:text-[10px] tracking-widest shadow-lg" onClick={() => { if(currentIdx < questions.length-1) { const next = currentIdx + 1; setCurrentIdx(next); if(!visited.includes(next)) setVisited(v=>[...v, next])} }}>
+                   Next <ChevronRight className="h-3 w-3 ml-1" />
                 </Button>
              </div>
           </footer>
         </div>
 
-        <aside className="w-[360px] border-l border-slate-200 bg-white hidden lg:flex flex-col shrink-0 overflow-hidden">
-           <div className="flex-1 overflow-y-auto p-8 custom-scrollbar text-left">
+        <aside className="w-[300px] border-l border-slate-100 bg-white hidden lg:flex flex-col shrink-0 overflow-hidden">
+           <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
               <QuestionPalette 
                 totalQuestions={questions.length} currentIndex={currentIdx} 
                 answeredIndices={Object.keys(answers).map(Number)} 
@@ -306,6 +298,6 @@ export default function MockAttemptPage() {
 
 function LangTab({ label, active, onClick }: any) {
   return (
-    <button onClick={onClick} className={cn("px-2 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[8px] md:text-[10px] font-black tracking-widest transition-all", active ? "bg-white text-[#0B1528] shadow-2xl" : "text-white/40 hover:text-white")}>{label}</button>
+    <button onClick={onClick} className={cn("px-2 md:px-3 py-1 rounded-md text-[8px] md:text-[9px] font-black tracking-widest transition-all", active ? "bg-white text-black shadow-sm" : "text-white/40 hover:text-white")}>{label}</button>
   )
 }
