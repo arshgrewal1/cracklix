@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Trash2, Edit, Save, Gem, Zap, ShieldCheck, Trophy, Star, ChevronRight, Filter } from "lucide-react"
+import { Plus, Trash2, Edit, Save, Gem, Zap, ShieldCheck, Trophy, Filter, Lock } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, serverTimestamp, query, orderBy } from "firebase/firestore"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
+import { cn } from "@/lib/utils"
 
 export default function PassManagement() {
   const db = useFirestore()
@@ -43,7 +44,7 @@ export default function PassManagement() {
 
     try {
       await setDoc(passRef, payload, { merge: true })
-      toast({ title: "Pass Registry Synced", description: "Dynamic access node updated across ecosystem." })
+      toast({ title: "Registry Synced", description: "Premium pass configuration updated." })
       setEditingPass(null)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Audit Failed", description: e.message })
@@ -51,48 +52,48 @@ export default function PassManagement() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Permanently purge this access tier from the registry?")) return
+    if (!confirm("Permanently purge this access tier?")) return
     await deleteDoc(doc(db!, "passes", id))
     toast({ title: "Pass Purged", description: "Access node removed from cloud." })
   }
 
   return (
-    <div className="space-y-12 pb-20 text-left">
-      <div className="flex justify-between items-center">
+    <div className="space-y-12 pb-20 text-left text-[#0F172A]">
+      <div className="flex justify-between items-center px-4">
         <div>
            <div className="flex items-center gap-3 mb-2">
               <Gem className="h-5 w-5 text-amber-500" />
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Access Tier Architect</span>
            </div>
-          <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Pass Hub</h1>
-          <p className="text-slate-500 mt-1">Design unlimited custom preparation passes with tiered gating.</p>
+          <h1 className="text-4xl font-black font-headline uppercase tracking-tight">Pass Hub</h1>
+          <p className="text-slate-500 mt-1">Design unlimited Premium passes for content monetization.</p>
         </div>
-        <Button onClick={() => setEditingPass({ name: "", price: 0, durationDays: 30, features: [], active: true, displayOrder: (passes?.length || 0) + 1, type: "PREMIUM", description: "" })} className="bg-amber-500 hover:bg-amber-600 text-white gap-2 h-14 px-10 rounded-2xl font-black uppercase text-xs tracking-widest shadow-2xl shadow-amber-900/20">
-          <Plus className="h-5 w-5" /> Construct New Pass
+        <Button onClick={() => setEditingPass({ name: "", price: 299, durationDays: 30, features: [], active: true, displayOrder: (passes?.length || 0) + 1, type: "PREMIUM", description: "" })} className="bg-amber-500 hover:bg-amber-600 text-white gap-2 h-14 px-10 rounded-2xl font-black uppercase text-xs tracking-widest shadow-2xl shadow-amber-900/20">
+          <Plus className="h-5 w-5" /> Construct Pass
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 gap-6 px-4">
         {loading ? (
           Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-[2.5rem]" />)
         ) : passes?.map((p: any) => (
           <Card key={p.id} className="border-none shadow-3xl bg-white rounded-[3rem] overflow-hidden group hover:translate-y-[-4px] transition-all">
              <CardContent className="p-0 flex items-stretch h-44">
-                <div className={`w-3 ${p.active ? 'bg-amber-500' : 'bg-slate-200'}`} />
+                <div className={cn("w-3 transition-colors", p.active ? 'bg-amber-500' : 'bg-slate-200')} />
                 <div className="flex-1 p-10 flex items-center justify-between">
                    <div className="flex items-center gap-8">
                       <div className="h-16 w-16 rounded-[2rem] bg-slate-50 flex items-center justify-center text-amber-500 shadow-inner group-hover:scale-110 transition-transform">
-                         {p.type === 'FREE' ? <Zap className="h-8 w-8 text-slate-400" /> : <Trophy className="h-8 w-8" />}
+                         {p.type === 'FREE' ? <Zap className="h-8 w-8 text-slate-300" /> : <Lock className="h-8 w-8 text-amber-500" />}
                       </div>
                       <div className="space-y-1.5">
                          <div className="flex items-center gap-4">
                             <h3 className="text-2xl font-black text-[#0F172A] uppercase">{p.name}</h3>
-                            <Badge className={`${p.active ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'} border-none uppercase text-[8px] font-black tracking-widest px-3`}>{p.active ? 'ACTIVE NODE' : 'INACTIVE'}</Badge>
+                            <Badge className={cn("border-none uppercase text-[8px] font-black tracking-widest px-3", p.active ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400')}>{p.active ? 'ACTIVE NODE' : 'DISABLED'}</Badge>
                          </div>
                          <div className="flex items-center gap-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                            <span className="flex items-center gap-1.5"><Save className="h-3 w-3" /> ₹{p.price}</span>
-                            <span className="flex items-center gap-1.5"><Gem className="h-3 w-3" /> {p.durationDays} Days</span>
-                            <span className="flex items-center gap-1.5 text-primary"><Filter className="h-3 w-3" /> Order: {p.displayOrder}</span>
+                            <span className="flex items-center gap-1.5">₹{p.price}</span>
+                            <span className="flex items-center gap-1.5">{p.durationDays} Days</span>
+                            <span className="flex items-center gap-1.5 text-primary">Sort: {p.displayOrder}</span>
                          </div>
                       </div>
                    </div>
@@ -111,19 +112,19 @@ export default function PassManagement() {
       </div>
 
       <Dialog open={!!editingPass} onOpenChange={(open) => !open && setEditingPass(null)}>
-        <DialogContent className="sm:max-w-2xl rounded-[3rem] bg-white border-none shadow-4xl p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-2xl rounded-[3rem] bg-white border-none shadow-4xl p-0 overflow-hidden text-left">
           <div className="h-2 w-full bg-amber-500" />
           <DialogHeader className="p-10 pb-0 text-left">
             <DialogTitle className="text-3xl font-black font-headline uppercase flex items-center gap-4">
-               <Gem className="h-8 w-8 text-amber-500" /> {editingPass?.id ? "Sync Pass Registry" : "Initialize New Pass"}
+               <Gem className="h-8 w-8 text-amber-500" /> {editingPass?.id ? "Update Registry" : "Initialize New Pass"}
             </DialogTitle>
           </DialogHeader>
           
           <div className="p-10 space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
              <div className="grid grid-cols-2 gap-8">
                 <div className="space-y-3">
-                   <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Pass Identity</Label>
-                   <Input value={editingPass?.name || ""} onChange={e => setEditingPass({...editingPass, name: e.target.value})} placeholder="e.g. Gold Pass" className="h-14 rounded-xl bg-slate-50 border-none font-bold" />
+                   <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Pass Label</Label>
+                   <Input value={editingPass?.name || ""} onChange={e => setEditingPass({...editingPass, name: e.target.value})} placeholder="e.g. Premium Monthly" className="h-14 rounded-xl bg-slate-50 border-none font-bold" />
                 </div>
                 <div className="space-y-3">
                    <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Registry Price (₹)</Label>
@@ -137,14 +138,14 @@ export default function PassManagement() {
                    <Input type="number" value={editingPass?.durationDays || 30} onChange={e => setEditingPass({...editingPass, durationDays: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
                 </div>
                 <div className="space-y-3">
-                   <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Display Order</Label>
+                   <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Display Sort</Label>
                    <Input type="number" value={editingPass?.displayOrder || 1} onChange={e => setEditingPass({...editingPass, displayOrder: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
                 </div>
                 <div className="space-y-3">
-                   <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Type</Label>
+                   <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Access Tier</Label>
                    <select value={editingPass?.type || "PREMIUM"} onChange={e => setEditingPass({...editingPass, type: e.target.value})} className="w-full h-12 rounded-xl bg-slate-50 border-none px-4 font-bold text-xs uppercase outline-none">
                       <option value="FREE">Free Tier</option>
-                      <option value="PREMIUM">Premium</option>
+                      <option value="PREMIUM">Premium Access</option>
                    </select>
                 </div>
              </div>
@@ -155,14 +156,14 @@ export default function PassManagement() {
              </div>
 
              <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Feature Registry (Comma separated)</Label>
-                <Textarea value={Array.isArray(editingPass?.features) ? editingPass.features.join(', ') : editingPass?.features || ""} onChange={e => setEditingPass({...editingPass, features: e.target.value})} placeholder="Full Mocks, PYQs, AI Tutors..." className="rounded-2xl bg-slate-50 border-none h-24 p-6 font-medium" />
+                <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Feature List (Comma separated)</Label>
+                <Textarea value={Array.isArray(editingPass?.features) ? editingPass.features.join(', ') : editingPass?.features || ""} onChange={e => setEditingPass({...editingPass, features: e.target.value})} placeholder="Unlock All Mocks, AI Rationale, PYQ Vault..." className="rounded-2xl bg-slate-50 border-none h-24 p-6 font-medium" />
              </div>
 
              <div className="flex items-center justify-between p-8 bg-slate-50 rounded-[2rem] border border-slate-100">
                 <div className="space-y-1">
-                   <p className="font-black text-xs uppercase tracking-widest">Active Access Node</p>
-                   <p className="text-[10px] text-slate-400 font-bold uppercase">When disabled, this pass is hidden from students.</p>
+                   <p className="font-black text-xs uppercase tracking-widest">Active Enrollment Node</p>
+                   <p className="text-[10px] text-slate-400 font-bold uppercase">When disabled, this pass is hidden from student pricing.</p>
                 </div>
                 <Switch checked={editingPass?.active} onCheckedChange={val => setEditingPass({...editingPass, active: val})} />
              </div>

@@ -4,6 +4,7 @@ export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'CHAPTER' | 'PYQ' | 'CA_QUIZ';
 export type ContentStatus = 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'ARCHIVED';
 export type Gender = 'Male' | 'Female' | 'Other';
+export type AccessType = 'FREE' | 'PREMIUM';
 
 export type QuestionType = 
   | 'MCQ' 
@@ -49,7 +50,7 @@ export interface UserProfile {
   state: 'Punjab';
   targetExam: string;
   createdAt: any;
-  status: string; // Dynamic Pass ID or "Free"
+  status: string; // "Free" or a Pass ID
   subscriptions?: string[]; 
   passExpiryDate?: string;
 }
@@ -60,13 +61,12 @@ export interface MockTest {
   boardId: string;
   examId: string;
   mockType: MockType;
-  requiredPass: string; // Dynamic Pass ID
+  accessType: AccessType;
   duration: number;
   totalQuestions: number;
   questionIds: string[];
   difficulty: string;
   published: boolean;
-  isPremium?: boolean;
   createdAt: any;
   updatedAt: any;
 }
