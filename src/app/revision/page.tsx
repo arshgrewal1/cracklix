@@ -6,8 +6,22 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, orderBy, limit } from "firebase/firestore"
-import { Card, CardContent } from "@/components/ui/card"
-import { Bookmark, Search, Trash2, ChevronRight, BrainCircuit, ShieldCheck, Languages, AlertCircle, History, Star, Zap, Sparkles } from "lucide-react"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { 
+  Bookmark, 
+  Search, 
+  Trash2, 
+  ChevronRight, 
+  BrainCircuit, 
+  Languages, 
+  AlertCircle, 
+  History, 
+  Star, 
+  Zap, 
+  Sparkles,
+  ShieldAlert,
+  GraduationCap
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -15,11 +29,11 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 /**
- * @fileOverview Final Revision Hub.
- * Central portal for Bookmarks, Wrong Attempts (Smart Revision), and AI Rationalizations.
+ * @fileOverview Institutional Revision & Preparation Hub.
+ * Features: Smart Bookmarks, Missed Audit Nodes, and AI Rationalizations.
  */
 
-export default function RevisionCenter() {
+export default function RevisionHub() {
   const db = useFirestore()
   const { user } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
@@ -30,14 +44,15 @@ export default function RevisionCenter() {
   const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid), orderBy("timestamp", "desc"), limit(20)) : null), [db, user])
   const { data: results, loading: rLoading } = useCollection<any>(resultsQuery)
 
-  // Smart logic to extract "Wrong Attempts" from recent results
+  // Smart logic to extract "Audit Failures" from recent results for revision
   const wrongAttempts = useMemo(() => {
     if (!results) return []
     const wrongs: any[] = []
     results.forEach(res => {
       if (res.accuracy < 100) wrongs.push({
         id: res.id,
-        title: `Missed in ${res.mockTitle}`,
+        mockId: res.mockId,
+        title: `Audit Miss in ${res.mockTitle}`,
         count: res.totalQuestions - res.score,
         date: new Date(res.timestamp).toLocaleDateString()
       })
@@ -57,22 +72,22 @@ export default function RevisionCenter() {
         <div className="space-y-12">
           
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
-            <div className="space-y-4">
+            <div className="space-y-4 text-left">
               <div className="flex items-center gap-3">
                  <History className="h-5 w-5 text-primary" />
-                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Preparation Audit Hub</span>
+                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Preparation Mastery Hub</span>
               </div>
               <h1 className="text-5xl md:text-7xl font-headline font-black text-[#0F172A] tracking-tight uppercase leading-[0.9]">
-                Revision <br/> <span className="text-primary">Center</span>
+                Revision <br/> <span className="text-primary">Mastery</span>
               </h1>
               <p className="text-slate-500 font-medium text-lg max-w-xl">
-                Master the concepts you missed. Review your saved items and improve your accuracy for the 2026 Punjab recruitment cycle.
+                Registry for your saved items and missed concepts. Optimize your preparation trajectory for the 2026 cycle.
               </p>
             </div>
             <div className="relative w-full md:w-80">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input 
-                className="pl-12 h-14 rounded-2xl bg-white border-none shadow-xl shadow-slate-200/50" 
+                className="pl-12 h-14 rounded-2xl bg-white border-none shadow-xl shadow-slate-200/50 font-bold" 
                 placeholder="Search revision bank..." 
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
@@ -86,10 +101,10 @@ export default function RevisionCenter() {
                    <Bookmark className="h-4 w-4" /> Bookmarks
                 </TabsTrigger>
                 <TabsTrigger value="wrong" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">
-                   <AlertCircle className="h-4 w-4" /> Smart Revision
+                   <AlertCircle className="h-4 w-4" /> Missed Nodes
                 </TabsTrigger>
                 <TabsTrigger value="starred" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">
-                   <Star className="h-4 w-4" /> Priority
+                   <Star className="h-4 w-4" /> Critical
                 </TabsTrigger>
              </TabsList>
 
@@ -98,12 +113,12 @@ export default function RevisionCenter() {
                    Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-44 w-full rounded-[2.5rem]" />)
                 ) : filteredBookmarks.length > 0 ? (
                   filteredBookmarks.map((b) => (
-                    <Card key={b.id} className="border-none shadow-2xl shadow-slate-200/30 bg-white hover:translate-y-[-4px] transition-all duration-300 rounded-[2.5rem] overflow-hidden group">
+                    <Card key={b.id} className="border-none shadow-2xl shadow-slate-200/30 bg-white hover:translate-y-[-4px] transition-all duration-300 rounded-[2.5rem] overflow-hidden group text-left">
                       <CardContent className="p-10 space-y-6">
                         <div className="flex items-center justify-between">
                            <div className="flex items-center gap-4">
                               <Badge className="bg-primary/10 text-primary border-none text-[9px] font-black uppercase tracking-widest px-3">
-                                 {b.subjectId || 'General Punjab GK'}
+                                 {b.subjectId || 'General Punjab Hub'}
                               </Badge>
                               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Added {new Date(b.timestamp).toLocaleDateString()}</span>
                            </div>
@@ -119,13 +134,13 @@ export default function RevisionCenter() {
                         <div className="pt-6 border-t border-slate-50 flex items-center justify-between">
                            <div className="flex gap-4">
                               <Button variant="outline" className="rounded-xl border-slate-100 text-[10px] font-black uppercase h-10 px-6 gap-2">
-                                 <Languages className="h-4 w-4" /> Bilingual Support
+                                 <Languages className="h-4 w-4" /> Bilingual
                               </Button>
                               <Button variant="ghost" className="text-primary font-black uppercase text-[10px] gap-2">
-                                 <BrainCircuit className="h-4 w-4" /> AI Rationalization
+                                 <BrainCircuit className="h-4 w-4" /> AI Rationale
                               </Button>
                            </div>
-                           <Button variant="ghost" className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all">
+                           <Button variant="ghost" className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all shadow-sm">
                               <ChevronRight className="h-5 w-5" />
                            </Button>
                         </div>
@@ -133,7 +148,7 @@ export default function RevisionCenter() {
                     </Card>
                   ))
                 ) : (
-                  <RevisionEmptyState icon={<Bookmark />} title="No Bookmarks Detected" desc="Save high-fidelity questions during mocks to revise them later." />
+                  <EmptyRevision icon={<Bookmark />} title="No Bookmarks Detected" desc="Save high-fidelity questions during mocks to revise them later." />
                 )}
              </TabsContent>
 
@@ -142,30 +157,30 @@ export default function RevisionCenter() {
                    Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-[2.5rem]" />)
                 ) : wrongAttempts.length > 0 ? (
                   wrongAttempts.map((w) => (
-                    <Card key={w.id} className="border-none shadow-2xl bg-white rounded-[2.5rem] overflow-hidden group">
+                    <Card key={w.id} className="border-none shadow-2xl bg-white rounded-[2.5rem] overflow-hidden group text-left">
                        <CardContent className="p-10 flex items-center justify-between">
                           <div className="flex items-center gap-8">
                              <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-inner">
-                                <Zap className="h-8 w-8" />
+                                <ShieldAlert className="h-8 w-8" />
                              </div>
                              <div>
-                                <h3 className="text-xl font-headline font-black text-[#0F172A] uppercase">{w.title}</h3>
-                                <p className="text-sm font-bold text-slate-400 mt-1 uppercase tracking-widest">{w.count} Incorrect Audit Choices • {w.date}</p>
+                                <h3 className="text-xl font-headline font-black text-[#0F172A] uppercase leading-tight">{w.title}</h3>
+                                <p className="text-[11px] font-black text-slate-400 mt-1 uppercase tracking-widest">{w.count} Incorrect Audit Choices • {w.date}</p>
                              </div>
                           </div>
-                          <Button className="bg-[#0F172A] hover:bg-black text-white h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-3">
-                             Review Errors <ChevronRight className="h-4 w-4" />
+                          <Button asChild className="bg-[#0F172A] hover:bg-black text-white h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-3 shadow-xl shadow-slate-200">
+                             <Link href={`/results/${w.mockId}`}>Audit Failures <ChevronRight className="h-4 w-4" /></Link>
                           </Button>
                        </CardContent>
                     </Card>
                   ))
                 ) : (
-                  <RevisionEmptyState icon={<ShieldCheck className="text-emerald-500" />} title="Audit Engine Clean" desc="No wrong attempts detected in your recent history. Perfect accuracy!" />
+                  <EmptyRevision icon={<GraduationCap className="text-emerald-500" />} title="Perfect Audit Registry" desc="No missed nodes detected in your recent history. Excellence verified." />
                 )}
              </TabsContent>
 
              <TabsContent value="starred">
-                <RevisionEmptyState icon={<Star />} title="Priority Matrix Empty" desc="Tag items as high-priority to build your custom revision strategy." />
+                <EmptyRevision icon={<Star />} title="Priority Matrix Empty" desc="Tag critical items as high-priority to build your custom revision strategy." />
              </TabsContent>
           </Tabs>
         </div>
@@ -175,7 +190,7 @@ export default function RevisionCenter() {
   )
 }
 
-function RevisionEmptyState({ icon, title, desc }: any) {
+function EmptyRevision({ icon, title, desc }: any) {
    return (
       <div className="h-96 flex flex-col items-center justify-center text-slate-300 bg-white rounded-[4rem] border-2 border-dashed border-slate-100 shadow-inner">
          <div className="h-20 w-20 rounded-3xl bg-slate-50 flex items-center justify-center mb-8 opacity-20">

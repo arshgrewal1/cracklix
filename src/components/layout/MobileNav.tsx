@@ -3,13 +3,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, Zap, Gem, User, Home, BarChart3 } from "lucide-react";
+import { GraduationCap, Zap, User, Home, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * @fileOverview Premium Bottom Navigation Node for Mobile.
- * Updated to include Analytics and match high-fidelity 5-item UI.
+ * @fileOverview Institutional Sticky Bottom Navigation for Mobile.
+ * Optimized for rapid preparation trajectory switching.
  */
 
 export default function MobileNav() {
