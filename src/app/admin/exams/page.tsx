@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useRef } from "react"
@@ -17,8 +18,8 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 /**
- * @fileOverview Authority Hub v22.0 - Hardened Deletion & Registry Control.
- * Fixed: Operational Delete Engine with event propagation guards.
+ * @fileOverview Authority Hub v23.0 - Hardened Deletion Engine & Registry Control.
+ * Fixed: Robust Delete Engine with strict event isolation to prevent "dummy" behavior.
  */
 
 export default function ExamManagement() {
@@ -71,7 +72,9 @@ export default function ExamManagement() {
     e.stopPropagation();
     
     if (!id || !db) return
-    if (!window.confirm("Permanently purge this authority from the registry? Irreversible.")) return
+    
+    const confirmMsg = "Are you sure you want to permanently delete this authority? This will remove it from the global registry.";
+    if (!window.confirm(confirmMsg)) return
     
     setIsDeleting(id)
     try {
@@ -162,19 +165,24 @@ export default function ExamManagement() {
                     <TableCell className="font-headline font-black text-primary text-xl tracking-tighter uppercase">{board.abbreviation}</TableCell>
                     <TableCell className="text-sm font-bold text-slate-800 leading-tight max-w-xs">{board.name}</TableCell>
                     <TableCell className="text-right px-10">
-                      <div className="flex justify-end gap-2 opacity-30 group-hover:opacity-100 transition-all">
-                         <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-slate-100" onClick={() => setEditingBoard(board)}>
-                          <Edit className="h-5 w-5" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-12 w-12 rounded-xl hover:bg-rose-50 hover:text-rose-600" 
-                          onClick={(e) => handleDelete(e, board.id)}
-                          disabled={isDeleting === board.id}
-                        >
-                          {isDeleting === board.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-5 w-5" />}
-                        </Button>
+                      <div className="flex justify-end gap-2">
+                         <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-12 w-12 rounded-xl hover:bg-slate-100" 
+                            onClick={() => setEditingBoard(board)}
+                          >
+                           <Edit className="h-5 w-5" />
+                         </Button>
+                         <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-12 w-12 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition-all" 
+                            onClick={(e) => handleDelete(e, board.id)}
+                            disabled={isDeleting === board.id}
+                          >
+                            {isDeleting === board.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-5 w-5" />}
+                         </Button>
                       </div>
                     </TableCell>
                   </TableRow>
