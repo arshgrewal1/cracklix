@@ -38,6 +38,7 @@ import { useState } from "react";
  * @fileOverview Ultra-Compact Mobile Navigation Hub (180px).
  * Optimized: Entire content (Profile + Menu) scrolls as a single unit. 
  * Sidebar positioned flush with header.
+ * Fixed: ReferenceError for onClose inside MenuLink.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
@@ -171,7 +172,7 @@ function MenuLink({ item, active, onClick, indent = false }: any) {
   return (
     <Link 
       href={item.href} 
-      onClick={onClose}
+      onClick={onClick}
       className={cn(
         "flex items-center justify-between px-3 h-[40px] transition-all group w-full",
         active ? "bg-primary/5 text-primary border-r-[3px] border-primary" : "hover:bg-slate-50 text-slate-600",
