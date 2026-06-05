@@ -1,8 +1,7 @@
-
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle, FileText, Activity, ShieldAlert, HeartPulse, HelpCircle, Upload, Layers, CheckCircle2, Gem } from "lucide-react"
+import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle, FileText, Activity, ShieldAlert, HeartPulse, HelpCircle, Upload, Layers, CheckCircle2, Gem, History, SearchCode, Megaphone } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 import { useUser, useAuth } from "@/firebase"
@@ -45,12 +44,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </SidebarHeader>
           <SidebarContent className="custom-scrollbar overflow-x-hidden">
             <SidebarGroup>
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Atomic Bank Operations</SidebarGroupLabel>
+              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Operations</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
                   <AdminNavItem icon={<LayoutDashboard />} label="Dashboard" href="/admin" active={pathname === "/admin"} />
                   <AdminNavItem icon={<Database />} label="Atomic Bank" href="/admin/questions" active={pathname === "/admin/questions"} />
                   <AdminNavItem icon={<Upload className="text-primary" />} label="Bulk Ingestion" href="/admin/bulk-import" active={pathname === "/admin/bulk-import"} />
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup className="mt-4">
+              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Content Hub</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <AdminNavItem icon={<Newspaper className="text-emerald-400" />} label="Analysis Feed" href="/admin/current-affairs" active={pathname === "/admin/current-affairs"} />
+                  <AdminNavItem icon={<FileText className="text-blue-400" />} label="Audit Archives" href="/admin/pyqs" active={pathname === "/admin/pyqs"} />
+                  <AdminNavItem icon={<Megaphone className="text-orange-400" />} label="Exam Gazette" href="/admin/notifications" active={pathname === "/admin/notifications"} />
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup className="mt-4">
+              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Modular Architect</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <AdminNavItem icon={<Layers className="text-primary" />} label="Test Assembly" href="/admin/mocks" active={pathname === "/admin/mocks"} />
+                  <AdminNavItem icon={<ClipboardList />} label="Mock Blueprints" href="/admin/mocks/builder" active={pathname === "/admin/mocks/builder"} />
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -67,11 +87,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarGroup>
 
             <SidebarGroup className="mt-4">
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Modular Architect</SidebarGroupLabel>
+              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Audit & Integrity</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  <AdminNavItem icon={<Layers className="text-emerald-400" />} label="Test Assembly" href="/admin/mocks" active={pathname === "/admin/mocks"} />
-                  <AdminNavItem icon={<ClipboardList />} label="Mock Blueprints" href="/admin/mocks/builder" active={pathname === "/admin/mocks/builder"} />
+                  <AdminNavItem icon={<ShieldAlert className="text-rose-400" />} label="Audit Queue" href="/admin/reports" active={pathname === "/admin/reports"} />
+                  <AdminNavItem icon={<History />} label="Audit Ledger" href="/admin/audit-logs" active={pathname === "/admin/audit-logs"} />
+                  <AdminNavItem icon={<SearchCode />} label="Integrity Scan" href="/admin/qa" active={pathname === "/admin/qa"} />
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -81,6 +102,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarGroupContent>
                 <SidebarMenu>
                   <AdminNavItem icon={<Users />} label="Aspirant Registry" href="/admin/users" active={pathname === "/admin/users"} />
+                  <AdminNavItem icon={<HelpCircle />} label="Support Hub" href="/admin/support" active={pathname === "/admin/support"} />
+                  <AdminNavItem icon={<HeartPulse />} label="System Health" href="/admin/health" active={pathname === "/admin/health"} />
                   <AdminNavItem icon={<Settings />} label="System Settings" href="/admin/settings" active={pathname === "/admin/settings"} />
                 </SidebarMenu>
               </SidebarGroupContent>
@@ -114,7 +137,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                </div>
             </div>
           </header>
-          <main className="flex-1 p-8 bg-white">
+          <main className="flex-1 p-8 bg-white overflow-y-auto">
             {children}
           </main>
         </SidebarInset>
