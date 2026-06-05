@@ -17,7 +17,7 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 /**
- * @fileOverview Authority Hub v12.5 - Hardened Government SVG Renderer.
+ * @fileOverview Authority Hub v12.6 - Fixed Syntax Error & Referrer Bypass.
  * Features: Absolute Referrer Bypassing and Triple-Layer text fallback.
  */
 
@@ -213,7 +213,7 @@ export default function ExamManagement() {
                   {isUploading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Upload className="h-4 w-4 text-primary" />}
                   {isUploading ? "Syncing Asset..." : "Upload Device Logo"}
                 </Button>
-                <input type="file" fileInputRef.current?.click()} className="hidden" accept="image/*" onChange={handleFileUpload} />
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
               </div>
             </div>
 
