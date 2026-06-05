@@ -39,33 +39,32 @@
         "description": { "type": "string" }
       }
     },
-    "Subscription": {
-      "title": "Aspirant Subscription",
-      "description": "Active pass details for a specific user.",
-      "type": "object",
-      "properties": {
-        "userId": { "type": "string" },
-        "passId": { "type": "string" },
-        "status": { "type": "string", "enum": ["active", "expired", "cancelled"] },
-        "startDate": { "type": "string", "format": "date-time" },
-        "expiryDate": { "type": "string", "format": "date-time" }
-      }
-    },
-    "PaymentRequest": {
-      "title": "Manual Payment Request",
-      "description": "UPI/QR transaction details awaiting admin approval.",
+    "Board": {
+      "title": "Recruitment Board",
+      "description": "Official Punjab government board node.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "userId": { "type": "string" },
-        "userEmail": { "type": "string" },
-        "userName": { "type": "string" },
-        "planId": { "type": "string" },
-        "planName": { "type": "string" },
-        "amount": { "type": "number" },
-        "transactionId": { "type": "string" },
-        "status": { "type": "string", "enum": ["PENDING", "APPROVED", "REJECTED"] },
-        "createdAt": { "type": "string", "format": "date-time" }
+        "abbreviation": { "type": "string" },
+        "name": { "type": "string" },
+        "iconUrl": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "Question": {
+      "title": "Atomic MCQ Node",
+      "description": "A single reusable practice question.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "boardId": { "type": "string" },
+        "subjectId": { "type": "string" },
+        "questionEn": { "type": "string" },
+        "questionPa": { "type": "string" },
+        "correctAnswer": { "type": "string", "enum": ["A", "B", "C", "D"] },
+        "explanationEn": { "type": "string" },
+        "explanationPa": { "type": "string" },
+        "difficulty": { "type": "string" }
       }
     }
   },
@@ -81,12 +80,24 @@
       "schema": { "$ref": "#/backend/entities/Pass" },
       "description": "Dynamic pricing tiers."
     },
-    "/subscriptions/{subId}": {
-      "schema": { "$ref": "#/backend/entities/Subscription" },
-      "description": "Active pass records."
+    "/boards/{boardId}": {
+      "schema": { "$ref": "#/backend/entities/Board" },
+      "description": "Official Board Registry (PSPCL, PSSSB, etc)."
+    },
+    "/questions/{questionId}": {
+      "schema": { "$ref": "#/backend/entities/Question" },
+      "description": "Global Atomic Question Bank."
+    },
+    "/mocks/{mockId}": {
+      "schema": "object",
+      "description": "High-fidelity mock series."
+    },
+    "/results/{resultId}": {
+      "schema": "object",
+      "description": "Aspirant performance audit trails."
     },
     "/payment_requests/{reqId}": {
-      "schema": { "$ref": "#/backend/entities/PaymentRequest" },
+      "schema": "object",
       "description": "Pending UPI verifications."
     }
   }
