@@ -185,7 +185,7 @@ function HubGrid({ mocks, emptyLabel, logo, boardId, failedImages, setFailedImag
 
 function MockCard({ mock, logo, boardId, failedImages, setFailedImages }: any) {
   const isImgFailed = failedImages[mock.id];
-  const isArmy = boardId === 'indian-army' || boardId === 'Army';
+  const isArmy = boardId === 'indian-army' || boardId === 'ARMY';
   
   return (
     <Card className="border-none shadow-xl hover:shadow-3xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden text-left flex flex-col h-full border border-slate-100">

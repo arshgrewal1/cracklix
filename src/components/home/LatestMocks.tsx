@@ -73,7 +73,7 @@ export default function LatestMocks() {
             mocks.map((mock, i) => {
               const board = boards?.find((b: any) => b.id === mock.boardId);
               const isImgFailed = failedImages[mock.id];
-              const isArmy = board?.abbreviation === 'Army';
+              const isArmy = board?.id === 'indian-army' || board?.abbreviation === 'ARMY';
               
               return (
                 <motion.div

@@ -68,7 +68,9 @@ export default function ExamManagement() {
     }
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!id || !db) return
     
     const confirmMsg = "CRITICAL AUDIT: Permanently purge this authority from the global registry? This action is irreversible.";
@@ -177,11 +179,7 @@ export default function ExamManagement() {
                             variant="ghost" 
                             size="icon" 
                             className="h-12 w-12 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition-all" 
-                            onClick={(e) => {
-                               e.preventDefault();
-                               e.stopPropagation();
-                               handleDelete(board.id);
-                            }}
+                            onClick={(e) => handleDelete(e, board.id)}
                             disabled={isDeleting === board.id}
                           >
                             {isDeleting === board.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-5 w-5" />}

@@ -58,7 +58,7 @@ export async function seedInitialData(db: Firestore) {
   const hcOfficialLogo = 'https://highcourtchd.gov.in/images/newlogo.png';
   const psebSchoolLogo = 'https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png';
   const eduDeptLogo = 'https://pstet.pseb.ac.in/img/main-logo-2.png';
-  const armyOfficialLogo = 'https://joinindianarmy.nic.in/writereaddata/Portal/Images/logo.png';
+  const armyOfficialLogo = 'https://www.indianarmy.nic.in/writereaddata/images/slider/270526_Hindi_1.jpeg';
   const pspclOfficialLogo = 'https://pspcl.in/assets/images/logo.png';
   const pstclOfficialLogo = 'https://pstcl.org/images/logo.png';
   const technicalLogo = 'https://www.punjabteched.com/images/Clogo-blue.gif';
