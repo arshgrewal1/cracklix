@@ -3,7 +3,7 @@ import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/fi
 /**
  * @fileOverview Final Institutional Seeding Engine for Cracklix.
  * Synchronizes binary access passes, official board registry, and platform settings.
- * Updated: Official High-Fidelity URLs for all Punjab Boards.
+ * Updated: Official High-Fidelity URLs for all Punjab Boards including PSPCL.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('Initializing Global Punjab Access Registry Sync...');
@@ -100,7 +100,7 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() });
   }
 
-  // 3. Subject Registry Expansion
+  // 3. Subject Registry Expansion (Added EVS for PSTET/CTET)
   const subjects = [
     { id: 'punjab-gk', name: 'Punjab GK & Culture' },
     { id: 'mental-ability', name: 'Mental Ability / Reasoning' },

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useRef } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -17,8 +17,9 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 
 /**
- * @fileOverview Authority Hub - Recruitment Board Management v5.0.
- * Features: Robust Storage Upload, 30s Timeouts, and Deep Error Logging.
+ * @fileOverview Authority Hub - Recruitment Board Management v6.0.
+ * Fixed: Eager "Invalid Asset" validation bug.
+ * Features: Robust Storage Upload, Lifecycle Logging, and Idle-State Placeholders.
  */
 
 export default function ExamManagement() {
@@ -32,7 +33,16 @@ export default function ExamManagement() {
   const [editingBoard, setEditingBoard] = useState<any>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [assetError, setAssetError] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Reset asset error when modal changes or URL changes
+  useEffect(() => {
+    setAssetError(false);
+    if (editingBoard) {
+       console.log("[LOG] Modal Interaction Node Opened:", editingBoard.id || "NEW_ENTRY");
+    }
+  }, [editingBoard?.id, editingBoard?.iconUrl]);
 
   const handleSave = async () => {
     if (!db || !editingBoard) return
@@ -96,8 +106,8 @@ export default function ExamManagement() {
 
     console.log("[STORAGE] Upload Cycle Initiated:", file.name);
     setIsUploading(true)
+    setAssetError(false)
     
-    // 30 Second Institutional Timeout
     const timeoutId = setTimeout(() => {
        if (isUploading) {
           setIsUploading(false);
@@ -119,13 +129,7 @@ export default function ExamManagement() {
       toast({ title: "Upload Complete", description: "Logo successfully synchronized with institutional storage." })
     } catch (error: any) {
       console.error("[STORAGE] Upload Failed Error Code:", error.code);
-      console.error("[STORAGE] Upload Error Message:", error.message);
-      
-      const errorMsg = error.code === 'storage/unauthorized' 
-        ? "Permission Denied: Update Storage Security Rules." 
-        : error.message || "Could not reach storage node.";
-        
-      toast({ variant: "destructive", title: "Upload Failed", description: errorMsg })
+      toast({ variant: "destructive", title: "Upload Failed", description: error.message || "Could not reach storage node." })
     } finally {
       clearTimeout(timeoutId);
       setIsUploading(false)
@@ -189,7 +193,7 @@ export default function ExamManagement() {
                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-slate-100" onClick={() => setEditingBoard(board)}>
                         <Edit className="h-5 w-5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-rose hover:text-rose-500" onClick={() => handleDelete(board.id)}>
+                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-rose-500/10 hover:text-rose-500" onClick={() => handleDelete(board.id)}>
                         <Trash2 className="h-5 w-5" />
                       </Button>
                     </div>
@@ -211,22 +215,29 @@ export default function ExamManagement() {
           <div className="p-10 space-y-8 max-h-[70vh] overflow-y-auto custom-scrollbar">
             <div className="flex flex-col items-center gap-6">
               <div className="h-32 w-32 rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden group shadow-inner">
-                 {editingBoard?.iconUrl ? (
+                 {isUploading ? (
+                    <div className="flex flex-col items-center gap-2">
+                       <Loader2 className="h-8 w-8 text-primary animate-spin" />
+                       <span className="text-[8px] font-black text-primary uppercase tracking-widest">Syncing Asset...</span>
+                    </div>
+                 ) : editingBoard?.iconUrl && !assetError ? (
                     <img 
                       src={editingBoard.iconUrl} 
                       referrerPolicy="no-referrer"
                       crossOrigin="anonymous"
                       className="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform" 
                       alt="Preview"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "https://placehold.co/200x200?text=Invalid+Asset";
+                      onError={() => {
+                        console.error("[PREVIEW] Image load failed for URL:", editingBoard.iconUrl);
+                        setAssetError(true);
                       }}
                     />
                  ) : (
                     <div className="flex flex-col items-center gap-2">
-                       <ImageIcon className="h-8 w-8 text-slate-300" />
-                       <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">No Logo</span>
+                       {assetError ? <AlertCircle className="h-8 w-8 text-rose-500" /> : <ImageIcon className="h-8 w-8 text-slate-300" />}
+                       <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                          {assetError ? "Invalid Asset" : "No Logo Uploaded"}
+                       </span>
                     </div>
                  )}
               </div>
@@ -235,7 +246,10 @@ export default function ExamManagement() {
                  <Button 
                     variant="outline" 
                     className="flex-1 h-12 rounded-xl border-slate-200 bg-white font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-slate-50 shadow-sm"
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => {
+                       console.log("[LOG] File Picker Triggered");
+                       fileInputRef.current?.click();
+                    }}
                     disabled={isUploading || isSaving}
                  >
                     {isUploading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Upload className="h-4 w-4 text-primary" />}
@@ -258,8 +272,8 @@ export default function ExamManagement() {
                     <Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value.toUpperCase()})} className="bg-slate-50 border-none rounded-xl h-12 font-black uppercase" />
                  </div>
                  <div className="space-y-2">
-                    <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Asset URL (Overrides Upload)</Label>
-                    <Input value={editingBoard?.iconUrl || ""} onChange={e => setEditingBoard({...editingBoard, iconUrl: e.target.value})} className="bg-slate-50 border-none rounded-xl h-12 text-[10px] font-mono text-slate-500" placeholder="https://..." />
+                    <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Asset URL</Label>
+                    <Input value={editingBoard?.iconUrl || ""} onChange={e => setEditingBoard({...editingBoard, iconUrl: e.target.value.trim()})} className="bg-slate-50 border-none rounded-xl h-12 text-[10px] font-mono text-slate-500" placeholder="https://..." />
                  </div>
               </div>
 
