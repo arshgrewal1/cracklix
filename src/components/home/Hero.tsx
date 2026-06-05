@@ -13,7 +13,7 @@ import { useMemo } from 'react';
 
 /**
  * @fileOverview Final Institutional Hero Module.
- * Synchronized with Official Army Promotional Asset.
+ * Re-engineered to ensure absolute visibility of official assets.
  */
 
 export default function Hero() {
@@ -21,7 +21,7 @@ export default function Hero() {
   const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
   const { data: settings } = useDoc<any>(settingsRef);
 
-  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-punjab')?.imageUrl || "https://www.indianarmy.nic.in/writereaddata/images/slider/270526_Hindi_1.jpeg";
+  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-army')?.imageUrl || "https://www.indianarmy.nic.in/writereaddata/images/slider/270526_Hindi_1.jpeg";
 
   const content = {
     line1: settings?.heroLine1 || "Punjab's No. 1",
@@ -78,21 +78,24 @@ export default function Hero() {
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1 }}
-            className="relative hidden lg:block"
+            className="relative flex items-center justify-center lg:block"
           >
-            <div className="relative aspect-square rounded-[4rem] overflow-hidden border border-white/10 shadow-2xl group">
-              <Image 
+            {/* Glow Effect */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary to-orange-400 rounded-[4rem] blur opacity-20 transition duration-1000"></div>
+            
+            <div className="relative w-full aspect-square md:aspect-video lg:aspect-square max-w-[600px] rounded-[4rem] overflow-hidden border border-white/10 shadow-4xl group">
+              <img 
                 src={content.imageUrl} 
                 alt="Institutional Hero" 
-                fill 
-                className="object-cover transition-transform duration-1000 group-hover:scale-110"
-                priority
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                referrerPolicy="no-referrer"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#08152D] via-transparent to-transparent opacity-60" />
             </div>
+            
             {/* Shield Badge */}
-            <div className="absolute -top-6 -right-6 h-24 w-24 bg-emerald-500 rounded-3xl flex items-center justify-center shadow-2xl rotate-12 border-4 border-white/10">
-               <ShieldCheck className="h-10 w-10 text-white" />
+            <div className="absolute -top-6 -right-6 h-20 w-20 md:h-24 md:w-24 bg-emerald-500 rounded-3xl flex items-center justify-center shadow-2xl rotate-12 border-4 border-[#08152D] z-20">
+               <ShieldCheck className="h-8 w-8 md:h-10 md:w-10 text-white" />
             </div>
           </motion.div>
         </div>

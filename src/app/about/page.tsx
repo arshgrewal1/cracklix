@@ -17,7 +17,7 @@ import { PlaceHolderImages } from "@/lib/placeholder-images"
 
 export default function AboutPage() {
   const psssbPromo = PlaceHolderImages.find(img => img.id === 'promo-psssb')?.imageUrl;
-  const armySlider = PlaceHolderImages.find(img => img.id === 'hero-punjab')?.imageUrl;
+  const armyHero = PlaceHolderImages.find(img => img.id === 'hero-army')?.imageUrl;
 
   return (
     <div className="min-h-screen bg-white font-body">
@@ -84,11 +84,11 @@ export default function AboutPage() {
            <div className="container mx-auto px-6">
               <div className="max-w-6xl mx-auto bg-[#0B1528] rounded-[4rem] overflow-hidden shadow-4xl flex flex-col md:flex-row">
                  <div className="md:w-1/2 relative h-[500px] md:h-auto bg-slate-800 group">
-                    <Image 
+                    <img 
                       src={psssbPromo!} 
                       alt="Institutional Promo" 
-                      fill 
-                      className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
+                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
+                      referrerPolicy="no-referrer"
                     />
                     <div className="absolute inset-0 bg-primary/20 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity" />
                  </div>
@@ -123,7 +123,7 @@ export default function AboutPage() {
         {/* CTA with Army Asset Background */}
         <section className="py-32 bg-primary text-white relative overflow-hidden group">
            <div className="absolute inset-0 opacity-10 group-hover:scale-110 transition-transform duration-1000">
-              <Image src={armySlider!} fill alt="Army Background" className="object-cover grayscale" />
+              <img src={armyHero!} className="w-full h-full object-cover grayscale" referrerPolicy="no-referrer" />
            </div>
            <div className="container mx-auto px-6 text-center space-y-10 relative z-10">
               <h2 className="text-5xl md:text-8xl font-headline font-black uppercase leading-[0.85] tracking-tighter">Ready to start <br/> your journey?</h2>

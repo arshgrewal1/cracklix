@@ -9,13 +9,13 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 /**
  * @fileOverview Final App Preview Hub.
- * Updated to exclusively use official Punjab Police and Army tactical imagery.
+ * Updated to use official Army and Police nodes from registry.
  */
 
 export default function AppPreview() {
-  const policeAction = PlaceHolderImages.find(img => img.id === 'promo-police-action')?.imageUrl;
-  const policeTrust = PlaceHolderImages.find(img => img.id === 'promo-police-trust')?.imageUrl;
-  const armyHero = PlaceHolderImages.find(img => img.id === 'hero-punjab')?.imageUrl;
+  const mockPolice = PlaceHolderImages.find(img => img.id === 'mock-police')?.imageUrl;
+  const armyHero = PlaceHolderImages.find(img => img.id === 'hero-army')?.imageUrl;
+  const armyStrategic = PlaceHolderImages.find(img => img.id === 'army-strategic')?.imageUrl;
 
   return (
     <section className="py-32 bg-white overflow-hidden">
@@ -65,15 +65,15 @@ export default function AppPreview() {
 
           <div className="flex justify-center items-center gap-6 lg:gap-10">
              <div className="relative w-52 h-[450px] bg-slate-900 rounded-[2.5rem] border-[8px] border-slate-900 shadow-2xl overflow-hidden mt-20 group">
-                <Image src={policeAction!} fill alt="Police Action" className="object-cover group-hover:scale-110 transition-transform duration-1000" />
+                <img src={mockPolice!} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-primary/20 mix-blend-overlay" />
              </div>
              <div className="relative w-60 h-[520px] bg-slate-900 rounded-[3rem] border-[10px] border-slate-900 shadow-2xl overflow-hidden z-10 group">
-                <Image src={armyHero!} fill alt="Army Tactical" className="object-cover group-hover:scale-110 transition-transform duration-1000" />
+                <img src={armyHero!} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-[#0F172A]/40" />
              </div>
              <div className="relative w-52 h-[450px] bg-slate-900 rounded-[2.5rem] border-[8px] border-slate-900 shadow-2xl overflow-hidden mt-20 group">
-                <Image src={policeTrust!} fill alt="Police Uniform" className="object-cover group-hover:scale-110 transition-transform duration-1000" />
+                <img src={armyStrategic!} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" referrerPolicy="no-referrer" />
                 <div className="absolute inset-0 bg-primary/20 mix-blend-overlay" />
              </div>
           </div>
