@@ -19,8 +19,8 @@ import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Authority Hub v24.6 - Operational Hardening.
- * Features: Absolute Deletion Logic & Logo Zoom Protocol.
+ * @fileOverview Authority Hub v24.8 - Operational Hardening.
+ * Features: Absolute Deletion Logic (Propagation Fixed) & Logo Zoom Protocol.
  */
 
 export default function ExamManagement() {
@@ -141,7 +141,7 @@ export default function ExamManagement() {
                 ))
               ) : boards?.map((board: any) => {
                 const isImageFailed = failedImages[board.id];
-                const isArmy = board.abbreviation === 'Army';
+                const isArmy = board.id === 'indian-army' || board.abbreviation === 'Army';
                 return (
                   <TableRow key={board.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                     <TableCell className="px-10 py-6">
@@ -217,7 +217,7 @@ export default function ExamManagement() {
                         <img 
                           src={editingBoard.iconUrl} 
                           referrerPolicy="no-referrer"
-                          className={cn("absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform", editingBoard.abbreviation === 'Army' ? "scale-150" : "")} 
+                          className={cn("absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform", (editingBoard.id === 'indian-army' || editingBoard.abbreviation === 'Army') ? "scale-150" : "")} 
                           alt="Preview"
                         />
                       ) : (

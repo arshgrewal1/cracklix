@@ -130,9 +130,9 @@ export async function seedInitialData(db: Firestore) {
     {
       id: 'indian-army',
       abbreviation: 'Army',
-      name: 'Indian Army Agniveer Hub',
+      name: 'Indian Army Hub',
       iconUrl: armyOfficialLogo,
-      description: 'National recruitment gateway for Agniveer nodes.'
+      description: 'Official military recruitment gateway for Agniveer nodes.'
     }
   ];
 
