@@ -1,4 +1,3 @@
-
 "use client"
 
 import Navbar from "@/components/layout/Navbar"
@@ -26,7 +25,7 @@ import {
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
@@ -39,6 +38,7 @@ export default function ExamHubPage() {
   const router = useRouter()
   const db = useFirestore()
   const examId = params.id as string
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
 
   const { data: exam, loading: examLoading } = useDoc<any>(useMemo(() => (db ? doc(db, "exams", examId) : null), [db, examId]))
   
@@ -52,8 +52,9 @@ export default function ExamHubPage() {
   }, [db, examId]);
 
   const { data: rawMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
+  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
 
-  const psssbLogo = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
+  const stateEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
 
   const groupedMocks = useMemo(() => {
     if (!rawMocks) return { FULL: [], SUBJECT: [], SECTIONAL: [], PYQ: [], CA_QUIZ: [], CHAPTER: [] };
@@ -76,6 +77,8 @@ export default function ExamHubPage() {
 
   if (examLoading) return <div className="h-screen flex items-center justify-center bg-white"><Skeleton className="h-24 w-24 rounded-3xl" /></div>
   if (!exam) return <div className="h-screen flex flex-col items-center justify-center text-slate-400 gap-4"><Layout className="h-16 w-16 opacity-10" /><p className="font-black uppercase tracking-widest">Exam Hub Not Found</p></div>
+
+  const activeBoard = boards?.find((b: any) => b.id === exam.boardId);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body">
@@ -126,27 +129,27 @@ export default function ExamHubPage() {
             </div>
 
             <TabsContent value="FULL" className="space-y-6">
-               <HubGrid mocks={groupedMocks.FULL} emptyLabel="No Full-Length Mocks structured for this exam." logo={psssbLogo} />
+               <HubGrid mocks={groupedMocks.FULL} emptyLabel="No Full-Length Mocks structured for this exam." logo={activeBoard?.iconUrl || stateEmblem} boardId={exam.boardId} failedImages={failedImages} setFailedImages={setFailedImages} />
             </TabsContent>
 
             <TabsContent value="SUBJECT" className="space-y-6">
-               <HubGrid mocks={groupedMocks.SUBJECT} emptyLabel="Subject mastery tests are being audited for this hub." logo={psssbLogo} />
+               <HubGrid mocks={groupedMocks.SUBJECT} emptyLabel="Subject mastery tests are being audited for this hub." logo={activeBoard?.iconUrl || stateEmblem} boardId={exam.boardId} failedImages={failedImages} setFailedImages={setFailedImages} />
             </TabsContent>
 
             <TabsContent value="SECTIONAL" className="space-y-6">
-               <HubGrid mocks={groupedMocks.SECTIONAL} emptyLabel="No Sectional nodes linked to this recruitment." logo={psssbLogo} />
+               <HubGrid mocks={groupedMocks.SECTIONAL} emptyLabel="No Sectional nodes linked to this recruitment." logo={activeBoard?.iconUrl || stateEmblem} boardId={exam.boardId} failedImages={failedImages} setFailedImages={setFailedImages} />
             </TabsContent>
 
             <TabsContent value="CHAPTER" className="space-y-6">
-               <HubGrid mocks={groupedMocks.CHAPTER} emptyLabel="Chapter-wise preparation nodes pending registry." logo={psssbLogo} />
+               <HubGrid mocks={groupedMocks.CHAPTER} emptyLabel="Chapter-wise preparation nodes pending registry." logo={activeBoard?.iconUrl || stateEmblem} boardId={exam.boardId} failedImages={failedImages} setFailedImages={setFailedImages} />
             </TabsContent>
 
             <TabsContent value="PYQ" className="space-y-6">
-               <HubGrid mocks={groupedMocks.PYQ} emptyLabel="Official previous papers for this vertical are in registry." logo={psssbLogo} />
+               <HubGrid mocks={groupedMocks.PYQ} emptyLabel="Official previous papers for this vertical are in registry." logo={activeBoard?.iconUrl || stateEmblem} boardId={exam.boardId} failedImages={failedImages} setFailedImages={setFailedImages} />
             </TabsContent>
 
             <TabsContent value="CA_QUIZ" className="space-y-6">
-               <HubGrid mocks={groupedMocks.CA_QUIZ} emptyLabel="Daily current affairs quizzes for this board." logo={psssbLogo} />
+               <HubGrid mocks={groupedMocks.CA_QUIZ} emptyLabel="Daily current affairs quizzes for this board." logo={activeBoard?.iconUrl || stateEmblem} boardId={exam.boardId} failedImages={failedImages} setFailedImages={setFailedImages} />
             </TabsContent>
          </Tabs>
       </main>
@@ -169,23 +172,36 @@ function TabTrigger({ value, icon, label, count }: any) {
    )
 }
 
-function HubGrid({ mocks, emptyLabel, logo }: { mocks: any[], emptyLabel: string, logo: string }) {
+function HubGrid({ mocks, emptyLabel, logo, boardId, failedImages, setFailedImages }: any) {
    if (mocks.length === 0) return <EmptyState label={emptyLabel} />;
    return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-         {mocks.map((mock) => <MockCard key={mock.id} mock={mock} logo={logo} />)}
+         {mocks.map((mock: any) => <MockCard key={mock.id} mock={mock} logo={logo} boardId={boardId} failedImages={failedImages} setFailedImages={setFailedImages} />)}
       </div>
    )
 }
 
-function MockCard({ mock, logo }: { mock: any, logo: string }) {
+function MockCard({ mock, logo, boardId, failedImages, setFailedImages }: any) {
+  const isImgFailed = failedImages[mock.id];
   return (
-    <Card className="border-none shadow-xl hover:shadow-3xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden text-left flex flex-col h-full border border-slate-50">
+    <Card className="border-none shadow-xl hover:shadow-3xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden text-left flex flex-col h-full border border-slate-100">
       <CardContent className="p-0 flex-1 flex flex-col h-full">
          <div className="p-8 pb-4 space-y-6 flex-1">
             <div className="flex justify-between items-start">
-               <div className="h-16 w-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center relative overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-500 shadow-inner">
-                  <img src={logo} referrerPolicy="no-referrer" className="w-full h-full object-contain p-2" alt="Board" />
+               <div className="h-16 w-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center relative overflow-hidden shadow-lg group-hover:scale-105 transition-transform duration-500 shadow-inner shrink-0">
+                  {isImgFailed ? (
+                    <div className="bg-primary text-white h-full w-full flex items-center justify-center font-black text-xl">
+                       {boardId?.substring(0, 2).toUpperCase()}
+                    </div>
+                  ) : (
+                    <img 
+                      src={logo} 
+                      referrerPolicy="no-referrer" 
+                      className="w-full h-full object-contain p-2" 
+                      alt="Board" 
+                      onError={() => setFailedImages((p: any) => ({ ...p, [mock.id]: true }))}
+                    />
+                  )}
                </div>
                <div className="text-right space-y-1">
                   <Badge className="bg-orange-50 text-primary border-none text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-lg">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
 import { ShieldCheck, BookOpen, Clock, ChevronRight, Zap, GraduationCap } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 export default function LatestMocks() {
   const db = useFirestore()
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
   
   const mocksQuery = useMemo(() => {
     if (!db) return null
@@ -69,6 +70,7 @@ export default function LatestMocks() {
           ) : mocks.length > 0 ? (
             mocks.map((mock, i) => {
               const board = boards?.find((b: any) => b.id === mock.boardId);
+              const isImgFailed = failedImages[mock.id];
               return (
                 <motion.div
                   key={mock.id}
@@ -81,17 +83,19 @@ export default function LatestMocks() {
                   <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl hover:shadow-4xl hover:-translate-y-1 transition-all duration-500 group h-full flex flex-col p-6">
                     <div className="flex justify-between items-start mb-6">
                       <div className="h-16 w-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center relative overflow-hidden group-hover:shadow-lg transition-all shadow-inner shrink-0">
-                         <img 
-                            src={board?.iconUrl || stateEmblem} 
-                            referrerPolicy="no-referrer"
-                            crossOrigin="anonymous"
-                            className="w-full h-full object-contain p-1" 
-                            alt={mock.boardId || 'Board'} 
-                            onError={(e) => {
-                               const target = e.target as HTMLImageElement;
-                               target.src = stateEmblem;
-                            }}
-                         />
+                         {isImgFailed ? (
+                            <div className="bg-primary text-white h-full w-full flex items-center justify-center font-black text-xl">
+                               {board?.abbreviation?.substring(0, 2) || 'OK'}
+                            </div>
+                         ) : (
+                           <img 
+                              src={board?.iconUrl || stateEmblem} 
+                              referrerPolicy="no-referrer"
+                              className="w-full h-full object-contain p-1" 
+                              alt={mock.boardId || 'Board'} 
+                              onError={() => setFailedImages(p => ({ ...p, [mock.id]: true }))}
+                           />
+                         )}
                       </div>
                       <Badge className="bg-orange-50 text-primary border-none text-[8px] font-black uppercase px-2 py-0.5 rounded-lg">
                         {board?.abbreviation || mock.boardId?.toUpperCase() || 'OFFICIAL'}

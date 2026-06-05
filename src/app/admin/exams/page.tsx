@@ -17,8 +17,8 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 /**
- * @fileOverview Authority Hub v12.0 - Optimized Government SVG Renderer.
- * Features: Hardened Referrer Bypassing and Anti-Block protocols.
+ * @fileOverview Authority Hub v12.5 - Hardened Government SVG Renderer.
+ * Features: Absolute Referrer Bypassing and Triple-Layer text fallback.
  */
 
 export default function ExamManagement() {
@@ -87,11 +87,9 @@ export default function ExamManagement() {
       const snapshot = await uploadBytes(uploadRef, file)
       const downloadURL = await getDownloadURL(snapshot.ref)
       
-      console.log("[UPLOAD] File synced to storage. URL:", downloadURL);
       setEditingBoard((prev: any) => ({ ...prev, iconUrl: downloadURL }))
       toast({ title: "Asset Synced", description: "Logo updated in storage." })
     } catch (error: any) {
-      console.error("[UPLOAD] Sync failed:", error);
       toast({ variant: "destructive", title: "Upload Failed", description: error.message || "Storage rejection." })
     } finally {
       clearTimeout(timer);
@@ -215,7 +213,7 @@ export default function ExamManagement() {
                   {isUploading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Upload className="h-4 w-4 text-primary" />}
                   {isUploading ? "Syncing Asset..." : "Upload Device Logo"}
                 </Button>
-                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
+                <input type="file" fileInputRef.current?.click()} className="hidden" accept="image/*" onChange={handleFileUpload} />
               </div>
             </div>
 
