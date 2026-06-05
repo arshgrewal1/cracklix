@@ -9,15 +9,15 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { Globe, Shield, Layout, Bell, Save, RefreshCw, ShieldCheck, Lock, CloudLightning, FileCode, QrCode, Phone, Zap, Megaphone } from "lucide-react"
+import { Globe, Shield, Layout, Bell, Save, RefreshCw, ShieldCheck, Lock, CloudLightning, FileCode, QrCode, Phone, Zap, Megaphone, MapPin, Mail, Twitter, Facebook, Instagram, Send } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Final Enterprise CMS Node.
- * Features: Manual Payment Configuration (UPI Registry) and Announcement Toggle.
+ * @fileOverview Final Enterprise CMS Node v5.0.
+ * Features: Manual Payment Configuration, Announcement Toggle, and Social/Contact Registry.
  */
 
 export default function AdminSettings() {
@@ -35,12 +35,18 @@ export default function AdminSettings() {
     announcement: "🔥 Official Punjab 2026 Recruitment Calendar Live.",
     showAnnouncement: true,
     platformName: "Cracklix",
+    footerText: "Punjab's most advanced government exam portal. Designed for aspirants, built with integrity.",
+    address: "Shergarh, Bathinda, Punjab",
     revenueReady: false,
     negativeMarking: true,
     aiRationalization: true,
     upiId: "arshdeepgrewal1122@okaxis",
     supportPhone: "+91 98881 88602",
-    supportEmail: "cracklixhelp@gmail.com"
+    supportEmail: "cracklixhelp@gmail.com",
+    facebookUrl: "",
+    instagramUrl: "",
+    twitterUrl: "",
+    telegramUrl: "https://t.me/cracklixapp"
   });
 
   useEffect(() => {
@@ -75,6 +81,7 @@ export default function AdminSettings() {
       <Tabs defaultValue="homepage" className="space-y-8">
         <TabsList className="bg-slate-100 border border-slate-200 p-1.5 h-16 rounded-2xl overflow-x-auto overflow-y-hidden custom-scrollbar">
           <TabsTrigger value="homepage" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Global CMS</TabsTrigger>
+          <TabsTrigger value="social" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Social & Contact</TabsTrigger>
           <TabsTrigger value="payments" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Payment Registry</TabsTrigger>
           <TabsTrigger value="logic" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Logic Engines</TabsTrigger>
         </TabsList>
@@ -107,7 +114,89 @@ export default function AdminSettings() {
                    <Input value={formData.platformName} onChange={e => setFormData({...formData, platformName: e.target.value})} className="h-16 rounded-2xl bg-slate-50 border-slate-100 text-xl font-black" />
                 </div>
              </div>
+             
+             <div className="space-y-6">
+                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Footer Abstract Description</Label>
+                <Textarea 
+                  value={formData.footerText} 
+                  onChange={e => setFormData({...formData, footerText: e.target.value})} 
+                  className="min-h-[100px] rounded-2xl bg-slate-50 border-slate-100 font-medium leading-relaxed" 
+                />
+             </div>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="social">
+           <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12 space-y-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                 {/* Contact Details */}
+                 <div className="space-y-8">
+                    <h3 className="font-headline font-black text-xl uppercase flex items-center gap-3">
+                       <Phone className="h-6 w-6 text-primary" /> Official Contact Info
+                    </h3>
+                    <div className="space-y-4">
+                       <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Office HQs Address</Label>
+                          <div className="relative">
+                             <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                             <Input value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
+                          </div>
+                       </div>
+                       <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Support Email</Label>
+                          <div className="relative">
+                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                             <Input value={formData.supportEmail} onChange={e => setFormData({...formData, supportEmail: e.target.value})} className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
+                          </div>
+                       </div>
+                       <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Support WhatsApp/Phone</Label>
+                          <div className="relative">
+                             <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                             <Input value={formData.supportPhone} onChange={e => setFormData({...formData, supportPhone: e.target.value})} className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+
+                 {/* Social Hub */}
+                 <div className="space-y-8">
+                    <h3 className="font-headline font-black text-xl uppercase flex items-center gap-3">
+                       <Globe className="h-6 w-6 text-blue-500" /> Social Presence Hub
+                    </h3>
+                    <div className="space-y-4">
+                       <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Telegram Channel URL</Label>
+                          <div className="relative">
+                             <Send className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                             <Input value={formData.telegramUrl} onChange={e => setFormData({...formData, telegramUrl: e.target.value})} placeholder="https://t.me/..." className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
+                          </div>
+                       </div>
+                       <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Instagram URL</Label>
+                          <div className="relative">
+                             <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                             <Input value={formData.instagramUrl} onChange={e => setFormData({...formData, instagramUrl: e.target.value})} placeholder="https://instagram.com/..." className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
+                          </div>
+                       </div>
+                       <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Twitter (X) URL</Label>
+                          <div className="relative">
+                             <Twitter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                             <Input value={formData.twitterUrl} onChange={e => setFormData({...formData, twitterUrl: e.target.value})} placeholder="https://x.com/..." className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
+                          </div>
+                       </div>
+                       <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Facebook Page URL</Label>
+                          <div className="relative">
+                             <Facebook className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                             <Input value={formData.facebookUrl} onChange={e => setFormData({...formData, facebookUrl: e.target.value})} placeholder="https://facebook.com/..." className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              </div>
+           </Card>
         </TabsContent>
 
         <TabsContent value="payments">
@@ -115,15 +204,8 @@ export default function AdminSettings() {
              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                 <div className="space-y-6">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><QrCode className="h-3 w-3" /> Audit UPI ID</Label>
-                   <Input value={formData.upiId} onChange={e => setFormData({...formData, upiId: e.target.value})} className="h-16 rounded-2xl bg-slate-50 border-slate-100 text-xl font-black text-primary" placeholder="arsh@okaxis" />
+                   <Input value={formData.upiId} onChange={e => setFormData({...formData, upiId: e.target.value})} className="h-16 rounded-2xl bg-slate-50 border-slate-100 text-xl font-black text-primary" placeholder="arshdeepgrewal1122@okaxis" />
                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest ml-1">This ID will be displayed to all students during manual checkout.</p>
-                </div>
-                <div className="space-y-6">
-                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Phone className="h-3 w-3" /> Support Context</Label>
-                   <div className="grid grid-cols-1 gap-4">
-                      <Input value={formData.supportPhone} onChange={e => setFormData({...formData, supportPhone: e.target.value})} className="h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" placeholder="WhatsApp Number" />
-                      <Input value={formData.supportEmail} onChange={e => setFormData({...formData, supportEmail: e.target.value})} className="h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" placeholder="Support Email" />
-                   </div>
                 </div>
              </div>
           </Card>

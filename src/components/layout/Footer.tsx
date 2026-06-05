@@ -9,8 +9,8 @@ import { doc } from "firebase/firestore";
 import { useMemo } from "react";
 
 /**
- * @fileOverview Final Institutional Footer Node.
- * Updated: Prominent Credit to Founder & Developer Arsh Grewal.
+ * @fileOverview Final Institutional Footer Node v5.0.
+ * Features: Fully dynamic social links, address, and credit registry controlled by Admin settings.
  */
 
 export default function Footer() {
@@ -19,13 +19,15 @@ export default function Footer() {
   const { data: settings } = useDoc<any>(settingsRef);
 
   const content = {
+    platformName: settings?.platformName || "Cracklix",
     footerText: settings?.footerText || "Punjab's most advanced government exam portal. Designed for aspirants, built with integrity.",
     email: settings?.supportEmail || "cracklixhelp@gmail.com",
     phone: settings?.supportPhone || "+91 98881 88602",
+    address: settings?.address || "Shergarh, Bathinda, Punjab",
     fb: settings?.facebookUrl || "#",
     ig: settings?.instagramUrl || "#",
     tw: settings?.twitterUrl || "#",
-    tg: "https://t.me/cracklixapp"
+    tg: settings?.telegramUrl || "https://t.me/cracklixapp"
   };
 
   return (
@@ -41,7 +43,7 @@ export default function Footer() {
             <div className="space-y-4">
                <div className="flex items-center gap-4 text-slate-300">
                   <MapPin className="h-5 w-5 text-primary" />
-                  <span className="font-bold text-sm">HQs: Shergarh, Bathinda, Punjab</span>
+                  <span className="font-bold text-sm">HQs: {content.address}</span>
                </div>
                <div className="flex items-center gap-4 text-slate-300">
                   <ShieldCheck className="h-5 w-5 text-primary" />
@@ -72,20 +74,20 @@ export default function Footer() {
 
           <div className="text-left">
             <h4 className="font-headline font-black text-xs uppercase tracking-[0.2em] text-slate-500 mb-8">Connect</h4>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
                <SocialIcon icon={<Send className="fill-current" />} href={content.tg} label="Telegram" />
-               <SocialIcon icon={<Twitter />} href={content.tw} label="Twitter" />
-               <SocialIcon icon={<Instagram />} href={content.ig} label="Instagram" />
-               <SocialIcon icon={<Facebook />} href={content.fb} label="Facebook" />
+               {content.tw !== "#" && <SocialIcon icon={<Twitter />} href={content.tw} label="Twitter" />}
+               {content.ig !== "#" && <SocialIcon icon={<Instagram />} href={content.ig} label="Instagram" />}
+               {content.fb !== "#" && <SocialIcon icon={<Facebook />} href={content.fb} label="Facebook" />}
             </div>
             <div className="mt-8 space-y-2">
-               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Support Node</p>
+               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">FOUNDER: ARSH GREWAL</p>
                <a 
-                 href="https://wa.me/919888188602" 
+                 href={`https://wa.me/${content.phone.replace(/[^0-9]/g, '')}`} 
                  target="_blank" 
                  className="text-2xl font-black text-primary hover:text-orange-400 transition-colors block"
                >
-                 +91 98881 88602
+                 {content.phone}
                </a>
             </div>
           </div>
@@ -95,7 +97,7 @@ export default function Footer() {
         <div className="mt-24 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex flex-col md:flex-row items-center gap-6">
              <p className="text-slate-500 text-xs font-bold italic">
-               © 2026 {settings?.platformName || 'Cracklix'} Technologies. Built with ❤️ in Punjab.
+               © 2026 {content.platformName} Technologies. Built with ❤️ in Punjab.
              </p>
              <div className="hidden md:block h-4 w-px bg-white/10" />
              <div className="flex items-center gap-3 px-5 py-2 bg-white/5 rounded-full border border-white/5">
@@ -122,10 +124,14 @@ export default function Footer() {
 }
 
 function SocialIcon({ icon, href, label }: { icon: React.ReactNode, href: string, label?: string }) {
+  const isDummy = href === "#" || !href;
+  if (isDummy) return null;
+
   return (
     <a 
       href={href} 
       target="_blank" 
+      rel="noopener noreferrer"
       title={label}
       className="h-12 w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center hover:bg-primary hover:text-white transition-all cursor-pointer group"
     >
