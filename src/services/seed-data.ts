@@ -4,7 +4,7 @@ import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/fi
  * @fileOverview Final Institutional Seeding Engine for Cracklix.
  * Synchronizes binary access passes, official board registry, and platform settings.
  * Optimized for Testbook-style "Select Board" logic with high-fidelity logos.
- * Fixed: Hardcoded official URLs for all boards to prevent upload dependency.
+ * Hardcoded to Wikimedia URLs to ensure Cross-Origin (CORS) compatibility.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[REGISTRY] Initializing Global Punjab Access Registry Sync...');
@@ -51,69 +51,72 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'passes', p.id), { ...p, updatedAt: serverTimestamp() });
   }
 
-  // 2. Master Authority Registry with Absolute Verified URLs
+  // 2. Master Authority Registry with Stable Wikimedia URLs (CORS Friendly)
+  const stateEmblem = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png';
+  const policeEmblem = 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Punjab_Police_India_Logo.png';
+
   const boards = [
     {
       id: 'psssb',
       abbreviation: 'PSSSB',
       name: 'Punjab Subordinate Services Selection Board',
-      iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png',
+      iconUrl: stateEmblem,
       description: 'Official board for Group B and C posts.'
     },
     {
       id: 'ppsc',
       abbreviation: 'PPSC',
       name: 'Punjab Public Service Commission',
-      iconUrl: 'https://ppsc.gov.in/assets/images/logo.png',
+      iconUrl: stateEmblem,
       description: 'Authority for Class A and B civil services.'
     },
     {
       id: 'punjab-police',
       abbreviation: 'Police',
       name: 'Punjab Police Recruitment Board',
-      iconUrl: 'https://1000logos.net/wp-content/uploads/2022/12/Punjab-Police-Logo.png',
+      iconUrl: policeEmblem,
       description: 'District and Armed cadre recruitments.'
     },
     {
       id: 'pseb',
       abbreviation: 'Education',
       name: 'Punjab School Education Board',
-      iconUrl: 'https://www.pseb.ac.in/images/logo-punjabi.png',
+      iconUrl: stateEmblem,
       description: 'ETT, Master Cadre, and PSTET recruitments.'
     },
     {
       id: 'pspcl',
       abbreviation: 'PSPCL',
       name: 'Punjab State Power Corporation Limited',
-      iconUrl: 'https://pspcl.in/images/logo.png',
+      iconUrl: stateEmblem,
       description: 'Technical and clerical power sector nodes.'
     },
     {
       id: 'pstcl',
       abbreviation: 'PSTCL',
       name: 'Punjab State Transmission Corporation',
-      iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png',
+      iconUrl: stateEmblem,
       description: 'Transmission sector recruitment hub.'
     },
     {
       id: 'high-court',
       abbreviation: 'High Court',
       name: 'Punjab & Haryana High Court',
-      iconUrl: 'https://highcourtchd.gov.in/sub_pages/left_menu/images/logo1.png',
+      iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Scale_of_justice_2.svg/512px-Scale_of_justice_2.svg.png',
       description: 'Judicial and clerical court recruitments.'
     },
     {
       id: 'markfed',
       abbreviation: 'MARKFED',
       name: 'Punjab MARKFED',
-      iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png',
+      iconUrl: stateEmblem,
       description: 'Cooperative federation recruitments.'
     },
     {
       id: 'verka',
       abbreviation: 'Verka',
       name: 'Milkfed Punjab (Verka)',
-      iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png',
+      iconUrl: stateEmblem,
       description: 'Management and production nodes.'
     }
   ];
@@ -122,7 +125,7 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() });
   }
 
-  // 3. Subject Registry with EVS & Pedagogy
+  // 3. Subject Registry
   const subjects = [
     { id: 'punjab-gk', name: 'Punjab GK & Culture' },
     { id: 'mental-ability', name: 'Mental Ability / Reasoning' },

@@ -17,8 +17,8 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 /**
- * @fileOverview Authority Hub v6.0 - Bulletproof Branding Node.
- * Features: Triple-layer failover for logos and absolute black text support.
+ * @fileOverview Authority Hub v7.0 - Triple-Layer Branding Engine.
+ * Features: High-reliability Wikimedia failover + Text-based identity nodes for blocked assets.
  */
 
 export default function ExamManagement() {
@@ -32,15 +32,11 @@ export default function ExamManagement() {
   const [editingBoard, setEditingBoard] = useState<any>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
-  const [assetError, setAssetError] = useState(false)
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Official State Emblem Fallback - Highly Stable Wikimedia URL
   const stateEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
-
-  useEffect(() => {
-    setAssetError(false);
-  }, [editingBoard?.id, editingBoard?.iconUrl]);
 
   const handleSave = async () => {
     if (!db || !editingBoard) return
@@ -74,13 +70,11 @@ export default function ExamManagement() {
     const file = e.target.files?.[0]
     if (!file || !storage) return
 
-    console.log("[STORAGE] Starting upload node for:", file.name);
     setIsUploading(true)
-    setAssetError(false)
     
     const timer = setTimeout(() => {
        setIsUploading(false);
-       toast({ variant: "destructive", title: "Sync Timeout", description: "Storage response took too long. Check your rules or use URL override." });
+       toast({ variant: "destructive", title: "Sync Timeout", description: "Storage response took too long." });
     }, 30000);
 
     try {
@@ -91,7 +85,6 @@ export default function ExamManagement() {
       setEditingBoard((prev: any) => ({ ...prev, iconUrl: downloadURL }))
       toast({ title: "Asset Synced", description: "Logo updated in storage." })
     } catch (error: any) {
-      console.error("[STORAGE] Node failure:", error);
       toast({ variant: "destructive", title: "Upload Failed", description: error.message || "Storage rejection." })
     } finally {
       clearTimeout(timer);
@@ -101,7 +94,7 @@ export default function ExamManagement() {
   }
 
   return (
-    <div className="space-y-12 pb-24 text-[#0F172A] text-left pt-10">
+    <div className="space-y-12 pb-24 text-[#0F172A] text-left pt-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-6">
         <div>
            <div className="flex items-center gap-3 mb-2">
@@ -132,34 +125,40 @@ export default function ExamManagement() {
                 Array.from({ length: 4 }).map((_, i) => (
                   <TableRow key={i} className="border-slate-50"><TableCell colSpan={4} className="px-10 py-5"><Skeleton className="h-14 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
                 ))
-              ) : boards?.map((board: any) => (
-                <TableRow key={board.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
-                  <TableCell className="px-10 py-6">
-                    <div className="h-16 w-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center overflow-hidden relative shadow-inner group-hover:scale-110 transition-transform">
-                        <img 
-                          src={board.iconUrl || stateEmblem} 
-                          className="h-full w-full object-contain p-2" 
-                          crossOrigin="anonymous"
-                          referrerPolicy="no-referrer"
-                          alt={board.abbreviation}
-                          onError={(e) => { 
-                            const target = e.target as HTMLImageElement;
-                            target.src = stateEmblem;
-                          }}
-                        />
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-headline font-black text-primary text-xl tracking-tighter uppercase">{board.abbreviation}</TableCell>
-                  <TableCell className="text-sm font-bold text-slate-800 leading-tight max-w-xs">{board.name}</TableCell>
-                  <TableCell className="text-right px-10">
-                    <div className="flex justify-end gap-2 opacity-30 group-hover:opacity-100 transition-all">
-                       <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-slate-100" onClick={() => setEditingBoard(board)}>
-                        <Edit className="h-5 w-5" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+              ) : boards?.map((board: any) => {
+                const isImageFailed = failedImages[board.id];
+                return (
+                  <TableRow key={board.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
+                    <TableCell className="px-10 py-6">
+                      <div className="h-16 w-16 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden relative shadow-inner group-hover:scale-110 transition-transform">
+                          {isImageFailed ? (
+                             <div className="bg-primary text-white h-full w-full flex items-center justify-center font-black text-xl">
+                                {board.abbreviation?.substring(0, 2)}
+                             </div>
+                          ) : (
+                            <img 
+                              src={board.iconUrl || stateEmblem} 
+                              className="h-full w-full object-contain p-2" 
+                              crossOrigin="anonymous"
+                              referrerPolicy="no-referrer"
+                              alt={board.abbreviation}
+                              onError={() => setFailedImages(p => ({...p, [board.id]: true}))}
+                            />
+                          )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-headline font-black text-primary text-xl tracking-tighter uppercase">{board.abbreviation}</TableCell>
+                    <TableCell className="text-sm font-bold text-slate-800 leading-tight max-w-xs">{board.name}</TableCell>
+                    <TableCell className="text-right px-10">
+                      <div className="flex justify-end gap-2 opacity-30 group-hover:opacity-100 transition-all">
+                         <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-slate-100" onClick={() => setEditingBoard(board)}>
+                          <Edit className="h-5 w-5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         </CardContent>
@@ -179,10 +178,7 @@ export default function ExamManagement() {
             <div className="flex flex-col items-center gap-6">
               <div className="h-36 w-36 rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden group shadow-inner">
                  {isUploading ? (
-                    <div className="flex flex-col items-center gap-2">
-                       <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                       <span className="text-[9px] font-black text-primary uppercase tracking-widest">Syncing Asset...</span>
-                    </div>
+                    <Loader2 className="h-8 w-8 text-primary animate-spin" />
                  ) : (
                     <div className="relative h-full w-full flex items-center justify-center">
                       <img 
@@ -191,41 +187,22 @@ export default function ExamManagement() {
                         crossOrigin="anonymous"
                         className="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform" 
                         alt="Preview"
-                        onError={(e) => { 
-                          if (editingBoard?.iconUrl) setAssetError(true);
-                          const target = e.target as HTMLImageElement;
-                          target.src = stateEmblem;
-                        }}
+                        onError={(e) => { (e.target as HTMLImageElement).src = stateEmblem }}
                       />
-                      {assetError && editingBoard?.iconUrl && (
-                        <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex flex-col items-center justify-center text-center p-4">
-                           <AlertCircle className="h-6 w-6 text-rose-500 mb-1" />
-                           <span className="text-[8px] font-black text-rose-600 uppercase tracking-widest leading-tight">Invalid Asset URL</span>
-                        </div>
-                      )}
                     </div>
                  )}
               </div>
               
               <div className="w-full space-y-4">
-                <div className="grid grid-cols-1 gap-3">
-                  <Button 
-                    variant="outline" 
-                    className="w-full h-14 rounded-xl border-slate-200 bg-white font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-slate-50 shadow-sm"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading || isSaving}
-                  >
-                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Upload className="h-4 w-4 text-primary" />}
-                    {isUploading ? "Uploading to Storage..." : "Upload Device Logo"}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    className="h-10 text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-primary gap-2"
-                    onClick={() => setEditingBoard({...editingBoard, iconUrl: stateEmblem})}
-                  >
-                    <RefreshCw className="h-3 w-3" /> Restore Official Emblem
-                  </Button>
-                </div>
+                <Button 
+                  variant="outline" 
+                  className="w-full h-14 rounded-xl border-slate-200 bg-white font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-slate-50 shadow-sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading || isSaving}
+                >
+                  {isUploading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Upload className="h-4 w-4 text-primary" />}
+                  {isUploading ? "Syncing Asset..." : "Upload Device Logo"}
+                </Button>
                 <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
               </div>
             </div>
@@ -233,7 +210,7 @@ export default function ExamManagement() {
             <div className="space-y-6 pt-4 border-t border-slate-50">
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
-                    <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Short Code (e.g. PSSSB)</Label>
+                    <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Short Code</Label>
                     <Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value.toUpperCase()})} className="bg-slate-50 border-none rounded-xl h-12 font-black uppercase" />
                  </div>
                  <div className="space-y-2">
@@ -242,12 +219,8 @@ export default function ExamManagement() {
                  </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1 flex items-center justify-between">
-                  Logo URL (Manual Entry / Override)
-                  {editingBoard?.iconUrl && <button onClick={() => setEditingBoard({...editingBoard, iconUrl: ""})} className="text-rose-500 hover:underline">Clear</button>}
-                </Label>
-                <Input value={editingBoard?.iconUrl || ""} onChange={e => setEditingBoard({...editingBoard, iconUrl: e.target.value.trim()})} className="bg-slate-50 border-none rounded-xl h-12 text-[10px] font-mono" placeholder="https://..." />
-                <p className="text-[8px] text-slate-400 font-bold uppercase italic">Use this field if your storage upload hangs or to use a direct government URL.</p>
+                <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Logo URL Override</Label>
+                <Input value={editingBoard?.iconUrl || ""} onChange={e => setEditingBoard({...editingBoard, iconUrl: e.target.value.trim()})} className="bg-slate-50 border-none rounded-xl h-12 text-[10px] font-mono" />
               </div>
             </div>
           </div>
