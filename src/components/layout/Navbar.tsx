@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -27,7 +26,7 @@ import { cn } from "@/lib/utils";
 /**
  * @fileOverview Global Navigation Node.
  * Features: Optimized for compact mobile sidebar and safe-area constraints.
- * Fixed: Mobile Sidebar Width strictly constrained to 280px.
+ * Fixed: Mobile Sidebar Width strictly constrained to 250px for high density.
  */
 
 export default function Navbar() {
@@ -72,7 +71,7 @@ export default function Navbar() {
                  </SheetTrigger>
                  <SheetContent 
                    side="left" 
-                   className="p-0 border-none w-[280px] h-full"
+                   className="p-0 border-none w-[250px] h-full"
                  >
                    <SheetHeader className="sr-only"><SheetTitle>Aspirant Menu</SheetTitle></SheetHeader>
                    <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
