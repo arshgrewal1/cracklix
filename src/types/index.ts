@@ -5,6 +5,7 @@ export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'CHAPTER' | 'PYQ' | 'C
 export type ContentStatus = 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'ARCHIVED';
 export type Gender = 'Male' | 'Female' | 'Other';
 export type AccessType = 'FREE' | 'PREMIUM';
+export type RegionType = 'Punjab' | 'National';
 
 export type QuestionType = 
   | 'MCQ' 
@@ -25,6 +26,15 @@ export type DiagramType =
   | 'barGraph' 
   | 'lineGraph' 
   | 'map';
+
+export interface Board {
+  id: string;
+  abbreviation: string;
+  name: string;
+  iconUrl: string;
+  description: string;
+  region: RegionType;
+}
 
 export interface Pass {
   id: string;

@@ -4,7 +4,7 @@ import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/fi
 /**
  * @fileOverview Final Institutional Seeding Engine for Cracklix.
  * Synchronizes binary access passes, official board registry, and platform settings.
- * Hardcoded to official Government URLs provided by Management.
+ * categorizes boards into 'Punjab' and 'National' regions for backend routing.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[REGISTRY] Initializing Global Punjab & National Access Registry Sync...');
@@ -20,7 +20,7 @@ export async function seedInitialData(db: Firestore) {
       displayOrder: 1, 
       type: 'FREE',
       description: 'Start your journey with verified patterns.',
-      features: ['Limited Mocks', 'Daily Analysis', 'Exam Calendar']
+      features: ['10 Free Mocks', 'Daily Analysis', 'Exam Calendar']
     },
     { 
       id: 'silver_pass', 
@@ -51,7 +51,7 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'passes', p.id), { ...p, updatedAt: serverTimestamp() });
   }
 
-  // 2. Master Authority Registry with OFFICIAL Government URLs
+  // 2. Master Authority Registry with REGIONAL Routing
   const stateEmblem = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png';
   const psssbLogo = 'https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg';
   const policeLogo = 'https://punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png';
@@ -70,6 +70,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'PSSSB',
       name: 'Punjab Subordinate Services Selection Board',
       iconUrl: psssbLogo,
+      region: 'Punjab',
       description: 'Official board for Group B and C recruitment nodes.'
     },
     {
@@ -77,6 +78,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'PPSC',
       name: 'Punjab Public Service Commission',
       iconUrl: stateEmblem,
+      region: 'Punjab',
       description: 'Official authority for Class A and B civil services.'
     },
     {
@@ -84,6 +86,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'Police',
       name: 'Punjab Police Recruitment',
       iconUrl: policeLogo,
+      region: 'Punjab',
       description: 'District and Armed cadre recruitment registry.'
     },
     {
@@ -91,6 +94,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'PSEB',
       name: 'Punjab School Education Board (Schooling)',
       iconUrl: psebSchoolLogo,
+      region: 'Punjab',
       description: 'Official board for school-level staff and schooling nodes.'
     },
     {
@@ -98,6 +102,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'PSTET',
       name: 'Punjab Education Department',
       iconUrl: eduDeptLogo,
+      region: 'Punjab',
       description: 'ETT, Master Cadre, and PSTET recruitment hub.'
     },
     {
@@ -105,6 +110,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'PSPCL',
       name: 'Punjab State Power Corporation Limited',
       iconUrl: pspclOfficialLogo,
+      region: 'Punjab',
       description: 'Technical and clerical power sector recruitment.'
     },
     {
@@ -112,6 +118,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'PSTCL',
       name: 'Punjab State Transmission Corporation',
       iconUrl: pstclOfficialLogo,
+      region: 'Punjab',
       description: 'Technical and clerical transmission sector recruitment.'
     },
     {
@@ -119,6 +126,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'Technical',
       name: 'Punjab Technical Education Board',
       iconUrl: technicalLogo,
+      region: 'Punjab',
       description: 'Punjab State Board of Technical Education and Industrial Training.'
     },
     {
@@ -126,6 +134,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'High Court',
       name: 'Punjab & Haryana High Court',
       iconUrl: hcOfficialLogo,
+      region: 'Punjab',
       description: 'Judicial and clerical court recruitment registry.'
     },
     {
@@ -133,6 +142,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'ARMY',
       name: 'Indian Army Hub',
       iconUrl: armyOfficialLogo,
+      region: 'National',
       description: 'Official military recruitment gateway for Agniveer nodes.'
     },
     {
@@ -140,6 +150,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'CTET',
       name: 'Central Teacher Eligibility Test',
       iconUrl: ctetLogo,
+      region: 'National',
       description: 'National level eligibility test for central schooling nodes.'
     }
   ];
