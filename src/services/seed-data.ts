@@ -56,7 +56,7 @@ export async function seedInitialData(db: Firestore) {
   const pspclOfficialLogo = 'https://pspcl.in/assets/images/logo.png';
   const pstclOfficialLogo = 'https://www.pstcl.org/images/logo.png';
   const policeOfficialLogo = 'https://punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png';
-  const hcEmblem = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Scale_of_justice_2.svg/512px-Scale_of_justice_2.svg.png';
+  const hcOfficialLogo = 'https://highcourtchd.gov.in/images/newlogo.png';
 
   const boards = [
     {
@@ -105,7 +105,7 @@ export async function seedInitialData(db: Firestore) {
       id: 'high-court',
       abbreviation: 'High Court',
       name: 'Punjab & Haryana High Court',
-      iconUrl: hcEmblem,
+      iconUrl: hcOfficialLogo,
       description: 'Judicial and clerical court recruitment registry.'
     }
   ];
