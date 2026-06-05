@@ -1,12 +1,11 @@
 
 'use client';
 
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect } from 'react';
 import { useCollection, useFirestore, useUser, useDoc } from '@/firebase';
 import { collection, query, where, doc } from 'firebase/firestore';
 import { Advertisement, AdPlacementType } from '@/types';
 import { trackAdImpression, trackAdClick } from '@/app/actions/ads';
-import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 

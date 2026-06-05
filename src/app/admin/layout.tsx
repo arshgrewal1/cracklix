@@ -2,7 +2,7 @@
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle, FileText, Activity, ShieldAlert, HeartPulse, HelpCircle, Upload, Layers, CheckCircle2, Gem, History, SearchCode, Megaphone, Globe, MousePointer2 } from "lucide-react"
+import { LayoutDashboard, Database, ClipboardList, Settings, Users, LogOut, ShieldCheck, Zap, Newspaper, FileText, Megaphone, Globe, MousePointer2, Layers, CheckCircle2, Gem, History, ShieldAlert, SearchCode, HeartPulse, HelpCircle, Upload } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 import { useUser, useAuth } from "@/firebase"

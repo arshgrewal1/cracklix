@@ -2,10 +2,10 @@
 "use client"
 
 import { useMemo } from "react"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Megaphone, Edit, Trash2, Zap, BarChart3, TrendingUp, Search, Calendar, Globe, MousePointer2, Eye } from "lucide-react"
+import { Plus, Megaphone, Edit, Trash2, Zap, TrendingUp, Globe, MousePointer2, Eye } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, deleteDoc, doc, orderBy } from "firebase/firestore"
@@ -99,7 +99,7 @@ export default function AdManagement() {
                      <div className="flex flex-col gap-2">
                         <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black w-fit">{ad.type}</Badge>
                         <div className="flex items-center gap-2">
-                           <div className={`h-2 w-2 rounded-full ${ad.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                           <div className={`h-2.5 w-2.5 rounded-full ${ad.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
                            <span className="text-[9px] font-bold text-slate-500 uppercase">{ad.status}</span>
                         </div>
                      </div>
