@@ -36,7 +36,8 @@ import { useState } from "react";
 
 /**
  * @fileOverview Ultra-Compact Mobile Navigation Hub (180px).
- * Optimized: Badge moved to right of name, reduced header height, lifted avatar.
+ * Optimized: Entire content (Profile + Menu) scrolls as a single unit. 
+ * Sidebar positioned flush with header.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
@@ -79,81 +80,87 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="flex flex-col h-full bg-white text-[#0F172A] overflow-hidden font-body w-[180px] max-w-[180px]">
-      {/* 1. HIGH-DENSITY PROFILE HUB (CROPPED) */}
-      <div className="px-3 pt-3 pb-2 bg-[#0B1528] shrink-0 border-b border-white/5">
-        <div className="flex flex-col gap-2">
-          <StudentAvatar 
-            profile={profile} 
-            className="h-8 w-8 border border-white/10 rounded-lg shrink-0 shadow-lg" 
-          />
-          <div className="flex items-center justify-between gap-1 w-full overflow-hidden">
-            <h2 className="font-headline font-black text-[12px] text-white uppercase tracking-tight leading-tight truncate flex-1">
-              {profile?.name?.split(' ')[0] || "Aspirant"}
-            </h2>
-            <Badge className="bg-[#F97316] text-white border-none text-[6px] font-black uppercase px-1.5 py-0.5 rounded-sm shrink-0">
-              {profile?.status === 'Free' ? 'FREE' : 'GOLD'}
-            </Badge>
+      
+      {/* 1. UNIFIED SCROLLABLE CONTENT (Profile + Menu) */}
+      <div className="flex-1 overflow-y-auto no-scrollbar pb-8">
+        
+        {/* HIGH-DENSITY PROFILE HUB (Now Scrolls) */}
+        <div className="px-3 pt-3 pb-2 bg-[#0B1528] border-b border-white/5 mb-1">
+          <div className="flex flex-col gap-2">
+            <StudentAvatar 
+              profile={profile} 
+              className="h-8 w-8 border border-white/10 rounded-lg shrink-0 shadow-lg" 
+              iconClassName="h-3/4 w-3/4"
+            />
+            <div className="flex items-center justify-between gap-1 w-full overflow-hidden">
+              <h2 className="font-headline font-black text-[12px] text-white uppercase tracking-tight leading-tight truncate flex-1">
+                {profile?.name?.split(' ')[0] || "Aspirant"}
+              </h2>
+              <Badge className="bg-[#F97316] text-white border-none text-[6px] font-black uppercase px-1.5 py-0.5 rounded-sm shrink-0">
+                {profile?.status === 'Free' ? 'FREE' : 'GOLD'}
+              </Badge>
+            </div>
           </div>
+        </div>
+
+        {/* NAVIGATION LIST */}
+        <div className="space-y-0.5 pt-1">
+          {primaryMenu.map((item) => (
+            <MenuLink 
+              key={item.href} 
+              item={item} 
+              active={pathname === item.href}
+              onClick={onClose} 
+            />
+          ))}
+
+          <div className="my-1 border-t border-slate-50 mx-3" />
+
+          <CollapsibleGroup 
+            label="Account" 
+            isOpen={isAccountOpen} 
+            onToggle={setIsAccountOpen}
+          >
+            {secondaryMenu.map((item) => (
+              <MenuLink 
+                key={item.href} 
+                item={item} 
+                active={pathname === item.href}
+                onClick={onClose}
+                indent
+              />
+            ))}
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center gap-2 px-3 h-[38px] text-rose-500 hover:bg-rose-50 transition-colors group text-left"
+            >
+              <LogOut className="h-[16px] w-[16px] shrink-0" />
+              <span className="text-[11px] font-bold uppercase tracking-tight">Logout</span>
+            </button>
+          </CollapsibleGroup>
+
+          <CollapsibleGroup 
+            label="More" 
+            isOpen={isMoreOpen} 
+            onToggle={setIsMoreOpen}
+          >
+            {moreMenu.map((item) => (
+              <MenuLink 
+                key={item.href} 
+                item={item} 
+                active={pathname === item.href}
+                onClick={onClose}
+                indent
+              />
+            ))}
+          </CollapsibleGroup>
         </div>
       </div>
 
-      {/* 2. FITTED NAVIGATION LIST (180px Width) */}
-      <div className="flex-1 overflow-y-auto no-scrollbar py-1 space-y-0.5">
-        {primaryMenu.map((item) => (
-          <MenuLink 
-            key={item.href} 
-            item={item} 
-            active={pathname === item.href}
-            onClick={onClose} 
-          />
-        ))}
-
-        <div className="my-1 border-t border-slate-50 mx-3" />
-
-        <CollapsibleGroup 
-          label="Account" 
-          isOpen={isAccountOpen} 
-          onToggle={setIsAccountOpen}
-        >
-          {secondaryMenu.map((item) => (
-            <MenuLink 
-              key={item.href} 
-              item={item} 
-              active={pathname === item.href}
-              onClick={onClose}
-              indent
-            />
-          ))}
-          <button 
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2 px-3 h-[38px] text-rose-500 hover:bg-rose-50 transition-colors group text-left"
-          >
-            <LogOut className="h-[16px] w-[16px] shrink-0" />
-            <span className="text-[11px] font-bold uppercase tracking-tight">Logout</span>
-          </button>
-        </CollapsibleGroup>
-
-        <CollapsibleGroup 
-          label="More" 
-          isOpen={isMoreOpen} 
-          onToggle={setIsMoreOpen}
-        >
-          {moreMenu.map((item) => (
-            <MenuLink 
-              key={item.href} 
-              item={item} 
-              active={pathname === item.href}
-              onClick={onClose}
-              indent
-            />
-          ))}
-        </CollapsibleGroup>
-      </div>
-
-      {/* 3. COMPACT FOOTER */}
+      {/* 2. COMPACT FIXED FOOTER */}
       <div className="px-3 py-2 border-t border-slate-100 bg-slate-50 shrink-0 mb-[env(safe-area-inset-bottom,0px)]">
         <p className="text-[7px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">
-          Cracklix v6.0
+          Cracklix v6.5
         </p>
       </div>
     </div>

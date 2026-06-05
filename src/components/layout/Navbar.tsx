@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * @fileOverview Global Navigation Node.
- * Features: Optimized for ultra-slender mobile sidebar (180px) starting below header.
+ * Features: Optimized for ultra-slender mobile sidebar (180px) starting flush below header.
  */
 
 export default function Navbar() {
@@ -71,7 +71,7 @@ export default function Navbar() {
                  </SheetTrigger>
                  <SheetContent 
                    side="left" 
-                   className="p-0 border-r border-slate-100 !w-[180px] !max-w-[180px] top-[64px] h-[calc(100vh-64px)] overflow-hidden shadow-2xl"
+                   className="p-0 border-r border-slate-100 !w-[180px] !max-w-[180px] top-[54px] h-[calc(100vh-54px)] overflow-hidden shadow-2xl"
                  >
                    <SheetHeader className="sr-only"><SheetTitle>Aspirant Menu</SheetTitle></SheetHeader>
                    <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
