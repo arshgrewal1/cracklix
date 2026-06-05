@@ -3,7 +3,7 @@ import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/fi
 /**
  * @fileOverview Final Institutional Seeding Engine for Cracklix.
  * Synchronizes binary access passes, official board registry, and platform settings.
- * Hardcoded to official Government URLs for PSSSB, PSPCL, and Punjab Police.
+ * Hardcoded to official Government URLs for PSSSB, PSPCL, PSTCL, and Punjab Police.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[REGISTRY] Initializing Global Punjab Access Registry Sync...');
@@ -54,6 +54,7 @@ export async function seedInitialData(db: Firestore) {
   const stateEmblem = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png';
   const psssbOfficialLogo = 'https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg';
   const pspclOfficialLogo = 'https://pspcl.in/assets/images/logo.png';
+  const pstclOfficialLogo = 'https://www.pstcl.org/images/logo.png';
   const policeOfficialLogo = 'https://punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png';
   const hcEmblem = 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Scale_of_justice_2.svg/512px-Scale_of_justice_2.svg.png';
 
@@ -92,6 +93,13 @@ export async function seedInitialData(db: Firestore) {
       name: 'State Power Corporation',
       iconUrl: pspclOfficialLogo,
       description: 'Technical and clerical power sector recruitment.'
+    },
+    {
+      id: 'pstcl',
+      abbreviation: 'PSTCL',
+      name: 'State Transmission Corporation',
+      iconUrl: pstclOfficialLogo,
+      description: 'Technical and clerical transmission sector recruitment.'
     },
     {
       id: 'high-court',
@@ -143,6 +151,15 @@ export async function seedInitialData(db: Firestore) {
       totalMocks: 12,
       activeQuestions: 1500,
       description: 'Preparation for Power Corporation clerical nodes.'
+    },
+    {
+      id: 'pstcl-ae',
+      boardId: 'pstcl',
+      name: 'PSTCL Assistant Engineer',
+      category: 'Technical',
+      totalMocks: 8,
+      activeQuestions: 1200,
+      description: 'Mastery hub for Transmission Corporation technical nodes.'
     },
     {
       id: 'pstet-p1',
