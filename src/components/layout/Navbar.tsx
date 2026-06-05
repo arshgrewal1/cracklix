@@ -71,7 +71,7 @@ export default function Navbar() {
                  </SheetTrigger>
                  <SheetContent 
                    side="left" 
-                   className="p-0 border-r border-slate-100 !w-[180px] !max-w-[180px] top-[54px] h-[calc(100vh-54px)] overflow-hidden shadow-2xl"
+                   className="p-0 border-r border-slate-100 !w-[180px] !max-w-[180px] top-[52px] h-[calc(100vh-52px)] overflow-hidden shadow-2xl"
                  >
                    <SheetHeader className="sr-only"><SheetTitle>Aspirant Menu</SheetTitle></SheetHeader>
                    <MobileSidebar onClose={() => setIsSidebarOpen(false)} />

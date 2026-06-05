@@ -85,18 +85,18 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
       <div className="flex-1 overflow-y-auto no-scrollbar pb-8">
         
         {/* HIGH-DENSITY PROFILE HUB (Now Scrolls) */}
-        <div className="px-3 pt-3 pb-2 bg-[#0B1528] border-b border-white/5 mb-1">
-          <div className="flex flex-col gap-2">
+        <div className="px-3 pt-2 pb-1.5 bg-[#0B1528] border-b border-white/5 mb-1">
+          <div className="flex flex-col gap-1.5">
             <StudentAvatar 
               profile={profile} 
-              className="h-8 w-8 border border-white/10 rounded-lg shrink-0 shadow-lg" 
+              className="h-7 w-7 border border-white/10 rounded-md shrink-0 shadow-lg" 
               iconClassName="h-3/4 w-3/4"
             />
             <div className="flex items-center justify-between gap-1 w-full overflow-hidden">
-              <h2 className="font-headline font-black text-[12px] text-white uppercase tracking-tight leading-tight truncate flex-1">
+              <h2 className="font-headline font-black text-[11px] text-white uppercase tracking-tight leading-none truncate flex-1">
                 {profile?.name?.split(' ')[0] || "Aspirant"}
               </h2>
-              <Badge className="bg-[#F97316] text-white border-none text-[6px] font-black uppercase px-1.5 py-0.5 rounded-sm shrink-0">
+              <Badge className="bg-[#F97316] text-white border-none text-[5px] font-black uppercase px-1 py-0.5 rounded-sm shrink-0">
                 {profile?.status === 'Free' ? 'FREE' : 'GOLD'}
               </Badge>
             </div>
@@ -171,7 +171,7 @@ function MenuLink({ item, active, onClick, indent = false }: any) {
   return (
     <Link 
       href={item.href} 
-      onClick={onClick}
+      onClick={onClose}
       className={cn(
         "flex items-center justify-between px-3 h-[40px] transition-all group w-full",
         active ? "bg-primary/5 text-primary border-r-[3px] border-primary" : "hover:bg-slate-50 text-slate-600",
