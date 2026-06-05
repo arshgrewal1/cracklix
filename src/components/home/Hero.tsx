@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from "next/image";
@@ -13,6 +12,7 @@ import { useMemo } from 'react';
 /**
  * @fileOverview Final Dynamic Hero Module.
  * Optimized for mobile "fold" visibility by reducing vertical padding and asset size.
+ * Fixed: Secondary button visibility on dark background.
  */
 
 export default function Hero() {
@@ -50,22 +50,22 @@ export default function Hero() {
               <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">Verified Patterns</span>
             </div>
 
-            <h1 className="text-4xl lg:text-8xl font-black leading-[0.95] tracking-tight text-white font-headline">
+            <h1 className="text-4xl lg:text-8xl font-black leading-[0.95] tracking-tight text-white font-headline text-left">
               {content.line1}<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">
                 {content.line2}
               </span>
             </h1>
 
-            <p className="text-lg lg:text-xl text-slate-400 leading-relaxed max-w-xl">
+            <p className="text-lg lg:text-xl text-slate-400 leading-relaxed max-w-xl text-left">
               {content.description}
             </p>
 
             <div className="flex flex-wrap gap-4">
-              <Button asChild className="h-14 lg:h-16 px-8 lg:px-10 bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl gap-3 shadow-2xl">
+              <Button asChild className="h-14 lg:h-16 px-8 lg:px-10 bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] rounded-2xl gap-3 shadow-2xl border-none">
                 <Link href="/mocks">Start Practice <ArrowRight className="h-4 w-4" /></Link>
               </Button>
-              <Button variant="outline" asChild className="h-14 lg:h-16 px-8 lg:px-10 border-white/10 text-white hover:bg-white/5 rounded-2xl font-black uppercase tracking-widest text-[10px]">
+              <Button variant="ghost" asChild className="h-14 lg:h-16 px-8 lg:px-10 border border-white/20 text-white hover:bg-white/10 rounded-2xl font-black uppercase tracking-widest text-[10px] bg-transparent">
                 <Link href="/exams">Explore Hubs</Link>
               </Button>
             </div>
