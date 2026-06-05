@@ -1,11 +1,11 @@
-
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
-export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'CHAPTER' | 'PYQ' | 'CA_QUIZ';
+export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'CHAPTER' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET';
 export type ContentStatus = 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'ARCHIVED';
 export type Gender = 'Male' | 'Female' | 'Other';
 export type AccessType = 'FREE' | 'PREMIUM';
 export type RegionType = 'Punjab' | 'National';
+export type BoardCategory = 'PUNJAB_STATE' | 'TEACHING' | 'CENTRAL';
 
 export type QuestionType = 
   | 'MCQ' 
@@ -34,6 +34,7 @@ export interface Board {
   iconUrl: string;
   description: string;
   region: RegionType;
+  category: BoardCategory;
 }
 
 export interface Pass {
@@ -76,7 +77,36 @@ export interface MockTest {
   totalQuestions: number;
   questionIds: string[];
   difficulty: string;
+  status: ContentStatus;
   published: boolean;
+  isDummy?: boolean;
+  createdAt: any;
+  updatedAt: any;
+}
+
+export interface Question {
+  id: string;
+  boardId: string;
+  subjectId: string;
+  chapterId?: string;
+  questionEn: string;
+  questionPa?: string;
+  optionAEn: string;
+  optionAPa?: string;
+  optionBEn: string;
+  optionBPa?: string;
+  optionCEn: string;
+  optionCPa?: string;
+  optionDEn: string;
+  optionDPa?: string;
+  correctAnswer: 'A' | 'B' | 'C' | 'D';
+  explanationEn: string;
+  explanationPa?: string;
+  difficulty: Difficulty;
+  questionType: QuestionType;
+  status: ContentStatus;
+  isStandalone: boolean;
+  isDummy?: boolean;
   createdAt: any;
   updatedAt: any;
 }
