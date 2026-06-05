@@ -2,12 +2,13 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { Apple, Play, Smartphone, CheckCircle2, Map as MapIcon, Globe, ShieldCheck, Heart } from "lucide-react";
+import { Smartphone, CheckCircle2, Map as MapIcon, Globe, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Apple, Play } from "lucide-react";
 
 /**
- * @fileOverview Final App Preview Hub v4.0.
- * Fixed: Zero-clip map rendering and high-visibility labels.
+ * @fileOverview Final App Preview Hub v5.0.
+ * Re-engineered for maximum map visibility (zero-clip) and clean white containers.
  * Added: Founder & Developer Credit: Arsh Grewal.
  */
 
@@ -65,21 +66,23 @@ export default function AppPreview() {
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
                 <div className="absolute -inset-10 bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
                 
-                {/* Punjab Coverage Node */}
+                {/* Punjab Coverage Node - CLEAN WHITE CONTAINER */}
                 <motion.div 
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  className="group relative rounded-[3rem] bg-white border-[8px] border-[#0F172A] shadow-5xl overflow-hidden aspect-[3/4] hover:-translate-y-2 transition-all duration-500 flex items-center justify-center p-4"
+                  className="group relative rounded-[3rem] bg-white border border-slate-100 shadow-2xl overflow-hidden aspect-[3/4] hover:-translate-y-2 transition-all duration-500 flex flex-col items-center justify-center p-6"
                 >
-                   <img 
-                      src={punjabMap} 
-                      className="w-full h-full object-contain transition-all duration-[2s] group-hover:scale-105" 
-                      referrerPolicy="no-referrer"
-                      alt="Punjab Hub"
-                   />
-                   {/* FIXED VISIBILITY LABEL */}
-                   <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between bg-[#0B1528] border border-white/10 p-4 rounded-2xl shadow-2xl z-20">
+                   <div className="w-full h-full relative">
+                      <img 
+                        src={punjabMap} 
+                        className="w-full h-full object-contain transition-all duration-[2s] group-hover:scale-110" 
+                        referrerPolicy="no-referrer"
+                        alt="Punjab Hub"
+                      />
+                   </div>
+                   
+                   <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between bg-[#0B1528] border border-white/10 p-4 rounded-2xl shadow-4xl z-20 transition-all group-hover:scale-105">
                       <div className="flex items-center gap-3">
                          <div className="h-8 w-8 rounded-lg bg-primary/20 flex items-center justify-center">
                             <MapIcon className="h-4 w-4 text-primary" />
@@ -90,22 +93,24 @@ export default function AppPreview() {
                    </div>
                 </motion.div>
 
-                {/* National Coverage Node */}
+                {/* National Coverage Node - CLEAN WHITE CONTAINER */}
                 <motion.div 
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ delay: 0.2 }}
-                  className="group relative rounded-[3rem] bg-white border-[8px] border-[#0F172A] shadow-5xl overflow-hidden aspect-[3/4] md:mt-12 hover:-translate-y-2 transition-all duration-500 flex items-center justify-center p-4"
+                  className="group relative rounded-[3rem] bg-white border border-slate-100 shadow-2xl overflow-hidden aspect-[3/4] md:mt-12 hover:-translate-y-2 transition-all duration-500 flex flex-col items-center justify-center p-6"
                 >
-                   <img 
-                      src={indiaMap} 
-                      className="w-full h-full object-contain transition-all duration-[2s] group-hover:scale-105" 
-                      referrerPolicy="no-referrer"
-                      alt="National Hub"
-                   />
-                   {/* FIXED VISIBILITY LABEL */}
-                   <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between bg-[#0B1528] border border-white/10 p-4 rounded-2xl shadow-2xl z-20">
+                   <div className="w-full h-full relative">
+                      <img 
+                        src={indiaMap} 
+                        className="w-full h-full object-contain transition-all duration-[2s] group-hover:scale-110" 
+                        referrerPolicy="no-referrer"
+                        alt="National Hub"
+                      />
+                   </div>
+                   
+                   <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between bg-[#0B1528] border border-white/10 p-4 rounded-2xl shadow-4xl z-20 transition-all group-hover:scale-105">
                       <div className="flex items-center gap-3">
                          <div className="h-8 w-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
                             <Globe className="h-4 w-4 text-blue-400" />
@@ -132,7 +137,7 @@ export default function AppPreview() {
                 <div className="text-left">
                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Architect & Authority</p>
                    <p className="text-sm font-bold text-[#0F172A] flex items-center gap-2">
-                      Founder & Developer: <span className="text-primary font-black uppercase tracking-tighter">Arsh Grewal</span>
+                      Founder & Developer: <span className="text-primary font-black uppercase tracking-tighter ml-1">Arsh Grewal</span>
                    </p>
                 </div>
              </motion.div>
