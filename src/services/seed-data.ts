@@ -4,10 +4,10 @@ import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/fi
 /**
  * @fileOverview Final Institutional Seeding Engine for Cracklix.
  * Synchronizes binary access passes, official board registry, and platform settings.
- * Hardcoded to official Government URLs provided by Arsh Grewal Management.
+ * Hardcoded to official Government URLs provided by Management.
  */
 export async function seedInitialData(db: Firestore) {
-  console.log('[REGISTRY] Initializing Global Punjab Access Registry Sync...');
+  console.log('[REGISTRY] Initializing Global Punjab & National Access Registry Sync...');
 
   // 1. Initial Pass Registry
   const passes = [
@@ -58,6 +58,7 @@ export async function seedInitialData(db: Firestore) {
   const policeOfficialLogo = 'https://punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png';
   const hcOfficialLogo = 'https://highcourtchd.gov.in/images/newlogo.png';
   const psebOfficialLogo = 'https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png';
+  const armyLogo = 'https://joinindianarmy.nic.in/writereaddata/Portal/Images/logo.png';
 
   const boards = [
     {
@@ -108,6 +109,13 @@ export async function seedInitialData(db: Firestore) {
       name: 'Punjab & Haryana High Court',
       iconUrl: hcOfficialLogo,
       description: 'Judicial and clerical court recruitment registry.'
+    },
+    {
+      id: 'indian-army',
+      abbreviation: 'Army',
+      name: 'Indian Army Agniveer Hub',
+      iconUrl: armyLogo,
+      description: 'National recruitment gateway for Agniveer GD, Tech, and Clerical nodes.'
     }
   ];
 
@@ -145,6 +153,15 @@ export async function seedInitialData(db: Firestore) {
       description: 'Official pattern mocks for Revenue and Canal Patwari.'
     },
     {
+      id: 'agniveer-gd',
+      boardId: 'indian-army',
+      name: 'Agniveer GD / Tech',
+      category: 'Defense',
+      totalMocks: 15,
+      activeQuestions: 1800,
+      description: 'High-fidelity preparation series for Indian Army Agniveer national recruitment.'
+    },
+    {
       id: 'pspcl-clerk',
       boardId: 'pspcl',
       name: 'PSPCL LDC / Clerk',
@@ -152,15 +169,6 @@ export async function seedInitialData(db: Firestore) {
       totalMocks: 12,
       activeQuestions: 1500,
       description: 'Preparation for Power Corporation clerical nodes.'
-    },
-    {
-      id: 'pstcl-ae',
-      boardId: 'pstcl',
-      name: 'PSTCL Assistant Engineer',
-      category: 'Technical',
-      totalMocks: 8,
-      activeQuestions: 1200,
-      description: 'Mastery hub for Transmission Corporation technical nodes.'
     },
     {
       id: 'pstet-p1',

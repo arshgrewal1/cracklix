@@ -18,8 +18,8 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 /**
- * @fileOverview Authority Hub v23.9 - Hardened Operations Engine.
- * Features: Corrected Deletion with explicit event isolation.
+ * @fileOverview Authority Hub v24.2 - Hardened Operations Engine.
+ * Features: Fixed Deletion Logic with explicit event isolation and Firestore targeting.
  */
 
 export default function ExamManagement() {
@@ -68,7 +68,7 @@ export default function ExamManagement() {
   }
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
-    // CRITICAL: Explicitly stop event propagation to avoid row clicks interfering
+    // CRITICAL: Stop event propagation to prevent Row/Sidebar interference
     e.preventDefault();
     e.stopPropagation();
     
@@ -119,7 +119,7 @@ export default function ExamManagement() {
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Official Board Registry</span>
            </div>
           <h1 className="text-5xl font-headline font-black text-primary uppercase tracking-tight">Authority Hub</h1>
-          <p className="text-slate-600 mt-1 font-medium">Manage institutional identities for all Punjab recruitment boards.</p>
+          <p className="text-slate-600 mt-1 font-medium">Manage institutional identities for all Punjab and National recruitment boards.</p>
         </div>
         <Button className="bg-primary hover:bg-primary/90 h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl gap-3" onClick={() => setEditingBoard({ abbreviation: "", name: "", description: "", iconUrl: "" })}>
           <Plus className="h-5 w-5" /> Add New Authority
@@ -139,7 +139,7 @@ export default function ExamManagement() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                Array.from({ length: 4 }).map((_, i) => (
+                Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i} className="border-slate-50"><TableCell colSpan={4} className="px-10 py-5"><Skeleton className="h-14 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
                 ))
               ) : boards?.map((board: any) => {

@@ -69,6 +69,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'dte.punjab.gov.in',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'joinindianarmy.nic.in',
+        pathname: '/**',
       }
     ],
   },
