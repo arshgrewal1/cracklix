@@ -85,21 +85,21 @@ export async function seedInitialData(db: Firestore) {
     {
       id: 'pseb',
       abbreviation: 'Education',
-      name: 'School Education Board',
+      name: 'School Education Board (PSEB)',
       iconUrl: psebOfficialLogo,
       description: 'ETT, Master Cadre, and PSTET recruitment nodes.'
     },
     {
       id: 'pspcl',
       abbreviation: 'PSPCL',
-      name: 'State Power Corporation',
+      name: 'State Power Corporation (PSPCL)',
       iconUrl: pspclOfficialLogo,
       description: 'Technical and clerical power sector recruitment.'
     },
     {
       id: 'pstcl',
       abbreviation: 'PSTCL',
-      name: 'State Transmission Corporation',
+      name: 'State Transmission Corporation (PSTCL)',
       iconUrl: pstclOfficialLogo,
       description: 'Technical and clerical transmission sector recruitment.'
     },
