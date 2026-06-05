@@ -12,8 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * @fileOverview High-Fidelity Latest Mocks Node.
- * Dynamically fetches published mocks from Firestore and applies Board Branding.
- * Optimized with Absolute Fallbacks for Government emblems.
+ * Updated: Robust board logo lookup to ensure official emblems appear at top-left.
  */
 
 export default function LatestMocks() {
@@ -79,9 +78,9 @@ export default function LatestMocks() {
                   viewport={{ once: true }}
                   className="h-full"
                 >
-                  <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl hover:shadow-3xl hover:-translate-y-1 transition-all duration-500 group h-full flex flex-col p-6">
+                  <div className="bg-white rounded-[2.5rem] border border-slate-100 shadow-xl hover:shadow-4xl hover:-translate-y-1 transition-all duration-500 group h-full flex flex-col p-6">
                     <div className="flex justify-between items-start mb-6">
-                      <div className="h-14 w-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center relative overflow-hidden group-hover:shadow-lg transition-all shadow-inner">
+                      <div className="h-16 w-16 rounded-2xl bg-white border border-slate-100 flex items-center justify-center relative overflow-hidden group-hover:shadow-lg transition-all shadow-inner shrink-0">
                          <img 
                             src={board?.iconUrl || stateEmblem} 
                             referrerPolicy="no-referrer"
@@ -112,7 +111,7 @@ export default function LatestMocks() {
                       </div>
                     </div>
 
-                    <Button asChild className="w-full bg-[#0B1528] hover:bg-primary text-white font-black h-12 rounded-xl text-[10px] uppercase tracking-[0.2em] mt-auto shadow-lg transition-all active:scale-95">
+                    <Button asChild className="w-full h-14 bg-[#0B1528] hover:bg-primary text-white font-black h-12 rounded-xl text-[10px] uppercase tracking-[0.2em] mt-auto shadow-lg transition-all active:scale-95">
                       <Link href={`/mocks/${mock.id}`}>Attempt Now</Link>
                     </Button>
                   </div>

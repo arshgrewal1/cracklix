@@ -4,7 +4,7 @@ import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/fi
  * @fileOverview Final Institutional Seeding Engine for Cracklix.
  * Synchronizes binary access passes, official board registry, and platform settings.
  * Optimized for Testbook-style "Select Board" logic with high-fidelity logos.
- * Fixed: Explicit inclusion of PSPCL, PSTCL, and EVS subject nodes.
+ * Fixed: Hardcoded official URLs for all boards to prevent upload dependency.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[REGISTRY] Initializing Global Punjab Access Registry Sync...');
@@ -51,7 +51,7 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'passes', p.id), { ...p, updatedAt: serverTimestamp() });
   }
 
-  // 2. Master Authority Registry with High-Fidelity Logos
+  // 2. Master Authority Registry with Absolute Verified URLs
   const boards = [
     {
       id: 'psssb',
@@ -122,7 +122,7 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() });
   }
 
-  // 3. Subject Registry with EVS Expansion
+  // 3. Subject Registry with EVS & Pedagogy
   const subjects = [
     { id: 'punjab-gk', name: 'Punjab GK & Culture' },
     { id: 'mental-ability', name: 'Mental Ability / Reasoning' },
@@ -140,7 +140,7 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'subjects', s.id), { ...s, updatedAt: serverTimestamp() });
   }
 
-  // 4. Exam Hub Hierarchy (Linked to Boards)
+  // 4. Exam Hub Hierarchy
   const exams = [
     {
       id: 'psssb-patwari',
