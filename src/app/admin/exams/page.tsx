@@ -171,7 +171,7 @@ export default function ExamManagement() {
                             variant="ghost" 
                             size="icon" 
                             className="h-12 w-12 rounded-xl hover:bg-slate-100" 
-                            onClick={() => setEditingBoard(board)}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingBoard(board); }}
                           >
                            <Edit className="h-5 w-5" />
                          </Button>

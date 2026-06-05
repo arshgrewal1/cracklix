@@ -60,6 +60,7 @@ export async function seedInitialData(db: Firestore) {
   const armyLogo = 'https://joinindianarmy.nic.in/writereaddata/Portal/Images/logo.png';
   const pspclOfficialLogo = 'https://pspcl.in/assets/images/logo.png';
   const pstclOfficialLogo = 'https://pstcl.org/images/logo.png';
+  const technicalLogo = 'https://www.punjabteched.com/images/Clogo-blue.gif';
 
   const boards = [
     {
@@ -103,6 +104,13 @@ export async function seedInitialData(db: Firestore) {
       name: 'State Transmission Corporation (PSTCL)',
       iconUrl: pstclOfficialLogo,
       description: 'Technical and clerical transmission sector recruitment.'
+    },
+    {
+      id: 'technical-edu',
+      abbreviation: 'Technical',
+      name: 'Board of Technical Education',
+      iconUrl: technicalLogo,
+      description: 'Punjab State Board of Technical Education and Industrial Training.'
     },
     {
       id: 'high-court',

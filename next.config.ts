@@ -79,6 +79,11 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'joinindianarmy.nic.in',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.punjabteched.com',
+        pathname: '/**',
       }
     ],
   },
