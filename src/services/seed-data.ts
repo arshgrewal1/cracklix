@@ -11,6 +11,7 @@ export async function seedInitialData(db: Firestore) {
   const psssbLogo = 'https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg';
   const policeLogo = 'https://punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png';
   const eduDeptLogo = 'https://pstet.pseb.ac.in/img/main-logo-2.png';
+  const ppscOfficialLogo = 'https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png';
 
   // 1. Boards Registry
   const boards = [
@@ -19,7 +20,7 @@ export async function seedInitialData(db: Firestore) {
     { id: 'punjab-police', abbreviation: 'Police', name: 'Punjab Police Recruitment', iconUrl: policeLogo, region: 'Punjab', category: 'PUNJAB_STATE', description: 'District and Armed cadre registry.' },
     { id: 'pspcl', abbreviation: 'PSPCL', name: 'Punjab State Power Corporation Limited', iconUrl: 'https://pspcl.in/assets/images/logo.png', region: 'Punjab', category: 'PUNJAB_STATE', description: 'Technical and clerical power nodes.' },
     { id: 'pstcl', abbreviation: 'PSTCL', name: 'Punjab State Transmission Corporation', iconUrl: 'https://pstcl.org/images/logo.png', region: 'Punjab', category: 'PUNJAB_STATE', description: 'Transmission sector recruitment.' },
-    { id: 'ppsc', abbreviation: 'PPSC', name: 'Punjab Public Service Commission', iconUrl: stateEmblem, region: 'Punjab', category: 'PUNJAB_STATE', description: 'Class A and B Gazetted services.' },
+    { id: 'ppsc', abbreviation: 'PPSC', name: 'Punjab Public Service Commission', iconUrl: ppscOfficialLogo, region: 'Punjab', category: 'PUNJAB_STATE', description: 'Class A and B Gazetted services.' },
     { id: 'high-court', abbreviation: 'High Court', name: 'Punjab & Haryana High Court', iconUrl: 'https://highcourtchd.gov.in/images/newlogo.png', region: 'Punjab', category: 'PUNJAB_STATE', description: 'Judicial and SSSC clerical nodes.' },
     
     // Teaching Exams
