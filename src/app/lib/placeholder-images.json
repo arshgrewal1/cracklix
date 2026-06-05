@@ -2,10 +2,10 @@
 {
   "placeholderImages": [
     {
-      "id": "hero-army",
-      "description": "Official Indian Army Tactical Slider",
-      "imageUrl": "https://www.indianarmy.nic.in/writereaddata/images/slider/270526_Hindi_1.jpeg",
-      "imageHint": "indian army"
+      "id": "hero-police",
+      "description": "Punjab Police Strategic Asset",
+      "imageUrl": "https://punjabpolice.gov.in/media/images/pp10.original.jpg",
+      "imageHint": "punjab police"
     },
     {
       "id": "promo-psssb",
@@ -14,16 +14,22 @@
       "imageHint": "psssb official"
     },
     {
+      "id": "map-punjab",
+      "description": "Punjab Geographic Node",
+      "imageUrl": "https://www.mapsofindia.com/maps/punjab/punjab-map.jpg",
+      "imageHint": "punjab map"
+    },
+    {
+      "id": "map-india",
+      "description": "India National Registry Map",
+      "imageUrl": "https://www.mapsofindia.com/images2/india-map.jpg",
+      "imageHint": "india map"
+    },
+    {
       "id": "mock-police",
       "description": "Punjab Police Operational Readiness",
       "imageUrl": "https://punjabpolice.gov.in/media/images/pp7.original.jpg",
       "imageHint": "punjab police"
-    },
-    {
-      "id": "army-strategic",
-      "description": "Institutional Trust Node",
-      "imageUrl": "https://punjabpolice.gov.in/media/images/pp10.original.jpg",
-      "imageHint": "police uniform"
     }
   ]
 }
