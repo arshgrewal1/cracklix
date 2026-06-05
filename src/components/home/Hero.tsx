@@ -1,18 +1,19 @@
+
 'use client';
 
 import Image from "next/image";
 import Link from "next/link";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Sparkles, TrendingUp, ShieldCheck, MapPin } from "lucide-react";
+import { ArrowRight, Sparkles, ShieldCheck } from "lucide-react";
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { useMemo } from 'react';
 
 /**
- * @fileOverview Final Dynamic Hero Module.
- * Optimized for mobile "fold" visibility by reducing vertical padding and asset size.
- * Fixed: Secondary button visibility on dark background.
+ * @fileOverview Final Institutional Hero Module.
+ * Synchronized with Official Army Promotional Asset.
  */
 
 export default function Hero() {
@@ -20,11 +21,13 @@ export default function Hero() {
   const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
   const { data: settings } = useDoc<any>(settingsRef);
 
+  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-punjab')?.imageUrl || "https://www.indianarmy.nic.in/writereaddata/images/slider/270526_Hindi_1.jpeg";
+
   const content = {
     line1: settings?.heroLine1 || "Punjab's No. 1",
     line2: settings?.heroLine2 || "Dedicated Authority.",
     description: settings?.heroDescription || "Specialize exclusively for Punjab Govt preparation. Join 15,000+ aspirants.",
-    imageUrl: settings?.heroImageUrl || "https://picsum.photos/seed/amritsar/1200/800"
+    imageUrl: heroImage
   };
 
   return (
@@ -50,14 +53,14 @@ export default function Hero() {
               <span className="text-[9px] font-black text-primary uppercase tracking-[0.2em]">Verified Patterns</span>
             </div>
 
-            <h1 className="text-4xl lg:text-8xl font-black leading-[0.95] tracking-tight text-white font-headline text-left">
+            <h1 className="text-4xl lg:text-8xl font-black leading-[0.95] tracking-tight text-white font-headline text-left uppercase">
               {content.line1}<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">
                 {content.line2}
               </span>
             </h1>
 
-            <p className="text-lg lg:text-xl text-slate-400 leading-relaxed max-w-xl text-left">
+            <p className="text-lg lg:text-xl text-slate-400 leading-relaxed max-w-xl text-left font-medium">
               {content.description}
             </p>
 
@@ -80,7 +83,7 @@ export default function Hero() {
             <div className="relative aspect-square rounded-[4rem] overflow-hidden border border-white/10 shadow-2xl group">
               <Image 
                 src={content.imageUrl} 
-                alt="Golden Temple" 
+                alt="Institutional Hero" 
                 fill 
                 className="object-cover transition-transform duration-1000 group-hover:scale-110"
                 priority

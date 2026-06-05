@@ -1,58 +1,29 @@
+
 {
   "placeholderImages": [
     {
       "id": "hero-punjab",
-      "description": "Golden Temple Amritsar at night",
-      "imageUrl": "https://picsum.photos/seed/punjab-hero/1200/800",
-      "imageHint": "golden temple"
+      "description": "Official Indian Army Tactical Slider",
+      "imageUrl": "https://www.indianarmy.nic.in/writereaddata/images/slider/270526_Hindi_1.jpeg",
+      "imageHint": "indian army"
     },
     {
-      "id": "exam-psssb",
-      "description": "Punjab government seal",
-      "imageUrl": "https://picsum.photos/seed/psssb/400/250",
-      "imageHint": "government seal"
+      "id": "promo-psssb",
+      "description": "PSSSB Official Institutional Promotion",
+      "imageUrl": "https://sssb.punjab.gov.in/wp-content/uploads/2025/08/sssb-1.jpg",
+      "imageHint": "psssb official"
     },
     {
-      "id": "exam-police",
-      "description": "Punjab Police insignia",
-      "imageUrl": "https://picsum.photos/seed/police/400/250",
-      "imageHint": "police emblem"
+      "id": "promo-police-action",
+      "description": "Punjab Police Operational Readiness",
+      "imageUrl": "https://punjabpolice.gov.in/media/images/pp7.original.jpg",
+      "imageHint": "punjab police"
     },
     {
-      "id": "exam-ppsc",
-      "description": "Historic administrative building Punjab",
-      "imageUrl": "https://picsum.photos/seed/ppsc/400/250",
-      "imageHint": "historic building"
-    },
-    {
-      "id": "exam-teaching",
-      "description": "Classroom in Punjab",
-      "imageUrl": "https://picsum.photos/seed/teaching/400/250",
-      "imageHint": "classroom study"
-    },
-    {
-      "id": "exam-pspcl",
-      "description": "Power lines and electricity infrastructure",
-      "imageUrl": "https://picsum.photos/seed/pspcl/400/250",
-      "imageHint": "power lines"
-    },
-    {
-      "id": "exam-hc",
-      "description": "Courtroom gavel and scales",
-      "imageUrl": "https://picsum.photos/seed/court/400/250",
-      "imageHint": "justice scale"
-    },
-    {
-      "id": "mobile-mockup-1",
-      "description": "iPhone mockup showing exam dashboard",
-      "imageUrl": "https://picsum.photos/seed/mockup1/400/800",
-      "imageHint": "iphone mockup"
-    },
-    {
-      "id": "mobile-mockup-2",
-      "description": "iPhone mockup showing mock test engine",
-      "imageUrl": "https://picsum.photos/seed/mockup2/400/800",
-      "imageHint": "smartphone screen"
+      "id": "promo-police-trust",
+      "description": "Punjab Police Institutional Trust",
+      "imageUrl": "https://punjabpolice.gov.in/media/images/pp10.original.jpg",
+      "imageHint": "police uniform"
     }
   ]
 }
