@@ -17,8 +17,8 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 
 /**
- * @fileOverview Authority Hub v7.0 - Triple-Layer Branding Engine.
- * Features: High-reliability Wikimedia failover + Text-based identity nodes for blocked assets.
+ * @fileOverview Authority Hub v8.0 - Hardened Anti-Block Branding Hub.
+ * Features: Triple-layer failover + Cross-Origin anti-block protocols for government SVGs.
  */
 
 export default function ExamManagement() {
@@ -33,10 +33,15 @@ export default function ExamManagement() {
   const [isUploading, setIsUploading] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
+  const [assetError, setAssetError] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Official State Emblem Fallback - Highly Stable Wikimedia URL
+  // Standard Failover Emblem
   const stateEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
+
+  useEffect(() => {
+     setAssetError(false);
+  }, [editingBoard?.iconUrl]);
 
   const handleSave = async () => {
     if (!db || !editingBoard) return
@@ -71,7 +76,6 @@ export default function ExamManagement() {
     if (!file || !storage) return
 
     setIsUploading(true)
-    
     const timer = setTimeout(() => {
        setIsUploading(false);
        toast({ variant: "destructive", title: "Sync Timeout", description: "Storage response took too long." });
@@ -130,7 +134,7 @@ export default function ExamManagement() {
                 return (
                   <TableRow key={board.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                     <TableCell className="px-10 py-6">
-                      <div className="h-16 w-16 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden relative shadow-inner group-hover:scale-110 transition-transform">
+                      <div className="h-16 w-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden relative shadow-inner group-hover:scale-110 transition-transform">
                           {isImageFailed ? (
                              <div className="bg-primary text-white h-full w-full flex items-center justify-center font-black text-xl">
                                 {board.abbreviation?.substring(0, 2)}
@@ -138,7 +142,7 @@ export default function ExamManagement() {
                           ) : (
                             <img 
                               src={board.iconUrl || stateEmblem} 
-                              className="h-full w-full object-contain p-2" 
+                              className="h-full w-full object-contain p-1" 
                               crossOrigin="anonymous"
                               referrerPolicy="no-referrer"
                               alt={board.abbreviation}
@@ -176,19 +180,26 @@ export default function ExamManagement() {
           
           <div className="p-10 space-y-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
             <div className="flex flex-col items-center gap-6">
-              <div className="h-36 w-36 rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden group shadow-inner">
+              <div className="h-36 w-36 rounded-[2.5rem] bg-white border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden group shadow-inner">
                  {isUploading ? (
                     <Loader2 className="h-8 w-8 text-primary animate-spin" />
                  ) : (
                     <div className="relative h-full w-full flex items-center justify-center">
-                      <img 
-                        src={editingBoard?.iconUrl || stateEmblem} 
-                        referrerPolicy="no-referrer"
-                        crossOrigin="anonymous"
-                        className="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform" 
-                        alt="Preview"
-                        onError={(e) => { (e.target as HTMLImageElement).src = stateEmblem }}
-                      />
+                      {!assetError && editingBoard?.iconUrl ? (
+                        <img 
+                          src={editingBoard.iconUrl} 
+                          referrerPolicy="no-referrer"
+                          crossOrigin="anonymous"
+                          className="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform" 
+                          alt="Preview"
+                          onError={() => setAssetError(true)}
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 opacity-30 group-hover:opacity-100 transition-opacity">
+                           <ImageIcon className="h-8 w-8 text-slate-400" />
+                           <span className="text-[8px] font-black uppercase text-slate-400">No Asset Load</span>
+                        </div>
+                      )}
                     </div>
                  )}
               </div>
@@ -219,7 +230,7 @@ export default function ExamManagement() {
                  </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Logo URL Override</Label>
+                <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Logo URL Override (Government SVG)</Label>
                 <Input value={editingBoard?.iconUrl || ""} onChange={e => setEditingBoard({...editingBoard, iconUrl: e.target.value.trim()})} className="bg-slate-50 border-none rounded-xl h-12 text-[10px] font-mono" />
               </div>
             </div>

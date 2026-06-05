@@ -4,7 +4,7 @@ import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/fi
  * @fileOverview Final Institutional Seeding Engine for Cracklix.
  * Synchronizes binary access passes, official board registry, and platform settings.
  * Optimized for Testbook-style "Select Board" logic with high-fidelity logos.
- * Hardcoded to Wikimedia URLs to ensure Cross-Origin (CORS) compatibility.
+ * Hardcoded to Wikimedia and Government URLs to ensure Cross-Origin (CORS) compatibility.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[REGISTRY] Initializing Global Punjab Access Registry Sync...');
@@ -51,8 +51,9 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'passes', p.id), { ...p, updatedAt: serverTimestamp() });
   }
 
-  // 2. Master Authority Registry with Stable Wikimedia URLs (CORS Friendly)
+  // 2. Master Authority Registry with Official Government & Wikimedia URLs
   const stateEmblem = 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png';
+  const psssbOfficialLogo = 'https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg';
   const policeEmblem = 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Punjab_Police_India_Logo.png';
 
   const boards = [
@@ -60,7 +61,7 @@ export async function seedInitialData(db: Firestore) {
       id: 'psssb',
       abbreviation: 'PSSSB',
       name: 'Punjab Subordinate Services Selection Board',
-      iconUrl: stateEmblem,
+      iconUrl: psssbOfficialLogo,
       description: 'Official board for Group B and C posts.'
     },
     {
@@ -104,20 +105,6 @@ export async function seedInitialData(db: Firestore) {
       name: 'Punjab & Haryana High Court',
       iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Scale_of_justice_2.svg/512px-Scale_of_justice_2.svg.png',
       description: 'Judicial and clerical court recruitments.'
-    },
-    {
-      id: 'markfed',
-      abbreviation: 'MARKFED',
-      name: 'Punjab MARKFED',
-      iconUrl: stateEmblem,
-      description: 'Cooperative federation recruitments.'
-    },
-    {
-      id: 'verka',
-      abbreviation: 'Verka',
-      name: 'Milkfed Punjab (Verka)',
-      iconUrl: stateEmblem,
-      description: 'Management and production nodes.'
     }
   ];
 

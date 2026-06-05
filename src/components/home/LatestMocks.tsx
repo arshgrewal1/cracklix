@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * @fileOverview High-Fidelity Latest Mocks Node.
- * Updated: Triple-layer failover for logos to guarantee branding presence.
+ * Updated: Government SVG Protocol and Triple-layer failover.
  */
 
 export default function LatestMocks() {
@@ -37,7 +37,7 @@ export default function LatestMocks() {
     }).slice(0, 5)
   }, [rawMocks])
 
-  // Triple Failover State Emblem
+  // Standard Failover Emblem
   const stateEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
 
   return (
@@ -85,7 +85,7 @@ export default function LatestMocks() {
                             src={board?.iconUrl || stateEmblem} 
                             referrerPolicy="no-referrer"
                             crossOrigin="anonymous"
-                            className="w-full h-full object-contain p-2" 
+                            className="w-full h-full object-contain p-1" 
                             alt={mock.boardId || 'Board'} 
                             onError={(e) => {
                                const target = e.target as HTMLImageElement;
