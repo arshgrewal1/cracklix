@@ -23,6 +23,11 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 
+/**
+ * @fileOverview Global Navigation Node.
+ * Features: Sheet-based Mobile Sidebar with safe-area constraints.
+ */
+
 export default function Navbar() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user, profile, loading } = useUser();
@@ -63,8 +68,11 @@ export default function Navbar() {
                      <Menu className="h-5 w-5" />
                    </button>
                  </SheetTrigger>
-                 <SheetContent side="left" className="p-0 border-none w-[300px]">
-                   <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle></SheetHeader>
+                 <SheetContent 
+                   side="left" 
+                   className="p-0 border-none w-[min(320px,80vw)]"
+                 >
+                   <SheetHeader className="sr-only"><SheetTitle>Aspirant Menu</SheetTitle></SheetHeader>
                    <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
                  </SheetContent>
                </Sheet>
