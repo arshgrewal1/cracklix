@@ -2,7 +2,7 @@
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle, FileText, Activity, ShieldAlert, HeartPulse, HelpCircle, Upload, Layers, CheckCircle2, Gem, History, SearchCode, Megaphone, Globe } from "lucide-react"
+import { LayoutDashboard, Database, ClipboardList, TrendingUp, Settings, Users, LogOut, Bell, ShieldCheck, GraduationCap, Zap, Newspaper, AlertCircle, AlertTriangle, FileText, Activity, ShieldAlert, HeartPulse, HelpCircle, Upload, Layers, CheckCircle2, Gem, History, SearchCode, Megaphone, Globe, MousePointer2 } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 import { useUser, useAuth } from "@/firebase"
@@ -82,6 +82,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarGroupContent>
                 <SidebarMenu>
                   <AdminNavItem icon={<Gem className="text-amber-400" />} label="Pass Management" href="/admin/passes" active={pathname === "/admin/passes"} />
+                  <AdminNavItem icon={<MousePointer2 className="text-orange-400" />} label="Ad Manager" href="/admin/ads" active={pathname === "/admin/ads"} />
                   <AdminNavItem icon={<CheckCircle2 className="text-emerald-400" />} label="Verify Payments" href="/admin/payments/verify" active={pathname === "/admin/payments/verify"} />
                   <AdminNavItem icon={<Zap />} label="Gross Revenue" href="/admin/payments" active={pathname === "/admin/payments"} />
                 </SidebarMenu>

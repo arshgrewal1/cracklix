@@ -9,15 +9,15 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { Globe, Shield, Layout, Bell, Save, RefreshCw, ShieldCheck, Lock, CloudLightning, FileCode, QrCode, Phone, Zap, Megaphone, MapPin, Mail, Twitter, Facebook, Instagram, Send } from "lucide-react"
+import { Globe, Shield, Layout, Bell, Save, RefreshCw, ShieldCheck, Lock, CloudLightning, FileCode, QrCode, Phone, Zap, Megaphone, MapPin, Mail, Twitter, Facebook, Instagram, Send, MousePointer2 } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Final Enterprise CMS Node v5.0.
- * Features: Manual Payment Configuration, Announcement Toggle, and Social/Contact Registry.
+ * @fileOverview Final Enterprise CMS Node v5.1.
+ * Features: AdSense Control & Manual Payment Configuration.
  */
 
 export default function AdminSettings() {
@@ -46,7 +46,9 @@ export default function AdminSettings() {
     facebookUrl: "",
     instagramUrl: "",
     twitterUrl: "",
-    telegramUrl: "https://t.me/cracklixapp"
+    telegramUrl: "https://t.me/cracklixapp",
+    adSenseEnabled: false,
+    adSenseClientCode: ""
   });
 
   useEffect(() => {
@@ -71,7 +73,7 @@ export default function AdminSettings() {
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">System Configuration Node</span>
            </div>
           <h1 className="text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight">System Portal</h1>
-          <p className="text-slate-500 mt-2 text-lg font-medium">Enterprise Control: CMS, Security, and Payments.</p>
+          <p className="text-slate-500 mt-2 text-lg font-medium">Enterprise Control: CMS, Security, and Monetization.</p>
         </div>
         <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 h-16 px-12 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl gap-3">
           <Save className="h-5 w-5" /> Commit Platform Changes
@@ -82,7 +84,7 @@ export default function AdminSettings() {
         <TabsList className="bg-slate-100 border border-slate-200 p-1.5 h-16 rounded-2xl overflow-x-auto overflow-y-hidden custom-scrollbar">
           <TabsTrigger value="homepage" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Global CMS</TabsTrigger>
           <TabsTrigger value="social" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Social & Contact</TabsTrigger>
-          <TabsTrigger value="payments" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Payment Registry</TabsTrigger>
+          <TabsTrigger value="monetization" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Monetization</TabsTrigger>
           <TabsTrigger value="logic" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Logic Engines</TabsTrigger>
         </TabsList>
 
@@ -129,7 +131,6 @@ export default function AdminSettings() {
         <TabsContent value="social">
            <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12 space-y-12">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                 {/* Contact Details */}
                  <div className="space-y-8">
                     <h3 className="font-headline font-black text-xl uppercase flex items-center gap-3">
                        <Phone className="h-6 w-6 text-primary" /> Official Contact Info
@@ -159,7 +160,6 @@ export default function AdminSettings() {
                     </div>
                  </div>
 
-                 {/* Social Hub */}
                  <div className="space-y-8">
                     <h3 className="font-headline font-black text-xl uppercase flex items-center gap-3">
                        <Globe className="h-6 w-6 text-blue-500" /> Social Presence Hub
@@ -179,36 +179,40 @@ export default function AdminSettings() {
                              <Input value={formData.instagramUrl} onChange={e => setFormData({...formData, instagramUrl: e.target.value})} placeholder="https://instagram.com/..." className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
                           </div>
                        </div>
-                       <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Twitter (X) URL</Label>
-                          <div className="relative">
-                             <Twitter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                             <Input value={formData.twitterUrl} onChange={e => setFormData({...formData, twitterUrl: e.target.value})} placeholder="https://x.com/..." className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
-                          </div>
-                       </div>
-                       <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Facebook Page URL</Label>
-                          <div className="relative">
-                             <Facebook className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                             <Input value={formData.facebookUrl} onChange={e => setFormData({...formData, facebookUrl: e.target.value})} placeholder="https://facebook.com/..." className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
-                          </div>
-                       </div>
                     </div>
                  </div>
               </div>
            </Card>
         </TabsContent>
 
-        <TabsContent value="payments">
-          <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12 space-y-10">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <TabsContent value="monetization">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+             <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12 space-y-10">
+                <h3 className="font-headline font-black text-xl uppercase flex items-center gap-4"><QrCode className="h-6 w-6 text-primary" /> Gateway Node</h3>
                 <div className="space-y-6">
-                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><QrCode className="h-3 w-3" /> Audit UPI ID</Label>
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Audit UPI ID</Label>
                    <Input value={formData.upiId} onChange={e => setFormData({...formData, upiId: e.target.value})} className="h-16 rounded-2xl bg-slate-50 border-slate-100 text-xl font-black text-primary" placeholder="arshdeepgrewal1122@okaxis" />
                    <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest ml-1">This ID will be displayed to all students during manual checkout.</p>
                 </div>
-             </div>
-          </Card>
+             </Card>
+
+             <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12 space-y-10">
+                <h3 className="font-headline font-black text-xl uppercase flex items-center gap-4"><MousePointer2 className="h-6 w-6 text-orange-500" /> AdSense Node</h3>
+                <div className="space-y-6">
+                   <div className="flex items-center justify-between p-6 bg-orange-50/30 rounded-2xl border border-orange-100">
+                      <div className="space-y-1">
+                         <p className="font-black text-xs uppercase text-orange-900">Enable Google AdSense</p>
+                         <p className="text-[9px] text-orange-500 uppercase font-bold">Injects AdSense code across placement nodes.</p>
+                      </div>
+                      <Switch checked={formData.adSenseEnabled} onCheckedChange={val => setFormData({...formData, adSenseEnabled: val})} />
+                   </div>
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Universal AdSense Script</Label>
+                      <Textarea value={formData.adSenseClientCode} onChange={e => setFormData({...formData, adSenseClientCode: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 border-slate-100 font-mono text-xs" placeholder="<script async src='...'></script>" />
+                   </div>
+                </div>
+             </Card>
+          </div>
         </TabsContent>
 
         <TabsContent value="logic">

@@ -1,3 +1,4 @@
+
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'CHAPTER' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET';
@@ -6,6 +7,21 @@ export type Gender = 'Male' | 'Female' | 'Other';
 export type AccessType = 'FREE' | 'PREMIUM';
 export type RegionType = 'Punjab' | 'National';
 export type BoardCategory = 'PUNJAB_STATE' | 'TEACHING' | 'CENTRAL';
+
+export type AdType = 'ADSENSE' | 'BANNER' | 'HTML' | 'AFFILIATE';
+export type AdStatus = 'ACTIVE' | 'PAUSED' | 'SCHEDULED';
+export type AdPlacementType = 
+  | 'HOMEPAGE_TOP' 
+  | 'HOMEPAGE_MIDDLE' 
+  | 'HOMEPAGE_BOTTOM' 
+  | 'EXAM_LISTING' 
+  | 'MOCK_LISTING' 
+  | 'NOTES_PAGE' 
+  | 'CA_PAGE' 
+  | 'RESULT_PAGE' 
+  | 'SIDEBAR' 
+  | 'FOOTER' 
+  | 'HEADER';
 
 export type QuestionType = 
   | 'MCQ' 
@@ -46,6 +62,7 @@ export interface Pass {
   active: boolean;
   displayOrder: number;
   recommended?: boolean;
+  adFree: boolean;
   type: 'FREE' | 'PREMIUM';
   description?: string;
   updatedAt?: any;
@@ -66,6 +83,33 @@ export interface UserProfile {
   passExpiryDate?: string;
 }
 
+export interface Advertisement {
+  id: string;
+  title: string;
+  type: AdType;
+  status: AdStatus;
+  placements: AdPlacementType[];
+  desktopImageUrl?: string;
+  mobileImageUrl?: string;
+  externalUrl?: string;
+  htmlCode?: string;
+  adSenseCode?: string;
+  startDate?: any;
+  endDate?: any;
+  priority: number;
+  targeting: {
+    regions?: string[];
+    examIds?: string[];
+    categories?: string[];
+  };
+  stats: {
+    impressions: number;
+    clicks: number;
+  };
+  createdAt: any;
+  updatedAt: any;
+}
+
 export interface MockTest {
   id: string;
   title: string;
@@ -79,33 +123,6 @@ export interface MockTest {
   difficulty: string;
   status: ContentStatus;
   published: boolean;
-  isDummy?: boolean;
-  createdAt: any;
-  updatedAt: any;
-}
-
-export interface Question {
-  id: string;
-  boardId: string;
-  subjectId: string;
-  chapterId?: string;
-  questionEn: string;
-  questionPa?: string;
-  optionAEn: string;
-  optionAPa?: string;
-  optionBEn: string;
-  optionBPa?: string;
-  optionCEn: string;
-  optionCPa?: string;
-  optionDEn: string;
-  optionDPa?: string;
-  correctAnswer: 'A' | 'B' | 'C' | 'D';
-  explanationEn: string;
-  explanationPa?: string;
-  difficulty: Difficulty;
-  questionType: QuestionType;
-  status: ContentStatus;
-  isStandalone: boolean;
   isDummy?: boolean;
   createdAt: any;
   updatedAt: any;

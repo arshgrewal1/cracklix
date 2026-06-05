@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Trash2, Edit, Save, Gem, Zap, Lock, X, ChevronRight } from "lucide-react"
+import { Plus, Trash2, Edit, Save, Gem, Zap, Lock, X, ChevronRight, ShieldOff } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -18,8 +18,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Dynamic Pass Hub v3.1.
- * Optimized: Client-side sorting to bypass composite index requirements.
+ * @fileOverview Institutional Dynamic Pass Hub v3.2.
+ * Updated: Ad-Free monetisation toggle.
  */
 
 export default function PassManagement() {
@@ -79,7 +79,7 @@ export default function PassManagement() {
           <p className="text-slate-500 mt-1 font-medium">Configure institutional access tiers and pricing logic.</p>
         </div>
         <Button 
-           onClick={() => setEditingPass({ name: "", price: 299, durationDays: 30, features: [], active: true, displayOrder: (passes?.length || 0) + 1, type: "PREMIUM", description: "" })} 
+           onClick={() => setEditingPass({ name: "", price: 299, durationDays: 30, features: [], active: true, displayOrder: (passes?.length || 0) + 1, type: "PREMIUM", description: "", adFree: false })} 
            className="bg-[#0F172A] hover:bg-black text-white gap-3 h-14 px-8 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl transition-all active:scale-95"
         >
           <Plus className="h-5 w-5" /> Construct New Pass
@@ -111,11 +111,11 @@ export default function PassManagement() {
                      <Badge className={cn("border-none text-[7px] font-black tracking-widest px-2 py-0.5", p.active ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400')}>
                         {p.active ? 'LIVE' : 'DISABLED'}
                      </Badge>
+                     {p.adFree && <Badge className="bg-blue-50 text-blue-600 border-none text-[7px] font-black px-2 py-0.5 rounded-lg">AD FREE</Badge>}
                   </div>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[9px] font-black uppercase text-slate-400 tracking-wider">
                      <span className="text-primary">₹{p.price}</span>
                      <span className="flex items-center gap-1.5"><ChevronRight className="h-2.5 w-2.5" /> {p.durationDays} Days</span>
-                     <span className="flex items-center gap-1.5"><ChevronRight className="h-2.5 w-2.5" /> Index: {p.displayOrder}</span>
                   </div>
                </div>
             </div>
@@ -189,17 +189,25 @@ export default function PassManagement() {
                 <Textarea value={editingPass?.description || ""} onChange={e => setEditingPass({...editingPass, description: e.target.value})} placeholder="Strategic pass description..." className="rounded-xl bg-slate-50 border-none h-16 p-3 resize-none text-xs font-medium" />
              </div>
 
-             <div className="space-y-1.5">
-                <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Features (CSV)</Label>
-                <Textarea value={Array.isArray(editingPass?.features) ? editingPass.features.join(', ') : editingPass?.features || ""} onChange={e => setEditingPass({...editingPass, features: e.target.value})} placeholder="Full Mocks, AI Solutions, All PYQs..." className="rounded-xl bg-slate-50 border-none h-16 p-3 font-bold resize-none text-xs" />
-             </div>
-
-             <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <div className="space-y-0.5">
-                   <p className="font-black text-[11px] uppercase text-[#0F172A]">Visibility Active</p>
-                   <p className="text-[8px] text-slate-400 font-bold uppercase">Toggle to hide/show in pricing hub</p>
+             <div className="space-y-4 pt-4 border-t border-slate-50">
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                   <div className="space-y-0.5">
+                      <p className="font-black text-[11px] uppercase text-[#0F172A]">Visibility Active</p>
+                      <p className="text-[8px] text-slate-400 font-bold uppercase">Toggle to hide/show in pricing hub</p>
+                   </div>
+                   <Switch checked={editingPass?.active} onCheckedChange={val => setEditingPass({...editingPass, active: val})} />
                 </div>
-                <Switch checked={editingPass?.active} onCheckedChange={val => setEditingPass({...editingPass, active: val})} />
+
+                <div className="flex items-center justify-between p-4 bg-blue-50/30 rounded-2xl border border-blue-100">
+                   <div className="space-y-0.5">
+                      <div className="flex items-center gap-2">
+                         <ShieldOff className="h-3 w-3 text-blue-600" />
+                         <p className="font-black text-[11px] uppercase text-blue-900">Ad-Free Experience</p>
+                      </div>
+                      <p className="text-[8px] text-blue-400 font-bold uppercase">Disable all advertisements for this pass</p>
+                   </div>
+                   <Switch checked={editingPass?.adFree} onCheckedChange={val => setEditingPass({...editingPass, adFree: val})} />
+                </div>
              </div>
           </div>
 

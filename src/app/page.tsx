@@ -9,6 +9,7 @@ import LatestMocks from "@/components/home/LatestMocks";
 import Features from "@/components/home/Features";
 import AppPreview from "@/components/home/AppPreview";
 import Footer from "@/components/layout/Footer";
+import AdPlacement from "@/components/ads/AdPlacement";
 import { useCollection, useFirestore } from "@/firebase";
 import { collection, query, limit } from "firebase/firestore";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,9 +33,8 @@ import Link from "next/link";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 /**
- * @fileOverview Redesigned Homepage Hub v7.0.
- * Mirrors professional platforms like Adda247.
- * Features: Regional vs National Routing Nodes.
+ * @fileOverview Redesigned Homepage Hub v7.1.
+ * Features: Ad Registry Placements.
  */
 
 export default function HomePage() {
@@ -61,6 +61,8 @@ export default function HomePage() {
       
       <Hero />
 
+      <AdPlacement placement="HOMEPAGE_TOP" />
+
       {/* Trust Stats Bar */}
       <section className="bg-white py-12 border-b border-slate-100">
          <div className="container mx-auto px-6 max-w-7xl">
@@ -72,6 +74,8 @@ export default function HomePage() {
             </div>
          </div>
       </section>
+
+      <AdPlacement placement="HOMEPAGE_MIDDLE" />
 
       {/* Geographic Hubs Section (Redesigned) */}
       <section className="py-24 bg-[#F8FAFC]">
@@ -193,6 +197,8 @@ export default function HomePage() {
             </div>
          </div>
       </section>
+
+      <AdPlacement placement="HOMEPAGE_BOTTOM" />
 
       <Features />
       <AppPreview />

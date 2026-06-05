@@ -4,6 +4,7 @@
 import { useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
+import AdPlacement from "@/components/ads/AdPlacement"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
@@ -65,6 +66,8 @@ export default function MocksGatewayPage() {
           </p>
         </div>
 
+        <AdPlacement placement="MOCK_LISTING" />
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
            {examsLoading ? (
              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[450px] w-full rounded-[3.5rem]" />)
@@ -118,6 +121,8 @@ export default function MocksGatewayPage() {
              )
            })}
         </div>
+
+        <AdPlacement placement="SIDEBAR" className="my-16" />
 
         <div className="mt-32 p-16 md:p-24 rounded-[5rem] bg-[#0F172A] text-white relative overflow-hidden shadow-4xl group">
            <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Sparkles className="h-96 w-96" /></div>

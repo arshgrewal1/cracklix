@@ -35,36 +35,44 @@
         "active": { "type": "boolean" },
         "displayOrder": { "type": "number" },
         "recommended": { "type": "boolean" },
+        "adFree": { "type": "boolean" },
         "type": { "type": "string", "enum": ["FREE", "PREMIUM"] },
         "description": { "type": "string" }
       }
     },
-    "Board": {
-      "title": "Recruitment Board",
-      "description": "Official Punjab government board node.",
+    "Advertisement": {
+      "title": "Advertisement",
+      "description": "Campaign management for monetization.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "abbreviation": { "type": "string" },
-        "name": { "type": "string" },
-        "iconUrl": { "type": "string" },
-        "description": { "type": "string" }
-      }
-    },
-    "Question": {
-      "title": "Atomic MCQ Node",
-      "description": "A single reusable practice question.",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "boardId": { "type": "string" },
-        "subjectId": { "type": "string" },
-        "questionEn": { "type": "string" },
-        "questionPa": { "type": "string" },
-        "correctAnswer": { "type": "string", "enum": ["A", "B", "C", "D"] },
-        "explanationEn": { "type": "string" },
-        "explanationPa": { "type": "string" },
-        "difficulty": { "type": "string" }
+        "title": { "type": "string" },
+        "type": { "type": "string", "enum": ["ADSENSE", "BANNER", "HTML", "AFFILIATE"] },
+        "status": { "type": "string", "enum": ["ACTIVE", "PAUSED", "SCHEDULED"] },
+        "placements": { "type": "array", "items": { "type": "string" } },
+        "desktopImageUrl": { "type": "string" },
+        "mobileImageUrl": { "type": "string" },
+        "externalUrl": { "type": "string" },
+        "htmlCode": { "type": "string" },
+        "adSenseCode": { "type": "string" },
+        "startDate": { "type": "string", "format": "date-time" },
+        "endDate": { "type": "string", "format": "date-time" },
+        "priority": { "type": "number" },
+        "targeting": {
+           "type": "object",
+           "properties": {
+              "regions": { "type": "array", "items": { "type": "string" } },
+              "examIds": { "type": "array", "items": { "type": "string" } },
+              "categories": { "type": "array", "items": { "type": "string" } }
+           }
+        },
+        "stats": {
+           "type": "object",
+           "properties": {
+              "impressions": { "type": "number" },
+              "clicks": { "type": "number" }
+           }
+        }
       }
     }
   },
@@ -80,25 +88,9 @@
       "schema": { "$ref": "#/backend/entities/Pass" },
       "description": "Dynamic pricing tiers."
     },
-    "/boards/{boardId}": {
-      "schema": { "$ref": "#/backend/entities/Board" },
-      "description": "Official Board Registry (PSPCL, PSSSB, etc)."
-    },
-    "/questions/{questionId}": {
-      "schema": { "$ref": "#/backend/entities/Question" },
-      "description": "Global Atomic Question Bank."
-    },
-    "/mocks/{mockId}": {
-      "schema": "object",
-      "description": "High-fidelity mock series."
-    },
-    "/results/{resultId}": {
-      "schema": "object",
-      "description": "Aspirant performance audit trails."
-    },
-    "/payment_requests/{reqId}": {
-      "schema": "object",
-      "description": "Pending UPI verifications."
+    "/ads/{adId}": {
+      "schema": { "$ref": "#/backend/entities/Advertisement" },
+      "description": "Ad campaigns."
     }
   }
 }

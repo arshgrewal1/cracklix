@@ -1,8 +1,10 @@
+
 "use client"
 
 import { useMemo, Suspense } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
+import AdPlacement from "@/components/ads/AdPlacement"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, where } from "firebase/firestore"
 import { Input } from "@/components/ui/input"
@@ -81,9 +83,13 @@ function CatalogContent() {
           </div>
         </div>
 
+        <AdPlacement placement="EXAM_LISTING" />
+
         {/* Section: Punjab State Exams */}
         <CatalogSection title="Punjab State Verticals" data={categorizedData.Punjab} boards={boards} loading={examsLoading} icon={<ShieldCheck className="text-emerald-600" />} />
         
+        <AdPlacement placement="SIDEBAR" className="hidden lg:block my-12" />
+
         {/* Section: Teaching Exams */}
         <CatalogSection title="Teaching Cadre Registry" data={categorizedData.Teaching} boards={boards} loading={examsLoading} icon={<BookOpen className="text-blue-600" />} />
 
