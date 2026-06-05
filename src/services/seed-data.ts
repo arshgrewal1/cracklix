@@ -1,8 +1,9 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Engine v5.0.
+ * @fileOverview Institutional Seeding Engine v5.1.
  * Organizes content into Punjab State, Teaching, and Central verticals.
+ * Updated: Verified Indian Army recruitment banner asset.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Global Institutional Registry Sync...');
@@ -12,6 +13,7 @@ export async function seedInitialData(db: Firestore) {
   const policeLogo = 'https://punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png';
   const eduDeptLogo = 'https://pstet.pseb.ac.in/img/main-logo-2.png';
   const ppscOfficialLogo = 'https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png';
+  const armyBanner = 'https://pbs.twimg.com/profile_banners/1227253801/1778662972/1080x360';
 
   // 1. Boards Registry
   const boards = [
@@ -29,7 +31,7 @@ export async function seedInitialData(db: Firestore) {
     { id: 'master-cadre', abbreviation: 'Master Cadre', name: 'Punjab Master Cadre Board', iconUrl: eduDeptLogo, region: 'Punjab', category: 'TEACHING', description: 'Subject-specific teacher recruitment.' },
     
     // Central Exams
-    { id: 'indian-army', abbreviation: 'ARMY', name: 'Indian Army Recruitment', iconUrl: 'https://www.indianarmy.nic.in/writereaddata/images/slider/270526_Hindi_1.jpeg', region: 'National', category: 'CENTRAL', description: 'Defense and Agniveer verticals.' },
+    { id: 'indian-army', abbreviation: 'ARMY', name: 'Indian Army Recruitment', iconUrl: armyBanner, region: 'National', category: 'CENTRAL', description: 'Defense and Agniveer verticals.' },
     { id: 'ssc', abbreviation: 'SSC', name: 'Staff Selection Commission', iconUrl: 'https://ssc.gov.in/assets/sscLogo.webp', region: 'National', category: 'CENTRAL', description: 'Central staff recruitment authority.' }
   ];
 
