@@ -31,13 +31,15 @@ export default function QuestionRenderer({
   const isBi = language === 'bilingual';
 
   // Uniform Typography Standard
-  const typographyClass = "text-[18px] md:text-[20px] lg:text-[24px] xl:text-[28px] font-[700] leading-[1.6] antialiased tracking-tight text-[#111111]";
+  const desktopSize = "xl:text-[28px] lg:text-[24px]";
+  const mobileSize = "text-[20px] md:text-[22px]";
+  const typographyClass = cn(mobileSize, desktopSize, "font-[700] leading-[1.6] antialiased tracking-tight text-[#111111]");
 
   return (
     <div className="w-full text-left font-body bg-transparent h-auto min-h-0">
       
       {/* 1. CORE QUESTION STATEMENT */}
-      <div className="space-y-[12px]">
+      <div className="flex flex-col gap-[12px]">
          {/* EN Mode or BI Mode */}
          {(isEn || isBi) && (
             <div className={typographyClass}>
@@ -54,7 +56,7 @@ export default function QuestionRenderer({
       </div>
 
       {/* Spacing before options */}
-      <div className="h-[24px]" />
+      <div className="h-[16px]" />
 
       {/* 2. OPTION HUB */}
       {!hideOptions && (
@@ -64,7 +66,7 @@ export default function QuestionRenderer({
             const pa = (question as any)[`option${key}Punjabi`];
 
             return (
-              <div key={key} className="flex gap-4 items-center group p-4 h-auto min-h-[68px] md:min-h-[76px] rounded-[16px] border-2 border-slate-100 hover:border-primary/20 transition-all bg-white shadow-sm">
+              <div key={key} className="flex gap-4 items-center group p-4 h-auto min-h-[68px] md:min-h-[72px] rounded-[16px] border-2 border-slate-100 hover:border-primary/20 transition-all bg-white shadow-sm">
                 <span className="shrink-0 font-black px-3 py-1 bg-[#0F172A] text-white rounded-lg text-xs md:text-sm">({key})</span>
                 <div className="flex-1 py-1 overflow-hidden">
                    {isEn && <p className="font-[600] text-[16px] md:text-[20px] text-[#111111] leading-tight">{en}</p>}
