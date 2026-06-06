@@ -7,9 +7,8 @@ import { ChevronLeft, ChevronRight, LayoutGrid, List, FileText, Info } from "luc
 import { useExamStore } from '@/store/useExamStore';
 
 /**
- * @fileOverview Professional CBT Palette Node v25.0.
- * Strictly mirrors Testbook/SSC Grid View.
- * 5-column matrix with official color-coded logic.
+ * @fileOverview Professional CBT Palette Node v26.0.
+ * Optimized Grid Visibility: grid-area assigned flex-1 to ensure all nodes are viewable.
  */
 export default function QuestionPalette({ onSelect }: { onSelect: (index: number) => void }) {
   const { questions, status, currentIdx, visited } = useExamStore();
@@ -34,10 +33,10 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
   const visibleQuestions = questions.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 
   return (
-    <div className="flex flex-col h-full bg-white text-left font-body">
+    <div className="flex flex-col h-full bg-white text-left font-body border-l border-slate-100 shadow-[-4px_0_20px_rgba(0,0,0,0.02)]">
       
       {/* 1. PALETTE HEADER TABS */}
-      <div className="flex border-b border-slate-100">
+      <div className="flex border-b border-slate-100 shrink-0">
          <button 
            onClick={() => setViewViewMode('grid')}
            className={cn(
@@ -59,7 +58,7 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
       </div>
 
       {/* 2. TACTICAL LINKS */}
-      <div className="grid grid-cols-2 divide-x divide-slate-100 border-b border-slate-100">
+      <div className="grid grid-cols-2 divide-x divide-slate-100 border-b border-slate-100 shrink-0">
          <button className="h-10 flex items-center justify-center gap-2 text-[9px] font-black uppercase text-slate-500 hover:bg-slate-50">
             <Info className="h-3 w-3 text-primary" /> Instructions
          </button>
@@ -69,7 +68,7 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
       </div>
 
       {/* 3. LEGEND / STATISTICS */}
-      <div className="p-4 grid grid-cols-2 gap-2 bg-slate-50/50">
+      <div className="p-3 grid grid-cols-2 gap-1.5 bg-slate-50/50 shrink-0">
          <LegendItem count={summary.answered} label="Answered" color="bg-blue-600" />
          <LegendItem count={summary.notAnswered} label="Not Answered" color="bg-slate-400" />
          <LegendItem count={summary.marked} label="Marked" color="bg-pink-500" />
@@ -77,10 +76,10 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
          <LegendItem count={summary.ansMarked} label="Ans & Marked" color="bg-violet-600" colSpan={2} />
       </div>
 
-      <div className="h-px w-full bg-slate-100" />
+      <div className="h-px w-full bg-slate-200 shrink-0" />
 
-      {/* 4. GRID MATRIX (5x5 Locked) */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+      {/* 4. GRID MATRIX (5-column scrollable) */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-4 min-h-0">
          <div className="grid grid-cols-5 gap-2.5">
             {visibleQuestions.map((_, i) => {
               const idx = currentPage * pageSize + i;
@@ -110,32 +109,29 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
       </div>
 
       {/* 5. PAGINATION NAV */}
-      {totalPages > 1 && (
-        <div className="p-4 border-t border-slate-100 bg-white flex items-center justify-between">
+      <div className="shrink-0 p-3 border-t border-slate-100 bg-white">
+        <div className="flex items-center justify-between mb-4">
            <button 
              disabled={currentPage === 0}
              onClick={() => setCurrentPage(p => p - 1)}
-             className="h-9 w-9 rounded-lg border border-slate-200 flex items-center justify-center disabled:opacity-30 hover:bg-slate-50"
+             className="h-8 w-8 rounded-lg border border-slate-200 flex items-center justify-center disabled:opacity-30 hover:bg-slate-50"
            >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5" />
            </button>
-           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+           <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
               Palette {currentPage + 1} / {totalPages}
            </span>
            <button 
              disabled={currentPage === totalPages - 1}
              onClick={() => setCurrentPage(p => p + 1)}
-             className="h-9 w-9 rounded-lg border border-slate-200 flex items-center justify-center disabled:opacity-30 hover:bg-slate-50"
+             className="h-8 w-8 rounded-lg border border-slate-200 flex items-center justify-center disabled:opacity-30 hover:bg-slate-50"
            >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5" />
            </button>
         </div>
-      )}
-
-      <div className="pb-4 pt-2">
-         <p className="text-[7px] font-black text-slate-300 uppercase tracking-[0.4em] text-center">
+        <p className="text-[7px] font-black text-slate-300 uppercase tracking-[0.4em] text-center">
             CRACKLIX INSTITUTIONAL CBT
-         </p>
+        </p>
       </div>
     </div>
   )
@@ -143,8 +139,8 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
 
 function LegendItem({ count, label, color, textColor = "text-white", colSpan = 1 }: any) {
   return (
-    <div className={cn("flex items-center gap-2 p-1.5 rounded-lg border border-slate-100 bg-white shadow-sm", colSpan > 1 && "col-span-2")}>
-       <div className={cn("h-5 w-5 rounded-md flex items-center justify-center text-[9px] font-black shrink-0 border", color, textColor)}>
+    <div className={cn("flex items-center gap-2 p-1 rounded-lg border border-slate-100 bg-white shadow-sm", colSpan > 1 && "col-span-2")}>
+       <div className={cn("h-4.5 w-4.5 rounded-md flex items-center justify-center text-[8px] font-black shrink-0 border", color, textColor)}>
           {count}
        </div>
        <span className="text-[8px] font-black uppercase text-slate-500 tracking-tight truncate">{label}</span>
