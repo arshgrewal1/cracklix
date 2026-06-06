@@ -27,8 +27,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Final Institutional CBT Attempt Hub v5.0.
- * Optimized: Cinema Dark Mode for question area.
+ * @fileOverview Final Institutional CBT Attempt Hub v6.0.
+ * Integrated selection logic into QuestionRenderer.
  */
 
 export default function MockAttemptPage() {
@@ -184,6 +184,7 @@ export default function MockAttemptPage() {
   );
 
   const q = examStore.questions[examStore.currentIdx];
+  const selectedAnswer = examStore.answers[examStore.currentIdx];
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-900 font-body select-none">
@@ -232,6 +233,8 @@ export default function MockAttemptPage() {
                 <QuestionRenderer 
                    language={examStore.language} 
                    question={{...q, displayId: (examStore.currentIdx + 1).toString()}} 
+                   selectedAnswer={selectedAnswer}
+                   onSelect={(idx) => examStore.setAnswer(examStore.currentIdx, idx, db)}
                 />
               ) : (
                 <div className="flex flex-col items-center justify-center h-full opacity-20 text-white">
@@ -249,7 +252,7 @@ export default function MockAttemptPage() {
               animate={{ x: 0 }}
               exit={{ x: 380 }}
               transition={{ type: 'spring', damping: 30, stiffness: 250 }}
-              className="hidden lg:block w-[380px] shrink-0 h-full border-l border-white/5 bg-white"
+              className="hidden lg:block w-[320px] shrink-0 h-full border-l border-white/5 bg-white"
             >
                <QuestionPalette onSelect={(idx) => examStore.setCurrentIdx(idx)} onSubmit={() => setShowSubmitModal(true)} />
             </motion.aside>

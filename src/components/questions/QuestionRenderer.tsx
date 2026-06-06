@@ -5,7 +5,6 @@ import React from 'react';
 import { Question } from '@/types';
 import { cn } from '@/lib/utils';
 import MathText from './MathText';
-import { Bookmark, Flag, Info, Circle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface QuestionRendererProps {
@@ -13,18 +12,21 @@ interface QuestionRendererProps {
   language: 'en' | 'pa' | 'hi' | 'bilingual';
   showSolution?: boolean;
   hideOptions?: boolean;
+  selectedAnswer?: number; // 0, 1, 2, 3
+  onSelect?: (index: number) => void;
 }
 
 /**
- * @fileOverview Institutional High-Fidelity Dark Renderer v16.0.
- * Matches user-provided screenshot: Black background, White text, Slash-separated options.
- * Fixed: Standardized language keys to ensure bilingual statements render correctly.
+ * @fileOverview Institutional High-Fidelity Dark Renderer v17.0.
+ * Synchronized with user screenshot: Black bg, White prefixes, Slate-300 text, Orange selection.
  */
 export default function QuestionRenderer({ 
   question, 
   language = 'bilingual',
   showSolution = false,
-  hideOptions = false 
+  hideOptions = false,
+  selectedAnswer,
+  onSelect
 }: QuestionRendererProps) {
   
   const isEn = language === 'en';
@@ -65,17 +67,30 @@ export default function QuestionRenderer({
 
       {/* 2. OPTION MATRIX (Slash Separated Style) */}
       {!hideOptions && (
-        <div className="flex flex-col space-y-4 mb-10">
-          {['A', 'B', 'C', 'D'].map(key => {
+        <div className="flex flex-col space-y-5 mb-10">
+          {['A', 'B', 'C', 'D'].map((key, idx) => {
             const en = q[`option${key}English`] || q[`option_${key.toLowerCase()}_english`];
             const pa = q[`option${key}Punjabi`] || q[`option_${key.toLowerCase()}_punjabi`];
+            const isSelected = selectedAnswer === idx;
 
             if (!en && !pa) return null;
 
             return (
-              <div key={key} className="flex gap-4 items-baseline group cursor-pointer hover:text-primary transition-colors">
-                <span className="font-[700] text-[16px] md:text-[19px] shrink-0">({key})</span>
-                <p className="font-[700] text-[16px] md:text-[19px] leading-tight">
+              <div 
+                key={key} 
+                onClick={() => onSelect?.(idx)}
+                className="flex gap-4 items-baseline group cursor-pointer transition-all active:scale-[0.99]"
+              >
+                <span className={cn(
+                  "font-[700] text-[16px] md:text-[19px] shrink-0 transition-colors",
+                  isSelected ? "text-primary" : "text-white"
+                )}>
+                  ({key})
+                </span>
+                <p className={cn(
+                  "font-[700] text-[16px] md:text-[19px] leading-tight transition-colors",
+                  isSelected ? "text-white" : "text-slate-300 group-hover:text-white"
+                )}>
                   {en} {pa ? ` / ${pa}` : ''}
                 </p>
               </div>
