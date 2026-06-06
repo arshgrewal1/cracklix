@@ -33,7 +33,7 @@ git remote add origin https://github.com/arshgrewal1122/cracklix.git
 # 4. Set branch to main
 git branch -M main
 
-# 5. Push to GitHub
+# 5. Push and Link to GitHub (Crucial Step)
 git push -u origin main
 ```
 

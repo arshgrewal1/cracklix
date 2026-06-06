@@ -1,4 +1,3 @@
-
 {
   "placeholderImages": [
     {
@@ -12,6 +11,18 @@
       "description": "PSSSB Official Institutional Promotion",
       "imageUrl": "https://sssb.punjab.gov.in/wp-content/uploads/2025/08/sssb-1.jpg",
       "imageHint": "psssb official"
+    },
+    {
+      "id": "hero-army",
+      "description": "Indian Army Preparation Node",
+      "imageUrl": "https://joinindianarmy.nic.in/writereaddata/Portal/Images/Banner/Banner1.jpg",
+      "imageHint": "indian army"
+    },
+    {
+      "id": "hero-punjab",
+      "description": "Punjab Heritage Hero",
+      "imageUrl": "https://picsum.photos/seed/punjab-hero/1200/800",
+      "imageHint": "punjab heritage"
     },
     {
       "id": "map-punjab",
