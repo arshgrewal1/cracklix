@@ -3,14 +3,10 @@
 
 import { useExamStore } from '@/store/useExamStore';
 import { Button } from '@/components/ui/button';
-import { Pause, Play, LayoutGrid } from 'lucide-react';
+import { Pause, Play, LayoutGrid, Monitor, Smartphone, PanelRightOpen, PanelRightClose } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Timer from '@/components/mocks/Timer';
 
-/**
- * @fileOverview Institutional High-Fidelity Exam Header.
- * Updated: Palette button is hidden on desktop to satisfy "Single Palette" rule.
- */
 export default function ExamHeader({ onPaletteToggle }: { onPaletteToggle: () => void }) {
   const { 
     isPaused, 
@@ -20,7 +16,9 @@ export default function ExamHeader({ onPaletteToggle }: { onPaletteToggle: () =>
     mockTitle,
     timeLeft,
     currentIdx,
-    questions
+    questions,
+    isPaletteVisible,
+    togglePalette
   } = useExamStore();
 
   return (
@@ -78,12 +76,18 @@ export default function ExamHeader({ onPaletteToggle }: { onPaletteToggle: () =>
               ))}
            </div>
            
+           {/* Palette Toggle Control */}
            <Button 
-             onClick={onPaletteToggle}
-             className="lg:hidden bg-[#F97316] hover:bg-orange-600 h-9 px-4 rounded-xl font-black uppercase text-[10px] tracking-widest gap-2 shadow-xl"
+             variant="ghost"
+             onClick={() => {
+                if (window.innerWidth < 1024) onPaletteToggle();
+                else togglePalette();
+             }}
+             className="bg-[#F97316] hover:bg-orange-600 h-9 px-4 rounded-xl font-black uppercase text-[10px] tracking-widest gap-2 shadow-xl"
            >
-              <LayoutGrid className="h-4 w-4" /> 
-              <span>Palette</span>
+              {isPaletteVisible ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+              <span className="hidden sm:inline">{isPaletteVisible ? 'Hide Palette' : 'Show Palette'}</span>
+              <span className="sm:hidden">Palette</span>
            </Button>
         </div>
       </div>

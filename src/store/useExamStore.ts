@@ -11,11 +11,14 @@ interface ExamStore extends AttemptState {
   language: ExamLanguage;
   isPaused: boolean;
   isSubmitting: boolean;
+  isPaletteVisible: boolean;
 
   // Actions
   initExam: (mockId: string, mockTitle: string, userId: string, questions: Question[], duration: number, savedState?: any) => void;
   setLanguage: (lang: ExamLanguage) => void;
   setPaused: (paused: boolean) => void;
+  setPaletteVisible: (visible: boolean) => void;
+  togglePalette: () => void;
   setCurrentIdx: (idx: number) => void;
   setAnswer: (idx: number, optionIdx: number | null, db: Firestore) => Promise<void>;
   clearAnswer: (idx: number, db: Firestore) => Promise<void>;
@@ -34,6 +37,7 @@ export const useExamStore = create<ExamStore>((set, get) => ({
   language: 'bilingual',
   isPaused: false,
   isSubmitting: false,
+  isPaletteVisible: true,
 
   answers: {},
   status: {},
@@ -68,6 +72,8 @@ export const useExamStore = create<ExamStore>((set, get) => ({
 
   setLanguage: (language) => set({ language }),
   setPaused: (isPaused) => set({ isPaused }),
+  setPaletteVisible: (isPaletteVisible) => set({ isPaletteVisible }),
+  togglePalette: () => set((state) => ({ isPaletteVisible: !state.isPaletteVisible })),
 
   setCurrentIdx: (idx) => {
     const { visited, questions } = get();

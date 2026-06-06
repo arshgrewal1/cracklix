@@ -5,7 +5,8 @@ import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { 
   CheckCircle2, 
-  ShieldCheck
+  ShieldCheck,
+  ChevronDown
 } from "lucide-react";
 import { useExamStore } from '@/store/useExamStore';
 import { Badge } from "@/components/ui/badge";
@@ -13,8 +14,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 /**
- * @fileOverview Professional CBT Question Palette Hub v3.0.
- * Strictly mirrors the provided screenshot for status summary and colors.
+ * @fileOverview Professional CBT Question Palette Hub v4.0.
+ * Unified Scroll: The entire panel—legend, grid, and submit—scrolls as one unit.
  */
 export default function QuestionPalette({ onSelect }: { onSelect: (index: number) => void }) {
   const { questions, status, currentIdx, visited } = useExamStore();
@@ -50,61 +51,69 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
   }, [questions]);
 
   return (
-    <div className="flex flex-col h-full bg-white border-l border-slate-200 text-left font-body select-none">
+    <div className="flex flex-col h-full bg-white border-l border-slate-200 text-left font-body select-none overflow-hidden">
       
-      {/* 1. STATUS SUMMARY HUB (Mirroring Screenshot) */}
-      <div className="p-5 bg-white shrink-0 border-b border-slate-100 shadow-sm">
-         <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-5 ml-1">Question Status</p>
-         <div className="grid grid-cols-2 gap-3">
-            <SummaryItem count={stats.answered} label="ANSWERED" color="bg-blue-600" />
-            <SummaryItem count={stats.notAnswered} label="NOT ANSWERED" color="bg-slate-400" />
-            <SummaryItem count={stats.marked} label="MARKED" color="bg-pink-500" />
-            <SummaryItem count={stats.notVisited} label="NOT VISITED" color="bg-slate-100" textColor="text-slate-400" />
-            <SummaryItem count={stats.ansMarked} label="ANS & MARKED" color="bg-violet-600" colSpan={2} />
-         </div>
-      </div>
-
-      {/* 2. SECTION-WISE SCROLLABLE GRID */}
-      <ScrollArea className="flex-1 bg-slate-50/20">
+      {/* UNIFIED SCROLL AREA */}
+      <ScrollArea className="flex-1">
         <div className="p-5 space-y-8">
-           {sections.map(([secId, data]) => (
-             <div key={secId} className="space-y-5">
-                <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-                   <h4 className="text-[11px] font-black text-[#0B1528] tracking-widest uppercase">{data.name}</h4>
-                   <Badge variant="secondary" className="text-[9px] font-bold uppercase bg-white border border-slate-100 text-slate-400 px-2">{data.questions.length} Qs</Badge>
+           
+           {/* 1. STATUS SUMMARY HUB */}
+           <div className="space-y-5">
+              <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Question Status</p>
+              <div className="grid grid-cols-2 gap-3">
+                 <SummaryItem count={stats.answered} label="ANSWERED" color="bg-blue-600" />
+                 <SummaryItem count={stats.notAnswered} label="NOT ANSWERED" color="bg-slate-400" />
+                 <SummaryItem count={stats.marked} label="MARKED" color="bg-pink-500" />
+                 <SummaryItem count={stats.notVisited} label="NOT VISITED" color="bg-slate-50" textColor="text-slate-300" border="border-slate-200" />
+                 <SummaryItem count={stats.ansMarked} label="ANS & MARKED" color="bg-violet-600" colSpan={2} />
+              </div>
+           </div>
+
+           {/* 2. SECTION-WISE GRID */}
+           <div className="space-y-8 pt-4 border-t border-slate-50">
+              {sections.map(([secId, data]) => (
+                <div key={secId} className="space-y-4">
+                   <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                      <h4 className="text-[11px] font-black text-[#0B1528] tracking-widest uppercase flex items-center gap-2">
+                        <ChevronDown className="h-3 w-3 text-primary" /> {data.name}
+                      </h4>
+                      <Badge variant="secondary" className="text-[8px] font-bold uppercase bg-slate-50 text-slate-400 px-2">{data.questions.length} Qs</Badge>
+                   </div>
+                   
+                   <div className="grid grid-cols-5 gap-3">
+                      {data.questions.map((idx) => (
+                         <QuestionNode 
+                           key={idx} 
+                           index={idx} 
+                           isActive={currentIdx === idx} 
+                           status={status[idx]} 
+                           isVisited={visited.includes(idx)}
+                           onClick={() => onSelect(idx)}
+                         />
+                      ))}
+                   </div>
                 </div>
-                
-                <div className="grid grid-cols-5 gap-3">
-                   {data.questions.map((idx) => (
-                      <QuestionNode 
-                        key={idx} 
-                        index={idx} 
-                        isActive={currentIdx === idx} 
-                        status={status[idx]} 
-                        isVisited={visited.includes(idx)}
-                        onClick={() => onSelect(idx)}
-                      />
-                   ))}
-                </div>
-             </div>
-           ))}
+              ))}
+           </div>
+
+           {/* 3. SUBMIT HUB (Embedded in Scroll) */}
+           <div className="pt-10">
+              <Button className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-xl shadow-xl shadow-emerald-900/10 gap-3 group transition-all">
+                 <ShieldCheck className="h-4 w-4 group-hover:scale-110 transition-transform" /> SUBMIT FINAL ASSESSMENT
+              </Button>
+              <p className="text-[8px] text-center text-slate-400 font-bold uppercase tracking-widest mt-4">Audit Registry Sync v4.0</p>
+           </div>
+
         </div>
       </ScrollArea>
-
-      {/* 3. SUBMIT HUB (Emerald Green) */}
-      <div className="p-5 border-t border-slate-100 bg-white shrink-0 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-         <Button className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-xl shadow-xl shadow-emerald-900/10 gap-3 group transition-all">
-            <ShieldCheck className="h-4 w-4 group-hover:scale-110 transition-transform" /> SUBMIT FINAL ASSESSMENT
-         </Button>
-      </div>
     </div>
   );
 }
 
-function SummaryItem({ count, label, color, textColor = "text-white", colSpan = 1 }: any) {
+function SummaryItem({ count, label, color, textColor = "text-white", colSpan = 1, border = "border-transparent" }: any) {
   return (
     <div className={cn("flex items-center gap-3 p-3 rounded-2xl bg-white border border-slate-100 shadow-sm", colSpan > 1 && "col-span-2")}>
-       <div className={cn("h-7 w-7 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 shadow-md", color, textColor)}>
+       <div className={cn("h-7 w-7 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 shadow-md border", color, textColor, border)}>
           {count}
        </div>
        <span className="text-[9px] font-black uppercase text-slate-500 tracking-tighter truncate">{label}</span>

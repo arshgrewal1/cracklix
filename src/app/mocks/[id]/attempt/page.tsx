@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo } from "react";
@@ -16,6 +17,7 @@ import { Loader2, Play, ShieldCheck, CheckCircle2, History, Zap, Trophy, Trendin
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -24,10 +26,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 
-/**
- * @fileOverview Final Production-Grade CBT Evaluation Hub v3.5.
- * Fixed: Accessibility console errors for Sheet component and reinforced section logic.
- */
 export default function MockAttemptPage() {
   const params = useParams();
   const router = useRouter();
@@ -37,7 +35,7 @@ export default function MockAttemptPage() {
   const mockId = params.id as string;
 
   const [isInitializing, setIsInitializing] = useState(true);
-  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [isMobilePaletteOpen, setIsMobilePaletteOpen] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
 
@@ -58,7 +56,6 @@ export default function MockAttemptPage() {
 
         if (questions.length === 0) throw new Error("This mock has no questions available.");
 
-        // RESUME LOGIC HUB
         const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
         const savedState = attemptSnap.exists() ? attemptSnap.data() : undefined;
 
@@ -93,7 +90,6 @@ export default function MockAttemptPage() {
     loadExam();
   }, [db, user, mockId, router, toast]);
 
-  // Global Timer Tick
   useEffect(() => {
     if (isInitializing) return;
     const interval = setInterval(() => {
@@ -174,7 +170,7 @@ export default function MockAttemptPage() {
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-50 font-body select-none">
       <AntiCheat />
-      <ExamHeader onPaletteToggle={() => setIsPaletteOpen(true)} />
+      <ExamHeader onPaletteToggle={() => setIsMobilePaletteOpen(true)} />
       <SubjectTabs />
 
       <main className="flex-1 flex overflow-hidden relative">
@@ -223,19 +219,29 @@ export default function MockAttemptPage() {
            </div>
         </div>
 
-        <aside className="hidden lg:block w-[350px] shrink-0">
-           <QuestionPalette onSelect={(idx) => examStore.setCurrentIdx(idx)} />
-        </aside>
+        <AnimatePresence>
+          {examStore.isPaletteVisible && (
+            <motion.aside 
+              initial={{ x: 350 }}
+              animate={{ x: 0 }}
+              exit={{ x: 350 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 250 }}
+              className="hidden lg:block w-[350px] shrink-0"
+            >
+               <QuestionPalette onSelect={(idx) => examStore.setCurrentIdx(idx)} />
+            </motion.aside>
+          )}
+        </AnimatePresence>
       </main>
 
       <TacticalFooter onSubmit={() => setShowSubmitModal(true)} />
       
-      <Sheet open={isPaletteOpen} onOpenChange={setIsPaletteOpen}>
+      <Sheet open={isMobilePaletteOpen} onOpenChange={setIsMobilePaletteOpen}>
         <SheetContent side="right" className="w-[300px] p-0 border-none">
           <SheetHeader className="sr-only">
              <SheetTitle>Question Palette</SheetTitle>
           </SheetHeader>
-          <QuestionPalette onSelect={(idx) => { examStore.setCurrentIdx(idx); setIsPaletteOpen(false); }} />
+          <QuestionPalette onSelect={(idx) => { examStore.setCurrentIdx(idx); setIsMobilePaletteOpen(false); }} />
         </SheetContent>
       </Sheet>
 
