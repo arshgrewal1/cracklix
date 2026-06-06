@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -27,7 +26,7 @@ export default function AdminDashboard() {
 
   const proUsers = useMemo(() => users?.filter((u: any) => u.status && u.status !== 'Free') || [], [users]);
 
-  // Subject Breakdown
+  // Subject Breakdown Audit
   const subjectBreakdown = useMemo(() => {
     if (!questions) return [];
     const uniqueSubjectIds = Array.from(new Set(questions.map((q: any) => q.subjectId))).filter(Boolean);
@@ -37,7 +36,7 @@ export default function AdminDashboard() {
     }).sort((a, b) => b.count - a.count);
   }, [questions, subjects]);
 
-  // Exam Breakdown
+  // Exam Breakdown Audit
   const examBreakdown = useMemo(() => {
      if (!questions || !exams) return [];
      return exams.map((e: any) => {

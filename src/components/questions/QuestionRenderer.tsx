@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -13,8 +12,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview High-Fidelity Question Renderer v11.0.
+ * @fileOverview High-Fidelity Question Renderer v12.0.
  * Permanent Fix: Strict language isolation and automatic artifact sanitization.
+ * Combines English and Punjabi on a single line with '/' in bilingual mode.
  */
 
 export default function QuestionRenderer({ question, language, showSolution = false }: QuestionRendererProps) {
@@ -23,15 +23,10 @@ export default function QuestionRenderer({ question, language, showSolution = fa
     return text
       .replace(/^[A-D][\.\):\s-]*/i, '') // Remove A., B) etc
       .replace(/^\d+[\.\):\s-]*/, '')    // Remove leading numbers
-      .replace(/^\*\*|\*\*$/g, '')    // Remove bold markers
+      .replace(/^\*\*|\*\*$/g, '')       // Remove bold markers
+      .replace(/\*\*/g, '')              // Remove all stars
       .trim();
   };
-
-  const showEn = language === 'en' || language === 'bilingual';
-  const showPa = language === 'pa' || language === 'bilingual';
-  
-  const expEn = useMemo(() => question.explanationEn || (question as any).explanation || "", [question]);
-  const expPa = useMemo(() => question.explanationPa || "", [question]);
 
   const renderContent = (en: string = "", pa: string = "") => {
     const cEn = cleanText(en);
@@ -41,6 +36,9 @@ export default function QuestionRenderer({ question, language, showSolution = fa
     if (language === 'pa') return cPa || cEn; // Fallback to EN if PA is missing
     return `${cEn}${cPa ? ` / ${cPa}` : ''}`;
   };
+
+  const expEn = useMemo(() => question.explanationEn || (question as any).explanation || "", [question]);
+  const expPa = useMemo(() => question.explanationPa || "", [question]);
 
   return (
     <div className="w-full text-left font-body">

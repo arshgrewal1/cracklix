@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect, Suspense } from "react"
@@ -19,7 +18,6 @@ import {
   Search,
   Layers,
   Loader2,
-  Settings2,
   Plus,
   Trash2,
   Zap,
@@ -71,7 +69,7 @@ function MockBuilderContent() {
     difficulty: "Medium" as Difficulty, 
     mockType: "FULL" as MockType, 
     accessType: "FREE" as AccessType,
-    passId: "", 
+    passId: "any", 
     published: false,
     positiveMarks: 1,
     negativeMarks: 0.25,
@@ -232,8 +230,8 @@ function MockBuilderContent() {
                     <Input type="number" step="0.05" value={mockData.negativeMarks} onChange={e => setMockData({...mockData, negativeMarks: parseFloat(e.target.value) || 0})} className="h-12 rounded-xl text-center" />
                   </div>
                   <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-500">Access Protocol</Label>
-                    <Select value={mockData.accessType} onValueChange={(v: AccessType) => setMockData({...mockData, accessType: v, passId: v === 'FREE' ? 'any' : mockData.passId})}>
+                    <Label className="text-[10px) font-black uppercase text-slate-500">Access Protocol</Label>
+                    <Select value={mockData.accessType} onValueChange={(v: AccessType) => setMockData({...mockData, accessType: v})}>
                       <SelectTrigger className="rounded-xl h-12 bg-slate-50/50"><SelectValue placeholder="Protocol" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="FREE">Free Node</SelectItem>
@@ -298,9 +296,11 @@ function MockBuilderContent() {
                           />
                           <p className="font-black uppercase text-[10px]">Select Visible ({bankSelection.length})</p>
                        </div>
-                       <Button disabled={bankSelection.length === 0} onClick={handleBulkLink} className="bg-emerald-600 hover:bg-emerald-700 h-10 px-8 rounded-xl">
-                          Link {bankSelection.length} Nodes
-                       </Button>
+                       <div className="flex gap-3">
+                         <Button disabled={bankSelection.length === 0} onClick={handleBulkLink} className="bg-emerald-600 hover:bg-emerald-700 h-10 px-8 rounded-xl">
+                            Link {bankSelection.length} Nodes
+                         </Button>
+                       </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 space-y-3">

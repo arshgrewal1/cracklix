@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo } from "react"
@@ -123,6 +122,7 @@ export default function BulkImportPage() {
         isStandalone: true,
       };
       
+      // Cleanup undefined
       Object.keys(payload).forEach(key => (payload[key] === undefined || payload[key] === null) && delete payload[key]);
       batch.set(qRef, payload)
     })
