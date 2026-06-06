@@ -40,7 +40,7 @@ Question: {{{questionText}}}
 Options:
 {{#each options}}
 - {{{this}}}
-{{/each}}
+{{#each}}
 Correct Answer: {{{correctAnswer}}}
 {{#if userAnswer}}
 User's Answer: {{{userAnswer}}}
@@ -52,9 +52,9 @@ If the user provided an answer, also explain why their answer might be incorrect
 Finally, summarize the key learning points from this question.
 
 Structure your response as a JSON object matching the following schema:
-```json
+\`\`\`json
 {{jsonSchema output}}
-````,
+\`\`\``,
 });
 
 const rationalizeMockQuestionFlow = ai.defineFlow(

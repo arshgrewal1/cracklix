@@ -18,7 +18,7 @@ import Link from "next/link";
 
 /**
  * @fileOverview High-Density Mobile-First Homepage.
- * Updated: Precision counters for global Atomic Bank.
+ * Updated: Fixed syntax error in TrustNode component.
  */
 
 export default function HomePage() {

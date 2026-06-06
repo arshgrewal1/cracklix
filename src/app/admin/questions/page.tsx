@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState, useEffect, useCallback } from "react"
@@ -9,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Search, Edit, Trash2, Database, Filter, Eye, AlertCircle, CheckSquare, History, X, Loader2, Zap, AlertTriangle, Layers, Copy, ChevronLeft, ChevronRight, RefreshCw, ExternalLink } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, deleteDoc, doc, where, writeBatch, setDoc, serverTimestamp, limit, orderBy, getDocs, startAfter, Query } from "firebase/firestore"
+import { collection, query, deleteDoc, doc, where, writeBatch, setDoc, serverTimestamp, limit, getDocs, startAfter } from "firebase/firestore"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
@@ -26,9 +25,10 @@ import {
 } from "@/components/ui/tooltip"
 
 /**
- * @fileOverview Institutional Asset Ledger (Global Bank) v7.5.
+ * @fileOverview Institutional Asset Ledger (Global Bank) v7.6.
  * Optimized: Removed server-side orderBy to bypass mandatory Firestore indexing.
  * Handles massive scale via client-side processing for active viewports.
+ * Fixed: Redundant closing tag in Subject select.
  */
 
 export default function QuestionBank() {
@@ -56,7 +56,6 @@ export default function QuestionBank() {
     setLoading(true)
     
     try {
-      // Bypassing Index: Remove 'orderBy' to ensure visibility of all 250+ recovered nodes
       let constraints: any[] = [limit(100)]
       
       if (examFilter !== "all") constraints.unshift(where("examId", "==", examFilter))
@@ -113,7 +112,7 @@ export default function QuestionBank() {
         const matchesSub = subjectFilter === "all" || q.subjectId === subjectFilter
         return matchesSearch && matchesSub
       })
-      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)) // Local sort
+      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)) 
   }, [questions, searchTerm, subjectFilter])
 
   const handleSelectAll = (checked: boolean) => {
