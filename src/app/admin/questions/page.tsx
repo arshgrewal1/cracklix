@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Search, Edit, Trash2, Database, Filter, Eye, AlertCircle, CheckSquare, History, X, Loader2, Zap, AlertTriangle, Layers, Copy, ChevronLeft, ChevronRight, RefreshCw, ExternalLink } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, deleteDoc, doc, where, writeBatch, setDoc, serverTimestamp, limit, getDocs, startAfter } from "firebase/firestore"
+import { collection, query, deleteDoc, doc, where, writeBatch, setDoc, serverTimestamp, limit, getDocs, startAfter, Firestore } from "firebase/firestore"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/tooltip"
 
 /**
- * @fileOverview Institutional Asset Ledger (Global Bank) v7.8.
+ * @fileOverview Institutional Asset Ledger (Global Bank) v7.9.
  * Hardened: Enforced strict Firestore instance validation for all collection/query nodes.
  */
 
@@ -45,12 +45,12 @@ export default function QuestionBank() {
   const [lastDoc, setLastDoc] = useState<any>(null)
   const [hasMore, setLastHasMore] = useState(true)
 
-  const { data: allMocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
-  const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
+  const { data: allMocks } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? collection(db, "mocks") : null), [db]))
+  const { data: boards } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? collection(db, "boards") : null), [db]))
+  const { data: subjects } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? collection(db, "subjects") : null), [db]))
 
   const fetchQuestions = useCallback(async (isNext = false) => {
-    if (!db) return
+    if (!db || typeof db !== 'object') return
     setLoading(true)
     
     try {
@@ -63,8 +63,7 @@ export default function QuestionBank() {
         constraints.push(startAfter(lastDoc))
       }
 
-      const questionsCol = collection(db, "questions");
-      const q = query(questionsCol, ...constraints)
+      const q = query(collection(db as Firestore, "questions"), ...constraints)
       const snap = await getDocs(q)
       
       const newQs = snap.docs.map(d => ({ ...d.data(), id: d.id }))

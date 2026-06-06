@@ -183,25 +183,25 @@ export default function MockAttemptPage() {
               exit={{ opacity: 0 }}
               className="absolute inset-0 z-[100] bg-[#0B1528]/95 backdrop-blur-xl flex items-center justify-center p-6"
             >
-              <div className="max-w-xl w-full bg-white rounded-[3rem] shadow-5xl overflow-hidden">
-                 <div className="bg-slate-50 p-12 border-b border-slate-100 text-center space-y-6">
-                    <div className="h-20 w-20 bg-primary/10 rounded-[2rem] flex items-center justify-center mx-auto text-[#F97316] shadow-2xl">
-                       <Play className="h-10 w-10 fill-current" />
+              <div className="max-w-xl w-full bg-white rounded-[2.5rem] shadow-5xl overflow-hidden">
+                 <div className="bg-slate-50 p-8 border-b border-slate-100 text-center space-y-4">
+                    <div className="h-14 w-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto text-[#F97316] shadow-xl">
+                       <Play className="h-7 w-7 fill-current" />
                     </div>
                     <div>
-                       <h2 className="text-4xl font-headline font-black text-[#0F172A] uppercase tracking-tight">TEST PAUSED</h2>
-                       <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest mt-2">Institutional Progress Audit</p>
+                       <h2 className="text-2xl md:text-3xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none">TEST PAUSED</h2>
+                       <p className="text-slate-500 font-medium uppercase text-[8px] tracking-widest mt-1">Institutional Progress Audit</p>
                     </div>
                  </div>
-                 <div className="p-12 space-y-12">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                       <ResumeStat label="Answered" val={stats.answered} color="bg-blue-600" />
-                       <ResumeStat label="Not Answered" val={stats.notAnswered} color="bg-slate-400" />
-                       <ResumeStat label="Marked" val={stats.marked} color="bg-pink-500" />
+                 <div className="p-8 md:p-10 space-y-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                       <ResumeStat label="Answered" val={stats.answered + stats.ansMarked} color="bg-blue-600" />
+                       <ResumeStat label="Not Ans." val={stats.notAnswered} color="bg-slate-400" />
+                       <ResumeStat label="Marked" val={stats.marked + stats.ansMarked} color="bg-pink-500" />
                        <ResumeStat label="Remaining" val={stats.notVisited} color="bg-slate-50" textColor="text-slate-300" />
                     </div>
-                    <Button onClick={() => examStore.setPaused(false)} className="w-full h-20 bg-[#F97316] hover:bg-orange-600 text-white rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-[11px] shadow-3xl gap-4">
-                       <Play className="h-6 w-6 fill-current" /> RESUME EVALUATION
+                    <Button onClick={() => examStore.setPaused(false)} className="w-full h-16 bg-[#F97316] hover:bg-orange-600 text-white rounded-[1.25rem] font-black uppercase tracking-[0.2em] text-[10px] shadow-3xl gap-4">
+                       <Play className="h-5 w-5 fill-current" /> RESUME EVALUATION
                     </Button>
                  </div>
               </div>
@@ -284,9 +284,9 @@ export default function MockAttemptPage() {
 
 function ResumeStat({ label, val, color, textColor = "text-white" }: any) {
    return (
-      <div className="p-5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col items-center">
-         <span className="text-[9px] font-black uppercase text-slate-400 mb-2 tracking-tighter">{label}</span>
-         <div className={cn("h-10 w-14 rounded-xl flex items-center justify-center text-lg font-black shadow-lg", color, textColor)}>
+      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+         <span className="text-[7px] font-black uppercase text-slate-400 mb-1 tracking-tighter text-center">{label}</span>
+         <div className={cn("h-8 w-10 rounded-lg flex items-center justify-center text-sm font-black shadow-md", color, textColor)}>
             {val}
          </div>
       </div>
