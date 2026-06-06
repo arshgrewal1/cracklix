@@ -16,6 +16,7 @@ import { Progress } from "@/components/ui/progress"
 /**
  * @fileOverview Final Command Center v5.0.
  * Features: High-Fidelity Exam Breakdown and Live Content Statistics.
+ * Fixed: Question count synced to match Atomic Bank filter (isStandalone == true).
  */
 
 export default function AdminDashboard() {
@@ -24,9 +25,9 @@ export default function AdminDashboard() {
   const { toast } = useToast()
   const [isSyncing, setIsSyncing] = useState(false)
 
-  // Real-time Collections
+  // Real-time Collections with Strict Filtering for Atomic Bank
   const { data: users } = useCollection<any>(useMemo(() => (db ? collection(db, "users") : null), [db]))
-  const { data: questions } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]))
+  const { data: questions } = useCollection<any>(useMemo(() => (db ? query(collection(db, "questions"), where("isStandalone", "==", true)) : null), [db]))
   const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
   const { data: reports } = useCollection<any>(useMemo(() => (db ? collection(db, "reports") : null), [db]))
   const { data: results } = useCollection<any>(useMemo(() => (db ? collection(db, "results") : null), [db]))

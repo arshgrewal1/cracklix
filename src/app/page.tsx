@@ -20,6 +20,7 @@ import Link from "next/link";
 /**
  * @fileOverview High-Density Mobile-First Homepage.
  * Activated with real-time Firestore statistics.
+ * Fixed: Question count synced to match Atomic Bank filter (isStandalone == true).
  */
 
 export default function HomePage() {
@@ -27,7 +28,7 @@ export default function HomePage() {
 
   // Real-time Data Ingestion
   const { data: users } = useCollection<any>(useMemo(() => (db ? collection(db, "users") : null), [db]));
-  const { data: questions } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]));
+  const { data: questions } = useCollection<any>(useMemo(() => (db ? query(collection(db, "questions"), where("isStandalone", "==", true)) : null), [db]));
   const { data: mocks } = useCollection<any>(useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]));
   const { data: results } = useCollection<any>(useMemo(() => (db ? collection(db, "results") : null), [db]));
   const { data: notices } = useCollection<any>(useMemo(() => (db ? query(collection(db, "notifications"), limit(3)) : null), [db]));
