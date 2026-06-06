@@ -26,8 +26,8 @@ import {
 } from "@/components/ui/tooltip"
 
 /**
- * @fileOverview Institutional Asset Ledger (Global Bank) v8.5.
- * Hardened: Enforced strict null checks for all Firestore collection calls to prevent runtime crashes.
+ * @fileOverview Institutional Asset Ledger (Global Bank) v8.6.
+ * Hardened: Enforced strict validation on db instance to prevent runtime query errors.
  */
 
 export default function QuestionBank() {
@@ -45,16 +45,16 @@ export default function QuestionBank() {
   const [lastDoc, setLastDoc] = useState<any>(null)
   const [hasMore, setLastHasMore] = useState(true)
 
-  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db])
-  const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db])
-  const subjectsQuery = useMemo(() => (db ? collection(db, "subjects") : null), [db])
+  const mocksQuery = useMemo(() => (db && typeof db === 'object' ? query(collection(db, "mocks")) : null), [db])
+  const boardsQuery = useMemo(() => (db && typeof db === 'object' ? query(collection(db, "boards")) : null), [db])
+  const subjectsQuery = useMemo(() => (db && typeof db === 'object' ? query(collection(db, "subjects")) : null), [db])
 
   const { data: allMocks } = useCollection<any>(mocksQuery)
   const { data: boards } = useCollection<any>(boardsQuery)
   const { data: subjects } = useCollection<any>(subjectsQuery)
 
   const fetchQuestions = useCallback(async (isNext = false) => {
-    if (!db) return
+    if (!db || typeof db !== 'object') return
     setLoading(true)
     
     try {
@@ -226,7 +226,7 @@ export default function QuestionBank() {
                 <SelectTrigger className="rounded-xl h-11 bg-white border-none w-36 shadow-sm font-bold text-xs">
                   <SelectValue placeholder="Subject Hub" />
                 </SelectTrigger>
-                <SelectContent><SelectItem value="all">All Subjects</SelectItem>{subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                <SelectContent className="max-h-60 overflow-y-auto">{subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
           </div>

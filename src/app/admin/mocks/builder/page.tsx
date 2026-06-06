@@ -66,11 +66,11 @@ function MockBuilderContent() {
   const mockId = searchParams.get("id")
   const isEditing = !!mockId
 
-  const { data: existingMock } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
-  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
-  const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
-  const { data: passes } = useCollection<any>(useMemo(() => (db ? query(collection(db, "passes"), where("active", "==", true)) : null), [db]))
+  const { data: existingMock } = useDoc<any>(useMemo(() => (db && typeof db === 'object' && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
+  const { data: boards } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? query(collection(db, "boards")) : null), [db]))
+  const { data: exams } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? query(collection(db, "exams")) : null), [db]))
+  const { data: subjects } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? query(collection(db, "subjects")) : null), [db]))
+  const { data: passes } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? query(collection(db, "passes"), where("active", "==", true)) : null), [db]))
   
   const [bankLoading, setBankLoading] = useState(false)
   const [questionBank, setQuestionBank] = useState<any[]>([])
@@ -104,7 +104,7 @@ function MockBuilderContent() {
 
   useEffect(() => {
     async function fetchBank() {
-      if (!db) return
+      if (!db || typeof db !== 'object') return
       setBankLoading(true)
       try {
         const q = query(collection(db, "questions"), limit(1000))
@@ -323,23 +323,21 @@ function MockBuilderContent() {
                     </div>
 
                     <div className="bg-[#0F172A] p-6 rounded-[2rem] mb-8 flex flex-col md:flex-row md:items-center justify-between gap-8 text-white shadow-2xl overflow-hidden relative">
-                       <div className="flex flex-col md:flex-row md:items-center gap-8 md:gap-10 flex-1 min-w-0">
-                          <div className="space-y-1.5 text-left flex-1 max-w-[280px]">
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 flex-1 min-w-0">
+                          <div className="space-y-1.5 text-left w-full">
                              <p className="text-[7px] font-black uppercase text-slate-500 tracking-[0.3em]">Target</p>
                              <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1.5">Subject Node</p>
                              <Select value={activeSectionId} onValueChange={setActiveSectionId}>
                                 <SelectTrigger className="h-12 w-full bg-white/10 border-white/10 text-white font-black text-[10px] rounded-xl uppercase tracking-widest">
                                    <SelectValue />
                                 </SelectTrigger>
-                                <SelectContent className="max-h-60 overflow-y-auto">
+                                <SelectContent className="max-h-[300px] overflow-y-auto">
                                    {sections.map(s => <SelectItem key={s.id} value={s.id} className="uppercase font-bold text-[10px]">{s.name}</SelectItem>)}
                                 </SelectContent>
                              </Select>
                           </div>
                           
-                          <div className="h-12 w-px bg-white/10 hidden md:block" />
-
-                          <div className="flex items-center gap-4 shrink-0">
+                          <div className="flex items-center gap-4 shrink-0 justify-center md:justify-start">
                              <div className="relative h-6 w-6">
                                 <Checkbox 
                                   id="select-all"
@@ -361,7 +359,7 @@ function MockBuilderContent() {
                        <Button 
                          disabled={bankSelection.length === 0} 
                          onClick={handleBulkLink} 
-                         className="bg-emerald-600 hover:bg-emerald-700 h-14 px-10 rounded-xl text-[10px] uppercase font-black tracking-[0.2em] shadow-xl"
+                         className="bg-emerald-600 hover:bg-emerald-700 h-14 px-10 rounded-xl text-[10px] uppercase font-black tracking-[0.2em] shadow-xl w-full md:w-auto shrink-0"
                        >
                           Link {bankSelection.length} Nodes
                        </Button>
@@ -382,7 +380,7 @@ function MockBuilderContent() {
                                 <Checkbox 
                                   checked={bankSelection.includes(q.id)} 
                                   onCheckedChange={() => {
-                                     setBankSelection(prev => prev.includes(q.id) ? prev.filter(id => id !== q.id) : [...prev, q.id])
+                                     setBankSelection(prev => prev.includes(q.id) ? prev.filter(id => id !== q.id) : [...prev, id])
                                   }}
                                 />
                                 <div className="min-w-0 flex-1">

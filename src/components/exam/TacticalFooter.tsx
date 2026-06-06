@@ -7,9 +7,9 @@ import { ChevronLeft, ChevronRight, CheckCircle2, RotateCcw, Flag } from 'lucide
 import { useFirestore } from '@/firebase';
 
 /**
- * @fileOverview Institutional Tactical Navigation Belt v5.0.
+ * @fileOverview Institutional Tactical Navigation Belt v6.0.
  * Re-ordered: [PREVIOUS] ... [MARK FOR REVIEW] [CLEAR RESPONSE] [SAVE & NEXT / SUBMIT]
- * Scaling: Reduced height and text sizes for high-density mobile interface.
+ * Scaling: Primary action SAVE & NEXT anchored to the far right for ergonomic palette proximity.
  */
 export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
   const { currentIdx, questions, clearAnswer, markForReview, saveAndNext, setCurrentIdx } = useExamStore();

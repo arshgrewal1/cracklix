@@ -16,8 +16,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional High-Fidelity Dark Renderer v18.0.
- * Strictly mirrored to user screenshot: Black Box (#111111), Bold White Typography (700), Slash Separated Options.
+ * @fileOverview Institutional High-Fidelity Dark Renderer v19.0.
+ * Strictly mirrored to user screenshot: Black Box (#111111), Bold White Typography, Slash Separated Options.
+ * Synchronized: Selection highlights and prefix colors strictly aligned.
  */
 export default function QuestionRenderer({ 
   question, 
