@@ -3,14 +3,15 @@
 
 import Link from "next/link";
 import Logo from "@/components/brand/Logo";
-import { Twitter, Facebook, Instagram, Mail, Phone, Heart, ShieldCheck, MapPin, Send, Code, User } from "lucide-react";
+import { Twitter, Facebook, Instagram, Mail, Phone, Heart, ShieldCheck, MapPin, Send, Code, User, Share2 } from "lucide-react";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { useMemo } from "react";
+import ShareButton from "@/components/navigation/ShareButton";
 
 /**
- * @fileOverview Final Institutional Footer Node v5.0.
- * Features: Fully dynamic social links, address, and credit registry controlled by Admin settings.
+ * @fileOverview Final Institutional Footer Node v5.1.
+ * Updated: Share CRACKLIX node added.
  */
 
 export default function Footer() {
@@ -49,6 +50,13 @@ export default function Footer() {
                   <ShieldCheck className="h-5 w-5 text-primary" />
                   <span className="font-bold text-sm">Institutional Registry Verified</span>
                </div>
+            </div>
+            
+            <div className="pt-4">
+               <ShareButton 
+                  variant="dark" 
+                  className="bg-white/5 hover:bg-white/10 border border-white/10 h-14 px-8" 
+               />
             </div>
           </div>
 

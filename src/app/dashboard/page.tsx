@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -28,18 +29,19 @@ import {
   ShieldCheck,
   Activity,
   LayoutGrid,
-  AlertTriangle
+  AlertTriangle,
+  Share2
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Progress } from "@/components/ui/progress"
+import ShareButton from "@/components/navigation/ShareButton"
 
 /**
  * @fileOverview Final Production-Grade Student Success Hub.
- * Optimized: Fully mobile-responsive grid and card layouts.
- * Added: Circular Readiness Score Index v2.0.
+ * Updated: Dynamic Website Share system integrated into Quick Access.
  */
 
 export default function StudentDashboard() {
@@ -241,6 +243,13 @@ export default function StudentDashboard() {
                    <ActionTile icon={<TrendingUp className="text-blue-500 h-5 w-5" />} label="Ranks" href="/leaderboard" />
                    <ActionTile icon={<FileText className="text-emerald-500 h-5 w-5" />} label="PYQ" href="/pyqs" />
                    <ActionTile icon={<LayoutGrid className="text-orange-500 h-5 w-5" />} label="Hubs" href="/exams" />
+                </div>
+                
+                <div className="pt-4 border-t border-slate-50">
+                   <ShareButton 
+                      className="w-full h-14 bg-slate-50 border border-slate-100 text-[#0F172A] hover:bg-slate-100 shadow-none" 
+                      variant="ghost" 
+                   />
                 </div>
              </Card>
 

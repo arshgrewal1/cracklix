@@ -9,15 +9,15 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { Globe, Shield, Layout, Bell, Save, RefreshCw, ShieldCheck, Lock, CloudLightning, FileCode, QrCode, Phone, Zap, Megaphone, MapPin, Mail, Twitter, Facebook, Instagram, Send, MousePointer2, Smartphone, Apple, Play } from "lucide-react"
+import { Globe, Shield, Layout, Bell, Save, RefreshCw, ShieldCheck, Lock, CloudLightning, FileCode, QrCode, Phone, Zap, Megaphone, MapPin, Mail, Twitter, Facebook, Instagram, Send, MousePointer2, Smartphone, Apple, Play, Share2, Info } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Final Enterprise CMS Node v6.5.
- * Features: High-Fidelity Mobile App Gateway management.
+ * @fileOverview Final Enterprise CMS Node v6.6.
+ * Updated: Website Share Registry controls added.
  */
 
 export default function AdminSettings() {
@@ -50,7 +50,10 @@ export default function AdminSettings() {
     playStoreUrl: "",
     appStoreUrl: "",
     adSenseEnabled: false,
-    adSenseClientCode: ""
+    adSenseClientCode: "",
+    shareUrl: "https://cracklix.com",
+    shareTitle: "CRACKLIX | Punjab Exam Authority Hub",
+    shareDescription: "Practice Mock Tests and Prepare for Punjab Government Exams (PSSSB, PPSC, Police)."
   });
 
   useEffect(() => {
@@ -61,7 +64,7 @@ export default function AdminSettings() {
     if (!db) return;
     const payload = { ...formData, updatedAt: serverTimestamp() };
     setDoc(doc(db, 'settings', 'global'), payload, { merge: true })
-      .then(() => toast({ title: "System Synced", description: "Institutional configuration and app links are now live." }))
+      .then(() => toast({ title: "System Synced", description: "Institutional configuration and share settings are now live." }))
   };
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-white"><RefreshCw className="h-10 w-10 text-primary animate-spin" /></div>
@@ -84,6 +87,7 @@ export default function AdminSettings() {
       <Tabs defaultValue="homepage" className="px-4">
         <TabsList className="bg-slate-100 border border-slate-200 p-1 h-14 rounded-xl mb-8 overflow-x-auto no-scrollbar">
           <TabsTrigger value="homepage" className="rounded-lg px-6 font-black uppercase text-[10px] h-full">Global CMS</TabsTrigger>
+          <TabsTrigger value="website" className="rounded-lg px-6 font-black uppercase text-[10px] h-full">Website Settings</TabsTrigger>
           <TabsTrigger value="mobile" className="rounded-lg px-6 font-black uppercase text-[10px] h-full">App Settings</TabsTrigger>
           <TabsTrigger value="social" className="rounded-lg px-6 font-black uppercase text-[10px] h-full">Contact Hub</TabsTrigger>
           <TabsTrigger value="monetization" className="rounded-lg px-6 font-black uppercase text-[10px] h-full">Monetization</TabsTrigger>
@@ -110,6 +114,39 @@ export default function AdminSettings() {
                 <Textarea value={formData.footerText} onChange={e => setFormData({...formData, footerText: e.target.value})} className="min-h-[80px] rounded-xl font-medium" />
              </div>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="website">
+           <Card className="border-none shadow-lg rounded-[2rem] bg-white p-8 space-y-8">
+              <div className="flex items-center gap-3 mb-4">
+                 <Share2 className="h-6 w-6 text-primary" />
+                 <h3 className="font-headline font-black text-lg uppercase">Website Share Registry</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="space-y-4">
+                    <div className="space-y-2">
+                       <Label className="text-[10px] font-black uppercase text-slate-500">Global Share URL</Label>
+                       <Input value={formData.shareUrl} onChange={e => setFormData({...formData, shareUrl: e.target.value})} className="h-12 rounded-xl font-bold text-primary" placeholder="https://cracklix.com" />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="text-[10px] font-black uppercase text-slate-500">Share Title</Label>
+                       <Input value={formData.shareTitle} onChange={e => setFormData({...formData, shareTitle: e.target.value})} className="h-12 rounded-xl font-bold" />
+                    </div>
+                 </div>
+                 <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Share Description (Social Text)</Label>
+                    <Textarea value={formData.shareDescription} onChange={e => setFormData({...formData, shareDescription: e.target.value})} className="min-h-[110px] rounded-xl font-medium" />
+                 </div>
+              </div>
+
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-4">
+                 <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+                 <p className="text-[11px] font-medium text-slate-600 leading-relaxed uppercase">
+                    This URL and metadata will be used when users click the "Share CRACKLIX" buttons across the platform. Changing these values will update all share buttons instantly.
+                 </p>
+              </div>
+           </Card>
         </TabsContent>
 
         <TabsContent value="mobile">

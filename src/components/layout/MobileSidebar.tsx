@@ -19,7 +19,8 @@ import {
   LogOut,
   ChevronDown,
   Info,
-  LayoutGrid
+  LayoutGrid,
+  Share2
 } from "lucide-react";
 import Link from "next/link";
 import { useUser, useAuth } from "@/firebase";
@@ -34,10 +35,11 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useState } from "react";
+import ShareButton from "@/components/navigation/ShareButton";
 
 /**
  * @fileOverview Responsive Mobile Navigation Hub.
- * Updated: Analysis replaced with 'Free Hub'.
+ * Updated: Website Share Registry integrated.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
@@ -114,6 +116,14 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
           ))}
 
           <div className="my-1 lg:my-3 border-t border-slate-50 mx-3 lg:mx-6" />
+
+          {/* SHARE ACTION NODE */}
+          <div className="px-3 lg:px-6 py-1">
+             <ShareButton 
+               className="w-full justify-start h-10 lg:h-12 bg-slate-50 border-none shadow-none hover:bg-slate-100 text-slate-600 px-0" 
+               variant="ghost" 
+             />
+          </div>
 
           <CollapsibleGroup 
             label="Account" 
