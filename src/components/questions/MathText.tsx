@@ -11,12 +11,12 @@ interface MathTextProps {
 }
 
 /**
- * @fileOverview Precision Neat & Clean Math Renderer v8.0.
+ * @fileOverview Precision Neat & Clean Math Renderer v9.0.
  * Optimized to prevent word clumping while ensuring beautiful formula typesetting.
  * Rules:
- * 1. PRESERVE SPACES: Renders plain text as HTML to keep spaces.
- * 2. SYMBOL PRECISION: Only applies KaTeX to detected math operators or formula blocks.
- * 3. NEAT VERTICALITY: Maintains user-provided line breaks exactly.
+ * 1. LINE-BY-LINE GAPS: Added py-3 to ensure vertical clarity.
+ * 2. PUNJABI CLARITY: Enforced line-height 2.4 for Gurmukhi script.
+ * 3. SYMBOL PRECISION: Only applies KaTeX to detected math operators.
  */
 export default function MathText({ text, className }: MathTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -41,29 +41,25 @@ export default function MathText({ text, className }: MathTextProps) {
           .replace(/√/g, '\\sqrt');
 
         // Logic: Is this line a pure formula or text with math?
-        // We look for common math indicators but avoid rendering plain sentences as KaTeX.
         const isPureFormula = /^[sabcxyz\d\s\+\-\*\/\=\(\)\\\^\sqrt{}]+$/i.test(trimmed) && trimmed.includes('=');
         const hasSymbols = /[√\\×÷²³≤≥]/.test(trimmed);
 
         if (isPureFormula || (hasSymbols && !/[a-z]{4,}/i.test(trimmed))) {
-          // Render as a centered or clean formula block
           try {
-            return `<div class="py-2 overflow-x-auto no-scrollbar font-sans text-xl md:text-2xl">${katex.renderToString(processed, {
+            return `<div class="py-3 overflow-x-auto no-scrollbar font-sans text-xl md:text-2xl">${katex.renderToString(processed, {
               throwOnError: false,
               displayMode: false,
               trust: true
             })}</div>`;
           } catch (e) {
-            return `<div class="py-2">${trimmed}</div>`;
+            return `<div class="py-3">${trimmed}</div>`;
           }
         }
 
-        // If it's descriptive text (e.g., "Total age of 20 students = 300"), 
-        // we render it as HTML to preserve spaces, but we can still highlight 
-        // the calculation part if it has one.
-        if (trimmed.includes('=')) {
+        // descriptive text (e.g., "Total age = 300")
+        if (trimmed.includes('=') && !/[a-z]{10,}/i.test(trimmed)) {
           const parts = trimmed.split('=');
-          return `<div class="py-2 flex flex-wrap items-baseline gap-2">
+          return `<div class="py-3 flex flex-wrap items-baseline gap-2">
             <span class="font-bold text-slate-100">${parts[0].trim()}</span>
             <span class="text-primary font-black">=</span>
             <span class="font-black text-white">${parts[1].trim()}</span>
@@ -72,11 +68,11 @@ export default function MathText({ text, className }: MathTextProps) {
         
         // Header detection for "Formula:", "Calculation:", etc.
         if (trimmed.endsWith(':')) {
-           return `<div class="font-black text-primary/80 mt-6 mb-2 uppercase tracking-[0.2em] text-xs md:text-sm border-l-4 border-primary/40 pl-4 bg-primary/5 py-2 rounded-r-lg">${trimmed}</div>`;
+           return `<div class="font-black text-primary/80 mt-8 mb-4 uppercase tracking-[0.2em] text-xs md:text-sm border-l-4 border-primary/40 pl-4 bg-primary/5 py-2 rounded-r-lg">${trimmed}</div>`;
         }
 
-        // Standard neat text line
-        return `<div class="py-1.5 text-slate-200 font-medium leading-relaxed">${trimmed}</div>`;
+        // Standard neat text line with generous leading for Punjabi
+        return `<div class="py-2 text-slate-100 font-bold leading-[2.4] tracking-normal">${trimmed}</div>`;
       }).join('');
 
       containerRef.current.innerHTML = renderedHtml;

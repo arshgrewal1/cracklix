@@ -15,10 +15,10 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Neat & Clean Renderer v16.0.
+ * @fileOverview Institutional Neat & Clean Renderer v17.0.
  * Rules Enforcement:
  * 1. HIGH VERTICAL SPACING: Generous margins between all logic steps.
- * 2. ZERO CLUMPING: Math and Text are visually separated for clarity.
+ * 2. HEADER GAPS: Fixed spacing between badges and content (mt-10).
  * 3. PREMIUM THEME: High-contrast Solution Hub with #121212 background.
  */
 export default function QuestionRenderer({ 
@@ -34,7 +34,7 @@ export default function QuestionRenderer({
   return (
     <div className="w-full text-left font-body space-y-0 text-[#0F172A] bg-transparent">
       {/* 1. English Question Statement */}
-      <div className="text-[18px] md:text-[22px] font-black leading-[1.8] antialiased">
+      <div className="text-[18px] md:text-[22px] font-black leading-[1.8] antialiased text-[#0F172A]">
          <MathText text={question.questionEn || ""} />
       </div>
 
@@ -42,7 +42,7 @@ export default function QuestionRenderer({
 
       {/* 2. Punjabi Question Statement */}
       {question.questionPa && (
-        <div className="text-[18px] md:text-[22px] font-black leading-[1.8] antialiased text-slate-800">
+        <div className="text-[18px] md:text-[22px] font-black leading-[1.8] antialiased text-[#0F172A]">
            <MathText text={question.questionPa} />
         </div>
       )}
@@ -93,17 +93,17 @@ export default function QuestionRenderer({
               <CheckCircle2 className="h-40 w-40" />
            </div>
 
-           <div className="space-y-16 relative z-10">
+           <div className="relative z-10 flex flex-col">
               
               {/* English Explanation Block */}
               {(question.explanationEn || (question as any).englishExplanation) && (
-                <div className="space-y-8">
-                   <div className="flex items-center">
+                <div className="flex flex-col">
+                   <div className="flex items-center mb-10">
                       <span className="text-[12px] md:text-[14px] font-black uppercase tracking-[0.3em] text-primary bg-primary/10 px-6 py-2 rounded-full border border-primary/20 shadow-xl">
                         • English Explanation
                       </span>
                    </div>
-                   <div className="text-[18px] md:text-[21px] text-slate-100 leading-[2.2] antialiased whitespace-pre-wrap break-words px-2">
+                   <div className="text-[18px] md:text-[21px] text-slate-100 leading-[2.4] antialiased whitespace-pre-wrap break-words px-2">
                       <MathText text={question.explanationEn || (question as any).englishExplanation || ""} />
                    </div>
                 </div>
@@ -111,13 +111,13 @@ export default function QuestionRenderer({
 
               {/* Punjabi Explanation Block */}
               {(question.explanationPa || (question as any).punjabiExplanation) && (
-                <div className="space-y-8 pt-16 border-t border-white/5">
-                   <div className="flex items-center">
+                <div className="flex flex-col mt-20 pt-16 border-t border-white/5">
+                   <div className="flex items-center mb-10">
                       <span className="text-[12px] md:text-[14px] font-black uppercase tracking-[0.3em] text-emerald-500 bg-emerald-500/10 px-6 py-2 rounded-full border border-emerald-500/20 shadow-xl">
                         • ਪੰਜਾਬੀ ਵਿਆਖਿਆ
                       </span>
                    </div>
-                   <div className="text-[18px] md:text-[21px] text-slate-100 leading-[2.2] antialiased whitespace-pre-wrap break-words px-2">
+                   <div className="text-[18px] md:text-[21px] text-slate-100 leading-[2.4] antialiased whitespace-pre-wrap break-words px-2">
                       <MathText text={question.explanationPa || (question as any).punjabiExplanation || ""} />
                    </div>
                 </div>
