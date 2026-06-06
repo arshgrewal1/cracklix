@@ -133,6 +133,8 @@ export interface MockTest {
   status: ContentStatus;
   published: boolean;
   isDummy?: boolean;
+  positiveMarks: number;
+  negativeMarks: number;
   createdAt: any;
   updatedAt: any;
 }
