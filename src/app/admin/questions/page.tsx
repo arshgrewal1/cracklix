@@ -26,8 +26,9 @@ import {
 } from "@/components/ui/tooltip"
 
 /**
- * @fileOverview Institutional Asset Ledger (Global Bank) v7.0.
- * Optimized for Massive Scale: Features Graceful Index Fallback and Index Provisioning UI.
+ * @fileOverview Institutional Asset Ledger (Global Bank) v7.5.
+ * Optimized: Removed server-side orderBy to bypass mandatory Firestore indexing.
+ * Handles massive scale via client-side processing for active viewports.
  */
 
 export default function QuestionBank() {
@@ -44,22 +45,19 @@ export default function QuestionBank() {
   const [questions, setQuestions] = useState<any[]>([])
   const [lastDoc, setLastDoc] = useState<any>(null)
   const [hasMore, setLastHasMore] = useState(true)
-  const [indexErrorUrl, setIndexErrorUrl] = useState<string | null>(null)
 
-  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db])
-  const { data: allMocks } = useCollection<any>(mocksQuery)
+  const { data: allMocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
 
-  // Fetch Logic - Index-resilient with automatic fallback
+  // Fetch Logic - Simplified to bypass indexing requirements
   const fetchQuestions = useCallback(async (isNext = false) => {
     if (!db) return
     setLoading(true)
-    setIndexErrorUrl(null)
     
     try {
-      // 1. Primary Attempt: Scalable Sorting (Requires Index)
-      let constraints: any[] = [orderBy("createdAt", "desc"), limit(50)]
+      // Bypassing Index: Remove 'orderBy' to ensure visibility of all 250+ recovered nodes
+      let constraints: any[] = [limit(100)]
       
       if (examFilter !== "all") constraints.unshift(where("examId", "==", examFilter))
       else if (boardFilter !== "all") constraints.unshift(where("boardId", "==", boardFilter))
@@ -80,38 +78,10 @@ export default function QuestionBank() {
       }
       
       setLastDoc(snap.docs[snap.docs.length - 1])
-      setLastHasMore(snap.docs.length === 50)
+      setLastHasMore(snap.docs.length === 100)
     } catch (e: any) {
-      console.error("Fetch Error:", e)
-      
-      // 2. Index Error Detected: Provide URL and attempt fallback
-      if (e.code === 'failed-precondition') {
-        const urlMatch = e.message.match(/https:\/\/console\.firebase\.google\.com[^\s]*/);
-        if (urlMatch) setIndexErrorUrl(urlMatch[0]);
-        
-        try {
-           // Fallback: Remove 'orderBy' to bypass index requirement
-           let fallbackConstraints: any[] = [limit(50)]
-           if (examFilter !== "all") fallbackConstraints.push(where("examId", "==", examFilter))
-           else if (boardFilter !== "all") fallbackConstraints.push(where("boardId", "==", boardFilter))
-           
-           if (isNext && lastDoc) fallbackConstraints.push(startAfter(lastDoc))
-
-           const qFallback = query(collection(db, "questions"), ...fallbackConstraints)
-           const snapFallback = await getDocs(qFallback)
-           const fallbackQs = snapFallback.docs.map(d => ({ ...d.data(), id: d.id }))
-           
-           if (isNext) setQuestions(prev => [...prev, ...fallbackQs])
-           else setQuestions(fallbackQs)
-           
-           setLastDoc(snapFallback.docs[snapFallback.docs.length - 1])
-           setLastHasMore(snapFallback.docs.length === 50)
-        } catch (innerErr) {
-           toast({ variant: "destructive", title: "Registry Audit Failed", description: "Database rejected query." })
-        }
-      } else {
-        toast({ variant: "destructive", title: "Fetch Error", description: e.message })
-      }
+      console.error("Fetch Rejection:", e)
+      toast({ variant: "destructive", title: "Fetch Error", description: "Cloud database rejected query node." })
     } finally {
       setLoading(false)
     }
@@ -143,6 +113,7 @@ export default function QuestionBank() {
         const matchesSub = subjectFilter === "all" || q.subjectId === subjectFilter
         return matchesSearch && matchesSub
       })
+      .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)) // Local sort
   }, [questions, searchTerm, subjectFilter])
 
   const handleSelectAll = (checked: boolean) => {
@@ -211,30 +182,13 @@ export default function QuestionBank() {
         </div>
         <div className="flex gap-4">
           <Button variant="outline" onClick={() => fetchQuestions()} className="h-12 px-6 rounded-2xl bg-white shadow-sm gap-2">
-            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} /> Refresh
+            <RefreshCw className={cn("h-4 w-4", loading && "animate-spin")} /> Refresh Hub
           </Button>
           <Button asChild className="bg-[#0F172A] hover:bg-black text-white gap-2 font-black shadow-2xl h-12 px-8 rounded-2xl uppercase tracking-widest text-[9px]">
             <Link href="/admin/questions/add"><Plus className="h-4 w-4" /> Add Manual</Link>
           </Button>
         </div>
       </div>
-
-      {indexErrorUrl && (
-         <div className="mx-4 bg-orange-50 border border-orange-200 p-6 rounded-[2rem] flex flex-col md:flex-row items-center justify-between animate-in fade-in zoom-in-95 gap-6">
-            <div className="flex items-center gap-4">
-               <div className="h-12 w-12 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600 shrink-0">
-                  <AlertTriangle className="h-6 w-6" />
-               </div>
-               <div className="text-left">
-                  <p className="font-black text-orange-900 uppercase text-xs tracking-tight">Composite Index Required</p>
-                  <p className="text-[10px] text-orange-700 font-medium max-w-md">Query sorting is temporarily disabled. Click to provision the required backend index for maximum performance.</p>
-               </div>
-            </div>
-            <Button asChild className="bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-11 px-6 font-black uppercase text-[10px] tracking-widest gap-2 shadow-xl">
-               <a href={indexErrorUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" /> Provision Index</a>
-            </Button>
-         </div>
-      )}
 
       {selectedIds.length > 0 && (
          <div className="mx-4 bg-[#0B1528] p-4 rounded-2xl flex flex-wrap items-center justify-between animate-in fade-in slide-in-from-top-4 shadow-4xl text-white sticky top-2 z-[60] border border-white/10">
@@ -262,13 +216,13 @@ export default function QuestionBank() {
             <div className="flex flex-wrap items-center gap-3">
               <Select value={boardFilter} onValueChange={v => setBoardFilter(v)}>
                 <SelectTrigger className="rounded-xl h-11 bg-white border-none w-36 shadow-sm font-bold text-xs">
-                  <SelectValue placeholder="Board" />
+                  <SelectValue placeholder="Board Registry" />
                 </SelectTrigger>
                 <SelectContent><SelectItem value="all">All Boards</SelectItem>{boards?.map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
               </Select>
               <Select value={subjectFilter} onValueChange={setSubjectFilter}>
                 <SelectTrigger className="rounded-xl h-11 bg-white border-none w-36 shadow-sm font-bold text-xs">
-                  <SelectValue placeholder="Subject" />
+                  <SelectValue placeholder="Subject Hub" />
                 </SelectTrigger>
                 <SelectContent><SelectItem value="all">All Subjects</SelectItem>{subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
               </Select>
@@ -285,7 +239,7 @@ export default function QuestionBank() {
                 <TableHead className="px-4 text-[9px] font-black uppercase text-slate-500">Identity & Content</TableHead>
                 <TableHead className="text-[9px] font-black uppercase text-slate-500">Context</TableHead>
                 <TableHead className="text-center text-[9px] font-black uppercase text-slate-500">Usage</TableHead>
-                <TableHead className="text-right px-8 text-[9px] font-black uppercase text-slate-500">Actions</TableHead>
+                <TableHead className="text-right px-8 text-[9px] font-black uppercase text-slate-500">Audit Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

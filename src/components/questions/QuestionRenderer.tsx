@@ -1,10 +1,11 @@
+
 'use client';
 
 import React from 'react';
 import { Question } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, AlertTriangle, Info, Database, BrainCircuit } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Info, Database, BrainCircuit } from 'lucide-center';
 import { Badge } from '@/components/ui/badge';
 
 interface QuestionRendererProps {
@@ -14,16 +15,20 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview High-Fidelity Question Renderer v3.1.
- * Hardened: Guaranteed explanation visibility and sectional boundary checks.
+ * @fileOverview High-Fidelity Question Renderer v3.5.
+ * Hardened: Support for legacy 'explanation' fields and sectional boundary checks.
  */
 
 export default function QuestionRenderer({ question, language, showSolution = false }: QuestionRendererProps) {
   const showEn = language === 'en' || language === 'bilingual';
   const showPa = language === 'pa' || language === 'bilingual';
   
+  // Legacy field mapping for recovered ICT nodes
+  const expEn = question.explanationEn || (question as any).explanation || "";
+  const expPa = question.explanationPa || "";
+  const hasExplanation = !!(expEn || expPa);
+  
   const isMissingPa = !question.questionPa || question.questionPa === question.questionEn;
-  const hasExplanation = !!(question.explanationEn || question.explanationPa);
 
   return (
     <div className="w-full text-left font-body animate-in fade-in duration-300">
@@ -31,7 +36,7 @@ export default function QuestionRenderer({ question, language, showSolution = fa
       {/* Question Header & Boundary Marker */}
       <div className="flex items-center gap-3 mb-6">
          <Badge className="bg-[#0F172A] text-white border-none text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-lg">
-            {question.displayId || 'NODE'}
+            {question.displayId || 'Q-NODE'}
          </Badge>
          <div className="h-px flex-1 bg-slate-100" />
       </div>
@@ -41,7 +46,7 @@ export default function QuestionRenderer({ question, language, showSolution = fa
         <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 mb-8 space-y-6 shadow-inner">
            <div className="flex items-center gap-2 mb-1">
               <Info className="h-4 w-4 text-primary" />
-              <span className="text-[10px] font-black uppercase text-slate-400">Reference Node</span>
+              <span className="text-[10px] font-black uppercase text-slate-400">Reference Context</span>
            </div>
 
            {question.imageUrl && (
@@ -91,7 +96,7 @@ export default function QuestionRenderer({ question, language, showSolution = fa
         </div>
       )}
 
-      {/* Main Question Statement - Preserves All Whitespace */}
+      {/* Main Question Statement */}
       <div className="space-y-6 mb-8">
         {showEn && question.questionEn && (
            <div className="text-[18px] md:text-[22px] font-black leading-snug text-[#000000] tracking-tight whitespace-pre-wrap break-words">
@@ -110,7 +115,7 @@ export default function QuestionRenderer({ question, language, showSolution = fa
 
         {language === 'pa' && isMissingPa && (
           <Badge variant="destructive" className="bg-rose-50 text-rose-600 border-none text-[8px] font-black uppercase">
-            <AlertTriangle className="h-3 w-3 mr-2" /> Translation Node Pending
+            <AlertTriangle className="h-3 w-3 mr-2" /> Translation Pending
           </Badge>
         )}
       </div>
@@ -120,26 +125,26 @@ export default function QuestionRenderer({ question, language, showSolution = fa
         <div className="mt-10 p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100 space-y-6 shadow-xl animate-in slide-in-from-bottom-4">
            <div className="flex items-center gap-4">
               <div className="h-10 w-10 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-lg"><CheckCircle2 className="h-5 w-5" /></div>
-              <h4 className="text-[16px] text-[#0F172A] font-black uppercase tracking-tight">Verified Answer Key: {question.correctAnswer}</h4>
+              <h4 className="text-[16px] text-[#0F172A] font-black uppercase tracking-tight">Verified Answer: {question.correctAnswer}</h4>
            </div>
            
            <div className="space-y-6 pt-6 border-t border-emerald-200/50">
-              {showEn && question.explanationEn && (
+              {showEn && expEn && (
                 <div className="space-y-2">
                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-1">Audit Rationale (English)</p>
-                   <div className="text-[14px] text-slate-800 leading-relaxed font-bold bg-white/60 p-6 rounded-2xl whitespace-pre-wrap break-words">{question.explanationEn}</div>
+                   <div className="text-[14px] text-slate-800 leading-relaxed font-bold bg-white/60 p-6 rounded-2xl whitespace-pre-wrap break-words">{expEn}</div>
                 </div>
               )}
-              {showPa && question.explanationPa && (
+              {showPa && expPa && (
                 <div className="space-y-2">
                    <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest ml-1">ਵਿਆਖਿਆ (Punjabi)</p>
-                   <div className="text-[14px] text-slate-800 leading-relaxed font-bold bg-white/60 p-6 rounded-2xl whitespace-pre-wrap break-words">{question.explanationPa}</div>
+                   <div className="text-[14px] text-slate-800 leading-relaxed font-bold bg-white/60 p-6 rounded-2xl whitespace-pre-wrap break-words">{expPa}</div>
                 </div>
               )}
               {!hasExplanation && (
                 <div className="flex items-center gap-3 p-4 bg-white/40 rounded-xl border border-dashed border-emerald-200">
                    <BrainCircuit className="h-4 w-4 text-emerald-400" />
-                   <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-tight">AI Rationale Node is being generated for this asset.</p>
+                   <p className="text-[11px] font-bold text-emerald-600 uppercase tracking-tight">AI Rationale Node is being generated.</p>
                 </div>
               )}
            </div>
