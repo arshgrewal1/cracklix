@@ -25,8 +25,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Hardened CBT Attempt Hub v17.0.
- * Updated: Viewport height optimized for mobile safe-areas to prevent button clipping.
+ * @fileOverview Hardened CBT Attempt Hub v17.1.
+ * Updated: Mobile palette height optimized to 65vh to prevent full-screen coverage.
  */
 
 export default function MockAttemptPage() {
@@ -262,9 +262,10 @@ export default function MockAttemptPage() {
       <TacticalFooter onSubmit={() => setShowSubmitModal(true)} />
       
       <Sheet open={isMobilePaletteOpen} onOpenChange={setIsMobilePaletteOpen}>
-        <SheetContent side="bottom" className="h-[85vh] p-0 border-none rounded-t-[2.5rem] overflow-hidden">
-          <SheetHeader className="p-6 border-b shrink-0">
-             <SheetTitle className="text-sm font-black uppercase tracking-[0.2em]">CBT Navigation Palette</SheetTitle>
+        <SheetContent side="bottom" className="h-[65vh] p-0 border-none rounded-t-[3rem] overflow-hidden">
+          <SheetHeader className="p-4 md:p-6 border-b shrink-0 bg-slate-50">
+             <div className="w-12 h-1 bg-slate-300 rounded-full mx-auto mb-2 opacity-50" />
+             <SheetTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 text-center">CBT Navigation Palette</SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-hidden">
             <QuestionPalette onSelect={(idx) => { examStore.setCurrentIdx(idx); setIsMobilePaletteOpen(false); }} onSubmit={() => setShowSubmitModal(true)} />
