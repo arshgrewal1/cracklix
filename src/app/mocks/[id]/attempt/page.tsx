@@ -13,15 +13,15 @@ import AntiCheat from "@/components/exam/AntiCheat";
 import QuestionRenderer from "@/components/questions/QuestionRenderer";
 import QuestionPalette from "@/components/mocks/QuestionPalette";
 import { Button } from "@/components/ui/button";
-import { Loader2, Clock } from "lucide-react";
+import { Loader2, Clock, CheckCircle2, AlertCircle, HelpCircle, Eye, ShieldCheck, Play, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 /**
- * @fileOverview Professional CBT Engine v2.0.
- * Viewport Locked: Fit everything into one screen without outer scrolling.
- * High-Fidelity Testbook-style layout.
+ * @fileOverview Professional CBT Engine v3.0.
+ * Features: Viewport Locked, High-Fidelity Testbook-style layout.
+ * Updated: Professional Resume Test Hub with Progress Audit.
  */
 export default function MockAttemptPage() {
   const params = useParams();
@@ -85,6 +85,18 @@ export default function MockAttemptPage() {
     router.push(`/results/${mockId}`);
   };
 
+  const progressStats = useMemo(() => {
+    const s = { answered: 0, marked: 0, notAnswered: 0, notVisited: 0 };
+    examStore.questions.forEach((_, i) => {
+      const st = examStore.status[i];
+      if (st === 'answered' || st === 'answered-marked') s.answered++;
+      else if (st === 'marked') s.marked++;
+      else if (examStore.visited.includes(i)) s.notAnswered++;
+      else s.notVisited++;
+    });
+    return s;
+  }, [examStore.questions, examStore.status, examStore.visited]);
+
   if (isInitializing) return (
     <div className="h-svh flex flex-col items-center justify-center bg-white space-y-6">
        <Loader2 className="h-12 w-12 text-primary animate-spin" />
@@ -108,27 +120,63 @@ export default function MockAttemptPage() {
 
       <main className="flex-1 flex overflow-hidden bg-white">
         
-        {/* LEFT ZONE: QUESTION CONTENT (Scrollable independently) */}
+        {/* LEFT ZONE: QUESTION CONTENT */}
         <div className="flex-1 overflow-y-auto custom-scrollbar relative">
+           
+           {/* PROFESSIONAL RESUME HUB */}
            {examStore.isPaused && (
-             <div className="absolute inset-0 z-50 bg-white/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
-                <div className="h-24 w-24 bg-[#0F172A] rounded-[3rem] flex items-center justify-center text-white mb-8 shadow-2xl">
-                   <Clock className="h-12 w-12 text-primary" />
+             <div className="absolute inset-0 z-50 bg-[#0B1528]/95 backdrop-blur-xl flex flex-col items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
+                <div className="max-w-md w-full bg-white rounded-[3rem] shadow-5xl overflow-hidden text-left flex flex-col">
+                   <div className="bg-[#F8FAFC] p-8 md:p-10 border-b border-slate-100 flex flex-col items-center text-center space-y-4">
+                      <div className="h-16 w-16 bg-[#0F172A] rounded-2xl flex items-center justify-center text-white shadow-xl animate-bounce">
+                         <Play className="h-8 w-8 text-primary fill-current" />
+                      </div>
+                      <div className="space-y-1">
+                         <h2 className="text-3xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Test Paused</h2>
+                         <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Progress Audit Registered</p>
+                      </div>
+                   </div>
+
+                   <div className="p-8 md:p-10 space-y-8">
+                      <div className="grid grid-cols-2 gap-4">
+                         <SummaryCard label="Answered" val={progressStats.answered} color="bg-emerald-500" />
+                         <SummaryCard label="Marked" val={progressStats.marked} color="bg-purple-600" />
+                         <SummaryCard label="Unanswered" val={progressStats.notAnswered} color="bg-rose-500" />
+                         <SummaryCard label="Not Visited" val={progressStats.notVisited} color="bg-slate-200" textColor="text-slate-400" />
+                      </div>
+
+                      <div className="space-y-4 pt-4">
+                         <Button 
+                            onClick={() => examStore.setPaused(false)} 
+                            className="w-full h-16 bg-primary hover:bg-orange-600 text-white rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] shadow-3xl flex items-center justify-center gap-3 transition-all active:scale-95"
+                         >
+                            <Play className="h-5 w-5 fill-current" /> Resume Test Now
+                         </Button>
+                         <Button 
+                            onClick={handleSubmitTest}
+                            variant="ghost"
+                            className="w-full h-14 text-slate-400 hover:text-rose-500 font-bold uppercase tracking-widest text-[9px] gap-2"
+                         >
+                            <ShieldCheck className="h-4 w-4" /> Submit Assessment
+                         </Button>
+                      </div>
+                   </div>
+
+                   <div className="bg-slate-50 p-6 text-center border-t border-slate-100">
+                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-[0.4em]">Official Institutional Engine v3.0</p>
+                   </div>
                 </div>
-                <h2 className="text-4xl font-headline font-black text-[#0F172A] uppercase tracking-tight mb-4">Test Paused</h2>
-                <p className="text-slate-500 font-medium mb-12 max-w-sm">The assessment is currently locked. Your progress is safe.</p>
-                <Button onClick={() => examStore.setPaused(false)} className="bg-[#0F172A] text-white h-16 px-16 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] shadow-4xl active:scale-95 transition-all">Resume Test</Button>
              </div>
            )}
 
-           <div className="max-w-[1200px] mx-auto p-4 md:p-8 space-y-4 md:space-y-6 h-auto min-h-0">
+           <div className="max-w-[1200px] mx-auto p-4 md:p-14 space-y-6 h-auto min-h-0">
               <QuestionRenderer 
                  language={examStore.language} 
                  question={q} 
                  hideOptions={true}
               />
 
-              <div className="grid grid-cols-1 gap-3 md:gap-4 pb-12">
+              <div className="grid grid-cols-1 gap-4 pb-12">
                  {['A', 'B', 'C', 'D'].map((key, i) => {
                     const isSelected = selectedOption === i;
                     const enVal = (q as any)[`option${key}English`];
@@ -139,14 +187,14 @@ export default function MockAttemptPage() {
                          key={i}
                          onClick={() => examStore.setAnswer(examStore.currentIdx, i)}
                          className={cn(
-                           "flex items-center gap-4 p-4 md:p-5 rounded-[16px] border-2 transition-all text-left shadow-sm min-h-[68px] group",
+                           "flex items-center gap-6 p-5 md:p-6 rounded-[16px] border-2 transition-all text-left shadow-sm min-h-[68px] group",
                            isSelected 
                              ? "border-primary bg-primary/5 ring-4 ring-primary/10" 
                              : "border-slate-100 bg-white hover:border-slate-300 hover:shadow-md"
                          )}
                        >
                           <div className={cn(
-                             "h-8 w-8 md:h-10 md:w-10 rounded-lg flex items-center justify-center font-black text-xs md:text-sm shrink-0 transition-all",
+                             "h-10 w-10 rounded-lg flex items-center justify-center font-black text-sm shrink-0 transition-all",
                              isSelected ? "bg-primary text-white shadow-xl" : "bg-[#0F172A] text-white"
                           )}>
                              {key}
@@ -168,7 +216,7 @@ export default function MockAttemptPage() {
            </div>
         </div>
 
-        {/* RIGHT ZONE: QUESTION PALETTE (Fixed Panel) */}
+        {/* RIGHT ZONE: QUESTION PALETTE */}
         <aside className="hidden lg:block w-[320px] shrink-0 border-l border-slate-200 bg-white">
            <QuestionPalette onSelect={(idx) => examStore.setCurrentIdx(idx)} />
         </aside>
@@ -187,4 +235,15 @@ export default function MockAttemptPage() {
       </Sheet>
     </div>
   );
+}
+
+function SummaryCard({ label, val, color, textColor = "text-white" }: any) {
+   return (
+      <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center justify-between">
+         <span className="text-[10px] font-black uppercase text-slate-400 tracking-tight">{label}</span>
+         <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center text-xs font-black shadow-lg", color, textColor)}>
+            {val}
+         </div>
+      </div>
+   )
 }
