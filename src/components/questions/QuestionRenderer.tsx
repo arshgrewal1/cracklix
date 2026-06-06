@@ -1,11 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Question } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, AlertTriangle, Info, Database, BrainCircuit } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, Info, Database, BrainCircuit, Loader2, Sparkles, Zap, Wand2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { rationalizeMockQuestion } from '@/ai/flows/rationalize-mock-question';
+import { useFirestore } from '@/firebase';
+import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 interface QuestionRendererProps {
   question: Partial<Question> & { displayId?: string };
@@ -14,11 +19,15 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview High-Fidelity Question Renderer v3.5.
- * Hardened: Support for legacy 'explanation' fields and sectional boundary checks.
+ * @fileOverview High-Fidelity Question Renderer v4.0.
+ * Features: Integrated AI Rationalization Engine and Legacy Field Recovery.
  */
 
 export default function QuestionRenderer({ question, language, showSolution = false }: QuestionRendererProps) {
+  const db = useFirestore();
+  const { toast } = useToast();
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const showEn = language === 'en' || language === 'bilingual';
   const showPa = language === 'pa' || language === 'bilingual';
   
@@ -28,6 +37,37 @@ export default function QuestionRenderer({ question, language, showSolution = fa
   const hasExplanation = !!(expEn || expPa);
   
   const isMissingPa = !question.questionPa || question.questionPa === question.questionEn;
+
+  const handleGenerateAI = async () => {
+    if (!db || !question.id) return;
+    setIsGenerating(true);
+    
+    try {
+      const result = await rationalizeMockQuestion({
+        questionText: question.questionEn || "",
+        options: [
+          question.optionAEn || "",
+          question.optionBEn || "",
+          question.optionCEn || "",
+          question.optionDEn || ""
+        ].filter(Boolean),
+        correctAnswer: question.correctAnswer || "A"
+      });
+
+      const qRef = doc(db, "questions", question.id);
+      await updateDoc(qRef, {
+        explanationEn: result.rationalization,
+        updatedAt: serverTimestamp()
+      });
+
+      toast({ title: "Rationale Synced", description: "AI explanation successfully added to the registry node." });
+      // Note: Component will re-render via Firestore stream or manual refresh
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "AI Node Error", description: "Could not initialize rationalization." });
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   return (
     <div className="w-full text-left font-body animate-in fade-in duration-300">
@@ -122,9 +162,21 @@ export default function QuestionRenderer({ question, language, showSolution = fa
       {/* Solution & Rationale Node */}
       {showSolution && (
         <div className="mt-10 p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100 space-y-6 shadow-xl animate-in slide-in-from-bottom-4">
-           <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-lg"><CheckCircle2 className="h-5 w-5" /></div>
-              <h4 className="text-[16px] text-[#0F172A] font-black uppercase tracking-tight">Verified Answer: {question.correctAnswer}</h4>
+           <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                 <div className="h-10 w-10 rounded-full bg-emerald-600 flex items-center justify-center text-white shadow-lg"><CheckCircle2 className="h-5 w-5" /></div>
+                 <h4 className="text-[16px] text-[#0F172A] font-black uppercase tracking-tight">Verified Answer: {question.correctAnswer}</h4>
+              </div>
+              {!hasExplanation && question.id && (
+                 <Button 
+                   onClick={handleGenerateAI} 
+                   disabled={isGenerating}
+                   className="bg-primary hover:bg-orange-600 text-white font-black uppercase text-[9px] tracking-widest gap-2 rounded-xl h-10 px-6 shadow-xl"
+                 >
+                    {isGenerating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+                    Generate AI Explain
+                 </Button>
+              )}
            </div>
            
            <div className="space-y-6 pt-6 border-t border-emerald-200/50">
