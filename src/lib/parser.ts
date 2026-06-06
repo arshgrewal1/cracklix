@@ -1,8 +1,8 @@
 
 /**
- * @fileOverview Exam-Grade Regex Parser for Deterministic Ingestion v9.0.
+ * @fileOverview Institutional Regex Parser v10.0.
  * Strictly non-AI. Optimized for "Line 1 English / Line 2 Punjabi" format.
- * Features: High-precision explanation extraction and formula preservation.
+ * Preserves bilingual strings for options and answers as requested.
  */
 
 import { Question } from "@/types";
@@ -13,18 +13,15 @@ export interface ParsedResults {
 }
 
 export function parseBulkQuestions(rawText: string, metadata: any): ParsedResults {
-  // Normalize line endings and split by Q followed by a number
   const cleanRaw = rawText.replace(/\r\n/g, '\n');
   
-  // Pattern to find boundaries of questions (e.g., Q1., Q24., Q100.)
+  // Split by Q followed by a number
   const blocks = cleanRaw.split(/\n(?=Q\d+[\.\s])/g).filter(b => b.trim().length > 10);
   
-  // Fallback for cases where the very first question doesn't have a preceding newline
+  // Fallback for first block
   if (blocks.length === 1 && !blocks[0].trim().startsWith('Q')) {
-    const initialSplit = cleanRaw.split(/(?=Q\d+[\.\s])/g).filter(b => b.trim().length > 10);
-    if (initialSplit.length > 0 && initialSplit[0].trim().startsWith('Q')) {
-      return parseBlocks(initialSplit, metadata);
-    }
+    const initialSplit = cleanRaw.split(/(?=Q\d+[\.\s])/g).filter(b => b.trim().startsWith('Q'));
+    return parseBlocks(initialSplit, metadata);
   }
 
   return parseBlocks(blocks, metadata);
@@ -35,8 +32,8 @@ function parseBlocks(blocks: string[], metadata: any): ParsedResults {
   const errors: string[] = [];
 
   blocks.forEach((block, index) => {
-    const lines = block.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    if (lines.length < 3) return;
+    const lines = block.split('\n').map(l => l.trim());
+    if (lines.length < 5) return;
 
     try {
       const q: any = { 
@@ -46,61 +43,54 @@ function parseBlocks(blocks: string[], metadata: any): ParsedResults {
         isStandalone: true,
         questionEn: "",
         questionPa: "",
-        optionAEn: "", optionAPa: "",
-        optionBEn: "", optionBPa: "",
-        optionCEn: "", optionCPa: "",
-        optionDEn: "", optionDPa: "",
+        optionAEn: "",
+        optionBEn: "",
+        optionCEn: "",
+        optionDEn: "",
         correctAnswer: "",
         explanationEn: "",
         explanationPa: ""
       };
 
-      // 1. Extract Question Text (Line 1 EN, Line 2 PA)
+      // 1. Question EN
       q.questionEn = lines[0].replace(/^Q\d+[\.\s]*/i, '').trim();
 
-      let nextIdx = 1;
-      if (lines[nextIdx] && !lines[nextIdx].match(/^\(?[A-D][\.\)\s]/i)) {
-        q.questionPa = lines[nextIdx].replace(/^(ਪ੍ਰਸ਼ਨ|ਪ੍ਰਸ਼ਨ)\s*\d+[\.\s]*/, '').trim();
-        nextIdx++;
-      }
-
-      // 2. Extract Options (A-D) with strict "/" split
-      const optionPattern = /^\(?([A-D])[\.\)\s]+(.*)/i;
-      for (let i = nextIdx; i < lines.length; i++) {
-        const line = lines[i];
-        const optMatch = line.match(optionPattern);
-        if (optMatch) {
-          const letter = optMatch[1].toUpperCase();
-          const content = optMatch[2].trim();
-          
-          if (content.includes('/')) {
-            const parts = content.split('/');
-            q[`option${letter}En`] = parts[0]?.trim() || "";
-            q[`option${letter}Pa`] = parts[1]?.trim() || "";
-          } else {
-            q[`option${letter}En`] = content;
-          }
+      // 2. Question PA (Look for first line that isn't an option)
+      let currentLine = 1;
+      while (lines[currentLine] && !lines[currentLine].match(/^\([A-D]\)/i)) {
+        if (lines[currentLine].length > 0) {
+          q.questionPa = lines[currentLine].replace(/^(ਪ੍ਰਸ਼ਨ|ਪ੍ਰਸ਼ਨ)\s*\d+[\.\s]*/, '').trim();
+          break;
         }
+        currentLine++;
       }
 
-      // 3. Extract Correct Answer (Key logic)
-      const ansLine = lines.find(l => 
-        l.toLowerCase().includes('correct answer') || 
-        l.toLowerCase().includes('ਸਹੀ ਉੱਤਰ') ||
-        l.toLowerCase().startsWith('ans:')
-      );
-      
+      // 3. Options (A-D) - Capture full bilingual string
+      const optionA = lines.find(l => l.startsWith('(A)'));
+      const optionB = lines.find(l => l.startsWith('(B)'));
+      const optionC = lines.find(l => l.startsWith('(C)'));
+      const optionD = lines.find(l => l.startsWith('(D)'));
+
+      if (optionA) q.optionAEn = optionA.replace(/^\(A\)\s*/i, '').trim();
+      if (optionB) q.optionBEn = optionB.replace(/^\(B\)\s*/i, '').trim();
+      if (optionC) q.optionCEn = optionC.replace(/^\(C\)\s*/i, '').trim();
+      if (optionD) q.optionDEn = optionD.replace(/^\(D\)\s*/i, '').trim();
+
+      // 4. Correct Answer Line
+      const ansLine = lines.find(l => l.toLowerCase().includes('correct answer') || l.toLowerCase().includes('ਸਹੀ ਉੱਤਰ'));
       if (ansLine) {
-        const match = ansLine.match(/(?:correct answer|ans|ਸਹੀ ਉੱਤਰ)[:\s]*\(?([A-D])\)?/i);
+        const match = ansLine.match(/(?:correct answer|ans)[:\s]*\(?([A-D])\)?/i);
         if (match) q.correctAnswer = match[1].toUpperCase();
+        q.correctAnswerRaw = ansLine.trim(); // Store for exact rendering
       }
 
-      // 4. Extract Explanations with High-Fidelity preservation
-      const expEnStart = lines.findIndex(l => l.toLowerCase().includes('english explanation'));
-      const expPaStart = lines.findIndex(l => l.toLowerCase().includes('ਪੰਜਾਬੀ ਵਿਆਖਿਆ'));
+      // 5. Explanations (Vertical Flow Preservation)
+      const expEnStart = lines.findIndex(l => l.includes('• English Explanation:'));
+      const expPaStart = lines.findIndex(l => l.includes('• ਪੰਜਾਬੀ ਵਿਆਖਿਆ:'));
 
       if (expEnStart !== -1) {
         const end = expPaStart !== -1 ? expPaStart : lines.length;
+        // Slice and preserve line breaks
         q.explanationEn = lines.slice(expEnStart + 1, end).join('\n').trim();
       }
 
@@ -108,14 +98,11 @@ function parseBlocks(blocks: string[], metadata: any): ParsedResults {
         q.explanationPa = lines.slice(expPaStart + 1).join('\n').trim();
       }
 
-      // Validations
-      if (!q.questionEn) throw new Error(`Missing Statement in Block ${index + 1}`);
-      if (!q.correctAnswer) throw new Error(`Missing Answer Key in Block ${index + 1}`);
-      if (!q.optionAEn || !q.optionBEn) throw new Error(`Insufficient Options in Block ${index + 1}`);
-
-      questions.push(q);
+      if (q.questionEn && q.correctAnswer) {
+        questions.push(q);
+      }
     } catch (err: any) {
-      errors.push(err.message);
+      errors.push(`Block ${index + 1}: ${err.message}`);
     }
   });
 

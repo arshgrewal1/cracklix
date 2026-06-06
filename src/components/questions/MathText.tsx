@@ -4,6 +4,7 @@
 import React, { useEffect, useRef } from 'react';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import { cn } from '@/lib/utils';
 
 interface MathTextProps {
   text: string;
@@ -11,8 +12,9 @@ interface MathTextProps {
 }
 
 /**
- * @fileOverview Exam-Grade Math Renderer v2.0.
- * Standardizes math symbols and renders LaTeX formulas with zero broken glyphs.
+ * @fileOverview Precision Math Renderer v3.0.
+ * Renders LaTeX blocks and converts plain text symbols to high-fidelity glyphs.
+ * Ensures multi-line calculations remain vertically separated.
  */
 export default function MathText({ text, className }: MathTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,36 +22,45 @@ export default function MathText({ text, className }: MathTextProps) {
   useEffect(() => {
     if (containerRef.current) {
       try {
-        // Clean common math characters to ensure compatibility
-        const cleanText = text
-          .replace(/−/g, '-')
-          .replace(/×/g, '\\times ')
-          .replace(/÷/g, '\\div ')
-          .replace(/√/g, '\\sqrt ');
-
-        // Identify LaTeX blocks or render entire text as standard markup
-        // Supporting both $...$ and plain text with math symbols
-        const parts = cleanText.split(/(\$.*?\$)/g);
+        const lines = text.split('\n');
         
-        containerRef.current.innerHTML = parts.map(part => {
-          if (part.startsWith('$') && part.endsWith('$')) {
-            const math = part.slice(1, -1);
-            return katex.renderToString(math, {
-              throwOnError: false,
-              displayMode: false
-            });
+        const renderedLines = lines.map(line => {
+          if (!line.trim()) return '<div class="h-4"></div>'; // Preserve blank lines
+
+          // Convert standard math symbols to LaTeX for KaTeX
+          const processedLine = line
+            .replace(/√/g, '\\sqrt')
+            .replace(/×/g, '\\times')
+            .replace(/÷/g, '\\div')
+            .replace(/\^2|²/g, '^2')
+            .replace(/\^3|³/g, '^3')
+            .replace(/≤/g, '\\leq')
+            .replace(/≥/g, '\\geq');
+
+          // Check if line contains common math operators
+          const hasMath = /[\\√×÷²³≤≥=+\-\/]/.test(processedLine);
+
+          if (hasMath) {
+            try {
+              return `<div class="py-1">${katex.renderToString(processedLine, {
+                throwOnError: false,
+                displayMode: false,
+                trust: true
+              })}</div>`;
+            } catch (e) {
+              return `<div>${line}</div>`;
+            }
           }
           
-          // For non-LaTeX parts, we still want to ensure nice formatting
-          return part.replace(/\n/g, '<br/>');
-        }).join('');
-        
+          return `<div>${line}</div>`;
+        });
+
+        containerRef.current.innerHTML = renderedLines.join('');
       } catch (err) {
-        console.error("KaTeX Rendering Audit Failed:", err);
         containerRef.current.textContent = text;
       }
     }
   }, [text]);
 
-  return <div ref={containerRef} className={cn("whitespace-pre-wrap", className)} />;
+  return <div ref={containerRef} className={cn("whitespace-pre-wrap leading-relaxed", className)} />;
 }
