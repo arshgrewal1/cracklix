@@ -16,9 +16,10 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional High-Fidelity Dark Renderer v25.0.
+ * @fileOverview Institutional High-Fidelity Dark Renderer v26.0.
  * Updated: High-density scaling pass to minimize scrolling.
  * Style: Deep black workspace with high-contrast white option boxes.
+ * Result Mode: Highlights correct/incorrect choices when showSolution is true.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -72,29 +73,49 @@ export default function QuestionRenderer({
             const en = q[`option${key}English`] || q[`option_${key.toLowerCase()}_english`];
             const pa = q[`option${key}Punjabi`] || q[`option_${key.toLowerCase()}_punjabi`];
             const isSelected = selectedAnswer === idx;
+            const isCorrect = q.correctAnswer === key;
 
             if (!en && !pa) return null;
+
+            // Strategic Result Styling
+            const boxClasses = cn(
+              "flex items-center gap-3 p-2 md:p-2.5 rounded-xl cursor-pointer transition-all border-2",
+              showSolution 
+                ? isCorrect ? "bg-emerald-50 border-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.1)]" 
+                  : isSelected ? "bg-rose-50 border-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.1)]"
+                  : "bg-white border-transparent"
+                : isSelected ? "bg-white border-[#F97316] shadow-[0_0_12px_rgba(249,115,22,0.15)]" 
+                  : "bg-white border-transparent hover:bg-slate-50"
+            );
+
+            const prefixClasses = cn(
+              "font-[900] text-[13px] md:text-[16px] shrink-0 transition-colors",
+              showSolution
+                ? isCorrect ? "text-emerald-600"
+                  : isSelected ? "text-rose-600"
+                  : "text-[#0F172A]"
+                : isSelected ? "text-[#F97316]" : "text-[#0F172A]"
+            );
+
+            const textClasses = cn(
+              "font-[700] text-[12px] md:text-[14px] leading-tight transition-colors",
+              showSolution
+                ? isCorrect ? "text-emerald-800"
+                  : isSelected ? "text-rose-800"
+                  : "text-[#0F172A]"
+                : "text-[#0F172A]"
+            );
 
             return (
               <div 
                 key={key} 
                 onClick={() => onSelect?.(idx)}
-                className={cn(
-                  "flex items-center gap-3 p-2 md:p-2.5 rounded-xl cursor-pointer transition-all active:scale-[0.99] border-2",
-                  isSelected 
-                    ? "bg-white border-[#F97316] shadow-[0_0_12px_rgba(249,115,22,0.15)]" 
-                    : "bg-white border-transparent hover:bg-slate-50"
-                )}
+                className={boxClasses}
               >
-                <span className={cn(
-                  "font-[900] text-[13px] md:text-[16px] shrink-0 transition-colors",
-                  isSelected ? "text-[#F97316]" : "text-[#0F172A]"
-                )}>
+                <span className={prefixClasses}>
                   ({key})
                 </span>
-                <div className={cn(
-                  "font-[700] text-[12px] md:text-[14px] leading-tight transition-colors text-[#0F172A]"
-                )}>
+                <div className={textClasses}>
                   <MathText text={`${en}${pa ? ` / ${pa}` : ''}`} />
                 </div>
               </div>

@@ -35,8 +35,8 @@ import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Institutional Result Engine v2.7.
- * Features: Re-attempt logic and Registry Purge.
+ * @fileOverview Institutional Result Engine v2.8.
+ * Features: Re-attempt logic, Registry Purge, and High-Fidelity Solutions.
  */
 export default function ResultPage() {
   const params = useParams()
@@ -215,10 +215,14 @@ export default function ResultPage() {
                
                <div className="space-y-4 md:space-y-6">
                   {questions.map((q, idx) => {
-                     const studentAnsIdx = sessionData.answers[idx];
+                     // Fix index resolution for JSON objects with string keys
+                     const studentAnsIdx = sessionData.answers?.[idx] !== undefined 
+                       ? sessionData.answers[idx] 
+                       : sessionData.answers?.[idx.toString()];
+
                      const correctAnsIdx = ['A','B','C','D'].indexOf(q.correctAnswer);
                      const isCorrect = studentAnsIdx === correctAnsIdx;
-                     const isSkipped = studentAnsIdx === undefined;
+                     const isSkipped = studentAnsIdx === undefined || studentAnsIdx === null;
                      const isExpanded = expandedQs[idx];
 
                      return (
@@ -240,13 +244,25 @@ export default function ResultPage() {
                                        <p className="text-[7px] font-black uppercase text-slate-400 ml-0.5">Section: {q.sectionId || q.subjectId || 'Audit Node'}</p>
                                     </div>
                                  </div>
-                                 <Button variant="ghost" onClick={() => setExpandedQs(p => ({ ...p, [idx]: !p[idx] }))} className="rounded-xl h-9 w-9 p-0 hover:bg-slate-50 border border-slate-100 shadow-sm">
-                                    {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                                 <Button 
+                                    onClick={() => setExpandedQs(p => ({ ...p, [idx]: !p[idx] }))}
+                                    className={cn(
+                                       "rounded-xl h-10 px-4 font-black uppercase text-[9px] tracking-widest gap-2 shadow-sm",
+                                       isExpanded ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-500 border border-slate-200"
+                                    )}
+                                 >
+                                    {isExpanded ? "Hide Logic" : "View Solution"}
+                                    {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <BrainCircuit className="h-3.5 w-3.5" />}
                                  </Button>
                               </div>
 
                               <div className="text-left">
-                                 <QuestionRenderer question={q} language="bilingual" showSolution={isExpanded} />
+                                 <QuestionRenderer 
+                                   question={q} 
+                                   language="bilingual" 
+                                   showSolution={isExpanded} 
+                                   selectedAnswer={studentAnsIdx}
+                                 />
                               </div>
 
                               {isExpanded && (
