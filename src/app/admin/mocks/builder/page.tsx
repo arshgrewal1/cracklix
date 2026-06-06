@@ -25,7 +25,8 @@ import {
   MinusCircle,
   PlusCircle,
   XCircle,
-  Gem
+  Gem,
+  Filter
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, where, limit, getDocs } from "firebase/firestore"
@@ -84,7 +85,7 @@ function MockBuilderContent() {
       if (!db) return
       setBankLoading(true)
       try {
-        const q = query(collection(db, "questions"), limit(250))
+        const q = query(collection(db, "questions"), limit(500))
         const snap = await getDocs(q)
         setQuestionBank(snap.docs.map(d => ({ ...d.data(), id: d.id })))
       } finally {
@@ -283,6 +284,23 @@ function MockBuilderContent() {
                           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                           <Input placeholder="Filter bank nodes..." value={bankFilter.search} onChange={e => setBankFilter({...bankFilter, search: e.target.value})} className="h-12 pl-12 rounded-xl bg-slate-50 border-none" />
                        </div>
+                       
+                       <div className="w-full md:w-64">
+                          <Select value={bankFilter.subjectId} onValueChange={(v) => setBankFilter({...bankFilter, subjectId: v})}>
+                             <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none font-bold text-xs">
+                                <div className="flex items-center gap-2">
+                                   <Filter className="h-3.5 w-3.5 text-primary" />
+                                   <SelectValue placeholder="Choose Subject" />
+                                </div>
+                             </SelectTrigger>
+                             <SelectContent>
+                                <SelectItem value="all">All Subjects</SelectItem>
+                                {subjects?.map((s: any) => (
+                                   <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                ))}
+                             </SelectContent>
+                          </Select>
+                       </div>
                     </div>
 
                     <div className="bg-[#0F172A] p-4 rounded-2xl mb-6 flex items-center justify-between text-white">
@@ -297,7 +315,7 @@ function MockBuilderContent() {
                           <p className="font-black uppercase text-[10px]">Select Visible ({bankSelection.length})</p>
                        </div>
                        <div className="flex gap-3">
-                         <Button disabled={bankSelection.length === 0} onClick={handleBulkLink} className="bg-emerald-600 hover:bg-emerald-700 h-10 px-8 rounded-xl">
+                         <Button disabled={bankSelection.length === 0} onClick={handleBulkLink} className="bg-emerald-600 hover:bg-emerald-700 h-10 px-8 rounded-xl text-[10px] uppercase font-black tracking-widest shadow-xl">
                             Link {bankSelection.length} Nodes
                          </Button>
                        </div>
@@ -309,7 +327,7 @@ function MockBuilderContent() {
                        ) : filteredBank.map(q => (
                           <div key={q.id} className={cn(
                              "p-4 rounded-2xl border border-slate-100 flex items-center justify-between transition-all",
-                             bankSelection.includes(q.id) ? "bg-primary/5 border-primary/20" : "bg-white"
+                             bankSelection.includes(q.id) ? "bg-primary/5 border-primary/20" : "bg-white hover:border-primary/10"
                           )}>
                              <div className="flex items-center gap-6 min-w-0 flex-1">
                                 <Checkbox 
@@ -320,12 +338,19 @@ function MockBuilderContent() {
                                 />
                                 <div className="min-w-0 flex-1">
                                    <p className="font-bold text-sm text-[#0F172A] truncate">{q.questionEn}</p>
-                                   <Badge variant="outline" className="text-[8px] font-black uppercase mt-1">{q.subjectId}</Badge>
+                                   <Badge variant="outline" className="text-[8px] font-black uppercase mt-1 border-slate-100 text-slate-400">{q.subjectId}</Badge>
                                 </div>
                              </div>
-                             <Button size="sm" variant="ghost" className="text-primary font-black uppercase text-[9px]" onClick={() => setSelectedQuestions([...selectedQuestions, q])}>Link</Button>
+                             <Button size="sm" variant="ghost" className="text-primary font-black uppercase text-[9px] hover:bg-primary/10" onClick={() => setSelectedQuestions([...selectedQuestions, q])}>Link</Button>
                           </div>
                        ))}
+                       
+                       {filteredBank.length === 0 && !bankLoading && (
+                          <div className="text-center py-20 opacity-20 flex flex-col items-center gap-4">
+                             <Database className="h-12 w-12" />
+                             <p className="font-black uppercase text-[10px] tracking-widest">No matching assets in this subject node.</p>
+                          </div>
+                       )}
                     </div>
                  </TabsContent>
 
