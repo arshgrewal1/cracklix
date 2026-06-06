@@ -7,7 +7,7 @@ import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query } from "firebase/firestore"
 import { Input } from "@/components/ui/input"
-import { Search, GraduationCap, ChevronRight, Zap, ShieldCheck, BookOpen } from "lucide-react"
+import { Search, GraduationCap, ChevronRight, Zap, ShieldCheck, BookOpen, Layers, FileText } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -15,8 +15,8 @@ import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview High-Density Responsive Exam Catalog.
- * Optimized: Uses dynamic Firestore counts from the Exam registry.
+ * @fileOverview High-Density Responsive Exam Catalog v2.0.
+ * Optimized: Uses real-time aggregation logic from the 'mocks' collection.
  */
 
 export default function ExamsCatalog() {
@@ -33,9 +33,38 @@ function CatalogContent() {
 
   const examsQuery = useMemo(() => (db ? query(collection(db, 'exams')) : null), [db])
   const boardsQuery = useMemo(() => (db ? query(collection(db, 'boards')) : null), [db])
+  const mocksQuery = useMemo(() => (db ? query(collection(db, 'mocks')) : null), [db])
 
   const { data: exams, loading: examsLoading } = useCollection<any>(examsQuery)
   const { data: boards } = useCollection<any>(boardsQuery)
+  const { data: mocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
+
+  // Dynamic Aggregation Engine
+  const statsMap = useMemo(() => {
+    if (!mocks) return {};
+    const map: Record<string, any> = {};
+    
+    mocks.forEach(m => {
+      const eid = m.examId;
+      if (!eid) return;
+      
+      if (!map[eid]) {
+        map[eid] = {
+          full: 0,
+          pyq: 0,
+          sectional: 0,
+          subjects: new Set<string>()
+        };
+      }
+      
+      if (m.mockType === 'FULL') map[eid].full++;
+      if (m.mockType === 'PYQ') map[eid].pyq++;
+      if (m.mockType === 'SECTIONAL') map[eid].sectional++;
+      if (m.subjectId) map[eid].subjects.add(m.subjectId);
+    });
+    
+    return map;
+  }, [mocks]);
 
   const filteredExams = useMemo(() => {
     if (!exams) return [];
@@ -67,10 +96,12 @@ function CatalogContent() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
-           {examsLoading ? (
+           {examsLoading || mocksLoading ? (
               Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3.5rem]" />)
            ) : filteredExams.map((exam: any) => {
               const board = boards?.find((b: any) => b.id === exam.boardId);
+              const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, subjects: new Set() };
+              
               return (
                 <Link key={exam.id} href={`/exams/${exam.id}`}>
                   <Card className="border-none shadow-lg hover:shadow-2xl transition-all duration-300 rounded-xl md:rounded-[3.5rem] bg-white group overflow-hidden text-left h-full flex flex-col border border-slate-100 p-4 md:p-10">
@@ -96,15 +127,12 @@ function CatalogContent() {
                           </p>
                        </div>
 
-                       <div className="grid grid-cols-2 gap-2 mt-6 pt-6 border-t border-slate-50">
-                          <div className="space-y-0.5">
-                             <p className="text-[10px] font-black text-[#0F172A]">{exam.totalFullMocks || 0}</p>
-                             <p className="text-[7px] font-bold text-slate-400 uppercase">Full Mocks</p>
-                          </div>
-                          <div className="space-y-0.5">
-                             <p className="text-[10px] font-black text-[#0F172A]">{exam.totalPyqs || 0}</p>
-                             <p className="text-[7px] font-bold text-slate-400 uppercase">Archives</p>
-                          </div>
+                       {/* Institutional Reactive Counters */}
+                       <div className="grid grid-cols-2 gap-y-4 gap-x-2 mt-6 pt-6 border-t border-slate-50">
+                          <CounterNode icon={<Zap className="h-3 w-3 text-primary" />} val={stats.full} label="Full Mocks" />
+                          <CounterNode icon={<BookOpen className="h-3 w-3 text-blue-500" />} val={stats.subjects.size} label="Subject Nodes" />
+                          <CounterNode icon={<FileText className="h-3 w-3 text-emerald-500" />} val={stats.pyq} label="Archives" />
+                          <CounterNode icon={<Layers className="h-3 w-3 text-orange-500" />} val={stats.sectional} label="Sectionals" />
                        </div>
 
                        <div className="mt-6 md:mt-10">
@@ -119,6 +147,18 @@ function CatalogContent() {
         </div>
       </main>
       <Footer />
+    </div>
+  )
+}
+
+function CounterNode({ icon, val, label }: { icon: React.ReactNode, val: number, label: string }) {
+  return (
+    <div className="space-y-0.5">
+       <div className="flex items-center gap-1.5">
+          {icon}
+          <p className="text-[10px] md:text-[12px] font-black text-[#0F172A]">{val}</p>
+       </div>
+       <p className="text-[6px] md:text-[8px] font-black text-slate-400 uppercase tracking-widest pl-4.5">{label}</p>
     </div>
   )
 }
