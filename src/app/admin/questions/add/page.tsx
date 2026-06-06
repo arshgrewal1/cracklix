@@ -19,12 +19,6 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
-/**
- * @fileOverview Enterprise Question Editor Node.
- * Optimized for payload sanitization and React controlled component stability.
- * Fixed: Robust save logic with error emission.
- */
-
 export default function QuestionEntryPage() {
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
@@ -113,7 +107,8 @@ function QuestionEntryContent() {
     delete basePayload.tableDataJson;
     delete basePayload.chartConfigJson;
 
-    Object.keys(basePayload).forEach(key => basePayload[key] === undefined && delete basePayload[key]);
+    // Purge undefined/null values
+    Object.keys(basePayload).forEach(key => (basePayload[key] === undefined || basePayload[key] === null) && delete basePayload[key]);
 
     const finalPayload = {
       ...basePayload,
@@ -138,9 +133,9 @@ function QuestionEntryContent() {
   }
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-10 pb-20">
+    <div className="max-w-[1600px] mx-auto space-y-10 pb-20 text-left">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-6 text-left">
+        <div className="flex items-center gap-6">
           <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 border border-slate-200 bg-white" onClick={() => router.back()}><ChevronLeft className="h-6 w-6" /></Button>
           <div className="text-left">
             <h1 className="text-3xl font-black font-headline text-[#0F172A] uppercase tracking-tight">{isEditing ? "Audit Entry" : "Manual Entry Node"}</h1>
@@ -337,8 +332,8 @@ function QuestionEntryContent() {
                    language="bilingual" 
                    question={{
                      ...formData,
-                     tableData: formData.tableDataJson ? JSON.parse(formData.tableDataJson || '{}') : null,
-                     chartConfig: formData.chartConfigJson ? JSON.parse(formData.chartConfigJson || '{}') : null
+                     tableData: formData.tableDataJson ? (JSON.parse(formData.tableDataJson || '{}')) : null,
+                     chartConfig: formData.chartConfigJson ? (JSON.parse(formData.chartConfigJson || '{}')) : null
                    }} 
                    showSolution={true}
                 />

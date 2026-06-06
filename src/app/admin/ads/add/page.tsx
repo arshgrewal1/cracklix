@@ -16,11 +16,6 @@ import { useToast } from "@/hooks/use-toast"
 import { AdType, AdPlacementType, AdStatus } from "@/types"
 import { cn } from "@/lib/utils"
 
-/**
- * @fileOverview High-Fidelity Campaign Editor.
- * Orchestrates direct banner assets and targeting registries.
- */
-
 const PLACEMENTS: AdPlacementType[] = [
   'HOMEPAGE_TOP', 'HOMEPAGE_MIDDLE', 'HOMEPAGE_BOTTOM', 'EXAM_LISTING', 
   'MOCK_LISTING', 'NOTES_PAGE', 'CA_PAGE', 'RESULT_PAGE', 'SIDEBAR', 'FOOTER'
@@ -88,8 +83,11 @@ function AdEntryContent() {
       id: finalId,
       updatedAt: serverTimestamp(),
       createdAt: isEditing ? (existingAd?.createdAt || serverTimestamp()) : serverTimestamp(),
-      stats: isEditing ? existingAd.stats : { impressions: 0, clicks: 0 }
+      stats: isEditing ? (existingAd.stats || { impressions: 0, clicks: 0 }) : { impressions: 0, clicks: 0 }
     }
+
+    // Purge undefined/null
+    Object.keys(payload).forEach(key => (payload[key] === undefined || payload[key] === null) && delete payload[key]);
 
     try {
       await setDoc(adRef, payload, { merge: true })

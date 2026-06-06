@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Search, MoreVertical, ShieldCheck, Trash2, Gift, Gem, RefreshCw, XCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, doc, updateDoc, serverTimestamp } from "firebase/firestore"
+import { collection, query, doc, updateDoc, serverTimestamp, deleteDoc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   DropdownMenu,
@@ -28,11 +28,6 @@ import {
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import StudentAvatar from "@/components/brand/StudentAvatar"
-
-/**
- * @fileOverview Aspirants Management Terminal.
- * Optimized: Client-side sorting for passes to bypass composite index requirement.
- */
 
 export default function AspirantsManagement() {
   const db = useFirestore()
@@ -58,19 +53,20 @@ export default function AspirantsManagement() {
     if (!aspirants) return []
     return aspirants
       .filter(a => 
-        a.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        a.email?.toLowerCase().includes(searchTerm.toLowerCase())
+        (a.name || "").toLowerCase().includes(searchTerm.toLowerCase()) || 
+        (a.email || "").toLowerCase().includes(searchTerm.toLowerCase())
       )
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
   }, [aspirants, searchTerm])
 
   const handleUpdateRole = async (userId: string, newRole: string) => {
+    if (!db) return
     const isFounder = currentUser?.email === 'arshdeepgrewal1122@gmail.com';
     if (currentProfile?.role !== 'SUPER_ADMIN' && !isFounder) {
       toast({ variant: "destructive", title: "Access Denied", description: "Lead authority only." })
       return
     }
-    await updateDoc(doc(db!, "users", userId), { role: newRole })
+    await updateDoc(doc(db, "users", userId), { role: newRole })
     toast({ title: "Permissions Updated", description: `User role changed to ${newRole}.` })
   }
 
@@ -96,13 +92,21 @@ export default function AspirantsManagement() {
   }
 
   const handleRevokePass = async (userId: string) => {
+    if (!db) return
     if (!confirm("Revoke institutional access and reset to Free?")) return
-    await updateDoc(doc(db!, "users", userId), {
-       status: 'aspirant_free',
+    await updateDoc(doc(db, "users", userId), {
+       status: 'Free',
        passExpiryDate: null,
        updatedAt: serverTimestamp()
     })
     toast({ title: "Pass Revoked", description: "Aspirant reset to basic entry node." })
+  }
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!db) return
+    if (!confirm("CRITICAL: Permanently purge this user and all their attempt data?")) return
+    await deleteDoc(doc(db, "users", userId))
+    toast({ title: "User Purged", description: "Identity node removed from registry." })
   }
 
   return (
@@ -160,7 +164,7 @@ export default function AspirantsManagement() {
                   <TableCell>
                     <div className="flex flex-col gap-1">
                        <Badge className="bg-amber-50 text-amber-600 border-none px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest">
-                         {aspirant.status?.replace('_', ' ') || 'aspirant_free'}
+                         {aspirant.status?.replace('_', ' ') || 'Free'}
                        </Badge>
                        {aspirant.passExpiryDate && (
                           <span className="text-[8px] font-bold text-slate-400 uppercase text-center">Expires: {new Date(aspirant.passExpiryDate).toLocaleDateString()}</span>
@@ -175,13 +179,16 @@ export default function AspirantsManagement() {
                        <DropdownMenuContent align="end" className="w-64 bg-[#0F172A] border-white/10 text-white rounded-[2rem] p-3 shadow-4xl">
                           <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-slate-500 px-4 py-2">Lead Audit</DropdownMenuLabel>
                           <DropdownMenuItem onClick={() => { setGrantDialogUser(aspirant); setGrantPlanId(aspirant.status); }} className="rounded-xl cursor-pointer font-bold px-4 py-3 focus:bg-primary/20 text-primary">
-                             <Gift className="h-4 w-4 mr-3" /> Custom Pass Grant
+                             <Gem className="h-4 w-4 mr-3" /> Grant Access Node
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleRevokePass(aspirant.id)} className="rounded-xl cursor-pointer font-bold px-4 py-3 text-rose-400 focus:bg-rose-500/10">
-                             <XCircle className="h-4 w-4 mr-3" /> Revoke All Access
+                          <DropdownMenuItem onClick={() => handleRevokePass(aspirant.id)} className="rounded-xl cursor-pointer font-bold px-4 py-3 text-amber-400 focus:bg-amber-500/10">
+                             <XCircle className="h-4 w-4 mr-3" /> Reset to Free
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-white/5" />
                           <DropdownMenuItem onClick={() => handleUpdateRole(aspirant.id, 'ADMIN')} className="rounded-xl cursor-pointer font-bold px-4 py-3 focus:bg-white/5">Promote to Admin</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleDeleteUser(aspirant.id)} className="rounded-xl cursor-pointer font-bold px-4 py-3 text-rose-500 focus:bg-rose-500/10">
+                             <Trash2 className="h-4 w-4 mr-3" /> Delete Node
+                          </DropdownMenuItem>
                        </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -196,12 +203,12 @@ export default function AspirantsManagement() {
          <DialogContent className="bg-[#0F172A] text-white border-white/10 rounded-[3rem] max-w-md p-10 shadow-4xl">
             <DialogHeader className="text-center space-y-4">
                <div className="h-16 w-16 bg-primary/20 rounded-[2rem] flex items-center justify-center mx-auto text-primary shadow-2xl"><Gem className="h-8 w-8" /></div>
-               <DialogTitle className="text-2xl font-headline font-black uppercase">Gift Custom Pass</DialogTitle>
-               <p className="text-slate-400 text-sm font-medium">Elevating {grantDialogUser?.name} node.</p>
+               <DialogTitle className="text-2xl font-headline font-black uppercase">Grant Pass Access</DialogTitle>
+               <p className="text-slate-400 text-sm font-medium">Elevating {grantDialogUser?.name} identity.</p>
             </DialogHeader>
             <div className="py-10 space-y-6">
                <div className="space-y-2 text-left">
-                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">Select Registry Pass</label>
+                  <label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">Select Active Pass</label>
                   <select 
                     value={grantPlanId} 
                     onChange={e => setGrantPlanId(e.target.value)} 
@@ -216,7 +223,7 @@ export default function AspirantsManagement() {
             </div>
             <DialogFooter>
                <Button variant="ghost" onClick={() => setGrantDialogUser(null)} className="text-slate-500 hover:text-white rounded-xl">Cancel</Button>
-               <Button onClick={handleGrantPass} className="bg-primary hover:bg-orange-600 rounded-xl px-8 font-black uppercase text-[10px] tracking-widest shadow-2xl h-12">Activate Grant</Button>
+               <Button onClick={handleGrantPass} className="bg-primary hover:bg-orange-600 rounded-xl px-8 font-black uppercase text-[10px] tracking-widest shadow-2xl h-12">Activate Pass</Button>
             </DialogFooter>
          </DialogContent>
       </Dialog>

@@ -17,11 +17,6 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
-/**
- * @fileOverview Institutional Dynamic Pass Hub v3.2.
- * Updated: Ad-Free monetisation toggle.
- */
-
 export default function PassManagement() {
   const db = useFirestore()
   const { toast } = useToast()
@@ -50,6 +45,9 @@ export default function PassManagement() {
       displayOrder: parseInt(editingPass.displayOrder) || 1,
       features: typeof editingPass.features === 'string' ? editingPass.features.split(',').map((f: string) => f.trim()) : editingPass.features
     }
+
+    // Purge undefined
+    Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
 
     try {
       await setDoc(passRef, payload, { merge: true })

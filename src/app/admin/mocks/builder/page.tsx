@@ -33,7 +33,7 @@ import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, where, orderBy } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
-import { FirestorePermissionError } from "@/firebase/errors"
+import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 import { MockType, Difficulty, AccessType } from "@/types"
 import { cn } from "@/lib/utils"
 
@@ -95,7 +95,7 @@ function MockBuilderContent() {
     if (!questionBank) return []
     return questionBank.filter((q: any) => {
       const matchesSub = bankFilter.subjectId === "all" || q.subjectId === bankFilter.subjectId
-      const matchesSearch = !bankFilter.search || q.questionEn?.toLowerCase().includes(bankFilter.search.toLowerCase())
+      const matchesSearch = !bankFilter.search || (q.questionEn || q.titleEn || "").toLowerCase().includes(bankFilter.search.toLowerCase())
       const notSelected = !selectedQuestions.find(sq => sq.id === q.id)
       return matchesSub && matchesSearch && notSelected
     })
@@ -120,15 +120,15 @@ function MockBuilderContent() {
       createdAt: isEditing ? (existingMock?.createdAt || serverTimestamp()) : serverTimestamp(),
     };
 
-    // Purge undefined
-    Object.keys(payload).forEach(key => payload[key] === undefined && delete payload[key]);
+    // Purge undefined/null
+    Object.keys(payload).forEach(key => (payload[key] === undefined || payload[key] === null) && delete payload[key]);
 
     try {
       await setDoc(mockRef, payload, { merge: true })
       toast({ title: "Series Deployed", description: "Exam-specific content successfully synced." })
       router.push("/admin/mocks")
     } catch (err: any) {
-      errorEmitter.emit("permission-error", new FirestorePermissionError({ path: mockRef.path, operation: 'write' }))
+      errorEmitter.emit("permission-error", new FirestorePermissionError({ path: mockRef.path, operation: 'write', requestResourceData: payload } satisfies SecurityRuleContext))
     } finally {
       setIsPublishing(false)
     }
@@ -231,7 +231,7 @@ function MockBuilderContent() {
                        {filteredBank.slice(0, 30).map(q => (
                           <div key={q.id} className="p-4 border rounded-xl flex items-center justify-between hover:bg-slate-50 transition-colors">
                              <div className="min-w-0 flex-1 mr-4">
-                                <p className="font-bold text-sm truncate">{q.questionEn}</p>
+                                <p className="font-bold text-sm truncate">{q.questionEn || q.titleEn}</p>
                                 <p className="text-[9px] font-black uppercase text-slate-400">{q.subjectId} • {q.boardId}</p>
                              </div>
                              <Button size="sm" variant="outline" className="rounded-lg h-8 px-4 text-[9px] font-black uppercase" onClick={() => setSelectedQuestions([...selectedQuestions, q])}>Link Node</Button>
@@ -243,7 +243,7 @@ function MockBuilderContent() {
                     {selectedQuestions.map((q, idx) => (
                        <div key={q.id} className="p-4 bg-slate-50 rounded-xl flex items-center justify-between">
                           <span className="text-[10px] font-black text-slate-300 w-6">#{idx+1}</span>
-                          <p className="flex-1 font-bold text-xs truncate mx-4">{q.questionEn}</p>
+                          <p className="flex-1 font-bold text-xs truncate mx-4">{q.questionEn || q.titleEn}</p>
                           <Button size="icon" variant="ghost" className="h-8 w-8 text-rose-500" onClick={() => setSelectedQuestions(selectedQuestions.filter(sq => sq.id !== q.id))}><Trash2 className="h-4 w-4" /></Button>
                        </div>
                     ))}
