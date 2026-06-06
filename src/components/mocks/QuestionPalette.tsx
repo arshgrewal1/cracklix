@@ -6,12 +6,12 @@ import { ChevronLeft, ChevronRight, LayoutGrid, List, FileText, Info } from "luc
 import { useExamStore } from '@/store/useExamStore';
 
 /**
- * @fileOverview Professional CBT Palette Node v27.0.
- * Enforced Grid Visibility: Grid displays 25 questions in a single screen without scrolling.
- * Functional pagination for tests > 25 nodes.
+ * @fileOverview Professional CBT Palette Node v28.0.
+ * Applied Color Logic: 
+ * Not Visited = White, Not Answered = Grey, Answered = Blue, Marked = Pink, Ans + Marked = Purple
  */
 export default function QuestionPalette({ onSelect }: { onSelect: (index: number) => void }) {
-  const { questions, status, currentIdx, visited } = useExamStore();
+  const { questions, status, currentIdx, setCurrentIdx, visited } = useExamStore();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 25;
@@ -40,35 +40,35 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
          <button 
            onClick={() => setViewMode('grid')}
            className={cn(
-             "flex-1 h-12 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all",
+             "flex-1 h-11 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all",
              viewMode === 'grid' ? "border-primary text-primary bg-primary/5" : "border-transparent text-slate-400"
            )}
          >
-            <LayoutGrid className="h-3.5 w-3.5" /> Grid View
+            <LayoutGrid className="h-3.5 w-3.5" /> GRID VIEW
          </button>
          <button 
            onClick={() => setViewMode('list')}
            className={cn(
-             "flex-1 h-12 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all",
+             "flex-1 h-11 flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all",
              viewMode === 'list' ? "border-primary text-primary bg-primary/5" : "border-transparent text-slate-400"
            )}
          >
-            <List className="h-3.5 w-3.5" /> List View
+            <List className="h-3.5 w-3.5" /> LIST VIEW
          </button>
       </div>
 
       {/* 2. TACTICAL LINKS */}
       <div className="grid grid-cols-2 divide-x divide-slate-100 border-b border-slate-100 shrink-0">
-         <button className="h-10 flex items-center justify-center gap-2 text-[9px] font-black uppercase text-slate-500 hover:bg-slate-50">
-            <Info className="h-3 w-3 text-primary" /> Instructions
+         <button className="h-9 flex items-center justify-center gap-2 text-[9px] font-black uppercase text-slate-500 hover:bg-slate-50">
+            <Info className="h-3 w-3 text-primary" /> INSTRUCTIONS
          </button>
-         <button className="h-10 flex items-center justify-center gap-2 text-[9px] font-black uppercase text-slate-500 hover:bg-slate-50">
-            <FileText className="h-3 w-3 text-primary" /> Paper
+         <button className="h-9 flex items-center justify-center gap-2 text-[9px] font-black uppercase text-slate-500 hover:bg-slate-50">
+            <FileText className="h-3 w-3 text-primary" /> PAPER
          </button>
       </div>
 
-      {/* 3. LEGEND / STATISTICS (Compact) */}
-      <div className="p-3 grid grid-cols-2 gap-1.5 bg-slate-50/50 shrink-0">
+      {/* 3. LEGEND / STATISTICS (High Density) */}
+      <div className="p-2 grid grid-cols-2 gap-1.5 bg-slate-50/50 shrink-0">
          <LegendItem count={summary.answered} label="Answered" color="bg-blue-600" />
          <LegendItem count={summary.notAnswered} label="Not Answered" color="bg-slate-400" />
          <LegendItem count={summary.marked} label="Marked" color="bg-pink-500" />
@@ -77,7 +77,7 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
       </div>
 
       {/* 4. GRID MATRIX (5x5 Single Screen) */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-3 min-h-0 bg-white">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-2 min-h-0 bg-white">
          <div className="grid grid-cols-5 gap-2">
             {visibleQuestions.map((_, i) => {
               const idx = currentPage * pageSize + i;
@@ -96,7 +96,7 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
                     !isCurrent && st === 'marked' ? "bg-pink-500 text-white" :
                     !isCurrent && st === 'answered-marked' ? "bg-violet-600 text-white" :
                     !isCurrent && isVisited ? "bg-slate-400 text-white" :
-                    !isCurrent && "bg-slate-50 text-slate-400 border-slate-100"
+                    !isCurrent && "bg-white text-slate-400 border-slate-200"
                   )}
                 >
                   {idx + 1}
@@ -107,8 +107,8 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
       </div>
 
       {/* 5. PAGINATION NAV */}
-      <div className="shrink-0 p-3 border-t border-slate-100 bg-slate-50/50">
-        <div className="flex items-center justify-between mb-2">
+      <div className="shrink-0 p-2 border-t border-slate-100 bg-slate-50/50">
+        <div className="flex items-center justify-between">
            <button 
              disabled={currentPage === 0}
              onClick={() => setCurrentPage(p => p - 1)}
@@ -117,7 +117,7 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
               <ChevronLeft className="h-3.5 w-3.5" />
            </button>
            <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">
-              Palette {currentPage + 1} / {totalPages}
+              PALETTE {currentPage + 1} / {totalPages}
            </span>
            <button 
              disabled={currentPage === totalPages - 1}
@@ -134,7 +134,7 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
 
 function LegendItem({ count, label, color, textColor = "text-white", colSpan = 1 }: any) {
   return (
-    <div className={cn("flex items-center gap-2 p-1.5 rounded-lg border border-slate-100 bg-white shadow-sm", colSpan > 1 && "col-span-2")}>
+    <div className={cn("flex items-center gap-2 p-1 rounded-lg border border-slate-100 bg-white shadow-sm", colSpan > 1 && "col-span-2")}>
        <div className={cn("h-4.5 w-4.5 rounded-md flex items-center justify-center text-[8px] font-black shrink-0 border", color, textColor)}>
           {count}
        </div>
