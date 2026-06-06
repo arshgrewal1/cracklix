@@ -9,15 +9,15 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { Globe, Shield, Layout, Bell, Save, RefreshCw, ShieldCheck, Lock, CloudLightning, FileCode, QrCode, Phone, Zap, Megaphone, MapPin, Mail, Twitter, Facebook, Instagram, Send, MousePointer2, Smartphone } from "lucide-react"
+import { Globe, Shield, Layout, Bell, Save, RefreshCw, ShieldCheck, Lock, CloudLightning, FileCode, QrCode, Phone, Zap, Megaphone, MapPin, Mail, Twitter, Facebook, Instagram, Send, MousePointer2, Smartphone, Apple, Play } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Final Enterprise CMS Node v5.2.
- * Features: Play Store / App Store link management & AdSense Control.
+ * @fileOverview Final Enterprise CMS Node v6.5.
+ * Features: High-Fidelity Mobile App Gateway management.
  */
 
 export default function AdminSettings() {
@@ -47,8 +47,8 @@ export default function AdminSettings() {
     instagramUrl: "",
     twitterUrl: "",
     telegramUrl: "https://t.me/cracklixapp",
-    playStoreUrl: "#",
-    appStoreUrl: "#",
+    playStoreUrl: "",
+    appStoreUrl: "",
     adSenseEnabled: false,
     adSenseClientCode: ""
   });
@@ -61,204 +61,123 @@ export default function AdminSettings() {
     if (!db) return;
     const payload = { ...formData, updatedAt: serverTimestamp() };
     setDoc(doc(db, 'settings', 'global'), payload, { merge: true })
-      .then(() => toast({ title: "System Synced", description: "Institutional configuration is now live." }))
+      .then(() => toast({ title: "System Synced", description: "Institutional configuration and app links are now live." }))
   };
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-white"><RefreshCw className="h-10 w-10 text-primary animate-spin" /></div>
 
   return (
-    <div className="space-y-12 pb-20 text-[#0F172A] text-left">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+    <div className="space-y-8 pb-20 text-[#0F172A] text-left">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-4">
         <div>
-           <div className="flex items-center gap-3 mb-2">
+           <div className="flex items-center gap-3 mb-1.5">
               <ShieldCheck className="h-5 w-5 text-primary" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">System Configuration Node</span>
            </div>
-          <h1 className="text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight">System Portal</h1>
-          <p className="text-slate-500 mt-2 text-lg font-medium">Enterprise Control: CMS, Security, and App Links.</p>
+          <h1 className="text-3xl font-headline font-black text-[#0F172A] uppercase tracking-tight">System Portal</h1>
         </div>
-        <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 h-16 px-12 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl gap-3">
-          <Save className="h-5 w-5" /> Commit Platform Changes
+        <Button onClick={handleSave} className="bg-primary hover:bg-primary/90 h-12 px-10 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-xl gap-2">
+          <Save className="h-4 w-4" /> Commit Changes
         </Button>
       </div>
 
-      <Tabs defaultValue="homepage" className="space-y-8">
-        <TabsList className="bg-slate-100 border border-slate-200 p-1.5 h-16 rounded-2xl overflow-x-auto overflow-y-hidden custom-scrollbar">
-          <TabsTrigger value="homepage" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Global CMS</TabsTrigger>
-          <TabsTrigger value="social" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Social & Contact</TabsTrigger>
-          <TabsTrigger value="monetization" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Monetization</TabsTrigger>
-          <TabsTrigger value="app-links" className="rounded-xl px-8 font-black uppercase text-[10px] h-full data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">App Stores</TabsTrigger>
+      <Tabs defaultValue="homepage" className="px-4">
+        <TabsList className="bg-slate-100 border border-slate-200 p-1 h-14 rounded-xl mb-8 overflow-x-auto no-scrollbar">
+          <TabsTrigger value="homepage" className="rounded-lg px-6 font-black uppercase text-[10px] h-full">Global CMS</TabsTrigger>
+          <TabsTrigger value="mobile" className="rounded-lg px-6 font-black uppercase text-[10px] h-full">App Settings</TabsTrigger>
+          <TabsTrigger value="social" className="rounded-lg px-6 font-black uppercase text-[10px] h-full">Contact Hub</TabsTrigger>
+          <TabsTrigger value="monetization" className="rounded-lg px-6 font-black uppercase text-[10px] h-full">Monetization</TabsTrigger>
         </TabsList>
 
         <TabsContent value="homepage">
-          <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12 space-y-10">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <div className="space-y-6">
-                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Marquee Announcement</Label>
-                   <Input value={formData.announcement} onChange={e => setFormData({...formData, announcement: e.target.value})} className="h-16 rounded-2xl bg-slate-50 border-slate-100 text-lg font-bold" />
-                   
-                   <div className="flex items-center justify-between p-6 bg-orange-50 rounded-2xl border border-orange-100 mt-4">
-                      <div className="flex items-center gap-4">
-                         <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                            <Megaphone className="h-5 w-5 text-primary" />
-                         </div>
-                         <div className="text-left">
-                            <p className="font-black text-xs uppercase tracking-tight text-[#0F172A]">Display Announcement Bar</p>
-                            <p className="text-[9px] text-slate-500 uppercase font-bold">Toggle visibility for all students.</p>
-                         </div>
-                      </div>
-                      <Switch 
-                         checked={formData.showAnnouncement} 
-                         onCheckedChange={val => setFormData({...formData, showAnnouncement: val})} 
-                      />
+          <Card className="border-none shadow-lg rounded-[2rem] bg-white p-8 space-y-6">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                   <Label className="text-[10px] font-black uppercase text-slate-500">Marquee Announcement</Label>
+                   <Input value={formData.announcement} onChange={e => setFormData({...formData, announcement: e.target.value})} className="h-12 rounded-xl font-bold" />
+                   <div className="flex items-center justify-between p-4 bg-orange-50 rounded-xl border border-orange-100">
+                      <p className="font-black text-[10px] uppercase text-[#0F172A]">Display Announcement Bar</p>
+                      <Switch checked={formData.showAnnouncement} onCheckedChange={val => setFormData({...formData, showAnnouncement: val})} />
                    </div>
                 </div>
-                <div className="space-y-6">
-                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Platform Identity</Label>
-                   <Input value={formData.platformName} onChange={e => setFormData({...formData, platformName: e.target.value})} className="h-16 rounded-2xl bg-slate-50 border-slate-100 text-xl font-black" />
+                <div className="space-y-4">
+                   <Label className="text-[10px] font-black uppercase text-slate-500">Platform Name</Label>
+                   <Input value={formData.platformName} onChange={e => setFormData({...formData, platformName: e.target.value})} className="h-12 rounded-xl font-black" />
                 </div>
              </div>
-             
-             <div className="space-y-6">
-                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Footer Abstract Description</Label>
-                <Textarea 
-                  value={formData.footerText} 
-                  onChange={e => setFormData({...formData, footerText: e.target.value})} 
-                  className="min-h-[100px] rounded-2xl bg-slate-50 border-slate-100 font-medium leading-relaxed" 
-                />
+             <div className="space-y-4">
+                <Label className="text-[10px] font-black uppercase text-slate-500">Footer Text</Label>
+                <Textarea value={formData.footerText} onChange={e => setFormData({...formData, footerText: e.target.value})} className="min-h-[80px] rounded-xl font-medium" />
              </div>
           </Card>
         </TabsContent>
 
-        <TabsContent value="app-links">
-           <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12 space-y-12">
-              <h3 className="font-headline font-black text-xl uppercase flex items-center gap-3">
-                 <Smartphone className="h-6 w-6 text-primary" /> Mobile Distribution
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <TabsContent value="mobile">
+           <Card className="border-none shadow-lg rounded-[2rem] bg-white p-8 space-y-8">
+              <div className="flex items-center gap-3 mb-4">
+                 <Smartphone className="h-6 w-6 text-primary" />
+                 <h3 className="font-headline font-black text-lg uppercase">Mobile Distribution Registry</h3>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Google Play Store Link</Label>
-                    <Input value={formData.playStoreUrl} onChange={e => setFormData({...formData, playStoreUrl: e.target.value})} className="h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" placeholder="https://play.google.com/store/apps/details?id=..." />
+                    <Label className="text-[10px] font-black uppercase text-slate-500 flex items-center gap-2"><Play className="h-3 w-3" /> Play Store Link</Label>
+                    <Input value={formData.playStoreUrl} onChange={e => setFormData({...formData, playStoreUrl: e.target.value})} className="h-12 rounded-xl font-bold text-primary" placeholder="https://play.google.com/..." />
                  </div>
                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Apple App Store Link</Label>
-                    <Input value={formData.appStoreUrl} onChange={e => setFormData({...formData, appStoreUrl: e.target.value})} className="h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" placeholder="https://apps.apple.com/app/..." />
+                    <Label className="text-[10px] font-black uppercase text-slate-500 flex items-center gap-2"><Apple className="h-3 w-3" /> App Store Link</Label>
+                    <Input value={formData.appStoreUrl} onChange={e => setFormData({...formData, appStoreUrl: e.target.value})} className="h-12 rounded-xl font-bold text-primary" placeholder="https://apps.apple.com/..." />
                  </div>
+              </div>
+              <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex items-start gap-4">
+                 <Info className="h-5 w-5 text-blue-500 shrink-0 mt-0.5" />
+                 <p className="text-[11px] font-medium text-slate-600 leading-relaxed uppercase">
+                    Buttons for App Stores will automatically render on the landing page once these URLs are populated. Leave blank to hide the buttons.
+                 </p>
               </div>
            </Card>
         </TabsContent>
 
         <TabsContent value="social">
-           <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12 space-y-12">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                 <div className="space-y-8">
-                    <h3 className="font-headline font-black text-xl uppercase flex items-center gap-3">
-                       <Phone className="h-6 w-6 text-primary" /> Official Contact Info
-                    </h3>
-                    <div className="space-y-4">
-                       <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Office HQs Address</Label>
-                          <div className="relative">
-                             <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                             <Input value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
-                          </div>
-                       </div>
-                       <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Support Email</Label>
-                          <div className="relative">
-                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                             <Input value={formData.supportEmail} onChange={e => setFormData({...formData, supportEmail: e.target.value})} className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
-                          </div>
-                       </div>
-                       <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Support WhatsApp/Phone</Label>
-                          <div className="relative">
-                             <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                             <Input value={formData.supportPhone} onChange={e => setFormData({...formData, supportPhone: e.target.value})} className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
-                          </div>
-                       </div>
-                    </div>
+           <Card className="border-none shadow-lg rounded-[2rem] bg-white p-8 space-y-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="space-y-4">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">HQs Address</Label>
+                    <Input value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="h-12 rounded-xl" />
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Support Email</Label>
+                    <Input value={formData.supportEmail} onChange={e => setFormData({...formData, supportEmail: e.target.value})} className="h-12 rounded-xl" />
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Support Phone</Label>
+                    <Input value={formData.supportPhone} onChange={e => setFormData({...formData, supportPhone: e.target.value})} className="h-12 rounded-xl" />
                  </div>
-
-                 <div className="space-y-8">
-                    <h3 className="font-headline font-black text-xl uppercase flex items-center gap-3">
-                       <Globe className="h-6 w-6 text-blue-500" /> Social Presence Hub
-                    </h3>
-                    <div className="space-y-4">
-                       <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Telegram Channel URL</Label>
-                          <div className="relative">
-                             <Send className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                             <Input value={formData.telegramUrl} onChange={e => setFormData({...formData, telegramUrl: e.target.value})} placeholder="https://t.me/..." className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
-                          </div>
-                       </div>
-                       <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Instagram URL</Label>
-                          <div className="relative">
-                             <Instagram className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                             <Input value={formData.instagramUrl} onChange={e => setFormData({...formData, instagramUrl: e.target.value})} placeholder="https://instagram.com/..." className="pl-12 h-14 rounded-xl bg-slate-50 border-slate-100 font-bold" />
-                          </div>
-                       </div>
-                    </div>
+                 <div className="space-y-4">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Telegram Link</Label>
+                    <Input value={formData.telegramUrl} onChange={e => setFormData({...formData, telegramUrl: e.target.value})} className="h-12 rounded-xl" />
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Instagram Link</Label>
+                    <Input value={formData.instagramUrl} onChange={e => setFormData({...formData, instagramUrl: e.target.value})} className="h-12 rounded-xl" />
                  </div>
               </div>
            </Card>
         </TabsContent>
 
         <TabsContent value="monetization">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-             <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12 space-y-10">
-                <h3 className="font-headline font-black text-xl uppercase flex items-center gap-4"><QrCode className="h-6 w-6 text-primary" /> Gateway Node</h3>
-                <div className="space-y-6">
-                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Audit UPI ID</Label>
-                   <Input value={formData.upiId} onChange={e => setFormData({...formData, upiId: e.target.value})} className="h-16 rounded-2xl bg-slate-50 border-slate-100 text-xl font-black text-primary" placeholder="arshdeepgrewal1122@okaxis" />
-                   <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest ml-1">This ID will be displayed to all students during manual checkout.</p>
-                </div>
-             </Card>
-
-             <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12 space-y-10">
-                <h3 className="font-headline font-black text-xl uppercase flex items-center gap-4"><MousePointer2 className="h-6 w-6 text-orange-500" /> AdSense Node</h3>
-                <div className="space-y-6">
-                   <div className="flex items-center justify-between p-6 bg-orange-50/30 rounded-2xl border border-orange-100">
-                      <div className="space-y-1">
-                         <p className="font-black text-xs uppercase text-orange-900">Enable Google AdSense</p>
-                         <p className="text-[9px] text-orange-500 uppercase font-bold">Injects AdSense code across placement nodes.</p>
-                      </div>
-                      <Switch checked={formData.adSenseEnabled} onCheckedChange={val => setFormData({...formData, adSenseEnabled: val})} />
-                   </div>
-                   <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Universal AdSense Script</Label>
-                      <Textarea value={formData.adSenseClientCode} onChange={e => setFormData({...formData, adSenseClientCode: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 border-slate-100 font-mono text-xs" placeholder="<script async src='...'></script>" />
-                   </div>
-                </div>
-             </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="logic">
-          <Card className="border-slate-100 bg-white shadow-xl rounded-[3rem] p-12">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                <ConfigCard icon={<Shield className="text-rose-600" />} label="Negative Marking" desc="Apply penalty for mismatched choices." checked={formData.negativeMarking} onChange={(v: boolean) => setFormData({...formData, negativeMarking: v})} />
-                <ConfigCard icon={<Zap className="text-emerald-600" />} label="AI Tutors" desc="Generate AI rationalizations for attempts." checked={formData.aiRationalization} onChange={(v: boolean) => setFormData({...formData, aiRationalization: v})} />
-             </div>
-          </Card>
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Card className="border-none shadow-lg rounded-[2rem] bg-white p-8 space-y-6">
+                 <h3 className="font-headline font-black text-lg uppercase flex items-center gap-3"><QrCode className="h-5 w-5" /> UPI Node</h3>
+                 <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase text-slate-500">Registry UPI ID</Label>
+                    <Input value={formData.upiId} onChange={e => setFormData({...formData, upiId: e.target.value})} className="h-12 rounded-xl font-black text-primary" />
+                 </div>
+              </Card>
+              <Card className="border-none shadow-lg rounded-[2rem] bg-white p-8 space-y-6">
+                 <h3 className="font-headline font-black text-lg uppercase flex items-center gap-3"><MousePointer2 className="h-5 w-5" /> AdSense</h3>
+                 <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <p className="font-black text-[10px] uppercase text-[#0F172A]">AdSense Enabled</p>
+                    <Switch checked={formData.adSenseEnabled} onCheckedChange={val => setFormData({...formData, adSenseEnabled: val})} />
+                 </div>
+                 <Textarea value={formData.adSenseClientCode} onChange={e => setFormData({...formData, adSenseClientCode: e.target.value})} className="min-h-[80px] rounded-xl font-mono text-[10px]" placeholder="Paste global script here..." />
+              </Card>
+           </div>
         </TabsContent>
       </Tabs>
-    </div>
-  )
-}
-
-function ConfigCard({ icon, label, desc, checked, onChange }: any) {
-  return (
-    <div className="flex items-center justify-between p-8 bg-slate-50 rounded-[2rem] border border-slate-100 group hover:border-primary/20 transition-all shadow-sm">
-       <div className="flex items-center gap-6">
-          <div className="h-14 w-14 rounded-2xl bg-white border border-slate-100 flex items-center justify-center shadow-sm">{icon}</div>
-          <div className="space-y-1 text-left">
-             <p className="font-black text-xs uppercase tracking-widest text-[#0F172A]">{label}</p>
-             <p className="text-[10px] text-slate-500 uppercase font-bold">{desc}</p>
-          </div>
-       </div>
-       <Switch checked={checked} onCheckedChange={onChange} />
     </div>
   )
 }
