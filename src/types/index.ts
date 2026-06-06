@@ -8,41 +8,6 @@ export type AccessType = 'FREE' | 'PREMIUM';
 export type RegionType = 'Punjab' | 'National';
 export type BoardCategory = 'PUNJAB_STATE' | 'TEACHING' | 'CENTRAL';
 
-export type AdType = 'ADSENSE' | 'BANNER' | 'HTML' | 'AFFILIATE';
-export type AdStatus = 'ACTIVE' | 'PAUSED' | 'SCHEDULED';
-export type AdPlacementType = 
-  | 'HOMEPAGE_TOP' 
-  | 'HOMEPAGE_MIDDLE' 
-  | 'HOMEPAGE_BOTTOM' 
-  | 'EXAM_LISTING' 
-  | 'MOCK_LISTING' 
-  | 'NOTES_PAGE' 
-  | 'CA_PAGE' 
-  | 'RESULT_PAGE' 
-  | 'SIDEBAR' 
-  | 'FOOTER' 
-  | 'HEADER';
-
-export type QuestionType = 
-  | 'MCQ' 
-  | 'IMAGE_MCQ'
-  | 'MATCHING'
-  | 'ASSERTION_REASON'
-  | 'DI_SET'
-  | 'DI_QUESTION'
-  | 'PASSAGE'
-  | 'PASSAGE_QUESTION'
-  | 'CURRENT_AFFAIRS';
-
-export type DiagramType = 
-  | 'none' 
-  | 'image' 
-  | 'table' 
-  | 'pieChart' 
-  | 'barGraph' 
-  | 'lineGraph' 
-  | 'map';
-
 export interface Board {
   id: string;
   abbreviation: string;
@@ -61,12 +26,28 @@ export interface Subject {
   updatedAt: any;
 }
 
+export interface Exam {
+  id: string;
+  name: string;
+  boardId: string;
+  description: string;
+  category: string;
+  totalFullMocks: number;
+  totalSubjects: number;
+  totalPyqs: number;
+  totalSectional: number;
+  iconUrl?: string;
+  updatedAt?: any;
+}
+
 export interface Pass {
   id: string;
   name: string;
   price: number;
   durationDays: number;
   features: string[];
+  allowedExams: string[]; // List of exam IDs this pass unlocks
+  promotionBannerUrl?: string;
   active: boolean;
   displayOrder: number;
   recommended?: boolean;
@@ -74,6 +55,15 @@ export interface Pass {
   type: 'FREE' | 'PREMIUM';
   description?: string;
   updatedAt?: any;
+}
+
+export interface UserSubscription {
+  id: string;
+  userId: string;
+  passId: string;
+  status: 'ACTIVE' | 'EXPIRED';
+  expiryDate: string;
+  purchaseDate: string;
 }
 
 export interface UserProfile {
@@ -91,33 +81,6 @@ export interface UserProfile {
   passExpiryDate?: string;
 }
 
-export interface Advertisement {
-  id: string;
-  title: string;
-  type: AdType;
-  status: AdStatus;
-  placements: AdPlacementType[];
-  desktopImageUrl?: string;
-  mobileImageUrl?: string;
-  externalUrl?: string;
-  htmlCode?: string;
-  adSenseCode?: string;
-  startDate?: any;
-  endDate?: any;
-  priority: number;
-  targeting: {
-    regions?: string[];
-    examIds?: string[];
-    categories?: string[];
-  };
-  stats: {
-    impressions: number;
-    clicks: number;
-  };
-  createdAt: any;
-  updatedAt: any;
-}
-
 export interface MockTest {
   id: string;
   title: string;
@@ -126,7 +89,7 @@ export interface MockTest {
   subjectId?: string;
   mockType: MockType;
   accessType: AccessType;
-  passId?: string; // Links to a specific Pass node
+  passId?: string; 
   duration: number;
   totalQuestions: number;
   questionIds: string[];
@@ -159,21 +122,7 @@ export interface Question {
   boardId: string;
   difficulty: Difficulty;
   isStandalone: boolean;
-  usageCount?: number;
   status: ContentStatus;
-  createdAt: any;
-  updatedAt: any;
-}
-
-export interface FreeContent {
-  id: string;
-  title: string;
-  description: string;
-  slug: string;
-  type: 'mock' | 'pdf' | 'current' | 'pyq' | 'note';
-  link: string;
-  fileUrl?: string;
-  category: string;
   createdAt: any;
   updatedAt: any;
 }

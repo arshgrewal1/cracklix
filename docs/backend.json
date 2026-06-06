@@ -10,53 +10,58 @@
         "name": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "phone": { "type": "string" },
-        "gender": { "type": "string", "enum": ["Male", "Female", "Other"] },
         "role": { "type": "string", "enum": ["SUPER_ADMIN", "ADMIN", "CONTENT_MANAGER", "STUDENT"] },
         "state": { "type": "string", "enum": ["Punjab"] },
         "targetExam": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "status": { "type": "string", "description": "The ID of the active pass or 'Free'" },
-        "passExpiryDate": { "type": "string", "format": "date-time" },
-        "referralCount": { "type": "number" },
-        "subscriptions": { "type": "array", "items": { "type": "string" } }
+        "passExpiryDate": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "name", "email", "role"]
     },
+    "Exam": {
+      "title": "Exam Vertical",
+      "description": "A recruitment hub (e.g., PSSSB Patwari).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "boardId": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "totalFullMocks": { "type": "number" },
+        "totalSubjects": { "type": "number" },
+        "totalPyqs": { "type": "number" },
+        "totalSectional": { "type": "number" },
+        "iconUrl": { "type": "string" }
+      }
+    },
     "Pass": {
       "title": "Institutional Pass",
-      "description": "A dynamic access tier created by admin.",
+      "description": "A tiered access node.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "name": { "type": "string" },
         "price": { "type": "number" },
         "durationDays": { "type": "number" },
-        "features": { "type": "array", "items": { "type": "string" } },
-        "active": { "type": "boolean" },
-        "displayOrder": { "type": "number" },
-        "recommended": { "type": "boolean" },
-        "adFree": { "type": "boolean" },
-        "type": { "type": "string", "enum": ["FREE", "PREMIUM"] },
-        "description": { "type": "string" }
+        "allowedExams": { "type": "array", "items": { "type": "string" } },
+        "promotionBannerUrl": { "type": "string" },
+        "active": { "type": "boolean" }
       }
     },
-    "FreeContent": {
-      "title": "Free Content",
-      "description": "Unified repository for free study material.",
+    "Subscription": {
+      "title": "User Subscription",
+      "description": "Ledger of pass purchases.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "slug": { "type": "string", "description": "SEO friendly unique identifier" },
-        "type": { "type": "string", "enum": ["mock", "pdf", "current", "pyq", "note"] },
-        "link": { "type": "string", "description": "The destination URL or internal path" },
-        "fileUrl": { "type": "string" },
-        "category": { "type": "string", "default": "free" },
-        "createdAt": { "type": "string", "format": "date-time" },
-        "updatedAt": { "type": "string", "format": "date-time" }
-      },
-      "required": ["id", "title", "type"]
+        "userId": { "type": "string" },
+        "passId": { "type": "string" },
+        "status": { "type": "string", "enum": ["ACTIVE", "EXPIRED"] },
+        "expiryDate": { "type": "string", "format": "date-time" },
+        "purchaseDate": { "type": "string", "format": "date-time" }
+      }
     }
   },
   "auth": {
@@ -64,16 +69,16 @@
   },
   "firestore": {
     "/users/{userId}": {
-      "schema": { "$ref": "#/backend/entities/UserProfile" },
-      "description": "Student and Admin profiles."
+      "schema": { "$ref": "#/backend/entities/UserProfile" }
+    },
+    "/exams/{examId}": {
+      "schema": { "$ref": "#/backend/entities/Exam" }
     },
     "/passes/{passId}": {
-      "schema": { "$ref": "#/backend/entities/Pass" },
-      "description": "Dynamic pricing tiers."
+      "schema": { "$ref": "#/backend/entities/Pass" }
     },
-    "/free_content/{contentId}": {
-      "schema": { "$ref": "#/backend/entities/FreeContent" },
-      "description": "Unified free study hub registry."
+    "/subscriptions/{subId}": {
+      "schema": { "$ref": "#/backend/entities/Subscription" }
     }
   }
 }
