@@ -200,6 +200,20 @@ function MockBuilderContent() {
                  <Input placeholder="e.g. Patwari Full Mock 01" value={mockData.title} onChange={e => setMockData({...mockData, title: e.target.value})} className="rounded-xl h-14 font-bold text-lg border-slate-50 bg-slate-50/50" />
                </div>
 
+               <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Category</Label>
+                  <Select value={mockData.mockType} onValueChange={(v: MockType) => setMockData({...mockData, mockType: v})}>
+                    <SelectTrigger className="rounded-xl h-12 bg-slate-50/50 border-slate-50 font-black uppercase text-[10px]"><SelectValue placeholder="Select Category" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="FULL">Full Length Mock</SelectItem>
+                      <SelectItem value="SECTIONAL">Sectional Test</SelectItem>
+                      <SelectItem value="CHAPTER">Chapter Wise Test</SelectItem>
+                      <SelectItem value="PYQ">Previous Year Paper</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest px-1">Determines where this test appears on the Exam page.</p>
+               </div>
+
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Authority</Label>
