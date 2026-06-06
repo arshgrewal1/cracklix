@@ -13,8 +13,8 @@ import { HelpCircle, ShieldCheck, Sparkles, BookOpen, GraduationCap } from "luci
 
 const FAQS = [
   {
-    q: "Are the mock tests updated as per the 2026 patterns?",
-    a: "Yes. All high-fidelity mock series on Cracklix are designed to mirror the latest PSSSB and PPSC cabinet notifications for the 2026 recruitment cycle."
+    q: "Are the mock tests updated as per upcoming exams?",
+    a: "Yes. All high-fidelity mock series on Cracklix are designed to mirror the latest PSSSB and PPSC cabinet notifications for upcoming recruitment cycles."
   },
   {
     q: "How does the 'Punjabi Qualifying' section work?",
@@ -22,7 +22,7 @@ const FAQS = [
   },
   {
     q: "Is there any negative marking in the practice tests?",
-    a: "Yes. Following official norms, Cracklix applies a -1.0 penalty for every mismatched audit choice in standard PSSSB/PPSC mocks."
+    a: "Yes. Following official norms, Cracklix applies a penalty for every mismatched audit choice in standard PSSSB/PPSC mocks."
   },
   {
     q: "Can I attempt mocks in Punjabi language?",
@@ -64,8 +64,8 @@ export default function FAQPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-             <QuickHelp icon={<ShieldCheck />} label="Verified Patterns" desc="Official 2026 norms" />
-             <QuickHelp icon={<BookOpen />} label="Bilingual Audio" desc="Punjabi/English Support" />
+             <QuickHelp icon={<ShieldCheck />} label="Verified Patterns" desc="Upcoming official norms" />
+             <QuickHelp icon={<BookOpen />} label="Bilingual Hub" desc="Punjabi/English Support" />
              <QuickHelp icon={<GraduationCap />} label="Elite Mentors" desc="Arsh Grewal Management" />
           </div>
         </div>

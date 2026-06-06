@@ -6,10 +6,10 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Search, Edit, Trash2, Database, Filter, Eye, AlertCircle, CheckSquare, History, X, Loader2, Zap, AlertTriangle, Layers, Copy, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Database, Filter, Eye, AlertCircle, CheckSquare, History, X, Loader2, Zap, AlertTriangle, Layers, Copy, ChevronLeft, ChevronRight, RefreshCw, ExternalLink } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { useFirestore, useCollection } from "@/firebase"
-import { collection, query, deleteDoc, doc, where, writeBatch, setDoc, serverTimestamp, limit, orderBy, getDocs, startAfter } from "firebase/firestore"
+import { useCollection, useFirestore } from "@/firebase"
+import { collection, query, deleteDoc, doc, where, writeBatch, setDoc, serverTimestamp, limit, orderBy, getDocs, startAfter, Query } from "firebase/firestore"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
@@ -26,9 +26,8 @@ import {
 } from "@/components/ui/tooltip"
 
 /**
- * @fileOverview Institutional Asset Ledger (Global Bank) v6.0.
- * Optimized for Massive Scale: Uses manual fetch with pagination instead of real-time listeners.
- * Prevents Firestore Assertion Failures and handles missing indexes gracefully.
+ * @fileOverview Institutional Asset Ledger (Global Bank) v6.5.
+ * Optimized for Massive Scale: Features index-resilience and graceful fallbacks.
  */
 
 export default function QuestionBank() {
@@ -45,16 +44,19 @@ export default function QuestionBank() {
   const [questions, setQuestions] = useState<any[]>([])
   const [lastDoc, setLastDoc] = useState<any>(null)
   const [hasMore, setLastHasMore] = useState(true)
+  const [indexErrorUrl, setIndexErrorUrl] = useState<string | null>(null)
 
   const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db])
   const { data: allMocks } = useCollection<any>(mocksQuery)
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
 
-  // Fetch Logic - Manual trigger to prevent "Assertion Failed" recursion
+  // Fetch Logic - Index-resilient manual trigger
   const fetchQuestions = useCallback(async (isNext = false) => {
     if (!db) return
     setLoading(true)
+    setIndexErrorUrl(null)
+    
     try {
       let constraints: any[] = [orderBy("createdAt", "desc"), limit(50)]
       
@@ -79,9 +81,26 @@ export default function QuestionBank() {
       setLastDoc(snap.docs[snap.docs.length - 1])
       setLastHasMore(snap.docs.length === 50)
     } catch (e: any) {
-      console.error("Fetch Error:", e)
+      console.error("Fetch Error Context:", e)
       if (e.code === 'failed-precondition') {
-        toast({ variant: "destructive", title: "Index Required", description: "This combination needs a composite index. Check console for link." })
+        const urlMatch = e.message.match(/https:\/\/console\.firebase\.google\.com[^\s]*/);
+        if (urlMatch) setIndexErrorUrl(urlMatch[0]);
+        
+        // Fallback: Try query without ordering if index is missing to at least show results
+        try {
+           let simpleConstraints: any[] = [limit(50)]
+           if (examFilter !== "all") simpleConstraints.push(where("examId", "==", examFilter))
+           else if (boardFilter !== "all") simpleConstraints.push(where("boardId", "==", boardFilter))
+           
+           const qFallback = query(collection(db, "questions"), ...simpleConstraints)
+           const snapFallback = await getDocs(qFallback)
+           setQuestions(snapFallback.docs.map(d => ({ ...d.data(), id: d.id })))
+           setLastHasMore(false)
+        } catch (err) {
+           toast({ variant: "destructive", title: "Audit Failed", description: "Database query rejected." })
+        }
+      } else {
+        toast({ variant: "destructive", title: "Fetch Error", description: e.message })
       }
     } finally {
       setLoading(false)
@@ -92,7 +111,6 @@ export default function QuestionBank() {
     fetchQuestions()
   }, [boardFilter, examFilter, db])
 
-  // Usage Matrix Generator
   const usageMap = useMemo(() => {
     if (!questions || !allMocks) return {};
     const map: Record<string, string[]> = {};
@@ -190,6 +208,23 @@ export default function QuestionBank() {
           </Button>
         </div>
       </div>
+
+      {indexErrorUrl && (
+         <div className="mx-4 bg-orange-50 border border-orange-200 p-6 rounded-[2rem] flex items-center justify-between animate-in fade-in zoom-in-95">
+            <div className="flex items-center gap-4">
+               <div className="h-12 w-12 rounded-2xl bg-orange-100 flex items-center justify-center text-orange-600">
+                  <AlertTriangle className="h-6 w-6" />
+               </div>
+               <div className="text-left">
+                  <p className="font-black text-orange-900 uppercase text-xs tracking-tight">Composite Index Required</p>
+                  <p className="text-[10px] text-orange-700 font-medium max-w-md">Sorting and filtering at scale requires a backend index. Sorting has been temporarily disabled.</p>
+               </div>
+            </div>
+            <Button asChild className="bg-orange-600 hover:bg-orange-700 text-white rounded-xl h-11 px-6 font-black uppercase text-[10px] tracking-widest gap-2">
+               <a href={indexErrorUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" /> Provision Index</a>
+            </Button>
+         </div>
+      )}
 
       {selectedIds.length > 0 && (
          <div className="mx-4 bg-[#0B1528] p-4 rounded-2xl flex flex-wrap items-center justify-between animate-in fade-in slide-in-from-top-4 shadow-4xl text-white sticky top-2 z-[60] border border-white/10">
@@ -303,15 +338,11 @@ export default function QuestionBank() {
             disabled={loading}
             className="rounded-xl h-12 px-12 bg-white border border-slate-200 text-[#0F172A] font-black uppercase text-[10px] tracking-widest hover:bg-slate-50 shadow-sm gap-3"
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronDown className="h-4 w-4" />}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronRight className="h-4 w-4 rotate-90" />}
             Load More Assets
           </Button>
         </div>
       )}
     </div>
   )
-}
-
-function ChevronDown(props: any) {
-  return <svg {...props} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
 }

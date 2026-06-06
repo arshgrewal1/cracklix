@@ -20,13 +20,12 @@ import Link from "next/link";
 /**
  * @fileOverview High-Density Mobile-First Homepage.
  * Activated with real-time Firestore statistics.
- * Fixed: Question count synced to global volume to include all recovered nodes.
  */
 
 export default function HomePage() {
   const db = useFirestore();
 
-  // Real-time Data Ingestion - Global count for high-fidelity social proof
+  // Real-time Data Ingestion
   const { data: users } = useCollection<any>(useMemo(() => (db ? collection(db, "users") : null), [db]));
   const { data: questions } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]));
   const { data: mocks } = useCollection<any>(useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]));
@@ -53,17 +52,17 @@ export default function HomePage() {
                <TrustNode 
                  icon={<BookOpen className="text-primary h-3.5 w-3.5 md:h-6 md:w-6" />} 
                  label="MCQ Bank" 
-                 val={questions?.length ? `${(questions.length / 1000).toFixed(1)}k+` : "0.3k+"} 
+                 val={questions?.length ? questions.length.toLocaleString() : "0"} 
                />
                <TrustNode 
                  icon={<Zap className="text-blue-500 h-3.5 w-3.5 md:h-6 md:w-6" />} 
                  label="Mocks Live" 
-                 val={mocks?.length || "12"} 
+                 val={mocks?.length || "0"} 
                />
                <TrustNode 
                  icon={<Users className="text-emerald-500 h-3.5 w-3.5 md:h-6 md:w-6" />} 
                  label="Aspirants" 
-                 val={users?.length ? users.length.toLocaleString() : "15k+"} 
+                 val={users?.length ? users.length.toLocaleString() : "0"} 
                />
                <TrustNode 
                  icon={<Target className="text-amber-500 h-3.5 w-3.5 md:h-6 md:w-6" />} 
@@ -105,7 +104,7 @@ export default function HomePage() {
                               <Zap className="h-4 w-4 md:h-6 md:w-6 text-slate-400 group-hover:text-primary" />
                            </div>
                            <div className="space-y-0.5 min-w-0 flex-1">
-                              <p className="text-[11px] md:text-sm font-black text-[#0F172A] truncate uppercase leading-tight">{n.title}</p>
+                              <p className="text-[11px] md:sm font-black text-[#0F172A] truncate uppercase leading-tight">{n.title}</p>
                               <span className="text-[7px] md:text-[9px] text-slate-400 font-bold uppercase">{n.time}</span>
                            </div>
                         </Link>

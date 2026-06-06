@@ -14,18 +14,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 /**
  * @fileOverview Institutional Download Center (Phase 150).
  * Unified repository for Study Notes, PYQs, and Syllabus PDFs.
- * Updated: High-Fidelity Mobile Responsiveness for Tabs and Cards.
  */
 
 const NOTES = [
-  { title: "Punjab History & Culture (Gurus Era)", category: "Punjab GK", format: "PDF", size: "2.4 MB", date: "24 Oct 2026", color: "bg-orange-50 text-primary" },
-  { title: "Logical Reasoning Shortcuts 2026", category: "Reasoning", format: "PDF", size: "1.8 MB", date: "22 Oct 2026", color: "bg-blue-50 text-blue-600" },
-  { title: "Mandatory Punjabi Grammar Guide", category: "Punjabi", format: "PDF", size: "3.1 MB", date: "20 Oct 2026", color: "bg-emerald-50 text-emerald-600" },
+  { title: "Punjab History & Culture (Gurus Era)", category: "Punjab GK", format: "PDF", size: "2.4 MB", date: "Oct 2026", color: "bg-orange-50 text-primary" },
+  { title: "Logical Reasoning Shortcuts", category: "Reasoning", format: "PDF", size: "1.8 MB", date: "Oct 2026", color: "bg-blue-50 text-blue-600" },
+  { title: "Mandatory Punjabi Grammar Guide", category: "Punjabi", format: "PDF", size: "3.1 MB", date: "Oct 2026", color: "bg-emerald-50 text-emerald-600" },
 ]
 
 const SYLLABUS = [
-  { title: "PSSSB Patwari 2026 Pattern", category: "Syllabus", format: "PDF", size: "1.1 MB", date: "15 Oct 2026", color: "bg-slate-50 text-slate-600" },
-  { title: "Punjab Police SI Syllabus", category: "Syllabus", format: "PDF", size: "0.9 MB", date: "12 Oct 2026", color: "bg-slate-50 text-slate-600" },
+  { title: "PSSSB Patwari Syllabus Pattern", category: "Syllabus", format: "PDF", size: "1.1 MB", date: "Oct 2026", color: "bg-slate-50 text-slate-600" },
+  { title: "Punjab Police SI Syllabus", category: "Syllabus", format: "PDF", size: "0.9 MB", date: "Oct 2026", color: "bg-slate-50 text-slate-600" },
 ]
 
 export default function NotesLibrary() {
@@ -49,7 +48,7 @@ export default function NotesLibrary() {
                 Download <br/> <span className="text-primary">Center</span>
               </h1>
               <p className="text-slate-500 font-medium text-base md:text-lg max-w-xl">
-                Verified high-fidelity study materials curated by Arsh Grewal Management for all Punjab verticals.
+                Verified high-fidelity study materials curated by Arsh Grewal Management for all upcoming Punjab verticals.
               </p>
             </div>
             <div className="relative w-full md:w-96">
@@ -107,7 +106,7 @@ export default function NotesLibrary() {
                    <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Arsh Grewal Management</span>
                 </div>
                 <h2 className="text-3xl md:text-4xl font-headline font-black uppercase leading-tight">Master the <br/> Punjabi Qualifying Base</h2>
-                <p className="text-slate-400 text-base md:text-lg font-medium">Download our exclusive 100-page summary of Gurmukhi Grammar and Sikh History verified for all 2026 PSSSB/PPSC exams.</p>
+                <p className="text-slate-400 text-base md:text-lg font-medium">Download our exclusive summary guide verified for upcoming PSSSB/PPSC exams.</p>
                 <Button className="w-full md:w-auto h-16 px-12 bg-white text-black hover:bg-slate-200 font-black uppercase tracking-widest text-xs rounded-2xl gap-3 shadow-2xl mt-4">
                    Unlock Premium Repository <Zap className="h-5 w-5 fill-current" />
                 </Button>
