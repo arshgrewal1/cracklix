@@ -10,7 +10,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Button } from "@/components/ui/button"
 import { RadioGroup } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Loader2, Target, LayoutGrid, ChevronRight, ChevronLeft, ShieldCheck, Pause, Play, Languages } from "lucide-react"
+import { Loader2, Target, LayoutGrid, ChevronRight, ChevronLeft, ShieldCheck, Pause, Play } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
@@ -18,11 +18,11 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 type LangMode = 'en' | 'pa' | 'bilingual'
 
 /**
- * @fileOverview Institutional High-Fidelity CBT Engine v17.0.
+ * @fileOverview Institutional High-Fidelity CBT Engine v18.0.
  * Rules Enforcement:
- * 1. STRICT LANGUAGE SEGREGATION: "EN" only shows English text.
- * 2. NO SCROLLING: Optimized spacing to fit elements within viewport.
- * 3. MOBILE FRIENDLY: Reduced gaps and padding for small screens.
+ * 1. STRICT LANGUAGE SEGREGATION: "PA" mode renders ONLY Punjabi.
+ * 2. PALETTE OVERLAP FIX: Precision spacing for question matrix.
+ * 3. NO SCROLLING: Optimized spacing to fit elements within viewport.
  */
 
 export default function MockAttemptPage() {
@@ -197,7 +197,7 @@ export default function MockAttemptPage() {
                  </Button>
                </SheetTrigger>
                <SheetContent side="right" className="p-0 border-none w-[280px]">
-                  <div className="p-6 h-full overflow-y-auto bg-white pt-16">
+                  <div className="p-4 h-full overflow-y-auto bg-white pt-16">
                      <QuestionPalette 
                         questions={questions} 
                         currentIndex={currentIdx} 
@@ -243,11 +243,13 @@ export default function MockAttemptPage() {
                                {k}
                             </div>
                             <Label className="flex-1 cursor-pointer select-none text-[14px] md:text-[17px] font-bold text-[#0F172A] text-left leading-tight">
-                                {language === 'en' ? cleanText(enVal) : language === 'pa' ? cleanText(paVal) : (
+                                {language === 'en' ? cleanText(enVal) : 
+                                 language === 'pa' ? (cleanText(paVal) || cleanText(enVal)) : 
+                                 (
                                   <div className="inline">
                                     {cleanText(enVal)} {paVal && <span className="text-primary/40 mx-2">/</span>} {cleanText(paVal)}
                                   </div>
-                                )}
+                                 )}
                             </Label>
                          </div>
                        )
@@ -275,8 +277,8 @@ export default function MockAttemptPage() {
           </footer>
         </div>
 
-        <aside className="w-[300px] border-l border-slate-50 bg-white hidden lg:flex flex-col shrink-0 overflow-hidden">
-           <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+        <aside className="w-[320px] border-l border-slate-50 bg-white hidden lg:flex flex-col shrink-0 overflow-hidden">
+           <div className="flex-1 overflow-y-auto p-5 no-scrollbar">
               <QuestionPalette 
                 questions={questions} 
                 currentIndex={currentIdx} 

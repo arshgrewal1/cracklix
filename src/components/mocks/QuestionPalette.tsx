@@ -15,11 +15,11 @@ interface QuestionPaletteProps {
 }
 
 /**
- * @fileOverview Paginated Institutional Audit Matrix v4.0.
+ * @fileOverview Paginated Institutional Audit Matrix v5.0.
  * Rules Enforcement:
- * 1. Exactly 25 questions per page view.
- * 2. Exam Name visible at the top.
- * 3. NO CIRCLE OVERLAP: Precise spacing and box-sizing.
+ * 1. FIXED CIRCLE OVERLAP: Explicit grid gaps and button sizing.
+ * 2. EXACT 25 NODES: Pagination Hub calibrated.
+ * 3. NO SCROLLING: Fits within standard mobile viewports.
  */
 
 export default function QuestionPalette({
@@ -60,7 +60,7 @@ export default function QuestionPalette({
   }, [totalQuestions, answeredIndices, flaggedIndices, visitedIndices])
 
   return (
-    <div className="space-y-6 flex flex-col h-full text-left font-body">
+    <div className="space-y-5 flex flex-col h-full text-left font-body">
       {/* Dynamic Exam Branding */}
       <div className="space-y-1 pb-4 border-b border-slate-100">
          <p className="text-[7px] font-black text-primary uppercase tracking-[0.4em] leading-none">ACTIVE AUDIT</p>
@@ -69,17 +69,17 @@ export default function QuestionPalette({
          </h3>
       </div>
 
-      {/* Stats Summary Grid */}
+      {/* Stats Summary Grid (Compact) */}
       <div className="grid grid-cols-2 gap-2">
-         <PaletteStat count={summary.answered} label="Answered" color="bg-emerald-600" />
-         <PaletteStat count={summary.notAnswered} label="Unanswered" color="bg-rose-500" />
-         <PaletteStat count={summary.notVisited} label="Not Visited" color="bg-slate-100" textColor="text-slate-400" />
+         <PaletteStat count={summary.answered} label="Done" color="bg-emerald-600" />
+         <PaletteStat count={summary.notAnswered} label="Missed" color="bg-rose-500" />
+         <PaletteStat count={summary.notVisited} label="Left" color="bg-slate-50" textColor="text-slate-400" />
          <PaletteStat count={summary.review} label="Review" color="bg-amber-500" />
       </div>
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-2">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
            {Array.from({ length: totalPages }).map((_, i) => (
               <button
                 key={i}
@@ -97,9 +97,9 @@ export default function QuestionPalette({
         </div>
       )}
 
-      {/* High-Density Matrix (NO OVERLAP) */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 pt-2">
-         <div className="grid grid-cols-5 gap-3 p-1">
+      {/* High-Density Matrix (FIXED OVERLAP) */}
+      <div className="flex-1 overflow-y-auto no-scrollbar pt-2">
+         <div className="grid grid-cols-5 gap-y-3.5 gap-x-2.5">
             {currentQuestions.map((q) => {
               const idx = q.globalIdx;
               const isCurrent = currentIndex === idx
@@ -109,23 +109,22 @@ export default function QuestionPalette({
               const isBoth = isAnswered && isFlagged
 
               return (
-                <div key={idx} className="flex items-center justify-center p-0.5 box-border">
-                  <button
-                    onClick={() => onSelect(idx)}
-                    className={cn(
-                      "h-10 w-10 md:h-11 md:w-11 rounded-full text-[11px] font-black transition-all flex items-center justify-center shrink-0 border-2 box-border relative",
-                      "hover:scale-105 active:scale-95",
-                      isCurrent ? "border-primary ring-2 ring-primary ring-offset-2 bg-white text-primary z-20 shadow-xl" : "border-transparent",
-                      !isCurrent && isBoth && "bg-purple-600 text-white border-purple-600",
-                      !isCurrent && isAnswered && !isFlagged && "bg-emerald-600 text-white border-emerald-600",
-                      !isCurrent && isFlagged && !isAnswered && "bg-amber-500 text-white border-amber-500",
-                      !isCurrent && isVisited && !isAnswered && !isFlagged && "bg-rose-500 text-white border-rose-500",
-                      !isCurrent && !isVisited && "bg-slate-50 text-slate-300",
-                    )}
-                  >
-                    {idx + 1}
-                  </button>
-                </div>
+                <button
+                  key={idx}
+                  onClick={() => onSelect(idx)}
+                  className={cn(
+                    "w-10 h-10 rounded-full text-[10px] font-black transition-all flex items-center justify-center shrink-0 border-2 relative",
+                    "hover:scale-105 active:scale-95 box-border",
+                    isCurrent ? "border-primary bg-white text-primary z-20 shadow-xl ring-2 ring-primary ring-offset-2" : "border-transparent",
+                    !isCurrent && isBoth && "bg-purple-600 text-white border-purple-600",
+                    !isCurrent && isAnswered && !isFlagged && "bg-emerald-600 text-white border-emerald-600",
+                    !isCurrent && isFlagged && !isAnswered && "bg-amber-500 text-white border-amber-500",
+                    !isCurrent && isVisited && !isAnswered && !isFlagged && "bg-rose-500 text-white border-rose-500",
+                    !isCurrent && !isVisited && "bg-slate-50 text-slate-300 border-slate-100",
+                  )}
+                >
+                  {idx + 1}
+                </button>
               )
             })}
          </div>
@@ -133,7 +132,7 @@ export default function QuestionPalette({
       
       <div className="pt-4 border-t border-slate-100">
          <p className="text-[8px] font-black text-slate-300 uppercase tracking-widest text-center">
-            Nodes {currentPage * PAGE_SIZE + 1} - {Math.min((currentPage + 1) * PAGE_SIZE, totalQuestions)} of {totalQuestions}
+            Nodes {currentPage * PAGE_SIZE + 1} - {Math.min((currentPage + 1) * PAGE_SIZE, totalQuestions)}
          </p>
       </div>
     </div>
@@ -142,11 +141,11 @@ export default function QuestionPalette({
 
 function PaletteStat({ count, label, color, textColor = "text-white" }: any) {
   return (
-    <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
-       <div className={cn("h-4 w-4 rounded-md flex items-center justify-center text-[8px] font-black shrink-0", color, textColor)}>
+    <div className="flex items-center gap-2 p-2 rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+       <div className={cn("h-3.5 w-3.5 rounded flex items-center justify-center text-[7px] font-black shrink-0", color, textColor)}>
           {count}
        </div>
-       <span className="text-[8px] font-black uppercase text-slate-500 tracking-tight truncate">{label}</span>
+       <span className="text-[7px] font-black uppercase text-slate-500 tracking-tight truncate">{label}</span>
     </div>
   )
 }

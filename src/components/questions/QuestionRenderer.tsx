@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { Question } from '@/types';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, Languages } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 interface QuestionRendererProps {
   question: Partial<Question> & { displayId?: string };
@@ -13,11 +13,11 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional High-Fidelity Question Renderer v26.0.
+ * @fileOverview Institutional High-Fidelity Question Renderer v27.0.
  * Rules Enforcement:
- * 1. STRICT SEGREGATION: "EN" only shows English. "PA" only shows Punjabi.
- * 2. BI MODE: Joined with "/" on ONE LINE. No repetition.
- * 3. NO SCROLLING: Optimized font sizing for mobile viewports.
+ * 1. STRICT SEGREGATION: "PA" mode renders ONLY Punjabi. "EN" mode renders ONLY English.
+ * 2. BI MODE: Joined with "/" on ONE LINE.
+ * 3. NO SCROLLING: Optimized font sizing for high-density mobile viewports.
  */
 
 export default function QuestionRenderer({ 
@@ -49,6 +49,22 @@ export default function QuestionRenderer({
   const expEn = useMemo(() => question.explanationEn || (question as any).explanation || "", [question]);
   const expPa = useMemo(() => question.explanationPa || "", [question]);
 
+  // CONTENT SELECTOR LOGIC
+  const renderQuestion = () => {
+    if (isEnglishSubject) return qEn;
+    if (isPunjabiSubject) return qPa || qEn;
+
+    if (language === 'en') return qEn;
+    if (language === 'pa') return qPa || qEn;
+    
+    // Bilingual Mode
+    return (
+      <div className="inline">
+        {qEn} {qPa && qPa !== qEn && <span className="text-primary mx-2">/</span>} {qPa !== qEn && qPa}
+      </div>
+    );
+  };
+
   return (
     <div className="w-full text-left font-body space-y-4 md:space-y-6">
       {question.imageUrl && (
@@ -59,25 +75,12 @@ export default function QuestionRenderer({
 
       {/* Question Statement Hub */}
       <div className="text-[15px] md:text-[18px] font-black leading-snug text-[#0F172A] antialiased">
-        {isEnglishSubject ? (
-          qEn
-        ) : isPunjabiSubject ? (
-          qPa || qEn
-        ) : language === 'en' ? (
-          qEn
-        ) : language === 'pa' ? (
-          qPa || qEn
-        ) : (
-          // Bilingual Mode: Single Line joined by /
-          <div className="inline">
-            {qEn} {qPa && qPa !== qEn && <span className="text-primary mx-2">/</span>} {qPa !== qEn && qPa}
-          </div>
-        )}
+        {renderQuestion()}
       </div>
 
       {/* Options Hub */}
       {!hideOptions && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5 md:gap-4">
           {['A', 'B', 'C', 'D'].map(key => {
             const en = (question as any)[`option${key}En`] || "";
             const pa = (question as any)[`option${key}Pa`] || "";
@@ -93,19 +96,15 @@ export default function QuestionRenderer({
                      {key}
                   </div>
                   <div className="text-[14px] md:text-[16px] font-bold text-slate-700 leading-snug">
-                      {isEnglishSubject ? (
-                        cEn
-                      ) : isPunjabiSubject ? (
-                        cPa || cEn
-                      ) : language === 'en' ? (
-                        cEn
-                      ) : language === 'pa' ? (
-                        cPa || cEn
-                      ) : (
+                      {isEnglishSubject ? cEn : 
+                       isPunjabiSubject ? (cPa || cEn) : 
+                       language === 'en' ? cEn : 
+                       language === 'pa' ? (cPa || cEn) : 
+                       (
                         <div className="inline">
                           {cEn} {cPa && cPa !== cEn && <span className="text-primary/40 mx-1.5">/</span>} {cPa !== cEn && cPa}
                         </div>
-                      )}
+                       )}
                   </div>
                 </div>
             )
