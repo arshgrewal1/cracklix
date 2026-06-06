@@ -13,14 +13,15 @@ import AntiCheat from "@/components/exam/AntiCheat";
 import QuestionRenderer from "@/components/questions/QuestionRenderer";
 import QuestionPalette from "@/components/mocks/QuestionPalette";
 import { Button } from "@/components/ui/button";
-import { Loader2, Clock, ShieldCheck } from "lucide-react";
+import { Loader2, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 /**
- * @fileOverview Official Institutional CBT Engine v1.0.
- * Optimized Viewport Lock: Header (Fixed) + Main (Scrollable Area) + Sidebar (Fixed) + Footer (Fixed).
+ * @fileOverview Professional CBT Engine v2.0.
+ * Viewport Locked: Fit everything into one screen without outer scrolling.
+ * High-Fidelity Testbook-style layout.
  */
 export default function MockAttemptPage() {
   const params = useParams();
@@ -80,14 +81,14 @@ export default function MockAttemptPage() {
     
     examStore.setPaused(true);
     await examStore.syncToFirestore(db);
-    toast({ title: "Audit Submitted", description: "Your performance node is being generated." });
+    toast({ title: "Test Submitted", description: "Your results are being processed." });
     router.push(`/results/${mockId}`);
   };
 
   if (isInitializing) return (
     <div className="h-svh flex flex-col items-center justify-center bg-white space-y-6">
        <Loader2 className="h-12 w-12 text-primary animate-spin" />
-       <p className="font-black uppercase text-[10px] tracking-[0.4em] text-slate-400">Syncing CBT Repository...</p>
+       <p className="font-black uppercase text-[10px] tracking-[0.4em] text-slate-400">Loading CBT Engine...</p>
     </div>
   );
 
@@ -107,27 +108,27 @@ export default function MockAttemptPage() {
 
       <main className="flex-1 flex overflow-hidden bg-white">
         
-        {/* LEFT ZONE: QUESTION CONTENT (Scrollable Area) */}
+        {/* LEFT ZONE: QUESTION CONTENT (Scrollable independently) */}
         <div className="flex-1 overflow-y-auto custom-scrollbar relative">
            {examStore.isPaused && (
              <div className="absolute inset-0 z-50 bg-white/95 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-300">
-                <div className="h-24 w-24 bg-primary/10 rounded-[3rem] flex items-center justify-center text-primary mb-8 shadow-2xl">
-                   <Clock className="h-12 w-12" />
+                <div className="h-24 w-24 bg-[#0F172A] rounded-[3rem] flex items-center justify-center text-white mb-8 shadow-2xl">
+                   <Clock className="h-12 w-12 text-primary" />
                 </div>
                 <h2 className="text-4xl font-headline font-black text-[#0F172A] uppercase tracking-tight mb-4">Test Paused</h2>
-                <p className="text-slate-500 font-medium mb-12 max-w-sm">The CBT registry is currently locked. Your progress is secure.</p>
-                <Button onClick={() => examStore.setPaused(false)} className="bg-[#0F172A] text-white h-16 px-16 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] shadow-4xl active:scale-95 transition-all">Resume Evaluation</Button>
+                <p className="text-slate-500 font-medium mb-12 max-w-sm">The assessment is currently locked. Your progress is safe.</p>
+                <Button onClick={() => examStore.setPaused(false)} className="bg-[#0F172A] text-white h-16 px-16 rounded-2xl font-black uppercase tracking-[0.3em] text-[10px] shadow-4xl active:scale-95 transition-all">Resume Test</Button>
              </div>
            )}
 
-           <div className="max-w-[1400px] mx-auto p-6 md:p-8 lg:p-14 space-y-10">
+           <div className="max-w-[1200px] mx-auto p-4 md:p-8 space-y-4 md:space-y-6 h-auto min-h-0">
               <QuestionRenderer 
                  language={examStore.language} 
                  question={q} 
                  hideOptions={true}
               />
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-3 md:gap-4 pb-12">
                  {['A', 'B', 'C', 'D'].map((key, i) => {
                     const isSelected = selectedOption === i;
                     const enVal = (q as any)[`option${key}English`];
@@ -138,25 +139,25 @@ export default function MockAttemptPage() {
                          key={i}
                          onClick={() => examStore.setAnswer(examStore.currentIdx, i)}
                          className={cn(
-                           "flex items-center gap-5 p-5 md:p-6 rounded-[2rem] border-2 transition-all text-left shadow-sm group",
+                           "flex items-center gap-4 p-4 md:p-5 rounded-[16px] border-2 transition-all text-left shadow-sm min-h-[68px] group",
                            isSelected 
                              ? "border-primary bg-primary/5 ring-4 ring-primary/10" 
                              : "border-slate-100 bg-white hover:border-slate-300 hover:shadow-md"
                          )}
                        >
                           <div className={cn(
-                             "h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center font-black text-sm md:text-lg shrink-0 transition-all",
-                             isSelected ? "bg-primary text-white shadow-xl" : "bg-slate-50 text-slate-400 group-hover:bg-slate-100"
+                             "h-8 w-8 md:h-10 md:w-10 rounded-lg flex items-center justify-center font-black text-xs md:text-sm shrink-0 transition-all",
+                             isSelected ? "bg-primary text-white shadow-xl" : "bg-[#0F172A] text-white"
                           )}>
                              {key}
                           </div>
                           <div className="flex-1 overflow-hidden">
-                             {examStore.language === 'en' && <p className="font-bold text-slate-800 text-lg">{enVal}</p>}
-                             {examStore.language === 'pa' && <p className="font-bold text-slate-800 text-lg">{paVal || enVal}</p>}
+                             {examStore.language === 'en' && <p className="font-[600] text-[18px] md:text-[20px] text-[#111111] leading-tight">{enVal}</p>}
+                             {examStore.language === 'pa' && <p className="font-[600] text-[18px] md:text-[20px] text-[#111111] leading-tight">{paVal || enVal}</p>}
                              {examStore.language === 'bi' && (
                                 <div className="space-y-1">
-                                   <p className="font-bold text-slate-800 text-lg leading-tight">{enVal}</p>
-                                   <p className="font-bold text-[#1E3A8A] leading-tight text-lg">{paVal}</p>
+                                   <p className="font-[600] text-[18px] md:text-[20px] text-[#111111] leading-tight">{enVal}</p>
+                                   <p className="font-[600] text-[18px] md:text-[20px] text-[#111111] leading-tight">{paVal}</p>
                                 </div>
                              )}
                           </div>
@@ -167,7 +168,7 @@ export default function MockAttemptPage() {
            </div>
         </div>
 
-        {/* RIGHT ZONE: QUESTION PALETTE (Fixed Panel on Desktop) */}
+        {/* RIGHT ZONE: QUESTION PALETTE (Fixed Panel) */}
         <aside className="hidden lg:block w-[320px] shrink-0 border-l border-slate-200 bg-white">
            <QuestionPalette onSelect={(idx) => examStore.setCurrentIdx(idx)} />
         </aside>
