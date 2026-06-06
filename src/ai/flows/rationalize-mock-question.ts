@@ -40,7 +40,7 @@ Question: {{{questionText}}}
 Options:
 {{#each options}}
 - {{{this}}}
-{{#each}}
+{{/each}}
 Correct Answer: {{{correctAnswer}}}
 {{#if userAnswer}}
 User's Answer: {{{userAnswer}}}

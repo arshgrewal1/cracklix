@@ -61,7 +61,6 @@ export default function QuestionRenderer({ question, language, showSolution = fa
       });
 
       toast({ title: "Rationale Synced", description: "AI explanation successfully added to the registry node." });
-      // Note: Component will re-render via Firestore stream or manual refresh
     } catch (e: any) {
       toast({ variant: "destructive", title: "AI Node Error", description: "Could not initialize rationalization." });
     } finally {

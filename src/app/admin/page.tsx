@@ -13,8 +13,8 @@ import { useToast } from "@/hooks/use-toast"
 import { Progress } from "@/components/ui/progress"
 
 /**
- * @fileOverview Final Command Center v7.0.
- * Features: Institutional Subject Breakdown & High-Fidelity Count Registry.
+ * @fileOverview Final Command Center v7.1.
+ * Features: Institutional Subject Breakdown & High-Fidelity Count Registry for upcoming exams.
  */
 
 export default function AdminDashboard() {
@@ -91,7 +91,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
-         <StatCard label="MCQ Bank" value={questions?.length || 0} icon={<Database className="text-blue-500" />} />
+         <StatCard label="MCQ Bank Volume" value={questions?.length || 0} icon={<Database className="text-blue-500" />} />
          <StatCard label="Live Series" value={mocks?.filter((m: any) => m.published).length || 0} icon={<Zap className="text-primary" />} />
          <StatCard label="Pro Aspirants" value={proUsers.length} icon={<Users className="text-emerald-500" />} />
          <StatCard label="Audit Archives" value={pyqs?.length || 0} icon={<FileText className="text-orange-500" />} />
@@ -103,8 +103,8 @@ export default function AdminDashboard() {
             <CardHeader className="p-12 border-b border-slate-50 bg-slate-50/30">
                <div className="flex items-center justify-between">
                   <div className="text-left">
-                     <CardTitle className="text-2xl font-headline font-black uppercase text-[#0F172A]">Subject Breakdown</CardTitle>
-                     <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Question distribution by pedagogical node.</CardDescription>
+                     <CardTitle className="text-2xl font-headline font-black uppercase text-[#0F172A]">Subject breakdown hub</CardTitle>
+                     <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Question distribution across the entire registry.</CardDescription>
                   </div>
                   <Button variant="ghost" asChild className="text-primary font-black uppercase text-[10px] tracking-widest">
                      <Link href="/admin/subjects">Subject Hub <ChevronRight className="h-3 w-3 ml-2" /></Link>

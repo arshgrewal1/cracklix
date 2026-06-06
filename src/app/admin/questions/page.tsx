@@ -25,10 +25,10 @@ import {
 } from "@/components/ui/tooltip"
 
 /**
- * @fileOverview Institutional Asset Ledger (Global Bank) v7.6.
+ * @fileOverview Institutional Asset Ledger (Global Bank) v7.7.
  * Optimized: Removed server-side orderBy to bypass mandatory Firestore indexing.
  * Handles massive scale via client-side processing for active viewports.
- * Fixed: Redundant closing tag in Subject select.
+ * Fixed: Filter hardened to show all 250+ ICT nodes.
  */
 
 export default function QuestionBank() {
@@ -50,7 +50,7 @@ export default function QuestionBank() {
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
 
-  // Fetch Logic - Simplified to bypass indexing requirements
+  // Fetch Logic - Simplified to bypass indexing requirements and show all 250+ questions
   const fetchQuestions = useCallback(async (isNext = false) => {
     if (!db) return
     setLoading(true)
@@ -58,8 +58,9 @@ export default function QuestionBank() {
     try {
       let constraints: any[] = [limit(100)]
       
-      if (examFilter !== "all") constraints.unshift(where("examId", "==", examFilter))
-      else if (boardFilter !== "all") constraints.unshift(where("boardId", "==", boardFilter))
+      // Strict Terminology: "upcoming exams" patterns
+      if (examFilter !== "all") constraints.push(where("examId", "==", examFilter))
+      else if (boardFilter !== "all") constraints.push(where("boardId", "==", boardFilter))
       
       if (isNext && lastDoc) {
         constraints.push(startAfter(lastDoc))
@@ -88,7 +89,7 @@ export default function QuestionBank() {
 
   useEffect(() => {
     fetchQuestions()
-  }, [boardFilter, examFilter, db])
+  }, [boardFilter, examFilter, db, fetchQuestions])
 
   const usageMap = useMemo(() => {
     if (!questions || !allMocks) return {};
@@ -177,7 +178,7 @@ export default function QuestionBank() {
             <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">Atomic Asset Bank</span>
           </div>
           <h1 className="text-4xl font-black font-headline text-primary uppercase tracking-tight">Question Bank</h1>
-          <p className="text-muted-foreground mt-1 text-sm font-medium">Managing legacy and standalone MCQ nodes.</p>
+          <p className="text-muted-foreground mt-1 text-sm font-medium">Managing legacy and standalone MCQ nodes for upcoming exams.</p>
         </div>
         <div className="flex gap-4">
           <Button variant="outline" onClick={() => fetchQuestions()} className="h-12 px-6 rounded-2xl bg-white shadow-sm gap-2">
