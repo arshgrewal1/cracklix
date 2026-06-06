@@ -28,9 +28,9 @@ import {
 } from "@/components/ui/tooltip"
 
 /**
- * @fileOverview Institutional Asset Ledger (Global Bank) v5.0.
+ * @fileOverview Institutional Asset Ledger (Global Bank) v5.1.
  * Features: Massive Scale Pagination, ID-Based Search, and Usage Detection.
- * Fixed: Redundant SelectValue tag and optimized Scalable Query.
+ * Fixed: Redundant SelectValue tag, corrected Checkbox props, and optimized Scalable Query.
  */
 
 export default function QuestionBank() {
@@ -47,12 +47,12 @@ export default function QuestionBank() {
   const [pageLimit, setPageLimit] = useState(50)
 
   // Optimized Scalable Query
+  // Note: Combined where/orderBy requires a composite index. 
+  // Please click the link in your console to create it.
   const qQuery = useMemo(() => {
     if (!db) return null
     let constraints: any[] = [where("isStandalone", "==", true), orderBy("createdAt", "desc"), limit(pageLimit)];
     
-    // Note: Applying these filters combined with orderBy requires composite indexes.
-    // If the index is missing, Firestore will throw an error with a link to create it.
     if (examFilter !== "all") constraints.unshift(where("examId", "==", examFilter));
     else if (boardFilter !== "all") constraints.unshift(where("boardId", "==", boardFilter));
     
@@ -193,15 +193,21 @@ export default function QuestionBank() {
             </div>
             <div className="flex flex-wrap items-center gap-3">
               <Select value={boardFilter} onValueChange={v => { setBoardFilter(v); setExamFilter("all"); }}>
-                <SelectTrigger className="rounded-xl h-11 bg-white border-none w-36 shadow-sm font-bold text-xs"><SelectValue placeholder="Board" /></SelectTrigger>
+                <SelectTrigger className="rounded-xl h-11 bg-white border-none w-36 shadow-sm font-bold text-xs">
+                  <SelectValue placeholder="Board" />
+                </SelectTrigger>
                 <SelectContent><SelectItem value="all">All Boards</SelectItem>{boards?.map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
               </Select>
               <Select value={examFilter} onValueChange={setExamFilter}>
-                <SelectTrigger className="rounded-xl h-11 bg-white border-none w-48 shadow-sm font-bold text-xs"><SelectValue placeholder="Target Exam" /></SelectTrigger>
+                <SelectTrigger className="rounded-xl h-11 bg-white border-none w-48 shadow-sm font-bold text-xs">
+                  <SelectValue placeholder="Target Exam" />
+                </SelectTrigger>
                 <SelectContent><SelectItem value="all">All Exams</SelectItem>{exams?.filter(e => boardFilter === "all" || e.boardId === boardFilter).map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
               </Select>
               <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-                <SelectTrigger className="rounded-xl h-11 bg-white border-none w-36 shadow-sm font-bold text-xs"><SelectValue placeholder="Subject" /></SelectTrigger>
+                <SelectTrigger className="rounded-xl h-11 bg-white border-none w-36 shadow-sm font-bold text-xs">
+                  <SelectValue placeholder="Subject" />
+                </SelectTrigger>
                 <SelectContent><SelectItem value="all">All Subjects</SelectItem>{subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
