@@ -13,11 +13,11 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional High-Fidelity Question Renderer v24.0.
+ * @fileOverview Institutional High-Fidelity Question Renderer v25.0.
  * Rules Enforcement:
- * 1. STRICT SEGREGATION: No mixing languages unless in BI mode.
- * 2. SUBJECT LOCKING: English/Punjabi subjects stay in their native tongue.
- * 3. DEDUPLICATION: Prevents double rendering if fields already contain combined text.
+ * 1. STRICT SEGREGATION: EN/PA show only native tongue. BI shows "Eng / Pun" on ONE LINE.
+ * 2. SUBJECT LOCKING: English/Punjabi subjects stay in their native tongue only.
+ * 3. NO DUAL NUMBERING: Prefixes are stripped by cleanText.
  */
 
 export default function QuestionRenderer({ 
@@ -47,12 +47,8 @@ export default function QuestionRenderer({
   const qEn = cleanText(question.questionEn);
   const qPa = cleanText(question.questionPa);
   
-  // Deduplication Logic: If fields are identical, they are already combined
-  const isDataAlreadyCombined = qEn === qPa;
-
-  // Determine display flags based on Subject Rules and Toggles
-  const shouldShowEn = isEnglishSubject || (!isPunjabiSubject && language !== 'pa');
-  const shouldShowPa = isPunjabiSubject || (!isEnglishSubject && language !== 'en');
+  // Logic: In "BI" mode, we join with "/" on one line as per "ek dusri line me na ho"
+  // But if it's a language subject, we strictly show only that language.
 
   const expEn = useMemo(() => question.explanationEn || (question as any).explanation || "", [question]);
   const expPa = useMemo(() => question.explanationPa || "", [question]);
@@ -66,21 +62,15 @@ export default function QuestionRenderer({
       )}
 
       {/* Question Statement Hub */}
-      <div className="space-y-4">
-        {shouldShowEn && (
-          <div className="text-[15px] md:text-[18px] font-black leading-tight text-[#0F172A] antialiased">
-            {qEn}
-          </div>
-        )}
-        
-        {/* Only show separator if both are active AND the data isn't already combined */}
-        {shouldShowEn && shouldShowPa && !isDataAlreadyCombined && (
-          <div className="h-px w-20 bg-slate-100" />
-        )}
-
-        {shouldShowPa && !isDataAlreadyCombined && (
-          <div className="text-[15px] md:text-[18px] font-black leading-tight text-[#0F172A] antialiased">
-            {qPa}
+      <div className="text-[16px] md:text-[19px] font-black leading-tight text-[#0F172A] antialiased">
+        {language === 'en' || isEnglishSubject ? (
+          qEn
+        ) : language === 'pa' || isPunjabiSubject ? (
+          qPa || qEn
+        ) : (
+          // Bilingual Mode: Join with slash on one line
+          <div className="inline">
+            {qEn} {qPa && qPa !== qEn && <span className="text-primary mx-2">/</span>} {qPa !== qEn && qPa}
           </div>
         )}
       </div>
@@ -96,17 +86,23 @@ export default function QuestionRenderer({
 
             const cEn = cleanText(en);
             const cPa = cleanText(pa);
-            const isOptCombined = cEn === cPa;
             
             return (
                 <div key={key} className="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-xl shadow-sm">
                   <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center font-black text-[11px] text-primary shrink-0 border border-slate-100">
                      {key}
                   </div>
-                  <div className="text-[14px] md:text-[16px] font-bold text-slate-700 leading-snug space-y-1">
-                      {shouldShowEn && <div>{cEn}</div>}
-                      {shouldShowEn && shouldShowPa && !isOptCombined && <div className="h-px w-8 bg-slate-100 my-1" />}
-                      {shouldShowPa && !isOptCombined && <div>{cPa}</div>}
+                  <div className="text-[14px] md:text-[17px] font-bold text-slate-700 leading-snug">
+                      {language === 'en' || isEnglishSubject ? (
+                        cEn
+                      ) : language === 'pa' || isPunjabiSubject ? (
+                        cPa || cEn
+                      ) : (
+                        // Bilingual Options on one line
+                        <div className="inline">
+                          {cEn} {cPa && cPa !== cEn && <span className="text-primary/40 mx-1.5">/</span>} {cPa !== cEn && cPa}
+                        </div>
+                      )}
                   </div>
                 </div>
             )
@@ -131,7 +127,8 @@ export default function QuestionRenderer({
            </div>
            
            <div className="space-y-10 pt-8 border-t border-emerald-100 relative z-10">
-              {shouldShowEn && expEn && (
+              {/* English Logic */}
+              {(language !== 'pa' || isEnglishSubject) && expEn && (
                 <div className="space-y-3">
                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600/60 flex items-center gap-2">
                       <Languages className="h-4 w-4" /> English Logic
@@ -142,12 +139,9 @@ export default function QuestionRenderer({
                 </div>
               )}
               
-              {shouldShowEn && shouldShowPa && expEn && expPa && !isDataAlreadyCombined && (
-                 <div className="h-px w-full bg-emerald-100/50" />
-              )}
-
-              {shouldShowPa && expPa && !isDataAlreadyCombined && (
-                <div className="space-y-3">
+              {/* 1-Line Space and Divider for Punjabi Logic */}
+              {(language === 'bilingual' || language === 'pa' || isPunjabiSubject) && expPa && expPa !== expEn && (
+                <div className="space-y-3 pt-6 border-t border-emerald-100/30">
                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-emerald-600/60 flex items-center gap-2">
                       <Languages className="h-4 w-4" /> ਪੰਜਾਬੀ ਵਿਆਖਿਆ
                    </p>

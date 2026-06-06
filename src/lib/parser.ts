@@ -1,10 +1,9 @@
 /**
- * @fileOverview Institutional High-Fidelity Ingestion Engine v16.0.
+ * @fileOverview Institutional High-Fidelity Ingestion Engine v17.0.
  * Rules Enforcement:
- * 1. NO DUAL NUMBERING: Strips "Q1." from English and "ਪ੍ਰਸ਼ਨ 1." from Punjabi.
- * 2. NO SLASH IN QUESTIONS: English and Punjabi on separate lines.
- * 3. OPTION FORMATTING: Combine EN / PA on one line, separated by /.
- * 4. Segregated Explanations with Spacing.
+ * 1. NO DUAL NUMBERING: Strips "Q1." and "ਪ੍ਰਸ਼ਨ 1." strictly.
+ * 2. SEGREGATED STORAGE: Maps to questionEn and questionPa even if joined in source.
+ * 3. OPTION FORMATTING: Combine EN / PA on one line.
  */
 
 import { Question } from "@/types";
@@ -65,15 +64,28 @@ function parseStandardBlock(block: string, metadata: any): Partial<Question> {
   let explanationPa = "";
 
   lines.forEach((line, idx) => {
-    // English Question Detection
+    // English Question Detection (Starts with Q1.)
     if (line.match(/^Q\d+[\.\):\s-]/i)) {
-      questionEn = sanitizeText(line);
-      // Punjabi Question is usually the immediately following line without a marker
-      const nextLine = lines[idx+1];
-      if (nextLine && !nextLine.match(/^\([A-D]\)/i) && !nextLine.toLowerCase().includes('correct answer')) {
-        questionPa = sanitizeText(nextLine);
+      const fullText = line.replace(/^Q\d+[\.\):\s-]*/i, '').trim();
+      
+      // Check if Punjabi question is joined on the same line via marker
+      if (fullText.includes('ਪ੍ਰਸ਼ਨ') || fullText.includes('ਪ੍ਰਸ਼ਨ')) {
+        const parts = fullText.split(/ਪ੍ਰਸ਼ਨ\s*\d+[\.\):\s-]*|ਪ੍ਰਸ਼ਨ\s*\d+[\.\):\s-]*/);
+        questionEn = sanitizeText(parts[0]);
+        questionPa = sanitizeText(parts[1]);
+      } else {
+        questionEn = sanitizeText(fullText);
+        // Look for Punjabi text on the next line if it doesn't have an option marker
+        const nextLine = lines[idx+1];
+        if (nextLine && !nextLine.match(/^\([A-D]\)/i) && !nextLine.toLowerCase().includes('correct answer')) {
+          questionPa = sanitizeText(nextLine);
+        }
       }
     } 
+    // Punjabi Question Detection (In case it's a separate block or start marker)
+    else if (line.match(/^ਪ੍ਰਸ਼ਨ\s*\d+[\.\):\s-]*|^ਪ੍ਰਸ਼ਨ\s*\d+[\.\):\s-]*/) && !questionPa) {
+      questionPa = sanitizeText(line);
+    }
     // Option Detection (A) Eng / Pun
     else if (line.match(/^\([A-D]\)/i)) {
       const labelMatch = line.match(/^\(([A-D])\)/i);
