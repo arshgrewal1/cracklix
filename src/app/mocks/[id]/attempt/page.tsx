@@ -27,8 +27,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Final Institutional CBT Attempt Hub v6.0.
- * Integrated selection logic into QuestionRenderer.
+ * @fileOverview Final Institutional CBT Attempt Hub v7.0.
+ * Optimized: Unified black background for high-fidelity dark-mode box.
  */
 
 export default function MockAttemptPage() {
@@ -187,7 +187,7 @@ export default function MockAttemptPage() {
   const selectedAnswer = examStore.answers[examStore.currentIdx];
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-900 font-body select-none">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#000000] font-body select-none">
       <AntiCheat />
       <ExamHeader onPaletteToggle={() => setIsMobilePaletteOpen(true)} />
       <SubjectTabs />
@@ -199,7 +199,7 @@ export default function MockAttemptPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-[100] bg-[#0B1528]/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-6"
+              className="absolute inset-0 z-[100] bg-[#000000]/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-6"
             >
               <div className="max-w-md w-full bg-white rounded-[2rem] shadow-5xl overflow-hidden">
                  <div className="bg-slate-50 p-6 border-b border-slate-100 text-center space-y-3">
@@ -227,7 +227,7 @@ export default function MockAttemptPage() {
           )}
         </AnimatePresence>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-8 bg-[#000000]">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-3 md:p-10 bg-[#000000]">
            <div className="max-w-[1000px] mx-auto pb-24">
               {q ? (
                 <QuestionRenderer 
