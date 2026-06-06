@@ -198,7 +198,7 @@ export default function QuestionBank() {
                 <SelectContent><SelectItem value="all">All Exams</SelectItem>{exams?.filter(e => boardFilter === "all" || e.boardId === boardFilter).map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
               </Select>
               <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-                <SelectTrigger className="rounded-xl h-11 bg-white border-none w-36 shadow-sm font-bold text-xs"><SelectValue placeholder="Subject" /></SelectValue></SelectTrigger>
+                <SelectTrigger className="rounded-xl h-11 bg-white border-none w-36 shadow-sm font-bold text-xs"><SelectValue placeholder="Subject" /></SelectTrigger>
                 <SelectContent><SelectItem value="all">All Subjects</SelectItem>{subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
               </Select>
             </div>
