@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo } from "react"
@@ -7,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -15,11 +15,12 @@ import {
   Loader2, 
   Trash2, 
   Rocket, 
-  Languages,
-  CheckCircle2,
-  ClipboardList,
-  ArrowRight,
-  FileText
+  CheckCircle2, 
+  ClipboardList, 
+  ArrowRight, 
+  FileText,
+  Edit,
+  X
 } from "lucide-react"
 import { useFirestore, useCollection } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp } from "firebase/firestore"
@@ -27,11 +28,11 @@ import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions } from "@/lib/parser"
 import { Difficulty, Question, ContentStatus } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Exam Content Ingestion Hub v10.0.
- * Focus: High-fidelity reading layout matching official solution pages.
- * Purged: AI jargon, validation reports, and secondary panels.
+ * @fileOverview Exam Content Ingestion Hub v11.0.
+ * Focus: High-fidelity reading layout with Edit/Delete capabilities for staged questions.
  */
 export default function BulkImportPage() {
   const router = useRouter()
@@ -51,6 +52,10 @@ export default function BulkImportPage() {
   const [rawText, setRawText] = useState("")
   const [parsedQuestions, setParsedQuestions] = useState<Partial<Question>[]>([])
   const [isSyncing, setIsSyncing] = useState(false)
+  
+  // Edit State
+  const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null)
+  const [editFormData, setEditFormData] = useState<any>(null)
 
   const handleImport = () => {
     if (!rawText.trim()) return
@@ -73,7 +78,26 @@ export default function BulkImportPage() {
     }
   }
 
-  const handleSave = async () => {
+  const handleOpenEdit = (index: number) => {
+    setEditingQuestionIndex(index)
+    setEditFormData({ ...parsedQuestions[index] })
+  }
+
+  const handleSaveEdit = () => {
+    if (editingQuestionIndex === null || !editFormData) return
+    const updated = [...parsedQuestions]
+    updated[editingQuestionIndex] = editFormData
+    setParsedQuestions(updated)
+    setEditingQuestionIndex(null)
+    toast({ title: "Entry Modified" })
+  }
+
+  const handleDeleteEntry = (index: number) => {
+    setParsedQuestions(parsedQuestions.filter((_, i) => i !== index))
+    toast({ title: "Entry Removed" })
+  }
+
+  const handleSaveToRegistry = async () => {
     if (!db || parsedQuestions.length === 0) return
     setIsSyncing(true)
     const batch = writeBatch(db)
@@ -111,7 +135,7 @@ export default function BulkImportPage() {
           </div>
         </div>
         <div className="flex gap-4">
-           <Button onClick={handleSave} disabled={isSyncing || parsedQuestions.length === 0} className="bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] tracking-widest rounded-xl h-14 px-12 gap-3 shadow-2xl transition-all">
+           <Button onClick={handleSaveToRegistry} disabled={isSyncing || parsedQuestions.length === 0} className="bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] tracking-widest rounded-xl h-14 px-12 gap-3 shadow-2xl transition-all">
               {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4 text-primary fill-current" />} Save {parsedQuestions.length} Questions
            </Button>
         </div>
@@ -126,14 +150,14 @@ export default function BulkImportPage() {
             </CardHeader>
             <CardContent className="p-8 pt-4 space-y-6">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 text-left">
                   <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Board Registry</Label>
                   <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v})}>
                     <SelectTrigger className="rounded-xl h-11 bg-slate-50 border-none font-bold shadow-inner"><SelectValue placeholder="Select" /></SelectTrigger>
                     <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 text-left">
                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Subject Hub</Label>
                    <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
                       <SelectTrigger className="rounded-xl h-11 bg-slate-50 border-none font-bold shadow-inner"><SelectValue placeholder="Select" /></SelectTrigger>
@@ -169,7 +193,10 @@ export default function BulkImportPage() {
                       <Card key={idx} className="border-none shadow-3xl rounded-[3rem] bg-white p-12 text-left group relative overflow-hidden">
                          <div className="flex justify-between items-center mb-10 border-b border-slate-50 pb-6">
                             <Badge className="bg-[#0F172A] text-white border-none text-[10px] font-black px-6 py-2 rounded-xl uppercase tracking-widest">Entry Hub: {idx + 1}</Badge>
-                            <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl text-rose-500 bg-rose-50 hover:bg-rose-100 shadow-sm" onClick={() => setParsedQuestions(parsedQuestions.filter((_, i) => i !== idx))}><Trash2 className="h-5 w-5" /></Button>
+                            <div className="flex gap-2">
+                               <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl text-blue-500 bg-blue-50 hover:bg-blue-100 shadow-sm" onClick={() => handleOpenEdit(idx)}><Edit className="h-5 w-5" /></Button>
+                               <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl text-rose-500 bg-rose-50 hover:bg-rose-100 shadow-sm" onClick={() => handleDeleteEntry(idx)}><Trash2 className="h-5 w-5" /></Button>
+                            </div>
                          </div>
                          <QuestionRenderer question={q} language="bilingual" showSolution={true} />
                       </Card>
@@ -185,6 +212,66 @@ export default function BulkImportPage() {
            )}
         </div>
       </div>
+
+      {/* Modify Entry Dialog */}
+      <Dialog open={editingQuestionIndex !== null} onOpenChange={open => !open && setEditingQuestionIndex(null)}>
+         <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] bg-white border-none shadow-4xl p-0 text-left">
+            <div className="h-2 w-full bg-[#0F172A] sticky top-0 z-20" />
+            <DialogHeader className="p-8 pb-0 flex flex-row items-center justify-between">
+               <DialogTitle className="text-2xl font-black font-headline uppercase">Modify Entry Hub</DialogTitle>
+               <Button variant="ghost" size="icon" onClick={() => setEditingQuestionIndex(null)} className="rounded-xl"><X className="h-6 w-6" /></Button>
+            </DialogHeader>
+            <div className="p-8 space-y-8">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Question Statement (English)</Label>
+                     <Textarea value={editFormData?.questionEn || ""} onChange={e => setEditFormData({...editFormData, questionEn: e.target.value})} className="h-32 rounded-xl bg-slate-50 font-bold" />
+                  </div>
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Question Statement (Punjabi)</Label>
+                     <Textarea value={editFormData?.questionPa || ""} onChange={e => setEditFormData({...editFormData, questionPa: e.target.value})} className="h-32 rounded-xl bg-slate-50 font-bold" />
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {['A', 'B', 'C', 'D'].map(opt => (
+                    <div key={opt} className="space-y-2">
+                       <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Option {opt}</Label>
+                       <Input value={editFormData?.[`option${opt}En`] || ""} onChange={e => setEditFormData({...editFormData, [`option${opt}En`]: e.target.value})} className="h-12 rounded-xl bg-slate-50 font-bold" />
+                    </div>
+                  ))}
+               </div>
+
+               <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Correct Answer Node</Label>
+                  <Select value={editFormData?.correctAnswer} onValueChange={v => setEditFormData({...editFormData, correctAnswer: v})}>
+                     <SelectTrigger className="h-12 rounded-xl bg-emerald-50 text-emerald-700 font-black"><SelectValue /></SelectTrigger>
+                     <SelectContent>
+                        <SelectItem value="A">Option A</SelectItem>
+                        <SelectItem value="B">Option B</SelectItem>
+                        <SelectItem value="C">Option C</SelectItem>
+                        <SelectItem value="D">Option D</SelectItem>
+                     </SelectContent>
+                  </Select>
+               </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">English Explanation Logic</Label>
+                     <Textarea value={editFormData?.explanationEn || ""} onChange={e => setEditFormData({...editFormData, explanationEn: e.target.value})} className="h-48 rounded-xl bg-slate-50 font-medium" />
+                  </div>
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Punjabi Explanation Logic</Label>
+                     <Textarea value={editFormData?.explanationPa || ""} onChange={e => setEditFormData({...editFormData, explanationPa: e.target.value})} className="h-48 rounded-xl bg-slate-50 font-medium" />
+                  </div>
+               </div>
+            </div>
+            <DialogFooter className="p-8 bg-slate-50 flex gap-4 rounded-b-[2.5rem]">
+               <Button variant="ghost" onClick={() => setEditingQuestionIndex(null)} className="h-14 px-8 font-black uppercase text-[10px]">Discard Tweak</Button>
+               <Button onClick={handleSaveEdit} className="bg-[#0F172A] hover:bg-black text-white h-14 px-12 rounded-xl font-black uppercase text-[10px] tracking-widest flex-1 shadow-xl">Apply Modification</Button>
+            </DialogFooter>
+         </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useRef } from 'react';
@@ -12,9 +11,8 @@ interface MathTextProps {
 }
 
 /**
- * @fileOverview Precision Math Renderer v3.0.
- * Renders LaTeX blocks and converts plain text symbols to high-fidelity glyphs.
- * Ensures multi-line calculations remain vertically separated.
+ * @fileOverview Precision Math Renderer v3.5.
+ * Hardened to prevent plain text labels from inheriting serif font styles.
  */
 export default function MathText({ text, className }: MathTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,9 +23,9 @@ export default function MathText({ text, className }: MathTextProps) {
         const lines = text.split('\n');
         
         const renderedLines = lines.map(line => {
-          if (!line.trim()) return '<div class="h-4"></div>'; // Preserve blank lines
+          if (!line.trim()) return '<div class="h-4"></div>';
 
-          // Convert standard math symbols to LaTeX for KaTeX
+          // Standardize math symbols
           const processedLine = line
             .replace(/√/g, '\\sqrt')
             .replace(/×/g, '\\times')
@@ -37,10 +35,12 @@ export default function MathText({ text, className }: MathTextProps) {
             .replace(/≤/g, '\\leq')
             .replace(/≥/g, '\\geq');
 
-          // Check if line contains common math operators
-          const hasMath = /[\\√×÷²³≤≥=+\-\/]/.test(processedLine);
+          // Narrow check: Only use KaTeX if specific math symbols are found, 
+          // avoiding triggers on simple colons or slashes in labels.
+          const hasSignificantMath = /[\\√×÷²³≤≥^]/.test(processedLine) || 
+                                     (/[=]/.test(processedLine) && /\d/.test(processedLine));
 
-          if (hasMath) {
+          if (hasSignificantMath) {
             try {
               return `<div class="py-1">${katex.renderToString(processedLine, {
                 throwOnError: false,
