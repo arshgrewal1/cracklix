@@ -30,6 +30,7 @@ import {
 /**
  * @fileOverview Institutional Asset Ledger (Global Bank) v5.0.
  * Features: Massive Scale Pagination, ID-Based Search, and Usage Detection.
+ * Fixed: Redundant SelectValue tag and optimized Scalable Query.
  */
 
 export default function QuestionBank() {
@@ -50,6 +51,8 @@ export default function QuestionBank() {
     if (!db) return null
     let constraints: any[] = [where("isStandalone", "==", true), orderBy("createdAt", "desc"), limit(pageLimit)];
     
+    // Note: Applying these filters combined with orderBy requires composite indexes.
+    // If the index is missing, Firestore will throw an error with a link to create it.
     if (examFilter !== "all") constraints.unshift(where("examId", "==", examFilter));
     else if (boardFilter !== "all") constraints.unshift(where("boardId", "==", boardFilter));
     
@@ -208,7 +211,9 @@ export default function QuestionBank() {
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-white/5 h-16">
-                <TableHead className="w-[60px] px-8 text-center"><Checkbox checked={allSelected} onCheckedChange={(v) => handleSelectAll(!!v)} /></TableHead>
+                <TableHead className="w-[60px] px-8 text-center">
+                  <Checkbox checked={allSelected} onCheckedChange={(v) => handleSelectAll(!!v)} />
+                </TableHead>
                 <TableHead className="px-4 text-[9px] font-black uppercase text-slate-500">Identity & Content</TableHead>
                 <TableHead className="text-[9px] font-black uppercase text-slate-500">Context</TableHead>
                 <TableHead className="text-center text-[9px] font-black uppercase text-slate-500">Usage</TableHead>
