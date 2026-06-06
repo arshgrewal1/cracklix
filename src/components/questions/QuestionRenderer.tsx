@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -13,11 +14,12 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional High-Fidelity Question Renderer v28.0.
+ * @fileOverview Institutional High-Fidelity Question Renderer v29.0.
  * Rules Enforcement:
  * 1. STRICT ISOLATION: "EN" mode hides ALL Punjabi. "PA" mode hides ALL English.
- * 2. BILINGUAL JOIN: Combined with "/" on a single line.
- * 3. SUBJECT LOCKING: Language subjects (English/Punjabi) automatically lock to their respective tongue.
+ * 2. NEAT SPACING: Professional gap between logic steps.
+ * 3. SUBJECT LOCKING: Language subjects automatically lock to their native tongue.
+ * 4. PREFIX PURGE: Ensures no "Q1." or "ਪ੍ਰਸ਼ਨ 01" appears in the statement.
  */
 
 export default function QuestionRenderer({ 
@@ -34,6 +36,7 @@ export default function QuestionRenderer({
       .replace(/^\d+[\.\):\s-]*/, '')         
       .replace(/^ਪ੍ਰਸ਼ਨ\s*\d+[\.\):\s-]*/, '')
       .replace(/^ਪ੍ਰਸ਼ਨ\s*\d+[\.\):\s-]*/, '')
+      .replace(/^ਪ੍ਰਸ਼ਨ\s*0\d+[\.\):\s-]*/, '')
       .replace(/^\*\*|\*\*$/g, '')           
       .replace(/\*\*/g, '')                  
       .trim();
@@ -55,9 +58,9 @@ export default function QuestionRenderer({
     if (isPunjabiSubject) return qPa || qEn;
 
     if (language === 'en') return qEn;
-    if (language === 'pa') return qPa;
+    if (language === 'pa') return qPa || qEn;
     
-    // Bilingual Mode
+    // Bilingual Mode: Single line joined by /
     return (
       <div className="inline">
         {qEn} {qPa && qPa !== qEn && <span className="text-primary/40 mx-2">/</span>} {qPa !== qEn && qPa}
@@ -97,7 +100,7 @@ export default function QuestionRenderer({
                       {isEnglishSubject ? cEn : 
                        isPunjabiSubject ? (cPa || cEn) : 
                        language === 'en' ? cEn : 
-                       language === 'pa' ? cPa : 
+                       language === 'pa' ? (cPa || cEn) : 
                        (
                         <div className="inline">
                           {cEn} {cPa && cPa !== cEn && <span className="text-primary/40 mx-1.5">/</span>} {cPa !== cEn && cPa}
@@ -124,9 +127,9 @@ export default function QuestionRenderer({
               </div>
            </div>
            
-           <div className="space-y-6 pt-6 border-t border-emerald-100 relative z-10">
+           <div className="space-y-8 pt-6 border-t border-emerald-100 relative z-10">
               {(isEnglishSubject || (language !== 'pa' && expEn)) && (
-                <div className="space-y-2">
+                <div className="space-y-3">
                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-600/60">English Logic</p>
                    <p className="text-[14px] text-slate-700 font-medium leading-relaxed italic whitespace-pre-wrap">
                       {cleanText(expEn)}
@@ -135,7 +138,7 @@ export default function QuestionRenderer({
               )}
               
               {(isPunjabiSubject || (language !== 'en' && expPa)) && (
-                <div className="space-y-2 pt-4 border-t border-emerald-100/30">
+                <div className="space-y-3 pt-6 border-t border-emerald-100/30">
                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-600/60">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</p>
                    <p className="text-[14px] text-slate-700 font-medium leading-relaxed italic whitespace-pre-wrap">
                       {cleanText(expPa)}

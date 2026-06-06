@@ -16,11 +16,12 @@ interface QuestionPaletteProps {
 }
 
 /**
- * @fileOverview Paginated Institutional Audit Matrix v6.5.
+ * @fileOverview Paginated Institutional Audit Matrix v6.6.
  * Rules Enforcement:
- * 1. FIXED CIRCLE OVERLAP: Explicit gap-3 and box-sizing: border-box.
+ * 1. FIXED CIRCLE OVERLAP: Strictly controlled padding and gap-3 with w-10 nodes.
  * 2. EXACT 25 NODES: Pagination Hub calibrated for mobile focus.
  * 3. NO SCROLLING: Elements sized to fit within standard viewports.
+ * 4. BOX-SIZING LOCKDOWN: Ensures borders grow inward and don't touch neighbors.
  */
 
 export default function QuestionPalette({
@@ -61,7 +62,7 @@ export default function QuestionPalette({
   }, [totalQuestions, answeredIndices, flaggedIndices, visitedIndices])
 
   return (
-    <div className="space-y-6 flex flex-col h-full text-left font-body">
+    <div className="space-y-6 flex flex-col h-full text-left font-body box-border">
       {/* Dynamic Exam Branding */}
       <div className="space-y-1 pb-4 border-b border-slate-100">
          <p className="text-[7px] font-black text-primary uppercase tracking-[0.4em] leading-none">ACTIVE AUDIT</p>
@@ -92,7 +93,7 @@ export default function QuestionPalette({
                     : "bg-white text-slate-400 border-slate-100 hover:border-primary/20"
                 )}
               >
-                Page {i + 1}
+                P{i + 1}
               </button>
            ))}
         </div>
@@ -142,7 +143,7 @@ export default function QuestionPalette({
 
 function PaletteStat({ count, label, color, textColor = "text-white" }: any) {
   return (
-    <div className="flex items-center gap-2.5 p-2 rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+    <div className="flex items-center gap-2.5 p-2 rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden box-border">
        <div className={cn("h-4 w-4 rounded flex items-center justify-center text-[7px] font-black shrink-0", color, textColor)}>
           {count}
        </div>
