@@ -8,8 +8,8 @@ import { cn } from '@/lib/utils';
 import Timer from '@/components/mocks/Timer';
 
 /**
- * @fileOverview Institutional CBT Header v5.0.
- * Scaling: Reduced header height to h-14 to maximize vertical workspace.
+ * @fileOverview Institutional CBT Header v6.0.
+ * Standardized: Language keys updated to match 'bilingual' canonical type.
  */
 export default function ExamHeader({ onPaletteToggle }: { onPaletteToggle: () => void }) {
   const { 
@@ -63,7 +63,7 @@ export default function ExamHeader({ onPaletteToggle }: { onPaletteToggle: () =>
         {/* RIGHT: TACTICAL CONTROLS */}
         <div className="flex items-center gap-2 md:gap-5">
            <div className="hidden lg:flex items-center bg-white/5 p-0.5 rounded-lg border border-white/10">
-              {(['en', 'pa', 'bi'] as const).map(l => (
+              {(['en', 'pa', 'bilingual'] as const).map(l => (
                 <button 
                   key={l}
                   onClick={() => setLanguage(l)}
@@ -72,7 +72,7 @@ export default function ExamHeader({ onPaletteToggle }: { onPaletteToggle: () =>
                     language === l ? "bg-[#F97316] text-white shadow-lg" : "text-slate-500 hover:text-white"
                   )}
                 >
-                  {l === 'bi' ? 'Bilingual' : l.toUpperCase()}
+                  {l === 'bilingual' ? 'Bilingual' : l.toUpperCase()}
                 </button>
               ))}
            </div>

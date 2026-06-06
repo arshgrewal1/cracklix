@@ -10,7 +10,7 @@ import { doc } from "firebase/firestore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShieldCheck, Info, CheckCircle2, Clock, BookOpen, Zap, Globe, Languages } from "lucide-react";
+import { ShieldCheck, Info, CheckCircle2, Clock, BookOpen, Zap, Globe, Languages, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { useExamStore } from "@/store/useExamStore";
 import { cn } from "@/lib/utils";
@@ -25,7 +25,7 @@ export default function InstructionsPage() {
   const db = useFirestore();
   const mockId = params.id as string;
   const { setLanguage } = useExamStore();
-  const [prefLang, setPrefLang] = useState<'en' | 'pa' | 'hi' | 'bi'>('bi');
+  const [prefLang, setPrefLang] = useState<'en' | 'pa' | 'hi' | 'bilingual'>('bilingual');
 
   const { data: mock, loading } = useDoc<any>(useMemo(() => (db ? doc(db, "mocks", mockId) : null), [db, mockId]));
 
@@ -82,7 +82,7 @@ export default function InstructionsPage() {
                        <LangBtn label="English" val="en" active={prefLang === 'en'} onClick={setPrefLang} />
                        <LangBtn label="Punjabi" val="pa" active={prefLang === 'pa'} onClick={setPrefLang} />
                        <LangBtn label="Hindi" val="hi" active={prefLang === 'hi'} onClick={setPrefLang} />
-                       <LangBtn label="Bilingual" val="bi" active={prefLang === 'bi'} onClick={setPrefLang} />
+                       <LangBtn label="Bilingual" val="bilingual" active={prefLang === 'bilingual'} onClick={setPrefLang} />
                     </div>
                  </div>
 
@@ -143,24 +143,5 @@ function LangBtn({ label, val, active, onClick }: any) {
     >
        {label}
     </button>
-  )
-}
-
-function ChevronRight(props: any) {
-  return (
-    <svg
-      {...props}
-      xmlns="http://www.w3.org/2000/svg"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="3"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="m9 18 6-6-6-6" />
-    </svg>
   )
 }

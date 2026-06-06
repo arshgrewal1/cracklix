@@ -10,25 +10,26 @@ import { Badge } from '@/components/ui/badge';
 
 interface QuestionRendererProps {
   question: Partial<Question> & { displayId?: string };
-  language: 'en' | 'pa' | 'hi' | 'bi';
+  language: 'en' | 'pa' | 'hi' | 'bilingual';
   showSolution?: boolean;
   hideOptions?: boolean;
 }
 
 /**
- * @fileOverview Institutional High-Fidelity Dark Renderer v15.0.
+ * @fileOverview Institutional High-Fidelity Dark Renderer v16.0.
  * Matches user-provided screenshot: Black background, White text, Slash-separated options.
+ * Fixed: Standardized language keys to ensure bilingual statements render correctly.
  */
 export default function QuestionRenderer({ 
   question, 
-  language = 'bi',
+  language = 'bilingual',
   showSolution = false,
   hideOptions = false 
 }: QuestionRendererProps) {
   
   const isEn = language === 'en';
   const isPa = language === 'pa';
-  const isBi = language === 'bi';
+  const isBi = language === 'bilingual';
 
   const q = question as any;
   const englishQ = q.englishQuestion || q.questionEn || q.question_english || q.titleEn || q.questionText;
@@ -87,26 +88,30 @@ export default function QuestionRenderer({
       {showSolution && (
         <div className="mt-4 space-y-8 animate-in fade-in slide-in-from-top-2">
            <div className="font-[900] text-[16px] md:text-[19px] text-white">
-              Correct Answer: ({q.correctAnswer}) {q[`option${q.correctAnswer}English`]} / ਸਹੀ ਉੱਤਰ: {q[`option${q.correctAnswer}Punjabi`]}
+              Correct Answer: ({q.correctAnswer || '?'}) {q[`option${q.correctAnswer}English`]} / ਸਹੀ ਉੱਤਰ: {q[`option${q.correctAnswer}Punjabi`]}
            </div>
 
            {/* 4. RATIONALE HUB (Bulleted) */}
            <div className="space-y-8 pt-8 border-t border-white/10">
-              <div className="flex gap-6 items-start">
-                 <div className="h-2 w-2 rounded-full border border-white shrink-0 mt-3" />
-                 <div className="font-[700] text-[15px] md:text-[17px] leading-[1.8] text-slate-300">
-                    <span className="text-white font-[900] mr-2">English Explanation:</span>
-                    <MathText text={englishExp || ""} />
-                 </div>
-              </div>
+              {(englishExp || isBi) && (
+                <div className="flex gap-6 items-start">
+                   <div className="h-2 w-2 rounded-full border border-white shrink-0 mt-3" />
+                   <div className="font-[700] text-[15px] md:text-[17px] leading-[1.8] text-slate-300">
+                      <span className="text-white font-[900] mr-2">English Explanation:</span>
+                      <MathText text={englishExp || "Logic audit pending."} />
+                   </div>
+                </div>
+              )}
 
-              <div className="flex gap-6 items-start">
-                 <div className="h-2 w-2 rounded-full border border-white shrink-0 mt-3" />
-                 <div className="font-[700] text-[15px] md:text-[17px] leading-[1.8] text-slate-300">
-                    <span className="text-white font-[900] mr-2">ਪੰਜਾਬੀ ਵਿਆਖਿਆ:</span>
-                    <MathText text={punjabiExp || ""} />
-                 </div>
-              </div>
+              {(punjabiExp || isBi) && (
+                <div className="flex gap-6 items-start">
+                   <div className="h-2 w-2 rounded-full border border-white shrink-0 mt-3" />
+                   <div className="font-[700] text-[15px] md:text-[17px] leading-[1.8] text-slate-300">
+                      <span className="text-white font-[900] mr-2">ਪੰਜਾਬੀ ਵਿਆਖਿਆ:</span>
+                      <MathText text={punjabiExp || "ਵਿਆਖਿਆ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"} />
+                   </div>
+                </div>
+              )}
            </div>
         </div>
       )}

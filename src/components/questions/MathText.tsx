@@ -12,14 +12,19 @@ interface MathTextProps {
 }
 
 /**
- * @fileOverview Precision High-Contrast Math Renderer v12.0.
- * Optimized for Dark Themes: Ensures white rendering on deep backgrounds.
+ * @fileOverview Precision High-Contrast Math Renderer v13.0.
+ * Fixed: Robust fallback logic to ensure text is never empty or invisible.
  */
 export default function MathText({ text, className }: MathTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!containerRef.current) return;
+
+    if (!text || typeof text !== 'string') {
+      containerRef.current.innerHTML = '';
+      return;
+    }
 
     try {
       const lines = text.split('\n');
@@ -53,7 +58,7 @@ export default function MathText({ text, className }: MathTextProps) {
           }
         }
 
-        // descriptive text (e.g., "Total age = 300")
+        // Descriptive text (e.g., "Total age = 300")
         if (trimmed.includes('=') && !/[a-z]{10,}/i.test(trimmed)) {
           const parts = trimmed.split('=');
           return `<div class="py-2 flex flex-wrap items-baseline gap-2 text-white">
@@ -64,7 +69,7 @@ export default function MathText({ text, className }: MathTextProps) {
         }
 
         // Standard neat text line
-        return `<div class="py-1 text-inherit font-[700] leading-[1.8] antialiased">${trimmed}</div>`;
+        return `<div class="py-1 text-inherit font-[700] leading-[1.8] antialiased text-white">${trimmed}</div>`;
       }).join('');
 
       containerRef.current.innerHTML = renderedHtml;
