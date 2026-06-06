@@ -17,24 +17,30 @@ Punjab's most advanced government exam preparation platform. Designed for aspira
 
 ## 📦 GitHub Deployment (Correct Sequence)
 
-If you see the message **"nothing to commit, working tree clean"**, it means your work is already saved! Skip to step 3.
+If you have already committed your work and see **"nothing to commit"**, follow these steps to push your changes:
 
 ```bash
-# 1. Stage all files
-git add .
-
-# 2. Commit the files (Only if step 1 found new changes)
-git commit -m "Initial commit: Production-hardened Cracklix platform"
-
-# 3. Add your remote repository
-# If you get an error saying 'remote origin already exists', skip this step.
+# 1. Add your remote repository (If not already added)
 git remote add origin https://github.com/arshgrewal1122/cracklix.git
 
-# 4. Set branch to main
+# 2. Set branch to main
 git branch -M main
 
-# 5. Push and Link to GitHub (Crucial Step)
+# 3. Push and Link to GitHub
 git push -u origin main
+```
+
+If you have NEW changes to save:
+
+```bash
+# 1. Stage all files (Crucial step!)
+git add .
+
+# 2. Commit the files
+git commit -m "Fix dashboard syntax and update deployment guide"
+
+# 3. Push to GitHub
+git push
 ```
 
 ## 🚀 Vercel Deployment
