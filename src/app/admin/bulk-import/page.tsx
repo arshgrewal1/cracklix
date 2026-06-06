@@ -176,21 +176,21 @@ export default function BulkImportPage() {
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Authority Board</Label>
                   <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v, examId: ""})}>
                     <SelectTrigger className="rounded-xl h-12 bg-slate-50 border-none font-bold text-[#0F172A] shadow-inner"><SelectValue placeholder="Select" /></SelectTrigger>
-                    <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
+                    <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id || "b-id"} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Exam Hub</Label>
                   <Select value={metadata.examId} onValueChange={v => setMetadata({...metadata, examId: v})}>
                     <SelectTrigger className="rounded-xl h-12 bg-slate-50 border-none font-bold text-[#0F172A] shadow-inner"><SelectValue placeholder="Select" /></SelectTrigger>
-                    <SelectContent>{exams?.filter(e => e.boardId === metadata.boardId).map((e: any) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+                    <SelectContent>{exams?.filter(e => e.boardId === metadata.boardId).map((e: any) => <SelectItem key={e.id || "e-id"} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1.5">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Subject Registry</Label>
                    <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
                       <SelectTrigger className="rounded-xl h-12 bg-slate-50 border-none font-bold text-[#0F172A] shadow-inner"><SelectValue placeholder="Select" /></SelectTrigger>
-                      <SelectContent>{subjects?.map((s:any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                      <SelectContent>{subjects?.map((s:any) => <SelectItem key={s.id || "s-id"} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                    </Select>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect, Suspense } from "react"
@@ -53,8 +54,6 @@ function QuestionEntryContent() {
     optionDEn: "", optionDPa: "",
     correctAnswer: "A", 
     explanationEn: "", explanationPa: "",
-    instructionEn: "", instructionPa: "",
-    passageEn: "", passagePa: "",
     imageUrl: "",
     chapterId: ""
   })
@@ -63,7 +62,6 @@ function QuestionEntryContent() {
     if (existingData) {
       setFormData({ 
         ...existingData,
-        // Ensure all fields are strings to avoid controlled/uncontrolled component errors
         questionEn: existingData.questionEn || "",
         questionPa: existingData.questionPa || "",
         optionAEn: existingData.optionAEn || "",
@@ -76,6 +74,11 @@ function QuestionEntryContent() {
         optionDPa: existingData.optionDPa || "",
         explanationEn: existingData.explanationEn || existingData.explanation || "",
         explanationPa: existingData.explanationPa || "",
+        subjectId: existingData.subjectId || "",
+        boardId: existingData.boardId || "",
+        examId: existingData.examId || "",
+        chapterId: existingData.chapterId || "",
+        difficulty: existingData.difficulty || "Medium"
       })
     }
   }, [existingData])
@@ -100,7 +103,6 @@ function QuestionEntryContent() {
       author: existingData?.author || profile?.name || "Team Node"
     };
 
-    // Purge undefined/null values
     Object.keys(payload).forEach(key => (payload[key] === undefined || payload[key] === null) && delete payload[key]);
 
     try {
@@ -243,14 +245,14 @@ function QuestionEntryContent() {
                         <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Board Hub</Label>
                         <Select value={formData.boardId} onValueChange={v => setFormData({...formData, boardId: v})}>
                            <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100"><SelectValue placeholder="Select" /></SelectTrigger>
-                           <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
+                           <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id || "b-id"} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
                         </Select>
                      </div>
                      <div className="space-y-3 text-left">
                         <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Subject Hub</Label>
                         <Select value={formData.subjectId} onValueChange={v => setFormData({...formData, subjectId: v})}>
                            <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-slate-100"><SelectValue placeholder="Select" /></SelectTrigger>
-                           <SelectContent>{subjects?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                           <SelectContent>{subjects?.map((s: any) => <SelectItem key={s.id || "s-id"} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                         </Select>
                      </div>
                   </div>

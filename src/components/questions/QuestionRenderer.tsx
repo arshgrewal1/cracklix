@@ -14,7 +14,7 @@ interface QuestionRendererProps {
 
 /**
  * @fileOverview High-Fidelity Question Renderer v10.0.
- * Optimized: Reduced font sizes and margins for high-density viewport support.
+ * Optimized: Bilingual options are always rendered for professional review parity.
  */
 
 export default function QuestionRenderer({ question, language, showSolution = false }: QuestionRendererProps) {
@@ -27,7 +27,7 @@ export default function QuestionRenderer({ question, language, showSolution = fa
   // Utility to clean text artifacts
   const cleanText = (text: string = "") => {
     return text
-      .replace(/^\d+[\.\):\s-]*/, '') // Remove leading numbers (1. or 1))
+      .replace(/^\d+[\.\):\s-]*/, '') // Remove leading numbers
       .replace(/^\*\*|\*\*$/g, '')    // Remove bold markers
       .trim();
   };
@@ -51,7 +51,7 @@ export default function QuestionRenderer({ question, language, showSolution = fa
         </div>
       )}
 
-      {/* Question Statements - High Contrast Black */}
+      {/* Question Statements */}
       <div className="space-y-2 mb-6">
         {showEn && question.questionEn && (
            <div className="text-[17px] md:text-[19px] font-black leading-snug text-black whitespace-pre-wrap antialiased">
@@ -68,19 +68,21 @@ export default function QuestionRenderer({ question, language, showSolution = fa
         )}
       </div>
 
-      {/* Logic Hub: Render Options for Preview/Matrix */}
-      {!showSolution && (
-         <div className="space-y-2 mb-6">
-            {['A', 'B', 'C', 'D'].map(key => (
-               <div key={key} className="flex items-start gap-3">
-                  <span className="font-black text-xs text-primary min-w-[20px]">{key})</span>
-                  <p className="text-sm font-bold text-slate-700 leading-tight">
-                     {renderOption(key)}
-                  </p>
-               </div>
-            ))}
-         </div>
-      )}
+      {/* Options Hub - Always visible for professional review hubs */}
+      <div className="space-y-2 mb-6">
+        {['A', 'B', 'C', 'D'].map(key => {
+           const optionText = renderOption(key);
+           if (!optionText) return null;
+           return (
+              <div key={key} className="flex items-start gap-3">
+                 <span className="font-black text-xs text-primary min-w-[20px]">{key})</span>
+                 <p className="text-sm font-bold text-slate-700 leading-tight">
+                    {optionText}
+                 </p>
+              </div>
+           )
+        })}
+      </div>
 
       {showSolution && (
         <div className="mt-6 p-6 bg-emerald-50 rounded-2xl border border-emerald-100 space-y-4 shadow-lg">

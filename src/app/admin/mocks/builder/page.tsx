@@ -183,7 +183,7 @@ function MockBuilderContent() {
               <Trash2 className="h-4 w-4 text-rose-500" /> Purge Assembly
            </Button>
            <Button className="bg-primary hover:bg-orange-600 font-black px-12 h-16 rounded-2xl uppercase text-[11px] tracking-[0.2em] gap-3 shadow-3xl shadow-primary/20" onClick={handlePublish} disabled={isPublishing}>
-             {isPublishing ? <Loader2 className="h-5 w-5 animate-spin" /> : <ClipboardCheck className="h-5 w-5" />} {isEditing ? "Update Module" : "Deploy Live Series"}
+             {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ClipboardCheck className="h-5 w-5" />} {isEditing ? "Update Module" : "Deploy Live Series"}
            </Button>
         </div>
       </div>
@@ -215,16 +215,16 @@ function MockBuilderContent() {
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Authority</Label>
-                   <Select value={mockData.boardId} onValueChange={v => setMetadata({...mockData, boardId: v, examId: ""})}>
+                   <Select value={mockData.boardId} onValueChange={v => setMockData({...mockData, boardId: v, examId: ""})}>
                      <SelectTrigger className="rounded-xl h-12 bg-slate-50/50 border-slate-50 font-black uppercase text-[10px]"><SelectValue placeholder="Select" /></SelectTrigger>
-                     <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
+                     <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id || "board-id"} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
                    </Select>
                  </div>
                  <div className="space-y-2">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Exam Hub</Label>
                    <Select value={mockData.examId} onValueChange={v => setMockData({...mockData, examId: v})}>
                      <SelectTrigger className="rounded-xl h-12 bg-slate-50/50 border-slate-50 font-bold text-xs"><SelectValue placeholder="Select" /></SelectTrigger>
-                     <SelectContent>{exams?.filter((e: any) => e.boardId === mockData.boardId).map((e: any) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+                     <SelectContent>{exams?.filter((e: any) => e.boardId === mockData.boardId).map((e: any) => <SelectItem key={e.id || "exam-id"} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
                    </Select>
                  </div>
                </div>
@@ -265,7 +265,7 @@ function MockBuilderContent() {
                       <SelectContent>
                         <SelectItem value="any">Any Premium Pass</SelectItem>
                         {passes?.map((p: any) => (
-                           <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                           <SelectItem key={p.id || "pass-id"} value={p.id}>{p.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
@@ -306,7 +306,7 @@ function MockBuilderContent() {
                           <SelectTrigger className="rounded-xl h-12 bg-slate-50 border-none w-56 shadow-inner font-bold text-xs"><SelectValue placeholder="Subject Hub" /></SelectTrigger>
                           <SelectContent>
                              <SelectItem value="all">All Subjects</SelectItem>
-                             {subjects?.map((s:any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                             {subjects?.map((s:any) => <SelectItem key={s.id || "sub-id"} value={s.id}>{s.name}</SelectItem>)}
                           </SelectContent>
                        </Select>
                     </div>
