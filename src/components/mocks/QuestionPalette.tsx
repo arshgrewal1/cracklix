@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState } from "react"
@@ -15,10 +16,8 @@ interface QuestionPaletteProps {
 }
 
 /**
- * @fileOverview Institutional Audit Matrix v8.0.
- * Rules Enforcement:
- * 1. FIXED CIRCLE OVERLAP: Calibrated grid-cols-5 with gap-3.
- * 2. NO BLEED: Strict box-sizing for number nodes.
+ * @fileOverview Institutional Audit Matrix v9.0.
+ * Redesign: Larger circles, no redundant headers, optimized grid.
  */
 
 export default function QuestionPalette({
@@ -28,12 +27,11 @@ export default function QuestionPalette({
   flaggedIndices,
   visitedIndices,
   onSelect,
-  subjectMap = {},
   examName = "OFFICIAL SERIES"
 }: QuestionPaletteProps) {
   
   const [currentPage, setCurrentPage] = useState(0)
-  const PAGE_SIZE = 25
+  const PAGE_SIZE = 50 // Increased page size for easier browsing
   const totalQuestions = questions.length
   const totalPages = Math.ceil(totalQuestions / PAGE_SIZE)
 
@@ -59,42 +57,37 @@ export default function QuestionPalette({
   }, [totalQuestions, answeredIndices, flaggedIndices, visitedIndices])
 
   return (
-    <div className="space-y-8 flex flex-col h-full text-left font-body box-border">
-      <div className="space-y-1.5 pb-6 border-b border-slate-100">
-         <p className="text-[7px] font-black text-primary uppercase tracking-[0.4em] leading-none">ACTIVE AUDIT Hub</p>
-         <h3 className="text-[13px] font-black text-[#0F172A] uppercase leading-tight truncate">
-            {examName}
-         </h3>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
+    <div className="space-y-6 flex flex-col h-full text-left font-body box-border">
+      {/* Responsive Summary */}
+      <div className="grid grid-cols-2 gap-2">
          <PaletteStat count={summary.answered} label="Done" color="bg-emerald-600" />
          <PaletteStat count={summary.notAnswered} label="Missed" color="bg-rose-500" />
-         <PaletteStat count={summary.notVisited} label="Left" color="bg-slate-50" textColor="text-slate-400" />
          <PaletteStat count={summary.review} label="Review" color="bg-amber-500" />
+         <PaletteStat count={summary.notVisited} label="Left" color="bg-slate-100" textColor="text-slate-400" />
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 shrink-0">
            {Array.from({ length: totalPages }).map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrentPage(i)}
                 className={cn(
-                  "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shrink-0 border",
+                  "px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all shrink-0 border",
                   currentPage === i 
-                    ? "bg-[#0F172A] text-white border-[#0F172A] shadow-xl" 
-                    : "bg-white text-slate-400 border-slate-100 hover:border-primary/20"
+                    ? "bg-[#0F172A] text-white border-[#0F172A] shadow-lg" 
+                    : "bg-white text-slate-400 border-slate-100"
                 )}
               >
-                {i + 1}
+                {i * PAGE_SIZE + 1}-{Math.min((i + 1) * PAGE_SIZE, totalQuestions)}
               </button>
            ))}
         </div>
       )}
 
-      <div className="flex-1 overflow-y-auto no-scrollbar pt-2">
-         <div className="grid grid-cols-5 gap-3 w-full">
+      {/* Optimized Grid */}
+      <div className="flex-1 overflow-y-auto no-scrollbar py-2">
+         <div className="grid grid-cols-5 gap-2.5 w-full">
             {currentQuestions.map((q) => {
               const idx = q.globalIdx;
               const isCurrent = currentIndex === idx
@@ -108,12 +101,12 @@ export default function QuestionPalette({
                   key={idx}
                   onClick={() => onSelect(idx)}
                   className={cn(
-                    "w-10 h-10 rounded-full text-[11px] font-black transition-all flex items-center justify-center shrink-0 border-2 box-border",
-                    isCurrent ? "border-primary bg-white text-primary shadow-lg ring-2 ring-primary ring-offset-2 z-10" : "border-transparent",
+                    "w-11 h-11 rounded-xl text-[12px] font-black transition-all flex items-center justify-center shrink-0 border-2 box-border",
+                    isCurrent ? "border-primary bg-white text-primary shadow-xl ring-4 ring-primary/10 z-10 scale-105" : "border-transparent",
                     !isCurrent && isBoth && "bg-purple-600 text-white",
-                    !isCurrent && isAnswered && !isFlagged && "bg-emerald-600 text-white",
-                    !isCurrent && isFlagged && !isAnswered && "bg-amber-500 text-white",
-                    !isCurrent && isVisited && !isAnswered && !isFlagged && "bg-rose-500 text-white",
+                    !isCurrent && isAnswered && !isFlagged && "bg-emerald-600 text-white shadow-md",
+                    !isCurrent && isFlagged && !isAnswered && "bg-amber-500 text-white shadow-md",
+                    !isCurrent && isVisited && !isAnswered && !isFlagged && "bg-rose-500 text-white shadow-md",
                     !isCurrent && !isVisited && "bg-slate-50 text-slate-300 border-slate-100",
                   )}
                 >
@@ -124,9 +117,9 @@ export default function QuestionPalette({
          </div>
       </div>
       
-      <div className="pt-6 border-t border-slate-100">
+      <div className="pt-4 border-t border-slate-50 shrink-0">
          <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest text-center">
-            Nodes {currentPage * PAGE_SIZE + 1} - {Math.min((currentPage + 1) * PAGE_SIZE, totalQuestions)}
+            {totalQuestions} Nodes Total
          </p>
       </div>
     </div>
@@ -135,8 +128,8 @@ export default function QuestionPalette({
 
 function PaletteStat({ count, label, color, textColor = "text-white" }: any) {
   return (
-    <div className="flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden box-border">
-       <div className={cn("h-4 w-4 rounded flex items-center justify-center text-[7px] font-black shrink-0", color, textColor)}>
+    <div className="flex items-center gap-2 p-2 rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+       <div className={cn("h-3.5 w-3.5 rounded flex items-center justify-center text-[7px] font-black shrink-0", color, textColor)}>
           {count}
        </div>
        <span className="text-[8px] font-black uppercase text-slate-500 tracking-tight truncate">{label}</span>

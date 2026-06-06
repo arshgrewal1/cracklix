@@ -11,7 +11,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Button } from "@/components/ui/button"
 import { RadioGroup } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { Loader2, Target, LayoutGrid, ChevronRight, ChevronLeft, ShieldCheck, Pause, Play } from "lucide-react"
+import { Loader2, Target, LayoutGrid, ChevronRight, ChevronLeft, ShieldCheck, Pause, Play, LogOut } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet"
@@ -19,11 +19,8 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 type LangMode = 'en' | 'pa' | 'bilingual'
 
 /**
- * @fileOverview Institutional High-Fidelity CBT Engine v20.0.
- * Rules:
- * 1. CLEAN HEADER: Removed duplicate exam names. Standardized layout.
- * 2. COMPACT UI: Reduced padding and card sizes.
- * 3. LANGUAGE LOCKED: selector controls source fields only.
+ * @fileOverview Institutional High-Fidelity CBT Engine v25.0.
+ * Redesign: Viewport-locked, No Sidebar, Mobile Optimized.
  */
 
 export default function MockAttemptPage() {
@@ -37,7 +34,6 @@ export default function MockAttemptPage() {
   const { data: mock, loading: mockLoading } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
-  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
   
   const [questions, setQuestions] = useState<any[]>([])
   const [currentIdx, setCurrentIdx] = useState(0)
@@ -128,102 +124,88 @@ export default function MockAttemptPage() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-white text-black font-body">
-      <header className="h-16 border-b flex items-center justify-between px-4 md:px-12 bg-[#0B1528] text-white shrink-0 z-[100] shadow-2xl">
-        <div className="flex items-center gap-8">
-           <ShieldCheck className="h-7 w-7 text-primary hidden sm:block" />
-           <div className="flex flex-col text-left">
-              <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em] leading-none mb-1">CBT EVALUATION</p>
-              <h1 className="text-sm md:text-base font-black uppercase tracking-tight truncate max-w-[140px] md:max-w-none text-white">
-                {activeBoard?.name || "Official Board Hub"}
-              </h1>
-           </div>
+      {/* Viewport Anchored Header */}
+      <header className="h-[60px] md:h-16 border-b flex items-center justify-between px-3 md:px-12 bg-[#0B1528] text-white shrink-0 z-[100] shadow-xl">
+        <div className="flex items-center gap-1.5 md:gap-3 bg-white/5 p-0.5 md:p-1 rounded-lg md:rounded-xl border border-white/10 scale-90 md:scale-100 origin-left">
+          <LangTab label="EN" active={language === 'en'} onClick={() => setLanguage('en')} />
+          <LangTab label="PA" active={language === 'pa'} onClick={() => setLanguage('pa')} />
+          <LangTab label="BI" active={language === 'bilingual'} onClick={() => setLanguage('bilingual')} />
         </div>
 
-        <div className="hidden md:flex flex-col items-center">
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none mb-1">MODULE</p>
-            <h2 className="text-xs font-black uppercase tracking-widest text-primary">OFFICIAL MOCK TEST</h2>
+        <div className="flex items-center gap-2 md:gap-4 flex-1 justify-center">
+          <Timer onTimeUp={submitMock} initialSeconds={remainingTime} onTick={setRemainingTime} isPaused={isPaused} />
+          <Button variant="ghost" size="icon" onClick={() => setIsPaused(!isPaused)} className="h-8 w-8 md:h-10 md:w-10 rounded-lg bg-white/5 text-white hover:bg-white/10 shrink-0">
+            {isPaused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+          </Button>
         </div>
 
-        <div className="flex items-center gap-3 md:gap-8">
-           <div className="flex items-center gap-0.5 bg-white/5 p-1 rounded-xl border border-white/10">
-              <LangTab label="EN" active={language === 'en'} onClick={() => setLanguage('en')} />
-              <LangTab label="PA" active={language === 'pa'} onClick={() => setLanguage('pa')} />
-              <LangTab label="BI" active={language === 'bilingual'} onClick={() => setLanguage('bilingual')} />
-           </div>
-           
-           <div className="flex items-center gap-3">
-              <Timer onTimeUp={submitMock} initialSeconds={remainingTime} onTick={setRemainingTime} isPaused={isPaused} />
-              <Button variant="ghost" size="icon" onClick={() => setIsPaused(!isPaused)} className="h-10 w-10 rounded-xl bg-white/5 text-white hover:bg-white/10">
-                {isPaused ? <Play className="h-5 w-5" /> : <Pause className="h-5 w-5" />}
-              </Button>
-           </div>
-        </div>
+        <Button onClick={submitMock} disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[8px] md:text-[10px] tracking-widest h-8 md:h-10 px-3 md:px-6 rounded-lg md:rounded-xl shadow-lg transition-all shrink-0">
+          FINISH
+        </Button>
       </header>
 
-      <main className="flex-1 flex overflow-hidden relative bg-[#F8FAFC]">
+      {/* Main Attempt Zone */}
+      <main className="flex-1 flex flex-col overflow-hidden relative bg-[#F8FAFC]">
         {isPaused && (
            <div className="absolute inset-0 z-[200] bg-[#0B1528]/95 backdrop-blur-xl flex flex-col items-center justify-center text-white p-6">
-              <Pause className="h-16 w-16 text-primary mb-8 animate-pulse" />
-              <h2 className="text-4xl font-headline font-black uppercase mb-10 tracking-tighter text-center">Audit Paused</h2>
-              <Button onClick={() => setIsPaused(false)} className="bg-primary text-white font-black h-16 px-16 rounded-[2rem] uppercase text-[11px] tracking-[0.3em] shadow-4xl hover:bg-orange-600 transition-all">Resume Evaluation</Button>
+              <Pause className="h-12 w-12 text-primary mb-6 animate-pulse" />
+              <h2 className="text-3xl font-headline font-black uppercase mb-8 tracking-tighter text-center">Audit Paused</h2>
+              <Button onClick={() => setIsPaused(false)} className="bg-primary text-white font-black h-14 px-12 rounded-2xl uppercase text-[10px] tracking-[0.3em] shadow-4xl">Resume Evaluation</Button>
            </div>
         )}
 
-        <div className="flex-1 flex flex-col overflow-hidden bg-white md:m-4 md:rounded-[2rem] md:shadow-2xl md:border md:border-slate-100">
-          <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between shrink-0">
-             <div className="flex items-center gap-10">
-                <div className="text-left space-y-1">
-                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">ACTIVE SECTION</p>
-                   <h2 className="text-xs font-black text-black uppercase flex items-center gap-2">
-                     <Target className="h-3 w-3 text-primary" /> {activeSubject}
+        <div className="flex-1 flex flex-col overflow-hidden bg-white">
+          {/* Section Info Bar */}
+          <div className="px-4 py-3 border-b border-slate-100 bg-white flex items-center justify-between shrink-0">
+             <div className="flex items-center gap-4 md:gap-10">
+                <div className="text-left">
+                   <p className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">SECTION</p>
+                   <h2 className="text-[10px] md:text-sm font-black text-black uppercase flex items-center gap-1.5 truncate max-w-[120px] md:max-w-none">
+                     <Target className="h-3 w-3 text-primary shrink-0" /> {activeSubject}
                    </h2>
                 </div>
-                <div className="h-8 w-px bg-slate-200 hidden md:block" />
-                <div className="text-left space-y-1">
-                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none">Q-INDEX</p>
-                   <p className="text-xs font-black text-black">{currentIdx + 1} of {questions.length}</p>
+                <div className="h-6 w-px bg-slate-200" />
+                <div className="text-left">
+                   <p className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">QUESTION</p>
+                   <p className="text-[10px] md:text-sm font-black text-black">{currentIdx + 1} / {questions.length}</p>
                 </div>
              </div>
              
-             <div className="flex gap-4">
-                <Sheet>
-                  <SheetTrigger asChild>
-                    <Button variant="outline" className="lg:hidden rounded-xl h-10 px-4 gap-2 font-black text-[10px] uppercase border-slate-200 bg-white">
-                        <LayoutGrid className="h-4 w-4 text-primary" /> Palette
-                    </Button>
-                  </SheetTrigger>
-                  <SheetContent side="right" className="p-0 border-none w-[320px]">
-                      <div className="p-6 h-full overflow-y-auto bg-white pt-16">
-                        <QuestionPalette 
-                            questions={questions} 
-                            currentIndex={currentIdx} 
-                            answeredIndices={Object.keys(answers).map(Number)} 
-                            flaggedIndices={flagged} visitedIndices={visited}
-                            onSelect={(idx) => { setCurrentIdx(idx); if (!visited.includes(idx)) setVisited(p => [...p, idx]); }} 
-                            examName={mock?.title}
-                          />
-                      </div>
-                  </SheetContent>
-                </Sheet>
-                <Button onClick={submitMock} disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-[0.2em] h-10 px-8 rounded-xl shadow-xl transition-all">
-                    FINISH EVALUATION
-                </Button>
-             </div>
+             <Sheet>
+               <SheetTrigger asChild>
+                 <Button variant="outline" className="rounded-lg h-8 md:h-10 px-3 md:px-5 gap-2 font-black text-[9px] md:text-[11px] uppercase border-slate-200 bg-white shadow-sm hover:bg-slate-50">
+                    <LayoutGrid className="h-3.5 w-3.5 text-primary" /> Palette
+                 </Button>
+               </SheetTrigger>
+               <SheetContent side="right" className="p-0 border-none w-[280px] md:w-[340px]">
+                   <div className="p-6 h-full overflow-y-auto bg-white pt-16">
+                     <QuestionPalette 
+                         questions={questions} 
+                         currentIndex={currentIdx} 
+                         answeredIndices={Object.keys(answers).map(Number)} 
+                         flaggedIndices={flagged} visitedIndices={visited}
+                         onSelect={(idx) => { setCurrentIdx(idx); if (!visited.includes(idx)) setVisited(p => [...p, idx]); }} 
+                         examName={mock?.title}
+                       />
+                   </div>
+               </SheetContent>
+             </Sheet>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 md:p-10 custom-scrollbar bg-white">
-             <div className="max-w-4xl mx-auto space-y-8">
+          {/* Question & Option Body - Scrollable */}
+          <div className="flex-1 overflow-y-auto p-4 md:p-12 custom-scrollbar bg-white">
+             <div className="max-w-[900px] mx-auto space-y-6 md:space-y-10">
                 <QuestionRenderer 
                    language={language}
                    question={q}
                    hideOptions={true}
                 />
                 
-                <div className="space-y-3">
+                <div className="space-y-2 md:space-y-3">
                    <RadioGroup 
                      value={answers[currentIdx]?.toString() || ""} 
                      onValueChange={(v) => setAnswers(prev => ({ ...prev, [currentIdx]: parseInt(v) }))} 
-                     className="grid grid-cols-1 gap-3"
+                     className="grid grid-cols-1 gap-2 md:gap-3"
                    >
                      {['A', 'B', 'C', 'D'].map((k, i) => {
                        const isSelected = answers[currentIdx] === i;
@@ -232,21 +214,21 @@ export default function MockAttemptPage() {
 
                        return (
                          <div key={i} className={cn(
-                           "flex items-center space-x-6 p-4 md:p-5 border-2 rounded-2xl transition-all cursor-pointer shadow-sm",
+                           "flex items-center space-x-3 md:space-x-6 p-3 md:p-4 border-2 rounded-xl md:rounded-2xl transition-all cursor-pointer shadow-sm min-h-[52px] md:min-h-[64px]",
                            isSelected ? 'border-primary bg-primary/5' : 'border-slate-100 bg-white hover:border-primary/20'
                          )} onClick={() => setAnswers(prev => ({ ...prev, [currentIdx]: i }))}>
                             <div className={cn(
-                               "h-10 w-10 rounded-xl border-2 flex items-center justify-center font-black text-sm shrink-0 transition-all shadow-sm",
-                               isSelected ? "bg-primary border-primary text-white scale-110 shadow-lg" : "border-slate-200 text-slate-300"
+                               "h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl border-2 flex items-center justify-center font-black text-xs md:text-sm shrink-0 transition-all",
+                               isSelected ? "bg-primary border-primary text-white scale-105 shadow-md" : "border-slate-200 text-slate-300"
                             )}>
                                {k}
                             </div>
-                            <Label className="flex-1 cursor-pointer select-none text-[16px] md:text-[19px] font-black text-[#0F172A] text-left leading-snug">
+                            <Label className="flex-1 cursor-pointer select-none text-[14px] md:text-[18px] font-black text-[#0F172A] text-left leading-snug">
                                 {language === 'en' ? enVal : 
                                  language === 'pa' ? (paVal || enVal) : 
                                  (
                                   <div className="inline">
-                                    {enVal} {paVal && <span className="text-primary/30 mx-3">/</span>} {paVal}
+                                    {enVal} {paVal && <span className="text-primary/30 mx-2">/</span>} {paVal}
                                   </div>
                                  )}
                             </Label>
@@ -258,34 +240,22 @@ export default function MockAttemptPage() {
              </div>
           </div>
 
-          <footer className="h-20 md:h-24 border-t border-slate-100 bg-slate-50/30 px-6 md:px-12 flex items-center justify-between shrink-0 z-50">
-             <Button variant="outline" className="h-12 px-8 text-[11px] font-black uppercase rounded-xl border-slate-200 bg-white shadow-sm hover:bg-slate-50" onClick={() => currentIdx > 0 && setCurrentIdx(currentIdx - 1)} disabled={currentIdx === 0}>
-                <ChevronLeft className="h-4 w-4 mr-2" /> Previous
+          {/* Sticky Nav Footer */}
+          <footer className="h-[76px] md:h-24 border-t border-slate-100 bg-white px-3 md:px-12 flex items-center justify-between shrink-0 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.03)]">
+             <Button variant="ghost" className="h-10 md:h-14 px-3 md:px-8 text-[9px] md:text-[11px] font-black uppercase rounded-xl text-slate-500" onClick={() => currentIdx > 0 && setCurrentIdx(currentIdx - 1)} disabled={currentIdx === 0}>
+                <ChevronLeft className="h-4 w-4 md:mr-2" /> <span className="hidden md:inline">Previous</span>
              </Button>
              
-             <div className="flex gap-4">
-                <Button variant="outline" className={cn("h-12 px-8 text-[11px] font-black uppercase rounded-xl border-2 transition-all shadow-sm", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white" : "text-amber-500 border-amber-100 bg-white")} onClick={() => { if(!flagged.includes(currentIdx)) setFlagged(p=>[...p, currentIdx]); else setFlagged(p=>p.filter(idx=>idx!==currentIdx)); }}>
-                   {flagged.includes(currentIdx) ? 'FLAGGED' : 'MARK REVIEW'}
+             <div className="flex gap-2 md:gap-4">
+                <Button variant="outline" className={cn("h-10 md:h-14 px-3 md:px-8 text-[9px] md:text-[11px] font-black uppercase rounded-xl border-2 transition-all shadow-sm", flagged.includes(currentIdx) ? "bg-amber-500 border-amber-500 text-white" : "text-amber-500 border-amber-100 bg-white")} onClick={() => { if(!flagged.includes(currentIdx)) setFlagged(p=>[...p, currentIdx]); else setFlagged(p=>p.filter(idx=>idx!==currentIdx)); }}>
+                   {flagged.includes(currentIdx) ? 'FLAGGED' : 'REVIEW'}
                 </Button>
-                <Button className="bg-[#0F172A] hover:bg-black text-white h-12 px-12 rounded-xl font-black uppercase text-[11px] tracking-widest shadow-2xl transition-all active:scale-95" onClick={() => { if(currentIdx < questions.length-1) { const next = currentIdx + 1; setCurrentIdx(next); if(!visited.includes(next)) setVisited(v=>[...v, next])} }}>
-                   Save & Next <ChevronRight className="h-4 w-4 ml-2" />
+                <Button className="bg-[#0F172A] hover:bg-black text-white h-10 md:h-14 px-6 md:px-14 rounded-xl font-black uppercase text-[9px] md:text-[11px] tracking-widest shadow-2xl transition-all active:scale-95" onClick={() => { if(currentIdx < questions.length-1) { const next = currentIdx + 1; setCurrentIdx(next); if(!visited.includes(next)) setVisited(v=>[...v, next])} }}>
+                   SAVE & NEXT <ChevronRight className="h-4 w-4 md:ml-2" />
                 </Button>
              </div>
           </footer>
         </div>
-
-        <aside className="w-[340px] border-l border-slate-100 bg-white hidden lg:flex flex-col shrink-0 overflow-hidden m-4 ml-0 rounded-[2rem] shadow-xl">
-           <div className="flex-1 overflow-y-auto p-6 no-scrollbar">
-              <QuestionPalette 
-                questions={questions} 
-                currentIndex={currentIdx} 
-                answeredIndices={Object.keys(answers).map(Number)} 
-                flaggedIndices={flagged} visitedIndices={visited}
-                onSelect={(idx) => { setCurrentIdx(idx); if (!visited.includes(idx)) setVisited(p => [...p, idx]); }} 
-                examName={mock?.title}
-              />
-           </div>
-        </aside>
       </main>
     </div>
   )
@@ -293,6 +263,6 @@ export default function MockAttemptPage() {
 
 function LangTab({ label, active, onClick }: any) {
   return (
-    <button onClick={onClick} className={cn("px-4 py-2 rounded-lg text-[10px] font-black tracking-widest transition-all", active ? "bg-[#F97316] text-white shadow-lg" : "text-white/40 hover:text-white hover:bg-white/5")}>{label}</button>
+    <button onClick={onClick} className={cn("px-2 md:px-4 py-1.5 md:py-2 rounded-md md:rounded-lg text-[8px] md:text-[10px] font-black tracking-widest transition-all", active ? "bg-[#F97316] text-white shadow-lg" : "text-white/40 hover:text-white hover:bg-white/5")}>{label}</button>
   )
 }
