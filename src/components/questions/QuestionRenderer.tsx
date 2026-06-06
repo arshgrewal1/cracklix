@@ -1,11 +1,10 @@
-
 'use client';
 
 import React from 'react';
 import { Question } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
-import { CheckCircle2, AlertTriangle, Info, Database, BrainCircuit } from 'lucide-center';
+import { CheckCircle2, AlertTriangle, Info, Database, BrainCircuit } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 interface QuestionRendererProps {
