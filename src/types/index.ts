@@ -53,6 +53,14 @@ export interface Board {
   category: BoardCategory;
 }
 
+export interface Subject {
+  id: string;
+  name: string;
+  aliases: string[];
+  description?: string;
+  updatedAt: any;
+}
+
 export interface Pass {
   id: string;
   name: string;
@@ -115,6 +123,7 @@ export interface MockTest {
   title: string;
   boardId: string;
   examId: string;
+  subjectId?: string;
   mockType: MockType;
   accessType: AccessType;
   duration: number;
@@ -124,6 +133,31 @@ export interface MockTest {
   status: ContentStatus;
   published: boolean;
   isDummy?: boolean;
+  createdAt: any;
+  updatedAt: any;
+}
+
+export interface Question {
+  id: string;
+  questionEn: string;
+  questionPa?: string;
+  optionAEn: string;
+  optionAPa?: string;
+  optionBEn: string;
+  optionBPa?: string;
+  optionCEn: string;
+  optionCPa?: string;
+  optionDEn: string;
+  optionDPa?: string;
+  correctAnswer: 'A' | 'B' | 'C' | 'D';
+  explanationEn?: string;
+  explanationPa?: string;
+  subjectId: string;
+  boardId: string;
+  difficulty: Difficulty;
+  isStandalone: boolean;
+  usageCount?: number;
+  status: ContentStatus;
   createdAt: any;
   updatedAt: any;
 }

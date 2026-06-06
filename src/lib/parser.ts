@@ -1,10 +1,7 @@
+
 /**
  * @fileOverview Institutional Ultimate Hybrid Ingestion Engine.
- * Supports: 
- * 1. Simple Format (Q1. Text, A., B., C., D., Answer: B)
- * 2. High-Fidelity Tagged Format (QUESTION_TYPE: ..., QUESTION_EN: ..., etc.)
- * 3. Contextual Sets (DI_SET, PASSAGE)
- * Updated: Aggressive sanitization to strip Markdown artifacts (**), redundant dots, and numbering.
+ * Features: Automatic Subject Normalization via Alias Mapping.
  */
 
 import { Question, Difficulty, ContentStatus, QuestionType } from "@/types";
@@ -15,18 +12,36 @@ export interface ParsedResults {
   confidence: number;
 }
 
-/**
- * Strips Markdown artifacts, redundant dots, and extra whitespace.
- * Specifically handles trailing stars (**) and bolding markers.
- */
 function cleanText(text: string): string {
   if (!text) return "";
   return text
-    .replace(/^[\s\d\.\*]+/, '') // Remove leading numbers, dots, stars (e.g. "Q1. ", "**2.** ")
-    .replace(/\*+$/, '')         // Remove trailing stars/bold markers (e.g. "**")
-    .replace(/[\*\_]/g, '')      // Remove any remaining Markdown bold/italic markers (*, _)
-    .replace(/\s+/g, ' ')        // Normalize whitespace
+    .replace(/^[\s\d\.\*]+/, '') 
+    .replace(/\*+$/, '')         
+    .replace(/[\*\_]/g, '')      
+    .replace(/\s+/g, ' ')        
     .trim();
+}
+
+/**
+ * Intelligent Subject Normalizer.
+ * Matches input string against Canonical Subjects and their Aliases.
+ */
+export function normalizeSubjectId(input: string, masterSubjects: any[]): string {
+  if (!input || !masterSubjects) return 'general-knowledge';
+  const cleanInput = input.trim().toLowerCase();
+  
+  // 1. Check Exact Matches
+  const exact = masterSubjects.find(s => s.name.toLowerCase() === cleanInput || s.id.toLowerCase() === cleanInput);
+  if (exact) return exact.id;
+  
+  // 2. Check Alias Registry
+  const aliasMatch = masterSubjects.find(s => 
+    s.aliases?.some((a: string) => a.toLowerCase() === cleanInput)
+  );
+  if (aliasMatch) return aliasMatch.id;
+  
+  // 3. Fallback
+  return 'general-knowledge';
 }
 
 export function parseBulkQuestions(
@@ -38,38 +53,30 @@ export function parseBulkQuestions(
     chapterId: string;
     difficulty: Difficulty;
     status: ContentStatus;
-  }
+  },
+  masterSubjects: any[] = []
 ): ParsedResults {
   const questions: Partial<Question>[] = [];
   const errors: string[] = [];
   
-  // Normalize and clean text
   const text = "\n" + rawText.replace(/\r\n/g, '\n').trim();
-  
-  // Resilient splitting: Look for separators like --- or === OR question starts like Q1, 1., **Q1**
   const blocks = text.split(/(?:\n\s*[=-]{3,}\s*\n|(?=\n\s*\**Q?\d+[\.\)])|(?=\n\s*QUESTION_TYPE:))/i)
     .map(b => b.trim())
     .filter(b => b.length > 5);
 
   if (blocks.length === 0) {
-    return { questions: [], errors: ["No valid content blocks detected. Ensure questions start with Q1., 1. or use === separators."], confidence: 0 };
+    return { questions: [], errors: ["No valid content blocks detected."], confidence: 0 };
   }
 
   blocks.forEach((block, index) => {
     try {
       const isTaggedFormat = block.toUpperCase().includes('QUESTION_TYPE:') || block.toUpperCase().includes('QUESTION_EN:');
-      
       let parsed: Partial<Question>;
 
       if (isTaggedFormat) {
-        parsed = parseTaggedBlock(block, metadata);
+        parsed = parseTaggedBlock(block, metadata, masterSubjects);
       } else {
         parsed = parseSimpleBlock(block, metadata);
-      }
-
-      // Validate question existence
-      if (!parsed.questionEn && parsed.questionType !== 'DI_SET' && parsed.questionType !== 'PASSAGE') {
-        throw new Error("Could not extract question statement. Check formatting.");
       }
 
       questions.push({
@@ -87,7 +94,7 @@ export function parseBulkQuestions(
   return { questions, errors, confidence };
 }
 
-function parseTaggedBlock(block: string, metadata: any): Partial<Question> {
+function parseTaggedBlock(block: string, metadata: any, masterSubjects: any[]): Partial<Question> {
   const getTag = (tag: string) => {
     const regex = new RegExp(`${tag}:?\\s*([\\s\\S]*?)(?=\\n[A-Z_\\d\\s]+:?|$)`, 'i');
     const match = block.match(regex);
@@ -95,24 +102,20 @@ function parseTaggedBlock(block: string, metadata: any): Partial<Question> {
   };
 
   const qType = (getTag("QUESTION_TYPE") || "MCQ").toUpperCase() as QuestionType;
+  
+  // Dynamic Normalization for per-question subjects if tagged
+  const blockSubject = getTag("SUBJECT");
+  const finalSubjectId = blockSubject 
+    ? normalizeSubjectId(blockSubject, masterSubjects) 
+    : metadata.subjectId;
+
   const ansRaw = getTag("ANSWER") || getTag("CORRECT_ANSWER");
   const correctAnswer = (ansRaw?.match(/[A-D]/i)?.[0].toUpperCase() || "A") as 'A' | 'B' | 'C' | 'D';
 
-  const tableDataRaw = getTag("TABLE_DATA");
-  let tableData = null;
-  if (tableDataRaw) {
-    const lines = tableDataRaw.split('\n').filter(l => l.includes('|'));
-    if (lines.length > 0) {
-      const headers = lines[0].split('|').map(h => h.trim());
-      const rows = lines.slice(1).map(r => r.split('|').map(c => c.trim()));
-      tableData = { headers, rows };
-    }
-  }
-
   return {
     ...metadata,
+    subjectId: finalSubjectId,
     questionType: qType,
-    diagramType: getTag("IMAGE_URL") ? 'image' : tableData ? 'table' : 'none',
     questionEn: getTag("QUESTION_EN") || getTag("TITLE"),
     questionPa: getTag("QUESTION_PA") || getTag("QUESTION_EN") || "",
     optionAEn: getTag("OPTION_A_EN") || "Option A",
@@ -133,36 +136,20 @@ function parseTaggedBlock(block: string, metadata: any): Partial<Question> {
 }
 
 function parseSimpleBlock(block: string, metadata: any): Partial<Question> {
-  // Split parts based on typical labels
   const parts = block.split(/(?=\n\s*\**[A-D][\.\)]\s*\*?|(?:\n\s*\**Correct Answer:?\**)|(?:\n\s*\**Explanation:?\**))/i);
+  const qLines = parts[0]?.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
   
-  const questionPart = parts[0]?.trim();
-  const qLines = questionPart.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  
-  // Bilingual question detection (Line 1: EN, Line 2: PA)
   const questionEn = cleanText(qLines[0] || "");
   const questionPa = qLines.length > 1 ? cleanText(qLines.slice(1).join('\n')) : questionEn;
 
-  const findRawPart = (prefix: string) => {
-    return parts.find(p => {
-       const cleanP = p.trim().replace(/^\**|\**$/g, '');
-       return cleanP.toLowerCase().startsWith(prefix.toLowerCase());
-    });
-  };
-
   const extractOption = (prefix: string) => {
-    const raw = findRawPart(prefix);
+    const raw = parts.find(p => p.trim().replace(/^\**|\**$/g, '').toLowerCase().startsWith(prefix.toLowerCase()));
     if (!raw) return { en: `Option ${prefix}`, pa: "" };
-    
-    // Remove the A) or B. prefix and cleaning markers
     const content = raw.trim().replace(new RegExp(`^\\**${prefix}[\\.\\)]?\\s*\\**`, 'i'), '').trim();
-    
-    // Handle pipe separator for bilingual options
     if (content.includes('|')) {
       const [en, pa] = content.split('|').map(s => s.trim());
       return { en: cleanText(en), pa: cleanText(pa) };
     }
-    
     return { en: cleanText(content), pa: "" };
   };
 
@@ -171,32 +158,18 @@ function parseSimpleBlock(block: string, metadata: any): Partial<Question> {
   const optC = extractOption("C");
   const optD = extractOption("D");
 
-  const ansPart = findRawPart("Correct Answer") || "A";
+  const ansPart = parts.find(p => p.trim().replace(/^\**|\**$/g, '').toLowerCase().startsWith("correct answer")) || "A";
   const correctAnswer = (ansPart.match(/[A-D]/i)?.[0].toUpperCase() || "A") as 'A' | 'B' | 'C' | 'D';
-
-  const expPart = findRawPart("Explanation") || "";
-  const expLines = expPart.replace(/^\**Explanation:?\**\s*/i, '').split('\n').filter(l => l.trim().length > 0);
-  const explanationEn = cleanText(expLines[0] || "Rationale available in bank.");
-  const explanationPa = expLines.length > 1 ? cleanText(expLines.slice(1).join('\n')) : "";
 
   return {
     ...metadata,
     questionType: 'MCQ',
-    diagramType: 'none',
     questionEn,
     questionPa,
-    optionAEn: optA.en,
-    optionAPa: optA.pa,
-    optionBEn: optB.en,
-    optionBPa: optB.pa,
-    optionCEn: optC.en,
-    optionCPa: optC.pa,
-    optionDEn: optD.en,
-    optionDPa: optD.pa,
+    optionAEn: optA.en, optionAPa: optA.pa,
+    optionBEn: optB.en, optionBPa: optB.pa,
+    optionCEn: optC.en, optionCPa: optC.pa,
+    optionDEn: optD.en, optionDPa: optD.pa,
     correctAnswer,
-    explanationEn,
-    explanationPa,
-    imageUrl: null,
-    tableData: null
   };
 }

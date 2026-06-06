@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from "react"
@@ -32,11 +33,6 @@ import { parseBulkQuestions } from "@/lib/parser"
 import { Difficulty, Question, ContentStatus } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
-/**
- * @fileOverview Institutional Ultimate Bulk Ingestion Hub.
- * Features Structure & Audit (Preview) + Institutional Save (Commit).
- */
-
 export default function BulkImportPage() {
   const router = useRouter()
   const db = useFirestore()
@@ -67,7 +63,7 @@ export default function BulkImportPage() {
       return
     }
 
-    const { questions, errors, confidence: conf } = parseBulkQuestions(rawText, metadata)
+    const { questions, errors, confidence: conf } = parseBulkQuestions(rawText, metadata, subjects || [])
     setParsedQuestions(questions)
     setParseErrors(errors)
     setConfidence(conf)
@@ -87,8 +83,6 @@ export default function BulkImportPage() {
 
     parsedQuestions.forEach(q => {
       const qRef = doc(collection(db, "questions"))
-      
-      // Strict Payload Sanitization
       const payload: any = {
         ...q,
         id: qRef.id,
@@ -98,10 +92,9 @@ export default function BulkImportPage() {
         status: metadata.status
       };
 
-      // Purge undefined values which Firestore rejects
       Object.keys(payload).forEach(key => {
-         if (payload[key] === undefined) {
-            payload[key] = null;
+         if (payload[key] === undefined || payload[key] === null) {
+            delete payload[key];
          }
       });
 
@@ -113,8 +106,7 @@ export default function BulkImportPage() {
       toast({ title: "Bank Sync Success", description: `${parsedQuestions.length} reusable nodes successfully committed.` })
       router.push("/admin/questions")
     } catch (e: any) {
-      console.error("Firestore Write Error:", e)
-      toast({ variant: "destructive", title: "Sync Failed", description: e.message || "Database transaction rejected." })
+      toast({ variant: "destructive", title: "Sync Failed", description: e.message })
     } finally {
       setIsSyncing(false)
     }
@@ -129,7 +121,7 @@ export default function BulkImportPage() {
           </Button>
           <div className="text-left">
             <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Institutional Ingestion</h1>
-            <p className="text-slate-500 font-medium text-left">Structure raw text into atomic reusable bank nodes.</p>
+            <p className="text-slate-500 font-medium">Structure raw text into atomic reusable bank nodes.</p>
           </div>
         </div>
         <div className="flex gap-4">
@@ -147,7 +139,7 @@ export default function BulkImportPage() {
           <Card className="border-none bg-white shadow-3xl rounded-[3rem] overflow-hidden">
             <div className="h-2 w-full bg-primary" />
             <CardHeader className="p-10 pb-4">
-              <CardTitle className="font-headline font-black text-2xl uppercase flex items-center gap-4 text-left">
+              <CardTitle className="font-headline font-black text-2xl uppercase flex items-center gap-4">
                 <Settings2 className="h-6 w-6 text-primary" /> Target Metadata
               </CardTitle>
             </CardHeader>
@@ -174,16 +166,6 @@ export default function BulkImportPage() {
                    <Input value={metadata.chapterId} onChange={e => setMetadata({...metadata, chapterId: e.target.value})} placeholder="e.g. Percentage" className="h-12 bg-slate-50 border-none rounded-xl font-bold" />
                 </div>
               </div>
-
-              <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2"><FileCode className="h-3 w-3" /> PROTOCOL MODES</p>
-                 <ul className="text-[9px] font-bold text-slate-600 space-y-3">
-                    <li>• <span className="text-primary">SIMPLE MODE:</span> Q1. Question text &gt; A. Option A &gt; Answer: B</li>
-                    <li>• <span className="text-primary">TAGGED MODE:</span> QUESTION_TYPE: MCQ &gt; QUESTION_EN: ...</li>
-                    <li>• <span className="text-primary">DI MODE:</span> DI_SET_ID: DI01 &gt; IMAGE_URL: [Link]</li>
-                    <li>• Use <span className="font-black text-[#0F172A]">===</span> between blocks.</li>
-                 </ul>
-              </div>
             </CardContent>
           </Card>
         </div>
@@ -194,7 +176,7 @@ export default function BulkImportPage() {
               <Textarea 
                 value={rawText}
                 onChange={e => setRawText(e.target.value)}
-                placeholder="Paste TAGGED content here (QUESTION_EN, QUESTION_PA, OPTION_A_EN...)"
+                placeholder="Paste TAGGED or SIMPLE content here..."
                 className="min-h-[500px] rounded-[3.5rem] bg-white border-none p-12 text-sm font-mono shadow-4xl custom-scrollbar text-[#0F172A]"
               />
               <Button onClick={handleAnalyze} className="w-full h-20 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.3em] rounded-[2.5rem] shadow-4xl mt-6 gap-4">
@@ -205,9 +187,9 @@ export default function BulkImportPage() {
            {parsedQuestions.length > 0 && (
              <Card className="border-none shadow-4xl rounded-[4rem] bg-white overflow-hidden text-left">
                 <CardHeader className="p-12 border-b border-slate-50 bg-slate-50/30 flex flex-row justify-between items-center">
-                   <div className="space-y-2 text-left">
+                   <div className="space-y-2">
                       <CardTitle className="font-headline font-black text-3xl uppercase">Extraction Matrix ({parsedQuestions.length})</CardTitle>
-                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest text-left">Confidence: {confidence}% • Schema: Production v2</p>
+                      <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Confidence: {confidence}% • Subject: {subjects?.find(s => s.id === metadata.subjectId)?.name}</p>
                    </div>
                    <Badge className="bg-emerald-100 text-emerald-600 border-none font-black px-6 py-2 rounded-xl text-xs uppercase tracking-widest">VALIDATED NODES</Badge>
                 </CardHeader>
@@ -216,32 +198,12 @@ export default function BulkImportPage() {
                       <div key={idx} className="p-10 bg-slate-50/50 rounded-[3rem] border border-slate-100 space-y-8">
                          <div className="flex items-center justify-between">
                             <Badge className="bg-primary text-white border-none text-[10px] font-black uppercase px-4 py-1 rounded-lg">Audit Node #{idx+1}</Badge>
-                            <div className="flex gap-4">
-                               <Badge variant="outline" className="text-[9px] font-black uppercase border-slate-200">{q.questionType}</Badge>
-                               <Button variant="ghost" size="icon" className="h-10 w-10 text-rose-500" onClick={() => setParsedQuestions(parsedQuestions.filter((_, i) => i !== idx))}><Trash2 className="h-4 w-4" /></Button>
-                            </div>
+                            <Button variant="ghost" size="icon" className="h-10 w-10 text-rose-500" onClick={() => setParsedQuestions(parsedQuestions.filter((_, i) => i !== idx))}><Trash2 className="h-4 w-4" /></Button>
                          </div>
                          <QuestionRenderer question={q} language="bilingual" />
                       </div>
                    ))}
                 </CardContent>
-             </Card>
-           )}
-
-           {parseErrors.length > 0 && (
-             <Card className="border-rose-100 bg-rose-50/50 p-16 rounded-[4rem] shadow-4xl text-left">
-                <div className="flex items-center gap-6 text-rose-600 mb-10 text-left">
-                   <AlertCircle className="h-12 w-12" />
-                   <h4 className="font-headline font-black text-3xl uppercase tracking-tight">Audit Flags</h4>
-                </div>
-                <div className="space-y-4">
-                   {parseErrors.map((err, i) => (
-                      <div key={i} className="p-6 bg-white rounded-3xl border border-rose-100 shadow-xl flex items-start gap-4 text-left">
-                         <div className="h-6 w-6 rounded-full bg-rose-500 text-white flex items-center justify-center text-[10px] font-black shrink-0 mt-1">!</div>
-                         <p className="text-base font-bold text-rose-900 leading-tight">{err}</p>
-                      </div>
-                   ))}
-                </div>
              </Card>
            )}
         </div>
