@@ -2,8 +2,8 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Engine v6.0.
- * Orchestrates strict isolation for Teaching, Punjab State, and Central verticals.
+ * @fileOverview Institutional Seeding Engine v7.0.
+ * Optimized: Purged duplicate subjects and added missing modules for 2026 patterns.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Global Institutional Registry Sync...');
@@ -17,7 +17,8 @@ export async function seedInitialData(db: Firestore) {
     { id: 'ctet-board', abbreviation: 'CTET', name: 'Central Teacher Eligibility Board', region: 'National', category: 'TEACHING', iconUrl: 'https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png' },
     { id: 'high-court-board', abbreviation: 'High Court', name: 'Punjab & Haryana High Court', region: 'Punjab', category: 'PUNJAB_STATE', iconUrl: 'https://highcourtchd.gov.in/images/newlogo.png' },
     { id: 'central-ssc', abbreviation: 'SSC', name: 'Staff Selection Commission', region: 'National', category: 'CENTRAL', iconUrl: 'https://ssc.gov.in/assets/sscLogo.webp' },
-    { id: 'defense-army', abbreviation: 'ARMY', name: 'Indian Army', region: 'National', category: 'CENTRAL', iconUrl: 'https://pbs.twimg.com/profile_images/2054486939102035969/AE8RcJUh_400x400.jpg' }
+    { id: 'defense-army', abbreviation: 'ARMY', name: 'Indian Army', region: 'National', category: 'CENTRAL', iconUrl: 'https://pbs.twimg.com/profile_images/2054486939102035969/AE8RcJUh_400x400.jpg' },
+    { id: 'markfed-board', abbreviation: 'MARKFED', name: 'Punjab Markfed Recruitment', region: 'Punjab', category: 'PUNJAB_STATE', iconUrl: 'https://www.punjabteched.com/images/logo.png' }
   ];
 
   for (const b of boards) {
@@ -53,13 +54,21 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'exams', e.id), { ...e, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 3. Subjects Registry
+  // 3. Subjects Registry (CLEAN & DEDUPLICATED)
   const subjects = [
-    { id: 'punjab-gk', name: 'Punjab GK' },
-    { id: 'punjabi-paper-a', name: 'Punjabi Paper A' },
-    { id: 'mental-ability', name: 'Reasoning' },
-    { id: 'quant', name: 'Quantitative Aptitude' },
-    { id: 'ict', name: 'ICT / Computers' }
+    { id: 'punjab-gk', name: 'Punjab GK & History' },
+    { id: 'punjabi-qualifying', name: 'Punjabi Qualifying (Paper A)' },
+    { id: 'punjabi-language', name: 'Punjabi Language' },
+    { id: 'mental-ability', name: 'Mental Ability & Reasoning' },
+    { id: 'quant-maths', name: 'Quantitative Aptitude' },
+    { id: 'ict-computers', name: 'ICT / Computers' },
+    { id: 'english-lang', name: 'English Language' },
+    { id: 'current-affairs', name: 'Current Affairs' },
+    { id: 'general-science', name: 'General Science' },
+    { id: 'agriculture-node', name: 'Agriculture (Patwari Spec.)' },
+    { id: 'police-laws', name: 'Police Laws & Digital Literacy' },
+    { id: 'child-pedagogy', name: 'Child Development & Pedagogy' },
+    { id: 'india-gk', name: 'Indian Polity & Constitution' }
   ];
 
   for (const s of subjects) {
