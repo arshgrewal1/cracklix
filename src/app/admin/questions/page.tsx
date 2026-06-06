@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState, useEffect, useCallback } from "react"
@@ -26,7 +25,7 @@ import {
 } from "@/components/ui/tooltip"
 
 /**
- * @fileOverview Institutional Asset Ledger (Global Bank) v11.0.
+ * @fileOverview Institutional Asset Ledger (Global Bank) v12.0.
  * Hardened: Robust Firestore instance validation to prevent runtime collection() errors.
  */
 

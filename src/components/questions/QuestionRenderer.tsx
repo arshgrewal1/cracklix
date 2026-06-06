@@ -15,8 +15,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional High-Fidelity High-Density Dark Renderer v28.0.
- * Optimized: Scaled down font sizes and paddings to minimize vertical scrolling.
+ * @fileOverview Institutional High-Fidelity High-Density Dark Renderer v29.0.
+ * Optimized: Strictly mirrors the "Testbook" rationale style with uppercase labels and orange bullets.
  * Style: Deep black workspace with high-contrast white option boxes.
  */
 export default function QuestionRenderer({ 
@@ -109,30 +109,34 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      {/* 3. CORRECT ANSWER & RATIONALE */}
+      {/* 3. CORRECT ANSWER & RATIONALE (Institutional Style) */}
       {showSolution && (
-        <div className="mt-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300 pt-4 border-t border-white/10">
-           <div className="font-[900] text-[11px] md:text-[12px] text-emerald-400 bg-emerald-500/5 px-3 py-1.5 rounded-lg border border-emerald-500/20 inline-block uppercase tracking-wide">
-              Verified Key: ({q.correctAnswer || '?'}) {q[`option${q.correctAnswer}English`]}
+        <div className="mt-4 space-y-5 animate-in fade-in slide-in-from-top-2 duration-300 pt-6 border-t border-white/10">
+           <div className="font-[900] text-[10px] md:text-[11px] text-emerald-400 bg-emerald-900/20 px-4 py-2 rounded-full border border-emerald-500/30 inline-block uppercase tracking-wider shadow-lg">
+              VERIFIED KEY: ({q.correctAnswer || '?'}) {q[`option${q.correctAnswer}English`]?.toUpperCase()}
            </div>
 
-           <div className="space-y-3">
+           <div className="space-y-5">
               {(englishExp || isBi) && (
-                <div className="flex gap-3 items-start text-left">
-                   <div className="h-1.5 w-1.5 rounded-full border-2 border-primary shrink-0 mt-1.5 shadow-[0_0_6px_rgba(249,115,22,0.4)]" />
-                   <div className="font-[700] text-[11px] md:text-[12px] leading-relaxed text-slate-300 flex-1">
-                      <span className="text-white font-[900] mr-2 uppercase tracking-wide text-[9px]">Rationale (EN):</span>
-                      <MathText text={englishExp || "Registry node audit logic..."} />
+                <div className="flex gap-4 items-start text-left group">
+                   <div className="h-2.5 w-2.5 rounded-full border-2 border-primary shrink-0 mt-1 shadow-[0_0_8px_rgba(249,115,22,0.4)] group-hover:bg-primary transition-colors" />
+                   <div className="flex flex-col gap-1 flex-1">
+                      <span className="text-white font-[900] uppercase tracking-[0.1em] text-[10px] md:text-[11px]">RATIONALE (EN):</span>
+                      <div className="font-[700] text-[13px] md:text-[14px] leading-relaxed text-slate-300 antialiased">
+                         <MathText text={englishExp || "Registry node audit logic..."} />
+                      </div>
                    </div>
                 </div>
               )}
 
               {(punjabiExp || isBi) && (
-                <div className="flex gap-3 items-start text-left">
-                   <div className="h-1.5 w-1.5 rounded-full border-2 border-primary shrink-0 mt-1.5 shadow-[0_0_6px_rgba(249,115,22,0.4)]" />
-                   <div className="font-[700] text-[11px] md:text-[12px] leading-relaxed text-slate-300 flex-1">
-                      <span className="text-white font-[900] mr-2 text-[9px]">ਤੱਰਕ (PA):</span>
-                      <MathText text={punjabiExp || "ਵਿਆਖਿਆ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"} />
+                <div className="flex gap-4 items-start text-left group">
+                   <div className="h-2.5 w-2.5 rounded-full border-2 border-primary shrink-0 mt-1 shadow-[0_0_8px_rgba(249,115,22,0.4)] group-hover:bg-primary transition-colors" />
+                   <div className="flex flex-col gap-1 flex-1">
+                      <span className="text-white font-[900] uppercase tracking-wide text-[10px] md:text-[11px]">ਤੱਰਕ (PA):</span>
+                      <div className="font-[700] text-[13px] md:text-[14px] leading-relaxed text-slate-300 antialiased">
+                         <MathText text={punjabiExp || "ਵਿਆਖਿਆ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।"} />
+                      </div>
                    </div>
                 </div>
               )}
