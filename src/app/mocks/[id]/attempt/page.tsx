@@ -7,6 +7,7 @@ import { useFirestore, useUser } from "@/firebase";
 import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
 import ExamHeader from "@/components/exam/ExamHeader";
+import SubjectTabs from "@/components/exam/SubjectTabs";
 import TacticalFooter from "@/components/exam/TacticalFooter";
 import AntiCheat from "@/components/exam/AntiCheat";
 import QuestionRenderer from "@/components/questions/QuestionRenderer";
@@ -27,7 +28,6 @@ import {
 /**
  * @fileOverview Final Production-Grade CBT Evaluation Hub.
  * Strictly implements Auto-Save, Resume, and High-Density professional layout.
- * FIXED: Resolved 'replace' error for undefined section IDs.
  */
 export default function MockAttemptPage() {
   const params = useParams();
@@ -81,7 +81,7 @@ export default function MockAttemptPage() {
            });
         }
 
-        examStore.initExam(mockId, mockData.title, user.uid, questions, mockData.duration, savedState);
+        examStore.initExam(mockId, mockTitle, user.uid, questions, mockData.duration, savedState);
       } catch (err: any) {
         toast({ variant: "destructive", title: "CBT Sync Failure", description: err.message });
         router.push(`/mocks/${mockId}`);
@@ -126,8 +126,8 @@ export default function MockAttemptPage() {
       examStore.questions.forEach((q, idx) => {
         const studentAnsIdx = examStore.answers[idx];
         const correctAnsIdx = ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer);
-        if (studentAnsIdx === correctAnsIdx) score += (q.positiveMarks || 1);
-        else if (studentAnsIdx !== undefined) score -= (q.negativeMarks || 0.25);
+        if (studentAnsIdx === correctAnsIdx) score += 1;
+        else if (studentAnsIdx !== undefined) score -= 0.25;
       });
 
       const accuracy = Math.round((score / (Object.keys(examStore.answers).length || 1)) * 100);
@@ -168,70 +168,38 @@ export default function MockAttemptPage() {
   );
 
   const q = examStore.questions[examStore.currentIdx];
-  const sectionIds = Array.from(new Set(examStore.questions.map(q => q.sectionId).filter(Boolean)));
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-slate-50 font-body select-none">
       <AntiCheat />
       <ExamHeader onPaletteToggle={() => setIsPaletteOpen(true)} />
-      
-      {/* MULTI-SECTION NAVIGATION */}
-      <div className="h-14 bg-white border-b border-slate-200 flex items-center px-6 overflow-x-auto no-scrollbar gap-2 shrink-0 shadow-sm z-40">
-         {['PART A', 'PART B'].map(part => (
-           <button
-             key={part}
-             className={cn(
-               "px-8 h-full flex items-center justify-center text-[11px] font-black uppercase tracking-widest border-b-[3px] transition-all whitespace-nowrap",
-               part === 'PART B' ? "border-[#F97316] text-[#F97316] bg-orange-50/50" : "border-transparent text-slate-400 hover:text-slate-600"
-             )}
-           >
-             {part}
-           </button>
-         ))}
-         <div className="h-6 w-px bg-slate-200 mx-4" />
-         {sectionIds.map(sid => (
-           <button
-             key={sid}
-             onClick={() => {
-                const firstIdx = examStore.questions.findIndex(question => question.sectionId === sid);
-                examStore.setCurrentIdx(firstIdx);
-             }}
-             className={cn(
-               "px-6 h-full flex items-center justify-center text-[10px] font-bold uppercase tracking-wider border-b-2 transition-all whitespace-nowrap",
-               examStore.currentSectionId === sid ? "border-[#F97316] text-[#F97316] bg-orange-50/50" : "border-transparent text-slate-400 hover:text-slate-600"
-             )}
-           >
-             {String(sid).replace(/-/g, ' ')}
-           </button>
-         ))}
-      </div>
+      <SubjectTabs />
 
       <main className="flex-1 flex overflow-hidden relative">
         {/* RESUME INTERFACE */}
         {examStore.isPaused && (
            <div className="absolute inset-0 z-[100] bg-[#0B1528]/95 backdrop-blur-xl flex items-center justify-center animate-in fade-in duration-300 p-6">
               <div className="max-w-xl w-full bg-white rounded-[3rem] shadow-5xl overflow-hidden">
-                 <div className="bg-slate-50 p-12 border-b border-slate-100 text-center space-y-6">
+                 <div className="bg-slate-50 p-12 border-b border-slate-100 text-center space-y-6 text-left">
                     <div className="h-20 w-20 bg-primary/10 rounded-[2rem] flex items-center justify-center mx-auto text-[#F97316] shadow-2xl">
                        <Play className="h-10 w-10 fill-current" />
                     </div>
                     <div>
-                       <h2 className="text-4xl font-headline font-black text-[#0F172A] uppercase tracking-tight">TEST PAUSED</h2>
-                       <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest mt-2">Institutional Progress Audit</p>
+                       <h2 className="text-4xl font-headline font-black text-[#0F172A] uppercase tracking-tight text-center">TEST PAUSED</h2>
+                       <p className="text-slate-500 font-medium uppercase text-[10px] tracking-widest mt-2 text-center">Institutional Progress Audit</p>
                     </div>
                  </div>
                  <div className="p-12 space-y-12">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                       <ResumeStat label="Answered" val={stats.answered} color="bg-emerald-600" />
-                       <ResumeStat label="Not Answered" val={stats.notAnswered} color="bg-rose-600" />
-                       <ResumeStat label="Marked" val={stats.marked} color="bg-violet-600" />
-                       <ResumeStat label="Remaining" val={stats.notVisited} color="bg-slate-100" textColor="text-slate-400" />
+                       <ResumeStat label="Answered" val={stats.answered} color="bg-blue-600" />
+                       <ResumeStat label="Not Answered" val={stats.notAnswered} color="bg-slate-400" />
+                       <ResumeStat label="Marked" val={stats.marked} color="bg-pink-500" />
+                       <ResumeStat label="Remaining" val={stats.notVisited} color="bg-slate-50" textColor="text-slate-300" />
                     </div>
                     <div className="flex flex-col gap-4">
                        <Button onClick={() => examStore.setPaused(false)} className="w-full h-20 bg-[#F97316] hover:bg-orange-600 text-white rounded-[1.5rem] font-black uppercase tracking-[0.2em] text-[11px] shadow-3xl gap-4">
                           <Play className="h-6 w-6 fill-current" /> RESUME EVALUATION
                        </Button>
-                       <Button variant="ghost" onClick={() => setShowSubmitModal(true)} className="w-full text-slate-400 font-bold uppercase text-[10px] tracking-widest">Submit Final Assessment</Button>
                     </div>
                  </div>
               </div>
@@ -239,7 +207,7 @@ export default function MockAttemptPage() {
         )}
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
-           <div className="max-w-[900px] mx-auto">
+           <div className="max-w-[900px] mx-auto pb-24">
               <QuestionRenderer 
                  language={examStore.language} 
                  question={{...q, displayId: (examStore.currentIdx + 1).toString()}} 
@@ -261,7 +229,7 @@ export default function MockAttemptPage() {
       </Sheet>
 
       <Dialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
-         <DialogContent className="max-w-xl rounded-[3rem] p-12 bg-white border-none shadow-5xl">
+         <DialogContent className="max-w-xl rounded-[3rem] p-12 bg-white border-none shadow-5xl text-left">
             <DialogHeader className="text-center space-y-6">
                <div className="h-20 w-20 bg-emerald-50 rounded-[2rem] flex items-center justify-center mx-auto text-emerald-600 shadow-2xl">
                   <ShieldCheck className="h-10 w-10" />

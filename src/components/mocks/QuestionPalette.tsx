@@ -13,7 +13,9 @@ import {
   Bookmark, 
   AlertCircle,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Info,
+  BookOpen
 } from "lucide-react";
 import { useExamStore } from '@/store/useExamStore';
 import { Badge } from "@/components/ui/badge";
@@ -28,13 +30,12 @@ import {
 
 /**
  * @fileOverview Professional CBT Question Palette Hub.
- * Features: Grid/List views, Section-wise grouping, and institutional color logic.
+ * Grouped by actual Section Names instead of Parts.
  */
 export default function QuestionPalette({ onSelect }: { onSelect: (index: number) => void }) {
   const { questions, status, currentIdx, visited, mockTitle } = useExamStore();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // 1. Dynamic Status Summary
   const stats = useMemo(() => {
     const s = { answered: 0, marked: 0, notAnswered: 0, notVisited: 0, ansMarked: 0 };
     questions.forEach((_, i) => {
@@ -48,31 +49,28 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
     return s;
   }, [questions, status, visited]);
 
-  // 2. Section Grouping Logic (Hierarchical)
-  const groupedSections = useMemo(() => {
-    const parts: Record<string, Record<string, { name: string, questions: { q: any, idx: number }[] }>> = {};
+  // Group by Section Name
+  const sections = useMemo(() => {
+    const map: Record<string, { name: string, questions: { q: any, idx: number }[] }> = {};
     
     questions.forEach((q, idx) => {
-      const partId = q.partId || 'PART B';
-      const sectionId = q.sectionId || 'general';
-      
-      if (!parts[partId]) parts[partId] = {};
-      if (!parts[partId][sectionId]) {
-        parts[partId][sectionId] = {
+      const sectionId = q.sectionId || 'General';
+      if (!map[sectionId]) {
+        map[sectionId] = {
           name: sectionId.replace(/-/g, ' ').toUpperCase(),
           questions: []
         };
       }
-      parts[partId][sectionId].questions.push({ q, idx });
+      map[sectionId].questions.push({ q, idx });
     });
     
-    return parts;
+    return map;
   }, [questions]);
 
   return (
     <div className="flex flex-col h-full bg-white border-l border-slate-200 text-left font-body select-none">
       
-      {/* TABS HUB: Grid vs List */}
+      {/* TABS HUB */}
       <div className="flex border-b border-slate-100 shrink-0 bg-slate-50/50">
          <button 
            onClick={() => setViewMode('grid')} 
@@ -103,65 +101,60 @@ export default function QuestionPalette({ onSelect }: { onSelect: (index: number
          <LegendItem count={stats.ansMarked} label="Ans & Marked" color="bg-violet-600" colSpan={2} />
       </div>
 
-      {/* SCROLLABLE NAVIGATION CONTENT */}
+      {/* SECTIONAL CONTENT */}
       <ScrollArea className="flex-1 bg-slate-50/30">
-        <div className="p-4 space-y-6">
-          {Object.entries(groupedSections).map(([partId, sections]) => (
-            <div key={partId} className="space-y-4">
-              <div className="flex items-center gap-2 px-2">
-                 <Badge className="bg-[#0B1528] text-white border-none text-[8px] font-black tracking-widest px-2 py-0.5">{partId}</Badge>
-              </div>
-              
-              <Accordion type="multiple" defaultValue={Object.keys(sections)} className="space-y-3">
-                {Object.entries(sections).map(([secId, data]) => (
-                  <AccordionItem key={secId} value={secId} className="border-none bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
-                    <AccordionTrigger className="px-5 py-4 hover:no-underline group">
-                       <div className="flex items-center justify-between w-full pr-4">
-                          <span className="text-[10px] font-black text-[#0B1528] tracking-tight uppercase">{data.name}</span>
-                          <span className="text-[9px] font-bold text-slate-400 uppercase">{data.questions.length} Qs</span>
-                       </div>
-                    </AccordionTrigger>
-                    <AccordionContent className="px-5 pb-5 pt-2">
-                      {viewMode === 'grid' ? (
-                        <div className="grid grid-cols-5 gap-2.5">
-                          {data.questions.map(({ idx }) => (
-                            <QuestionNode 
-                              key={idx} 
-                              index={idx} 
-                              isActive={currentIdx === idx} 
-                              status={status[idx]} 
-                              isVisited={visited.includes(idx)}
-                              onClick={() => onSelect(idx)}
-                            />
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="space-y-2">
-                           {data.questions.map(({ q, idx }) => (
-                             <QuestionCard 
-                               key={idx}
-                               q={q}
-                               idx={idx}
-                               isActive={currentIdx === idx}
-                               status={status[idx]}
-                               onClick={() => onSelect(idx)}
-                             />
-                           ))}
-                        </div>
-                      )}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
-            </div>
-          ))}
+        <div className="p-4 space-y-4">
+           <Accordion type="multiple" defaultValue={Object.keys(sections)} className="space-y-3">
+              {Object.entries(sections).map(([secId, data]) => (
+                <AccordionItem key={secId} value={secId} className="border-none bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+                  <AccordionTrigger className="px-5 py-4 hover:no-underline group">
+                     <div className="flex items-center justify-between w-full pr-4 text-left">
+                        <span className="text-[10px] font-black text-[#0B1528] tracking-tight uppercase">{data.name}</span>
+                        <Badge variant="secondary" className="text-[9px] font-bold uppercase bg-slate-100 text-slate-400 px-2">{data.questions.length} Qs</Badge>
+                     </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-5 pb-5 pt-2">
+                    {viewMode === 'grid' ? (
+                      <div className="grid grid-cols-5 gap-2.5">
+                        {data.questions.map(({ idx }) => (
+                          <QuestionNode 
+                            key={idx} 
+                            index={idx} 
+                            isActive={currentIdx === idx} 
+                            status={status[idx]} 
+                            isVisited={visited.includes(idx)}
+                            onClick={() => onSelect(idx)}
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                         {data.questions.map(({ q, idx }) => (
+                           <QuestionCard 
+                             key={idx}
+                             q={q}
+                             idx={idx}
+                             isActive={currentIdx === idx}
+                             status={status[idx]}
+                             onClick={() => onSelect(idx)}
+                           />
+                         ))}
+                      </div>
+                    )}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+           </Accordion>
         </div>
       </ScrollArea>
 
-      {/* FINAL SUBMIT ACTION */}
       <div className="p-4 border-t border-slate-100 bg-white shrink-0">
+         <div className="flex items-center justify-between mb-4 px-2">
+            <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Section Complete</span>
+            <span className="text-[10px] font-black text-[#0F172A]">0%</span>
+         </div>
          <Button className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-xl shadow-xl shadow-emerald-900/10 gap-3">
-            <ShieldCheck className="h-5 w-5" /> SUBMIT TEST
+            <ShieldCheck className="h-5 w-5" /> SUBMIT FINAL ASSESSMENT
          </Button>
       </div>
     </div>
@@ -239,7 +232,7 @@ function QuestionCard({ q, idx, isActive, status, onClick }: any) {
               status === 'answered-marked' ? "text-violet-600" :
               "text-slate-400"
             )}>
-              Status: {status?.replace('-', ' ') || 'Not Visited'}
+              {status?.replace('-', ' ') || 'Not Visited'}
             </span>
             <ChevronRight className="h-3 w-3 text-slate-300 group-hover:translate-x-1 transition-transform" />
          </div>
