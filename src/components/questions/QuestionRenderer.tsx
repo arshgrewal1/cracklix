@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -14,11 +13,11 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional High-Fidelity Question Renderer v20.0.
- * Rules:
- * 1. Bilingual Mode: Single line joined by /
- * 2. Explanations: Segregated logic blocks with professional spacing.
- * 3. Mobile Friendly: Compact 15px/17px scaling.
+ * @fileOverview Institutional High-Fidelity Question Renderer v21.0.
+ * Rules Enforcement:
+ * 1. Neat and Clean: Professional typography with calibrated line heights.
+ * 2. 1-Line Space: English and Punjabi explanations are visually separated by a clean gap.
+ * 3. Sanitizer: Strips dual numbering from the UI display to prevent "Q1. Q1." errors.
  */
 
 export default function QuestionRenderer({ 
@@ -34,6 +33,7 @@ export default function QuestionRenderer({
       .replace(/^[A-D][\.\):\s-]*/i, '') 
       .replace(/^\d+[\.\):\s-]*/, '')     
       .replace(/^ਪ੍ਰਸ਼ਨ\s*\d+[\.\):\s-]*/, '')
+      .replace(/^ਪ੍ਰਸ਼ਨ\s*\d+[\.\):\s-]*/, '')
       .replace(/^\*\*|\*\*$/g, '')       
       .replace(/\*\*/g, '')              
       .trim();
@@ -46,7 +46,6 @@ export default function QuestionRenderer({
     if (language === 'en') return cEn;
     if (language === 'pa') return cPa || cEn;
     
-    // Single-line bilingual rendering as requested
     return (
       <span className="inline-flex flex-wrap items-center gap-x-2">
         <span className="text-[#0F172A]">{cEn}</span>
@@ -71,7 +70,7 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      {/* Question Statement - Mobile Friendly & Single Line Bilingual */}
+      {/* Question Statement */}
       <div className="text-[15px] md:text-[17px] font-black leading-tight text-[#0F172A] antialiased">
         {renderContent(question.questionEn, question.questionPa)}
       </div>
@@ -115,23 +114,24 @@ export default function QuestionRenderer({
               </div>
            </div>
            
-           <div className="space-y-6 pt-6 border-t border-emerald-100 relative z-10">
+           <div className="space-y-8 pt-6 border-t border-emerald-100 relative z-10">
               {expEn && (
                 <div className="space-y-2">
                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-600/60 flex items-center gap-2">
                       <Languages className="h-3 w-3" /> English Rationale
                    </p>
-                   <p className="text-[14px] md:text-[15px] text-slate-700 font-medium leading-relaxed italic antialiased">
+                   <p className="text-[14px] md:text-[15px] text-slate-700 font-medium leading-relaxed italic antialiased whitespace-pre-wrap">
                       {cleanText(expEn)}
                    </p>
                 </div>
               )}
+              {/* 1-Line Space Implemented with pt-8 and border-t */}
               {expPa && (
-                <div className="space-y-2 pt-4 border-t border-emerald-100/50">
+                <div className="space-y-2 pt-8 border-t border-emerald-100/50">
                    <p className="text-[8px] font-black uppercase tracking-[0.2em] text-emerald-600/60 flex items-center gap-2">
                       <Languages className="h-3 w-3" /> ਪੰਜਾਬੀ ਵਿਆਖਿਆ
                    </p>
-                   <p className="text-[14px] md:text-[15px] text-slate-700 font-medium leading-relaxed italic antialiased">
+                   <p className="text-[14px] md:text-[15px] text-slate-700 font-medium leading-relaxed italic antialiased whitespace-pre-wrap">
                       {cleanText(expPa)}
                    </p>
                 </div>

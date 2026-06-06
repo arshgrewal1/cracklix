@@ -1,10 +1,10 @@
 /**
- * @fileOverview Institutional High-Fidelity Ingestion Engine v15.0.
+ * @fileOverview Institutional High-Fidelity Ingestion Engine v16.0.
  * Rules Enforcement:
- * 1. NO DUAL NUMBERING: Strips numbering from Punjabi lines.
+ * 1. NO DUAL NUMBERING: Strips "Q1." from English and "ਪ੍ਰਸ਼ਨ 1." from Punjabi.
  * 2. NO SLASH IN QUESTIONS: English and Punjabi on separate lines.
  * 3. OPTION FORMATTING: Combine EN / PA on one line, separated by /.
- * 4. Segregated Explanations.
+ * 4. Segregated Explanations with Spacing.
  */
 
 import { Question } from "@/types";
@@ -19,6 +19,7 @@ const sanitizeText = (text: string = "") => {
   return text
     .replace(/^Q\d+[\.\):\s-]*/i, '')      
     .replace(/^ਪ੍ਰਸ਼ਨ\s*\d+[\.\):\s-]*/, '') 
+    .replace(/^ਪ੍ਰਸ਼ਨ\s*\d+[\.\):\s-]*/, '')
     .replace(/^\d+[\.\):\s-]*/, '')        
     .replace(/^\(?[A-D]\)?[\.\):\s-]*/i, '') 
     .replace(/^\*\*|\*\*$/g, '')
@@ -63,23 +64,18 @@ function parseStandardBlock(block: string, metadata: any): Partial<Question> {
   let explanationEn = "";
   let explanationPa = "";
 
-  // 1. Identify Questions & Options
-  // Logic: First line with Q is English. Next line without a known marker is Punjabi.
-  let questionStarted = false;
-  let punjabiQuestionFound = false;
-
   lines.forEach((line, idx) => {
+    // English Question Detection
     if (line.match(/^Q\d+[\.\):\s-]/i)) {
       questionEn = sanitizeText(line);
-      questionStarted = true;
-      // Look at the next line: if it's not an option, it's Punjabi
+      // Punjabi Question is usually the immediately following line without a marker
       const nextLine = lines[idx+1];
       if (nextLine && !nextLine.match(/^\([A-D]\)/i) && !nextLine.toLowerCase().includes('correct answer')) {
         questionPa = sanitizeText(nextLine);
-        punjabiQuestionFound = true;
       }
-    } else if (line.match(/^\([A-D]\)/i)) {
-      // 2. Identify Options (Line: (A) Eng / Pun)
+    } 
+    // Option Detection (A) Eng / Pun
+    else if (line.match(/^\([A-D]\)/i)) {
       const labelMatch = line.match(/^\(([A-D])\)/i);
       if (labelMatch) {
         const label = labelMatch[1].toUpperCase();
@@ -91,12 +87,12 @@ function parseStandardBlock(block: string, metadata: any): Partial<Question> {
           options[label] = { en: sanitizeText(content), pa: "" };
         }
       }
-    } else if (line.toLowerCase().includes('correct answer:')) {
-      // 3. Identify Answer & Explanation
+    } 
+    // Correct Answer & Explanation Detection
+    else if (line.toLowerCase().includes('correct answer:')) {
       const ansMatch = line.match(/Correct Answer:\s*(?:\()?([A-D])(?:\))?/i);
       if (ansMatch) correctAnswer = ansMatch[1].toUpperCase() as any;
 
-      // Segregated Explanation Extraction
       if (line.includes('* English Explanation:')) {
         const expParts = line.split('* English Explanation:');
         const logicTail = expParts[1].split('* ਪੰਜਾਬੀ ਵਿਆਖਿਆ:');
