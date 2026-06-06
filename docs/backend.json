@@ -40,6 +40,22 @@
         "description": { "type": "string" }
       }
     },
+    "Note": {
+      "title": "Study Note",
+      "description": "Free or Premium PDF study material.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "subjectId": { "type": "string" },
+        "examId": { "type": "string" },
+        "pdfUrl": { "type": "string" },
+        "category": { "type": "string", "enum": ["NOTES", "SYLLABUS", "E-BOOK"] },
+        "description": { "type": "string" },
+        "isFree": { "type": "boolean" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
     "Advertisement": {
       "title": "Advertisement",
       "description": "Campaign management for monetization.",
@@ -87,6 +103,10 @@
     "/passes/{passId}": {
       "schema": { "$ref": "#/backend/entities/Pass" },
       "description": "Dynamic pricing tiers."
+    },
+    "/notes/{noteId}": {
+      "schema": { "$ref": "#/backend/entities/Note" },
+      "description": "Dynamic study materials."
     },
     "/ads/{adId}": {
       "schema": { "$ref": "#/backend/entities/Advertisement" },

@@ -1,36 +1,42 @@
 
 "use client"
 
+import { useMemo, useState } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Download, Search, BookOpen, Clock, ShieldCheck, Zap, Layers, GraduationCap, FileArchive, Info } from "lucide-react"
+import { FileText, Download, Search, BookOpen, Clock, ShieldCheck, Zap, Layers, GraduationCap, FileArchive, Info, Lock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useCollection, useFirestore, useUser } from "@/firebase"
+import { collection, query, where, orderBy } from "firebase/firestore"
+import { Skeleton } from "@/components/ui/skeleton"
+import Link from "next/link"
 
 /**
- * @fileOverview Institutional Download Center (Phase 150).
- * Unified repository for Study Notes, PYQs, and Syllabus PDFs.
+ * @fileOverview Institutional Download Hub v2.0.
+ * Features: Real-time dynamic Firestore feed with Pass-gating logic.
  */
 
-const NOTES = [
-  { title: "Punjab History & Culture (Gurus Era)", category: "Punjab GK", format: "PDF", size: "2.4 MB", date: "Oct 2026", color: "bg-orange-50 text-primary" },
-  { title: "Logical Reasoning Shortcuts", category: "Reasoning", format: "PDF", size: "1.8 MB", date: "Oct 2026", color: "bg-blue-50 text-blue-600" },
-  { title: "Mandatory Punjabi Grammar Guide", category: "Punjabi", format: "PDF", size: "3.1 MB", date: "Oct 2026", color: "bg-emerald-50 text-emerald-600" },
-]
-
-const SYLLABUS = [
-  { title: "PSSSB Patwari Syllabus Pattern", category: "Syllabus", format: "PDF", size: "1.1 MB", date: "Oct 2026", color: "bg-slate-50 text-slate-600" },
-  { title: "Punjab Police SI Syllabus", category: "Syllabus", format: "PDF", size: "0.9 MB", date: "Oct 2026", color: "bg-slate-50 text-slate-600" },
-]
-
 export default function NotesLibrary() {
+  const db = useFirestore()
+  const { profile } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
 
-  const filteredNotes = NOTES.filter(n => n.title.toLowerCase().includes(searchTerm.toLowerCase()))
+  const notesQuery = useMemo(() => (db ? query(collection(db, "notes"), orderBy("updatedAt", "desc")) : null), [db])
+  const { data: notes, loading } = useCollection<any>(notesQuery)
+
+  const filteredNotes = useMemo(() => {
+    if (!notes) return { NOTES: [], SYLLABUS: [], EBOOK: [] };
+    const base = notes.filter((n: any) => n.title?.toLowerCase().includes(searchTerm.toLowerCase()));
+    return {
+      NOTES: base.filter((n: any) => n.category === 'NOTES'),
+      SYLLABUS: base.filter((n: any) => n.category === 'SYLLABUS'),
+      EBOOK: base.filter((n: any) => n.category === 'E-BOOK'),
+    }
+  }, [notes, searchTerm])
 
   return (
     <div className="min-h-screen bg-slate-50/30">
@@ -54,7 +60,7 @@ export default function NotesLibrary() {
             <div className="relative w-full md:w-96">
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <Input 
-                className="pl-16 h-16 rounded-2xl bg-white border-none shadow-2xl shadow-slate-200/50 text-lg" 
+                className="pl-16 h-16 rounded-2xl bg-white border-none shadow-2xl shadow-slate-200/50 text-lg font-medium" 
                 placeholder="Search repository..." 
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
@@ -72,29 +78,21 @@ export default function NotesLibrary() {
                     <Info className="h-4 w-4" /> Exam Syllabus
                   </TabsTrigger>
                   <TabsTrigger value="archives" className="rounded-xl px-6 md:px-8 font-black uppercase text-[10px] gap-2 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">
-                    <FileArchive className="h-4 w-4" /> PYQ Archives
+                    <FileArchive className="h-4 w-4" /> E-Book Node
                   </TabsTrigger>
                </TabsList>
              </div>
 
-             <TabsContent value="notes" className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-               {filteredNotes.map((note, i) => (
-                 <DownloadCard key={i} asset={note} />
-               ))}
+             <TabsContent value="notes">
+                <NotesGrid data={filteredNotes.NOTES} loading={loading} profile={profile} />
              </TabsContent>
 
-             <TabsContent value="syllabus" className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                {SYLLABUS.map((s, i) => (
-                   <DownloadCard key={i} asset={s} />
-                ))}
+             <TabsContent value="syllabus">
+                <NotesGrid data={filteredNotes.SYLLABUS} loading={loading} profile={profile} />
              </TabsContent>
 
              <TabsContent value="archives">
-                <div className="h-80 flex flex-col items-center justify-center text-slate-300 bg-white rounded-[3rem] md:rounded-[4rem] border-2 border-dashed border-slate-100">
-                   <FileArchive className="h-16 w-16 mb-6 opacity-10" />
-                   <p className="font-headline font-black text-xl uppercase">PYQ Indexing Node</p>
-                   <p className="text-sm font-bold opacity-50 mt-1 uppercase tracking-widest px-10 text-center">Official previous papers are being audited.</p>
-                </div>
+                <NotesGrid data={filteredNotes.EBOOK} loading={loading} profile={profile} />
              </TabsContent>
           </Tabs>
 
@@ -107,8 +105,8 @@ export default function NotesLibrary() {
                 </div>
                 <h2 className="text-3xl md:text-4xl font-headline font-black uppercase leading-tight">Master the <br/> Punjabi Qualifying Base</h2>
                 <p className="text-slate-400 text-base md:text-lg font-medium">Download our exclusive summary guide verified for upcoming PSSSB/PPSC exams.</p>
-                <Button className="w-full md:w-auto h-16 px-12 bg-white text-black hover:bg-slate-200 font-black uppercase tracking-widest text-xs rounded-2xl gap-3 shadow-2xl mt-4">
-                   Unlock Premium Repository <Zap className="h-5 w-5 fill-current" />
+                <Button asChild className="w-full md:w-auto h-16 px-12 bg-white text-black hover:bg-slate-200 font-black uppercase tracking-widest text-xs rounded-2xl gap-3 shadow-2xl mt-4">
+                   <Link href="/pass">Unlock Premium Repository <Zap className="h-5 w-5 fill-current" /></Link>
                 </Button>
              </div>
           </div>
@@ -119,30 +117,74 @@ export default function NotesLibrary() {
   )
 }
 
-function DownloadCard({ asset }: { asset: any }) {
+function NotesGrid({ data, loading, profile }: any) {
+   if (loading) return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+         {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[3rem]" />)}
+      </div>
+   );
+
+   if (!data || data.length === 0) return (
+      <div className="h-80 flex flex-col items-center justify-center text-slate-300 bg-white rounded-[4rem] border-2 border-dashed border-slate-100">
+         <FileArchive className="h-16 w-16 mb-6 opacity-10" />
+         <p className="font-headline font-black text-xl uppercase">Repository Node Empty</p>
+         <p className="text-sm font-bold opacity-50 mt-1 uppercase tracking-widest">Awaiting official content push.</p>
+      </div>
+   );
+
    return (
-      <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden group hover:translate-y-[-4px] md:hover:translate-y-[-8px] transition-all duration-500">
-         <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 md:gap-10">
-            <div className={`h-20 w-20 md:h-24 md:w-24 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform ${asset.color}`}>
-               <FileText className="h-8 w-8 md:h-10 md:w-10" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+         {data.map((item: any) => (
+            <DownloadCard key={item.id} asset={item} profile={profile} />
+         ))}
+      </div>
+   );
+}
+
+function DownloadCard({ asset, profile }: { asset: any, profile: any }) {
+   const isLocked = !asset.isFree && (!profile || profile.status === 'Free');
+
+   return (
+      <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden group hover:translate-y-[-8px] transition-all duration-500 text-left h-full flex flex-col">
+         <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 md:gap-10 flex-1">
+            <div className={cn(
+               "h-20 w-20 md:h-24 md:w-24 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
+               asset.isFree ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-500"
+            )}>
+               {isLocked ? <Lock className="h-8 w-8 md:h-10 md:w-10" /> : <FileText className="h-8 w-8 md:h-10 md:w-10" />}
             </div>
-            <div className="flex-1 space-y-4 text-left w-full">
+            <div className="flex-1 space-y-4 text-left w-full flex flex-col h-full">
                <div className="flex items-center gap-4">
-                  <Badge className={`${asset.color} border-none font-black text-[9px] uppercase tracking-widest px-3 py-1`}>
-                     {asset.category}
+                  <Badge className={cn(
+                     "border-none font-black text-[9px] uppercase tracking-widest px-3 py-1",
+                     asset.isFree ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-500"
+                  )}>
+                     {asset.subjectId || 'GENERAL'}
                   </Badge>
-                  <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{asset.size}</span>
+                  {asset.isFree ? (
+                     <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">FREE ASSET</span>
+                  ) : (
+                     <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">ELITE HUB</span>
+                  )}
                </div>
-               <h3 className="text-xl md:text-2xl font-headline font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors">
+               <h3 className="text-xl md:text-2xl font-headline font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors flex-1">
                   {asset.title}
                </h3>
-               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-slate-50">
+               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-slate-50 mt-auto">
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-                     <Clock className="h-3.5 w-3.5" /> Updated {asset.date}
+                     <Clock className="h-3.5 w-3.5" /> Registry Updated
                   </p>
-                  <Button className="w-full sm:w-auto h-12 px-8 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest text-[9px] rounded-xl gap-2 shadow-xl">
-                     <Download className="h-4 w-4" /> Save PDF
-                  </Button>
+                  {isLocked ? (
+                     <Button asChild className="w-full sm:w-auto h-12 px-8 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-[9px] rounded-xl gap-2 shadow-xl">
+                        <Link href="/pass"><Lock className="h-4 w-4" /> Get Pass</Link>
+                     </Button>
+                  ) : (
+                     <Button asChild className="w-full sm:w-auto h-12 px-8 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest text-[9px] rounded-xl gap-2 shadow-xl">
+                        <a href={asset.pdfUrl} target="_blank" rel="noopener noreferrer">
+                           <Download className="h-4 w-4" /> Download Node
+                        </a>
+                     </Button>
+                  )}
                </div>
             </div>
          </CardContent>

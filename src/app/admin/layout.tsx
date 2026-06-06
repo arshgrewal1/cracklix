@@ -2,7 +2,7 @@
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, ClipboardList, Settings, Users, LogOut, ShieldCheck, Zap, Newspaper, FileText, Megaphone, Globe, MousePointer2, Layers, CheckCircle2, Gem, History, ShieldAlert, SearchCode, HeartPulse, HelpCircle, Upload, ListTree, Landmark } from "lucide-react"
+import { LayoutDashboard, Database, ClipboardList, Settings, Users, LogOut, ShieldCheck, Zap, Newspaper, FileText, Megaphone, Globe, MousePointer2, Layers, CheckCircle2, Gem, History, ShieldAlert, SearchCode, HeartPulse, HelpCircle, Upload, ListTree, Landmark, BookOpen } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 import { useUser, useAuth } from "@/firebase"
@@ -63,8 +63,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarGroupContent>
                 <SidebarMenu>
                   <AdminNavItem icon={<Newspaper className="text-emerald-400" />} label="Analysis Feed" href="/admin/current-affairs" active={pathname === "/admin/current-affairs"} />
+                  <AdminNavItem icon={<BookOpen className="text-orange-400" />} label="Study Notes" href="/admin/notes" active={pathname === "/admin/notes"} />
                   <AdminNavItem icon={<FileText className="text-blue-400" />} label="Audit Archives" href="/admin/pyqs" active={pathname === "/admin/pyqs"} />
-                  <AdminNavItem icon={<Megaphone className="text-orange-400" />} label="Exam Gazette" href="/admin/notifications" active={pathname === "/admin/notifications"} />
+                  <AdminNavItem icon={<Megaphone className="text-rose-400" />} label="Exam Gazette" href="/admin/notifications" active={pathname === "/admin/notifications"} />
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>

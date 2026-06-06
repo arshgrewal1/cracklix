@@ -1,8 +1,9 @@
+
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus, Database, Users, ShieldCheck, Rocket, Zap, RefreshCw, ChevronRight, ListTree, Loader2, FileText, Newspaper, Landmark } from "lucide-react"
+import { Plus, Database, Users, ShieldCheck, Rocket, Zap, RefreshCw, ChevronRight, ListTree, Loader2, FileText, Newspaper, Landmark, BookOpen } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query } from "firebase/firestore"
@@ -83,7 +84,7 @@ export default function AdminDashboard() {
          <StatCard label="Live Series" value={mocks?.filter((m: any) => m.published).length ?? "..."} icon={<Zap className="text-primary" />} />
          <StatCard label="Pro Aspirants" value={proUsers.length} icon={<Users className="text-emerald-500" />} />
          <StatCard label="PYQ Archives" value={pyqs?.length ?? "..."} icon={<FileText className="text-orange-500" />} />
-         <StatCard label="Study Notes" value={notes?.length ?? "..."} icon={<Newspaper className="text-rose-500" />} />
+         <StatCard label="Study Notes" value={notes?.length ?? "..."} icon={<BookOpen className="text-rose-500" />} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
