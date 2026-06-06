@@ -1,10 +1,11 @@
+
 'use client';
 
 import { motion } from "framer-motion";
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Search, Sparkles, Zap, ShieldCheck, Trophy, Globe } from "lucide-react";
+import { Search, Sparkles, Zap, ShieldCheck, Trophy, Globe, LayoutGrid } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { useCollection, useFirestore } from "@/firebase";
@@ -12,7 +13,7 @@ import { collection } from "firebase/firestore";
 
 /**
  * @fileOverview High-Density Mobile-First Hero.
- * Calibrated for real-time success metrics.
+ * Updated: Action button changed to 'Mastery Hubs' for better differentiation.
  */
 
 export default function Hero() {
@@ -77,11 +78,13 @@ export default function Hero() {
                </div>
             </form>
 
-            <div className="flex flex-wrap gap-1.5 md:gap-2">
-               <CategoryPill icon={<Zap className="w-2.5 h-2.5" />} label="PSSSB" href="/exams?region=Punjab" />
-               <CategoryPill icon={<ShieldCheck className="w-2.5 h-2.5" />} label="POLICE" href="/exams?region=Punjab" />
-               <CategoryPill icon={<Trophy className="w-2.5 h-2.5" />} label="ARMY" href="/exams?region=National" />
-               <CategoryPill icon={<Globe className="w-2.5 h-2.5" />} label="SSC" href="/exams?region=National" />
+            <div className="flex flex-wrap gap-4 mt-6">
+              <Button asChild className="bg-primary hover:bg-orange-600 text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] h-14 shadow-xl shadow-primary/20 transition-all active:scale-95">
+                 <Link href="/mocks">Start Practice <Zap className="ml-2 h-4 w-4" /></Link>
+              </Button>
+              <Button asChild variant="outline" className="border-white/20 text-white hover:bg-white/5 px-10 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] h-14 transition-all backdrop-blur-sm">
+                 <Link href="/exams">Mastery Hubs <LayoutGrid className="ml-2 h-4 w-4" /></Link>
+              </Button>
             </div>
           </motion.div>
 
@@ -112,15 +115,4 @@ export default function Hero() {
       </div>
     </section>
   );
-}
-
-function CategoryPill({ icon, label, href }: any) {
-   return (
-      <Link href={href}>
-         <div className="flex items-center gap-1.5 px-2.5 py-1.5 md:px-4 md:py-2.5 bg-white/5 border border-white/10 rounded-md md:rounded-xl text-slate-300 hover:bg-primary hover:text-white transition-all">
-            <span className="text-primary">{icon}</span>
-            <span className="text-[7px] md:text-[10px] font-black uppercase tracking-widest">{label}</span>
-         </div>
-      </Link>
-   )
 }

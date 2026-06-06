@@ -1,7 +1,8 @@
+
 'use client';
 
 import Link from "next/link";
-import { Menu, Search, Zap, CreditCard, LogOut, ShieldCheck, Megaphone, LayoutGrid } from "lucide-react";
+import { Menu, Search, Zap, CreditCard, LogOut, ShieldCheck, Megaphone, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import { useState, useMemo } from "react";
@@ -25,7 +26,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * @fileOverview Global Navigation Node.
- * Features: Responsive Sidebar width (180px mobile / 280px desktop).
+ * Updated: Replaced redundant 'Exams' link with 'Analysis' for better differentiation.
  */
 
 export default function Navbar() {
@@ -84,7 +85,7 @@ export default function Navbar() {
             </div>
 
             <div className="hidden lg:flex items-center gap-8 text-[12px] font-bold uppercase tracking-widest text-[#7A8B9E]">
-              <Link href="/exams" className={pathname === '/exams' ? 'text-white' : 'hover:text-primary transition-colors'}>Exams</Link>
+              <Link href="/current-affairs" className={pathname === '/current-affairs' ? 'text-white' : 'hover:text-primary transition-colors'}>Analysis</Link>
               <Link href="/mocks" className={pathname === '/mocks' ? 'text-white' : 'hover:text-primary transition-colors'}>Mocks</Link>
               <Link href="/pass" className={pathname === '/pass' ? 'text-white' : 'hover:text-primary transition-colors'}>Pass</Link>
               <Link href="/notes" className={pathname === '/notes' ? 'text-white' : 'hover:text-primary transition-colors'}>Notes</Link>
@@ -108,7 +109,7 @@ export default function Navbar() {
                 <DropdownMenuContent className="w-64 bg-[#0F172A] border-white/10 text-white rounded-[2rem] p-3 shadow-4xl animate-in fade-in zoom-in-95 duration-200" align="end">
                   <DropdownMenuLabel className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-slate-500">Account Access</DropdownMenuLabel>
                   
-                  <DropdownNavItem href="/dashboard" icon={<LayoutGrid className="h-5 w-5" />} label="Dashboard" />
+                  <DropdownNavItem href="/dashboard" icon={<Zap className="h-5 w-5" />} label="Dashboard" />
                   <DropdownNavItem href="/pass" icon={<CreditCard className="h-5 w-5" />} label="My Pass" />
                   
                   {isAdmin && (

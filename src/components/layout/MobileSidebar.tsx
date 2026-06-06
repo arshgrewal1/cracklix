@@ -1,3 +1,4 @@
+
 'use client';
 
 import { 
@@ -35,7 +36,7 @@ import { useState } from "react";
 
 /**
  * @fileOverview Responsive Mobile Navigation Hub.
- * Optimized: Adaptive width (180px mobile / 280px desktop) with scaled information density.
+ * Updated: Replaced 'Exams' with 'Exam Calendar' for differentiation.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
@@ -55,13 +56,13 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
   const primaryMenu = [
     { label: "Home", href: "/", icon: Home },
-    { label: "Exams", href: "/exams", icon: GraduationCap },
-    { label: "My Mocks", href: "/mocks", icon: Zap },
-    { label: "Notes", href: "/notes", icon: FileText },
-    { label: "Results", href: "/dashboard", icon: BarChart3 },
-    { label: "PYQ", href: "/pyqs", icon: FileStack },
-    { label: "Pass", href: "/pass", icon: Gem },
-    { label: "Analysis", href: "/current-affairs", icon: Newspaper },
+    { label: "Practice Series", href: "/mocks", icon: Zap },
+    { label: "Exam Calendar", href: "/exam-calendar", icon: CalendarDays },
+    { label: "Daily Analysis", href: "/current-affairs", icon: Newspaper },
+    { label: "Study Notes", href: "/notes", icon: FileText },
+    { label: "Performance", href: "/dashboard", icon: BarChart3 },
+    { label: "PYQ Hub", href: "/pyqs", icon: FileStack },
+    { label: "Pass Registry", href: "/pass", icon: Gem },
   ];
 
   const secondaryMenu = [
@@ -72,8 +73,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
   const moreMenu = [
     { label: "Hall of Rankers", href: "/leaderboard", icon: Trophy },
-    { label: "Exam Calendar", href: "/exam-calendar", icon: CalendarDays },
-    { label: "Institutional Nodes", href: "/about", icon: Info },
+    { label: "Origin Story", href: "/about", icon: Info },
   ];
 
   return (

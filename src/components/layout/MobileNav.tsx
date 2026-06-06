@@ -3,13 +3,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { GraduationCap, Zap, User, Home, BarChart3 } from "lucide-react";
+import { Zap, User, Home, Newspaper, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
  * @fileOverview Institutional Sticky Bottom Navigation for Mobile.
- * Optimized for rapid preparation trajectory switching.
+ * Updated: Replaced 'Exams' with 'Analysis' to distinguish from practice hubs.
  */
 
 export default function MobileNav() {
@@ -17,10 +17,10 @@ export default function MobileNav() {
 
   const navItems = [
     { label: "Home", href: "/", icon: Home },
-    { label: "Exams", href: "/exams", icon: GraduationCap },
+    { label: "Analysis", href: "/current-affairs", icon: Newspaper },
     { label: "Mocks", href: "/mocks", icon: Zap },
-    { label: "Analysis", href: "/analytics", icon: BarChart3 },
-    { label: "Profile", href: "/dashboard", icon: User },
+    { label: "Results", href: "/dashboard", icon: BarChart3 },
+    { label: "Profile", href: "/profile", icon: User },
   ];
 
   return (
