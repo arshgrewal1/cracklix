@@ -19,8 +19,9 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 type LangMode = 'en' | 'pa' | 'bilingual'
 
 /**
- * @fileOverview Institutional High-Fidelity CBT Engine v25.0.
- * Redesign: Viewport-locked, No Sidebar, Mobile Optimized.
+ * @fileOverview Institutional High-Fidelity CBT Engine v26.0.
+ * Redesign: Viewport-locked, Fixed Header/Footer, Slide-out Palette.
+ * Fixed: Accessibility error (missing SheetTitle).
  */
 
 export default function MockAttemptPage() {
@@ -178,6 +179,9 @@ export default function MockAttemptPage() {
                  </Button>
                </SheetTrigger>
                <SheetContent side="right" className="p-0 border-none w-[280px] md:w-[340px]">
+                   <SheetHeader className="sr-only">
+                      <SheetTitle>Question Palette</SheetTitle>
+                   </SheetHeader>
                    <div className="p-6 h-full overflow-y-auto bg-white pt-16">
                      <QuestionPalette 
                          questions={questions} 
