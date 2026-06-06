@@ -3,15 +3,15 @@
 
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import { Smartphone, CheckCircle2, Map as MapIcon, Globe, ShieldCheck, Info } from "lucide-react";
+import { Smartphone, CheckCircle2, Map as MapIcon, Globe, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Apple, Play } from "lucide-react";
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
 /**
- * @fileOverview Final Geographic Registry Hub v6.3.
- * Fixed: Overlapping text on mobile and map visibility issues.
+ * @fileOverview Final Geographic Registry Hub v6.5.
+ * Optimized for full-width landing page display.
  */
 
 export default function AppPreview() {
@@ -145,7 +145,7 @@ export default function AppPreview() {
                 <div className="text-left">
                    <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1 md:mb-1.5">Platform Founder</p>
                    <p className="text-sm md:text-base font-bold text-[#0F172A]">
-                      Developed by <span className="text-primary font-black uppercase tracking-tighter ml-1">Arsh Grewal</span>
+                      Developed by <span className="text-primary font-black uppercase tracking-tighter ml-1 group-hover:text-primary transition-colors">Arsh Grewal</span>
                    </p>
                 </div>
              </motion.div>

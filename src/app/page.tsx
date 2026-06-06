@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo } from "react";
@@ -40,19 +41,13 @@ export default function HomePage() {
          </div>
       </section>
 
-      <div className="container mx-auto px-4 py-8 md:py-24 max-w-7xl">
-         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-            <div className="lg:col-span-8 space-y-12">
-               <PopularExams />
-               <LatestMocks />
-            </div>
-            <div className="lg:col-span-4 hidden lg:block">
-               <AppPreview />
-            </div>
-         </div>
+      <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl space-y-12 md:space-y-24">
+         <PopularExams />
+         <LatestMocks />
       </div>
 
       <Features />
+      <AppPreview />
       <Footer />
     </main>
   );
