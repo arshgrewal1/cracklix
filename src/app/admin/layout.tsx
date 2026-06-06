@@ -2,7 +2,7 @@
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, ClipboardList, Settings, Users, LogOut, ShieldCheck, Zap, Newspaper, FileText, Megaphone, Globe, MousePointer2, Layers, CheckCircle2, Gem, History, ShieldAlert, SearchCode, HeartPulse, HelpCircle, Upload, ListTree, Landmark, BookOpen } from "lucide-react"
+import { LayoutDashboard, Database, ClipboardList, Settings, Users, LogOut, ShieldCheck, Zap, Newspaper, FileText, Megaphone, Globe, MousePointer2, Layers, CheckCircle2, Gem, History, ShieldAlert, SearchCode, HeartPulse, HelpCircle, Upload, ListTree, Landmark, BookOpen, FileStack } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 import { useUser, useAuth } from "@/firebase"
@@ -59,12 +59,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarGroup>
 
             <SidebarGroup className="mt-4">
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Content Hub</SidebarGroupLabel>
+              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">CMS Hub</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
+                  <AdminNavItem icon={<Zap className="text-primary" />} label="Free Study Hub" href="/admin/free-content" active={pathname === "/admin/free-content"} />
                   <AdminNavItem icon={<Newspaper className="text-emerald-400" />} label="Analysis Feed" href="/admin/current-affairs" active={pathname === "/admin/current-affairs"} />
                   <AdminNavItem icon={<BookOpen className="text-orange-400" />} label="Study Notes" href="/admin/notes" active={pathname === "/admin/notes"} />
-                  <AdminNavItem icon={<FileText className="text-blue-400" />} label="Audit Archives" href="/admin/pyqs" active={pathname === "/admin/pyqs"} />
+                  <AdminNavItem icon={<FileStack className="text-blue-400" />} label="Audit Archives" href="/admin/pyqs" active={pathname === "/admin/pyqs"} />
                   <AdminNavItem icon={<Megaphone className="text-rose-400" />} label="Exam Gazette" href="/admin/notifications" active={pathname === "/admin/notifications"} />
                 </SidebarMenu>
               </SidebarGroupContent>
@@ -92,29 +93,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </SidebarGroupContent>
             </SidebarGroup>
 
-            <SidebarGroup className="mt-4">
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">Audit & Integrity</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <AdminNavItem icon={<ShieldAlert className="text-rose-400" />} label="Audit Queue" href="/admin/reports" active={pathname === "/admin/reports"} />
-                  <AdminNavItem icon={<History />} label="Audit Ledger" href="/admin/audit-logs" active={pathname === "/admin/audit-logs"} />
-                  <AdminNavItem icon={<SearchCode />} label="Integrity Scan" href="/admin/qa" active={pathname === "/admin/qa"} />
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
-            <SidebarGroup className="mt-4">
-              <SidebarGroupLabel className="px-6 text-xs font-black uppercase tracking-widest text-white/20 text-left">System Control</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  <AdminNavItem icon={<Users />} label="Aspirant Registry" href="/admin/users" active={pathname === "/admin/users"} />
-                  <AdminNavItem icon={<HelpCircle />} label="Support Hub" href="/admin/support" active={pathname === "/admin/support"} />
-                  <AdminNavItem icon={<HeartPulse />} label="System Health" href="/admin/health" active={pathname === "/admin/health"} />
-                  <AdminNavItem icon={<Settings />} label="System Settings" href="/admin/settings" active={pathname === "/admin/settings"} />
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-
             <SidebarGroup className="mt-auto pb-8">
               <SidebarMenu>
                 <SidebarMenuItem>
@@ -136,11 +114,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                  <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#0F172A] truncate">Cracklix Management System</span>
               </div>
-            </div>
-            <div className="flex items-center gap-4">
-               <div className="h-9 w-9 rounded-xl bg-[#0F172A] flex items-center justify-center border border-[#0F172A]">
-                  <span className="font-black text-white text-xs">{displayName.split(' ').map(n => n[0]).join('')}</span>
-               </div>
             </div>
           </header>
           <main className="flex-1 p-8 bg-white overflow-y-auto">

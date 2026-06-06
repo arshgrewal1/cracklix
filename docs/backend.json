@@ -40,56 +40,22 @@
         "description": { "type": "string" }
       }
     },
-    "Note": {
-      "title": "Study Note",
-      "description": "Free or Premium PDF study material.",
+    "FreeContent": {
+      "title": "Free Content",
+      "description": "Unified repository for free study material.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
         "title": { "type": "string" },
-        "subjectId": { "type": "string" },
-        "examId": { "type": "string" },
-        "pdfUrl": { "type": "string" },
-        "category": { "type": "string", "enum": ["NOTES", "SYLLABUS", "E-BOOK"] },
         "description": { "type": "string" },
-        "isFree": { "type": "boolean" },
+        "type": { "type": "string", "enum": ["mock", "pdf", "current", "pyq", "note"] },
+        "link": { "type": "string" },
+        "fileUrl": { "type": "string" },
+        "category": { "type": "string", "default": "free" },
+        "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
-      }
-    },
-    "Advertisement": {
-      "title": "Advertisement",
-      "description": "Campaign management for monetization.",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "type": { "type": "string", "enum": ["ADSENSE", "BANNER", "HTML", "AFFILIATE"] },
-        "status": { "type": "string", "enum": ["ACTIVE", "PAUSED", "SCHEDULED"] },
-        "placements": { "type": "array", "items": { "type": "string" } },
-        "desktopImageUrl": { "type": "string" },
-        "mobileImageUrl": { "type": "string" },
-        "externalUrl": { "type": "string" },
-        "htmlCode": { "type": "string" },
-        "adSenseCode": { "type": "string" },
-        "startDate": { "type": "string", "format": "date-time" },
-        "endDate": { "type": "string", "format": "date-time" },
-        "priority": { "type": "number" },
-        "targeting": {
-           "type": "object",
-           "properties": {
-              "regions": { "type": "array", "items": { "type": "string" } },
-              "examIds": { "type": "array", "items": { "type": "string" } },
-              "categories": { "type": "array", "items": { "type": "string" } }
-           }
-        },
-        "stats": {
-           "type": "object",
-           "properties": {
-              "impressions": { "type": "number" },
-              "clicks": { "type": "number" }
-           }
-        }
-      }
+      },
+      "required": ["id", "title", "type"]
     }
   },
   "auth": {
@@ -104,13 +70,9 @@
       "schema": { "$ref": "#/backend/entities/Pass" },
       "description": "Dynamic pricing tiers."
     },
-    "/notes/{noteId}": {
-      "schema": { "$ref": "#/backend/entities/Note" },
-      "description": "Dynamic study materials."
-    },
-    "/ads/{adId}": {
-      "schema": { "$ref": "#/backend/entities/Advertisement" },
-      "description": "Ad campaigns."
+    "/free_content/{contentId}": {
+      "schema": { "$ref": "#/backend/entities/FreeContent" },
+      "description": "Unified free study hub registry."
     }
   }
 }
