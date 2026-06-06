@@ -16,11 +16,11 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Zero-Inference Renderer v30.0.
+ * @fileOverview Institutional Zero-Inference Renderer v31.0.
  * Rules Enforcement:
- * 1. NO DETECTION: Directly renders englishQuestion and punjabiQuestion fields.
- * 2. EXPLICIT OPTIONS: Renders {EN} / {PA} pattern for all options.
- * 3. NO COMPRESSION: Preserves all line breaks and spacing.
+ * 1. STRICT EXPLICIT FIELDS: Calls englishQuestion and punjabiQuestion directly.
+ * 2. BILINGUAL OPTIONS: Renders (A) {EN} / {PA} pattern.
+ * 3. NO DETECTION: System does not infer or guess language.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -31,21 +31,21 @@ export default function QuestionRenderer({
   
   return (
     <div className="w-full text-left font-body space-y-0 text-black bg-transparent">
-      {/* 1. English Statement - EXPLICIT FIELD */}
+      {/* 1. English Statement */}
       <div className="text-[18px] md:text-[22px] font-black leading-[1.8] antialiased text-[#000000] tracking-wide">
          <MathText text={question.englishQuestion || ""} />
       </div>
 
       <div className="h-6" />
 
-      {/* 2. Punjabi Statement - EXPLICIT FIELD */}
+      {/* 2. Punjabi Statement */}
       <div className="text-[18px] md:text-[22px] font-black leading-[1.8] antialiased text-[#000000] tracking-wide">
          <MathText text={question.punjabiQuestion || ""} />
       </div>
 
       <div className="h-12" />
 
-      {/* 3. Options List - BILINGUAL INLINE FORMAT */}
+      {/* 3. Options List - Vertical Bilingual Format */}
       {!hideOptions && (
         <div className="flex flex-col space-y-6">
           {['A', 'B', 'C', 'D'].map(key => {
@@ -71,7 +71,7 @@ export default function QuestionRenderer({
 
       <div className="h-16" />
 
-      {/* 4. Correct Answer - BILINGUAL MULTI-LINE */}
+      {/* 4. Correct Answer - Explicit Bilingual Hub */}
       <div className="text-[18px] md:text-[22px] font-black text-[#000000] border-y-2 border-slate-100 py-12 mb-16 bg-slate-50/50 px-10 rounded-[2.5rem] shadow-inner tracking-wide">
          <div className="space-y-8">
             <div className="space-y-2">
@@ -85,7 +85,7 @@ export default function QuestionRenderer({
          </div>
       </div>
 
-      {/* 5. Solution Hub - EXPLICIT FIELD MAPPING */}
+      {/* 5. Solution Hub - Explicit Field Mapping */}
       {showSolution && (
         <div className="bg-[#121212] rounded-[3.5rem] p-10 md:p-16 text-white shadow-4xl border border-white/10 h-auto min-h-0 overflow-visible relative">
            <div className="absolute top-0 right-0 p-10 opacity-[0.03] pointer-events-none">

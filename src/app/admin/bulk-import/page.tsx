@@ -69,7 +69,7 @@ export default function BulkImportPage() {
     setErrors(result.errors);
 
     if (result.questions.length > 0) {
-      toast({ title: "Extraction Success", description: `${result.questions.length} blocks mapped to discrete fields.` });
+      toast({ title: "Extraction Success", description: `${result.questions.length} blocks mapped to 12 bilingual fields.` });
     } else {
       toast({ variant: "destructive", title: "Audit Rejected", description: "Check field validation reports." });
     }
@@ -77,7 +77,21 @@ export default function BulkImportPage() {
 
   const handleOpenEdit = (idx: number) => {
     setEditingIndex(idx)
-    setEditForm({ ...parsedQuestions[idx] })
+    setEditForm({ 
+      ...parsedQuestions[idx],
+      englishQuestion: parsedQuestions[idx].englishQuestion || "",
+      punjabiQuestion: parsedQuestions[idx].punjabiQuestion || "",
+      optionAEnglish: parsedQuestions[idx].optionAEnglish || "",
+      optionAPunjabi: parsedQuestions[idx].optionAPunjabi || "",
+      optionBEnglish: parsedQuestions[idx].optionBEnglish || "",
+      optionBPunjabi: parsedQuestions[idx].optionBPunjabi || "",
+      optionCEnglish: parsedQuestions[idx].optionCEnglish || "",
+      optionCPunjabi: parsedQuestions[idx].optionCPunjabi || "",
+      optionDEnglish: parsedQuestions[idx].optionDEnglish || "",
+      optionDPunjabi: parsedQuestions[idx].optionDPunjabi || "",
+      englishExplanation: parsedQuestions[idx].englishExplanation || "",
+      punjabiExplanation: parsedQuestions[idx].punjabiExplanation || ""
+    })
   }
 
   const handleSaveEdit = () => {
@@ -127,8 +141,8 @@ export default function BulkImportPage() {
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-xl border border-slate-200 h-12 w-12 bg-white"><ChevronLeft className="h-6 w-6" /></Button>
           <div>
-            <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Content Paste Hub</h1>
-            <p className="text-slate-500 font-medium">Explicit Bilingual Field Management.</p>
+            <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Content Ingestion</h1>
+            <p className="text-slate-500 font-medium">12-Node Explicit Field Management.</p>
           </div>
         </div>
         <Button onClick={handleSaveToRegistry} disabled={isSyncing || parsedQuestions.length === 0} className="bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] tracking-widest rounded-xl h-14 px-12 gap-3 shadow-2xl">
@@ -167,7 +181,7 @@ export default function BulkImportPage() {
             <Textarea 
                 value={rawText}
                 onChange={e => setRawText(e.target.value)}
-                placeholder="Paste Q1. English... Punjabi... (A) / (B) / (C) / (D)... Correct Answer... English Explanation... Punjabi Explanation..."
+                placeholder="Paste Q1. English... Punjabi... (A) EN / PA... Correct Answer... English Explanation... Punjabi Explanation..."
                 className="min-h-[550px] rounded-[2.5rem] bg-white border-none p-12 text-sm font-bold shadow-4xl leading-relaxed resize-none focus-visible:ring-primary"
             />
             <Button onClick={handleImport} className="w-full h-20 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-[2rem] shadow-4xl gap-4 group">
@@ -208,9 +222,9 @@ export default function BulkImportPage() {
                           <div className="space-y-2">
                              <Badge className="bg-[#0F172A] text-white border-none text-[10px] font-black px-6 py-2 rounded-xl uppercase tracking-widest">Asset {idx + 1}</Badge>
                              <div className="flex flex-wrap gap-2 pt-2">
-                                <DebugIndicator label="EN_Q" active={q.debug.EN_Q === 'YES'} />
-                                <DebugIndicator label="PA_Q" active={q.debug.PA_Q === 'YES'} />
-                                <DebugIndicator label="OPT" active={q.debug.OPT === 'YES'} />
+                                <DebugIndicator label="EN" active={q.debug.EN_Q === 'YES'} />
+                                <DebugIndicator label="PA" active={q.debug.PA_Q === 'YES'} />
+                                <DebugIndicator label="OPTS" active={q.debug.OPT === 'YES'} />
                                 <DebugIndicator label="KEY" active={q.debug.KEY === 'YES'} />
                                 <DebugIndicator label="LOGIC" active={q.debug.LOGIC === 'YES'} />
                              </div>

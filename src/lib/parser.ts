@@ -1,8 +1,8 @@
 
 /**
- * @fileOverview Institutional High-Fidelity Explicit Parser v40.0.
+ * @fileOverview Institutional High-Fidelity Explicit Parser v41.0.
  * Strictly maps to discrete English and Punjabi fields. 
- * Language detection is removed. split("/") only used for extraction.
+ * Language detection is removed. split("/") only used for initial extraction.
  */
 
 export interface ParsedResults {
@@ -86,10 +86,14 @@ export function parseBulkQuestions(rawText: string, metadata: any): ParsedResult
       const missing = [];
       if (!q.englishQuestion) missing.push("English Question");
       if (!q.punjabiQuestion) missing.push("Punjabi Question");
-      if (!q.optionAEnglish || !q.optionAPunjabi) missing.push("Bilingual Option A");
-      if (!q.optionBEnglish || !q.optionBPunjabi) missing.push("Bilingual Option B");
-      if (!q.optionCEnglish || !q.optionCPunjabi) missing.push("Bilingual Option C");
-      if (!q.optionDEnglish || !q.optionDPunjabi) missing.push("Bilingual Option D");
+      if (!q.optionAEnglish) missing.push("Option A English");
+      if (!q.optionAPunjabi) missing.push("Option A Punjabi");
+      if (!q.optionBEnglish) missing.push("Option B English");
+      if (!q.optionBPunjabi) missing.push("Option B Punjabi");
+      if (!q.optionCEnglish) missing.push("Option C English");
+      if (!q.optionCPunjabi) missing.push("Option C Punjabi");
+      if (!q.optionDEnglish) missing.push("Option D English");
+      if (!q.optionDPunjabi) missing.push("Option D Punjabi");
       if (!q.correctAnswer) missing.push("Correct Answer");
       if (!q.englishExplanation) missing.push("English Explanation");
       if (!q.punjabiExplanation) missing.push("Punjabi Explanation");

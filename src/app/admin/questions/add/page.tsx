@@ -58,14 +58,30 @@ function QuestionEntryContent() {
 
   useEffect(() => {
     if (existingData) {
-      setFormData({ ...existingData })
+      setFormData(prev => ({ 
+        ...prev, 
+        ...existingData,
+        // Ensure strings for controlled inputs
+        englishQuestion: existingData.englishQuestion || "",
+        punjabiQuestion: existingData.punjabiQuestion || "",
+        optionAEnglish: existingData.optionAEnglish || "",
+        optionAPunjabi: existingData.optionAPunjabi || "",
+        optionBEnglish: existingData.optionBEnglish || "",
+        optionBPunjabi: existingData.optionBPunjabi || "",
+        optionCEnglish: existingData.optionCEnglish || "",
+        optionCPunjabi: existingData.optionCPunjabi || "",
+        optionDEnglish: existingData.optionDEnglish || "",
+        optionDPunjabi: existingData.optionDPunjabi || "",
+        englishExplanation: existingData.englishExplanation || "",
+        punjabiExplanation: existingData.punjabiExplanation || ""
+      }))
     }
   }, [existingData])
 
   const handleSave = async () => {
     if (!db || isSaving) return
     
-    // Strict Validation Rule: No Empty Bilingual Fields
+    // Strict Validation: Audit all 12 nodes
     const mandatory = [
       'englishQuestion', 'punjabiQuestion', 
       'optionAEnglish', 'optionAPunjabi',
@@ -97,7 +113,7 @@ function QuestionEntryContent() {
 
     try {
       await setDoc(questionRef, payload, { merge: true })
-      toast({ title: "Registry Synced", description: "All 12 bilingual nodes locked." })
+      toast({ title: "Registry Synced", description: "All 12 nodes securely locked." })
       router.push("/admin/questions")
     } catch (err: any) {
       errorEmitter.emit("permission-error", new FirestorePermissionError({
@@ -114,10 +130,12 @@ function QuestionEntryContent() {
     <div className="max-w-[1600px] mx-auto space-y-10 pb-20 text-left">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 border border-slate-200 bg-white" onClick={() => router.back()}><ChevronLeft className="h-6 w-6" /></Button>
+          <button onClick={() => router.back()} className="rounded-2xl h-12 w-12 border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-colors">
+            <ChevronLeft className="h-6 w-6" />
+          </button>
           <div className="text-left">
             <h1 className="text-3xl font-black font-headline text-[#0F172A] uppercase tracking-tight">{isEditing ? "Audit Registry" : "Manual Ingestion Node"}</h1>
-            <p className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-1">Strict Explicit Field Control</p>
+            <p className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-1">Strict 12-Node Field Control</p>
           </div>
         </div>
         <Button className="bg-primary hover:bg-primary/90 gap-3 font-black px-10 h-14 shadow-xl rounded-2xl uppercase tracking-widest text-xs" onClick={handleSave} disabled={isSaving}>
@@ -133,11 +151,11 @@ function QuestionEntryContent() {
                  <div className="space-y-6">
                     <div className="space-y-2">
                        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">English Statement</Label>
-                       <Textarea value={formData.englishQuestion} onChange={e => setFormData({...formData, englishQuestion: e.target.value})} className="h-24 rounded-xl bg-slate-50 font-bold" />
+                       <Textarea value={formData.englishQuestion || ""} onChange={e => setFormData({...formData, englishQuestion: e.target.value})} className="h-24 rounded-xl bg-slate-50 font-bold" />
                     </div>
                     <div className="space-y-2">
                        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Punjabi Statement</Label>
-                       <Textarea value={formData.punjabiQuestion} onChange={e => setFormData({...formData, punjabiQuestion: e.target.value})} className="h-24 rounded-xl bg-slate-50 font-bold" />
+                       <Textarea value={formData.punjabiQuestion || ""} onChange={e => setFormData({...formData, punjabiQuestion: e.target.value})} className="h-24 rounded-xl bg-slate-50 font-bold" />
                     </div>
                  </div>
               </div>
@@ -149,11 +167,11 @@ function QuestionEntryContent() {
                        <div key={opt} className="grid grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
                           <div className="space-y-2">
                              <Label className="text-[9px] font-black uppercase text-slate-500">Option {opt} English</Label>
-                             <Input value={formData[`option${opt}English`]} onChange={e => setFormData({...formData, [`option${opt}English`]: e.target.value})} className="bg-white font-bold" />
+                             <Input value={formData[`option${opt}English`] || ""} onChange={e => setFormData({...formData, [`option${opt}English`]: e.target.value})} className="bg-white font-bold" />
                           </div>
                           <div className="space-y-2">
                              <Label className="text-[9px] font-black uppercase text-slate-500">Option {opt} Punjabi</Label>
-                             <Input value={formData[`option${opt}Punjabi`]} onChange={e => setFormData({...formData, [`option${opt}Punjabi`]: e.target.value})} className="bg-white font-bold" />
+                             <Input value={formData[`option${opt}Punjabi`] || ""} onChange={e => setFormData({...formData, [`option${opt}Punjabi`]: e.target.value})} className="bg-white font-bold" />
                           </div>
                        </div>
                     ))}
@@ -184,11 +202,11 @@ function QuestionEntryContent() {
                  <div className="space-y-6">
                     <div className="space-y-2">
                        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">English Logic</Label>
-                       <Textarea value={formData.englishExplanation} onChange={e => setFormData({...formData, englishExplanation: e.target.value})} className="h-40 rounded-xl bg-slate-900 text-emerald-400 font-medium" />
+                       <Textarea value={formData.englishExplanation || ""} onChange={e => setFormData({...formData, englishExplanation: e.target.value})} className="h-40 rounded-xl bg-slate-900 text-emerald-400 font-medium" />
                     </div>
                     <div className="space-y-2">
                        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Punjabi Logic</Label>
-                       <Textarea value={formData.punjabiExplanation} onChange={e => setFormData({...formData, punjabiExplanation: e.target.value})} className="h-40 rounded-xl bg-slate-900 text-blue-400 font-medium" />
+                       <Textarea value={formData.punjabiExplanation || ""} onChange={e => setFormData({...formData, punjabiExplanation: e.target.value})} className="h-40 rounded-xl bg-slate-900 text-blue-400 font-medium" />
                     </div>
                  </div>
               </div>
@@ -196,13 +214,13 @@ function QuestionEntryContent() {
         </div>
 
         <div className="lg:col-span-5">
-           <Card className="border-none bg-white shadow-2xl rounded-[3.5rem] overflow-hidden sticky top-32">
+           <Card className="border-none bg-white shadow-2xl rounded-[3rem] overflow-hidden sticky top-32">
              <div className="bg-[#0B1528] px-10 py-6 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                    <Eye className="h-4 w-4 text-primary" />
                    <span className="text-[10px] font-black uppercase tracking-widest text-white">Student View Node</span>
                 </div>
-                <Badge className="bg-emerald-500 text-white border-none text-[8px] font-black uppercase tracking-widest px-3 py-1">Explicit Binary Logic</Badge>
+                <Badge className="bg-emerald-500 text-white border-none text-[8px] font-black uppercase tracking-widest px-3 py-1">Zero Inference Logic</Badge>
              </div>
              <CardContent className="p-10 space-y-10 h-[70vh] overflow-y-auto custom-scrollbar text-left">
                 <QuestionRenderer 
