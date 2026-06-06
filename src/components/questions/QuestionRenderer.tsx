@@ -20,8 +20,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview High-Fidelity Question Renderer v4.1.
+ * @fileOverview High-Fidelity Question Renderer v4.2.
  * Optimized: Deep field scanning for existing explanations (Restores user data).
+ * Fixed: Removed duplicate Wand2 import.
  */
 
 export default function QuestionRenderer({ question, language, showSolution = false }: QuestionRendererProps) {
@@ -34,7 +35,11 @@ export default function QuestionRenderer({ question, language, showSolution = fa
   
   // Deep scan for existing explanations (Restores your 250+ ICT node data)
   const expEn = useMemo(() => {
-     return question.explanationEn || (question as any).explanation || (question as any).solution || "";
+     return question.explanationEn || 
+            (question as any).explanation || 
+            (question as any).solution || 
+            (question as any).rationale || 
+            "";
   }, [question]);
 
   const expPa = useMemo(() => {
@@ -42,7 +47,7 @@ export default function QuestionRenderer({ question, language, showSolution = fa
   }, [question]);
 
   const hasExplanation = !!(expEn || expPa);
-  const isMissingPa = !question.questionPa || question.questionPa === question.questionEn;
+  const isMissingPa = !question.questionPa || (question.questionPa === question.questionEn && question.questionEn !== "");
 
   const handleGenerateAI = async () => {
     if (!db || !question.id) return;
@@ -209,5 +214,3 @@ export default function QuestionRenderer({ question, language, showSolution = fa
     </div>
   );
 }
-
-import { Wand2 } from 'lucide-react';

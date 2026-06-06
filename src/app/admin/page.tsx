@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus, Database, Users, ShieldCheck, Rocket, Zap, Activity, ShieldAlert, Megaphone, ClipboardList, TrendingUp, RefreshCw, Layers, FileText, Globe, Newspaper, ChevronRight, ListTree, Loader2 } from "lucide-react"
+import { Plus, Database, Users, ShieldCheck, Rocket, Zap, RefreshCw, ChevronRight, ListTree, Loader2, FileText, Newspaper } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where } from "firebase/firestore"
@@ -13,7 +13,7 @@ import { seedInitialData } from "@/services/seed-data"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Final Command Center v7.2.
+ * @fileOverview Final Command Center v7.3.
  * Features: Dynamic Subject Detection & Real-time Institutional Counting.
  */
 

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo } from "react";
@@ -18,7 +19,7 @@ import Link from "next/link";
 
 /**
  * @fileOverview High-Density Mobile-First Homepage.
- * Updated: Fixed syntax error in TrustNode component.
+ * Updated: Corrected TrustNode syntax and tagline.
  */
 
 export default function HomePage() {
