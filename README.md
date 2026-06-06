@@ -17,16 +17,17 @@ Punjab's most advanced government exam preparation platform. Designed for aspira
 
 ## 📦 GitHub Deployment (Correct Sequence)
 
-If you are pushing to a new repository for the first time, run these commands exactly in this order:
+If you see the message **"nothing to commit, working tree clean"**, it means your work is already saved! Skip to step 3.
 
 ```bash
-# 1. Initialize and Stage all files (This was the missing step)
+# 1. Stage all files
 git add .
 
-# 2. Commit the files to your local registry
+# 2. Commit the files (Only if step 1 found new changes)
 git commit -m "Initial commit: Production-hardened Cracklix platform"
 
-# 3. Add your remote repository (If already added, skip this or use 'set-url')
+# 3. Add your remote repository
+# If you get an error saying 'remote origin already exists', skip this step.
 git remote add origin https://github.com/arshgrewal1122/cracklix.git
 
 # 4. Set branch to main
