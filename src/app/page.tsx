@@ -46,8 +46,8 @@ export default function HomePage() {
          <LatestMocks />
       </div>
 
-      <Features />
       <AppPreview />
+      <Features />
       <Footer />
     </main>
   );
