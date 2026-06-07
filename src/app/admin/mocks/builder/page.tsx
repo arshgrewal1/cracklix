@@ -36,7 +36,8 @@ import {
   FileStack,
   Gem,
   Lock,
-  Unlock
+  Unlock,
+  History
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, where, limit, getDocs, documentId } from "firebase/firestore"
@@ -241,6 +242,11 @@ function MockBuilderContent() {
     }
   }
 
+  const handleSwitchMock = (id: string) => {
+     if (id === 'new') router.push("/admin/mocks/builder");
+     else router.push(`/admin/mocks/builder?id=${id}`);
+  };
+
   return (
     <div className="max-w-[1600px] mx-auto space-y-8 pb-32 text-left pt-4">
       <div className="flex items-center justify-between gap-6 px-4">
@@ -260,6 +266,23 @@ function MockBuilderContent() {
         <div className="lg:col-span-4 space-y-8">
           <Card className="border-none shadow-4xl rounded-[3rem] bg-white p-10 space-y-8">
              <div className="space-y-6">
+               <div className="space-y-2">
+                 <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2">
+                    <History className="h-3 w-3" /> Load Existing Series
+                 </Label>
+                 <Select value={mockId || 'new'} onValueChange={handleSwitchMock}>
+                    <SelectTrigger className="h-14 rounded-xl bg-slate-900 text-white border-none font-bold">
+                       <SelectValue placeholder="Select a mock to edit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                       <SelectItem value="new" className="font-black text-primary uppercase text-[10px]">Create New Series +</SelectItem>
+                       {allMocks?.sort((a:any, b:any) => a.title.localeCompare(b.title)).map((m: any) => (
+                          <SelectItem key={m.id} value={m.id} className="font-bold text-[10px] uppercase">{m.title}</SelectItem>
+                       ))}
+                    </SelectContent>
+                 </Select>
+               </div>
+
                <div className="space-y-2">
                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Title</Label>
                  <Input value={mockData.title} onChange={e => setMockData({...mockData, title: e.target.value})} className="rounded-xl h-14 font-bold text-lg border-slate-100 text-[#0F172A]" />
