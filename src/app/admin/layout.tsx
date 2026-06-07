@@ -1,8 +1,7 @@
-
 'use client';
 
-import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, ClipboardList, LogOut, ShieldCheck, Zap, Newspaper, Megaphone, Globe, MousePointer2, Layers, CheckCircle2, Gem, BookOpen, FileStack, Upload, ListTree, Landmark, Menu, HeartPulse, Settings, Users, CreditCard, ShieldAlert, HelpCircle, History, User } from "lucide-react"
+import { SidebarProvider, Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
+import { LayoutDashboard, Database, LogOut, ShieldCheck, Zap, Globe, Menu, HeartPulse, Settings, Users, CreditCard, ShieldAlert, History, User } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 import { useUser, useAuth } from "@/firebase"
@@ -11,10 +10,11 @@ import { useEffect, useState } from "react"
 import { signOut } from "firebase/auth"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import BackButton from "@/components/navigation/BackButton";
+import { Loader2 } from "lucide-react";
 
 /**
- * @fileOverview MASTER Administrative Hub Layout.
- * Ensures the Admin has absolute control over every content registry.
+ * @fileOverview Master Administrative Security Node.
+ * PROTECTS: Strictly audits user identity and role before granting entry to content registries.
  */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -28,8 +28,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
 
   useEffect(() => {
-    if (!loading && (!user || !isAdmin)) {
-      router.push('/login')
+    if (!loading) {
+      if (!user) {
+        router.push('/login?returnUrl=/admin');
+      } else if (!isAdmin) {
+        router.push('/dashboard');
+      }
     }
   }, [user, profile, loading, router, isAdmin])
 
@@ -38,7 +42,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/login')
   }
 
-  if (loading) return <div className="h-screen w-full bg-[#0F172A] flex items-center justify-center"><ShieldCheck className="h-10 w-10 text-primary animate-pulse" /></div>
+  if (loading) return (
+    <div className="h-screen w-full bg-[#0F172A] flex flex-col items-center justify-center space-y-6">
+       <ShieldCheck className="h-12 w-12 text-primary animate-pulse" />
+       <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500">Auditing Authority Node...</p>
+    </div>
+  )
   
   if (!user || !isAdmin) return null
 
@@ -54,9 +63,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <AdminNavItem icon={<LayoutDashboard />} label="Dashboard" href="/admin" active={pathname === "/admin"} />
               <AdminNavItem icon={<HeartPulse className="text-rose-400" />} label="System Health" href="/admin/health" active={pathname === "/admin/health"} />
               <AdminNavItem icon={<Globe className="text-blue-400" />} label="Authority Hub" href="/admin/exams" active={pathname === "/admin/exams"} />
-              <AdminNavItem icon={<Landmark className="text-amber-400" />} label="Exam Registry" href="/admin/exam-registry" active={pathname === "/admin/exam-registry"} />
               <AdminNavItem icon={<Database />} label="Atomic Bank" href="/admin/questions" active={pathname === "/admin/questions"} />
-              <AdminNavItem icon={<Upload className="text-primary" />} label="Bulk Ingestion" href="/admin/bulk-import" active={pathname === "/admin/bulk-import"} />
             </SidebarMenu>
           </SidebarGroup>
 
@@ -64,14 +71,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Mock Control</SidebarGroupLabel>
             <SidebarMenu>
               <AdminNavItem icon={<Zap className="text-primary" />} label="Mock Manager" href="/admin/mocks" active={pathname === "/admin/mocks"} />
-              <AdminNavItem icon={<FileStack className="text-emerald-400" />} label="PYQ Archives" href="/admin/pyqs" active={pathname === "/admin/pyqs"} />
             </SidebarMenu>
           </SidebarGroup>
 
           <SidebarGroup className="mt-4">
             <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Monetization</SidebarGroupLabel>
             <SidebarMenu>
-              <AdminNavItem icon={<Gem className="text-amber-400" />} label="Elite Passes" href="/admin/passes" active={pathname === "/admin/passes"} />
               <AdminNavItem icon={<CreditCard className="text-emerald-400" />} label="Payments" href="/admin/payments" active={pathname === "/admin/payments"} />
               <AdminNavItem icon={<ShieldCheck className="text-blue-400" />} label="Verify UPI" href="/admin/payments/verify" active={pathname === "/admin/payments/verify"} />
             </SidebarMenu>
@@ -94,8 +99,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 <User className="h-4 w-4" />
              </div>
              <div className="text-left">
-                <p className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">DEVELOPED BY</p>
-                <p className="text-[11px] font-black text-white uppercase tracking-tight">Arsh Grewal</p>
+                <p className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">AUTHORITY NODE</p>
+                <p className="text-[11px] font-black text-white uppercase tracking-tight">{profile?.name || 'ADMIN'}</p>
              </div>
           </div>
        </div>

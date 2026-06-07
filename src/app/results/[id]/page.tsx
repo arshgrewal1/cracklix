@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -11,7 +10,6 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   CheckCircle2, 
-  XCircle, 
   Target, 
   Zap, 
   Loader2, 
@@ -20,26 +18,14 @@ import {
   ChevronDown,
   ChevronUp,
   BarChart3,
-  Clock,
   TrendingUp,
-  Activity,
   Trophy,
-  Users,
-  Share2,
   Download,
-  Info,
-  ArrowRight,
-  Filter,
-  Medal,
   Award,
-  MessageCircle,
-  Send,
-  HelpCircle,
-  FileText,
   Gem
 } from "lucide-react"
 import { useFirestore, useUser, useCollection } from "@/firebase"
-import { collection, query, where, doc, getDoc, documentId, getDocs, orderBy, limit } from "firebase/firestore"
+import { collection, query, where, doc, getDoc, documentId, getDocs, orderBy } from "firebase/firestore"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -47,9 +33,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview FINAL TESTBOOK-STYLE RESULT Hub.
- * Simplified Language: Replaced technical jargon with clear terms.
- * Features: Live State Rank, Percentile, and Topper comparison.
+ * @fileOverview Production Hardened Result Hub v18.0.
+ * FEATURES: Precision rank calculation, percentile efficiency, and robust comparisons.
  */
 
 export default function ResultPage() {
@@ -66,7 +51,6 @@ export default function ResultPage() {
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
   const [expandedQs, setExpandedQs] = useState<Record<number, boolean>>({})
 
-  // 1. Fetch Student's Result
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
     return query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId))
@@ -74,7 +58,6 @@ export default function ResultPage() {
 
   const { data: rawResultDocs, loading: resultsLoading } = useCollection<any>(resultsQuery)
   
-  // 2. Fetch Ranking Data
   const globalResultsQuery = useMemo(() => {
     if (!db || !mockId) return null
     return query(collection(db, "results"), where("mockId", "==", mockId), orderBy("score", "desc"))
@@ -130,7 +113,7 @@ export default function ResultPage() {
           setQuestions(questionIds.map(id => fetchedQuestions.find(q => q.id === id)).filter(Boolean))
         }
       } catch (e) {
-        toast({ variant: "destructive", title: "Sync Failed" })
+        toast({ variant: "destructive", title: "Content Missing" })
       } finally {
         setLoadingContent(false)
       }
@@ -161,9 +144,9 @@ export default function ResultPage() {
         name,
         ...data,
         accuracy: Math.round((data.correct / (data.correct + data.wrong || 1)) * 100),
-        score: data.correct - (data.wrong * 0.25)
+        score: data.correct - (data.wrong * (mockData?.negativeMarks || 0.25))
      }));
-  }, [questions, sessionData]);
+  }, [questions, sessionData, mockData]);
 
   const filteredQuestions = useMemo(() => {
      return questions.map((q, i) => ({ ...q, index: i })).filter((q) => {
@@ -179,16 +162,16 @@ export default function ResultPage() {
   if (resultsLoading || loadingContent) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
        <Loader2 className="h-12 w-12 text-primary animate-spin" />
-       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Calculating Your Rank...</p>
+       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Auditing Performance node...</p>
     </div>
   )
 
   if (!sessionData) return (
     <div className="h-screen flex flex-col items-center justify-center bg-slate-50 p-6 space-y-8">
        <Trophy className="h-20 w-20 text-slate-200" />
-       <p className="text-sm font-black text-slate-400 uppercase tracking-widest text-center">No Result Found</p>
+       <p className="text-sm font-black text-slate-400 uppercase tracking-widest text-center">Result Node Not Detected</p>
        <Button asChild className="rounded-2xl h-16 px-12 bg-[#0B1528] text-white font-black uppercase text-[10px] tracking-widest shadow-xl">
-          <Link href="/mocks">Attempt Mocks</Link>
+          <Link href="/mocks">Back to Mocks</Link>
        </Button>
     </div>
   )
@@ -199,7 +182,6 @@ export default function ResultPage() {
       
       <main className="container mx-auto px-4 md:px-6 py-6 md:py-12 max-w-7xl space-y-8 md:space-y-12">
         
-        {/* SCORE SECTION */}
         <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
            <Card className="flex-1 border-none shadow-4xl rounded-[2.5rem] md:rounded-[4rem] bg-[#0B1528] text-white overflow-hidden relative group">
               <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-80 w-80" /></div>
@@ -208,7 +190,7 @@ export default function ResultPage() {
                     <div className="space-y-4">
                        <div className="flex items-center gap-3">
                           <ShieldCheck className="h-6 w-6 text-primary" />
-                          <Badge className="bg-primary/20 text-primary border-none px-4 py-1.5 rounded-full font-black uppercase text-[9px] tracking-[0.2em] shadow-lg">Official Result</Badge>
+                          <Badge className="bg-primary/20 text-primary border-none px-4 py-1.5 rounded-full font-black uppercase text-[9px] tracking-[0.2em] shadow-lg">Certified Rank</Badge>
                        </div>
                        <h1 className="text-3xl md:text-5xl lg:text-7xl font-headline font-black uppercase leading-[0.85] tracking-tighter">
                           {sessionData.mockTitle}
@@ -231,17 +213,17 @@ export default function ResultPage() {
                  </div>
 
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 pt-8">
-                    <HeroMetric label="SCORE" val={`${sessionData.score}/${sessionData.totalQuestions}`} sub="Marks Obtained" color="text-primary" />
+                    <HeroMetric label="SCORE" val={`${sessionData.score.toFixed(1)}/${sessionData.totalQuestions}`} sub="Net Points" color="text-primary" />
                     <HeroMetric label="ACCURACY" val={`${sessionData.accuracy}%`} sub="Precision" color="text-emerald-400" />
-                    <HeroMetric label="CORRECT" val={sessionData.score} sub="Right Answers" color="text-emerald-400" />
-                    <HeroMetric label="TIME" val={`${Math.floor(sessionData.timeTaken / 60)}m`} sub="Time Spent" color="text-blue-400" />
+                    <HeroMetric label="CORRECT" val={Math.floor(sessionData.score)} sub="Validated Answers" color="text-emerald-400" />
+                    <HeroMetric label="TIME" val={`${Math.floor(sessionData.timeTaken / 60)}m`} sub="Audit Duration" color="text-blue-400" />
                  </div>
               </CardContent>
            </Card>
 
            <div className="w-full lg:w-80 flex flex-col gap-6">
               <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-8 space-y-6">
-                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Next Steps</h3>
+                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Management</h3>
                  <div className="space-y-4">
                     <Button onClick={() => window.print()} className="w-full h-16 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl gap-3">
                        <Download className="h-5 w-5" /> Download Report
@@ -264,7 +246,6 @@ export default function ResultPage() {
            </div>
         </div>
 
-        {/* ANALYSIS TABS */}
         <Tabs defaultValue="SECTIONAL" className="space-y-8 md:space-y-12">
            <TabsList className="bg-white border border-slate-100 p-1.5 h-16 rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm inline-flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-2">
               <TabsTrigger value="SECTIONAL" className="rounded-2xl px-6 md:px-12 font-black uppercase text-[10px] gap-3 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white transition-all whitespace-nowrap">
@@ -352,8 +333,8 @@ export default function ResultPage() {
            <TabsContent value="SOLUTIONS" className="m-0 space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm flex flex-wrap items-center gap-4">
                  <FilterNode active={activeReviewFilter === 'ALL'} label="ALL" count={questions.length} onClick={() => setActiveReviewFilter('ALL')} color="bg-slate-50 text-slate-500" />
-                 <FilterNode active={activeReviewFilter === 'CORRECT'} label="CORRECT" count={sessionData.score} onClick={() => setActiveReviewFilter('CORRECT')} color="bg-emerald-50 text-emerald-600" />
-                 <FilterNode active={activeReviewFilter === 'WRONG'} label="WRONG" count={Object.keys(sessionData.answers).length - sessionData.score} onClick={() => setActiveReviewFilter('WRONG')} color="bg-rose-50 text-rose-600" />
+                 <FilterNode active={activeReviewFilter === 'CORRECT'} label="CORRECT" count={Math.floor(sessionData.score)} onClick={() => setActiveReviewFilter('CORRECT')} color="bg-emerald-50 text-emerald-600" />
+                 <FilterNode active={activeReviewFilter === 'WRONG'} label="WRONG" count={Object.keys(sessionData.answers).length - Math.floor(sessionData.score)} onClick={() => setActiveReviewFilter('WRONG')} color="bg-rose-50 text-rose-600" />
                  <FilterNode active={activeReviewFilter === 'SKIPPED'} label="SKIPPED" count={sessionData.totalQuestions - Object.keys(sessionData.answers).length} onClick={() => setActiveReviewFilter('SKIPPED')} color="bg-slate-100 text-slate-400" />
               </div>
 
@@ -412,19 +393,6 @@ export default function ResultPage() {
               </div>
            </TabsContent>
         </Tabs>
-
-        {/* FOOTER CREDITS */}
-        <div className="pt-32 border-t border-slate-200 flex flex-col items-center gap-6 text-center">
-           <div className="h-12 w-12 rounded-2xl bg-[#0B1528] flex items-center justify-center text-primary shadow-2xl">
-              <ShieldCheck className="h-6 w-6" />
-           </div>
-           <div className="space-y-2">
-              <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em]">© 2026 Cracklix</p>
-              <div className="flex flex-col items-center gap-1">
-                 <p className="text-sm font-black text-[#0B1528] uppercase tracking-widest">Developed by <span className="text-primary">Arsh Grewal</span></p>
-              </div>
-           </div>
-        </div>
       </main>
       <Footer />
     </div>

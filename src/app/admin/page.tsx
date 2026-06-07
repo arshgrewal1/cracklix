@@ -1,22 +1,20 @@
-
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Plus, Database, Users, ShieldCheck, Zap, RefreshCw, Loader2, Landmark, BookOpen, Send, CheckCircle2 } from "lucide-react"
+import { Plus, Database, Users, ShieldCheck, Zap, Loader2, Landmark, BookOpen, Send, CheckCircle2 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query } from "firebase/firestore"
+import { collection } from "firebase/firestore"
 import { useMemo, useState } from "react"
 import { seedInitialData } from "@/services/seed-data"
 import { useToast } from "@/hooks/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { motion, AnimatePresence } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Command Center.
- * Enhanced Feedback: Provides visible status for Data Sync.
+ * ENHANCED: Fixed ReferenceErrors and added robust state feedback for registry sync.
  */
 
 export default function AdminDashboard() {
@@ -25,33 +23,23 @@ export default function AdminDashboard() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [lastSyncStatus, setLastSyncStatus] = useState<'idle' | 'success'>('idle')
 
-  const usersQuery = useMemo(() => (db ? collection(db, "users") : null), [db])
-  const questionsQuery = useMemo(() => (db ? collection(db, "questions") : null), [db])
-  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db])
-  const subjectsQuery = useMemo(() => (db ? collection(db, "subjects") : null), [db])
-  const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db])
-  const notesQuery = useMemo(() => (db ? collection(db, "notes") : null), [db])
-  const pyqsQuery = useMemo(() => (db ? collection(db, "pyqs") : null), [db])
-
-  const { data: users } = useCollection<any>(usersQuery)
-  const { data: questions, loading: qLoading } = useCollection<any>(questionsQuery)
-  const { data: mocks } = useCollection<any>(mocksQuery)
-  const { data: subjects } = useCollection<any>(subjectsQuery)
-  const { data: exams } = useCollection<any>(examsQuery)
-  const { data: notes } = useCollection<any>(notesQuery)
-  const { data: pyqs } = useCollection<any>(pyqsQuery)
-
-  const formattedQCount = useMemo(() => {
-    const count = questions?.length || 0;
-    return count > 999 ? `${(count / 1000).toFixed(1)}k+` : count.toString();
-  }, [questions]);
+  const { data: users } = useCollection<any>(useMemo(() => (db ? collection(db, "users") : null), [db]))
+  const { data: questions, loading: qLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]))
+  const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
+  const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
+  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
+  const { data: notes } = useCollection<any>(useMemo(() => (db ? collection(db, "notes") : null), [db]))
+  const { data: pyqs } = useCollection<any>(useMemo(() => (db ? collection(db, "pyqs") : null), [db]))
 
   const subjectBreakdown = useMemo(() => {
     if (!questions) return [];
-    const uniqueSubjectIds = Array.from(new Set(questions.map((q: any) => q.subjectId))).filter(Boolean);
-    return uniqueSubjectIds.map(id => {
+    const map: Record<string, number> = {};
+    questions.forEach((q: any) => {
+       if (q.subjectId) map[q.subjectId] = (map[q.subjectId] || 0) + 1;
+    });
+    return Object.entries(map).map(([id, count]) => {
        const subjectName = subjects?.find((s: any) => s.id === id)?.name || id.replace(/-/g, ' ').toUpperCase();
-       return { id, name: subjectName, count: questions.filter((q: any) => q.subjectId === id).length }
+       return { id, name: subjectName, count };
     }).sort((a, b) => b.count - a.count);
   }, [questions, subjects]);
 
@@ -68,7 +56,7 @@ export default function AdminDashboard() {
     setLastSyncStatus('idle')
     try {
       await seedInitialData(db)
-      toast({ title: "Database Updated", description: "Official Punjab Exam data synced." })
+      toast({ title: "Registry Synced", description: "Official Punjab Exam nodes updated." })
       setLastSyncStatus('success')
       setTimeout(() => setLastSyncStatus('idle'), 5000)
     } catch (e: any) {
@@ -134,7 +122,6 @@ export default function AdminDashboard() {
                         {qLoading ? (
                            <div className="p-20 flex flex-col items-center justify-center gap-4 text-slate-300">
                               <Loader2 className="h-10 w-10 animate-spin" />
-                              <p className="font-black uppercase text-[10px]">Auditing Database...</p>
                            </div>
                         ) : subjectBreakdown.map((s) => (
                            <div key={s.id} className="p-6 md:p-8 flex items-center justify-between hover:bg-slate-50/50 transition-colors">

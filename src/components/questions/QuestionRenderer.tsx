@@ -16,9 +16,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Final Institutional Question Engine v23.0.
- * Layout: 1. Statements -> 2. Options -> 3. Solution (Strict Order).
- * Fixed: Robust language mode normalization to prevent "hidden" English text.
+ * @fileOverview Production Hardened Question Engine v24.0.
+ * FEATURES: Robust null guards, sanitized language modes, and zero-flicker transitions.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -30,7 +29,12 @@ export default function QuestionRenderer({
   className
 }: QuestionRendererProps) {
   
-  // Normalized Mode Logic (Case Insensitive & Comprehensive)
+  if (!question) return (
+    <div className="p-8 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 opacity-20">
+       <p className="text-[10px] font-black uppercase">Node Hydration Failed</p>
+    </div>
+  );
+
   const normalizedLang = (language || 'ENGLISH_PUNJABI').toUpperCase();
   
   const mode = normalizedLang === 'EN' ? 'ENGLISH' :
@@ -40,16 +44,14 @@ export default function QuestionRenderer({
 
   const q = question as any;
   
-  // Extract standard fields
-  const englishQ = q.englishQuestion || q.questionEn || q.questionText;
-  const punjabiQ = q.punjabiQuestion || q.questionPa;
-  const hindiQ = q.hindiQuestion || q.questionHi;
+  const englishQ = q.englishQuestion || q.questionEn || q.questionText || "";
+  const punjabiQ = q.punjabiQuestion || q.questionPa || "";
+  const hindiQ = q.hindiQuestion || q.questionHi || "";
   
-  const englishExp = q.englishExplanation || q.explanationEn || q.rationalization;
-  const punjabiExp = q.punjabiExplanation || q.explanationPa;
-  const hindiExp = q.hindiExplanation;
+  const englishExp = q.englishExplanation || q.explanationEn || q.rationalization || "";
+  const punjabiExp = q.punjabiExplanation || q.explanationPa || "";
+  const hindiExp = q.hindiExplanation || "";
 
-  // Visibility Rules
   const showEn = mode === 'ENGLISH' || mode === 'ENGLISH_PUNJABI' || mode === 'ENGLISH_HINDI';
   const showPa = mode === 'PUNJABI' || mode === 'ENGLISH_PUNJABI';
   const showHi = mode === 'HINDI' || mode === 'ENGLISH_HINDI';
@@ -136,7 +138,7 @@ export default function QuestionRenderer({
            <div className="space-y-6">
               {showEn && englishExp && (
                 <div className="space-y-2">
-                   <span className="text-primary font-[900] uppercase tracking-[0.2em] text-[10px] ml-1">English Logic Hub:</span>
+                   <span className="text-primary font-[900] uppercase tracking-[0.2em] text-[10px] ml-1">English Rationale:</span>
                    <div className="font-[600] text-[14px] md:text-[15px] leading-relaxed text-slate-600 antialiased bg-slate-50/50 p-6 rounded-3xl border border-slate-100 shadow-inner">
                       <MathText text={englishExp} />
                    </div>

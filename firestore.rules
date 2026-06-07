@@ -2,27 +2,24 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     /**
-     * @fileOverview Enterprise RBAC Security Protocol v1.0.
+     * @fileOverview Enterprise RBAC Security Protocol v2.0.
      * Hardened for 10k+ Aspirants with strict ownership and authority gates.
      */
 
-    // Helper: Verify if the request is from a legitimate authenticated node
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Helper: Check for Administrative Authority
     function isAdmin() {
       return isAuthenticated() && 
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['ADMIN', 'SUPER_ADMIN'];
     }
 
-    // Helper: Verify Resource Ownership
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // --- 1. Master Registry (Official Content) ---
+    // --- 1. Master Content (Public Read, Admin Write) ---
     match /boards/{boardId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -43,7 +40,19 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
-    match /current_affairs/{caId} {
+    match /subjects/{sId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /settings/{sId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+    match /ads/{adId} {
+      allow read: if true;
+      allow write: if true; // stats incrementation
+    }
+    match /notifications/{nId} {
       allow read: if true;
       allow write: if isAdmin();
     }
@@ -51,12 +60,12 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
-    match /notifications/{nId} {
+    match /current_affairs/{caId} {
       allow read: if true;
       allow write: if isAdmin();
     }
 
-    // --- 2. Aspirant Registry (Private Nodes) ---
+    // --- 2. Aspirant Data (Private Nodes) ---
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow write: if isOwner(userId) || isAdmin();
@@ -64,7 +73,9 @@ service cloud.firestore {
 
     match /attempts/{attemptId} {
       // attemptId format is {userId}_{mockId}
-      allow read, write: if isAuthenticated() && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
+      allow read: if isAuthenticated() && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
+      allow create, update: if isAuthenticated() && attemptId.split('_')[0] == request.auth.uid;
+      allow delete: if isAdmin();
     }
 
     match /results/{resultId} {
@@ -74,36 +85,37 @@ service cloud.firestore {
     }
 
     match /bookmarks/{bId} {
-      allow read, write: if isAuthenticated() && (resource.data.userId == request.auth.uid || request.resource.data.userId == request.auth.uid);
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
-    // --- 3. Management Registry (Audit & Support) ---
-    match /audit_logs/{logId} {
-      allow read, write: if isAdmin();
+    match /subscriptions/{sId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create, update, delete: if isAdmin();
     }
+
+    // --- 3. Management & Payment Audits ---
     match /payment_requests/{reqId} {
-      allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin() || (resource.data.userId == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow update, delete: if isAdmin();
     }
     match /payments/{pId} {
       allow read: if isAdmin() || (resource.data.userId == request.auth.uid);
-      allow create, update, delete: if isAdmin();
+      allow write: if isAdmin();
     }
     match /reports/{reportId} {
       allow create: if isAuthenticated();
-      allow read, update, delete: if isAdmin();
+      allow read: if isAdmin();
+      allow update, delete: if isAdmin();
     }
     match /support_tickets/{ticketId} {
-      allow create: if true; // Public access for contact form
+      allow create: if true;
       allow read, update, delete: if isAdmin();
     }
-    match /settings/{docId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    match /ads/{adId} {
-      allow read: if true;
-      allow write: if true; // impressions/clicks incrementation allowed
+    match /audit_logs/{logId} {
+      allow read, write: if isAdmin();
     }
   }
 }

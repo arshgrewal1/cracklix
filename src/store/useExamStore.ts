@@ -1,15 +1,15 @@
-
 'use client';
 
 import { create } from 'zustand';
 import { AttemptState, ExamLanguage, QuestionStatus, Question, LanguageDisplayMode } from '@/types';
 import { doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 /**
- * @fileOverview Elite CBT Global Store v27.0 (Performance Hardened).
- * ZERO-LAG ARCHITECTURE: Optimistic UI updates with non-blocking background sync.
- * RECOVERY ENGINE: Instant state restoration from local cache + cloud sync.
+ * @fileOverview Elite CBT Global Store v28.0 (Production Hardened).
+ * FEATURES: Precision scoring, background sync hardening, and mathematical accuracy.
  */
 
 interface ExamStore extends AttemptState {
@@ -97,7 +97,9 @@ export const useExamStore = create<ExamStore>((set, get) => ({
       setDoc(attemptRef, {
         userId, mockId, startTime: now, endTime: finalEndTime,
         status: 'IN_PROGRESS', updatedAt: serverTimestamp()
-      }, { merge: true }).catch(() => {});
+      }, { merge: true }).catch((err) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: attemptRef.path, operation: 'create' }));
+      });
     }
   },
 
@@ -109,15 +111,12 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     if (idx < 0 || idx >= questions.length) return;
     
     const newVisited = Array.from(new Set([...visited, idx]));
-    
-    // 1. Instant UI Feedback
     set({ 
       currentIdx: idx, 
       visited: newVisited,
       currentSectionId: questions[idx]?.sectionId || ''
     });
     
-    // 2. Non-blocking Background Sync
     if (userId && mockId) {
       const { firestore: db } = initializeFirebase();
       updateDoc(doc(db, 'attempts', `${userId}_${mockId}`), {
@@ -143,10 +142,8 @@ export const useExamStore = create<ExamStore>((set, get) => ({
       newStatus[idx] = 'answered';
     }
 
-    // 1. Optimistic Update (Instant response < 100ms)
     set({ answers: newAnswers, status: newStatus });
 
-    // 2. Silent Sync
     updateDoc(doc(db, 'attempts', `${userId}_${mockId}`), {
       [`answers.${idx}`]: optionIdx,
       [`status.${idx}`]: newStatus[idx],
