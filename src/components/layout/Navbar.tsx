@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * @fileOverview Global Navigation Node.
- * Updated: "Free Hub" rebranded to "My Exams" with Target icon.
+ * Updated: Search hub integration refined.
  */
 
 export default function Navbar() {
