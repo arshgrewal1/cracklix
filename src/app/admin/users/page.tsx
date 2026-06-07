@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState } from "react"
@@ -32,9 +33,8 @@ import { cn } from "@/lib/utils"
 import React from "react"
 
 /**
- * @fileOverview Student Registry v16.0.
- * Resolved: ReferenceError: Label is not defined.
- * Features: Manual Pass & Test Controls with Master Unlock logic.
+ * @fileOverview Student Registry v17.0.
+ * HARDENED: Correct imports for Label, Input, and Button nodes.
  */
 export default function AspirantsManagement() {
   const db = useFirestore()
@@ -123,7 +123,7 @@ export default function AspirantsManagement() {
         <div>
            <div className="flex items-center gap-3 mb-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Student List</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Student List Hub</span>
            </div>
           <h1 className="text-5xl font-headline font-black text-primary uppercase tracking-tight">Student Hub</h1>
           <p className="text-slate-600 mt-1 font-medium">Monitoring {aspirants?.length || 0} student profiles and pass levels.</p>
@@ -202,7 +202,7 @@ export default function AspirantsManagement() {
       <Dialog open={!!grantDialogUser} onOpenChange={o => !o && setGrantDialogUser(null)}>
          <DialogContent className="bg-[#0F172A] text-white border-white/10 rounded-[3rem] max-w-md p-10 shadow-5xl text-left">
             <DialogHeader className="text-center space-y-4">
-               <DialogTitle className="text-2xl font-headline font-black uppercase text-primary">Authorize Pass</DialogTitle>
+               <DialogTitle className="text-2xl font-headline font-black uppercase text-primary">Authorize Pass Access</DialogTitle>
                <p className="text-slate-400 text-sm">Grant premium access to {grantDialogUser?.name}.</p>
             </DialogHeader>
             <div className="py-8 space-y-6">
@@ -220,7 +220,7 @@ export default function AspirantsManagement() {
             </div>
             <DialogFooter>
                <Button onClick={handleGrantPass} disabled={isProcessing} className="w-full bg-primary hover:bg-orange-600 h-14 rounded-xl font-black uppercase tracking-widest text-[11px] shadow-2xl">
-                  {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Authorize Pass Access"}
+                  {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Authorize Now"}
                </Button>
             </DialogFooter>
          </DialogContent>
@@ -230,7 +230,7 @@ export default function AspirantsManagement() {
       <Dialog open={!!selectedUser} onOpenChange={o => !o && setSelectedUser(null)}>
          <DialogContent className="sm:max-w-xl rounded-[3rem] bg-white border-none shadow-4xl p-10 overflow-hidden text-left">
             <DialogHeader>
-               <DialogTitle className="text-2xl font-headline font-black uppercase">Student Details</DialogTitle>
+               <DialogTitle className="text-2xl font-headline font-black uppercase text-[#0F172A]">Student Details</DialogTitle>
             </DialogHeader>
             <div className="py-10 space-y-8">
                <div className="flex items-center gap-6 bg-slate-50 p-6 rounded-[2.5rem]">

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
@@ -39,9 +40,8 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Administrative Security Hub v8.0.
- * Fixed: Resolved ReferenceError: Button is not defined.
- * Restored: All management functions for total institutional control.
+ * @fileOverview Administrative Security Hub v9.0.
+ * HARDENED: Robust component imports for Button and Layout Nodes.
  */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
