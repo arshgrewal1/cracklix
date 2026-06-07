@@ -19,8 +19,8 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 
 /**
- * @fileOverview Institutional Checkout Hub v25.0.
- * FIXED: Aggressive Sanitization Hub implemented to resolve "Invalid Name" and "Order failed" errors.
+ * @fileOverview Institutional Checkout Hub v26.0.
+ * FIXED: Explicitly enabled UPI VPA (ID) entry field in Razorpay config to allow manual typing.
  */
 
 export default function CheckoutPage() {
@@ -73,11 +73,9 @@ function CheckoutContent() {
       if (orderData.error) throw new Error(orderData.error);
 
       // 2. AGGRESSIVE SANITIZATION (Strict domestic node rules)
-      // Strip everything except letters and spaces to resolve "Name format is invalid"
       const rawName = profile?.name || user?.displayName || 'Aspirant';
       const sanitizedName = rawName.replace(/[^a-zA-Z\s]/g, '').trim().slice(0, 40) || "Student";
       
-      // Extract exactly 10 digits for contact node to force domestic logic
       const phoneDigits = (profile?.phone || '').replace(/\D/g, '').slice(-10);
       const sanitizedPhone = phoneDigits.length === 10 ? `+91${phoneDigits}` : '';
 
@@ -92,7 +90,6 @@ function CheckoutContent() {
         handler: async function (response: any) {
           setProcessing(true);
           try {
-            // 3. Verify Signature Node
             const verifyRes = await fetch('/api/razorpay/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -123,6 +120,20 @@ function CheckoutContent() {
           contact: sanitizedPhone
         },
         theme: { color: "#F97316" },
+        // CRITICAL: Explicitly enable VPA (UPI ID) entry field
+        config: {
+          display: {
+            preferences: {
+              show_default_blocks: true,
+            },
+            methods: {
+              upi: {
+                vpa: true,
+                qr: true,
+              }
+            }
+          }
+        },
         modal: {
           ondismiss: function() { 
             setProcessing(false); 
@@ -174,7 +185,7 @@ function CheckoutContent() {
   }
 
   if (planLoading) return <div className="h-screen flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>
-  if (!planData) return <div className="h-screen flex items-center justify-center bg-slate-50 text-slate-400 font-black uppercase text-xs">Registry Node Not Found</div>
+  if (!planData) return <div className="h-screen flex items-center justify-center bg-slate-50 text-slate-400 font-black uppercase tracking-widest text-xs">Registry Node Not Found</div>
 
   return (
     <div className="min-h-screen bg-slate-50/50 font-body">
