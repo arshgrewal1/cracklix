@@ -1,3 +1,4 @@
+
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
@@ -13,7 +14,7 @@ import BackButton from "@/components/navigation/BackButton";
 
 /**
  * @fileOverview Administrative Sidebar & Navigation Layout.
- * Updated: System Health Monitor node added to Operations.
+ * Updated: Logo scaling refined for mobile-first native app feel.
  */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -46,7 +47,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const SideNavContent = () => (
     <div className="flex flex-col h-full bg-[#0F172A]">
        <div className="p-6">
-          <Logo variant="light" className="scale-90 origin-left" />
+          <Logo variant="light" className="origin-left" />
        </div>
        <div className="flex-1 custom-scrollbar overflow-y-auto overflow-x-hidden">
           <SidebarGroup>

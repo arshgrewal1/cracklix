@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link";
@@ -25,7 +26,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * @fileOverview Global Navigation Node.
- * Updated: Analysis replaced with 'Free Hub'.
+ * Updated: Logo scaling refined for mobile-first native app feel.
  */
 
 export default function Navbar() {
@@ -82,7 +83,7 @@ export default function Navbar() {
                    <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
                  </SheetContent>
                </Sheet>
-               <Logo variant="light" className="scale-[0.75] md:scale-90 origin-left" />
+               <Logo variant="light" className="origin-left" />
             </div>
 
             <div className="hidden lg:flex items-center gap-8 text-[12px] font-bold uppercase tracking-widest text-[#7A8B9E]">
