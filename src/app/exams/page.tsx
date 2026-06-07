@@ -18,8 +18,8 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @file Overview High-Density Responsive Exam Catalog v3.6.
- * Optimized: Enhanced Institutional Logo rendering with full visibility and Referrer policies.
+ * @file Overview High-Density Responsive Exam Catalog v3.7.
+ * Optimized: Enhanced Institutional Logo rendering with dynamic Board lookup.
  */
 
 export default function ExamsCatalog() {
@@ -114,7 +114,11 @@ function CatalogContent() {
            {examsLoading || mocksLoading ? (
               Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3.5rem]" />)
            ) : filteredExams.map((exam: any) => {
-              const board = boards?.find((b: any) => b.id === exam.boardId);
+              const board = boards?.find((b: any) => 
+                b.id === exam.boardId || 
+                b.abbreviation === exam.boardId || 
+                b.id === exam.boardId?.toLowerCase()
+              );
               const logoUrl = board?.iconUrl || exam.iconUrl;
               const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, subjects: new Set() };
               const isPinned = profile?.pinnedExams?.includes(exam.id);
@@ -135,7 +139,7 @@ function CatalogContent() {
                              {logoUrl && !isImgFailed ? (
                                 <img 
                                   src={logoUrl} 
-                                  className="w-full h-full object-contain p-2 md:p-3" 
+                                  className="w-full h-full object-contain p-1.5 md:p-2" 
                                   alt="Logo" 
                                   referrerPolicy="no-referrer" 
                                   crossOrigin="anonymous"

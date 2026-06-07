@@ -2,7 +2,7 @@
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Engine v23.0.
+ * @fileOverview Institutional Seeding Engine v24.0.
  * Features: Hardened Unique Hub Registry with support for ARMY, DEFENSE and TECHNICAL IDs.
  * Updated: SSWCD (Anganwadi) official asset node integrated.
  */
@@ -12,7 +12,6 @@ export async function seedInitialData(db: Firestore) {
   // Stable Institutional Assets
   const psssbSvg = "https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg";
   const ppscJpg = "https://upload.wikimedia.org/wikipedia/en/a/a1/Punjab_Public_Service_Commission.jpg";
-  const stateEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
   const policeEmblem = "https://upload.wikimedia.org/wikipedia/commons/3/3a/Logo_of_Punjab_Police_India.png";
   const armyEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Indian_Army_Logo.png/400px-Indian_Army_Logo.png";
   const courtEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Emblem_of_India.svg/200px-Emblem_of_India.svg.png";
@@ -26,10 +25,8 @@ export async function seedInitialData(db: Firestore) {
     { id: 'punjab-police', abbreviation: 'POLICE', name: 'Punjab Police Recruitment Board', region: 'Punjab', category: 'DEFENCE_BOARD', iconUrl: policeEmblem },
     { id: 'sswcd', abbreviation: 'SSWCD', name: 'Social Security and Women & Child Development', region: 'Punjab', category: 'STATE_BOARD', iconUrl: anganwadiLogo },
     { id: 'pspcl', abbreviation: 'PSPCL', name: 'Punjab State Power Corporation Ltd', region: 'Punjab', category: 'TECHNICAL_BOARD', iconUrl: pspclLogo },
-    { id: 'TECHNICAL', abbreviation: 'PSPCL', name: 'Punjab Technical & Power Board', region: 'Punjab', category: 'TECHNICAL_BOARD', iconUrl: pspclLogo },
     { id: 'high-court', abbreviation: 'COURT', name: 'Punjab & Haryana High Court (SSSC)', region: 'Punjab/Haryana', category: 'JUDICIAL_BOARD', iconUrl: courtEmblem },
     { id: 'army', abbreviation: 'ARMY', name: 'Indian Army Recruitment', region: 'National', category: 'CENTRAL_BOARD', iconUrl: armyEmblem },
-    { id: 'ARMY', abbreviation: 'ARMY', name: 'Indian Army Recruitment Hub', region: 'National', category: 'CENTRAL_BOARD', iconUrl: armyEmblem },
     { id: 'INDIAN-ARMY', abbreviation: 'ARMY', name: 'Indian Army Defense Node', region: 'National', category: 'DEFENCE_BOARD', iconUrl: armyEmblem }
   ];
 
@@ -39,15 +36,15 @@ export async function seedInitialData(db: Firestore) {
 
   // 2. CANONICAL EXAM MASTER HUBS
   const exams = [
-    { id: 'punjab-patwari', boardId: 'psssb', name: 'Revenue Patwari 2026', category: 'STATE', description: 'Prepare for Revenue Patwari, Canal Patwari and Ziladar recruitment.', totalFullMocks: 45, totalPyqs: 10, iconUrl: psssbSvg },
-    { id: 'psssb-clerk', boardId: 'psssb', name: 'Subordinate Clerk (PSSSB)', category: 'STATE', description: 'Clerical recruitment for multi-departmental Punjab govt posts.', totalFullMocks: 60, totalPyqs: 15, iconUrl: psssbSvg },
-    { id: 'punjab-anganwadi', boardId: 'sswcd', name: 'Anganwadi Recruitment', category: 'STATE', description: 'Prepare for Supervisor, Worker and Helper posts in SSWCD Punjab.', totalFullMocks: 15, totalPyqs: 3, iconUrl: anganwadiLogo },
-    { id: 'police-si', boardId: 'punjab-police', name: 'Sub-Inspector (Dist/Armed)', category: 'POLICE', description: 'District and Armed Cadre recruitment for Punjab Police.', totalFullMocks: 30, totalPyqs: 5, iconUrl: policeEmblem },
-    { id: 'police-constable', boardId: 'punjab-police', name: 'Constable Recruitment', category: 'POLICE', description: 'Direct recruitment for Constable posts in Punjab Police.', totalFullMocks: 50, totalPyqs: 8, iconUrl: policeEmblem },
-    { id: 'ppsc-pcs', boardId: 'ppsc', name: 'PCS Executive Prelims', category: 'CIVIL', description: 'Higher Class A & B services including DSP and Tehsildar posts.', totalFullMocks: 20, totalPyqs: 12, iconUrl: ppscJpg },
-    { id: 'pspcl-clerk', boardId: 'pspcl', name: 'PSPCL LDC / Clerk', category: 'TECHNICAL', description: 'Clerical recruitment for Punjab State Power Corporation.', totalFullMocks: 25, totalPyqs: 6, iconUrl: pspclLogo },
-    { id: 'court-clerk', boardId: 'high-court', name: 'High Court Clerk', category: 'JUDICIAL', description: 'Subordinate Court clerical recruitment (SSSC).', totalFullMocks: 35, totalPyqs: 10, iconUrl: courtEmblem },
-    { id: 'indian-army', boardId: 'army', name: 'Agniveer Recruitment', category: 'CENTRAL', description: 'National level Indian Army preparation node.', totalFullMocks: 10, totalPyqs: 5, iconUrl: armyEmblem }
+    { id: 'punjab-patwari', boardId: 'psssb', name: 'Revenue Patwari 2026', category: 'STATE', description: 'Prepare for Revenue Patwari, Canal Patwari and Ziladar recruitment.', totalFullMocks: 45, iconUrl: psssbSvg },
+    { id: 'psssb-clerk', boardId: 'psssb', name: 'Subordinate Clerk (PSSSB)', category: 'STATE', description: 'Clerical recruitment for multi-departmental Punjab govt posts.', totalFullMocks: 60, iconUrl: psssbSvg },
+    { id: 'punjab-anganwadi', boardId: 'sswcd', name: 'Punjab Anganwadi / NTT', category: 'STATE', description: 'Official syllabus and preparation matrix for Supervisor and NTT posts.', totalFullMocks: 15, iconUrl: anganwadiLogo },
+    { id: 'police-si', boardId: 'punjab-police', name: 'Sub-Inspector (Dist/Armed)', category: 'POLICE', description: 'District and Armed Cadre recruitment for Punjab Police.', totalFullMocks: 30, iconUrl: policeEmblem },
+    { id: 'police-constable', boardId: 'punjab-police', name: 'Constable Recruitment', category: 'POLICE', description: 'Direct recruitment for Constable posts in Punjab Police.', totalFullMocks: 50, iconUrl: policeEmblem },
+    { id: 'ppsc-pcs', boardId: 'ppsc', name: 'PCS Executive Prelims', category: 'CIVIL', description: 'Higher Class A & B services including DSP and Tehsildar posts.', totalFullMocks: 20, iconUrl: ppscJpg },
+    { id: 'pspcl-clerk', boardId: 'pspcl', name: 'PSPCL LDC / Clerk', category: 'TECHNICAL', description: 'Clerical recruitment for Punjab State Power Corporation.', totalFullMocks: 25, iconUrl: pspclLogo },
+    { id: 'court-clerk', boardId: 'high-court', name: 'High Court Clerk', category: 'JUDICIAL', description: 'Subordinate Court clerical recruitment (SSSC).', totalFullMocks: 35, iconUrl: courtEmblem },
+    { id: 'indian-army', boardId: 'INDIAN-ARMY', name: 'Agniveer GD / Tech', category: 'CENTRAL', description: 'High-fidelity preparation series for Indian Army Agniveer.', totalFullMocks: 10, iconUrl: armyEmblem }
   ];
 
   for (const e of exams) {
