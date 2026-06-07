@@ -47,7 +47,7 @@ export default function ResultPage() {
   const [mockLanguageMode, setMockLanguageMode] = useState<any>('ENGLISH_PUNJABI')
 
   const resultsQuery = useMemo(() => {
-    if (!db || typeof db !== 'object' || !user) return null
+    if (!db || db.type !== 'firestore' || !user) return null
     return query(collection(db, "results"), where("userId", "==", user.uid))
   }, [db, user])
 
@@ -67,7 +67,7 @@ export default function ResultPage() {
 
   useEffect(() => {
     async function loadQuestions() {
-      if (!db || typeof db !== 'object') return;
+      if (!db || db.type !== 'firestore') return;
       if (resultsLoading) return;
       if (!sessionData) {
         setLoadingContent(false);
@@ -89,7 +89,10 @@ export default function ResultPage() {
           }
 
           const chunkSnaps = await Promise.all(
-            chunks.map(chunk => getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk))))
+            chunks.map(chunk => {
+               if (!db || db.type !== 'firestore') return Promise.resolve({ docs: [] });
+               return getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+            })
           )
 
           chunkSnaps.forEach(snap => {
@@ -108,11 +111,8 @@ export default function ResultPage() {
   }, [db, sessionData, mockId, toast, resultsLoading])
 
   const handleReattempt = async () => {
-    if (!db || typeof db !== 'object' || !user || !mockId) return;
+    if (!db || db.type !== 'firestore' || !user || !mockId) return;
     if (!window.confirm("Restart evaluation node?")) return;
-
-    console.log("Reattempt clicked");
-    console.log("Mock ID:", mockId);
 
     const attemptId = `${user.uid}_${mockId}`;
     

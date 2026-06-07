@@ -28,9 +28,11 @@ export default function MockManagement() {
   const [searchTerm, setSearchTerm] = useState("")
   const [boardFilter, setBoardFilter] = useState("all")
 
-  const mocksQuery = useMemo(() => (db && typeof db === 'object' ? query(collection(db, "mocks")) : null), [db])
+  const mocksQuery = useMemo(() => (db && db.type === 'firestore' ? query(collection(db, "mocks")) : null), [db])
+  const boardsQuery = useMemo(() => (db && db.type === 'firestore' ? collection(db, "boards") : null), [db])
+
   const { data: rawMocks, loading } = useCollection<any>(mocksQuery)
-  const { data: boards } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? collection(db, "boards") : null), [db]))
+  const { data: boards } = useCollection<any>(boardsQuery)
 
   const mocks = useMemo(() => {
     if (!rawMocks) return []
@@ -44,14 +46,14 @@ export default function MockManagement() {
   }, [rawMocks, searchTerm, boardFilter])
 
   const handleDelete = async (id: string) => {
-    if (!db || typeof db !== 'object') return
+    if (!db || db.type !== 'firestore') return
     if (!confirm("Audit: Permanently purge this mock blueprint?")) return
     await deleteDoc(doc(db, "mocks", id))
     toast({ title: "Series Purged" })
   }
 
   const togglePublish = async (id: string, current: boolean) => {
-    if (!db || typeof db !== 'object') return
+    if (!db || db.type !== 'firestore') return
     await setDoc(doc(db, "mocks", id), { published: !current, updatedAt: serverTimestamp() }, { merge: true })
     toast({ title: "Registry Updated" })
   }

@@ -35,11 +35,14 @@ export default function QuestionBank() {
   const [hasMore, setLastHasMore] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
 
-  const { data: boards } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? query(collection(db, "boards")) : null), [db]))
-  const { data: subjects } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? query(collection(db, "subjects")) : null), [db]))
+  const boardsQuery = useMemo(() => (db && db.type === 'firestore' ? query(collection(db, "boards")) : null), [db])
+  const subjectsQuery = useMemo(() => (db && db.type === 'firestore' ? query(collection(db, "subjects")) : null), [db])
+
+  const { data: boards } = useCollection<any>(boardsQuery)
+  const { data: subjects } = useCollection<any>(subjectsQuery)
 
   const fetchQuestions = useCallback(async (isNext = false) => {
-    if (!db || typeof db !== 'object') return
+    if (!db || db.type !== 'firestore') return
     setLoading(true)
     
     try {
@@ -124,7 +127,7 @@ export default function QuestionBank() {
         <CardHeader className={cn("p-4 md:p-8 border-b border-slate-50 bg-muted/20", !showFilters && "hidden md:block")}>
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             <div className="relative w-full lg:w-[40%]">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <Input className="pl-12 h-11 md:h-12 rounded-xl bg-white border-none shadow-inner" placeholder="Search by ID or Text..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-2 md:gap-3 w-full lg:w-auto">
