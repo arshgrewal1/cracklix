@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -26,8 +27,8 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
- * @fileOverview Production Hardened CBT Attempt Engine v18.0.
- * FEATURES: Precision marking (+1/-0.25), robust data hydration, and crash-proof navigation.
+ * @fileOverview Production Hardened CBT Attempt Engine v19.0.
+ * UPDATED: Reduced padding and spacing for a more compact, high-density interface.
  */
 
 export default function MockAttemptPage() {
@@ -59,7 +60,6 @@ export default function MockAttemptPage() {
         const questionIds = mData.questionIds || [];
         const fetchedQuestions: any[] = [];
         
-        // Chunked fetching to prevent URI length issues
         const chunks = [];
         for (let i = 0; i < questionIds.length; i += 30) {
           chunks.push(questionIds.slice(i, i + 30));
@@ -116,7 +116,6 @@ export default function MockAttemptPage() {
     if (!db || isSubmittingFinal || !user) return;
     setIsSubmittingFinal(true);
     
-    // PRECISION MARKING LOGIC
     let score = 0;
     const positiveMarks = mockData?.positiveMarks || 1;
     const negativeMarks = mockData?.negativeMarks || 0.25;
@@ -204,20 +203,20 @@ export default function MockAttemptPage() {
         </AnimatePresence>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center">
-           <div className="w-full max-w-4xl p-3 md:p-10 space-y-6">
+           <div className="w-full max-w-4xl p-2 md:p-6 space-y-3 md:space-y-4">
               {q ? (
                 <motion.div 
                    key={examStore.currentIdx}
-                   initial={{ opacity: 0, x: 10 }}
+                   initial={{ opacity: 0, x: 5 }}
                    animate={{ opacity: 1, x: 0 }}
-                   transition={{ duration: 0.2 }}
+                   transition={{ duration: 0.15 }}
                 >
                   <QuestionRenderer 
                     language={examStore.language as any} 
                     question={{...q, displayId: (examStore.currentIdx + 1).toString()}} 
                     selectedAnswer={selectedAnswer}
                     onSelect={(idx) => examStore.setAnswer(examStore.currentIdx, idx, db)}
-                    className="shadow-xl border-none p-6 md:p-12 rounded-[2.5rem]"
+                    className="shadow-md border-none p-4 md:p-10 rounded-[1.5rem] md:rounded-[2rem]"
                   />
                 </motion.div>
               ) : (
@@ -230,7 +229,7 @@ export default function MockAttemptPage() {
            </div>
         </div>
 
-        <aside className="hidden lg:block w-[400px] bg-white border-l border-slate-100 h-full shrink-0 shadow-2xl z-20">
+        <aside className="hidden lg:block w-[320px] md:w-[380px] bg-white border-l border-slate-100 h-full shrink-0 shadow-2xl z-20">
            <QuestionPalette onSelect={(idx) => examStore.setCurrentIdx(idx)} onSubmit={() => setShowSubmitModal(true)} />
         </aside>
       </main>

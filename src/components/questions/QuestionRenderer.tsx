@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -16,8 +17,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Production Hardened Question Engine v24.0.
- * FEATURES: Robust null guards, sanitized language modes, and zero-flicker transitions.
+ * @fileOverview Production Hardened Question Engine v25.0.
+ * UPDATED: Reduced spacing and internal padding for high-density mock display.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -57,22 +58,22 @@ export default function QuestionRenderer({
   const showHi = mode === 'HINDI' || mode === 'ENGLISH_HINDI';
 
   return (
-    <div className={cn("w-full text-left font-body bg-white text-[#0F172A] p-4 md:p-6 rounded-[2rem] shadow-sm border border-slate-100 flex flex-col select-none", className)}>
+    <div className={cn("w-full text-left font-body bg-white text-[#0F172A] p-3 md:p-5 rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col select-none", className)}>
       
       {/* 1. QUESTION STATEMENTS */}
-      <div className="space-y-3 mb-6">
+      <div className="space-y-2 mb-4 md:mb-6">
          {showEn && englishQ && (
-           <div className="font-[700] text-[16px] md:text-[18px] leading-snug tracking-tight text-[#0F172A] antialiased">
+           <div className="font-[700] text-[15px] md:text-[18px] leading-snug tracking-tight text-[#0F172A] antialiased">
              <MathText text={englishQ} />
            </div>
          )}
          {showPa && punjabiQ && (
-           <div className="font-[700] text-[15px] md:text-[17px] leading-snug tracking-tight text-[#0F172A] antialiased">
+           <div className="font-[700] text-[14px] md:text-[17px] leading-snug tracking-tight text-[#0F172A] antialiased">
              <MathText text={punjabiQ} />
            </div>
          )}
          {showHi && hindiQ && (
-           <div className="font-[700] text-[15px] md:text-[17px] leading-snug tracking-tight text-[#0F172A] antialiased">
+           <div className="font-[700] text-[14px] md:text-[17px] leading-snug tracking-tight text-[#0F172A] antialiased">
              <MathText text={hindiQ} />
            </div>
          )}
@@ -80,7 +81,7 @@ export default function QuestionRenderer({
 
       {/* 2. OPTIONS MATRIX */}
       {!hideOptions && (
-        <div className="flex flex-col space-y-3">
+        <div className="flex flex-col space-y-2.5">
           {['A', 'B', 'C', 'D'].map((key, idx) => {
             const en = q[`option${key}English`];
             const pa = q[`option${key}Punjabi`];
@@ -90,7 +91,7 @@ export default function QuestionRenderer({
             const isCorrect = q.correctAnswer === key;
 
             const boxClasses = cn(
-              "flex items-start gap-4 p-3.5 rounded-2xl cursor-pointer transition-all border-2",
+              "flex items-start gap-3 p-2.5 md:p-3.5 rounded-xl md:rounded-2xl cursor-pointer transition-all border-2",
               showSolution 
                 ? isCorrect ? "bg-emerald-50 border-emerald-500 shadow-sm" 
                   : isSelected ? "bg-rose-50 border-rose-500"
@@ -102,7 +103,7 @@ export default function QuestionRenderer({
             return (
               <div key={key} onClick={() => onSelect?.(idx)} className={boxClasses}>
                 <span className={cn(
-                  "font-[900] text-[16px] shrink-0 mt-0.5",
+                  "font-[900] text-[14px] md:text-[16px] shrink-0 mt-0.5",
                   showSolution ? (isCorrect ? "text-emerald-600" : isSelected ? "text-rose-600" : "text-[#0F172A]")
                   : (isSelected ? "text-primary" : "text-slate-400")
                 )}>
@@ -110,13 +111,13 @@ export default function QuestionRenderer({
                 </span>
                 <div className="flex flex-col flex-1 min-w-0">
                   {showEn && en && (
-                    <div className="font-[700] text-[16px] leading-tight text-[#0F172A]"><MathText text={en} /></div>
+                    <div className="font-[700] text-[14px] md:text-[16px] leading-tight text-[#0F172A]"><MathText text={en} /></div>
                   )}
                   {showPa && pa && (
-                    <div className="font-[700] text-[15px] leading-tight text-[#0F172A] mt-1.5"><MathText text={pa} /></div>
+                    <div className="font-[700] text-[13px] md:text-[15px] leading-tight text-[#0F172A] mt-1"><MathText text={pa} /></div>
                   )}
                   {showHi && hi && (
-                    <div className="font-[700] text-[15px] leading-tight text-[#0F172A] mt-1.5"><MathText text={hi} /></div>
+                    <div className="font-[700] text-[13px] md:text-[15px] leading-tight text-[#0F172A] mt-1"><MathText text={hi} /></div>
                   )}
                 </div>
               </div>
@@ -127,38 +128,29 @@ export default function QuestionRenderer({
 
       {/* 3. SOLUTION HUB */}
       {showSolution && (
-        <div className="mt-8 pt-8 border-t border-slate-100 space-y-6 animate-in fade-in slide-in-from-top-4 duration-500">
-           <div className="flex items-center gap-4">
-              <div className="font-[900] text-[11px] text-emerald-600 bg-emerald-100/50 px-4 py-1.5 rounded-xl border border-emerald-200 inline-block uppercase tracking-[0.2em] shadow-sm">
-                 Verified Key: ({q.correctAnswer || '?'})
+        <div className="mt-6 pt-6 border-t border-slate-100 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500">
+           <div className="flex items-center gap-3">
+              <div className="font-[900] text-[10px] text-emerald-600 bg-emerald-100/50 px-3 py-1 rounded-lg border border-emerald-200 inline-block uppercase tracking-[0.2em] shadow-sm">
+                 Key: ({q.correctAnswer || '?'})
               </div>
               <div className="h-px flex-1 bg-slate-50" />
            </div>
 
-           <div className="space-y-6">
+           <div className="space-y-4">
               {showEn && englishExp && (
-                <div className="space-y-2">
-                   <span className="text-primary font-[900] uppercase tracking-[0.2em] text-[10px] ml-1">English Rationale:</span>
-                   <div className="font-[600] text-[14px] md:text-[15px] leading-relaxed text-slate-600 antialiased bg-slate-50/50 p-6 rounded-3xl border border-slate-100 shadow-inner">
+                <div className="space-y-1">
+                   <span className="text-primary font-[900] uppercase tracking-[0.2em] text-[9px] ml-1">English Rationale:</span>
+                   <div className="font-[600] text-[13px] md:text-[14px] leading-relaxed text-slate-600 antialiased bg-slate-50/50 p-4 rounded-2xl border border-slate-100 shadow-inner">
                       <MathText text={englishExp} />
                    </div>
                 </div>
               )}
 
               {showPa && punjabiExp && (
-                <div className="space-y-2">
-                   <span className="text-primary font-[900] uppercase tracking-[0.2em] text-[10px] ml-1">ਪੰਜਾਬੀ ਵਿਆਖਿਆ:</span>
-                   <div className="font-[600] text-[14px] md:text-[15px] leading-relaxed text-slate-600 antialiased bg-slate-50/50 p-6 rounded-3xl border border-slate-100 shadow-inner">
+                <div className="space-y-1">
+                   <span className="text-primary font-[900] uppercase tracking-[0.2em] text-[9px] ml-1">ਪੰਜਾਬੀ ਵਿਆਖਿਆ:</span>
+                   <div className="font-[600] text-[13px] md:text-[14px] leading-relaxed text-slate-600 antialiased bg-slate-50/50 p-4 rounded-2xl border border-slate-100 shadow-inner">
                       <MathText text={punjabiExp} />
-                   </div>
-                </div>
-              )}
-
-              {showHi && hindiExp && (
-                <div className="space-y-2">
-                   <span className="text-primary font-[900] uppercase tracking-[0.2em] text-[10px] ml-1">हिंदी व्याख्या:</span>
-                   <div className="font-[600] text-[14px] md:text-[15px] leading-relaxed text-slate-600 antialiased bg-slate-50/50 p-6 rounded-3xl border border-slate-100 shadow-inner">
-                      <MathText text={hindiExp} />
                    </div>
                 </div>
               )}
