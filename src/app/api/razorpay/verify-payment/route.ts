@@ -5,8 +5,8 @@ import { initializeFirebase } from '@/firebase';
 import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Razorpay Verification Hub v13.0.
- * Hardened: Secure signature verification and automatic user registry update.
+ * @fileOverview Institutional Razorpay Verification Hub v14.0.
+ * Hardened: Secure signature verification and automatic pass provisioning.
  */
 
 export async function POST(request: Request) {
@@ -19,7 +19,10 @@ export async function POST(request: Request) {
       planId
     } = await request.json();
 
-    const secret = process.env.RAZORPAY_KEY_SECRET || 'KZiaT67ZZEqNgex081ELoSZW';
+    const secret = process.env.RAZORPAY_KEY_SECRET;
+    if (!secret) {
+      return NextResponse.json({ error: 'Verification secret missing.' }, { status: 500 });
+    }
     
     // 1. HMAC-SHA256 Signature Verification
     const hmac = crypto.createHmac('sha256', secret);

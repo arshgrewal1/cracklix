@@ -19,8 +19,8 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 
 /**
- * @fileOverview Institutional Checkout Hub v40.0.
- * FIXED: Forced UPI ID (VPA) entry and Aggressive Customer Metadata Sanitization.
+ * @fileOverview Institutional Checkout Hub v41.0.
+ * FIXED: Explicit forced UI blocks for UPI ID entry and Card payments.
  */
 
 export default function CheckoutPage() {
