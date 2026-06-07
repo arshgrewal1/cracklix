@@ -14,12 +14,12 @@ import { useEffect, useState, Suspense, useMemo } from "react"
 import { useToast } from "@/hooks/use-toast"
 import { submitManualPayment } from "@/app/actions/payment"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { doc, setDoc, updateDoc, collection, addDoc, serverTimestamp } from "firebase/firestore"
+import { doc } from "firebase/firestore"
 import Script from "next/script"
 
 /**
- * @fileOverview Institutional Checkout Hub v16.0.
- * FIXED: Aggressive sanitization for names and contact numbers to resolve "International" rejections.
+ * @fileOverview Institutional Checkout Hub v18.0.
+ * FIXED: Blank screen (about:blank) resolved via aggressive sanitization and reliable key handshake.
  */
 
 export default function CheckoutPage() {
@@ -54,14 +54,14 @@ function CheckoutContent() {
     if (!user || !planData || !db) return;
     
     if (!(window as any).Razorpay) {
-      toast({ variant: "destructive", title: "Gateway Node Offline", description: "Razorpay script is initializing. Please wait 5 seconds." });
+      toast({ variant: "destructive", title: "Gateway Node Offline", description: "Payment script is initializing. Wait 5 seconds." });
       return;
     }
 
     setProcessing(true);
 
     try {
-      // 1. Create order node
+      // 1. Create order node via backend registry
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,17 +71,17 @@ function CheckoutContent() {
       const orderData = await orderRes.json();
       if (orderData.error) throw new Error(orderData.error);
 
-      // 2. AGGRESSIVE SANITIZATION (Strict English-only protocol)
-      // Removing dots, dashes, and symbols that trigger "International" false-positives
+      // 2. AGGRESSIVE SANITIZATION (Strict domestic protocol)
+      // Strip everything except letters and spaces to resolve "Name format is invalid"
       const rawName = profile?.name || user?.displayName || 'Aspirant';
       const sanitizedName = rawName.replace(/[^a-zA-Z\s]/g, '').trim().slice(0, 40) || "Student";
       
-      // Strict domestic contact extraction (Exactly 10 digits)
+      // Extract exactly the last 10 digits for the contact registry
       const phoneDigits = (profile?.phone || '').replace(/\D/g, '').slice(-10);
       const sanitizedPhone = phoneDigits.length === 10 ? `+91${phoneDigits}` : '';
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        key: orderData.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: orderData.amount,
         currency: "INR",
         name: "CRACKLIX",
@@ -91,7 +91,7 @@ function CheckoutContent() {
         handler: async function (response: any) {
           setProcessing(true);
           try {
-            // 3. Verify Signature
+            // 3. Verify Signature Node
             const verifyRes = await fetch('/api/razorpay/verify-payment', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -109,10 +109,10 @@ function CheckoutContent() {
               toast({ title: "Pass Activated" });
               router.push(`/payment/success?plan=${planData.name}`);
             } else {
-              throw new Error("Verification Registry Rejected");
+              throw new Error("Signature verification failed.");
             }
           } catch (e: any) {
-            toast({ variant: "destructive", title: "Security Alert", description: "Payment verification failed." });
+            toast({ variant: "destructive", title: "Security Alert", description: "Payment verification registry rejected." });
             setProcessing(false);
           }
         },
@@ -130,6 +130,7 @@ function CheckoutContent() {
       };
 
       const rzp = new (window as any).Razorpay(options);
+      
       rzp.on('payment.failed', function (response: any) {
         toast({ 
           variant: "destructive", 
@@ -138,6 +139,7 @@ function CheckoutContent() {
         });
         setProcessing(false);
       });
+
       rzp.open();
     } catch (e: any) {
       toast({ variant: "destructive", title: "Gateway Error", description: e.message });
@@ -212,7 +214,7 @@ function CheckoutContent() {
                                 <ShieldCheck className="h-6 w-6" />
                              </div>
                              <p className="text-sm font-medium text-emerald-800 leading-relaxed uppercase">
-                                Use the test credentials shown in your Razorpay dashboard for this evaluation.
+                                Use the test credentials shown in your Razorpay dashboard for this transaction.
                              </p>
                           </div>
                           <Button 
