@@ -34,6 +34,11 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview High-Fidelity Bulk Ingestion v4.0.
+ * Features: Direct Paste Protocol with Staged Hub for tweaking field mapping.
+ */
+
 export default function BulkImportPage() {
   const router = useRouter()
   const db = useFirestore()
@@ -61,7 +66,7 @@ export default function BulkImportPage() {
   const handleImport = () => {
     if (!rawText.trim()) return
     if (!metadata.boardId || !metadata.subjectId) {
-      toast({ variant: "destructive", title: "Audit Blocked", description: "Select Board and Subject hub first." })
+      toast({ variant: "destructive", title: "Audit Blocked", description: "Select Board and Subject first." })
       return
     }
 
@@ -148,10 +153,10 @@ export default function BulkImportPage() {
     <div className="space-y-10 pb-32 text-left max-w-7xl mx-auto pt-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-4">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-xl border border-slate-200 h-12 w-12 bg-white"><ChevronLeft className="h-6 w-6" /></Button>
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-xl border border-slate-200 h-12 w-12 bg-white shadow-sm"><ChevronLeft className="h-6 w-6" /></Button>
           <div>
-            <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Content Ingestion</h1>
-            <p className="text-slate-500 font-medium">High-Fidelity Multi-Language Mapping.</p>
+            <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight leading-none">Bulk Ingestion</h1>
+            <p className="text-slate-500 font-medium">High-Fidelity Multi-Language Mapping Hub.</p>
           </div>
         </div>
         <Button onClick={handleSaveToRegistry} disabled={isSyncing || parsedQuestions.length === 0} className="bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] tracking-widest rounded-xl h-14 px-12 gap-3 shadow-2xl">
@@ -171,14 +176,14 @@ export default function BulkImportPage() {
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Board Hub</Label>
                   <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v})}>
-                    <SelectTrigger className="rounded-xl h-12 bg-slate-50 border-none font-bold text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
+                    <SelectTrigger className="rounded-xl h-12 bg-slate-50/50 border-none font-bold text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                     <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                   <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Subject Hub</Label>
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Subject Hub</Label>
                    <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
-                      <SelectTrigger className="rounded-xl h-12 bg-slate-50 border-none font-bold text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectTrigger className="rounded-xl h-12 bg-slate-50/50 border-none font-bold text-sm"><SelectValue placeholder="Select" /></SelectTrigger>
                       <SelectContent>{subjects?.map((s:any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                    </Select>
                 </div>
@@ -201,10 +206,10 @@ export default function BulkImportPage() {
             <Textarea 
                 value={rawText}
                 onChange={e => setRawText(e.target.value)}
-                placeholder={`Paste Q1. English...\n${isHindiMode ? 'Hindi...' : 'Punjabi...'}\n(A) EN / ${isHindiMode ? 'HI' : 'PA'}...\nCorrect Answer: A\nEnglish Explanation: ...\n${isHindiMode ? 'Hindi Explanation' : 'Punjabi Explanation'}: ...`}
-                className="min-h-[550px] rounded-[2.5rem] bg-white border-none p-12 text-sm font-bold shadow-4xl leading-relaxed resize-none focus-visible:ring-primary"
+                placeholder={`Paste Q1. English Statement...\n${isHindiMode ? 'Hindi Statement...' : 'Punjabi Statement...'}\n(A) EN / ${isHindiMode ? 'HI' : 'PA'}...\nCorrect Answer: A\nEnglish Explanation: ...\n${isHindiMode ? 'Hindi Explanation' : 'Punjabi Explanation'}: ...`}
+                className="min-h-[550px] rounded-[2.5rem] bg-white border-none p-12 text-sm font-bold shadow-4xl leading-relaxed resize-none focus-visible:ring-primary text-[#0F172A]"
             />
-            <Button onClick={handleImport} className="w-full h-20 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-[2rem] shadow-4xl gap-4 group">
+            <Button onClick={handleImport} className="w-full h-20 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-[2rem] shadow-4xl gap-4 group transition-all active:scale-95">
                Initialize Extraction <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
@@ -282,14 +287,14 @@ export default function BulkImportPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div className="space-y-3">
                      <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">English Statement</Label>
-                     <Textarea value={editForm?.englishQuestion || ""} onChange={e => setEditForm({...editForm, englishQuestion: e.target.value})} className="h-36 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner" />
+                     <Textarea value={editForm?.englishQuestion || ""} onChange={e => setEditForm({...editForm, englishQuestion: e.target.value})} className="h-36 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner text-[#0F172A]" />
                   </div>
                   <div className="space-y-3">
                      <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">{isHindiMode ? 'Hindi Statement' : 'Punjabi Statement'}</Label>
                      <Textarea 
                         value={isHindiMode ? (editForm?.hindiQuestion || "") : (editForm?.punjabiQuestion || "")} 
                         onChange={e => setEditForm({...editForm, [isHindiMode ? 'hindiQuestion' : 'punjabiQuestion']: e.target.value})} 
-                        className="h-36 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner" 
+                        className="h-36 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner text-[#0F172A]" 
                      />
                   </div>
                </div>
@@ -299,14 +304,14 @@ export default function BulkImportPage() {
                     <div key={opt} className="grid grid-cols-2 gap-4 bg-slate-50/50 p-4 rounded-xl">
                        <div className="space-y-2">
                           <Label className="text-[9px] font-black uppercase text-slate-400">Option {opt} English</Label>
-                          <Input value={editForm?.[`option${opt}English`] || ""} onChange={e => setEditForm({...editForm, [`option${opt}English`]: e.target.value})} className="bg-white font-bold" />
+                          <Input value={editForm?.[`option${opt}English`] || ""} onChange={e => setEditForm({...editForm, [`option${opt}English`]: e.target.value})} className="bg-white font-bold text-[#0F172A]" />
                        </div>
                        <div className="space-y-2">
                           <Label className="text-[9px] font-black uppercase text-slate-400">Option {opt} {isHindiMode ? 'Hindi' : 'Punjabi'}</Label>
                           <Input 
                             value={isHindiMode ? (editForm?.[`option${opt}Hindi`] || "") : (editForm?.[`option${opt}Punjabi`] || "")} 
                             onChange={e => setEditForm({...editForm, [isHindiMode ? `option${opt}Hindi` : `option${opt}Punjabi`]: e.target.value})} 
-                            className="bg-white font-bold" 
+                            className="bg-white font-bold text-[#0F172A]" 
                           />
                        </div>
                     </div>
@@ -316,14 +321,14 @@ export default function BulkImportPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-4 border-t border-slate-50">
                   <div className="space-y-3">
                      <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">English Logic Hub</Label>
-                     <Textarea value={editForm?.englishExplanation || ""} onChange={e => setEditForm({...editForm, englishExplanation: e.target.value})} className="h-64 rounded-2xl bg-slate-50 border-none font-medium p-8 leading-relaxed shadow-inner" />
+                     <Textarea value={editForm?.englishExplanation || ""} onChange={e => setEditForm({...editForm, englishExplanation: e.target.value})} className="h-64 rounded-2xl bg-slate-50 border-none font-medium p-8 leading-relaxed shadow-inner text-[#0F172A]" />
                   </div>
                   <div className="space-y-3">
                      <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">{isHindiMode ? 'Hindi Logic Hub' : 'Punjabi Logic Hub'}</Label>
                      <Textarea 
                         value={isHindiMode ? (editForm?.hindiExplanation || "") : (editForm?.punjabiExplanation || "")} 
                         onChange={e => setEditForm({...editForm, [isHindiMode ? 'hindiExplanation' : 'punjabiExplanation']: e.target.value})} 
-                        className="h-64 rounded-2xl bg-slate-50 border-none font-medium p-8 leading-relaxed shadow-inner" 
+                        className="h-64 rounded-2xl bg-slate-50 border-none font-medium p-8 leading-relaxed shadow-inner text-[#0F172A]" 
                      />
                   </div>
                </div>

@@ -25,7 +25,8 @@ import {
   Sparkles,
   SearchCode,
   Bell,
-  Gem
+  Gem,
+  Plus
 } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
@@ -38,7 +39,8 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Administrative Security Hub v7.0.
+ * @fileOverview Administrative Security Hub v8.0.
+ * Fixed: Resolved ReferenceError: Button is not defined.
  * Restored: All management functions for total institutional control.
  */
 
@@ -210,5 +212,3 @@ function AdminNavItem({ icon, label, href, active }: { icon: React.ReactNode, la
     </SidebarMenuItem>
   )
 }
-
-import { Plus } from "lucide-react";

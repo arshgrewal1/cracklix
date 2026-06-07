@@ -32,8 +32,8 @@ import { cn } from "@/lib/utils"
 import React from "react"
 
 /**
- * @fileOverview Student Registry v15.0.
- * Hardened: Fully resolved all ReferenceErrors and imports.
+ * @fileOverview Student Registry v16.0.
+ * Resolved: ReferenceError: Label is not defined.
  * Features: Manual Pass & Test Controls with Master Unlock logic.
  */
 export default function AspirantsManagement() {
@@ -111,7 +111,7 @@ export default function AspirantsManagement() {
           passExpiryDate: expiry.toISOString(),
           updatedAt: serverTimestamp()
        });
-       toast({ title: "Master Unlock Activated", description: "Aspirant now has access to everything." });
+       toast({ title: "Master Unlock Activated", description: "Aspirant now has access to everything for 1 year." });
     } catch (e) {
        toast({ variant: "destructive", title: "Unlock Failed" });
     }
@@ -226,7 +226,7 @@ export default function AspirantsManagement() {
          </DialogContent>
       </Dialog>
 
-      {/* STUDENT AUDIT DIALOG */}
+      {/* STUDENT DETAILS DIALOG */}
       <Dialog open={!!selectedUser} onOpenChange={o => !o && setSelectedUser(null)}>
          <DialogContent className="sm:max-w-xl rounded-[3rem] bg-white border-none shadow-4xl p-10 overflow-hidden text-left">
             <DialogHeader>

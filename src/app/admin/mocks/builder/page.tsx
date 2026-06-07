@@ -46,6 +46,11 @@ const LANGUAGE_MODES: { label: string, value: LanguageDisplayMode }[] = [
   { label: "BILINGUAL (EN+HI)", value: "ENGLISH_HINDI" },
 ];
 
+/**
+ * @fileOverview Institutional Mock Architect v8.0.
+ * Features: High-Fidelity Active Assembly with real-time question swapping for live mocks.
+ */
+
 export default function MockBuilderPage() {
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>}>
@@ -136,7 +141,7 @@ function MockBuilderContent() {
         languageMode: existingMock.languageMode || "ENGLISH_PUNJABI"
       }));
 
-      // Hydrate questions for each section
+      // Hydrate questions for each section using explicit questionIds matrix
       if (existingMock.sections && existingMock.sections.length > 0 && existingMock.questionIds) {
         let currentIndex = 0;
         const qIds = existingMock.questionIds;
@@ -172,7 +177,7 @@ function MockBuilderContent() {
       const matchesBoard = bankFilter.boardId === "all" || q.boardId === bankFilter.boardId
       const matchesExam = bankFilter.examId === "all" || q.examId === bankFilter.examId
       const matchesSub = bankFilter.subjectId === "all" || q.subjectId === bankFilter.subjectId
-      const qText = (q.englishQuestion || q.questionText || "").toLowerCase()
+      const qText = (q.englishQuestion || q.questionEn || "").toLowerCase()
       const matchesSearch = !bankFilter.search || qText.includes(bankFilter.search.toLowerCase())
       const notAlreadySelected = !allSelectedIds.includes(q.id)
       
@@ -251,7 +256,7 @@ function MockBuilderContent() {
              <div className="space-y-6">
                <div className="space-y-2">
                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Title</Label>
-                 <Input value={mockData.title} onChange={e => setMockData({...mockData, title: e.target.value})} className="rounded-xl h-14 font-bold text-lg border-slate-100" />
+                 <Input value={mockData.title} onChange={e => setMockData({...mockData, title: e.target.value})} className="rounded-xl h-14 font-bold text-lg border-slate-100 text-[#0F172A]" />
                </div>
 
                <div className="grid grid-cols-2 gap-4">
@@ -263,7 +268,7 @@ function MockBuilderContent() {
                    </Select>
                  </div>
                  <div className="space-y-2">
-                   <Label className="text-[10px) font-black uppercase text-slate-500 ml-1">Exam Hub</Label>
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Exam Hub</Label>
                    <Select value={mockData.examId} onValueChange={v => setMockData({...mockData, examId: v})}>
                      <SelectTrigger className="rounded-xl h-12 bg-slate-50/50 border-none"><SelectValue placeholder="Exam" /></SelectTrigger>
                      <SelectContent>{exams?.filter((e: any) => e.boardId === mockData.boardId).map((e: any) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
@@ -292,7 +297,7 @@ function MockBuilderContent() {
                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Clock className="h-3 w-3" /> Duration (Mins)</Label>
-                    <Input type="number" value={mockData.duration} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value) || 0})} className="h-12 rounded-xl text-center border-slate-100" />
+                    <Input type="number" value={mockData.duration} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value) || 0})} className="h-12 rounded-xl text-center border-slate-100 text-[#0F172A]" />
                   </div>
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Access Tier</Label>
@@ -332,7 +337,7 @@ function MockBuilderContent() {
                     <div className="flex flex-wrap items-center gap-4 mb-8">
                        <div className="relative flex-1 min-w-[200px]">
                           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                          <Input placeholder="Search bank nodes..." value={bankFilter.search} onChange={e => setBankFilter({...bankFilter, search: e.target.value})} className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold" />
+                          <Input placeholder="Search bank nodes..." value={bankFilter.search} onChange={e => setBankFilter({...bankFilter, search: e.target.value})} className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold text-[#0F172A]" />
                        </div>
                        <div className="flex items-center gap-3 bg-slate-50 px-6 h-12 rounded-xl border border-slate-100">
                           <EyeOff className="h-4 w-4 text-slate-400" />
@@ -351,8 +356,8 @@ function MockBuilderContent() {
                     </div>
 
                     <div className="bg-[#0F172A] p-6 rounded-[2rem] mb-8 flex flex-col md:flex-row md:items-center justify-between gap-8 text-white shadow-2xl overflow-hidden">
-                       <div className="flex-1 min-w-0">
-                             <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1.5 text-left">Target Section</p>
+                       <div className="flex-1 min-w-0 text-left">
+                             <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1.5">Target Section</p>
                              <Select value={activeSectionId} onValueChange={setActiveSectionId}>
                                 <SelectTrigger className="h-12 w-full bg-white/10 border-white/10 text-white font-black text-[10px] rounded-xl uppercase tracking-widest">
                                    <SelectValue />
