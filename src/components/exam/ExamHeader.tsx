@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useExamStore } from '@/store/useExamStore';
@@ -23,8 +24,8 @@ const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
 ];
 
 /**
- * @fileOverview Institutional CBT Header v14.0.
- * Fixed: Explicit language selection nodes with onSelect event handling.
+ * @fileOverview Institutional CBT Header v15.0.
+ * PERFORMANCE OPTIMIZED: Granular selectors prevent whole-header re-renders on timer tick.
  */
 export default function ExamHeader({ 
   onPaletteToggle, 
@@ -58,7 +59,10 @@ export default function ExamHeader({
         
         {/* LEFT: BACK & PROGRESS */}
         <div className="flex items-center gap-2 md:gap-8 shrink-0">
-           <button onClick={onExitRequest} className="p-1 text-slate-400 hover:text-white active:scale-90 transition-all">
+           <button 
+             onClick={onExitRequest} 
+             className="p-1 text-slate-400 hover:text-white active:scale-90 transition-all cursor-pointer pointer-events-auto"
+           >
               <ChevronLeft className="h-6 w-6" />
            </button>
            
@@ -84,7 +88,7 @@ export default function ExamHeader({
            {availableModes.length > 1 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                   <Button variant="ghost" size="icon" className="h-9 w-9 md:h-11 md:w-11 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded-xl transition-all">
+                   <Button variant="ghost" size="icon" className="h-9 w-9 md:h-11 md:w-11 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded-xl transition-all active:scale-95">
                       <Languages className="h-4 w-4 md:h-5 md:w-5 text-primary" />
                    </Button>
                 </DropdownMenuTrigger>
@@ -109,7 +113,7 @@ export default function ExamHeader({
              variant="ghost" 
              size="icon" 
              onClick={() => setPaused(!isPaused)}
-             className="h-9 w-9 md:h-11 md:w-11 bg-white/5 text-white hover:bg-white/10 shrink-0 border border-white/10 rounded-xl"
+             className="h-9 w-9 md:h-11 md:w-11 bg-white/5 text-white hover:bg-white/10 shrink-0 border border-white/10 rounded-xl active:scale-95"
            >
              {isPaused ? <Play className="h-4 w-4 md:h-5 md:w-5 fill-current text-primary" /> : <Pause className="h-4 w-4 md:h-5 md:w-5 fill-current" />}
            </Button>
@@ -117,7 +121,7 @@ export default function ExamHeader({
            <Button 
              variant="ghost"
              onClick={onPaletteToggle}
-             className="bg-[#F97316] hover:bg-orange-600 h-9 md:h-12 px-4 md:px-6 rounded-xl font-black uppercase text-[9px] md:text-[11px] tracking-widest gap-2 md:gap-3 shadow-xl transition-all active:scale-95"
+             className="bg-[#F97316] hover:bg-orange-600 h-9 md:h-12 px-4 md:px-6 rounded-xl font-black uppercase text-[9px] md:text-[11px] tracking-widest gap-2 md:gap-3 shadow-xl transition-all active:scale-95 pointer-events-auto"
            >
               <Menu className="h-4 w-4" />
               <span>Palette</span>

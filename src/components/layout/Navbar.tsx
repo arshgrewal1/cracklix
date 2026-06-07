@@ -26,7 +26,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * @fileOverview Global Navigation Node.
- * Updated: Search hub integration refined.
+ * PERFORMANCE OPTIMIZED: Hardened pointer events and fast dropdown triggers.
  */
 
 export default function Navbar() {
@@ -49,7 +49,7 @@ export default function Navbar() {
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
 
   return (
-    <div className="sticky top-0 z-[1000] w-full">
+    <div className="sticky top-0 z-[1000] w-full pointer-events-auto">
       {settings?.showAnnouncement && (
         <div className="bg-[#F97316] text-white py-1 px-4 flex items-center justify-center gap-2 overflow-hidden relative min-h-[22px]">
           <Megaphone className="h-2.5 w-2.5 shrink-0" />
@@ -65,7 +65,7 @@ export default function Navbar() {
             <div className="flex items-center gap-1 md:gap-4">
                <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                  <SheetTrigger asChild>
-                   <button className="text-white p-1.5 hover:bg-white/5 rounded-xl transition-all active:scale-90">
+                   <button className="text-white p-1.5 hover:bg-white/5 rounded-xl transition-all active:scale-90 cursor-pointer">
                      <Menu className="h-5 w-5" />
                    </button>
                  </SheetTrigger>
@@ -87,15 +87,15 @@ export default function Navbar() {
             </div>
 
             <div className="hidden lg:flex items-center gap-8 text-[11px] font-black uppercase tracking-widest text-[#7A8B9E]">
-              <Link href="/my-exams" className={pathname === '/my-exams' ? 'text-white' : 'hover:text-primary transition-colors flex items-center gap-2'}><Target className="h-3.5 w-3.5 text-primary" /> My Exams</Link>
-              <Link href="/mocks" className={pathname === '/mocks' ? 'text-white' : 'hover:text-primary transition-colors'}>Mocks</Link>
-              <Link href="/pass" className={pathname === '/pass' ? 'text-white' : 'hover:text-primary transition-colors'}>Pass</Link>
-              <Link href="/notes" className={pathname === '/notes' ? 'text-white' : 'hover:text-primary transition-colors'}>Notes</Link>
+              <Link href="/my-exams" className={cn("transition-colors flex items-center gap-2 hover:text-white", pathname === '/my-exams' ? 'text-white' : '')}><Target className="h-3.5 w-3.5 text-primary" /> My Exams</Link>
+              <Link href="/mocks" className={cn("transition-colors hover:text-white", pathname === '/mocks' ? 'text-white' : '')}>Mocks</Link>
+              <Link href="/pass" className={cn("transition-colors hover:text-white", pathname === '/pass' ? 'text-white' : '')}>Pass</Link>
+              <Link href="/notes" className={cn("transition-colors hover:text-white", pathname === '/notes' ? 'text-white' : '')}>Notes</Link>
             </div>
           </div>
 
           <div className="flex items-center gap-1 md:gap-2">
-            <Link href="/search" className="text-slate-400 hover:text-white p-1.5 md:p-2 rounded-xl hover:bg-white/5 transition-all">
+            <Link href="/search" className="text-slate-400 hover:text-white p-1.5 md:p-2 rounded-xl hover:bg-white/5 transition-all active:scale-95">
               <Search className="h-4 w-4 md:h-5 md:w-5" />
             </Link>
 
@@ -104,7 +104,7 @@ export default function Navbar() {
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 md:h-9 md:w-9 p-0 rounded-full overflow-hidden border border-white/10 hover:bg-white/5 bg-[#0F172A] shadow-inner focus-visible:ring-0">
+                  <Button variant="ghost" className="h-8 w-8 md:h-9 md:w-9 p-0 rounded-full overflow-hidden border border-white/10 hover:bg-white/5 bg-[#0F172A] shadow-inner focus-visible:ring-0 active:scale-95">
                     <StudentAvatar profile={profile} className="h-full w-full border-none" />
                   </Button>
                 </DropdownMenuTrigger>

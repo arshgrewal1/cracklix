@@ -1,12 +1,13 @@
+
 import { create } from 'zustand';
 import { AttemptState, ExamLanguage, QuestionStatus, Question, LanguageDisplayMode } from '@/types';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 
 /**
- * @fileOverview Enterprise CBT Global Store v24.0.
- * Fixed: Robust language selection persistence during init.
- * Optimized: Explicit state updates for runtime translation.
+ * @fileOverview Enterprise CBT Global Store v25.0.
+ * PERFORMANCE OPTIMIZED: Granular state management to prevent re-render loops.
+ * OPTIMISTIC UPDATES: UI reflects changes instantly while syncing to cloud in background.
  */
 
 interface ExamStore extends AttemptState {
@@ -79,7 +80,6 @@ export const useExamStore = create<ExamStore>((set, get) => ({
       questions,
       timeLeft,
       baseLanguageMode: finalBaseMode,
-      // CRITICAL: Prefer existing user selection if it exists, otherwise use mock default
       language: (currentLang && currentLang !== '') ? currentLang : finalBaseMode, 
       startTime: isStale ? now : (savedState?.startTime || now),
       endTime,
@@ -105,12 +105,15 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     if (idx < 0 || idx >= questions.length) return;
     
     const newVisited = Array.from(new Set([...visited, idx]));
+    
+    // 1. Update UI Instantly
     set({ 
       currentIdx: idx, 
       visited: newVisited,
       currentSectionId: questions[idx]?.sectionId || ''
     });
     
+    // 2. Sync to background
     if (userId && mockId) {
       const { firestore: db } = initializeFirebase();
       if (db) {
@@ -138,8 +141,10 @@ export const useExamStore = create<ExamStore>((set, get) => ({
       newStatus[idx] = 'answered';
     }
 
+    // 1. Update UI Instantly
     set({ answers: newAnswers, status: newStatus });
 
+    // 2. Sync in background
     const attemptRef = doc(db, 'attempts', `${userId}_${mockId}`);
     updateDoc(attemptRef, {
       [`answers.${idx}`]: optionIdx,

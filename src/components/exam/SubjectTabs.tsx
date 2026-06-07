@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useExamStore } from '@/store/useExamStore';
@@ -6,11 +7,13 @@ import { useMemo } from 'react';
 
 /**
  * @fileOverview High-Density Subject Navigation.
- * Optimized: Matches user screenshot with precise pill counts and orange highlights.
- * Logic: Clicking a tab jumps the aspirant to the first node of that section.
+ * PERFORMANCE OPTIMIZED: Uses granular selectors to prevent re-renders on timer tick.
  */
 export default function SubjectTabs() {
-  const { questions, currentIdx, setCurrentIdx, status } = useExamStore();
+  const questions = useExamStore(s => s.questions);
+  const currentIdx = useExamStore(s => s.currentIdx);
+  const setCurrentIdx = useExamStore(s => s.setCurrentIdx);
+  const status = useExamStore(s => s.status);
 
   const sections = useMemo(() => {
     const map = new Map<string, { id: string, name: string, startIdx: number, total: number, answered: number }>();
@@ -41,7 +44,7 @@ export default function SubjectTabs() {
   const activeSectionId = questions[currentIdx]?.sectionId || '';
 
   return (
-    <nav className="bg-white border-b border-slate-200 h-10 flex items-center px-4 overflow-x-auto no-scrollbar gap-6 shrink-0 sticky top-0 z-40">
+    <nav className="bg-white border-b border-slate-200 h-10 flex items-center px-4 overflow-x-auto no-scrollbar gap-6 shrink-0 sticky top-0 z-40 pointer-events-auto">
       {sections.map((s) => {
         const isActive = activeSectionId === s.id;
         return (
@@ -49,7 +52,7 @@ export default function SubjectTabs() {
             key={s.id}
             onClick={() => setCurrentIdx(s.startIdx)}
             className={cn(
-              "h-full flex items-center gap-2 transition-all whitespace-nowrap border-b-2 px-1",
+              "h-full flex items-center gap-2 transition-all whitespace-nowrap border-b-2 px-1 cursor-pointer active:scale-95",
               isActive 
                 ? "border-primary text-primary" 
                 : "border-transparent text-slate-400 hover:text-slate-600"

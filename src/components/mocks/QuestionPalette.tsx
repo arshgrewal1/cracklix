@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from "react";
@@ -17,12 +18,14 @@ interface QuestionPaletteProps {
 }
 
 /**
- * @fileOverview Professional CBT Question Palette Hub v11.0.
- * Optimized: Increased labels and spacing for 280px mobile width.
- * Layout: Full data visibility for all status nodes.
+ * @fileOverview Professional CBT Question Palette Hub v12.0.
+ * PERFORMANCE OPTIMIZED: Granular selectors prevent heavy grid re-renders on timer tick.
  */
 export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteProps) {
-  const { questions, status, currentIdx, visited } = useExamStore();
+  const questions = useExamStore(s => s.questions);
+  const status = useExamStore(s => s.status);
+  const currentIdx = useExamStore(s => s.currentIdx);
+  const visited = useExamStore(s => s.visited);
 
   const stats = useMemo(() => {
     const s = { answered: 0, marked: 0, notAnswered: 0, notVisited: 0, ansMarked: 0 };
@@ -58,11 +61,11 @@ export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteP
   }, [questions]);
 
   return (
-    <div className="flex flex-col h-full bg-white text-left font-body select-none">
+    <div className="flex flex-col h-full bg-white text-left font-body select-none pointer-events-auto">
       <ScrollArea className="h-full">
         <div className="p-4 md:p-8 pt-8 md:pt-10 space-y-8 md:space-y-12 pb-32">
            
-           {/* 1. STATUS SUMMARY HUB (Optimized for 280px-380px) */}
+           {/* 1. STATUS SUMMARY HUB */}
            <div className="space-y-4">
               <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Evaluation Status</p>
               <div className="grid grid-cols-2 gap-3">
@@ -107,7 +110,7 @@ export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteP
                    e.preventDefault();
                    onSubmit();
                 }}
-                className="w-full h-14 md:h-16 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-[11px] rounded-xl shadow-xl shadow-emerald-900/10 gap-3 group transition-all"
+                className="w-full h-14 md:h-16 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-[11px] rounded-xl shadow-xl shadow-emerald-900/10 gap-3 group transition-all active:scale-95"
               >
                  <ShieldCheck className="h-5 w-5 md:h-5 md:w-5 group-hover:scale-110 transition-transform" /> SUBMIT TEST
               </Button>
@@ -151,7 +154,7 @@ function QuestionNode({ index, isActive, status, isVisited, onClick }: any) {
     <button
       onClick={onClick}
       className={cn(
-        "relative w-full aspect-square rounded-full flex items-center justify-center font-black text-[12px] md:text-[14px] transition-all border shadow-sm shrink-0 active:scale-90 md:h-11 md:w-11 mx-auto",
+        "relative w-full aspect-square rounded-full flex items-center justify-center font-black text-[12px] md:text-[14px] transition-all border shadow-sm shrink-0 active:scale-90 md:h-11 md:w-11 mx-auto cursor-pointer",
         colorClass
       )}
     >
