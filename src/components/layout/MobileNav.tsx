@@ -3,17 +3,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Zap, User, Home, BarChart3, Target, Gem } from "lucide-react";
+import { Zap, Home, BarChart3, Target, Gem } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
  * @fileOverview Institutional Sticky Bottom Navigation for Mobile.
- * Updated: Replaced Profile with 'Pass' (Gem icon) to match Testbook styling.
+ * Updated: Hidden during active mock attempts to maximize workspace.
  */
 
 export default function MobileNav() {
   const pathname = usePathname();
+
+  // Guard: Hide navigation during live CBT attempts to prevent UI collision
+  if (pathname?.includes('/attempt')) return null;
 
   const navItems = [
     { label: "Home", href: "/", icon: Home },

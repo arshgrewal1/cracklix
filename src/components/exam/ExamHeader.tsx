@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useExamStore } from '@/store/useExamStore';
@@ -23,8 +24,8 @@ const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
 ];
 
 /**
- * @fileOverview Institutional CBT Header v20.0.
- * UPDATED: Removed "Bilingual" term as requested. Replaced with "Language & Language".
+ * @fileOverview Institutional CBT Header v21.0.
+ * Adjusted for maximum mobile density based on user screenshot.
  */
 export default function ExamHeader({ 
   onPaletteToggle, 
@@ -55,34 +56,32 @@ export default function ExamHeader({
 
   return (
     <header className="bg-[#0B1528] text-white flex flex-col shrink-0 z-[100] border-b border-white/5 shadow-lg">
-      <div className="h-12 md:h-16 flex items-center justify-between px-3 md:px-6">
+      <div className="h-12 md:h-16 flex items-center justify-between px-2 md:px-6">
         
         {/* LEFT: BACK & PROGRESS & TITLE */}
-        <div className="flex items-center gap-2 md:gap-6 shrink-0 min-w-0 flex-1">
+        <div className="flex items-center gap-1.5 md:gap-4 shrink-0 min-w-0 flex-1">
            <button 
              onClick={onExitRequest} 
              className="p-1 text-slate-400 hover:text-white active:scale-90 transition-all cursor-pointer"
            >
-              <ChevronLeft className="h-6 w-6" />
+              <ChevronLeft className="h-5 w-5" />
            </button>
            
            <div className="flex flex-col items-start leading-none gap-0.5">
-              <p className="text-[7px] md:text-[9px] font-black uppercase text-primary tracking-[0.2em]">PROGRESS</p>
-              <p className="text-[14px] md:text-[18px] font-black text-white">
-                 {currentIdx + 1}<span className="text-slate-500 text-[10px] md:text-[12px] font-bold">/{questionsCount}</span>
+              <p className="text-[7px] font-black uppercase text-primary tracking-[0.1em]">PROGRESS</p>
+              <p className="text-[12px] md:text-[18px] font-black text-white">
+                 {currentIdx + 1}<span className="text-slate-500 text-[9px] md:text-[12px] font-bold">/{questionsCount}</span>
               </p>
            </div>
 
-           <div className="hidden sm:flex h-8 w-px bg-white/10 mx-2" />
-
-           <div className="flex flex-col items-start leading-none min-w-0 max-w-[140px] md:max-w-[240px]">
-              <p className="text-[7px] md:text-[9px] font-black uppercase text-slate-500 tracking-[0.2em] mb-0.5">EXAM HUB</p>
+           <div className="flex flex-col items-start leading-none min-w-0 max-w-[80px] md:max-w-[240px]">
+              <p className="text-[7px] font-black uppercase text-slate-500 tracking-[0.1em] mb-0.5">EXAM HUB</p>
               <p className="text-[10px] md:text-[13px] font-black text-white uppercase truncate w-full">{mockTitle}</p>
            </div>
         </div>
 
         {/* CENTER: TIMER PILL */}
-        <div className="flex-1 flex justify-center px-1">
+        <div className="flex justify-center px-1">
            <Timer 
              onTimeUp={() => {}} 
              initialSeconds={timeLeft} 
@@ -91,12 +90,12 @@ export default function ExamHeader({
         </div>
 
         {/* RIGHT: ACTIONS HUB */}
-        <div className="flex items-center justify-end gap-1.5 md:gap-5 shrink-0 flex-1">
+        <div className="flex items-center justify-end gap-1 md:gap-4 shrink-0 flex-1">
            {availableModes.length > 1 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                   <button className="h-9 w-9 md:h-11 md:w-11 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded-xl transition-all active:scale-95 flex items-center justify-center">
-                      <Languages className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                   <button className="h-8 w-8 md:h-11 md:w-11 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded-xl transition-all active:scale-95 flex items-center justify-center">
+                      <Languages className="h-3.5 w-3.5 md:h-5 md:w-5 text-primary" />
                    </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56 bg-[#0F172A] border-white/10 text-white rounded-xl shadow-2xl p-1">
@@ -118,17 +117,17 @@ export default function ExamHeader({
 
            <button 
              onClick={() => setPaused(!isPaused)}
-             className="h-9 w-9 md:h-11 md:w-11 bg-white/5 text-white hover:bg-white/10 shrink-0 border border-white/10 rounded-xl active:scale-95 flex items-center justify-center"
+             className="h-8 w-8 md:h-11 md:w-11 bg-white/5 text-white hover:bg-white/10 shrink-0 border border-white/10 rounded-xl active:scale-95 flex items-center justify-center"
            >
-             {isPaused ? <Play className="h-4 w-4 md:h-5 md:w-5 fill-current text-primary" /> : <Pause className="h-4 w-4 md:h-5 md:w-5 fill-current" />}
+             {isPaused ? <Play className="h-3.5 w-3.5 md:h-5 md:w-5 fill-current text-primary" /> : <Pause className="h-3.5 w-3.5 md:h-5 md:w-5 fill-current" />}
            </button>
            
            <Button 
              variant="ghost"
              onClick={onPaletteToggle}
-             className="bg-[#F97316] hover:bg-orange-600 h-9 md:h-12 px-2 md:px-6 rounded-xl font-black uppercase text-[8px] md:text-[11px] tracking-widest gap-1.5 md:gap-3 shadow-xl transition-all active:scale-95"
+             className="bg-[#F97316] hover:bg-orange-600 h-8 md:h-12 px-2 md:px-6 rounded-xl font-black uppercase text-[8px] md:text-[11px] tracking-widest gap-1 shadow-xl transition-all active:scale-95"
            >
-              <Menu className="h-4 w-4" />
+              <Menu className="h-3.5 w-3.5" />
               <span className="hidden xs:inline">Palette</span>
            </Button>
         </div>
