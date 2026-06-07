@@ -35,8 +35,8 @@ import { cn } from "@/lib/utils"
 import { parseBulkQuestions } from "@/lib/parser"
 
 /**
- * @fileOverview Institutional Current Affairs Management Hub v6.0.
- * FIXED: Drastically optimized dialog heights and high-density grids to prevent UI clipping.
+ * @fileOverview Institutional Current Affairs Management Hub v7.0.
+ * UPDATED: Increased ingestion box size and aligned with interleaved bilingual parser.
  */
 
 export default function AdminCurrentAffairs() {
@@ -73,7 +73,7 @@ export default function AdminCurrentAffairs() {
       setBulkText("");
       toast({ title: "Extraction Success", description: `${result.questions.length} questions staged.` });
     } else {
-      toast({ variant: "destructive", title: "Parse Failed", description: "Format: Q1, Statement, (A) Option" });
+      toast({ variant: "destructive", title: "Parse Failed", description: "Format: Q1, Pa Statement, (A) Opt EN/PA" });
     }
   };
 
@@ -300,7 +300,7 @@ export default function AdminCurrentAffairs() {
                         <div className="flex items-center gap-4">
                            <Zap className="h-6 w-6 text-primary" />
                            <div className="text-left">
-                              <h4 className="font-headline font-black text-xl uppercase text-[#0F172A]">Bulk Architect</h4>
+                              <h4 className="font-headline font-black text-xl uppercase text-[#0F172A]">Bulk Ingestion</h4>
                               <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Institutional Ingestion Protocol</p>
                            </div>
                         </div>
@@ -312,10 +312,10 @@ export default function AdminCurrentAffairs() {
                            <Textarea 
                               value={bulkText}
                               onChange={e => setBulkText(e.target.value)}
-                              placeholder={`Q1. Question EN...\nਸਟੇਟਮੈਂਟ PA...\n(A) Option EN / PA...\nAnswer: A`}
-                              className="min-h-[120px] rounded-xl bg-slate-50 border-none p-4 text-xs font-bold shadow-inner resize-none focus-visible:ring-primary"
+                              placeholder={`Q1. English Question\nPunjabi Question\n(A) Option EN / Option PA\nAnswer: (B)\nExplanation: English rationale\nPunjabi rationale`}
+                              className="min-h-[400px] rounded-xl bg-slate-50 border-none p-6 text-sm font-bold shadow-inner resize-none focus-visible:ring-primary"
                            />
-                           <Button onClick={handleProcessBulk} disabled={!bulkText.trim()} className="w-full h-12 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[10px] rounded-xl shadow-2xl gap-3 border-none">
+                           <Button onClick={handleProcessBulk} disabled={!bulkText.trim()} className="w-full h-14 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-xl shadow-2xl gap-3 border-none">
                               Process Bulk Extraction <ChevronRight className="h-4 w-4" />
                            </Button>
                         </div>
@@ -326,7 +326,7 @@ export default function AdminCurrentAffairs() {
                                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                     {editingItem.questions.map((q: any, idx: number) => (
                                        <div key={idx} className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 group/q relative transition-all hover:bg-white hover:shadow-lg">
-                                          <button onClick={() => { const qs = [...editingItem.questions]; qs.splice(idx, 1); setEditingItem({...editingItem, questions: qs}); }} className="absolute top-3 right-3 text-rose-300 hover:text-rose-500 opacity-0 group-hover/q:opacity-100 transition-opacity"><Trash2 className="h-4 w-4" /></button>
+                                          <button onClick={() => { const qs = [...editingItem.questions]; qs.splice(idx, 1); setEditingItem({...editingItem, questions: qs}); }} className="absolute top-3 right-3 text-rose-300 hover:text-rose-50 opacity-0 group-hover/q:opacity-100 transition-opacity"><Trash2 className="h-4 w-4" /></button>
                                           <div className="flex items-center gap-3 mb-2">
                                              <div className="h-5 w-5 rounded-md bg-[#0F172A] text-white flex items-center justify-center font-black text-[8px]">{idx + 1}</div>
                                              <span className="text-[7px] font-black uppercase text-slate-400">VERIFIED</span>
