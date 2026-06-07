@@ -25,8 +25,8 @@ import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Elite Global Navigation Hub v7.0.
- * REFINED: Sidebar width strictly 290px with zero internal padding to allow full-height scrolling child.
+ * @fileOverview Elite Global Navigation Hub v7.1.
+ * REFINED: Sidebar width strictly 290px to match professional specifications.
  */
 
 export default function Navbar() {
@@ -72,7 +72,7 @@ export default function Navbar() {
                  <SheetContent 
                    side="left" 
                    className={cn(
-                     "p-0 border-none w-[290px] overflow-hidden shadow-5xl transition-all duration-200 bg-white",
+                     "p-0 border-none w-[290px] overflow-hidden shadow-5xl transition-all duration-200 bg-[#0F172A]",
                      "top-0 h-screen"
                    )}
                  >
