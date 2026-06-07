@@ -32,8 +32,9 @@ import { cn } from "@/lib/utils"
 import React from "react"
 
 /**
- * @fileOverview Student Registry v12.0 - Manual Pass & Test Controls.
- * Added: Pass unlock everything logic and granular test access.
+ * @fileOverview Student Registry v13.0.
+ * Fixed: Added missing Label and Input imports.
+ * Features: Manual Pass & Test Controls with Unlock Everything logic.
  */
 export default function AspirantsManagement() {
   const db = useFirestore()
@@ -110,7 +111,7 @@ export default function AspirantsManagement() {
           passExpiryDate: expiry.toISOString(),
           updatedAt: serverTimestamp()
        });
-       toast({ title: "Master Unlock Activated", description: "Aspirant now has access to every mock vertical." });
+       toast({ title: "Master Unlock Activated", description: "Aspirant now has access to every mock list." });
     } catch (e) {
        toast({ variant: "destructive", title: "Unlock Failed" });
     }
@@ -122,10 +123,10 @@ export default function AspirantsManagement() {
         <div>
            <div className="flex items-center gap-3 mb-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Student Registry</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Student List</span>
            </div>
           <h1 className="text-5xl font-headline font-black text-primary uppercase tracking-tight">Student Hub</h1>
-          <p className="text-slate-600 mt-1 font-medium">Monitoring {aspirants?.length || 0} student identities and access tiers.</p>
+          <p className="text-slate-600 mt-1 font-medium">Monitoring {aspirants?.length || 0} student profiles and pass levels.</p>
         </div>
       </div>
 
@@ -168,7 +169,7 @@ export default function AspirantsManagement() {
                   </TableCell>
                   <TableCell>
                     <Badge className={cn("border-none px-4 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-sm", aspirant.status === 'Free' ? "bg-slate-100 text-slate-500" : "bg-primary text-white")}>
-                      {aspirant.status || 'Free'} PASS
+                      {(aspirant.status || 'Free').toUpperCase()} PASS
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right px-10">
@@ -182,9 +183,6 @@ export default function AspirantsManagement() {
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleUnlockEverything(aspirant.id)} className="rounded-xl px-4 py-3 gap-3 focus:bg-emerald-500/20 text-emerald-400">
                              <Unlock className="h-4 w-4" /> Pass Unlock Everything
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="rounded-xl px-4 py-3 gap-3 focus:bg-blue-500/20 text-blue-400">
-                             <Zap className="h-4 w-4" /> Unlock Specific Test
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-white/5 my-2" />
                           <DropdownMenuItem onClick={async () => { if(confirm("Permanently delete this student?")) await deleteDoc(doc(db!, "users", aspirant.id)) }} className="rounded-xl px-4 py-3 gap-3 text-rose-500">

@@ -24,7 +24,8 @@ import {
   Layers,
   Sparkles,
   SearchCode,
-  Bell
+  Bell,
+  Gem
 } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
@@ -37,7 +38,8 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Administrative Security Node v5.0.
+ * @fileOverview Administrative Security Hub v6.0.
+ * Fixed: Missing Button import.
  * Restored all management functions for full institutional control.
  */
 
@@ -87,14 +89,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <AdminNavItem icon={<LayoutDashboard />} label="Dashboard" href="/admin" active={pathname === "/admin"} />
               <AdminNavItem icon={<HeartPulse className="text-rose-400" />} label="System Health" href="/admin/health" active={pathname === "/admin/health"} />
               <AdminNavItem icon={<Globe className="text-blue-400" />} label="Authority Hub" href="/admin/exams" active={pathname === "/admin/exams"} />
-              <AdminNavItem icon={<Layers className="text-amber-500" />} label="Exam Registry" href="/admin/exam-registry" active={pathname === "/admin/exam-registry"} />
+              <AdminNavItem icon={<Layers className="text-amber-500" />} label="Exam List" href="/admin/exam-registry" active={pathname === "/admin/exam-registry"} />
               <AdminNavItem icon={<Database />} label="Question Bank" href="/admin/questions" active={pathname === "/admin/questions"} />
-              <AdminNavItem icon={<SearchCode className="text-emerald-400" />} label="Subject Hub" href="/admin/subjects" active={pathname === "/admin/subjects"} />
+              <AdminNavItem icon={<SearchCode className="text-emerald-400" />} label="Subject List" href="/admin/subjects" active={pathname === "/admin/subjects"} />
             </SidebarMenu>
           </SidebarGroup>
 
           <SidebarGroup className="mt-4">
-            <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Content Hubs</SidebarGroupLabel>
+            <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Content Sections</SidebarGroupLabel>
             <SidebarMenu>
               <AdminNavItem icon={<Zap className="text-primary" />} label="Mock Manager" href="/admin/mocks" active={pathname === "/admin/mocks"} />
               <AdminNavItem icon={<FileStack className="text-blue-500" />} label="PYQ Repository" href="/admin/pyqs" active={pathname === "/admin/pyqs"} />
