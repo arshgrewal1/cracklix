@@ -1,10 +1,9 @@
-
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 
 /**
  * @fileOverview Backend Node for Razorpay Order Creation.
- * FIXED: Added credential presence check and improved error logging.
+ * FIXED: Hardened credential check and receipt length validation.
  */
 
 export async function POST(request: Request) {
@@ -16,7 +15,7 @@ export async function POST(request: Request) {
 
     if (!key_id || !key_secret) {
       console.error('[RAZORPAY_CONFIG_ERR]: Missing API Keys in environment.');
-      return NextResponse.json({ error: 'Gateway configuration error' }, { status: 500 });
+      return NextResponse.json({ error: 'Gateway configuration error: Keys missing' }, { status: 500 });
     }
 
     const razorpay = new Razorpay({
@@ -24,15 +23,21 @@ export async function POST(request: Request) {
       key_secret: key_secret,
     });
 
-    if (amount === undefined || amount === null || amount < 1) {
-      return NextResponse.json({ error: 'Invalid amount (Min ₹1 required)' }, { status: 400 });
+    // Razorpay requires amount in paise (1 INR = 100 paise)
+    // Minimum amount must be 1 INR (100 paise)
+    const amountInPaise = Math.round(Number(amount) * 100);
+
+    if (isNaN(amountInPaise) || amountInPaise < 100) {
+      return NextResponse.json({ error: 'Invalid amount (Minimum ₹1 required)' }, { status: 400 });
     }
 
-    // Razorpay expects amount in paise (e.g. 1 INR = 100 paise)
+    // Receipt ID must be max 40 chars
+    const receiptId = `rcpt_${planId.slice(0, 10)}_${Date.now()}`.slice(0, 40);
+
     const options = {
-      amount: Math.round(Number(amount) * 100), 
+      amount: amountInPaise,
       currency: 'INR',
-      receipt: `rcpt_${planId.slice(0, 15)}_${Date.now()}`.slice(0, 40),
+      receipt: receiptId,
     };
 
     const order = await razorpay.orders.create(options);
@@ -44,6 +49,9 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error('[RAZORPAY_ORDER_ERR]:', error);
-    return NextResponse.json({ error: error.message || 'Order generation failed' }, { status: 500 });
+    return NextResponse.json({ 
+      error: error.message || 'Order generation failed',
+      details: error.description || 'Internal Gateway Error'
+    }, { status: 500 });
   }
 }
