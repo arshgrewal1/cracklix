@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState } from "react"
@@ -5,7 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Search, Trash2, Edit, ClipboardList, Layers, ChevronRight, Clock, FileText, Calendar } from "lucide-react"
+import { Plus, Search, Trash2, Edit, ClipboardList, Layers, ChevronRight, Clock, FileText, Calendar, BookOpen, ListTree, FileStack } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, deleteDoc, doc, setDoc, serverTimestamp, where } from "firebase/firestore"
@@ -14,11 +15,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
-
-/**
- * @fileOverview Ultimate Mock Management Ledger.
- * Fixed: Robust Firebase instance validation (removed HALLUCINATED .type checks).
- */
 
 export default function MockManagement() {
   const db = useFirestore()
@@ -96,6 +92,7 @@ export default function MockManagement() {
               <TableHeader className="bg-slate-50/50">
                 <TableRow className="h-20">
                   <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Identity</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Category</TableHead>
                   <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Stats</TableHead>
                   <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Status</TableHead>
                   <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Control</TableHead>
@@ -103,7 +100,7 @@ export default function MockManagement() {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                   Array.from({ length: 4 }).map((_, i) => <TableRow key={i}><TableCell colSpan={4} className="p-10"><Skeleton className="h-16 w-full rounded-xl" /></TableCell></TableRow>)
+                   Array.from({ length: 4 }).map((_, i) => <TableRow key={i}><TableCell colSpan={5} className="p-10"><Skeleton className="h-16 w-full rounded-xl" /></TableCell></TableRow>)
                 ) : mocks.map((mock: any) => (
                   <TableRow key={mock.id} className="hover:bg-slate-50 border-slate-50 transition-colors">
                     <TableCell className="px-10 py-6">
@@ -116,6 +113,15 @@ export default function MockManagement() {
                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2">{mock.boardId}</p>
                         </div>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                       <div className="flex items-center gap-2">
+                          {mock.mockType === 'FULL' && <Zap className="h-3 w-3 text-primary" />}
+                          {mock.mockType === 'SUBJECT' && <BookOpen className="h-3 w-3 text-blue-500" />}
+                          {mock.mockType === 'CHAPTER' && <ListTree className="h-3 w-3 text-emerald-500" />}
+                          {mock.mockType === 'PYQ' && <FileStack className="h-3 w-3 text-amber-500" />}
+                          <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">{mock.mockType || 'FULL'}</span>
+                       </div>
                     </TableCell>
                     <TableCell>
                        <div className="flex items-center gap-4 text-[10px] font-bold text-slate-500 uppercase">
@@ -139,37 +145,6 @@ export default function MockManagement() {
                 ))}
               </TableBody>
             </Table>
-          </div>
-
-          <div className="md:hidden divide-y divide-slate-100">
-             {loading ? (
-                Array.from({ length: 3 }).map((_, i) => <div key={i} className="p-6 space-y-4"><Skeleton className="h-24 w-full rounded-2xl" /></div>)
-             ) : mocks.map((mock: any) => (
-                <div key={mock.id} className="p-6 space-y-6 bg-white">
-                   <div className="flex justify-between items-start">
-                      <div className="space-y-1">
-                         <Badge className="bg-primary/10 text-primary border-none text-[7px] font-black uppercase tracking-widest">{mock.boardId}</Badge>
-                         <h3 className="font-black text-sm text-[#0F172A] uppercase leading-tight">{mock.title}</h3>
-                      </div>
-                      <button onClick={() => togglePublish(mock.id, mock.published)} className={cn(
-                        "h-2.5 w-2.5 rounded-full shadow-sm shrink-0",
-                        mock.published ? 'bg-emerald-500 shadow-emerald-200' : 'bg-slate-300 shadow-slate-100'
-                      )} />
-                   </div>
-                   <div className="flex items-center gap-6 text-[8px] font-black uppercase text-slate-400 tracking-[0.2em] bg-slate-50 p-3 rounded-xl">
-                      <span className="flex items-center gap-2"><FileText className="h-3 w-3" /> {mock.totalQuestions} Questions</span>
-                      <span className="flex items-center gap-2"><Calendar className="h-3 w-3" /> {new Date(mock.createdAt?.seconds * 1000).toLocaleDateString()}</span>
-                   </div>
-                   <div className="flex gap-2">
-                      <Button asChild variant="outline" className="flex-1 h-11 rounded-xl font-black uppercase text-[9px] tracking-widest border-slate-200">
-                        <Link href={`/admin/mocks/builder?id=${mock.id}`}><Edit className="h-4 w-4 mr-2" /> Modify Blueprint</Link>
-                      </Button>
-                      <Button variant="outline" size="icon" className="h-11 w-11 rounded-xl text-rose-500 border-rose-100 bg-rose-50" onClick={() => handleDelete(mock.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                   </div>
-                </div>
-             ))}
           </div>
         </CardContent>
       </Card>

@@ -24,7 +24,8 @@ import {
   FileStack,
   Map,
   Bell,
-  GraduationCap
+  GraduationCap,
+  ListTree
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -32,11 +33,6 @@ import { useMemo, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-
-/**
- * @file Overview Final Exam-Specific Mastery Hub v5.0.
- * HARDENED: Robust Board Logo lookup logic with specialized scaling for circular emblems (Army).
- */
 
 export default function ExamHubPage() {
   const params = useParams()
@@ -46,7 +42,6 @@ export default function ExamHubPage() {
   const examId = params.id as string
   const [imgFailed, setImgFailed] = useState(false);
 
-  // Registry Guards
   const { data: exam, loading: examLoading } = useDoc<any>(useMemo(() => (db && examId ? doc(db, "exams", examId) : null), [db, examId]))
   
   const mocksQuery = useMemo(() => {
@@ -64,10 +59,11 @@ export default function ExamHubPage() {
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
 
   const groupedMocks = useMemo(() => {
-    if (!rawMocks) return { FULL: [], FREE: [], PYQ: [] };
+    if (!rawMocks) return { FULL: [], SUBJECT: [], CHAPTER: [], PYQ: [] };
     return {
       FULL: rawMocks.filter(m => m.mockType === 'FULL'),
-      FREE: rawMocks.filter(m => m.accessType === 'FREE'),
+      SUBJECT: rawMocks.filter(m => m.mockType === 'SUBJECT'),
+      CHAPTER: rawMocks.filter(m => m.mockType === 'CHAPTER'),
       PYQ: rawMocks.filter(m => m.mockType === 'PYQ'),
     }
   }, [rawMocks])
@@ -121,32 +117,26 @@ export default function ExamHubPage() {
       </section>
 
       <main className="container mx-auto px-4 py-4 md:py-8 max-w-6xl pb-40">
-         <Tabs defaultValue="MOCKS" className="space-y-6">
+         <Tabs defaultValue="FULL" className="space-y-6">
             <div className="bg-white border border-slate-100 rounded-xl p-1 shadow-sm overflow-x-auto no-scrollbar">
                <TabsList className="bg-transparent border-none p-0 flex h-10 w-full justify-start gap-1">
-                  <DashboardTab value="MOCKS" label="Mock Tests" icon={<Zap className="h-3 w-3" />} />
-                  <DashboardTab value="FREE" label="Free Tests" icon={<Sparkles className="h-3 w-3" />} />
-                  <DashboardTab value="PYQ" label="PYQ" icon={<FileStack className="h-3 w-3" />} />
-                  <DashboardTab value="ANALYSIS" label="Analysis" icon={<Newspaper className="h-3 w-3" />} />
-                  <DashboardTab value="NOTES" label="Notes" icon={<FileText className="h-3 w-3" />} />
+                  <DashboardTab value="FULL" label="Full Mocks" icon={<Zap className="h-3 w-3" />} />
+                  <DashboardTab value="SUBJECT" label="Subject Tests" icon={<BookOpen className="h-3 w-3" />} />
+                  <DashboardTab value="CHAPTER" label="Chapter Tests" icon={<ListTree className="h-3 w-3" />} />
+                  <DashboardTab value="PYQ" label="PYQ Papers" icon={<FileStack className="h-3 w-3" />} />
+                  <DashboardTab value="NOTES" label="Study Notes" icon={<FileText className="h-3 w-3" />} />
                   <DashboardTab value="SYLLABUS" label="Syllabus" icon={<Info className="h-3 w-3" />} />
-                  <DashboardTab value="PATTERN" label="Pattern" icon={<Map className="h-3 w-3" />} />
-                  <DashboardTab value="PDFS" label="PDFs" icon={<FileText className="h-3 w-3" />} />
-                  <DashboardTab value="UPDATES" label="Updates" icon={<Bell className="h-3 w-3" />} />
                </TabsList>
             </div>
 
             <div className="animate-in fade-in duration-500">
-               <TabsContent value="MOCKS" className="m-0"><MockList data={groupedMocks.FULL} results={userResults} hasPass={hasPass} user={user} /></TabsContent>
-               <TabsContent value="FREE" className="m-0"><MockList data={groupedMocks.FREE} results={userResults} hasPass={hasPass} user={user} /></TabsContent>
+               <TabsContent value="FULL" className="m-0"><MockList data={groupedMocks.FULL} results={userResults} hasPass={hasPass} user={user} /></TabsContent>
+               <TabsContent value="SUBJECT" className="m-0"><MockList data={groupedMocks.SUBJECT} results={userResults} hasPass={hasPass} user={user} /></TabsContent>
+               <TabsContent value="CHAPTER" className="m-0"><MockList data={groupedMocks.CHAPTER} results={userResults} hasPass={hasPass} user={user} /></TabsContent>
                <TabsContent value="PYQ" className="m-0"><MockList data={groupedMocks.PYQ} results={userResults} hasPass={hasPass} user={user} /></TabsContent>
                
-               <TabsContent value="ANALYSIS" className="m-0"><EmptyNode label="No Strategic Analysis Nodes" /></TabsContent>
                <TabsContent value="NOTES" className="m-0"><EmptyNode label="No Study Notes Recorded" /></TabsContent>
                <TabsContent value="SYLLABUS" className="m-0"><EmptyNode label="Syllabus Audit Pending" /></TabsContent>
-               <TabsContent value="PATTERN" className="m-0"><EmptyNode label="Exam Pattern Verification active" /></TabsContent>
-               <TabsContent value="PDFS" className="m-0"><EmptyNode label="Cloud PDF Registry empty" /></TabsContent>
-               <TabsContent value="UPDATES" className="m-0"><EmptyNode label="No Institutional Updates" /></TabsContent>
             </div>
          </Tabs>
       </main>
@@ -168,7 +158,7 @@ function DashboardTab({ value, label, icon }: any) {
    return (
       <TabsTrigger 
          value={value} 
-         className="px-3 h-full font-black text-[9px] uppercase tracking-wider text-slate-400 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5"
+         className="px-4 h-full font-black text-[9px] uppercase tracking-wider text-slate-400 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-lg transition-all whitespace-nowrap flex items-center gap-1.5"
       >
          {icon} {label}
       </TabsTrigger>

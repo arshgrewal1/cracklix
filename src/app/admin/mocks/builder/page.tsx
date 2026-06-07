@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect, Suspense } from "react"
@@ -30,7 +31,9 @@ import {
   Landmark,
   ListTree,
   Globe,
-  EyeOff
+  EyeOff,
+  BookOpen,
+  FileStack
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, where, limit, getDocs, documentId } from "firebase/firestore"
@@ -46,10 +49,13 @@ const LANGUAGE_MODES: { label: string, value: LanguageDisplayMode }[] = [
   { label: "BILINGUAL (EN+HI)", value: "ENGLISH_HINDI" },
 ];
 
-/**
- * @fileOverview Institutional Mock Architect v8.0.
- * Features: High-Fidelity Active Assembly with real-time question swapping for live mocks.
- */
+const MOCK_TYPES: { label: string, value: MockType, icon: any }[] = [
+  { label: "FULL LENGTH MOCK", value: "FULL", icon: <Zap className="h-3 w-3" /> },
+  { label: "SUBJECT TEST", value: "SUBJECT", icon: <BookOpen className="h-3 w-3" /> },
+  { label: "CHAPTER TEST", value: "CHAPTER", icon: <ListTree className="h-3 w-3" /> },
+  { label: "OFFICIAL PYQ", value: "PYQ", icon: <FileStack className="h-3 w-3" /> },
+  { label: "SECTIONAL TEST", value: "SECTIONAL", icon: <Layers className="h-3 w-3" /> },
+];
 
 export default function MockBuilderPage() {
   return (
@@ -105,12 +111,11 @@ function MockBuilderContent() {
   const [activeSectionId, setActiveSectionId] = useState('sec-1')
   const [bankSelection, setBankSelection] = useState<string[]>([])
 
-  // Tracking question usage across other mocks
   const usedQuestionIds = useMemo(() => {
     if (!allMocks) return new Set<string>();
     const ids = new Set<string>();
     allMocks.forEach((m: any) => {
-      if (m.id === mockId) return; // Ignore current mock if editing
+      if (m.id === mockId) return; 
       if (m.questionIds) m.questionIds.forEach((id: string) => ids.add(id));
     });
     return ids;
@@ -141,7 +146,6 @@ function MockBuilderContent() {
         languageMode: existingMock.languageMode || "ENGLISH_PUNJABI"
       }));
 
-      // Hydrate questions for each section using explicit questionIds matrix
       if (existingMock.sections && existingMock.sections.length > 0 && existingMock.questionIds) {
         let currentIndex = 0;
         const qIds = existingMock.questionIds;
@@ -160,7 +164,6 @@ function MockBuilderContent() {
         setSections(hydratedSections);
         if (hydratedSections[0]) setActiveSectionId(hydratedSections[0].id);
       } else if (existingMock.questionIds) {
-        // Fallback for flat mocks without sections
         setSections([{
            id: 'sec-1',
            name: 'Main Assessment',
@@ -274,6 +277,24 @@ function MockBuilderContent() {
                      <SelectContent>{exams?.filter((e: any) => e.boardId === mockData.boardId).map((e: any) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
                    </Select>
                  </div>
+               </div>
+
+               <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2">
+                     <Layers className="h-3 w-3" /> Mock Category
+                  </Label>
+                  <Select value={mockData.mockType} onValueChange={(v: MockType) => setMockData({...mockData, mockType: v})}>
+                     <SelectTrigger className="h-14 rounded-xl bg-slate-50/50 border-none font-bold">
+                        <SelectValue />
+                     </SelectTrigger>
+                     <SelectContent>
+                        {MOCK_TYPES.map(type => (
+                           <SelectItem key={type.value} value={type.value} className="font-bold text-[10px] uppercase tracking-wider">
+                              <div className="flex items-center gap-2">{type.icon} {type.label}</div>
+                           </SelectItem>
+                        ))}
+                     </SelectContent>
+                  </Select>
                </div>
 
                <div className="space-y-2">
