@@ -141,7 +141,7 @@ function CatalogContent() {
                              {logoUrl && !isImgFailed ? (
                                 <img 
                                   src={logoUrl} 
-                                  className={cn("w-full h-full object-contain p-1.5 md:p-2 transition-transform duration-500 group-hover:scale-105", isArmy ? "scale-150" : "")} 
+                                  className={cn("w-full h-full object-contain p-1.5 md:p-2 transition-transform duration-500 group-hover:scale-105", isArmy ? "scale-125" : "")} 
                                   alt="Institutional Logo" 
                                   referrerPolicy="no-referrer" 
                                   onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}

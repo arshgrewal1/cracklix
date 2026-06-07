@@ -197,7 +197,7 @@ export default function ExamRegistryPage() {
                             {logoUrl ? (
                               <img 
                                 src={logoUrl} 
-                                className={cn("w-full h-full object-contain p-2", isArmy ? "scale-150" : "")} 
+                                className={cn("w-full h-full object-contain p-2", isArmy ? "scale-125" : "")} 
                                 alt="Logo" 
                                 referrerPolicy="no-referrer"
                               />

@@ -2,7 +2,7 @@
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Engine v36.0 (Agniveer Hub Optimized).
+ * @fileOverview Institutional Seeding Engine v37.0 (Agniveer Hub Optimized).
  * Features: Hardened Unique Hub Registry with High-Fidelity Official Assets.
  * ReferrerPolicy Hardening is applied at the rendering layer.
  */
@@ -16,7 +16,7 @@ export async function seedInitialData(db: Firestore) {
   const ssscLogo = "https://highcourtchd.gov.in/images/logo.png";
   const pspclLogo = "https://pspcl.in/assets/images/logo.png";
   const anganwadiLogo = "https://sswcd.punjab.gov.in/sites/default/files/download.png";
-  const armyEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Indian_Army_Circular_Insignia.svg/250px-Indian_Army_Circular_Insignia.svg.png";
+  const armyEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/ab/Indian_Army_Insignia_circular.png/1280px-Indian_Army_Insignia_circular.png";
   const ibpsLogo = "https://careeravenues.info/wp-content/uploads/2023/05/Introduction.jpg";
   const punjabEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
 
