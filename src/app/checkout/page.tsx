@@ -19,8 +19,8 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 
 /**
- * @fileOverview Institutional Checkout Hub v20.0.
- * FIXED: Aggressive Name Sanitization and Domestic Node Forcing to resolve "Invalid Name" and "International Card" errors.
+ * @fileOverview Institutional Checkout Hub v25.0.
+ * FIXED: Aggressive Sanitization Hub implemented to resolve "Invalid Name" and "Order failed" errors.
  */
 
 export default function CheckoutPage() {
@@ -55,14 +55,14 @@ function CheckoutContent() {
     if (!user || !planData || !db) return;
     
     if (!(window as any).Razorpay) {
-      toast({ variant: "destructive", title: "Gateway Script Missing", description: "The payment engine is still initializing. Please wait 5 seconds." });
+      toast({ variant: "destructive", title: "Gateway Script Error", description: "The payment engine failed to load. Please refresh the page." });
       return;
     }
 
     setProcessing(true);
 
     try {
-      // 1. Create order node via backend registry
+      // 1. Create order node via backend hub
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -72,12 +72,12 @@ function CheckoutContent() {
       const orderData = await orderRes.json();
       if (orderData.error) throw new Error(orderData.error);
 
-      // 2. AGGRESSIVE SANITIZATION (Strict domestic protocol)
+      // 2. AGGRESSIVE SANITIZATION (Strict domestic node rules)
       // Strip everything except letters and spaces to resolve "Name format is invalid"
       const rawName = profile?.name || user?.displayName || 'Aspirant';
       const sanitizedName = rawName.replace(/[^a-zA-Z\s]/g, '').trim().slice(0, 40) || "Student";
       
-      // Extract exactly the last 10 digits for the contact registry to force domestic mode
+      // Extract exactly 10 digits for contact node to force domestic logic
       const phoneDigits = (profile?.phone || '').replace(/\D/g, '').slice(-10);
       const sanitizedPhone = phoneDigits.length === 10 ? `+91${phoneDigits}` : '';
 
@@ -107,13 +107,13 @@ function CheckoutContent() {
 
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-              toast({ title: "Pass Activated", description: "Your subscription node is now live." });
+              toast({ title: "Pass Activated", description: "Your preparation hub is now fully unlocked." });
               router.push(`/payment/success?plan=${planData.name}`);
             } else {
-              throw new Error("Signature verification failed.");
+              throw new Error("Security audit failed.");
             }
           } catch (e: any) {
-            toast({ variant: "destructive", title: "Security Alert", description: "Payment verification registry rejected." });
+            toast({ variant: "destructive", title: "Security Rejection", description: "Payment verification registry rejected." });
             setProcessing(false);
           }
         },
@@ -135,8 +135,8 @@ function CheckoutContent() {
       rzp.on('payment.failed', function (response: any) {
         toast({ 
           variant: "destructive", 
-          title: "Payment Declined", 
-          description: response.error.description || "The transaction was interrupted." 
+          title: "Gateway Rejection", 
+          description: response.error.description || "The bank node declined the transaction." 
         });
         setProcessing(false);
       });
@@ -151,7 +151,7 @@ function CheckoutContent() {
   const handleManualPayment = async () => {
     if (!user || !profile || !planData) return
     if (!utr || utr.length < 10) {
-       toast({ variant: "destructive", title: "UTR Missing", description: "Enter the 12-digit transaction ID." })
+       toast({ variant: "destructive", title: "UTR Code Invalid", description: "Please enter the 12-digit transaction ID." })
        return
     }
 
@@ -164,10 +164,10 @@ function CheckoutContent() {
           planId: planId,
           transactionId: utr
        })
-       toast({ title: "Audit Submitted", description: "Admin will verify your payment node within 24 hours." })
+       toast({ title: "Audit Logged", description: "Admin will verify your payment node within 24 hours." })
        router.push("/dashboard")
     } catch (e: any) {
-       toast({ variant: "destructive", title: "Submission Failed" })
+       toast({ variant: "destructive", title: "Registry Error" })
     } finally {
        setProcessing(false)
     }
@@ -191,7 +191,7 @@ function CheckoutContent() {
            </Button>
            <div className="text-left">
               <h1 className="text-4xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Checkout Hub</h1>
-              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1 text-left">Secure Transaction Node</p>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] mt-1 text-left">Secure Transaction Registry</p>
            </div>
         </div>
 
@@ -206,7 +206,7 @@ function CheckoutContent() {
                  <TabsContent value="online" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <Card className="border-none shadow-3xl rounded-[3rem] bg-white overflow-hidden">
                        <CardHeader className="p-10 bg-slate-50/50 border-b border-slate-100">
-                          <CardTitle className="font-headline font-black text-xl uppercase text-[#0F172A]">Instant Activation</CardTitle>
+                          <CardTitle className="font-headline font-black text-xl uppercase text-[#0F172A]">Direct Activation</CardTitle>
                           <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Secure transaction via Razorpay domestic gateway</CardDescription>
                        </CardHeader>
                        <CardContent className="p-10 space-y-10">
@@ -215,7 +215,7 @@ function CheckoutContent() {
                                 <ShieldCheck className="h-6 w-6" />
                              </div>
                              <p className="text-sm font-medium text-emerald-800 leading-relaxed uppercase">
-                                Your payment is protected by 128-bit encryption. Access is granted immediately after verification.
+                                Your transaction is verified against the master Punjab Exam Hub registry instantly.
                              </p>
                           </div>
                           <Button 
@@ -233,7 +233,7 @@ function CheckoutContent() {
                  <TabsContent value="manual" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <Card className="border-none shadow-3xl rounded-[3rem] bg-white overflow-hidden">
                        <CardHeader className="p-10 bg-slate-50/50 border-b border-slate-100">
-                          <CardTitle className="font-headline font-black text-xl uppercase text-[#0F172A]">Direct Audit Entry</CardTitle>
+                          <CardTitle className="font-headline font-black text-xl uppercase text-[#0F172A]">Manual Hub Audit</CardTitle>
                           <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Scan QR and submit transaction UTR code</CardDescription>
                        </CardHeader>
                        <CardContent className="p-10 space-y-10">
@@ -243,23 +243,23 @@ function CheckoutContent() {
                              </div>
                              <div className="flex-1 space-y-4 text-left">
                                 <div className="p-5 bg-[#0F172A] rounded-2xl border border-white/5 space-y-1 shadow-2xl">
-                                   <p className="text-[9px] font-black text-primary uppercase tracking-widest">Institutional UPI ID</p>
+                                   <p className="text-[9px] font-black text-primary uppercase tracking-widest">Institutional UPI Node</p>
                                    <p className="text-lg font-black text-white break-all leading-none">{upiId}</p>
                                 </div>
                                 <ul className="space-y-2">
                                    <li className="flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase"><CheckCircle2 className="h-3 w-3 text-emerald-500" /> Pay exactly ₹{planData.price}</li>
-                                   <li className="flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase"><CheckCircle2 className="h-3 w-3 text-emerald-500" /> Copy 12-digit UTR from app</li>
+                                   <li className="flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase"><CheckCircle2 className="h-3 w-3 text-emerald-500" /> Copy 12-digit UTR from your app</li>
                                 </ul>
                              </div>
                           </div>
 
                           <div className="space-y-4 pt-6 border-t border-slate-50">
                              <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">UTR / Transaction Number</Label>
+                                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">UTR / Transaction ID</Label>
                                 <Input 
                                   value={utr}
                                   onChange={e => setUtr(e.target.value)}
-                                  placeholder="Enter 12-digit UTR Code" 
+                                  placeholder="Enter 12-digit UTR" 
                                   className="h-14 rounded-xl border-slate-100 bg-slate-50 font-black text-lg tracking-widest text-[#0F172A]" 
                                 />
                              </div>
@@ -283,7 +283,7 @@ function CheckoutContent() {
                  <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Gem className="h-48 w-48" /></div>
                  <div className="relative z-10 space-y-12">
                     <div className="space-y-2 text-center">
-                       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Order Node Summary</p>
+                       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Transaction Node Summary</p>
                        <h3 className="text-3xl md:text-5xl font-headline font-black uppercase leading-tight">{planData.name}</h3>
                     </div>
                     
@@ -303,7 +303,7 @@ function CheckoutContent() {
               <div className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl flex items-start gap-4">
                  <Lock className="h-5 w-5 text-slate-300 shrink-0 mt-1" />
                  <p className="text-[10px] font-bold text-slate-500 leading-relaxed uppercase">
-                    Institutional security active. All transactions are verified against the master Punjab Exam Registry node.
+                    Institutional security active. All transactions are audited against the master Punjab recruitment database node.
                  </p>
               </div>
            </div>

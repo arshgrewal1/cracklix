@@ -3,8 +3,8 @@ import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 
 /**
- * @fileOverview Hardened Razorpay Order Node v6.0.
- * Ensures amount is in whole paise and receipt ID is strictly alphanumeric and short.
+ * @fileOverview Production-Grade Razorpay Order Node v7.0.
+ * Hardened: Strict integer paise conversion and short receipt validation.
  */
 
 export async function POST(request: Request) {
@@ -15,8 +15,8 @@ export async function POST(request: Request) {
     const key_secret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!key_id || !key_secret) {
-      console.error('[GATEWAY_ERROR]: Missing Razorpay Credentials in Registry');
-      return NextResponse.json({ error: 'Gateway keys missing in environment registry.' }, { status: 500 });
+      console.error('[GATEWAY_ERROR]: Credentials missing in registry.');
+      return NextResponse.json({ error: 'Gateway configuration node is offline.' }, { status: 500 });
     }
 
     const razorpay = new Razorpay({
@@ -24,15 +24,14 @@ export async function POST(request: Request) {
       key_secret: key_secret,
     });
 
-    // 1. Convert to whole integer paise (Razorpay Protocol)
+    // 1. Strict Integer Conversion (Razorpay Protocol requires whole paise)
     const amountInPaise = Math.round(Number(amount) * 100);
 
     if (isNaN(amountInPaise) || amountInPaise < 100) {
-      return NextResponse.json({ error: 'Invalid transaction amount node.' }, { status: 400 });
+      return NextResponse.json({ error: 'Minimum transaction amount is ₹1.' }, { status: 400 });
     }
 
-    // 2. Short alphanumeric receipt (Max 40, strictly enforced)
-    // Using a shorter timestamp based ID to ensure acceptance
+    // 2. Short Alphanumeric Receipt (Razorpay Max Limit is 40 characters)
     const receipt = `rcpt_${Date.now().toString().slice(-10)}`;
 
     const options = {

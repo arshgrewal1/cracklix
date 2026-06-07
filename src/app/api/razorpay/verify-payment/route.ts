@@ -5,8 +5,8 @@ import { initializeFirebase } from '@/firebase';
 import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Razorpay Signature Verification & Subscription Automation Node.
- * Hardened with domestic signature audit and automatic user registry update.
+ * @fileOverview Institutional Razorpay Verification Hub v7.0.
+ * Hardened: Domestic signature audit and automatic Firestore subscription update.
  */
 
 export async function POST(request: Request) {
@@ -21,14 +21,14 @@ export async function POST(request: Request) {
 
     const secret = process.env.RAZORPAY_KEY_SECRET || '';
     
-    // 1. Verify Signature Integrity
+    // 1. Verify Signature Node
     const hmac = crypto.createHmac('sha256', secret);
     hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
     const generated_signature = hmac.digest('hex');
 
     if (generated_signature !== razorpay_signature) {
-      console.error('[SECURITY_ALERT]: Invalid Payment Signature Attempt');
-      return NextResponse.json({ error: 'Transaction signature mismatch.' }, { status: 400 });
+      console.error('[SECURITY_ALERT]: Payment signature mismatch.');
+      return NextResponse.json({ error: 'Security audit failed. Transaction rejected.' }, { status: 400 });
     }
 
     // 2. Grant Access in Institutional Registry
@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     if (!planSnap.exists()) throw new Error("Plan node missing in master registry.");
     const planData = planSnap.data();
 
-    // Calculate expiry based on plan duration (default 30 days)
+    // Calculate expiry (Default 30 days if Duration missing)
     const duration = planData.durationDays || 30;
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + duration);
@@ -63,15 +63,14 @@ export async function POST(request: Request) {
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
       amount: planData.price,
-      gateway: 'RAZORPAY_WEB',
+      gateway: 'RAZORPAY_DOMESTIC',
       verified: true,
       updatedAt: serverTimestamp()
     });
 
-    // Optional: Log payment to a separate collection for finance audit
+    // Log to Finance Audit Collection
     await addDoc(collection(db, 'payments'), {
       userId,
-      userEmail: (await getDoc(userRef)).data()?.email || 'N/A',
       amount: planData.price,
       paymentId: razorpay_payment_id,
       planName: planData.name,
@@ -80,7 +79,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('[RAZORPAY_VERIFY_ERROR]:', error);
+    console.error('[VERIFY_ERROR]:', error);
     return NextResponse.json({ error: error.message || 'Verification node failure.' }, { status: 500 });
   }
 }
