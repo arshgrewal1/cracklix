@@ -38,9 +38,9 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Test Results Hub v3.1 (High-Fidelity Hardened).
- * FIXED: Tabs runtime error by wrapping triggers in TabsList.
- * FIXED: Responsive text overflow in Hero Title.
+ * @fileOverview Test Results Hub v4.0 (Production Hardened).
+ * FIXED: Text truncation in metrics nodes.
+ * FIXED: Hero title overflow and merit node overlapping.
  */
 
 export default function ResultPage() {
@@ -172,59 +172,44 @@ export default function ResultPage() {
     </div>
   )
 
-  if (!sessionData) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-slate-50 p-6 space-y-8 text-center">
-       <div className="h-24 w-24 bg-slate-100 rounded-[3rem] flex items-center justify-center text-slate-300">
-          <Trophy className="h-12 w-12" />
-       </div>
-       <div className="space-y-2">
-          <p className="text-xl font-headline font-black text-[#0B1528] uppercase">Result Entry Missing</p>
-          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">The assessment node could not be synchronized.</p>
-       </div>
-       <Button asChild className="rounded-2xl h-16 px-12 bg-[#0B1528] text-white font-black uppercase text-[10px] tracking-[0.2em] shadow-xl">
-          <Link href="/mocks">Browse Tests</Link>
-       </Button>
-    </div>
-  )
-
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 font-body pb-safe text-left">
       <Navbar />
       
-      <main className="container mx-auto px-4 md:px-6 py-6 md:py-16 max-w-7xl space-y-8 md:space-y-20">
+      <main className="container mx-auto px-4 md:px-6 py-6 md:py-16 max-w-7xl space-y-8 md:space-y-16">
         
         {/* HERO HUB */}
-        <div className="flex flex-col lg:flex-row gap-6 md:gap-12">
+        <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
            <Card className="flex-1 border-none shadow-5xl rounded-[2.5rem] md:rounded-[4rem] bg-[#0B1528] text-white overflow-hidden relative group">
               <div className="absolute top-0 right-0 p-12 opacity-[0.03] rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-96 w-96" /></div>
-              <CardContent className="p-8 md:p-20 space-y-8 md:space-y-12 relative z-10">
-                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 md:gap-10">
-                    <div className="space-y-4 md:space-y-6 max-w-full lg:max-w-[55%]">
+              <CardContent className="p-8 md:p-14 lg:p-20 space-y-8 md:space-y-12 relative z-10">
+                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
+                    <div className="space-y-6 max-w-full lg:max-w-[60%]">
                        <div className="flex items-center gap-4">
                           <ShieldCheck className="h-5 w-5 md:h-7 md:w-7 text-primary" />
-                          <Badge className="bg-primary/20 text-primary border-none px-4 md:px-5 py-1.5 md:py-2 rounded-full font-black uppercase text-[9px] md:text-[10px] tracking-[0.2em] shadow-xl">Audit Finalized</Badge>
+                          <Badge className="bg-primary/20 text-primary border-none px-4 py-1.5 md:py-2 rounded-full font-black uppercase text-[9px] md:text-[10px] tracking-[0.2em] shadow-xl">Audit Finalized</Badge>
                        </div>
-                       <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-headline font-black uppercase leading-tight tracking-tight break-words">
+                       <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-headline font-black uppercase leading-[1.1] tracking-tight break-words">
                           {sessionData.mockTitle}
                        </h1>
                     </div>
                     
-                    <div className="flex items-center gap-4 md:gap-12 bg-white/5 backdrop-blur-3xl p-6 md:p-12 rounded-[2rem] md:rounded-[4rem] border border-white/10 shadow-5xl group/merit w-full lg:w-auto overflow-hidden">
+                    <div className="flex items-center gap-6 md:gap-10 bg-white/5 backdrop-blur-3xl p-6 md:p-10 rounded-[2.5rem] border border-white/10 shadow-5xl group/merit w-full lg:w-auto">
                        <div className="flex-1 text-center space-y-1">
-                          <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">RANK</p>
-                          <p className="text-3xl md:text-7xl font-headline font-black text-primary leading-none text-center tabular-nums group-hover/merit:scale-105 transition-transform duration-500">#{merit.rank}</p>
-                          <p className="text-[9px] md:text-[11px] font-black text-slate-500 uppercase text-center">OF {merit.total}</p>
+                          <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">RANK</p>
+                          <p className="text-3xl md:text-6xl font-headline font-black text-primary leading-none tabular-nums group-hover/merit:scale-105 transition-transform duration-500">#{merit.rank}</p>
+                          <p className="text-[9px] md:text-[11px] font-black text-slate-500 uppercase">OF {merit.total}</p>
                        </div>
-                       <div className="h-16 md:h-24 w-px bg-white/10 shrink-0" />
+                       <div className="h-16 md:h-20 w-px bg-white/10 shrink-0" />
                        <div className="flex-1 text-center space-y-1">
-                          <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">PERCENTILE</p>
-                          <p className="text-3xl md:text-7xl font-headline font-black text-emerald-400 leading-none text-center tabular-nums">{merit.percentile}</p>
-                          <p className="text-[9px] md:text-[11px] font-black text-slate-500 uppercase text-center">EFFICIENCY</p>
+                          <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">PERCENTILE</p>
+                          <p className="text-3xl md:text-6xl font-headline font-black text-emerald-400 leading-none tabular-nums">{merit.percentile}</p>
+                          <p className="text-[9px] md:text-[11px] font-black text-slate-500 uppercase">EFFICIENCY</p>
                        </div>
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-10 pt-8 border-t border-white/5">
+                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 pt-8 border-t border-white/5">
                     <MetricCard label="SCORE" val={`${(sessionData.score || 0).toFixed(1)}/${sessionData.totalQuestions}`} sub="Gross Marks" color="text-primary" />
                     <MetricCard label="ACCURACY" val={`${sessionData.accuracy || 0}%`} sub="Selection Precision" color="text-emerald-400" />
                     <MetricCard label="CORRECT" val={Math.floor(sessionData.score || 0)} sub="Successful Nodes" color="text-emerald-400" />
@@ -252,10 +237,10 @@ export default function ResultPage() {
               {profile?.status === 'Free' && (
                 <div className="bg-primary rounded-[2.5rem] p-10 text-white relative overflow-hidden group shadow-4xl cursor-pointer">
                    <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-125 transition-transform duration-[2s]"><Award className="h-48 w-48" /></div>
-                   <div className="relative z-10 space-y-4">
+                   <div className="relative z-10 space-y-4 text-left">
                       <h4 className="text-2xl font-headline font-black uppercase leading-[1.1]">Join the <br/> Elite Cohort</h4>
                       <p className="text-white/70 text-[9px] font-bold uppercase tracking-widest">Unlock AI rationales and all state ranks.</p>
-                      <Button asChild className="w-full h-12 bg-white text-primary hover:bg-slate-50 font-black rounded-xl text-[10px] uppercase tracking-widest shadow-xl border-none">
+                      <Button asChild className="w-full h-12 mt-4 bg-white text-primary hover:bg-slate-50 font-black rounded-xl text-[10px] uppercase tracking-widest shadow-xl border-none">
                         <Link href="/pass"><Gem className="h-4 w-4 mr-2" /> Activate Elite Pass</Link>
                       </Button>
                    </div>
@@ -323,7 +308,7 @@ export default function ResultPage() {
            <TabsContent value="TOPPER" className="m-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
               <Card className="border-none shadow-5xl rounded-[3rem] md:rounded-[4rem] bg-white overflow-hidden border border-slate-100">
                  <div className="grid grid-cols-1 lg:grid-cols-2">
-                    <div className="p-8 md:p-24 space-y-12 md:space-y-16 border-b lg:border-b-0 lg:border-r border-slate-50">
+                    <div className="p-8 md:p-14 lg:p-24 space-y-12 md:space-y-16 border-b lg:border-b-0 lg:border-r border-slate-50">
                        <div className="flex items-center gap-6">
                           <div className="h-14 w-14 md:h-20 md:w-20 rounded-[1.5rem] bg-amber-50 flex items-center justify-center text-amber-500 shadow-xl border border-amber-100">
                              <Trophy className="h-8 w-8 md:h-10 md:w-10" />
@@ -374,11 +359,11 @@ export default function ResultPage() {
                     return (
                        <Card key={q.id} className="border-none shadow-3xl rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-white group hover:shadow-5xl transition-all border border-slate-100 relative text-left">
                           <div className={cn("absolute top-0 left-0 w-2 h-full transition-colors", isCorrect ? 'bg-emerald-500' : isSkipped ? 'bg-slate-200' : 'bg-rose-500')} />
-                          <CardContent className="p-6 md:p-20 space-y-8 md:space-y-12">
+                          <CardContent className="p-6 md:p-14 lg:p-20 space-y-8 md:space-y-12">
                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-10">
                                 <div className="flex items-center gap-6 md:gap-10">
                                    <div className={cn(
-                                      "h-14 w-14 md:h-24 md:w-24 rounded-2xl md:rounded-3xl flex items-center justify-center font-black text-2xl md:text-5xl shadow-inner transition-transform group-hover:rotate-6",
+                                      "h-14 w-14 md:h-20 md:w-20 rounded-2xl md:rounded-3xl flex items-center justify-center font-black text-2xl md:text-4xl shadow-inner transition-transform group-hover:rotate-6",
                                       isCorrect ? "bg-emerald-50 text-emerald-600" : isSkipped ? "bg-slate-50 text-slate-300" : "bg-rose-50 text-rose-500"
                                    )}>
                                       {q.index + 1}
@@ -430,11 +415,11 @@ export default function ResultPage() {
 
 function MetricCard({ label, val, sub, color }: any) {
    return (
-      <div className="space-y-2 md:space-y-4 p-4 md:p-12 bg-white/5 border border-white/5 rounded-2xl md:rounded-[3.5rem] transition-all hover:bg-white/10 group shadow-2xl text-left cursor-pointer">
+      <div className="space-y-2 md:space-y-4 p-5 md:p-10 bg-white/5 border border-white/5 rounded-[2.5rem] transition-all hover:bg-white/10 group shadow-2xl text-left cursor-pointer">
          <p className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.4em]">{label}</p>
-         <p className={cn("text-2xl md:text-7xl font-headline font-black leading-none tracking-tighter truncate", color)}>{val}</p>
+         <p className={cn("text-xl sm:text-2xl md:text-5xl font-headline font-black leading-none tracking-tighter whitespace-nowrap", color)}>{val}</p>
          <div className="flex items-center gap-2 pt-1 md:pt-2">
-            <div className={cn("h-1 w-1 md:h-1.5 md:w-1.5 rounded-full animate-pulse", val === 'NaNm' ? 'bg-rose-500' : 'bg-emerald-500')} />
+            <div className={cn("h-1 w-1 md:h-1.5 md:w-1.5 rounded-full animate-pulse", val.includes('NaN') ? 'bg-rose-500' : 'bg-emerald-500')} />
             <p className="text-[8px] md:text-[10px] font-bold text-slate-600 uppercase tracking-widest">{sub}</p>
          </div>
       </div>
