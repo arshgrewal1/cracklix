@@ -4,8 +4,8 @@ import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 
 /**
- * @fileOverview Enterprise CBT Global Store v19.0.
- * Fixed: Robust initExam to prevent starting with 0 time.
+ * @fileOverview Enterprise CBT Global Store v20.0.
+ * Optimized: High-speed non-blocking updates and robust re-initialization.
  */
 
 interface ExamStore extends AttemptState {
@@ -58,13 +58,13 @@ export const useExamStore = create<ExamStore>((set, get) => ({
   initExam: (mockId, mockTitle, userId, questions, duration, savedState) => {
     const now = Date.now();
     
-    // Safety Audit: If no savedState or it's expired, create new time window
-    let endTime = savedState?.endTime || (now + (duration * 60 * 1000));
-    
-    if (now >= endTime) {
-       endTime = now + (duration * 60 * 1000);
+    // Logic: If session is completed or expired, treat as a fresh start
+    let isStale = false;
+    if (savedState?.status === 'COMPLETED' || (savedState?.endTime && now >= savedState.endTime)) {
+      isStale = true;
     }
-    
+
+    const endTime = isStale ? (now + (duration * 60 * 1000)) : (savedState?.endTime || (now + (duration * 60 * 1000)));
     const timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
     
     set({
@@ -73,15 +73,15 @@ export const useExamStore = create<ExamStore>((set, get) => ({
       userId,
       questions,
       timeLeft,
-      startTime: savedState?.startTime || now,
+      startTime: isStale ? now : (savedState?.startTime || now),
       endTime,
-      answers: savedState?.answers || {},
-      status: savedState?.status || {},
-      visited: Array.from(new Set([...(savedState?.visited || []), 0])),
-      bookmarks: savedState?.bookmarks || [],
-      violations: savedState?.violations || 0,
-      currentIdx: savedState?.currentIdx || 0,
-      currentSectionId: questions[savedState?.currentIdx || 0]?.sectionId || '',
+      answers: isStale ? {} : (savedState?.answers || {}),
+      status: isStale ? {} : (savedState?.status || {}),
+      visited: isStale ? [0] : Array.from(new Set([...(savedState?.visited || []), 0])),
+      bookmarks: isStale ? [] : (savedState?.bookmarks || []),
+      violations: isStale ? 0 : (savedState?.violations || 0),
+      currentIdx: isStale ? 0 : (savedState?.currentIdx || 0),
+      currentSectionId: questions[isStale ? 0 : (savedState?.currentIdx || 0)]?.sectionId || '',
       isPaused: false,
       isSubmitting: false
     });
@@ -103,6 +103,7 @@ export const useExamStore = create<ExamStore>((set, get) => ({
       currentSectionId: questions[idx]?.sectionId || ''
     });
     
+    // Async registry sync
     if (userId && mockId) {
       const { firestore: db } = initializeFirebase();
       updateDoc(doc(db, 'attempts', `${userId}_${mockId}`), {
@@ -128,8 +129,10 @@ export const useExamStore = create<ExamStore>((set, get) => ({
       newStatus[idx] = 'answered';
     }
 
+    // Instant UI update
     set({ answers: newAnswers, status: newStatus });
 
+    // Background cloud sync
     const attemptRef = doc(db, 'attempts', `${userId}_${mockId}`);
     updateDoc(attemptRef, {
       [`answers.${idx}`]: optionIdx,

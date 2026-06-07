@@ -27,8 +27,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Final CBT Attempt Node v20.0.
- * Fixed: Stale data audit to prevent auto-submit on re-attempt.
+ * @fileOverview Final CBT Attempt Node v20.1.
+ * Optimized: High-speed loading and robust session reset.
  */
 
 export default function MockAttemptPage() {
@@ -58,6 +58,7 @@ export default function MockAttemptPage() {
         const questionIds = mockData.questionIds || [];
         const fetchedQuestions: any[] = [];
         
+        // High-velocity chunked hydration
         const chunks = [];
         for (let i = 0; i < questionIds.length; i += 30) {
           chunks.push(questionIds.slice(i, i + 30));
@@ -87,39 +88,12 @@ export default function MockAttemptPage() {
 
         if (questions.length === 0) throw new Error("This mock has no questions available.");
 
+        // Fast session retrieval
         const attemptRef = doc(db, "attempts", `${user.uid}_${mockId}`);
         const attemptSnap = await getDoc(attemptRef);
-        let savedState = attemptSnap.exists() ? attemptSnap.data() : undefined;
+        const savedState = attemptSnap.exists() ? attemptSnap.data() : undefined;
 
-        // CRITICAL FIX: If attempt is already COMPLETED or EXPIRED, force a fresh start
-        if (savedState && (savedState.status === 'COMPLETED' || (savedState.endTime && Date.now() > savedState.endTime))) {
-           savedState = undefined;
-        }
-
-        if (!savedState) {
-           const startTime = Date.now();
-           const endTime = startTime + (mockData.duration * 60 * 1000);
-           
-           const newAttemptData = {
-              userId: user.uid,
-              mockId,
-              mockTitle: mockData.title,
-              status: 'IN_PROGRESS',
-              startedAt: serverTimestamp(),
-              answers: {},
-              status: {},
-              visited: [0],
-              currentIdx: 0,
-              startTime,
-              endTime,
-              violations: 0
-           };
-
-           setDoc(attemptRef, newAttemptData).catch(() => {});
-           examStore.initExam(mockId, mockData.title || "Evaluation Series", user.uid, questions, mockData.duration || 120, newAttemptData);
-        } else {
-           examStore.initExam(mockId, mockData.title || "Evaluation Series", user.uid, questions, mockData.duration || 120, savedState);
-        }
+        examStore.initExam(mockId, mockData.title || "Evaluation Series", user.uid, questions, mockData.duration || 120, savedState);
       } catch (err: any) {
         toast({ variant: "destructive", title: "CBT Sync Failure", description: err.message });
         router.push(`/mocks/${mockId}`);
@@ -134,7 +108,6 @@ export default function MockAttemptPage() {
     if (isInitializing) return;
     const interval = setInterval(() => {
       examStore.tick();
-      // Only auto-submit if time actually ran out (timeLeft is 0 and it's not a fresh init)
       if (examStore.timeLeft <= 0 && !isSubmittingFinal && examStore.endTime > 0) {
          handleSubmitFinal();
       }
@@ -184,6 +157,8 @@ export default function MockAttemptPage() {
     };
 
     const resultRef = doc(db, "results", `${user.uid}_${mockId}`);
+    
+    // Non-blocking submission
     setDoc(resultRef, resultPayload).catch(async (err) => {
       errorEmitter.emit('permission-error', new FirestorePermissionError({
         path: resultRef.path,
@@ -197,7 +172,7 @@ export default function MockAttemptPage() {
       updatedAt: serverTimestamp() 
     }).catch(() => {});
     
-    toast({ title: "Audit Synchronized" });
+    toast({ title: "Assessment Synced" });
     router.push(`/results/${mockId}`);
   }, [db, user, isSubmittingFinal, examStore, router, toast, mockId]);
 

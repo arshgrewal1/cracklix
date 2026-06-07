@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo, useEffect, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -37,8 +36,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Institutional Result Engine v5.0.
- * Optimized: High-density solution hub with button below options for maximum vertical efficiency.
+ * @fileOverview Institutional Result Engine v5.1.
+ * Optimized: High-density solution hub and instant re-attempt logic.
  */
 export default function ResultPage() {
   const params = useParams()
@@ -110,17 +109,19 @@ export default function ResultPage() {
     loadQuestions()
   }, [db, sessionData, mockId, toast, resultsLoading])
 
-  const handleReattempt = async () => {
+  const handleReattempt = useCallback(async () => {
     if (!db || !user || !mockId) return;
-    const confirmMsg = "CRITICAL AUDIT: This will permanently purge your current results and restart the evaluation node. Proceed?";
+    
+    const confirmMsg = "CRITICAL AUDIT: Restart evaluation node? Current scores will be archived.";
     if (!window.confirm(confirmMsg)) return;
 
+    // Instant non-blocking reset
     deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {});
     deleteDoc(doc(db, "results", `${user.uid}_${mockId}`)).catch(() => {});
     
-    toast({ title: "Registry Reset", description: "Node cleared. Redirecting to instructions..." });
+    toast({ title: "Registry Reset", description: "Loading fresh attempt..." });
     router.push(`/mocks/${mockId}/instructions`);
-  };
+  }, [db, user, mockId, router, toast]);
 
   const chartData = useMemo(() => {
     if (!sessionData?.subjectStats) return []

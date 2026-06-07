@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -9,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 /**
  * @fileOverview Institutional Sticky Bottom Navigation for Mobile.
- * Updated: Analysis replaced with 'Free Hub'.
+ * Updated: High-priority z-index and touch area optimization.
  */
 
 export default function MobileNav() {
@@ -24,14 +23,14 @@ export default function MobileNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[1000] bg-[#0F172A] border-t border-white/5 pb-[env(safe-area-inset-bottom)] md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+    <nav className="fixed bottom-0 left-0 right-0 z-[1000] bg-[#0F172A] border-t border-white/5 pb-[env(safe-area-inset-bottom)] md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.4)] pointer-events-auto">
       <div className="flex items-center justify-around h-[76px] px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
           return (
-            <Link key={item.href} href={item.href} className="flex-1 h-full">
+            <Link key={item.href} href={item.href} className="flex-1 h-full touch-manipulation">
               <div className="relative flex flex-col items-center justify-center gap-1.5 h-full py-1">
                 <AnimatePresence>
                   {isActive && (
