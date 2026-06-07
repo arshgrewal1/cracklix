@@ -26,8 +26,9 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
- * @fileOverview Production Hardened CBT Attempt Engine v32.0.
- * UPDATED: Palette width adjusted to 75vw for the perfect half-screen overlap.
+ * @fileOverview Production Hardened CBT Attempt Engine v33.0.
+ * FIXED: Rules of Hooks violation by moving useMemo to top-level.
+ * FIXED: Palette width set to 75vw for half-screen overlap.
  */
 
 export default function MockAttemptPage() {
@@ -57,6 +58,21 @@ export default function MockAttemptPage() {
   const setAnswer = useExamStore(s => s.setAnswer);
   const startTime = useExamStore(s => s.startTime);
   const language = useExamStore(s => s.language); 
+
+  // SUBJECT-SPECIFIC LANGUAGE OVERRIDE LOGIC (Moved to top-level to satisfy React Rules of Hooks)
+  const q = questions[currentIdx];
+  const selectedAnswer = answers[currentIdx];
+  
+  const effectiveLanguage = useMemo(() => {
+    if (!q) return language;
+    const sectionName = (q.sectionId || "").toUpperCase();
+    
+    if (sectionName.includes("PUNJABI")) return "PUNJABI";
+    if (sectionName.includes("ENGLISH")) return "ENGLISH";
+    if (sectionName.includes("HINDI")) return "HINDI";
+    
+    return language;
+  }, [q, language]);
 
   useEffect(() => {
     async function loadExam() {
@@ -182,21 +198,6 @@ export default function MockAttemptPage() {
     </div>
   );
 
-  const q = questions[currentIdx];
-  const selectedAnswer = answers[currentIdx];
-
-  // Subject-Specific Language Override Logic
-  const effectiveLanguage = useMemo(() => {
-    if (!q) return language;
-    const sectionName = (q.sectionId || "").toUpperCase();
-    
-    if (sectionName.includes("PUNJABI")) return "PUNJABI";
-    if (sectionName.includes("ENGLISH")) return "ENGLISH";
-    if (sectionName.includes("HINDI")) return "HINDI";
-    
-    return language;
-  }, [q, language]);
-
   return (
     <div className="flex flex-col h-[100dvh] bg-white font-body select-none overflow-hidden relative">
       <AntiCheat />
@@ -286,7 +287,7 @@ export default function MockAttemptPage() {
                        setShowExitModal(false);
                        router.push('/dashboard');
                     }}
-                    className="flex-1 h-16 bg-primary hover:bg-orange-600 text-white rounded-xl font-black uppercase text-[11px] tracking-widest shadow-xl shadow-orange-500/20 transition-all border-none"
+                    className="flex-1 h-16 bg-[#F97316] hover:bg-orange-600 text-white rounded-xl font-black uppercase text-[11px] tracking-widest shadow-xl shadow-orange-500/20 transition-all border-none"
                   >
                      Yes, Pause
                   </Button>
@@ -295,7 +296,7 @@ export default function MockAttemptPage() {
          </DialogContent>
       </Dialog>
 
-      <Dialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
+      <Dialog open={showSubmitModal} onOpenChange={show => !isSubmittingFinal && setShowSubmitModal(show)}>
          <DialogContent className="max-w-[440px] rounded-[3rem] p-12 bg-[#0F172A] text-white border-none shadow-5xl text-center">
             <div className="space-y-10">
                <div className="h-24 w-24 bg-primary/20 rounded-[3rem] flex items-center justify-center mx-auto text-primary shadow-3xl">
@@ -306,7 +307,7 @@ export default function MockAttemptPage() {
                   <p className="text-slate-400 font-medium leading-relaxed">Are you sure you want to commit your answers? This node will be locked for evaluation.</p>
                </div>
                <div className="flex gap-4 pt-4">
-                  <Button variant="ghost" onClick={() => setShowSubmitModal(false)} className="flex-1 h-16 rounded-2xl text-slate-500 hover:text-white font-black uppercase text-[10px] tracking-widest">Cancel</Button>
+                  <Button variant="ghost" onClick={() => setShowSubmitModal(false)} disabled={isSubmittingFinal} className="flex-1 h-16 rounded-2xl text-slate-500 hover:text-white font-black uppercase text-[10px] tracking-widest">Cancel</Button>
                   <Button 
                      onClick={handleSubmitFinal}
                      disabled={isSubmittingFinal}
