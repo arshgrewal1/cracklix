@@ -17,8 +17,8 @@ import { cn } from "@/lib/utils";
 import { LanguageDisplayMode } from "@/types";
 
 /**
- * @fileOverview Testbook-Style Entrance Hub v2.0.
- * Updated: Language nodes match Admin terminology.
+ * @fileOverview Testbook-Style Entrance Hub v3.0.
+ * Updated: Aspirant language selection filtered by Admin's Mock Registry.
  */
 export default function InstructionsPage() {
   const params = useParams();
@@ -34,6 +34,17 @@ export default function InstructionsPage() {
     if (mock?.languageMode) {
       setPrefLang(mock.languageMode);
     }
+  }, [mock]);
+
+  const availableLangs = useMemo(() => {
+    if (!mock?.languageMode) return [];
+    const mode = mock.languageMode;
+    if (mode === 'ENGLISH_PUNJABI') return ['ENGLISH', 'PUNJABI', 'ENGLISH_PUNJABI'];
+    if (mode === 'ENGLISH_HINDI') return ['ENGLISH', 'HINDI', 'ENGLISH_HINDI'];
+    if (mode === 'ENGLISH') return ['ENGLISH'];
+    if (mode === 'PUNJABI') return ['PUNJABI'];
+    if (mode === 'HINDI') return ['HINDI'];
+    return [];
   }, [mock]);
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-[#F97316] animate-pulse" /></div>;
@@ -80,19 +91,21 @@ export default function InstructionsPage() {
                     <Instruction text="You can re-audit any question using the side palette." />
                  </div>
 
-                 <div className="pt-12 border-t border-slate-100 flex flex-col items-center gap-8">
-                    <div className="flex items-center gap-3">
-                       <Globe className="h-5 w-5 text-slate-400" />
-                       <p className="text-sm font-black text-[#0F172A] uppercase tracking-widest">Select Default Assessment Language</p>
+                 {availableLangs.length > 1 && (
+                    <div className="pt-12 border-t border-slate-100 flex flex-col items-center gap-8">
+                       <div className="flex items-center gap-3">
+                          <Globe className="h-5 w-5 text-slate-400" />
+                          <p className="text-sm font-black text-[#0F172A] uppercase tracking-widest">Select Default Assessment Language</p>
+                       </div>
+                       <div className="flex flex-wrap justify-center gap-4">
+                          {availableLangs.includes('ENGLISH') && <LangBtn label="English Only" val="ENGLISH" active={prefLang === 'ENGLISH'} onClick={setPrefLang} />}
+                          {availableLangs.includes('PUNJABI') && <LangBtn label="Punjabi Only" val="PUNJABI" active={prefLang === 'PUNJABI'} onClick={setPrefLang} />}
+                          {availableLangs.includes('HINDI') && <LangBtn label="Hindi Only" val="HINDI" active={prefLang === 'HINDI'} onClick={setPrefLang} />}
+                          {availableLangs.includes('ENGLISH_PUNJABI') && <LangBtn label="BILINGUAL (EN+PA)" val="ENGLISH_PUNJABI" active={prefLang === 'ENGLISH_PUNJABI'} onClick={setPrefLang} />}
+                          {availableLangs.includes('ENGLISH_HINDI') && <LangBtn label="BILINGUAL (EN+HI)" val="ENGLISH_HINDI" active={prefLang === 'ENGLISH_HINDI'} onClick={setPrefLang} />}
+                       </div>
                     </div>
-                    <div className="flex flex-wrap justify-center gap-4">
-                       <LangBtn label="English Only" val="ENGLISH" active={prefLang === 'ENGLISH'} onClick={setPrefLang} />
-                       <LangBtn label="Punjabi Only" val="PUNJABI" active={prefLang === 'PUNJABI'} onClick={setPrefLang} />
-                       <LangBtn label="Hindi Only" val="HINDI" active={prefLang === 'HINDI'} onClick={setPrefLang} />
-                       <LangBtn label="BILINGUAL (EN+PA)" val="ENGLISH_PUNJABI" active={prefLang === 'ENGLISH_PUNJABI'} onClick={setPrefLang} />
-                       <LangBtn label="BILINGUAL (EN+HI)" val="ENGLISH_HINDI" active={prefLang === 'ENGLISH_HINDI'} onClick={setPrefLang} />
-                    </div>
-                 </div>
+                 )}
 
                  <div className="bg-emerald-50 border-2 border-emerald-100 p-8 rounded-[2rem] flex items-start gap-4">
                     <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0 mt-1" />

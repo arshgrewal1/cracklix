@@ -13,10 +13,11 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { LanguageDisplayMode } from '@/types';
+import { useMemo } from 'react';
 
 /**
- * @fileOverview Institutional CBT Header v10.0.
- * Updated: Runtime labels match Admin labels for terminology consistency.
+ * @fileOverview Institutional CBT Header v11.0.
+ * Updated: Translation options are now filtered by the Mock's available language registry.
  */
 export default function ExamHeader({ 
   onPaletteToggle, 
@@ -32,16 +33,29 @@ export default function ExamHeader({
     currentIdx,
     questions,
     language,
+    baseLanguageMode,
     setLanguage
   } = useExamStore();
 
-  const langModes: { label: string, value: LanguageDisplayMode }[] = [
+  const allLangModes: { label: string, value: LanguageDisplayMode }[] = [
     { label: "ENGLISH ONLY", value: "ENGLISH" },
     { label: "PUNJABI ONLY", value: "PUNJABI" },
     { label: "HINDI ONLY", value: "HINDI" },
     { label: "BILINGUAL (EN+PA)", value: "ENGLISH_PUNJABI" },
     { label: "BILINGUAL (EN+HI)", value: "ENGLISH_HINDI" },
   ];
+
+  // Logic: Filter dropdown based on Admin's base configuration
+  const availableModes = useMemo(() => {
+    if (baseLanguageMode === 'ENGLISH_PUNJABI') {
+      return allLangModes.filter(m => ['ENGLISH', 'PUNJABI', 'ENGLISH_PUNJABI'].includes(m.value));
+    }
+    if (baseLanguageMode === 'ENGLISH_HINDI') {
+      return allLangModes.filter(m => ['ENGLISH', 'HINDI', 'ENGLISH_HINDI'].includes(m.value));
+    }
+    // For single language modes, only that one is relevant
+    return allLangModes.filter(m => m.value === baseLanguageMode);
+  }, [baseLanguageMode]);
 
   return (
     <header className="bg-[#0B1528] text-white flex flex-col shrink-0 z-[100] border-b border-white/5">
@@ -69,28 +83,30 @@ export default function ExamHeader({
         </div>
 
         <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
-           {/* Runtime Language Translator */}
-           <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                 <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/5 text-white hover:bg-white/10 border border-white/5 rounded-lg">
-                    <Languages className="h-3.5 w-3.5 text-primary" />
-                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-[#0F172A] border-white/10 text-white rounded-xl shadow-2xl p-1">
-                 {langModes.map((mode) => (
-                    <DropdownMenuItem 
-                      key={mode.value} 
-                      onClick={() => setLanguage(mode.value)}
-                      className={cn(
-                        "text-[10px] font-black uppercase px-4 py-3.5 rounded-lg cursor-pointer tracking-wider",
-                        language === mode.value ? "bg-primary text-white" : "hover:bg-white/5 text-slate-400"
-                      )}
-                    >
-                       {mode.label}
-                    </DropdownMenuItem>
-                 ))}
-              </DropdownMenuContent>
-           </DropdownMenu>
+           {/* Runtime Filtered Language Hub */}
+           {availableModes.length > 1 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                   <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/5 text-white hover:bg-white/10 border border-white/5 rounded-lg">
+                      <Languages className="h-3.5 w-3.5 text-primary" />
+                   </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-[#0F172A] border-white/10 text-white rounded-xl shadow-2xl p-1">
+                   {availableModes.map((mode) => (
+                      <DropdownMenuItem 
+                        key={mode.value} 
+                        onClick={() => setLanguage(mode.value)}
+                        className={cn(
+                          "text-[10px] font-black uppercase px-4 py-3.5 rounded-lg cursor-pointer tracking-wider",
+                          language === mode.value ? "bg-primary text-white" : "hover:bg-white/5 text-slate-400"
+                        )}
+                      >
+                         {mode.label}
+                      </DropdownMenuItem>
+                   ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+           )}
 
            <Button 
              variant="ghost" 

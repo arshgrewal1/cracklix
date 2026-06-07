@@ -5,8 +5,8 @@ import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase';
 
 /**
- * @fileOverview Enterprise CBT Global Store v21.0.
- * Updated: Hydration support for Mock Language Display Mode.
+ * @fileOverview Enterprise CBT Global Store v22.0.
+ * Updated: Filtered Language Registry logic to support Admin-defined base modes.
  */
 
 interface ExamStore extends AttemptState {
@@ -15,6 +15,7 @@ interface ExamStore extends AttemptState {
   mockTitle: string;
   userId: string;
   language: ExamLanguage | LanguageDisplayMode;
+  baseLanguageMode: LanguageDisplayMode; // Master config from Admin
   isPaused: boolean;
   isSubmitting: boolean;
   isPaletteVisible: boolean;
@@ -40,7 +41,8 @@ export const useExamStore = create<ExamStore>((set, get) => ({
   mockId: '',
   mockTitle: '',
   userId: '',
-  language: 'bilingual',
+  language: 'ENGLISH_PUNJABI',
+  baseLanguageMode: 'ENGLISH_PUNJABI',
   isPaused: false,
   isSubmitting: false,
   isPaletteVisible: true,
@@ -67,13 +69,16 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const endTime = isStale ? (now + (duration * 60 * 1000)) : (savedState?.endTime || (now + (duration * 60 * 1000)));
     const timeLeft = Math.max(0, Math.floor((endTime - now) / 1000));
     
+    const finalBaseMode = languageMode || 'ENGLISH_PUNJABI';
+
     set({
       mockId,
       mockTitle,
       userId,
       questions,
       timeLeft,
-      language: languageMode || 'bilingual',
+      baseLanguageMode: finalBaseMode,
+      language: finalBaseMode, // Aspirant defaults to Admin's choice
       startTime: isStale ? now : (savedState?.startTime || now),
       endTime,
       answers: isStale ? {} : (savedState?.answers || {}),
