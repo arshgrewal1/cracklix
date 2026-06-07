@@ -29,8 +29,8 @@ import {
   XCircle,
   AlertCircle
 } from "lucide-react"
-import { useFirestore, useUser, useCollection } from "@/firebase"
-import { collection, query, where, doc, getDoc, documentId, getDocs, orderBy } from "firebase/firestore"
+import { useUser, useFirestore, useCollection } from "@/firebase"
+import { collection, query, where, doc, getDoc, documentId, getDocs } from "firebase/firestore"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
@@ -38,9 +38,9 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Test Results Hub v3.0 (High-Fidelity).
- * FIXED: Title overflow (Text outside box) and responsive Merit Node scaling.
- * MATCHED: Design strictly follows Testbook/Gradeup inspired elite layouts.
+ * @fileOverview Test Results Hub v3.1 (High-Fidelity Hardened).
+ * FIXED: Tabs runtime error by wrapping triggers in TabsList.
+ * FIXED: Responsive text overflow in Hero Title.
  */
 
 export default function ResultPage() {
@@ -193,32 +193,32 @@ export default function ResultPage() {
       
       <main className="container mx-auto px-4 md:px-6 py-6 md:py-16 max-w-7xl space-y-8 md:space-y-20">
         
-        {/* HERO HUB (Optimized for Mobile/Desktop Scaling) */}
+        {/* HERO HUB */}
         <div className="flex flex-col lg:flex-row gap-6 md:gap-12">
            <Card className="flex-1 border-none shadow-5xl rounded-[2.5rem] md:rounded-[4rem] bg-[#0B1528] text-white overflow-hidden relative group">
               <div className="absolute top-0 right-0 p-12 opacity-[0.03] rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-96 w-96" /></div>
               <CardContent className="p-8 md:p-20 space-y-8 md:space-y-12 relative z-10">
                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8 md:gap-10">
-                    <div className="space-y-4 md:space-y-6 max-w-full lg:max-w-[50%]">
+                    <div className="space-y-4 md:space-y-6 max-w-full lg:max-w-[55%]">
                        <div className="flex items-center gap-4">
                           <ShieldCheck className="h-5 w-5 md:h-7 md:w-7 text-primary" />
                           <Badge className="bg-primary/20 text-primary border-none px-4 md:px-5 py-1.5 md:py-2 rounded-full font-black uppercase text-[9px] md:text-[10px] tracking-[0.2em] shadow-xl">Audit Finalized</Badge>
                        </div>
-                       <h1 className="text-3xl sm:text-4xl md:text-6xl font-headline font-black uppercase leading-[1] tracking-tight break-words">
+                       <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-headline font-black uppercase leading-tight tracking-tight break-words">
                           {sessionData.mockTitle}
                        </h1>
                     </div>
                     
-                    <div className="flex items-center gap-6 md:gap-12 bg-white/5 backdrop-blur-3xl p-6 md:p-12 rounded-[2.5rem] md:rounded-[4rem] border border-white/10 shadow-5xl group/merit w-fit">
-                       <div className="text-center space-y-1">
+                    <div className="flex items-center gap-4 md:gap-12 bg-white/5 backdrop-blur-3xl p-6 md:p-12 rounded-[2rem] md:rounded-[4rem] border border-white/10 shadow-5xl group/merit w-full lg:w-auto overflow-hidden">
+                       <div className="flex-1 text-center space-y-1">
                           <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">RANK</p>
-                          <p className="text-4xl md:text-8xl font-headline font-black text-primary leading-none text-center tabular-nums group-hover/merit:scale-105 transition-transform duration-500">#{merit.rank}</p>
+                          <p className="text-3xl md:text-7xl font-headline font-black text-primary leading-none text-center tabular-nums group-hover/merit:scale-105 transition-transform duration-500">#{merit.rank}</p>
                           <p className="text-[9px] md:text-[11px] font-black text-slate-500 uppercase text-center">OF {merit.total}</p>
                        </div>
-                       <div className="h-16 md:h-24 w-px bg-white/10" />
-                       <div className="text-center space-y-1">
+                       <div className="h-16 md:h-24 w-px bg-white/10 shrink-0" />
+                       <div className="flex-1 text-center space-y-1">
                           <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">PERCENTILE</p>
-                          <p className="text-4xl md:text-8xl font-headline font-black text-emerald-400 leading-none text-center tabular-nums">{merit.percentile}</p>
+                          <p className="text-3xl md:text-7xl font-headline font-black text-emerald-400 leading-none text-center tabular-nums">{merit.percentile}</p>
                           <p className="text-[9px] md:text-[11px] font-black text-slate-500 uppercase text-center">EFFICIENCY</p>
                        </div>
                     </div>
@@ -266,7 +266,7 @@ export default function ResultPage() {
 
         {/* DETAILED ANALYSIS TABS */}
         <Tabs defaultValue="SECTIONAL" className="space-y-10">
-           <div className="bg-white border border-slate-100 p-1.5 h-16 md:h-20 rounded-[2rem] shadow-xl inline-flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-2 px-2">
+           <TabsList className="bg-white border border-slate-100 p-1.5 h-16 md:h-20 rounded-[2rem] shadow-xl inline-flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-2 px-2">
               <TabsTrigger value="SECTIONAL" className="rounded-xl md:rounded-2xl px-6 md:px-10 font-black uppercase text-[9px] md:text-[10px] tracking-widest gap-2 md:gap-3 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white data-[state=active]:shadow-2xl transition-all whitespace-nowrap">
                  <BarChart3 className="h-4 w-4" /> Sectional Audit
               </TabsTrigger>
@@ -276,7 +276,7 @@ export default function ResultPage() {
               <TabsTrigger value="SOLUTIONS" className="rounded-xl md:rounded-2xl px-6 md:px-10 font-black uppercase text-[9px] md:text-[10px] tracking-widest gap-2 md:gap-3 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white data-[state=active]:shadow-2xl transition-all whitespace-nowrap">
                  <BrainCircuit className="h-4 w-4" /> Answer Review
               </TabsTrigger>
-           </div>
+           </TabsList>
 
            <TabsContent value="SECTIONAL" className="m-0 animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
