@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect, Suspense } from "react"
@@ -32,7 +33,8 @@ import {
   History,
   Target,
   AlertTriangle,
-  ChevronDown
+  ChevronDown,
+  Languages
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, where, limit, getDocs, documentId } from "firebase/firestore"
@@ -41,8 +43,8 @@ import { MockType, Difficulty, AccessType, LanguageDisplayMode } from "@/types"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Mock Architect v32.0.
- * FEATURES: Restored Old Blueprint (Sidebar + Tabs), Subject Selector (Replaces Search), and dynamic context filtering.
+ * @fileOverview Institutional Mock Architect v34.0.
+ * FEATURES: Restored High-Fidelity Blueprint with Subject Selection Hub in the dark action bar.
  */
 
 const MOCK_TYPES: { label: string, value: MockType, icon: any }[] = [
@@ -80,7 +82,8 @@ function MockBuilderContent() {
   const [hideUsed, setHideUsed] = useState(true)
   const [bankFilter, setBankFilter] = useState({ 
     boardId: "all",
-    subjectId: "all"
+    subjectId: "all",
+    examId: "all"
   })
 
   const [isPublishing, setIsPublishing] = useState(false)
@@ -156,10 +159,11 @@ function MockBuilderContent() {
     return questionBank.filter((q: any) => {
       const matchesBoard = bankFilter.boardId === "all" || q.boardId === bankFilter.boardId
       const matchesSubject = bankFilter.subjectId === "all" || q.subjectId === bankFilter.subjectId
+      const matchesExam = bankFilter.examId === "all" || q.examId === bankFilter.examId
       const notAlreadySelected = !allSelectedIds.includes(q.id)
       const passesUsageCheck = !hideUsed || !usedQuestionIds.has(q.id);
 
-      return matchesBoard && matchesSubject && notAlreadySelected && passesUsageCheck
+      return matchesBoard && matchesSubject && matchesExam && notAlreadySelected && passesUsageCheck
     })
   }, [questionBank, bankFilter, sections, hideUsed, usedQuestionIds])
 
@@ -317,49 +321,54 @@ function MockBuilderContent() {
                  </TabsList>
 
                  <TabsContent value="bank" className="p-8 md:p-10 flex-1 flex flex-col m-0 text-left">
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8">
-                       <div className="md:col-span-5">
-                          <Select value={bankFilter.subjectId} onValueChange={v => setBankFilter({...bankFilter, subjectId: v})}>
-                             <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none font-bold text-xs">
-                                <SelectValue placeholder="All Subjects" />
-                             </SelectTrigger>
-                             <SelectContent>
-                                <SelectItem value="all">All Subjects</SelectItem>
-                                {subjects?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                             </SelectContent>
-                          </Select>
-                       </div>
-                       <div className="md:col-span-4">
-                          <Select value={bankFilter.boardId} onValueChange={v => setBankFilter({...bankFilter, boardId: v})}>
-                             <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none font-bold text-xs"><SelectValue placeholder="All Boards" /></SelectTrigger>
-                             <SelectContent>
-                                <SelectItem value="all">All Boards</SelectItem>
-                                {boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}
-                             </SelectContent>
-                          </Select>
-                       </div>
-                       <div className="md:col-span-3 flex items-center gap-3 bg-slate-50 px-4 rounded-xl border border-slate-100">
-                          <span className="text-[8px] font-black uppercase text-slate-500">Hide Used</span>
-                          <Switch checked={hideUsed} onCheckedChange={setHideUsed} className="scale-75" />
-                       </div>
-                    </div>
-
-                    <div className="bg-[#0F172A] p-6 rounded-[2rem] mb-8 flex flex-col md:flex-row md:items-center justify-between gap-8 text-white shadow-2xl overflow-hidden shrink-0">
-                       <div className="flex-1 min-w-0 text-left">
-                             <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1.5">Target Section Hub</p>
-                             <Select value={activeSectionId} onValueChange={setActiveSectionId}>
-                                <SelectTrigger className="h-12 w-full bg-white/10 border-white/10 text-white font-black text-[10px] rounded-xl uppercase tracking-widest focus:ring-0"><SelectValue /></SelectTrigger>
-                                <SelectContent>{sections.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                    
+                    <div className="bg-[#0F172A] p-6 rounded-[2.5rem] mb-8 flex flex-col gap-6 text-white shadow-2xl overflow-hidden shrink-0 border border-white/5">
+                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                          <div className="space-y-2">
+                             <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1 flex items-center gap-2"><Filter className="h-3 w-3" /> Filter Board</p>
+                             <Select value={bankFilter.boardId} onValueChange={v => setBankFilter({...bankFilter, boardId: v})}>
+                                <SelectTrigger className="h-12 w-full bg-white/5 border-white/10 text-white font-bold text-xs rounded-xl focus:ring-0"><SelectValue placeholder="All Boards" /></SelectTrigger>
+                                <SelectContent>
+                                   <SelectItem value="all">All Boards</SelectItem>
+                                   {boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}
+                                </SelectContent>
                              </Select>
+                          </div>
+                          <div className="space-y-2">
+                             <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1 flex items-center gap-2"><BookOpen className="h-3 w-3" /> Filter Subject</p>
+                             <Select value={bankFilter.subjectId} onValueChange={v => setBankFilter({...bankFilter, subjectId: v})}>
+                                <SelectTrigger className="h-12 w-full bg-white/5 border-white/10 text-white font-bold text-xs rounded-xl focus:ring-0"><SelectValue placeholder="All Subjects" /></SelectTrigger>
+                                <SelectContent className="max-h-60">
+                                   <SelectItem value="all">All Subjects</SelectItem>
+                                   {subjects?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                                </SelectContent>
+                             </Select>
+                          </div>
+                          <div className="flex items-center gap-3 bg-white/5 px-4 h-12 rounded-xl border border-white/10">
+                             <span className="text-[8px] font-black uppercase text-slate-400">Hide Used</span>
+                             <Switch checked={hideUsed} onCheckedChange={setHideUsed} className="scale-75" />
+                          </div>
                        </div>
-                       <Button disabled={bankSelection.length === 0} onClick={handleBulkLink} className="bg-emerald-600 hover:bg-emerald-700 h-14 px-10 rounded-xl text-[10px] uppercase font-black tracking-[0.2em] shadow-xl w-full md:w-auto">Link {bankSelection.length} Questions</Button>
+
+                       <div className="h-px w-full bg-white/5" />
+
+                       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+                          <div className="flex-1 min-w-0">
+                                <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1.5 ml-1">Target Section Hub</p>
+                                <Select value={activeSectionId} onValueChange={setActiveSectionId}>
+                                   <SelectTrigger className="h-12 w-full bg-primary/20 border-primary/20 text-white font-black text-[10px] rounded-xl uppercase tracking-widest focus:ring-0 shadow-lg"><SelectValue /></SelectTrigger>
+                                   <SelectContent>{sections.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                                </Select>
+                          </div>
+                          <Button disabled={bankSelection.length === 0} onClick={handleBulkLink} className="bg-emerald-600 hover:bg-emerald-700 h-14 px-10 rounded-xl text-[10px] uppercase font-black tracking-[0.2em] shadow-xl w-full md:w-auto">Link {bankSelection.length} Questions</Button>
+                       </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 space-y-3 min-h-0 bg-slate-50/50 rounded-[2.5rem] p-6 border border-slate-100/50">
                        {bankLoading ? (
                           <div className="flex flex-col items-center justify-center h-full opacity-20"><Loader2 className="h-8 w-8 animate-spin mb-4" /></div>
                        ) : filteredBank.length > 0 ? filteredBank.map(q => (
-                            <div key={q.id} className={cn("p-4 rounded-xl border flex items-center justify-between transition-all", bankSelection.includes(q.id) ? "bg-primary/5 border-primary/20" : "bg-white border-slate-100 hover:border-primary/10 shadow-sm")}>
+                            <div key={q.id} className={cn("p-4 rounded-xl border flex items-center justify-between transition-all", bankSelection.includes(q.id) ? "bg-primary/5 border-primary/20 shadow-inner" : "bg-white border-slate-100 hover:border-primary/10 shadow-sm")}>
                                <div className="flex items-center gap-6 min-w-0 flex-1 text-left">
                                   <Checkbox checked={bankSelection.includes(q.id)} onCheckedChange={() => setBankSelection(prev => prev.includes(q.id) ? prev.filter(id => id !== q.id) : [...prev, q.id])} />
                                   <div className="min-w-0 flex-1">
@@ -372,7 +381,7 @@ function MockBuilderContent() {
                                </div>
                             </div>
                        )) : (
-                          <div className="h-full flex flex-col items-center justify-center opacity-20"><Database className="h-12 w-12 mx-auto mb-4" /><p className="font-black uppercase text-[10px]">Registry Hub Clear.</p></div>
+                          <div className="h-full flex flex-col items-center justify-center opacity-20"><Database className="h-12 w-12 mx-auto mb-4" /><p className="font-black uppercase text-[10px]">No matches found in Registry Hub.</p></div>
                        )}
                     </div>
                  </TabsContent>
