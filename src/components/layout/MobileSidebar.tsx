@@ -27,23 +27,28 @@ import { signOut } from "firebase/auth";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import StudentAvatar from "@/components/brand/StudentAvatar";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
 /**
  * @fileOverview Institutional Sidebar.
- * UPDATED: Integrated Current Affairs Hub with semantic Newspaper icon.
+ * FIXED: Hydration mismatch and standard Current Affairs icon usage.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
+  const [mounted, setMounted] = useState(false);
   const { profile } = useUser();
   const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
   const [isShareOpen, setIsShareOpen] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -132,7 +137,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
         {/* 2. MENU ITEMS */}
         <div className="flex flex-col py-6">
           {menuItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = mounted && pathname === item.href;
             
             const content = (
               <>

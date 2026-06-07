@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Menu, Search, Zap, CreditCard, LogOut, ShieldCheck, Megaphone, Target, LayoutGrid, Award, Gem, User, Sparkles, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useUser, useAuth, useDoc, useFirestore } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { usePathname, useRouter } from "next/navigation";
@@ -24,17 +24,22 @@ import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Elite Global Navigation Hub v7.4.
- * UPDATED: Explicit Current Affairs labeling for high-fidelity discovery.
+ * @fileOverview Elite Global Navigation Hub v7.5.
+ * FIXED: Hydration mismatch by deferring dynamic state rendering.
  */
 
 export default function Navbar() {
+  const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user, profile, loading } = useUser();
   const auth = useAuth();
   const db = useFirestore();
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
   const { data: settings } = useDoc<any>(settingsRef);
@@ -49,7 +54,7 @@ export default function Navbar() {
 
   return (
     <div className="sticky top-0 z-[1000] w-full pointer-events-auto">
-      {settings?.showAnnouncement && (
+      {mounted && settings?.showAnnouncement && (
         <div className="bg-primary text-white py-1.5 px-4 flex items-center justify-center gap-2 overflow-hidden relative shadow-2xl">
           <Megaphone className="h-3 w-3 shrink-0 animate-bounce" />
           <p className="text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap overflow-hidden text-ellipsis">
@@ -85,12 +90,16 @@ export default function Navbar() {
             </div>
 
             <div className="hidden lg:flex items-center gap-10 text-[12px] font-black uppercase tracking-[0.2em] text-[#7A8B9E]">
-              <Link href="/my-exams" className={cn("transition-colors flex items-center gap-2 hover:text-white", pathname === '/my-exams' ? 'text-white' : '')}><Target className="h-4 w-4 text-primary" /> My Exams</Link>
-              <Link href="/mocks" className={cn("transition-colors hover:text-white", pathname === '/mocks' ? 'text-white' : '')}>Mocks</Link>
-              <Link href="/pass" className={cn("transition-all flex items-center gap-2 px-5 py-2 rounded-xl border", pathname === '/pass' ? 'bg-primary border-primary text-white shadow-xl shadow-primary/20' : 'bg-primary/10 border-primary/20 text-primary/80 hover:text-primary hover:bg-primary/20')}>
+              <Link href="/my-exams" className={cn("transition-colors flex items-center gap-2 hover:text-white", mounted && pathname === '/my-exams' ? 'text-white' : '')}>
+                <Target className="h-4 w-4 text-primary" /> My Exams
+              </Link>
+              <Link href="/mocks" className={cn("transition-colors hover:text-white", mounted && pathname === '/mocks' ? 'text-white' : '')}>
+                Mocks
+              </Link>
+              <Link href="/pass" className={cn("transition-all flex items-center gap-2 px-5 py-2 rounded-xl border", mounted && pathname === '/pass' ? 'bg-primary border-primary text-white shadow-xl shadow-primary/20' : 'bg-primary/10 border-primary/20 text-primary/80 hover:text-primary hover:bg-primary/20')}>
                 <Gem className="h-4 w-4" /> PASS
               </Link>
-              <Link href="/current-affairs" className={cn("transition-colors flex items-center gap-2 hover:text-white", pathname === '/current-affairs' ? 'text-white' : '')}>
+              <Link href="/current-affairs" className={cn("transition-colors flex items-center gap-2 hover:text-white", mounted && pathname === '/current-affairs' ? 'text-white' : '')}>
                 <Newspaper className="h-4 w-4 text-primary" /> Current Affairs
               </Link>
             </div>
@@ -101,7 +110,7 @@ export default function Navbar() {
               <Search className="h-5 w-5" />
             </Link>
 
-            {loading ? (
+            {!mounted || loading ? (
               <Skeleton className="h-9 w-9 md:h-10 md:w-10 rounded-full bg-white/5" />
             ) : user ? (
               <DropdownMenu>
