@@ -45,9 +45,9 @@ import { cn } from "@/lib/utils"
 import React from "react"
 
 /**
- * @fileOverview Student Profile Hub v15.0.
+ * @fileOverview Student Profile Hub v16.0.
  * Simplified language: Replaced technical jargon with common student terms.
- * Features: Editable Target Board and fixed Accuracy icon.
+ * Features: Editable Email, Target Board, and fixed Accuracy icon.
  */
 export default function ProfilePage() {
   const { user, profile, loading } = useUser()
@@ -58,6 +58,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState<any>({
     name: "",
+    email: "",
     phone: "",
     dob: "",
     address: "",
@@ -76,6 +77,7 @@ export default function ProfilePage() {
       const cleanPhone = profile.phone?.replace('+91 ', '') || ""
       setEditForm({
         name: profile.name || "",
+        email: profile.email || "",
         phone: cleanPhone,
         dob: profile.dob || "",
         address: profile.address || "",
@@ -106,7 +108,7 @@ export default function ProfilePage() {
   const handleUpdateProfile = async () => {
     if (!db || !user || !editForm) return
 
-    const mandatory = ['name', 'phone', 'dob', 'address', 'targetExam'];
+    const mandatory = ['name', 'email', 'phone', 'dob', 'address', 'targetExam'];
     const missing = mandatory.find(key => !editForm[key]?.trim());
     
     if (missing) {
@@ -350,23 +352,15 @@ export default function ProfilePage() {
                      <Input value={editForm?.name || ""} onChange={e => setEditForm({...editForm, name: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none font-bold text-sm" />
                   </div>
                   <div className="space-y-1.5 text-left">
-                     <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Date of Birth</Label>
-                     <Input type="date" value={editForm?.dob || ""} onChange={e => setEditForm({...editForm, dob: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none font-bold text-sm" />
+                     <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Email Address</Label>
+                     <Input type="email" value={editForm?.email || ""} onChange={e => setEditForm({...editForm, email: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none font-bold text-sm" />
                   </div>
                </div>
-               
+
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-1.5 text-left">
-                     <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Mobile Number</Label>
-                     <div className="relative">
-                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400">+91</span>
-                       <Input 
-                         value={editForm?.phone || ""} 
-                         onChange={e => setEditForm({...editForm, phone: e.target.value.replace(/\D/g, '').slice(0,10)})} 
-                         className="h-11 pl-14 rounded-xl bg-slate-50 border-none font-black text-lg tracking-wider" 
-                         placeholder="10-digit number" 
-                       />
-                     </div>
+                     <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Date of Birth</Label>
+                     <Input type="date" value={editForm?.dob || ""} onChange={e => setEditForm({...editForm, dob: e.target.value})} className="h-11 rounded-xl bg-slate-50 border-none font-bold text-sm" />
                   </div>
                   <div className="space-y-1.5 text-left">
                      <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Target Exam Board</Label>
@@ -382,6 +376,19 @@ export default function ProfilePage() {
                         <option value="Army">Indian Army</option>
                         <option value="High Court">High Court</option>
                      </select>
+                  </div>
+               </div>
+               
+               <div className="space-y-1.5 text-left">
+                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Mobile Number</Label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-black text-slate-400">+91</span>
+                    <Input 
+                      value={editForm?.phone || ""} 
+                      onChange={e => setEditForm({...editForm, phone: e.target.value.replace(/\D/g, '').slice(0,10)})} 
+                      className="h-11 pl-14 rounded-xl bg-slate-50 border-none font-black text-lg tracking-wider" 
+                      placeholder="10-digit number" 
+                    />
                   </div>
                </div>
 
