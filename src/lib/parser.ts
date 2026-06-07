@@ -1,6 +1,7 @@
+
 /**
- * @fileOverview Institutional High-Fidelity Explicit Parser v50.0.
- * UPDATED: Optimized for multi-line stacked bilingual patterns and Hindi markers.
+ * @fileOverview Institutional High-Fidelity Explicit Parser v50.1.
+ * UPDATED: Robust multi-line extraction for bilingual stacked patterns.
  * 
  * Format Supported:
  * Q15. English Question
@@ -8,9 +9,8 @@
  * (A) Option EN
  * Hindi/Punjabi Option
  * Answer: C. Text
- * उत्तर/ਉੱਤਰ: C. Text
  * Explanation (English): Text...
- * व्याख्या/ਵਿਆਖਿਆ (Hindi/Punjabi): Text...
+ * व्याख्या/ਵਿਆਖਿਆ: Text...
  */
 
 export interface ParsedResults {
@@ -20,11 +20,9 @@ export interface ParsedResults {
 
 export function parseBulkQuestions(rawText: string, metadata: any): ParsedResults {
   const secondaryLang = metadata.secondaryLanguage || 'punjabi';
-  // Strip bold markers and clean line endings
   const cleanText = rawText.replace(/\*\*/g, '').replace(/\r\n/g, '\n').trim();
   const text = "\n" + cleanText + "\n";
   
-  // Split by Q1., Question 1., etc.
   const blocks = text.split(/\n(?=Q\s*\d+[\.\s]|Question\s*\d*[\.\s\:]|Question\s*\(English\s*Box\)\:)/i).filter(b => b.trim().length > 10);
   
   const results: any[] = [];
@@ -47,17 +45,13 @@ export function parseBulkQuestions(rawText: string, metadata: any): ParsedResult
       const expField = secondaryLang === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
       const optSuffix = secondaryLang === 'hindi' ? 'Hindi' : 'Punjabi';
 
-      // 1. EXTRACT BILINGUAL QUESTIONS
       q.englishQuestion = lines[0].replace(/^(?:Q|Question)\s*\d+[\.\s]*/i, '').trim();
       
-      // Secondary question is line 1, provided it's not an option
       if (lines[1] && !lines[1].match(/^[A-D][\.\)\s]|\([A-D]\)/i)) {
         q[qField] = lines[1].trim();
       }
 
-      // 2. EXTRACT BILINGUAL OPTIONS (Multi-line or Interleaved)
       const getOptionBlock = (letter: string, next: string | null) => {
-        // Handle both "A." and "(A)" formats
         const pattern = `\\n(?:\\(${letter}\\)|${letter}[\\.\\)])\\s*([\\s\\S]*?)`;
         const lookahead = next 
           ? `(?=\\n(?:\\(${next}\\)|${next}[\\.\\)])|\\nAnswer|\\nਉੱਤਰ|\\nउत्तर|\\nExplanation|\\nਵਿਆਖਿਆ|\\nव्याख्या|$)`
@@ -70,13 +64,11 @@ export function parseBulkQuestions(rawText: string, metadata: any): ParsedResult
         const content = match[1].trim();
         const contentLines = content.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         
-        // If interleaved: "Option En / Option Pa"
         if (content.includes('/')) {
            const parts = content.split('/').map(s => s.trim());
            return [parts[0] || "", parts[1] || parts[0] || ""];
         }
         
-        // If multi-line: Line 0 is En, Line 1 is Secondary
         if (contentLines.length >= 2) {
            return [contentLines[0], contentLines[1]];
         }
@@ -89,18 +81,15 @@ export function parseBulkQuestions(rawText: string, metadata: any): ParsedResult
       [q.optionCEnglish, q[`optionC${optSuffix}`]] = getOptionBlock('C', 'D');
       [q.optionDEnglish, q[`optionD${optSuffix}`]] = getOptionBlock('D', null);
 
-      // 3. CORRECT ANSWER (Support Answer: and उत्तर: / ਉੱਤਰ:)
       const ansMatch = fullText.match(/(?:Correct Answer|Answer|Answer Key|ਉੱਤਰ|उत्तर|Sahi Uttar)[:\s]*\(?([A-D])\)?/i);
       if (ansMatch) q.correctAnswer = ansMatch[1].toUpperCase();
 
-      // 4. BILINGUAL EXPLANATIONS (Strict Labeling)
       const enExpMatch = fullText.match(/(?:Explanation\s*\(English\)|Explanation|Rationale)[:\s]*([\s\S]*?)(?=\n(?:ਵਿਆਖਿਆ|व्याख्या|Punjabi|Hindi|ਉੱਤਰ|उत्तर)|$)/i);
-      const secExpMatch = fullText.match(/(?:ਵਿਆਖਿਆ\s*\(Punjabi\)|Explanation\s*\(Punjabi\)|Explanation\s*\(Hindi\)|व्याख्या\s*\(Hindi\))[:\s]*([\s\S]*?)(?=$)/i);
+      const secExpMatch = fullText.match(/(?:ਵਿਆਖਿਆ|व्याख्या|ਵਿਆਖਿਆ\s*\(Punjabi\)|Explanation\s*\(Punjabi\)|Explanation\s*\(Hindi\)|व्याख्या\s*\(Hindi\))[:\s]*([\s\S]*?)(?=$)/i);
 
       if (enExpMatch) q.englishExplanation = enExpMatch[1].trim();
       if (secExpMatch) q[expField] = secExpMatch[1].trim();
 
-      // Fallback for interleaved or label-less explanations (Lines after Answer)
       if (!q.englishExplanation && !q[expField]) {
         const expMarkerIndex = lines.findIndex(l => /^(?:English\s+)?Explanation|Logic|Rationale/i.test(l));
         if (expMarkerIndex !== -1) {
@@ -111,7 +100,6 @@ export function parseBulkQuestions(rawText: string, metadata: any): ParsedResult
         }
       }
 
-      // Debugging Matrix
       q.debug = {
         EN_Q: q.englishQuestion ? 'YES' : 'NO',
         SEC_Q: q[qField] ? 'YES' : 'NO',
@@ -121,7 +109,6 @@ export function parseBulkQuestions(rawText: string, metadata: any): ParsedResult
         SEC_EXP: q[expField] ? 'YES' : 'NO'
       };
 
-      // Validation
       if (q.englishQuestion && q.optionAEnglish && q.correctAnswer) {
         results.push(q);
       } else {

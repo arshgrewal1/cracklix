@@ -1,3 +1,4 @@
+
 'use client';
 
 import { create } from 'zustand';
@@ -8,8 +9,8 @@ import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
 /**
- * @fileOverview Elite CBT Global Store v31.0 (Production Hardened).
- * UPDATED: Strict language compatibility audit on initialization.
+ * @fileOverview Elite CBT Global Store v31.1 (Production Hardened).
+ * FIXED: setPaused recalibrates endTime correctly to prevent timer drift.
  */
 
 interface ExamStore extends AttemptState {
@@ -62,7 +63,6 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const now = Date.now();
     const state = get();
     
-    // Prevent double init if already active for same mock
     if (state.mockId === mockId && state.questions.length > 0 && !savedState) return;
 
     const isCompleted = savedState?.status === 'COMPLETED';
@@ -73,7 +73,6 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const timeLeft = Math.max(0, Math.floor((finalEndTime - now) / 1000));
     const finalBaseMode = languageMode || 'ENGLISH_PUNJABI';
 
-    // LANGUAGE COMPATIBILITY AUDIT
     let initialLang = (state.language && state.language !== '') ? (state.language as string) : finalBaseMode;
     
     if (finalBaseMode === 'ENGLISH_PUNJABI' && initialLang.includes('HINDI')) {
@@ -122,7 +121,6 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const now = Date.now();
     
     if (!val) {
-       // Resuming: Recalculate end time based on preserved time left
        const newEndTime = now + (timeLeft * 1000);
        set({ isPaused: false, endTime: newEndTime });
        

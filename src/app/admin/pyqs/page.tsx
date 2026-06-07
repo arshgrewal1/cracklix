@@ -20,9 +20,8 @@ import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional PYQ Repository Management v15.2.
- * Features: Deep Registry Audit and Working PDF integration.
- * FIXED: Missing Badge and cn imports.
+ * @fileOverview Institutional PYQ Repository Management v15.3.
+ * FIXED: Missing Badge and cn imports resolved.
  */
 
 export default function AdminPYQManagement() {
@@ -32,7 +31,6 @@ export default function AdminPYQManagement() {
   const pyqQuery = useMemo(() => (db ? query(collection(db, "pyqs"), orderBy("year", "desc")) : null), [db])
   const { data: pyqs, loading } = useCollection<any>(pyqQuery)
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
-  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
 
   const [editingPYQ, setEditingPYQ] = useState<any>(null)
   const [searchTerm, setSearchTerm] = useState("")

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect, Suspense } from "react"
@@ -17,7 +18,7 @@ import {
   Languages, 
   Zap, 
   ClipboardCheck, 
-  CheckCircle2,
+  CheckCircle2, 
   AlertTriangle,
   Search,
   BookOpen
@@ -31,8 +32,8 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview High-Fidelity Manual Content Editor v1.1.
- * UPDATED: Full Hindi entry support for questions and explanations during manual audit.
+ * @fileOverview High-Fidelity Manual Content Editor v1.2.
+ * FIXED: Explicit Badge import added.
  */
 
 export default function ManualMockEditPage() {
