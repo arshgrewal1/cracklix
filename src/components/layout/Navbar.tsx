@@ -25,8 +25,8 @@ import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Elite Global Navigation Hub v6.0.
- * FIXED: Mobile Sidebar width strictly set to 290px for professional exam-platform UI.
+ * @fileOverview Elite Global Navigation Hub v7.0.
+ * REFINED: Sidebar width strictly 290px with zero internal padding to allow full-height scrolling child.
  */
 
 export default function Navbar() {
