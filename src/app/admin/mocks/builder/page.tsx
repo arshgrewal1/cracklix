@@ -266,11 +266,23 @@ function MockBuilderContent() {
                <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-50">
                   <div className="space-y-2">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Target className="h-3 w-3 text-emerald-500" /> Positive (+)</Label>
-                     <Input type="number" step="0.5" value={mockData.positiveMarks} onChange={e => setMockData({...mockData, positiveMarks: parseFloat(e.target.value)})} className="h-12 rounded-xl text-center font-black border-slate-100 text-emerald-600" />
+                     <Input 
+                        type="number" 
+                        step="0.5" 
+                        value={Number.isNaN(mockData.positiveMarks) ? "" : mockData.positiveMarks} 
+                        onChange={e => setMockData({...mockData, positiveMarks: parseFloat(e.target.value)})} 
+                        className="h-12 rounded-xl text-center font-black border-slate-100 text-emerald-600" 
+                      />
                   </div>
                   <div className="space-y-2">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><AlertTriangle className="h-3 w-3 text-rose-500" /> Penalty (-)</Label>
-                     <Input type="number" step="0.05" value={mockData.negativeMarks} onChange={e => setMockData({...mockData, negativeMarks: parseFloat(e.target.value)})} className="h-12 rounded-xl text-center font-black border-slate-100 text-rose-500" />
+                     <Input 
+                        type="number" 
+                        step="0.05" 
+                        value={Number.isNaN(mockData.negativeMarks) ? "" : mockData.negativeMarks} 
+                        onChange={e => setMockData({...mockData, negativeMarks: parseFloat(e.target.value)})} 
+                        className="h-12 rounded-xl text-center font-black border-slate-100 text-rose-500" 
+                      />
                   </div>
                </div>
 
@@ -299,7 +311,12 @@ function MockBuilderContent() {
                <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1"><Clock className="h-3 w-3" /> Duration (Mins)</Label>
-                    <Input type="number" value={mockData.duration} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value)})} className="h-12 rounded-xl text-center border-slate-100" />
+                    <Input 
+                      type="number" 
+                      value={Number.isNaN(mockData.duration) ? "" : mockData.duration} 
+                      onChange={e => setMockData({...mockData, duration: parseInt(e.target.value)})} 
+                      className="h-12 rounded-xl text-center border-slate-100" 
+                    />
                   </div>
                   <div className="space-y-2 text-center">
                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Live Status</Label>
