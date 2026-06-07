@@ -18,7 +18,8 @@ import {
   Mail,
   MessageSquare,
   X,
-  Shield
+  Shield,
+  Sparkles
 } from "lucide-react";
 import Link from "next/link";
 import { useUser, useAuth } from "@/firebase";
@@ -32,8 +33,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Institutional Dark Sidebar v14.0.
- * UPDATED: Removed Daily Analysis per management audit.
+ * @fileOverview Institutional Dark Sidebar v15.0.
+ * UPDATED: Consolidated Study Materials and PYQs into "Free Hub".
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
@@ -79,8 +80,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
     { label: "Home Registry", href: "/", icon: Home },
     { label: "Elite Pass Hub", href: "/pass", icon: Gem, badge: "ACTIVATE" },
     { label: "Test Series", href: "/mocks", icon: Zap },
-    { label: "Previous Papers", href: "/pyqs", icon: FileText },
-    { label: "Study Materials", href: "/notes", icon: Library },
+    { label: "Free Hub", href: "/current-affairs", icon: Sparkles },
     { label: "Share CRACKLIX", icon: Share2, onClick: () => setIsShareOpen(true) },
     { label: "Ask Arsh Grewal", href: "/contact", icon: MessageCircleQuestion },
   ];
@@ -258,4 +258,3 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
     </>
   );
 }
-

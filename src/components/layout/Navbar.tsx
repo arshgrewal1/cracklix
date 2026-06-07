@@ -2,7 +2,7 @@
 'use client';
 
 import Link from "next/link";
-import { Menu, Search, Zap, CreditCard, LogOut, ShieldCheck, Megaphone, Target, LayoutGrid, Award, Gem, User } from "lucide-react";
+import { Menu, Search, Zap, CreditCard, LogOut, ShieldCheck, Megaphone, Target, LayoutGrid, Award, Gem, User, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import { useState, useMemo } from "react";
@@ -25,8 +25,8 @@ import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Elite Global Navigation Hub v7.1.
- * REFINED: Sidebar width strictly 290px to match professional specifications.
+ * @fileOverview Elite Global Navigation Hub v7.2.
+ * REFINED: Replaced Study Notes with Free Hub consolidation.
  */
 
 export default function Navbar() {
@@ -91,7 +91,9 @@ export default function Navbar() {
               <Link href="/pass" className={cn("transition-all flex items-center gap-2 px-5 py-2 rounded-xl border", pathname === '/pass' ? 'bg-primary border-primary text-white shadow-xl shadow-primary/20' : 'bg-primary/10 border-primary/20 text-primary/80 hover:text-primary hover:bg-primary/20')}>
                 <Gem className="h-4 w-4" /> PASS
               </Link>
-              <Link href="/notes" className={cn("transition-colors hover:text-white", pathname === '/notes' ? 'text-white' : '')}>Study Notes</Link>
+              <Link href="/current-affairs" className={cn("transition-colors flex items-center gap-2 hover:text-white", pathname === '/current-affairs' ? 'text-white' : '')}>
+                <Sparkles className="h-4 w-4 text-amber-400" /> Free Hub
+              </Link>
             </div>
           </div>
 

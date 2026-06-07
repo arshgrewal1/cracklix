@@ -25,7 +25,8 @@ import {
   Target,
   Medal,
   ChevronRight,
-  User
+  User,
+  Library
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -34,15 +35,15 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Free Hub v6.0.
- * UPDATED: Removed Analysis category from the hub.
+ * @fileOverview Institutional Free Hub v7.0.
+ * UPDATED: Renamed to FREE HUB and consolidated PYQs and Study Materials.
  */
 
 const CATEGORIES = [
   { id: "all", label: "All Hubs", icon: <Globe className="h-6 w-6" />, color: "bg-blue-50 text-blue-600" },
   { id: "mock", label: "Free Mocks", icon: <Zap className="h-6 w-6" />, color: "bg-orange-50 text-primary" },
-  { id: "pdf", label: "Blueprints", icon: <FileText className="h-6 w-6" />, color: "bg-emerald-50 text-emerald-600" },
-  { id: "pyq", label: "Official PYQ", icon: <FileStack className="h-6 w-6" />, color: "bg-rose-50 text-rose-600" }
+  { id: "pdf", label: "Blueprints", icon: <Library className="h-6 w-6" />, color: "bg-emerald-50 text-emerald-600" },
+  { id: "pyq", label: "Previous Papers", icon: <FileStack className="h-6 w-6" />, color: "bg-rose-50 text-rose-600" }
 ]
 
 export default function FreeContentHub() {
@@ -80,25 +81,25 @@ export default function FreeContentHub() {
             <div className="space-y-8 relative z-10 max-w-3xl">
               <div className="flex items-center gap-3">
                  <Badge className="bg-primary text-white border-none px-4 py-1.5 rounded-full font-black uppercase text-[10px] tracking-[0.2em] shadow-xl">
-                    Official Registry 2026
+                    Official Free Hub
                  </Badge>
                  <Badge className="bg-white/10 text-white border border-white/20 px-3 py-1.5 rounded-full font-bold uppercase text-[9px]">
                     100% Free Nodes
                  </Badge>
               </div>
               <h1 className="text-4xl md:text-8xl font-headline font-black tracking-tighter uppercase leading-[0.85]">
-                FREE STUDY <br/>
-                <span className="text-primary">MASTERY HUB</span>
+                PUNJAB EXAM <br/>
+                <span className="text-primary">FREE HUB</span>
               </h1>
               <p className="text-slate-400 font-medium text-base md:text-xl max-w-2xl leading-relaxed">
-                Access high-fidelity mocks and unique test URLs. Join 15,000+ aspirants preparing for PSSSB, Police, and PPSC.
+                Access high-fidelity mocks, previous papers, and study blueprints curated by Arsh Grewal Management.
               </p>
               
               <div className="relative w-full md:w-[480px]">
                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-500" />
                  <Input 
                    className="h-16 pl-16 rounded-[1.5rem] bg-white/10 border-white/10 text-white placeholder:text-slate-500 text-lg font-medium backdrop-blur-md focus-visible:ring-primary shadow-2xl" 
-                   placeholder="Search mocks or PDF nodes..." 
+                   placeholder="Search free repository..." 
                    value={searchTerm}
                    onChange={e => setSearchTerm(e.target.value)}
                  />
@@ -109,7 +110,7 @@ export default function FreeContentHub() {
                <HeroStat val="500+" label="Free Mocks" />
                <HeroStat val="1.2k+" label="PDF Nodes" />
                <HeroStat val="15k+" label="Aspirants" />
-               <HeroStat val="24/7" label="Audit Live" />
+               <HeroStat val="Real" label="PYQ Archive" />
             </div>
           </div>
 
@@ -150,15 +151,17 @@ export default function FreeContentHub() {
                           <CardContent className="p-8 md:p-10 flex flex-col md:row items-center gap-8">
                              <div className={cn(
                                 "h-16 w-16 md:h-20 md:w-20 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
-                                item.type === 'mock' ? 'bg-orange-50 text-primary' : 'bg-blue-50 text-blue-600'
+                                item.type === 'mock' ? 'bg-orange-50 text-primary' : 
+                                item.type === 'pyq' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
                              )}>
-                                {item.type === 'mock' ? <Zap className="h-8 md:h-10 md:w-10" /> : <FileText className="h-8 md:h-10 md:w-10" />}
+                                {item.type === 'mock' ? <Zap className="h-8 md:h-10 md:w-10" /> : 
+                                 item.type === 'pyq' ? <FileStack className="h-8 md:h-10 md:w-10" /> : <FileText className="h-8 md:h-10 md:w-10" />}
                              </div>
                              <div className="flex-1 space-y-3 w-full">
                                 <div className="flex items-center justify-between">
                                    <Badge className="bg-slate-100 text-slate-400 border-none px-3 py-1 font-black uppercase text-[8px] tracking-widest">{item.type?.toUpperCase()}</Badge>
                                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2">
-                                      <Bell className="h-3 w-3 text-primary" /> New Registry
+                                      <Bell className="h-3 w-3 text-primary" /> New Entry
                                    </span>
                                 </div>
                                 <h2 className="text-xl md:text-2xl font-headline font-black text-[#0F172A] group-hover:text-primary transition-colors uppercase leading-tight">{item.title}</h2>
@@ -168,7 +171,7 @@ export default function FreeContentHub() {
                                 <Button asChild className="w-full md:w-auto h-14 px-10 bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl shadow-xl transition-all active:scale-95">
                                    {isInternal ? (
                                      <Link href={item.link}>
-                                        {item.type === 'mock' ? 'Start Mock Test' : 'View Content'} <ArrowRight className="ml-2 h-4 w-4" />
+                                        {item.type === 'mock' ? 'Attempt Now' : 'View Content'} <ArrowRight className="ml-2 h-4 w-4" />
                                      </Link>
                                    ) : (
                                      <a href={item.link || "#"} target="_blank" rel="noopener noreferrer">
