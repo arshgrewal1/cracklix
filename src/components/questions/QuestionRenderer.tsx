@@ -19,8 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview High-Fidelity Question Engine v26.0.
- * Matches the "Diagnostic Info Row" and italicized option labels from the reference.
+ * @fileOverview High-Fidelity Question Engine v27.0.
+ * MATCHED: Reverted to A, B, C, D labels and updated selection colors per user screenshot.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -49,6 +49,8 @@ export default function QuestionRenderer({
   
   const showEn = normalizedLang.includes('ENGLISH');
   const showPa = normalizedLang.includes('PUNJABI');
+
+  const OPT_LABELS = ['A', 'B', 'C', 'D'];
 
   return (
     <div className={cn("w-full text-left font-body bg-white text-[#0F172A] p-4 md:p-8 flex flex-col select-none", className)}>
@@ -94,7 +96,7 @@ export default function QuestionRenderer({
       {/* 3. OPTIONS MATRIX */}
       {!hideOptions && (
         <div className="flex flex-col space-y-3">
-          {['A', 'B', 'C', 'D'].map((key, idx) => {
+          {OPT_LABELS.map((key, idx) => {
             const en = q[`option${key}English`];
             const pa = q[`option${key}Punjabi`];
             
@@ -106,24 +108,24 @@ export default function QuestionRenderer({
                 key={key} 
                 onClick={() => onSelect?.(idx)} 
                 className={cn(
-                  "flex items-center gap-4 p-4 rounded-xl border-2 transition-all cursor-pointer",
+                  "flex items-center gap-6 p-5 rounded-2xl border-2 transition-all cursor-pointer",
                   showSolution 
                     ? isCorrect ? "bg-emerald-50 border-emerald-500" 
                       : isSelected ? "bg-rose-50 border-rose-500"
                       : "bg-white border-slate-100"
-                    : isSelected ? "bg-blue-50 border-blue-500 shadow-md" 
+                    : isSelected ? "bg-orange-50 border-primary shadow-lg shadow-orange-500/10" 
                       : "bg-white border-slate-100 hover:border-slate-200"
                 )}
               >
                 <span className={cn(
-                  "font-serif italic text-lg md:text-xl shrink-0 w-6 text-center",
-                  isSelected ? "text-blue-600" : "text-slate-400"
+                  "font-black text-lg md:text-xl shrink-0 w-6 text-left",
+                  isSelected ? "text-primary" : "text-slate-400"
                 )}>
-                  {idx + 1}.
+                  {key}
                 </span>
-                <div className="flex flex-col flex-1 min-w-0">
-                  {showEn && en && <div className="font-bold text-base md:text-lg text-[#0F172A]"><MathText text={en} /></div>}
-                  {showPa && pa && <div className="font-bold text-base md:text-lg text-[#0F172A]"><MathText text={pa} /></div>}
+                <div className="flex flex-col flex-1 min-w-0 space-y-1">
+                  {showEn && en && <div className={cn("font-bold text-base md:text-lg", isSelected ? "text-primary" : "text-[#0F172A]")}><MathText text={en} /></div>}
+                  {showPa && pa && <div className={cn("font-bold text-base md:text-lg", isSelected ? "text-primary" : "text-[#0F172A]")}><MathText text={pa} /></div>}
                 </div>
               </div>
             )

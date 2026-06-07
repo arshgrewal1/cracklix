@@ -16,15 +16,15 @@ import { useMemo } from 'react';
 
 const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
   { label: "ENGLISH ONLY", value: "ENGLISH" },
-  { label: "PUNJABI ONLY", value: "PUNJABI" },
+  { label: "ਪੰਜਾਬੀ ONLY", value: "PUNJABI" },
   { label: "HINDI ONLY", value: "HINDI" },
-  { label: "BILINGUAL (EN+PA)", value: "ENGLISH_PUNJABI" },
-  { label: "BILINGUAL (EN+HI)", value: "ENGLISH_HINDI" },
+  { label: "ENGLISH & ਪੰਜਾਬੀ", value: "ENGLISH_PUNJABI" },
+  { label: "ENGLISH & HINDI", value: "ENGLISH_HINDI" },
 ];
 
 /**
- * @fileOverview Institutional CBT Header v19.0.
- * UPDATED: Palette button visible on all devices; Exam Title restored.
+ * @fileOverview Institutional CBT Header v20.0.
+ * UPDATED: Removed "Bilingual" term as requested. Replaced with "Language & Language".
  */
 export default function ExamHeader({ 
   onPaletteToggle, 

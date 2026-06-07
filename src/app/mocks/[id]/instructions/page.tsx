@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils";
 import { LanguageDisplayMode } from "@/types";
 
 /**
- * @fileOverview Testbook-Style Entrance Hub v4.0.
- * Fixed: Pre-test language selection persistence logic.
+ * @fileOverview Testbook-Style Entrance Hub v5.0.
+ * UPDATED: Removed "Bilingual" term from buttons as requested.
  */
 export default function InstructionsPage() {
   const params = useParams();
@@ -46,7 +46,6 @@ export default function InstructionsPage() {
   }, [mock]);
 
   const handleStart = () => {
-    // Commit preference to store before navigation
     setLanguage(prefLang);
     router.push(`/mocks/${mockId}/attempt`);
   };
@@ -60,7 +59,6 @@ export default function InstructionsPage() {
       <main className="container mx-auto px-4 md:px-6 py-12 md:py-24 max-w-5xl text-left">
         <div className="space-y-12">
            
-           {/* HEADER HUB */}
            <div className="flex flex-col md:row items-start md:items-center justify-between gap-6">
               <div className="space-y-2">
                  <div className="flex items-center gap-3">
@@ -71,7 +69,6 @@ export default function InstructionsPage() {
               </div>
            </div>
 
-           {/* STATS MATRIX */}
            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <StatPlate icon={<Clock />} label="DURATION" val={`${mock.duration} Mins`} />
               <StatPlate icon={<BookOpen />} label="QUESTIONS" val={mock.totalQuestions} />
@@ -91,7 +88,7 @@ export default function InstructionsPage() {
                     <Instruction text="Negative marking is applied for incorrect audit choices." />
                     <Instruction text="The test will auto-submit exactly when the timer hits zero." />
                     <Instruction text="Switching tabs or minimizing the browser will log a violation." />
-                    <Instruction text="Bilingual mode provides both English and Punjabi statements." />
+                    <Instruction text="Multi-language mode provides both English and local statements." />
                     <Instruction text="You can re-audit any question using the side palette." />
                  </div>
 
@@ -103,10 +100,10 @@ export default function InstructionsPage() {
                        </div>
                        <div className="flex flex-wrap justify-center gap-4">
                           {availableLangs.includes('ENGLISH') && <LangBtn label="English Only" val="ENGLISH" active={prefLang === 'ENGLISH'} onClick={setPrefLang} />}
-                          {availableLangs.includes('PUNJABI') && <LangBtn label="Punjabi Only" val="PUNJABI" active={prefLang === 'PUNJABI'} onClick={setPrefLang} />}
-                          {availableLangs.includes('HINDI') && <LangBtn label="Hindi Only" val="HINDI" active={prefLang === 'HINDI'} onClick={setPrefLang} />}
-                          {availableLangs.includes('ENGLISH_PUNJABI') && <LangBtn label="BILINGUAL (EN+PA)" val="ENGLISH_PUNJABI" active={prefLang === 'ENGLISH_PUNJABI'} onClick={setPrefLang} />}
-                          {availableLangs.includes('ENGLISH_HINDI') && <LangBtn label="BILINGUAL (EN+HI)" val="ENGLISH_HINDI" active={prefLang === 'ENGLISH_HINDI'} onClick={setPrefLang} />}
+                          {availableLangs.includes('PUNJABI') && <LangBtn label="ਪੰਜਾਬੀ Only" val="PUNJABI" active={prefLang === 'PUNJABI'} onClick={setPrefLang} />}
+                          {availableLangs.includes('HINDI') && <LangBtn label="हिन्दी Only" val="HINDI" active={prefLang === 'HINDI'} onClick={setPrefLang} />}
+                          {availableLangs.includes('ENGLISH_PUNJABI') && <LangBtn label="English & ਪੰਜਾਬੀ" val="ENGLISH_PUNJABI" active={prefLang === 'ENGLISH_PUNJABI'} onClick={setPrefLang} />}
+                          {availableLangs.includes('ENGLISH_HINDI') && <LangBtn label="English & हिन्दी" val="ENGLISH_HINDI" active={prefLang === 'ENGLISH_HINDI'} onClick={setPrefLang} />}
                        </div>
                     </div>
                  )}
