@@ -24,20 +24,22 @@ import {
   Rocket,
   ChevronRight,
   CheckCircle2,
-  Info
+  Info,
+  Languages
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, serverTimestamp, writeBatch } from "firebase/firestore"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
-import { CurrentAffairHubItem } from "@/types"
+import { CurrentAffairHubItem, LanguageDisplayMode } from "@/types"
 import { cn } from "@/lib/utils"
 import { parseBulkQuestions } from "@/lib/parser"
 
 /**
- * @fileOverview Institutional Current Affairs Management Hub v9.0.
+ * @fileOverview Institutional Current Affairs Management Hub v10.0.
  * UPDATED: Multi-language preview for full extraction audit (Question, Options, Key, Rationale).
+ * ADDED: Explicit CBT Language Mode control for generated quizzes.
  */
 
 export default function AdminCurrentAffairs() {
@@ -95,6 +97,8 @@ export default function AdminCurrentAffairs() {
     const caRef = doc(db, "current_affairs_hub", caId)
     
     let quizId = editingItem.quizId || `quiz-${caId}`
+    const langMode: LanguageDisplayMode = editingItem.language === 'English & Hindi' ? 'ENGLISH_HINDI' : 'ENGLISH_PUNJABI';
+
     if (editingItem.questions && editingItem.questions.length > 0) {
       const batch = writeBatch(db)
       const qIds: string[] = []
@@ -125,6 +129,7 @@ export default function AdminCurrentAffairs() {
         totalQuestions: qIds.length,
         questionIds: qIds,
         published: true,
+        languageMode: langMode,
         updatedAt: serverTimestamp(),
         createdAt: serverTimestamp()
       }, { merge: true })
@@ -280,7 +285,7 @@ export default function AdminCurrentAffairs() {
 
                      <div className="grid grid-cols-1 gap-4">
                         <div className="space-y-1.5">
-                           <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Secondary Language</Label>
+                           <Label className="text-[9px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Languages className="h-3 w-3" /> Secondary Language (CBT Mode)</Label>
                            <select value={editingItem?.language} onChange={e => setEditingItem({...editingItem, language: e.target.value})} className="w-full h-10 bg-[#0B1528] text-white border-none rounded-lg px-2 font-black uppercase text-[9px] outline-none shadow-sm">
                               <option value="English & Punjabi">English & Punjabi</option>
                               <option value="English & Hindi">English & Hindi</option>
@@ -326,7 +331,7 @@ export default function AdminCurrentAffairs() {
                            <Textarea 
                               value={bulkText}
                               onChange={e => setBulkText(e.target.value)}
-                              placeholder={`Q15. English Question\nहिंदी/ਪੰਜਾਬੀ ਪ੍ਰਸ਼ਨ\n(A) Option EN\nहिंदी/ਪੰਜਾਬੀ ਆਪਸ਼ਨ\nAnswer: C. Text\nExplanation (English): Text...\nव्याख्या/ਵਿਆਖਿਆ: Text...`}
+                              placeholder={`Q15. English Question\nहिंदी/ਪੰਜਾਬੀ ਪ੍ਰਸ਼ਨ\n(A) Option EN\nहिंदी/ਪੰਜਾਬੀ ਆਪਸ਼ਨ\nAnswer: C. Text\nExplanation (English): Text...\nव्याख्या/ਵਿਆਖ्या: Text...`}
                               className="min-h-[500px] rounded-xl bg-slate-50 border-none p-6 text-sm font-bold shadow-inner resize-none focus-visible:ring-primary"
                            />
                            <Button onClick={handleProcessBulk} disabled={!bulkText.trim()} className="w-full h-14 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-xl shadow-2xl gap-3 border-none">
@@ -379,7 +384,7 @@ export default function AdminCurrentAffairs() {
                                                 </div>
                                                 <div className="space-y-2 pt-2 border-t border-slate-50">
                                                    <p className="text-[8px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
-                                                      <Info className="h-3 w-3" /> {q.hindiQuestion ? 'हिंदी व्याख्या' : 'ਪੰਜਾਬੀ ਵਿਆਖਿਆ'}
+                                                      <Info className="h-3 w-3" /> {q.hindiQuestion ? 'हिन्दी व्याख्या' : 'ਪੰਜਾਬੀ ਵਿਆਖਿਆ'}
                                                    </p>
                                                    <p className="text-xs font-medium text-slate-600 leading-relaxed italic">{q.hindiExplanation || q.punjabiExplanation || 'Awaiting audit...'}</p>
                                                 </div>

@@ -32,7 +32,8 @@ import {
   History,
   Target,
   AlertTriangle,
-  ChevronDown
+  ChevronDown,
+  Languages
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, where, limit, getDocs, documentId } from "firebase/firestore"
@@ -132,7 +133,8 @@ function MockBuilderContent() {
         ...existingMock,
         positiveMarks: existingMock.positiveMarks ?? 1,
         negativeMarks: existingMock.negativeMarks ?? 0.25,
-        duration: existingMock.duration ?? 120
+        duration: existingMock.duration ?? 120,
+        languageMode: existingMock.languageMode || "ENGLISH_PUNJABI"
       }));
 
       if (existingMock.sections && existingMock.sections.length > 0 && existingMock.questionIds) {
@@ -245,6 +247,22 @@ function MockBuilderContent() {
                <div className="space-y-2">
                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Title</Label>
                  <Input value={mockData.title} onChange={e => setMockData({...mockData, title: e.target.value})} className="rounded-xl h-14 font-bold text-lg border-slate-100 text-[#0F172A]" />
+               </div>
+
+               <div className="space-y-2">
+                 <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2">
+                    <Languages className="h-3 w-3 text-primary" /> Language Architecture (CBT)
+                 </Label>
+                 <Select value={mockData.languageMode} onValueChange={(v: LanguageDisplayMode) => setMockData({...mockData, languageMode: v})}>
+                    <SelectTrigger className="h-14 rounded-xl bg-slate-50 border-none font-black uppercase text-[10px]"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                       <SelectItem value="ENGLISH">English Only</SelectItem>
+                       <SelectItem value="PUNJABI">ਪੰਜਾਬੀ Only</SelectItem>
+                       <SelectItem value="HINDI">हिन्दी Only</SelectItem>
+                       <SelectItem value="ENGLISH_PUNJABI">English & ਪੰਜਾਬੀ (Bilingual)</SelectItem>
+                       <SelectItem value="ENGLISH_HINDI">English & हिन्दी (Bilingual)</SelectItem>
+                    </SelectContent>
+                 </Select>
                </div>
 
                <div className="grid grid-cols-2 gap-4">

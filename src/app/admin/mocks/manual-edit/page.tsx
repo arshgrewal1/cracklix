@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect, Suspense } from "react"
@@ -32,8 +31,8 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview High-Fidelity Manual Content Editor v1.0.
- * Allows direct typing and modification of bilingual question nodes within a mock.
+ * @fileOverview High-Fidelity Manual Content Editor v1.1.
+ * UPDATED: Full Hindi entry support for questions and explanations during manual audit.
  */
 
 export default function ManualMockEditPage() {
@@ -158,7 +157,7 @@ function ManualEditContent() {
                         <div className="flex-1 space-y-4 min-w-0">
                            <div className="space-y-2">
                               <p className="font-bold text-lg text-[#0F172A] leading-snug">{q.englishQuestion}</p>
-                              <p className="font-bold text-lg text-slate-400 leading-snug">{q.punjabiQuestion}</p>
+                              <p className="font-bold text-lg text-slate-400 leading-snug">{q.punjabiQuestion || q.hindiQuestion}</p>
                            </div>
                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                               {['A','B','C','D'].map(opt => (

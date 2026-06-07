@@ -20,8 +20,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Manual Question Entry v15.5.
- * FIXED: Globe reference error and side-by-side bilingual option editing.
+ * @fileOverview Hardened Manual Question Entry v16.0.
+ * UPDATED: Added full Hindi Statement and Hindi Rationalization support.
  */
 
 export default function QuestionEntryPage() {
