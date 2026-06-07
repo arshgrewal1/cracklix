@@ -11,27 +11,10 @@ interface TimerProps {
   isPaused?: boolean
 }
 
-/**
- * @fileOverview Institutional High-Visibility Timer Node.
- * Hardened: Background #0F172A, White Digits.
- * Mobile: Scaled down for high-density header compatibility.
- */
-
 export default function Timer({ onTimeUp, initialSeconds, onTick, isPaused }: TimerProps) {
   const [timeLeft, setTimeLeft] = useState(initialSeconds)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
-  const onTickRef = useRef(onTick)
   const hasSubmitted = useRef(false)
-
-  useEffect(() => {
-    onTickRef.current = onTick
-  }, [onTick])
-
-  useEffect(() => {
-    if (onTickRef.current && !isPaused) {
-      onTickRef.current(timeLeft)
-    }
-  }, [timeLeft, isPaused])
 
   useEffect(() => {
     if (isPaused) {
@@ -59,18 +42,18 @@ export default function Timer({ onTimeUp, initialSeconds, onTick, isPaused }: Ti
     const h = Math.floor(safeSecs / 3600)
     const m = Math.floor((safeSecs % 3600) / 60)
     const s = safeSecs % 60
-    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
+    return `${h > 0 ? h.toString().padStart(2, '0') + ':' : ''}${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
   }
 
   const isLowTime = timeLeft < 600
 
   return (
     <div className={cn(
-      "flex items-center gap-1.5 md:gap-4 px-2 md:px-6 h-8 md:h-14 rounded-lg md:rounded-2xl font-bold transition-all duration-500 tabular-nums shadow-lg border hover:shadow-primary/5 shrink-0",
-      isLowTime ? "bg-rose-600 border-rose-500 text-white animate-pulse" : "bg-[#0F172A] border-white/15 text-white"
+      "flex items-center gap-2 px-3 h-8 rounded-lg font-bold transition-all tabular-nums border",
+      isLowTime ? "bg-rose-600 border-rose-500 text-white animate-pulse" : "bg-[#0F172A] border-white/10 text-white"
     )}>
-      <Clock className={cn("h-3 w-3 md:h-5 md:w-5", isLowTime ? "text-white" : "text-[#F97316]")} />
-      <span className="text-[11px] md:text-[24px] font-[700] tracking-widest leading-none text-white">{formatTime(timeLeft)}</span>
+      <Clock className={cn("h-3.5 w-3.5", isLowTime ? "text-white" : "text-primary")} />
+      <span className="text-[14px] md:text-[18px] font-black tracking-widest leading-none">{formatTime(timeLeft)}</span>
     </div>
   )
 }

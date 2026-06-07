@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect, useCallback } from "react"
@@ -36,11 +35,6 @@ import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import BackButton from "@/components/navigation/BackButton"
 
-/**
- * @fileOverview Institutional Result Engine v6.2.
- * Fixed: Re-attempt logic and click propagation.
- * Hardened: Firestore argument validation to prevent collection() errors.
- */
 export default function ResultPage() {
   const params = useParams()
   const router = useRouter()
@@ -105,7 +99,7 @@ export default function ResultPage() {
           setQuestions(questionIds.map(id => fetchedQuestions.find(q => q.id === id)).filter(Boolean))
         }
       } catch (e) {
-        toast({ variant: "destructive", title: "Content Sync Failure", description: "Could not load solution hub data." })
+        toast({ variant: "destructive", title: "Sync Failure" })
       } finally {
         setLoadingContent(false)
       }
@@ -115,187 +109,116 @@ export default function ResultPage() {
 
   const handleReattempt = () => {
     if (!isValidDb || !user || !mockId) return;
-    
-    const confirmMsg = "CRITICAL AUDIT: Restart evaluation node? Current scores will be archived.";
-    if (!window.confirm(confirmMsg)) return;
+    if (!window.confirm("Restart evaluation node?")) return;
 
     const attemptId = `${user.uid}_${mockId}`;
     deleteDoc(doc(db, "attempts", attemptId)).catch(() => {});
     deleteDoc(doc(db, "results", attemptId)).catch(() => {});
     
-    if (typeof window !== 'undefined') {
-       localStorage.removeItem(`attempt_${mockId}`);
-       localStorage.removeItem(`result_${mockId}`);
-    }
-
-    toast({ title: "Registry Reset", description: "Loading fresh attempt instructions..." });
+    toast({ title: "Registry Reset" });
     router.push(`/mocks/${mockId}/instructions`);
   };
 
-  const chartData = useMemo(() => {
-    if (!sessionData?.subjectStats) return []
-    return Object.entries(sessionData.subjectStats).map(([id, stats]: [string, any]) => ({
-      name: String(id).replace(/-/g, ' ').toUpperCase(),
-      accuracy: Math.round((stats.correct / (stats.attempted || 1)) * 100),
-      score: `${stats.correct}/${stats.total}`
-    })).sort((a, b) => b.accuracy - a.accuracy)
-  }, [sessionData])
-
   if (resultsLoading || loadingContent) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
-       <Loader2 className="h-10 w-10 text-primary animate-spin" />
-       <div className="text-center space-y-1">
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Institutional Audit</p>
-          <p className="text-sm font-bold text-slate-400">Syncing Results...</p>
-       </div>
+    <div className="h-full flex flex-col items-center justify-center bg-white space-y-4">
+       <Loader2 className="h-8 w-8 text-primary animate-spin" />
+       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Auditing Node...</p>
     </div>
   )
 
   if (!sessionData) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-slate-50 p-6">
-       <Trophy className="h-20 w-20 text-slate-200 mb-6" />
-       <h1 className="text-2xl font-headline font-black uppercase text-slate-300 tracking-tight text-center">Audit Trail Missing</h1>
-       <p className="text-slate-400 text-sm font-medium mt-2 mb-8 uppercase tracking-widest">No previous attempts found for this series.</p>
-       <Button asChild className="rounded-xl h-14 px-10 bg-[#0B1528] hover:bg-black text-white font-black uppercase tracking-widest text-xs shadow-2xl">
-          <Link href="/mocks">Explore All Series</Link>
+    <div className="h-full flex flex-col items-center justify-center bg-slate-50 p-6 space-y-8">
+       <Trophy className="h-16 w-16 text-slate-200" />
+       <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-center">No Audit Node Detected</p>
+       <Button asChild className="rounded-xl h-14 px-10 bg-[#0B1528] text-white font-black uppercase text-[10px]">
+          <Link href="/mocks">Explore All Hubs</Link>
        </Button>
     </div>
   )
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50/50 w-full overflow-x-hidden text-left">
+    <div className="flex flex-col min-h-screen bg-slate-50">
       <Navbar />
-      <main className="container mx-auto px-2 md:px-6 py-4 md:py-8 max-w-4xl w-full">
-        <div className="flex items-center gap-2 md:gap-4 mb-6">
-           <BackButton label="Dashboard" fallback="/dashboard" />
-           <div className="h-6 w-px bg-slate-200" />
-           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Audit Summary</p>
+      <main className="mobile-app-shell py-4 px-2 space-y-6">
+        <div className="flex items-center gap-2 mb-2">
+           <BackButton label="Dashboard" fallback="/dashboard" className="h-10" />
+           <div className="h-4 w-px bg-slate-200" />
+           <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Audit Registry</p>
         </div>
 
-        <div className="flex flex-col gap-6 md:gap-8 w-full">
-          <div className="space-y-6 md:space-y-8 text-left w-full">
-            <Card className="border-none shadow-3xl rounded-xl md:rounded-[2.5rem] overflow-hidden bg-white group w-full">
-               <div className="h-1.5 w-full bg-primary" />
-               <CardHeader className="p-4 md:p-8 border-b border-slate-50 flex flex-col md:flex-row justify-between items-center gap-4">
-                  <div className="space-y-2 text-center md:text-left w-full">
-                    <div className="flex items-center justify-center md:justify-start gap-3">
-                       <ShieldCheck className="h-4 w-4 text-primary" />
-                       <Badge className="bg-emerald-50 text-emerald-600 border-none px-2 py-0.5 rounded-lg font-black uppercase text-[7px] tracking-widest">AUDIT COMPLETE</Badge>
-                    </div>
-                    <CardTitle className="font-headline text-lg md:text-3xl font-black text-[#0F172A] uppercase leading-tight tracking-tight break-words">{sessionData.mockTitle}</CardTitle>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto relative z-10">
-                     <Button 
-                        onClick={handleReattempt}
-                        type="button"
-                        className="flex-1 sm:flex-none bg-primary hover:bg-orange-600 text-white rounded-lg h-10 px-6 font-black uppercase text-[8px] tracking-widest shadow-lg transition-all active:scale-95 gap-2"
-                     >
-                        <RefreshCw className="h-3.5 w-3.5" /> RE-ATTEMPT MOCK
-                     </Button>
-                     <Button asChild className="flex-1 sm:flex-none bg-[#0F172A] hover:bg-black text-white rounded-lg h-10 px-6 font-black uppercase text-[8px] tracking-widest shadow-lg transition-all active:scale-95">
-                        <Link href="/dashboard"><LayoutDashboard className="h-3.5 w-3.5 mr-2 text-primary" /> Dashboard</Link>
-                     </Button>
-                  </div>
-               </CardHeader>
-               <CardContent className="p-4 md:p-8">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4 text-center mb-8">
-                    <ResultNode icon={<CheckCircle2 className="text-emerald-500 h-5 w-5 md:h-6 md:w-6" />} label="Correct" value={sessionData.score} color="text-emerald-600" />
-                    <ResultNode icon={<XCircle className="text-rose-500 h-5 w-5 md:h-6 md:w-6" />} label="Incorrect" value={Object.keys(sessionData.answers).length - sessionData.score} color="text-rose-600" />
-                    <ResultNode icon={<HelpCircle className="text-slate-300 h-5 w-5 md:h-6 md:w-6" />} label="Skipped" value={sessionData.totalQuestions - Object.keys(sessionData.answers).length} color="text-slate-400" />
-                    <ResultNode icon={<Target className="text-primary h-5 w-5 md:h-6 md:w-6" />} label="Accuracy" value={`${sessionData.accuracy}%`} color="text-primary" />
-                  </div>
+        <Card className="border-none shadow-sm rounded-2xl overflow-hidden bg-white">
+           <div className="h-1 w-full bg-primary" />
+           <CardHeader className="p-5 border-b border-slate-50 space-y-3">
+              <div className="flex items-center gap-3">
+                 <ShieldCheck className="h-4 w-4 text-primary" />
+                 <Badge className="bg-emerald-50 text-emerald-600 border-none px-2 py-0.5 rounded-lg font-black uppercase text-[7px] tracking-widest">VERIFIED</Badge>
+              </div>
+              <CardTitle className="text-lg font-black text-[#0F172A] uppercase leading-tight">{sessionData.mockTitle}</CardTitle>
+              
+              <div className="flex gap-2 pt-2">
+                 <Button onClick={handleReattempt} className="flex-1 h-10 bg-primary text-white rounded-lg font-black uppercase text-[8px] tracking-widest">Re-Attempt</Button>
+                 <Button asChild className="flex-1 h-10 bg-[#0F172A] text-white rounded-lg font-black uppercase text-[8px] tracking-widest"><Link href="/dashboard">Dashboard</Link></Button>
+              </div>
+           </CardHeader>
+           <CardContent className="p-5">
+              <div className="grid grid-cols-4 gap-2 text-center">
+                <MiniStat icon={<CheckCircle2 className="text-emerald-500 h-4 w-4" />} val={sessionData.score} label="CORRECT" />
+                <MiniStat icon={<XCircle className="text-rose-500 h-4 w-4" />} val={Object.keys(sessionData.answers).length - sessionData.score} label="WRONG" />
+                <MiniStat icon={<HelpCircle className="text-slate-300 h-4 w-4" />} val={sessionData.totalQuestions - Object.keys(sessionData.answers).length} label="SKIP" />
+                <MiniStat icon={<Target className="text-primary h-4 w-4" />} val={`${sessionData.accuracy}%`} label="ACCURACY" />
+              </div>
+           </CardContent>
+        </Card>
 
-                  <div className="space-y-4">
-                     <h4 className="font-headline font-black text-sm md:text-xl uppercase tracking-tight border-b border-slate-100 pb-2 flex items-center gap-2">
-                        <TrendingUp className="h-5 w-5 text-primary" /> Mastery Index
-                     </h4>
-                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3">
-                        {chartData.length > 0 ? chartData.map((subj, i) => (
-                           <div key={i} className="p-3 rounded-xl bg-slate-50/50 border border-slate-100 space-y-2 shadow-inner">
-                              <div className="flex justify-between items-start">
-                                 <div className="min-w-0 flex-1">
-                                    <span className="text-[7px] font-black uppercase text-slate-400 tracking-widest block">SUBJECT NODE</span>
-                                    <h5 className="text-[9px] md:text-xs font-black text-[#0B1528] uppercase truncate">{subj.name}</h5>
-                                 </div>
-                                 <span className={cn("text-xs md:text-base font-headline font-black ml-2", subj.accuracy > 70 ? "text-emerald-600" : "text-rose-500")}>{subj.accuracy}%</span>
-                              </div>
-                              <div className="h-1 w-full bg-slate-200 rounded-full overflow-hidden">
-                                 <div className={cn("h-full transition-all duration-1000", subj.accuracy > 70 ? "bg-emerald-500" : "bg-rose-500")} style={{ width: `${subj.accuracy}%` }} />
-                              </div>
-                           </div>
-                        )) : <div className="col-span-full py-6 text-center opacity-30 italic text-xs">Registry nodes not detected.</div>}
-                     </div>
-                  </div>
-               </CardContent>
-            </Card>
+        <div className="space-y-4 pb-32">
+           <h3 className="font-headline font-black text-sm uppercase px-1 flex items-center gap-2">
+              <BrainCircuit className="h-4 w-4 text-primary" /> Performance Review
+           </h3>
+           
+           <div className="space-y-3">
+              {questions.map((q, idx) => {
+                 const studentAnsIdx = sessionData.answers?.[idx];
+                 const correctAnsIdx = ['A','B','C','D'].indexOf(q.correctAnswer);
+                 const isCorrect = studentAnsIdx === correctAnsIdx;
+                 const isSkipped = studentAnsIdx === undefined || studentAnsIdx === null;
+                 const isExpanded = expandedQs[idx];
 
-            <div className="space-y-4 md:space-y-6 w-full">
-               <div className="flex items-center justify-between px-1">
-                  <h3 className="font-headline font-black text-lg md:text-2xl uppercase flex items-center gap-3">
-                     <BrainCircuit className="h-5 w-5 md:h-6 md:w-6 text-primary" /> Solutions Hub
-                  </h3>
-               </div>
-               
-               <div className="space-y-4 w-full">
-                  {questions.map((q, idx) => {
-                     const studentAnsIdx = sessionData.answers?.[idx] !== undefined 
-                       ? sessionData.answers[idx] 
-                       : sessionData.answers?.[idx.toString()];
+                 return (
+                    <Card key={idx} className="border-none shadow-sm rounded-xl overflow-hidden bg-white">
+                       <div className={cn("h-1 w-full", isCorrect ? "bg-emerald-500" : isSkipped ? "bg-slate-200" : "bg-rose-500")} />
+                       <CardContent className="p-3 space-y-4">
+                          <div className="flex items-center justify-between">
+                             <div className="h-6 w-6 rounded-lg bg-slate-50 flex items-center justify-center font-black text-[10px] text-slate-400">
+                                {idx + 1}
+                             </div>
+                             <Badge className={cn("border-none px-2 py-0.5 rounded text-[6px] font-black uppercase tracking-widest", isCorrect ? "bg-emerald-50 text-emerald-600" : isSkipped ? "bg-slate-50 text-slate-400" : "bg-rose-50 text-rose-600")}>
+                                {isCorrect ? 'SUCCESS' : isSkipped ? 'SKIPPED' : 'FAILURE'}
+                             </Badge>
+                          </div>
 
-                     const correctAnsIdx = ['A','B','C','D'].indexOf(q.correctAnswer);
-                     const isCorrect = studentAnsIdx === correctAnsIdx;
-                     const isSkipped = studentAnsIdx === undefined || studentAnsIdx === null;
-                     const isExpanded = expandedQs[idx];
+                          <QuestionRenderer 
+                            question={q} 
+                            language="bilingual" 
+                            showSolution={isExpanded} 
+                            selectedAnswer={studentAnsIdx}
+                            hideOptions={false}
+                          />
 
-                     return (
-                        <Card key={idx} className="border-none shadow-lg rounded-xl md:rounded-[2rem] overflow-hidden bg-white w-full">
-                           <div className={cn("h-1 w-full", isCorrect ? "bg-emerald-500" : isSkipped ? "bg-slate-200" : "bg-rose-500")} />
-                           <CardContent className="p-3 md:p-6 space-y-4">
-                              <div className="flex items-center justify-between">
-                                 <div className="flex items-center gap-2 md:gap-3">
-                                    <div className={cn(
-                                       "h-7 w-7 md:h-9 md:w-9 rounded-lg flex items-center justify-center shadow-md font-black text-[10px] md:text-sm transition-all",
-                                       isCorrect ? "bg-emerald-500 text-white" : isSkipped ? "bg-slate-100 text-slate-300" : "bg-rose-500 text-white"
-                                    )}>
-                                       {idx + 1}
-                                    </div>
-                                    <div className="text-left">
-                                       <Badge className={cn("border-none px-1 py-0.5 rounded text-[6px] font-black uppercase tracking-widest", isCorrect ? "bg-emerald-50 text-emerald-600" : isSkipped ? "bg-slate-100 text-slate-400" : "bg-rose-50 text-rose-600")}>
-                                          {isCorrect ? 'Correct' : isSkipped ? 'Skipped' : 'Mismatched'}
-                                       </Badge>
-                                    </div>
-                                 </div>
-                                 <p className="text-[7px] md:text-[9px] font-black uppercase text-slate-400 truncate max-w-[120px]">{q.sectionId || q.subjectId || 'Audit'}</p>
-                              </div>
-
-                              <div className="text-left w-full overflow-hidden">
-                                 <QuestionRenderer 
-                                   question={q} 
-                                   language="bilingual" 
-                                   showSolution={isExpanded} 
-                                   selectedAnswer={studentAnsIdx}
-                                 />
-                              </div>
-
-                              <div className="pt-2 flex justify-center">
-                                 <Button 
-                                    onClick={() => setExpandedQs(p => ({ ...p, [idx]: !p[idx] }))}
-                                    className={cn(
-                                       "rounded-xl h-10 px-6 md:px-12 font-black uppercase text-[8px] md:text-[9px] tracking-[0.2em] gap-2 shadow-sm transition-all w-full md:w-auto",
-                                       isExpanded ? "bg-slate-900 text-white" : "bg-primary text-white hover:bg-orange-600 shadow-orange-500/20"
-                                    )}
-                                 >
-                                    {isExpanded ? "Hide Solution" : "View Full Solution"}
-                                    {isExpanded ? <ChevronUp className="h-3.5 w-3.5" /> : <BrainCircuit className="h-3.5 w-3.5" />}
-                                 </Button>
-                              </div>
-                           </CardContent>
-                        </Card>
-                     )
-                  })}
-               </div>
-            </div>
-          </div>
+                          <div className="flex justify-center">
+                             <Button 
+                                variant="ghost"
+                                onClick={() => setExpandedQs(p => ({ ...p, [idx]: !p[idx] }))}
+                                className="h-10 px-6 font-black uppercase text-[9px] tracking-widest gap-2 text-primary"
+                             >
+                                {isExpanded ? "Hide Logic" : "View Solution"}
+                                {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                             </Button>
+                          </div>
+                       </CardContent>
+                    </Card>
+                 )
+              })}
+           </div>
         </div>
       </main>
       <Footer />
@@ -303,12 +226,12 @@ export default function ResultPage() {
   )
 }
 
-function ResultNode({ icon, label, value, color }: any) {
+function MiniStat({ icon, val, label }: any) {
   return (
     <div className="space-y-1">
       <div className="flex justify-center">{icon}</div>
-      <p className={cn("text-lg md:text-2xl font-headline font-black tracking-tighter leading-none", color)}>{value}</p>
-      <p className="text-[6px] md:text-[8px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+      <p className="text-sm font-headline font-black text-[#0F172A]">{val}</p>
+      <p className="text-[6px] font-black uppercase text-slate-400">{label}</p>
     </div>
   )
 }

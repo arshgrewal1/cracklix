@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useExamStore } from '@/store/useExamStore';
@@ -7,10 +6,6 @@ import { ChevronLeft, ChevronRight, CheckCircle2, RotateCcw, Flag } from 'lucide
 import { useFirestore } from '@/firebase';
 import { cn } from '@/lib/utils';
 
-/**
- * @fileOverview Institutional Tactical Action Belt v15.0.
- * Updated: Minimized vertical spacing and refined mobile ergonomic widths.
- */
 export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
   const { currentIdx, questions, clearAnswer, markForReview, saveAndNext, setCurrentIdx } = useExamStore();
   const db = useFirestore();
@@ -18,50 +13,47 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
   const isLast = currentIdx === questions.length - 1;
 
   return (
-    <div className="w-full flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 pb-6 select-none">
-      
-      {/* SECONDARY ACTIONS (Grouped for mobile) */}
-      <div className="flex items-center gap-2 w-full sm:w-auto">
+    <div className="w-full flex flex-col gap-2.5 pt-2 pb-8 select-none">
+      <div className="flex items-center gap-2 w-full">
         <Button 
           variant="outline" 
           onClick={() => clearAnswer(currentIdx, db)}
-          className="flex-1 sm:flex-none h-11 md:h-14 px-4 rounded-xl font-black uppercase text-[9px] tracking-widest border-slate-200 text-slate-400 hover:bg-slate-50 gap-2 transition-all active:scale-95"
+          className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest border-slate-200 text-slate-500 bg-white"
         >
-          <RotateCcw className="h-3.5 w-3.5" /> Clear
+          <RotateCcw className="h-4 w-4 mr-2" /> Clear
         </Button>
         <Button 
           variant="outline" 
           onClick={() => markForReview(currentIdx, db)}
-          className="flex-1 sm:flex-none h-11 md:h-14 px-4 rounded-xl font-black uppercase text-[9px] tracking-widest border-violet-100 text-violet-600 bg-violet-50 hover:bg-violet-100 gap-2 transition-all active:scale-95"
+          className="flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest border-violet-100 text-violet-600 bg-violet-50"
         >
-          <Flag className="h-3.5 w-3.5" /> Mark
+          <Flag className="h-4 w-4 mr-2" /> Mark
         </Button>
       </div>
 
-      {/* PRIMARY NAVIGATION & SUBMISSION */}
-      <div className="flex items-center gap-2 w-full sm:w-auto">
+      <div className="flex items-center gap-2 w-full">
         <Button 
           variant="outline" 
           onClick={() => setCurrentIdx(Math.max(0, currentIdx - 1))}
           disabled={currentIdx === 0}
-          className="h-11 md:h-14 px-5 rounded-xl font-black uppercase text-[10px] tracking-widest border-slate-200 text-slate-500 disabled:opacity-30"
+          className="h-14 px-5 rounded-xl border-slate-200 bg-white text-slate-500"
         >
-          <ChevronLeft className="h-5 w-5" />
+          <ChevronLeft className="h-6 w-6" />
         </Button>
 
         {isLast ? (
           <Button 
             onClick={onSubmit}
-            className="flex-1 sm:min-w-[180px] h-11 md:h-14 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl gap-2 transition-all active:scale-95 border-none"
+            className="flex-1 h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black uppercase text-[11px] tracking-widest shadow-lg gap-2"
           >
-            Submit Assessment <CheckCircle2 className="h-4 w-4" />
+            Finish Test <CheckCircle2 className="h-4 w-4" />
           </Button>
         ) : (
           <Button 
             onClick={() => saveAndNext(db)}
-            className="flex-1 sm:min-w-[180px] h-11 md:h-14 px-6 bg-primary hover:bg-orange-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl shadow-orange-500/20 gap-2 transition-all active:scale-95 border-none"
+            className="flex-1 h-14 bg-primary hover:bg-orange-600 text-white rounded-xl font-black uppercase text-[11px] tracking-widest shadow-lg gap-2"
           >
-            Save & Next <ChevronRight className="h-5 w-5" />
+            Save & Next <ChevronRight className="h-4 w-4" />
           </Button>
         )}
       </div>
