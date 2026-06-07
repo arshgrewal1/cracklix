@@ -20,8 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview High-Fidelity Question Engine v30.0.
- * Optimized: Matches user screenshot exactly with bold letters and adjusted spacing.
+ * @fileOverview High-Fidelity Question Engine v31.0.
+ * FIXED: Language visibility logic strictly enforced for English, Punjabi, and Hindi.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -47,9 +47,11 @@ export default function QuestionRenderer({
 
   const englishQ = q.englishQuestion || q.questionEn || q.questionText || "";
   const punjabiQ = q.punjabiQuestion || q.questionPa || "";
+  const hindiQ = q.hindiQuestion || q.questionHi || "";
   
   const showEn = normalizedLang.includes('ENGLISH');
   const showPa = normalizedLang.includes('PUNJABI');
+  const showHi = normalizedLang.includes('HINDI');
 
   const OPT_LABELS = ['A', 'B', 'C', 'D'];
 
@@ -92,6 +94,11 @@ export default function QuestionRenderer({
              <MathText text={punjabiQ} />
            </div>
          )}
+         {showHi && hindiQ && (
+           <div className="font-bold text-sm md:text-xl text-[#0F172A] antialiased leading-relaxed tracking-tight">
+             <MathText text={hindiQ} />
+           </div>
+         )}
       </div>
 
       {/* 3. OPTIONS MATRIX */}
@@ -100,9 +107,9 @@ export default function QuestionRenderer({
           {OPT_LABELS.map((key, idx) => {
             const en = q[`option${key}English`];
             const pa = q[`option${key}Punjabi`];
+            const hi = q[`option${key}Hindi`];
             
             const isSelected = selectedAnswer === idx;
-            const isCorrect = q.correctAnswer === key;
 
             return (
               <div 
@@ -111,7 +118,7 @@ export default function QuestionRenderer({
                 className={cn(
                   "flex items-center gap-4 md:gap-6 p-4 md:p-6 rounded-2xl border-2 transition-all cursor-pointer group/opt",
                   showSolution 
-                    ? isCorrect ? "bg-[#F0FDF4] border-[#10B981]" 
+                    ? q.correctAnswer === key ? "bg-[#F0FDF4] border-[#10B981]" 
                       : isSelected ? "bg-[#FEF2F2] border-[#F43F5E]"
                       : "bg-white border-[#F1F5F9]"
                     : isSelected ? "bg-[#FFF7ED] border-[#F97316] shadow-md ring-1 ring-orange-500/20" 
@@ -127,6 +134,7 @@ export default function QuestionRenderer({
                 <div className="flex flex-col flex-1 min-w-0 space-y-0.5">
                   {showEn && en && <div className={cn("font-bold text-sm md:text-lg", isSelected ? "text-[#F97316]" : "text-[#0F172A]")}><MathText text={en} /></div>}
                   {showPa && pa && <div className={cn("font-bold text-sm md:text-lg", isSelected ? "text-[#F97316]" : "text-[#0F172A]")}><MathText text={pa} /></div>}
+                  {showHi && hi && <div className={cn("font-bold text-sm md:text-lg", isSelected ? "text-[#F97316]" : "text-[#0F172A]")}><MathText text={hi} /></div>}
                 </div>
               </div>
             )

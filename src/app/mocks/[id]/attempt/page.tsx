@@ -27,8 +27,8 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
- * @fileOverview Production Hardened CBT Attempt Engine v29.0.
- * UPDATED: Adjusted palette width to 75vw for a perfect half-screen feel.
+ * @fileOverview Production Hardened CBT Attempt Engine v30.0.
+ * FIXED: Language reactivity bug - now uses reactive selector for store language.
  */
 
 export default function MockAttemptPage() {
@@ -46,7 +46,7 @@ export default function MockAttemptPage() {
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [mockData, setMockData] = useState<any>(null);
 
-  // Granular Selectors
+  // Granular Reactive Selectors
   const initExam = useExamStore(s => s.initExam);
   const tick = useExamStore(s => s.tick);
   const isPaused = useExamStore(s => s.isPaused);
@@ -57,6 +57,7 @@ export default function MockAttemptPage() {
   const mockTitle = useExamStore(s => s.mockTitle);
   const setAnswer = useExamStore(s => s.setAnswer);
   const startTime = useExamStore(s => s.startTime);
+  const language = useExamStore(s => s.language); // Reactive language selection
 
   useEffect(() => {
     async function loadExam() {
@@ -226,7 +227,7 @@ export default function MockAttemptPage() {
                       transition={{ duration: 0.15 }}
                    >
                      <QuestionRenderer 
-                       language={useExamStore.getState().language as any} 
+                       language={language} 
                        question={{...q, displayId: (currentIdx + 1).toString()}} 
                        selectedAnswer={selectedAnswer}
                        onSelect={(idx) => setAnswer(currentIdx, idx, db)}
