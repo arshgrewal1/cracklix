@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link";
@@ -24,9 +25,8 @@ import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Elite Global Navigation Hub v5.1.
- * FIXED: Added missing User icon import.
- * UI: prioritized Pass node with high-fidelity Gem branding.
+ * @fileOverview Elite Global Navigation Hub v5.2.
+ * Updated: Prioritized "PASS" node with distinct background and Gem icon.
  */
 
 export default function Navbar() {
@@ -88,7 +88,7 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center gap-10 text-[12px] font-black uppercase tracking-[0.2em] text-[#7A8B9E]">
               <Link href="/my-exams" className={cn("transition-colors flex items-center gap-2 hover:text-white", pathname === '/my-exams' ? 'text-white' : '')}><Target className="h-4 w-4 text-primary" /> My Exams</Link>
               <Link href="/mocks" className={cn("transition-colors hover:text-white", pathname === '/mocks' ? 'text-white' : '')}>Mocks</Link>
-              <Link href="/pass" className={cn("transition-colors flex items-center gap-2 px-4 py-1.5 rounded-lg bg-primary/10 border border-primary/20", pathname === '/pass' ? 'text-primary' : 'text-primary/70 hover:text-primary')}>
+              <Link href="/pass" className={cn("transition-all flex items-center gap-2 px-5 py-2 rounded-xl border", pathname === '/pass' ? 'bg-primary border-primary text-white shadow-xl shadow-primary/20' : 'bg-primary/10 border-primary/20 text-primary/80 hover:text-primary hover:bg-primary/20')}>
                 <Gem className="h-4 w-4" /> PASS
               </Link>
               <Link href="/notes" className={cn("transition-colors hover:text-white", pathname === '/notes' ? 'text-white' : '')}>Study Notes</Link>
@@ -129,7 +129,7 @@ export default function Navbar() {
                   
                   <DropdownMenuItem 
                     onClick={handleLogout} 
-                    className="flex items-center gap-4 px-5 py-4 cursor-pointer rounded-2xl transition-all focus:bg-rose-500/20 focus:text-rose-500 text-rose-500/80"
+                    className="flex items-center gap-4 px-5 py-4 cursor-pointer rounded-2xl transition-all focus:bg-white/5 focus:text-rose-500 text-rose-500/80"
                   >
                     <LogOut className="h-5 w-5 shrink-0" />
                     <span className="font-bold text-[13px] tracking-tight uppercase">Logout</span>
