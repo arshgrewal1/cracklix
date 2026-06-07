@@ -44,9 +44,8 @@ import { cn } from "@/lib/utils"
 import React from "react"
 
 /**
- * @fileOverview Elite Aspirant Profile Hub v10.5.
- * Features: Mandatory Real-World Data (DOB, Address, Phone) with Admin Sync.
- * Fixed: All Lucide Icon imports and Save button prominence.
+ * @fileOverview Elite Aspirant Profile Hub v11.0.
+ * Formatting: Mobile (+91), DOB (DD/MM/YYYY), and Iconized Accuracy.
  */
 export default function ProfilePage() {
   const { user, profile, loading } = useUser()
@@ -72,7 +71,6 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (profile) {
-      // Clean phone number for editing (strip +91 if present for easier typing)
       const cleanPhone = profile.phone?.replace('+91 ', '') || ""
       setEditForm({
         name: profile.name || "",
@@ -110,7 +108,6 @@ export default function ProfilePage() {
   const handleUpdateProfile = async () => {
     if (!db || !user || !editForm) return
 
-    // Strict Validation: Mandatory Fields
     const mandatory = ['name', 'phone', 'dob', 'address'];
     const missing = mandatory.find(key => !editForm[key]?.trim());
     
@@ -118,13 +115,13 @@ export default function ProfilePage() {
       toast({ 
         variant: "destructive", 
         title: "Update Blocked", 
-        description: `The field '${missing.toUpperCase()}' is mandatory for institutional records.` 
+        description: `The field '${missing.toUpperCase()}' is mandatory.` 
       });
       return;
     }
 
     if (editForm.phone.replace(/\D/g, '').length < 10) {
-      toast({ variant: "destructive", title: "Invalid Contact", description: "Please enter a valid 10-digit mobile number." });
+      toast({ variant: "destructive", title: "Invalid Contact", description: "Enter 10-digit mobile number." });
       return;
     }
 
@@ -136,7 +133,7 @@ export default function ProfilePage() {
           phone: finalPhone,
           updatedAt: serverTimestamp()
        })
-       toast({ title: "Registry Synced", description: "Your institutional details have been updated." })
+       toast({ title: "Registry Synced", description: "Details updated." })
        setIsEditing(false)
     } catch (e: any) {
        toast({ variant: "destructive", title: "Sync Failed", description: e.message })
@@ -144,6 +141,25 @@ export default function ProfilePage() {
        setIsSaving(false)
     }
   }
+
+  // Format Helper: +91 99999 99999
+  const formatPhone = (phone: string) => {
+    if (!phone) return "Not Linked";
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length === 10) return `+91 ${digits}`;
+    if (digits.startsWith('91') && digits.length === 12) return `+${digits}`;
+    return phone;
+  };
+
+  // Format Helper: DD/MM/YYYY
+  const formatDOB = (dob: string) => {
+    if (!dob) return "Audit Pending";
+    const parts = dob.split('-'); // Expected YYYY-MM-DD from input type date
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dob;
+  };
 
   const memberSince = useMemo(() => {
      if (!profile?.createdAt) return "Registry Active";
@@ -202,7 +218,7 @@ export default function ProfilePage() {
                     
                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-x-6 gap-y-2">
                        <HeaderInfo icon={<Mail className="h-3.5 w-3.5 text-primary" />} text={profile.email} />
-                       <HeaderInfo icon={<Phone className="h-3.5 w-3.5 text-primary" />} text={profile.phone} />
+                       <HeaderInfo icon={<Phone className="h-3.5 w-3.5 text-primary" />} text={formatPhone(profile.phone)} />
                        <HeaderInfo icon={<GraduationCap className="h-3.5 w-3.5 text-primary" />} text={`Target: ${profile.targetExam || 'General Hub'}`} />
                     </div>
                  </div>
@@ -235,8 +251,8 @@ export default function ProfilePage() {
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
-                       <ProfileDataNode icon={<Calendar className="text-blue-500" />} label="DATE OF BIRTH" value={profile.dob || "Audit Pending"} />
-                       <ProfileDataNode icon={<Phone className="text-emerald-500" />} label="VERIFIED MOBILE" value={profile.phone || "Not Linked"} />
+                       <ProfileDataNode icon={<Calendar className="text-blue-500" />} label="DATE OF BIRTH" value={formatDOB(profile.dob)} />
+                       <ProfileDataNode icon={<Phone className="text-emerald-500" />} label="VERIFIED MOBILE" value={formatPhone(profile.phone)} />
                        <ProfileDataNode icon={<MapPin className="text-rose-500" />} label="FULL CORRESPONDENCE ADDRESS" value={profile.address || "No address node synced"} colSpan={2} />
                        <ProfileDataNode icon={<ShieldCheck className="text-primary" />} label="REGISTRY STATUS" value={`${profile.role || 'STUDENT'} Node`} />
                        <ProfileDataNode icon={<Activity className="text-orange-500" />} label="MEMBER SINCE" value={memberSince} />
@@ -303,7 +319,7 @@ export default function ProfilePage() {
                     <div className="relative z-10 space-y-4">
                        <h4 className="text-2xl font-headline font-black uppercase leading-tight">Mastery Index <br/> Sync High</h4>
                        <p className="text-white/70 text-[11px] font-bold uppercase tracking-tight">Your readiness audit is complete.</p>
-                       <Button asChild className="w-full bg-white text-primary hover:bg-slate-100 font-black h-12 rounded-xl text-[10px] uppercase">
+                       <Button asChild className="w-full bg-white text-primary hover:bg-slate-100 font-black h-12 rounded-xl text-[10px] uppercase shadow-lg">
                           <Link href="/leaderboard">View Rankings</Link>
                        </Button>
                     </div>
