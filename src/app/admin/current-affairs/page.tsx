@@ -26,7 +26,8 @@ import {
   Database,
   CheckCircle2,
   Rocket,
-  Info
+  Info,
+  ChevronRight
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, query, serverTimestamp, writeBatch } from "firebase/firestore"
@@ -39,7 +40,7 @@ import { parseBulkQuestions } from "@/lib/parser"
 
 /**
  * @fileOverview Institutional Current Affairs Management Hub v2.0.
- * UPDATED: Integrated high-fidelity Bulk Ingestion System and fixed dialog geometry.
+ * UPDATED: Fixed ReferenceError for ChevronRight and integrated high-fidelity Bulk Ingestion System.
  */
 
 export default function AdminCurrentAffairs() {
@@ -366,7 +367,7 @@ export default function AdminCurrentAffairs() {
                                              qs.splice(idx, 1);
                                              setEditingItem({...editingItem, questions: qs});
                                           }} 
-                                          className="absolute top-4 right-4 text-rose-300 hover:text-rose-500 opacity-0 group-hover/q:opacity-100 transition-opacity"
+                                          className="absolute top-4 right-4 text-rose-300 hover:text-rose-50 opacity-0 group-hover/q:opacity-100 transition-opacity"
                                        >
                                           <Trash2 className="h-4 w-4" />
                                        </button>
