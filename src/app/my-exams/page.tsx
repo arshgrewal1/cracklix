@@ -29,8 +29,8 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @file Overview Institutional "My Exams" Dashboard v5.0.
- * HARDENED: Fixed Logo rendering and parent Board lookup to ensure 100% visibility for students.
+ * @file Overview Institutional "My Exams" Dashboard v6.0.
+ * HARDENED: Robust Board Logo lookup logic with Referrer Policy bypass for Government Images.
  */
 
 export default function MyExamsPage() {
@@ -104,7 +104,7 @@ export default function MyExamsPage() {
            
            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
               {pinnedExams.length > 0 ? pinnedExams.map((exam) => {
-                 // HARDENED BOARD LOOKUP
+                 // HARDENED BOARD LOOKUP: Priority board mapping
                  const board = boards?.find((b: any) => 
                    b.id.toLowerCase() === exam.boardId?.toLowerCase() || 
                    b.abbreviation?.toLowerCase() === exam.boardId?.toLowerCase()
@@ -115,14 +115,14 @@ export default function MyExamsPage() {
 
                  return (
                   <Link key={exam.id} href={`/exams/${exam.id}`}>
-                      <Card className="border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-white p-4 md:p-6 text-left group relative overflow-hidden h-full flex flex-col">
+                      <Card className="border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-white p-4 md:p-6 text-left group relative overflow-hidden h-full flex flex-col border border-slate-100">
                         <div className="h-12 w-12 md:h-16 md:w-16 rounded-xl bg-white flex items-center justify-center mb-3 md:mb-4 group-hover:bg-slate-50 transition-colors relative overflow-hidden shrink-0 border border-slate-100 shadow-inner">
                             {logoUrl && !isImgFailed ? (
                               <img 
                                 src={logoUrl} 
-                                className="w-full h-full object-contain p-1" 
+                                className="w-full h-full object-contain p-1.5" 
                                 referrerPolicy="no-referrer" 
-                                alt={exam.name} 
+                                alt="Board Logo" 
                                 onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}
                               />
                             ) : (

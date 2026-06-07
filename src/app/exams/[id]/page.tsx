@@ -23,19 +23,19 @@ import {
   Newspaper,
   FileStack,
   Map,
-  Bell
+  Bell,
+  GraduationCap
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 /**
- * @fileOverview Final Exam-Specific Mastery Hub v3.0.
- * Features: 9-Node Registry and Authentication Guards.
- * Optimized: Horizontal back button and high-density mobile UI.
+ * @file Overview Final Exam-Specific Mastery Hub v4.0.
+ * HARDENED: Robust Board Logo lookup logic with Referrer Policy bypass for Govt Assets.
  */
 
 export default function ExamHubPage() {
@@ -44,6 +44,7 @@ export default function ExamHubPage() {
   const db = useFirestore()
   const { user, profile, loading: userLoading } = useUser()
   const examId = params.id as string
+  const [imgFailed, setImgFailed] = useState(false);
 
   // Registry Guards
   const { data: exam, loading: examLoading } = useDoc<any>(useMemo(() => (db && examId ? doc(db, "exams", examId) : null), [db, examId]))
@@ -76,7 +77,12 @@ export default function ExamHubPage() {
   if (examLoading || userLoading) return <div className="h-screen flex items-center justify-center bg-white"><Skeleton className="h-20 w-20 rounded-full animate-pulse" /></div>
   if (!exam) return <div className="h-screen flex flex-col items-center justify-center text-slate-400 gap-4"><Info className="h-12 w-12 opacity-10" /><p className="font-black uppercase tracking-widest text-xs">Registry node missing</p></div>
 
-  const activeBoard = boards?.find((b: any) => b.id === exam.boardId);
+  const activeBoard = boards?.find((b: any) => 
+    b.id.toLowerCase() === exam.boardId?.toLowerCase() || 
+    b.abbreviation?.toLowerCase() === exam.boardId?.toLowerCase()
+  );
+
+  const logoUrl = activeBoard?.iconUrl || exam.iconUrl;
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body">
@@ -84,15 +90,30 @@ export default function ExamHubPage() {
       
       <section className="bg-white border-b border-slate-100 py-3 md:py-6">
          <div className="container mx-auto px-4 max-w-7xl text-left">
-            <div className="flex items-center gap-3 md:gap-6">
-               <button onClick={() => router.back()} className="h-8 w-8 md:h-10 md:w-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:text-black shrink-0 transition-all">
+            <div className="flex items-center gap-4 md:gap-8">
+               <button onClick={() => router.back()} className="h-10 w-10 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:text-black shrink-0 transition-all">
                   <ChevronLeft className="h-5 w-5" />
                </button>
+               
+               <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-white border border-slate-100 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner">
+                  {logoUrl && !imgFailed ? (
+                    <img 
+                      src={logoUrl} 
+                      className="w-full h-full object-contain p-1.5" 
+                      alt="Board Logo" 
+                      referrerPolicy="no-referrer" 
+                      onError={() => setImgFailed(true)}
+                    />
+                  ) : (
+                    <GraduationCap className="h-5 w-5 md:h-8 md:w-8 text-slate-300" />
+                  )}
+               </div>
+
                <div className="min-w-0">
                   <h1 className="text-lg md:text-2xl font-black text-[#0F172A] uppercase leading-tight tracking-tight truncate">
-                     {activeBoard?.abbreviation || 'PSSSB'} {exam.name}
+                     {activeBoard?.abbreviation || 'GOVT'} {exam.name}
                   </h1>
-                  <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Mastery Dashboard Active</p>
+                  <p className="text-[8px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em]">Mastery Dashboard Active</p>
                </div>
             </div>
          </div>

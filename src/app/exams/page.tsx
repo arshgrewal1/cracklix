@@ -18,8 +18,8 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @file Overview High-Density Responsive Exam Catalog v5.0.
- * HARDENED: Robust Board Logo lookup logic to ensure 100% visibility for students.
+ * @file Overview High-Density Responsive Exam Catalog v6.0.
+ * HARDENED: Robust Board Logo lookup logic with Referrer Policy for Government Domains.
  */
 
 export default function ExamsCatalog() {
@@ -90,7 +90,7 @@ function CatalogContent() {
     <div className="flex flex-col min-h-screen bg-slate-50/50 pb-safe overflow-x-hidden">
       <Navbar />
       <main className="container mx-auto px-4 py-6 md:py-16 max-w-7xl">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-16 gap-4 text-left">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-8 md:mb-16 gap-4 text-left">
           <div className="space-y-1">
              <div className="flex items-center gap-2">
                 <GraduationCap className="h-3.5 w-3.5 text-primary" />
@@ -103,7 +103,7 @@ function CatalogContent() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
             <Input 
               className="pl-9 h-11 md:h-14 rounded-lg md:rounded-xl bg-white border-none shadow-sm text-sm" 
-              placeholder="Search by recruitment name..." 
+              placeholder="Search recruitment hubs..." 
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
@@ -114,7 +114,7 @@ function CatalogContent() {
            {examsLoading || mocksLoading ? (
               Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3.5rem]" />)
            ) : filteredExams.map((exam: any) => {
-              // ROBUST LOOKUP: Check both Exam Icon and parent Board Icon
+              // ROBUST LOOKUP: Cross-reference Board ID (handle case-sensitivity)
               const board = boards?.find((b: any) => 
                 b.id.toLowerCase() === exam.boardId?.toLowerCase() || 
                 b.abbreviation?.toLowerCase() === exam.boardId?.toLowerCase()
@@ -140,8 +140,8 @@ function CatalogContent() {
                              {logoUrl && !isImgFailed ? (
                                 <img 
                                   src={logoUrl} 
-                                  className="w-full h-full object-contain p-1.5 md:p-2" 
-                                  alt="Logo" 
+                                  className="w-full h-full object-contain p-1.5 md:p-2 transition-transform duration-500 group-hover:scale-105" 
+                                  alt="Institutional Logo" 
                                   referrerPolicy="no-referrer" 
                                   onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}
                                 />
@@ -159,7 +159,7 @@ function CatalogContent() {
                             {exam.name}
                           </h3>
                           <p className="text-[10px] md:text-sm font-medium text-slate-400 leading-relaxed line-clamp-1 md:line-clamp-2">
-                            {exam.description || "Official syllabus and preparation matrix."}
+                            {exam.description || "Official institutional preparation matrix."}
                           </p>
                        </div>
 

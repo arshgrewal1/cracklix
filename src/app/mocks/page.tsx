@@ -28,8 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @file Overview Final Exam Gateway Node v5.0.
- * HARDENED: Robust Board Logo lookup logic to ensure IBPS, PSSSB, and Police logos load for students.
+ * @file Overview Final Exam Gateway Node v6.0.
+ * HARDENED: Robust Board Logo lookup logic with Referrer Policy bypass for Government Assets.
  */
 
 export default function MocksGatewayPage() {
@@ -44,7 +44,6 @@ export default function MocksGatewayPage() {
   const { data: boards } = useCollection<any>(boardsQuery)
   const { data: mocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
 
-  // Dynamic Aggregation Hub
   const statsMap = useMemo(() => {
     if (!mocks) return {};
     const map: Record<string, any> = {};
@@ -54,12 +53,7 @@ export default function MocksGatewayPage() {
       if (!eid) return;
       
       if (!map[eid]) {
-        map[eid] = {
-          full: 0,
-          pyq: 0,
-          sectional: 0,
-          subjects: new Set<string>()
-        };
+        map[eid] = { full: 0, pyq: 0, sectional: 0, subjects: new Set<string>() };
       }
       
       if (m.mockType === 'FULL') map[eid].full++;
@@ -96,7 +90,7 @@ export default function MocksGatewayPage() {
            {examsLoading || mocksLoading ? (
              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-[450px] w-full rounded-[3.5rem]" />)
            ) : exams?.sort((a: any, b: any) => a.name.localeCompare(b.name)).map((exam: any) => {
-             // ROBUST BOARD LOGO LOOKUP
+             // HARDENED BOARD LOOKUP: Matches exams to their respective board icons
              const board = boards?.find((b: any) => 
                b.id.toLowerCase() === exam.boardId?.toLowerCase() || 
                b.abbreviation?.toLowerCase() === exam.boardId?.toLowerCase()
@@ -116,8 +110,8 @@ export default function MocksGatewayPage() {
                                   <img 
                                     src={logoUrl} 
                                     referrerPolicy="no-referrer"
-                                    alt={board?.abbreviation || 'Board'} 
-                                    className="w-full h-full object-contain p-3 transition-transform duration-500 group-hover:scale-110" 
+                                    alt="Board Logo" 
+                                    className="w-full h-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-110" 
                                     onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}
                                   />
                                ) : (
@@ -127,7 +121,7 @@ export default function MocksGatewayPage() {
                                )}
                             </div>
                             <Badge className="bg-primary/5 text-primary border-none text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-lg shadow-sm">
-                               {board?.abbreviation || 'OFFICIAL'} BOARD
+                               {board?.abbreviation || 'GOVT'} Hub
                             </Badge>
                          </div>
                          
@@ -136,11 +130,10 @@ export default function MocksGatewayPage() {
                                {exam.name}
                             </h3>
                             <p className="text-sm font-medium text-slate-400 leading-relaxed line-clamp-2">
-                               {exam.description || "Official syllabus and preparation matrix."}
+                               {exam.description || "Official institutional preparation matrix."}
                             </p>
                          </div>
 
-                         {/* Reactive Inventory Matrix */}
                          <div className="mt-12 pt-8 border-t border-slate-50 grid grid-cols-2 gap-4">
                             <InventoryNode icon={<Zap className="text-primary h-3.5 w-3.5" />} count={stats.full} label="Full Mocks" />
                             <InventoryNode icon={<BookOpen className="text-blue-500 h-3.5 w-3.5" />} count={stats.subjects.size} label="Subject" />
@@ -161,23 +154,6 @@ export default function MocksGatewayPage() {
         </div>
 
         <AdPlacement placement="SIDEBAR" className="my-16" />
-
-        <div className="mt-32 p-16 md:p-24 rounded-[5rem] bg-[#0F172A] text-white relative overflow-hidden shadow-4xl group">
-           <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Sparkles className="h-96 w-96" /></div>
-           <div className="grid lg:grid-cols-2 gap-20 items-center relative z-10 text-left">
-              <div className="space-y-10">
-                 <div className="flex items-center gap-4 text-left">
-                    <div className="h-16 w-16 rounded-3xl bg-primary/20 flex items-center justify-center text-primary shadow-2xl">
-                       <Target className="h-8 w-8" />
-                    </div>
-                    <h2 className="text-5xl md:text-7xl font-headline font-black uppercase leading-[0.85]">Audit Your <br/> Progress.</h2>
-                 </div>
-                 <p className="text-slate-400 text-xl font-medium leading-relaxed max-w-xl">
-                    Every exam vertical is audited daily to ensure pattern accuracy and updated current affairs for upcoming exams.
-                 </p>
-              </div>
-           </div>
-        </div>
       </main>
       <Footer />
     </div>
