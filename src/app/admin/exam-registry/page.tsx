@@ -35,8 +35,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Exam Master Registry.
- * Updated: High-Fidelity Board Logo lookup for registry identity nodes.
- * Optimized: Added referrer policy for gov domains (SSWCD, PSSSB).
+ * Updated: High-Fidelity Board Logo lookup with specialized scaling for circular emblems (Army).
  */
 
 export default function ExamRegistryPage() {
@@ -188,6 +187,7 @@ export default function ExamRegistryPage() {
                   b.abbreviation?.toLowerCase() === e.boardId?.toLowerCase()
                 );
                 const logoUrl = board?.iconUrl || e.iconUrl;
+                const isArmy = e.boardId?.toLowerCase() === 'army' || e.id?.toLowerCase().includes('army');
 
                 return (
                   <TableRow key={e.id} className="hover:bg-slate-50 border-slate-50 transition-colors group">
@@ -197,7 +197,7 @@ export default function ExamRegistryPage() {
                             {logoUrl ? (
                               <img 
                                 src={logoUrl} 
-                                className="w-full h-full object-contain p-2" 
+                                className={cn("w-full h-full object-contain p-2", isArmy ? "scale-150" : "")} 
                                 alt="Logo" 
                                 referrerPolicy="no-referrer"
                               />

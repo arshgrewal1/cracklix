@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @file Overview High-Density Responsive Exam Catalog v6.0.
- * HARDENED: Robust Board Logo lookup logic with Referrer Policy for Government Domains.
+ * HARDENED: Robust Board Logo lookup logic with specialized scaling for circular insignias (Army).
  */
 
 export default function ExamsCatalog() {
@@ -114,7 +114,7 @@ function CatalogContent() {
            {examsLoading || mocksLoading ? (
               Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3.5rem]" />)
            ) : filteredExams.map((exam: any) => {
-              // ROBUST LOOKUP: Cross-reference Board ID (handle case-sensitivity)
+              // ROBUST LOOKUP: Cross-reference Board ID
               const board = boards?.find((b: any) => 
                 b.id.toLowerCase() === exam.boardId?.toLowerCase() || 
                 b.abbreviation?.toLowerCase() === exam.boardId?.toLowerCase()
@@ -124,6 +124,7 @@ function CatalogContent() {
               const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, subjects: new Set() };
               const isPinned = profile?.pinnedExams?.includes(exam.id);
               const isImgFailed = failedImages[exam.id];
+              const isArmy = exam.boardId?.toLowerCase() === 'army' || exam.id?.toLowerCase().includes('army');
               
               return (
                 <Card key={exam.id} className="border-none shadow-lg hover:shadow-2xl transition-all duration-300 rounded-xl md:rounded-[3.5rem] bg-white group overflow-hidden text-left h-full flex flex-col border border-slate-100 p-4 md:p-10 relative">
@@ -140,7 +141,7 @@ function CatalogContent() {
                              {logoUrl && !isImgFailed ? (
                                 <img 
                                   src={logoUrl} 
-                                  className="w-full h-full object-contain p-1.5 md:p-2 transition-transform duration-500 group-hover:scale-105" 
+                                  className={cn("w-full h-full object-contain p-1.5 md:p-2 transition-transform duration-500 group-hover:scale-105", isArmy ? "scale-150" : "")} 
                                   alt="Institutional Logo" 
                                   referrerPolicy="no-referrer" 
                                   onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}

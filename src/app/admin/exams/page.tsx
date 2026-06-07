@@ -143,7 +143,7 @@ export default function ExamManagement() {
                 ))
               ) : boards?.map((board: any) => {
                 const isImageFailed = failedImages[board.id];
-                const isArmy = board.id === 'indian-army' || board.abbreviation === 'ARMY';
+                const isArmy = board.id?.toLowerCase() === 'army' || board.abbreviation?.toLowerCase() === 'army';
                 return (
                   <TableRow key={board.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                     <TableCell className="px-10 py-6">
@@ -215,7 +215,7 @@ export default function ExamManagement() {
                         <img 
                           src={editingBoard.iconUrl} 
                           referrerPolicy="no-referrer"
-                          className={cn("absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform", (editingBoard.id === 'indian-army' || editingBoard.abbreviation === 'ARMY') ? "scale-150" : "")} 
+                          className={cn("absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform", (editingBoard.id === 'army' || editingBoard.abbreviation === 'ARMY') ? "scale-150" : "")} 
                           alt="Preview"
                         />
                       ) : (
