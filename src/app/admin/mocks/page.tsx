@@ -28,10 +28,9 @@ export default function MockManagement() {
   const [searchTerm, setSearchTerm] = useState("")
   const [boardFilter, setBoardFilter] = useState("all")
 
-  const isValidDb = db && typeof db === 'object';
-  const mocksQuery = useMemo(() => (isValidDb ? query(collection(db, "mocks")) : null), [isValidDb, db])
+  const mocksQuery = useMemo(() => (db && typeof db === 'object' ? query(collection(db, "mocks")) : null), [db])
   const { data: rawMocks, loading } = useCollection<any>(mocksQuery)
-  const { data: boards } = useCollection<any>(useMemo(() => (isValidDb ? collection(db, "boards") : null), [isValidDb, db]))
+  const { data: boards } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? collection(db, "boards") : null), [db]))
 
   const mocks = useMemo(() => {
     if (!rawMocks) return []
@@ -45,13 +44,14 @@ export default function MockManagement() {
   }, [rawMocks, searchTerm, boardFilter])
 
   const handleDelete = async (id: string) => {
-    if (!isValidDb || !confirm("Audit: Permanently purge this mock blueprint?")) return
+    if (!db || typeof db !== 'object') return
+    if (!confirm("Audit: Permanently purge this mock blueprint?")) return
     await deleteDoc(doc(db, "mocks", id))
     toast({ title: "Series Purged" })
   }
 
   const togglePublish = async (id: string, current: boolean) => {
-    if (!isValidDb) return
+    if (!db || typeof db !== 'object') return
     await setDoc(doc(db, "mocks", id), { published: !current, updatedAt: serverTimestamp() }, { merge: true })
     toast({ title: "Registry Updated" })
   }

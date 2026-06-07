@@ -47,7 +47,7 @@ export default function ResultPage() {
   const [mockLanguageMode, setMockLanguageMode] = useState<any>('ENGLISH_PUNJABI')
 
   const resultsQuery = useMemo(() => {
-    if (!db || !user) return null
+    if (!db || typeof db !== 'object' || !user) return null
     return query(collection(db, "results"), where("userId", "==", user.uid))
   }, [db, user])
 
@@ -67,7 +67,8 @@ export default function ResultPage() {
 
   useEffect(() => {
     async function loadQuestions() {
-      if (resultsLoading || !db) return;
+      if (!db || typeof db !== 'object') return;
+      if (resultsLoading) return;
       if (!sessionData) {
         setLoadingContent(false);
         return;
@@ -107,7 +108,7 @@ export default function ResultPage() {
   }, [db, sessionData, mockId, toast, resultsLoading])
 
   const handleReattempt = async () => {
-    if (!db || !user || !mockId) return;
+    if (!db || typeof db !== 'object' || !user || !mockId) return;
     if (!window.confirm("Restart evaluation node?")) return;
 
     console.log("Reattempt clicked");

@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 /**
  * @fileOverview Institutional Command Center.
- * Standardized: Verified Firestore instance checks to prevent runtime collection() errors.
+ * Hardened: Verified Firestore instance checks to prevent runtime collection() errors.
  */
 
 export default function AdminDashboard() {
@@ -22,13 +22,13 @@ export default function AdminDashboard() {
   const { toast } = useToast()
   const [isSyncing, setIsSyncing] = useState(false)
 
-  const usersQuery = useMemo(() => (db ? collection(db, "users") : null), [db])
-  const questionsQuery = useMemo(() => (db ? collection(db, "questions") : null), [db])
-  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db])
-  const subjectsQuery = useMemo(() => (db ? collection(db, "subjects") : null), [db])
-  const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db])
-  const notesQuery = useMemo(() => (db ? collection(db, "notes") : null), [db])
-  const pyqsQuery = useMemo(() => (db ? collection(db, "pyqs") : null), [db])
+  const usersQuery = useMemo(() => (db && typeof db === 'object' ? collection(db, "users") : null), [db])
+  const questionsQuery = useMemo(() => (db && typeof db === 'object' ? collection(db, "questions") : null), [db])
+  const mocksQuery = useMemo(() => (db && typeof db === 'object' ? collection(db, "mocks") : null), [db])
+  const subjectsQuery = useMemo(() => (db && typeof db === 'object' ? collection(db, "subjects") : null), [db])
+  const examsQuery = useMemo(() => (db && typeof db === 'object' ? collection(db, "exams") : null), [db])
+  const notesQuery = useMemo(() => (db && typeof db === 'object' ? collection(db, "notes") : null), [db])
+  const pyqsQuery = useMemo(() => (db && typeof db === 'object' ? collection(db, "pyqs") : null), [db])
 
   const { data: users } = useCollection<any>(usersQuery)
   const { data: questions, loading: qLoading } = useCollection<any>(questionsQuery)

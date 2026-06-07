@@ -35,11 +35,11 @@ export default function QuestionBank() {
   const [hasMore, setLastHasMore] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
 
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards")) : null), [db]))
-  const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects")) : null), [db]))
+  const { data: boards } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? query(collection(db, "boards")) : null), [db]))
+  const { data: subjects } = useCollection<any>(useMemo(() => (db && typeof db === 'object' ? query(collection(db, "subjects")) : null), [db]))
 
   const fetchQuestions = useCallback(async (isNext = false) => {
-    if (!db) return
+    if (!db || typeof db !== 'object') return
     setLoading(true)
     
     try {
