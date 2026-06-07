@@ -13,34 +13,30 @@ import {
   Plus, 
   Trash2, 
   Edit, 
-  Save, 
   Search, 
   Newspaper, 
   Zap, 
   Loader2, 
   X, 
   Upload, 
-  FileCode,
   Calendar,
   Layers,
   Database,
-  CheckCircle2,
   Rocket,
-  Info,
   ChevronRight
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, doc, setDoc, deleteDoc, query, serverTimestamp, writeBatch } from "firebase/firestore"
+import { collection, doc, setDoc, deleteDoc, serverTimestamp, writeBatch } from "firebase/firestore"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
-import { CurrentAffairHubItem, Question } from "@/types"
+import { CurrentAffairHubItem } from "@/types"
 import { cn } from "@/lib/utils"
 import { parseBulkQuestions } from "@/lib/parser"
 
 /**
- * @fileOverview Institutional Current Affairs Management Hub v4.0.
- * FIXED: Optimized Dialog sizing and padding to prevent content clipping on mobile.
+ * @fileOverview Institutional Current Affairs Management Hub v5.0.
+ * FIXED: Drastically optimized dialog heights and grid layout to prevent panel clipping.
  */
 
 export default function AdminCurrentAffairs() {
@@ -92,7 +88,6 @@ export default function AdminCurrentAffairs() {
     const caId = editingItem.id || `ca-hub-${Date.now()}`
     const caRef = doc(db, "current_affairs_hub", caId)
     
-    // Process Questions into the global registry if they exist
     let quizId = editingItem.quizId || `quiz-${caId}`
     if (editingItem.questions && editingItem.questions.length > 0) {
       const batch = writeBatch(db)
@@ -114,7 +109,6 @@ export default function AdminCurrentAffairs() {
         }, { merge: true })
       })
 
-      // Create/Update the associated MockTest
       const mockRef = doc(db, "mocks", quizId)
       batch.set(mockRef, {
         id: quizId,
@@ -169,7 +163,7 @@ export default function AdminCurrentAffairs() {
   }, [caItems, searchTerm])
 
   return (
-    <div className="space-y-6 md:space-y-10 pb-24 text-left">
+    <div className="space-y-6 pb-24 text-left">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 md:gap-8 px-2 md:px-4">
         <div className="min-w-0 flex-1">
            <div className="flex items-center gap-3 mb-2">
@@ -263,61 +257,62 @@ export default function AdminCurrentAffairs() {
       </Card>
 
       <Dialog open={!!editingItem} onOpenChange={(open) => !open && !isSaving && setEditingItem(null)}>
-        <DialogContent className="sm:max-w-7xl w-[95vw] h-[92vh] max-h-[92vh] rounded-[1.5rem] md:rounded-[3rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
+        <DialogContent className="sm:max-w-[98vw] w-[98vw] h-[95vh] max-h-[95vh] rounded-2xl md:rounded-[2rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
           <div className="h-1.5 w-full bg-[#0F172A] shrink-0" />
-          <DialogHeader className="px-5 md:px-10 py-4 md:py-8 shrink-0 flex flex-row items-center justify-between border-b border-slate-50">
-            <DialogTitle className="text-lg md:text-3xl font-black font-headline uppercase text-[#0F172A] truncate pr-4">CA Hub Configuration</DialogTitle>
+          <DialogHeader className="px-6 py-4 shrink-0 flex flex-row items-center justify-between border-b border-slate-50">
+            <DialogTitle className="text-lg md:text-2xl font-black font-headline uppercase text-[#0F172A] truncate pr-4">CA Hub Configuration</DialogTitle>
             <button onClick={() => setEditingItem(null)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors shrink-0"><X className="h-5 w-5 md:h-6 md:w-6 text-slate-400" /></button>
           </DialogHeader>
           
-          <div className="flex-1 overflow-y-auto custom-scrollbar px-5 md:px-10 py-6 md:py-10 space-y-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
+          <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-6 space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                {/* Metadata Column */}
-               <div className="lg:col-span-4 space-y-6">
-                  <Card className="border-none bg-slate-50/50 p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] space-y-6 shadow-inner">
-                     <p className="text-[9px] md:text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Archive Metadata</p>
-                     <div className="space-y-2">
-                        <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 ml-1">Package Title</Label>
-                        <Input value={editingItem?.title || ""} onChange={e => setEditingItem({...editingItem, title: e.target.value})} className="h-12 md:h-14 rounded-xl border-slate-100 bg-white font-black text-base md:text-lg text-[#0F172A]" placeholder="e.g. Daily CA - 25 Oct 2026" />
+               <div className="lg:col-span-3 space-y-4">
+                  <Card className="border-none bg-slate-50/50 p-5 rounded-2xl space-y-5 shadow-inner">
+                     <p className="text-[9px] font-black uppercase text-primary tracking-[0.3em] ml-1">Archive Metadata</p>
+                     
+                     <div className="space-y-1.5">
+                        <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Package Title</Label>
+                        <Input value={editingItem?.title || ""} onChange={e => setEditingItem({...editingItem, title: e.target.value})} className="h-11 rounded-lg border-slate-100 bg-white font-black text-sm text-[#0F172A]" placeholder="e.g. Daily CA - 25 Oct 2026" />
                      </div>
 
-                     <div className="grid grid-cols-2 gap-4 md:gap-6">
-                        <div className="space-y-2">
-                        <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 ml-1">Package Type</Label>
-                        <select value={editingItem?.type} onChange={e => setEditingItem({...editingItem, type: e.target.value})} className="w-full h-12 md:h-14 bg-white border-none rounded-xl px-3 md:px-4 font-black uppercase text-[9px] md:text-[10px] outline-none shadow-sm">
-                           <option value="DAILY">DAILY HUB</option>
-                           <option value="WEEKLY">WEEKLY HUB</option>
-                           <option value="MONTHLY">MONTHLY HUB</option>
-                           <option value="SPECIAL">SPECIAL NODE</option>
-                        </select>
+                     <div className="grid grid-cols-1 gap-4">
+                        <div className="space-y-1.5">
+                           <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Package Type</Label>
+                           <select value={editingItem?.type} onChange={e => setEditingItem({...editingItem, type: e.target.value})} className="w-full h-11 bg-white border-none rounded-lg px-3 font-black uppercase text-[9px] outline-none shadow-sm">
+                              <option value="DAILY">DAILY HUB</option>
+                              <option value="WEEKLY">WEEKLY HUB</option>
+                              <option value="MONTHLY">MONTHLY HUB</option>
+                              <option value="SPECIAL">SPECIAL NODE</option>
+                           </select>
                         </div>
-                        <div className="space-y-2">
-                        <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 ml-1">Language</Label>
-                        <Input value={editingItem?.language || "English + Punjabi"} onChange={e => setEditingItem({...editingItem, language: e.target.value})} className="h-12 md:h-14 rounded-xl border-none bg-white font-bold uppercase text-[9px] md:text-[10px] shadow-sm" />
+                        <div className="space-y-1.5">
+                           <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Language</Label>
+                           <Input value={editingItem?.language || "English + Punjabi"} onChange={e => setEditingItem({...editingItem, language: e.target.value})} className="h-11 rounded-lg border-none bg-white font-bold uppercase text-[9px] shadow-sm" />
                         </div>
                      </div>
 
-                     <div className="grid grid-cols-2 gap-4 md:gap-6">
-                        <div className="space-y-2">
-                           <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 ml-1">Month</Label>
-                           <select value={editingItem?.month} onChange={e => setEditingItem({...editingItem, month: e.target.value})} className="w-full h-12 md:h-14 bg-white border-none rounded-xl px-3 md:px-4 font-bold text-xs md:text-sm outline-none shadow-sm">
+                     <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1.5">
+                           <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Month</Label>
+                           <select value={editingItem?.month} onChange={e => setEditingItem({...editingItem, month: e.target.value})} className="w-full h-11 bg-white border-none rounded-lg px-2 font-bold text-[10px] outline-none shadow-sm">
                            {["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"].map(m => <option key={m} value={m}>{m}</option>)}
                            </select>
                         </div>
-                        <div className="space-y-2">
-                           <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 ml-1">Year</Label>
-                           <Input value={editingItem?.year} onChange={e => setEditingItem({...editingItem, year: e.target.value})} className="h-12 md:h-14 rounded-xl border-none bg-white font-bold shadow-sm" />
+                        <div className="space-y-1.5">
+                           <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Year</Label>
+                           <Input value={editingItem?.year} onChange={e => setEditingItem({...editingItem, year: e.target.value})} className="h-11 rounded-lg border-none bg-white font-bold shadow-sm text-center" />
                         </div>
                      </div>
 
-                     <div className="space-y-2">
-                        <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2">
+                     <div className="space-y-1.5">
+                        <Label className="text-[9px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2">
                            <Upload className="h-3 w-3" /> PDF Material Link
                         </Label>
                         <Input 
                         value={editingItem?.pdfUrl || ""} 
                         onChange={e => setEditingItem({...editingItem, pdfUrl: e.target.value.trim()})} 
-                        className="h-12 md:h-14 rounded-xl border-none bg-white font-bold text-primary shadow-sm text-xs" 
+                        className="h-11 rounded-lg border-none bg-white font-bold text-primary shadow-sm text-[10px]" 
                         placeholder="https://..." 
                         />
                      </div>
@@ -325,24 +320,24 @@ export default function AdminCurrentAffairs() {
                </div>
 
                {/* Quiz / MCQs Bulk Architect */}
-               <div className="lg:col-span-8 space-y-8">
-                  <Card className="border-none bg-white shadow-xl rounded-2xl md:rounded-[3rem] p-5 md:p-10 space-y-8 border border-slate-100">
-                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+               <div className="lg:col-span-9 space-y-6">
+                  <Card className="border-none bg-white shadow-xl rounded-2xl p-6 space-y-6 border border-slate-100 h-full flex flex-col">
+                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
                         <div className="flex items-center gap-4">
-                           <Zap className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+                           <Zap className="h-6 w-6 text-primary" />
                            <div className="text-left">
-                              <h4 className="font-headline font-black text-xl md:text-2xl uppercase text-[#0F172A]">Quiz Architect</h4>
-                              <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Institutional Bulk Ingestion Protocol</p>
+                              <h4 className="font-headline font-black text-xl uppercase text-[#0F172A]">Quiz Architect</h4>
+                              <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Institutional Bulk Ingestion Protocol</p>
                            </div>
                         </div>
-                        <Badge className="bg-[#0F172A] text-white border-none font-black px-4 md:px-6 py-1.5 md:py-2 rounded-xl text-[9px] md:text-[10px] w-fit shadow-lg">{editingItem?.questions?.length || 0} Questions Staged</Badge>
+                        <Badge className="bg-[#0F172A] text-white border-none font-black px-4 py-1.5 rounded-lg text-[9px] w-fit shadow-lg">{editingItem?.questions?.length || 0} Questions Staged</Badge>
                      </div>
 
-                     <div className="space-y-6">
-                        <div className="space-y-3">
+                     <div className="space-y-4 flex flex-col flex-1 min-h-0">
+                        <div className="space-y-2 shrink-0">
                            <div className="flex items-center justify-between ml-1">
-                              <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 tracking-widest">Pasted Blocks Hub</Label>
-                              <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase border-primary/20 text-primary flex items-center gap-1">
+                              <Label className="text-[9px] font-black uppercase text-slate-500 tracking-widest">Pasted Blocks Hub</Label>
+                              <Badge variant="outline" className="text-[7px] font-black uppercase border-primary/20 text-primary flex items-center gap-1">
                                  <Database className="h-2 w-2" /> Q1 EN / Q1 PA Format
                               </Badge>
                            </div>
@@ -350,47 +345,49 @@ export default function AdminCurrentAffairs() {
                               value={bulkText}
                               onChange={e => setBulkText(e.target.value)}
                               placeholder={`Q1. Question Statement EN...\nਪ੍ਰਸ਼ਨ 1. ਸਟੇਟਮੈਂਟ PA...\n(A) Option EN / ਵਿਕਲਪ PA\n(B) Option EN / ਵਿਕਲਪ PA\nCorrect Answer: A`}
-                              className="min-h-[180px] md:min-h-[250px] rounded-xl md:rounded-[2rem] bg-slate-50 border-none p-5 md:p-8 text-xs md:text-sm font-bold shadow-inner custom-scrollbar resize-none focus-visible:ring-primary"
+                              className="min-h-[120px] md:min-h-[160px] rounded-xl bg-slate-50 border-none p-4 text-xs font-bold shadow-inner custom-scrollbar resize-none focus-visible:ring-primary"
                            />
-                           <Button onClick={handleProcessBulk} disabled={!bulkText.trim()} className="w-full h-14 md:h-16 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[10px] md:text-[11px] rounded-xl shadow-2xl gap-4 group transition-all active:scale-95 border-none">
-                              Initialize Bulk Extraction <ChevronRight className="h-4 w-4 md:h-5 md:w-5 group-hover:translate-x-1 transition-transform" />
+                           <Button onClick={handleProcessBulk} disabled={!bulkText.trim()} className="w-full h-12 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[10px] rounded-xl shadow-2xl gap-3 group transition-all active:scale-95 border-none">
+                              Initialize Bulk Extraction <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                            </Button>
                         </div>
 
                         {editingItem?.questions?.length > 0 && (
-                           <div className="pt-6 border-t border-slate-50">
-                              <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest mb-6 ml-1">Review Staged Assets</p>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[250px] md:max-h-[400px] overflow-y-auto custom-scrollbar pr-2">
-                                 {editingItem.questions.map((q: any, idx: number) => (
-                                    <div key={idx} className="bg-slate-50/50 p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-100 group/q relative transition-all hover:bg-white hover:shadow-lg">
-                                       <button 
-                                          onClick={() => {
-                                             const qs = [...editingItem.questions];
-                                             qs.splice(idx, 1);
-                                             setEditingItem({...editingItem, questions: qs});
-                                          }} 
-                                          className="absolute top-4 right-4 text-rose-300 hover:text-rose-500 opacity-0 group-hover/q:opacity-100 transition-opacity"
-                                       >
-                                          <Trash2 className="h-4 w-4" />
-                                       </button>
-                                       <div className="flex items-center gap-3 mb-3">
-                                          <div className="h-6 w-6 rounded-lg bg-[#0F172A] text-white flex items-center justify-center font-black text-[9px] md:text-[10px]">{idx + 1}</div>
-                                          <span className="text-[7px] md:text-[8px] font-black uppercase text-slate-400">NODE_VERIFIED</span>
+                           <div className="flex-1 flex flex-col min-h-0 pt-4 border-t border-slate-50">
+                              <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-3 ml-1 shrink-0">Review Staged Assets</p>
+                              <div className="flex-1 overflow-y-auto custom-scrollbar pr-2 space-y-3">
+                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    {editingItem.questions.map((q: any, idx: number) => (
+                                       <div key={idx} className="bg-slate-50/50 p-4 rounded-xl border border-slate-100 group/q relative transition-all hover:bg-white hover:shadow-lg">
+                                          <button 
+                                             onClick={() => {
+                                                const qs = [...editingItem.questions];
+                                                qs.splice(idx, 1);
+                                                setEditingItem({...editingItem, questions: qs});
+                                             }} 
+                                             className="absolute top-3 right-3 text-rose-300 hover:text-rose-500 opacity-0 group-hover/q:opacity-100 transition-opacity"
+                                          >
+                                             <Trash2 className="h-4 w-4" />
+                                          </button>
+                                          <div className="flex items-center gap-3 mb-2">
+                                             <div className="h-5 w-5 rounded-md bg-[#0F172A] text-white flex items-center justify-center font-black text-[8px]">{idx + 1}</div>
+                                             <span className="text-[7px] font-black uppercase text-slate-400">NODE_VERIFIED</span>
+                                          </div>
+                                          <p className="font-bold text-[10px] text-[#0F172A] line-clamp-2 leading-snug">{q.englishQuestion}</p>
+                                          <div className="mt-2 flex items-center gap-2">
+                                             <Badge className="bg-emerald-50 text-emerald-600 border-none text-[7px] font-black">KEY: {q.correctAnswer}</Badge>
+                                             {q.punjabiQuestion && <Badge className="bg-blue-50 text-blue-600 border-none text-[7px] font-black">BILINGUAL</Badge>}
+                                          </div>
                                        </div>
-                                       <p className="font-bold text-[11px] md:text-xs text-[#0F172A] line-clamp-2">{q.englishQuestion}</p>
-                                       <div className="mt-3 flex items-center gap-2">
-                                          <Badge className="bg-emerald-50 text-emerald-600 border-none text-[7px] md:text-[8px] font-black">KEY: {q.correctAnswer}</Badge>
-                                          {q.punjabiQuestion && <Badge className="bg-blue-50 text-blue-600 border-none text-[7px] md:text-[8px] font-black">BILINGUAL</Badge>}
-                                       </div>
-                                    </div>
-                                 ))}
+                                    ))}
+                                 </div>
                               </div>
                               <Button 
                                  variant="ghost" 
                                  onClick={() => setEditingItem({...editingItem, questions: []})}
-                                 className="mt-6 text-rose-500 hover:bg-rose-50 font-black uppercase text-[9px] md:text-[10px] tracking-widest gap-2"
+                                 className="mt-3 text-rose-500 hover:bg-rose-50 font-black uppercase text-[9px] tracking-widest gap-2 shrink-0 self-start"
                               >
-                                 <Trash2 className="h-4 w-4" /> Purge Staging Hub
+                                 <Trash2 className="h-3 w-3" /> Purge Staging Hub
                               </Button>
                            </div>
                         )}
@@ -400,9 +397,9 @@ export default function AdminCurrentAffairs() {
             </div>
           </div>
 
-          <DialogFooter className="p-4 md:p-10 pt-2 bg-slate-50 flex gap-3 md:gap-4 shrink-0 border-t border-slate-100">
-            <button onClick={() => setEditingItem(null)} className="rounded-xl h-11 md:h-14 px-4 md:px-8 font-black uppercase text-[9px] md:text-[10px] text-slate-400 hover:text-[#0F172A]">Cancel Draft</button>
-            <Button onClick={handleSave} disabled={isSaving} className="bg-[#0F172A] hover:bg-black text-white h-11 md:h-14 px-6 md:px-10 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest flex-1 shadow-xl transition-all active:scale-95 gap-3 border-none">
+          <DialogFooter className="px-6 py-4 bg-slate-50 flex flex-row items-center gap-3 md:gap-4 shrink-0 border-t border-slate-100">
+            <button onClick={() => setEditingItem(null)} className="rounded-xl h-12 px-6 font-black uppercase text-[9px] text-slate-400 hover:text-[#0F172A] transition-colors">Cancel Draft</button>
+            <Button onClick={handleSave} disabled={isSaving} className="bg-[#0F172A] hover:bg-black text-white h-12 px-10 rounded-xl font-black uppercase text-[9px] tracking-widest flex-1 shadow-xl transition-all active:scale-95 gap-3 border-none">
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4 text-primary fill-current" />} Commit CA Hub to Registry
             </Button>
           </DialogFooter>
