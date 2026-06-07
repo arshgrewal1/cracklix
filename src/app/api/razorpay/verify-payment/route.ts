@@ -1,11 +1,10 @@
-
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { initializeFirebase } from '@/firebase';
 import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Backend Hub for Razorpay Signature Verification & Subscription Grant.
+ * @fileOverview Razorpay Signature Verification & Subscription Node.
  */
 
 export async function POST(request: Request) {
@@ -21,6 +20,7 @@ export async function POST(request: Request) {
     const secret = process.env.RAZORPAY_KEY_SECRET || '';
     const body = razorpay_order_id + "|" + razorpay_payment_id;
 
+    // 1. Verify Signature
     const expectedSignature = crypto
       .createHmac('sha256', secret)
       .update(body.toString())
@@ -29,16 +29,16 @@ export async function POST(request: Request) {
     const isSignatureValid = expectedSignature === razorpay_signature;
 
     if (!isSignatureValid) {
-      return NextResponse.json({ error: 'Signature mismatch. Transaction audit rejected.' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid transaction signature.' }, { status: 400 });
     }
 
-    // 2. Grant Subscription in Firestore
+    // 2. Grant Access in Registry
     const { firestore: db } = initializeFirebase();
     const userRef = doc(db, 'users', userId);
     const planRef = doc(db, 'passes', planId);
     
     const planSnap = await getDoc(planRef);
-    if (!planSnap.exists()) throw new Error("Plan node missing");
+    if (!planSnap.exists()) throw new Error("Plan ID not found in registry.");
     const planData = planSnap.data();
 
     const expiryDate = new Date();
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       updatedAt: serverTimestamp()
     });
 
-    // Create Subscription Log
+    // Create Subscription Hub Entry
     await addDoc(collection(db, 'subscriptions'), {
       userId,
       planId,
@@ -63,10 +63,11 @@ export async function POST(request: Request) {
       orderId: razorpay_order_id,
       amount: planData.price,
       gateway: 'RAZORPAY',
-      createdAt: serverTimestamp()
+      verified: true,
+      updatedAt: serverTimestamp()
     });
 
-    // Create Payment Record
+    // Create Payment Node
     await addDoc(collection(db, 'payments'), {
       userId,
       planId,
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error('[RAZORPAY_VERIFY_ERR]:', error);
-    return NextResponse.json({ error: error.message || 'Verification logic failure' }, { status: 500 });
+    console.error('[RAZORPAY_VERIFY_ERROR]:', error);
+    return NextResponse.json({ error: error.message || 'Verification failed' }, { status: 500 });
   }
 }

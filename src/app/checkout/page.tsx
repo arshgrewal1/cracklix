@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useSearchParams, useRouter } from "next/navigation"
@@ -19,8 +18,8 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 
 /**
- * @fileOverview Aspirant Checkout Hub v8.1.
- * FIXED: Added window.Razorpay check and improved script reliability.
+ * @fileOverview Aspirant Checkout Hub v9.0.
+ * HARDENED: Robust order generation logic and verification flow.
  */
 
 export default function CheckoutPage() {
@@ -55,14 +54,14 @@ function CheckoutContent() {
     if (!user || !profile || !planData) return;
     
     if (!(window as any).Razorpay) {
-      toast({ variant: "destructive", title: "Gateway Offline", description: "Razorpay script is still loading. Please wait a second." });
+      toast({ variant: "destructive", title: "Gateway Offline", description: "Razorpay script is still loading. Please wait." });
       return;
     }
 
     setProcessing(true);
 
     try {
-      // 1. Create Order
+      // 1. Create order on backend
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -72,42 +71,47 @@ function CheckoutContent() {
       const orderData = await orderRes.json();
       if (orderData.error) throw new Error(orderData.error);
 
-      // 2. Open Razorpay Modal
+      // 2. Launch Razorpay Checkout
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: orderData.amount,
         currency: orderData.currency,
         name: "CRACKLIX",
-        description: `Activation of ${planData.name}`,
+        description: `Access Pass: ${planData.name}`,
         image: "https://i.ibb.co/5hkxTtKS/Whats-App-Image-2026-05-28-at-10-31-36-AM.jpg",
         order_id: orderData.order_id,
         handler: async function (response: any) {
-          // 3. Verify Signature
+          // 3. Verify on backend
           setProcessing(true);
-          const verifyRes = await fetch('/api/razorpay/verify-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              userId: user.uid,
-              planId: planId
-            }),
-          });
+          try {
+            const verifyRes = await fetch('/api/razorpay/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                userId: user.uid,
+                planId: planId
+              }),
+            });
 
-          const verifyData = await verifyRes.json();
-          if (verifyData.success) {
-            toast({ title: "Activation Success", description: "Your Elite Pass is now active." });
-            router.push(`/payment/success?plan=${planData.name}`);
-          } else {
-            router.push('/payment/failed');
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+              toast({ title: "Activation Success", description: "Your Elite Pass is now active." });
+              router.push(`/payment/success?plan=${planData.name}`);
+            } else {
+              throw new Error(verifyData.error || "Verification failed");
+            }
+          } catch (e: any) {
+            toast({ variant: "destructive", title: "Verification Failed", description: e.message });
+            setProcessing(false);
           }
         },
         prefill: {
           name: profile.name,
           email: user.email,
-          contact: profile.phone
+          contact: profile.phone?.replace(/\D/g, '').slice(-10)
         },
         theme: { color: "#F97316" },
         modal: {
@@ -116,6 +120,10 @@ function CheckoutContent() {
       };
 
       const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+        toast({ variant: "destructive", title: "Transaction Declined", description: response.error.description });
+        setProcessing(false);
+      });
       rzp.open();
     } catch (e: any) {
       toast({ variant: "destructive", title: "Gateway Error", description: e.message });
@@ -154,7 +162,10 @@ function CheckoutContent() {
   return (
     <div className="min-h-screen bg-slate-50/50 font-body">
       <Navbar />
-      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="beforeInteractive" />
+      <Script 
+        src="https://checkout.razorpay.com/v1/checkout.js" 
+        strategy="lazyOnload" 
+      />
       
       <main className="container mx-auto px-4 md:px-6 py-12 md:py-24 max-w-5xl">
         <div className="flex items-center gap-6 mb-12">
