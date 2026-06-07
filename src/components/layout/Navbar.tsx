@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -77,7 +76,9 @@ export default function Navbar() {
                      "lg:top-[60px] lg:h-[calc(100vh-60px)]"
                    )}
                  >
-                   <SheetHeader className="sr-only"><SheetTitle>Aspirant Menu</SheetTitle></SheetHeader>
+                   <SheetHeader className="sr-only">
+                      <SheetTitle>Navigation Menu</SheetTitle>
+                   </SheetHeader>
                    <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
                  </SheetContent>
                </Sheet>

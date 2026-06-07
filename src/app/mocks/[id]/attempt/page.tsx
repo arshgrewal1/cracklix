@@ -218,6 +218,9 @@ export default function MockAttemptPage() {
       
       <Sheet open={isMobilePaletteOpen} onOpenChange={setIsMobilePaletteOpen}>
         <SheetContent side="bottom" className="h-[65dvh] p-0 border-none rounded-t-[2.5rem] overflow-hidden">
+          <SheetHeader className="sr-only">
+             <SheetTitle>Question Palette</SheetTitle>
+          </SheetHeader>
           <QuestionPalette onSelect={(idx) => { examStore.setCurrentIdx(idx); setIsMobilePaletteOpen(false); }} onSubmit={() => setShowSubmitModal(true)} />
         </SheetContent>
       </Sheet>

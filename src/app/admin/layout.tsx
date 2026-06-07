@@ -1,4 +1,3 @@
-
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
@@ -110,7 +109,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                        <button className="p-2 rounded-xl bg-slate-50 text-[#0F172A]"><Menu className="h-5 w-5" /></button>
                     </SheetTrigger>
                     <SheetContent side="left" className="p-0 border-none w-[280px] bg-[#0F172A]">
-                       <SheetHeader className="sr-only"><SheetTitle>Admin Menu</SheetTitle></SheetHeader>
+                       <SheetHeader className="sr-only">
+                          <SheetTitle>Admin Menu</SheetTitle>
+                       </SheetHeader>
                        <SideNavContent />
                     </SheetContent>
                  </Sheet>
