@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -20,8 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview High-Fidelity Question Engine v31.0.
- * FIXED: Language visibility logic strictly enforced for English, Punjabi, and Hindi.
+ * @fileOverview High-Fidelity Question Engine v32.0.
+ * FIXED: Strict language visibility and optimized mobile typography.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -85,17 +84,17 @@ export default function QuestionRenderer({
       {/* 2. QUESTION STATEMENTS */}
       <div className="space-y-3 md:space-y-6 mb-6 md:mb-10 px-1">
          {showEn && englishQ && (
-           <div className="font-bold text-sm md:text-xl text-[#0F172A] antialiased leading-relaxed tracking-tight">
+           <div className="font-bold text-[15px] md:text-xl text-[#0F172A] antialiased leading-relaxed tracking-tight">
              <MathText text={englishQ} />
            </div>
          )}
          {showPa && punjabiQ && (
-           <div className="font-bold text-sm md:text-xl text-[#0F172A] antialiased leading-relaxed tracking-tight">
+           <div className="font-bold text-[15px] md:text-xl text-[#0F172A] antialiased leading-relaxed tracking-tight">
              <MathText text={punjabiQ} />
            </div>
          )}
          {showHi && hindiQ && (
-           <div className="font-bold text-sm md:text-xl text-[#0F172A] antialiased leading-relaxed tracking-tight">
+           <div className="font-bold text-[15px] md:text-xl text-[#0F172A] antialiased leading-relaxed tracking-tight">
              <MathText text={hindiQ} />
            </div>
          )}
@@ -132,9 +131,9 @@ export default function QuestionRenderer({
                   {key}
                 </span>
                 <div className="flex flex-col flex-1 min-w-0 space-y-0.5">
-                  {showEn && en && <div className={cn("font-bold text-sm md:text-lg", isSelected ? "text-[#F97316]" : "text-[#0F172A]")}><MathText text={en} /></div>}
-                  {showPa && pa && <div className={cn("font-bold text-sm md:text-lg", isSelected ? "text-[#F97316]" : "text-[#0F172A]")}><MathText text={pa} /></div>}
-                  {showHi && hi && <div className={cn("font-bold text-sm md:text-lg", isSelected ? "text-[#F97316]" : "text-[#0F172A]")}><MathText text={hi} /></div>}
+                  {showEn && en && <div className={cn("font-bold text-[14px] md:text-lg", isSelected ? "text-[#F97316]" : "text-[#0F172A]")}><MathText text={en} /></div>}
+                  {showPa && pa && <div className={cn("font-bold text-[14px] md:text-lg", isSelected ? "text-[#F97316]" : "text-[#0F172A]")}><MathText text={pa} /></div>}
+                  {showHi && hi && <div className={cn("font-bold text-[14px] md:text-lg", isSelected ? "text-[#F97316]" : "text-[#0F172A]")}><MathText text={hi} /></div>}
                 </div>
               </div>
             )

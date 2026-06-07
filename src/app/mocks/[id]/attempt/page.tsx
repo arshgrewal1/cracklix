@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -27,8 +26,8 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
- * @fileOverview Production Hardened CBT Attempt Engine v30.0.
- * FIXED: Language reactivity bug - now uses reactive selector for store language.
+ * @fileOverview Production Hardened CBT Attempt Engine v31.0.
+ * FIXED: Language specific subjects (Punjabi/English) now force single-language display.
  */
 
 export default function MockAttemptPage() {
@@ -57,7 +56,7 @@ export default function MockAttemptPage() {
   const mockTitle = useExamStore(s => s.mockTitle);
   const setAnswer = useExamStore(s => s.setAnswer);
   const startTime = useExamStore(s => s.startTime);
-  const language = useExamStore(s => s.language); // Reactive language selection
+  const language = useExamStore(s => s.language); 
 
   useEffect(() => {
     async function loadExam() {
@@ -186,6 +185,19 @@ export default function MockAttemptPage() {
   const q = questions[currentIdx];
   const selectedAnswer = answers[currentIdx];
 
+  // Subject-Specific Language Override Logic
+  const effectiveLanguage = useMemo(() => {
+    if (!q) return language;
+    const sectionName = (q.sectionId || "").toUpperCase();
+    
+    // Strict Subject Overrides: Language sections are never bilingual
+    if (sectionName.includes("PUNJABI")) return "PUNJABI";
+    if (sectionName.includes("ENGLISH")) return "ENGLISH";
+    if (sectionName.includes("HINDI")) return "HINDI";
+    
+    return language;
+  }, [q, language]);
+
   return (
     <div className="flex flex-col h-[100dvh] bg-white font-body select-none overflow-hidden relative">
       <AntiCheat />
@@ -227,7 +239,7 @@ export default function MockAttemptPage() {
                       transition={{ duration: 0.15 }}
                    >
                      <QuestionRenderer 
-                       language={language} 
+                       language={effectiveLanguage} 
                        question={{...q, displayId: (currentIdx + 1).toString()}} 
                        selectedAnswer={selectedAnswer}
                        onSelect={(idx) => setAnswer(currentIdx, idx, db)}
