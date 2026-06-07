@@ -10,10 +10,11 @@ import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { PlaceHolderImages } from "@/lib/placeholder-images"
 import { Badge } from "@/components/ui/badge"
+import MeetFounder from "@/components/home/MeetFounder"
 
 /**
- * @fileOverview Institutional About Hub v3.2.
- * Updated: Founder Identity corrected to Arsh Grewal.
+ * @fileOverview Institutional About Hub v3.5.
+ * Updated: Founder Identity corrected to Arsh Grewal with high-fidelity profile components.
  */
 
 export default function AboutPage() {
@@ -59,56 +60,7 @@ export default function AboutPage() {
         </section>
 
         {/* Founder Profile Section */}
-        <section className="py-32 bg-white">
-           <div className="container mx-auto px-6">
-              <div className="max-w-6xl mx-auto bg-[#0B1528] rounded-[4rem] overflow-hidden shadow-4xl flex flex-col md:flex-row">
-                 <div className="md:w-1/2 relative h-[500px] md:h-auto bg-slate-800 group">
-                    <img 
-                      src={founderImg!} 
-                      alt="Arsh Grewal" 
-                      className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
-                      referrerPolicy="no-referrer"
-                      onError={(e) => {
-                         (e.target as HTMLImageElement).src = psssbPromo!;
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-primary/20 mix-blend-overlay opacity-0 group-hover:opacity-100 transition-opacity" />
-                    <div className="absolute bottom-10 left-10 z-10 flex flex-col gap-2">
-                       <Badge className="bg-primary text-white border-none px-4 py-1 rounded-lg font-black uppercase text-[10px] tracking-widest w-fit shadow-xl">Lead Developer</Badge>
-                       <p className="text-white font-headline font-black text-4xl uppercase tracking-tight">Arsh Grewal</p>
-                    </div>
-                 </div>
-                 <div className="md:w-1/2 p-12 md:p-24 flex flex-col justify-center space-y-10 text-left">
-                    <div className="flex items-center gap-6">
-                       <div className="h-16 w-16 bg-primary/20 rounded-[2rem] flex items-center justify-center shadow-2xl">
-                          <Shield className="text-primary h-8 w-8" />
-                       </div>
-                       <div className="space-y-1">
-                          <p className="text-primary font-black uppercase tracking-[0.3em] text-[10px]">Preparation Authority</p>
-                          <h3 className="text-2xl font-headline font-black text-white uppercase">The Founder's Mission</h3>
-                       </div>
-                    </div>
-                    <blockquote className="text-2xl md:text-3xl text-slate-300 font-headline font-medium leading-tight italic antialiased border-l-4 border-primary pl-8">
-                       "I developed Cracklix because I saw aspirants struggling with outdated patterns and low-quality materials. My mission is to provide the cleanest and most accurate preparation experience for my fellow students."
-                    </blockquote>
-                    <div className="pt-8 border-t border-white/5 flex items-center gap-10">
-                       <div className="text-left">
-                          <p className="text-white font-black uppercase tracking-widest text-2xl">Arsh Grewal</p>
-                          <div className="flex items-center gap-3 mt-1.5">
-                             <Badge variant="outline" className="border-primary/30 text-primary text-[8px] font-black uppercase tracking-widest">Founder</Badge>
-                             <Badge variant="outline" className="border-blue-500/30 text-blue-400 text-[8px] font-black uppercase tracking-widest">Lead Developer</Badge>
-                          </div>
-                       </div>
-                       <div className="h-12 w-px bg-white/5" />
-                       <div className="flex flex-col gap-1">
-                          <p className="text-slate-500 font-black uppercase text-[8px] tracking-[0.3em]">PLATFORM</p>
-                          <p className="text-white font-black uppercase text-xs tracking-widest">Cracklix Technologies</p>
-                       </div>
-                    </div>
-                 </div>
-              </div>
-           </div>
-        </section>
+        <MeetFounder />
 
         {/* Vision Grid */}
         <section className="py-32 bg-slate-50">
@@ -154,7 +106,7 @@ export default function AboutPage() {
               <h2 className="text-5xl md:text-8xl font-headline font-black uppercase leading-[0.85] tracking-tighter">Ready to start <br/> your journey?</h2>
               <p className="text-white/80 max-w-xl mx-auto text-xl font-medium">Join thousands of aspirants already preparing with Cracklix's verified mock series.</p>
               <div className="flex justify-center gap-4">
-                 <Button asChild className="bg-white text-primary hover:bg-slate-100 font-black px-12 h-20 rounded-3xl uppercase tracking-widest text-xs shadow-4xl">
+                 <Button asChild className="w-full md:w-auto bg-white text-primary hover:bg-slate-100 font-black px-12 h-20 rounded-3xl uppercase tracking-widest text-xs shadow-4xl border-none">
                     <Link href="/mocks">Start Free Mock <ArrowRight className="ml-2 h-5 w-5" /></Link>
                  </Button>
               </div>
