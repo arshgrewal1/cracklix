@@ -6,7 +6,7 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore } from "@/firebase"
 import { collection, query, where, doc, updateDoc, serverTimestamp } from "firebase/firestore"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -33,9 +33,9 @@ import {
   ChevronRight,
   CreditCard,
   Loader2,
-  X
+  X,
+  Gem
 } from "lucide-react"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
@@ -45,9 +45,9 @@ import { cn } from "@/lib/utils"
 import React from "react"
 
 /**
- * @fileOverview Student Profile Hub v16.0.
- * Simplified language: Replaced technical jargon with common student terms.
- * Features: Editable Email, Target Board, and fixed Accuracy icon.
+ * @fileOverview Student Profile Hub v17.0.
+ * Simplified language: Replaced jargon like "Node" and "Hub" with simple terms.
+ * Features: Consolidated Pass & Profile, fixed Accuracy icon background.
  */
 export default function ProfilePage() {
   const { user, profile, loading } = useUser()
@@ -102,7 +102,7 @@ export default function ProfilePage() {
     if (!results || results.length === 0) return { total: 0, avgAccuracy: 0, rank: "N/A" }
     const total = results.length
     const avgAccuracy = Math.round(results.reduce((acc: number, curr: any) => acc + (curr.accuracy || 0), 0) / total)
-    return { total, avgAccuracy, rank: total > 5 ? "Top 12%" : "Live" }
+    return { total, avgAccuracy, rank: total > 5 ? "Top 12%" : "Rank Active" }
   }, [results])
 
   const handleUpdateProfile = async () => {
@@ -114,8 +114,8 @@ export default function ProfilePage() {
     if (missing) {
       toast({ 
         variant: "destructive", 
-        title: "Update Blocked", 
-        description: `Please fill in your ${missing === 'targetExam' ? 'Target Board' : missing.toUpperCase()}.` 
+        title: "Missing Details", 
+        description: `Please enter your ${missing === 'targetExam' ? 'Target Board' : missing.toUpperCase()}.` 
       });
       return;
     }
@@ -135,7 +135,7 @@ export default function ProfilePage() {
           phone: finalPhone,
           updatedAt: serverTimestamp()
        })
-       toast({ title: "Details Saved", description: "Your profile has been updated." })
+       toast({ title: "Profile Updated", description: "Your details have been saved successfully." })
        setIsEditing(false)
     } catch (e: any) {
        toast({ variant: "destructive", title: "Update Failed", description: e.message })
@@ -189,7 +189,7 @@ export default function ProfilePage() {
       <Navbar />
       
       <main className="w-full">
-        {/* HEADER */}
+        {/* HEADER SECTION */}
         <div className="bg-[#0B1528] relative overflow-hidden">
            <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 blur-[120px] rounded-full" />
            <div className="container mx-auto px-4 md:px-6 max-w-6xl pt-8 md:pt-16 pb-16 md:pb-20">
@@ -224,10 +224,15 @@ export default function ProfilePage() {
                     </div>
                  </div>
 
-                 <div className="shrink-0 w-full md:w-auto pt-4 md:pt-0">
-                    <Button onClick={() => setIsEditing(true)} className="w-full md:w-auto h-12 md:h-14 px-8 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-2xl">
+                 <div className="shrink-0 w-full md:w-auto pt-4 md:pt-0 flex flex-col sm:flex-row gap-3">
+                    <Button onClick={() => setIsEditing(true)} className="h-12 md:h-14 px-8 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-2xl">
                        <Edit className="h-4 w-4 text-primary" /> Edit Profile
                     </Button>
+                    {profile.status === 'Free' && (
+                       <Button asChild className="h-12 md:h-14 px-8 bg-primary hover:bg-orange-600 text-white rounded-xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-2xl border-none">
+                          <Link href="/pass"><Gem className="h-4 w-4" /> Get Elite Pass</Link>
+                       </Button>
+                    )}
                  </div>
               </div>
            </div>
@@ -236,12 +241,12 @@ export default function ProfilePage() {
         <div className="container mx-auto px-4 md:px-6 max-w-6xl -mt-8 relative z-20">
            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
               
-              {/* LEFT: PERFORMANCE & STATS */}
+              {/* LEFT: PERFORMANCE STATS */}
               <div className="lg:col-span-8 space-y-6 md:space-y-8">
                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-6">
-                    <StatsCard icon={<ClipboardList className="h-5 w-5 text-blue-500" />} label="TESTS COMPLETED" value={stats.total} color="text-blue-500" />
-                    <StatsCard icon={<Target className="h-5 w-5 text-primary" />} label="AVERAGE ACCURACY" value={`${stats.avgAccuracy}%`} color="text-primary" />
-                    <StatsCard icon={<Trophy className="h-5 w-5 text-emerald-500" />} label="STATE RANKING" value={stats.rank} color="text-emerald-500" className="hidden sm:flex" />
+                    <StatsCard icon={<ClipboardList className="h-5 w-5 text-blue-500" />} label="TESTS COMPLETED" value={stats.total} color="text-blue-500" bgColor="bg-blue-50" />
+                    <StatsCard icon={<Target className="h-5 w-5 text-primary" />} label="AVERAGE ACCURACY" value={`${stats.avgAccuracy}%`} color="text-primary" bgColor="bg-orange-50" />
+                    <StatsCard icon={<Trophy className="h-5 w-5 text-emerald-500" />} label="STATE RANKING" value={stats.rank} color="text-emerald-500" bgColor="bg-emerald-50" className="hidden sm:flex" />
                  </div>
 
                  <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 md:p-10 space-y-8">
@@ -256,11 +261,11 @@ export default function ProfilePage() {
                        <ProfileDataNode icon={<Phone className="text-emerald-500" />} label="MOBILE NUMBER" value={formatPhone(profile.phone)} />
                        <ProfileDataNode icon={<MapPin className="text-rose-500" />} label="HOME ADDRESS" value={profile.address || "Not provided"} colSpan={2} />
                        <ProfileDataNode icon={<ShieldCheck className="text-primary" />} label="ACCOUNT TYPE" value={`${profile.role || 'STUDENT'}`} />
-                       <ProfileDataNode icon={<Activity className="text-orange-500" />} label="JOINED" value={memberSince} />
+                       <ProfileDataNode icon={<Activity className="text-orange-500" />} label="MEMBER SINCE" value={memberSince} />
                     </div>
                  </Card>
 
-                 {/* RECENT PERFORMANCE LIST */}
+                 {/* TEST HISTORY LIST */}
                  <Card className="border-none shadow-xl rounded-[2.5rem] overflow-hidden bg-white">
                     <CardHeader className="p-8 md:p-10 border-b border-slate-50 flex flex-row items-center justify-between">
                        <div className="space-y-1">
@@ -301,7 +306,7 @@ export default function ProfilePage() {
                  </Card>
               </div>
 
-              {/* RIGHT: BILLING & QUICK ACTIONS */}
+              {/* RIGHT: QUICK ACTIONS */}
               <div className="lg:col-span-4 space-y-6 md:space-y-8">
                  <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 space-y-8">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Quick Actions</h3>
@@ -320,7 +325,7 @@ export default function ProfilePage() {
                     <div className="relative z-10 space-y-4">
                        <h4 className="text-2xl font-headline font-black uppercase leading-tight">State Ranking <br/> Is Live</h4>
                        <p className="text-white/70 text-[11px] font-bold uppercase tracking-tight">Check your standing among thousands.</p>
-                       <Button asChild className="w-full bg-white text-primary hover:bg-slate-100 font-black h-12 rounded-xl text-[10px] uppercase shadow-lg">
+                       <Button asChild className="w-full mt-8 bg-white text-primary hover:bg-slate-50 font-black h-12 rounded-xl text-[10px] uppercase shadow-lg">
                           <Link href="/leaderboard">See Rankings</Link>
                        </Button>
                     </div>
@@ -339,7 +344,7 @@ export default function ProfilePage() {
             <DialogHeader className="p-6 md:p-8 pb-2 md:pb-4 shrink-0">
                <div className="flex justify-between items-center">
                   <DialogTitle className="text-xl md:text-3xl font-black font-headline uppercase text-[#0F172A] flex items-center gap-4">
-                     <ShieldCheck className="h-6 w-6 md:h-8 md:w-8 text-primary" /> Update Your Profile
+                     <ShieldCheck className="h-6 w-6 md:h-8 md:w-8 text-primary" /> Edit Your Details
                   </DialogTitle>
                   <button onClick={() => setIsEditing(false)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors"><X className="h-5 w-5 text-slate-400" /></button>
                </div>
@@ -393,7 +398,7 @@ export default function ProfilePage() {
                </div>
 
                <div className="space-y-1.5 text-left">
-                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Full Home Address</Label>
+                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Home Address</Label>
                   <Textarea 
                     value={editForm?.address || ""} 
                     onChange={e => setEditForm({...editForm, address: e.target.value})} 
@@ -428,11 +433,11 @@ function HeaderInfo({ icon, text }: { icon: React.ReactNode, text: string }) {
    )
 }
 
-function StatsCard({ icon, label, value, color, className }: any) {
+function StatsCard({ icon, label, value, color, bgColor, className }: any) {
    return (
       <Card className={cn("border-none shadow-lg rounded-[1.5rem] p-6 md:p-8 bg-white group hover:translate-y-[-4px] transition-all", className)}>
          <div className="flex flex-col gap-4">
-            <div className={cn("h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", color.replace('text-', 'bg-').replace('500', '50'))}>
+            <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", bgColor)}>
                {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: cn("h-5 w-5", color) }) : icon}
             </div>
             <div className="space-y-1 text-left">

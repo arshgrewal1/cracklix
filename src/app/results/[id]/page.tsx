@@ -35,7 +35,8 @@ import {
   MessageCircle,
   Send,
   HelpCircle,
-  FileText
+  FileText,
+  Gem
 } from "lucide-react"
 import { useFirestore, useUser, useCollection } from "@/firebase"
 import { collection, query, where, doc, getDoc, documentId, getDocs, orderBy, limit } from "firebase/firestore"
@@ -46,9 +47,9 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview FINAL ELITE RESULT ENGINE v2.0.
- * Replaces all previous implementations with a high-fidelity merit hub.
- * Logic: Calculates Real Ranks and Percentiles from live Firestore data.
+ * @fileOverview FINAL TESTBOOK-STYLE RESULT Hub.
+ * Simplified Language: Replaced technical jargon with clear terms.
+ * Features: Live State Rank, Percentile, and Topper comparison.
  */
 
 export default function ResultPage() {
@@ -56,7 +57,7 @@ export default function ResultPage() {
   const router = useRouter()
   const mockId = params.id as string
   const db = useFirestore()
-  const { user } = useUser()
+  const { user, profile } = useUser()
   const { toast } = useToast()
 
   const [questions, setQuestions] = useState<any[]>([])
@@ -65,7 +66,7 @@ export default function ResultPage() {
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
   const [expandedQs, setExpandedQs] = useState<Record<number, boolean>>({})
 
-  // 1. Fetch Student's Specific Result
+  // 1. Fetch Student's Result
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
     return query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId))
@@ -73,7 +74,7 @@ export default function ResultPage() {
 
   const { data: rawResultDocs, loading: resultsLoading } = useCollection<any>(resultsQuery)
   
-  // 2. Fetch Global Ranking Data (Sorted by Score)
+  // 2. Fetch Ranking Data
   const globalResultsQuery = useMemo(() => {
     if (!db || !mockId) return null
     return query(collection(db, "results"), where("mockId", "==", mockId), orderBy("score", "desc"))
@@ -86,7 +87,6 @@ export default function ResultPage() {
     return [...rawResultDocs].sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]
   }, [rawResultDocs])
 
-  // 3. Precision Rank & Percentile Calculation
   const merit = useMemo(() => {
      if (!globalResults || !sessionData) return { rank: '?', total: 0, percentile: 0, topper: null };
      const sorted = [...globalResults];
@@ -130,7 +130,7 @@ export default function ResultPage() {
           setQuestions(questionIds.map(id => fetchedQuestions.find(q => q.id === id)).filter(Boolean))
         }
       } catch (e) {
-        toast({ variant: "destructive", title: "Data Sync Failed" })
+        toast({ variant: "destructive", title: "Sync Failed" })
       } finally {
         setLoadingContent(false)
       }
@@ -138,7 +138,7 @@ export default function ResultPage() {
     loadQuestions()
   }, [db, sessionData, mockId, toast, resultsLoading])
 
-  const sectionalAudit = useMemo(() => {
+  const sectionalAnalysis = useMemo(() => {
      if (!questions.length || !sessionData) return [];
      const sections: Record<string, { total: number, correct: number, wrong: number, skipped: number }> = {};
      
@@ -178,7 +178,7 @@ export default function ResultPage() {
 
   if (resultsLoading || loadingContent) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
-       <Zap className="h-12 w-12 text-primary animate-spin" />
+       <Loader2 className="h-12 w-12 text-primary animate-spin" />
        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Calculating Your Rank...</p>
     </div>
   )
@@ -199,7 +199,7 @@ export default function ResultPage() {
       
       <main className="container mx-auto px-4 md:px-6 py-6 md:py-12 max-w-7xl space-y-8 md:space-y-12">
         
-        {/* SCORE HERO */}
+        {/* SCORE SECTION */}
         <div className="flex flex-col lg:flex-row gap-6 md:gap-10">
            <Card className="flex-1 border-none shadow-4xl rounded-[2.5rem] md:rounded-[4rem] bg-[#0B1528] text-white overflow-hidden relative group">
               <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-80 w-80" /></div>
@@ -225,7 +225,7 @@ export default function ResultPage() {
                        <div className="text-center space-y-1">
                           <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">PERCENTILE</p>
                           <p className="text-4xl md:text-8xl font-headline font-black text-emerald-400 leading-none text-center">{merit.percentile}</p>
-                          <p className="text-[10px] font-bold text-slate-500 uppercase text-center">Student Score</p>
+                          <p className="text-[10px] font-bold text-slate-500 uppercase text-center">Efficiency</p>
                        </div>
                     </div>
                  </div>
@@ -233,15 +233,15 @@ export default function ResultPage() {
                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 pt-8">
                     <HeroMetric label="SCORE" val={`${sessionData.score}/${sessionData.totalQuestions}`} sub="Marks Obtained" color="text-primary" />
                     <HeroMetric label="ACCURACY" val={`${sessionData.accuracy}%`} sub="Precision" color="text-emerald-400" />
-                    <HeroMetric label="CORRECT" val={sessionData.score} sub="Right Choices" color="text-emerald-400" />
-                    <HeroMetric label="TIME" val={`${Math.floor(sessionData.timeTaken / 60)}m`} sub="Attempt Duration" color="text-blue-400" />
+                    <HeroMetric label="CORRECT" val={sessionData.score} sub="Right Answers" color="text-emerald-400" />
+                    <HeroMetric label="TIME" val={`${Math.floor(sessionData.timeTaken / 60)}m`} sub="Time Spent" color="text-blue-400" />
                  </div>
               </CardContent>
            </Card>
 
            <div className="w-full lg:w-80 flex flex-col gap-6">
               <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-8 space-y-6">
-                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Actions</h3>
+                 <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Next Steps</h3>
                  <div className="space-y-4">
                     <Button onClick={() => window.print()} className="w-full h-16 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl gap-3">
                        <Download className="h-5 w-5" /> Download Report
@@ -252,13 +252,15 @@ export default function ResultPage() {
                  </div>
               </Card>
 
-              <div className="bg-primary rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Award className="h-40 w-40" /></div>
-                 <h4 className="text-2xl font-headline font-black uppercase leading-tight relative z-10">Real State <br/> Merit List</h4>
-                 <Button asChild className="w-full mt-8 bg-white text-primary hover:bg-slate-50 font-black h-12 rounded-xl text-[10px] uppercase shadow-lg">
-                    <Link href="/leaderboard">See Rankings</Link>
-                 </Button>
-              </div>
+              {profile?.status === 'Free' && (
+                <div className="bg-primary rounded-[2.5rem] p-10 text-white relative overflow-hidden group">
+                   <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Award className="h-40 w-40" /></div>
+                   <h4 className="text-2xl font-headline font-black uppercase leading-tight relative z-10">Get Your Elite <br/> Mastery Pass</h4>
+                   <Button asChild className="w-full mt-8 bg-white text-primary hover:bg-slate-50 font-black h-12 rounded-xl text-[10px] uppercase shadow-lg">
+                      <Link href="/pass"><Gem className="h-4 w-4 mr-2" /> Unlock Everything</Link>
+                   </Button>
+                </div>
+              )}
            </div>
         </div>
 
@@ -266,7 +268,7 @@ export default function ResultPage() {
         <Tabs defaultValue="SECTIONAL" className="space-y-8 md:space-y-12">
            <TabsList className="bg-white border border-slate-100 p-1.5 h-16 rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm inline-flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-2">
               <TabsTrigger value="SECTIONAL" className="rounded-2xl px-6 md:px-12 font-black uppercase text-[10px] gap-3 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white transition-all whitespace-nowrap">
-                 <BarChart3 className="h-4 w-4" /> Section Performance
+                 <BarChart3 className="h-4 w-4" /> Section Score
               </TabsTrigger>
               <TabsTrigger value="TOPPER" className="rounded-2xl px-6 md:px-12 font-black uppercase text-[10px] gap-3 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white transition-all whitespace-nowrap">
                  <TrendingUp className="h-4 w-4" /> Compare with #1
@@ -278,8 +280,8 @@ export default function ResultPage() {
 
            <TabsContent value="SECTIONAL" className="m-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-                 {sectionalAudit.map((s, i) => (
-                    <Card key={i} className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 group hover:translate-y-[-6px] transition-all border border-slate-50">
+                 {sectionalAnalysis.map((s, i) => (
+                    <Card key={i} className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 group hover:translate-y-[-6px] transition-all border border-slate-100">
                        <CardHeader className="p-0 mb-8 flex flex-row items-center justify-between">
                           <h4 className="font-headline font-black text-xl uppercase text-[#0B1528] leading-none truncate pr-4">{s.name}</h4>
                           <Badge className={cn("border-none text-[9px] font-black uppercase px-3 py-1 rounded-lg", s.accuracy > 70 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600')}>
@@ -299,7 +301,7 @@ export default function ResultPage() {
                           </div>
                           <div className="space-y-3">
                              <div className="flex justify-between items-center text-[10px] font-black uppercase text-slate-400 tracking-widest">
-                                <span>Performance node</span>
+                                <span>Correct nodes</span>
                                 <span>{s.correct} / {s.total}</span>
                              </div>
                              <div className="h-2.5 w-full bg-slate-50 rounded-full overflow-hidden">
@@ -313,7 +315,7 @@ export default function ResultPage() {
            </TabsContent>
 
            <TabsContent value="TOPPER" className="m-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
-              <Card className="border-none shadow-3xl rounded-[3.5rem] bg-white overflow-hidden border border-slate-50">
+              <Card className="border-none shadow-3xl rounded-[3.5rem] bg-white overflow-hidden border border-slate-100">
                  <div className="grid grid-cols-1 lg:grid-cols-2">
                     <div className="p-10 md:p-20 space-y-12 border-b lg:border-b-0 lg:border-r border-slate-50">
                        <div className="flex items-center gap-6">
@@ -321,15 +323,15 @@ export default function ResultPage() {
                              <Trophy className="h-8 w-8" />
                           </div>
                           <div className="space-y-1">
-                             <h3 className="font-headline font-black text-3xl uppercase text-[#0B1528]">Registry Match</h3>
+                             <h3 className="font-headline font-black text-3xl uppercase text-[#0B1528]">Score Comparison</h3>
                              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Comparing with state rank #1</p>
                           </div>
                        </div>
                        
                        <div className="space-y-12">
-                          <CompareRow label="SCORE AUDIT" user={sessionData.score} topper={merit.topper?.score || 0} max={sessionData.totalQuestions} />
+                          <CompareRow label="SCORE PERFORMANCE" user={sessionData.score} topper={merit.topper?.score || 0} max={sessionData.totalQuestions} />
                           <CompareRow label="ACCURACY INDEX" user={sessionData.accuracy} topper={merit.topper?.accuracy || 0} unit="%" />
-                          <CompareRow label="TIME SPENT" user={Math.floor(sessionData.timeTaken / 60)} topper={Math.floor((merit.topper?.timeTaken || 0) / 60)} />
+                          <CompareRow label="TIME COMPARISON" user={Math.floor(sessionData.timeTaken / 60)} topper={Math.floor((merit.topper?.timeTaken || 0) / 60)} />
                        </div>
                     </div>
 
@@ -340,7 +342,7 @@ export default function ResultPage() {
                        </div>
                        <div className="space-y-3">
                           <p className="text-primary font-black uppercase tracking-[0.4em] text-[10px]">CURRENT LEADER</p>
-                          <h4 className="text-3xl md:text-4xl font-headline font-black uppercase text-[#0B1528]">{merit.topper?.name || 'Aspirant #1'}</h4>
+                          <h4 className="text-3xl md:text-4xl font-headline font-black uppercase text-[#0B1528]">{merit.topper?.name || 'Top Student'}</h4>
                        </div>
                     </div>
                  </div>
@@ -370,7 +372,7 @@ export default function ResultPage() {
                                 <div className="flex items-center gap-8">
                                    <div className={cn(
                                       "h-14 w-14 md:h-20 md:w-20 rounded-2xl flex items-center justify-center font-black text-2xl md:text-3xl shadow-inner",
-                                      isCorrect ? "bg-emerald-50 text-emerald-500" : isSkipped ? "bg-slate-50 text-slate-300" : "bg-rose-50 text-rose-500"
+                                      isCorrect ? "bg-emerald-50 text-emerald-600" : isSkipped ? "bg-slate-50 text-slate-300" : "bg-rose-50 text-rose-500"
                                    )}>
                                       {q.index + 1}
                                    </div>
@@ -379,7 +381,7 @@ export default function ResultPage() {
                                          "border-none text-[10px] font-black uppercase px-4 py-1 rounded-lg shadow-sm", 
                                          isCorrect ? 'bg-emerald-50 text-emerald-600' : isSkipped ? 'bg-slate-100 text-slate-400' : 'bg-rose-50 text-rose-600'
                                       )}>
-                                         {isCorrect ? 'RIGHT' : isSkipped ? 'SKIPPED' : 'WRONG'}
+                                         {isCorrect ? 'CORRECT' : isSkipped ? 'SKIPPED' : 'INCORRECT'}
                                       </Badge>
                                       <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest ml-1">{q.sectionId || 'GK'}</p>
                                    </div>
@@ -389,7 +391,7 @@ export default function ResultPage() {
                                    variant="ghost" 
                                    className="h-14 px-10 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 bg-slate-50 text-[#0B1528] hover:bg-[#0B1528] hover:text-white transition-all shadow-sm"
                                 >
-                                   {isExpanded ? 'Hide Solution' : 'View Rationale'}
+                                   {isExpanded ? 'Hide Solution' : 'View Explanation'}
                                    {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
                                 </Button>
                              </div>
@@ -411,13 +413,13 @@ export default function ResultPage() {
            </TabsContent>
         </Tabs>
 
-        {/* BRANDING */}
+        {/* FOOTER CREDITS */}
         <div className="pt-32 border-t border-slate-200 flex flex-col items-center gap-6 text-center">
            <div className="h-12 w-12 rounded-2xl bg-[#0B1528] flex items-center justify-center text-primary shadow-2xl">
               <ShieldCheck className="h-6 w-6" />
            </div>
            <div className="space-y-2">
-              <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em]">© 2026 Cracklix Technologies</p>
+              <p className="text-slate-500 text-xs font-bold uppercase tracking-[0.2em]">© 2026 Cracklix</p>
               <div className="flex flex-col items-center gap-1">
                  <p className="text-sm font-black text-[#0B1528] uppercase tracking-widest">Developed by <span className="text-primary">Arsh Grewal</span></p>
               </div>

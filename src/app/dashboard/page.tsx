@@ -28,7 +28,8 @@ import {
   TrendingUp,
   BarChart3,
   Calendar,
-  Loader2
+  Loader2,
+  Gem
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -37,8 +38,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import ShareButton from "@/components/navigation/ShareButton"
 
 /**
- * @fileOverview Final Professional Student Dashboard v8.2.
- * Updated: Simplified Language, Fixed Loader2 import error.
+ * @fileOverview FINAL STUDENT DASHBOARD Hub.
+ * Simplified Language: Replaced jargon like "Registry" and "Trajectory" with clear terms.
  */
 
 export default function StudentDashboard() {
@@ -89,10 +90,9 @@ export default function StudentDashboard() {
       
       <main className="container mx-auto px-4 md:px-6 py-6 md:py-12 max-w-7xl space-y-8 md:space-y-12">
         
-        {/* TOP HUB: IDENTITY & QUICK STATS */}
+        {/* PROFILE HEADER */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
            
-           {/* LEFT: STUDENT PROFILE */}
            <div className="lg:col-span-8 space-y-8">
               <section className="bg-[#0B1528] text-white p-8 md:p-16 rounded-[3rem] shadow-4xl relative overflow-hidden text-left group">
                 <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[150%] bg-primary/10 blur-[100px] rounded-full group-hover:bg-primary/20 transition-all duration-1000" />
@@ -108,10 +108,10 @@ export default function StudentDashboard() {
                         <h2 className="text-3xl md:text-5xl font-headline font-black tracking-tight uppercase truncate">{profile?.name}</h2>
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
                            <Badge className="bg-primary text-white border-none text-[10px] font-black uppercase px-4 py-1 rounded-lg shadow-xl">
-                             {profile?.status || 'Free'} PASS
+                             {profile?.status || 'Free'} Pass
                            </Badge>
                            <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
-                             <Target className="h-3.5 w-3.5 text-primary" /> {profile?.targetExam || 'General Prep'}
+                             <Target className="h-3.5 w-3.5 text-primary" /> {profile?.targetExam || 'General Studies'}
                            </p>
                         </div>
                      </div>
@@ -127,12 +127,12 @@ export default function StudentDashboard() {
                 </div>
               </section>
 
-              {/* READINESS GRID */}
+              {/* STATS GRID */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-                 <MetricNode label="READINESS" val={`${stats.readiness}%`} icon={<TrendingUp className="text-primary h-4 w-4" />} />
-                 <MetricNode label="ACCURACY" val={`${stats.avgAccuracy}%`} icon={<Target className="text-emerald-500 h-4 w-4" />} />
-                 <MetricNode label="TESTS" val={stats.total} icon={<ClipboardList className="text-blue-500 h-4 w-4" />} />
-                 <MetricNode label="PREP HOURS" val={stats.hours} icon={<Clock className="text-amber-500 h-4 w-4" />} />
+                 <MetricNode label="PREPARATION SCORE" val={`${stats.readiness}%`} icon={<TrendingUp className="text-primary h-4 w-4" />} />
+                 <MetricNode label="AVG ACCURACY" val={`${stats.avgAccuracy}%`} icon={<Target className="text-emerald-500 h-4 w-4" />} />
+                 <MetricNode label="TESTS COMPLETED" val={stats.total} icon={<ClipboardList className="text-blue-500 h-4 w-4" />} />
+                 <MetricNode label="TIME SPENT" val={stats.hours} icon={<Clock className="text-amber-500 h-4 w-4" />} />
               </div>
 
               {/* RECENT TESTS */}
@@ -158,7 +158,7 @@ export default function StudentDashboard() {
                                       <Zap className="h-6 w-6 text-primary" />
                                    </div>
                                    <div className="min-w-0 space-y-2">
-                                      <p className="font-black text-[#0B1528] text-lg md:text-2xl uppercase truncate leading-none">{r.mockTitle}</p>
+                                      <p className="font-black text-[#0B1528] text-sm md:text-2xl uppercase truncate leading-none">{r.mockTitle}</p>
                                       <div className="flex items-center gap-6 text-[10px] md:text-[12px] font-bold text-slate-400 uppercase tracking-tight">
                                          <span className="flex items-center gap-2"><Calendar className="h-3.5 w-3.5 text-slate-300" /> {new Date(r.timestamp).toLocaleDateString()}</span>
                                          <Badge className="bg-emerald-50 text-emerald-600 border-none font-black px-2 py-0.5 rounded shadow-sm">{r.score}/{r.totalQuestions} Marks</Badge>
@@ -176,10 +176,9 @@ export default function StudentDashboard() {
               </Card>
            </div>
 
-           {/* RIGHT SIDEBAR */}
+           {/* SIDEBAR */}
            <div className="lg:col-span-4 space-y-8 md:space-y-12">
               
-              {/* STREAK CARD */}
               <Card className="border-none shadow-4xl bg-gradient-to-br from-orange-500 to-primary text-white p-10 rounded-[3rem] relative overflow-hidden group">
                  <div className="absolute bottom-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform duration-[2s]"><Flame className="h-64 w-64" /></div>
                  <div className="relative z-10 space-y-6">
@@ -188,7 +187,7 @@ export default function StudentDashboard() {
                        <p className="text-7xl md:text-9xl font-headline font-black leading-none">{stats.streak}</p>
                        <div className="space-y-1">
                           <p className="text-xl font-black uppercase">Days</p>
-                          <p className="text-[9px] font-bold uppercase text-white/60">Streak Active</p>
+                          <p className="text-[9px] font-bold uppercase text-white/60">Keep it up!</p>
                        </div>
                     </div>
                     <div className="pt-4 flex gap-2">
@@ -199,23 +198,21 @@ export default function StudentDashboard() {
                  </div>
               </Card>
 
-              {/* QUICK LINKS */}
               <div className="grid grid-cols-2 gap-4 md:gap-6">
-                 <DashboardTile icon={<Bookmark className="text-primary" />} label="SAVED QUESTIONS" href="/revision" />
-                 <DashboardTile icon={<Trophy className="text-amber-500" />} label="RANKINGS" href="/leaderboard" />
+                 <DashboardTile icon={<Bookmark className="text-primary" />} label="SAVED ITEMS" href="/revision" />
+                 <DashboardTile icon={<Trophy className="text-amber-500" />} label="STATE RANKINGS" href="/leaderboard" />
                  <DashboardTile icon={<LayoutGrid className="text-blue-500" />} label="ALL EXAMS" href="/exams" />
                  <DashboardTile icon={<Activity className="text-emerald-500" />} label="MY ANALYSIS" href="/analytics" />
               </div>
 
-              {/* SHARE BRANDING */}
-              <Card className="border-none shadow-xl bg-white p-10 rounded-[3rem] text-left space-y-8 border border-slate-50">
+              <Card className="border-none shadow-xl bg-white p-10 rounded-[3rem] text-left space-y-8 border border-slate-100">
                  <div className="flex items-center gap-6">
                     <div className="h-14 w-14 rounded-2xl bg-primary/5 flex items-center justify-center text-primary shadow-inner">
                        <Award className="h-8 w-8" />
                     </div>
                     <div className="space-y-1">
                        <h4 className="text-lg font-black uppercase text-[#0B1528]">Spread Success</h4>
-                       <p className="text-[9px] font-bold uppercase text-slate-400">Help others grow</p>
+                       <p className="text-[9px] font-bold uppercase text-slate-400">Share with other students</p>
                     </div>
                  </div>
                  <ShareButton 
@@ -228,7 +225,7 @@ export default function StudentDashboard() {
                  <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">
                     Developed by <span className="text-[#0F172A] font-black">Arsh Grewal</span>
                  </p>
-                 <Badge className="bg-slate-50 text-slate-300 border-none text-[8px] font-bold uppercase px-3 py-1">Cracklix v8.1 • Secure Platform</Badge>
+                 <Badge className="bg-slate-50 text-slate-300 border-none text-[8px] font-bold uppercase px-3 py-1">Cracklix v8.2 • Stable</Badge>
               </div>
            </div>
         </div>
