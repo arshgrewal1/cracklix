@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -26,8 +27,8 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
- * @fileOverview Production Hardened CBT Attempt Engine v27.0.
- * UPDATED: Pause modal buttons set to institutional orange per high-fidelity screenshot.
+ * @fileOverview Production Hardened CBT Attempt Engine v28.0.
+ * UPDATED: Sheet width set to 85vw to match user screenshot exactly.
  */
 
 export default function MockAttemptPage() {
@@ -247,7 +248,7 @@ export default function MockAttemptPage() {
       <Sheet open={isPaletteOpen} onOpenChange={setIsPaletteOpen}>
         <SheetContent 
           side="right" 
-          className="p-0 border-none overflow-hidden shadow-5xl w-[320px] max-w-[85vw] h-full"
+          className="p-0 border-none overflow-hidden shadow-5xl w-[85vw] md:w-[400px] h-full"
         >
           <SheetHeader className="sr-only">
              <SheetTitle>Registry Palette</SheetTitle>
@@ -273,7 +274,7 @@ export default function MockAttemptPage() {
                        setShowExitModal(false);
                        router.push('/dashboard');
                     }}
-                    className="flex-1 h-16 bg-[#F97316] hover:bg-orange-600 text-white rounded-xl font-black uppercase text-[11px] tracking-widest shadow-xl shadow-orange-500/20 transition-all border-none"
+                    className="flex-1 h-16 bg-primary hover:bg-orange-600 text-white rounded-xl font-black uppercase text-[11px] tracking-widest shadow-xl shadow-orange-500/20 transition-all border-none"
                   >
                      Yes, Pause
                   </Button>
