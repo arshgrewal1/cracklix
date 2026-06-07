@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import Logo from "@/components/brand/Logo"
-import { ShieldCheck, Mail, Lock, ChevronLeft, User, Phone, AlertCircle } from "lucide-react"
+import { ShieldCheck, Mail, Lock, ChevronLeft, User, Phone, AlertCircle, RefreshCw } from "lucide-react"
 import { useAuth, useFirestore } from "@/firebase"
 import { 
   signInWithEmailAndPassword, 
@@ -25,8 +25,8 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Login & Sign Up Hub v1.5.
- * HARDENED: Fixed visibility of headings and descriptions for dark theme.
+ * @fileOverview Login & Sign Up Hub v1.6.
+ * FEATURE: Integrated Forgot Password with official backend registry.
  */
 
 export default function LoginPage() {
@@ -46,6 +46,7 @@ function LoginContent() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [resetEmail, setResetEmail] = useState("")
   const [loading, setLoading] = useState(false)
+  const [resetLoading, setResetLoading] = useState(false)
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
   
   const router = useRouter()
@@ -115,6 +116,28 @@ function LoginContent() {
     }
   }
 
+  const handleResetPassword = async () => {
+    if (!resetEmail) {
+      toast({ variant: "destructive", title: "Wait", description: "Please enter your registered email." });
+      return;
+    }
+
+    setResetLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+      toast({ 
+        title: "Reset Node Transmitted", 
+        description: "Please check your inbox (and spam) for password reset instructions." 
+      });
+      setIsResetDialogOpen(false);
+      setResetEmail("");
+    } catch (error: any) {
+      toast({ variant: "destructive", title: "Sync Failed", description: error.message });
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#020817] flex flex-col items-center justify-center p-6 relative overflow-hidden text-white">
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full" />
@@ -146,8 +169,23 @@ function LoginContent() {
                    <Input value={phone} onChange={e => setPhone(e.target.value)} required maxLength={10} className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary" placeholder="Mobile Number" />
                 </div>
               )}
-              <Input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary" placeholder="Email Address" />
-              <Input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary" placeholder="Password" />
+              <div className="space-y-4">
+                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary" placeholder="Email Address" />
+                <div className="space-y-2">
+                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary" placeholder="Password" />
+                  {mode === 'login' && (
+                    <div className="flex justify-end">
+                      <button 
+                        type="button" 
+                        onClick={() => setIsResetDialogOpen(true)}
+                        className="text-[10px] font-black uppercase text-primary hover:text-orange-400 transition-colors tracking-widest"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
               {mode === 'register' && <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary" placeholder="Confirm Password" />}
               
               <Button type="submit" className="w-full h-14 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-xl shadow-xl border-none transition-all active:scale-95" disabled={loading}>
@@ -175,6 +213,42 @@ function LoginContent() {
            <div className="h-px w-8 bg-slate-500/20" />
         </div>
       </motion.div>
+
+      {/* RESET PASSWORD DIALOG */}
+      <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
+        <DialogContent className="bg-[#0F172A] text-white border-white/10 rounded-[2.5rem] max-w-[400px] p-10 shadow-5xl">
+          <DialogHeader className="text-center space-y-4">
+            <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto text-primary shadow-xl">
+               <RefreshCw className={cn("h-8 w-8", resetLoading && "animate-spin")} />
+            </div>
+            <DialogTitle className="text-2xl font-headline font-black uppercase tracking-tight">Recover Account</DialogTitle>
+            <DialogDescription className="text-slate-400 text-xs font-bold uppercase tracking-widest leading-relaxed">
+              ENTER YOUR EMAIL TO RECEIVE A RESET LINK IN YOUR REGISTRY.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-8 space-y-6">
+            <div className="space-y-2 text-left">
+               <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Registered Email</Label>
+               <Input 
+                 type="email" 
+                 value={resetEmail} 
+                 onChange={e => setResetEmail(e.target.value)}
+                 placeholder="name@domain.com" 
+                 className="h-12 bg-white/5 border-white/10 rounded-xl focus-visible:ring-primary text-white" 
+               />
+            </div>
+          </div>
+          <DialogFooter>
+             <Button 
+               onClick={handleResetPassword} 
+               disabled={resetLoading}
+               className="w-full h-14 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-widest text-[11px] rounded-xl shadow-2xl transition-all"
+             >
+               {resetLoading ? "Processing..." : "Transmit Reset Link"}
+             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
