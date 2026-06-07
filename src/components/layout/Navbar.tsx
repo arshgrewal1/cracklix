@@ -24,8 +24,8 @@ import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Elite Global Navigation Hub v5.8.
- * FIXED: Sidebar width adjusted to 80vw for the premium high-fidelity app feel.
+ * @fileOverview Elite Global Navigation Hub v6.0.
+ * FIXED: Mobile Sidebar width strictly set to 290px for professional exam-platform UI.
  */
 
 export default function Navbar() {
@@ -71,7 +71,7 @@ export default function Navbar() {
                  <SheetContent 
                    side="left" 
                    className={cn(
-                     "p-0 border-r border-white/5 !w-[80vw] lg:!w-[400px] overflow-hidden shadow-5xl transition-all duration-500 bg-[#0F172A]",
+                     "p-0 border-none w-[290px] overflow-hidden shadow-5xl transition-all duration-200 bg-[#0F172A]",
                      "top-0 h-screen"
                    )}
                  >
