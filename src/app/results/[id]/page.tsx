@@ -39,9 +39,10 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Test Results Hub v5.0 (High-Fidelity).
- * FIXED: Optimized filter pill sizing for mobile/desktop.
- * FIXED: Replaced "AI Rationale" with "Solution".
+ * @fileOverview Test Results Hub v5.5 (Production Hardened).
+ * FIXED: Null reference guard for sessionData.
+ * FIXED: val.includes type error in MetricCard.
+ * UPDATED: Solution labeling and fluid typography.
  */
 
 export default function ResultPage() {
@@ -74,7 +75,7 @@ export default function ResultPage() {
 
   const sessionData = useMemo(() => {
     if (!rawResultDocs || rawResultDocs.length === 0) return null
-    return [...rawResultDocs].sort((a: any, b: any) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]
+    return [...rawResultDocs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0]
   }, [rawResultDocs])
 
   const merit = useMemo(() => {
@@ -173,6 +174,16 @@ export default function ResultPage() {
     </div>
   )
 
+  if (!sessionData) return (
+     <div className="h-screen flex flex-col items-center justify-center text-slate-400 gap-4">
+        <AlertCircle className="h-12 w-12 opacity-10" />
+        <p className="font-black uppercase tracking-widest text-xs">Result node not found.</p>
+        <Button asChild variant="outline" className="rounded-xl border-slate-200">
+           <Link href="/dashboard">Return to Dashboard</Link>
+        </Button>
+     </div>
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 font-body pb-safe text-left">
       <Navbar />
@@ -190,7 +201,7 @@ export default function ResultPage() {
                           <ShieldCheck className="h-5 w-5 text-primary" />
                           <Badge className="bg-primary/20 text-primary border-none px-4 py-1.5 rounded-full font-black uppercase text-[9px] tracking-[0.2em] shadow-xl">Audit Finalized</Badge>
                        </div>
-                       <h1 className="text-xl sm:text-2xl md:text-5xl font-headline font-black uppercase leading-[1.1] tracking-tight break-words">
+                       <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-headline font-black uppercase leading-[1.1] tracking-tight break-words">
                           {sessionData.mockTitle}
                        </h1>
                     </div>
@@ -252,17 +263,19 @@ export default function ResultPage() {
 
         {/* DETAILED ANALYSIS TABS */}
         <Tabs defaultValue="SECTIONAL" className="space-y-8">
-           <TabsList className="bg-white border border-slate-100 p-1 md:p-1.5 h-14 md:h-16 rounded-2xl shadow-xl inline-flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-1 md:gap-2 px-1">
-              <TabsTrigger value="SECTIONAL" className="rounded-xl px-4 md:px-8 font-black uppercase text-[8px] md:text-[10px] tracking-widest gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white data-[state=active]:shadow-xl transition-all whitespace-nowrap">
-                 <BarChart3 className="h-4 w-4" /> Sectional Audit
-              </TabsTrigger>
-              <TabsTrigger value="TOPPER" className="rounded-xl px-4 md:px-8 font-black uppercase text-[8px] md:text-[10px] tracking-widest gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white data-[state=active]:shadow-xl transition-all whitespace-nowrap">
-                 <Trophy className="h-4 w-4" /> State Comparison
-              </TabsTrigger>
-              <TabsTrigger value="SOLUTIONS" className="rounded-xl px-4 md:px-8 font-black uppercase text-[8px] md:text-[10px] tracking-widest gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white data-[state=active]:shadow-xl transition-all whitespace-nowrap">
-                 <BrainCircuit className="h-4 w-4" /> Answer Review
-              </TabsTrigger>
-           </TabsList>
+           <div className="bg-white border border-slate-100 rounded-2xl p-1 md:p-1.5 shadow-xl inline-flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start">
+             <TabsList className="bg-transparent border-none p-0 flex h-14 md:h-16 gap-1 md:gap-2 px-1">
+                <TabsTrigger value="SECTIONAL" className="rounded-xl px-4 md:px-8 font-black uppercase text-[8px] md:text-[10px] tracking-widest gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white data-[state=active]:shadow-xl transition-all whitespace-nowrap">
+                   <BarChart3 className="h-4 w-4" /> Sectional Audit
+                </TabsTrigger>
+                <TabsTrigger value="TOPPER" className="rounded-xl px-4 md:px-8 font-black uppercase text-[8px] md:text-[10px] tracking-widest gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white data-[state=active]:shadow-xl transition-all whitespace-nowrap">
+                   <Trophy className="h-4 w-4" /> State Comparison
+                </TabsTrigger>
+                <TabsTrigger value="SOLUTIONS" className="rounded-xl px-4 md:px-8 font-black uppercase text-[8px] md:text-[10px] tracking-widest gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white data-[state=active]:shadow-xl transition-all whitespace-nowrap">
+                   <BrainCircuit className="h-4 w-4" /> Answer Review
+                </TabsTrigger>
+             </TabsList>
+           </div>
 
            <TabsContent value="SECTIONAL" className="m-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -415,12 +428,17 @@ export default function ResultPage() {
 }
 
 function MetricCard({ label, val, sub, color }: any) {
+   const valStr = String(val);
    return (
       <div className="space-y-1.5 md:space-y-2 p-5 md:p-8 bg-white/5 border border-white/5 rounded-3xl transition-all hover:bg-white/10 group text-left">
          <p className="text-[8px] md:text-[9px] font-black text-slate-500 uppercase tracking-[0.3em]">{label}</p>
          <div className="flex items-baseline gap-1">
-            <p className={cn("text-xl sm:text-2xl md:text-4xl font-headline font-black leading-none", color)}>{val}</p>
+            <p className={cn("text-xl sm:text-2xl md:text-5xl font-headline font-black leading-none tracking-tighter whitespace-nowrap", color)}>{val}</p>
             <span className="text-[10px] md:text-[12px] font-bold text-slate-600 uppercase tracking-widest">{sub}</span>
+         </div>
+         <div className="flex items-center gap-2 pt-1 md:pt-2">
+            <div className={cn("h-1 w-1 md:h-1.5 md:w-1.5 rounded-full animate-pulse", valStr.includes('NaN') ? 'bg-rose-500' : 'bg-emerald-500')} />
+            <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{valStr.includes('NaN') ? 'Error Syncing' : 'Node Active'}</p>
          </div>
       </div>
    )
