@@ -15,10 +15,11 @@ import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview High-Density Responsive Exam Catalog v3.5.
- * Features: Pin to My Exams Engine and Authentication Protocol.
+ * @fileOverview High-Density Responsive Exam Catalog v3.6.
+ * Optimized: Enhanced Institutional Logo rendering with full visibility and fallbacks.
  */
 
 export default function ExamsCatalog() {
@@ -35,6 +36,7 @@ function CatalogContent() {
   const { toast } = useToast()
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
 
   const examsQuery = useMemo(() => (db ? query(collection(db, 'exams')) : null), [db])
   const boardsQuery = useMemo(() => (db ? query(collection(db, 'boards')) : null), [db])
@@ -113,8 +115,10 @@ function CatalogContent() {
               Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3.5rem]" />)
            ) : filteredExams.map((exam: any) => {
               const board = boards?.find((b: any) => b.id === exam.boardId);
+              const logoUrl = board?.iconUrl || exam.iconUrl;
               const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, subjects: new Set() };
               const isPinned = profile?.pinnedExams?.includes(exam.id);
+              const isImgFailed = failedImages[exam.id];
               
               return (
                 <Card key={exam.id} className="border-none shadow-lg hover:shadow-2xl transition-all duration-300 rounded-xl md:rounded-[3.5rem] bg-white group overflow-hidden text-left h-full flex flex-col border border-slate-100 p-4 md:p-10 relative">
@@ -127,15 +131,22 @@ function CatalogContent() {
 
                    <Link href={`/exams/${exam.id}`} className="flex-1 flex flex-col">
                        <div className="flex justify-between items-start mb-4 md:mb-10 pr-10">
-                          <div className="h-10 w-10 md:h-20 md:w-20 rounded-lg md:rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center relative overflow-hidden shrink-0">
-                             {board?.iconUrl ? (
-                                <img src={board.iconUrl} className="w-full h-full object-contain p-1.5 md:p-3" alt="Logo" referrerPolicy="no-referrer" />
+                          <div className="h-10 w-10 md:h-20 md:w-20 rounded-lg md:rounded-3xl bg-white border border-slate-100 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner">
+                             {logoUrl && !isImgFailed ? (
+                                <img 
+                                  src={logoUrl} 
+                                  className="w-full h-full object-contain p-1.5 md:p-2" 
+                                  alt="Logo" 
+                                  referrerPolicy="no-referrer" 
+                                  crossOrigin="anonymous"
+                                  onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}
+                                />
                              ) : (
                                 <GraduationCap className="h-5 w-5 md:h-10 md:w-10 text-slate-300" />
                              )}
                           </div>
                           <Badge className="bg-primary/5 text-primary border-none text-[6px] md:text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md">
-                             {board?.abbreviation || 'GOVT'}
+                             {board?.abbreviation || 'GOVT'} Hub
                           </Badge>
                        </div>
                        

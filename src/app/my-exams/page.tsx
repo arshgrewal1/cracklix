@@ -29,8 +29,8 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional "My Exams" Dashboard v2.5.
- * Optimized: Robust Logo Scaling and Wikimedia-first Fallbacks.
+ * @fileOverview Institutional "My Exams" Dashboard v3.0.
+ * Optimized: Robust Logo Visibility with SVG support and Referrer policies.
  */
 
 export default function MyExamsPage() {
@@ -105,19 +105,20 @@ export default function MyExamsPage() {
            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
               {pinnedExams.length > 0 ? pinnedExams.map((exam) => {
                  const board = boards?.find((b: any) => b.id === exam.boardId);
-                 const logoUrl = exam.iconUrl || board?.iconUrl;
+                 // Prioritize corrected Board logo
+                 const logoUrl = board?.iconUrl || exam.iconUrl;
                  const isImgFailed = failedImages[exam.id];
-                 const isArmy = exam.id === 'indian-army' || board?.id === 'army';
 
                  return (
                   <Link key={exam.id} href={`/exams/${exam.id}`}>
                       <Card className="border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-white p-4 md:p-6 text-left group relative overflow-hidden h-full flex flex-col">
-                        <div className="h-12 w-12 md:h-14 md:w-14 rounded-xl bg-white flex items-center justify-center mb-3 md:mb-4 group-hover:bg-slate-50 transition-colors relative overflow-hidden shrink-0 border border-slate-100 shadow-inner">
+                        <div className="h-12 w-12 md:h-16 md:w-16 rounded-xl bg-white flex items-center justify-center mb-3 md:mb-4 group-hover:bg-slate-50 transition-colors relative overflow-hidden shrink-0 border border-slate-100 shadow-inner">
                             {logoUrl && !isImgFailed ? (
                               <img 
                                 src={logoUrl} 
-                                className={cn("w-full h-full object-contain p-1.5", isArmy ? "scale-150" : "")} 
+                                className="w-full h-full object-contain p-1" 
                                 referrerPolicy="no-referrer" 
+                                crossOrigin="anonymous"
                                 alt={exam.name} 
                                 onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}
                               />
@@ -128,7 +129,7 @@ export default function MyExamsPage() {
                             )}
                         </div>
                         <h4 className="font-black text-[13px] md:text-base text-[#0F172A] uppercase leading-tight line-clamp-2 flex-1">{exam.name}</h4>
-                        <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase mt-2">Registry Active</p>
+                        <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase mt-2">{board?.abbreviation || 'PSSSB'} Hub</p>
                       </Card>
                   </Link>
                  )
