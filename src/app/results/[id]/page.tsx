@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect, useCallback } from "react"
@@ -36,8 +37,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Institutional Result Engine v6.0.
- * Optimized: Full Mobile Responsive Audit. Removed all fixed widths.
+ * @fileOverview Institutional Result Engine v6.2.
+ * Fixed: Re-attempt logic and click propagation.
  */
 export default function ResultPage() {
   const params = useParams()
@@ -109,18 +110,38 @@ export default function ResultPage() {
     loadQuestions()
   }, [db, sessionData, mockId, toast, resultsLoading])
 
-  const handleReattempt = useCallback(async () => {
-    if (!db || !user || !mockId) return;
+  /**
+   * CRITICAL BUG FIX: Re-attempt Handler
+   */
+  const handleReattempt = () => {
+    console.log("Reattempt clicked");
+    console.log("Mock ID:", mockId);
+
+    if (!db || !user || !mockId) {
+      console.error("Reattempt failed: Missing context", { db: !!db, user: !!user, mockId });
+      return;
+    }
     
     const confirmMsg = "CRITICAL AUDIT: Restart evaluation node? Current scores will be archived.";
     if (!window.confirm(confirmMsg)) return;
 
-    deleteDoc(doc(db, "attempts", `${user.uid}_${mockId}`)).catch(() => {});
-    deleteDoc(doc(db, "results", `${user.uid}_${mockId}`)).catch(() => {});
+    // 1. Reset Firestore state (Non-blocking)
+    const attemptId = `${user.uid}_${mockId}`;
+    deleteDoc(doc(db, "attempts", attemptId)).catch(e => console.error("Attempt purge failed", e));
+    deleteDoc(doc(db, "results", attemptId)).catch(e => console.error("Result purge failed", e));
     
-    toast({ title: "Registry Reset", description: "Loading fresh attempt..." });
+    // 2. Clear potential LocalStorage caches
+    if (typeof window !== 'undefined') {
+       localStorage.removeItem(`attempt_${mockId}`);
+       localStorage.removeItem(`result_${mockId}`);
+    }
+
+    // 3. UI Feedback
+    toast({ title: "Registry Reset", description: "Loading fresh attempt instructions..." });
+    
+    // 4. Instant Navigation
     router.push(`/mocks/${mockId}/instructions`);
-  }, [db, user, mockId, router, toast]);
+  };
 
   const chartData = useMemo(() => {
     if (!sessionData?.subjectStats) return []
@@ -174,9 +195,13 @@ export default function ResultPage() {
                     </div>
                     <CardTitle className="font-headline text-lg md:text-3xl font-black text-[#0F172A] uppercase leading-tight tracking-tight break-words">{sessionData.mockTitle}</CardTitle>
                   </div>
-                  <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                     <Button onClick={handleReattempt} className="flex-1 sm:flex-none bg-primary hover:bg-orange-600 text-white rounded-lg h-10 px-6 font-black uppercase text-[8px] tracking-widest shadow-lg transition-all active:scale-95 gap-2">
-                        <RefreshCw className="h-3.5 w-3.5" /> Re-attempt
+                  <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto relative z-10">
+                     <Button 
+                        onClick={handleReattempt}
+                        type="button"
+                        className="flex-1 sm:flex-none bg-primary hover:bg-orange-600 text-white rounded-lg h-10 px-6 font-black uppercase text-[8px] tracking-widest shadow-lg transition-all active:scale-95 gap-2"
+                     >
+                        <RefreshCw className="h-3.5 w-3.5" /> RE-ATTEMPT MOCK
                      </Button>
                      <Button asChild className="flex-1 sm:flex-none bg-[#0F172A] hover:bg-black text-white rounded-lg h-10 px-6 font-black uppercase text-[8px] tracking-widest shadow-lg transition-all active:scale-95">
                         <Link href="/dashboard"><LayoutDashboard className="h-3.5 w-3.5 mr-2 text-primary" /> Dashboard</Link>
