@@ -23,8 +23,8 @@ const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
 ];
 
 /**
- * @fileOverview Institutional CBT Header v24.0.
- * MATCHED: Strictly aligns with the user screenshot (Orange Palette button, Dark Icon buttons).
+ * @fileOverview Institutional CBT Header v25.0.
+ * UPDATED: Streamlined mobile layout to prevent timer overlap. Removed Progress/Hub labels.
  */
 export default function ExamHeader({ 
   onPaletteToggle, 
@@ -56,8 +56,8 @@ export default function ExamHeader({
     <header className="bg-[#0B1528] text-white flex flex-col shrink-0 z-[100] border-b border-white/5 shadow-lg">
       <div className="h-14 md:h-18 flex items-center justify-between px-2 md:px-6 py-2">
         
-        {/* LEFT: BACK & PROGRESS */}
-        <div className="flex items-center gap-2 md:gap-4 shrink-0 min-w-0 flex-1">
+        {/* LEFT: BACK & SLIM PROGRESS */}
+        <div className="flex items-center gap-1 md:gap-4 shrink-0 min-w-0 flex-1">
            <button 
              onClick={onExitRequest} 
              className="p-1 text-slate-400 hover:text-white active:scale-90 transition-all cursor-pointer"
@@ -65,16 +65,13 @@ export default function ExamHeader({
               <ChevronLeft className="h-5 w-5" />
            </button>
            
-           <div className="flex flex-col items-start leading-none gap-0.5 min-w-0">
-              <div className="flex items-center gap-1.5">
-                 <p className="text-[8px] font-black uppercase text-primary tracking-widest">PROGRESS</p>
-                 <p className="text-[8px] font-black uppercase text-slate-500 tracking-widest">EXAM HUB</p>
-              </div>
-              <div className="flex items-baseline gap-2 min-w-0">
-                 <p className="text-[14px] md:text-[18px] font-black text-white shrink-0">
-                    {currentIdx + 1}<span className="text-slate-500 text-[10px] md:text-[12px] font-bold">/{questionsCount}</span>
-                 </p>
-              </div>
+           <div className="flex items-baseline gap-1 min-w-0">
+              <p className="text-[16px] md:text-[20px] font-black text-white shrink-0">
+                 {currentIdx + 1}
+              </p>
+              <p className="text-slate-500 text-[10px] md:text-[13px] font-bold uppercase tracking-widest">
+                 /{questionsCount}
+              </p>
            </div>
         </div>
 
@@ -87,7 +84,7 @@ export default function ExamHeader({
            />
         </div>
 
-        {/* RIGHT: ACTIONS HUB (Screenshot Match) */}
+        {/* RIGHT: ACTIONS HUB */}
         <div className="flex items-center justify-end gap-1.5 md:gap-4 shrink-0 flex-1">
            {availableModes.length > 1 && (
               <DropdownMenu>
@@ -124,7 +121,7 @@ export default function ExamHeader({
              onClick={onPaletteToggle}
              className="bg-[#F97316] hover:bg-orange-600 text-white h-10 md:h-12 px-3 md:px-6 rounded-xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center shadow-xl shadow-orange-500/20 transition-all active:scale-95 border-none"
            >
-              <span className="inline">PALETTE</span>
+              <span>PALETTE</span>
            </button>
         </div>
       </div>
