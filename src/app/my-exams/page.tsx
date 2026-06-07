@@ -26,10 +26,11 @@ import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional "My Exams" Dashboard v2.2.
- * Optimized: Robust Logo Error Handling and Full visibility logic.
+ * @fileOverview Institutional "My Exams" Dashboard v2.5.
+ * Optimized: Robust Logo Scaling and Wikimedia-first Fallbacks.
  */
 
 export default function MyExamsPage() {
@@ -106,15 +107,16 @@ export default function MyExamsPage() {
                  const board = boards?.find((b: any) => b.id === exam.boardId);
                  const logoUrl = exam.iconUrl || board?.iconUrl;
                  const isImgFailed = failedImages[exam.id];
+                 const isArmy = exam.id === 'indian-army' || board?.id === 'army';
 
                  return (
                   <Link key={exam.id} href={`/exams/${exam.id}`}>
                       <Card className="border-none shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-white p-4 md:p-6 text-left group relative overflow-hidden h-full flex flex-col">
-                        <div className="h-12 w-12 md:h-14 md:w-14 rounded-xl bg-slate-50 flex items-center justify-center mb-3 md:mb-4 group-hover:bg-primary/10 transition-colors relative overflow-hidden shrink-0 border border-slate-100 shadow-inner">
+                        <div className="h-12 w-12 md:h-14 md:w-14 rounded-xl bg-white flex items-center justify-center mb-3 md:mb-4 group-hover:bg-slate-50 transition-colors relative overflow-hidden shrink-0 border border-slate-100 shadow-inner">
                             {logoUrl && !isImgFailed ? (
                               <img 
                                 src={logoUrl} 
-                                className="w-full h-full object-contain p-1.5" 
+                                className={cn("w-full h-full object-contain p-1.5", isArmy ? "scale-150" : "")} 
                                 referrerPolicy="no-referrer" 
                                 alt={exam.name} 
                                 onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}

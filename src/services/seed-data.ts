@@ -2,14 +2,17 @@
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Engine v16.0.
- * Features: High-Fidelity Stable Asset Registry for all Punjab Boards.
- * Updated: Switched to Wikimedia-hosted emblems for 100% stability.
+ * @fileOverview Institutional Seeding Engine v17.0.
+ * Features: High-Fidelity STABLE Asset Registry.
+ * Fixed: Switched to Wikimedia Commons URLs to bypass government site hotlink blocks.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Cracklix Global Registry Sync...');
 
   const stateEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
+  const policeEmblem = "https://upload.wikimedia.org/wikipedia/commons/3/3a/Logo_of_Punjab_Police_India.png";
+  const armyEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Indian_Army_Logo.png/400px-Indian_Army_Logo.png";
+  const courtEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Emblem_of_India.svg/200px-Emblem_of_India.svg.png";
 
   // 1. BOARDS REGISTRY (The Governing Bodies)
   const boards = [
@@ -35,7 +38,7 @@ export async function seedInitialData(db: Firestore) {
       name: 'Punjab Police Recruitment Board', 
       region: 'Punjab', 
       category: 'DEFENCE_BOARD', 
-      iconUrl: 'https://punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png' 
+      iconUrl: policeEmblem
     },
     { 
       id: 'pspcl', 
@@ -51,7 +54,7 @@ export async function seedInitialData(db: Firestore) {
       name: 'Punjab & Haryana High Court (SSSC)', 
       region: 'Punjab/Haryana', 
       category: 'JUDICIAL_BOARD', 
-      iconUrl: 'https://highcourtchd.gov.in/images/hc_logo.png' 
+      iconUrl: courtEmblem
     },
     { 
       id: 'army', 
@@ -59,7 +62,7 @@ export async function seedInitialData(db: Firestore) {
       name: 'Indian Army Recruitment', 
       region: 'National', 
       category: 'CENTRAL_BOARD', 
-      iconUrl: 'https://www.indianarmy.nic.in/assets/img/logo.png' 
+      iconUrl: armyEmblem
     }
   ];
 
@@ -71,14 +74,16 @@ export async function seedInitialData(db: Firestore) {
   const exams = [
     { id: 'punjab-patwari', boardId: 'psssb', name: 'Revenue Patwari 2026', category: 'STATE', totalFullMocks: 45, totalPyqs: 10, iconUrl: stateEmblem },
     { id: 'psssb-clerk', boardId: 'psssb', name: 'Subordinate Clerk (PSSSB)', category: 'STATE', totalFullMocks: 60, totalPyqs: 15, iconUrl: stateEmblem },
-    { id: 'police-si', boardId: 'punjab-police', name: 'Sub-Inspector (Dist/Armed)', category: 'POLICE', totalFullMocks: 30, totalPyqs: 5, iconUrl: 'https://punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png' },
-    { id: 'police-constable', boardId: 'punjab-police', name: 'Constable Recruitment', category: 'POLICE', totalFullMocks: 50, totalPyqs: 8, iconUrl: 'https://punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png' },
+    { id: 'police-si', boardId: 'punjab-police', name: 'Sub-Inspector (Dist/Armed)', category: 'POLICE', totalFullMocks: 30, totalPyqs: 5, iconUrl: policeEmblem },
+    { id: 'police-constable', boardId: 'punjab-police', name: 'Constable Recruitment', category: 'POLICE', totalFullMocks: 50, totalPyqs: 8, iconUrl: policeEmblem },
     { id: 'ppsc-pcs', boardId: 'ppsc', name: 'PCS Executive Prelims', category: 'CIVIL', totalFullMocks: 20, totalPyqs: 12, iconUrl: stateEmblem },
     { id: 'pspcl-clerk', boardId: 'pspcl', name: 'PSPCL LDC / Clerk', category: 'STATE', totalFullMocks: 25, totalPyqs: 6, iconUrl: 'https://pspcl.in/assets/images/logo.png' },
-    { id: 'court-clerk', boardId: 'high-court', name: 'Subordinate Court Clerk', category: 'JUDICIAL', totalFullMocks: 35, totalPyqs: 10, iconUrl: 'https://highcourtchd.gov.in/images/hc_logo.png' }
+    { id: 'court-clerk', boardId: 'high-court', name: 'Subordinate Court Clerk', category: 'JUDICIAL', totalFullMocks: 35, totalPyqs: 10, iconUrl: courtEmblem },
+    { id: 'indian-army', boardId: 'army', name: 'Agniveer Recruitment', category: 'CENTRAL', totalFullMocks: 10, totalPyqs: 5, iconUrl: armyEmblem }
   ];
 
   for (const e of exams) {
+    // Overwriting stale iconUrl explicitly
     await setDoc(doc(db, 'exams', e.id), { ...e, updatedAt: serverTimestamp() }, { merge: true });
   }
 
