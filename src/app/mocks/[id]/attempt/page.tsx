@@ -43,6 +43,7 @@ export default function MockAttemptPage() {
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
+  const [mockData, setMockData] = useState<any>(null);
 
   const examStore = useExamStore();
 
@@ -52,9 +53,10 @@ export default function MockAttemptPage() {
       try {
         const mockSnap = await getDoc(doc(db, "mocks", mockId));
         if (!mockSnap.exists()) throw new Error("Mock series not found in registry.");
-        const mockData = mockSnap.data();
+        const mData = mockSnap.data();
+        setMockData(mData);
 
-        const questionIds = mockData.questionIds || [];
+        const questionIds = mData.questionIds || [];
         const fetchedQuestions: any[] = [];
         
         // Chunked fetching to prevent URI length issues
@@ -73,9 +75,9 @@ export default function MockAttemptPage() {
 
         const questions = questionIds.map(id => fetchedQuestions.find(q => q.id === id)).filter(Boolean);
 
-        if (mockData.sections && mockData.sections.length > 0) {
+        if (mData.sections && mData.sections.length > 0) {
            let currentIndex = 0;
-           mockData.sections.forEach((sec: any) => {
+           mData.sections.forEach((sec: any) => {
               for (let i = 0; i < sec.count; i++) {
                  if (questions[currentIndex]) {
                     questions[currentIndex].sectionId = sec.name;
@@ -91,7 +93,7 @@ export default function MockAttemptPage() {
         const attemptSnap = await getDoc(attemptRef);
         const savedState = attemptSnap.exists() ? attemptSnap.data() : undefined;
 
-        examStore.initExam(mockId, mockData.title || "Elite Series", user.uid, questions, mockData.duration || 120, savedState, mockData.languageMode);
+        examStore.initExam(mockId, mData.title || "Elite Series", user.uid, questions, mData.duration || 120, savedState, mData.languageMode);
       } catch (err: any) {
         toast({ variant: "destructive", title: "Assessment Blocked", description: err.message });
         router.push(`/mocks/${mockId}`);

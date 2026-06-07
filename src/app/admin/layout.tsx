@@ -1,8 +1,7 @@
-
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
-import { LayoutDashboard, Database, LogOut, ShieldCheck, Zap, Globe, Menu, HeartPulse, Settings, Users, CreditCard, ShieldAlert, History, User } from "lucide-react"
+import { LayoutDashboard, Database, LogOut, ShieldCheck, Zap, Globe, Menu, HeartPulse, Settings, Users, CreditCard, ShieldAlert, History, User, Loader2 } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
 import { useUser, useAuth } from "@/firebase"
@@ -12,7 +11,6 @@ import { signOut } from "firebase/auth"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
-import { Loader2 } from "lucide-react";
 
 /**
  * @fileOverview Administrative Security Node.
