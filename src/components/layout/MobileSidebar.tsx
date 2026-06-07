@@ -5,19 +5,15 @@ import {
   Home, 
   Zap, 
   FileText, 
-  BookOpen, 
-  Gem, 
-  Book, 
   Target, 
   Library, 
   MessageCircleQuestion, 
   Newspaper, 
   ChevronRight,
   LogOut,
-  Sparkles,
   ShieldCheck,
   User,
-  GraduationCap
+  Gem
 } from "lucide-react";
 import Link from "next/link";
 import { useUser, useAuth } from "@/firebase";
@@ -28,9 +24,9 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import React from "react";
 
 /**
- * @fileOverview Premium Institutional Dark Sidebar v9.0.
- * RECOVERED: Classic Dark Navy theme with 290px width and professional 14px font.
- * REFINED: Fully scrollable container with sticky-header aesthetics.
+ * @fileOverview Institutional Dark Sidebar v10.0 (Recovered).
+ * Reverts style to the premium Dark Navy theme with 'Node' terminology.
+ * Optimized: 290px width, 14px font size, 46px menu height.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
@@ -46,9 +42,9 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   };
 
   const menuItems = [
-    { label: "My Exams Hub", href: "/my-exams", icon: Target, isPrimary: true },
+    { label: "My Exams Hub", href: "/my-exams", icon: Target },
     { label: "Home Registry", href: "/", icon: Home },
-    { label: "Elite Pass Center", href: "/pass", icon: Gem, badge: "ACTIVATE" },
+    { label: "Elite Pass Hub", href: "/pass", icon: Gem, badge: "ACTIVATE" },
     { label: "Test Series", href: "/mocks", icon: Zap },
     { label: "Previous Papers", href: "/pyqs", icon: FileText },
     { label: "Study Materials", href: "/notes", icon: Library },
@@ -59,7 +55,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col h-full bg-[#0F172A] text-white overflow-y-auto no-scrollbar font-body w-full select-none">
       
-      {/* 1. PROFILE HUB (Institutional Dark) */}
+      {/* 1. PROFILE NODE (Institutional Dark) */}
       <div className="bg-[#0B1528] px-6 pt-12 pb-10 flex flex-col gap-6 relative overflow-hidden border-b border-white/5">
         <div className="absolute top-0 right-0 p-8 opacity-5"><ShieldCheck className="h-40 w-40" /></div>
         
@@ -93,13 +89,13 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
         >
           <div className="flex items-center gap-3">
              <User className="h-4 w-4 text-primary" />
-             <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-300">View Registry Profile</span>
+             <span className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-300">Registry Profile</span>
           </div>
           <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-primary transition-all" />
         </Link>
       </div>
 
-      {/* 2. MENU LEDGER */}
+      {/* 2. MENU REGISTRY */}
       <div className="flex flex-col py-6">
         {menuItems.map((item) => {
           const isActive = pathname === item.href;
