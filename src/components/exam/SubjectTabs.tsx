@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
 
 /**
- * @fileOverview High-Density Subject Navigation v2.0.
- * UPDATED: Optimized tab width to show only 2-3 sections at a time on mobile.
+ * @fileOverview High-Density Subject Navigation v3.0.
+ * UPDATED: Restricts visibility to exactly two subject nodes at a time for cleaner UX.
  */
 export default function SubjectTabs() {
   const questions = useExamStore(s => s.questions);
@@ -44,7 +44,7 @@ export default function SubjectTabs() {
   const activeSectionId = questions[currentIdx]?.sectionId || '';
 
   return (
-    <nav className="bg-white border-b border-slate-200 h-11 flex items-center px-2 overflow-x-auto no-scrollbar gap-2 shrink-0 sticky top-0 z-40 pointer-events-auto">
+    <nav className="bg-white border-b border-slate-200 h-11 flex items-center px-1 overflow-x-auto no-scrollbar gap-1 shrink-0 sticky top-0 z-40 pointer-events-auto">
       {sections.map((s) => {
         const isActive = activeSectionId === s.id;
         return (
@@ -52,7 +52,7 @@ export default function SubjectTabs() {
             key={s.id}
             onClick={() => setCurrentIdx(s.startIdx)}
             className={cn(
-              "h-full flex items-center justify-between gap-2 transition-all whitespace-nowrap border-b-2 px-3 cursor-pointer active:scale-95 min-w-[140px] max-w-[180px]",
+              "h-full flex items-center justify-between gap-2 transition-all whitespace-nowrap border-b-2 px-3 cursor-pointer active:scale-95 min-w-[48%] md:min-w-[200px]",
               isActive 
                 ? "border-primary text-primary bg-primary/5" 
                 : "border-transparent text-slate-400 hover:text-slate-600"

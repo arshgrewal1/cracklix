@@ -11,6 +11,7 @@ import TacticalFooter from "@/components/exam/TacticalFooter";
 import AntiCheat from "@/components/exam/AntiCheat";
 import QuestionRenderer from "@/components/questions/QuestionRenderer";
 import QuestionPalette from "@/components/mocks/QuestionPalette";
+import SubjectTabs from "@/components/exam/SubjectTabs";
 import { Button } from "@/components/ui/button";
 import { Loader2, Play, ShieldCheck, CheckCircle2, Zap, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
@@ -26,8 +27,8 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
- * @fileOverview Production Hardened CBT Attempt Engine v20.0.
- * UPDATED: Removed SubjectTabs to maximize vertical space as requested.
+ * @fileOverview Production Hardened CBT Attempt Engine v21.0.
+ * UPDATED: Integrated SubjectTabs with dual-visibility constraints.
  */
 
 export default function MockAttemptPage() {
@@ -179,7 +180,7 @@ export default function MockAttemptPage() {
         onExitRequest={() => setShowExitModal(true)}
       />
 
-      <main className="flex-1 flex overflow-hidden relative bg-slate-50/30">
+      <main className="flex-1 flex flex-col overflow-hidden relative bg-slate-50/30">
         <AnimatePresence>
           {examStore.isPaused && (
             <motion.div 
@@ -200,36 +201,41 @@ export default function MockAttemptPage() {
           )}
         </AnimatePresence>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center">
-           <div className="w-full max-w-4xl p-2 md:p-6 space-y-3 md:space-y-4">
-              {q ? (
-                <motion.div 
-                   key={examStore.currentIdx}
-                   initial={{ opacity: 0, x: 5 }}
-                   animate={{ opacity: 1, x: 0 }}
-                   transition={{ duration: 0.15 }}
-                >
-                  <QuestionRenderer 
-                    language={examStore.language as any} 
-                    question={{...q, displayId: (examStore.currentIdx + 1).toString()}} 
-                    selectedAnswer={selectedAnswer}
-                    onSelect={(idx) => examStore.setAnswer(examStore.currentIdx, idx, db)}
-                    className="shadow-md border-none p-4 md:p-10 rounded-[1.5rem] md:rounded-[2rem]"
-                  />
-                </motion.div>
-              ) : (
-                <div className="p-20 text-center opacity-20">
-                   <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
-                   <p className="text-[10px] font-black uppercase">Loading node...</p>
+        <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex flex-col overflow-hidden">
+             <SubjectTabs />
+             <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center">
+                <div className="w-full max-w-4xl p-2 md:p-6 space-y-3 md:space-y-4">
+                   {q ? (
+                     <motion.div 
+                        key={examStore.currentIdx}
+                        initial={{ opacity: 0, x: 5 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.15 }}
+                     >
+                       <QuestionRenderer 
+                         language={examStore.language as any} 
+                         question={{...q, displayId: (examStore.currentIdx + 1).toString()}} 
+                         selectedAnswer={selectedAnswer}
+                         onSelect={(idx) => examStore.setAnswer(examStore.currentIdx, idx, db)}
+                         className="shadow-md border-none p-4 md:p-10 rounded-[1.5rem] md:rounded-[2rem]"
+                       />
+                     </motion.div>
+                   ) : (
+                     <div className="p-20 text-center opacity-20">
+                        <Loader2 className="h-10 w-10 animate-spin mx-auto mb-4" />
+                        <p className="text-[10px] font-black uppercase">Loading node...</p>
+                     </div>
+                   )}
+                   <TacticalFooter onSubmit={() => setShowSubmitModal(true)} />
                 </div>
-              )}
-              <TacticalFooter onSubmit={() => setShowSubmitModal(true)} />
-           </div>
-        </div>
+             </div>
+          </div>
 
-        <aside className="hidden lg:block w-[320px] md:w-[380px] bg-white border-l border-slate-100 h-full shrink-0 shadow-2xl z-20">
-           <QuestionPalette onSelect={(idx) => examStore.setCurrentIdx(idx)} onSubmit={() => setShowSubmitModal(true)} />
-        </aside>
+          <aside className="hidden lg:block w-[320px] md:w-[380px] bg-white border-l border-slate-100 h-full shrink-0 shadow-2xl z-20">
+             <QuestionPalette onSelect={(idx) => examStore.setCurrentIdx(idx)} onSubmit={() => setShowSubmitModal(true)} />
+          </aside>
+        </div>
       </main>
       
       <Sheet open={isMobilePaletteOpen} onOpenChange={setIsMobilePaletteOpen}>

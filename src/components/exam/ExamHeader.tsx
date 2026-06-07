@@ -24,8 +24,8 @@ const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
 ];
 
 /**
- * @fileOverview Institutional CBT Header v17.0.
- * UPDATED: Added Mock Title and restored Palette button visibility.
+ * @fileOverview Institutional CBT Header v18.0.
+ * UPDATED: Optimized for high visibility of Mock Title and Palette Button across all breakpoints.
  */
 export default function ExamHeader({ 
   onPaletteToggle, 
