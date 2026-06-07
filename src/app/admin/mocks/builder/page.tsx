@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect, Suspense } from "react"
@@ -128,7 +127,13 @@ function MockBuilderContent() {
 
   useEffect(() => {
     if (existingMock && questionBank.length > 0) {
-      setMockData(prev => ({ ...prev, ...existingMock }));
+      setMockData(prev => ({ 
+        ...prev, 
+        ...existingMock,
+        positiveMarks: existingMock.positiveMarks ?? 1,
+        negativeMarks: existingMock.negativeMarks ?? 0.25,
+        duration: existingMock.duration ?? 120
+      }));
 
       if (existingMock.sections && existingMock.sections.length > 0 && existingMock.questionIds) {
         let currentIndex = 0;
@@ -209,7 +214,7 @@ function MockBuilderContent() {
         <div className="flex items-center gap-6">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-2xl border bg-white h-12 w-12 shadow-sm"><ChevronLeft className="h-6 w-6" /></Button>
           <div className="text-left">
-            <h1 className="text-4xl font-black font-headline uppercase tracking-tight text-[#0F172A]">{isEditing ? "Modify Mock" : "Mock Architect"}</h1>
+            <h1 className="text-4xl font-headline font-black uppercase tracking-tight text-[#0F172A]">{isEditing ? "Modify Mock" : "Mock Architect"}</h1>
             <p className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-1">Design High-Fidelity Test Series</p>
           </div>
         </div>

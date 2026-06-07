@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -35,7 +34,7 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
  * @fileOverview Test Results Center.
- * Simplified Language: Replaced technical jargon with easy words.
+ * FIXED: Removed query orderBy to resolve composite index requirements, sorting client-side instead.
  */
 
 export default function ResultPage() {
@@ -59,12 +58,13 @@ export default function ResultPage() {
 
   const { data: rawResultDocs, loading: resultsLoading } = useCollection<any>(resultsQuery)
   
+  // FIXED: No orderBy here to prevent indexing crash
   const globalResultsQuery = useMemo(() => {
     if (!db || !mockId) return null
-    return query(collection(db, "results"), where("mockId", "==", mockId), orderBy("score", "desc"))
+    return query(collection(db, "results"), where("mockId", "==", mockId))
   }, [db, mockId])
 
-  const { data: globalResults } = useCollection<any>(globalResultsQuery)
+  const { data: rawGlobalResults } = useCollection<any>(globalResultsQuery)
 
   const sessionData = useMemo(() => {
     if (!rawResultDocs || rawResultDocs.length === 0) return null
@@ -72,14 +72,15 @@ export default function ResultPage() {
   }, [rawResultDocs])
 
   const merit = useMemo(() => {
-     if (!globalResults || !sessionData) return { rank: '?', total: 0, percentile: 0, topper: null };
-     const sorted = [...globalResults];
+     if (!rawGlobalResults || !sessionData) return { rank: '?', total: 0, percentile: 0, topper: null };
+     // CLIENT-SIDE SORTING to avoid Firestore composite index requirement
+     const sorted = [...rawGlobalResults].sort((a, b) => (b.score || 0) - (a.score || 0));
      const rank = sorted.findIndex((r: any) => r.userId === user?.uid) + 1 || 1;
      const total = sorted.length;
      const percentile = Math.round(((total - rank) / (total || 1)) * 1000) / 10;
      const topper = sorted[0];
      return { rank, total, percentile, topper };
-  }, [globalResults, sessionData, user]);
+  }, [rawGlobalResults, sessionData, user]);
 
   useEffect(() => {
     async function loadQuestions() {
@@ -260,7 +261,7 @@ export default function ResultPage() {
               </TabsTrigger>
            </TabsList>
 
-           <TabsContent value="SECTIONAL" className="m-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
+           <TabsContent value="SECTIONAL" className="m-0 animate-in fade-in duration-500">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                  {sectionalAnalysis.map((s, i) => (
                     <Card key={i} className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 group hover:translate-y-[-6px] transition-all border border-slate-100">
@@ -296,7 +297,7 @@ export default function ResultPage() {
               </div>
            </TabsContent>
 
-           <TabsContent value="TOPPER" className="m-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
+           <TabsContent value="TOPPER" className="m-0 animate-in fade-in duration-500">
               <Card className="border-none shadow-3xl rounded-[3.5rem] bg-white overflow-hidden border border-slate-100">
                  <div className="grid grid-cols-1 lg:grid-cols-2">
                     <div className="p-10 md:p-20 space-y-12 border-b lg:border-b-0 lg:border-r border-slate-50">
@@ -331,7 +332,7 @@ export default function ResultPage() {
               </Card>
            </TabsContent>
 
-           <TabsContent value="SOLUTIONS" className="m-0 space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+           <TabsContent value="SOLUTIONS" className="m-0 space-y-10 animate-in fade-in duration-500">
               <div className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-sm flex flex-wrap items-center gap-4">
                  <FilterNode active={activeReviewFilter === 'ALL'} label="ALL" count={questions.length} onClick={() => setActiveReviewFilter('ALL')} color="bg-slate-50 text-slate-500" />
                  <FilterNode active={activeReviewFilter === 'CORRECT'} label="CORRECT" count={Math.floor(sessionData.score)} onClick={() => setActiveReviewFilter('CORRECT')} color="bg-emerald-50 text-emerald-600" />
