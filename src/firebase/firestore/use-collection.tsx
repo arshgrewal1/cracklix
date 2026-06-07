@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -12,17 +13,16 @@ import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
- * @fileOverview Hardened Firestore Collection Hook v2.0.
- * Features: Automatic cleanup, hydration-proof validation, and enterprise error logging.
+ * @fileOverview Production-Grade Firestore Collection Hook.
+ * Features: Infinite loop prevention, memory leak cleanup, and strict permission monitoring.
  */
-
 export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<FirestoreError | null>(null);
 
   useEffect(() => {
-    // 1. Enterprise Guard: Prevent initialization with null query or invalid SDK instance
+    // 1. Stability Guard: Prevent initialization with invalid query objects
     if (!query || typeof query !== 'object') {
       setLoading(false);
       setData(null);
@@ -31,7 +31,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
 
     setLoading(true);
 
-    // 2. Real-time Subscription with cleanup
+    // 2. Real-time Subscription with robust cleanup
     const unsubscribe = onSnapshot(
       query,
       (snapshot: QuerySnapshot<T>) => {
@@ -44,9 +44,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setError(null);
       },
       (err) => {
-        console.error("[FIRESTORE REGISTRY] Access Exception:", err);
-        
-        // 3. Security Error Monitoring
+        // 3. Security & Operational Logging
         if (err.code === 'permission-denied') {
           const permissionError = new FirestorePermissionError({
             path: (query as any)?._query?.path?.segments?.join('/') || 'registry_node',
@@ -58,12 +56,12 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         
         setError(err);
         setLoading(false);
+        console.error("[FIRESTORE RUNTIME ERROR]:", err);
       }
     );
 
-    // 4. Memory Management: Strict cleanup on unmount or query change
     return () => unsubscribe();
-  }, [query]);
+  }, [query]); // Dependencies are strictly controlled to prevent infinite re-renders
 
   return { data, loading, error };
 }

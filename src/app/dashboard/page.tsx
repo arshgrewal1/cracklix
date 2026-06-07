@@ -38,8 +38,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import ShareButton from "@/components/navigation/ShareButton"
 
 /**
- * @fileOverview Student Dashboard v12.0.
- * UPDATED: Hardened real-time stats calculation using actual result metrics.
+ * @fileOverview Student Dashboard v13.0.
+ * HARDENED: Real-time stats calculated from live results with strict null checks.
  */
 
 export default function StudentDashboard() {
@@ -60,7 +60,7 @@ export default function StudentDashboard() {
 
   const results = useMemo(() => {
     if (!rawResults) return []
-    return [...rawResults].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+    return [...rawResults].sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime())
   }, [rawResults])
 
   const stats = useMemo(() => {
@@ -68,19 +68,19 @@ export default function StudentDashboard() {
     
     const total = results.length
     
-    // 1. Accuracy Audit
+    // 1. Precise Accuracy Audit
     const avgAcc = Math.round(results.reduce((acc: number, r: any) => acc + (r.accuracy || 0), 0) / total)
     
-    // 2. Real Time Spent Node
+    // 2. Verified Time Accumulation
     const totalSeconds = results.reduce((acc: number, r: any) => acc + (r.timeTaken || 0), 0)
     const hoursSpent = totalSeconds / 3600
     const timeFormatted = hoursSpent >= 1 ? `${hoursSpent.toFixed(1)}h` : `${Math.round(totalSeconds / 60)}m`
 
-    // 3. Activity Streak Check (Unique Days)
+    // 3. Activity Streak Audit (Unique Dates)
     const uniqueDays = new Set(results.map(r => new Date(r.timestamp).toDateString()))
     const streak = uniqueDays.size
 
-    // 4. Preparation Readiness Index (Weighted Score)
+    // 4. Weighted Preparation Index
     const readiness = Math.min(100, Math.round((avgAcc * 0.7) + (Math.min(total, 30) * 1)))
 
     return { 
@@ -105,7 +105,7 @@ export default function StudentDashboard() {
       
       <main className="container mx-auto px-4 md:px-6 py-6 md:py-12 max-w-7xl space-y-8 md:space-y-12">
         
-        {/* PROFILE CARD */}
+        {/* PROFILE HUB */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
            
            <div className="lg:col-span-8 space-y-8">
@@ -126,7 +126,7 @@ export default function StudentDashboard() {
                              {profile?.status || 'Free'} Pass
                            </Badge>
                            <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px] flex items-center gap-2">
-                             <Target className="h-3.5 w-3.5 text-primary" /> {profile?.targetExam || 'General Prep'}
+                             <Target className="h-3.5 w-3.5 text-primary" /> {profile?.targetExam || 'General Hub'}
                            </p>
                         </div>
                      </div>
@@ -142,20 +142,20 @@ export default function StudentDashboard() {
                 </div>
               </section>
 
-              {/* METRICS */}
+              {/* STATS MATRIX */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-                 <MetricItem label="PREPARATION SCORE" val={`${stats.readiness}%`} icon={<TrendingUp className="text-primary h-4 w-4" />} />
-                 <MetricItem label="AVG ACCURACY" val={`${stats.avgAccuracy}%`} icon={<Target className="text-emerald-500 h-4 w-4" />} />
+                 <MetricItem label="PREP SCORE" val={`${stats.readiness}%`} icon={<TrendingUp className="text-primary h-4 w-4" />} />
+                 <MetricItem label="ACCURACY" val={`${stats.avgAccuracy}%`} icon={<Target className="text-emerald-500 h-4 w-4" />} />
                  <MetricItem label="TESTS DONE" val={stats.total} icon={<ClipboardList className="text-blue-500 h-4 w-4" />} />
-                 <MetricItem label="TIME SPENT" val={stats.hours} icon={<Clock className="text-amber-500 h-4 w-4" />} />
+                 <MetricItem label="TOTAL TIME" val={stats.hours} icon={<Clock className="text-amber-500 h-4 w-4" />} />
               </div>
 
-              {/* RECENT TESTS */}
+              {/* RECENT FEED */}
               <Card className="border-none shadow-3xl rounded-[3rem] bg-white overflow-hidden text-left border border-slate-100">
                  <CardHeader className="p-8 md:p-12 border-b border-slate-50 bg-slate-50/30 flex flex-row items-center justify-between">
                     <div className="space-y-1">
-                       <h3 className="font-headline text-xl md:text-2xl font-black text-[#0F172A] uppercase">Recent Tests</h3>
-                       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Your latest performance records</p>
+                       <h3 className="font-headline text-xl md:text-2xl font-black text-[#0F172A] uppercase">Attempt Ledger</h3>
+                       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Verified performance history</p>
                     </div>
                     <Button asChild variant="ghost" className="h-10 text-[9px] font-black uppercase tracking-widest text-primary gap-2">
                        <Link href="/my-exams">View All <ChevronRight className="h-4 w-4" /></Link>
@@ -184,14 +184,14 @@ export default function StudentDashboard() {
                              </Link>
                           ))
                        ) : (
-                          <div className="p-24 text-center opacity-30 italic text-[11px] uppercase font-black tracking-widest text-slate-400">No tests completed yet.</div>
+                          <div className="p-24 text-center opacity-30 italic text-[11px] uppercase font-black tracking-widest text-slate-400">Registry hub empty. Start your first mock.</div>
                        )}
                     </div>
                  </CardContent>
               </Card>
            </div>
 
-           {/* SIDEBAR */}
+           {/* SIDEBAR NODES */}
            <div className="lg:col-span-4 space-y-8 md:space-y-12">
               
               <Card className="border-none shadow-4xl bg-gradient-to-br from-orange-500 to-primary text-white p-10 rounded-[3rem] relative overflow-hidden group">
@@ -214,10 +214,10 @@ export default function StudentDashboard() {
               </Card>
 
               <div className="grid grid-cols-2 gap-4 md:gap-6">
-                 <DashboardTile icon={<Bookmark className="text-primary" />} label="SAVED ITEMS" href="/revision" />
-                 <DashboardTile icon={<Trophy className="text-amber-500" />} label="RANKINGS" href="/leaderboard" />
-                 <DashboardTile icon={<LayoutGrid className="text-blue-500" />} label="ALL EXAMS" href="/exams" />
-                 <DashboardTile icon={<Activity className="text-emerald-500" />} label="MY PERFORMANCE" href="/analytics" />
+                 <DashboardTile icon={<Bookmark className="text-primary" />} label="REVISION" href="/revision" />
+                 <DashboardTile icon={<Trophy className="text-amber-500" />} label="MERIT LIST" href="/leaderboard" />
+                 <DashboardTile icon={<LayoutGrid className="text-blue-500" />} label="ALL HUBS" href="/exams" />
+                 <DashboardTile icon={<Activity className="text-emerald-500" />} label="ANALYTICS" href="/analytics" />
               </div>
 
               <Card className="border-none shadow-xl bg-white p-10 rounded-[3rem] text-left space-y-8 border border-slate-100">
@@ -227,7 +227,7 @@ export default function StudentDashboard() {
                     </div>
                     <div className="space-y-1">
                        <h4 className="text-lg font-black uppercase text-[#0B1528]">Spread Success</h4>
-                       <p className="text-[9px] font-bold uppercase text-slate-400">Share with other students</p>
+                       <p className="text-[9px] font-bold uppercase text-slate-400">Share with aspirants</p>
                     </div>
                  </div>
                  <ShareButton 
