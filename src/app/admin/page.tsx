@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import { Plus, Database, Users, ShieldCheck, Zap, Loader2, Landmark, BookOpen, Send, CheckCircle2, Activity, Clock, ChevronRight, History } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore } from "@/firebase"
