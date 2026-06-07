@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, Suspense, useEffect } from "react"
@@ -23,6 +22,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Login & Sign Up Hub v1.6.
