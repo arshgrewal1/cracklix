@@ -140,22 +140,22 @@ export default function PassManagement() {
              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Identity Name</Label>
-                   <Input value={editingPass?.name} onChange={e => setEditingPass({...editingPass, name: e.target.value})} className="h-14 rounded-xl border-slate-100 font-bold" />
+                   <Input value={editingPass?.name || ""} onChange={e => setEditingPass({...editingPass, name: e.target.value})} className="h-14 rounded-xl border-slate-100 font-bold" />
                 </div>
                 <div className="space-y-2">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Price (₹)</Label>
-                   <Input type="number" value={editingPass?.price} onChange={e => setEditingPass({...editingPass, price: e.target.value})} className="h-14 rounded-xl border-slate-100 font-black text-primary" />
+                   <Input type="number" value={editingPass?.price ?? ""} onChange={e => setEditingPass({...editingPass, price: e.target.value})} className="h-14 rounded-xl border-slate-100 font-black text-primary" />
                 </div>
              </div>
 
              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Duration (Days)</Label>
-                   <Input type="number" value={editingPass?.durationDays} onChange={e => setEditingPass({...editingPass, durationDays: e.target.value})} className="h-12 rounded-xl" />
+                   <Input type="number" value={editingPass?.durationDays ?? ""} onChange={e => setEditingPass({...editingPass, durationDays: e.target.value})} className="h-12 rounded-xl" />
                 </div>
                 <div className="space-y-2">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Display Sort Index</Label>
-                   <Input type="number" value={editingPass?.displayOrder} onChange={e => setEditingPass({...editingPass, displayOrder: e.target.value})} className="h-12 rounded-xl" />
+                   <Input type="number" value={editingPass?.displayOrder ?? ""} onChange={e => setEditingPass({...editingPass, displayOrder: e.target.value})} className="h-12 rounded-xl" />
                 </div>
              </div>
 
@@ -178,11 +178,11 @@ export default function PassManagement() {
              <div className="grid grid-cols-2 gap-6 pt-6 border-t border-slate-50">
                 <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                    <div className="space-y-0.5"><p className="text-[10px] font-black uppercase">Pass Active</p></div>
-                   <Switch checked={editingPass?.active} onCheckedChange={v => setEditingPass({...editingPass, active: v})} />
+                   <Switch checked={editingPass?.active || false} onCheckedChange={v => setEditingPass({...editingPass, active: v})} />
                 </div>
                 <div className="flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-100">
                    <div className="space-y-0.5"><p className="text-[10px] font-black uppercase">Ad-Free</p></div>
-                   <Switch checked={editingPass?.adFree} onCheckedChange={v => setEditingPass({...editingPass, adFree: v})} />
+                   <Switch checked={editingPass?.adFree || false} onCheckedChange={v => setEditingPass({...editingPass, adFree: v})} />
                 </div>
              </div>
           </div>
