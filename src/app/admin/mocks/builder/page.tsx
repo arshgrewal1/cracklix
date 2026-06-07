@@ -38,7 +38,9 @@ import {
   Lock,
   Unlock,
   History,
-  LayoutGrid
+  LayoutGrid,
+  Sparkles,
+  FileBox
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, where, limit, getDocs, documentId } from "firebase/firestore"
@@ -246,6 +248,18 @@ function MockBuilderContent() {
      else router.push(`/admin/mocks/builder?id=${id}`);
   };
 
+  const handleAutoGenerateSections = () => {
+    if (!subjects || subjects.length === 0) return;
+    const newSections = subjects.map((s: any, idx: number) => ({
+      id: `sec-sub-${idx}`,
+      name: s.name,
+      questions: []
+    }));
+    setSections(newSections);
+    if (newSections[0]) setActiveSectionId(newSections[0].id);
+    toast({ title: "Sections Generated", description: `${subjects.length} subject hubs added to assembly.` });
+  }
+
   return (
     <div className="max-w-[1600px] mx-auto space-y-8 pb-32 text-left pt-4">
       <div className="flex items-center justify-between gap-6 px-4">
@@ -451,7 +465,7 @@ function MockBuilderContent() {
                              <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1.5">Target Section</p>
                              <Select value={activeSectionId} onValueChange={setActiveSectionId}>
                                 <SelectTrigger className="h-12 w-full bg-white/10 border-white/10 text-white font-black text-[10px] rounded-xl uppercase tracking-widest">
-                                   <SelectValue />
+                                   <SelectValue placeholder="Choose Target Section" />
                                 </SelectTrigger>
                                 <SelectContent>
                                    {sections.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
@@ -498,6 +512,16 @@ function MockBuilderContent() {
                  </TabsContent>
 
                  <TabsContent value="assembly" className="p-10 flex-1 flex flex-col m-0 text-left">
+                    <div className="mb-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+                       <div className="space-y-1">
+                          <h3 className="text-xl font-headline font-black uppercase text-[#0F172A]">Mock Blueprint</h3>
+                          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Organize and reorder test sections.</p>
+                       </div>
+                       <Button onClick={handleAutoGenerateSections} variant="outline" className="h-12 rounded-xl border-primary/20 text-primary font-black uppercase text-[10px] tracking-widest gap-2 bg-primary/5 hover:bg-primary hover:text-white">
+                          <Sparkles className="h-4 w-4" /> Auto-Generate Subject Hubs
+                       </Button>
+                    </div>
+
                     <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 space-y-10">
                        {sections.map((section, sIdx) => (
                           <div key={section.id} className="space-y-4">
@@ -526,15 +550,41 @@ function MockBuilderContent() {
                                       </Button>
                                    </div>
                                 ))}
-                                <Button variant="ghost" onClick={() => setActiveSectionId(section.id)} className="text-[9px] font-black uppercase text-primary tracking-widest h-8 px-4 gap-2">
-                                   <Plus className="h-3 w-3" /> Add More to this section
-                                </Button>
+                                
+                                <div className="flex gap-2">
+                                   <Button variant="ghost" onClick={() => setActiveSectionId(section.id)} className="text-[9px] font-black uppercase text-primary tracking-widest h-8 px-4 gap-2">
+                                      <Plus className="h-3 w-3" /> Link Questions
+                                   </Button>
+                                </div>
                              </div>
                           </div>
                        ))}
-                       <Button onClick={() => setSections([...sections, { id: `sec-${Date.now()}`, name: 'New Section', questions: [] }])} className="w-full h-14 border-2 border-dashed border-slate-100 text-slate-400 hover:text-primary hover:border-primary/50 transition-all rounded-2xl bg-white font-black uppercase text-[10px] tracking-widest gap-2">
-                          <PlusCircle className="h-4 w-4" /> Add Dynamic Section Hub
-                       </Button>
+                       
+                       <div className="flex flex-col gap-4 pt-6 border-t border-slate-100">
+                          <p className="text-[9px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Manual Node Management</p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <Button onClick={() => setSections([...sections, { id: `sec-${Date.now()}`, name: 'New Section', questions: [] }])} className="h-14 border-2 border-dashed border-slate-100 text-slate-400 hover:text-primary hover:border-primary/50 transition-all rounded-2xl bg-white font-black uppercase text-[10px] tracking-widest gap-2">
+                                <PlusCircle className="h-4 w-4" /> Add Dynamic Hub
+                             </Button>
+                             
+                             <Select onValueChange={(val) => {
+                                const sub = subjects?.find((s:any) => s.id === val);
+                                if (sub) {
+                                   setSections([...sections, { id: `sec-${Date.now()}`, name: sub.name, questions: [] }]);
+                                   toast({ title: "Hub Added", description: `${sub.name} appended to assembly.` });
+                                }
+                             }}>
+                                <SelectTrigger className="h-14 border-2 border-dashed border-slate-100 text-slate-400 hover:text-blue-500 hover:border-blue-500/50 transition-all rounded-2xl bg-white font-black uppercase text-[10px] tracking-widest gap-2">
+                                   <div className="flex items-center gap-2"><FileBox className="h-4 w-4" /> <SelectValue placeholder="Add Subject Hub" /></div>
+                                </SelectTrigger>
+                                <SelectContent>
+                                   {subjects?.filter((s:any) => !sections.some(sec => sec.name === s.name)).map((s:any) => (
+                                      <SelectItem key={s.id} value={s.id} className="font-bold uppercase text-[10px]">{s.name}</SelectItem>
+                                   ))}
+                                </SelectContent>
+                             </Select>
+                          </div>
+                       </div>
                     </div>
                  </TabsContent>
               </Tabs>
@@ -544,3 +594,4 @@ function MockBuilderContent() {
     </div>
   )
 }
+
