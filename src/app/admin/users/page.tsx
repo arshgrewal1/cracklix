@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Search, MoreVertical, ShieldCheck, Trash2, Gift, Gem, RefreshCw, XCircle, User as UserIcon, Calendar, MapPin, Mail, Phone, GraduationCap, Unlock, Zap } from "lucide-react"
+import { Search, MoreVertical, ShieldCheck, Trash2, Gift, Gem, RefreshCw, XCircle, User as UserIcon, Calendar, MapPin, Mail, Phone, GraduationCap, Unlock, Zap, Loader2 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, doc, updateDoc, serverTimestamp, deleteDoc, addDoc } from "firebase/firestore"
@@ -32,8 +32,8 @@ import { cn } from "@/lib/utils"
 import React from "react"
 
 /**
- * @fileOverview Student Registry v13.0.
- * Fixed: Added missing Label and Input imports.
+ * @fileOverview Student Registry v14.0.
+ * Fixed: Added missing Label, Input, and Loader2 imports.
  * Features: Manual Pass & Test Controls with Unlock Everything logic.
  */
 export default function AspirantsManagement() {

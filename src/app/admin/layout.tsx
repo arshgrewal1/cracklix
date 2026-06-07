@@ -38,7 +38,7 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Administrative Security Hub v6.0.
+ * @fileOverview Administrative Security Hub v6.5.
  * Fixed: Missing Button import.
  * Restored all management functions for full institutional control.
  */
