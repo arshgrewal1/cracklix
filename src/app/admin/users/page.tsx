@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Search, MoreVertical, ShieldCheck, Trash2, Gift, Gem, RefreshCw, XCircle, User as UserIcon, Calendar, MapPin, Mail, Phone, GraduationCap, Unlock } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -33,7 +34,7 @@ import React from "react"
 
 /**
  * @fileOverview Student Registry v11.0 - Manual Pass & Test Controls.
- * Allows Admin to manually upgrade users and grant specific premium access.
+ * Fixed: Label import added to prevent ReferenceError.
  */
 export default function AspirantsManagement() {
   const db = useFirestore()
@@ -101,7 +102,7 @@ export default function AspirantsManagement() {
         <div>
            <div className="flex items-center gap-3 mb-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Student Registry Node</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Student List</span>
            </div>
           <h1 className="text-5xl font-headline font-black text-primary uppercase tracking-tight">Student Hub</h1>
           <p className="text-slate-600 mt-1 font-medium">Monitoring {aspirants?.length || 0} student identities and access tiers.</p>
@@ -119,10 +120,10 @@ export default function AspirantsManagement() {
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-slate-100 h-20">
-                <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Aspirant Node</TableHead>
+                <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Student</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Contact & Target</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Current Status</TableHead>
-                <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Audit Control</TableHead>
+                <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Edit</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -163,8 +164,8 @@ export default function AspirantsManagement() {
                              <Unlock className="h-4 w-4" /> Unlock Specific Test
                           </DropdownMenuItem>
                           <DropdownMenuSeparator className="bg-white/5 my-2" />
-                          <DropdownMenuItem onClick={async () => { if(confirm("Permanently purge this student?")) await deleteDoc(doc(db!, "users", aspirant.id)) }} className="rounded-xl px-4 py-3 gap-3 text-rose-500">
-                             <Trash2 className="h-4 w-4" /> Purge Global Node
+                          <DropdownMenuItem onClick={async () => { if(confirm("Permanently delete this student?")) await deleteDoc(doc(db!, "users", aspirant.id)) }} className="rounded-xl px-4 py-3 gap-3 text-rose-500">
+                             <Trash2 className="h-4 w-4" /> Delete Profile
                           </DropdownMenuItem>
                        </DropdownMenuContent>
                     </DropdownMenu>
@@ -181,24 +182,24 @@ export default function AspirantsManagement() {
          <DialogContent className="bg-[#0F172A] text-white border-white/10 rounded-[3rem] max-w-md p-10 shadow-5xl">
             <DialogHeader className="text-center space-y-4">
                <DialogTitle className="text-2xl font-headline font-black uppercase text-primary">Manual Authorization</DialogTitle>
-               <p className="text-slate-400 text-sm">Grant premium registry access to {grantDialogUser?.name}.</p>
+               <p className="text-slate-400 text-sm">Grant premium access to {grantDialogUser?.name}.</p>
             </DialogHeader>
             <div className="py-8 space-y-6">
                <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase text-slate-500">Select Pass Tier</Label>
                   <select value={grantPlanId} onChange={e => setGrantPlanId(e.target.value)} className="w-full h-14 bg-white/5 border border-white/10 rounded-2xl px-4 outline-none font-bold text-white">
-                     <option value="" disabled className="bg-[#0F172A]">Select Monetization Node</option>
+                     <option value="" disabled className="bg-[#0F172A]">Select Pass</option>
                      {passes?.map((p: any) => <option key={p.id} value={p.id} className="bg-[#0F172A]">{p.name}</option>)}
                   </select>
                </div>
                <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase text-slate-500">Access Duration (Days)</Label>
-                  <Input type="number" value={grantDuration} onChange={e => setGrantDuration(e.target.value)} className="h-14 bg-white/5 border-white/10 rounded-2xl font-black text-xl text-center" />
+                  <Input type="number" value={grantDuration} onChange={e => setGrantDuration(e.target.value)} className="h-14 bg-white/5 border border-white/10 rounded-2xl font-black text-xl text-center" />
                </div>
             </div>
             <DialogFooter>
                <Button onClick={handleGrantPass} className="w-full bg-primary hover:bg-orange-600 h-14 rounded-xl font-black uppercase tracking-widest text-[11px] shadow-2xl">
-                  Authorize Registry Access
+                  Authorize Pass Access
                </Button>
             </DialogFooter>
          </DialogContent>
@@ -208,22 +209,22 @@ export default function AspirantsManagement() {
       <Dialog open={!!selectedUser} onOpenChange={o => !o && setSelectedUser(null)}>
          <DialogContent className="sm:max-w-xl rounded-[3rem] bg-white border-none shadow-4xl p-10 overflow-hidden text-left">
             <DialogHeader>
-               <DialogTitle className="text-2xl font-headline font-black uppercase">Aspirant Audit</DialogTitle>
+               <DialogTitle className="text-2xl font-headline font-black uppercase">Student Details</DialogTitle>
             </DialogHeader>
             <div className="py-10 space-y-8">
                <div className="flex items-center gap-6 bg-slate-50 p-6 rounded-[2.5rem]">
                   <StudentAvatar profile={selectedUser} className="h-20 w-20 shadow-xl" />
                   <div>
                      <h2 className="text-2xl font-black text-[#0F172A] uppercase">{selectedUser?.name}</h2>
-                     <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{selectedUser?.status} NODE</p>
+                     <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">{selectedUser?.status} PASS</p>
                   </div>
                </div>
                <div className="grid grid-cols-2 gap-8">
-                  <AuditData label="EMAIL NODE" val={selectedUser?.email} />
-                  <AuditData label="CONTACT HUB" val={selectedUser?.phone || "Pending"} />
+                  <AuditData label="EMAIL" val={selectedUser?.email} />
+                  <AuditData label="CONTACT" val={selectedUser?.phone || "Pending"} />
                   <AuditData label="BIRTH DATE" val={selectedUser?.dob || "Pending"} />
                   <AuditData label="TARGET BOARD" val={selectedUser?.targetExam} />
-                  <AuditData label="HOME ADDRESS" val={selectedUser?.address || "No residential address node synced"} colSpan={2} />
+                  <AuditData label="HOME ADDRESS" val={selectedUser?.address || "No address saved"} colSpan={2} />
                </div>
             </div>
          </DialogContent>
