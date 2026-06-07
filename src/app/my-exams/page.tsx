@@ -29,8 +29,8 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional "My Exams" Dashboard v3.0.
- * Optimized: Robust Logo Visibility with SVG support and Referrer policies.
+ * @fileOverview Institutional "My Exams" Dashboard v4.0.
+ * Optimized: Full visibility protocol for official SVGs (PSSSB).
  */
 
 export default function MyExamsPage() {
@@ -104,8 +104,11 @@ export default function MyExamsPage() {
            
            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
               {pinnedExams.length > 0 ? pinnedExams.map((exam) => {
-                 const board = boards?.find((b: any) => b.id === exam.boardId);
-                 // Prioritize corrected Board logo
+                 const board = boards?.find((b: any) => 
+                   b.id.toLowerCase() === exam.boardId?.toLowerCase() || 
+                   b.abbreviation?.toLowerCase() === exam.boardId?.toLowerCase()
+                 );
+                 
                  const logoUrl = board?.iconUrl || exam.iconUrl;
                  const isImgFailed = failedImages[exam.id];
 
@@ -129,7 +132,7 @@ export default function MyExamsPage() {
                             )}
                         </div>
                         <h4 className="font-black text-[13px] md:text-base text-[#0F172A] uppercase leading-tight line-clamp-2 flex-1">{exam.name}</h4>
-                        <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase mt-2">{board?.abbreviation || 'PSSSB'} Hub</p>
+                        <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase mt-2">{board?.abbreviation || 'GOVT'} Hub</p>
                       </Card>
                   </Link>
                  )

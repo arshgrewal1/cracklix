@@ -2,9 +2,9 @@
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Engine v25.0.
- * Features: Hardened Unique Hub Registry with support for ARMY, EDUCATION, and SSWCD.
- * Updated: Standardized Punjab State Emblem for Education Board nodes.
+ * @fileOverview Institutional Seeding Engine v26.0.
+ * Features: Hardened Unique Hub Registry with PSSSB Expansion.
+ * Updated: Official PSSSB SVG and additional exam nodes for 2026.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Cracklix Global Registry Sync...');
@@ -38,14 +38,21 @@ export async function seedInitialData(db: Firestore) {
 
   // 2. CANONICAL EXAM MASTER HUBS
   const exams = [
+    // PSSSB Vertical (Expanded)
     { id: 'punjab-patwari', boardId: 'psssb', name: 'Revenue Patwari 2026', category: 'STATE', description: 'Prepare for Revenue Patwari, Canal Patwari and Ziladar recruitment.', totalFullMocks: 45, iconUrl: psssbSvg },
     { id: 'psssb-clerk', boardId: 'psssb', name: 'Subordinate Clerk (PSSSB)', category: 'STATE', description: 'Clerical recruitment for multi-departmental Punjab govt posts.', totalFullMocks: 60, iconUrl: psssbSvg },
+    { id: 'psssb-excise', boardId: 'psssb', name: 'Excise & Taxation Inspector', category: 'STATE', description: 'Institutional series for Excise department recruitment.', totalFullMocks: 30, iconUrl: psssbSvg },
+    { id: 'psssb-auditor', boardId: 'psssb', name: 'Junior Auditor', category: 'STATE', description: 'Verified audit series for finance department recruitment.', totalFullMocks: 20, iconUrl: psssbSvg },
+    { id: 'psssb-senior-assistant', boardId: 'psssb', name: 'Senior Assistant', category: 'STATE', description: 'High-fidelity mocks for Senior Assistant recruitment.', totalFullMocks: 15, iconUrl: psssbSvg },
+    
+    // Other Verticals
     { id: 'punjab-anganwadi', boardId: 'sswcd', name: 'Punjab Anganwadi / NTT', category: 'STATE', description: 'Official syllabus and preparation matrix for Supervisor and NTT posts.', totalFullMocks: 15, iconUrl: anganwadiLogo },
     { id: 'police-si', boardId: 'punjab-police', name: 'Sub-Inspector (Dist/Armed)', category: 'POLICE', description: 'District and Armed Cadre recruitment for Punjab Police.', totalFullMocks: 30, iconUrl: policeEmblem },
     { id: 'police-constable', boardId: 'punjab-police', name: 'Constable Recruitment', category: 'POLICE', description: 'Direct recruitment for Constable posts in Punjab Police.', totalFullMocks: 50, iconUrl: policeEmblem },
     { id: 'ppsc-pcs', boardId: 'ppsc', name: 'PCS Executive Prelims', category: 'CIVIL', description: 'Higher Class A & B services including DSP and Tehsildar posts.', totalFullMocks: 20, iconUrl: ppscJpg },
     { id: 'ppsc-naib', boardId: 'ppsc', name: 'Naib Tehsildar', category: 'REVENUE', description: 'PPSC Revenue department recruitment for Naib Tehsildar posts.', totalFullMocks: 15, iconUrl: ppscJpg },
     { id: 'pspcl-je', boardId: 'pspcl', name: 'PSPCL Junior Engineer', category: 'TECHNICAL', description: 'Electrical, Civil and IT JE recruitment for Punjab Power Board.', totalFullMocks: 25, iconUrl: pspclLogo },
+    { id: 'pspcl-alm', boardId: 'pspcl', name: 'Assistant Lineman (ALM)', category: 'TECHNICAL', description: 'Technical series for ALM recruitment in Power Board.', totalFullMocks: 35, iconUrl: pspclLogo },
     { id: 'master-cadre', boardId: 'education', name: 'Master Cadre', category: 'TEACHING', description: 'Subject-wise teacher recruitment for Punjab Government Schools.', totalFullMocks: 40, iconUrl: punjabEmblem },
     { id: 'lecturer-cadre', boardId: 'education', name: 'Lecturer Cadre', category: 'TEACHING', description: 'Group B lecturer recruitment for Senior Secondary Schools.', totalFullMocks: 35, iconUrl: punjabEmblem },
     { id: 'court-clerk', boardId: 'high-court', name: 'High Court Clerk', category: 'JUDICIAL', description: 'Subordinate Court clerical recruitment (SSSC).', totalFullMocks: 35, iconUrl: courtEmblem },

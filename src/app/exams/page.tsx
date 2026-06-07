@@ -18,8 +18,8 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @file Overview High-Density Responsive Exam Catalog v3.8.
- * Optimized: Unified Institutional Logo Protocol with cross-origin hardening.
+ * @file Overview High-Density Responsive Exam Catalog v3.9.
+ * Optimized: Unified Institutional Logo Protocol with PSSSB SVG support.
  */
 
 export default function ExamsCatalog() {
@@ -119,7 +119,6 @@ function CatalogContent() {
                 b.abbreviation?.toLowerCase() === exam.boardId?.toLowerCase()
               );
               
-              // Robust Logo Lookup Logic
               const logoUrl = board?.iconUrl || exam.iconUrl;
               const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, subjects: new Set() };
               const isPinned = profile?.pinnedExams?.includes(exam.id);
