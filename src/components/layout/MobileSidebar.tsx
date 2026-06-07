@@ -1,4 +1,3 @@
-
 'use client';
 
 import { 
@@ -15,7 +14,8 @@ import {
   ChevronDown,
   Target,
   User as UserIcon,
-  X
+  X,
+  ShieldCheck
 } from "lucide-react";
 import Link from "next/link";
 import { useUser, useAuth } from "@/firebase";
@@ -34,8 +34,8 @@ import ShareButton from "@/components/navigation/ShareButton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 /**
- * @fileOverview High-Fidelity Mobile Sidebar v3.0.
- * UPDATED: Matches user screenshot exactly with dark background, bold profile name, and orange accents.
+ * @fileOverview High-Fidelity Mobile Sidebar v3.1.
+ * FIXED: Added missing ShieldCheck import to resolve ReferenceError.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
@@ -66,7 +66,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
       <ScrollArea className="h-full w-full">
         <div className="flex flex-col min-h-full">
           
-          {/* 1. HIGH-FIDELITY PROFILE HEADER (SCREENSHOT MATCHED) */}
+          {/* 1. HIGH-FIDELITY PROFILE HEADER */}
           <div className="px-6 md:px-10 pt-16 pb-12 bg-[#0B1528] relative overflow-hidden text-left border-b border-white/5">
             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 blur-[100px] rounded-full" />
             
