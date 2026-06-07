@@ -5,7 +5,7 @@ import { useMemo, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore } from "@/firebase"
-import { collection, query, where, orderBy } from "firebase/firestore"
+import { collection, query, where, doc, updateDoc } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -28,7 +28,7 @@ import { useRouter } from "next/navigation"
 
 /**
  * @fileOverview Institutional "My Exams" Dashboard.
- * Optimized for mobile-first scanning with high-density card layouts.
+ * Optimized: Client-side sorting for Results to bypass composite index requirements.
  */
 
 export default function MyExamsPage() {
@@ -45,11 +45,23 @@ export default function MyExamsPage() {
   const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db])
   const { data: allExams } = useCollection<any>(examsQuery)
 
+  // Simplified query to bypass index requirement
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
-    return query(collection(db, "results"), where("userId", "==", user.uid), orderBy("timestamp", "desc"))
+    return query(collection(db, "results"), where("userId", "==", user.uid))
   }, [db, user])
-  const { data: recentAttempts, loading: attemptsLoading } = useCollection<any>(resultsQuery)
+
+  const { data: rawResults, loading: attemptsLoading } = useCollection<any>(resultsQuery)
+
+  const recentAttempts = useMemo(() => {
+    if (!rawResults) return []
+    // Client-side chronological sort
+    return [...rawResults].sort((a: any, b: any) => {
+      const tA = new Date(a.timestamp || 0).getTime()
+      const tB = new Date(b.timestamp || 0).getTime()
+      return tB - tA
+    })
+  }, [rawResults])
 
   const pinnedExams = useMemo(() => {
     if (!allExams || !profile?.pinnedExams) return []

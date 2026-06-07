@@ -31,7 +31,7 @@ import Link from "next/link"
 
 /**
  * @fileOverview Institutional Revision & Preparation Hub.
- * Optimized: Client-side sorting for Results to bypass composite index requirements.
+ * Optimized: Removed Firestore orderBy to bypass composite index requirement.
  */
 
 export default function RevisionHub() {
@@ -48,6 +48,7 @@ export default function RevisionHub() {
 
   const results = useMemo(() => {
     if (!rawResults) return []
+    // Client-side chronological sort
     return [...rawResults].sort((a: any, b: any) => {
       const tA = new Date(a.timestamp || 0).getTime()
       const tB = new Date(b.timestamp || 0).getTime()
@@ -165,7 +166,7 @@ export default function RevisionHub() {
 
              <TabsContent value="wrong" className="space-y-6">
                 {rLoading ? (
-                   Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-[2.5rem]" />)
+                   Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-44 w-full rounded-[2.5rem]" />)
                 ) : wrongAttempts.length > 0 ? (
                   wrongAttempts.map((w) => (
                     <Card key={w.id} className="border-none shadow-2xl bg-white rounded-[2.5rem] overflow-hidden group text-left">
