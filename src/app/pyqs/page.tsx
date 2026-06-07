@@ -1,50 +1,154 @@
+
+"use client"
+
+import { useMemo, useState } from "react"
 import Navbar from "@/components/layout/Navbar"
-import { EXAMS } from "@/lib/mock-data"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import Footer from "@/components/layout/Footer"
+import { useCollection, useFirestore } from "@/firebase"
+import { collection, query, orderBy } from "firebase/firestore"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { FileText, Download, Eye } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+import { 
+  FileText, 
+  Download, 
+  Eye, 
+  Search, 
+  ShieldCheck, 
+  ChevronRight,
+  FileStack,
+  Loader2,
+  Sparkles
+} from "lucide-react"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Input } from "@/components/ui/input"
+
+/**
+ * @fileOverview High-Fidelity PYQ Hub v2.0.
+ * Strictly matched to user screenshot: Orange headers, functional PDF nodes.
+ */
 
 export default function PYQPage() {
-  return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
-      <main className="container mx-auto px-4 py-12">
-        <div className="mb-12 text-center">
-          <h1 className="text-3xl font-headline font-bold text-primary mb-2">Previous Year Papers</h1>
-          <p className="text-muted-foreground">Authentic exam papers with verified official answer keys.</p>
-        </div>
+  const db = useFirestore()
+  const [searchTerm, setSearchTerm] = useState("")
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {EXAMS.map((exam) => (
-            <Card key={exam.id} className="border-foreground/5 bg-card/50">
-              <CardHeader className="flex flex-row items-center gap-4">
-                <div className="h-12 w-12 rounded-xl bg-secondary/10 flex items-center justify-center">
-                  <FileText className="h-6 w-6 text-secondary" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg font-bold text-primary">{exam.name} Papers</CardTitle>
-                  <p className="text-xs text-muted-foreground">{exam.board} Series</p>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {[2025, 2024, 2023].map((year) => (
-                  <div key={year} className="flex items-center justify-between p-3 rounded-lg bg-background border border-foreground/5">
-                    <span className="text-sm font-medium">{exam.name} ({year})</span>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" className="h-8 px-2 text-xs">
-                        <Eye className="h-3 w-3 mr-1" /> View
-                      </Button>
-                      <Button variant="outline" size="sm" className="h-8 px-2 text-xs text-primary border-primary/20">
-                        <Download className="h-3 w-3 mr-1" /> PDF
-                      </Button>
+  const pyqQuery = useMemo(() => {
+    if (!db) return null
+    return query(collection(db, "pyqs"), orderBy("year", "desc"))
+  }, [db])
+
+  const { data: pyqs, loading } = useCollection<any>(pyqQuery)
+
+  // Group PYQs by title/exam category for the card-based layout in the screenshot
+  const groupedPyqs = useMemo(() => {
+    if (!pyqs) return {}
+    const filtered = pyqs.filter((p: any) => 
+      p.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      p.boardId?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    
+    const groups: Record<string, any[]> = {}
+    filtered.forEach(p => {
+      // Normalize group title: e.g. "Revenue Patwari" from "Revenue Patwari 2025"
+      const groupTitle = p.title.replace(/\d{4}.*$/, '').trim() + " Papers"
+      if (!groups[groupTitle]) groups[groupTitle] = []
+      groups[groupTitle].push(p)
+    })
+    return groups
+  }, [pyqs, searchTerm])
+
+  return (
+    <div className="flex flex-col min-h-screen bg-slate-50/50 font-body">
+      <Navbar />
+      
+      <main className="container mx-auto px-4 md:px-6 py-12 md:py-24 max-w-5xl text-center">
+        <div className="space-y-16">
+          
+          {/* SCREENSHOT MATCHED HEADER */}
+          <div className="space-y-4">
+            <h1 className="text-4xl md:text-7xl font-headline font-black text-primary uppercase tracking-tight leading-none">
+              PREVIOUS YEAR PAPERS
+            </h1>
+            <p className="text-slate-500 font-medium text-lg md:text-xl max-w-2xl mx-auto">
+              Authentic exam papers with verified official answer keys.
+            </p>
+          </div>
+
+          <div className="relative max-w-2xl mx-auto group">
+             <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+             <Input 
+                className="h-16 pl-14 rounded-[1.5rem] bg-white border-none shadow-xl text-lg font-bold text-[#0F172A]" 
+                placeholder="Search institutional archives..." 
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+             />
+          </div>
+
+          <div className="grid grid-cols-1 gap-12">
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-64 w-full rounded-[3.5rem]" />
+              ))
+            ) : Object.entries(groupedPyqs).length > 0 ? (
+              Object.entries(groupedPyqs).map(([groupTitle, items]: [string, any[]]) => (
+                <Card key={groupTitle} className="border-none shadow-3xl rounded-[3.5rem] bg-white overflow-hidden text-left border border-slate-100 p-8 md:p-14">
+                  <CardHeader className="p-0 mb-10 flex flex-row items-center gap-6 md:gap-10">
+                    <div className="h-16 w-16 md:h-20 md:w-20 rounded-[1.5rem] bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 shadow-inner">
+                       <FileStack className="h-8 md:h-10 text-slate-300" />
                     </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          ))}
+                    <div>
+                       <h2 className="text-2xl md:text-4xl font-headline font-black text-primary uppercase leading-tight">{groupTitle}</h2>
+                       <p className="text-[10px] md:text-sm font-black text-slate-400 uppercase tracking-[0.3em] mt-1">{items[0]?.boardId || 'Official'} Series</p>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="p-0 space-y-4">
+                    {items.map((paper) => (
+                      <div 
+                        key={paper.id} 
+                        className="flex flex-col sm:flex-row items-center justify-between p-6 md:p-8 rounded-[2rem] bg-slate-50/50 border border-slate-100 hover:bg-white hover:shadow-xl transition-all group/node"
+                      >
+                         <div className="flex flex-col mb-4 sm:mb-0 text-center sm:text-left">
+                            <span className="text-lg md:text-2xl font-black text-[#0F172A] uppercase leading-none">{paper.title}</span>
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Audit Year: {paper.year}</span>
+                         </div>
+                         
+                         <div className="flex items-center gap-3">
+                            <Button 
+                              asChild 
+                              variant="ghost" 
+                              className="h-12 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest gap-2 text-[#0F172A] hover:bg-slate-100"
+                            >
+                               <a href={paper.pdfUrl} target="_blank" rel="noopener noreferrer">
+                                  <Eye className="h-4 w-4" /> View
+                               </a>
+                            </Button>
+                            <Button 
+                              asChild 
+                              className="h-12 px-8 bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white rounded-xl font-black uppercase text-[10px] tracking-widest gap-2 shadow-sm transition-all"
+                            >
+                               <a href={paper.pdfUrl} target="_blank" rel="noopener noreferrer">
+                                  <Download className="h-4 w-4" /> PDF
+                               </a>
+                            </Button>
+                         </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="py-32 flex flex-col items-center justify-center text-slate-300 opacity-20 text-center">
+                 <Sparkles className="h-20 w-20 mb-8" />
+                 <p className="font-headline font-black text-2xl uppercase tracking-[0.3em]">Registry Hub Empty</p>
+                 <p className="text-sm font-bold uppercase mt-2">Awaiting institutional archive push.</p>
+              </div>
+            )}
+          </div>
         </div>
       </main>
+
+      <Footer />
     </div>
   )
 }
