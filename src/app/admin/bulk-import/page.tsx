@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo } from "react"
@@ -95,7 +94,10 @@ export default function BulkImportPage() {
       optionCHindi: parsedQuestions[idx].optionCHindi || "",
       optionDEnglish: parsedQuestions[idx].optionDEnglish || "",
       optionDPunjabi: parsedQuestions[idx].optionDPunjabi || "",
-      optionDHindi: parsedQuestions[idx].optionDHindi || ""
+      optionDHindi: parsedQuestions[idx].optionDHindi || "",
+      englishExplanation: parsedQuestions[idx].englishExplanation || "",
+      punjabiExplanation: parsedQuestions[idx].punjabiExplanation || "",
+      hindiExplanation: parsedQuestions[idx].hindiExplanation || ""
     })
   }
 
@@ -265,14 +267,29 @@ export default function BulkImportPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div className="space-y-3">
                      <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">English Statement</Label>
-                     <Textarea value={editForm?.englishQuestion || ""} onChange={e => setEditForm({...editForm, englishQuestion: e.target.value})} className="h-36 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner text-[#0F172A]" />
+                     <Textarea value={editForm?.englishQuestion || ""} onChange={e => setEditForm({...editForm, englishQuestion: e.target.value})} className="h-32 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner text-[#0F172A]" />
                   </div>
                   <div className="space-y-3">
                      <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">{isHindiMode ? 'Hindi Statement' : 'Punjabi Statement'}</Label>
                      <Textarea 
                         value={isHindiMode ? (editForm?.hindiQuestion || "") : (editForm?.punjabiQuestion || "")} 
                         onChange={e => setEditForm({...editForm, [isHindiMode ? 'hindiQuestion' : 'punjabiQuestion']: e.target.value})} 
-                        className="h-36 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner text-[#0F172A]" 
+                        className="h-32 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner text-[#0F172A]" 
+                     />
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="space-y-3">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">English Rationalization</Label>
+                     <Textarea value={editForm?.englishExplanation || ""} onChange={e => setEditForm({...editForm, englishExplanation: e.target.value})} className="h-32 rounded-2xl bg-slate-50 border-none font-medium p-6 shadow-inner text-[#0F172A]" />
+                  </div>
+                  <div className="space-y-3">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">{isHindiMode ? 'Hindi Rationalization' : 'Punjabi Rationalization'}</Label>
+                     <Textarea 
+                        value={isHindiMode ? (editForm?.hindiExplanation || "") : (editForm?.punjabiExplanation || "")} 
+                        onChange={e => setEditForm({...editForm, [isHindiMode ? 'hindiExplanation' : 'punjabiExplanation']: e.target.value})} 
+                        className="h-32 rounded-2xl bg-slate-50 border-none font-medium p-6 shadow-inner text-[#0F172A]" 
                      />
                   </div>
                </div>

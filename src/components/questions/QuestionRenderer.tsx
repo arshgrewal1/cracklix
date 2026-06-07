@@ -19,8 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview High-Fidelity Question Engine v32.0.
- * FIXED: Strict language visibility and optimized mobile typography.
+ * @fileOverview High-Fidelity Question Engine v33.0.
+ * UPDATED: Bilingual Explanation Rendering Node.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -143,18 +143,42 @@ export default function QuestionRenderer({
 
       {/* 4. SOLUTION HUB */}
       {showSolution && (
-        <div className="mt-8 md:mt-10 pt-8 md:pt-10 border-t border-slate-100 space-y-4 md:space-y-5 animate-in fade-in slide-in-from-top-2 duration-500">
+        <div className="mt-8 md:mt-10 pt-8 md:pt-10 border-t border-slate-100 space-y-4 md:space-y-6 animate-in fade-in slide-in-from-top-2 duration-500">
            <div className="flex items-center gap-3">
               <Badge className="bg-[#F0FDF4] text-[#047857] border-none font-black text-[10px] md:text-xs uppercase px-4 md:px-5 py-1.5 rounded-lg shadow-sm">
                 <Info className="h-3 w-3 mr-2 inline" /> Institutional Solution
               </Badge>
            </div>
-           <div className="bg-[#F8FAFC] p-6 md:p-8 rounded-[2rem] border border-[#F1F5F9] text-[#475569] leading-relaxed font-medium text-sm md:text-base">
-              <div className="mb-4 flex items-center gap-2">
+           
+           <div className="bg-[#F8FAFC] p-6 md:p-8 rounded-[2rem] border border-[#F1F5F9] text-[#475569] leading-relaxed font-medium text-sm md:text-base space-y-6">
+              <div className="flex items-center gap-2 pb-4 border-b border-slate-200/50">
                  <span className="font-black text-[#0B1528] uppercase text-[10px] tracking-widest">Official Key:</span>
                  <span className="h-6 w-6 rounded-lg bg-[#0B1528] text-white flex items-center justify-center font-black text-xs">{q.correctAnswer}</span>
               </div>
-              <MathText text={q.englishExplanation || "Institutional rationale pending audit."} />
+              
+              <div className="space-y-6">
+                 {showEn && q.englishExplanation && (
+                    <div className="space-y-2">
+                       <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">English Rationale</p>
+                       <MathText text={q.englishExplanation} />
+                    </div>
+                 )}
+                 {showPa && q.punjabiExplanation && (
+                    <div className="space-y-2">
+                       <p className="text-[10px] font-black text-blue-600 uppercase tracking-widest">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</p>
+                       <MathText text={q.punjabiExplanation} />
+                    </div>
+                 )}
+                 {showHi && q.hindiExplanation && (
+                    <div className="space-y-2">
+                       <p className="text-[10px] font-black text-orange-600 uppercase tracking-widest">हिन्दी व्याख्या</p>
+                       <MathText text={q.hindiExplanation} />
+                    </div>
+                 )}
+                 {!(showEn && q.englishExplanation) && !(showPa && q.punjabiExplanation) && !(showHi && q.hindiExplanation) && (
+                    <MathText text="Institutional rationale pending audit." />
+                 )}
+              </div>
            </div>
         </div>
       )}
