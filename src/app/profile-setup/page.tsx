@@ -16,6 +16,10 @@ import { useToast } from "@/hooks/use-toast"
 import { Phone, User as UserIcon, GraduationCap, Calendar, MapPin } from "lucide-react"
 import { Gender } from "@/types"
 
+/**
+ * @fileOverview High-Fidelity Aspirant Onboarding v10.0.
+ * Mandatory Fields: Name, Phone, Gender, DOB, Address, Target Board.
+ */
 export default function ProfileSetup() {
   const router = useRouter()
   const db = useFirestore()
@@ -41,44 +45,66 @@ export default function ProfileSetup() {
   }, [user])
 
   const handleSubmit = async () => {
-    if (!user || !formData.name || !formData.targetExam || !formData.phone || !formData.gender || !formData.dob) {
+    if (!user) return;
+
+    // Strict Validation Node
+    const requiredFields = [
+      { key: 'name', label: 'Full Name' },
+      { key: 'phone', label: 'Mobile Number' },
+      { key: 'gender', label: 'Gender Identity' },
+      { key: 'dob', label: 'Date of Birth' },
+      { key: 'address', label: 'Full Address' },
+      { key: 'targetExam', label: 'Target Board' }
+    ];
+
+    const missing = requiredFields.find(f => !formData[f.key as keyof typeof formData]?.trim());
+
+    if (missing) {
       toast({
         variant: "destructive",
-        title: "Incomplete Profile",
-        description: "Please fill in all mandatory details, including DOB, to proceed."
+        title: "Audit Blocked",
+        description: `${missing.label} is mandatory for institutional registration.`
       })
+      return
+    }
+
+    if (formData.phone.length < 10) {
+      toast({ variant: "destructive", title: "Invalid Contact", description: "Mobile number must be exactly 10 digits." })
       return
     }
 
     setIsSubmitting(true)
     try {
       const userRef = doc(db, 'users', user.uid)
-      await setDoc(userRef, {
+      const payload = {
         id: user.uid,
-        name: formData.name,
+        name: formData.name.trim(),
         email: user.email,
         phone: formData.phone.startsWith('+91') ? formData.phone : `+91 ${formData.phone}`,
         gender: formData.gender,
         dob: formData.dob,
-        address: formData.address,
+        address: formData.address.trim(),
         targetExam: formData.targetExam,
         state: "Punjab",
         createdAt: new Date().toISOString(),
+        updatedAt: serverTimestamp(),
         status: 'Free',
         role: 'STUDENT',
         pinnedExams: []
-      }, { merge: true })
+      }
+
+      await setDoc(userRef, payload, { merge: true })
 
       toast({
-        title: "Profile Synchronized",
-        description: "Your preparation journey starts now!"
+        title: "Registry Synced",
+        description: "Your preparation journey has been initialized."
       })
-      router.push("/")
+      router.push("/dashboard")
     } catch (error: any) {
       toast({
         variant: "destructive",
-        title: "Save Failed",
-        description: error.message || "Something went wrong while saving your profile."
+        title: "Sync Failed",
+        description: error.message || "Cloud registry rejection."
       })
     } finally {
       setIsSubmitting(false)
@@ -96,18 +122,18 @@ export default function ProfileSetup() {
       <Card className="w-full max-w-xl border-none shadow-2xl rounded-[2.5rem] overflow-hidden z-10">
         <div className="h-2 w-full bg-primary" />
         <CardHeader className="text-center pt-10 pb-6">
-          <CardTitle className="font-headline font-black text-3xl text-[#0F172A]">Aspirant Onboarding</CardTitle>
+          <CardTitle className="font-headline font-black text-3xl text-[#0F172A] uppercase">Aspirant Onboarding</CardTitle>
           <CardDescription className="text-slate-500 font-medium px-4">
-            Personalize your identity node to access high-fidelity mocks.
+            Initialize your identity node to access the high-fidelity mock registry.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6 px-10 pb-12">
           <div className="space-y-2 text-left">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Legal Identity</Label>
+            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Identity Name</Label>
             <div className="relative">
               <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input 
-                placeholder="Arsh Grewal" 
+                placeholder="e.g. Arsh Grewal" 
                 className="pl-12 h-12 rounded-xl border-slate-200 bg-slate-50/50 font-bold"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
@@ -115,19 +141,17 @@ export default function ProfileSetup() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
              <div className="space-y-2 text-left">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Contact Node</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mobile Contact</Label>
                 <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-slate-400" />
-                  </div>
+                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input 
                     type="tel"
-                    placeholder="98XXX XXXXX" 
+                    placeholder="10-digit number" 
                     className="pl-12 h-12 rounded-xl border-slate-200 bg-slate-50/50 font-bold"
                     value={formData.phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))}
                     maxLength={10}
                   />
                 </div>
@@ -147,9 +171,9 @@ export default function ProfileSetup() {
               </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2 text-left">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Identity</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Gender Node</Label>
                 <Select onValueChange={(val: Gender) => setFormData(prev => ({ ...prev, gender: val }))}>
                   <SelectTrigger className="h-12 rounded-xl border-slate-200 bg-slate-50/50 font-bold">
                     <SelectValue placeholder="Select" />
@@ -162,10 +186,10 @@ export default function ProfileSetup() {
                 </Select>
             </div>
             <div className="space-y-2 text-left">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Primary Target Board</Label>
+              <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Primary Target Hub</Label>
               <Select onValueChange={(val) => setFormData(prev => ({ ...prev, targetExam: val }))}>
                 <SelectTrigger className="h-12 rounded-xl border-slate-200 bg-slate-50/50 font-bold">
-                  <SelectValue placeholder="Select Hub" />
+                  <SelectValue placeholder="Select Board" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="PSSSB">PSSSB Boards</SelectItem>
@@ -179,12 +203,12 @@ export default function ProfileSetup() {
           </div>
 
           <div className="space-y-2 text-left">
-             <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Correspondence Address</Label>
+             <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Correspondence Address</Label>
              <div className="relative">
                 <MapPin className="absolute left-4 top-4 h-4 w-4 text-slate-400" />
                 <Textarea 
-                   placeholder="Enter your complete address..." 
-                   className="pl-12 min-h-[80px] rounded-xl border-slate-200 bg-slate-50/50 font-bold"
+                   placeholder="Enter your complete residential address for records..." 
+                   className="pl-12 min-h-[100px] rounded-xl border-slate-200 bg-slate-50/50 font-bold"
                    value={formData.address}
                    onChange={(e) => setFormData(prev => ({ ...prev, address: e.target.value }))}
                 />
@@ -192,7 +216,7 @@ export default function ProfileSetup() {
           </div>
 
           <Button 
-            className="w-full h-16 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-xl rounded-2xl mt-4 transition-all active:scale-95"
+            className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl rounded-2xl mt-4 transition-all active:scale-95"
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
@@ -200,7 +224,7 @@ export default function ProfileSetup() {
           </Button>
           
           <p className="text-[9px] text-center text-slate-400 uppercase font-bold tracking-widest leading-relaxed">
-            By initializing, you authorize Arsh Grewal Management to send institutional alerts.
+            By initializing, you authorize Arsh Grewal Management to verify your institutional audit nodes.
           </p>
         </CardContent>
       </Card>

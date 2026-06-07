@@ -21,7 +21,7 @@
         "passExpiryDate": { "type": "string", "format": "date-time" },
         "pinnedExams": { "type": "array", "items": { "type": "string" } }
       },
-      "required": ["id", "name", "email", "role"]
+      "required": ["id", "name", "email", "phone", "dob", "address", "role"]
     },
     "Exam": {
       "title": "Exam Vertical",

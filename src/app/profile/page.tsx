@@ -23,19 +23,14 @@ import {
   ClipboardList, 
   ShieldCheck,
   Zap,
-  Sparkles,
-  Bell,
-  CreditCard,
-  Settings,
-  ChevronRight,
-  User as UserIcon,
   Activity,
   Edit,
   Save,
-  X,
   TrendingUp,
   Award,
-  History
+  History,
+  User as UserIcon,
+  ChevronRight
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useRouter } from "next/navigation"
@@ -44,12 +39,12 @@ import Link from "next/link"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import React from "react"
 
 /**
- * @fileOverview Elite Aspirant Profile Hub v9.2 (Testbook Inspired).
- * Fixed: Added missing Award and History icon imports to resolve runtime ReferenceErrors.
+ * @fileOverview Elite Aspirant Profile Hub v10.0.
+ * Features: Mandatory Real-World Data (DOB, Address, Phone) with Admin Sync.
  */
-
 export default function ProfilePage() {
   const { user, profile, loading } = useUser()
   const db = useFirestore()
@@ -57,7 +52,13 @@ export default function ProfilePage() {
   const { toast } = useToast()
 
   const [isEditing, setIsEditing] = useState(false)
-  const [editForm, setEditForm] = useState<any>(null)
+  const [editForm, setEditForm] = useState<any>({
+    name: "",
+    phone: "",
+    dob: "",
+    address: "",
+    targetExam: ""
+  })
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => {
@@ -103,6 +104,16 @@ export default function ProfilePage() {
 
   const handleUpdateProfile = async () => {
     if (!db || !user || !editForm) return
+
+    // Strict Validation: Mandatory Fields
+    const mandatory = ['name', 'phone', 'dob', 'address'];
+    const missing = mandatory.find(key => !editForm[key]?.trim());
+    
+    if (missing) {
+      toast({ variant: "destructive", title: "Update Blocked", description: `The field '${missing.toUpperCase()}' is mandatory for institutional records.` });
+      return;
+    }
+
     setIsSaving(true)
     try {
        await updateDoc(doc(db, "users", user.uid), {
@@ -210,7 +221,7 @@ export default function ProfilePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8">
                        <ProfileDataNode icon={<Calendar className="text-blue-500" />} label="DATE OF BIRTH" value={profile.dob || "Audit Pending"} />
                        <ProfileDataNode icon={<Phone className="text-emerald-500" />} label="VERIFIED MOBILE" value={profile.phone || "Not Linked"} />
-                       <ProfileDataNode icon={<MapPin className="text-rose-500" />} label="FULL ADDRESS" value={profile.address || "No correspondense address set"} colSpan={2} />
+                       <ProfileDataNode icon={<MapPin className="text-rose-500" />} label="FULL CORRESPONDENCE ADDRESS" value={profile.address || "No address node synced"} colSpan={2} />
                        <ProfileDataNode icon={<ShieldCheck className="text-primary" />} label="REGISTRY STATUS" value={`${profile.role || 'STUDENT'} Node`} />
                        <ProfileDataNode icon={<Activity className="text-orange-500" />} label="MEMBER SINCE" value={memberSince} />
                     </div>
@@ -299,22 +310,22 @@ export default function ProfilePage() {
             </DialogHeader>
             <div className="px-10 pb-10 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Identity Name</Label>
                      <Input value={editForm?.name || ""} onChange={e => setEditForm({...editForm, name: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Date of Birth</Label>
                      <Input type="date" value={editForm?.dob || ""} onChange={e => setEditForm({...editForm, dob: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
                   </div>
                </div>
-               <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Contact Hub</Label>
-                  <Input value={editForm?.phone || ""} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
+               <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Verified Contact Node</Label>
+                  <Input value={editForm?.phone || ""} onChange={e => setEditForm({...editForm, phone: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" placeholder="10-digit number" />
                </div>
-               <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Permanent Address</Label>
-                  <Textarea value={editForm?.address || ""} onChange={e => setEditForm({...editForm, address: e.target.value})} className="min-h-[100px] rounded-xl bg-slate-50 border-none font-medium p-4" />
+               <div className="space-y-2 text-left">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Permanent Correspondence Address</Label>
+                  <Textarea value={editForm?.address || ""} onChange={e => setEditForm({...editForm, address: e.target.value})} className="min-h-[120px] rounded-xl bg-slate-50 border-none font-medium p-4 leading-relaxed" placeholder="Complete address for institutional records..." />
                </div>
             </div>
             <DialogFooter className="p-10 pt-4 bg-slate-50 flex gap-4">
@@ -333,7 +344,7 @@ function HeaderInfo({ icon, text }: { icon: React.ReactNode, text: string }) {
    return (
       <div className="flex items-center gap-3 text-white/60 font-bold uppercase text-[11px] tracking-tight">
          <span className="shrink-0">{icon}</span>
-         <span className="truncate max-w-[240px]">{text}</span>
+         <span className="truncate max-w-[240px]">{text || 'Pending'}</span>
       </div>
    )
 }
@@ -360,12 +371,10 @@ function ProfileDataNode({ icon, label, value, colSpan = 1 }: any) {
          <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
             {React.cloneElement(icon, { className: "h-5 w-5" })}
          </div>
-         <div className="min-w-0 space-y-1">
+         <div className="min-w-0 space-y-1 text-left">
             <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">{label}</p>
-            <p className="text-sm md:text-base font-bold text-[#0F172A] leading-relaxed break-words">{value}</p>
+            <p className="text-sm md:text-base font-bold text-[#0F172A] leading-relaxed break-words uppercase">{value}</p>
          </div>
       </div>
    )
 }
-
-import React from "react"
