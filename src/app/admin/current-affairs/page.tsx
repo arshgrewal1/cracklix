@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from "react"
@@ -25,7 +26,10 @@ import {
   ChevronRight,
   CheckCircle2,
   Info,
-  Languages
+  Languages,
+  Clock,
+  Target,
+  AlertTriangle
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, serverTimestamp, writeBatch } from "firebase/firestore"
@@ -35,11 +39,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { CurrentAffairHubItem, LanguageDisplayMode } from "@/types"
 import { cn } from "@/lib/utils"
 import { parseBulkQuestions } from "@/lib/parser"
+import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Institutional Current Affairs Management Hub v10.0.
- * UPDATED: Multi-language preview for full extraction audit (Question, Options, Key, Rationale).
- * ADDED: Explicit CBT Language Mode control for generated quizzes.
+ * @fileOverview Institutional Current Affairs Management Hub v11.0.
+ * UPDATED: Multi-language preview with QuestionRenderer (Live CBT style).
+ * ADDED: Timer, Positive Marks, and Negative Marks controls for generated quizzes.
  */
 
 export default function AdminCurrentAffairs() {
@@ -125,7 +130,9 @@ export default function AdminCurrentAffairs() {
         title: `${editingItem.title} Quiz`,
         mockType: 'CA_QUIZ',
         accessType: 'FREE',
-        duration: 15,
+        duration: parseInt(editingItem.duration) || 15,
+        positiveMarks: parseFloat(editingItem.positiveMarks) || 1,
+        negativeMarks: parseFloat(editingItem.negativeMarks) || 0.25,
         totalQuestions: qIds.length,
         questionIds: qIds,
         published: true,
@@ -179,10 +186,10 @@ export default function AdminCurrentAffairs() {
               <Newspaper className="h-5 w-5 md:h-6 md:w-6 text-primary" />
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 truncate">Official news hub</span>
            </div>
-          <h1 className="text-3xl md:text-5xl font-black font-headline text-primary uppercase tracking-tight leading-tight">CA Manager</h1>
+          <h1 className="text-3xl md:text-5xl font-black font-headline text-primary uppercase tracking-tight leading-tight truncate">CA Manager</h1>
           <p className="text-slate-500 mt-1 md:mt-2 text-sm md:text-lg font-medium">Coordinate Daily, Weekly, and Monthly strategic coverage.</p>
         </div>
-        <button onClick={() => setEditingItem({ title: "", type: "DAILY", month: "January", year: "2026", status: "PUBLISHED", questions: [], language: "English & Punjabi" })} className="w-full lg:w-auto bg-primary hover:bg-orange-600 text-white h-14 md:h-16 px-10 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 shadow-2xl transition-all active:scale-95 border-none">
+        <button onClick={() => setEditingItem({ title: "", type: "DAILY", month: "January", year: "2026", status: "PUBLISHED", questions: [], language: "English & Punjabi", duration: 15, positiveMarks: 1, negativeMarks: 0.25 })} className="w-full lg:w-auto bg-primary hover:bg-orange-600 text-white h-14 md:h-16 px-10 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-3 shadow-2xl transition-all active:scale-95 border-none">
           <Plus className="h-5 w-5" /> Initialize CA Hub
         </button>
       </div>
@@ -293,7 +300,27 @@ export default function AdminCurrentAffairs() {
                         </div>
                      </div>
 
-                     <div className="grid grid-cols-2 gap-3">
+                     <div className="grid grid-cols-1 gap-4 pt-2 border-t border-slate-200/50">
+                        <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest ml-1">Evaluation Controls</p>
+                        
+                        <div className="space-y-1.5">
+                           <Label className="text-[9px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Clock className="h-3 w-3" /> Duration (Mins)</Label>
+                           <Input type="number" value={editingItem?.duration || 15} onChange={e => setEditingItem({...editingItem, duration: e.target.value})} className="h-10 rounded-lg border-none bg-white font-black shadow-sm" />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                           <div className="space-y-1.5">
+                              <Label className="text-[9px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Target className="h-3 w-3 text-emerald-500" /> Pos (+)</Label>
+                              <Input type="number" step="0.5" value={editingItem?.positiveMarks || 1} onChange={e => setEditingItem({...editingItem, positiveMarks: e.target.value})} className="h-10 rounded-lg border-none bg-white font-black shadow-sm text-center" />
+                           </div>
+                           <div className="space-y-1.5">
+                              <Label className="text-[9px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><AlertTriangle className="h-3 w-3 text-rose-500" /> Neg (-)</Label>
+                              <Input type="number" step="0.05" value={editingItem?.negativeMarks || 0.25} onChange={e => setEditingItem({...editingItem, negativeMarks: e.target.value})} className="h-10 rounded-lg border-none bg-white font-black shadow-sm text-center" />
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200/50">
                         <div className="space-y-1.5">
                            <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Month</Label>
                            <select value={editingItem?.month} onChange={e => setEditingItem({...editingItem, month: e.target.value})} className="w-full h-10 bg-white border-none rounded-lg px-2 font-bold text-[10px] outline-none shadow-sm">
@@ -332,7 +359,7 @@ export default function AdminCurrentAffairs() {
                               value={bulkText}
                               onChange={e => setBulkText(e.target.value)}
                               placeholder={`Q15. English Question\nहिंदी/ਪੰਜਾਬੀ ਪ੍ਰਸ਼ਨ\n(A) Option EN\nहिंदी/ਪੰਜਾਬੀ ਆਪਸ਼ਨ\nAnswer: C. Text\nExplanation (English): Text...\nव्याख्या/ਵਿਆਖ्या: Text...`}
-                              className="min-h-[500px] rounded-xl bg-slate-50 border-none p-6 text-sm font-bold shadow-inner resize-none focus-visible:ring-primary"
+                              className="min-h-[250px] md:min-h-[400px] rounded-xl bg-slate-50 border-none p-6 text-sm font-bold shadow-inner resize-none focus-visible:ring-primary"
                            />
                            <Button onClick={handleProcessBulk} disabled={!bulkText.trim()} className="w-full h-14 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-xl shadow-2xl gap-3 border-none">
                               Initialize Extraction <ChevronRight className="h-4 w-4" />
@@ -349,46 +376,16 @@ export default function AdminCurrentAffairs() {
                                           
                                           <div className="flex items-center gap-4 mb-4">
                                              <div className="h-8 w-8 rounded-xl bg-[#0F172A] text-white flex items-center justify-center font-black text-xs shadow-lg">{idx + 1}</div>
-                                             <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-3 py-1">EXTRACTED ASSET</Badge>
+                                             <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-3 py-1">LIVE CBT AUDIT</Badge>
                                           </div>
 
-                                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                             <div className="space-y-6 text-left">
-                                                <div className="space-y-1">
-                                                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Question Statement</p>
-                                                   <p className="font-bold text-sm text-[#0F172A] leading-snug">{q.englishQuestion}</p>
-                                                   <p className="font-bold text-sm text-slate-500 leading-snug mt-1">{q.punjabiQuestion || q.hindiQuestion}</p>
-                                                </div>
-
-                                                <div className="space-y-2">
-                                                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Options Audit</p>
-                                                   <div className="grid grid-cols-1 gap-2">
-                                                      {['A','B','C','D'].map(key => (
-                                                         <div key={key} className="text-[10px] font-bold text-slate-600 border-l-2 border-slate-200 pl-3">
-                                                            <span className="text-[#0F172A]">{key}.</span> {q[`option${key}English`]} / {q[`option${key}${q.hindiQuestion ? 'Hindi' : 'Punjabi'}`]}
-                                                         </div>
-                                                      ))}
-                                                   </div>
-                                                </div>
-
-                                                <div className="bg-emerald-50/50 p-3 rounded-lg border border-emerald-100/50">
-                                                   <p className="text-[7px] font-black text-emerald-600 uppercase">Correct Answer Key</p>
-                                                   <p className="font-black text-[#0F172A] text-sm">Option {q.correctAnswer}</p>
-                                                </div>
-                                             </div>
-
-                                             <div className="space-y-4 text-left border-l border-slate-100 pl-4 md:pl-8">
-                                                <div className="space-y-2">
-                                                   <p className="text-[8px] font-black text-emerald-600 uppercase tracking-widest flex items-center gap-2"><Info className="h-3 w-3" /> English Rationale</p>
-                                                   <p className="text-xs font-medium text-slate-600 leading-relaxed italic">{q.englishExplanation || 'Awaiting audit...'}</p>
-                                                </div>
-                                                <div className="space-y-2 pt-2 border-t border-slate-50">
-                                                   <p className="text-[8px] font-black text-blue-600 uppercase tracking-widest flex items-center gap-2">
-                                                      <Info className="h-3 w-3" /> {q.hindiQuestion ? 'हिन्दी व्याख्या' : 'ਪੰਜਾਬੀ ਵਿਆਖਿਆ'}
-                                                   </p>
-                                                   <p className="text-xs font-medium text-slate-600 leading-relaxed italic">{q.hindiExplanation || q.punjabiExplanation || 'Awaiting audit...'}</p>
-                                                </div>
-                                             </div>
+                                          <div className="space-y-6">
+                                             <QuestionRenderer 
+                                                question={q} 
+                                                language={editingItem.language === 'English & Hindi' ? 'ENGLISH_HINDI' : 'ENGLISH_PUNJABI'}
+                                                showSolution={true}
+                                                className="bg-transparent p-0 shadow-none border-none"
+                                             />
                                           </div>
                                        </div>
                                     ))}
