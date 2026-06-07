@@ -29,8 +29,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid transaction amount.' }, { status: 400 });
     }
 
-    // 2. Generate truncated receipt (Strict < 40 chars)
-    const receipt = `rcpt_${Date.now().toString().slice(-8)}_${planId.slice(0, 4)}`;
+    // 2. Generate sanitized receipt (Strict < 40 chars, alphanumeric/underscore only)
+    const receipt = `rcpt_${Date.now().toString().slice(-10)}`;
 
     const options = {
       amount: amountInPaise,

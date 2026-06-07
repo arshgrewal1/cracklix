@@ -18,8 +18,8 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 
 /**
- * @fileOverview Aspirant Checkout Hub v9.0.
- * HARDENED: Robust order generation logic and verification flow.
+ * @fileOverview Aspirant Checkout Hub v10.0.
+ * HARDENED: Sanitized name fields to resolve Razorpay "Name format is invalid" error.
  */
 
 export default function CheckoutPage() {
@@ -51,7 +51,7 @@ function CheckoutContent() {
   const upiId = settings?.upiId || "arshdeepgrewal1122@okaxis";
 
   const handleRazorpayPayment = async () => {
-    if (!user || !profile || !planData) return;
+    if (!user || !planData) return;
     
     if (!(window as any).Razorpay) {
       toast({ variant: "destructive", title: "Gateway Offline", description: "Razorpay script is still loading. Please wait." });
@@ -71,7 +71,9 @@ function CheckoutContent() {
       const orderData = await orderRes.json();
       if (orderData.error) throw new Error(orderData.error);
 
-      // 2. Launch Razorpay Checkout
+      // 2. Launch Razorpay Checkout with sanitized name fields
+      const sanitizedCustomerName = (profile?.name || user?.displayName || 'Aspirant').replace(/[^\w\s]/gi, '').slice(0, 40).trim();
+
       const options = {
         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
         amount: orderData.amount,
@@ -109,9 +111,9 @@ function CheckoutContent() {
           }
         },
         prefill: {
-          name: profile.name,
+          name: sanitizedCustomerName,
           email: user.email,
-          contact: profile.phone?.replace(/\D/g, '').slice(-10)
+          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || ""
         },
         theme: { color: "#F97316" },
         modal: {
