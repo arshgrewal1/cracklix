@@ -14,19 +14,15 @@ import {
   Zap, 
   FileText, 
   FileStack, 
-  TrendingUp, 
-  Download, 
-  ExternalLink,
-  MessageCircle,
-  Sparkles,
-  Trophy,
-  Globe,
-  Bell,
-  Target,
-  Medal,
+  Globe, 
+  Newspaper,
+  Library,
   ChevronRight,
-  User,
-  Library
+  MessageCircle,
+  Trophy,
+  Sparkles,
+  Bell,
+  Medal
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -35,15 +31,16 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Free Hub v7.0.
- * UPDATED: Renamed to FREE HUB and consolidated PYQs and Study Materials.
+ * @fileOverview Institutional Free Hub v8.0.
+ * UPDATED: Replaced Blueprints with Current Affairs and added Notes category.
  */
 
 const CATEGORIES = [
-  { id: "all", label: "All Hubs", icon: <Globe className="h-6 w-6" />, color: "bg-blue-50 text-blue-600" },
-  { id: "mock", label: "Free Mocks", icon: <Zap className="h-6 w-6" />, color: "bg-orange-50 text-primary" },
-  { id: "pdf", label: "Blueprints", icon: <Library className="h-6 w-6" />, color: "bg-emerald-50 text-emerald-600" },
-  { id: "pyq", label: "Previous Papers", icon: <FileStack className="h-6 w-6" />, color: "bg-rose-50 text-rose-600" }
+  { id: "all", label: "All Hubs", icon: <Globe className="h-5 w-5 md:h-6 md:w-6" />, color: "bg-blue-50 text-blue-600" },
+  { id: "mock", label: "Free Mocks", icon: <Zap className="h-5 w-5 md:h-6 md:w-6" />, color: "bg-orange-50 text-primary" },
+  { id: "note", label: "Study Notes", icon: <FileText className="h-5 w-5 md:h-6 md:w-6" />, color: "bg-emerald-50 text-emerald-600" },
+  { id: "ca", label: "Current Affairs", icon: <Newspaper className="h-5 w-5 md:h-6 md:w-6" />, color: "bg-amber-50 text-amber-600" },
+  { id: "pyq", label: "Previous Papers", icon: <FileStack className="h-5 w-5 md:h-6 md:w-6" />, color: "bg-rose-50 text-rose-600" }
 ]
 
 export default function FreeContentHub() {
@@ -73,10 +70,10 @@ export default function FreeContentHub() {
       <Navbar />
       
       <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 max-w-7xl">
-        <div className="space-y-10 md:space-y-16">
+        <div className="space-y-10 md:space-y-16 text-left">
           
           {/* HERO HUB */}
-          <div className="flex flex-col lg:flex-row justify-between items-center gap-12 text-left bg-[#0B1528] p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] text-white relative overflow-hidden shadow-4xl group">
+          <div className="flex flex-col lg:flex-row justify-between items-center gap-12 bg-[#0B1528] p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] text-white relative overflow-hidden shadow-4xl group">
             <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Trophy className="h-80 w-80" /></div>
             <div className="space-y-8 relative z-10 max-w-3xl">
               <div className="flex items-center gap-3">
@@ -92,7 +89,7 @@ export default function FreeContentHub() {
                 <span className="text-primary">FREE HUB</span>
               </h1>
               <p className="text-slate-400 font-medium text-base md:text-xl max-w-2xl leading-relaxed">
-                Access high-fidelity mocks, previous papers, and study blueprints curated by Arsh Grewal Management.
+                Access high-fidelity mocks, current affairs, and study notes curated by Arsh Grewal Management.
               </p>
               
               <div className="relative w-full md:w-[480px]">
@@ -117,23 +114,23 @@ export default function FreeContentHub() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
              {/* LEFT: CONTENT HUB */}
              <div className="lg:col-span-8 space-y-12">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-3 md:gap-4">
                    {CATEGORIES.map(cat => (
                      <button 
                       key={cat.id}
                       onClick={() => setActiveFilter(cat.id)}
                       className={cn(
-                        "p-6 rounded-[2rem] transition-all flex flex-col items-center justify-center gap-4 shadow-sm hover:shadow-2xl border-2",
+                        "p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] transition-all flex flex-col items-center justify-center gap-3 md:gap-4 shadow-sm hover:shadow-2xl border-2 shrink-0",
                         activeFilter === cat.id ? 'bg-[#0B1528] border-[#0B1528] text-white' : 'bg-white border-white text-slate-400 hover:border-primary/20'
                       )}
                      >
                        <div className={cn(
-                         "h-14 w-14 rounded-2xl flex items-center justify-center shadow-inner",
+                         "h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl flex items-center justify-center shadow-inner",
                          activeFilter === cat.id ? 'bg-white/10 text-primary' : cat.color
                        )}>
                          {cat.icon}
                        </div>
-                       <span className="text-[10px] font-black uppercase tracking-[0.2em]">{cat.label}</span>
+                       <span className="text-[7px] md:text-[10px] font-black uppercase tracking-widest text-center leading-tight">{cat.label}</span>
                      </button>
                    ))}
                 </div>
@@ -148,18 +145,22 @@ export default function FreeContentHub() {
                       const isInternal = item.link?.startsWith('/');
                       return (
                         <Card key={item.id} className="bg-white border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] overflow-hidden group text-left">
-                          <CardContent className="p-8 md:p-10 flex flex-col md:row items-center gap-8">
+                          <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-center gap-8">
                              <div className={cn(
                                 "h-16 w-16 md:h-20 md:w-20 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
                                 item.type === 'mock' ? 'bg-orange-50 text-primary' : 
-                                item.type === 'pyq' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600'
+                                item.type === 'pyq' ? 'bg-rose-50 text-rose-600' : 
+                                item.type === 'ca' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'
                              )}>
                                 {item.type === 'mock' ? <Zap className="h-8 md:h-10 md:w-10" /> : 
-                                 item.type === 'pyq' ? <FileStack className="h-8 md:h-10 md:w-10" /> : <FileText className="h-8 md:h-10 md:w-10" />}
+                                 item.type === 'pyq' ? <FileStack className="h-8 md:h-10 md:w-10" /> : 
+                                 item.type === 'ca' ? <Newspaper className="h-8 md:h-10 md:w-10" /> : <FileText className="h-8 md:h-10 md:w-10" />}
                              </div>
                              <div className="flex-1 space-y-3 w-full">
                                 <div className="flex items-center justify-between">
-                                   <Badge className="bg-slate-100 text-slate-400 border-none px-3 py-1 font-black uppercase text-[8px] tracking-widest">{item.type?.toUpperCase()}</Badge>
+                                   <Badge className="bg-slate-100 text-slate-400 border-none px-3 py-1 font-black uppercase text-[8px] tracking-widest">
+                                      {item.type === 'ca' ? 'DAILY ANALYSIS' : item.type?.toUpperCase()}
+                                   </Badge>
                                    <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2">
                                       <Bell className="h-3 w-3 text-primary" /> New Entry
                                    </span>
@@ -175,7 +176,7 @@ export default function FreeContentHub() {
                                      </Link>
                                    ) : (
                                      <a href={item.link || "#"} target="_blank" rel="noopener noreferrer">
-                                        {item.type === 'mock' ? 'Attempt' : 'Open PDF'} <ArrowRight className="ml-2 h-4 w-4" />
+                                        {item.type === 'mock' ? 'Attempt' : item.type === 'ca' ? 'Read Analysis' : 'Open PDF'} <ArrowRight className="ml-2 h-4 w-4" />
                                      </a>
                                    )}
                                 </Button>
@@ -194,7 +195,7 @@ export default function FreeContentHub() {
              </div>
 
              {/* RIGHT: RANKING PODIUM & TELEGRAM */}
-             <div className="lg:col-span-4 space-y-12 text-left">
+             <div className="lg:col-span-4 space-y-12">
                 <Card className="border-none shadow-3xl rounded-[3rem] bg-white overflow-hidden">
                    <div className="bg-[#0F172A] p-8 text-white">
                       <div className="flex items-center gap-4 mb-2">

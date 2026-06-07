@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Trash2, Edit, Save, Search, Sparkles, FileText, Zap, TrendingUp, FileStack, Loader2, X, Link as LinkIcon } from "lucide-react"
+import { Plus, Trash2, Edit, Save, Search, Sparkles, FileText, Zap, TrendingUp, FileStack, Loader2, X, Link as LinkIcon, Newspaper } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, query, orderBy, serverTimestamp } from "firebase/firestore"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
@@ -18,8 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Free Content CMS v4.0.
- * UPDATED: Removed Strategic News category from ingestion.
+ * @fileOverview Institutional Free Hub CMS v5.0.
+ * UPDATED: Added Current Affairs and Study Notes to explicit ingestion types.
  */
 
 export default function AdminFreeContent() {
@@ -55,7 +55,6 @@ export default function AdminFreeContent() {
     const payload = {
       ...editingItem,
       id,
-      category: "free",
       updatedAt: serverTimestamp(),
       createdAt: editingItem.createdAt || serverTimestamp()
     }
@@ -92,9 +91,9 @@ export default function AdminFreeContent() {
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Free Content Master Registry</span>
            </div>
           <h1 className="text-5xl font-black font-headline text-[#0F172A] uppercase tracking-tight leading-none">Free Hub CMS</h1>
-          <p className="text-slate-500 mt-2 text-lg font-medium">Coordinate high-fidelity Mocks and PDFs for the public feed.</p>
+          <p className="text-slate-500 mt-2 text-lg font-medium">Coordinate Mocks, Notes, and Analysis for the public feed.</p>
         </div>
-        <Button onClick={() => setEditingItem({ title: "", description: "", slug: "", type: "pdf", link: "", fileUrl: "" })} className="bg-primary hover:bg-orange-600 gap-3 h-16 px-10 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl transition-all active:scale-95">
+        <Button onClick={() => setEditingItem({ title: "", description: "", slug: "", type: "note", link: "", fileUrl: "" })} className="bg-primary hover:bg-orange-600 gap-3 h-16 px-10 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl transition-all active:scale-95">
           <Plus className="h-5 w-5" /> Initialize Free Content
         </Button>
       </div>
@@ -132,11 +131,12 @@ export default function AdminFreeContent() {
                     <div className="flex items-center gap-6">
                        <div className={cn(
                          "h-14 w-14 rounded-2xl flex items-center justify-center shrink-0 shadow-inner transition-transform group-hover:scale-105",
-                         item.type === 'mock' ? 'bg-orange-50 text-primary' : 'bg-blue-50 text-blue-600'
+                         item.type === 'mock' ? 'bg-orange-50 text-primary' : 
+                         item.type === 'ca' ? 'bg-amber-50 text-amber-600' : 'bg-blue-50 text-blue-600'
                        )}>
                           {item.type === 'mock' ? <Zap className="h-6 w-6" /> : 
-                           item.type === 'pdf' ? <FileText className="h-6 w-6" /> : 
-                           <FileStack className="h-6 w-6" />}
+                           item.type === 'ca' ? <Newspaper className="h-6 w-6" /> : 
+                           item.type === 'pyq' ? <FileStack className="h-6 w-6" /> : <FileText className="h-6 w-6" />}
                        </div>
                        <div>
                           <p className="font-black text-[#0F172A] text-xl uppercase tracking-tight leading-none">{item.title}</p>
@@ -197,9 +197,10 @@ export default function AdminFreeContent() {
                 <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Thematic Type</Label>
                 <select value={editingItem?.type} onChange={e => setEditingItem({...editingItem, type: e.target.value})} className="w-full h-14 bg-slate-50 border-none rounded-xl px-4 font-black uppercase text-[10px] outline-none">
                   <option value="mock">FREE MOCK</option>
-                  <option value="pdf">BLUEPRINT PDF</option>
-                  <option value="pyq">OFFICIAL PYQ</option>
                   <option value="note">STUDY NOTE</option>
+                  <option value="ca">CURRENT AFFAIRS</option>
+                  <option value="pyq">OFFICIAL PYQ</option>
+                  <option value="pdf">BLUEPRINT PDF</option>
                 </select>
               </div>
               <div className="space-y-2">
