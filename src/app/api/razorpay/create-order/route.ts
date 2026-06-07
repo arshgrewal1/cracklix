@@ -3,13 +3,13 @@ import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 
 /**
- * @fileOverview Production-Grade Razorpay Order Node v8.0.
+ * @fileOverview Production-Grade Razorpay Order Node v9.0.
  * Hardened: Strict integer paise conversion and 20-char receipt validation.
  */
 
 export async function POST(request: Request) {
   try {
-    const { amount, planId } = await request.json();
+    const { amount } = await request.json();
 
     const key_id = process.env.RAZORPAY_KEY_ID;
     const key_secret = process.env.RAZORPAY_KEY_SECRET;

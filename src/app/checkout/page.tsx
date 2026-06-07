@@ -19,8 +19,8 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 
 /**
- * @fileOverview Institutional Checkout Hub v27.0.
- * FIXED: Explicitly enabled UPI VPA (ID) entry field in Razorpay config to allow manual typing.
+ * @fileOverview Institutional Checkout Hub v28.0.
+ * FIXED: Forcefully enabled UPI VPA (ID) entry field using custom display blocks to override default QR-only view.
  * HARDENED: Aggressive name sanitization to prevent "Invalid Format" rejection.
  */
 
@@ -50,8 +50,6 @@ function CheckoutContent() {
     if (!loading && !user) router.push("/login")
   }, [user, loading, router])
 
-  const upiId = settings?.upiId || "arshdeepgrewal1122@okaxis";
-
   const handleRazorpayPayment = async () => {
     if (!user || !planData || !db) return;
     
@@ -68,7 +66,7 @@ function CheckoutContent() {
       const orderRes = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: planData.price, planId: planId }),
+        body: JSON.stringify({ amount: planData.price }),
       });
 
       const orderData = await orderRes.json();
@@ -122,17 +120,32 @@ function CheckoutContent() {
           contact: sanitizedPhone
         },
         theme: { color: "#F97316" },
-        // CRITICAL: Explicitly enable VPA (UPI ID) field visibility
+        // FORCED VPA CONFIGURATION: Explicitly separate VPA and QR into blocks to force input visibility
         config: {
           display: {
-            preferences: {
-              show_default_blocks: true, // Forces "Pay with UPI ID" to show up
-            },
-            methods: {
-              upi: {
-                vpa: true, // Specifically enables the text input for UPI IDs
-                qr: true,
+            blocks: {
+              upi_vpa: {
+                name: "Pay via UPI ID",
+                instruments: [
+                  {
+                    method: "upi",
+                    protocols: ["vpa"]
+                  }
+                ]
+              },
+              upi_qr: {
+                name: "Pay via QR Code",
+                instruments: [
+                  {
+                    method: "upi",
+                    protocols: ["qr"]
+                  }
+                ]
               }
+            },
+            sequence: ["block.upi_vpa", "block.upi_qr", "method.card", "method.netbanking"],
+            preferences: {
+              show_default_blocks: true
             }
           }
         },
@@ -252,12 +265,12 @@ function CheckoutContent() {
                        <CardContent className="p-10 space-y-10">
                           <div className="flex flex-col md:flex-row items-center gap-10">
                              <div className="h-48 w-48 bg-white rounded-3xl border-2 border-dashed border-slate-200 flex items-center justify-center p-4 shadow-inner relative group">
-                                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${upiId}%26pn=Cracklix%26am=${planData.price}%26cu=INR`} alt="Audit QR" className="w-full h-full object-contain" />
+                                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${settings?.upiId || 'arshdeepgrewal1122@okaxis'}%26pn=Cracklix%26am=${planData.price}%26cu=INR`} alt="Audit QR" className="w-full h-full object-contain" />
                              </div>
                              <div className="flex-1 space-y-4 text-left">
                                 <div className="p-5 bg-[#0F172A] rounded-2xl border border-white/5 space-y-1 shadow-2xl">
                                    <p className="text-[9px] font-black text-primary uppercase tracking-widest">Institutional UPI Node</p>
-                                   <p className="text-lg font-black text-white break-all leading-none">{upiId}</p>
+                                   <p className="text-lg font-black text-white break-all leading-none">{settings?.upiId || "arshdeepgrewal1122@okaxis"}</p>
                                 </div>
                                 <ul className="space-y-2">
                                    <li className="flex items-center gap-3 text-[10px] font-bold text-slate-500 uppercase"><CheckCircle2 className="h-3 w-3 text-emerald-500" /> Pay exactly ₹{planData.price}</li>
