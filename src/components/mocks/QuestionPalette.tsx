@@ -18,8 +18,9 @@ interface QuestionPaletteProps {
 }
 
 /**
- * @fileOverview Professional CBT Question Palette Hub v7.2.
- * Optimized: Sidebar layout with ultra-compact navigation nodes.
+ * @fileOverview Professional CBT Question Palette Hub v8.0.
+ * Optimized: Maximum information density with full-height scroll protection.
+ * Fix: Increased top/bottom padding to prevent clipping on mobile devices.
  */
 export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteProps) {
   const { questions, status, currentIdx, visited } = useExamStore();
@@ -60,11 +61,12 @@ export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteP
   return (
     <div className="flex flex-col h-full bg-white border-l border-slate-200 text-left font-body select-none">
       <ScrollArea className="h-full">
-        <div className="p-2 md:p-5 space-y-4 md:space-y-8">
+        {/* INNER CONTAINER WITH SCROLL PROTECTION */}
+        <div className="p-2 md:p-5 pt-8 md:pt-10 space-y-4 md:space-y-8">
            
            {/* 1. STATUS SUMMARY HUB (Ultra Compact) */}
            <div className="space-y-1.5">
-              <p className="text-[7px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Status</p>
+              <p className="text-[7px] font-black uppercase text-slate-400 tracking-[0.2em] ml-1">Status Overview</p>
               <div className="grid grid-cols-2 gap-1 md:gap-3">
                  <SummaryCard count={stats.answered} label="ANS" color="bg-blue-600" />
                  <SummaryCard count={stats.notAnswered} label="NOT" color="bg-slate-400" />
@@ -100,16 +102,16 @@ export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteP
               ))}
            </div>
 
-           {/* 3. TACTICAL SUBMIT BUTTON */}
-           <div className="pt-2 md:pt-4 pb-12 md:pb-10">
+           {/* 3. TACTICAL SUBMIT BUTTON - PROTECTED BY BOTTOM PADDING */}
+           <div className="pt-4 pb-32">
               <Button 
                 onClick={(e) => {
                    e.preventDefault();
                    onSubmit();
                 }}
-                className="w-full h-8 md:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[7px] md:text-[10px] rounded-lg md:rounded-xl shadow-xl shadow-emerald-900/10 gap-1.5 md:gap-3 group transition-all"
+                className="w-full h-10 md:h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase tracking-[0.2em] text-[8px] md:text-[10px] rounded-lg md:rounded-xl shadow-xl shadow-emerald-900/10 gap-1.5 md:gap-3 group transition-all"
               >
-                 <ShieldCheck className="h-3 md:h-3.5 group-hover:scale-110 transition-transform" /> SUBMIT
+                 <ShieldCheck className="h-3 md:h-3.5 group-hover:scale-110 transition-transform" /> SUBMIT TEST
               </Button>
            </div>
         </div>
@@ -121,7 +123,7 @@ export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteP
 function SummaryCard({ count, label, color, textColor = "text-white", colSpan = 1, border = "border-transparent" }: any) {
   return (
     <div className={cn(
-      "flex items-center gap-1 p-1 rounded-md bg-slate-50/50 border border-slate-100 shadow-sm transition-all hover:border-primary/20",
+      "flex items-center gap-1.5 p-1.5 rounded-md bg-slate-50/50 border border-slate-100 shadow-sm transition-all hover:border-primary/20",
       colSpan > 1 && "col-span-2"
     )}>
        <div className={cn("h-4 w-4 md:h-7 md:w-7 rounded-full flex items-center justify-center text-[7px] md:text-[10px] font-black shrink-0 shadow-sm border", color, textColor, border)}>

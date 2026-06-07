@@ -26,6 +26,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 
 export default function MockAttemptPage() {
   const params = useParams();
@@ -105,19 +106,6 @@ export default function MockAttemptPage() {
     }, 1000);
     return () => clearInterval(interval);
   }, [isInitializing, examStore]);
-
-  const stats = useMemo(() => {
-    const s = { answered: 0, marked: 0, notAnswered: 0, notVisited: 0, ansMarked: 0 };
-    examStore.questions.forEach((_, i) => {
-      const st = examStore.status[i];
-      if (st === 'answered') s.answered++;
-      else if (st === 'marked') s.marked++;
-      else if (st === 'answered-marked') s.ansMarked++;
-      else if (examStore.visited.includes(i)) s.notAnswered++;
-      else s.notVisited++;
-    });
-    return s;
-  }, [examStore.questions, examStore.status, examStore.visited]);
 
   const handleSubmitFinal = useCallback(async () => {
     if (!db || isSubmittingFinal || !user) return;
@@ -214,7 +202,13 @@ export default function MockAttemptPage() {
       </main>
       
       <Sheet open={isMobilePaletteOpen} onOpenChange={setIsMobilePaletteOpen}>
-        <SheetContent side="right" className="w-[180px] lg:w-[320px] p-0 border-none overflow-hidden">
+        <SheetContent 
+          side="right" 
+          className={cn(
+            "p-0 border-none overflow-hidden shadow-2xl transition-all duration-300",
+            "!w-[180px] !max-w-[180px] h-full"
+          )}
+        >
           <SheetHeader className="sr-only">
              <SheetTitle>Question Palette</SheetTitle>
           </SheetHeader>
