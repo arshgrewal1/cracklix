@@ -34,7 +34,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Elite Institutional Results Hub v22.0.
+ * @fileOverview Elite Institutional Results Hub v23.0.
+ * Responsive Mastery: Optimized for 360px to 1440px+ viewports.
  * Features: Real-Time State Ranking, Sectional Mastery, and Percentile Audit.
  */
 
@@ -170,7 +171,7 @@ export default function ResultPage() {
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body pb-32 text-left">
       <Navbar />
       
-      <main className="container mx-auto px-4 md:px-6 py-8 md:py-12 max-w-6xl space-y-10 text-left animate-in fade-in duration-700">
+      <main className="container mx-auto px-4 md:px-6 py-6 md:py-12 max-w-6xl space-y-8 md:space-y-10 text-left animate-in fade-in duration-700">
         
         <div className="flex items-center gap-3">
            <BackButton label="Home" fallback="/dashboard" className="p-0 h-auto" />
@@ -182,61 +183,61 @@ export default function ResultPage() {
         </div>
 
         {/* 1. ELITE PERFORMANCE HEADER */}
-        <Card className="border-none shadow-3xl rounded-[3rem] overflow-hidden bg-white">
+        <Card className="border-none shadow-3xl rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-white">
            <div className="h-2 w-full bg-primary" />
-           <CardHeader className="p-10 md:p-16 border-b border-slate-50 space-y-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+           <CardHeader className="p-6 md:p-16 border-b border-slate-50 space-y-6">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 md:gap-8">
                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                       <ShieldCheck className="h-8 w-8 text-primary" />
-                       <Badge className="bg-emerald-50 text-emerald-600 border-none px-4 py-1.5 rounded-xl font-black uppercase text-[10px] tracking-[0.2em] shadow-lg">OFFICIAL AUDIT</Badge>
+                    <div className="flex items-center gap-3">
+                       <ShieldCheck className="h-6 w-6 md:h-8 md:w-8 text-primary" />
+                       <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 md:px-4 py-1.5 rounded-xl font-black uppercase text-[8px] md:text-[10px] tracking-[0.2em] shadow-md">OFFICIAL AUDIT</Badge>
                     </div>
-                    <CardTitle className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase leading-tight tracking-tight">
+                    <CardTitle className="text-xl md:text-5xl font-headline font-black text-[#0F172A] uppercase leading-tight tracking-tight">
                        {sessionData.mockTitle}
                     </CardTitle>
                  </div>
                  
-                 <div className="flex items-center gap-6 bg-slate-50 p-6 rounded-[2.5rem] border border-slate-100 shadow-inner shrink-0">
-                    <div className="text-center space-y-1">
-                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">STATE RANK</p>
-                       <p className="text-4xl font-headline font-black text-[#0F172A] leading-none">#{merit.rank}</p>
-                       <p className="text-[8px] font-bold text-primary uppercase">OUT OF {merit.total}</p>
+                 <div className="flex items-center justify-around md:justify-center gap-4 md:gap-8 bg-slate-50 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 shadow-inner w-full md:w-auto">
+                    <div className="text-center space-y-0.5 md:space-y-1">
+                       <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">STATE RANK</p>
+                       <p className="text-2xl md:text-5xl font-headline font-black text-[#0F172A] leading-none">#{merit.rank}</p>
+                       <p className="text-[7px] md:text-[9px] font-bold text-primary uppercase">OF {merit.total}</p>
                     </div>
-                    <div className="h-10 w-px bg-slate-200" />
-                    <div className="text-center space-y-1">
-                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none">PERCENTILE</p>
-                       <p className="text-4xl font-headline font-black text-emerald-600 leading-none">{merit.percentile}%</p>
-                       <p className="text-[8px] font-bold text-slate-300 uppercase">Registry Index</p>
+                    <div className="h-10 md:h-16 w-px bg-slate-200" />
+                    <div className="text-center space-y-0.5 md:space-y-1">
+                       <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">PERCENTILE</p>
+                       <p className="text-2xl md:text-5xl font-headline font-black text-emerald-600 leading-none">{merit.percentile}%</p>
+                       <p className="text-[7px] md:text-[9px] font-bold text-slate-300 uppercase">Registry Index</p>
                     </div>
                  </div>
               </div>
            </CardHeader>
 
-           <CardContent className="p-10 md:p-16 bg-slate-50/30">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
-                <MetricNode icon={<CheckCircle2 className="text-emerald-500 h-6 w-6" />} val={sessionData.score} label="CORRECT" sub="Audit Success" />
-                <MetricNode icon={<XCircle className="text-rose-500 h-6 w-6" />} val={Object.keys(sessionData.answers).length - sessionData.score} label="WRONG" sub="Logic Gap" />
-                <MetricNode icon={<Clock className="text-slate-400 h-6 w-6" />} val={`${Math.floor(sessionData.timeTaken / 60)}m`} label="TIME" sub="Pace Index" />
-                <MetricNode icon={<Target className="text-primary h-6 w-6" />} val={`${sessionData.accuracy}%`} label="PRECISION" sub="Registry Rank" />
+           <CardContent className="p-6 md:p-16 bg-slate-50/30">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+                <MetricNode icon={<CheckCircle2 className="text-emerald-500 h-5 w-5 md:h-6 md:w-6" />} val={sessionData.score} label="CORRECT" sub="Audit Success" />
+                <MetricNode icon={<XCircle className="text-rose-500 h-5 w-5 md:h-6 md:w-6" />} val={Object.keys(sessionData.answers).length - sessionData.score} label="WRONG" sub="Logic Gap" />
+                <MetricNode icon={<Clock className="text-slate-400 h-5 w-5 md:h-6 md:w-6" />} val={`${Math.floor(sessionData.timeTaken / 60)}m`} label="TIME" sub="Pace Index" />
+                <MetricNode icon={<Target className="text-primary h-5 w-5 md:h-6 md:w-6" />} val={`${sessionData.accuracy}%`} label="PRECISION" sub="Registry Rank" />
               </div>
            </CardContent>
         </Card>
 
         {/* 2. SECTIONAL PERFORMANCE MATRIX */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-           <Card className="lg:col-span-8 border-none shadow-xl rounded-[2.5rem] bg-white p-10 md:p-12 space-y-10">
-              <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
-                 <BarChart3 className="h-6 w-6 text-primary" />
-                 <h3 className="text-2xl font-headline font-black uppercase text-[#0F172A]">Sectional Mastery Audit</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
+           <Card className="lg:col-span-8 border-none shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-6 md:p-12 space-y-8 md:space-y-10">
+              <div className="flex items-center gap-3 border-b border-slate-50 pb-4 md:pb-6">
+                 <BarChart3 className="h-5 w-5 md:h-6 md:w-6 text-primary" />
+                 <h3 className="text-lg md:text-2xl font-headline font-black uppercase text-[#0F172A]">Sectional Mastery Audit</h3>
               </div>
-              <div className="space-y-8">
+              <div className="space-y-6 md:space-y-8">
                  {sectionalAudit.map((s, i) => (
-                    <div key={i} className="space-y-3">
-                       <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
-                          <span>{s.name}</span>
+                    <div key={i} className="space-y-2 md:space-y-3">
+                       <div className="flex justify-between items-center text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">
+                          <span className="truncate max-w-[200px]">{s.name}</span>
                           <span className="text-[#0F172A]">{s.accuracy}%</span>
                        </div>
-                       <div className="h-2 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner">
+                       <div className="h-1.5 md:h-2 w-full bg-slate-50 rounded-full overflow-hidden shadow-inner">
                           <div className={cn("h-full transition-all duration-1000", s.color)} style={{ width: `${s.accuracy}%` }} />
                        </div>
                     </div>
@@ -244,20 +245,20 @@ export default function ResultPage() {
               </div>
            </Card>
 
-           <Card className="lg:col-span-4 border-none shadow-xl rounded-[2.5rem] bg-[#0F172A] text-white p-10 space-y-10 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform"><TrendingUp className="h-48 w-48" /></div>
-              <div className="relative z-10 space-y-8">
-                 <div className="h-14 w-14 bg-white/10 rounded-2xl flex items-center justify-center text-primary shadow-2xl">
-                    <Activity className="h-8 w-8" />
+           <Card className="lg:col-span-4 border-none shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-10 space-y-8 md:space-y-10 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform"><TrendingUp className="h-32 md:h-48 w-32 md:w-48" /></div>
+              <div className="relative z-10 space-y-6 md:space-y-8">
+                 <div className="h-12 w-12 md:h-14 md:w-14 bg-white/10 rounded-2xl flex items-center justify-center text-primary shadow-2xl">
+                    <Activity className="h-6 w-6 md:h-8 md:w-8" />
                  </div>
-                 <div className="space-y-2">
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">State Comparison</p>
-                    <h4 className="text-3xl font-headline font-black uppercase leading-tight">Mastery <br/> Index Analysis</h4>
+                 <div className="space-y-1.5 md:space-y-2">
+                    <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-primary">State Comparison</p>
+                    <h4 className="text-2xl md:text-3xl font-headline font-black uppercase leading-tight">Mastery <br/> Index Analysis</h4>
                  </div>
-                 <p className="text-slate-400 text-sm font-medium leading-relaxed">
+                 <p className="text-slate-400 text-[13px] md:text-sm font-medium leading-relaxed">
                     Aspirants in the Top 10% average <strong>84% accuracy</strong> in {sectionalAudit[0]?.name || 'GK'}. Your current trajectory is <strong>{merit.percentile > 50 ? 'Above' : 'Below'} Average</strong>.
                  </p>
-                 <Button asChild variant="outline" className="w-full h-14 border-white/10 bg-white/5 hover:bg-white/10 text-white rounded-xl font-black uppercase text-[10px] tracking-widest gap-2">
+                 <Button asChild variant="outline" className="w-full h-12 md:h-14 border-white/10 bg-white/5 hover:bg-white/10 text-white rounded-xl font-black uppercase text-[10px] tracking-widest gap-2">
                     <Link href="/leaderboard"><Trophy className="h-4 w-4" /> View State Rankings</Link>
                  </Button>
               </div>
@@ -265,17 +266,17 @@ export default function ResultPage() {
         </div>
 
         {/* 3. SOLUTION REVIEW HUB */}
-        <div className="space-y-10">
-           <div className="flex items-center justify-between border-b border-slate-200 pb-8">
-              <div className="space-y-2">
-                 <h3 className="font-headline font-black text-3xl uppercase text-[#0F172A] flex items-center gap-4">
-                    <BrainCircuit className="h-8 w-8 text-primary" /> Rationale Review
+        <div className="space-y-8 md:space-y-10">
+           <div className="flex items-center justify-between border-b border-slate-200 pb-6 md:pb-8">
+              <div className="space-y-1.5 md:space-y-2">
+                 <h3 className="font-headline font-black text-xl md:text-3xl uppercase text-[#0F172A] flex items-center gap-3 md:gap-4">
+                    <BrainCircuit className="h-6 w-6 md:h-8 md:w-8 text-primary" /> Rationale Review
                  </h3>
-                 <p className="text-slate-400 font-medium text-sm">Audit every question node for logic validation.</p>
+                 <p className="text-slate-400 font-medium text-[11px] md:text-sm">Audit every question node for logic validation.</p>
               </div>
            </div>
            
-           <div className="grid grid-cols-1 gap-8">
+           <div className="grid grid-cols-1 gap-6 md:gap-8">
               {questions.map((q, idx) => {
                  const studentAnsIdx = sessionData.answers?.[idx];
                  const correctAnsIdx = ['A','B','C','D'].indexOf(q.correctAnswer);
@@ -284,36 +285,36 @@ export default function ResultPage() {
                  const isExpanded = expandedQs[idx];
 
                  return (
-                    <Card key={idx} className="border-none shadow-xl rounded-[2.5rem] overflow-hidden bg-white group hover:shadow-2xl transition-all duration-300">
-                       <div className={cn("h-2.5 w-full", isCorrect ? "bg-emerald-500" : isSkipped ? "bg-slate-200" : "bg-rose-500")} />
-                       <CardContent className="p-10 md:p-12 space-y-10">
+                    <Card key={idx} className="border-none shadow-xl rounded-[1.5rem] md:rounded-[2.5rem] overflow-hidden bg-white group hover:shadow-2xl transition-all duration-300">
+                       <div className={cn("h-1.5 md:h-2.5 w-full", isCorrect ? "bg-emerald-500" : isSkipped ? "bg-slate-200" : "bg-rose-500")} />
+                       <CardContent className="p-6 md:p-12 space-y-8 md:space-y-10">
                           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-                             <div className="flex items-center gap-6">
-                                <div className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center font-black text-xl text-slate-400 group-hover:text-primary transition-colors">
+                             <div className="flex items-center gap-4 md:gap-6">
+                                <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center font-black text-lg md:text-xl text-slate-400 group-hover:text-primary transition-colors shrink-0">
                                    {idx + 1}
                                 </div>
-                                <div className="space-y-1.5">
+                                <div className="space-y-1">
                                    <Badge className={cn(
-                                     "border-none px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-sm",
+                                     "border-none px-3 md:px-4 py-1 md:py-1.5 rounded-xl text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] shadow-sm",
                                      isCorrect ? "bg-emerald-50 text-emerald-600" : isSkipped ? "bg-slate-50 text-slate-400" : "bg-rose-50 text-rose-600"
                                    )}>
                                       {isCorrect ? 'REGISTRY SUCCESS' : isSkipped ? 'NOT ATTEMPTED' : 'LOGIC FAILURE'}
                                    </Badge>
-                                   <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">{q.sectionId || 'General'}</p>
+                                   <p className="text-[8px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest px-1">{q.sectionId || 'General'}</p>
                                 </div>
                              </div>
                              
                              <Button 
                                 variant="ghost"
                                 onClick={() => setExpandedQs(p => ({ ...p, [idx]: !p[idx] }))}
-                                className="h-12 px-8 font-black uppercase text-[10px] tracking-widest gap-3 text-primary bg-primary/5 hover:bg-primary/10 rounded-xl transition-all active:scale-95"
+                                className="w-full sm:w-auto h-11 md:h-12 px-6 md:px-8 font-black uppercase text-[10px] tracking-widest gap-3 text-primary bg-primary/5 hover:bg-primary/10 rounded-xl transition-all active:scale-95"
                              >
                                 {isExpanded ? "Hide Logic" : "Audit Rationale"}
                                 {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                              </Button>
                           </div>
 
-                          <div className="px-1 md:px-4">
+                          <div className="px-0 md:px-4 overflow-x-hidden">
                             <QuestionRenderer 
                                 question={q} 
                                 language={mockLanguageMode} 
@@ -337,14 +338,14 @@ export default function ResultPage() {
 
 function MetricNode({ icon, val, label, sub }: any) {
   return (
-    <div className="space-y-4 p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm text-center group hover:translate-y-[-6px] transition-all">
-      <div className="h-14 w-14 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto shadow-inner group-hover:scale-110 transition-transform">
+    <div className="space-y-2 md:space-y-4 p-5 md:p-8 bg-white rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 shadow-sm text-center group hover:translate-y-[-6px] transition-all">
+      <div className="h-10 w-10 md:h-14 md:w-14 bg-slate-50 rounded-xl md:rounded-2xl flex items-center justify-center mx-auto shadow-inner group-hover:scale-110 transition-transform">
          {icon}
       </div>
-      <div className="space-y-1">
-         <p className="text-4xl font-headline font-black text-[#0F172A] tracking-tighter leading-none">{val}</p>
-         <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-2">{label}</p>
-         <p className="text-[8px] font-bold text-slate-300 uppercase tracking-tighter">{sub}</p>
+      <div className="space-y-0.5 md:space-y-1">
+         <p className="text-2xl md:text-4xl font-headline font-black text-[#0F172A] tracking-tighter leading-none">{val}</p>
+         <p className="text-[8px] md:text-[10px] font-black uppercase text-slate-500 tracking-widest mt-1 md:mt-2">{label}</p>
+         <p className="text-[6px] md:text-[8px] font-bold text-slate-300 uppercase tracking-tighter hidden xs:block">{sub}</p>
       </div>
     </div>
   )
