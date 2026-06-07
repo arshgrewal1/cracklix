@@ -99,6 +99,7 @@ export default function MocksGatewayPage() {
              const logoUrl = board?.iconUrl || exam.iconUrl;
              const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, subjects: new Set() };
              const isImgFailed = failedImages[exam.id];
+             const isArmy = exam.boardId?.toLowerCase() === 'army' || exam.id?.toLowerCase().includes('army');
 
              return (
                 <Link key={exam.id} href={`/exams/${exam.id}`}>
@@ -111,7 +112,7 @@ export default function MocksGatewayPage() {
                                     src={logoUrl} 
                                     referrerPolicy="no-referrer"
                                     alt="Board Logo" 
-                                    className="w-full h-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-110" 
+                                    className={cn("w-full h-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-110", isArmy ? "scale-150" : "")} 
                                     onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}
                                   />
                                ) : (

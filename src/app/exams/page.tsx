@@ -159,7 +159,7 @@ function CatalogContent() {
                           <h3 className="text-[15px] md:text-3xl font-black text-[#0F172A] uppercase leading-tight group-hover:text-primary transition-colors">
                             {exam.name}
                           </h3>
-                          <p className="text-[10px] md:text-sm font-medium text-slate-400 leading-relaxed line-clamp-1 md:line-clamp-2">
+                          <p className="text-[10px] md:sm font-medium text-slate-400 leading-relaxed line-clamp-1 md:line-clamp-2">
                             {exam.description || "Official institutional preparation matrix."}
                           </p>
                        </div>

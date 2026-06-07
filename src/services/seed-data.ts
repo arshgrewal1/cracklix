@@ -2,7 +2,7 @@
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Engine v33.0.
+ * @fileOverview Institutional Seeding Engine v34.0.
  * Features: Hardened Unique Hub Registry with High-Fidelity Official Assets.
  * Updated: Official Agniveer Army Circular Insignia and Board Mappings.
  */

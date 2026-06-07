@@ -117,6 +117,7 @@ export default function MyExamsPage() {
                  const board = boards?.find((b: any) => b.id.toLowerCase() === exam.boardId?.toLowerCase() || b.abbreviation?.toLowerCase() === exam.boardId?.toLowerCase());
                  const logoUrl = board?.iconUrl || exam.iconUrl;
                  const isImgFailed = failedImages[exam.id];
+                 const isArmy = exam.boardId?.toLowerCase() === 'army' || exam.id?.toLowerCase().includes('army');
                  
                  // Elite logic: Find new mocks for this pinned hub
                  const hasNewMocks = recentMocks?.some(m => m.examId === exam.id && (Date.now() - (m.createdAt?.seconds * 1000 || 0)) < 86400000 * 7);
@@ -132,7 +133,7 @@ export default function MyExamsPage() {
                         <div className="flex justify-between items-start mb-8">
                            <div className="h-16 w-16 rounded-2xl bg-white flex items-center justify-center shrink-0 border border-slate-100 shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
                               {logoUrl && !isImgFailed ? (
-                                <img src={logoUrl} className="w-full h-full object-contain p-2" referrerPolicy="no-referrer" alt="Logo" onError={() => setFailedImages(p => ({...p, [exam.id]: true}))} />
+                                <img src={logoUrl} className={cn("w-full h-full object-contain p-2", isArmy ? "scale-150" : "")} referrerPolicy="no-referrer" alt="Logo" onError={() => setFailedImages(p => ({...p, [exam.id]: true}))} />
                               ) : (
                                 <GraduationCap className="h-8 w-8 text-slate-200" />
                               )}
