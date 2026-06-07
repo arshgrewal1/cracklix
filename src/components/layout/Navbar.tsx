@@ -2,7 +2,7 @@
 'use client';
 
 import Link from "next/link";
-import { Menu, Search, Zap, CreditCard, LogOut, ShieldCheck, Megaphone, Target, LayoutGrid, Award } from "lucide-react";
+import { Menu, Search, Zap, CreditCard, LogOut, ShieldCheck, Megaphone, Target, LayoutGrid, Award, Gem } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import { useState, useMemo } from "react";
@@ -25,9 +25,8 @@ import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Elite Global Navigation Node v4.0.
- * PERFORMANCE OPTIMIZED: Ultra-fast dropdown triggers and hardened pointer events.
- * UI: Professional dark-aesthetic for institutional focus.
+ * @fileOverview Elite Global Navigation Node v5.0.
+ * Updated: 'Unlock Pass' changed to bold 'PASS' and Profile replaced with Pass in priority nodes.
  */
 
 export default function Navbar() {
@@ -78,7 +77,7 @@ export default function Navbar() {
                    )}
                  >
                    <SheetHeader className="sr-only">
-                      <SheetTitle>Registry Menu</SheetTitle>
+                      <SheetTitle>Menu</SheetTitle>
                    </SheetHeader>
                    <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
                  </SheetContent>
@@ -89,8 +88,10 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center gap-10 text-[12px] font-black uppercase tracking-[0.2em] text-[#7A8B9E]">
               <Link href="/my-exams" className={cn("transition-colors flex items-center gap-2 hover:text-white", pathname === '/my-exams' ? 'text-white' : '')}><Target className="h-4 w-4 text-primary" /> My Exams</Link>
               <Link href="/mocks" className={cn("transition-colors hover:text-white", pathname === '/mocks' ? 'text-white' : '')}>Mocks</Link>
-              <Link href="/pass" className={cn("transition-colors hover:text-white", pathname === '/pass' ? 'text-white' : '')}>Unlock Pass</Link>
-              <Link href="/notes" className={cn("transition-colors hover:text-white", pathname === '/notes' ? 'text-white' : '')}>Registry Nodes</Link>
+              <Link href="/pass" className={cn("transition-colors flex items-center gap-2 px-4 py-1.5 rounded-lg bg-primary/10 border border-primary/20", pathname === '/pass' ? 'text-primary' : 'text-primary/70 hover:text-primary')}>
+                <Gem className="h-4 w-4" /> PASS
+              </Link>
+              <Link href="/notes" className={cn("transition-colors hover:text-white", pathname === '/notes' ? 'text-white' : '')}>Study Notes</Link>
             </div>
           </div>
 
@@ -109,17 +110,17 @@ export default function Navbar() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-72 bg-[#0F172A] border-white/10 text-white rounded-[2.5rem] p-4 shadow-5xl animate-in fade-in zoom-in-95 duration-200" align="end">
-                  <DropdownMenuLabel className="px-5 py-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Aspirant Terminal</DropdownMenuLabel>
+                  <DropdownMenuLabel className="px-5 py-3 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Student Area</DropdownMenuLabel>
                   
-                  <DropdownNavItem href="/my-exams" icon={<Target className="h-5 w-5 text-primary" />} label="Master Dashboard" />
-                  <DropdownNavItem href="/dashboard" icon={<Award className="h-5 w-5 text-emerald-400" />} label="Readiness Index" />
-                  <DropdownNavItem href="/pass" icon={<CreditCard className="h-5 w-5 text-blue-400" />} label="Monetization Pass" />
+                  <DropdownNavItem href="/profile" icon={<User className="h-5 w-5 text-blue-400" />} label="My Profile" />
+                  <DropdownNavItem href="/dashboard" icon={<Award className="h-5 w-5 text-emerald-400" />} label="My Results" />
+                  <DropdownNavItem href="/pass" icon={<Gem className="h-5 w-5 text-primary" />} label="Elite Pass" />
                   
                   {isAdmin && (
                     <DropdownNavItem 
                       href="/admin" 
                       icon={<ShieldCheck className="h-5 w-5 text-rose-500" />} 
-                      label="Governance Portal" 
+                      label="Admin Portal" 
                       className="bg-rose-500/5 mt-2"
                     />
                   )}
@@ -131,13 +132,13 @@ export default function Navbar() {
                     className="flex items-center gap-4 px-5 py-4 cursor-pointer rounded-2xl transition-all focus:bg-rose-500/20 focus:text-rose-500 text-rose-500/80"
                   >
                     <LogOut className="h-5 w-5 shrink-0" />
-                    <span className="font-bold text-[13px] tracking-tight uppercase">Logout Node</span>
+                    <span className="font-bold text-[13px] tracking-tight uppercase">Logout</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
               <Button asChild className="bg-primary hover:bg-orange-600 text-white font-black px-6 md:px-8 py-2 rounded-xl h-10 md:h-12 uppercase text-[10px] md:text-[11px] tracking-[0.2em] shadow-2xl transition-all active:scale-95 border-none">
-                <Link href="/login">Login Hub</Link>
+                <Link href="/login">Login</Link>
               </Button>
             )}
           </div>

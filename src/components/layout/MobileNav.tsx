@@ -3,13 +3,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Zap, User, Home, BarChart3, Target } from "lucide-react";
+import { Zap, User, Home, BarChart3, Target, Gem } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
  * @fileOverview Institutional Sticky Bottom Navigation for Mobile.
- * Updated: "Free Hub" rebranded to "My Exams" with high-contrast Target icon.
+ * Updated: Replaced Profile with 'Pass' (Gem icon) to match Testbook styling.
  */
 
 export default function MobileNav() {
@@ -20,7 +20,7 @@ export default function MobileNav() {
     { label: "My Exams", href: "/my-exams", icon: Target },
     { label: "Mocks", href: "/mocks", icon: Zap },
     { label: "Results", href: "/dashboard", icon: BarChart3 },
-    { label: "Profile", href: "/profile", icon: User },
+    { label: "Pass", href: "/pass", icon: Gem },
   ];
 
   return (
