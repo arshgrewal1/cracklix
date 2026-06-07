@@ -1,4 +1,3 @@
-
 'use client';
 
 import { 
@@ -19,7 +18,8 @@ import {
   MessageSquare,
   X,
   Shield,
-  Sparkles
+  Sparkles,
+  Newspaper
 } from "lucide-react";
 import Link from "next/link";
 import { useUser, useAuth } from "@/firebase";
@@ -34,7 +34,7 @@ import { Button } from "@/components/ui/button";
 
 /**
  * @fileOverview Institutional Sidebar.
- * Simplified Language: Replaced 'Aspirant Node' with 'My Account'.
+ * UPDATED: Integrated Current Affairs Hub with semantic Newspaper icon.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
@@ -80,7 +80,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
     { label: "Home Page", href: "/", icon: Home },
     { label: "Elite Pass Hub", href: "/pass", icon: Gem, badge: "ACTIVATE" },
     { label: "Practice Tests", href: "/mocks", icon: Zap },
-    { label: "The Free Hub", href: "/current-affairs", icon: Sparkles },
+    { label: "Current Affairs Hub", href: "/current-affairs", icon: Newspaper },
     { label: "Share Cracklix", icon: Share2, onClick: () => setIsShareOpen(true) },
     { label: "Help & Support", href: "/contact", icon: MessageCircleQuestion },
   ];

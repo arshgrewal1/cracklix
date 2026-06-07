@@ -1,8 +1,7 @@
-
 'use client';
 
 import Link from "next/link";
-import { Menu, Search, Zap, CreditCard, LogOut, ShieldCheck, Megaphone, Target, LayoutGrid, Award, Gem, User, Sparkles } from "lucide-react";
+import { Menu, Search, Zap, CreditCard, LogOut, ShieldCheck, Megaphone, Target, LayoutGrid, Award, Gem, User, Sparkles, Newspaper } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import { useState, useMemo } from "react";
@@ -25,8 +24,8 @@ import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Elite Global Navigation Hub v7.3.
- * UPDATED: Compact Student Profile Dropdown for mobile efficiency.
+ * @fileOverview Elite Global Navigation Hub v7.4.
+ * UPDATED: Explicit Current Affairs labeling for high-fidelity discovery.
  */
 
 export default function Navbar() {
@@ -92,7 +91,7 @@ export default function Navbar() {
                 <Gem className="h-4 w-4" /> PASS
               </Link>
               <Link href="/current-affairs" className={cn("transition-colors flex items-center gap-2 hover:text-white", pathname === '/current-affairs' ? 'text-white' : '')}>
-                <Sparkles className="h-4 w-4 text-amber-400" /> Free Hub
+                <Newspaper className="h-4 w-4 text-primary" /> Current Affairs
               </Link>
             </div>
           </div>
