@@ -1,12 +1,11 @@
-
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { initializeFirebase } from '@/firebase';
 import { doc, getDoc, updateDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Razorpay Verification Hub v10.0.
- * Hardened: Domestic signature audit and automatic user registry update.
+ * @fileOverview Institutional Razorpay Verification Hub v12.0.
+ * Hardened: Secure signature verification and automatic user registry update.
  */
 
 export async function POST(request: Request) {
@@ -19,9 +18,9 @@ export async function POST(request: Request) {
       planId
     } = await request.json();
 
-    const secret = process.env.RAZORPAY_KEY_SECRET || 'Ikrj9m0oFrwlW1peOzgq0Nrb';
+    const secret = process.env.RAZORPAY_KEY_SECRET || 'l2sDZOg2Ypc6QbIlDAivUDfc';
     
-    // 1. Signature Audit Hub (HMAC-SHA256)
+    // 1. HMAC-SHA256 Signature Verification
     const hmac = crypto.createHmac('sha256', secret);
     hmac.update(razorpay_order_id + "|" + razorpay_payment_id);
     const generated_signature = hmac.digest('hex');
@@ -30,30 +29,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Security audit failed. Transaction rejected.' }, { status: 400 });
     }
 
-    // 2. Access Synchronization Node
+    // 2. Sync Access with Firestore Registry
     const { firestore: db } = initializeFirebase();
     const userRef = doc(db, 'users', userId);
     const planRef = doc(db, 'passes', planId);
     
     const planSnap = await getDoc(planRef);
-    if (!planSnap.exists()) throw new Error("Pass node missing in master registry.");
+    if (!planSnap.exists()) throw new Error("Pass node missing in registry.");
     const planData = planSnap.data();
 
+    // Calculate Expiry Node
     const duration = planData.durationDays || 30;
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + duration);
 
-    // Update User Registry
+    // Update User Profile
     await updateDoc(userRef, {
       status: planId,
       passExpiryDate: expiryDate.toISOString(),
       updatedAt: serverTimestamp()
     });
 
-    // Log Transaction Audit
+    // Log Transaction for Audit
+    const userSnap = await getDoc(userRef);
     await addDoc(collection(db, 'payments'), {
       userId,
-      userEmail: (await getDoc(userRef)).data()?.email || 'N/A',
+      userEmail: userSnap.data()?.email || 'N/A',
       planId,
       planName: planData.name,
       amount: planData.price,
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
       createdAt: serverTimestamp()
     });
 
-    // Create Subscription Hub Entry
+    // Create Official Subscription Entry
     await addDoc(collection(db, 'subscriptions'), {
       userId,
       planId,

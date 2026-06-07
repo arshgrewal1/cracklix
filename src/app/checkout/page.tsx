@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useSearchParams, useRouter } from "next/navigation"
@@ -19,8 +18,8 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 
 /**
- * @fileOverview Institutional Checkout Hub v35.0.
- * FIXED: Forced UPI ID (VPA) entry field and Aggressive Customer Name Sanitization.
+ * @fileOverview Institutional Checkout Hub v38.0.
+ * FIXED: Forced UPI ID (VPA) entry field and Aggressive Customer Metadata Sanitization.
  */
 
 export default function CheckoutPage() {
@@ -53,7 +52,7 @@ function CheckoutContent() {
     if (!user || !planData || !db) return;
     
     if (!(window as any).Razorpay) {
-      toast({ variant: "destructive", title: "Gateway Script Missing", description: "Payment node script failed to load. Please refresh." });
+      toast({ variant: "destructive", title: "Gateway Script Missing", description: "Payment script failed to load. Please refresh." });
       return;
     }
 
@@ -70,7 +69,7 @@ function CheckoutContent() {
       if (orderData.error) throw new Error(orderData.error);
 
       // 1. AGGRESSIVE NAME SANITIZATION (Only A-Z and spaces)
-      // Razorpay's domestic node rejects names with periods, dashes, or symbols.
+      // Prevents "Invalid Name Format" errors in Razorpay domestic node.
       const rawName = profile?.name || user?.displayName || 'Aspirant';
       const sanitizedName = rawName.replace(/[^a-zA-Z\s]/g, '').trim().slice(0, 40) || "Aspirant";
       
@@ -78,7 +77,7 @@ function CheckoutContent() {
       const phoneDigits = (profile?.phone || '').replace(/\D/g, '').slice(-10);
 
       const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_SynIbBuKzUu1w2',
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Synv8cGJNAB23X',
         amount: orderData.amount,
         currency: "INR",
         name: "CRACKLIX Hub",
@@ -127,7 +126,7 @@ function CheckoutContent() {
                 instruments: [
                   {
                     method: "upi",
-                    protocols: ["vpa"] // Forces the "Enter UPI ID" text field
+                    protocols: ["vpa"] // Forces the "Enter UPI ID" text field for test@razorpay
                   }
                 ]
               },
@@ -142,7 +141,7 @@ function CheckoutContent() {
             },
             sequence: ["block.upi", "block.card"],
             preferences: {
-              show_default_blocks: false 
+              show_default_blocks: false // Hides the automated QR code to prioritize manual entry
             }
           }
         },
@@ -159,7 +158,7 @@ function CheckoutContent() {
         toast({ 
           variant: "destructive", 
           title: "Payment Declined", 
-          description: response.error.description || "The bank node rejected the transaction." 
+          description: response.error.description || "The transaction was rejected." 
         });
         setProcessing(false);
       });

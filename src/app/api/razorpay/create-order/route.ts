@@ -1,18 +1,17 @@
-
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 
 /**
- * @fileOverview Production-Grade Razorpay Order Node v12.0.
- * Hardened: Strict integer paise conversion and 20-char receipt protocol.
+ * @fileOverview Production-Grade Razorpay Order Node v15.0.
+ * Hardened: Strict integer paise conversion and short receipt ID protocol.
  */
 
 export async function POST(request: Request) {
   try {
     const { amount } = await request.json();
 
-    const key_id = process.env.RAZORPAY_KEY_ID || 'rzp_test_SynIbBuKzUu1w2';
-    const key_secret = process.env.RAZORPAY_KEY_SECRET || 'Ikrj9m0oFrwlW1peOzgq0Nrb';
+    const key_id = process.env.RAZORPAY_KEY_ID || 'rzp_test_Synv8cGJNAB23X';
+    const key_secret = process.env.RAZORPAY_KEY_SECRET || 'l2sDZOg2Ypc6QbIlDAivUDfc';
 
     if (!key_id || !key_secret) {
       return NextResponse.json({ error: 'Gateway credentials missing in registry.' }, { status: 500 });
@@ -30,7 +29,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Minimum transaction node is ₹1.' }, { status: 400 });
     }
 
-    // 2. Short Receipt Protocol (< 40 chars)
+    // 2. Short Receipt Protocol (< 20 chars) for high compatibility
     const receipt = `rcpt_${Date.now().toString().slice(-10)}`;
 
     const options = {
