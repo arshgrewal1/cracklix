@@ -48,6 +48,7 @@ export interface MockTest {
   examIds: string[];
   assignmentMode?: MockAssignmentMode;
   mockType: MockType;
+  testCategory?: string;
   accessLevel: AccessLevel;
   duration: number;
   totalQuestions: number;

@@ -39,7 +39,9 @@ import {
   Info,
   X,
   History,
-  Globe
+  Globe,
+  LayoutGrid,
+  Tags
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch, where, documentId, orderBy } from "firebase/firestore"
@@ -49,8 +51,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Mock Architect v60.0.
- * UPDATED: Multi-Exam Assignment Hub with Authority-wide targeting.
+ * @fileOverview Institutional Mock Architect v65.0.
+ * UPDATED: Multi-Board Assignment Hub and Test Category Integration.
  */
 
 export default function MockBuilderPage() {
@@ -96,6 +98,7 @@ function MockBuilderContent() {
     boardIds: [] as string[],
     examIds: [] as string[],
     assignmentMode: "SINGLE" as MockAssignmentMode,
+    testCategory: "General",
     duration: 120, 
     difficulty: "Medium" as Difficulty, 
     mockType: "FULL" as MockType, 
@@ -135,7 +138,8 @@ function MockBuilderContent() {
         ...existingMock,
         boardIds: existingMock.boardIds || (existingMock.boardId ? [existingMock.boardId] : []),
         examIds: existingMock.examIds || (existingMock.examId ? [existingMock.examId] : []),
-        assignmentMode: existingMock.assignmentMode || "SINGLE"
+        assignmentMode: existingMock.assignmentMode || "SINGLE",
+        testCategory: existingMock.testCategory || "General"
       });
 
       if (existingMock.questionIds && questionBank.length > 0) {
@@ -178,8 +182,8 @@ function MockBuilderContent() {
 
   const handlePublish = async () => {
     if (!db || isPublishing) return
-    if (!mockData.title || !mockData.boardId) {
-      toast({ variant: "destructive", title: "Audit Blocked", description: "Config incomplete." })
+    if (!mockData.title || (mockData.boardIds.length === 0 && !mockData.boardId)) {
+      toast({ variant: "destructive", title: "Audit Blocked", description: "Title and at least one Authority are mandatory." })
       return
     }
 
@@ -195,16 +199,19 @@ function MockBuilderContent() {
     const sectionMetadata = sections.map(s => ({ name: s.name, count: s.questions.length })).filter(s => s.count > 0);
 
     // Mode specific ID calculation
-    let finalExamIds = [...mockData.examIds];
-    let finalBoardIds = [...mockData.boardIds];
+    let finalExamIds = [...(mockData.examIds || [])];
+    let finalBoardIds = [...(mockData.boardIds || [])];
+
+    // Ensure primary boardId is included in the array for legacy support
+    if (mockData.boardId && !finalBoardIds.includes(mockData.boardId)) {
+       finalBoardIds.push(mockData.boardId);
+    }
 
     if (mockData.assignmentMode === 'AUTHORITY' && mockData.boardId) {
        const boardExams = exams?.filter((e: any) => e.boardId === mockData.boardId).map((e: any) => e.id) || [];
        finalExamIds = Array.from(new Set([...finalExamIds, ...boardExams]));
-       finalBoardIds = [mockData.boardId];
     } else if (mockData.assignmentMode === 'SINGLE' && mockData.examId) {
        finalExamIds = [mockData.examId];
-       finalBoardIds = [mockData.boardId];
     }
 
     const payload = {
@@ -212,6 +219,7 @@ function MockBuilderContent() {
       id: finalId,
       examIds: finalExamIds,
       boardIds: finalBoardIds,
+      boardId: mockData.boardId || finalBoardIds[0] || "",
       totalQuestions: flatQuestionIds.length,
       questionIds: flatQuestionIds,
       sections: sectionMetadata,
@@ -300,6 +308,20 @@ function MockBuilderContent() {
                     <Input value={mockData.title || ""} onChange={e => setMockData({...mockData, title: e.target.value})} className="rounded-xl h-12 border-slate-100 bg-slate-50/50" />
                  </div>
 
+                 <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Tags className="h-3 w-3" /> Test Category</Label>
+                    <Select value={mockData.testCategory || "General"} onValueChange={(v) => setMockData({...mockData, testCategory: v})}>
+                       <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none font-bold text-[10px] uppercase"><SelectValue placeholder="Select Category" /></SelectTrigger>
+                       <SelectContent>
+                          <SelectItem value="General">General Practice</SelectItem>
+                          <SelectItem value="Marathon">Marathon Series</SelectItem>
+                          <SelectItem value="Crash Course">Crash Course Node</SelectItem>
+                          <SelectItem value="Scholarship">Scholarship Test</SelectItem>
+                          <SelectItem value="Expected Paper">Expected Paper 2026</SelectItem>
+                       </SelectContent>
+                    </Select>
+                 </div>
+
                  <div className="space-y-4 pt-4 border-t border-slate-50">
                     <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em]">Assignment Engine</p>
                     
@@ -308,36 +330,40 @@ function MockBuilderContent() {
                        <Select value={mockData.assignmentMode} onValueChange={(v: any) => setMockData({...mockData, assignmentMode: v})}>
                           <SelectTrigger className="h-11 rounded-xl bg-slate-900 text-white border-none font-black uppercase text-[10px]"><SelectValue /></SelectTrigger>
                           <SelectContent>
-                             <SelectItem value="SINGLE">Single Recruitment</SelectItem>
-                             <SelectItem value="MULTIPLE">Multiple Recruits</SelectItem>
-                             <SelectItem value="AUTHORITY">Authority Hub (All Exams)</SelectItem>
+                             <SelectItem value="SINGLE">Single Vertical</SelectItem>
+                             <SelectItem value="MULTIPLE">Multiple Verticals</SelectItem>
+                             <SelectItem value="AUTHORITY">Authority Hub (Broadcast)</SelectItem>
                           </SelectContent>
                        </Select>
                     </div>
 
-                    <div className="space-y-2">
-                       <Label className="text-[9px] font-black uppercase text-slate-400">Primary Authority</Label>
-                       <Select value={mockData.boardId} onValueChange={(v) => setMockData({...mockData, boardId: v})}>
-                          <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none font-bold text-[10px] uppercase"><SelectValue placeholder="Select Board" /></SelectTrigger>
-                          <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Board</SelectItem>)}</SelectContent>
-                       </Select>
+                    <div className="space-y-3">
+                       <Label className="text-[9px] font-black uppercase text-slate-400">Target Authority Boards</Label>
+                       <div className="max-h-32 overflow-y-auto custom-scrollbar pr-2 space-y-2">
+                          {boards?.map((b: any) => (
+                             <div key={b.id} className="flex items-center space-x-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer" onClick={() => toggleBoardId(b.id)}>
+                                <Checkbox checked={mockData.boardIds?.includes(b.id) || mockData.boardId === b.id} className="border-slate-300" />
+                                <span className="text-[10px] font-bold text-[#0F172A] uppercase">{b.abbreviation} Hub</span>
+                             </div>
+                          ))}
+                       </div>
                     </div>
 
                     {mockData.assignmentMode === 'SINGLE' && (
                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
-                          <Label className="text-[9px] font-black uppercase text-slate-400">Target Vertical</Label>
+                          <Label className="text-[9px] font-black uppercase text-slate-400">Primary Recruitment Hub</Label>
                           <Select value={mockData.examId} onValueChange={(v) => setMockData({...mockData, examId: v, examIds: [v]})}>
                              <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none font-bold text-[10px] uppercase"><SelectValue placeholder="Select Exam" /></SelectTrigger>
-                             <SelectContent>{exams?.filter(e => e.boardId === mockData.boardId).map((e: any) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
+                             <SelectContent>{exams?.filter(e => mockData.boardIds?.includes(e.boardId) || e.boardId === mockData.boardId).map((e: any) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}</SelectContent>
                           </Select>
                        </div>
                     )}
 
                     {mockData.assignmentMode === 'MULTIPLE' && (
                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                          <Label className="text-[9px] font-black uppercase text-slate-400">Select Multiple Verticals</Label>
+                          <Label className="text-[9px] font-black uppercase text-slate-400">Select Target Verticals</Label>
                           <div className="max-h-48 overflow-y-auto custom-scrollbar pr-2 space-y-2">
-                             {exams?.filter(e => e.boardId === mockData.boardId || !mockData.boardId).map((e: any) => (
+                             {exams?.filter(e => mockData.boardIds?.includes(e.boardId) || !mockData.boardIds?.length).map((e: any) => (
                                 <div key={e.id} className="flex items-center space-x-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer" onClick={() => toggleExamId(e.id)}>
                                    <Checkbox checked={mockData.examIds?.includes(e.id)} className="border-slate-300" />
                                    <span className="text-[10px] font-bold text-[#0F172A] uppercase">{e.name}</span>
@@ -349,8 +375,8 @@ function MockBuilderContent() {
 
                     {mockData.assignmentMode === 'AUTHORITY' && (
                        <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 space-y-2 animate-in fade-in slide-in-from-top-2">
-                          <p className="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-2"><Globe className="h-3 w-3" /> Broadcast Mode Active</p>
-                          <p className="text-[8px] font-bold text-emerald-800/60 leading-relaxed uppercase">Mock will be automatically linked to all exams under {boards?.find(b => b.id === mockData.boardId)?.abbreviation || 'selected authority'}.</p>
+                          <p className="text-[9px] font-black text-emerald-600 uppercase flex items-center gap-2"><Globe className="h-3 w-3" /> Broadcast Hub Mode</p>
+                          <p className="text-[8px] font-bold text-emerald-800/60 leading-relaxed uppercase">Mock will be automatically linked to all exams under the selected authorities.</p>
                        </div>
                     )}
                  </div>
@@ -415,7 +441,7 @@ function MockBuilderContent() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
                        <div className="space-y-3">
-                          <Label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-2">Board Hub</Label>
+                          <Label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-2">Source Board Hub</Label>
                           <select value={filterBoard} onChange={e => setFilterBoard(e.target.value)} className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 font-bold text-sm outline-none transition-all focus:border-primary">
                              <option value="all">All Boards</option>
                              {boards?.map((b:any) => <option key={b.id} value={b.id}>{b.abbreviation}</option>)}

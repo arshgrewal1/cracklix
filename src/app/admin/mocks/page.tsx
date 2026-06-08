@@ -29,7 +29,8 @@ import {
   Lock,
   Unlock,
   RefreshCw,
-  Landmark
+  Landmark,
+  Tags
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -42,8 +43,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Mock Management Hub v10.0.
- * UPDATED: Integrated Access Control and real-time registry audit.
+ * @fileOverview Institutional Mock Management Hub v11.0.
+ * UPDATED: Displaying Test Category and support for Multi-Board filtering.
  */
 
 export default function MockManagement() {
@@ -152,6 +153,7 @@ export default function MockManagement() {
             <TableHeader className="bg-slate-50/50">
               <TableRow className="h-20 border-slate-100">
                 <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Series Identity</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Category</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tier Governance</TableHead>
                 <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-slate-500">Status</TableHead>
                 <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Actions</TableHead>
@@ -159,7 +161,7 @@ export default function MockManagement() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                 Array.from({length: 5}).map((_, i) => <TableRow key={i}><TableCell colSpan={4} className="p-10"><Skeleton className="h-16 w-full rounded-2xl" /></TableCell></TableRow>)
+                 Array.from({length: 5}).map((_, i) => <TableRow key={i}><TableCell colSpan={5} className="p-10"><Skeleton className="h-16 w-full rounded-2xl" /></TableCell></TableRow>)
               ) : mocks.map((mock: any) => {
                   const tier = (mock.accessLevel || 'FREE').toUpperCase();
                   const isSyncing = togglingId === mock.id;
@@ -167,7 +169,16 @@ export default function MockManagement() {
                     <TableRow key={mock.id} className="hover:bg-slate-50 border-slate-50 transition-colors group">
                       <TableCell className="px-10 py-8">
                         <p className="font-black text-[#0F172A] text-lg md:text-xl uppercase leading-none">{mock.title}</p>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-2">{mock.totalQuestions} Questions • {mock.duration}m • {mock.totalMarks} Marks</p>
+                        <div className="flex items-center gap-3 mt-2">
+                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{mock.totalQuestions} Questions • {mock.duration}m</p>
+                           {mock.boardIds?.length > 1 && <Badge className="bg-blue-50 text-blue-600 border-none text-[7px] font-black uppercase">Multi-Board</Badge>}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                         <div className="flex items-center gap-2">
+                            <Tags className="h-3 w-3 text-slate-300" />
+                            <span className="text-[10px] font-black text-slate-500 uppercase">{mock.testCategory || 'General'}</span>
+                         </div>
                       </TableCell>
                       <TableCell>
                          <button 
