@@ -37,20 +37,14 @@ import {
   Languages,
   ShieldCheck,
   Settings2,
-  CheckCircle2
+  CheckCircle2,
+  Gem
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, where, limit, getDocs, documentId, writeBatch } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { MockType, Difficulty, AccessType, LanguageDisplayMode } from "@/types"
 import { cn } from "@/lib/utils"
-
-const MOCK_TYPES: { label: string, value: MockType, icon: any }[] = [
-  { label: "FULL LENGTH MOCK", value: "FULL", icon: <Zap className="h-3 w-3" /> },
-  { label: "SUBJECT TEST", value: "SUBJECT", icon: <BookOpen className="h-3 w-3" /> },
-  { label: "CHAPTER TEST", value: "CHAPTER", icon: <Layers className="h-3 w-3" /> },
-  { label: "OFFICIAL PYQ", value: "PYQ", icon: <FileStack className="h-3 w-3" /> },
-];
 
 const SELECTION_RULES = [
   { id: 'unused-only', label: 'Use Only Unused Questions', icon: <Zap className="h-3 w-3" /> },
@@ -136,7 +130,9 @@ function MockBuilderContent() {
         positiveMarks: existingMock.positiveMarks ?? 1,
         negativeMarks: existingMock.negativeMarks ?? 0.25,
         duration: existingMock.duration ?? 120,
-        attemptLimit: existingMock.attemptLimit ?? 0
+        attemptLimit: existingMock.attemptLimit ?? 0,
+        languageMode: existingMock.languageMode ?? "ENGLISH_PUNJABI",
+        accessType: existingMock.accessType ?? "FREE"
       }));
 
       if (existingMock.sections && existingMock.sections.length > 0 && existingMock.questionIds) {
@@ -251,7 +247,7 @@ function MockBuilderContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 px-4">
         <div className="lg:col-span-4 space-y-8">
-          <Card className="border-none shadow-4xl rounded-[3rem] bg-white p-10 space-y-8">
+          <Card className="border-none shadow-4xl rounded-[3rem] bg-white p-10 space-y-10">
              <div className="space-y-6">
                <div className="space-y-2">
                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Title</Label>
@@ -279,18 +275,64 @@ function MockBuilderContent() {
                  </div>
                </div>
 
-               <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Attempt Control (Limit)</Label>
-                  <Select value={String(mockData.attemptLimit ?? 0)} onValueChange={(v) => setMockData({...mockData, attemptLimit: parseInt(v)})}>
-                     <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black"><SelectValue /></SelectTrigger>
-                     <SelectContent>
-                        <SelectItem value="0">Unlimited Attempts</SelectItem>
-                        <SelectItem value="1">1 Attempt Strict</SelectItem>
-                        <SelectItem value="2">2 Attempts Hub</SelectItem>
-                        <SelectItem value="3">3 Attempts Hub</SelectItem>
-                        <SelectItem value="5">5 Attempts Hub</SelectItem>
-                     </SelectContent>
-                  </Select>
+               <div className="space-y-4 pt-4 border-t border-slate-50">
+                  <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1 flex items-center gap-2"><Target className="h-3 w-3" /> Evaluation & Access</p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Clock className="h-3 w-3" /> Duration (Mins)</Label>
+                        <Input type="number" value={mockData.duration ?? ""} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value)})} className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" />
+                     </div>
+                     <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Gem className="h-3 w-3" /> Access Node</Label>
+                        <Select value={mockData.accessType ?? "FREE"} onValueChange={(v: any) => setMockData({...mockData, accessType: v})}>
+                           <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black"><SelectValue /></SelectTrigger>
+                           <SelectContent>
+                              <SelectItem value="FREE">FREE NODE</SelectItem>
+                              <SelectItem value="PREMIUM">PREMIUM ONLY</SelectItem>
+                           </SelectContent>
+                        </Select>
+                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                     <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Pos Marks (+)</Label>
+                        <Input type="number" step="0.5" value={mockData.positiveMarks ?? ""} onChange={e => setMockData({...mockData, positiveMarks: parseFloat(e.target.value)})} className="h-12 rounded-xl bg-emerald-50/50 border-none font-black text-center text-emerald-700" />
+                     </div>
+                     <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Neg Marks (-)</Label>
+                        <Input type="number" step="0.05" value={mockData.negativeMarks ?? ""} onChange={e => setMockData({...mockData, negativeMarks: parseFloat(e.target.value)})} className="h-12 rounded-xl bg-rose-50/50 border-none font-black text-center text-rose-700" />
+                     </div>
+                  </div>
+
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Languages className="h-3 w-3" /> Language Display</Label>
+                     <Select value={mockData.languageMode ?? "ENGLISH_PUNJABI"} onValueChange={(v: any) => setMockData({...mockData, languageMode: v})}>
+                        <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="ENGLISH">English Only</SelectItem>
+                           <SelectItem value="PUNJABI">ਪੰਜਾਬੀ Only</SelectItem>
+                           <SelectItem value="HINDI">हिन्दी Only</SelectItem>
+                           <SelectItem value="ENGLISH_PUNJABI">EN + ਪੰਜਾਬੀ</SelectItem>
+                           <SelectItem value="ENGLISH_HINDI">EN + हिन्दी</SelectItem>
+                        </SelectContent>
+                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><History className="h-3 w-3" /> Attempt Limit</Label>
+                     <Select value={String(mockData.attemptLimit ?? 0)} onValueChange={(v) => setMockData({...mockData, attemptLimit: parseInt(v)})}>
+                        <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                           <SelectItem value="0">Unlimited Attempts</SelectItem>
+                           <SelectItem value="1">1 Attempt Strict</SelectItem>
+                           <SelectItem value="2">2 Attempts Hub</SelectItem>
+                           <SelectItem value="3">3 Attempts Hub</SelectItem>
+                           <SelectItem value="5">5 Attempts Hub</SelectItem>
+                        </SelectContent>
+                     </Select>
+                  </div>
                </div>
 
                <div className="space-y-4 pt-6 border-t border-slate-50">
@@ -306,7 +348,7 @@ function MockBuilderContent() {
                            )}
                         >
                            <div className="flex items-center gap-3">
-                              {React.cloneElement(rule.icon as React.ReactElement, { className: cn("h-4 w-4", activeRules.includes(rule.id) ? "text-primary" : "text-slate-300") })}
+                              {React.isValidElement(rule.icon) ? React.cloneElement(rule.icon as React.ReactElement, { className: cn("h-4 w-4", activeRules.includes(rule.id) ? "text-primary" : "text-slate-300") }) : rule.icon}
                               <span className="text-[10px] font-bold uppercase tracking-tight">{rule.label}</span>
                            </div>
                            {activeRules.includes(rule.id) && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
@@ -425,4 +467,3 @@ function MockBuilderContent() {
     </div>
   )
 }
-

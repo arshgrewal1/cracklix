@@ -274,4 +274,3 @@ function QuickLink({ label, href, icon }: any) {
       </Link>
    )
 }
-
