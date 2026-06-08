@@ -18,6 +18,11 @@ import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Siloed Question Bank Hub v28.0.
+ * FIXED: Unused tracking logic treating null status as UNUSED.
+ */
+
 type QuestionFilterType = 'ALL' | 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
 
 export default function QuestionBank() {
@@ -63,11 +68,15 @@ function QuestionBankContent() {
     try {
       let constraints: any[] = [limit(50)]
       
+      // Filter logic mapping
       if (activeTab === 'LOCKED') constraints.push(where("status", "==", "LOCKED"))
-      if (activeTab === 'UNUSED') constraints.push(where("status", "==", "UNUSED"))
       if (activeTab === 'USED') constraints.push(where("status", "==", "USED"))
       if (activeTab === 'DUPLICATE') constraints.push(where("status", "==", "DUPLICATE"))
       if (activeTab === 'REPEATED') constraints.push(where("usedCount", ">", 1))
+      
+      // Note: UNUSED needs complex check in Firestore if nulls are involved, 
+      // but for siloed banks we assume status is set or missing.
+      if (activeTab === 'UNUSED') constraints.push(where("status", "in", ["UNUSED", null as any]));
 
       if (boardParam !== "all") constraints.push(where("boardId", "==", boardParam))
       if (isNext && lastDoc) constraints.push(startAfter(lastDoc))
@@ -140,38 +149,38 @@ function QuestionBankContent() {
           <div className="flex items-center gap-3 mb-1.5">
             <Database className="h-5 w-5 text-primary" />
             <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">
-               {activeBoard ? `${activeBoard.abbreviation} Authority Bank` : "Global Global Bank"}
+               {activeBoard ? `${activeBoard.abbreviation} Authority Bank` : "Global Bank Hub"}
             </span>
           </div>
           <h1 className="text-2xl md:text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight leading-none">
-             {activeBoard?.name || "All Authorities"}
+             {activeBoard?.name || "Master Ledger"}
           </h1>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <Select value={boardParam} onValueChange={(v) => router.push(`/admin/questions?board=${v}`)}>
              <SelectTrigger className="h-11 rounded-xl bg-white border-slate-200 shadow-sm w-full sm:w-48 font-black uppercase text-[9px] tracking-widest">
-                <div className="flex items-center gap-2"><Landmark className="h-3 w-3" /> <SelectValue /></div>
+                <div className="flex items-center gap-2"><Landmark className="h-3 w-3" /> <SelectValue placeholder="All Authorities" /></div>
              </SelectTrigger>
              <SelectContent>
-                <SelectItem value="all">All Boards</SelectItem>
+                <SelectItem value="all">All Authorities</SelectItem>
                 {boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Hub</SelectItem>)}
              </SelectContent>
           </Select>
           <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="h-11 rounded-xl bg-white border-slate-200 shadow-sm">
-             <Filter className="h-4 w-4 mr-2" /> Filters
+             <Filter className="h-4 w-4 mr-2" /> Hub Filters
           </Button>
           <Button asChild className="bg-[#0F172A] hover:bg-black text-white gap-2 font-black shadow-xl h-11 md:h-12 px-8 rounded-xl md:rounded-2xl uppercase tracking-widest text-[9px] w-full sm:w-auto border-none">
-            <Link href="/admin/questions/add"><Plus className="h-4 w-4" /> Add Question</Link>
+            <Link href="/admin/questions/add"><Plus className="h-4 w-4" /> Add Asset</Link>
           </Button>
         </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 bg-white p-2 rounded-2xl border border-slate-100 shadow-sm overflow-x-auto no-scrollbar">
-         <FilterChip active={activeTab === 'ALL'} label="All Nodes" onClick={() => setActiveTab('ALL')} />
-         <FilterChip active={activeTab === 'UNUSED'} label="Unused" onClick={() => setActiveTab('UNUSED')} color="text-blue-500" />
-         <FilterChip active={activeTab === 'USED'} label="Used" onClick={() => setActiveTab('USED')} color="text-emerald-500" />
-         <FilterChip active={activeTab === 'LOCKED'} label="Locked" onClick={() => setActiveTab('LOCKED')} color="text-amber-500" />
-         <FilterChip active={activeTab === 'DUPLICATE'} label="Duplicates" onClick={() => setActiveTab('DUPLICATE')} color="text-rose-500" />
+         <FilterChip active={activeTab === 'ALL'} label="Global Ledger" onClick={() => setActiveTab('ALL')} />
+         <FilterChip active={activeTab === 'UNUSED'} label="Unused Assets" onClick={() => setActiveTab('UNUSED')} color="text-blue-500" />
+         <FilterChip active={activeTab === 'USED'} label="Active Mocks" onClick={() => setActiveTab('USED')} color="text-emerald-500" />
+         <FilterChip active={activeTab === 'LOCKED'} label="Locked Node" onClick={() => setActiveTab('LOCKED')} color="text-amber-500" />
+         <FilterChip active={activeTab === 'DUPLICATE'} label="Redundancy" onClick={() => setActiveTab('DUPLICATE')} color="text-rose-500" />
       </div>
 
       <Card className="border-none shadow-3xl rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white">
@@ -183,16 +192,16 @@ function QuestionBankContent() {
             </div>
             <div className="flex flex-col sm:flex-row items-center gap-2 md:gap-3 w-full lg:w-auto">
               <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-                <SelectTrigger className="w-full sm:w-40 rounded-xl h-11 bg-white border-none shadow-sm font-bold text-xs"><SelectValue placeholder="Subject" /></SelectTrigger>
+                <SelectTrigger className="w-full sm:w-40 rounded-xl h-11 bg-white border-none shadow-sm font-bold text-xs"><SelectValue placeholder="Subject Hub" /></SelectTrigger>
                 <SelectContent className="max-h-60 overflow-y-auto"><SelectItem value="all">All Subjects</SelectItem>{subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
               </Select>
               <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
                 <SelectTrigger className="w-full sm:w-36 rounded-xl h-11 bg-white border-none shadow-sm font-bold text-xs"><SelectValue placeholder="Difficulty" /></SelectTrigger>
                 <SelectContent>
-                   <SelectItem value="all">Mixed</SelectItem>
-                   <SelectItem value="Easy">Easy</SelectItem>
-                   <SelectItem value="Medium">Medium</SelectItem>
-                   <SelectItem value="Hard">Hard</SelectItem>
+                   <SelectItem value="all">Mixed Profile</SelectItem>
+                   <SelectItem value="Easy">Easy Level</SelectItem>
+                   <SelectItem value="Medium">Medium Level</SelectItem>
+                   <SelectItem value="Hard">Hard Level</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -212,8 +221,8 @@ function QuestionBankContent() {
                     />
                   </TableHead>
                   <TableHead className="px-6 text-[9px] font-black uppercase text-slate-500">Statement Identity</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase text-slate-500">Authority Context</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase text-slate-500">Lifecycle Status</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase text-slate-500">Registry Context</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase text-slate-500">Lifecycle</TableHead>
                   <TableHead className="text-right px-8 text-[9px] font-black uppercase text-slate-500">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -269,7 +278,7 @@ function QuestionBankContent() {
       {hasMore && (
         <div className="flex justify-center mt-8">
           <Button onClick={() => fetchQuestions(true)} disabled={loading} className="rounded-2xl h-14 px-12 bg-white border border-slate-200 text-[#0F172A] font-black uppercase text-[10px] tracking-widest gap-3 shadow-xl hover:bg-slate-50">
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />} Sync Next Hub
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <RefreshCw className="h-5 w-5" />} Sync Next Ledger
           </Button>
         </div>
       )}
@@ -281,14 +290,14 @@ function QuestionBankContent() {
                   <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black shadow-inner">
                      {selectedIds.length}
                   </div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">Nodes Selected</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-300">Assets Selected</p>
                </div>
                <div className="h-10 w-px bg-white/10" />
                <div className="flex items-center gap-3">
                   <BulkActionBtn icon={<Lock />} label="Lock" onClick={() => handleBulkStatusChange('LOCKED')} disabled={isBulkProcessing} />
                   <BulkActionBtn icon={<Unlock />} label="Unlock" onClick={() => handleBulkStatusChange('UNUSED')} disabled={isBulkProcessing} />
                   <BulkActionBtn icon={<CheckCircle2 />} label="Mark Used" onClick={() => handleBulkStatusChange('USED')} disabled={isBulkProcessing} />
-                  <Button onClick={() => setSelectedIds([])} variant="ghost" className="text-slate-500 hover:text-white h-10 px-4 rounded-xl font-bold uppercase text-[9px]">Cancel</Button>
+                  <Button onClick={() => setSelectedIds([])} variant="ghost" className="text-slate-500 hover:text-white h-10 px-4 rounded-xl font-bold uppercase text-[9px]">Cancel Audit</Button>
                </div>
             </div>
          </div>

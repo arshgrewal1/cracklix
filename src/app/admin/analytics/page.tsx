@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useMemo } from "react"
+import React, { useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { 
   Users, 
@@ -34,7 +34,7 @@ const chartData = [
 ]
 
 /**
- * @fileOverview Final Administrative Control Center.
+ * @fileOverview Final Administrative Control Center v3.0.
  * UPDATED: Hardened stats calculation to treat missing status as UNUSED.
  */
 
@@ -50,6 +50,7 @@ export default function AdminAnalytics() {
      if (!questions) return { used: 0, unused: 0, locked: 0, repeated: 0, dup: 0 };
      return {
         used: questions.filter(q => q.status === 'USED').length,
+        // Treating null or undefined as UNUSED for legacy data support
         unused: questions.filter(q => q.status === 'UNUSED' || !q.status).length,
         locked: questions.filter(q => q.status === 'LOCKED').length,
         repeated: questions.filter(q => (q.usedCount || 0) > 1).length,
@@ -80,8 +81,8 @@ export default function AdminAnalytics() {
       {/* PRIMARY ASSET METRICS */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
          <MetricCard label="Used Inventory" value={stats.used} trend="Active" icon={<Zap className="text-emerald-500" />} />
-         <MetricChip label="Unused Nodes" value={stats.unused} icon={<Database className="text-blue-500" />} />
-         <MetricChip label="Repeated Assets" value={stats.repeated} icon={<Layers className="text-indigo-500" />} />
+         <MetricChip label="Unused Assets" value={stats.unused} icon={<Database className="text-blue-500" />} />
+         <MetricChip label="Repeated Nodes" value={stats.repeated} icon={<Layers className="text-indigo-500" />} />
          <MetricChip label="Locked/Banned" value={stats.locked} icon={<Lock className="text-amber-500" />} />
       </div>
 
@@ -133,7 +134,7 @@ export default function AdminAnalytics() {
                <h3 className="font-headline font-black text-3xl uppercase leading-none">Usage Audit</h3>
             </div>
             <div className="space-y-8 relative z-10">
-               <UsageProgress label="Verified Unique Nodes" value={Math.round((stats.unused / (questions?.length || 1)) * 100)} />
+               <UsageProgress label="Verified Unique Assets" value={Math.round((stats.unused / (questions?.length || 1)) * 100)} />
                <UsageProgress label="Market Active (Used)" value={Math.round((stats.used / (questions?.length || 1)) * 100)} />
                <UsageProgress label="Integrity Conflict" value={Math.round((stats.dup / (questions?.length || 1)) * 100)} />
             </div>
