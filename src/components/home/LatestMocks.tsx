@@ -14,9 +14,8 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview High-Density Mock Feed v15.0.
- * UPDATED: Rebuilt access logic to strictly follow pass.active blueprint.
- * DEBUG: Added [RUNTIME_VAL] logs for real-time audit.
+ * @fileOverview High-Density Mock Feed v17.0.
+ * HARDENED: Strict accessLevel normalization with [RUNTIME_VAL] console logs.
  */
 
 export default function LatestMocks() {
@@ -28,15 +27,16 @@ export default function LatestMocks() {
   const { data: rawMocks, loading } = useCollection<any>(mocksQuery)
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
 
+  // VERIFIED PASS HUB logic
   const hasActivePass = useMemo(() => {
      if (!profile) return false;
      const isAdmin = profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN';
      if (isAdmin) return true;
 
-     // STRICT BLUEPRINT CHECK ONLY
      if (profile.pass && profile.pass.active === true) {
         const expiry = new Date(profile.pass.expiryDate);
-        return expiry > new Date();
+        const now = new Date();
+        return expiry > now;
      }
      
      return false;
@@ -64,12 +64,14 @@ export default function LatestMocks() {
              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 md:h-64 w-full rounded-2xl" />)
           ) : mocks.map((mock, i) => {
             const board = boards?.find((b: any) => b.id === (mock.boardIds?.[0] || mock.boardId));
-            const tier = (mock.accessLevel || 'FREE').trim().toUpperCase();
+            
+            // NORMALIZATION Audit
+            const tier = (mock.accessLevel || mock.accessType || 'FREE').trim().toUpperCase();
             const isPremium = tier === 'PREMIUM';
             const locked = isPremium && !hasActivePass;
 
             // CRITICAL AUDIT LOG
-            console.log(`[RUNTIME_VAL] FEED | ${mock.title} | accessLevel: ${tier} | isPremium: ${isPremium} | hasActivePass: ${hasActivePass} | locked: ${locked}`);
+            console.log(`[RUNTIME_VAL] FEED_CARD: "${mock.title}" | tier: "${tier}" | isPassActive: ${hasActivePass} | isLocked: ${locked}`);
 
             return (
               <motion.div key={mock.id} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>
@@ -78,8 +80,8 @@ export default function LatestMocks() {
                     <div className="h-8 w-8 md:h-12 md:w-12 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 overflow-hidden shadow-inner">
                        {board?.iconUrl ? <img src={board.iconUrl} className="p-1.5 h-full w-full object-contain" alt="Logo" referrerPolicy="no-referrer" /> : <Zap className="h-4 w-4 text-primary" />}
                     </div>
-                    <Badge className={cn("border-none text-[6px] md:text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm", isPremium ? "bg-amber-50 text-amber-600" : "bg-primary/5 text-primary")}>
-                       {tier}
+                    <Badge className={cn("border-none text-[6px] md:text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm", isPremium ? "bg-amber-100 text-amber-600" : "bg-primary/5 text-primary")}>
+                       {isPremium ? 'PREMIUM' : 'FREE'}
                     </Badge>
                   </div>
                   <h3 className="font-black text-[13px] md:text-base text-[#000000] leading-tight mb-2 uppercase line-clamp-2 min-h-[32px] md:min-h-[40px] group-hover:text-primary transition-colors">{mock.title}</h3>

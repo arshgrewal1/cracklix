@@ -33,9 +33,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Hub v12.0.
- * UPDATED: Rebuilt access logic to strictly follow pass.active blueprint.
- * DEBUG: Added [RUNTIME_VAL] logs for real-time audit.
+ * @fileOverview Institutional Exam Hub v15.0.
+ * HARDENED: Strict accessLevel audit with direct console telemetry.
+ * LOGIC: (Premium + Inactive) -> UNLOCK WITH PASS | (Premium + Active) -> ATTEMPT NOW
  */
 
 export default function ExamHubPage() {
@@ -68,15 +68,18 @@ export default function ExamHubPage() {
   const { data: userResults } = useCollection<any>(resultsQuery)
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
 
+  // VERIFIED ACCESS HUB
   const isPassActive = useMemo(() => {
      if (!profile) return false;
      const isAdmin = profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN';
      if (isAdmin) return true;
 
-     // STRICT BLUEPRINT CHECK ONLY
+     // STATED BLUEPRINT: profile.pass.active must be true AND not expired
      if (profile.pass && profile.pass.active === true) {
         const expiry = new Date(profile.pass.expiryDate);
-        return expiry > new Date();
+        const now = new Date();
+        const active = expiry > now;
+        return active;
      }
      
      return false;
@@ -177,12 +180,13 @@ function MockList({ data, results, isPassActive }: { data: any[], results: any[]
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
          {data.map((mock: any) => {
             const result = results?.find((r: any) => r.mockId === mock.id);
-            const tier = (mock.accessLevel || 'FREE').trim().toUpperCase();
+            // STABILIZED FIELD NORMALIZATION
+            const tier = (mock.accessLevel || mock.accessType || 'FREE').trim().toUpperCase();
             const isPremium = tier === 'PREMIUM';
             const isLocked = isPremium && !isPassActive;
 
-            // CRITICAL AUDIT LOG
-            console.log(`[RUNTIME_VAL] Mock: ${mock.title} | accessLevel: ${tier} | isPremium: ${isPremium} | isPassActive: ${isPassActive} | isLocked: ${isLocked}`);
+            // CRITICAL AUDIT LOG - Verify these values in your browser console
+            console.log(`[RUNTIME_VAL] MOCK_CARD: "${mock.title}" | accessLevel: "${tier}" | isPassActive: ${isPassActive} | isLocked: ${isLocked}`);
 
             return (
                <Card key={mock.id} className="border-none shadow-sm rounded-2xl bg-white hover:shadow-md transition-all text-left group">
@@ -190,9 +194,9 @@ function MockList({ data, results, isPassActive }: { data: any[], results: any[]
                      <div className="flex items-center justify-between">
                         <Badge className={cn(
                            "border-none text-[8px] font-black px-2 py-0.5 rounded shadow-sm", 
-                           isPremium ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
+                           isPremium ? "bg-amber-100 text-amber-600" : "bg-emerald-50 text-emerald-600"
                         )}>
-                           {tier}
+                           {tier === 'PREMIUM' ? 'PREMIUM HUB' : 'FREE ACCESS'}
                         </Badge>
                         {result && <span className="text-[8px] font-black text-slate-300 uppercase tracking-widest">AUDITED</span>}
                      </div>

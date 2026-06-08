@@ -13,7 +13,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer";
 import QuestionPalette from "@/components/mocks/QuestionPalette";
 import SubjectTabs from "@/components/exam/SubjectTabs";
 import { Button } from "@/components/ui/button";
-import { Loader2, Play, ShieldCheck, CheckCircle2, Zap, LogOut } from "lucide-react";
+import { Loader2, Play, ShieldCheck, CheckCircle2, Zap, LogOut, Lock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
@@ -23,6 +23,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+
+/**
+ * @fileOverview Elite CBT Attempt Engine v16.0.
+ * HARDENED: Strict entrance gate for Premium content. Even direct URL access is blocked.
+ */
 
 export default function MockAttemptPage() {
   const params = useParams();
@@ -60,20 +65,22 @@ export default function MockAttemptPage() {
         const mData = mockSnap.data();
         setMockData(mData);
 
-        const isPremium = mData.accessLevel === 'PREMIUM';
+        // STABILIZED ACCESS FIREWALL
+        const tier = (mData.accessLevel || mData.accessType || 'FREE').trim().toUpperCase();
+        const isPremium = tier === 'PREMIUM';
         const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
         
-        let isPassActive = false;
+        let hasActivePass = false;
         if (isAdmin) {
-          isPassActive = true;
-        } else if (profile?.pass?.active === true) {
+          hasActivePass = true;
+        } else if (profile?.pass && profile.pass.active === true) {
           const expiry = new Date(profile.pass.expiryDate);
-          if (expiry > new Date()) isPassActive = true;
+          if (expiry > new Date()) hasActivePass = true;
         }
 
-        if (isPremium && !isPassActive) {
-           toast({ variant: "destructive", title: "Access Denied", description: "Active PASS required for premium mocks." });
-           router.push(`/mocks/${mockId}`);
+        if (isPremium && !hasActivePass) {
+           toast({ variant: "destructive", title: "Access Denied", description: "Premium pass required for this series." });
+           router.push('/pass');
            return;
         }
 

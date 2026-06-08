@@ -27,9 +27,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Individual Mock Gateway v11.0.
- * UPDATED: Rebuilt access logic to strictly follow pass.active blueprint.
- * DEBUG: Added [RUNTIME_VAL] logs for real-time audit.
+ * @fileOverview Individual Mock Gateway v14.0.
+ * HARDENED: Direct entrance audit with strict [RUNTIME_VAL] console telemetry.
  */
 
 export default function MockOverviewPage() {
@@ -50,7 +49,7 @@ export default function MockOverviewPage() {
       if (mockLoading) return;
       if (!mock || !db) { setAccessChecked(true); return; }
 
-      const tier = (mock.accessLevel || 'FREE').trim().toUpperCase();
+      const tier = (mock.accessLevel || mock.accessType || 'FREE').trim().toUpperCase();
       const isPremium = tier === 'PREMIUM';
       
       if (user) {
@@ -60,26 +59,26 @@ export default function MockOverviewPage() {
          } catch (e) {}
       }
 
-      if (!isPremium) { 
-        setIsLocked(false); 
-        setAccessChecked(true); 
-        return; 
-      }
-
-      let hasPass = false;
+      // 1. ADMIN BYPASS
       const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
       
+      // 2. PASS HUB AUDIT
+      let hasActivePass = false;
       if (isAdmin) {
-         hasPass = true;
+         hasActivePass = true;
       } else if (profile?.pass && profile.pass.active === true) {
          const expiry = new Date(profile.pass.expiryDate);
-         if (expiry > new Date()) hasPass = true;
+         const now = new Date();
+         if (expiry > now) hasActivePass = true;
       }
       
-      // CRITICAL AUDIT LOG
-      console.log(`[RUNTIME_VAL] GATEWAY | ${mock.title} | tier: ${tier} | hasPass: ${hasPass}`);
+      // 3. LOCK LOGIC
+      const locked = isPremium && !hasActivePass;
 
-      setIsLocked(!hasPass);
+      // CRITICAL AUDIT LOG
+      console.log(`[RUNTIME_VAL] GATEWAY_AUDIT | MOCK: "${mock.title}" | tier: "${tier}" | isPassActive: ${hasActivePass} | isLocked: ${locked}`);
+
+      setIsLocked(locked);
       setAccessChecked(true);
     }
     checkAccess();
@@ -96,7 +95,7 @@ export default function MockOverviewPage() {
 
   if (!mock) return <div className="h-screen flex flex-col items-center justify-center text-slate-400 gap-4"><Info className="h-12 w-12 opacity-10" /><p className="font-black uppercase tracking-widest text-xs">Registry node missing</p></div>;
 
-  const tier = (mock.accessLevel || 'FREE').trim().toUpperCase();
+  const tier = (mock.accessLevel || mock.accessType || 'FREE').trim().toUpperCase();
   const isPremium = tier === 'PREMIUM';
 
   return (
@@ -114,7 +113,7 @@ export default function MockOverviewPage() {
                         "border-none text-[8px] font-black px-2 py-0.5 rounded uppercase tracking-widest shadow-sm", 
                         isPremium ? "bg-amber-100 text-amber-600" : "bg-emerald-50 text-emerald-600"
                       )}>
-                        {tier}
+                        {isPremium ? 'PREMIUM HUB' : 'FREE ACCESS'}
                       </Badge>
                   </div>
                   <h1 className="text-xl md:text-4xl font-headline font-black text-[#0F172A] uppercase leading-tight tracking-tight">{mock.title}</h1>
