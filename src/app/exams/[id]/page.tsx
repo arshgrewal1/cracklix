@@ -32,8 +32,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Hub v12.0.
- * UPDATED: Implemented Test Access Control (FREE/PREMIUM) logic.
+ * @fileOverview Institutional Exam Hub v12.1.
+ * UPDATED: Hardened "Unlock with Pass" navigation to ensure reliable access to the pricing hub.
  */
 
 export default function ExamHubPage() {
@@ -185,13 +185,14 @@ function MockList({ data, results, hasPass, user }: any) {
    const router = useRouter();
 
    const handleInteraction = (e: React.MouseEvent, href: string) => {
+      // Always allow pass page regardless of login
+      if (href === "/pass") return;
+
       if (!user) {
          e.preventDefault();
          router.push(`/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
          return;
       }
-      // If manually handling locked status via button click to pass page
-      if (href === "/pass") return;
    };
 
    if (data.length === 0) return <EmptyNode label="Awaiting Content Registry" />;
@@ -222,8 +223,8 @@ function MockList({ data, results, hasPass, user }: any) {
                      </div>
                      <div className="pt-2 flex flex-col sm:flex-row gap-2">
                         {locked ? (
-                           <Button asChild onClick={(e) => handleInteraction(e, "/pass")} className="w-full h-10 bg-amber-500 hover:bg-amber-600 text-white border-none font-black uppercase text-[9px] rounded-xl shadow-lg gap-2">
-                              <Link href="/pass"><Lock className="h-3 w-3" /> Unlock with Pass</Link>
+                           <Button onClick={() => router.push('/pass')} className="w-full h-10 bg-amber-500 hover:bg-amber-600 text-white border-none font-black uppercase text-[9px] rounded-xl shadow-lg gap-2">
+                              <Lock className="h-3 w-3" /> Unlock with Pass
                            </Button>
                         ) : result ? (
                            <>
@@ -249,6 +250,7 @@ function MockList({ data, results, hasPass, user }: any) {
 }
 
 function NotesList({ data, hasPass, user }: any) {
+   const router = useRouter();
    if (data.length === 0) return <EmptyNode label="No Materials Archive Found" />;
 
    return (
@@ -272,8 +274,8 @@ function NotesList({ data, hasPass, user }: any) {
                      </div>
                      <div className="pt-2">
                         {locked ? (
-                          <Button asChild className="w-full h-10 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase text-[9px] rounded-xl border-none">
-                             <Link href="/pass"><Lock className="h-3 w-3 mr-2" /> Unlock for Download</Link>
+                          <Button onClick={() => router.push('/pass')} className="w-full h-10 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase text-[9px] rounded-xl border-none">
+                             <Lock className="h-3 w-3 mr-2" /> Unlock for Download
                           </Button>
                         ) : (
                           <Button asChild className="w-full h-10 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[9px] rounded-xl border-none">

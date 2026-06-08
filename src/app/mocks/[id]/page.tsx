@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Mock Node with Authentication & Tiered Attempt Guards.
- * UPDATED: Synchronized with Access Control (FREE/PREMIUM) requirements.
+ * UPDATED: Hardened "Unlock with Pass" navigation to ensure the pricing section opens reliably.
  */
 
 export default function MockOverviewPage() {
@@ -187,8 +187,11 @@ export default function MockOverviewPage() {
 
               <div className="w-full md:w-auto">
                  {isLocked ? (
-                    <Button asChild className="w-full h-14 md:h-16 px-10 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl gap-3">
-                      <Link href="/pass"><Lock className="h-4 w-4" /> Unlock with Pass</Link>
+                    <Button 
+                       onClick={() => router.push('/pass')} 
+                       className="w-full h-14 md:h-16 px-10 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl gap-3"
+                    >
+                      <Lock className="h-4 w-4" /> Unlock with Pass
                     </Button>
                  ) : isLimitReached ? (
                     <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl flex items-center gap-4 text-left">
