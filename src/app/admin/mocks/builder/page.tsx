@@ -50,7 +50,8 @@ import { MockType, Difficulty, AccessType, LanguageDisplayMode } from "@/types"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Elite Institutional Mock Architect v52.0.
+ * @fileOverview Elite Institutional Mock Architect v52.1.
+ * FIXED: Resolved NaN input value error by implementing safe numeric casting.
  * FIXED: Recalibrated 'Unused Only' logic to be inclusive of fresh assets while blocking used ones.
  */
 
@@ -363,7 +364,12 @@ function MockBuilderContent() {
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Duration (Mins)</Label>
-                      <Input type="number" value={mockData.duration ?? ""} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value)})} className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" />
+                      <Input 
+                        type="number" 
+                        value={isNaN(mockData.duration) ? "" : mockData.duration} 
+                        onChange={e => setMockData({...mockData, duration: parseInt(e.target.value) || 0})} 
+                        className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" 
+                      />
                    </div>
                    <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Access Level</Label>
@@ -377,17 +383,29 @@ function MockBuilderContent() {
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Pos Marks (+)</Label>
-                      <Input type="number" step="0.5" value={mockData.positiveMarks ?? ""} onChange={e => setMockData({...mockData, positiveMarks: e.target.value})} className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" />
+                      <Input 
+                        type="number" 
+                        step="0.5" 
+                        value={isNaN(mockData.positiveMarks) ? "" : mockData.positiveMarks} 
+                        onChange={e => setMockData({...mockData, positiveMarks: parseFloat(e.target.value) || 0})} 
+                        className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" 
+                      />
                    </div>
                    <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Neg Marks (-)</Label>
-                      <Input type="number" step="0.05" value={mockData.negativeMarks ?? ""} onChange={e => setMockData({...mockData, negativeMarks: e.target.value})} className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" />
+                      <Input 
+                        type="number" 
+                        step="0.05" 
+                        value={isNaN(mockData.negativeMarks) ? "" : mockData.negativeMarks} 
+                        onChange={e => setMockData({...mockData, negativeMarks: parseFloat(e.target.value) || 0})} 
+                        className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" 
+                      />
                    </div>
                 </div>
 
                 <div className="space-y-4 pt-6 border-t border-slate-50">
                   <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Attempt Hub Enforcement</p>
-                  <Select value={mockData.attemptLimit?.toString()} onValueChange={(v) => setMockData({...mockData, attemptLimit: parseInt(v)})}>
+                  <Select value={mockData.attemptLimit?.toString()} onValueChange={(v) => setMockData({...mockData, attemptLimit: parseInt(v) || 0})}>
                      <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-[10px] uppercase"><SelectValue /></SelectTrigger>
                      <SelectContent>
                         <SelectItem value="0">Unlimited Attempts</SelectItem>

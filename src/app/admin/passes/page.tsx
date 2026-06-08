@@ -18,8 +18,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Master Pass & Pricing Registry.
- * Allows Admin to control price, features, and visibility of all institutional passes.
+ * @fileOverview Master Pass & Pricing Registry v1.1.
+ * FIXED: Implemented safe numeric handling for price and order fields.
  */
 export default function PassManagement() {
   const db = useFirestore()
@@ -144,18 +144,33 @@ export default function PassManagement() {
                 </div>
                 <div className="space-y-2">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Price (₹)</Label>
-                   <Input type="number" value={editingPass?.price ?? ""} onChange={e => setEditingPass({...editingPass, price: e.target.value})} className="h-14 rounded-xl border-slate-100 font-black text-primary" />
+                   <Input 
+                      type="number" 
+                      value={isNaN(editingPass?.price) ? "" : editingPass?.price} 
+                      onChange={e => setEditingPass({...editingPass, price: parseFloat(e.target.value) || 0})} 
+                      className="h-14 rounded-xl border-slate-100 font-black text-primary" 
+                   />
                 </div>
              </div>
 
              <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Duration (Days)</Label>
-                   <Input type="number" value={editingPass?.durationDays ?? ""} onChange={e => setEditingPass({...editingPass, durationDays: e.target.value})} className="h-12 rounded-xl" />
+                   <Input 
+                      type="number" 
+                      value={isNaN(editingPass?.durationDays) ? "" : editingPass?.durationDays} 
+                      onChange={e => setEditingPass({...editingPass, durationDays: parseInt(e.target.value) || 0})} 
+                      className="h-12 rounded-xl" 
+                   />
                 </div>
                 <div className="space-y-2">
                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Display Sort Index</Label>
-                   <Input type="number" value={editingPass?.displayOrder ?? ""} onChange={e => setEditingPass({...editingPass, displayOrder: e.target.value})} className="h-12 rounded-xl" />
+                   <Input 
+                      type="number" 
+                      value={isNaN(editingPass?.displayOrder) ? "" : editingPass?.displayOrder} 
+                      onChange={e => setEditingPass({...editingPass, displayOrder: parseInt(e.target.value) || 0})} 
+                      className="h-12 rounded-xl" 
+                   />
                 </div>
              </div>
 

@@ -41,8 +41,8 @@ import { parseBulkQuestions } from "@/lib/parser"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Institutional Current Affairs Management Hub v19.5.
- * FIXED: Resolved syntax errors and hardened cleaning logic to prevent memory threshold crashes.
+ * @fileOverview Institutional Current Affairs Management Hub v19.6.
+ * FIXED: Resolved NaN input value error in mock metadata fields.
  */
 
 export default function AdminCurrentAffairs() {
@@ -321,17 +321,34 @@ export default function AdminCurrentAffairs() {
                      <div className="grid grid-cols-1 gap-4 pt-4 border-t border-slate-200/50">
                         <div className="space-y-1.5">
                            <Label className="text-[9px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Clock className="h-3 w-3" /> Duration (Mins)</Label>
-                           <Input type="number" value={editingItem?.duration ?? ""} onChange={e => setEditingItem({...editingItem, duration: e.target.value})} className="h-11 rounded-xl border-none bg-white font-black shadow-sm" />
+                           <Input 
+                              type="number" 
+                              value={isNaN(editingItem?.duration) ? "" : editingItem?.duration} 
+                              onChange={e => setEditingItem({...editingItem, duration: parseInt(e.target.value) || 0})} 
+                              className="h-11 rounded-xl border-none bg-white font-black shadow-sm" 
+                           />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                            <div className="space-y-1.5">
                               <Label className="text-[9px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Target className="h-3 w-3 text-emerald-500" /> Pos (+)</Label>
-                              <Input type="number" step="0.5" value={editingItem?.positiveMarks ?? ""} onChange={e => setEditingItem({...editingItem, positiveMarks: e.target.value})} className="h-11 rounded-xl border-none bg-white font-black shadow-sm text-center" />
+                              <Input 
+                                type="number" 
+                                step="0.5" 
+                                value={isNaN(editingItem?.positiveMarks) ? "" : editingItem?.positiveMarks} 
+                                onChange={e => setEditingItem({...editingItem, positiveMarks: parseFloat(e.target.value) || 0})} 
+                                className="h-11 rounded-xl border-none bg-white font-black shadow-sm text-center" 
+                              />
                            </div>
                            <div className="space-y-1.5">
                               <Label className="text-[9px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><AlertTriangle className="h-3 w-3 text-rose-500" /> Neg (-)</Label>
-                              <Input type="number" step="0.05" value={editingItem?.negativeMarks ?? ""} onChange={e => setEditingItem({...editingItem, negativeMarks: e.target.value})} className="h-11 rounded-xl border-none bg-white font-black shadow-sm text-center" />
+                              <Input 
+                                type="number" 
+                                step="0.05" 
+                                value={isNaN(editingItem?.negativeMarks) ? "" : editingItem?.negativeMarks} 
+                                onChange={e => setEditingItem({...editingItem, negativeMarks: parseFloat(e.target.value) || 0})} 
+                                className="h-11 rounded-xl border-none bg-white font-black shadow-sm text-center" 
+                              />
                            </div>
                         </div>
                      </div>
