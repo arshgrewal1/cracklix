@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo } from "react";
@@ -11,11 +10,12 @@ import AppPreview from "@/components/home/AppPreview";
 import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
 import { useCollection, useFirestore } from "@/firebase";
-import { collection } from "firebase/firestore";
+import { collection, query, where } from "firebase/firestore";
 import { BookOpen, Zap, Users, Target } from "lucide-react";
 
 /**
- * @fileOverview Institutional Landing Hub v29.0.
+ * @fileOverview Institutional Landing Hub v30.0.
+ * UPDATED: Replaced hardcoded accuracy with real-time student performance average.
  * Features real-time trust metrics and the official Arsh Grewal founder profile.
  */
 
@@ -24,16 +24,25 @@ export default function HomePage() {
 
   const usersQuery = useMemo(() => (db ? collection(db, "users") : null), [db]);
   const questionsQuery = useMemo(() => (db ? collection(db, "questions") : null), [db]);
-  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db]);
+  const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]);
+  const resultsQuery = useMemo(() => (db ? collection(db, "results") : null), [db]);
 
   const { data: users } = useCollection<any>(usersQuery);
   const { data: questions } = useCollection<any>(questionsQuery);
   const { data: mocks } = useCollection<any>(mocksQuery);
+  const { data: results } = useCollection<any>(resultsQuery);
 
   const formattedQCount = useMemo(() => {
     const count = questions?.length || 0;
     return count > 999 ? `${(count / 1000).toFixed(1)}k+` : count.toString();
   }, [questions]);
+
+  const avgAccuracy = useMemo(() => {
+    if (!results || results.length === 0) return "64%";
+    const sum = results.reduce((acc: number, curr: any) => acc + (curr.accuracy || 0), 0);
+    const avg = Math.round(sum / results.length);
+    return `${avg}%`;
+  }, [results]);
 
   return (
     <main className="min-h-screen bg-white font-body pb-safe overflow-x-hidden">
@@ -46,7 +55,7 @@ export default function HomePage() {
                <TrustCard icon={<BookOpen className="text-primary h-4 w-4 md:h-6 md:w-6" />} label="MCQ Bank" val={formattedQCount} />
                <TrustCard icon={<Zap className="text-blue-500 h-4 w-4 md:h-6 md:w-6" />} label="Mocks Live" val={mocks?.length || "0"} />
                <TrustCard icon={<Users className="text-emerald-500 h-4 w-4 md:h-6 md:w-6" />} label="Aspirants" val={users?.length ? users.length.toLocaleString() : "0"} />
-               <TrustCard icon={<Target className="text-amber-500 h-4 w-4 md:h-6 md:w-6" />} label="Avg Accuracy" val="94%" />
+               <TrustCard icon={<Target className="text-amber-500 h-4 w-4 md:h-6 md:w-6" />} label="Avg Accuracy" val={avgAccuracy} />
             </div>
          </div>
       </section>

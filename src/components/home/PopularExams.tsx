@@ -5,13 +5,14 @@ import { motion } from "framer-motion";
 import { ChevronRight, BookOpen, GraduationCap, ShieldCheck, Zap } from "lucide-react";
 import Link from "next/link";
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, limit } from "firebase/firestore"
+import { collection, query, limit, where } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Density Exam Hub Catalog.
+ * @fileOverview High-Density Exam Hub Catalog v8.0.
+ * UPDATED: Replaced static counts with real-time mock registry sync.
  * Optimized: Only displays exams with verified logos to maintain visual quality.
  */
 
@@ -25,9 +26,22 @@ export default function PopularExams() {
   }, [db])
 
   const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db])
+  const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db])
 
-  const { data: rawExams, loading } = useCollection<any>(examsQuery)
+  const { data: rawExams, loading: examsLoading } = useCollection<any>(examsQuery)
   const { data: boards } = useCollection<any>(boardsQuery)
+  const { data: mocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
+
+  const statsMap = useMemo(() => {
+    if (!mocks) return {};
+    const map: Record<string, number> = {};
+    mocks.forEach(m => {
+      if (m.examId) {
+        map[m.examId] = (map[m.examId] || 0) + 1;
+      }
+    });
+    return map;
+  }, [mocks]);
 
   const exams = useMemo(() => {
     if (!rawExams) return [];
@@ -58,13 +72,14 @@ export default function PopularExams() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-          {loading ? (
+          {(examsLoading || mocksLoading) ? (
              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 md:h-48 w-full rounded-2xl" />)
           ) : exams && exams.length > 0 ? (
             exams.map((exam, idx) => {
               const board = boards?.find(b => b.id === exam.boardId)
               const logoUrl = exam.iconUrl || board?.iconUrl;
               const isArmy = exam.boardId?.toLowerCase() === 'army' || exam.id?.toLowerCase().includes('army');
+              const liveTestsCount = statsMap[exam.id] || 0;
 
               return (
                 <motion.div
@@ -83,7 +98,7 @@ export default function PopularExams() {
                            {logoUrl ? (
                              <img 
                                src={logoUrl} 
-                               className={cn("w-full h-full object-contain p-2 md:p-3 transition-transform duration-500 group-hover:scale-110", isArmy ? "scale-150" : "")} 
+                               className={cn("w-full h-full object-contain p-2 md:p-3 transition-transform duration-500 group-hover:scale-110", isArmy ? "scale-125" : "")} 
                                alt={exam.name}
                                referrerPolicy="no-referrer"
                                onError={() => setFailedImages(prev => ({ ...prev, [exam.id]: true }))}
@@ -105,7 +120,7 @@ export default function PopularExams() {
                           <div className="flex items-center gap-4 pt-1">
                              <div className="flex items-center gap-1.5">
                                 <Zap className="h-2.5 w-2.5 md:h-3.5 md:w-3.5 text-primary" />
-                                <span className="text-[8px] md:text-[10px] font-black text-[#0F172A] uppercase">{exam.totalFullMocks || 0} Tests</span>
+                                <span className="text-[8px] md:text-[10px] font-black text-[#0F172A] uppercase">{liveTestsCount} Live Mocks</span>
                              </div>
                              <div className="flex items-center gap-1.5">
                                 <BookOpen className="h-2.5 w-2.5 md:h-3.5 md:w-3.5 text-primary" />
