@@ -1,9 +1,9 @@
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Engine v50.0.
+ * @fileOverview Institutional Seeding Engine v51.0.
  * Features: High-Fidelity Verified Official Logos for Punjab & National Exam Hubs.
- * UPDATED: Mandatory official PSTET logo fixed for all teaching verticals.
+ * UPDATED: Mandatory official PSEB logo for ETT, Master Cadre, and Teaching verticals.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Cracklix Global Registry Sync...');
@@ -11,6 +11,7 @@ export async function seedInitialData(db: Firestore) {
   // High-Fidelity Official Assets (Verified Nodes)
   const psssbLogo = "https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg";
   const punjabEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
+  const psebOfficialLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
   const ppscJpg = "https://upload.wikimedia.org/wikipedia/en/a/a1/Punjab_Public_Service_Commission.jpg";
   const policeEmblem = "https://upload.wikimedia.org/wikipedia/en/b/b5/Punjab_Police_India_Logo.png";
   const ctetLogo = "https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png";
@@ -28,7 +29,7 @@ export async function seedInitialData(db: Firestore) {
     { id: 'high-court', abbreviation: 'SSSC', name: 'High Court of Punjab & Haryana (SSSC)', region: 'Punjab/Haryana', category: 'JUDICIAL_BOARD', iconUrl: ssscLogo },
     { id: 'pspcl', abbreviation: 'PSPCL', name: 'Punjab State Power Corporation Ltd', region: 'Punjab', category: 'TECHNICAL_BOARD', iconUrl: pspclLogo },
     { id: 'army', abbreviation: 'ARMY', name: 'Indian Army Recruitment', region: 'National', category: 'CENTRAL_BOARD', iconUrl: armyEmblem },
-    { id: 'education', abbreviation: 'EDUCATION', name: 'Education Recruitment Board Punjab', region: 'Punjab', category: 'TEACHING_BOARD', iconUrl: punjabEmblem },
+    { id: 'education', abbreviation: 'EDUCATION', name: 'Education Recruitment Board Punjab (PSEB)', region: 'Punjab', category: 'TEACHING_BOARD', iconUrl: psebOfficialLogo },
     { id: 'cbse', abbreviation: 'CBSE', name: 'Central Board of Secondary Education (CTET)', region: 'National', category: 'TEACHING_BOARD', iconUrl: ctetLogo },
     { id: 'pstet', abbreviation: 'PSTET', name: 'Punjab State Teacher Eligibility Test (PSEB)', region: 'Punjab', category: 'TEACHING_BOARD', iconUrl: pstetLogo },
     { id: 'ibps', abbreviation: 'IBPS', name: 'Institute of Banking Personnel Selection', region: 'National', category: 'BANKING_BOARD', iconUrl: ibpsLogo }
@@ -57,8 +58,8 @@ export async function seedInitialData(db: Firestore) {
     { id: 'ctet-paper-1', boardId: 'cbse', name: 'CTET Paper 1', category: 'TEACHING', description: 'Central Teacher Eligibility Test (Primary Stage).', iconUrl: ctetLogo },
     { id: 'ctet-paper-2', boardId: 'cbse', name: 'CTET Paper 2', category: 'TEACHING', description: 'Central Teacher Eligibility Test (Elementary Stage).', iconUrl: ctetLogo },
     { id: 'pstet-hub', boardId: 'pstet', name: 'PSTET Hub', category: 'TEACHING', description: 'Punjab State Teacher Eligibility Test recruitment.', iconUrl: pstetLogo },
-    { id: 'ett-cadre', boardId: 'education', name: 'ETT Cadre', category: 'TEACHING', description: 'Elementary Teacher Training recruitment hub.', iconUrl: punjabEmblem },
-    { id: 'master-cadre', boardId: 'education', name: 'Master Cadre', category: 'TEACHING', description: 'Subject-wise teacher recruitment for Punjab Schools.', iconUrl: punjabEmblem }
+    { id: 'ett-cadre', boardId: 'education', name: 'ETT Cadre', category: 'TEACHING', description: 'Elementary Teacher Training recruitment hub.', iconUrl: psebOfficialLogo },
+    { id: 'master-cadre', boardId: 'education', name: 'Master Cadre', category: 'TEACHING', description: 'Subject-wise teacher recruitment for Punjab Schools.', iconUrl: psebOfficialLogo }
   ];
 
   for (const e of exams) {
