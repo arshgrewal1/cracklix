@@ -18,8 +18,8 @@ import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Authority Hub v29.0 - Hardened Mandatory Branding Engine.
- * Features: Persistent official logos for PSSSB, PSPCL, CTET, PSTET, and PSEB.
+ * @fileOverview Authority Hub v30.0 - Hardened Mandatory Branding Engine.
+ * Features: Persistent official logos for PSSSB, Punjab Police, PSPCL, CTET, PSTET, and PSEB.
  */
 
 export default function ExamManagement() {
@@ -42,6 +42,7 @@ export default function ExamManagement() {
   const ctetOfficialLogo = "https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png";
   const pstetOfficialLogo = "https://pstet.pseb.ac.in/img/main-logo-2.png";
   const psebOfficialLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
+  const policeOfficialLogo = "https://www.punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png";
 
   const handleSave = async () => {
     if (!db || !editingBoard) return
@@ -62,6 +63,7 @@ export default function ExamManagement() {
     const isCtet = abbrev === 'CTET' || abbrev === 'CBSE';
     const isPstet = abbrev === 'PSTET';
     const isEducation = abbrev === 'EDUCATION' || abbrev === 'PSEB';
+    const isPolice = abbrev.includes('POLICE');
     
     const payload = { 
       ...editingBoard, 
@@ -71,6 +73,7 @@ export default function ExamManagement() {
                isCtet ? ctetOfficialLogo : 
                isPstet ? pstetOfficialLogo :
                isEducation ? psebOfficialLogo :
+               isPolice ? policeOfficialLogo :
                (editingBoard.iconUrl || ""),
       updatedAt: serverTimestamp()
     }
@@ -96,7 +99,7 @@ export default function ExamManagement() {
     
     setIsDeleting(id)
     try {
-      const boardRef = doc(db, "boards", id)
+      const boardRef = doc(db, id.startsWith('boards/') ? id : `boards/${id}`)
       await deleteDoc(boardRef)
       toast({ title: "Registry Purged", description: "Authority node removed from cloud." })
     } catch (serverError: any) {
@@ -149,7 +152,7 @@ export default function ExamManagement() {
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-white/5 h-20">
                 <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Identity</TableHead>
-                <TableHead className="text-[10px) font-black uppercase tracking-widest text-slate-400">Short Code</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Short Code</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authority Name</TableHead>
                 <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
               </TableRow>
@@ -167,6 +170,7 @@ export default function ExamManagement() {
                 const isCtet = abbrev === 'CTET' || abbrev === 'CBSE';
                 const isPstet = abbrev === 'PSTET';
                 const isEducation = abbrev === 'EDUCATION' || abbrev === 'PSEB';
+                const isPolice = abbrev.includes('POLICE');
                 const isArmy = board.id?.toLowerCase() === 'army' || abbrev === 'ARMY';
                 
                 const effectiveIcon = isPsssb ? psssbOfficialLogo : 
@@ -174,6 +178,7 @@ export default function ExamManagement() {
                                      isCtet ? ctetOfficialLogo : 
                                      isPstet ? pstetOfficialLogo :
                                      isEducation ? psebOfficialLogo :
+                                     isPolice ? policeOfficialLogo :
                                      board.iconUrl;
 
                 return (
@@ -187,7 +192,7 @@ export default function ExamManagement() {
                           ) : (
                             <img 
                               src={effectiveIcon} 
-                              className={cn("h-full w-full object-contain p-2", (isArmy || isCtet || isPstet || isEducation) ? "scale-150" : "")} 
+                              className={cn("h-full w-full object-contain p-2", (isArmy || isCtet || isPstet || isEducation || isPolice) ? "scale-150" : "")} 
                               referrerPolicy="no-referrer"
                               alt={board.abbreviation}
                               onError={() => setFailedImages(p => ({...p, [board.id]: true}))}
@@ -247,7 +252,7 @@ export default function ExamManagement() {
                         <img 
                           src={editingBoard.iconUrl} 
                           referrerPolicy="no-referrer"
-                          className={cn("absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform", (editingBoard.id === 'army' || editingBoard.abbreviation?.toUpperCase() === 'ARMY' || editingBoard.abbreviation?.toUpperCase() === 'CTET' || editingBoard.abbreviation?.toUpperCase() === 'PSTET' || editingBoard.abbreviation?.toUpperCase() === 'EDUCATION' || editingBoard.abbreviation?.toUpperCase() === 'PSEB') ? "scale-150" : "")} 
+                          className={cn("absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform", (editingBoard.id === 'army' || editingBoard.abbreviation?.toUpperCase() === 'ARMY' || editingBoard.abbreviation?.toUpperCase() === 'CTET' || editingBoard.abbreviation?.toUpperCase() === 'PSTET' || editingBoard.abbreviation?.toUpperCase() === 'EDUCATION' || editingBoard.abbreviation?.toUpperCase() === 'PSEB' || editingBoard.abbreviation?.toUpperCase()?.includes('POLICE')) ? "scale-150" : "")} 
                           alt="Preview"
                         />
                       ) : (

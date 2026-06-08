@@ -1,9 +1,9 @@
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Engine v51.0.
+ * @fileOverview Institutional Seeding Engine v52.0.
  * Features: High-Fidelity Verified Official Logos for Punjab & National Exam Hubs.
- * UPDATED: Mandatory official PSEB logo for ETT, Master Cadre, and Teaching verticals.
+ * UPDATED: Mandatory official Punjab Police insignia from gov domain.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Cracklix Global Registry Sync...');
@@ -13,7 +13,7 @@ export async function seedInitialData(db: Firestore) {
   const punjabEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
   const psebOfficialLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
   const ppscJpg = "https://upload.wikimedia.org/wikipedia/en/a/a1/Punjab_Public_Service_Commission.jpg";
-  const policeEmblem = "https://upload.wikimedia.org/wikipedia/en/b/b5/Punjab_Police_India_Logo.png";
+  const policeEmblem = "https://www.punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png";
   const ctetLogo = "https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png";
   const pstetLogo = "https://pstet.pseb.ac.in/img/main-logo-2.png";
   const ssscLogo = "https://highcourtchd.gov.in/images/logo.png";
