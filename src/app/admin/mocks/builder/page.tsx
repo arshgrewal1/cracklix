@@ -50,9 +50,9 @@ import { MockType, Difficulty, AccessType, LanguageDisplayMode } from "@/types"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Elite Institutional Mock Architect v52.1.
- * FIXED: Resolved NaN input value error by implementing safe numeric casting.
- * FIXED: Recalibrated 'Unused Only' logic to be inclusive of fresh assets while blocking used ones.
+ * @fileOverview Elite Institutional Mock Architect v53.0.
+ * FIXED: Re-engineered "Block Duplicates" logic to strictly exclude redundancy nodes.
+ * PERFORMANCE: Stabilized numeric casting and cursor-based selection.
  */
 
 const SELECTION_RULES = [
@@ -198,13 +198,18 @@ function MockBuilderContent() {
       const qStatus = q.status || 'UNUSED';
       const qUsedCount = q.usedCount || 0;
 
-      // RECALIBRATED UNUSED LOGIC: Exclude only if explicitly USED, REPEATED or usedCount > 0
+      // 1. UNUSED ONLY: Exclude if USED or has usedCount > 0
       if (activeRules.includes('unused-only')) {
          if (qStatus === 'USED' || qStatus === 'REPEATED' || qUsedCount > 0) return false;
       }
       
+      // 2. NO LOCKED: Block manually disabled nodes
       if (activeRules.includes('no-locked') && qStatus === 'LOCKED') return false;
-      if (activeRules.includes('no-duplicates') && qStatus === 'DUPLICATE') return false;
+      
+      // 3. BLOCK DUPLICATES: Exclude redundancy nodes identified in QA audit
+      if (activeRules.includes('no-duplicates')) {
+         if (qStatus === 'DUPLICATE' || q.isDuplicateOf) return false;
+      }
 
       return matchesSubject && notAlreadySelected
     })
@@ -363,7 +368,7 @@ function MockBuilderContent() {
 
                 <div className="grid grid-cols-2 gap-4">
                    <div className="space-y-2">
-                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Duration (Mins)</Label>
+                      <Label className="text-[10px) font-black uppercase text-slate-500 ml-1">Duration (Mins)</Label>
                       <Input 
                         type="number" 
                         value={isNaN(mockData.duration) ? "" : mockData.duration} 
