@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useRef } from "react"
@@ -19,8 +18,8 @@ import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Authority Hub v25.2 - Logo Restoration & Hardened Purge Engine.
- * Features: Absolute Deletion Logic (Propagation Fixed) & Logo Zoom Protocol.
+ * @fileOverview Authority Hub v25.3 - Logo Restoration & Hardened Purge Engine.
+ * Features: Absolute Deletion Logic & PSSSB Official Branding Guard.
  */
 
 export default function ExamManagement() {
@@ -38,7 +37,7 @@ export default function ExamManagement() {
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const stateEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
+  const psssbOfficialLogo = "https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg";
 
   const handleSave = async () => {
     if (!db || !editingBoard) return
@@ -51,9 +50,13 @@ export default function ExamManagement() {
     setIsSaving(true)
     const boardId = editingBoard.id || `board-${Date.now()}`
     const boardRef = doc(db, "boards", boardId)
+    
+    // Auto-apply PSSSB branding if the board is PSSSB
+    const isPsssb = editingBoard.abbreviation?.toUpperCase() === 'PSSSB';
     const payload = { 
       ...editingBoard, 
       id: boardId,
+      iconUrl: isPsssb ? psssbOfficialLogo : (editingBoard.iconUrl || ""),
       updatedAt: serverTimestamp()
     }
     
@@ -131,7 +134,7 @@ export default function ExamManagement() {
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-white/5 h-20">
                 <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Identity</TableHead>
-                <TableHead className="text-[10px) font-black uppercase tracking-widest text-slate-400">Short Code</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Short Code</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authority Name</TableHead>
                 <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
               </TableRow>
@@ -143,18 +146,21 @@ export default function ExamManagement() {
                 ))
               ) : boards?.map((board: any) => {
                 const isImageFailed = failedImages[board.id];
+                const isPsssb = board.abbreviation?.toUpperCase() === 'PSSSB';
                 const isArmy = board.id?.toLowerCase() === 'army' || board.abbreviation?.toLowerCase() === 'army';
+                const effectiveIcon = isPsssb ? psssbOfficialLogo : board.iconUrl;
+
                 return (
                   <TableRow key={board.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                     <TableCell className="px-10 py-6">
                       <div className="h-16 w-16 rounded-2xl bg-white border border-slate-200 flex items-center justify-center overflow-hidden relative shadow-inner group-hover:scale-110 transition-transform">
-                          {isImageFailed || !board.iconUrl ? (
+                          {isImageFailed || !effectiveIcon ? (
                              <div className="bg-primary text-white h-full w-full flex items-center justify-center font-black text-xl">
                                 {board.abbreviation?.substring(0, 2).toUpperCase()}
                              </div>
                           ) : (
                             <img 
-                              src={board.iconUrl} 
+                              src={effectiveIcon} 
                               className={cn("h-full w-full object-contain p-2", isArmy ? "scale-150" : "")} 
                               referrerPolicy="no-referrer"
                               alt={board.abbreviation}

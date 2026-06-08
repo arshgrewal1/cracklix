@@ -1,14 +1,15 @@
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Engine v45.0.
+ * @fileOverview Institutional Seeding Engine v46.0.
  * Features: High-Fidelity Verified Official Logos for Punjab Exam Hubs.
- * UPDATED: Comprehensive asset nodes for all Boards and Exams including CTET, Police, and Power.
+ * UPDATED: Mandatory official PSSSB SVG logo applied to all relevant nodes.
  */
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Cracklix Global Registry Sync...');
 
   // High-Fidelity Official Assets (Verified Nodes)
+  const psssbLogo = "https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg";
   const punjabEmblem = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Emblem_of_Punjab.svg/512px-Emblem_of_Punjab.svg.png";
   const ppscJpg = "https://upload.wikimedia.org/wikipedia/en/a/a1/Punjab_Public_Service_Commission.jpg";
   const policeEmblem = "https://upload.wikimedia.org/wikipedia/en/b/b5/Punjab_Police_India_Logo.png";
@@ -20,7 +21,7 @@ export async function seedInitialData(db: Firestore) {
 
   // 1. BOARDS REGISTRY
   const boards = [
-    { id: 'psssb', abbreviation: 'PSSSB', name: 'Punjab Subordinate Services Selection Board', region: 'Punjab', category: 'STATE_BOARD', iconUrl: punjabEmblem },
+    { id: 'psssb', abbreviation: 'PSSSB', name: 'Punjab Subordinate Services Selection Board', region: 'Punjab', category: 'STATE_BOARD', iconUrl: psssbLogo },
     { id: 'ppsc', abbreviation: 'PPSC', name: 'Punjab Public Service Commission', region: 'Punjab', category: 'GAZETTED_BOARD', iconUrl: ppscJpg },
     { id: 'punjab-police', abbreviation: 'POLICE', name: 'Punjab Police Recruitment Board', region: 'Punjab', category: 'DEFENCE_BOARD', iconUrl: policeEmblem },
     { id: 'high-court', abbreviation: 'SSSC', name: 'High Court of Punjab & Haryana (SSSC)', region: 'Punjab/Haryana', category: 'JUDICIAL_BOARD', iconUrl: ssscLogo },
@@ -37,8 +38,8 @@ export async function seedInitialData(db: Firestore) {
 
   // 2. CANONICAL EXAM MASTER HUBS
   const exams = [
-    { id: 'psssb-clerk-gen', boardId: 'psssb', name: 'PSSSB Clerk (General/IT/Accounts)', category: 'STATE', description: 'Clerical recruitment for multi-departmental Punjab govt posts.', iconUrl: punjabEmblem },
-    { id: 'punjab-patwari', boardId: 'psssb', name: 'Revenue Patwari 2026', category: 'STATE', description: 'Prepare for Revenue Patwari, Canal Patwari and Ziladar recruitment.', iconUrl: punjabEmblem },
+    { id: 'psssb-clerk-gen', boardId: 'psssb', name: 'PSSSB Clerk (General/IT/Accounts)', category: 'STATE', description: 'Clerical recruitment for multi-departmental Punjab govt posts.', iconUrl: psssbLogo },
+    { id: 'punjab-patwari', boardId: 'psssb', name: 'Revenue Patwari 2026', category: 'STATE', description: 'Prepare for Revenue Patwari, Canal Patwari and Ziladar recruitment.', iconUrl: psssbLogo },
     { id: 'police-si', boardId: 'punjab-police', name: 'Sub-Inspector (Dist/Armed)', category: 'POLICE', description: 'District and Armed Cadre recruitment for Punjab Police.', iconUrl: policeEmblem },
     { id: 'police-constable', boardId: 'punjab-police', name: 'Constable Recruitment', category: 'POLICE', description: 'Direct recruitment for Constable posts in Punjab Police.', iconUrl: policeEmblem },
     { id: 'ppsc-pcs', boardId: 'ppsc', name: 'PCS Executive Prelims', category: 'CIVIL', description: 'Higher Class A & B services including DSP and Tehsildar posts.', iconUrl: ppscJpg },
