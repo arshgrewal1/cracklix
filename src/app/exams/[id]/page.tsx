@@ -33,8 +33,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Hub v14.1.
- * FIXED: Access control logic and added debug logs for Premium status.
+ * @fileOverview Institutional Exam Hub v14.2.
+ * FIXED: Access control logic string normalization (Free vs FREE).
  */
 
 export default function ExamHubPage() {
@@ -86,19 +86,17 @@ export default function ExamHubPage() {
   }, [rawMocks, rawNotes, examId])
 
   const hasPass = useMemo(() => {
-     const isElevated = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
-     const activeStatus = profile?.status && profile?.status !== 'Free';
-     return isElevated || activeStatus;
+     if (!profile) return false;
+     const role = (profile.role || '').toUpperCase();
+     const isElevated = role === 'ADMIN' || role === 'SUPER_ADMIN';
+     
+     const status = (profile.status || '').toLowerCase();
+     const activeStatus = status !== '' && status !== 'free';
+     
+     return !!(isElevated || activeStatus);
   }, [profile]);
 
-  useEffect(() => {
-    if (!userLoading && profile) {
-      console.log("[AUDIT] User Subscription Status:", profile.status);
-      console.log("[AUDIT] Has Pass:", hasPass);
-    }
-  }, [userLoading, profile, hasPass]);
-
-  if (examLoading || userLoading) return <div className="h-screen flex items-center justify-center bg-white"><Skeleton className="h-20 w-20 rounded-full animate-pulse" /></div>
+  if (examLoading || userLoading) return <div className="h-screen flex items-center justify-center bg-white"><Skeleton className="h-16 w-16 rounded-full animate-pulse" /></div>
   if (!exam) return <div className="h-screen flex flex-col items-center justify-center text-slate-400 gap-4"><Info className="h-12 w-12 opacity-10" /><p className="font-black uppercase tracking-widest text-xs">Registry node missing</p></div>
 
   const activeBoard = boards?.find((b: any) => 
@@ -215,17 +213,16 @@ function MockList({ data, results, hasPass, user }: any) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
          {data.map((mock: any) => {
             const result = results?.find((r: any) => r.mockId === mock.id);
-            const isFree = (mock.accessType || 'FREE') === 'FREE';
-            const locked = !isFree && !hasPass;
-
-            console.log(`[AUDIT] Mock: ${mock.title} | accessType: ${mock.accessType} | locked: ${locked}`);
+            const access = (mock.accessType || 'FREE').toUpperCase();
+            const isFree = access === 'FREE';
+            const isLocked = !isFree && !hasPass;
 
             return (
                <Card key={mock.id} className="border-none shadow-sm rounded-2xl bg-white hover:shadow-md transition-all text-left group">
                   <CardContent className="p-5 md:p-8 space-y-4">
                      <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                           {locked && <Lock className="h-3 w-3 text-amber-500" />}
+                           {isLocked && <Lock className="h-3 w-3 text-amber-500" />}
                            <Badge className={cn("border-none text-[8px] font-black px-2 py-0.5 rounded shadow-sm", isFree ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>
                               {isFree ? 'FREE' : 'PREMIUM'}
                            </Badge>
@@ -238,7 +235,7 @@ function MockList({ data, results, hasPass, user }: any) {
                         <span className="flex items-center gap-1.5"><BookOpen className="h-3 w-3" /> {mock.totalQuestions} Qs</span>
                      </div>
                      <div className="pt-2 flex flex-col sm:flex-row gap-2">
-                        {locked ? (
+                        {isLocked ? (
                            <Button onClick={() => router.push('/pass')} className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-white border-none font-black uppercase text-[10px] rounded-xl shadow-xl gap-3">
                               <Lock className="h-4 w-4" /> UNLOCK TEST
                            </Button>

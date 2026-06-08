@@ -13,8 +13,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview High-Density Mock Feed v9.1.
- * FIXED: Pass-gating logic and UNLOCK TEST button visibility.
+ * @fileOverview High-Density Mock Feed v9.2.
+ * FIXED: Pass-gating logic normalization (Free vs FREE).
  */
 
 export default function LatestMocks() {
@@ -30,12 +30,16 @@ export default function LatestMocks() {
   useEffect(() => {
     async function checkPass() {
       if (!user || !db) return;
-      if (profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN') {
+      
+      const role = (profile?.role || '').toUpperCase();
+      if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
         setHasPass(true);
         return;
       }
       
-      const activeStatus = profile?.status && profile.status !== 'Free';
+      const status = (profile?.status || '').toLowerCase();
+      const activeStatus = status !== '' && status !== 'free';
+      
       if (activeStatus) {
         setHasPass(true);
         return;
@@ -82,8 +86,6 @@ export default function LatestMocks() {
             const board = boards?.find((b: any) => b.id === boardId);
             const isPremium = (mock.accessType || 'FREE').toUpperCase() === 'PREMIUM';
             const locked = isPremium && !hasPass;
-
-            console.log(`[AUDIT] Feed Card: ${mock.title} | accessType: ${mock.accessType} | locked: ${locked}`);
 
             return (
               <motion.div key={mock.id} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>

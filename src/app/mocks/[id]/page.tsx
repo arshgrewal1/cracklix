@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Mock Node with Authentication & Tiered Attempt Guards.
- * UPDATED: Hardened "UNLOCK TEST" logic and debug logs.
+ * UPDATED: Hardened "UNLOCK TEST" logic and casing normalization.
  */
 
 export default function MockOverviewPage() {
@@ -55,8 +55,8 @@ export default function MockOverviewPage() {
         return;
       }
 
-      console.log("[AUDIT] Checking Mock accessType:", mock.accessType);
-
+      const mockTier = (mock.accessType || 'FREE').toUpperCase();
+      
       // 1. Fetch User Results for this Mock
       if (user) {
          try {
@@ -69,31 +69,28 @@ export default function MockOverviewPage() {
       }
 
       // 2. Pass Access Logic (Tiered Check)
-      const mockTier = (mock.accessType || 'FREE').toUpperCase();
-      
       if (mockTier === 'FREE') {
         setIsLocked(false);
         setAccessChecked(true);
         return;
       }
 
-      if (profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN') {
-        console.log("[AUDIT] Admin Access Granted");
+      const role = (profile?.role || '').toUpperCase();
+      if (role === 'ADMIN' || role === 'SUPER_ADMIN') {
         setIsLocked(false);
         setAccessChecked(true);
         return;
       }
 
       if (!user) {
-        console.log("[AUDIT] Guest Access Locked for Premium Mock");
         setIsLocked(true);
         setAccessChecked(true);
         return;
       }
 
-      // Check for active pass in profile
-      const hasActivePass = profile?.status && profile.status !== 'Free';
-      console.log("[AUDIT] Profile Pass Status:", profile?.status, "| hasActivePass:", hasActivePass);
+      // Normalized status check
+      const status = (profile?.status || '').toLowerCase();
+      const hasActivePass = status !== '' && status !== 'free';
 
       if (hasActivePass) {
         setIsLocked(false);
@@ -119,7 +116,6 @@ export default function MockOverviewPage() {
             subFound = true;
           }
         }
-        console.log("[AUDIT] Final Subscription Check Found:", subFound);
         setIsLocked(!subFound);
       } catch (e) {
         console.error("Access Audit Error:", e);
@@ -172,7 +168,7 @@ export default function MockOverviewPage() {
     </div>
   );
 
-  const isPremiumMock = (mock.accessType || 'FREE') === 'PREMIUM';
+  const isPremiumMock = (mock.accessType || 'FREE').toUpperCase() === 'PREMIUM';
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-body">
