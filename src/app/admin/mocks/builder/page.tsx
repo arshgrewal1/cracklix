@@ -52,8 +52,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Mock Architect v10.0.
- * RESTORED: Multi-Exam Assignment, used/unused tracking, negative marking, and source board silo.
+ * @fileOverview Institutional Mock Architect v12.0.
+ * UPDATED: Optimized Link button visibility, added regional language modes, and restored Duration/Attempt settings.
  */
 
 export default function MockBuilderPage() {
@@ -378,7 +378,7 @@ function MockBuilderContent() {
                     )}
                  </div>
 
-                 <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
+                 <div className="grid grid-cols-1 gap-4 pt-4 border-t border-slate-50">
                     <div className="space-y-2">
                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Language Mode</Label>
                        <Select value={mockData.languageMode} onValueChange={(v: any) => setMockData({...mockData, languageMode: v})}>
@@ -387,25 +387,34 @@ function MockBuilderContent() {
                              <SelectItem value="ENGLISH_PUNJABI">English & ਪੰਜਾਬੀ</SelectItem>
                              <SelectItem value="ENGLISH_HINDI">English & हिन्दी</SelectItem>
                              <SelectItem value="ENGLISH">English Only</SelectItem>
+                             <SelectItem value="PUNJABI">ਪੰਜਾਬੀ Only</SelectItem>
+                             <SelectItem value="HINDI">हिन्दी Only</SelectItem>
                           </SelectContent>
                        </Select>
                     </div>
-                    <div className="space-y-2">
-                       <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Attempt Limit</Label>
-                       <Select value={mockData.attemptLimit?.toString() || "0"} onValueChange={(v) => setMockData({...mockData, attemptLimit: parseInt(v)})}>
-                          <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none font-bold text-[10px] uppercase"><SelectValue placeholder="Limit" /></SelectTrigger>
-                          <SelectContent>
-                             <SelectItem value="0">Unlimited</SelectItem>
-                             <SelectItem value="1">1 Attempt</SelectItem>
-                             <SelectItem value="2">2 Attempts</SelectItem>
-                             <SelectItem value="3">3 Attempts</SelectItem>
-                             <SelectItem value="5">5 Attempts</SelectItem>
-                          </SelectContent>
-                       </Select>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Clock className="h-3 w-3" /> Duration (Min)</Label>
+                            <Input type="number" value={mockData.duration} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value) || 0})} className="h-11 rounded-xl bg-slate-50 border-none font-black text-center" />
+                        </div>
+                        <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Lock className="h-3 w-3" /> Attempt Limit</Label>
+                            <Select value={mockData.attemptLimit?.toString() || "0"} onValueChange={(v) => setMockData({...mockData, attemptLimit: parseInt(v)})}>
+                                <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none font-bold text-[10px] uppercase"><SelectValue placeholder="Limit" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="0">Unlimited</SelectItem>
+                                    <SelectItem value="1">1 Attempt</SelectItem>
+                                    <SelectItem value="2">2 Attempts</SelectItem>
+                                    <SelectItem value="3">3 Attempts</SelectItem>
+                                    <SelectItem value="5">5 Attempts</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-2 gap-4">
+                 <div className="grid grid-cols-2 gap-4 pt-4">
                     <div className="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 flex flex-col items-center gap-2">
                        <p className="text-[8px] font-black text-emerald-600 uppercase flex items-center gap-1"><Zap className="h-2 w-2" /> Positive (+)</p>
                        <Input type="number" step="0.5" value={mockData.positiveMarks} onChange={e => setMockData({...mockData, positiveMarks: parseFloat(e.target.value) || 1})} className="h-10 text-center border-none bg-transparent font-black text-xl text-emerald-700" />
@@ -460,19 +469,28 @@ function MockBuilderContent() {
                        </div>
                     </div>
 
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6 border-t border-white/5 relative z-10">
-                       <div className="flex items-center gap-6">
-                          <div className="space-y-2 text-left">
-                             <Label className="text-[9px] font-black uppercase text-slate-400">Target Section Hub</Label>
-                             <select value={activeSectionId} onChange={e => setActiveSectionId(e.target.value)} className="h-10 bg-primary/20 text-primary border border-primary/20 rounded-lg px-4 font-black uppercase text-[10px] outline-none">
-                                {sections.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    <div className="flex flex-wrap items-end justify-between gap-6 pt-8 border-t border-white/5 relative z-10">
+                       <div className="flex flex-wrap items-end gap-6">
+                          <div className="space-y-3 text-left">
+                             <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Target Section Hub</Label>
+                             <select 
+                               value={activeSectionId} 
+                               onChange={e => setActiveSectionId(e.target.value)} 
+                               className="h-12 bg-primary/20 text-white border border-primary/20 rounded-xl px-4 font-black uppercase text-[10px] outline-none min-w-[220px] shadow-inner"
+                             >
+                                {sections.map(s => <option key={s.id} value={s.id} className="bg-[#0B1528] text-white">{s.name}</option>)}
                              </select>
                           </div>
-                          <div className="flex items-center gap-4 bg-white/5 px-6 py-2.5 rounded-full border border-white/5">
-                             <span className="text-[9px] font-black uppercase text-slate-500">Unused Only</span>
+                          
+                          <div className="flex items-center gap-4 bg-white/5 px-6 h-12 rounded-xl border border-white/5 shadow-inner">
+                             <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Unused Only</span>
                              <Switch checked={hideUsed} onCheckedChange={setHideUsed} className="data-[state=checked]:bg-primary" />
                           </div>
-                          <button onClick={handleSelectAllInBank} className="text-[9px] font-black uppercase text-slate-400 hover:text-white transition-colors">
+
+                          <button 
+                            onClick={handleSelectAllInBank} 
+                            className="h-12 px-6 bg-white/5 border border-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] text-slate-300 transition-all active:scale-95"
+                          >
                              {bankSelection.length === filteredBank.length ? 'Deselect All' : 'Select All'}
                           </button>
                        </div>
@@ -480,9 +498,9 @@ function MockBuilderContent() {
                        <Button 
                          onClick={handleLinkQuestions}
                          disabled={bankSelection.length === 0}
-                         className="h-16 px-10 bg-[#10B981] hover:bg-[#059669] text-white font-black uppercase text-[11px] tracking-[0.2em] rounded-2xl shadow-3xl shadow-emerald-500/10 border-none transition-all active:scale-95 min-w-[240px]"
+                         className="h-16 px-10 bg-[#10B981] hover:bg-[#059669] text-white font-black uppercase text-[11px] tracking-[0.2em] rounded-2xl shadow-3xl shadow-emerald-500/20 border-none transition-all active:scale-95 min-w-[200px]"
                        >
-                          Link {bankSelection.length} Questions
+                          Link {bankSelection.length} Assets
                        </Button>
                     </div>
                  </div>
@@ -631,8 +649,4 @@ function MockBuilderContent() {
       </div>
     </div>
   )
-}
-
-function FilterChip({ active, label, onClick, color = "text-slate-400" }: any) {
-   return (<button onClick={onClick} className={cn("px-6 py-2.5 rounded-xl font-black uppercase text-[9px] tracking-[0.2em] transition-all border-2 whitespace-nowrap", active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-xl" : "bg-white border-slate-50 hover:border-slate-100 " + color)}>{label}</button>)
 }
