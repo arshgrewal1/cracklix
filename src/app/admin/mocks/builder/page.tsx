@@ -50,9 +50,8 @@ import { MockType, Difficulty, AccessType, LanguageDisplayMode } from "@/types"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Elite Institutional Mock Architect v46.0.
- * RECOVERED: Language Architecture (CBT), Access Level Hub, Modular Section Silos.
- * FIXED: Uniqueness filter for Exam list & Multi-Board protocol.
+ * @fileOverview Elite Institutional Mock Architect v47.0.
+ * FIXED: Strict Uniqueness Protocol applied to Exam and Board selection (hides duplicates by name).
  */
 
 const SELECTION_RULES = [
@@ -85,16 +84,30 @@ function MockBuilderContent() {
   const isEditing = !!mockId
 
   const { data: existingMock } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
+  const { data: rawBoards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: allExamsRaw } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
   
-  // UNIQUE EXAM REGISTRY FILTER (Prevents redundant nodes in scrollbar)
+  // UNIQUE BOARD REGISTRY FILTER
+  const boards = useMemo(() => {
+     if (!rawBoards) return [];
+     const unique = new Map();
+     rawBoards.forEach(b => {
+        const key = b.abbreviation?.toLowerCase().trim() || b.id;
+        if (!unique.has(key)) unique.set(key, b);
+     });
+     return Array.from(unique.values()).sort((a, b) => a.abbreviation.localeCompare(b.abbreviation));
+  }, [rawBoards]);
+
+  // UNIQUE EXAM REGISTRY FILTER (Prevents redundant nodes like PSTET 1, PSTET 1 from showing)
   const allExams = useMemo(() => {
      if (!allExamsRaw) return [];
      const unique = new Map();
      allExamsRaw.forEach(e => {
-        if (!unique.has(e.id)) unique.set(e.id, e);
+        const normalizedName = e.name?.toLowerCase().trim();
+        if (!unique.has(normalizedName)) {
+           unique.set(normalizedName, e);
+        }
      });
      return Array.from(unique.values()).sort((a, b) => a.name.localeCompare(b.name));
   }, [allExamsRaw]);

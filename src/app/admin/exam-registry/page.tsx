@@ -34,8 +34,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Master Registry v2.2.
- * FIXED: setEditingExam state mapping corrected.
+ * @fileOverview Institutional Exam Master Registry v2.3.
+ * UPDATED: Strict uniqueness filtering by name for registry list and normalization.
  */
 
 export default function ExamRegistryPage() {
@@ -50,9 +50,20 @@ export default function ExamRegistryPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [editingExam, setEditingExam] = useState<any>(null)
 
-  const { data: exams, loading } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
+  const { data: rawExams, loading } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: questions } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]))
+
+  // STRICT UNIQUE LIST (By Name)
+  const exams = useMemo(() => {
+    if (!rawExams) return [];
+    const unique = new Map();
+    rawExams.forEach(e => {
+       const key = e.name?.toLowerCase().trim();
+       if (!unique.has(key)) unique.set(key, e);
+    });
+    return Array.from(unique.values());
+  }, [rawExams]);
 
   // Atomic content volume per exam registry
   const stats = useMemo(() => {
@@ -104,8 +115,8 @@ export default function ExamRegistryPage() {
       return
     }
 
-    const sourceExam = exams?.find(e => e.id === mergeSource)
-    const targetExam = exams?.find(e => e.id === mergeTarget)
+    const sourceExam = rawExams?.find(e => e.id === mergeSource)
+    const targetExam = rawExams?.find(e => e.id === mergeTarget)
     
     if (!confirm(`CRITICAL: Merge "${sourceExam.name}" into "${targetExam.name}"? This will reassign all MCQs and Mocks.`)) return
 
@@ -187,7 +198,6 @@ export default function ExamRegistryPage() {
                   b.abbreviation?.toLowerCase() === e.boardId?.toLowerCase()
                 );
                 
-                // PRIORITY: Exam-specific iconUrl first
                 const logoUrl = e.iconUrl || board?.iconUrl;
                 const isArmy = e.boardId?.toLowerCase() === 'army' || e.id?.toLowerCase().includes('army');
 
@@ -273,7 +283,7 @@ export default function ExamRegistryPage() {
                     className="w-full h-14 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none"
                   >
                      <option value="">Select Source Registry</option>
-                     {exams?.map((e: any) => <option key={e.id} value={e.id}>{e.name} ({stats[e.id] || 0} Qs)</option>)}
+                     {rawExams?.map((e: any) => <option key={e.id} value={e.id}>{e.name} ({stats[e.id] || 0} Qs)</option>)}
                   </select>
                </div>
                <div className="flex justify-center"><ChevronRight className="h-6 w-6 text-slate-200 rotate-90" /></div>
@@ -285,7 +295,7 @@ export default function ExamRegistryPage() {
                     className="w-full h-14 bg-[#0F172A] text-white border-none rounded-xl px-4 font-bold text-sm outline-none"
                   >
                      <option value="" className="text-white/30">Select Target Hub</option>
-                     {exams?.filter(e => e.id !== mergeSource).map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
+                     {rawExams?.filter(e => e.id !== mergeSource).map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
                   </select>
                </div>
             </div>
