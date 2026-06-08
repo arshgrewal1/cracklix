@@ -52,8 +52,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Mock Architect v12.0.
- * UPDATED: Optimized Link button visibility, added regional language modes, and restored Duration/Attempt settings.
+ * @fileOverview Institutional Mock Architect v12.1.
+ * UPDATED: Implemented strict unique filtering for Boards and Exams to remove redundancy.
  */
 
 export default function MockBuilderPage() {
@@ -80,6 +80,25 @@ function MockBuilderContent() {
   const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
   
+  // --- UNIQUE REGISTRY FILTERS ---
+  const uniqueBoards = useMemo(() => {
+    if (!boards) return [];
+    const unique = new Map();
+    boards.forEach(b => {
+      if (!unique.has(b.id)) unique.set(b.id, b);
+    });
+    return Array.from(unique.values()).sort((a, b) => (a.abbreviation || "").localeCompare(b.abbreviation || ""));
+  }, [boards]);
+
+  const uniqueExams = useMemo(() => {
+    if (!exams) return [];
+    const unique = new Map();
+    exams.forEach(e => {
+      if (!unique.has(e.id)) unique.set(e.id, e);
+    });
+    return Array.from(unique.values()).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+  }, [exams]);
+
   // --- STATE HUB ---
   const [bankLoading, setBankLoading] = useState(false)
   const [questionBank, setQuestionBank] = useState<any[]>([])
@@ -213,7 +232,7 @@ function MockBuilderContent() {
     }
 
     if (mockData.assignmentMode === 'AUTHORITY' && mockData.boardId) {
-       const boardExams = exams?.filter((e: any) => e.boardId === mockData.boardId).map((e: any) => e.id) || [];
+       const boardExams = uniqueExams?.filter((e: any) => e.boardId === mockData.boardId).map((e: any) => e.id) || [];
        finalExamIds = Array.from(new Set([...finalExamIds, ...boardExams]));
     }
 
@@ -354,7 +373,7 @@ function MockBuilderContent() {
                     <div className="space-y-3">
                        <Label className="text-[9px] font-black uppercase text-slate-400">Target Authority Boards</Label>
                        <div className="max-h-32 overflow-y-auto custom-scrollbar pr-2 space-y-2">
-                          {boards?.map((b: any) => (
+                          {uniqueBoards?.map((b: any) => (
                              <div key={b.id} className="flex items-center space-x-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer" onClick={() => toggleBoardId(b.id)}>
                                 <Checkbox checked={mockData.boardIds?.includes(b.id) || mockData.boardId === b.id} className="border-slate-300" />
                                 <span className="text-[10px] font-bold text-[#0F172A] uppercase">{b.abbreviation} Hub</span>
@@ -367,7 +386,7 @@ function MockBuilderContent() {
                        <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
                           <Label className="text-[9px] font-black uppercase text-slate-400">Target Recruitment Verticals</Label>
                           <div className="max-h-48 overflow-y-auto custom-scrollbar pr-2 space-y-2">
-                             {exams?.filter(e => mockData.boardIds?.includes(e.boardId) || !mockData.boardIds?.length).map((e: any) => (
+                             {uniqueExams?.filter(e => mockData.boardIds?.includes(e.boardId) || !mockData.boardIds?.length).map((e: any) => (
                                 <div key={e.id} className="flex items-center space-x-3 p-2 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer" onClick={() => toggleExamId(e.id)}>
                                    <Checkbox checked={mockData.examIds?.includes(e.id)} className="border-slate-300" />
                                    <span className="text-[10px] font-bold text-[#0F172A] uppercase">{e.name}</span>
@@ -450,14 +469,14 @@ function MockBuilderContent() {
                           <Label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-2">Source Board Hub</Label>
                           <select value={filterBoard} onChange={e => setFilterBoard(e.target.value)} className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 font-bold text-sm outline-none transition-all focus:border-primary">
                              <option value="all">All Boards</option>
-                             {boards?.map((b:any) => <option key={b.id} value={b.id}>{b.abbreviation}</option>)}
+                             {uniqueBoards?.map((b:any) => <option key={b.id} value={b.id}>{b.abbreviation}</option>)}
                           </select>
                        </div>
                        <div className="space-y-3">
                           <Label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-2">Recruitment Vertical</Label>
                           <select value={filterExam} onChange={e => setFilterExam(e.target.value)} className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 font-bold text-sm outline-none transition-all focus:border-primary">
                              <option value="all">All Exams</option>
-                             {exams?.map((ex:any) => <option key={ex.id} value={ex.id}>{ex.name}</option>)}
+                             {uniqueExams?.map((ex:any) => <option key={ex.id} value={ex.id}>{ex.name}</option>)}
                           </select>
                        </div>
                        <div className="space-y-3">
