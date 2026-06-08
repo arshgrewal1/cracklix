@@ -32,8 +32,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Hub v12.1.
- * UPDATED: Hardened "Unlock with Pass" navigation to ensure reliable access to the pricing hub.
+ * @fileOverview Institutional Exam Hub v13.0.
+ * UPDATED: Hardened "UNLOCK TEST" button for premium content.
  */
 
 export default function ExamHubPage() {
@@ -84,7 +84,11 @@ export default function ExamHubPage() {
     }
   }, [rawMocks, rawNotes, examId])
 
-  const hasPass = useMemo(() => profile?.status && profile?.status !== 'Free', [profile]);
+  const hasPass = useMemo(() => {
+     const isElevated = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
+     const activeStatus = profile?.status && profile?.status !== 'Free';
+     return isElevated || activeStatus;
+  }, [profile]);
 
   if (examLoading || userLoading) return <div className="h-screen flex items-center justify-center bg-white"><Skeleton className="h-20 w-20 rounded-full animate-pulse" /></div>
   if (!exam) return <div className="h-screen flex flex-col items-center justify-center text-slate-400 gap-4"><Info className="h-12 w-12 opacity-10" /><p className="font-black uppercase tracking-widest text-xs">Registry node missing</p></div>
@@ -185,8 +189,10 @@ function MockList({ data, results, hasPass, user }: any) {
    const router = useRouter();
 
    const handleInteraction = (e: React.MouseEvent, href: string) => {
-      // Always allow pass page regardless of login
-      if (href === "/pass") return;
+      if (href === "/pass") {
+         router.push("/pass");
+         return;
+      }
 
       if (!user) {
          e.preventDefault();
@@ -224,7 +230,7 @@ function MockList({ data, results, hasPass, user }: any) {
                      <div className="pt-2 flex flex-col sm:flex-row gap-2">
                         {locked ? (
                            <Button onClick={() => router.push('/pass')} className="w-full h-10 bg-amber-500 hover:bg-amber-600 text-white border-none font-black uppercase text-[9px] rounded-xl shadow-lg gap-2">
-                              <Lock className="h-3 w-3" /> Unlock with Pass
+                              <Lock className="h-3 w-3" /> UNLOCK TEST
                            </Button>
                         ) : result ? (
                            <>
@@ -275,7 +281,7 @@ function NotesList({ data, hasPass, user }: any) {
                      <div className="pt-2">
                         {locked ? (
                           <Button onClick={() => router.push('/pass')} className="w-full h-10 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase text-[9px] rounded-xl border-none">
-                             <Lock className="h-3 w-3 mr-2" /> Unlock for Download
+                             <Lock className="h-3 w-3 mr-2" /> UNLOCK TEST
                           </Button>
                         ) : (
                           <Button asChild className="w-full h-10 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[9px] rounded-xl border-none">

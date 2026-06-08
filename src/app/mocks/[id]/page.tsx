@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Mock Node with Authentication & Tiered Attempt Guards.
- * UPDATED: Hardened "Unlock with Pass" navigation to ensure the pricing section opens reliably.
+ * UPDATED: Optimized "UNLOCK TEST" button behavior.
  */
 
 export default function MockOverviewPage() {
@@ -121,15 +121,15 @@ export default function MockOverviewPage() {
   const isLimitReached = attemptsLeft === 0;
 
   const handleStart = (e: React.MouseEvent) => {
-    if (!user) {
-      e.preventDefault();
-      router.push(`/login?returnUrl=/mocks/${mockId}`);
-      return;
-    }
     if (isLocked) {
        e.preventDefault();
        router.push("/pass");
        return;
+    }
+    if (!user) {
+      e.preventDefault();
+      router.push(`/login?returnUrl=/mocks/${mockId}`);
+      return;
     }
     if (isLimitReached) {
        e.preventDefault();
@@ -191,7 +191,7 @@ export default function MockOverviewPage() {
                        onClick={() => router.push('/pass')} 
                        className="w-full h-14 md:h-16 px-10 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl gap-3"
                     >
-                      <Lock className="h-4 w-4" /> Unlock with Pass
+                      <Lock className="h-4 w-4" /> UNLOCK TEST
                     </Button>
                  ) : isLimitReached ? (
                     <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl flex items-center gap-4 text-left">
