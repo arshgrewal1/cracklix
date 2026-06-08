@@ -19,15 +19,16 @@ import {
   Info,
   Lock,
   Zap,
-  Gem
+  Gem,
+  AlertCircle,
+  History
 } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Mock Node with Authentication Guards.
- * FIXED: Hardened access-check logic to prevent infinite skeleton screens.
+ * @fileOverview Institutional Mock Node with Authentication & Attempt Guards.
  */
 
 export default function MockOverviewPage() {
@@ -38,13 +39,13 @@ export default function MockOverviewPage() {
   const mockId = params.id as string
   
   const { data: mock, loading: mockLoading } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
-  const { data: passes } = useCollection<any>(useMemo(() => (db ? collection(db, "passes") : null), [db]))
-
+  
   const [isLocked, setIsLocked] = useState(true);
   const [accessChecked, setAccessChecked] = useState(false);
+  const [previousAttempts, setPreviousAttempts] = useState<any[]>([]);
 
   useEffect(() => {
-    async function checkAccess() {
+    async function checkAccessAndAttempts() {
       if (mockLoading) return;
 
       if (!mock || !db) {
@@ -52,6 +53,14 @@ export default function MockOverviewPage() {
         return;
       }
 
+      // 1. Fetch User Results for this Mock
+      if (user) {
+         const qResults = query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId));
+         const resSnap = await getDocs(qResults);
+         setPreviousAttempts(resSnap.docs.map(d => d.data()));
+      }
+
+      // 2. Pass Access Logic
       if (mock.accessType === 'FREE') {
         setIsLocked(false);
         setAccessChecked(true);
@@ -91,14 +100,25 @@ export default function MockOverviewPage() {
       }
       setAccessChecked(true);
     }
-    checkAccess();
-  }, [mock, mockLoading, user, profile, db]);
+    checkAccessAndAttempts();
+  }, [mock, mockLoading, user, profile, db, mockId]);
+
+  const attemptsLeft = useMemo(() => {
+     if (!mock?.attemptLimit || mock.attemptLimit === 0) return Infinity;
+     return Math.max(0, mock.attemptLimit - previousAttempts.length);
+  }, [mock, previousAttempts]);
+
+  const isLimitReached = attemptsLeft === 0;
 
   const handleStart = (e: React.MouseEvent) => {
     if (!user) {
       e.preventDefault();
       router.push(`/login?returnUrl=/mocks/${mockId}`);
       return;
+    }
+    if (isLimitReached) {
+       e.preventDefault();
+       return;
     }
   };
 
@@ -141,6 +161,7 @@ export default function MockOverviewPage() {
                   <div className="flex items-center gap-6 pt-1 text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-widest">
                       <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /> {mock.duration} Mins</span>
                       <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> {mock.totalQuestions} Qs</span>
+                      {mock.attemptLimit > 0 && <span className="flex items-center gap-2 text-rose-500"><History className="h-4 w-4" /> {attemptsLeft} Attempts Left</span>}
                   </div>
                 </div>
               </div>
@@ -150,8 +171,16 @@ export default function MockOverviewPage() {
                     <Button asChild className="w-full h-14 md:h-16 px-10 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl gap-3">
                       <Link href="/pass"><Lock className="h-4 w-4" /> Unlock with Pass</Link>
                     </Button>
+                 ) : isLimitReached ? (
+                    <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl flex items-center gap-4 text-left">
+                       <AlertCircle className="h-8 w-8 text-rose-600" />
+                       <div>
+                          <p className="text-[10px] font-black uppercase text-rose-700 tracking-widest leading-none mb-1">Attempt Limit Reached</p>
+                          <p className="text-xs font-bold text-rose-500 uppercase leading-none">Max {mock.attemptLimit} attempts audited.</p>
+                       </div>
+                    </div>
                  ) : (
-                    <Button asChild onClick={handleStart} className="w-full h-14 md:h-16 px-10 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl gap-3 group">
+                    <Button asChild onClick={handleStart} className="w-full h-14 md:h-16 px-10 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest text-[10px] rounded-xl shadow-xl gap-3 group border-none">
                       <Link href={`/mocks/${mockId}/instructions`}>Start Practice <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" /></Link>
                     </Button>
                  )}
@@ -161,14 +190,18 @@ export default function MockOverviewPage() {
         </section>
 
         <div className="container mx-auto px-4 py-8 max-w-6xl text-left">
-           <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 space-y-6">
-              <h3 className="text-lg font-headline font-black uppercase text-[#0F172A] flex items-center gap-3"><Info className="h-5 w-5 text-primary" /> Institutional Guidelines</h3>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                 <GuidelineItem text="Authentication node required for evaluation." />
-                 <GuidelineItem text="Negative marking (-0.25) active for mismatched nodes." />
-                 <GuidelineItem text="Real-time audit generated post-submission." />
-                 <GuidelineItem text="Official 2026 marking scheme applied." />
-              </ul>
+           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+              <div className="lg:col-span-8 space-y-8">
+                 <div className="bg-slate-50 rounded-3xl p-8 border border-slate-100 space-y-6">
+                    <h3 className="text-lg font-headline font-black uppercase text-[#0F172A] flex items-center gap-3"><Info className="h-5 w-5 text-primary" /> Institutional Guidelines</h3>
+                    <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                       <GuidelineItem text="Authentication node required for evaluation." />
+                       <GuidelineItem text="Negative marking (-0.25) active for mismatched nodes." />
+                       <GuidelineItem text={`Attempt Limit: ${mock.attemptLimit > 0 ? mock.attemptLimit + ' Max' : 'Unlimited'}`} />
+                       <GuidelineItem text="Official 2026 marking scheme applied." />
+                    </ul>
+                 </div>
+              </div>
            </div>
         </div>
       </main>

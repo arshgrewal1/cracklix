@@ -3,6 +3,7 @@ export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'CHAPTER' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET';
 export type ContentStatus = 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'ARCHIVED';
+export type QuestionLifecycleStatus = 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
 export type Gender = 'Male' | 'Female' | 'Other';
 export type AccessType = 'FREE' | 'PREMIUM';
 export type QuestionStatus = 'not-visited' | 'not-answered' | 'answered' | 'marked' | 'answered-marked';
@@ -40,6 +41,7 @@ export interface MockTest {
   sections: ExamSection[];
   published: boolean;
   languageMode: LanguageDisplayMode;
+  attemptLimit: number; // 0 for unlimited
   createdAt: any;
   updatedAt: any;
 }
@@ -86,6 +88,15 @@ export interface Question {
   hindiExplanation?: string;
   difficulty: Difficulty;
   subjectId: string;
+  topic?: string;
+  language?: string;
+  
+  // Usage Tracking
+  status: QuestionLifecycleStatus;
+  usedCount: number;
+  lastUsedDate?: string;
+  mockIdsUsedIn?: string[];
+  isDuplicateOf?: string;
 }
 
 export interface AttemptState {

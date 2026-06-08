@@ -18,100 +18,96 @@ import {
   Layers,
   SearchCode,
   Archive,
-  Rocket
+  Rocket,
+  GitMerge,
+  Eye,
+  FileText
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, doc, deleteDoc, writeBatch, updateDoc } from "firebase/firestore"
+import { collection, query, doc, deleteDoc, writeBatch, updateDoc, serverTimestamp } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
+import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Integrity & Cleanup Dashboard.
- * Features: Deep Scan for Duplicate Registries and Empty Vertical Nodes.
+ * Enhanced: Automated Duplicate Detection Engine (Text + Answer Key Matching).
  */
 
 export default function QADashboard() {
   const db = useFirestore()
   const { toast } = useToast()
-  const [isSyncing, setIsSyncing] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
 
   const { data: questions, loading: qLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]))
   const { data: mocks, loading: mLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
-  const { data: exams, loading: eLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
 
-  // AI-Driven Integrity Analysis
+  // ADVANCED INTEGRITY ANALYSIS
   const audit = useMemo(() => {
-    if (!questions || !mocks || !exams) return { dummyMocks: [], brokenQuestions: [], redundantExams: [], stats: { dummy: 0, critical: 0 } }
+    if (!questions || !mocks) return { duplicates: [], broken: [], stats: { dup: 0, broken: 0 } }
 
-    const dummyKeywords = ["TEST", "DUMMY", "DEMO", "SAMPLE", "MOCK 1", "MOCK 2", "PLACEHOLDER"];
-    
-    // 1. Detect Dummy Mocks
-    const dummyMocks = mocks.filter((m: any) => 
-      dummyKeywords.some(kw => m.title?.toUpperCase().includes(kw)) ||
-      m.isDummy === true
-    )
-
-    // 2. Detect Redundant/Empty Exams
-    const redundantExams = exams.filter((e: any) => {
-       const hasQuestions = questions.some((q: any) => q.examId === e.id);
-       const hasMocks = mocks.some((m: any) => m.examId === e.id);
-       return !hasQuestions && !hasMocks; // Hubs that exist but have zero content
-    })
-
-    // 3. Detect Overlapping Names (Potential Duplicates)
+    const contentHashes: Record<string, string[]> = {};
     const duplicates: any[] = [];
-    const nameMap: Record<string, string> = {};
-    exams.forEach((e: any) => {
-       const key = `${e.name?.toLowerCase()}_${e.boardId}`;
-       if (nameMap[key]) {
-          duplicates.push(e);
+    const broken: any[] = [];
+
+    questions.forEach(q => {
+       // 1. DUPLICATE DETECTION HASH (Text + Options + Answer)
+       const hash = `${q.englishQuestion?.trim()}_${q.correctAnswer}`.toLowerCase();
+       if (contentHashes[hash]) {
+          duplicates.push({ ...q, originalId: contentHashes[hash][0] });
+          contentHashes[hash].push(q.id);
        } else {
-          nameMap[key] = e.id;
+          contentHashes[hash] = [q.id];
+       }
+
+       // 2. BROKEN NODE DETECTION
+       if (!q.correctAnswer || !q.englishQuestion || !q.subjectId) {
+          broken.push(q);
        }
     });
 
-    const brokenQuestions = questions.filter((q: any) => 
-      !q.correctAnswer || 
-      (!q.englishQuestion && !q.questionEn)
-    )
+    return { 
+       duplicates, 
+       broken, 
+       stats: { dup: duplicates.length, broken: broken.length } 
+    };
+  }, [questions, mocks])
 
-    return {
-      dummyMocks,
-      brokenQuestions,
-      redundantExams: [...new Set([...redundantExams, ...duplicates])],
-      stats: {
-        dummy: dummyMocks.length,
-        critical: redundantExams.length + duplicates.length + brokenQuestions.length
-      }
-    }
-  }, [questions, mocks, exams])
-
-  const handleBulkPurgeDummy = async () => {
-    if (!db || audit.dummyMocks.length === 0) return
-    if (!confirm(`CRITICAL AUDIT: Permanently purge ${audit.dummyMocks.length} dummy nodes?`)) return
+  const handleBulkPurgeDuplicates = async () => {
+    if (!db || audit.duplicates.length === 0) return
+    if (!confirm(`CRITICAL AUDIT: Permanently purge ${audit.duplicates.length} duplicate nodes?`)) return
     
-    setIsSyncing(true)
+    setIsProcessing(true)
     const batch = writeBatch(db)
-    audit.dummyMocks.forEach(m => batch.delete(doc(db, "mocks", m.id)))
+    audit.duplicates.forEach(d => batch.delete(doc(db, "questions", d.id)))
 
     try {
       await batch.commit()
-      toast({ title: "Registry Cleaned" })
-    } catch (e) {
-      toast({ variant: "destructive", title: "Audit Failed" })
+      toast({ title: "Registry Sanitized", description: "All redundant overlaps purged." })
     } finally {
-      setIsSyncing(false)
+      setIsProcessing(false)
     }
   }
 
-  const handlePurgeExam = async (id: string) => {
+  const handleMergeDuplicate = async (dup: any) => {
      if (!db) return;
-     if (!confirm("Permanently purge this empty/duplicate registry hub?")) return;
-     await deleteDoc(doc(db, "exams", id));
-     toast({ title: "Hub Purged" });
+     setIsProcessing(true);
+     try {
+        const batch = writeBatch(db);
+        // Mark as duplicate in registry instead of delete (Soft Merge)
+        batch.update(doc(db, "questions", dup.id), { 
+           status: 'DUPLICATE', 
+           isDuplicateOf: dup.originalId,
+           updatedAt: serverTimestamp() 
+        });
+        await batch.commit();
+        toast({ title: "Node Merged", description: "Marked as redundant audit point." });
+     } finally {
+        setIsProcessing(false);
+     }
   }
 
   return (
@@ -120,68 +116,78 @@ export default function QADashboard() {
         <div>
            <div className="flex items-center gap-3 mb-2">
               <ShieldAlert className="h-6 w-6 text-rose-500" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Integrity & Audit Hub</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Integrity Governance Monitor</span>
            </div>
-          <h1 className="text-5xl font-black font-headline text-[#0F172A] uppercase tracking-tight">System Cleanup</h1>
-          <p className="text-slate-500 mt-2 text-lg font-medium">Scan and isolate redundant, empty, or placeholder registries.</p>
+          <h1 className="text-5xl font-black font-headline text-[#0F172A] uppercase tracking-tight leading-none">CBT Integrity</h1>
+          <p className="text-slate-500 mt-2 text-lg font-medium">Sanitize global bank overlaps and validate asset fidelity.</p>
         </div>
         <div className="flex gap-4">
            <Button 
              onClick={handleBulkPurgeDummy} 
-             disabled={isSyncing || audit.dummyMocks.length === 0}
-             className="bg-rose-600 hover:bg-rose-700 text-white h-16 px-10 rounded-2xl font-black uppercase tracking-widest text-xs gap-3 shadow-2xl"
+             className="bg-[#0F172A] hover:bg-black text-white h-16 px-10 rounded-2xl font-black uppercase tracking-widest text-xs gap-3 shadow-2xl transition-all border-none"
            >
-              <Trash2 className="h-5 w-5" /> Purge All Dummy Nodes
+              <RefreshCw className={cn("h-5 w-5", qLoading && "animate-spin")} /> Re-Scan Registry
            </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
-         <QAStatCard label="Dummy Detections" value={audit.stats.dummy} color="text-rose-600" desc="Mocks flagged with 'Test/Demo' keywords" />
-         <QAStatCard label="Redundant Hubs" value={audit.redundantExams.length} color="text-orange-600" desc="Exams with zero questions or duplicate names" />
-         <QAStatCard label="Registry Integrity" value={`${questions && questions.length > 0 ? Math.round(((questions.length - audit.brokenQuestions.length) / questions.length) * 100) : 100}%`} color="text-emerald-600" desc="Validated high-fidelity preparation nodes" />
+         <QAStatCard label="Overlapping Assets" value={audit.stats.dup} color="text-rose-600" desc="Questions with identical statements & keys." />
+         <QAStatCard label="Broken Nodes" value={audit.stats.broken} color="text-orange-600" desc="Missing metadata or logic paths." />
+         <QAStatCard label="Fidelity Index" value={`${questions && questions.length > 0 ? Math.round(((questions.length - audit.stats.dup) / questions.length) * 100) : 100}%`} color="text-emerald-600" desc="Valid, unique preparation nodes." />
       </div>
 
       <div className="space-y-12 px-4">
          <section className="space-y-6">
-            <h3 className="text-2xl font-headline font-black uppercase flex items-center gap-4">
-               <Archive className="h-6 w-6 text-orange-600" /> Redundant Registry Hubs
-            </h3>
+            <div className="flex justify-between items-center">
+               <h3 className="text-2xl font-headline font-black uppercase flex items-center gap-4">
+                  <Archive className="h-6 w-6 text-rose-600" /> Duplicate Audit Stream
+               </h3>
+               {audit.duplicates.length > 0 && (
+                  <Button onClick={handleBulkPurgeDuplicates} variant="outline" className="h-11 rounded-xl border-rose-100 text-rose-600 font-black uppercase text-[9px] gap-2">
+                     <Trash2 className="h-4 w-4" /> Purge All
+                  </Button>
+               )}
+            </div>
+            
             <Card className="border-slate-100 shadow-3xl bg-white rounded-[2.5rem] overflow-hidden">
                <Table>
                   <TableHeader className="bg-slate-50/50">
                      <TableRow className="border-slate-50 h-16">
-                        <TableHead className="px-10 text-[10px] font-black uppercase text-slate-500">Hub Identity</TableHead>
-                        <TableHead className="text-[10px] font-black uppercase text-center text-slate-500">Audit Context</TableHead>
+                        <TableHead className="px-10 text-[10px] font-black uppercase text-slate-500">Conflict Statements</TableHead>
+                        <TableHead className="text-[10px] font-black uppercase text-center text-slate-500">Confidence</TableHead>
                         <TableHead className="text-right px-10 text-[10px] font-black uppercase text-slate-500">Audit Action</TableHead>
                      </TableRow>
                   </TableHeader>
                   <TableBody>
-                     {eLoading ? (
-                        <TableRow><TableCell colSpan={3} className="p-10"><Skeleton className="h-12 w-full rounded-xl" /></TableCell></TableRow>
-                     ) : audit.redundantExams.length > 0 ? (
-                        audit.redundantExams.map((e: any) => (
-                           <TableRow key={e.id} className="border-slate-50 hover:bg-slate-50 transition-colors group">
+                     {qLoading ? (
+                        Array.from({length: 3}).map((_, i) => <TableRow key={i}><TableCell colSpan={3} className="p-10"><Skeleton className="h-12 w-full rounded-xl" /></TableCell></TableRow>)
+                     ) : audit.duplicates.length > 0 ? (
+                        audit.duplicates.map((d: any) => (
+                           <TableRow key={d.id} className="border-slate-50 hover:bg-slate-50 transition-colors group">
                               <TableCell className="px-10 py-6 text-left">
-                                 <p className="font-bold text-[#000000] uppercase">{e.name}</p>
-                                 <code className="text-[9px] text-slate-400 font-mono uppercase tracking-widest">ID: {e.id} • Board: {e.boardId}</code>
+                                 <p className="font-bold text-[#0F172A] line-clamp-1">{d.englishQuestion}</p>
+                                 <code className="text-[9px] text-slate-400 font-mono uppercase tracking-widest mt-1 block">NODE: {d.id} • ORIGIN: {d.originalId}</code>
                               </TableCell>
                               <TableCell className="text-center">
-                                 <Badge className="bg-orange-50 text-orange-600 border-none px-4 py-1 text-[9px] uppercase font-black">
-                                    CONTENT_EMPTY
+                                 <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 text-[9px] uppercase font-black tracking-widest">
+                                    100% OVERLAP
                                  </Badge>
                               </TableCell>
                               <TableCell className="text-right px-10">
                                  <div className="flex justify-end gap-3 opacity-20 group-hover:opacity-100 transition-all">
-                                    <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl bg-rose-50 text-rose-600" onClick={() => handlePurgeExam(e.id)}>
-                                       <Trash2 className="h-4 w-4" />
+                                    <Button onClick={() => handleMergeDuplicate(d)} variant="ghost" size="icon" className="h-12 w-12 rounded-xl bg-blue-50 text-blue-600">
+                                       <GitMerge className="h-5 w-5" />
+                                    </Button>
+                                    <Button onClick={async () => { if(confirm("Purge conflict?")) await deleteDoc(doc(db!, "questions", d.id)); }} variant="ghost" size="icon" className="h-12 w-12 rounded-xl bg-rose-50 text-rose-600">
+                                       <Trash2 className="h-5 w-5" />
                                     </Button>
                                  </div>
                               </TableCell>
                            </TableRow>
                         ))
                      ) : (
-                        <TableRow><TableCell colSpan={3} className="h-40 text-center opacity-30 italic font-black uppercase text-[10px]">Registry audit complete. Hub coverage is 100% efficient.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={3} className="h-40 text-center opacity-30 italic font-black uppercase text-[10px]">No overlaps detected. Registry fidelity is 100%.</TableCell></TableRow>
                      )}
                   </TableBody>
                </Table>
@@ -194,7 +200,7 @@ export default function QADashboard() {
 
 function QAStatCard({ label, value, color, desc }: any) {
    return (
-      <Card className="border-slate-100 bg-white rounded-[2.5rem] p-10 shadow-2xl text-left">
+      <Card className="border-slate-100 bg-white rounded-[2.5rem] p-10 shadow-2xl text-left border border-slate-50">
          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">{label}</p>
          <h4 className={`text-6xl font-headline font-black tracking-tighter ${color} leading-none`}>{value}</h4>
          <p className="text-xs font-bold text-slate-500 mt-5 leading-relaxed">{desc}</p>

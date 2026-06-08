@@ -13,7 +13,11 @@ import {
   CreditCard,
   TrendingUp,
   ArrowUpRight,
-  Activity
+  Activity,
+  Database,
+  Lock,
+  Layers,
+  Sparkles
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, limit } from "firebase/firestore"
@@ -31,7 +35,7 @@ const chartData = [
 
 /**
  * @fileOverview Final Administrative Control Center.
- * Features growth metrics, pass distribution, and institutional performance monitoring.
+ * Features growth metrics, pass distribution, and institutional usage analytics.
  */
 
 export default function AdminAnalytics() {
@@ -40,6 +44,18 @@ export default function AdminAnalytics() {
   const { data: users } = useCollection<any>(useMemo(() => (db ? collection(db, "users") : null), [db]))
   const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
   const { data: results } = useCollection<any>(useMemo(() => (db ? collection(db, "results") : null), [db]))
+  const { data: questions } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]))
+
+  const stats = useMemo(() => {
+     if (!questions) return { used: 0, unused: 0, locked: 0, repeated: 0, dup: 0 };
+     return {
+        used: questions.filter(q => q.status === 'USED').length,
+        unused: questions.filter(q => q.status === 'UNUSED').length,
+        locked: questions.filter(q => q.status === 'LOCKED').length,
+        repeated: questions.filter(q => (q.usedCount || 0) > 1).length,
+        dup: questions.filter(q => q.status === 'DUPLICATE').length
+     }
+  }, [questions]);
 
   const proUsers = useMemo(() => users?.filter((u: any) => u.status && u.status !== 'Free') || [], [users]);
 
@@ -57,8 +73,16 @@ export default function AdminAnalytics() {
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Institutional Governance Monitor</span>
            </div>
           <h1 className="text-5xl font-black font-headline text-primary uppercase tracking-tight">Ecosystem Insights</h1>
-          <p className="text-[#0F172A] mt-2 text-lg font-medium">Tracking student growth and preparation precision across all Punjab verticals.</p>
+          <p className="text-[#0F172A] mt-2 text-lg font-medium">Tracking student growth and question bank lifecycle metrics.</p>
         </div>
+      </div>
+
+      {/* PRIMARY ASSET METRICS */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+         <MetricCard label="Used Inventory" value={stats.used} trend="Active" icon={<Zap className="text-emerald-500" />} />
+         <MetricChip label="Unused Nodes" value={stats.unused} icon={<Database className="text-blue-500" />} />
+         <MetricChip label="Repeated Assets" value={stats.repeated} icon={<Layers className="text-indigo-500" />} />
+         <MetricChip label="Locked/Banned" value={stats.locked} icon={<Lock className="text-amber-500" />} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -69,10 +93,10 @@ export default function AdminAnalytics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-         <Card className="lg:col-span-8 border-none shadow-3xl shadow-slate-900/10 rounded-[3.5rem] bg-white overflow-hidden">
-            <CardHeader className="p-12 border-b border-slate-50">
-               <CardTitle className="font-headline font-black text-3xl text-[#0F172A] uppercase">Active User Flow</CardTitle>
-               <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Daily active nodes across the Cracklix ecosystem.</CardDescription>
+         <Card className="lg:col-span-8 border-none shadow-3xl shadow-slate-900/10 rounded-[3.5rem] bg-white overflow-hidden border border-slate-50">
+            <CardHeader className="p-12 border-b border-slate-50 bg-slate-50/30">
+               <CardTitle className="font-headline font-black text-3xl text-[#0F172A] uppercase">Active Engagement Flow</CardTitle>
+               <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Daily active nodes across the Punjab ecosystem.</CardDescription>
             </CardHeader>
             <CardContent className="p-12">
                <div className="h-[400px] w-full">
@@ -104,20 +128,19 @@ export default function AdminAnalytics() {
 
          <Card className="lg:col-span-4 border-none shadow-3xl shadow-slate-900/10 rounded-[3.5rem] bg-[#0F172A] text-white p-12 space-y-12 overflow-hidden relative">
             <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><ShieldCheck className="h-64 w-64" /></div>
-            <div className="space-y-2 relative z-10">
-               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Authority Distribution</p>
-               <h3 className="font-headline font-black text-3xl uppercase leading-none">Exam Popularity</h3>
+            <div className="space-y-2 relative z-10 text-left">
+               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Content Lifecycle</p>
+               <h3 className="font-headline font-black text-3xl uppercase leading-none">Usage Audit</h3>
             </div>
             <div className="space-y-8 relative z-10">
-               <BoardProgress label="PSSSB Verticals" value={78} />
-               <BoardProgress label="Punjab Police" value={92} />
-               <BoardProgress label="PPSC Gazetted" value={45} />
-               <BoardProgress label="High Court Clerk" value={32} />
+               <UsageProgress label="Verified Unique Nodes" value={Math.round((stats.unused / (questions?.length || 1)) * 100)} />
+               <UsageProgress label="Market Active (Used)" value={Math.round((stats.used / (questions?.length || 1)) * 100)} />
+               <UsageProgress label="Integrity Conflict" value={Math.round((stats.dup / (questions?.length || 1)) * 100)} />
             </div>
             <div className="pt-10 border-t border-white/5 relative z-10">
                <div className="flex items-center gap-4 text-emerald-500">
                   <Activity className="h-6 w-6" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Institutional Engine Online</span>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em]">Live Registry Audit Online</span>
                </div>
             </div>
          </Card>
@@ -128,12 +151,12 @@ export default function AdminAnalytics() {
 
 function MetricCard({ label, value, trend, icon }: any) {
   return (
-    <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-[2.5rem] p-10 bg-white hover:translate-y-[-6px] transition-all group">
+    <Card className="border-none shadow-2xl shadow-slate-200/50 rounded-[2.5rem] p-10 bg-white hover:translate-y-[-6px] transition-all group border border-slate-50">
        <div className="flex items-center justify-between mb-8">
           <div className="h-16 w-16 rounded-[1.5rem] bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
              {icon}
           </div>
-          <div className={`text-[10px] font-black px-3 py-1 rounded-xl ${trend.includes('+') ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-400'} uppercase tracking-widest`}>
+          <div className={`text-[10px] font-black px-3 py-1 rounded-xl ${trend?.includes('+') ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-50 text-slate-400'} uppercase tracking-widest`}>
              {trend}
           </div>
        </div>
@@ -143,14 +166,26 @@ function MetricCard({ label, value, trend, icon }: any) {
   )
 }
 
-function BoardProgress({ label, value }: any) {
+function MetricChip({ label, value, icon }: any) {
+   return (
+      <Card className="border-none shadow-xl bg-white rounded-3xl p-8 flex items-center gap-6 border border-slate-50 hover:bg-slate-50/50 transition-colors">
+         <div className="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner">{icon}</div>
+         <div className="text-left">
+            <p className="text-3xl font-headline font-black text-[#0F172A] leading-none tabular-nums">{value}</p>
+            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-2">{label}</p>
+         </div>
+      </Card>
+   )
+}
+
+function UsageProgress({ label, value }: any) {
    return (
       <div className="space-y-3">
          <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
             <span>{label}</span>
             <span className="text-primary">{value}%</span>
          </div>
-         <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden shadow-inner">
+         <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden shadow-inner">
             <div className="h-full bg-primary shadow-3xl shadow-primary/40 transition-all duration-1000" style={{ width: `${value}%` }} />
          </div>
       </div>
