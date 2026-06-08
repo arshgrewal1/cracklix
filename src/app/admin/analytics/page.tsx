@@ -3,7 +3,7 @@
 
 import React, { useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Users, Zap, BarChart3, ShieldCheck, Target, CreditCard, Activity, Database, Lock, Layers } from "lucide-react"
+import { Users, Zap, BarChart3, ShieldCheck, Target, CreditCard, Activity, Database, Lock, Layers, Unlock } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, limit } from "firebase/firestore"
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
@@ -14,8 +14,8 @@ const chartData = [
 ]
 
 /**
- * @fileOverview Final Administrative Control Center v3.1.
- * PERFORMANCE: Optimized analytics loops with useMemo and capped intake.
+ * @fileOverview Final Administrative Control Center v3.2.
+ * UPDATED: Added Access Level distribution report.
  */
 
 export default function AdminAnalytics() {
@@ -25,10 +25,12 @@ export default function AdminAnalytics() {
   const usersQuery = useMemo(() => (db ? query(collection(db, "users"), limit(200)) : null), [db]);
   const resultsQuery = useMemo(() => (db ? query(collection(db, "results"), limit(200)) : null), [db]);
   const questionsQuery = useMemo(() => (db ? query(collection(db, "questions"), limit(200)) : null), [db]);
+  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db]);
 
   const { data: users } = useCollection<any>(usersQuery)
   const { data: results } = useCollection<any>(resultsQuery)
   const { data: questions } = useCollection<any>(questionsQuery)
+  const { data: mocks } = useCollection<any>(mocksQuery)
 
   const stats = useMemo(() => {
      if (!questions) return { used: 0, unused: 0, locked: 0, repeated: 0, total: 0 };
@@ -40,6 +42,14 @@ export default function AdminAnalytics() {
         total: questions.length
      }
   }, [questions]);
+
+  const mockStats = useMemo(() => {
+    if (!mocks) return { free: 0, premium: 0 };
+    return {
+      free: mocks.filter(m => (m.accessType || 'FREE') === 'FREE').length,
+      premium: mocks.filter(m => m.accessType === 'PREMIUM').length
+    };
+  }, [mocks]);
 
   const proUsers = useMemo(() => users?.filter((u: any) => u.status && u.status !== 'Free') || [], [users]);
 
@@ -59,17 +69,17 @@ export default function AdminAnalytics() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-         <MetricCard label="Used Inventory" value={stats.used} trend="Active" icon={<Zap className="text-emerald-500" />} />
-         <MetricChip label="Unused Assets" value={stats.unused} icon={<Database className="text-blue-500" />} />
-         <MetricChip label="Repeated Nodes" value={stats.repeated} icon={<Layers className="text-indigo-500" />} />
-         <MetricChip label="Locked/Banned" value={stats.locked} icon={<Lock className="text-amber-500" />} />
+         <MetricCard label="Total Free Mocks" value={mockStats.free} trend="Public" icon={<Unlock className="text-emerald-500" />} />
+         <MetricCard label="Total Premium Mocks" value={mockStats.premium} trend="Locked" icon={<Lock className="text-amber-500" />} />
+         <MetricCard label="Active Aspirants" value={users?.length || "0"} trend="+24%" icon={<Users className="text-blue-400" />} />
+         <MetricCard label="Pro Pass Holders" value={proUsers.length} trend="+12%" icon={<CreditCard className="text-emerald-400" />} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-         <MetricCard label="Total Aspirants" value={users?.length || "0"} trend="+24%" icon={<Users className="text-blue-400" />} />
-         <MetricCard label="Pro Pass Holders" value={proUsers.length} trend="+12%" icon={<CreditCard className="text-emerald-400" />} />
-         <MetricCard label="Audit Attempts" value={results?.length || "0"} trend="+15%" icon={<Zap className="text-primary" />} />
-         <MetricCard label="Avg. Accuracy" value={`${avgAccuracy}%`} trend="Target 70%" icon={<Target className="text-rose-400" />} />
+         <MetricChip label="Used MCQs" value={stats.used} icon={<Zap className="text-primary" />} />
+         <MetricChip label="Audit Attempts" value={results?.length || "0"} icon={<Activity className="text-blue-500" />} />
+         <MetricChip label="Avg Accuracy" value={`${avgAccuracy}%`} icon={<Target className="text-rose-400" />} />
+         <MetricChip label="Banned Assets" value={stats.locked} icon={<Lock className="text-slate-400" />} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

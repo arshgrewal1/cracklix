@@ -32,8 +32,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Hub v11.0.
- * UPDATED: Replaced 'Chapter Test' with 'Sectional Test'.
+ * @fileOverview Institutional Exam Hub v12.0.
+ * UPDATED: Implemented Test Access Control (FREE/PREMIUM) logic.
  */
 
 export default function ExamHubPage() {
@@ -184,11 +184,14 @@ function DashboardTab({ value, label, icon }: any) {
 function MockList({ data, results, hasPass, user }: any) {
    const router = useRouter();
 
-   const handleInteraction = (e: React.MouseEvent) => {
+   const handleInteraction = (e: React.MouseEvent, href: string) => {
       if (!user) {
          e.preventDefault();
          router.push(`/login?returnUrl=${encodeURIComponent(window.location.pathname)}`);
+         return;
       }
+      // If manually handling locked status via button click to pass page
+      if (href === "/pass") return;
    };
 
    if (data.length === 0) return <EmptyNode label="Awaiting Content Registry" />;
@@ -197,16 +200,19 @@ function MockList({ data, results, hasPass, user }: any) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
          {data.map((mock: any) => {
             const result = results?.find((r: any) => r.mockId === mock.id);
-            const isFree = mock.accessType === 'FREE';
+            const isFree = (mock.accessType || 'FREE') === 'FREE';
             const locked = !isFree && !hasPass;
 
             return (
                <Card key={mock.id} className="border-none shadow-sm rounded-2xl bg-white hover:shadow-md transition-all text-left group">
                   <CardContent className="p-5 md:p-8 space-y-4">
                      <div className="flex items-center justify-between">
-                        <Badge className={cn("border-none text-[8px] font-black px-2 py-0.5 rounded", isFree ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600")}>
-                           {isFree ? 'FREE' : 'PREMIUM'}
-                        </Badge>
+                        <div className="flex items-center gap-2">
+                           {locked && <Lock className="h-3 w-3 text-amber-500" />}
+                           <Badge className={cn("border-none text-[8px] font-black px-2 py-0.5 rounded", isFree ? "bg-emerald-50 text-emerald-600" : "bg-amber-50 text-amber-600 shadow-sm")}>
+                              {isFree ? 'FREE' : 'PREMIUM'}
+                           </Badge>
+                        </div>
                         {result && <span className="text-[8px] font-black text-slate-300 uppercase">AUDITED</span>}
                      </div>
                      <h3 className="text-sm md:text-lg font-black text-[#0F172A] uppercase leading-tight group-hover:text-primary transition-colors">{mock.title}</h3>
@@ -216,21 +222,21 @@ function MockList({ data, results, hasPass, user }: any) {
                      </div>
                      <div className="pt-2 flex flex-col sm:flex-row gap-2">
                         {locked ? (
-                           <Button asChild onClick={handleInteraction} className="w-full h-10 bg-amber-500 hover:bg-amber-600 text-white border-none font-black uppercase text-[9px] rounded-xl">
-                              <Link href="/pass">Unlock with Pass</Link>
+                           <Button asChild onClick={(e) => handleInteraction(e, "/pass")} className="w-full h-10 bg-amber-500 hover:bg-amber-600 text-white border-none font-black uppercase text-[9px] rounded-xl shadow-lg gap-2">
+                              <Link href="/pass"><Lock className="h-3 w-3" /> Unlock with Pass</Link>
                            </Button>
                         ) : result ? (
                            <>
-                              <Button asChild onClick={handleInteraction} className="flex-1 h-10 bg-primary text-white hover:bg-orange-600 border-none font-black uppercase text-[9px] rounded-xl shadow-md">
+                              <Button asChild onClick={(e) => handleInteraction(e, `/results/${mock.id}`)} className="flex-1 h-10 bg-primary text-white hover:bg-orange-600 border-none font-black uppercase text-[9px] rounded-xl shadow-md">
                                  <Link href={`/results/${mock.id}`}>View Results</Link>
                               </Button>
-                              <Button asChild onClick={handleInteraction} variant="outline" className="flex-1 h-10 border-slate-200 text-slate-600 hover:bg-slate-50 font-black uppercase text-[9px] rounded-xl gap-2">
+                              <Button asChild onClick={(e) => handleInteraction(e, `/mocks/${mock.id}/instructions`)} variant="outline" className="flex-1 h-10 border-slate-200 text-slate-600 hover:bg-slate-50 font-black uppercase text-[9px] rounded-xl gap-2">
                                  <Link href={`/mocks/${mock.id}/instructions`}><RefreshCw className="h-3 w-3" /> Re-attempt</Link>
                               </Button>
                            </>
                         ) : (
-                           <Button asChild onClick={handleInteraction} className="w-full h-10 bg-slate-900 hover:bg-black text-white border-none font-black uppercase text-[9px] rounded-xl shadow-lg">
-                              <Link href={`/mocks/${mock.id}`}>Attempt Now</Link>
+                           <Button asChild onClick={(e) => handleInteraction(e, `/mocks/${mock.id}/instructions`)} className="w-full h-10 bg-slate-900 hover:bg-black text-white border-none font-black uppercase text-[9px] rounded-xl shadow-lg">
+                              <Link href={`/mocks/${mock.id}/instructions`}>Attempt Now</Link>
                            </Button>
                         )}
                      </div>

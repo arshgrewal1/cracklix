@@ -25,7 +25,9 @@ import {
   Loader2, 
   X, 
   Zap,
-  Eye
+  Eye,
+  Lock,
+  Unlock
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -38,8 +40,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Mock Manager v17.0.
- * UPDATED: Multi-Board filter support for cross-authority series.
+ * @fileOverview Institutional Mock Manager v18.0.
+ * UPDATED: Added Access Level (FREE/PREMIUM) filtering and tier management.
  */
 
 export default function MockManagement() {
@@ -48,6 +50,7 @@ export default function MockManagement() {
   
   const [searchTerm, setSearchTerm] = useState("")
   const [boardFilter, setBoardFilter] = useState("all")
+  const [accessFilter, setAccessFilter] = useState("all")
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [isDeletingBulk, setIsDeletingBulk] = useState(false)
 
@@ -66,10 +69,11 @@ export default function MockManagement() {
         const matchesBoard = boardFilter === "all" || 
                            m.boardId === boardFilter || 
                            (m.boardIds && Array.isArray(m.boardIds) && m.boardIds.includes(boardFilter))
-        return matchesSearch && matchesBoard
+        const matchesAccess = accessFilter === "all" || (m.accessType || 'FREE') === accessFilter;
+        return matchesSearch && matchesBoard && matchesAccess
       })
       .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-  }, [rawMocks, searchTerm, boardFilter])
+  }, [rawMocks, searchTerm, boardFilter, accessFilter])
 
   const handleDeleteSingle = async (id: string) => {
     if (!db) return
@@ -144,17 +148,31 @@ export default function MockManagement() {
       <Card className="border-none shadow-3xl bg-white rounded-2xl md:rounded-[3rem] overflow-hidden">
         <CardHeader className="p-4 md:p-10 border-b border-slate-50 bg-slate-50/30">
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-            <div className="relative w-full lg:w-[40%]">
+            <div className="relative w-full lg:w-[35%]">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <Input className="pl-12 h-11 md:h-14 rounded-xl md:rounded-2xl bg-white border-slate-100 shadow-inner" placeholder="Search series title..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
             </div>
-            <div className="w-full lg:w-44">
-              <Select value={boardFilter} onValueChange={setBoardFilter}>
-                <SelectTrigger className="w-full rounded-xl h-11 bg-white border-none shadow-sm font-bold text-xs">
-                  <SelectValue placeholder="Filter Board" />
-                </SelectTrigger>
-                <SelectContent><SelectItem value="all">All Boards</SelectItem>{boards?.map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
-              </Select>
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
+              <div className="w-full sm:w-44">
+                <Select value={boardFilter} onValueChange={setBoardFilter}>
+                  <SelectTrigger className="w-full rounded-xl h-11 bg-white border-none shadow-sm font-bold text-xs">
+                    <SelectValue placeholder="Filter Board" />
+                  </SelectTrigger>
+                  <SelectContent><SelectItem value="all">All Boards</SelectItem>{boards?.map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div className="w-full sm:w-44">
+                <Select value={accessFilter} onValueChange={setAccessFilter}>
+                  <SelectTrigger className="w-full rounded-xl h-11 bg-white border-none shadow-sm font-bold text-xs">
+                    <SelectValue placeholder="Access Level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Tiers</SelectItem>
+                    <SelectItem value="FREE">Free Mocks</SelectItem>
+                    <SelectItem value="PREMIUM">Premium Mocks</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
         </CardHeader>
@@ -172,7 +190,7 @@ export default function MockManagement() {
                     />
                   </TableHead>
                   <TableHead className="px-6 text-[10px] font-black uppercase tracking-widest text-slate-500">Identity</TableHead>
-                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Category</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tier & Category</TableHead>
                   <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Status</TableHead>
                   <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Control</TableHead>
                 </TableRow>
@@ -182,6 +200,7 @@ export default function MockManagement() {
                    Array.from({ length: 4 }).map((_, i) => <TableRow key={i}><TableCell colSpan={5} className="p-10"><Skeleton className="h-16 w-full rounded-xl" /></TableCell></TableRow>)
                 ) : mocks.map((mock: any) => {
                   const isSelected = selectedIds.includes(mock.id);
+                  const isPremium = (mock.accessType || 'FREE') === 'PREMIUM';
                   return (
                     <TableRow key={mock.id} className={cn("hover:bg-slate-50 border-slate-50 transition-colors group", isSelected && "bg-primary/5")}>
                       <TableCell className="px-6 text-center">
@@ -208,12 +227,16 @@ export default function MockManagement() {
                         </div>
                       </TableCell>
                       <TableCell>
-                         <div className="flex items-center gap-2">
-                            {mock.mockType === 'FULL' && <Zap className="h-3 w-3 text-primary" />}
-                            {mock.mockType === 'SUBJECT' && <BookOpen className="h-3 w-3 text-blue-500" />}
-                            {mock.mockType === 'CHAPTER' && <ListTree className="h-3 w-3 text-emerald-500" />}
-                            {mock.mockType === 'PYQ' && <FileStack className="h-3 w-3 text-amber-500" />}
-                            <span className="text-[9px] font-black uppercase tracking-widest text-slate-500">{mock.mockType || 'FULL'}</span>
+                         <div className="flex flex-col gap-2">
+                            <div className="flex items-center gap-2">
+                               {isPremium ? <Lock className="h-3 w-3 text-amber-500" /> : <Unlock className="h-3 w-3 text-emerald-500" />}
+                               <Badge className={cn("border-none text-[8px] font-black px-2 py-0.5", isPremium ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600")}>
+                                  {mock.accessType || 'FREE'}
+                               </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                               <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">{mock.mockType || 'FULL'} HUB</span>
+                            </div>
                          </div>
                       </TableCell>
                       <TableCell>

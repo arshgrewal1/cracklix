@@ -28,7 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Mock Node with Authentication & Attempt Guards.
+ * @fileOverview Institutional Mock Node with Authentication & Tiered Attempt Guards.
+ * UPDATED: Synchronized with Access Control (FREE/PREMIUM) requirements.
  */
 
 export default function MockOverviewPage() {
@@ -40,7 +41,7 @@ export default function MockOverviewPage() {
   
   const { data: mock, loading: mockLoading } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
   
-  const [isLocked, setIsLocked] = useState(true);
+  const [isLocked, setIsLocked] = useState(false);
   const [accessChecked, setAccessChecked] = useState(false);
   const [previousAttempts, setPreviousAttempts] = useState<any[]>([]);
 
@@ -55,13 +56,19 @@ export default function MockOverviewPage() {
 
       // 1. Fetch User Results for this Mock
       if (user) {
-         const qResults = query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId));
-         const resSnap = await getDocs(qResults);
-         setPreviousAttempts(resSnap.docs.map(d => d.data()));
+         try {
+           const qResults = query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId));
+           const resSnap = await getDocs(qResults);
+           setPreviousAttempts(resSnap.docs.map(d => d.data()));
+         } catch (e) {
+           console.error("Attempt Fetch Error:", e);
+         }
       }
 
-      // 2. Pass Access Logic
-      if (mock.accessType === 'FREE') {
+      // 2. Pass Access Logic (Tiered Check)
+      const mockTier = mock.accessType || 'FREE';
+      
+      if (mockTier === 'FREE') {
         setIsLocked(false);
         setAccessChecked(true);
         return;
@@ -88,15 +95,18 @@ export default function MockOverviewPage() {
         );
         const subSnap = await getDocs(subQuery);
         
+        let hasActivePass = false;
         if (!subSnap.empty) {
           const subData = subSnap.docs[0].data();
           const expiry = new Date(subData.expiryDate);
           if (expiry > new Date()) {
-            setIsLocked(false);
+            hasActivePass = true;
           }
         }
+        setIsLocked(!hasActivePass);
       } catch (e) {
         console.error("Access Audit Error:", e);
+        setIsLocked(true);
       }
       setAccessChecked(true);
     }
@@ -115,6 +125,11 @@ export default function MockOverviewPage() {
       e.preventDefault();
       router.push(`/login?returnUrl=/mocks/${mockId}`);
       return;
+    }
+    if (isLocked) {
+       e.preventDefault();
+       router.push("/pass");
+       return;
     }
     if (isLimitReached) {
        e.preventDefault();
@@ -140,6 +155,8 @@ export default function MockOverviewPage() {
     </div>
   );
 
+  const isPremiumMock = (mock.accessType || 'FREE') === 'PREMIUM';
+
   return (
     <div className="min-h-screen bg-white flex flex-col font-body">
       <Navbar />
@@ -154,8 +171,10 @@ export default function MockOverviewPage() {
                 </Button>
                 <div className="space-y-3">
                   <div className="flex flex-wrap items-center gap-2">
-                      <Badge className="bg-orange-50 text-primary border-none px-3 py-0.5 rounded font-black uppercase text-[8px] tracking-widest">OFFICIAL SERIES</Badge>
-                      {isLocked && <Badge className="bg-amber-100 text-amber-600 border-none px-3 py-0.5 rounded font-black uppercase text-[8px] tracking-widest flex items-center gap-1"><Lock className="h-3 w-3" /> PASS REQUIRED</Badge>}
+                      <Badge className={cn("border-none px-3 py-0.5 rounded font-black uppercase text-[8px] tracking-widest shadow-sm", isPremiumMock ? "bg-amber-100 text-amber-600" : "bg-emerald-50 text-emerald-600")}>
+                        {isPremiumMock ? "PREMIUM SERIES" : "FREE SERIES"}
+                      </Badge>
+                      {isLocked && <Badge className="bg-slate-100 text-slate-500 border-none px-3 py-0.5 rounded font-black uppercase text-[8px] tracking-widest flex items-center gap-1"><Lock className="h-3 w-3" /> PASS REQUIRED</Badge>}
                   </div>
                   <h1 className="text-xl md:text-4xl font-headline font-black text-[#0F172A] uppercase leading-tight tracking-tight">{mock.title}</h1>
                   <div className="flex items-center gap-6 pt-1 text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-widest">

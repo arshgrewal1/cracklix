@@ -1,9 +1,10 @@
+
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useFirestore, useUser } from "@/firebase";
-import { doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, documentId, getDocs } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp, collection, query, where, documentId, getDocs, limit } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
 import ExamHeader from "@/components/exam/ExamHeader";
 import TacticalFooter from "@/components/exam/TacticalFooter";
@@ -26,15 +27,15 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
- * @fileOverview Production Hardened CBT Attempt Engine v36.0.
- * PERFORMANCE: Removed blocking awaits from submission to ensure instant UI response.
+ * @fileOverview Production Hardened CBT Attempt Engine v37.0.
+ * UPDATED: Integrated Server-Sync subscription validation for access control.
  */
 
 export default function MockAttemptPage() {
   const params = useParams();
   const router = useRouter();
   const db = useFirestore();
-  const { user } = useUser();
+  const { user, profile } = useUser();
   const { toast } = useToast();
   const mockId = params.id as string;
 
@@ -78,6 +79,29 @@ export default function MockAttemptPage() {
         if (!mockSnap.exists()) throw new Error("Test series not found.");
         const mData = mockSnap.data();
         setMockData(mData);
+
+        // ACCESS CONTROL HUB: Strict Validation
+        const accessTier = mData.accessType || 'FREE';
+        if (accessTier === 'PREMIUM' && profile?.role !== 'ADMIN' && profile?.role !== 'SUPER_ADMIN') {
+           const subQuery = query(
+              collection(db, "subscriptions"), 
+              where("userId", "==", user.uid),
+              where("status", "==", "active"),
+              limit(1)
+           );
+           const subSnap = await getDocs(subQuery);
+           let hasPass = false;
+           if (!subSnap.empty) {
+              const subData = subSnap.docs[0].data();
+              if (new Date(subData.expiryDate) > new Date()) hasPass = true;
+           }
+           
+           if (!hasPass) {
+              toast({ variant: "destructive", title: "Access Denied", description: "This mock requires a Premium Pass." });
+              router.push(`/mocks/${mockId}`);
+              return;
+           }
+        }
 
         const questionIds = mData.questionIds || [];
         const fetchedQuestions: any[] = [];
@@ -124,7 +148,7 @@ export default function MockAttemptPage() {
       }
     }
     loadExam();
-  }, [db, user?.uid, mockId, initExam, router, toast]);
+  }, [db, user?.uid, profile, mockId, initExam, router, toast]);
 
   useEffect(() => {
     if (isInitializing) return;
