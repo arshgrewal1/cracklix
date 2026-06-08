@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Checkbox } from "@/components/ui/checkbox"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Switch } from "@/components/ui/switch"
 import { 
   ChevronLeft, 
   Database, 
@@ -34,7 +35,9 @@ import {
   Settings2,
   CheckCircle2,
   Gem,
-  LayoutGrid
+  LayoutGrid,
+  FileStack,
+  ListTree
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch } from "firebase/firestore"
@@ -132,7 +135,8 @@ function MockBuilderContent() {
         duration: existingMock.duration ?? 120,
         attemptLimit: existingMock.attemptLimit ?? 0,
         languageMode: existingMock.languageMode ?? "ENGLISH_PUNJABI",
-        accessType: existingMock.accessType ?? "FREE"
+        accessType: existingMock.accessType ?? "FREE",
+        published: existingMock.published ?? false
       }));
 
       if (existingMock.examIds?.length > 1) setAssignmentMode('MULTIPLE');
@@ -227,11 +231,12 @@ function MockBuilderContent() {
       const batch = writeBatch(db);
       flatQuestionIds.forEach(id => {
          const qRef = doc(db, "questions", id);
+         const currentQ = questionBank.find(q => q.id === id);
          batch.update(qRef, {
             status: 'USED',
-            usedCount: (questionBank.find(q => q.id === id)?.usedCount || 0) + 1,
+            usedCount: (currentQ?.usedCount || 0) + 1,
             lastUsedDate: new Date().toISOString(),
-            mockIdsUsedIn: Array.from(new Set([...(questionBank.find(q => q.id === id)?.mockIdsUsedIn || []), finalId]))
+            mockIdsUsedIn: Array.from(new Set([...(currentQ?.mockIdsUsedIn || []), finalId]))
          });
       });
       await batch.commit();
@@ -267,7 +272,7 @@ function MockBuilderContent() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 px-4">
-        <div className="lg:col-span-4 space-y-8">
+        <div className="lg:col-span-4 space-y-8 overflow-y-auto max-h-[85vh] custom-scrollbar pr-2">
           <Card className="border-none shadow-4xl rounded-[3rem] bg-white p-10 space-y-8">
              <div className="space-y-6">
                <div className="space-y-2">
@@ -275,19 +280,37 @@ function MockBuilderContent() {
                  <Input value={mockData.title ?? ""} onChange={e => setMockData({...mockData, title: e.target.value})} className="rounded-xl h-14 font-bold text-lg border-slate-100 text-[#0F172A]" />
                </div>
 
+               <div className="space-y-2">
+                 <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Test Category</Label>
+                 <Select value={mockData.mockType ?? "FULL"} onValueChange={(v: any) => setMockData({...mockData, mockType: v})}>
+                    <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none font-bold">
+                       <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                       <SelectItem value="FULL">Full Length Mock</SelectItem>
+                       <SelectItem value="SUBJECT">Subject Test Hub</SelectItem>
+                       <SelectItem value="SECTIONAL">Sectional Mock</SelectItem>
+                       <SelectItem value="CHAPTER">Chapter-wise Node</SelectItem>
+                       <SelectItem value="PYQ">Official PYQ Hub</SelectItem>
+                       <SelectItem value="CA_QUIZ">Daily Current Affairs</SelectItem>
+                       <SelectItem value="PRACTICE_SET">Daily Practice Set</SelectItem>
+                    </SelectContent>
+                 </Select>
+               </div>
+
                <div className="space-y-4 pt-2">
-                  <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Exam Linking Mode</p>
+                  <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Recruitment Vertical Linking</p>
                   <RadioGroup value={assignmentMode} onValueChange={(v: any) => setAssignmentMode(v)} className="grid grid-cols-1 gap-3">
                      <div className={cn("flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer", assignmentMode === 'SINGLE' ? "border-primary bg-primary/5" : "border-slate-100")} onClick={() => setAssignmentMode('SINGLE')}>
                         <div className="flex items-center gap-3">
                            <RadioGroupItem value="SINGLE" />
-                           <Label className="font-bold text-xs cursor-pointer">Single Vertical</Label>
+                           <Label className="font-bold text-xs cursor-pointer">Single Recruitment</Label>
                         </div>
                      </div>
                      <div className={cn("flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer", assignmentMode === 'MULTIPLE' ? "border-primary bg-primary/5" : "border-slate-100")} onClick={() => setAssignmentMode('MULTIPLE')}>
                         <div className="flex items-center gap-3">
                            <RadioGroupItem value="MULTIPLE" />
-                           <Label className="font-bold text-xs cursor-pointer">Multiple Verticals</Label>
+                           <Label className="font-bold text-xs cursor-pointer">Multiple Recruitments</Label>
                         </div>
                      </div>
                      <div className={cn("flex items-center justify-between p-4 rounded-xl border transition-all cursor-pointer", assignmentMode === 'BOARD' ? "border-primary bg-primary/5" : "border-slate-100")} onClick={() => setAssignmentMode('BOARD')}>
@@ -343,15 +366,6 @@ function MockBuilderContent() {
                        </div>
                     </div>
                  )}
-
-                 {assignmentMode === 'BOARD' && (
-                    <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex items-start gap-3 animate-in slide-in-from-top-2">
-                       <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5" />
-                       <p className="text-[10px] font-medium text-emerald-700 leading-relaxed uppercase">
-                          This series will be automatically visible across ALL exams registered under the <strong>{boards?.find(b => b.id === mockData.boardId)?.abbreviation}</strong> authority.
-                       </p>
-                    </div>
-                 )}
                </div>
 
                <div className="space-y-4 pt-4 border-t border-slate-50">
@@ -363,7 +377,7 @@ function MockBuilderContent() {
                         <Input type="number" value={mockData.duration ?? ""} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value)})} className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" />
                      </div>
                      <div className="space-y-2">
-                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Gem className="h-3 w-3" /> Access Node</Label>
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Gem className="h-3 w-3" /> Pass Access Node</Label>
                         <Select value={mockData.accessType ?? "FREE"} onValueChange={(v: any) => setMockData({...mockData, accessType: v})}>
                            <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black"><SelectValue /></SelectTrigger>
                            <SelectContent>
@@ -386,7 +400,7 @@ function MockBuilderContent() {
                   </div>
 
                   <div className="space-y-2">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Languages className="h-3 w-3" /> Language Display</Label>
+                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Languages className="h-3 w-3" /> Language Display Mode</Label>
                      <Select value={mockData.languageMode ?? "ENGLISH_PUNJABI"} onValueChange={(v: any) => setMockData({...mockData, languageMode: v})}>
                         <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black"><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -399,18 +413,12 @@ function MockBuilderContent() {
                      </Select>
                   </div>
 
-                  <div className="space-y-2">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><History className="h-3 w-3" /> Attempt Limit</Label>
-                     <Select value={String(mockData.attemptLimit ?? 0)} onValueChange={(v) => setMockData({...mockData, attemptLimit: parseInt(v)})}>
-                        <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black"><SelectValue /></SelectTrigger>
-                        <SelectContent>
-                           <SelectItem value="0">Unlimited Attempts</SelectItem>
-                           <SelectItem value="1">1 Attempt Strict</SelectItem>
-                           <SelectItem value="2">2 Attempts Hub</SelectItem>
-                           <SelectItem value="3">3 Attempts Hub</SelectItem>
-                           <SelectItem value="5">5 Attempts Hub</SelectItem>
-                        </SelectContent>
-                     </Select>
+                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                     <div className="space-y-0.5">
+                        <p className="font-black text-[11px] uppercase text-[#0F172A]">Registry Live Status</p>
+                        <p className="text-[8px] text-slate-400 font-bold uppercase">Toggle ON to publish to catalog</p>
+                     </div>
+                     <Switch checked={mockData.published} onCheckedChange={v => setMockData({...mockData, published: v})} />
                   </div>
                </div>
 
@@ -443,15 +451,15 @@ function MockBuilderContent() {
            <Card className="border-none shadow-4xl rounded-[4rem] bg-white overflow-hidden min-h-[850px] flex flex-col border border-slate-100">
               <Tabs defaultValue="bank" className="flex-1 flex flex-col">
                  <TabsList className="bg-slate-50/50 border-b border-slate-100 w-full justify-start h-20 px-10 gap-12 rounded-none">
-                    <TabsTrigger value="bank" className="font-black uppercase text-[11px] tracking-widest gap-3 h-12 data-[state=active]:text-primary"><Database className="h-4 w-4" /> Global Bank</TabsTrigger>
-                    <TabsTrigger value="assembly" className="font-black uppercase text-[11px] tracking-widest gap-3 h-12 data-[state=active]:text-primary"><Layers className="h-4 w-4" /> Active Assembly</TabsTrigger>
+                    <TabsTrigger value="bank" className="font-black uppercase text-[11px] tracking-widest gap-3 h-12 data-[state=active]:text-primary"><Database className="h-4 w-4" /> Global Asset Bank</TabsTrigger>
+                    <TabsTrigger value="assembly" className="font-black uppercase text-[11px] tracking-widest gap-3 h-12 data-[state=active]:text-primary"><Layers className="h-4 w-4" /> Target Section Hub</TabsTrigger>
                  </TabsList>
 
                  <TabsContent value="bank" className="p-8 md:p-10 flex-1 flex flex-col m-0 text-left">
                     <div className="bg-[#0F172A] p-6 rounded-[2.5rem] mb-8 flex flex-col gap-6 text-white shadow-2xl overflow-hidden shrink-0 border border-white/5">
                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-end">
                           <div className="space-y-2">
-                             <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1 flex items-center gap-2"><Filter className="h-3 w-3" /> Board Hub</p>
+                             <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1 flex items-center gap-2"><Filter className="h-3 w-3" /> Board Registry</p>
                              <Select value={bankFilter.boardId} onValueChange={v => setBankFilter({...bankFilter, boardId: v})}>
                                 <SelectTrigger className="h-12 w-full bg-white/5 border-white/10 text-white font-bold text-xs rounded-xl focus:ring-0"><SelectValue placeholder="All Boards" /></SelectTrigger>
                                 <SelectContent>
@@ -471,13 +479,11 @@ function MockBuilderContent() {
                              </Select>
                           </div>
                           <div className="flex items-center gap-4">
-                             <Button disabled={bankSelection.length === 0} onClick={handleBulkLink} className="bg-emerald-600 hover:bg-emerald-700 h-14 px-10 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl w-full">Link {bankSelection.length} Nodes</Button>
+                             <Button disabled={bankSelection.length === 0} onClick={handleBulkLink} className="bg-emerald-600 hover:bg-emerald-700 h-14 px-10 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] shadow-xl w-full">Link {bankSelection.length} Assets</Button>
                           </div>
                        </div>
                        <div className="h-px w-full bg-white/5" />
-                       <div className="flex items-center gap-4">
-                          <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1.5 ml-1 flex-1">Targeting Section: <span className="text-primary ml-2">{sections.find(s => s.id === activeSectionId)?.name}</span></p>
-                       </div>
+                       <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1.5 ml-1 flex-1">Targeting Section Hub: <span className="text-primary ml-2">{sections.find(s => s.id === activeSectionId)?.name}</span></p>
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar pr-4 space-y-3 min-h-0 bg-slate-50/50 rounded-[2.5rem] p-6 border border-slate-100/50">
@@ -520,7 +526,7 @@ function MockBuilderContent() {
                                 {section.questions.map((q: any) => (
                                    <div key={q.id} className="p-3.5 bg-white border border-slate-50 rounded-xl flex items-center justify-between group/q shadow-sm hover:border-primary/20">
                                       <p className="font-bold text-xs text-[#0F172A] truncate flex-1">{q.englishQuestion}</p>
-                                      <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-300 hover:text-rose-50 opacity-0 group-hover/q:opacity-100" onClick={() => setSections(sections.map(s => s.id === section.id ? { ...s, questions: s.questions.filter((item: any) => item.id !== q.id) } : s))}><Trash2 className="h-4 w-4" /></Button>
+                                      <Button size="icon" variant="ghost" className="h-8 w-8 text-slate-300 hover:text-rose-50 opacity-0 group-hover:q:opacity-100" onClick={() => setSections(sections.map(s => s.id === section.id ? { ...s, questions: s.questions.filter((item: any) => item.id !== q.id) } : s))}><Trash2 className="h-4 w-4" /></Button>
                                    </div>
                                 ))}
                              </div>
@@ -530,7 +536,7 @@ function MockBuilderContent() {
                        <div className="pt-4 border-t border-slate-50">
                           <Select onValueChange={(val) => setSections([...sections, { id: `sec-${Date.now()}`, name: val, questions: [] }])}>
                              <SelectTrigger className="h-14 border-2 border-dashed border-slate-200 text-slate-400 hover:text-primary hover:border-primary/50 transition-all rounded-2xl bg-white font-black uppercase text-[10px] tracking-widest gap-2 w-full shadow-sm">
-                                <PlusCircle className="h-4 w-4" /> Add Subject Section
+                                <PlusCircle className="h-4 w-4" /> Add Subject Section Hub
                              </SelectTrigger>
                              <SelectContent>
                                 {subjects?.map((s: any) => <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>)}

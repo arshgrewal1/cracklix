@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Search, Edit, Trash2, Database, Loader2, RefreshCw, Filter, CheckCircle2, AlertTriangle, X, Lock, Unlock, Zap, History, LayoutGrid } from "lucide-react"
+import { Plus, Search, Edit, Trash2, Database, Loader2, RefreshCw, Filter, CheckCircle2, AlertTriangle, X, Lock, Unlock, Zap, History, LayoutGrid, GraduationCap, Layers } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useCollection, useFirestore } from "@/firebase"
@@ -18,8 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Asset Ledger (Global Bank) v14.0.
- * Enhanced: Advanced Lifecycle Filtering (Used, Unused, Locked, Duplicate, Repeated).
+ * @fileOverview Institutional Asset Ledger (Global Bank) v15.0.
+ * UPDATED: Added Recruitment Vertical and Target Section Hub context to table cells.
  */
 
 type QuestionFilterType = 'ALL' | 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
@@ -45,8 +45,11 @@ export default function QuestionBank() {
 
   const boardsQuery = useMemo(() => (db ? query(collection(db, "boards")) : null), [db])
   const subjectsQuery = useMemo(() => (db ? query(collection(db, "subjects")) : null), [db])
+  const examsQuery = useMemo(() => (db ? query(collection(db, "exams")) : null), [db])
+  
   const { data: boards } = useCollection<any>(boardsQuery)
   const { data: subjects } = useCollection<any>(subjectsQuery)
+  const { data: exams } = useCollection<any>(examsQuery)
 
   const fetchQuestions = useCallback(async (isNext = false) => {
     if (!db) return
@@ -55,7 +58,6 @@ export default function QuestionBank() {
     try {
       let constraints: any[] = [limit(50)]
       
-      // Firestore Indexing strategy: Single property filters first
       if (activeTab === 'LOCKED') constraints.push(where("status", "==", "LOCKED"))
       if (activeTab === 'UNUSED') constraints.push(where("status", "==", "UNUSED"))
       if (activeTab === 'USED') constraints.push(where("status", "==", "USED"))
@@ -157,7 +159,7 @@ export default function QuestionBank() {
       </div>
 
       <Card className="border-none shadow-3xl rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white">
-        <CardHeader className={cn("p-4 md:p-8 border-b border-slate-50 bg-slate-50/50", !showFilters && "hidden md:block")}>
+        <CardHeader className={cn("p-4 md:p-8 border-b border-slate-50 bg-slate-50/30", !showFilters && "hidden md:block")}>
           <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
             <div className="relative w-full lg:w-[35%]">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
@@ -195,15 +197,16 @@ export default function QuestionBank() {
                     />
                   </TableHead>
                   <TableHead className="px-6 text-[9px] font-black uppercase text-slate-500">Statement Identity</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase text-slate-500 w-32">Status Node</TableHead>
-                  <TableHead className="text-[9px] font-black uppercase text-slate-500 w-32">Audit Usage</TableHead>
-                  <TableHead className="text-right px-8 text-[9px] font-black uppercase text-slate-500 w-32">Actions</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase text-slate-500">Context Node</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase text-slate-500">Status Node</TableHead>
+                  <TableHead className="text-[9px] font-black uppercase text-slate-500">Audit Usage</TableHead>
+                  <TableHead className="text-right px-8 text-[9px] font-black uppercase text-slate-500">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading && questions.length === 0 ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                    <TableRow key={i}><TableCell colSpan={5} className="px-8 py-6"><Skeleton className="h-12 w-full rounded-xl" /></TableCell></TableRow>
+                    <TableRow key={i}><TableCell colSpan={6} className="px-8 py-6"><Skeleton className="h-12 w-full rounded-xl" /></TableCell></TableRow>
                   ))
                 ) : filteredQuestions.map((q: any) => (
                   <TableRow key={q.id} className={cn("hover:bg-slate-50 border-slate-50 transition-colors group", selectedIds.includes(q.id) && "bg-primary/5")}>
@@ -214,12 +217,24 @@ export default function QuestionBank() {
                          className="border-primary"
                        />
                     </TableCell>
-                    <TableCell className="px-6 py-6 text-left">
+                    <TableCell className="px-6 py-6 text-left max-w-md">
                       <div className="flex items-center gap-3 mb-1.5">
                         <Badge variant="outline" className="text-[7px] font-black uppercase border-slate-200 text-slate-400">ID: {q.id?.slice(-8)}</Badge>
                         <p className="text-[8px] font-bold text-primary uppercase tracking-widest">{subjects?.find((s:any) => s.id === q.subjectId)?.name || q.subjectId}</p>
                       </div>
-                      <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-2">{q.englishQuestion}</p>
+                      <p className="font-bold text-[#0F172A] text-sm leading-snug line-clamp-2">{q.englishQuestion}</p>
+                    </TableCell>
+                    <TableCell>
+                       <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                             <GraduationCap className="h-3 w-3 text-slate-300" />
+                             <span className="text-[8px] font-black text-slate-500 uppercase">{exams?.find(e => e.id === q.examId)?.name || q.examId || 'UNMAPPED'}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                             <Layers className="h-3 w-3 text-slate-300" />
+                             <span className="text-[8px] font-bold text-slate-400 uppercase">{q.sectionId || 'GENERAL HUB'}</span>
+                          </div>
+                       </div>
                     </TableCell>
                     <TableCell>
                        <LifecycleBadge status={q.status || 'UNUSED'} />
