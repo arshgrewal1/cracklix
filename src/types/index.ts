@@ -15,6 +15,8 @@ export type LanguageDisplayMode = 'ENGLISH' | 'PUNJABI' | 'HINDI' | 'ENGLISH_PUN
 
 export type CurrentAffairType = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUIZ' | 'SPECIAL';
 
+export type MockAssignmentMode = 'SINGLE' | 'MULTIPLE' | 'AUTHORITY';
+
 export interface Board {
   id: string;
   abbreviation: string;
@@ -42,8 +44,9 @@ export interface MockTest {
   id: string;
   title: string;
   boardId: string;
-  boardIds?: string[];
+  boardIds: string[];
   examIds: string[];
+  assignmentMode?: MockAssignmentMode;
   mockType: MockType;
   accessLevel: AccessLevel;
   duration: number;

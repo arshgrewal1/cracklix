@@ -28,8 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @file Overview Final Exam Gateway Node v9.0.
- * UPDATED: Real-time counts for Full, Subject, PYQ, and Sectional tests.
+ * @file Overview Final Exam Gateway Node v10.0.
+ * UPDATED: Multi-Exam statistical audit. Handles mocks mapped to multiple verticals.
  */
 
 export default function MocksGatewayPage() {
@@ -46,7 +46,6 @@ export default function MocksGatewayPage() {
 
   const exams = useMemo(() => {
     if (!rawExams) return [];
-    // STRICT UNIQUENESS PROTOCOL: Remove redundant vertical hubs
     const unique = new Map();
     rawExams.forEach(e => {
        const key = e.name?.toLowerCase().trim();
@@ -60,6 +59,7 @@ export default function MocksGatewayPage() {
     const map: Record<string, any> = {};
     
     mocks.forEach(m => {
+      // Unified Multi-Exam Discovery
       const eids = m.examIds || (m.examId ? [m.examId] : []);
       if (!eids.length) return;
       
