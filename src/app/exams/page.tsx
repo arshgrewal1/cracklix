@@ -18,8 +18,8 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @file Overview High-Density Responsive Exam Catalog v6.1.
- * HARDENED: Prioritized Exam-Specific logos over Board logos for better visual fidelity (e.g. CTET).
+ * @file Overview High-Density Responsive Exam Catalog v6.2.
+ * UPDATED: Precise real-time question count per exam hub node.
  */
 
 export default function ExamsCatalog() {
@@ -41,25 +41,39 @@ function CatalogContent() {
   const examsQuery = useMemo(() => (db ? query(collection(db, 'exams')) : null), [db])
   const boardsQuery = useMemo(() => (db ? query(collection(db, 'boards')) : null), [db])
   const mocksQuery = useMemo(() => (db ? query(collection(db, 'mocks')) : null), [db])
+  const questionsQuery = useMemo(() => (db ? query(collection(db, 'questions')) : null), [db])
 
   const { data: exams, loading: examsLoading } = useCollection<any>(examsQuery)
   const { data: boards } = useCollection<any>(boardsQuery)
   const { data: mocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
+  const { data: questions } = useCollection<any>(questionsQuery)
 
   const statsMap = useMemo(() => {
     if (!mocks) return {};
     const map: Record<string, any> = {};
+    
     mocks.forEach(m => {
       const eid = m.examId;
       if (!eid) return;
-      if (!map[eid]) map[eid] = { full: 0, pyq: 0, sectional: 0, subjects: new Set<string>() };
+      if (!map[eid]) map[eid] = { full: 0, pyq: 0, sectional: 0, qCount: 0, subjects: new Set<string>() };
       if (m.mockType === 'FULL') map[eid].full++;
       if (m.mockType === 'PYQ') map[eid].pyq++;
       if (m.mockType === 'SECTIONAL') map[eid].sectional++;
       if (m.subjectId) map[eid].subjects.add(m.subjectId);
     });
+
+    if (questions) {
+      questions.forEach(q => {
+        if (q.examId && map[q.examId]) {
+          map[q.examId].qCount++;
+        } else if (q.examId) {
+          map[q.examId] = { full: 0, pyq: 0, sectional: 0, qCount: 1, subjects: new Set<string>() };
+        }
+      })
+    }
+
     return map;
-  }, [mocks]);
+  }, [mocks, questions]);
 
   const filteredExams = useMemo(() => {
     if (!exams) return [];
@@ -80,7 +94,7 @@ function CatalogContent() {
       await updateDoc(doc(db!, "users", user.uid), {
         pinnedExams: isPinned ? arrayRemove(examId) : arrayUnion(examId)
       });
-      toast({ title: isPinned ? "Hub Unpinned" : "Pinned to My Exams", description: isPinned ? "Removed from dashboard." : "Available on your dashboard node." });
+      toast({ title: isPinned ? "Hub Unpinned" : "Pinned to My Exams" });
     } catch (err) {
       toast({ variant: "destructive", title: "Sync Failed" });
     }
@@ -119,15 +133,14 @@ function CatalogContent() {
                 b.abbreviation?.toLowerCase() === exam.boardId?.toLowerCase()
               );
               
-              // PRIORITY: Exam-specific iconUrl first, then fallback to Board icon
               const logoUrl = exam.iconUrl || board?.iconUrl;
-              const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, subjects: new Set() };
+              const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, qCount: 0, subjects: new Set() };
               const isPinned = profile?.pinnedExams?.includes(exam.id);
               const isImgFailed = failedImages[exam.id];
               const isArmy = exam.boardId?.toLowerCase() === 'army' || exam.id?.toLowerCase().includes('army');
               
               return (
-                <Card key={exam.id} className="border-none shadow-lg hover:shadow-2xl transition-all duration-300 rounded-xl md:rounded-[3.5rem] bg-white group overflow-hidden text-left h-full flex flex-col border border-slate-100 p-4 md:p-10 relative">
+                <Card key={exam.id} className="border-none shadow-lg hover:shadow-2xl transition-all duration-300 rounded-xl md:rounded-[3rem] bg-white group overflow-hidden text-left h-full flex flex-col border border-slate-100 p-4 md:p-10 relative">
                    <button 
                      onClick={(e) => togglePin(e, exam.id)}
                      className={`absolute top-4 right-4 md:top-8 md:right-8 z-20 p-2 rounded-full transition-all ${isPinned ? 'bg-amber-100 text-amber-600' : 'bg-slate-50 text-slate-300 hover:text-primary'}`}
@@ -142,7 +155,7 @@ function CatalogContent() {
                                 <img 
                                   src={logoUrl} 
                                   className={cn("w-full h-full object-contain p-1.5 md:p-2 transition-transform duration-500 group-hover:scale-105", isArmy ? "scale-125" : "")} 
-                                  alt="Institutional Logo" 
+                                  alt="Logo" 
                                   referrerPolicy="no-referrer" 
                                   onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}
                                 />
@@ -168,7 +181,7 @@ function CatalogContent() {
                           <CounterNode icon={<Zap className="h-3 w-3 text-primary" />} val={stats.full} label="Full Mocks" />
                           <CounterNode icon={<BookOpen className="h-3 w-3 text-blue-500" />} val={stats.subjects.size} label="Subject Hubs" />
                           <CounterNode icon={<FileText className="h-3 w-3 text-emerald-500" />} val={stats.pyq} label="PYQ Archives" />
-                          <CounterNode icon={<Layers className="h-3 w-3 text-orange-500" />} val={stats.sectional} label="Sectionals" />
+                          <CounterNode icon={<Layers className="h-3 w-3 text-orange-500" />} val={stats.qCount} label="Active MCQs" />
                        </div>
 
                        <div className="mt-6 md:mt-10">

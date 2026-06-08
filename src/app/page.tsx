@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo } from "react";
@@ -14,9 +15,8 @@ import { collection, query, where } from "firebase/firestore";
 import { BookOpen, Zap, Users, Target } from "lucide-react";
 
 /**
- * @fileOverview Institutional Landing Hub v30.0.
- * UPDATED: Replaced hardcoded accuracy with real-time student performance average.
- * Features real-time trust metrics and the official Arsh Grewal founder profile.
+ * @fileOverview Institutional Landing Hub v31.0.
+ * UPDATED: Precise real-time question count synchronization.
  */
 
 export default function HomePage() {
@@ -34,7 +34,10 @@ export default function HomePage() {
 
   const formattedQCount = useMemo(() => {
     const count = questions?.length || 0;
-    return count > 999 ? `${(count / 1000).toFixed(1)}k+` : count.toString();
+    if (count > 999) {
+      return `${(count / 1000).toFixed(1)}k+`;
+    }
+    return count.toString();
   }, [questions]);
 
   const avgAccuracy = useMemo(() => {

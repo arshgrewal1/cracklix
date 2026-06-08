@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useState } from "react"
@@ -11,9 +12,8 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Density Exam Hub Catalog v8.0.
- * UPDATED: Replaced static counts with real-time mock registry sync.
- * Optimized: Only displays exams with verified logos to maintain visual quality.
+ * @fileOverview High-Density Exam Hub Catalog v9.0.
+ * UPDATED: Fully dynamic real-time mock and question registry synchronization.
  */
 
 export default function PopularExams() {
@@ -27,25 +27,31 @@ export default function PopularExams() {
 
   const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db])
   const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db])
+  const questionsQuery = useMemo(() => (db ? collection(db, "questions") : null), [db])
 
   const { data: rawExams, loading: examsLoading } = useCollection<any>(examsQuery)
   const { data: boards } = useCollection<any>(boardsQuery)
   const { data: mocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
+  const { data: questions } = useCollection<any>(questionsQuery)
 
   const statsMap = useMemo(() => {
-    if (!mocks) return {};
-    const map: Record<string, number> = {};
+    if (!mocks || !questions) return { mocks: {}, qs: {} };
+    const mockMap: Record<string, number> = {};
+    const qMap: Record<string, number> = {};
+    
     mocks.forEach(m => {
-      if (m.examId) {
-        map[m.examId] = (map[m.examId] || 0) + 1;
-      }
+      if (m.examId) mockMap[m.examId] = (mockMap[m.examId] || 0) + 1;
     });
-    return map;
-  }, [mocks]);
+
+    questions.forEach(q => {
+      if (q.examId) qMap[q.examId] = (qMap[q.examId] || 0) + 1;
+    });
+
+    return { mocks: mockMap, qs: qMap };
+  }, [mocks, questions]);
 
   const exams = useMemo(() => {
     if (!rawExams) return [];
-    // Show only exams that have a verified logo or whose board has a logo
     return rawExams.filter((exam: any) => {
       const board = boards?.find(b => b.id === exam.boardId);
       const hasLogo = exam.iconUrl || board?.iconUrl;
@@ -79,7 +85,8 @@ export default function PopularExams() {
               const board = boards?.find(b => b.id === exam.boardId)
               const logoUrl = exam.iconUrl || board?.iconUrl;
               const isArmy = exam.boardId?.toLowerCase() === 'army' || exam.id?.toLowerCase().includes('army');
-              const liveTestsCount = statsMap[exam.id] || 0;
+              const liveTestsCount = statsMap.mocks[exam.id] || 0;
+              const liveQuestionsCount = statsMap.qs[exam.id] || 0;
 
               return (
                 <motion.div
@@ -124,7 +131,7 @@ export default function PopularExams() {
                              </div>
                              <div className="flex items-center gap-1.5">
                                 <BookOpen className="h-2.5 w-2.5 md:h-3.5 md:w-3.5 text-primary" />
-                                <span className="text-[8px] md:text-[10px] font-black text-[#0F172A] uppercase">{exam.activeQuestions || '1k+'}+ Qs</span>
+                                <span className="text-[8px] md:text-[10px] font-black text-[#0F172A] uppercase">{liveQuestionsCount > 0 ? liveQuestionsCount : '0'}+ Qs</span>
                              </div>
                           </div>
                         </div>
