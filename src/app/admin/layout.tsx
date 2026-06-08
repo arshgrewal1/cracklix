@@ -29,28 +29,30 @@ import {
   Gem,
   Plus,
   ChevronRight,
-  Landmark
+  Landmark,
+  GraduationCap
 } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
-import { useUser, useAuth, useCollection, useFirestore } from "@/firebase"
+import { useUser, useAuth, useFirestore } from "@/firebase"
 import { useRouter, usePathname } from "next/navigation"
-import { useEffect, useState, useMemo } from "react"
+import { useEffect, useState } from "react"
 import { signOut } from "firebase/auth"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
-import { collection } from "firebase/firestore";
+
+/**
+ * @fileOverview Simplified Admin Layout v9.0.
+ * UPDATED: Centralized Authority management into a single hub, removing dynamic board sprawl.
+ */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser()
   const auth = useAuth()
   const router = useRouter()
-  const db = useFirestore()
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
 
   const isFounder = user?.email === 'arshdeepgrewal1122@gmail.com';
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
@@ -86,33 +88,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
        </div>
        <div className="flex-1 custom-scrollbar overflow-y-auto overflow-x-hidden">
           <SidebarGroup>
-            <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Core Control</SidebarGroupLabel>
+            <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Registry Hub</SidebarGroupLabel>
             <SidebarMenu>
               <AdminNavItem icon={<LayoutDashboard />} label="Dashboard" href="/admin" active={pathname === "/admin"} />
-              <AdminNavItem icon={<Globe className="text-blue-400" />} label="Authority Hub" href="/admin/exams" active={pathname === "/admin/exams"} />
-              <AdminNavItem icon={<Database />} label="Global Bank" href="/admin/questions" active={pathname === "/admin/questions"} />
+              <AdminNavItem icon={<Globe className="text-blue-400" />} label="Authority Registry" href="/admin/exams" active={pathname === "/admin/exams"} />
+              <AdminNavItem icon={<GraduationCap className="text-amber-400" />} label="Exam Verticals" href="/admin/exam-registry" active={pathname === "/admin/exam-registry"} />
+              <AdminNavItem icon={<Database />} label="Global MCQ Bank" href="/admin/questions" active={pathname === "/admin/questions"} />
               <AdminNavItem icon={<SearchCode className="text-emerald-400" />} label="Subject List" href="/admin/subjects" active={pathname === "/admin/subjects"} />
             </SidebarMenu>
           </SidebarGroup>
 
           <SidebarGroup className="mt-4">
-            <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Question Banks</SidebarGroupLabel>
-            <SidebarMenu>
-              {boards?.sort((a: any, b: any) => a.abbreviation.localeCompare(b.abbreviation)).map((board: any) => (
-                <AdminNavItem 
-                  key={board.id}
-                  icon={<Landmark className="h-4 w-4" />} 
-                  label={board.abbreviation} 
-                  href={`/admin/questions?board=${board.id}`} 
-                  active={pathname === "/admin/questions" && new URLSearchParams(window.location.search).get('board') === board.id} 
-                />
-              ))}
-              <AdminNavItem icon={<Plus className="text-slate-500" />} label="Manage Boards" href="/admin/exams" active={false} />
-            </SidebarMenu>
-          </SidebarGroup>
-
-          <SidebarGroup className="mt-4">
-            <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Content Sections</SidebarGroupLabel>
+            <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Content Engines</SidebarGroupLabel>
             <SidebarMenu>
               <AdminNavItem icon={<Zap className="text-primary" />} label="Mock Manager" href="/admin/mocks" active={pathname === "/admin/mocks"} />
               <AdminNavItem icon={<Zap className="text-orange-400" />} label="Mock Architect" href="/admin/mocks/builder" active={pathname === "/admin/mocks/builder"} />
@@ -126,7 +113,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Financials</SidebarGroupLabel>
             <SidebarMenu>
               <AdminNavItem icon={<Gem className="text-primary" />} label="Pass Manager" href="/admin/passes" active={pathname === "/admin/passes"} />
-              <AdminNavItem icon={<CreditCard className="text-emerald-400" />} label="Payments" href="/admin/payments" active={pathname === "/admin/payments"} />
+              <AdminNavItem icon={<CreditCard className="text-emerald-400" />} label="Payments Hub" href="/admin/payments" active={pathname === "/admin/payments" || pathname === "/admin/payments/verify"} />
             </SidebarMenu>
           </SidebarGroup>
 
@@ -135,7 +122,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <SidebarMenu>
               <AdminNavItem icon={<Users className="text-blue-400" />} label="Students" href="/admin/users" active={pathname === "/admin/users"} />
               <AdminNavItem icon={<History className="text-slate-400" />} label="Audit Trail" href="/admin/audit-logs" active={pathname === "/admin/audit-logs"} />
-              <AdminNavItem icon={<Settings className="text-primary" />} label="Settings" href="/admin/settings" active={pathname === "/admin/settings"} />
+              <AdminNavItem icon={<Settings className="text-primary" />} label="System Portal" href="/admin/settings" active={pathname === "/admin/settings"} />
             </SidebarMenu>
           </SidebarGroup>
        </div>
