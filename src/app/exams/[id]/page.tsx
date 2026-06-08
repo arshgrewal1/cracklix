@@ -20,7 +20,8 @@ import {
   Lock,
   GraduationCap,
   ListTree,
-  Download
+  Download,
+  Layers
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -30,7 +31,8 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Exam Hub v8.0.
+ * @fileOverview Institutional Exam Hub v8.1.
+ * FIXED: ReferenceError resolved by adding Layers to imports.
  * UPDATED: Multi-Exam Assignment support using array-contains logic.
  */
 
