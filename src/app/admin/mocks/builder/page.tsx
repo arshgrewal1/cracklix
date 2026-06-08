@@ -101,6 +101,7 @@ function MockBuilderContent() {
     languageMode: "ENGLISH_PUNJABI" as LanguageDisplayMode,
     positiveMarks: 1,
     negativeMarks: 0.25,
+    attemptLimit: 0,
   })
 
   // Assembly States
@@ -237,7 +238,7 @@ function MockBuilderContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10 px-4">
         
-        {/* LEFT: ARCHITECTURE SIDEBAR (RECONSTRUCTED) */}
+        {/* LEFT: ARCHITECTURE SIDEBAR */}
         <div className="lg:col-span-3 space-y-8">
            <div className="space-y-10 bg-white p-2 rounded-3xl">
               
@@ -262,13 +263,27 @@ function MockBuilderContent() {
                  </div>
 
                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Languages className="h-3 w-3" /> Language Architecture (CBT)</Label>
+                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Languages className="h-3 w-3" /> Language Mode (CBT)</Label>
                     <Select value={mockData.languageMode} onValueChange={(v: any) => setMockData({...mockData, languageMode: v})}>
                        <SelectTrigger className="h-12 rounded-xl bg-white border-slate-200 font-black uppercase text-[9px]"><SelectValue /></SelectTrigger>
                        <SelectContent>
-                          <SelectItem value="ENGLISH_PUNJABI">English & ਪੰਜਾਬੀ (Bilingual)</SelectItem>
-                          <SelectItem value="ENGLISH_HINDI">English & हिन्दी (Bilingual)</SelectItem>
+                          <SelectItem value="ENGLISH_PUNJABI">English & ਪੰਜਾਬੀ</SelectItem>
+                          <SelectItem value="ENGLISH_HINDI">English & हिन्दी</SelectItem>
                           <SelectItem value="ENGLISH">English Only</SelectItem>
+                       </SelectContent>
+                    </Select>
+                 </div>
+
+                 <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Attempt Limit</Label>
+                    <Select value={mockData.attemptLimit.toString()} onValueChange={(v) => setMockData({...mockData, attemptLimit: parseInt(v)})}>
+                       <SelectTrigger className="h-11 rounded-xl bg-slate-50 border-none font-bold text-[10px] uppercase"><SelectValue placeholder="Limit" /></SelectTrigger>
+                       <SelectContent>
+                          <SelectItem value="0">Unlimited</SelectItem>
+                          <SelectItem value="1">1 Attempt</SelectItem>
+                          <SelectItem value="2">2 Attempts</SelectItem>
+                          <SelectItem value="3">3 Attempts</SelectItem>
+                          <SelectItem value="5">5 Attempts</SelectItem>
                        </SelectContent>
                     </Select>
                  </div>
@@ -318,27 +333,27 @@ function MockBuilderContent() {
               </TabsList>
 
               <TabsContent value="bank" className="space-y-8 m-0 animate-in fade-in duration-300">
-                 {/* THE DARK FILTER HUB (RECONSTRUCTED) */}
+                 {/* THE DARK FILTER HUB */}
                  <div className="bg-[#0B1528] rounded-[2.5rem] p-8 md:p-12 text-white space-y-10 shadow-4xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-10 opacity-5"><Zap className="h-40 w-40" /></div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
                        <div className="space-y-3">
-                          <Label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-2"><Filter className="h-3 w-3" /> Board Hub</Label>
+                          <Label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-2">Board Hub</Label>
                           <select value={filterBoard} onChange={e => setFilterBoard(e.target.value)} className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 font-bold text-sm outline-none transition-all focus:border-primary">
                              <option value="all">All Boards</option>
                              {boards?.map((b:any) => <option key={b.id} value={b.id}>{b.abbreviation}</option>)}
                           </select>
                        </div>
                        <div className="space-y-3">
-                          <Label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-2"><Landmark className="h-3 w-3" /> Recruitment Vertical</Label>
+                          <Label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-2">Recruitment Vertical</Label>
                           <select value={filterExam} onChange={e => setFilterExam(e.target.value)} className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 font-bold text-sm outline-none transition-all focus:border-primary">
                              <option value="all">All Exams</option>
                              {exams?.map((ex:any) => <option key={ex.id} value={ex.id}>{ex.name}</option>)}
                           </select>
                        </div>
                        <div className="space-y-3">
-                          <Label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-2"><BookOpen className="h-3 w-3" /> Subject Node</Label>
+                          <Label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-2">Subject Node</Label>
                           <select value={filterSubject} onChange={e => setFilterSubject(e.target.value)} className="w-full h-12 bg-white/5 border border-white/10 rounded-xl px-4 font-bold text-sm outline-none transition-all focus:border-primary">
                              <option value="all">All Subjects</option>
                              {subjects?.map((s:any) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -395,6 +410,7 @@ function MockBuilderContent() {
                                    <div className="flex items-center gap-3 mb-2">
                                       <Badge variant="outline" className="bg-slate-50 border-slate-100 text-[#0F172A] font-black uppercase text-[8px] px-2 py-0.5">{q.subjectId}</Badge>
                                       {q.status === 'USED' && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase">Active Mock</Badge>}
+                                      {q.status === 'LOCKED' && <Badge className="bg-amber-50 text-amber-600 border-none text-[8px] font-black uppercase">Locked</Badge>}
                                    </div>
                                    <p className="font-bold text-[#0F172A] truncate text-base">{q.englishQuestion}</p>
                                 </div>
@@ -462,12 +478,4 @@ function MockBuilderContent() {
       </div>
     </div>
   )
-}
-
-function Filter({ className }: { className?: string }) {
-   return (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-      </svg>
-   );
 }

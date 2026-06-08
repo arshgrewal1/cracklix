@@ -115,11 +115,19 @@ export default function MockOverviewPage() {
                       )}>
                         {isPremium ? 'PREMIUM HUB' : 'FREE ACCESS'}
                       </Badge>
+                      {mock.attemptLimit > 0 && (
+                        <Badge variant="outline" className="text-[8px] font-black uppercase border-slate-200 text-slate-400 px-2 py-0.5">
+                           Limit: {mock.attemptLimit} Attempts
+                        </Badge>
+                      )}
                   </div>
                   <h1 className="text-xl md:text-4xl font-headline font-black text-[#0F172A] uppercase leading-tight tracking-tight">{mock.title}</h1>
                   <div className="flex items-center gap-6 pt-1 text-slate-500 font-bold text-[10px] md:text-sm uppercase tracking-widest">
                       <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /> {mock.duration} Mins</span>
                       <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> {mock.totalQuestions} Qs</span>
+                      {!isLocked && mock.attemptLimit > 0 && (
+                        <span className="flex items-center gap-2"><Target className="h-4 w-4 text-emerald-500" /> {attemptsLeft} Left</span>
+                      )}
                   </div>
                 </div>
               </div>

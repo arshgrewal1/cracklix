@@ -60,6 +60,40 @@ export interface MockTest {
   updatedAt: any;
 }
 
+export interface Question {
+  id: string;
+  englishQuestion: string;
+  punjabiQuestion?: string;
+  hindiQuestion?: string;
+  optionAEnglish: string;
+  optionAPunjabi?: string;
+  optionAHindi?: string;
+  optionBEnglish: string;
+  optionBPunjabi?: string;
+  optionBHindi?: string;
+  optionCEnglish: string;
+  optionCPunjabi?: string;
+  optionCHindi?: string;
+  optionDEnglish: string;
+  optionDPunjabi?: string;
+  optionDHindi?: string;
+  correctAnswer: 'A' | 'B' | 'C' | 'D';
+  englishExplanation?: string;
+  punjabiExplanation?: string;
+  hindiExplanation?: string;
+  subjectId: string;
+  boardId: string;
+  examId?: string;
+  sectionId?: string;
+  difficulty: Difficulty;
+  status: QuestionLifecycleStatus;
+  usedCount: number;
+  lastUsedDate?: string;
+  mockIdsUsedIn?: string[];
+  createdAt: any;
+  updatedAt: any;
+}
+
 export interface UserProfile {
   id: string;
   name: string;
@@ -78,6 +112,7 @@ export interface UserProfile {
   gender?: Gender;
   subscriptions?: string[];
   pinnedExams?: string[];
+  unlockedMocks?: string[];
   pass?: {
     active: boolean;
     plan: 'FREE_PASS' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
