@@ -31,7 +31,14 @@ import {
   BookOpen,
   Printer,
   FileText,
-  RefreshCw
+  RefreshCw,
+  Share2,
+  MessageCircle,
+  Facebook,
+  Instagram,
+  Send,
+  MessageSquare,
+  X
 } from "lucide-react"
 import { useUser, useFirestore, useCollection } from "@/firebase"
 import { collection, query, where, doc, getDoc, documentId, getDocs } from "firebase/firestore"
@@ -40,11 +47,11 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
-import Logo from "@/components/brand/Logo"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Test Results Hub v7.5.
- * UPDATED: Added Re-attempt action button to the results hero.
+ * @fileOverview Test Results Hub v8.0.
+ * UPDATED: Added comprehensive social sharing hub (WhatsApp, FB, IG, SMS).
  */
 
 export default function ResultPage() {
@@ -60,6 +67,7 @@ export default function ResultPage() {
   const [loadingContent, setLoadingContent] = useState(true)
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
   const [expandedQs, setExpandedQs] = useState<Record<number, boolean>>({})
+  const [isShareOpen, setIsShareOpen] = useState(false)
 
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
@@ -169,6 +177,41 @@ export default function ResultPage() {
      });
   }, [questions, sessionData, activeReviewFilter]);
 
+  const handleShareResult = async () => {
+    if (!sessionData) return;
+    
+    const shareText = `I scored ${sessionData.score.toFixed(1)}/${sessionData.totalQuestions} with ${sessionData.accuracy}% accuracy in ${sessionData.mockTitle} on Cracklix! Punjab's No. 1 Mock Hub.`;
+    const shareUrl = window.location.href;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: 'Cracklix Test Result',
+          text: shareText,
+          url: shareUrl
+        });
+      } catch (err) {
+        setIsShareOpen(true);
+      }
+    } else {
+      setIsShareOpen(true);
+    }
+  };
+
+  const getShareLink = (platform: string) => {
+    if (!sessionData) return "";
+    const text = encodeURIComponent(`I scored ${sessionData.score.toFixed(1)}/${sessionData.totalQuestions} in ${sessionData.mockTitle} on Cracklix! Check it out: `);
+    const url = encodeURIComponent(window.location.href);
+
+    switch(platform) {
+      case 'whatsapp': return `https://wa.me/?text=${text}${url}`;
+      case 'facebook': return `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`;
+      case 'sms': return `sms:?body=${text}${url}`;
+      case 'twitter': return `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+      default: return "";
+    }
+  };
+
   if (resultsLoading || loadingContent) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
        <Loader2 className="h-12 w-12 text-primary animate-spin" />
@@ -211,6 +254,9 @@ export default function ResultPage() {
                              <Link href={`/mocks/${mockId}/instructions`}>
                                 <RefreshCw className="h-4 w-4" /> Re-attempt Test
                              </Link>
+                          </Button>
+                          <Button onClick={handleShareResult} className="bg-[#10B981] hover:bg-emerald-600 text-white font-black uppercase text-[10px] tracking-widest h-12 px-8 rounded-xl shadow-xl gap-2 transition-all active:scale-95 border-none">
+                             <Share2 className="h-4 w-4" /> Share Result
                           </Button>
                           <Button variant="outline" className="bg-white/5 border-white/10 hover:bg-white/10 text-white font-black uppercase text-[10px] tracking-widest h-12 px-8 rounded-xl" onClick={() => window.print()}>
                              <Printer className="h-4 w-4 mr-2" /> Print Result
@@ -367,8 +413,54 @@ export default function ResultPage() {
         </Tabs>
       </main>
       <div className="print:hidden"><Footer /></div>
+
+      {/* SHARE HUB DIALOG */}
+      <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
+         <DialogContent className="bg-[#0F172A] text-white border-white/10 rounded-[2.5rem] max-w-[340px] p-0 overflow-hidden shadow-5xl text-left">
+            <div className="h-1.5 w-full bg-[#10B981]" />
+            <DialogHeader className="p-8 pb-4 text-center relative">
+               <DialogTitle className="text-xl font-headline font-black uppercase tracking-tight">Share Your Result</DialogTitle>
+               <button onClick={() => setIsShareOpen(false)} className="absolute top-8 right-8 text-slate-500 hover:text-white"><X className="h-5 w-5" /></button>
+            </DialogHeader>
+            <div className="p-8 pt-0 grid grid-cols-2 gap-4">
+               <ShareOption label="WhatsApp" icon={<MessageCircle className="h-6 w-6" />} color="bg-emerald-500" href={getShareLink('whatsapp')} />
+               <ShareOption label="Facebook" icon={<Facebook className="h-6 w-6" />} color="bg-blue-600" href={getShareLink('facebook')} />
+               <ShareOption label="SMS" icon={<MessageSquare className="h-6 w-6" />} color="bg-indigo-500" href={getShareLink('sms')} />
+               <ShareOption label="Twitter" icon={<Send className="h-6 w-6" />} color="bg-sky-500" href={getShareLink('twitter')} />
+            </div>
+            <div className="p-8 pt-0">
+               <Button 
+                 variant="outline" 
+                 className="w-full border-white/5 bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white rounded-xl h-12 font-black uppercase text-[10px] tracking-[0.2em]"
+                 onClick={async () => {
+                    await navigator.clipboard.writeText(window.location.href);
+                    toast({ title: "Link Copied", description: "Result link saved to clipboard." });
+                    setIsShareOpen(false);
+                 }}
+               >
+                  Copy Result URL
+               </Button>
+            </div>
+         </DialogContent>
+      </Dialog>
     </div>
   )
+}
+
+function ShareOption({ label, icon, color, href }: any) {
+  return (
+    <a 
+      href={href} 
+      target="_blank" 
+      rel="noopener noreferrer"
+      className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all border border-white/5 group"
+    >
+       <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center text-white shadow-lg transition-transform group-hover:scale-110", color)}>
+          {icon}
+       </div>
+       <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{label}</span>
+    </a>
+  );
 }
 
 function MetricCard({ label, val, sub, color }: any) {
