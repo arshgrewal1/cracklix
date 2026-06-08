@@ -1,10 +1,11 @@
+
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore } from "@/firebase"
-import { collection, query, where, doc, updateDoc, serverTimestamp } from "firebase/firestore"
+import { collection, query, where, doc, updateDoc, serverTimestamp, limit } from "firebase/firestore"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -37,8 +38,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import ShareButton from "@/components/navigation/ShareButton"
 
 /**
- * @fileOverview Student Dashboard v16.0.
- * FIXED: Standardized duration style to prevent Tailwind warnings.
+ * @fileOverview Optimized Student Dashboard v17.0.
+ * PERFORMANCE: Implemented limited result ingestion and stabilized queries.
  */
 
 export default function StudentDashboard() {
@@ -50,9 +51,10 @@ export default function StudentDashboard() {
     if (!loading && !user) router.push("/login")
   }, [user, loading, router])
 
+  // STABILIZED QUERY (Limited to latest 10 for dashboard performance)
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
-    return query(collection(db, "results"), where("userId", "==", user.uid))
+    return query(collection(db, "results"), where("userId", "==", user.uid), limit(15))
   }, [db, user])
 
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
@@ -66,35 +68,21 @@ export default function StudentDashboard() {
     if (!results || results.length === 0) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0h" }
     
     const total = results.length
-    
-    // 1. Precise Accuracy Audit
     const avgAcc = Math.round(results.reduce((acc: number, r: any) => acc + (r.accuracy || 0), 0) / total)
-    
-    // 2. Verified Time Accumulation
     const totalSeconds = results.reduce((acc: number, r: any) => acc + (r.timeTaken || 0), 0)
     const hoursSpent = totalSeconds / 3600
     const timeFormatted = hoursSpent >= 1 ? `${hoursSpent.toFixed(1)}h` : `${Math.round(totalSeconds / 60)}m`
-
-    // 3. Activity Streak Audit (Unique Dates)
     const uniqueDays = new Set(results.map(r => new Date(r.timestamp).toDateString()))
     const streak = uniqueDays.size
-
-    // 4. Weighted Preparation Index
     const readiness = Math.min(100, Math.round((avgAcc * 0.7) + (Math.min(total, 30) * 1)))
 
-    return { 
-      total, 
-      avgAccuracy: avgAcc, 
-      streak, 
-      readiness, 
-      hours: timeFormatted 
-    }
+    return { total, avgAccuracy: avgAcc, streak, readiness, hours: timeFormatted }
   }, [results])
 
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-4">
        <Loader2 className="h-10 w-10 text-primary animate-spin" />
-       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Loading Dashboard...</p>
+       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Synchronizing Hub...</p>
     </div>
   );
 

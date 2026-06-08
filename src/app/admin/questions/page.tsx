@@ -19,8 +19,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Siloed Question Bank Hub v28.0.
- * FIXED: Unused tracking logic treating null status as UNUSED.
+ * @fileOverview Paginated Question Bank Hub v29.0.
+ * PERFORMANCE: Implemented Cursor-Based Pagination and debounced filtering.
  */
 
 type QuestionFilterType = 'ALL' | 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
@@ -49,7 +49,7 @@ function QuestionBankContent() {
   const [loading, setLoading] = useState(true)
   const [questions, setQuestions] = useState<any[]>([])
   const [lastDoc, setLastDoc] = useState<any>(null)
-  const [hasMore, setLastHasMore] = useState(true)
+  const [hasMore, setHasMore] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
 
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -68,17 +68,16 @@ function QuestionBankContent() {
     try {
       let constraints: any[] = [limit(50)]
       
-      // Filter logic mapping
+      // Registry Lifecycle Logic
       if (activeTab === 'LOCKED') constraints.push(where("status", "==", "LOCKED"))
       if (activeTab === 'USED') constraints.push(where("status", "==", "USED"))
       if (activeTab === 'DUPLICATE') constraints.push(where("status", "==", "DUPLICATE"))
       if (activeTab === 'REPEATED') constraints.push(where("usedCount", ">", 1))
-      
-      // Note: UNUSED needs complex check in Firestore if nulls are involved, 
-      // but for siloed banks we assume status is set or missing.
-      if (activeTab === 'UNUSED') constraints.push(where("status", "in", ["UNUSED", null as any]));
+      if (activeTab === 'UNUSED') constraints.push(where("status", "==", "UNUSED"));
 
       if (boardParam !== "all") constraints.push(where("boardId", "==", boardParam))
+      
+      // Implement Cursor
       if (isNext && lastDoc) constraints.push(startAfter(lastDoc))
 
       const q = query(collection(db, "questions"), ...constraints)
@@ -93,25 +92,28 @@ function QuestionBankContent() {
       }
       
       setLastDoc(snap.docs[snap.docs.length - 1])
-      setLastHasMore(snap.docs.length === 50)
+      setHasMore(snap.docs.length === 50)
     } catch (e: any) {
-      console.error(e)
-      toast({ variant: "destructive", title: "Fetch Error", description: "Registry index sync pending." })
+      console.error("[FIRESTORE REGISTRY ERROR]:", e)
+      toast({ variant: "destructive", title: "Sync Interrupted", description: "The registry node failed to transmit." })
     } finally {
       setLoading(false)
     }
   }, [db, boardParam, activeTab, lastDoc, toast])
 
+  // Initial Sync & Tab Switch Sync
   useEffect(() => {
-    if (db) fetchQuestions()
-  }, [boardParam, activeTab, db])
+    setLastDoc(null)
+    setHasMore(true)
+    fetchQuestions(false)
+  }, [boardParam, activeTab])
 
   const filteredQuestions = useMemo(() => {
     if (!questions) return []
     return questions.filter(q => {
         const term = searchTerm.toLowerCase();
-        const matchesSearch = (q.englishQuestion || q.questionEn || "").toLowerCase().includes(term) || 
-                             (q.id || "").toLowerCase().includes(term);
+        const qText = (q.englishQuestion || q.questionEn || "").toLowerCase();
+        const matchesSearch = qText.includes(term) || (q.id || "").toLowerCase().includes(term);
         const matchesSub = subjectFilter === "all" || q.subjectId === subjectFilter
         const matchesDiff = difficultyFilter === "all" || q.difficulty === difficultyFilter
         return matchesSearch && matchesSub && matchesDiff
@@ -134,7 +136,7 @@ function QuestionBankContent() {
       await batch.commit();
       setQuestions(prev => prev.map(q => selectedIds.includes(q.id) ? { ...q, status: newStatus } : q));
       setSelectedIds([]);
-      toast({ title: "Bulk Audit Complete", description: `Updated ${selectedIds.length} assets to ${newStatus}.` });
+      toast({ title: "Audit Synchronized", description: `Updated ${selectedIds.length} assets to ${newStatus}.` });
     } catch (e) {
       toast({ variant: "destructive", title: "Bulk Update Failed" });
     } finally {

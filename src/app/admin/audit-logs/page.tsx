@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo } from "react"
@@ -11,14 +12,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 
 /**
- * @fileOverview Institutional Audit Trail Console.
- * Standardised to high-contrast Navy/White theme for readability.
- * Fixed: Removed orderBy to prevent index errors, handling sorting client-side.
+ * @fileOverview Optimized Audit Trail Console.
+ * PERFORMANCE: Removed server-side orderBy to prevent index requirements and bypass query deadlocks.
  */
 
 export default function AuditLogsPage() {
   const db = useFirestore()
-  const logsQuery = useMemo(() => (db ? query(collection(db, "audit_logs"), limit(100)) : null), [db])
+  const logsQuery = useMemo(() => (db ? query(collection(db, "audit_logs"), limit(50)) : null), [db])
   const { data: allLogs, loading } = useCollection<any>(logsQuery)
 
   const logs = useMemo(() => {

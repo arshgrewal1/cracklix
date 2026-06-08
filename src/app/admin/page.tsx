@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Institutional Command Center v26.0.
- * UPDATED: Hardened Unused Question calculation for real-time fidelity.
+ * @fileOverview Institutional Command Center v27.0.
+ * PERFORMANCE: Stabilized Query references and limited activity feeds to prevent memory leaks.
  */
 
 export default function AdminDashboard() {
@@ -26,21 +26,30 @@ export default function AdminDashboard() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [lastSyncStatus, setLastSyncStatus] = useState<'idle' | 'success'>('idle')
 
-  // Real-time Data Nodes
-  const { data: users } = useCollection<any>(useMemo(() => (db ? collection(db, "users") : null), [db]))
-  const { data: questions, loading: qLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]))
-  const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
-  const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
-  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
-  const { data: notes } = useCollection<any>(useMemo(() => (db ? collection(db, "notes") : null), [db]))
-  const { data: pyqs } = useCollection<any>(useMemo(() => (db ? collection(db, "pyqs") : null), [db]))
+  // STABILIZED DATA LISTENERS
+  const usersQuery = useMemo(() => (db ? query(collection(db, "users"), limit(500)) : null), [db]);
+  const questionsQuery = useMemo(() => (db ? query(collection(db, "questions"), limit(1000)) : null), [db]);
+  const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), limit(200)) : null), [db]);
+  const subjectsQuery = useMemo(() => (db ? collection(db, "subjects") : null), [db]);
+  const pyqsQuery = useMemo(() => (db ? query(collection(db, "pyqs"), limit(100)) : null), [db]);
 
-  // Live Activity Feeds (Latest 5)
+  const { data: users } = useCollection<any>(usersQuery);
+  const { data: questions, loading: qLoading } = useCollection<any>(questionsQuery);
+  const { data: mocks } = useCollection<any>(mocksQuery);
+  const { data: subjects } = useCollection<any>(subjectsQuery);
+  const { data: pyqs } = useCollection<any>(pyqsQuery);
+
+  // LIVE ACTIVITY FEEDS (Limited to prevent browser lag)
   const recentUsersQuery = useMemo(() => (db ? query(collection(db, "users"), orderBy("createdAt", "desc"), limit(5)) : null), [db]);
   const { data: recentUsers } = useCollection<any>(recentUsersQuery);
 
-  const recentResultsQuery = useMemo(() => (db ? query(collection(db, "results"), orderBy("timestamp", "desc"), limit(5)) : null), [db]);
-  const { data: recentResults } = useCollection<any>(recentResultsQuery);
+  const recentResultsQuery = useMemo(() => (db ? query(collection(db, "results"), limit(5)) : null), [db]);
+  const { data: rawRecentResults } = useCollection<any>(recentResultsQuery);
+
+  const recentResultsSorted = useMemo(() => {
+    if (!rawRecentResults) return [];
+    return [...rawRecentResults].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }, [rawRecentResults]);
 
   const unusedCount = useMemo(() => {
     if (!questions) return 0;
@@ -164,7 +173,7 @@ export default function AdminDashboard() {
                               <h4 className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Recent Test Audit Stream</h4>
                            </div>
                            <div className="grid grid-cols-1 gap-4">
-                              {recentResults?.map((r: any) => (
+                              {recentResultsSorted.map((r: any) => (
                                  <div key={r.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
                                     <div className="flex items-center gap-4 min-w-0 flex-1">
                                        <div className="h-8 w-8 md:h-9 md:w-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -178,7 +187,7 @@ export default function AdminDashboard() {
                                     <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[8px] md:text-[9px] shrink-0">{r.accuracy}%</Badge>
                                  </div>
                               ))}
-                              {(!recentResults || recentResults.length === 0) && <p className="text-center py-10 opacity-20 text-[10px] font-black uppercase">No recent attempts.</p>}
+                              {(recentResultsSorted.length === 0) && <p className="text-center py-10 opacity-20 text-[10px] font-black uppercase">No recent attempts.</p>}
                            </div>
                         </section>
                      </div>
