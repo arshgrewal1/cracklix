@@ -47,9 +47,12 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Hardened Admin Layout v14.0.
- * PERFORMANCE: Optimized redirect logic to eliminate "stuck" states after login.
+ * @fileOverview Institutional Security Protocol v99.0.
+ * HARDENED: Permanent Super Admin Authority for Arsh Grewal.
  */
+
+// FOUNDER WHITELIST - PERMANENT AUTHORITY
+const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser()
@@ -63,15 +66,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     setMounted(true);
   }, []);
 
-  const isFounder = user?.email === 'arshdeepgrewal1122@gmail.com';
+  // PERMANENT AUTHORITY CHECK (Hardcoded Bypass)
+  const isFounder = user?.email && SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase());
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
 
   useEffect(() => {
     if (!loading && mounted) {
       if (!user) {
-        // Use immediate router.push to avoid layout flickering
         router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
       } else if (!isAdmin) {
+        // Only redirect if NOT hardcoded founder or DB admin
         router.push('/dashboard');
       }
     }

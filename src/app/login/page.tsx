@@ -26,9 +26,12 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Optimized Login Hub v3.0.
- * PERFORMANCE: Implemented route prefetching and transition handling to eliminate navigation lag.
+ * @fileOverview Optimized Login Hub v4.0.
+ * HARDENED: Permanent Super Admin Registry for Founder Arsh Grewal.
  */
+
+// PERMANENT AUTHORITY WHITELIST
+const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 export default function LoginPage() {
   return (
@@ -82,12 +85,14 @@ function LoginContent() {
         startTransition(() => {
           router.push(returnUrl)
         })
-        // Note: We don't set loading(false) here on success to maintain the button spinner during navigation
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
         const user = userCredential.user
         await updateProfile(user, { displayName: name })
-        const isSuperAdmin = email.toLowerCase() === 'arshdeepgrewal1122@gmail.com';
+        
+        // PERMANENT SUPER ADMIN AUDIT
+        const isSuperAdmin = email && SUPER_ADMIN_WHITELIST.includes(email.toLowerCase());
+        
         await setDoc(doc(db, 'users', user.uid), {
           id: user.uid,
           name, email, phone: `+91 ${phone}`,
@@ -115,15 +120,21 @@ function LoginContent() {
       const result = await signInWithPopup(auth, provider)
       const user = result.user
       const userSnap = await getDoc(doc(db, 'users', user.uid))
+      
+      const isSuperAdmin = user.email && SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase());
+      
       if (!userSnap.exists()) {
-        const isSuperAdmin = user.email?.toLowerCase() === 'arshdeepgrewal1122@gmail.com';
         await setDoc(doc(db, 'users', user.uid), {
           id: user.uid, name: user.displayName || "Student",
           email: user.email, role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
           state: "Punjab", createdAt: new Date().toISOString(), status: 'Free',
           pinnedExams: []
         })
+      } else if (isSuperAdmin && userSnap.data().role !== 'SUPER_ADMIN') {
+        // Auto-upgrade if DB role is out of sync for Founder
+        await setDoc(doc(db, 'users', user.uid), { role: 'SUPER_ADMIN' }, { merge: true });
       }
+
       startTransition(() => {
         router.push(returnUrl)
       })
