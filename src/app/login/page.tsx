@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import Logo from "@/components/brand/Logo"
-import { ShieldCheck, Mail, Lock, ChevronLeft, User, Phone, AlertCircle, RefreshCw } from "lucide-react"
+import { ShieldCheck, Mail, Lock, ChevronLeft, User, Phone, AlertCircle, RefreshCw, Eye, EyeOff } from "lucide-react"
 import { useAuth, useFirestore } from "@/firebase"
 import { 
   signInWithEmailAndPassword, 
@@ -26,8 +26,8 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Login & Sign Up Hub.
- * Simplified Language: Replaced technical terms like 'Node Transmitted' with 'Email Sent'.
+ * @fileOverview Login & Sign Up Hub v2.0.
+ * UPDATED: Added password visibility toggles (Eye/EyeOff) for better UX.
  */
 
 export default function LoginPage() {
@@ -45,6 +45,8 @@ function LoginContent() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [resetEmail, setResetEmail] = useState("")
   const [loading, setLoading] = useState(false)
   const [resetLoading, setResetLoading] = useState(false)
@@ -174,7 +176,23 @@ function LoginContent() {
               <div className="space-y-4">
                 <Input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary" placeholder="Email Address" />
                 <div className="space-y-2">
-                  <Input type="password" value={password} onChange={e => setPassword(e.target.value)} required className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary" placeholder="Password" />
+                  <div className="relative">
+                    <Input 
+                      type={showPassword ? "text" : "password"} 
+                      value={password} 
+                      onChange={e => setPassword(e.target.value)} 
+                      required 
+                      className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary pr-12" 
+                      placeholder="Password" 
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
                   {mode === 'login' && (
                     <div className="flex justify-end">
                       <button 
@@ -188,7 +206,25 @@ function LoginContent() {
                   )}
                 </div>
               </div>
-              {mode === 'register' && <Input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary" placeholder="Confirm Password" />}
+              {mode === 'register' && (
+                <div className="relative">
+                  <Input 
+                    type={showConfirmPassword ? "text" : "password"} 
+                    value={confirmPassword} 
+                    onChange={e => setConfirmPassword(e.target.value)} 
+                    required 
+                    className="h-12 rounded-xl bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus-visible:ring-primary pr-12" 
+                    placeholder="Confirm Password" 
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              )}
               
               <Button type="submit" className="w-full h-14 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-xl shadow-xl border-none transition-all active:scale-95" disabled={loading}>
                 {loading ? "Please Wait..." : (mode === 'login' ? "Login" : "Sign Up")}
