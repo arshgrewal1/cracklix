@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from "react"
@@ -35,6 +36,11 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Institutional Bulk Ingestion Hub v5.0.
+ * UPDATED: Added individual node editing functionality for staged assets.
+ */
+
 export default function BulkImportPage() {
   const router = useRouter()
   const db = useFirestore()
@@ -53,7 +59,6 @@ export default function BulkImportPage() {
 
   const [rawText, setRawText] = useState("")
   const [parsedQuestions, setParsedQuestions] = useState<any[]>([])
-  const [errors, setErrors] = useState<string[]>([])
   const [isSyncing, setIsSyncing] = useState(false)
   
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
@@ -68,7 +73,6 @@ export default function BulkImportPage() {
 
     const result = parseBulkQuestions(rawText, metadata);
     setParsedQuestions(result.questions);
-    setErrors(result.errors);
 
     if (result.questions.length > 0) {
       toast({ title: "Extraction Success", description: `${result.questions.length} blocks mapped to explicit fields.` });
@@ -79,27 +83,7 @@ export default function BulkImportPage() {
 
   const handleOpenEdit = (idx: number) => {
     setEditingIndex(idx)
-    setEditForm({ 
-      ...parsedQuestions[idx],
-      englishQuestion: parsedQuestions[idx].englishQuestion || "",
-      punjabiQuestion: parsedQuestions[idx].punjabiQuestion || "",
-      hindiQuestion: parsedQuestions[idx].hindiQuestion || "",
-      optionAEnglish: parsedQuestions[idx].optionAEnglish || "",
-      optionAPunjabi: parsedQuestions[idx].optionAPunjabi || "",
-      optionAHindi: parsedQuestions[idx].optionAHindi || "",
-      optionBEnglish: parsedQuestions[idx].optionBEnglish || "",
-      optionBPunjabi: parsedQuestions[idx].optionBPunjabi || "",
-      optionBHindi: parsedQuestions[idx].optionBHindi || "",
-      optionCEnglish: parsedQuestions[idx].optionCEnglish || "",
-      optionCPunjabi: parsedQuestions[idx].optionCPunjabi || "",
-      optionCHindi: parsedQuestions[idx].optionCHindi || "",
-      optionDEnglish: parsedQuestions[idx].optionDEnglish || "",
-      optionDPunjabi: parsedQuestions[idx].optionDPunjabi || "",
-      optionDHindi: parsedQuestions[idx].optionDHindi || "",
-      englishExplanation: parsedQuestions[idx].englishExplanation || "",
-      punjabiExplanation: parsedQuestions[idx].punjabiExplanation || "",
-      hindiExplanation: parsedQuestions[idx].hindiExplanation || ""
-    })
+    setEditForm({ ...parsedQuestions[idx] })
   }
 
   const handleSaveEdit = () => {
@@ -205,7 +189,7 @@ export default function BulkImportPage() {
                 placeholder={`Q15. English Statement...\n${isHindiMode ? 'Hindi Statement...' : 'Punjabi Statement...'}\n(A) Option EN\n${isHindiMode ? 'Hindi Text' : 'Punjabi Text'}\nAnswer: C\nExplanation: Text...`}
                 className="min-h-[550px] rounded-[2.5rem] bg-white border-none p-12 text-sm font-bold shadow-4xl leading-relaxed resize-none focus-visible:ring-primary text-[#0F172A]"
             />
-            <Button onClick={handleImport} className="w-full h-20 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-[2rem] shadow-4xl gap-4 group transition-all active:scale-95">
+            <Button onClick={handleImport} className="w-full h-20 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-[2rem] shadow-4xl gap-4 group transition-all active:scale-95 border-none">
                Initialize Ingestion <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
@@ -226,16 +210,7 @@ export default function BulkImportPage() {
                   <div key={idx} className="relative group">
                     <Card className="border-none shadow-3xl rounded-[3rem] bg-white p-12 text-left group overflow-visible border border-slate-50 transition-all hover:border-primary/20">
                        <div className="flex justify-between items-start mb-10 border-b border-slate-50 pb-8">
-                          <div className="space-y-2">
-                             <Badge className="bg-[#0F172A] text-white border-none text-[10px] font-black px-6 py-2 rounded-xl uppercase tracking-widest">Asset {idx + 1}</Badge>
-                             <div className="flex flex-wrap gap-2 pt-2">
-                                <DebugIndicator label="EN" active={q.debug.EN_Q === 'YES'} />
-                                <DebugIndicator label={isHindiMode ? "HI" : "PA"} active={q.debug.SEC_Q === 'YES'} />
-                                <DebugIndicator label="OPTS" active={q.debug.OPT === 'YES'} />
-                                <DebugIndicator label="KEY" active={q.debug.KEY === 'YES'} />
-                                <DebugIndicator label="EXP" active={q.debug.SEC_EXP === 'YES'} />
-                             </div>
-                          </div>
+                          <Badge className="bg-[#0F172A] text-white border-none text-[10px] font-black px-6 py-2 rounded-xl uppercase tracking-widest">Asset {idx + 1}</Badge>
                           <div className="flex gap-3">
                              <Button variant="ghost" size="icon" className="h-14 w-14 rounded-2xl text-blue-500 bg-blue-50 shadow-sm hover:scale-110 transition-transform" onClick={() => handleOpenEdit(idx)}><Edit className="h-6 w-6" /></Button>
                              <Button variant="ghost" size="icon" className="h-14 w-14 rounded-2xl text-rose-500 bg-rose-50 shadow-sm hover:scale-110 transition-transform" onClick={() => handleDelete(idx)}><Trash2 className="h-6 w-6" /></Button>
@@ -300,7 +275,7 @@ export default function BulkImportPage() {
             </div>
             <DialogFooter className="p-10 pt-6 bg-slate-50 flex gap-6 shrink-0">
                <Button variant="ghost" onClick={() => setEditingIndex(null)} className="h-16 px-10 font-black uppercase text-[11px] text-slate-400 tracking-widest">Discard Changes</Button>
-               <Button onClick={handleSaveEdit} className="bg-[#0F172A] hover:bg-black text-white h-16 px-16 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] flex-1 shadow-2xl transition-all active:scale-95">
+               <Button onClick={handleSaveEdit} className="bg-[#0F172A] hover:bg-black text-white h-16 px-16 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] flex-1 shadow-2xl transition-all active:scale-95 border-none">
                   <CheckCircle2 className="h-5 w-5 mr-3" /> Apply Modifications
                </Button>
             </DialogFooter>
@@ -308,16 +283,4 @@ export default function BulkImportPage() {
       </Dialog>
     </div>
   )
-}
-
-function DebugIndicator({ label, active }: { label: string, active: boolean }) {
-   return (
-      <div className={cn(
-         "px-2 py-0.5 rounded text-[7px] font-black uppercase tracking-tighter flex items-center gap-1 border",
-         active ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"
-      )}>
-         <div className={cn("h-1 w-1 rounded-full", active ? "bg-emerald-500" : "bg-rose-500")} />
-         {label}
-      </div>
-   )
 }

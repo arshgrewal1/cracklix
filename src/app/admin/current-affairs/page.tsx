@@ -26,7 +26,8 @@ import {
   Target,
   AlertTriangle,
   ChevronRight,
-  Layers
+  Layers,
+  SearchCode
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, serverTimestamp, writeBatch } from "firebase/firestore"
@@ -39,9 +40,8 @@ import { parseBulkQuestions } from "@/lib/parser"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Institutional Current Affairs Management Hub v15.0.
- * UPDATED: Fixed controlled input warning and removed PDF requirements.
- * FEATURES: Direct Mock Architect with Live CBT Preview.
+ * @fileOverview Institutional Current Affairs Management Hub v16.0.
+ * UPDATED: Added individual question editing for staged extraction nodes.
  */
 
 export default function AdminCurrentAffairs() {
@@ -55,6 +55,9 @@ export default function AdminCurrentAffairs() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [bulkText, setBulkText] = useState("")
+
+  const [editingQIndex, setEditingQIndex] = useState<number | null>(null)
+  const [editQForm, setEditQForm] = useState<any>(null)
 
   const caItems = useMemo(() => {
      if (!rawCaItems) return [];
@@ -85,6 +88,20 @@ export default function AdminCurrentAffairs() {
     } else {
       toast({ variant: "destructive", title: "Parse Failed", description: "Verify stacked bilingual format." });
     }
+  };
+
+  const handleOpenEditQ = (idx: number) => {
+    setEditingQIndex(idx);
+    setEditQForm({ ...editingItem.questions[idx] });
+  };
+
+  const handleSaveEditQ = () => {
+    if (editingQIndex === null || !editQForm) return;
+    const updatedQs = [...editingItem.questions];
+    updatedQs[editingQIndex] = editQForm;
+    setEditingItem({ ...editingItem, questions: updatedQs });
+    setEditingQIndex(null);
+    toast({ title: "Question Tweaked" });
   };
 
   const handleSave = async () => {
@@ -372,7 +389,10 @@ export default function AdminCurrentAffairs() {
                                  <div className="grid grid-cols-1 gap-10">
                                     {editingItem.questions.map((q: any, idx: number) => (
                                        <div key={idx} className="bg-slate-50/50 p-8 md:p-12 rounded-[3.5rem] border border-slate-100 group/q relative transition-all hover:bg-white hover:shadow-4xl">
-                                          <button onClick={() => { const qs = [...editingItem.questions]; qs.splice(idx, 1); setEditingItem({...editingItem, questions: qs}); }} className="absolute top-10 right-10 text-rose-300 hover:text-rose-600 opacity-0 group-hover/q:opacity-100 transition-all p-3 rounded-2xl hover:bg-rose-50"><Trash2 className="h-6 w-6" /></button>
+                                          <div className="absolute top-10 right-10 flex gap-2 opacity-0 group-hover/q:opacity-100 transition-all">
+                                             <button onClick={() => handleOpenEditQ(idx)} className="text-blue-500 p-3 rounded-2xl hover:bg-blue-50 bg-white shadow-sm"><Edit className="h-6 w-6" /></button>
+                                             <button onClick={() => { const qs = [...editingItem.questions]; qs.splice(idx, 1); setEditingItem({...editingItem, questions: qs}); }} className="text-rose-500 p-3 rounded-2xl hover:bg-rose-50 bg-white shadow-sm"><Trash2 className="h-6 w-6" /></button>
+                                          </div>
                                           
                                           <div className="flex items-center gap-6 mb-10">
                                              <div className="h-10 w-10 rounded-2xl bg-[#0F172A] text-white flex items-center justify-center font-black text-sm shadow-xl">{idx + 1}</div>
@@ -406,6 +426,57 @@ export default function AdminCurrentAffairs() {
             </Button>
           </DialogFooter>
         </DialogContent>
+      </Dialog>
+
+      {/* INDIVIDUAL QUESTION EDIT DIALOG */}
+      <Dialog open={editingQIndex !== null} onOpenChange={open => !open && setEditingQIndex(null)}>
+         <DialogContent className="sm:max-w-5xl max-h-[95vh] overflow-y-auto rounded-[3rem] bg-white border-none shadow-5xl p-0 text-left flex flex-col">
+            <div className="h-2 w-full bg-[#0F172A] shrink-0" />
+            <DialogHeader className="p-10 pb-6 flex flex-row items-center justify-between shrink-0">
+               <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600"><SearchCode className="h-7 w-7" /></div>
+                  <DialogTitle className="text-3xl font-black font-headline uppercase text-[#0F172A]">Modify Explicit Fields</DialogTitle>
+               </div>
+               <Button variant="ghost" size="icon" onClick={() => setEditingQIndex(null)} className="rounded-xl h-12 w-12"><X className="h-6 w-6 text-slate-400" /></Button>
+            </DialogHeader>
+            <div className="px-10 pb-10 space-y-10 overflow-y-auto custom-scrollbar flex-1">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="space-y-3">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">English Statement</Label>
+                     <Textarea value={editQForm?.englishQuestion || ""} onChange={e => setEditQForm({...editQForm, englishQuestion: e.target.value})} className="h-32 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner text-[#0F172A]" />
+                  </div>
+                  <div className="space-y-3">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">Secondary Statement</Label>
+                     <Textarea 
+                        value={editingItem?.language === 'English & Hindi' ? (editQForm?.hindiQuestion || "") : (editQForm?.punjabiQuestion || "")} 
+                        onChange={e => setEditQForm({...editQForm, [editingItem?.language === 'English & Hindi' ? 'hindiQuestion' : 'punjabiQuestion']: e.target.value})} 
+                        className="h-32 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner text-[#0F172A]" 
+                     />
+                  </div>
+               </div>
+
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="space-y-3">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">English Rationalization</Label>
+                     <Textarea value={editQForm?.englishExplanation || ""} onChange={e => setEditQForm({...editQForm, englishExplanation: e.target.value})} className="h-32 rounded-2xl bg-slate-900 text-emerald-400 font-medium p-6 shadow-2xl" />
+                  </div>
+                  <div className="space-y-3">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">Secondary Rationalization</Label>
+                     <Textarea 
+                        value={editingItem?.language === 'English & Hindi' ? (editQForm?.hindiExplanation || "") : (editQForm?.punjabiExplanation || "")} 
+                        onChange={e => setEditQForm({...editQForm, [editingItem?.language === 'English & Hindi' ? 'hindiExplanation' : 'punjabiExplanation']: e.target.value})} 
+                        className="h-32 rounded-2xl bg-slate-900 text-blue-400 font-medium p-6 shadow-2xl" 
+                     />
+                  </div>
+               </div>
+            </div>
+            <DialogFooter className="p-10 pt-6 bg-slate-50 flex gap-6 shrink-0">
+               <Button variant="ghost" onClick={() => setEditingQIndex(null)} className="h-16 px-10 font-black uppercase text-[11px] text-slate-400 tracking-widest">Discard Changes</Button>
+               <Button onClick={handleSaveEditQ} className="bg-[#0F172A] hover:bg-black text-white h-16 px-16 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] flex-1 shadow-2xl transition-all active:scale-95 border-none">
+                  <CheckCircle2 className="h-5 w-5 mr-3" /> Apply Modifications
+               </Button>
+            </DialogFooter>
+         </DialogContent>
       </Dialog>
     </div>
   )
