@@ -5,20 +5,32 @@ import React, { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Database, Users, ShieldCheck, Zap, Loader2, Landmark, BookOpen, Send, CheckCircle2, Activity, Clock, ChevronRight, History, Target } from "lucide-react"
+import { 
+  Database, 
+  Users, 
+  ShieldCheck, 
+  Zap, 
+  Loader2, 
+  Activity, 
+  Clock, 
+  ChevronRight, 
+  RefreshCw, 
+  Target, 
+  DollarSign, 
+  CreditCard, 
+  AlertCircle 
+} from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
-import { collection, query, orderBy, limit, doc } from "firebase/firestore"
+import { collection, query, orderBy, limit, doc, where } from "firebase/firestore"
 import { seedInitialData } from "@/services/seed-data"
 import { useToast } from "@/hooks/use-toast"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { cn } from "@/lib/utils"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Command Center v29.0.
- * PERFORMANCE: Stabilized Query references and removed scan-heavy stats calculations.
+ * @fileOverview Institutional Command Center v30.0.
+ * UPDATED: Integrated Live Financial Metrics and Pass Holder Audit.
  */
 
 export default function AdminDashboard() {
@@ -26,15 +38,30 @@ export default function AdminDashboard() {
   const { toast } = useToast()
   const [isSyncing, setIsSyncing] = useState(false)
 
-  // STABILIZED DATA LISTENERS (Strictly limited for speed)
+  // STABILIZED DATA LISTENERS
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
-  const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
+  const { data: stats } = useDoc<any>(statsRef);
+
+  const { data: allUsers } = useCollection<any>(useMemo(() => (db ? collection(db, "users") : null), [db]));
+  const { data: pendingRequests } = useCollection<any>(useMemo(() => (db ? query(collection(db, "payment_requests"), where("status", "==", "PENDING")) : null), [db]));
+  const { data: approvedRequests } = useCollection<any>(useMemo(() => (db ? query(collection(db, "payment_requests"), where("status", "==", "APPROVED")) : null), [db]));
 
   const recentUsersQuery = useMemo(() => (db ? query(collection(db, "users"), orderBy("createdAt", "desc"), limit(5)) : null), [db]);
   const { data: recentUsers } = useCollection<any>(recentUsersQuery);
 
   const recentResultsQuery = useMemo(() => (db ? query(collection(db, "results"), orderBy("timestamp", "desc"), limit(5)) : null), [db]);
   const { data: recentResults } = useCollection<any>(recentResultsQuery);
+
+  // Financial Metrics Calculation
+  const finance = useMemo(() => {
+    const totalRev = approvedRequests?.reduce((acc, r) => acc + (r.amount || 0), 0) || 0;
+    const activePasses = allUsers?.filter((u: any) => u.pass?.active === true).length || 0;
+    return {
+      totalRevenue: totalRev,
+      pendingCount: pendingRequests?.length || 0,
+      activePasses
+    };
+  }, [allUsers, pendingRequests, approvedRequests]);
 
   const handlePushToRegistry = async () => {
     if (!db) return
@@ -68,16 +95,35 @@ export default function AdminDashboard() {
               {isSyncing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />} Initialize Seeding
            </Button>
            <Button asChild className="bg-[#0F172A] hover:bg-black text-white rounded-xl md:rounded-2xl h-12 md:h-14 px-8 md:px-10 font-black shadow-xl uppercase tracking-widest text-xs border-none">
-            <Link href="/admin/bulk-import"><Plus className="mr-2 h-4 w-4" /> Bulk Ingestion</Link>
+            <Link href="/admin/bulk-import">Bulk Ingestion</Link>
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-2 md:px-4">
-         <StatCard label="Global Bank" value={stats?.mcqCount || "..."} icon={<Database className="text-blue-500" />} />
-         <StatCard label="Live Mocks" value={stats?.mockCount || "..."} icon={<Zap className="text-primary" />} />
-         <StatCard label="Aspirants" value={stats?.userCount || "..."} icon={<Users className="text-emerald-500" />} />
-         <StatCard label="Accuracy" value={`${stats?.avgAccuracy || "94"}%`} icon={<Target className="text-rose-400" />} />
+      {/* FINANCIAL PULSE */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 px-2 md:px-4">
+         <MetricCard 
+           label="Gross Collection" 
+           value={`₹${finance.totalRevenue.toLocaleString()}`} 
+           subLabel="Verified Transactions" 
+           icon={<DollarSign className="text-emerald-500" />} 
+           href="/admin/payments"
+         />
+         <MetricCard 
+           label="Active Pass Holders" 
+           value={finance.activePasses} 
+           subLabel="Premium Aspirants" 
+           icon={<CreditCard className="text-primary" />} 
+           href="/admin/users"
+         />
+         <MetricCard 
+           label="Pending Approvals" 
+           value={finance.pendingCount} 
+           subLabel="M-Payment Queue" 
+           icon={<AlertCircle className={cn("h-6 w-6", finance.pendingCount > 0 ? "text-rose-500 animate-pulse" : "text-slate-300")} />} 
+           href="/admin/payments/verify"
+           highlight={finance.pendingCount > 0}
+         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-2 md:px-4">
@@ -99,7 +145,9 @@ export default function AdminDashboard() {
                                  <p className="text-[9px] text-slate-400 font-bold uppercase">{u.email}</p>
                               </div>
                            </div>
-                           <Badge variant="ghost" className="text-[8px] font-black text-slate-300">NEW HUB</Badge>
+                           <Badge variant="outline" className="text-[8px] font-black uppercase border-slate-200">
+                              {u.pass?.active ? (u.pass.plan || 'ELITE') : 'FREE NODE'}
+                           </Badge>
                         </div>
                      ))}
                   </div>
@@ -113,7 +161,7 @@ export default function AdminDashboard() {
                            <div className="flex items-center gap-4">
                               <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary"><Zap className="h-5 w-5" /></div>
                               <div>
-                                 <p className="font-bold text-sm text-[#0F172A] uppercase">{r.mockTitle}</p>
+                                 <p className="font-bold text-sm text-[#0F172A] uppercase truncate max-w-[200px]">{r.mockTitle}</p>
                                  <p className="text-[9px] text-slate-400 font-bold uppercase">{r.userName} • Score: {r.score}</p>
                               </div>
                            </div>
@@ -136,7 +184,8 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 gap-4">
                      <QuickLink label="Assemble Mock" href="/admin/mocks/builder" />
                      <QuickLink label="Manual MCQ Entry" href="/admin/questions/add" />
-                     <QuickLink label="Subject Registry" href="/admin/subjects" />
+                     <QuickLink label="Verify Payments" href="/admin/payments/verify" highlight={finance.pendingCount > 0} />
+                     <QuickLink label="Pass Registry" href="/admin/passes" />
                   </div>
                </div>
             </Card>
@@ -146,31 +195,38 @@ export default function AdminDashboard() {
   )
 }
 
-function StatCard({ label, value, icon }: any) {
-   return (
-      <Card className="border-none shadow-xl bg-white p-6 rounded-[2rem] hover:translate-y-[-4px] transition-all text-left">
-         <div className="flex items-center gap-4">
-            <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center border border-slate-100">{icon}</div>
-            <div>
-               <p className="text-xl md:text-3xl font-headline font-black text-[#0F172A] tabular-nums leading-none">{value}</p>
-               <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-2">{label}</p>
+function MetricCard({ label, value, subLabel, icon, href, highlight }: any) {
+  return (
+    <Link href={href}>
+      <Card className={cn(
+        "border-none shadow-xl bg-white p-8 rounded-[2.5rem] hover:translate-y-[-4px] transition-all group",
+        highlight && "ring-2 ring-rose-500/20"
+      )}>
+         <div className="flex items-center gap-6">
+            <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 shadow-inner group-hover:scale-110 transition-transform">
+               {icon}
+            </div>
+            <div className="text-left">
+               <p className="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-1">{label}</p>
+               <p className="text-3xl font-headline font-black text-[#0F172A] leading-none">{value}</p>
+               <p className="text-[8px] font-bold text-slate-300 uppercase mt-2">{subLabel}</p>
             </div>
          </div>
       </Card>
-   )
+    </Link>
+  )
 }
 
-function QuickLink({ label, href }: { label: string, href: string }) {
+function QuickLink({ label, href, highlight }: { label: string, href: string, highlight?: boolean }) {
    return (
       <Link href={href} className="group">
-         <div className="flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all">
+         <div className={cn(
+           "flex items-center justify-between p-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all",
+           highlight && "border-rose-500/30 bg-rose-500/5"
+         )}>
             <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
-            <ChevronRight className="h-4 w-4 text-primary group-hover:translate-x-1 transition-transform" />
+            <ChevronRight className={cn("h-4 w-4 transition-transform group-hover:translate-x-1", highlight ? "text-rose-500" : "text-primary")} />
          </div>
       </Link>
    )
-}
-
-function RefreshCw({ className }: { className?: string }) {
-  return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>;
 }
