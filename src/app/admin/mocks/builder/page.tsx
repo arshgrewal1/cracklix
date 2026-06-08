@@ -3,7 +3,7 @@
 
 import React, { useState, useMemo, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,13 +37,21 @@ import {
   LayoutGrid,
   Landmark,
   ChevronRight,
-  GraduationCap
+  GraduationCap,
+  AlertTriangle,
+  FileStack,
+  ListTree
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch, where } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { MockType, Difficulty, AccessType, LanguageDisplayMode } from "@/types"
 import { cn } from "@/lib/utils"
+
+/**
+ * @fileOverview Elite Institutional Mock Architect v40.0.
+ * Restored: All metadata, categories, language modes, and assignment logic.
+ */
 
 const SELECTION_RULES = [
   { id: 'unused-only', label: 'Use Only Unused Questions', icon: <Zap className="h-3 w-3" /> },
@@ -87,8 +95,8 @@ function MockBuilderContent() {
   const [isPublishing, setIsPublishing] = useState(false)
   const [mockData, setMockData] = useState<any>({
     title: "", 
-    sourceBoardId: "", // Where questions come from
-    boardIds: [] as string[], // Where mock appears
+    sourceBoardId: "", 
+    boardIds: [] as string[], 
     examIds: [] as string[],
     duration: 120, 
     difficulty: "Medium" as Difficulty, 
@@ -191,10 +199,10 @@ function MockBuilderContent() {
     const flatQuestionIds = sections.flatMap(s => s.questions.map(q => q.id));
     const sectionMetadata = sections.map(s => ({ name: s.name, count: s.questions.length })).filter(s => s.count > 0);
 
-    // Auto-assignment for Board Mode
-    let finalExamIds = mockData.examIds;
+    let finalExamIds = [...mockData.examIds];
     if (assignmentMode === 'BOARD') {
-       finalExamIds = allExams?.filter((e: any) => mockData.boardIds.includes(e.boardId)).map((e: any) => e.id) || [];
+       const boardExams = allExams?.filter((e: any) => mockData.boardIds.includes(e.boardId)).map((e: any) => e.id) || [];
+       finalExamIds = Array.from(new Set([...finalExamIds, ...boardExams]));
     }
 
     const payload = {
@@ -220,8 +228,10 @@ function MockBuilderContent() {
          });
       });
       await batch.commit();
-      toast({ title: "Series Deployed" });
+      toast({ title: "Series Deployed", description: "The mock has been synced to the registry." });
       router.push("/admin/mocks")
+    } catch (e: any) {
+      toast({ variant: "destructive", title: "Sync Failed", description: e.message })
     } finally {
       setIsPublishing(false)
     }
@@ -244,44 +254,124 @@ function MockBuilderContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 px-4">
         <div className="lg:col-span-4 space-y-8 overflow-y-auto max-h-[85vh] custom-scrollbar pr-2">
-          <Card className="border-none shadow-4xl rounded-[3rem] bg-white p-10 space-y-8">
+          
+          {/* STEP 1: SOURCE AUTHORITY */}
+          <Card className="border-none shadow-4xl rounded-[3rem] bg-[#0F172A] text-white p-10 space-y-8">
              <div className="space-y-6">
-               
                <div className="space-y-4">
-                  <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Step 1: Source Question Silo</p>
+                  <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Step 1: Source Bank</p>
                   <Select value={mockData.sourceBoardId} onValueChange={(v) => setMockData({...mockData, sourceBoardId: v})}>
-                     <SelectTrigger className="h-14 rounded-xl bg-slate-900 text-white border-none font-black uppercase text-[11px] tracking-widest">
-                        <div className="flex items-center gap-2"><Database className="h-4 w-4" /> <SelectValue placeholder="Source Authority" /></div>
+                     <SelectTrigger className="h-14 rounded-xl bg-white/5 border-none font-black uppercase text-[11px] tracking-widest">
+                        <div className="flex items-center gap-2"><Landmark className="h-4 w-4" /> <SelectValue placeholder="Source Authority" /></div>
                      </SelectTrigger>
                      <SelectContent>
-                        {boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Bank</SelectItem>)}
+                        {boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Silo</SelectItem>)}
                      </SelectContent>
                   </Select>
-                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest px-1">Questions will be pulled strictly from this board's bank.</p>
                </div>
+            </div>
+          </Card>
 
-               <div className="space-y-4 pt-4 border-t border-slate-50">
-                  <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Step 2: Assignment Mode</p>
-                  <div className="grid grid-cols-1 gap-2">
-                     {ASSIGNMENT_MODES.map(mode => (
-                        <button 
-                           key={mode.id}
-                           onClick={() => setAssignmentMode(mode.id as any)}
-                           className={cn(
-                              "px-4 py-3 rounded-xl border font-black text-[10px] uppercase tracking-widest transition-all text-left flex items-center justify-between",
-                              assignmentMode === mode.id ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400"
-                           )}
-                        >
-                           {mode.label}
-                           {assignmentMode === mode.id && <CheckCircle2 className="h-3 w-3 text-primary" />}
-                        </button>
-                     ))}
-                  </div>
+          {/* STEP 2: METADATA & CATEGORIES */}
+          <Card className="border-none shadow-4xl rounded-[3rem] bg-white p-10 space-y-8">
+             <div className="space-y-8">
+                <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Step 2: Institutional Metadata</p>
+                
+                <div className="space-y-2">
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Title</Label>
+                   <Input value={mockData.title ?? ""} onChange={e => setMockData({...mockData, title: e.target.value})} className="rounded-xl h-14 font-bold text-lg border-slate-100" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Layers className="h-3 w-3" /> Category</Label>
+                      <Select value={mockData.mockType} onValueChange={(v: any) => setMockData({...mockData, mockType: v})}>
+                         <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none font-black text-[9px] uppercase"><SelectValue /></SelectTrigger>
+                         <SelectContent>
+                            <SelectItem value="FULL">Full Length</SelectItem>
+                            <SelectItem value="SUBJECT">Subject-wise</SelectItem>
+                            <SelectItem value="CHAPTER">Chapter-wise</SelectItem>
+                            <SelectItem value="PYQ">PYQ Series</SelectItem>
+                         </SelectContent>
+                      </Select>
+                   </div>
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Languages className="h-3 w-3" /> Language Mode</Label>
+                      <Select value={mockData.languageMode} onValueChange={(v: any) => setMockData({...mockData, languageMode: v})}>
+                         <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none font-black text-[9px] uppercase"><SelectValue /></SelectTrigger>
+                         <SelectContent>
+                            <SelectItem value="ENGLISH_PUNJABI">English & Punjabi</SelectItem>
+                            <SelectItem value="ENGLISH_HINDI">English & Hindi</SelectItem>
+                            <SelectItem value="ENGLISH">English Only</SelectItem>
+                            <SelectItem value="PUNJABI">Punjabi Only</SelectItem>
+                            <SelectItem value="HINDI">Hindi Only</SelectItem>
+                         </SelectContent>
+                      </Select>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Duration (Mins)</Label>
+                      <Input type="number" value={mockData.duration ?? ""} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value)})} className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" />
+                   </div>
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Access Level</Label>
+                      <Select value={mockData.accessType ?? "FREE"} onValueChange={(v: any) => setMockData({...mockData, accessType: v})}>
+                         <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black"><SelectValue /></SelectTrigger>
+                         <SelectContent><SelectItem value="FREE">FREE</SelectItem><SelectItem value="PREMIUM">PREMIUM</SelectItem></SelectContent>
+                      </Select>
+                   </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Pos Marks (+)</Label>
+                      <Input type="number" step="0.5" value={mockData.positiveMarks ?? ""} onChange={e => setMockData({...mockData, positiveMarks: e.target.value})} className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" />
+                   </div>
+                   <div className="space-y-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Neg Marks (-)</Label>
+                      <Input type="number" step="0.05" value={mockData.negativeMarks ?? ""} onChange={e => setMockData({...mockData, negativeMarks: e.target.value})} className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" />
+                   </div>
+                </div>
+
+                <div className="space-y-4 pt-6 border-t border-slate-50">
+                  <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Attempt Gating</p>
+                  <Select value={mockData.attemptLimit?.toString()} onValueChange={(v) => setMockData({...mockData, attemptLimit: parseInt(v)})}>
+                     <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black"><SelectValue /></SelectTrigger>
+                     <SelectContent>
+                        <SelectItem value="0">Unlimited Attempts</SelectItem>
+                        <SelectItem value="1">1 Attempt</SelectItem>
+                        <SelectItem value="2">2 Attempts</SelectItem>
+                        <SelectItem value="3">3 Attempts</SelectItem>
+                        <SelectItem value="5">5 Attempts</SelectItem>
+                     </SelectContent>
+                  </Select>
                </div>
+             </div>
+          </Card>
 
-               <div className="space-y-4 pt-4 border-t border-slate-50">
-                  <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Step 3: Target Registries</p>
-                  
+          {/* STEP 3: TARGET ASSIGNMENT */}
+          <Card className="border-none shadow-4xl rounded-[3rem] bg-white p-10 space-y-8">
+             <div className="space-y-6">
+                <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Step 3: Target Hubs</p>
+                <div className="grid grid-cols-1 gap-2">
+                   {ASSIGNMENT_MODES.map(mode => (
+                      <button 
+                         key={mode.id}
+                         onClick={() => setAssignmentMode(mode.id as any)}
+                         className={cn(
+                            "px-4 py-3 rounded-xl border font-black text-[10px] uppercase tracking-widest transition-all text-left flex items-center justify-between",
+                            assignmentMode === mode.id ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400"
+                         )}
+                      >
+                         {mode.label}
+                         {assignmentMode === mode.id && <CheckCircle2 className="h-3 w-3 text-primary" />}
+                      </button>
+                   ))}
+                </div>
+
+                <div className="pt-4 space-y-4">
                   {assignmentMode === 'BOARD' ? (
                      <div className="grid grid-cols-1 gap-2">
                         {boards?.map((b: any) => (
@@ -311,79 +401,38 @@ function MockBuilderContent() {
                         ))}
                      </div>
                   )}
-               </div>
+                </div>
+             </div>
+          </Card>
 
-               <div className="space-y-2 pt-4 border-t border-slate-50">
-                 <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Series Title</Label>
-                 <Input value={mockData.title ?? ""} onChange={e => setMockData({...mockData, title: e.target.value})} className="rounded-xl h-14 font-bold text-lg border-slate-100" />
-               </div>
+          {/* STEP 4: SELECTION LOGIC */}
+          <Card className="border-none shadow-4xl rounded-[3rem] bg-white p-10 space-y-8">
+             <div className="space-y-6">
+                <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Step 4: Selection Logic</p>
+                <div className="grid grid-cols-1 gap-2">
+                   {SELECTION_RULES.map(rule => (
+                      <button 
+                         key={rule.id}
+                         onClick={() => setActiveRules(prev => prev.includes(rule.id) ? prev.filter(r => r !== rule.id) : [...prev, rule.id])}
+                         className={cn(
+                            "flex items-center justify-between p-4 rounded-xl border transition-all text-left group",
+                            activeRules.includes(rule.id) ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400"
+                         )}
+                      >
+                         <div className="flex items-center gap-3">
+                            {React.isValidElement(rule.icon) ? React.cloneElement(rule.icon as React.ReactElement, { className: cn("h-4 w-4", activeRules.includes(rule.id) ? "text-primary" : "text-slate-300") }) : rule.icon}
+                            <span className="text-[10px] font-bold uppercase tracking-tight">{rule.label}</span>
+                         </div>
+                         {activeRules.includes(rule.id) && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
+                      </button>
+                   ))}
+                </div>
 
-               <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Duration (Mins)</Label>
-                     <Input type="number" value={mockData.duration ?? ""} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value)})} className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" />
-                  </div>
-                  <div className="space-y-2">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Access Level</Label>
-                     <Select value={mockData.accessType ?? "FREE"} onValueChange={(v: any) => setMockData({...mockData, accessType: v})}>
-                        <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black"><SelectValue /></SelectTrigger>
-                        <SelectContent><SelectItem value="FREE">FREE</SelectItem><SelectItem value="PREMIUM">PREMIUM</SelectItem></SelectContent>
-                     </Select>
-                  </div>
-               </div>
-
-               <div className="grid grid-cols-2 gap-4 pt-2">
-                  <div className="space-y-2">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Pos Marks (+)</Label>
-                     <Input type="number" step="0.5" value={mockData.positiveMarks ?? ""} onChange={e => setMockData({...mockData, positiveMarks: e.target.value})} className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" />
-                  </div>
-                  <div className="space-y-2">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Neg Marks (-)</Label>
-                     <Input type="number" step="0.05" value={mockData.negativeMarks ?? ""} onChange={e => setMockData({...mockData, negativeMarks: e.target.value})} className="h-12 rounded-xl bg-slate-50/50 border-none font-black text-center" />
-                  </div>
-               </div>
-
-               <div className="space-y-4 pt-6 border-t border-slate-50">
-                  <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Attempt Gating</p>
-                  <Select value={mockData.attemptLimit?.toString()} onValueChange={(v) => setMockData({...mockData, attemptLimit: parseInt(v)})}>
-                     <SelectTrigger className="h-12 rounded-xl bg-slate-50/50 border-none font-black"><SelectValue /></SelectTrigger>
-                     <SelectContent>
-                        <SelectItem value="0">Unlimited Attempts</SelectItem>
-                        <SelectItem value="1">1 Attempt</SelectItem>
-                        <SelectItem value="2">2 Attempts</SelectItem>
-                        <SelectItem value="3">3 Attempts</SelectItem>
-                        <SelectItem value="5">5 Attempts</SelectItem>
-                     </SelectContent>
-                  </Select>
-               </div>
-
-               <div className="space-y-4 pt-4 border-t border-slate-50">
-                  <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] ml-1">Selection Logic</p>
-                  <div className="grid grid-cols-1 gap-2">
-                     {SELECTION_RULES.map(rule => (
-                        <button 
-                           key={rule.id}
-                           onClick={() => setActiveRules(prev => prev.includes(rule.id) ? prev.filter(r => r !== rule.id) : [...prev, rule.id])}
-                           className={cn(
-                              "flex items-center justify-between p-4 rounded-xl border transition-all text-left group",
-                              activeRules.includes(rule.id) ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400"
-                           )}
-                        >
-                           <div className="flex items-center gap-3">
-                              {React.isValidElement(rule.icon) ? React.cloneElement(rule.icon as React.ReactElement, { className: cn("h-4 w-4", activeRules.includes(rule.id) ? "text-primary" : "text-slate-300") }) : rule.icon}
-                              <span className="text-[10px] font-bold uppercase tracking-tight">{rule.label}</span>
-                           </div>
-                           {activeRules.includes(rule.id) && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
-                        </button>
-                     ))}
-                  </div>
-               </div>
-
-               <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                   <p className="font-black text-[11px] uppercase text-[#0F172A]">Registry Live</p>
                   <Switch checked={mockData.published} onCheckedChange={v => setMockData({...mockData, published: v})} />
-               </div>
-            </div>
+                </div>
+             </div>
           </Card>
         </div>
 
@@ -398,8 +447,9 @@ function MockBuilderContent() {
                  <TabsContent value="bank" className="p-8 md:p-10 flex-1 flex flex-col m-0 text-left">
                     {!mockData.sourceBoardId ? (
                        <div className="flex-1 flex flex-col items-center justify-center opacity-20 text-center">
-                          <Landmark className="h-16 w-16 mb-6" />
+                          <AlertTriangle className="h-16 w-16 mb-6 text-primary" />
                           <p className="font-headline font-black text-xl uppercase tracking-widest">Select Source Bank First</p>
+                          <p className="text-slate-400 text-xs mt-2 font-bold uppercase">Step 1 in the sidebar</p>
                        </div>
                     ) : (
                        <>
