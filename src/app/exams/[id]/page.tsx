@@ -28,13 +28,13 @@ import {
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Hub v14.0.
- * UPDATED: Premium Test Unlock Flow logic for UNLOCK WITH PASS.
+ * @fileOverview Institutional Exam Hub v14.1.
+ * FIXED: Access control logic and added debug logs for Premium status.
  */
 
 export default function ExamHubPage() {
@@ -90,6 +90,13 @@ export default function ExamHubPage() {
      const activeStatus = profile?.status && profile?.status !== 'Free';
      return isElevated || activeStatus;
   }, [profile]);
+
+  useEffect(() => {
+    if (!userLoading && profile) {
+      console.log("[AUDIT] User Subscription Status:", profile.status);
+      console.log("[AUDIT] Has Pass:", hasPass);
+    }
+  }, [userLoading, profile, hasPass]);
 
   if (examLoading || userLoading) return <div className="h-screen flex items-center justify-center bg-white"><Skeleton className="h-20 w-20 rounded-full animate-pulse" /></div>
   if (!exam) return <div className="h-screen flex flex-col items-center justify-center text-slate-400 gap-4"><Info className="h-12 w-12 opacity-10" /><p className="font-black uppercase tracking-widest text-xs">Registry node missing</p></div>
@@ -211,6 +218,8 @@ function MockList({ data, results, hasPass, user }: any) {
             const isFree = (mock.accessType || 'FREE') === 'FREE';
             const locked = !isFree && !hasPass;
 
+            console.log(`[AUDIT] Mock: ${mock.title} | accessType: ${mock.accessType} | locked: ${locked}`);
+
             return (
                <Card key={mock.id} className="border-none shadow-sm rounded-2xl bg-white hover:shadow-md transition-all text-left group">
                   <CardContent className="p-5 md:p-8 space-y-4">
@@ -231,7 +240,7 @@ function MockList({ data, results, hasPass, user }: any) {
                      <div className="pt-2 flex flex-col sm:flex-row gap-2">
                         {locked ? (
                            <Button onClick={() => router.push('/pass')} className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-white border-none font-black uppercase text-[10px] rounded-xl shadow-xl gap-3">
-                              <Lock className="h-4 w-4" /> UNLOCK WITH PASS
+                              <Lock className="h-4 w-4" /> UNLOCK TEST
                            </Button>
                         ) : result ? (
                            <>
@@ -282,7 +291,7 @@ function NotesList({ data, hasPass, user }: any) {
                      <div className="pt-2">
                         {locked ? (
                           <Button onClick={() => router.push('/pass')} className="w-full h-11 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase text-[10px] rounded-xl shadow-xl gap-2 border-none">
-                             <Lock className="h-4 w-4" /> UNLOCK WITH PASS
+                             <Lock className="h-4 w-4" /> UNLOCK TEST
                           </Button>
                         ) : (
                           <Button asChild className="w-full h-11 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] rounded-xl border-none shadow-lg">

@@ -13,8 +13,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview High-Density Mock Feed v9.0.
- * UPDATED: Premium Test Unlock Flow logic for Home Feed cards.
+ * @fileOverview High-Density Mock Feed v9.1.
+ * FIXED: Pass-gating logic and UNLOCK TEST button visibility.
  */
 
 export default function LatestMocks() {
@@ -30,7 +30,13 @@ export default function LatestMocks() {
   useEffect(() => {
     async function checkPass() {
       if (!user || !db) return;
-      if (profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (profile?.status && profile?.status !== 'Free')) {
+      if (profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN') {
+        setHasPass(true);
+        return;
+      }
+      
+      const activeStatus = profile?.status && profile.status !== 'Free';
+      if (activeStatus) {
         setHasPass(true);
         return;
       }
@@ -74,8 +80,10 @@ export default function LatestMocks() {
           ) : mocks.map((mock, i) => {
             const boardId = mock.boardIds?.[0] || mock.boardId;
             const board = boards?.find((b: any) => b.id === boardId);
-            const isPremium = mock.accessType === 'PREMIUM';
+            const isPremium = (mock.accessType || 'FREE').toUpperCase() === 'PREMIUM';
             const locked = isPremium && !hasPass;
+
+            console.log(`[AUDIT] Feed Card: ${mock.title} | accessType: ${mock.accessType} | locked: ${locked}`);
 
             return (
               <motion.div key={mock.id} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>
@@ -101,7 +109,7 @@ export default function LatestMocks() {
                     locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                   )}>
                     <Link href={locked ? "/pass" : `/mocks/${mock.id}`}>
-                       {locked ? "UNLOCK WITH PASS" : "ATTEMPT NOW"}
+                       {locked ? "UNLOCK TEST" : "ATTEMPT NOW"}
                     </Link>
                   </Button>
                 </div>

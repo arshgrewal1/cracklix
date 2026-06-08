@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Mock Node with Authentication & Tiered Attempt Guards.
- * UPDATED: Optimized "UNLOCK WITH PASS" button behavior and styling.
+ * UPDATED: Hardened "UNLOCK TEST" logic and debug logs.
  */
 
 export default function MockOverviewPage() {
@@ -55,6 +55,8 @@ export default function MockOverviewPage() {
         return;
       }
 
+      console.log("[AUDIT] Checking Mock accessType:", mock.accessType);
+
       // 1. Fetch User Results for this Mock
       if (user) {
          try {
@@ -67,7 +69,7 @@ export default function MockOverviewPage() {
       }
 
       // 2. Pass Access Logic (Tiered Check)
-      const mockTier = mock.accessType || 'FREE';
+      const mockTier = (mock.accessType || 'FREE').toUpperCase();
       
       if (mockTier === 'FREE') {
         setIsLocked(false);
@@ -76,17 +78,30 @@ export default function MockOverviewPage() {
       }
 
       if (profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN') {
+        console.log("[AUDIT] Admin Access Granted");
         setIsLocked(false);
         setAccessChecked(true);
         return;
       }
 
       if (!user) {
+        console.log("[AUDIT] Guest Access Locked for Premium Mock");
         setIsLocked(true);
         setAccessChecked(true);
         return;
       }
 
+      // Check for active pass in profile
+      const hasActivePass = profile?.status && profile.status !== 'Free';
+      console.log("[AUDIT] Profile Pass Status:", profile?.status, "| hasActivePass:", hasActivePass);
+
+      if (hasActivePass) {
+        setIsLocked(false);
+        setAccessChecked(true);
+        return;
+      }
+
+      // Final verification against subscriptions collection
       try {
         const subQuery = query(
           collection(db, "subscriptions"), 
@@ -96,15 +111,16 @@ export default function MockOverviewPage() {
         );
         const subSnap = await getDocs(subQuery);
         
-        let hasActivePass = false;
+        let subFound = false;
         if (!subSnap.empty) {
           const subData = subSnap.docs[0].data();
           const expiry = new Date(subData.expiryDate);
           if (expiry > new Date()) {
-            hasActivePass = true;
+            subFound = true;
           }
         }
-        setIsLocked(!hasActivePass);
+        console.log("[AUDIT] Final Subscription Check Found:", subFound);
+        setIsLocked(!subFound);
       } catch (e) {
         console.error("Access Audit Error:", e);
         setIsLocked(true);
@@ -192,7 +208,7 @@ export default function MockOverviewPage() {
                        onClick={() => router.push('/pass')} 
                        className="w-full h-14 md:h-16 px-10 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-[11px] rounded-2xl shadow-xl gap-3 transition-all active:scale-95"
                     >
-                      <Lock className="h-5 w-5" /> UNLOCK WITH PASS
+                      <Lock className="h-5 w-5" /> UNLOCK TEST
                     </Button>
                  ) : isLimitReached ? (
                     <div className="bg-rose-50 border border-rose-100 p-4 rounded-xl flex items-center gap-4 text-left shadow-sm">
