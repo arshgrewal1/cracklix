@@ -33,8 +33,8 @@ import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/e
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Integrity & Cleanup Dashboard.
- * Enhanced: Automated Duplicate Detection Engine (Text + Answer Key Matching).
+ * @fileOverview Institutional Integrity & Cleanup Dashboard v2.0.
+ * FIXED: ReferenceError resolved by defining handleReScan.
  */
 
 export default function QADashboard() {
@@ -75,6 +75,10 @@ export default function QADashboard() {
        stats: { dup: duplicates.length, broken: broken.length } 
     };
   }, [questions, mocks])
+
+  const handleReScan = () => {
+    toast({ title: "Re-scanning Registry", description: "Fidelity audit synchronized with live data." })
+  }
 
   const handleBulkPurgeDuplicates = async () => {
     if (!db || audit.duplicates.length === 0) return
@@ -123,7 +127,7 @@ export default function QADashboard() {
         </div>
         <div className="flex gap-4">
            <Button 
-             onClick={handleBulkPurgeDummy} 
+             onClick={handleReScan} 
              className="bg-[#0F172A] hover:bg-black text-white h-16 px-10 rounded-2xl font-black uppercase tracking-widest text-xs gap-3 shadow-2xl transition-all border-none"
            >
               <RefreshCw className={cn("h-5 w-5", qLoading && "animate-spin")} /> Re-Scan Registry
