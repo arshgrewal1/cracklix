@@ -27,6 +27,7 @@ import { seedInitialData } from "@/services/seed-data"
 import { useToast } from "@/hooks/use-toast"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Command Center v30.0.
