@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -28,8 +27,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @file Overview Final Exam Gateway Node v7.0.
- * UPDATED: Strict Uniqueness Protocol applied to hide redundant vertical hubs.
+ * @file Overview Final Exam Gateway Node v8.0.
+ * UPDATED: Strict Uniqueness Protocol + Full Logo Restoration for PSSSB, Police, CTET.
  */
 
 export default function MocksGatewayPage() {
@@ -46,7 +45,7 @@ export default function MocksGatewayPage() {
 
   const exams = useMemo(() => {
     if (!rawExams) return [];
-    // STRICT UNIQUENESS PROTOCOL
+    // STRICT UNIQUENESS PROTOCOL: Remove redundant vertical hubs
     const unique = new Map();
     rawExams.forEach(e => {
        const key = e.name?.toLowerCase().trim();
@@ -93,7 +92,7 @@ export default function MocksGatewayPage() {
             Select Your <br/> <span className="text-primary">Mastery Hub</span>
           </h1>
           <p className="text-slate-500 font-medium text-lg md:text-xl max-w-2xl mt-4 leading-relaxed">
-            Access strictly structured preparation matrices audited for upcoming exam patterns.
+            Access strictly structured preparation hubs audited for upcoming official recruitment patterns.
           </p>
         </div>
 
@@ -113,6 +112,7 @@ export default function MocksGatewayPage() {
              const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, subjects: new Set() };
              const isImgFailed = failedImages[exam.id];
              const isArmy = exam.boardId?.toLowerCase() === 'army' || exam.id?.toLowerCase().includes('army');
+             const isPolice = exam.boardId?.toLowerCase().includes('police');
 
              return (
                 <Link key={exam.id} href={`/exams/${exam.id}`}>
@@ -125,12 +125,15 @@ export default function MocksGatewayPage() {
                                     src={logoUrl} 
                                     referrerPolicy="no-referrer"
                                     alt="Board Logo" 
-                                    className={cn("w-full h-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-110", isArmy ? "scale-150" : "")} 
+                                    className={cn(
+                                      "w-full h-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-110", 
+                                      isArmy ? "scale-150" : isPolice ? "scale-125" : ""
+                                    )} 
                                     onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}
                                   />
                                ) : (
                                   <div className="flex flex-col items-center justify-center text-primary">
-                                     {board?.id === 'punjab-police' ? <Shield className="h-10 w-10" /> : <GraduationCap className="h-10 w-10" />}
+                                     {isPolice ? <Shield className="h-10 w-10" /> : <GraduationCap className="h-10 w-10" />}
                                   </div>
                                )}
                             </div>
@@ -144,7 +147,7 @@ export default function MocksGatewayPage() {
                                {exam.name}
                             </h3>
                             <p className="text-sm font-medium text-slate-400 leading-relaxed line-clamp-2">
-                               {exam.description || "Official institutional preparation matrix."}
+                               {exam.description || `Prepare for ${exam.name} recruitment.`}
                             </p>
                          </div>
 

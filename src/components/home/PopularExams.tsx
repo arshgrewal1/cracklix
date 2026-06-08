@@ -1,9 +1,8 @@
-
 'use client';
 
 import { useMemo, useState } from "react"
 import { motion } from "framer-motion";
-import { ChevronRight, BookOpen, GraduationCap, ShieldCheck, Zap } from "lucide-react";
+import { ChevronRight, BookOpen, GraduationCap, ShieldCheck, Zap, Shield } from "lucide-react";
 import Link from "next/link";
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, limit, where } from "firebase/firestore"
@@ -12,8 +11,8 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Density Exam Hub Catalog v12.0.
- * UPDATED: Strict Uniqueness Protocol applied to remove duplicate verticales by name.
+ * @fileOverview High-Density Exam Hub Catalog v13.0.
+ * UPDATED: Strict Uniqueness Protocol applied + Restored logos for PSSSB, Police, CTET, Power.
  */
 
 export default function PopularExams() {
@@ -36,7 +35,7 @@ export default function PopularExams() {
 
   const exams = useMemo(() => {
     if (!rawExams) return [];
-    // STRICT UNIQUENESS PROTOCOL
+    // STRICT UNIQUENESS PROTOCOL: Remove duplicate names
     const unique = new Map();
     rawExams.forEach(e => {
        const key = e.name?.toLowerCase().trim();
@@ -89,6 +88,7 @@ export default function PopularExams() {
               const board = boards?.find(b => b.id === exam.boardId)
               const logoUrl = exam.iconUrl || board?.iconUrl;
               const isArmy = exam.boardId?.toLowerCase() === 'army' || exam.id?.toLowerCase().includes('army');
+              const isPolice = exam.boardId?.toLowerCase().includes('police');
               const liveTestsCount = statsMap.mocks[exam.id] || 0;
               const liveQuestionsCount = statsMap.qs[exam.id] || 0;
               const isFailed = failedImages[exam.id];
@@ -110,13 +110,16 @@ export default function PopularExams() {
                            {logoUrl && !isFailed ? (
                              <img 
                                src={logoUrl} 
-                               className={cn("w-full h-full object-contain p-2 md:p-3 transition-transform duration-500 group-hover:scale-110", isArmy ? "scale-125" : "")} 
+                               className={cn(
+                                 "w-full h-full object-contain p-2 md:p-3 transition-transform duration-500 group-hover:scale-110", 
+                                 isArmy ? "scale-125" : isPolice ? "scale-110" : ""
+                               )} 
                                alt={exam.name}
                                referrerPolicy="no-referrer"
                                onError={() => setFailedImages(prev => ({ ...prev, [exam.id]: true }))}
                              />
                            ) : (
-                             <GraduationCap className="h-6 w-6 md:h-9 md:w-9 text-slate-300 group-hover:text-primary transition-colors" />
+                             isPolice ? <Shield className="h-6 w-6 md:h-9 md:w-9 text-primary" /> : <GraduationCap className="h-6 w-6 md:h-9 md:w-9 text-slate-300 group-hover:text-primary transition-colors" />
                            )}
                         </div>
                         <div className="min-w-0 flex-1 space-y-1 md:space-y-2">
@@ -132,7 +135,7 @@ export default function PopularExams() {
                           <div className="flex items-center gap-4 pt-1">
                              <div className="flex items-center gap-1.5">
                                 <Zap className="h-2.5 w-2.5 md:h-3.5 md:w-3.5 text-primary" />
-                                <span className="text-[8px] md:text-[10px] font-black text-[#0F172A] uppercase">{liveTestsCount} Live Mocks</span>
+                                <span className="text-[8px] md:text-[10px] font-black text-[#0F172A] uppercase">{liveTestsCount} Mocks</span>
                              </div>
                              <div className="flex items-center gap-1.5">
                                 <BookOpen className="h-2.5 w-2.5 md:h-3.5 md:w-3.5 text-primary" />

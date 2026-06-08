@@ -6,7 +6,7 @@ import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
 import { Input } from "@/components/ui/input"
-import { Search, GraduationCap, ChevronRight, Zap, BookOpen, Layers, FileText, Star } from "lucide-react"
+import { Search, GraduationCap, ChevronRight, Zap, BookOpen, Layers, FileText, Star, Shield } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -17,8 +17,8 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @file Overview High-Density Responsive Exam Catalog v9.0.
- * UPDATED: Strict Uniqueness Protocol + Hardened Logo Restoration.
+ * @file Overview High-Density Responsive Exam Catalog v10.0.
+ * UPDATED: Strict Uniqueness Protocol + Hardened Logo Restoration for PSSSB, CTET, Police, Power.
  */
 
 export default function ExamsCatalog() {
@@ -79,7 +79,7 @@ function CatalogContent() {
 
   const exams = useMemo(() => {
     if (!rawExams) return [];
-    // STRICT UNIQUENESS PROTOCOL
+    // STRICT UNIQUENESS PROTOCOL: Remove duplicate exams like PSTET 1, PSTET 2 by grouping by name
     const unique = new Map();
     rawExams.forEach(e => {
        const key = e.name?.toLowerCase().trim();
@@ -148,6 +148,7 @@ function CatalogContent() {
               const isPinned = profile?.pinnedExams?.includes(exam.id);
               const isImgFailed = failedImages[exam.id];
               const isArmy = exam.boardId?.toLowerCase() === 'army' || exam.id?.toLowerCase().includes('army');
+              const isPolice = exam.boardId?.toLowerCase().includes('police');
               
               return (
                 <Card key={exam.id} className="border-none shadow-lg hover:shadow-2xl transition-all duration-300 rounded-xl md:rounded-[3rem] bg-white group overflow-hidden text-left h-full flex flex-col border border-slate-100 p-4 md:p-10 relative">
@@ -164,13 +165,16 @@ function CatalogContent() {
                              {logoUrl && !isImgFailed ? (
                                 <img 
                                   src={logoUrl} 
-                                  className={cn("w-full h-full object-contain p-1.5 md:p-2 transition-transform duration-500 group-hover:scale-105", isArmy ? "scale-125" : "")} 
+                                  className={cn(
+                                    "w-full h-full object-contain p-1.5 md:p-2 transition-transform duration-500 group-hover:scale-105", 
+                                    isArmy ? "scale-125" : isPolice ? "scale-110 p-1" : ""
+                                  )} 
                                   alt="Logo" 
                                   referrerPolicy="no-referrer" 
                                   onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}
                                 />
                              ) : (
-                                <GraduationCap className="h-5 w-5 md:h-10 md:w-10 text-slate-300" />
+                                isPolice ? <Shield className="h-5 w-5 md:h-10 md:w-10 text-primary" /> : <GraduationCap className="h-5 w-5 md:h-10 md:w-10 text-slate-300" />
                              )}
                           </div>
                           <Badge className="bg-primary/5 text-primary border-none text-[6px] md:text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md">
@@ -183,7 +187,7 @@ function CatalogContent() {
                             {exam.name}
                           </h3>
                           <p className="text-[10px] md:sm font-medium text-slate-400 leading-relaxed line-clamp-1 md:line-clamp-2">
-                            {exam.description || "Official institutional preparation matrix."}
+                            {exam.description || `Prepare for ${exam.name} with official patterns.`}
                           </p>
                        </div>
 
