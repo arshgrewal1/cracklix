@@ -1,5 +1,7 @@
+
 "use client"
 
+import React, { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -7,7 +9,6 @@ import { Plus, Database, Users, ShieldCheck, Zap, Loader2, Landmark, BookOpen, S
 import Link from "next/link"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, orderBy, limit } from "firebase/firestore"
-import { useMemo, useState } from "react"
 import { seedInitialData } from "@/services/seed-data"
 import { useToast } from "@/hooks/use-toast"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -248,7 +249,9 @@ function StatCard({ label, value, icon, active }: any) {
       <Card className="border-none shadow-xl bg-white p-4 md:p-6 rounded-xl md:rounded-[2.5rem] group hover:translate-y-[-4px] transition-all text-left relative overflow-hidden">
          {active && <div className="absolute top-2 right-2 h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]" />}
          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 md:gap-4">
-            <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100">{icon}</div>
+            <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100">
+              {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: cn("h-5 w-5") }) : icon}
+            </div>
             <div className="min-w-0">
                <p className="text-base md:text-2xl font-headline font-black text-[#0F172A] leading-none tabular-nums">{value === "..." ? <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin" /> : value}</p>
                <p className="text-[7px] md:text-[8px] font-black uppercase tracking-widest text-slate-400 mt-1.5 md:mt-2 truncate">{label}</p>
@@ -271,3 +274,4 @@ function QuickLink({ label, href, icon }: any) {
       </Link>
    )
 }
+

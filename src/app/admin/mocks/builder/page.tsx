@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState, useMemo, useEffect, Suspense } from "react"
+import React, { useState, useMemo, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -36,10 +36,11 @@ import {
   ChevronDown,
   Languages,
   ShieldCheck,
-  Settings2
+  Settings2,
+  CheckCircle2
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
-import { collection, doc, setDoc, serverTimestamp, query, where, limit, getDocs, documentId } from "firebase/firestore"
+import { collection, doc, setDoc, serverTimestamp, query, where, limit, getDocs, documentId, writeBatch } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { MockType, Difficulty, AccessType, LanguageDisplayMode } from "@/types"
 import { cn } from "@/lib/utils"
@@ -424,3 +425,4 @@ function MockBuilderContent() {
     </div>
   )
 }
+

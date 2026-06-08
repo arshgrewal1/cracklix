@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useMemo, useState, useEffect } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore } from "@/firebase"
@@ -42,7 +43,6 @@ import Link from "next/link"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
-import React from "react"
 
 /**
  * @fileOverview Student Profile Center.
@@ -316,7 +316,7 @@ export default function ProfilePage() {
                  </Card>
 
                  <div className="bg-primary rounded-[3rem] p-10 text-white space-y-6 relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Award className="h-40 w-40" /></div>
+                    <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-[2000ms]"><Award className="h-40 w-40" /></div>
                     <div className="relative z-10 space-y-4">
                        <h4 className="text-2xl font-headline font-black uppercase leading-tight">Check Your <br/> Rankings</h4>
                        <p className="text-white/70 text-[11px] font-bold uppercase tracking-tight">Compare yourself with others.</p>
@@ -457,3 +457,4 @@ function ProfileDataNode({ icon, label, value, colSpan = 1 }: any) {
       </div>
    )
 }
+

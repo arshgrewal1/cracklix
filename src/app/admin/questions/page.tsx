@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useMemo, useState, useEffect, useCallback } from "react"
+import React, { useMemo, useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -313,7 +313,8 @@ function BulkActionBtn({ icon, label, onClick, disabled }: any) {
          variant="outline" 
          className="bg-white/5 border-white/10 hover:bg-primary hover:border-primary text-white h-11 px-6 rounded-xl font-black uppercase text-[9px] tracking-widest gap-2 shadow-sm transition-all"
       >
-         {React.cloneElement(icon, { className: "h-3.5 w-3.5" })} {label}
+         {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-3.5 w-3.5" }) : icon} {label}
       </Button>
    )
 }
+
