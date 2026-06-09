@@ -52,9 +52,9 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview FINAL HIGH-FIDELITY Mock Architect v56.0.
- * UPDATED: Tactical Command Bar perfectly matched to user screenshot.
- * FIXED: Target Section selector now functional with ScrollArea and stacked labels.
+ * @fileOverview FINAL HIGH-FIDELITY Mock Architect v58.0.
+ * UPDATED: Assignment Hub (Left Panel) perfectly matched to user screenshot.
+ * FIXED: Test Type and Access Level labels/styles strictly synchronized.
  */
 
 export default function MockBuilderPage() {
@@ -323,10 +323,49 @@ function MockBuilderContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10">
         
-        {/* LEFT COLUMN: ASSIGNMENT HUB */}
+        {/* LEFT COLUMN: ASSIGNMENT HUB (SAME AS SAME) */}
         <div className="lg:col-span-4 space-y-8">
            <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-100">
               
+              <div className="space-y-3">
+                 <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">SERIES TITLE</Label>
+                 <Input 
+                   value={mockData.title} 
+                   onChange={e => setMockData({...mockData, title: e.target.value})}
+                   className="h-16 rounded-2xl bg-slate-50/50 border-none font-black text-lg px-6 shadow-inner" 
+                   placeholder="e.g. Patwari High Fidelity Mock 1"
+                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-6">
+                 <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">TEST TYPE</Label>
+                    <Select value={mockData.mockType} onValueChange={(v: MockType) => setMockData({...mockData, mockType: v})}>
+                       <SelectTrigger className="h-14 rounded-xl bg-slate-50/50 border-none font-black text-[10px] uppercase px-4">
+                          <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent className="rounded-xl">
+                          <SelectItem value="FULL">Full Length Mock</SelectItem>
+                          <SelectItem value="SUBJECT">Subject-Wise Test</SelectItem>
+                          <SelectItem value="SECTIONAL">Sectional Test</SelectItem>
+                          <SelectItem value="PYQ">PYQ Paper</SelectItem>
+                       </SelectContent>
+                    </Select>
+                 </div>
+                 <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">ACCESS LEVEL</Label>
+                    <Select value={mockData.accessLevel} onValueChange={(v: AccessLevel) => setMockData({...mockData, accessLevel: v})}>
+                       <SelectTrigger className="h-14 rounded-xl bg-slate-50/50 border-none font-black text-[10px] uppercase px-4">
+                          <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent className="rounded-xl">
+                          <SelectItem value="FREE">Public (FREE)</SelectItem>
+                          <SelectItem value="PREMIUM">Elite (PREMIUM)</SelectItem>
+                       </SelectContent>
+                    </Select>
+                 </div>
+              </div>
+
               <div className="space-y-4">
                 <Select value={mockData.assignmentMode} onValueChange={(v: MockAssignmentMode) => setMockData({...mockData, assignmentMode: v})}>
                   <SelectTrigger className="h-16 rounded-2xl bg-[#0B1528] text-white border-none font-black uppercase text-[11px] tracking-[0.15em] px-6 shadow-2xl flex items-center justify-between">
@@ -492,7 +531,7 @@ function MockBuilderContent() {
                     <div className="absolute top-0 right-0 p-10 opacity-5"><Zap className="h-48 w-48" /></div>
                     
                     <div className="relative z-10 flex flex-col space-y-10">
-                        {/* 1. TOP STATS */}
+                        {/* 1. TOP STATS (Registry Hub Styles) */}
                         <div className="flex flex-wrap items-center justify-between gap-6 pb-8 border-b border-white/5">
                            <div className="flex items-center gap-6">
                               <div className="bg-white/5 px-4 py-2.5 rounded-xl border border-white/10 flex items-center gap-3">
@@ -512,7 +551,7 @@ function MockBuilderContent() {
                         {/* 2. THREE COLUMN FILTER */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
                            <div className="space-y-3">
-                              <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">BOARD HUB</Label>
+                              <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">SOURCE BOARD HUB</Label>
                               <Select value={filterBoard} onValueChange={setFilterBoard}>
                                  <SelectTrigger className="h-16 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All..." /></SelectTrigger>
                                  <SelectContent className="bg-[#0B1528] text-white border-white/10 rounded-2xl">
@@ -522,7 +561,7 @@ function MockBuilderContent() {
                               </Select>
                            </div>
                            <div className="space-y-3">
-                              <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">VERTICAL</Label>
+                              <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">RECRUITMENT VERTICAL</Label>
                               <Select value={filterExam} onValueChange={setFilterExam}>
                                  <SelectTrigger className="h-16 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All..." /></SelectTrigger>
                                  <SelectContent className="bg-[#0B1528] text-white border-white/10 rounded-2xl">
@@ -532,7 +571,7 @@ function MockBuilderContent() {
                               </Select>
                            </div>
                            <div className="space-y-3">
-                              <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">NODE</Label>
+                              <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">SUBJECT NODE</Label>
                               <Select value={filterSubject} onValueChange={setFilterSubject}>
                                  <SelectTrigger className="h-16 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All..." /></SelectTrigger>
                                  <SelectContent className="bg-[#0B1528] text-white border-white/10 rounded-2xl">
