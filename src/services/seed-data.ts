@@ -2,14 +2,14 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, getDocs, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Node v8.1.
- * UPDATED: Fixed PSBTE official logo URL.
+ * @fileOverview Institutional Seeding Node v8.2.
+ * UPDATED: Explicitly seeded all Teaching Cadre posts and technical hubs.
  */
 
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Hierarchical Registry Sync...');
 
-  // 1. CORE CATEGORIES (Top Level)
+  // 1. CORE CATEGORIES
   const categories = [
     {
       id: "punjab-govt",
@@ -74,19 +74,19 @@ export async function seedInitialData(db: Firestore) {
   const boards = [
     { id: 'psssb', abbreviation: 'PSSSB', name: 'Punjab Subordinate Services Selection Board', region: 'Punjab', category: 'STATE_BOARD', categoryId: 'punjab-govt', iconUrl: psssbLogo },
     { id: 'punjab-police', abbreviation: 'POLICE', name: 'Punjab Police Recruitment Board', region: 'Punjab', category: 'DEFENCE_BOARD', categoryId: 'punjab-govt', iconUrl: "https://www.punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png" },
-    { id: 'education-board', abbreviation: 'EDUCATION', name: 'Education Recruitment Board Punjab', region: 'Punjab', category: 'TEACHING_BOARD', categoryId: 'punjab-teaching', iconUrl: psebLogo },
-    { id: 'pstet-hub', abbreviation: 'PSTET', name: 'Punjab State Teacher Eligibility Test', region: 'Punjab', category: 'TEACHING_BOARD', categoryId: 'punjab-teaching', iconUrl: pstetLogo },
-    { id: 'ctet-hub', abbreviation: 'CTET', name: 'Central Teacher Eligibility Test', region: 'Punjab', category: 'TEACHING_BOARD', categoryId: 'punjab-teaching', iconUrl: ctetLogo },
-    { id: 'pspcl', abbreviation: 'PSPCL', name: 'Punjab State Power Corporation Limited', region: 'Punjab', category: 'TECHNICAL', categoryId: 'punjab-technical', iconUrl: pspclLogo },
-    { id: 'pstcl', abbreviation: 'PSTCL', name: 'Punjab State Transmission Corporation Limited', region: 'Punjab', category: 'TECHNICAL', categoryId: 'punjab-technical', iconUrl: pstclLogo },
-    { id: 'psbte', abbreviation: 'PSBTE', name: 'Punjab Technical Board (PSBTE)', region: 'Punjab', category: 'TECHNICAL', categoryId: 'punjab-technical', iconUrl: psbteLogo }
+    { id: 'education-board', abbreviation: 'EDUCATION', name: 'Education Recruitment Hub', region: 'Punjab', category: 'TEACHING_BOARD', categoryId: 'punjab-teaching', iconUrl: psebLogo },
+    { id: 'pstet-hub', abbreviation: 'PSTET', name: 'PSTET Hub', region: 'Punjab', category: 'TEACHING_BOARD', categoryId: 'punjab-teaching', iconUrl: pstetLogo },
+    { id: 'ctet-hub', abbreviation: 'CTET', name: 'CTET Hub', region: 'Punjab', category: 'TEACHING_BOARD', categoryId: 'punjab-teaching', iconUrl: ctetLogo },
+    { id: 'pspcl', abbreviation: 'PSPCL', name: 'PSPCL Hub', region: 'Punjab', category: 'TECHNICAL', categoryId: 'punjab-technical', iconUrl: pspclLogo },
+    { id: 'pstcl', abbreviation: 'PSTCL', name: 'PSTCL Hub', region: 'Punjab', category: 'TECHNICAL', categoryId: 'punjab-technical', iconUrl: pstclLogo },
+    { id: 'psbte', abbreviation: 'PSBTE', name: 'Punjab Technical Board', region: 'Punjab', category: 'TECHNICAL', categoryId: 'punjab-technical', iconUrl: psbteLogo }
   ];
 
   for (const b of boards) {
     await setDoc(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 3. EXAMS (Verticals) - EXPLICIT SEEDING
+  // 3. EXAMS (Verticals)
   const mandatoryExams = [
     // PSTET Hub
     { id: 'pstet-p1', name: 'PSTET Paper 1', boardId: 'pstet-hub', categoryId: 'punjab-teaching' },
@@ -96,7 +96,7 @@ export async function seedInitialData(db: Firestore) {
     { id: 'ctet-p1', name: 'CTET Paper 1', boardId: 'ctet-hub', categoryId: 'punjab-teaching' },
     { id: 'ctet-p2', name: 'CTET Paper 2', boardId: 'ctet-hub', categoryId: 'punjab-teaching' },
     
-    // Education Recruitment Hub (PSEB/EDUCATION)
+    // Education Recruitment Hub
     { id: 'ett-cadre', name: 'ETT Cadre', boardId: 'education-board', categoryId: 'punjab-teaching' },
     { id: 'master-cadre', name: 'Master Cadre', boardId: 'education-board', categoryId: 'punjab-teaching' },
     { id: 'lecturer-cadre', name: 'Lecturer Cadre', boardId: 'education-board', categoryId: 'punjab-teaching' },
@@ -112,16 +112,9 @@ export async function seedInitialData(db: Firestore) {
     { id: 'sub-inspector', name: 'Police Sub-Inspector', boardId: 'punjab-police', categoryId: 'punjab-govt' },
     { id: 'patwari', name: 'Revenue Patwari', boardId: 'psssb', categoryId: 'punjab-govt' },
     
-    // Technical - PSPCL
+    // Technical
     { id: 'pspcl-alm', name: 'PSPCL ALM', boardId: 'pspcl', categoryId: 'punjab-technical' },
-    { id: 'pspcl-assa', name: 'PSPCL ASSA', boardId: 'pspcl', categoryId: 'punjab-technical' },
-    { id: 'pspcl-apprentice', name: 'PSPCL Apprentice', boardId: 'pspcl', categoryId: 'punjab-technical' },
-    
-    // Technical - PSTCL
     { id: 'pstcl-alm', name: 'PSTCL ALM', boardId: 'pstcl', categoryId: 'punjab-technical' },
-    { id: 'pstcl-apprentice', name: 'PSTCL Apprentice', boardId: 'pstcl', categoryId: 'punjab-technical' },
-    
-    // Technical - PSBTE (JE Hub)
     { id: 'psbte-je-elec', name: 'JE Electrical', boardId: 'psbte', categoryId: 'punjab-technical' },
     { id: 'psbte-je-civil', name: 'JE Civil', boardId: 'psbte', categoryId: 'punjab-technical' },
     { id: 'psbte-je-mech', name: 'JE Mechanical', boardId: 'psbte', categoryId: 'punjab-technical' },

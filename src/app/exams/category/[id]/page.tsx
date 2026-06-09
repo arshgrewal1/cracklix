@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Category Explorer (Category -> Hubs).
- * UPDATED: Implemented Strict Uniqueness Protocol to prevent duplicate Hub nodes.
+ * UPDATED: Hardened relational counting logic to fix '0 verticals' bug.
  */
 
 const CATEGORY_META: Record<string, any> = {
@@ -55,7 +55,7 @@ export default function CategoryHubsPage() {
         if (b.categoryId === catId) matches = true;
         else if (catId === 'punjab-govt' && (['PSSSB', 'PPSC', 'POLICE'].includes(abbrev) || bid.includes('police'))) matches = true;
         else if (catId === 'punjab-teaching' && (['CTET', 'PSTET', 'EDUCATION'].includes(abbrev))) matches = true;
-        else if (catId === 'punjab-technical' && (['PSPCL', 'PSTCL'].includes(abbrev))) matches = true;
+        else if (catId === 'punjab-technical' && (['PSPCL', 'PSTCL', 'PSBTE'].includes(abbrev))) matches = true;
         else if (catId === 'banking' && (['IBPS', 'SBI', 'RBI', 'NABARD'].includes(abbrev))) matches = true;
         else if (catId === 'central-govt' && (['SSC', 'RAILWAYS', 'ARMY', 'NAVY', 'AIRFORCE'].includes(abbrev) || bid.includes('army'))) matches = true;
 
@@ -101,7 +101,12 @@ export default function CategoryHubsPage() {
          ) : categoryHubs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                {categoryHubs.map((hub) => {
-                  const examCount = (allExams || []).filter((e: any) => e.boardId === hub.id || e.boardId === hub.abbreviation).length;
+                  const examCount = (allExams || []).filter((e: any) => 
+                     e.boardId === hub.id || 
+                     e.boardId?.toLowerCase() === hub.id?.toLowerCase() ||
+                     e.boardId?.toLowerCase() === hub.abbreviation?.toLowerCase()
+                  ).length;
+
                   return (
                     <Link key={hub.id} href={`/exams/hub/${hub.id}`}>
                        <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100 p-8 text-left">

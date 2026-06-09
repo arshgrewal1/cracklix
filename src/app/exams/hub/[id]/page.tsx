@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Hub Explorer (Hub -> Exams).
- * UPDATED: Fixed PSBTE official logo URL.
+ * UPDATED: Hardened Teaching logo detection for all cadre posts.
  */
 
 export default function HubExamsPage() {
@@ -109,7 +109,7 @@ export default function HubExamsPage() {
                   let forcedLogo = exam.iconUrl || hub?.iconUrl;
                   if (name.includes('CTET')) forcedLogo = ctetLogo;
                   else if (name.includes('PSTET')) forcedLogo = pstetLogo;
-                  else if (abbrev === 'EDUCATION' || abbrev === 'PSEB' || name.includes('CADRE') || name.includes('ENTRANCE')) forcedLogo = psebLogo;
+                  else if (abbrev === 'EDUCATION' || abbrev === 'PSEB' || name.includes('CADRE') || name.includes('ENTRANCE') || name.includes('TEACHER') || name.includes('PRINCIPAL') || name.includes('PROFESSOR')) forcedLogo = psebLogo;
                   else if (abbrev === 'PSPCL') forcedLogo = pspclLogo;
                   else if (abbrev === 'PSTCL') forcedLogo = pstclLogo;
                   else if (abbrev === 'PSBTE') forcedLogo = psbteLogo;
@@ -120,7 +120,7 @@ export default function HubExamsPage() {
                           <div className="flex justify-between items-start mb-10">
                              <div className="h-16 w-16 md:h-20 md:w-20 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center transition-all group-hover:shadow-xl shadow-inner relative overflow-hidden shrink-0">
                                 {forcedLogo && !failedImages[exam.id] ? (
-                                   <img src={forcedLogo} className={cn("w-full h-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-110", (name.includes('CTET') || abbrev.includes('PS')) ? "scale-125" : "")} alt="Logo" referrerPolicy="no-referrer" onError={() => setFailedImages(p => ({...p, [exam.id]: true}))} />
+                                   <img src={forcedLogo} className={cn("w-full h-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-110", (name.includes('CTET') || name.includes('PSTET') || abbrev.includes('PS')) ? "scale-125" : "")} alt="Logo" referrerPolicy="no-referrer" onError={() => setFailedImages(p => ({...p, [exam.id]: true}))} />
                                 ) : (
                                    <GraduationCap className="h-8 w-8 text-primary" />
                                 )}

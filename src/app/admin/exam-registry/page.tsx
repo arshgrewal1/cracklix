@@ -31,8 +31,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Master Registry v4.8.
- * UPDATED: Fixed PSBTE official logo URL.
+ * @fileOverview Institutional Exam Master Registry v4.9.
+ * UPDATED: Hardened keyword-based logo detection.
  */
 
 export default function ExamRegistryPage() {
