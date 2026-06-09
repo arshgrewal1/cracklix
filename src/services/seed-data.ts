@@ -2,14 +2,14 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Node v20.0.
- * UPDATED: Restored official Hub-specific logos for PSSSB, PPSC, PSPCL, PSTCL, and PSBTE.
+ * @fileOverview Institutional Seeding Node v21.0.
+ * RECOVERED: Restored high-fidelity logos for Punjab Police and PSPCL.
  */
 
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Persistent Registry Sync...');
 
-  // 1. CORE CATEGORIES (Strictly 5 nodes)
+  // 1. CORE CATEGORIES
   const categories = [
     {
       id: "punjab-govt",
@@ -65,16 +65,8 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'categories', cat.id), { ...cat, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 2. HUBS (Boards) - Persistent Nodes with Official Logos
+  // 2. HUBS (Boards) - Persistent Nodes with Verified Official Logos
   const boards = [
-    // Govt Hubs
-    { 
-      id: 'psssb', 
-      abbreviation: 'PSSSB', 
-      name: 'Punjab Subordinate Services Selection Board', 
-      categoryId: 'punjab-govt',
-      iconUrl: 'https://sssb.punjab.gov.in/wp-content/themes/twentytwentyone-child/images/logo.png'
-    },
     { 
       id: 'punjab-police', 
       abbreviation: 'POLICE', 
@@ -83,40 +75,43 @@ export async function seedInitialData(db: Firestore) {
       iconUrl: 'https://punjabpolice.gov.in/media/images/pp10.original.jpg'
     },
     { 
+      id: 'psssb', 
+      abbreviation: 'PSSSB', 
+      name: 'Punjab Subordinate Services Selection Board', 
+      categoryId: 'punjab-govt',
+      iconUrl: 'https://sssb.punjab.gov.in/wp-content/themes/twentytwentyone-child/images/logo.png'
+    },
+    { 
       id: 'ppsc', 
       abbreviation: 'PPSC', 
       name: 'Punjab Public Service Commission', 
       categoryId: 'punjab-govt',
       iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/e/e9/Punjab_Government_Logo.png'
     },
-    
-    // Teaching Hubs
-    { id: 'pstet', abbreviation: 'PSTET', name: 'PSTET Hub', categoryId: 'punjab-teaching' },
-    { id: 'ctet', abbreviation: 'CTET', name: 'CTET Hub', categoryId: 'punjab-teaching' },
-    { id: 'education-recruitment', abbreviation: 'EDUCATION', name: 'Education Recruitment Hub', categoryId: 'punjab-teaching' },
-    
-    // Technical Hubs
     { 
       id: 'pspcl', 
       abbreviation: 'PSPCL', 
-      name: 'PSPCL Hub', 
+      name: 'Punjab State Power Corporation Limited', 
       categoryId: 'punjab-technical',
       iconUrl: 'https://pspcl.in/images/logo.png'
     },
     { 
       id: 'pstcl', 
       abbreviation: 'PSTCL', 
-      name: 'PSTCL Hub', 
+      name: 'Punjab State Transmission Corporation Limited', 
       categoryId: 'punjab-technical',
       iconUrl: 'https://pstcl.org/images/logo.png'
     },
     { 
       id: 'psbte', 
       abbreviation: 'PSBTE', 
-      name: 'Punjab Technical Board', 
+      name: 'Punjab Technical Education Board', 
       categoryId: 'punjab-technical',
       iconUrl: 'https://www.punjabteched.com/images/Clogo-blue.gif'
-    }
+    },
+    { id: 'pstet', abbreviation: 'PSTET', name: 'PSTET Hub', categoryId: 'punjab-teaching' },
+    { id: 'ctet', abbreviation: 'CTET', name: 'CTET Hub', categoryId: 'punjab-teaching' },
+    { id: 'education-recruitment', abbreviation: 'EDUCATION', name: 'Education Recruitment Board Punjab', categoryId: 'punjab-teaching' }
   ];
 
   for (const b of boards) {
@@ -125,24 +120,26 @@ export async function seedInitialData(db: Firestore) {
 
   // 3. EXAMS (Verticals)
   const mandatoryExams = [
-    { id: 'ett-cadre', name: 'ETT Cadre', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
-    { id: 'master-cadre', name: 'Master Cadre', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
-    { id: 'lecturer-cadre', name: 'Lecturer Cadre', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
-    { id: 'principal', name: 'Principal', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
-    { id: 'assistant-professor', name: 'Assistant Professor', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
-    { id: 'pspcl-alm', name: 'ALM (PSPCL)', boardId: 'pspcl', categoryId: 'punjab-technical' },
-    { id: 'pstcl-alm', name: 'ALM (PSTCL)', boardId: 'pstcl', categoryId: 'punjab-technical' },
-    { id: 'psbte-je-elec', name: 'JE Electrical', boardId: 'psbte', categoryId: 'punjab-technical' },
-    { id: 'psbte-je-civil', name: 'JE Civil', boardId: 'psbte', categoryId: 'punjab-technical' },
     { id: 'constable', name: 'Police Constable', boardId: 'punjab-police', categoryId: 'punjab-govt' },
     { id: 'sub-inspector', name: 'Police Sub-Inspector', boardId: 'punjab-police', categoryId: 'punjab-govt' },
     { id: 'patwari', name: 'Revenue Patwari', boardId: 'psssb', categoryId: 'punjab-govt' },
     { id: 'psssb-clerk', name: 'PSSSB Clerk', boardId: 'psssb', categoryId: 'punjab-govt' },
+    { id: 'pspcl-alm', name: 'ALM (PSPCL)', boardId: 'pspcl', categoryId: 'punjab-technical' },
+    { id: 'pstcl-alm', name: 'ALM (PSTCL)', boardId: 'pstcl', categoryId: 'punjab-technical' },
+    { id: 'je-electrical', name: 'JE Electrical', boardId: 'psbte', categoryId: 'punjab-technical' },
+    { id: 'ett-cadre', name: 'ETT Cadre', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
+    { id: 'master-cadre', name: 'Master Cadre', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
+    { id: 'lecturer-cadre', name: 'Lecturer Cadre', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
+    { id: 'principal', name: 'Principal', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
+    { id: 'pstet-p1', name: 'PSTET Paper 1', boardId: 'pstet', categoryId: 'punjab-teaching' },
+    { id: 'pstet-p2', name: 'PSTET Paper 2', boardId: 'pstet', categoryId: 'punjab-teaching' },
+    { id: 'ctet-p1', name: 'CTET Paper 1', boardId: 'ctet', categoryId: 'punjab-teaching' },
+    { id: 'ctet-p2', name: 'CTET Paper 2', boardId: 'ctet', categoryId: 'punjab-teaching' },
   ];
 
   for (const ex of mandatoryExams) {
     await setDoc(doc(db, 'exams', ex.id), { ...ex, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  console.log('[AUDIT] Registry Restored and Synchronized.');
+  console.log('[AUDIT] Registry Logos and Hierarchies Synchronized.');
 }

@@ -16,8 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Hub Explorer v6.0.
- * RECOVERED: Restored hierarchical branding ensures individual exams inherit official logos from parent Hubs or Categories.
+ * @fileOverview Institutional Hub Explorer v7.0.
+ * RECOVERED: Restored hierarchical branding ensures Police and PSPCL exams inherit official logos from parent Hubs.
  */
 
 export default function HubExamsPage() {
@@ -109,6 +109,7 @@ export default function HubExamsPage() {
                   const stats = statsMap[exam.id] || { full: 0, subject: 0, pyq: 0, sectional: 0 };
                   const category = categories?.find((c: any) => c.id === exam.categoryId);
                   const effectiveLogo = exam.iconUrl || hub?.iconUrl || category?.iconUrl;
+                  const isPolice = (hub?.id || "").toLowerCase().includes('police') || (exam.boardId || "").toLowerCase().includes('police');
 
                   return (
                     <Link key={exam.id} href={`/exams/${exam.id}`}>
@@ -118,7 +119,7 @@ export default function HubExamsPage() {
                                 {effectiveLogo && !failedImages[exam.id] ? (
                                    <img 
                                      src={effectiveLogo} 
-                                     className="w-full h-full object-contain p-2.5" 
+                                     className={cn("w-full h-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-110", isPolice && "scale-125")}
                                      alt="Logo" 
                                      referrerPolicy="no-referrer"
                                      onError={() => setFailedImages(p => ({ ...p, [exam.id]: true }))}

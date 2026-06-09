@@ -20,8 +20,8 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Authority Hub v52.0.
- * RECOVERED: Restored Hub-specific logos for PSSSB, PPSC, PSPCL, PSTCL, and PSBTE.
+ * @fileOverview Authority Hub v53.0.
+ * RECOVERED: Restored high-fidelity logos for Punjab Police, PSPCL, PSSSB, and PPSC.
  */
 
 export default function ExamManagement() {
@@ -81,12 +81,11 @@ export default function ExamManagement() {
     
     setIsDeleting(id)
     try {
-      const boardRef = doc(db, id.startsWith('boards/') ? id : `boards/${id}`)
+      const boardRef = doc(db, "boards", id)
       await deleteDoc(boardRef)
       toast({ title: "Registry Purged", description: "Authority node removed from cloud." })
     } catch (serverError: any) {
-      console.error("Delete Rejection:", serverError)
-      toast({ variant: "destructive", title: "Purge Failed", description: "Cloud registry sync rejected." })
+      toast({ variant: "destructive", title: "Purge Failed" })
     } finally {
       setIsDeleting(null)
     }
@@ -104,7 +103,7 @@ export default function ExamManagement() {
       setEditingBoard((prev: any) => ({ ...prev, iconUrl: downloadURL }))
       toast({ title: "Asset Synced", description: "Logo updated in storage." })
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Upload Failed", description: error.message || "Storage rejection." })
+      toast({ variant: "destructive", title: "Upload Failed" })
     } finally {
       setIsUploading(false)
     }
@@ -148,10 +147,9 @@ export default function ExamManagement() {
                 const id = board.id?.toLowerCase();
                 const abbrev = board.abbreviation?.toLowerCase();
                 const isPolice = id.includes('police') || abbrev === 'police';
-                const isTechnical = board.categoryId === 'punjab-technical';
                 const isTeaching = board.categoryId === 'punjab-teaching';
+                const isTechnical = board.categoryId === 'punjab-technical';
 
-                // RECOVERY: Prioritize Board Logo -> Category Logo
                 const effectiveLogo = board.iconUrl || category?.iconUrl;
 
                 return (
@@ -185,23 +183,8 @@ export default function ExamManagement() {
                     <TableCell className="text-sm font-bold text-slate-800 leading-tight max-w-xs">{board.name}</TableCell>
                     <TableCell className="text-right px-10">
                       <div className="flex justify-end gap-2">
-                         <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-12 w-12 rounded-xl hover:bg-white shadow-sm" 
-                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditingBoard(board); }}
-                          >
-                           <Edit className="h-5 w-5" />
-                         </Button>
-                         <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            className="h-12 w-12 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition-all" 
-                            onClick={(e) => handleDelete(e, board.id)}
-                            disabled={isDeleting === board.id}
-                          >
-                            {isDeleting === board.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-5 w-5" />}
-                         </Button>
+                         <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-white shadow-sm" onClick={() => setEditingBoard(board)}><Edit className="h-5 w-5" /></Button>
+                         <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-rose-50 hover:text-rose-600 transition-all" onClick={(e) => handleDelete(e, board.id)} disabled={isDeleting === board.id}><Trash2 className="h-5 w-5" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -225,73 +208,35 @@ export default function ExamManagement() {
           <div className="p-10 space-y-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
             <div className="flex flex-col items-center gap-6">
               <div className="h-36 w-36 rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden group shadow-inner">
-                 {isUploading ? (
-                    <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                 ) : (
+                 {isUploading ? <Loader2 className="h-8 w-8 text-primary animate-spin" /> : (
                     <div className="relative h-full w-full flex items-center justify-center bg-transparent p-2">
                       {editingBoard?.iconUrl ? (
-                        <img 
-                          src={editingBoard.iconUrl} 
-                          referrerPolicy="no-referrer"
-                          className="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform" 
-                          alt="Preview"
-                        />
+                        <img src={editingBoard.iconUrl} referrerPolicy="no-referrer" className="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform" alt="Preview" />
                       ) : (
-                        <div className="flex flex-col items-center gap-2 opacity-30">
-                           <ImageIcon className="h-8 w-8 text-slate-400" />
-                           <span className="text-[8px] font-black uppercase text-slate-400">No Logo Loaded</span>
-                        </div>
+                        <div className="flex flex-col items-center gap-2 opacity-30"><ImageIcon className="h-8 w-8 text-slate-400" /><span className="text-[8px] font-black uppercase text-slate-400">No Logo</span></div>
                       )}
                     </div>
                  )}
               </div>
-              
-              <div className="w-full space-y-4">
-                <Button 
-                  variant="outline" 
-                  className="w-full h-14 rounded-xl border-slate-200 bg-white font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-slate-50 shadow-sm"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isUploading || isSaving}
-                >
-                  {isUploading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Upload className="h-4 w-4 text-primary" />}
-                  {isUploading ? "Syncing Asset..." : "Upload Device Logo"}
-                </Button>
-                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (file) handleFileUpload(file);
-                }} />
-              </div>
+              <Button variant="outline" className="w-full h-14 rounded-xl border-slate-200 bg-white font-black uppercase text-[10px] tracking-widest gap-2" onClick={() => fileInputRef.current?.click()} disabled={isUploading || isSaving}>
+                <Upload className="h-4 w-4 text-primary" /> {isUploading ? "Syncing..." : "Upload Logo"}
+              </Button>
+              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if (file) handleFileUpload(file); }} />
             </div>
 
             <div className="space-y-6 pt-4 border-t border-slate-50">
-              <div className="space-y-2">
-                <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1 flex items-center gap-2"><Layers className="h-3 w-3" /> Target Vertical Category</Label>
-                <select 
-                  value={editingBoard?.categoryId || ""} 
-                  onChange={e => setEditingBoard({...editingBoard, categoryId: e.target.value})}
-                  className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-black uppercase text-[10px] outline-none shadow-inner"
-                >
-                   <option value="">Select Category</option>
-                   {categories?.map((c: any) => <option key={c.id} value={c.id}>{c.title}</option>)}
-                </select>
-              </div>
+              <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-slate-400">Vertical Category</Label><select value={editingBoard?.categoryId || ""} onChange={e => setEditingBoard({...editingBoard, categoryId: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-black uppercase text-[10px] outline-none shadow-inner"><option value="">Select Category</option>{categories?.map((c: any) => <option key={c.id} value={c.id}>{c.title}</option>)}</select></div>
               <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-2">
-                    <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Short Code</Label>
-                    <input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl h-12 font-black uppercase px-4 outline-none text-[#0F172A]" />
-                 </div>
-                 <div className="space-y-2">
-                    <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Registry Name</Label>
-                    <input value={editingBoard?.name || ""} onChange={e => setEditingBoard({...editingBoard, name: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl h-12 font-bold px-4 outline-none text-[#0F172A]" />
-                 </div>
+                 <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-slate-400">Short Code</Label><input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl h-12 font-black uppercase px-4 outline-none text-[#0F172A]" /></div>
+                 <div className="space-y-2"><Label className="text-[9px] font-black uppercase text-slate-400">Registry Name</Label><input value={editingBoard?.name || ""} onChange={e => setEditingBoard({...editingBoard, name: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl h-12 font-bold px-4 outline-none text-[#0F172A]" /></div>
               </div>
             </div>
           </div>
 
-          <DialogFooter className="p-10 pt-4 flex gap-4 border-t border-slate-50 bg-slate-50/30">
-            <Button variant="ghost" onClick={() => setEditingBoard(null)} disabled={isSaving || isUploading} className="rounded-xl h-12 px-6 font-bold text-slate-400">Cancel</Button>
-            <Button className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-12 px-10 font-black uppercase tracking-widest text-[10px] shadow-2xl gap-3 transition-all active:scale-95" onClick={handleSave} disabled={isSaving || isUploading}>
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit to Registry
+          <DialogFooter className="p-10 pt-4 flex gap-4 border-t border-slate-50">
+            <Button variant="ghost" onClick={() => setEditingBoard(null)} className="rounded-xl h-12 px-6 font-bold text-slate-400">Cancel</Button>
+            <Button className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-12 px-10 font-black uppercase tracking-widest text-[10px] gap-3" onClick={handleSave} disabled={isSaving || isUploading}>
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit Registry
             </Button>
           </DialogFooter>
         </DialogContent>

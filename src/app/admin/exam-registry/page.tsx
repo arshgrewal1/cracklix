@@ -33,8 +33,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Master Registry v7.0.
- * RECOVERED: Hierarchical branding logic ensures all verticals display recovered institutional logos from Boards.
+ * @fileOverview Institutional Exam Master Registry v8.0.
+ * RECOVERED: Hierarchical branding ensuring Police and PSPCL logos are displayed via board inheritance.
  */
 
 export default function ExamRegistryPage() {
@@ -134,16 +134,15 @@ export default function ExamRegistryPage() {
                 const isGovt = catId === 'punjab-govt';
                 const isTeaching = catId === 'punjab-teaching';
                 const isTechnical = catId === 'punjab-technical';
-                const isBank = catId === 'banking';
+                const isPolice = e.boardId?.toLowerCase().includes('police') || board?.id.toLowerCase().includes('police');
 
-                // RECOVERY LOGIC: Use Exam Logo -> Board Logo -> Category Logo -> Fallback Icon
                 const effectiveLogo = e.iconUrl || board?.iconUrl || category?.iconUrl;
 
                 return (
                   <TableRow key={e.id} className="hover:bg-slate-50 border-slate-50 transition-colors group">
                     <TableCell className="px-10 py-8">
                       <div className="flex items-center gap-6">
-                        <div className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0 shadow-inner relative">
+                        <div className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0 shadow-inner relative transition-transform group-hover:scale-110">
                             {effectiveLogo && !failedImages[e.id] ? (
                               <img 
                                 src={effectiveLogo} 
@@ -153,10 +152,9 @@ export default function ExamRegistryPage() {
                               />
                             ) : (
                               <div className="text-primary opacity-40">
-                                 {isGovt ? <Shield className="h-6 w-6" /> : 
+                                 {isPolice ? <Shield className="h-6 w-6" /> : 
                                   isTeaching ? <GraduationCap className="h-6 w-6" /> : 
                                   isTechnical ? <Zap className="h-6 w-6" /> :
-                                  isBank ? <Landmark className="h-6 w-6" /> :
                                   <Landmark className="h-6 w-6" />}
                               </div>
                             )}
