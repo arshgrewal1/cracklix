@@ -1,17 +1,19 @@
 
 /**
- * @fileOverview Production-Grade Service Worker for CRACKLIX.
- * Strategy: Stale-While-Revalidate for UI, Network-Only for Auth/Admin.
+ * @fileOverview Institutional Service Worker v1.0.
+ * Features: Static asset caching, network-first for pages, and strict security bypass.
  */
 
 const CACHE_NAME = 'cracklix-v1';
+const OFFLINE_URL = '/offline.html';
+
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/globals.css',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png',
 ];
 
-// 1. Install & Precache
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
@@ -21,49 +23,61 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// 2. Activate & Clean old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
       );
     })
   );
   self.clients.claim();
 });
 
-// 3. Fetch Strategy
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+  const { request } = event;
+  const url = new URL(request.url);
 
-  // SECURITY GUARD: Never cache sensitive routes
+  // 1. Strict Security Guard: Never cache Admin, API, or Auth routes
   if (
-    url.pathname.startsWith('/admin') ||
+    url.pathname.startsWith('/admin') || 
     url.pathname.startsWith('/api') ||
     url.hostname.includes('firebase') ||
-    event.request.method !== 'GET'
+    url.hostname.includes('googleapis') ||
+    request.method !== 'GET'
   ) {
     return;
   }
 
+  // 2. Navigation Preload / Network First for Pages
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(() => {
+        return caches.match('/');
+      })
+    );
+    return;
+  }
+
+  // 3. Cache-First for Static Assets (Images, Fonts, Scripts)
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      // Return cached response if found, else fetch and update cache
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-          const responseToCache = networkResponse.clone();
+    caches.match(request).then((response) => {
+      return response || fetch(request).then((networkResponse) => {
+        if (
+          networkResponse.status === 200 && 
+          (url.pathname.includes('/_next/static') || url.pathname.includes('/icons/'))
+        ) {
+          const cacheCopy = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
+            cache.put(request, cacheCopy);
           });
         }
         return networkResponse;
-      }).catch(() => {
-        // Fallback for offline mode if needed
-        return response;
       });
-
-      return response || fetchPromise;
     })
   );
 });
