@@ -1,8 +1,10 @@
+
 import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Node v35.0.
+ * @fileOverview Institutional Seeding Node v36.0.
  * RECOVERED & LOCKED: Verified official URLs for PSSSB, Police, PSPCL, PPSC, CTET, and PSTET Hubs.
+ * UPDATED: Explicitly locked the PSSSB SVG and Punjab Police PNG assets.
  */
 
 export async function seedInitialData(db: Firestore) {
