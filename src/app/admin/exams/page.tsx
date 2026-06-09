@@ -19,8 +19,8 @@ import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Authority Hub v39.0 - Hardened Mandatory Branding Engine.
- * Features: Permanent official logos for PSSSB, Police, PSEB, PSPCL, CTET, PSTET, SSC, and IBPS.
+ * @fileOverview Authority Hub v40.0 - Hardened Mandatory Branding Engine.
+ * FIXED: Strictly isolated CTET and PSTET logos.
  */
 
 export default function ExamManagement() {
@@ -261,7 +261,7 @@ export default function ExamManagement() {
                         <img 
                           src={editingBoard.iconUrl} 
                           referrerPolicy="no-referrer"
-                          className={cn("absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform", (editingBoard.id === 'army' || editingBoard.abbreviation?.toUpperCase() === 'ARMY' || editingBoard.abbreviation?.toUpperCase() === 'CTET' || editingBoard.abbreviation?.toUpperCase() === 'PSTET' || editingBoard.abbreviation?.toUpperCase() === 'EDUCATION' || editingBoard.abbreviation?.toUpperCase() === 'PSEB' || editingBoard.abbreviation?.toUpperCase()?.includes('POLICE') || editingBoard.abbreviation?.toUpperCase() === 'SSC' || editingBoard.abbreviation?.toUpperCase() === 'IBPS') ? "scale-150" : "")} 
+                          className={cn("absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform", (editingBoard.id === 'army' || editingBoard.abbreviation?.toUpperCase() === 'ARMY' || editingBoard.abbreviation?.toUpperCase() === 'CTET' || editingBoard.abbreviation?.toUpperCase() === 'CBSE' || editingBoard.abbreviation?.toUpperCase() === 'PSTET' || editingBoard.abbreviation?.toUpperCase() === 'EDUCATION' || editingBoard.abbreviation?.toUpperCase() === 'PSEB' || editingBoard.abbreviation?.toUpperCase()?.includes('POLICE') || editingBoard.abbreviation?.toUpperCase() === 'SSC' || editingBoard.abbreviation?.toUpperCase() === 'IBPS') ? "scale-150" : "")} 
                           alt="Preview"
                         />
                       ) : (

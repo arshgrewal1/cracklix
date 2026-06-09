@@ -33,8 +33,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Hub v16.1.
- * UPDATED: Implemented mandatory branding engine for CTET, PSTET, and PSEB official logos.
+ * @fileOverview Institutional Exam Hub v16.2.
+ * UPDATED: Strictly isolated CTET and PSTET official logos for Paper 1/2.
  */
 
 export default function ExamHubPage() {
@@ -113,13 +113,15 @@ export default function ExamHubPage() {
   const psebOfficialLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
 
   let logoUrl = exam.iconUrl || activeBoard?.iconUrl;
+  
+  // STRICT BRANDING AUDIT
   const isCtet = abbrev === 'CTET' || abbrev === 'CBSE' || exam.name.toUpperCase().includes('CTET');
-  const isPstet = abbrev === 'PSTET' || exam.name.toUpperCase().includes('PSTET');
-  const isPseb = abbrev === 'PSEB' || abbrev === 'EDUCATION' || exam.name.toUpperCase().includes('PSEB');
+  const isPstet = abbrev === 'PSTET' || (exam.name.toUpperCase().includes('PSTET') && !isCtet);
+  const isPseb = abbrev === 'PSEB' || abbrev === 'EDUCATION' || (exam.name.toUpperCase().includes('PSEB') && !isCtet && !isPstet);
 
   if (isCtet) logoUrl = ctetOfficialLogo;
-  if (isPstet) logoUrl = pstetOfficialLogo;
-  if (isPseb) logoUrl = psebOfficialLogo;
+  else if (isPstet) logoUrl = pstetOfficialLogo;
+  else if (isPseb) logoUrl = psebOfficialLogo;
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body">

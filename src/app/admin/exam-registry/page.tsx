@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Master Registry v2.8.
- * UPDATED: Enforced mandatory branding for CTET, PSTET, and PSEB exams across all registry nodes.
+ * @fileOverview Institutional Exam Master Registry v2.9.
+ * FIXED: Strictly isolated CTET and PSTET branding logic.
  */
 
 export default function ExamRegistryPage() {
@@ -146,9 +146,14 @@ export default function ExamRegistryPage() {
                 const abbrev = board?.abbreviation?.toUpperCase() || e.boardId?.toUpperCase();
                 
                 let forcedLogo = e.iconUrl || board?.iconUrl;
-                if (abbrev === 'CTET' || abbrev === 'CBSE' || e.name.toUpperCase().includes('CTET')) forcedLogo = ctetOfficialLogo;
-                if (abbrev === 'PSTET' || e.name.toUpperCase().includes('PSTET')) forcedLogo = pstetOfficialLogo;
-                if (abbrev === 'PSEB' || abbrev === 'EDUCATION' || e.name.toUpperCase().includes('PSEB')) forcedLogo = psebOfficialLogo;
+                // STRICT BRANDING AUDIT
+                if (abbrev === 'CTET' || abbrev === 'CBSE' || e.name.toUpperCase().includes('CTET')) {
+                  forcedLogo = ctetOfficialLogo;
+                } else if (abbrev === 'PSTET' || e.name.toUpperCase().includes('PSTET')) {
+                  forcedLogo = pstetOfficialLogo;
+                } else if (abbrev === 'PSEB' || abbrev === 'EDUCATION' || e.name.toUpperCase().includes('PSEB')) {
+                  forcedLogo = psebOfficialLogo;
+                }
 
                 const isImgFailed = failedImages[e.id];
 

@@ -18,8 +18,8 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview High-Density Responsive Exam Catalog v14.1.
- * UPDATED: Strictly enforced official logos for CTET, PSTET, and PSEB with optimized scaling.
+ * @fileOverview High-Density Responsive Exam Catalog v14.2.
+ * FIXED: Strictly isolated CTET and PSTET official logos with optimized scaling.
  */
 
 export default function ExamsCatalog() {
@@ -150,13 +150,14 @@ function CatalogContent() {
               const abbrev = board?.abbreviation?.toUpperCase() || exam.boardId?.toUpperCase();
               let logoUrl = exam.iconUrl || board?.iconUrl;
               
+              // STRICT BRANDING SYNC
               const isCtet = abbrev === 'CTET' || abbrev === 'CBSE' || exam.name.toUpperCase().includes('CTET');
-              const isPstet = abbrev === 'PSTET' || exam.name.toUpperCase().includes('PSTET');
-              const isPseb = abbrev === 'PSEB' || abbrev === 'EDUCATION' || exam.name.toUpperCase().includes('PSEB');
+              const isPstet = abbrev === 'PSTET' || (exam.name.toUpperCase().includes('PSTET') && !isCtet);
+              const isPseb = abbrev === 'PSEB' || abbrev === 'EDUCATION' || (exam.name.toUpperCase().includes('PSEB') && !isCtet && !isPstet);
 
               if (isCtet) logoUrl = ctetOfficialLogo;
-              if (isPstet) logoUrl = pstetOfficialLogo;
-              if (isPseb) logoUrl = psebOfficialLogo;
+              else if (isPstet) logoUrl = pstetOfficialLogo;
+              else if (isPseb) logoUrl = psebOfficialLogo;
 
               const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, qCount: 0, subjects: new Set() };
               const isPinned = profile?.pinnedExams?.includes(exam.id);
