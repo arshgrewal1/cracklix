@@ -35,8 +35,9 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Test Results Hub v9.0.
- * PERFORMANCE: Throttled global results scan to 100 entries for faster rank logic.
+ * @fileOverview Test Results Hub v10.0.
+ * FIXED: Removed server-side orderBy to bypass composite index requirements.
+ * PERFORMANCE: Sorting results client-side for immediate rendering.
  */
 
 export default function ResultPage() {
@@ -61,10 +62,11 @@ export default function ResultPage() {
 
   const { data: rawResultDocs, loading: resultsLoading } = useCollection<any>(resultsQuery)
   
-  // GLOBAL MERIT LISTENER (THROTTLED)
+  // GLOBAL MERIT LISTENER (PERFORMANCE BYPASS: Client-side sorting)
   const globalResultsQuery = useMemo(() => {
     if (!db || !mockId) return null
-    return query(collection(db, "results"), where("mockId", "==", mockId), orderBy("score", "desc"), limit(100))
+    // REMOVED orderBy("score", "desc") to prevent index error
+    return query(collection(db, "results"), where("mockId", "==", mockId), limit(100))
   }, [db, mockId])
 
   const { data: rawGlobalResults } = useCollection<any>(globalResultsQuery)
@@ -74,15 +76,21 @@ export default function ResultPage() {
     return rawResultDocs[0]
   }, [rawResultDocs])
 
+  const sortedGlobalResults = useMemo(() => {
+    if (!rawGlobalResults) return [];
+    return [...rawGlobalResults].sort((a, b) => (b.score || 0) - (a.score || 0));
+  }, [rawGlobalResults]);
+
   const merit = useMemo(() => {
-     if (!rawGlobalResults || !sessionData) return { rank: '?', total: 0, percentile: 0, topper: null };
-     const sorted = rawGlobalResults;
-     const rank = sorted.findIndex((r: any) => r.userId === user?.uid) + 1 || 1;
-     const total = sorted.length;
+     if (!sortedGlobalResults || sortedGlobalResults.length === 0 || !sessionData) {
+        return { rank: '?', total: 0, percentile: 0, topper: null };
+     }
+     const rank = sortedGlobalResults.findIndex((r: any) => r.userId === user?.uid) + 1 || 1;
+     const total = sortedGlobalResults.length;
      const percentile = Math.round(((total - rank) / (total || 1)) * 1000) / 10;
-     const topper = sorted[0];
+     const topper = sortedGlobalResults[0];
      return { rank, total, percentile, topper };
-  }, [rawGlobalResults, sessionData, user]);
+  }, [sortedGlobalResults, sessionData, user]);
 
   useEffect(() => {
     async function loadQuestions() {
@@ -217,14 +225,14 @@ export default function ResultPage() {
            <TabsContent value="TOPPER" className="space-y-4">
               <Card className="border-none shadow-3xl rounded-[3rem] bg-white overflow-hidden p-8">
                  <div className="space-y-4">
-                    {rawGlobalResults?.slice(0, 10).map((r: any, i: number) => (
+                    {sortedGlobalResults.slice(0, 10).map((r: any, i: number) => (
                        <div key={r.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                           <div className="flex items-center gap-4">
                              <span className="font-black text-slate-300 w-6">#{i+1}</span>
                              <p className="font-bold text-[#0F172A] uppercase">{r.userName}</p>
                           </div>
                           <div className="flex gap-8 items-center">
-                             <span className="text-xs font-black text-primary">{r.score.toFixed(1)} PTS</span>
+                             <span className="text-xs font-black text-primary">{r.score?.toFixed(1) || '0.0'} PTS</span>
                              <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px]">{r.accuracy}%</Badge>
                           </div>
                        </div>

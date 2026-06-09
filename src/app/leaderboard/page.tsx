@@ -17,15 +17,15 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Phase 143: State Merit Index (Optimized).
- * PERFORMANCE: Stabilized queries and memoized heavy ranking loops.
+ * FIXED: Replaced complex server sorting with client-side logic to bypass index requirements.
  */
 
 export default function LeaderboardPage() {
   const db = useFirestore()
   const [searchTerm, setSearchTerm] = useState("")
   
-  // STABILIZED LISTENERS (Strictly limited for speed)
-  const meritQuery = useMemo(() => (db ? query(collection(db, "results"), orderBy("score", "desc"), limit(50)) : null), [db])
+  // STABILIZED LISTENERS (Primary index only for performance)
+  const meritQuery = useMemo(() => (db ? query(collection(db, "results"), limit(200)) : null), [db])
   const usersQuery = useMemo(() => (db ? query(collection(db, "users"), limit(100)) : null), [db])
   const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true), limit(50)) : null), [db])
 
@@ -36,16 +36,22 @@ export default function LeaderboardPage() {
   const meritList = useMemo(() => {
     if (!results || !users) return []
     const lowerSearch = searchTerm.toLowerCase();
+    
+    // Sort client-side to avoid Firestore composite index requirement
+    const sortedResults = [...results].sort((a, b) => (b.score || 0) - (a.score || 0));
     const uniqueRankers = new Map();
     
-    results.forEach((r: any) => {
+    sortedResults.forEach((r: any) => {
       if (!uniqueRankers.has(r.userId)) {
         const userProfile = users.find(u => u.id === r.userId);
-        if (!searchTerm || (userProfile && (userProfile.name?.toLowerCase().includes(lowerSearch) || userProfile.email?.toLowerCase().includes(lowerSearch)))) {
+        const name = userProfile?.name || r.userName || "Aspirant";
+        const email = userProfile?.email || "---";
+
+        if (!searchTerm || (name.toLowerCase().includes(lowerSearch) || email.toLowerCase().includes(lowerSearch))) {
           uniqueRankers.set(r.userId, {
             id: r.userId,
-            name: userProfile?.name || r.userName || "Aspirant",
-            email: userProfile?.email || "---",
+            name,
+            email,
             profile: userProfile,
             score: r.score,
             accuracy: r.accuracy,
