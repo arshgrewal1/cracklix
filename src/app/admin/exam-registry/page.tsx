@@ -27,8 +27,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Master Registry v2.6.
- * PERFORMANCE: Removed heavy Question Bank fetch to restore navigation speed.
+ * @fileOverview Institutional Exam Master Registry v2.7.
+ * UPDATED: Enforced mandatory branding for CTET, PSTET, and PSEB exams.
  */
 
 export default function ExamRegistryPage() {
@@ -94,6 +94,10 @@ export default function ExamRegistryPage() {
     } finally { setIsMerging(false) }
   }
 
+  const ctetOfficialLogo = "https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png";
+  const pstetOfficialLogo = "https://pstet.pseb.ac.in/img/main-logo-2.png";
+  const psebOfficialLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
+
   return (
     <div className="space-y-12 pb-24 text-left">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-4">
@@ -138,7 +142,13 @@ export default function ExamRegistryPage() {
                 ))
               ) : filteredExams.map((e) => {
                 const board = boards?.find((b: any) => b.id.toLowerCase() === e.boardId?.toLowerCase() || b.abbreviation?.toLowerCase() === e.boardId?.toLowerCase());
-                const logoUrl = e.iconUrl || board?.iconUrl;
+                const abbrev = board?.abbreviation?.toUpperCase() || e.boardId?.toUpperCase();
+                
+                let forcedLogo = e.iconUrl || board?.iconUrl;
+                if (abbrev === 'CTET' || abbrev === 'CBSE' || e.name.toUpperCase().includes('CTET')) forcedLogo = ctetOfficialLogo;
+                if (abbrev === 'PSTET') forcedLogo = pstetOfficialLogo;
+                if (abbrev === 'PSEB' || abbrev === 'EDUCATION') forcedLogo = psebOfficialLogo;
+
                 const isImgFailed = failedImages[e.id];
 
                 return (
@@ -146,8 +156,13 @@ export default function ExamRegistryPage() {
                     <TableCell className="px-10 py-8">
                       <div className="flex items-center gap-6">
                         <div className="h-12 w-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
-                            {logoUrl && !isImgFailed ? (
-                              <img src={logoUrl} className="h-full w-full object-contain p-2" referrerPolicy="no-referrer" onError={() => setFailedImages(p => ({ ...p, [e.id]: true }))} />
+                            {forcedLogo && !isImgFailed ? (
+                              <img 
+                                src={forcedLogo} 
+                                className={cn("h-full w-full object-contain p-2", (abbrev === 'CTET' || abbrev === 'CBSE' || abbrev === 'PSTET' || abbrev === 'PSEB') ? "scale-150" : "")} 
+                                referrerPolicy="no-referrer" 
+                                onError={() => setFailedImages(p => ({ ...p, [e.id]: true }))} 
+                              />
                             ) : (
                               <div className="h-full w-full bg-amber-50 flex items-center justify-center text-amber-600 font-black text-xs">{e.name?.[0]?.toUpperCase()}</div>
                             )}

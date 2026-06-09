@@ -19,7 +19,7 @@ import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Authority Hub v38.0 - Hardened Mandatory Branding Engine.
+ * @fileOverview Authority Hub v39.0 - Hardened Mandatory Branding Engine.
  * Features: Permanent official logos for PSSSB, Police, PSEB, PSPCL, CTET, PSTET, SSC, and IBPS.
  */
 
@@ -241,7 +241,7 @@ export default function ExamManagement() {
       </Card>
 
       <Dialog open={!!editingBoard} onOpenChange={(open) => !open && !isSaving && !isUploading && setEditingBoard(null)}>
-        <DialogContent className="sm:max-w-xl rounded-[3rem] bg-white border-none shadow-4xl p-0 overflow-hidden text-left">
+        <DialogContent className="sm:max-w-xl rounded-[3rem] bg-white border-none shadow-4xl p-0 overflow-hidden text-left flex flex-col">
           <div className="h-2 w-full bg-[#0F172A]" />
           <DialogHeader className="p-10 pb-0 text-left">
             <div className="flex justify-between items-center">

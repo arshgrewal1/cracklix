@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, Suspense, useState } from "react"
@@ -17,9 +18,8 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview High-Density Responsive Exam Catalog v13.0.
- * UPDATED: Optimized high-fidelity rendering for PSSSB, Police, and PSEB logos.
- * FIXED: Mandatory branding protocol for ETT/Master Cadre.
+ * @fileOverview High-Density Responsive Exam Catalog v14.0.
+ * UPDATED: Mandatory official logo for CTET Paper 1 & 2.
  */
 
 export default function ExamsCatalog() {
@@ -110,6 +110,10 @@ function CatalogContent() {
     }
   };
 
+  const ctetOfficialLogo = "https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png";
+  const pstetOfficialLogo = "https://pstet.pseb.ac.in/img/main-logo-2.png";
+  const psebOfficialLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
+
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 pb-safe overflow-x-hidden">
       <Navbar />
@@ -143,17 +147,26 @@ function CatalogContent() {
                 b.abbreviation?.toLowerCase() === exam.boardId?.toLowerCase()
               );
               
-              const logoUrl = exam.iconUrl || board?.iconUrl;
+              const abbrev = board?.abbreviation?.toUpperCase() || exam.boardId?.toUpperCase();
+              let logoUrl = exam.iconUrl || board?.iconUrl;
+              
+              const isCtet = abbrev === 'CTET' || abbrev === 'CBSE' || exam.name.toUpperCase().includes('CTET');
+              const isPstet = abbrev === 'PSTET';
+              const isPseb = abbrev === 'PSEB' || abbrev === 'EDUCATION';
+
+              if (isCtet) logoUrl = ctetOfficialLogo;
+              if (isPstet) logoUrl = pstetOfficialLogo;
+              if (isPseb) logoUrl = psebOfficialLogo;
+
               const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, qCount: 0, subjects: new Set() };
               const isPinned = profile?.pinnedExams?.includes(exam.id);
               const isImgFailed = failedImages[exam.id];
               
               const bid = exam.boardId?.toLowerCase() || "";
-              const abbrev = board?.abbreviation?.toUpperCase() || "";
               
               const isArmy = bid === 'army' || exam.id?.toLowerCase().includes('army');
-              const isPolice = bid.includes('police') || abbrev.includes('POLICE');
-              const isPower = bid.includes('pspcl') || bid.includes('pstcl') || abbrev.includes('PSPCL');
+              const isPolice = bid.includes('police') || abbrev?.includes('POLICE');
+              const isPower = bid.includes('pspcl') || bid.includes('pstcl') || abbrev?.includes('PSPCL');
               const isSsc = bid === 'ssc' || exam.id?.toLowerCase().includes('ssc') || abbrev === 'SSC';
               const isEdu = bid.includes('education') || bid.includes('pseb') || abbrev === 'PSEB' || exam.name?.toLowerCase().includes('ett') || exam.name?.toLowerCase().includes('master');
 
@@ -173,7 +186,7 @@ function CatalogContent() {
                                 <img 
                                   src={logoUrl} 
                                   className={cn("w-full h-full object-contain p-1.5 md:p-2 transition-transform duration-500 group-hover:scale-105", 
-                                    isArmy ? "scale-125" : (isPolice || isEdu) ? "scale-110 p-1" : (isPower || isSsc) ? "scale-110" : ""
+                                    isArmy ? "scale-125" : (isPolice || isEdu || isCtet || isPstet) ? "scale-110 p-1" : (isPower || isSsc) ? "scale-110" : ""
                                   )} 
                                   alt="Board Logo" 
                                   referrerPolicy="no-referrer" 
