@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 /**
  * @fileOverview Institutional Master Registry Landing.
  * UPDATED: Dynamic Hub counting to ensure visibility of preparation depth.
+ * RESTORED: Original icon fallback system.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -67,7 +68,7 @@ export default function ExamsEntryPage() {
                      <Card className="border-none shadow-xl hover:shadow-5xl hover:translate-y-[-12px] transition-all duration-700 rounded-[3.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100">
                         <CardContent className="p-10 md:p-14 flex flex-col h-full">
                            <div className="flex justify-between items-start mb-12">
-                              <div className={cn("h-20 w-20 md:h-24 md:w-24 rounded-[1.8rem] md:rounded-[2.2rem] flex items-center justify-center transition-all group-hover:shadow-2xl shadow-inner relative overflow-hidden shrink-0", cat.bgColor || "bg-orange-50", cat.color || "text-primary")}>
+                              <div className={cn("h-20 w-20 md:h-24 md:w-24 rounded-[1.8rem] md:rounded-[2.2rem] flex items-center justify-center transition-all group-hover:shadow-2xl shadow-inner relative overflow-hidden shrink-0 bg-slate-50 text-slate-300", cat.id === 'punjab-govt' ? 'text-primary' : cat.id === 'punjab-teaching' ? 'text-blue-600' : cat.id === 'punjab-technical' ? 'text-amber-500' : '')}>
                                  {CATEGORY_ICONS[cat.id] || <ShieldCheck className="h-10 w-10" />}
                               </div>
                               <Badge className="bg-[#0F172A] text-white border-none text-[8px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-xl shadow-lg">

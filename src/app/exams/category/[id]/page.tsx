@@ -10,14 +10,15 @@ import { collection, query, where } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Landmark, GraduationCap, ShieldCheck, Zap, Globe, Wallet, Info, Shield, FileText } from "lucide-react"
+import { ChevronLeft, ChevronRight, Landmark, GraduationCap, ShieldCheck, Zap, Globe, Wallet, Info, Shield, Landmark as LandmarkIcon } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Explorer v4.0.
- * RECOVERED: Restored unique board fallback icons (Shield for Police, Zap for Technical, Cap for Teaching).
+ * @fileOverview Institutional Category Explorer v5.0.
+ * FIXED: Hardened counting logic to resolve "0 Verticals" issue.
+ * RESTORED: Original icon identities (Cap for Teaching, Shield for Police).
  */
 
 const CATEGORY_META: Record<string, any> = {
@@ -48,11 +49,11 @@ export default function CategoryHubsPage() {
      boards.forEach((b: any) => {
         if (b.categoryId === catId) {
            const abbrev = (b.abbreviation || "").toUpperCase();
-           const key = abbrev || b.id;
+           const key = b.id || abbrev;
            if (!hubMap.has(key)) hubMap.set(key, b);
         }
      });
-     return Array.from(hubMap.values()).sort((a, b) => a.abbreviation.localeCompare(b.abbreviation));
+     return Array.from(hubMap.values()).sort((a, b) => (a.abbreviation || "").localeCompare(b.abbreviation || ""));
   }, [boards, catId]);
 
   return (
@@ -86,15 +87,15 @@ export default function CategoryHubsPage() {
          ) : categoryHubs.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                {categoryHubs.map((hub) => {
+                  // HARDENED COUNTING LOGIC
                   const examCount = (allExams || []).filter((e: any) => 
                      e.boardId?.toLowerCase() === hub.id?.toLowerCase() ||
                      e.boardId?.toLowerCase() === hub.abbreviation?.toLowerCase()
                   ).length;
 
-                  // UNIQUE HUB ICON LOGIC
+                  // ORIGINAL ICON RECOVERY
                   const id = hub.id?.toLowerCase();
                   const abbrev = hub.abbreviation?.toLowerCase();
-                  
                   const isPolice = id.includes('police') || abbrev === 'police';
                   const isTechnical = catId === 'punjab-technical';
                   const isTeaching = catId === 'punjab-teaching';
@@ -112,8 +113,7 @@ export default function CategoryHubsPage() {
                                       {isPolice ? <Shield className="h-full w-full" /> : 
                                        isTeaching ? <GraduationCap className="h-full w-full" /> :
                                        isTechnical ? <Zap className="h-full w-full" /> :
-                                       isGovt ? <Landmark className="h-full w-full" /> :
-                                       <Landmark className="h-full w-full" />}
+                                       <LandmarkIcon className="h-full w-full" />}
                                    </div>
                                 )}
                              </div>
