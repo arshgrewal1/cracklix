@@ -16,8 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Hub Explorer v3.0.
- * RESTORED: Removed image URL overrides; defaulting to Lucide icons.
+ * @fileOverview Institutional Hub Explorer v4.0.
+ * RECOVERED: Restored unique fallback icons for different board categories.
  */
 
 export default function HubExamsPage() {
@@ -79,7 +79,7 @@ export default function HubExamsPage() {
                     />
                   ) : (
                     <div className="text-primary opacity-40">
-                       {hub?.categoryId === 'punjab-govt' ? <ShieldCheck className="h-16 w-16" /> : 
+                       {hub?.categoryId === 'punjab-govt' ? (hub.id.toLowerCase().includes('police') ? <ShieldCheck className="h-16 w-16" /> : <Landmark className="h-16 w-16" />) : 
                         hub?.categoryId === 'punjab-teaching' ? <GraduationCap className="h-16 w-16" /> : 
                         hub?.categoryId === 'punjab-technical' ? <Zap className="h-16 w-16" /> :
                         <Landmark className="h-16 w-16" />}
@@ -123,7 +123,7 @@ export default function HubExamsPage() {
                                    />
                                 ) : (
                                   <div className="text-primary opacity-40">
-                                     {hub?.categoryId === 'punjab-govt' ? <ShieldCheck className="h-10 w-10" /> : 
+                                     {hub?.categoryId === 'punjab-govt' ? (hub.id.toLowerCase().includes('police') ? <ShieldCheck className="h-10 w-10" /> : <Landmark className="h-10 w-10" />) : 
                                       hub?.categoryId === 'punjab-teaching' ? <GraduationCap className="h-10 w-10" /> : 
                                       hub?.categoryId === 'punjab-technical' ? <Zap className="h-10 w-10" /> :
                                       <Landmark className="h-10 w-10" />}

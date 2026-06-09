@@ -19,8 +19,8 @@ import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Authority Hub v49.0.
- * RESTORED: Defaulting to high-quality Lucide Icons.
+ * @fileOverview Authority Hub v50.0.
+ * RECOVERED: Unique fallback icons based on board identity.
  */
 
 export default function ExamManagement() {
@@ -145,11 +145,11 @@ export default function ExamManagement() {
                 const category = categories?.find(c => c.id === board.categoryId);
                 const isImageFailed = failedImages[board.id];
                 
-                const catId = board.categoryId;
-                const isGovt = catId === 'punjab-govt';
-                const isTeaching = catId === 'punjab-teaching';
-                const isTechnical = catId === 'punjab-technical';
-                const isBank = catId === 'banking';
+                const id = board.id?.toLowerCase();
+                const abbrev = board.abbreviation?.toLowerCase();
+                const isPolice = id.includes('police') || abbrev === 'police';
+                const isTechnical = board.categoryId === 'punjab-technical';
+                const isTeaching = board.categoryId === 'punjab-teaching';
 
                 return (
                   <TableRow key={board.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
@@ -165,10 +165,9 @@ export default function ExamManagement() {
                             />
                           ) : (
                             <div className="text-primary opacity-40">
-                               {isGovt ? <Shield className="h-8 w-8" /> : 
+                               {isPolice ? <Shield className="h-8 w-8" /> : 
                                 isTeaching ? <GraduationCap className="h-8 w-8" /> : 
                                 isTechnical ? <Zap className="h-8 w-8" /> :
-                                isBank ? <Landmark className="h-8 w-8" /> :
                                 <Landmark className="h-8 w-8" />}
                             </div>
                           )}

@@ -2,8 +2,8 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, getDocs, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Node v10.0.
- * RESTORED: Removed hardcoded image URLs to return to icon-based branding.
+ * @fileOverview Institutional Seeding Node v11.0.
+ * RESTORED: Removed all hardcoded iconUrl overrides to allow unique board-level branding.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -62,7 +62,7 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'categories', cat.id), { ...cat, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 2. HUBS (Boards) - RESTORED TO NO OVERRIDES
+  // 2. HUBS (Boards)
   const boards = [
     // Govt Hubs
     { id: 'psssb', abbreviation: 'PSSSB', name: 'Punjab Subordinate Services Selection Board', region: 'Punjab', categoryId: 'punjab-govt' },

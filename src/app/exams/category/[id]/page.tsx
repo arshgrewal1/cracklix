@@ -10,14 +10,14 @@ import { collection, query, where } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, Landmark, GraduationCap, ShieldCheck, Zap, Globe, Wallet, Info, Shield } from "lucide-react"
+import { ChevronLeft, ChevronRight, Landmark, GraduationCap, ShieldCheck, Zap, Globe, Wallet, Info, Shield, FileText } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Explorer v3.0.
- * RESTORED: Standard icons used as default hub identity.
+ * @fileOverview Institutional Category Explorer v4.0.
+ * RECOVERED: Restored unique board fallback icons (Shield for Police, Zap for Technical, Cap for Teaching).
  */
 
 const CATEGORY_META: Record<string, any> = {
@@ -91,6 +91,15 @@ export default function CategoryHubsPage() {
                      e.boardId?.toLowerCase() === hub.abbreviation?.toLowerCase()
                   ).length;
 
+                  // UNIQUE HUB ICON LOGIC
+                  const id = hub.id?.toLowerCase();
+                  const abbrev = hub.abbreviation?.toLowerCase();
+                  
+                  const isPolice = id.includes('police') || abbrev === 'police';
+                  const isTechnical = catId === 'punjab-technical';
+                  const isTeaching = catId === 'punjab-teaching';
+                  const isGovt = catId === 'punjab-govt';
+
                   return (
                     <Link key={hub.id} href={`/exams/hub/${hub.id}`}>
                        <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100 p-8 text-left">
@@ -100,7 +109,11 @@ export default function CategoryHubsPage() {
                                    <img src={hub.iconUrl} className="h-full w-full object-contain p-2" alt="Hub Logo" referrerPolicy="no-referrer" />
                                 ) : (
                                    <div className="text-primary opacity-40 p-4">
-                                      {meta.icon}
+                                      {isPolice ? <Shield className="h-full w-full" /> : 
+                                       isTeaching ? <GraduationCap className="h-full w-full" /> :
+                                       isTechnical ? <Zap className="h-full w-full" /> :
+                                       isGovt ? <Landmark className="h-full w-full" /> :
+                                       <Landmark className="h-full w-full" />}
                                    </div>
                                 )}
                              </div>
