@@ -26,8 +26,8 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Optimized Login Hub v4.0.
- * HARDENED: Permanent Super Admin Registry for Founder Arsh Grewal.
+ * @fileOverview Optimized Login Hub v5.0.
+ * UPDATED: Integrated returnUrl persistence for Test Access Firewall.
  */
 
 // PERMANENT AUTHORITY WHITELIST
@@ -174,10 +174,10 @@ function LoginContent() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="z-10 w-full max-w-md">
         <div className="flex flex-col items-center mb-10"><Logo variant="light" className="scale-110" /></div>
         
-        {returnUrl !== "/dashboard" && returnUrl !== "/" && (
+        {searchParams.has("returnUrl") && (
            <div className="bg-primary/10 border border-primary/20 p-4 rounded-xl mb-6 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
               <AlertCircle className="h-5 w-5 text-primary shrink-0" />
-              <p className="text-[11px] font-black uppercase tracking-widest text-primary">Please login to continue.</p>
+              <p className="text-[11px] font-black uppercase tracking-widest text-primary">Please login to attempt this test.</p>
            </div>
         )}
 
@@ -258,6 +258,12 @@ function LoginContent() {
               </Button>
             </form>
             
+            <div className="flex items-center gap-4 py-2">
+               <div className="h-px flex-1 bg-white/10" />
+               <span className="text-[10px] font-black text-slate-500 uppercase">OR</span>
+               <div className="h-px flex-1 bg-white/10" />
+            </div>
+
             <Button variant="outline" className="w-full h-12 border-white/10 bg-white/5 text-white gap-3 rounded-xl font-bold text-xs hover:bg-white/10" onClick={handleGoogleSignIn} disabled={isActuallyLoading}>
               Continue with Google
             </Button>
@@ -272,16 +278,14 @@ function LoginContent() {
           </CardContent>
         </Card>
         
-        {/* DEVELOPER CREDIT */}
         <div className="mt-10 text-center opacity-30 flex flex-col items-center gap-1">
            <p className="text-[9px] font-black uppercase tracking-[0.4em] text-slate-400">Developed by Arsh Grewal</p>
            <div className="h-px w-8 bg-slate-500/20" />
         </div>
       </motion.div>
 
-      {/* RESET PASSWORD DIALOG */}
       <Dialog open={isResetDialogOpen} onOpenChange={isResetDialogOpen && !resetLoading ? setIsResetDialogOpen : undefined}>
-        <DialogContent className="bg-[#0F172A] text-white border-white/10 rounded-[2.5rem] max-w-[400px] p-10 shadow-5xl">
+        <DialogContent className="bg-[#0F172A] text-white border-white/10 rounded-[2.5rem] max-w-[400px] p-10 shadow-5xl text-left">
           <DialogHeader className="text-center space-y-4">
             <div className="h-16 w-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto text-primary shadow-xl">
                <RefreshCw className={cn("h-8 w-8", resetLoading && "animate-spin")} />

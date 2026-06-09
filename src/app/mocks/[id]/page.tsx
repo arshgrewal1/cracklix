@@ -2,7 +2,7 @@
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, usePathname } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useFirestore, useUser } from "@/firebase"
@@ -27,13 +27,14 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Individual Mock Gateway v14.0.
- * HARDENED: Direct entrance audit with strict [RUNTIME_VAL] console telemetry.
+ * @fileOverview Individual Mock Gateway v15.0.
+ * HARDENED: Authentication Firewall with returnUrl persistence.
  */
 
 export default function MockOverviewPage() {
   const params = useParams()
   const router = useRouter()
+  const pathname = usePathname()
   const db = useFirestore()
   const { user, profile, loading: userLoading } = useUser()
   const mockId = params.id as string
@@ -44,20 +45,25 @@ export default function MockOverviewPage() {
   const [accessChecked, setAccessChecked] = useState(false);
   const [previousAttempts, setPreviousAttempts] = useState<any[]>([]);
 
+  // 1. AUTHENTICATION FIREWALL
+  useEffect(() => {
+    if (!userLoading && !user) {
+       router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+    }
+  }, [user, userLoading, router, pathname]);
+
   useEffect(() => {
     async function checkAccess() {
-      if (mockLoading) return;
+      if (mockLoading || !user) return;
       if (!mock || !db) { setAccessChecked(true); return; }
 
       const tier = (mock.accessLevel || mock.accessType || 'FREE').trim().toUpperCase();
       const isPremium = tier === 'PREMIUM';
       
-      if (user) {
-         try {
-           const resSnap = await getDocs(query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId), limit(1)));
-           setPreviousAttempts(resSnap.docs.map(d => d.data()));
-         } catch (e) {}
-      }
+      try {
+        const resSnap = await getDocs(query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId), limit(1)));
+        setPreviousAttempts(resSnap.docs.map(d => d.data()));
+      } catch (e) {}
 
       // 1. ADMIN BYPASS
       const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
@@ -92,6 +98,8 @@ export default function MockOverviewPage() {
   const isLimitReached = attemptsLeft === 0;
 
   if (mockLoading || userLoading || (user && !accessChecked)) return <div className="h-screen flex items-center justify-center bg-white"><Skeleton className="h-16 w-16 rounded-full animate-pulse" /></div>;
+
+  if (!user) return null; // Redirect handled by firewall
 
   if (!mock) return <div className="h-screen flex flex-col items-center justify-center text-slate-400 gap-4"><Info className="h-12 w-12 opacity-10" /><p className="font-black uppercase tracking-widest text-xs">Registry node missing</p></div>;
 

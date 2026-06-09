@@ -11,17 +11,18 @@ import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, limit } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 
 /**
- * @fileOverview High-Density Mock Feed v17.0.
- * HARDENED: Strict accessLevel normalization with [RUNTIME_VAL] console logs.
+ * @fileOverview High-Density Mock Feed v18.0.
+ * UPDATED: Authentication firewall on "Attempt Now" click.
  */
 
 export default function LatestMocks() {
   const db = useFirestore()
   const { user, profile } = useUser()
   const router = useRouter()
+  const pathname = usePathname()
   
   const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true), limit(8)) : null), [db])
   const { data: rawMocks, loading } = useCollection<any>(mocksQuery)
@@ -47,6 +48,14 @@ export default function LatestMocks() {
     return [...rawMocks].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
   }, [rawMocks])
 
+  const handleAttemptClick = (mockId: string) => {
+    if (!user) {
+       router.push(`/login?returnUrl=${encodeURIComponent(`/mocks/${mockId}`)}`);
+       return;
+    }
+    router.push(`/mocks/${mockId}`);
+  };
+
   return (
     <section className="py-8 md:py-16 bg-white">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -68,10 +77,7 @@ export default function LatestMocks() {
             // NORMALIZATION Audit
             const tier = (mock.accessLevel || mock.accessType || 'FREE').trim().toUpperCase();
             const isPremium = tier === 'PREMIUM';
-            const locked = isPremium && !hasActivePass;
-
-            // CRITICAL AUDIT LOG
-            console.log(`[RUNTIME_VAL] FEED_CARD: "${mock.title}" | tier: "${tier}" | isPassActive: ${hasActivePass} | isLocked: ${locked}`);
+            const locked = isPremium && user && !hasActivePass;
 
             return (
               <motion.div key={mock.id} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>
@@ -95,8 +101,8 @@ export default function LatestMocks() {
                           <Lock className="h-3 w-3" /> UNLOCK TEST
                        </Button>
                     ) : (
-                       <Button asChild className="w-full h-9 md:h-12 bg-[#0F172A] hover:bg-black text-white font-black text-[8px] md:text-[10px] uppercase tracking-widest rounded-lg shadow-lg border-none active:scale-95">
-                          <Link href={`/mocks/${mock.id}`}>ATTEMPT NOW</Link>
+                       <Button onClick={() => handleAttemptClick(mock.id)} className="w-full h-9 md:h-12 bg-[#0F172A] hover:bg-black text-white font-black text-[8px] md:text-[10px] uppercase tracking-widest rounded-lg shadow-lg border-none active:scale-95">
+                          ATTEMPT NOW
                        </Button>
                     )}
                   </div>
