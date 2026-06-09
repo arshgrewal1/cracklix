@@ -21,7 +21,6 @@ export interface Category {
   id: string;
   title: string;
   description: string;
-  icon: string;
   color: string;
   bgColor: string;
   highlight: string;
@@ -34,7 +33,7 @@ export interface Board {
   name: string;
   region: string;
   category: string;
-  categoryId: string; // Relational link to Category
+  categoryId: string; // RELATIONAL: Link to Category
   iconUrl?: string;
   color?: string;
   updatedAt?: any;

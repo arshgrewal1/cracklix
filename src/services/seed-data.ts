@@ -1,10 +1,15 @@
 
 import { Firestore, doc, setDoc, serverTimestamp, collection, getDocs, writeBatch } from 'firebase/firestore';
 
+/**
+ * @fileOverview Institutional Seeding Node v4.0.
+ * UPDATED: Strictly implements Category -> Hub (Board) -> Exam (Vertical) hierarchy.
+ */
+
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Hierarchical Registry Sync...');
 
-  // 1. Core Categories
+  // 1. CORE CATEGORIES (Top Level)
   const categories = [
     {
       id: "punjab-govt",
@@ -57,7 +62,7 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'categories', cat.id), { ...cat, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 2. Boards (Hubs) Migration
+  // 2. HUBS (Boards) - Mapped to Categories
   const psssbLogo = "https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg";
   const psebLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
   
@@ -72,7 +77,7 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 3. Exams (Verticals) Migration logic
+  // 3. EXAMS (Verticals) - Relational Migration
   const examsSnap = await getDocs(collection(db, "exams"));
   const batch = writeBatch(db);
   
@@ -80,7 +85,7 @@ export async function seedInitialData(db: Firestore) {
     const data = d.data();
     let catId = data.categoryId || 'punjab-govt';
     
-    // Auto-inference for legacy data
+    // Auto-inference logic for mapping legacy verticals to the new 5-tier system
     const name = (data.name || "").toUpperCase();
     if (name.includes('PSTET') || name.includes('CTET') || name.includes('CADRE') || name.includes('ETT')) catId = 'punjab-teaching';
     if (name.includes('PSPCL') || name.includes('JE ') || name.includes('ALM') || name.includes('LINEMAN')) catId = 'punjab-technical';

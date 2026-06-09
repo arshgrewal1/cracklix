@@ -48,7 +48,7 @@ export default function CategoryHubsPage() {
         // Option 1: Direct categoryId match
         if (b.categoryId === catId) return true;
         
-        // Option 2: Inference mapping
+        // Option 2: Inference mapping for legacy boards
         const abbrev = (b.abbreviation || "").toUpperCase();
         const bid = (b.id || "").toLowerCase();
 
