@@ -16,8 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Hub Explorer (Hub -> Exams) v22.0.
- * UPDATED: Permanently set official Emblem for all Punjab Government verticals.
+ * @fileOverview Institutional Hub Explorer.
+ * UPDATED: Hardened relational mapping and permanent logos.
  */
 
 export default function HubExamsPage() {
@@ -45,7 +45,6 @@ export default function HubExamsPage() {
       const eids = m.examIds || (m.examId ? [m.examId] : []);
       eids.forEach((eid: string) => {
         if (!map[eid]) map[eid] = { full: 0, subject: 0, pyq: 0, sectional: 0 };
-        
         const type = m.mockType;
         if (type === 'FULL') map[eid].full++;
         else if (type === 'SUBJECT') map[eid].subject++;
@@ -59,9 +58,9 @@ export default function HubExamsPage() {
   if (hubLoading) return <div className="h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
 
   // PERMANENT LOGO REGISTRY
-  const govtOfficialEmblem = "https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png";
-  const teachingOfficialLogo = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT77AiJp2d3yn7Lwjk7LG6nDeLpQC_ZnFs6FZg4yAieypyMsmctxNGWRdk&s=10";
-  const technicalOfficialLogo = "https://affiliation.pbteched.net/assets/images/banner-5.png";
+  const govtEmblem = "https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png";
+  const technicalLogo = "https://affiliation.pbteched.net/assets/images/banner-5.png";
+  const teachingLogo = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT77AiJp2d3yn7Lwjk7LG6nDeLpQC_ZnFs6FZg4yAieypyMsmctxNGWRdk&s=10";
 
   return (
     <div className="min-h-screen bg-slate-50/50 font-body">
@@ -75,8 +74,13 @@ export default function HubExamsPage() {
             </button>
             <div className="flex flex-col md:flex-row items-center gap-10">
                <div className="h-24 w-24 md:h-36 md:w-36 rounded-[2rem] md:rounded-[3rem] bg-slate-50 border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden shrink-0">
-                  {hub?.iconUrl && !failedImages[hub.id] ? (
-                    <img src={hub.iconUrl} className={cn("h-full w-full object-contain p-4", (hub.categoryId === 'punjab-govt' || hub.categoryId === 'punjab-teaching' || hub.categoryId === 'punjab-technical') ? "scale-140" : "")} alt="Logo" onError={() => setFailedImages(p => ({...p, [hub.id]: true}))} />
+                  {hub?.categoryId ? (
+                    <img 
+                      src={hub.categoryId === 'punjab-govt' ? govtEmblem : hub.categoryId === 'punjab-teaching' ? teachingLogo : technicalLogo} 
+                      className="h-full w-full object-contain p-4 scale-140" 
+                      alt="Hub Logo" 
+                      referrerPolicy="no-referrer"
+                    />
                   ) : (
                     <Shield className="h-12 w-12 text-slate-200" />
                   )}
@@ -101,38 +105,27 @@ export default function HubExamsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                {exams.map((exam) => {
                   const stats = statsMap[exam.id] || { full: 0, subject: 0, pyq: 0, sectional: 0 };
-                  const name = exam.name?.toUpperCase() || "";
-                  const abbrev = hub?.abbreviation?.toUpperCase() || "";
-                  const categoryId = exam.categoryId;
-                  
-                  const isGovt = categoryId === 'punjab-govt' || ['PSSSB', 'PPSC', 'POLICE'].includes(abbrev);
-                  const isTeaching = categoryId === 'punjab-teaching' || ['PSTET', 'CTET', 'EDUCATION'].includes(abbrev);
-                  const isTechnical = categoryId === 'punjab-technical' || ['PSPCL', 'PSTCL', 'PSBTE'].includes(abbrev);
+                  const categoryId = hub?.categoryId;
 
-                  let forcedLogo = exam.iconUrl || hub?.iconUrl;
-                  if (isGovt) forcedLogo = govtOfficialEmblem;
-                  else if (isTeaching) forcedLogo = teachingOfficialLogo;
-                  else if (isTechnical) forcedLogo = technicalOfficialLogo;
+                  let forcedLogo = govtEmblem;
+                  if (categoryId === 'punjab-teaching') forcedLogo = teachingLogo;
+                  else if (categoryId === 'punjab-technical') forcedLogo = technicalLogo;
 
                   return (
                     <Link key={exam.id} href={`/exams/${exam.id}`}>
                        <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[3rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100 p-10 text-left">
                           <div className="flex justify-between items-start mb-10">
                              <div className="h-16 w-16 md:h-20 md:w-20 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center transition-all group-hover:shadow-xl shadow-inner relative overflow-hidden shrink-0">
-                                {forcedLogo && !failedImages[exam.id] ? (
-                                   <img src={forcedLogo} className={cn("w-full h-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-110", (isGovt || isTeaching || isTechnical) ? "scale-140" : "")} alt="Logo" referrerPolicy="no-referrer" onError={() => setFailedImages(p => ({...p, [exam.id]: true}))} />
-                                ) : (
-                                   <GraduationCap className="h-8 w-8 text-primary" />
-                                )}
+                                <img src={forcedLogo} className="w-full h-full object-contain p-2.5 scale-140" alt="Logo" referrerPolicy="no-referrer" />
                              </div>
                              <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-100 text-slate-400">
-                                {hub?.abbreviation} HUB
+                                {hub?.abbreviation} VERTICAL
                              </Badge>
                           </div>
 
                           <div className="space-y-4 flex-1">
                              <h3 className="text-2xl md:text-3xl font-black text-[#0F172A] uppercase tracking-tight leading-tight group-hover:text-primary transition-colors">{exam.name}</h3>
-                             <p className="text-xs font-medium text-slate-400 leading-relaxed line-clamp-2">Prepare for {exam.name} with official patterns.</p>
+                             <p className="text-xs font-medium text-slate-400 leading-relaxed line-clamp-2">Complete practice for {exam.name}.</p>
                           </div>
 
                           <div className="mt-12 pt-8 border-t border-slate-50 grid grid-cols-2 gap-4">

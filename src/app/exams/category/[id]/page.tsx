@@ -16,8 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Explorer (Category -> Hubs).
- * UPDATED: Hardened relational counting logic to fix '0 verticals' bug.
+ * @fileOverview Institutional Category Explorer.
+ * UPDATED: Hardened relational counting and permanent logos.
  */
 
 const CATEGORY_META: Record<string, any> = {
@@ -41,32 +41,22 @@ export default function CategoryHubsPage() {
   const { data: boards, loading: boardsLoading } = useCollection<any>(boardsQuery);
   const { data: allExams } = useCollection<any>(examsQuery);
 
-  // MAPPING LOGIC (Strictly deduplicated by Abbreviation)
+  // OFFICIAL LOGOS
+  const govtEmblem = "https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png";
+  const technicalLogo = "https://affiliation.pbteched.net/assets/images/banner-5.png";
+  const teachingLogo = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT77AiJp2d3yn7Lwjk7LG6nDeLpQC_ZnFs6FZg4yAieypyMsmctxNGWRdk&s=10";
+
+  // DYNAMIC DEDUPLICATION HUB
   const categoryHubs = useMemo(() => {
      if (!boards) return [];
-     
      const hubMap = new Map();
-     
      boards.forEach((b: any) => {
-        const abbrev = (b.abbreviation || "").toUpperCase();
-        const bid = (b.id || "").toLowerCase();
-        
-        let matches = false;
-        if (b.categoryId === catId) matches = true;
-        else if (catId === 'punjab-govt' && (['PSSSB', 'PPSC', 'POLICE'].includes(abbrev) || bid.includes('police'))) matches = true;
-        else if (catId === 'punjab-teaching' && (['CTET', 'PSTET', 'EDUCATION'].includes(abbrev))) matches = true;
-        else if (catId === 'punjab-technical' && (['PSPCL', 'PSTCL', 'PSBTE'].includes(abbrev))) matches = true;
-        else if (catId === 'banking' && (['IBPS', 'SBI', 'RBI', 'NABARD'].includes(abbrev))) matches = true;
-        else if (catId === 'central-govt' && (['SSC', 'RAILWAYS', 'ARMY', 'NAVY', 'AIRFORCE'].includes(abbrev) || bid.includes('army'))) matches = true;
-
-        if (matches) {
+        if (b.categoryId === catId) {
+           const abbrev = (b.abbreviation || "").toUpperCase();
            const key = abbrev || b.id;
-           if (!hubMap.has(key)) {
-              hubMap.set(key, b);
-           }
+           if (!hubMap.has(key)) hubMap.set(key, b);
         }
      });
-
      return Array.from(hubMap.values()).sort((a, b) => a.abbreviation.localeCompare(b.abbreviation));
   }, [boards, catId]);
 
@@ -102,28 +92,32 @@ export default function CategoryHubsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                {categoryHubs.map((hub) => {
                   const examCount = (allExams || []).filter((e: any) => 
-                     e.boardId === hub.id || 
                      e.boardId?.toLowerCase() === hub.id?.toLowerCase() ||
                      e.boardId?.toLowerCase() === hub.abbreviation?.toLowerCase()
                   ).length;
+
+                  let forcedLogo = hub.iconUrl;
+                  if (catId === 'punjab-govt') forcedLogo = govtEmblem;
+                  else if (catId === 'punjab-teaching') forcedLogo = teachingLogo;
+                  else if (catId === 'punjab-technical') forcedLogo = technicalLogo;
 
                   return (
                     <Link key={hub.id} href={`/exams/hub/${hub.id}`}>
                        <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100 p-8 text-left">
                           <div className="flex justify-between items-start mb-8">
                              <div className="h-16 w-16 rounded-[1.2rem] bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0 shadow-inner group-hover:scale-105 transition-transform">
-                                {hub.iconUrl ? (
-                                   <img src={hub.iconUrl} className="h-full w-full object-contain p-2" alt="Hub Logo" referrerPolicy="no-referrer" />
+                                {forcedLogo ? (
+                                   <img src={forcedLogo} className="h-full w-full object-contain p-2 scale-125" alt="Hub Logo" referrerPolicy="no-referrer" />
                                 ) : (
                                    <Landmark className="h-8 w-8 text-slate-200" />
                                 )}
                              </div>
-                             <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-100 text-slate-400">BOARD HUB</Badge>
+                             <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-100 text-slate-400">OFFICIAL HUB</Badge>
                           </div>
                           
                           <div className="space-y-2 flex-1">
                              <h3 className="text-2xl font-black text-[#0F172A] uppercase tracking-tight leading-none group-hover:text-primary transition-colors">{hub.abbreviation} Hub</h3>
-                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{hub.name}</p>
+                             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest truncate">{hub.name}</p>
                           </div>
 
                           <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">

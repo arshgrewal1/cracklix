@@ -9,13 +9,14 @@ import { collection, query, orderBy } from "firebase/firestore"
 import { ShieldCheck, GraduationCap, Zap, Wallet, Globe, ChevronRight, Landmark } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview RESTORED: Hierarchical Category Discovery.
- * This is the root node showing the 5 major recruitment categories.
+ * @fileOverview Institutional Master Registry Landing.
+ * UPDATED: Dynamic Hub counting to ensure visibility of preparation depth.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -30,7 +31,10 @@ export default function ExamsEntryPage() {
   const db = useFirestore();
   
   const catQuery = useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]);
+  const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
+
   const { data: categories, loading } = useCollection<any>(catQuery);
+  const { data: boards } = useCollection<any>(boardsQuery);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body">
@@ -56,37 +60,40 @@ export default function ExamsEntryPage() {
            {loading ? (
              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3.5rem]" />)
            ) : categories && categories.length > 0 ? (
-             categories.map((cat) => (
-                <Link key={cat.id} href={`/exams/category/${cat.id}`}>
-                   <Card className="border-none shadow-xl hover:shadow-5xl hover:translate-y-[-12px] transition-all duration-700 rounded-[3.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100">
-                      <CardContent className="p-10 md:p-14 flex flex-col h-full">
-                         <div className="flex justify-between items-start mb-12">
-                            <div className={cn("h-20 w-20 md:h-24 md:w-24 rounded-[1.8rem] md:rounded-[2.2rem] flex items-center justify-center transition-all group-hover:shadow-2xl shadow-inner relative overflow-hidden shrink-0", cat.bgColor || "bg-orange-50", cat.color || "text-primary")}>
-                               {CATEGORY_ICONS[cat.id] || <ShieldCheck className="h-10 w-10" />}
-                            </div>
-                            <Badge className="bg-[#0F172A] text-white border-none text-[8px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-xl shadow-lg">
-                               {cat.highlight || "VERTICAL"}
-                            </Badge>
-                         </div>
-                         
-                         <div className="space-y-5 flex-1">
-                            <h3 className="font-headline text-3xl md:text-4xl font-black text-[#0F172A] uppercase leading-[0.95] group-hover:text-primary transition-colors">
-                               {cat.title}
-                            </h3>
-                            <p className="text-sm md:text-lg font-medium text-slate-400 leading-relaxed">
-                               {cat.description}
-                            </p>
-                         </div>
+             categories.map((cat) => {
+                const hubCount = (boards || []).filter((b: any) => b.categoryId === cat.id).length;
+                return (
+                  <Link key={cat.id} href={`/exams/category/${cat.id}`}>
+                     <Card className="border-none shadow-xl hover:shadow-5xl hover:translate-y-[-12px] transition-all duration-700 rounded-[3.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100">
+                        <CardContent className="p-10 md:p-14 flex flex-col h-full">
+                           <div className="flex justify-between items-start mb-12">
+                              <div className={cn("h-20 w-20 md:h-24 md:w-24 rounded-[1.8rem] md:rounded-[2.2rem] flex items-center justify-center transition-all group-hover:shadow-2xl shadow-inner relative overflow-hidden shrink-0", cat.bgColor || "bg-orange-50", cat.color || "text-primary")}>
+                                 {CATEGORY_ICONS[cat.id] || <ShieldCheck className="h-10 w-10" />}
+                              </div>
+                              <Badge className="bg-[#0F172A] text-white border-none text-[8px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-xl shadow-lg">
+                                 {hubCount} HUBS LIVE
+                              </Badge>
+                           </div>
+                           
+                           <div className="space-y-5 flex-1">
+                              <h3 className="font-headline text-3xl md:text-4xl font-black text-[#0F172A] uppercase leading-[0.95] group-hover:text-primary transition-colors">
+                                 {cat.title}
+                              </h3>
+                              <p className="text-sm md:text-lg font-medium text-slate-400 leading-relaxed">
+                                 {cat.description}
+                              </p>
+                           </div>
 
-                         <div className="mt-12 pt-8 border-t border-slate-50">
-                            <Button variant="ghost" className="w-full h-16 rounded-2xl bg-slate-900 text-white group-hover:bg-primary transition-all shadow-xl font-black uppercase text-[10px] tracking-widest gap-3">
-                               Open Category Hub <ChevronRight className="h-4 w-4" />
-                            </Button>
-                         </div>
-                      </CardContent>
-                   </Card>
-                </Link>
-             ))
+                           <div className="mt-12 pt-8 border-t border-slate-50">
+                              <Button variant="ghost" className="w-full h-16 rounded-2xl bg-slate-900 text-white group-hover:bg-primary transition-all shadow-xl font-black uppercase text-[10px] tracking-widest gap-3">
+                                 Open Category Hub <ChevronRight className="h-4 w-4" />
+                              </Button>
+                           </div>
+                        </CardContent>
+                     </Card>
+                  </Link>
+                )
+             })
            ) : (
              <div className="col-span-full py-20 text-center opacity-20 italic">No categories deployed. Run admin sync.</div>
            )}
