@@ -19,8 +19,8 @@ import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Authority Hub v44.0 - Teaching Hub Restructure.
- * UPDATED: Explicitly synchronized Education Recruitment Hub branding.
+ * @fileOverview Authority Hub v45.0.
+ * UPDATED: Fixed PSBTE official logo URL.
  */
 
 export default function ExamManagement() {
@@ -44,7 +44,7 @@ export default function ExamManagement() {
   const psssbOfficialLogo = "https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg";
   const pspclOfficialLogo = "https://pspcl.in/assets/images/logo.png";
   const pstclOfficialLogo = "https://pstcl.org/images/logo.png";
-  const psbteOfficialLogo = "http://www.punjabteched.com/images/logo.png";
+  const psbteOfficialLogo = "https://www.punjabteched.com/images/Clogo-blue.gif";
   const ctetOfficialLogo = "https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png";
   const pstetOfficialLogo = "https://pstet.pseb.ac.in/img/main-logo-2.png";
   const psebOfficialLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
@@ -183,7 +183,7 @@ export default function ExamManagement() {
                 const isPsssb = abbrev === 'PSSSB';
                 const isPspcl = abbrev === 'PSPCL';
                 const isPstcl = abbrev === 'PSTCL';
-                const isPsbte = abbrev === 'PSBTE';
+                const isPsbte = abbrev === 'PSBTE' || abbrev.includes('TECH');
                 const isCtet = abbrev === 'CTET' || abbrev === 'CBSE';
                 const isPstet = abbrev === 'PSTET';
                 const isEducation = abbrev === 'EDUCATION' || abbrev === 'PSEB' || abbrev.includes('ETT') || abbrev.includes('CADRE') || abbrev.includes('LECTURER');

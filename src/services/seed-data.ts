@@ -2,8 +2,8 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, getDocs, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Node v8.0.
- * UPDATED: 3-Hub Teaching Hierarchy (PSTET, CTET, Education Recruitment Hub).
+ * @fileOverview Institutional Seeding Node v8.1.
+ * UPDATED: Fixed PSBTE official logo URL.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -69,7 +69,7 @@ export async function seedInitialData(db: Firestore) {
   const ctetLogo = "https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png";
   const pspclLogo = "https://pspcl.in/assets/images/logo.png";
   const pstclLogo = "https://pstcl.org/images/logo.png";
-  const psbteLogo = "http://www.punjabteched.com/images/logo.png";
+  const psbteLogo = "https://www.punjabteched.com/images/Clogo-blue.gif";
   
   const boards = [
     { id: 'psssb', abbreviation: 'PSSSB', name: 'Punjab Subordinate Services Selection Board', region: 'Punjab', category: 'STATE_BOARD', categoryId: 'punjab-govt', iconUrl: psssbLogo },

@@ -31,8 +31,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Master Registry v4.7.
- * UPDATED: Hardened logo detection for Cadre exams and Teacher posts.
+ * @fileOverview Institutional Exam Master Registry v4.8.
+ * UPDATED: Fixed PSBTE official logo URL.
  */
 
 export default function ExamRegistryPage() {
@@ -95,7 +95,7 @@ export default function ExamRegistryPage() {
   const psebOfficialLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
   const pspclOfficialLogo = "https://pspcl.in/assets/images/logo.png";
   const pstclOfficialLogo = "https://pstcl.org/images/logo.png";
-  const psbteOfficialLogo = "http://www.punjabteched.com/images/logo.png";
+  const psbteOfficialLogo = "https://www.punjabteched.com/images/Clogo-blue.gif";
 
   return (
     <div className="space-y-12 pb-24 text-left">
@@ -126,7 +126,7 @@ export default function ExamRegistryPage() {
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-slate-50 h-20">
                 <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Vertical Identity</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Board Hub</TableHead>
+                <TableHead className="text-[10px) font-black uppercase tracking-widest text-slate-500">Board Hub</TableHead>
                 <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-slate-500">Registry Category</TableHead>
                 <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Actions</TableHead>
               </TableRow>

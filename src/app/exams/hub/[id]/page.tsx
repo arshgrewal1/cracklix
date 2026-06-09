@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Hub Explorer (Hub -> Exams).
- * UPDATED: Strictly enforcing technical board logos (PSPCL, PSTCL, PSBTE).
+ * UPDATED: Fixed PSBTE official logo URL.
  */
 
 export default function HubExamsPage() {
@@ -63,7 +63,7 @@ export default function HubExamsPage() {
   const psebLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
   const pspclLogo = "https://pspcl.in/assets/images/logo.png";
   const pstclLogo = "https://pstcl.org/images/logo.png";
-  const psbteLogo = "http://www.punjabteched.com/images/logo.png";
+  const psbteLogo = "https://www.punjabteched.com/images/Clogo-blue.gif";
 
   return (
     <div className="min-h-screen bg-slate-50/50 font-body">
