@@ -2,8 +2,9 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, getDocs, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Node v11.0.
- * RESTORED: Removed all hardcoded iconUrl overrides to allow unique board-level branding.
+ * @fileOverview Institutional Seeding Node v12.0.
+ * UPDATED: Strictly mapped Hub Slugs (pstet, ctet, education-recruitment).
+ * FIXED: Removed CTET papers from Education Recruitment Board.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -69,10 +70,10 @@ export async function seedInitialData(db: Firestore) {
     { id: 'punjab-police', abbreviation: 'POLICE', name: 'Punjab Police Recruitment Board', region: 'Punjab', categoryId: 'punjab-govt' },
     { id: 'ppsc-hub', abbreviation: 'PPSC', name: 'Punjab Public Service Commission', region: 'Punjab', categoryId: 'punjab-govt' },
     
-    // Teaching Hubs
-    { id: 'pstet-hub', abbreviation: 'PSTET', name: 'PSTET Hub', region: 'Punjab', categoryId: 'punjab-teaching' },
-    { id: 'ctet-hub', abbreviation: 'CTET', name: 'CTET Hub', region: 'Punjab', categoryId: 'punjab-teaching' },
-    { id: 'education-board', abbreviation: 'EDUCATION', name: 'Education Recruitment Hub', region: 'Punjab', categoryId: 'punjab-teaching' },
+    // Teaching Hubs (Synchronized Slugs)
+    { id: 'pstet', abbreviation: 'PSTET', name: 'PSTET Hub', region: 'Punjab', categoryId: 'punjab-teaching' },
+    { id: 'ctet', abbreviation: 'CTET', name: 'CTET Hub', region: 'National', categoryId: 'punjab-teaching' },
+    { id: 'education-recruitment', abbreviation: 'EDUCATION', name: 'Education Recruitment Board Punjab', region: 'Punjab', categoryId: 'punjab-teaching' },
     
     // Technical Hubs
     { id: 'pspcl', abbreviation: 'PSPCL', name: 'PSPCL Hub', region: 'Punjab', categoryId: 'punjab-technical' },
@@ -86,23 +87,23 @@ export async function seedInitialData(db: Firestore) {
 
   // 3. EXAMS (Verticals)
   const mandatoryExams = [
-    // PSTET Hub
-    { id: 'pstet-p1', name: 'PSTET Paper 1', boardId: 'pstet-hub', categoryId: 'punjab-teaching' },
-    { id: 'pstet-p2', name: 'PSTET Paper 2', boardId: 'pstet-hub', categoryId: 'punjab-teaching' },
+    // PSTET Hub (pstet)
+    { id: 'pstet-p1', name: 'PSTET Paper 1', boardId: 'pstet', categoryId: 'punjab-teaching' },
+    { id: 'pstet-p2', name: 'PSTET Paper 2', boardId: 'pstet', categoryId: 'punjab-teaching' },
     
-    // CTET Hub
-    { id: 'ctet-p1', name: 'CTET Paper 1', boardId: 'ctet-hub', categoryId: 'punjab-teaching' },
-    { id: 'ctet-p2', name: 'CTET Paper 2', boardId: 'ctet-hub', categoryId: 'punjab-teaching' },
+    // CTET Hub (ctet)
+    { id: 'ctet-p1', name: 'CTET Paper 1', boardId: 'ctet', categoryId: 'punjab-teaching' },
+    { id: 'ctet-p2', name: 'CTET Paper 2', boardId: 'ctet', categoryId: 'punjab-teaching' },
     
-    // Education Recruitment Hub
-    { id: 'ett-cadre', name: 'ETT Cadre', boardId: 'education-board', categoryId: 'punjab-teaching' },
-    { id: 'master-cadre', name: 'Master Cadre', boardId: 'education-board', categoryId: 'punjab-teaching' },
-    { id: 'lecturer-cadre', name: 'Lecturer Cadre', boardId: 'education-board', categoryId: 'punjab-teaching' },
-    { id: 'principal', name: 'Principal', boardId: 'education-board', categoryId: 'punjab-teaching' },
-    { id: 'assistant-professor', name: 'Assistant Professor', boardId: 'education-board', categoryId: 'punjab-teaching' },
-    { id: 'head-teacher', name: 'Head Teacher', boardId: 'education-board', categoryId: 'punjab-teaching' },
-    { id: 'computer-teacher', name: 'Computer Teacher', boardId: 'education-board', categoryId: 'punjab-teaching' },
-    { id: 'physical-edu-teacher', name: 'Physical Education Teacher', boardId: 'education-board', categoryId: 'punjab-teaching' },
+    // Education Recruitment Board Punjab (education-recruitment)
+    { id: 'ett-cadre', name: 'ETT Cadre', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
+    { id: 'master-cadre', name: 'Master Cadre', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
+    { id: 'lecturer-cadre', name: 'Lecturer Cadre', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
+    { id: 'principal', name: 'Principal', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
+    { id: 'assistant-professor', name: 'Assistant Professor', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
+    { id: 'head-teacher', name: 'Head Teacher', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
+    { id: 'computer-teacher', name: 'Computer Teacher', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
+    { id: 'physical-edu-teacher', name: 'Physical Education Teacher', boardId: 'education-recruitment', categoryId: 'punjab-teaching' },
     
     // Technical Hubs
     { id: 'pspcl-alm', name: 'ALM', boardId: 'pspcl', categoryId: 'punjab-technical' },
@@ -123,5 +124,5 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'exams', ex.id), { ...ex, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  console.log('[AUDIT] Hierarchical Registry Deduplicated and Synchronized.');
+  console.log('[AUDIT] Hierarchical Registry Slugs Synchronized and Deduped.');
 }

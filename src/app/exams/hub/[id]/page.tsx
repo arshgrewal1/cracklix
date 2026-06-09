@@ -16,8 +16,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Hub Explorer v4.0.
- * RECOVERED: Restored unique fallback icons for different board categories.
+ * @fileOverview Institutional Hub Explorer v5.0.
+ * RECOVERED: Restored original icon identities (Cap for Teaching, Shield for Police).
+ * UPDATED: Synchronized branding for new teaching slugs.
  */
 
 export default function HubExamsPage() {
