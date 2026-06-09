@@ -1,8 +1,8 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Node v29.0.
- * RECOVERED & LOCKED: Verified official URLs for PSSSB (SVG), Police (PNG), and PSPCL (PNG).
+ * @fileOverview Institutional Seeding Node v30.0.
+ * RECOVERED & LOCKED: Verified official URLs for PSSSB, Police, PSPCL, and Education Hub (PSEB).
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -27,7 +27,7 @@ export async function seedInitialData(db: Firestore) {
       highlight: "EDUCATIONAL",
       color: "text-blue-600",
       bgColor: "bg-blue-50",
-      iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT77AiJp2d3yn7Lwjk7LG6nDeLpQC_ZnFs6FZg4yAieypyMsmctxNGWRdk&s=10",
+      iconUrl: "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png",
       displayOrder: 2
     },
     {
@@ -108,9 +108,27 @@ export async function seedInitialData(db: Firestore) {
       categoryId: 'punjab-technical',
       iconUrl: 'https://www.punjabteched.com/images/Clogo-blue.gif'
     },
-    { id: 'pstet', abbreviation: 'PSTET', name: 'PSTET Hub', categoryId: 'punjab-teaching', iconUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT77AiJp2d3yn7Lwjk7LG6nDeLpQC_ZnFs6FZg4yAieypyMsmctxNGWRdk&s=10' },
-    { id: 'ctet', abbreviation: 'CTET', name: 'CTET Hub', categoryId: 'punjab-teaching', iconUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT77AiJp2d3yn7Lwjk7LG6nDeLpQC_ZnFs6FZg4yAieypyMsmctxNGWRdk&s=10' },
-    { id: 'education-recruitment', abbreviation: 'EDUCATION', name: 'Education Recruitment Board Punjab', categoryId: 'punjab-teaching', iconUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT77AiJp2d3yn7Lwjk7LG6nDeLpQC_ZnFs6FZg4yAieypyMsmctxNGWRdk&s=10' }
+    { 
+      id: 'pstet', 
+      abbreviation: 'PSTET', 
+      name: 'PSTET Hub', 
+      categoryId: 'punjab-teaching', 
+      iconUrl: 'https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png' 
+    },
+    { 
+      id: 'ctet', 
+      abbreviation: 'CTET', 
+      name: 'CTET Hub', 
+      categoryId: 'punjab-teaching', 
+      iconUrl: 'https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png' 
+    },
+    { 
+      id: 'education-recruitment', 
+      abbreviation: 'EDUCATION', 
+      name: 'Education Recruitment Board Punjab', 
+      categoryId: 'punjab-teaching', 
+      iconUrl: 'https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png' 
+    }
   ];
 
   for (const b of boards) {
