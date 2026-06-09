@@ -51,9 +51,9 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview FINAL HIGH-FIDELITY Mock Architect v61.0.
- * FIXED: Resolved NaN input value error in numeric metadata fields.
- * MAINTAINED: 7:00 AM state with orange Hub selector and dark Question Bank panel.
+ * @fileOverview FINAL HIGH-FIDELITY Mock Architect v62.0.
+ * UPDATED: Added standalone Punjabi/Hindi modes and hardened Question Bank filters.
+ * FIXED: Resolved filter mismatch by implementing cascading board-exam dependency.
  */
 
 export default function MockBuilderPage() {
@@ -89,7 +89,7 @@ function MockBuilderContent() {
   // Question Bank Filters
   const [filterBoard, setFilterBoard] = useState("all")
   const [filterExam, setFilterExam] = useState("all")
-  const [filterSubject, setFilterSubject] = useState("all")
+  const [filterSubject, setSubjectFilter] = useState("all")
   const [hideUsed, setHideUsed] = useState(true)
   const [blockDuplicates, setBlockDuplicates] = useState(true)
   const [bankSelection, setBankSelection] = useState<string[]>([])
@@ -179,6 +179,13 @@ function MockBuilderContent() {
     }
     return filtered;
   }, [rawExams, mockData.boardIds]);
+
+  // CASCADING BANK FILTERS
+  const bankExams = useMemo(() => {
+    if (!rawExams) return [];
+    if (filterBoard === "all") return rawExams;
+    return rawExams.filter(e => e.boardId === filterBoard);
+  }, [rawExams, filterBoard]);
 
   const filteredBank = useMemo(() => {
     const allSelectedIds = sections.flatMap(s => s.questions.map(q => q.id));
@@ -433,6 +440,8 @@ function MockBuilderContent() {
                     <SelectItem value="ENGLISH_PUNJABI">ENGLISH & ਪੰਜਾਬੀ</SelectItem>
                     <SelectItem value="ENGLISH_HINDI">ENGLISH & हिन्दी</SelectItem>
                     <SelectItem value="ENGLISH">ENGLISH ONLY</SelectItem>
+                    <SelectItem value="PUNJABI">ਪੰਜਾਬੀ ONLY</SelectItem>
+                    <SelectItem value="HINDI">हिन्दी ONLY</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -445,7 +454,7 @@ function MockBuilderContent() {
                     <Input 
                        type="number" 
                        value={isNaN(mockData.duration) ? "" : mockData.duration} 
-                       onChange={e => setMockData({...mockData, duration: parseInt(e.target.value)})} 
+                       onChange={e => setMockData({...mockData, duration: parseInt(e.target.value) || 0})} 
                        className="h-16 rounded-2xl bg-slate-50 border-none font-black text-center text-xl shadow-inner" 
                     />
                  </div>
@@ -455,7 +464,7 @@ function MockBuilderContent() {
                     </Label>
                     <Select 
                        value={mockData.attemptLimit?.toString()} 
-                       onValueChange={v => setMockData({...mockData, attemptLimit: parseInt(v)})}
+                       onValueChange={v => setMockData({...mockData, attemptLimit: parseInt(v) || 0})}
                     >
                        <SelectTrigger className="h-16 rounded-2xl bg-white border-2 border-[#F97316] font-black text-[11px] uppercase px-4 shadow-xl">
                           <SelectValue placeholder="UNLIMITED" />
@@ -479,7 +488,7 @@ function MockBuilderContent() {
                        type="number" 
                        step="0.1"
                        value={isNaN(mockData.positiveMarks) ? "" : mockData.positiveMarks} 
-                       onChange={e => setMockData({...mockData, positiveMarks: parseFloat(e.target.value)})}
+                       onChange={e => setMockData({...mockData, positiveMarks: parseFloat(e.target.value) || 0})}
                        className="h-10 bg-transparent border-none text-center font-black text-4xl text-[#10B981] p-0 focus-visible:ring-0" 
                     />
                  </div>
@@ -491,7 +500,7 @@ function MockBuilderContent() {
                        type="number" 
                        step="0.01"
                        value={isNaN(mockData.negativeMarks) ? "" : mockData.negativeMarks} 
-                       onChange={e => setMockData({...mockData, negativeMarks: parseFloat(e.target.value)})}
+                       onChange={e => setMockData({...mockData, negativeMarks: parseFloat(e.target.value) || 0})}
                        className="h-10 bg-transparent border-none text-center font-black text-4xl text-[#F43F5E] p-0 focus-visible:ring-0" 
                     />
                  </div>
@@ -551,7 +560,7 @@ function MockBuilderContent() {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
                            <div className="space-y-3">
                               <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">SOURCE BOARD HUB</Label>
-                              <Select value={filterBoard} onValueChange={setFilterBoard}>
+                              <Select value={filterBoard} onValueChange={(v) => { setFilterBoard(v); setFilterExam("all"); }}>
                                  <SelectTrigger className="h-16 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All..." /></SelectTrigger>
                                  <SelectContent className="bg-[#0B1528] text-white border-white/10 rounded-2xl">
                                     <SelectItem value="all">All Boards</SelectItem>
@@ -565,13 +574,13 @@ function MockBuilderContent() {
                                  <SelectTrigger className="h-16 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All..." /></SelectTrigger>
                                  <SelectContent className="bg-[#0B1528] text-white border-white/10 rounded-2xl">
                                     <SelectItem value="all">All Exams</SelectItem>
-                                    {uniqueExams.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
+                                    {bankExams.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
                                  </SelectContent>
                               </Select>
                            </div>
                            <div className="space-y-3">
                               <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">SUBJECT NODE</Label>
-                              <Select value={filterSubject} onValueChange={setFilterSubject}>
+                              <Select value={filterSubject} onValueChange={setSubjectFilter}>
                                  <SelectTrigger className="h-16 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All..." /></SelectTrigger>
                                  <SelectContent className="bg-[#0B1528] text-white border-white/10 rounded-2xl">
                                     <SelectItem value="all">All Subjects</SelectItem>

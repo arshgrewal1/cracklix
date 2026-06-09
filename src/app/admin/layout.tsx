@@ -40,8 +40,8 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Institutional Sidebar Restoration v112.0.
- * UPDATED: Precise labels synchronized to: DASHBOARD, CATEGORIES, HUBS (BOARDS), VERTICAL REGISTRY, SUBJECT LIST, GLOBAL BANK, BULK INGESTION.
+ * @fileOverview Institutional Sidebar Restoration v113.0.
+ * UPDATED: Standardized labels: DASHBOARD, CATEGORIES, HUBS (BOARDS), VERTICAL REGISTRY, SUBJECT LIST, GLOBAL BANK, BULK INGESTION.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
