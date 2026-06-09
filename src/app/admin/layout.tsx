@@ -1,4 +1,4 @@
-'use client';
+'use server';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { 
@@ -41,7 +41,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
-import { useUser, useAuth, useFirestore } from "@/firebase"
+import { useUser, useAuth } from "@/firebase"
 import { useRouter, usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
 import { signOut } from "firebase/auth"
@@ -50,13 +50,13 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Institutional Security Protocol v99.9.
- * UPDATED: Matched sidebar labels to the high-fidelity screenshot.
+ * @fileOverview Institutional Security Protocol v101.0.
+ * UPDATED: Sidebar labels strictly matched to high-fidelity screenshot.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
-export default function AdminLayout({ children }: { children: React.Node }) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser()
   const auth = useAuth()
   const router = useRouter()
@@ -106,9 +106,8 @@ export default function AdminLayout({ children }: { children: React.Node }) {
             <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Master Registry</SidebarGroupLabel>
             <SidebarMenu>
               <AdminNavItem icon={<LayoutDashboard />} label="Dashboard" href="/admin" active={pathname === "/admin"} />
-              <AdminNavItem icon={<Layers className="text-primary" />} label="Categories" href="/admin/categories" active={pathname === "/admin/categories"} />
-              <AdminNavItem icon={<Landmark className="text-amber-400" />} label="Hubs (Boards)" href="/admin/exams" active={pathname === "/admin/exams"} />
-              <AdminNavItem icon={<GraduationCap className="text-emerald-400" />} label="Vertical Registry" href="/admin/exam-registry" active={pathname === "/admin/exam-registry"} />
+              <AdminNavItem icon={<Landmark className="text-amber-400" />} label="Authority Hub" href="/admin/exams" active={pathname === "/admin/exams"} />
+              <AdminNavItem icon={<GraduationCap className="text-emerald-400" />} label="Exam Registry" href="/admin/exam-registry" active={pathname === "/admin/exam-registry"} />
               <AdminNavItem icon={<SearchCode className="text-emerald-400" />} label="Subject List" href="/admin/subjects" active={pathname === "/admin/subjects"} />
               <AdminNavItem icon={<Database />} label="Global Bank" href="/admin/questions" active={pathname === "/admin/questions"} />
               <AdminNavItem icon={<Rocket className="text-primary" />} label="Bulk Ingestion" href="/admin/bulk-import" active={pathname === "/admin/bulk-import"} />
@@ -167,7 +166,7 @@ export default function AdminLayout({ children }: { children: React.Node }) {
                 <User className="h-4 w-4" />
              </div>
              <div className="text-left">
-                <p className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none mb-1">ADMIN LOGIN</p>
+                <p className="text-[7px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none mb-1 md:mb-1.5">ADMIN LOGIN</p>
                 <p className="text-[11px] font-black text-white uppercase tracking-tight truncate max-w-[120px]">{profile?.name || (isFounder ? 'FOUNDER' : 'ADMIN')}</p>
              </div>
           </div>
