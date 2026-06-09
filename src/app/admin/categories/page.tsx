@@ -19,8 +19,8 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Governance Node v12.0.
- * UPDATED: Added MoveUp/Down reordering logic.
+ * @fileOverview Institutional Category Governance Node v12.1.
+ * FIXED: Hardened controlled inputs to prevent "undefined" value errors.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -190,7 +190,7 @@ export default function CategoryManagement() {
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Registry ID (Slug)</Label>
                      <Input 
-                        value={editingCat?.id} 
+                        value={editingCat?.id ?? ""} 
                         onChange={e => setEditingCat({...editingCat, id: e.target.value.toLowerCase().replace(/\s+/g, '-')})} 
                         className="h-12 rounded-xl bg-slate-50 border-none font-mono text-xs" 
                         placeholder="e.g. punjab-govt" 
@@ -201,7 +201,7 @@ export default function CategoryManagement() {
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Display Order</Label>
                      <Input 
                         type="number" 
-                        value={editingCat?.displayOrder} 
+                        value={editingCat?.displayOrder ?? ""} 
                         onChange={e => setEditingCat({...editingCat, displayOrder: e.target.value})} 
                         className="h-12 rounded-xl bg-slate-50 border-none font-black text-center" 
                      />
@@ -210,7 +210,7 @@ export default function CategoryManagement() {
                <div className="space-y-2 text-left">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Headline Title</Label>
                   <Input 
-                    value={editingCat?.title} 
+                    value={editingCat?.title ?? ""} 
                     onChange={e => setEditingCat({...editingCat, title: e.target.value})} 
                     className="h-14 rounded-xl border-slate-100 font-black text-lg text-[#0F172A]" 
                     placeholder="e.g. Punjab Teaching Exams"
@@ -219,7 +219,7 @@ export default function CategoryManagement() {
                <div className="space-y-2 text-left">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Thematic Description</Label>
                   <Textarea 
-                    value={editingCat?.description} 
+                    value={editingCat?.description ?? ""} 
                     onChange={e => setEditingCat({...editingCat, description: e.target.value})} 
                     className="rounded-xl border-slate-100 bg-slate-50 min-h-[100px] font-medium leading-relaxed" 
                     placeholder="Describe associated recruitment boards..."
@@ -229,7 +229,7 @@ export default function CategoryManagement() {
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Highlight Badge</Label>
                      <Input 
-                        value={editingCat?.highlight} 
+                        value={editingCat?.highlight ?? ""} 
                         onChange={e => setEditingCat({...editingCat, highlight: e.target.value})} 
                         className="h-12 rounded-xl border-slate-100 uppercase text-[10px] font-black" 
                         placeholder="e.g. STATE LEVEL"
@@ -238,7 +238,7 @@ export default function CategoryManagement() {
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Theme Color (Tailwind)</Label>
                      <Input 
-                        value={editingCat?.color} 
+                        value={editingCat?.color ?? ""} 
                         onChange={e => setEditingCat({...editingCat, color: e.target.value})} 
                         className="h-12 rounded-xl border-slate-100 font-mono text-xs" 
                         placeholder="text-primary" 

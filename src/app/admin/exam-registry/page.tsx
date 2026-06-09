@@ -33,8 +33,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Master Registry v8.0.
- * RECOVERED: Hierarchical branding ensuring Police and PSPCL logos are displayed via board inheritance.
+ * @fileOverview Institutional Exam Master Registry v8.1.
+ * FIXED: Hardened controlled inputs to prevent "undefined" value errors.
  */
 
 export default function ExamRegistryPage() {
@@ -208,7 +208,7 @@ export default function ExamRegistryPage() {
                </div>
                <div className="space-y-2">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Vertical Name</Label>
-                  <Input value={editingExam?.name} onChange={e => setEditingExam({...editingExam, name: e.target.value})} className="h-12 rounded-xl font-bold" placeholder="e.g. Constable District Cadre" />
+                  <Input value={editingExam?.name ?? ""} onChange={e => setEditingExam({...editingExam, name: e.target.value})} className="h-12 rounded-xl font-bold" placeholder="e.g. Constable District Cadre" />
                </div>
             </div>
             <DialogFooter className="p-10 pt-0">
