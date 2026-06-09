@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Image as ImageIcon, Trash2, Save, Globe, Upload, Loader2, X, Layers, Shield, GraduationCap, Zap, Landmark, MoveUp, MoveDown } from "lucide-react"
+import { Plus, Edit, Image as ImageIcon, Trash2, Save, Globe, Upload, Loader2, X, Layers, Shield, GraduationCap, Zap, Landmark, MoveUp, MoveDown, Search } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { useCollection, useFirestore, useStorage } from "@/firebase"
 import { collection, query, doc, deleteDoc, setDoc, serverTimestamp, orderBy } from "firebase/firestore"
@@ -20,8 +20,8 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Authority Hub v63.0.
- * RESTORED: Simplified management view without hierarchical drill-down.
+ * @fileOverview Authority Hub v64.0.
+ * UPDATED: High-Fidelity layout matching Mock Architect.
  */
 
 export default function ExamManagement() {
@@ -29,6 +29,7 @@ export default function ExamManagement() {
   const storage = useStorage()
   const { toast } = useToast()
   
+  const [searchTerm, setSearchTerm] = useState("")
   const boardsQuery = useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc")) : null), [db])
   const categoriesQuery = useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db])
   
@@ -42,9 +43,16 @@ export default function ExamManagement() {
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const filteredBoards = useMemo(() => {
+    if (!boards) return []
+    return boards.filter(b => 
+      b.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      b.abbreviation?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  }, [boards, searchTerm])
+
   const handleSave = async () => {
     if (!db || !editingBoard) return
-    
     if (!editingBoard.abbreviation || !editingBoard.name || !editingBoard.categoryId) {
       toast({ variant: "destructive", title: "Audit Blocked", description: "Short Code, Name, and Category are mandatory." })
       return
@@ -72,211 +80,133 @@ export default function ExamManagement() {
     }
   }
 
-  const handleReorder = async (board: any, direction: 'up' | 'down') => {
-     if (!db || !boards) return;
-     const idx = boards.findIndex(b => b.id === board.id);
-     const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
-     
-     if (swapIdx < 0 || swapIdx >= boards.length) return;
-     
-     const otherBoard = boards[swapIdx];
-     const oldOrder = board.displayOrder || 0;
-     const newOrder = otherBoard.displayOrder || 0;
-
-     try {
-        await Promise.all([
-           setDoc(doc(db, "boards", board.id), { displayOrder: newOrder }, { merge: true }),
-           setDoc(doc(db, "boards", otherBoard.id), { displayOrder: oldOrder }, { merge: true })
-        ]);
-        toast({ title: "Hub Reordered" });
-     } catch (e) {
-        toast({ variant: "destructive", title: "Reorder Failed" });
-     }
-  }
-
-  const handleDelete = async (e: React.MouseEvent | React.FocusEvent | any, id: string) => {
-    if (e && e.preventDefault) e.preventDefault();
-    if (e && e.stopPropagation) e.stopPropagation();
+  const handleDelete = async (id: string) => {
     if (!id || !db) return
-    
-    const confirmMsg = "CRITICAL AUDIT: Permanently purge this authority hub from the global registry?";
-    if (!window.confirm(confirmMsg)) return
+    if (!window.confirm("CRITICAL AUDIT: Permanently purge this authority hub?")) return
     
     setIsDeleting(id)
     try {
-      const boardRef = doc(db, "boards", id)
-      await deleteDoc(boardRef)
-      toast({ title: "Registry Purged", description: "Official Hub node removed from cloud." })
-      if (editingBoard?.id === id) setEditingBoard(null);
-    } catch (serverError: any) {
-      toast({ variant: "destructive", title: "Purge Failed" })
+      await deleteDoc(doc(db, "boards", id))
+      toast({ title: "Registry Purged" })
     } finally {
       setIsDeleting(null)
     }
   }
 
-  const handleFileUpload = async (file: File) => {
-    if (!file || !storage) return
-
-    setIsUploading(true)
-    const uploadRef = ref(storage, `authority_logos/${Date.now()}_${file.name.replace(/\s+/g, '_')}`)
-
-    try {
-      const snapshot = await uploadBytes(uploadRef, file)
-      const downloadURL = await getDownloadURL(snapshot.ref)
-      setEditingBoard((prev: any) => ({ ...prev, iconUrl: downloadURL }))
-      toast({ title: "Asset Synced", description: "Logo updated in storage." })
-    } catch (error: any) {
-      toast({ variant: "destructive", title: "Upload Failed" })
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
   return (
-    <div className="space-y-12 pb-24 text-[#0F172A] text-left pt-12 px-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+    <div className="space-y-10 pb-32 text-left pt-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-4">
         <div>
            <div className="flex items-center gap-3 mb-2">
-              <Globe className="h-6 w-6 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Official Board Registry</span>
+              <Landmark className="h-6 w-6 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Official Board Registry</span>
            </div>
-          <h1 className="text-5xl font-headline font-black text-primary uppercase tracking-tight">Authority Hub</h1>
-          <p className="text-slate-600 mt-1 font-medium">Manage institutional identities for recruitment boards.</p>
+          <h1 className="text-4xl md:text-6xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Authority Hub</h1>
+          <p className="text-slate-500 font-medium text-lg">Manage institutional identities for recruitment boards.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl gap-3" onClick={() => setEditingBoard({ abbreviation: "", name: "", description: "", iconUrl: "", categoryId: "", displayOrder: (boards?.length || 0) + 1 })}>
-          <Plus className="h-5 w-5" /> Add New Hub
+        <Button onClick={() => setEditingBoard({ abbreviation: "", name: "", description: "", iconUrl: "", categoryId: "", displayOrder: (boards?.length || 0) + 1 })} className="bg-[#0F172A] hover:bg-black text-white h-16 px-12 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-3xl gap-3 transition-all active:scale-95 border-none">
+          <Plus className="h-5 w-5 text-primary" /> Deploy New Hub
         </Button>
       </div>
 
-      <Card className="border-none shadow-3xl bg-white rounded-[3rem] overflow-hidden">
-        <CardContent className="p-0 text-left">
+      <div className="px-4">
+        <div className="relative group max-w-2xl">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+          <Input 
+            className="h-16 pl-16 rounded-[1.5rem] bg-white border-none shadow-2xl text-lg font-medium" 
+            placeholder="Search authority by name or code..." 
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
+      <Card className="border-none shadow-3xl bg-white rounded-[3rem] overflow-hidden mx-4">
+        <CardContent className="p-0">
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-white/5 h-20">
                 <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Hub Identity</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Order</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Full Official Name</TableHead>
-                <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Audit Actions</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Vertical Category</TableHead>
+                <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                Array.from({ length: 8 }).map((_, i) => (
-                  <TableRow key={i} className="border-slate-50"><TableCell colSpan={4} className="px-10 py-5"><Skeleton className="h-14 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i} className="border-slate-50"><TableCell colSpan={3} className="px-10 py-5"><Skeleton className="h-14 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
                 ))
-              ) : boards?.map((board: any, idx: number) => {
-                const category = categories?.find(c => c.id === board.categoryId);
-                
-                const id = board.id?.toLowerCase() || "";
-                const abbrev = board.abbreviation?.toLowerCase() || "";
-                const isPolice = id.includes('police') || abbrev === 'police';
-                const isTeaching = board.categoryId === 'punjab-teaching';
-                const isTechnical = board.categoryId === 'punjab-technical';
-
-                const effectiveLogo = board.iconUrl || category?.iconUrl;
-
-                return (
-                  <TableRow key={board.id} className="hover:bg-slate-50 border-slate-50 transition-all group">
-                    <TableCell className="px-10 py-6">
-                      <div className="flex items-center gap-6">
-                        <div className="h-16 w-16 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden relative shadow-inner group-hover:scale-110 transition-transform">
-                            {effectiveLogo && !failedImages[board.id] ? (
-                              <img 
-                                src={effectiveLogo} 
-                                className="h-full w-full object-contain p-2" 
-                                referrerPolicy="no-referrer"
-                                alt={board.abbreviation}
-                                onError={() => setFailedImages(p => ({...p, [board.id]: true}))}
-                              />
-                            ) : (
-                              <div className="text-primary opacity-40">
-                                 {isPolice ? <Shield className="h-8 w-8" /> : 
-                                  isTeaching ? <GraduationCap className="h-8 w-8" /> : 
-                                  isTechnical ? <Zap className="h-8 w-8" /> :
-                                  <Landmark className="h-8 w-8" />}
-                              </div>
-                            )}
-                        </div>
-                        <div>
-                           <p className="font-headline font-black text-primary text-xl tracking-tighter uppercase leading-none">{board.abbreviation}</p>
-                           <Badge variant="outline" className="bg-white border-slate-100 text-slate-400 text-[8px] font-black uppercase w-fit px-1.5 mt-1">{category?.title || "UNCATEGORIZED"}</Badge>
-                        </div>
+              ) : filteredBoards.map((board: any) => (
+                <TableRow key={board.id} className="hover:bg-slate-50 border-slate-50 transition-all group">
+                  <TableCell className="px-10 py-6">
+                    <div className="flex items-center gap-6">
+                      <div className="h-16 w-16 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden relative shadow-inner">
+                          {board.iconUrl && !failedImages[board.id] ? (
+                            <img src={board.iconUrl} className="h-full w-full object-contain p-2" onError={() => setFailedImages(p => ({...p, [board.id]: true}))} referrerPolicy="no-referrer" />
+                          ) : (
+                            <Landmark className="h-8 w-8 text-slate-300" />
+                          )}
                       </div>
-                    </TableCell>
-                    <TableCell className="text-center">
-                       <div className="flex flex-col items-center gap-1">
-                          <button onClick={() => handleReorder(board, 'up')} disabled={idx === 0} className="p-1 hover:text-primary disabled:opacity-10 transition-all"><MoveUp className="h-3 w-3" /></button>
-                          <span className="font-black text-slate-300 text-xl tabular-nums leading-none">{board.displayOrder || 0}</span>
-                          <button onClick={() => handleReorder(board, 'down')} disabled={idx === boards.length - 1} className="p-1 hover:text-primary disabled:opacity-10 transition-all"><MoveDown className="h-3 w-3" /></button>
-                       </div>
-                    </TableCell>
-                    <TableCell className="text-sm font-bold text-slate-800 leading-tight max-w-xs">{board.name}</TableCell>
-                    <TableCell className="text-right px-10">
-                      <div className="flex justify-end gap-3 opacity-20 group-hover:opacity-100 transition-all">
-                         <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-white shadow-sm" onClick={() => setEditingBoard(board)}><Edit className="h-5 w-5" /></Button>
-                         <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-rose-50 hover:text-rose-600" onClick={(e) => handleDelete(e, board.id)} disabled={isDeleting === board.id}><Trash2 className="h-5 w-5" /></Button>
+                      <div>
+                         <p className="font-headline font-black text-primary text-xl uppercase leading-none">{board.abbreviation}</p>
+                         <p className="text-sm font-bold text-slate-600 mt-1">{board.name}</p>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                     <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-500 text-[9px] font-black uppercase px-3 py-1">
+                        {categories?.find((c: any) => c.id === board.categoryId)?.title || "GENERAL"}
+                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-right px-10">
+                    <div className="flex justify-end gap-3 opacity-20 group-hover:opacity-100 transition-all">
+                       <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-white shadow-sm" onClick={() => setEditingBoard(board)}><Edit className="h-5 w-5" /></Button>
+                       <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-rose-50 hover:text-rose-600 shadow-sm" onClick={() => handleDelete(board.id)} disabled={isDeleting === board.id}><Trash2 className="h-5 w-5" /></Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
 
-      <Dialog open={!!editingBoard} onOpenChange={(open) => !open && !isSaving && !isUploading && setEditingBoard(null)}>
+      <Dialog open={!!editingBoard} onOpenChange={(open) => !open && !isSaving && setEditingBoard(null)}>
         <DialogContent className="sm:max-w-xl rounded-[3rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
           <div className="h-2 w-full bg-[#0F172A]" />
-          <DialogHeader className="p-10 pb-0 text-left">
-            <div className="flex justify-between items-center">
-               <DialogTitle className="text-2xl font-black font-headline uppercase text-[#0F172A]">{editingBoard?.id ? "Update Hub Node" : "New Official Hub"}</DialogTitle>
-               <button onClick={() => setEditingBoard(null)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors"><X className="h-5 w-5 text-slate-400" /></button>
-            </div>
+          <DialogHeader className="p-10 pb-0">
+             <DialogTitle className="text-2xl font-black font-headline uppercase text-[#0F172A]">Authority Registry</DialogTitle>
           </DialogHeader>
-          
-          <div className="p-10 space-y-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
-            <div className="flex flex-col items-center gap-6">
-              <div className="h-36 w-36 rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden group shadow-inner">
-                 {isUploading ? <Loader2 className="h-8 w-8 text-primary animate-spin" /> : (
-                    <div className="relative h-full w-full flex items-center justify-center bg-transparent p-2">
-                      {editingBoard?.iconUrl ? (
-                        <img src={editingBoard.iconUrl} referrerPolicy="no-referrer" className="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-110 transition-transform" alt="Preview" />
-                      ) : (
-                        <div className="flex flex-col items-center gap-2 opacity-30"><ImageIcon className="h-8 w-8 text-slate-400" /><span className="text-[8px] font-black uppercase text-slate-400">No Logo</span></div>
-                      )}
-                    </div>
-                 )}
-              </div>
-              <Button variant="outline" className="w-full h-14 rounded-xl border-slate-200 bg-white font-black uppercase text-[10px] tracking-widest gap-2" onClick={() => fileInputRef.current?.click()} disabled={isUploading || isSaving}>
-                <Upload className="h-4 w-4 text-primary" /> {isUploading ? "Syncing..." : "Upload Official Logo"}
-              </Button>
-              <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={e => { const file = e.target.files?.[0]; if (file) handleFileUpload(file); }} />
-            </div>
-
-            <div className="space-y-6 pt-4 border-t border-slate-50">
-              <div className="space-y-2 text-left"><Label className="text-[9px] font-black uppercase text-slate-400">Vertical Category</Label><select value={editingBoard?.categoryId || ""} onChange={e => setEditingBoard({...editingBoard, categoryId: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-black uppercase text-[10px] outline-none shadow-inner"><option value="">Select Category</option>{categories?.map((c: any) => <option key={c.id} value={c.id}>{c.title}</option>)}</select></div>
-              <div className="grid grid-cols-2 gap-4">
-                 <div className="space-y-2 text-left"><Label className="text-[9px] font-black uppercase text-slate-400">Short Code</Label><input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl h-12 font-black uppercase px-4 outline-none text-[#0F172A]" /></div>
-                 <div className="space-y-2 text-left"><Label className="text-[9px] font-black uppercase text-slate-400">Display Order</Label><input type="number" value={editingBoard?.displayOrder || 0} onChange={e => setEditingBoard({...editingBoard, displayOrder: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl h-12 font-black px-4 outline-none text-[#0F172A]" /></div>
-              </div>
-              <div className="space-y-2 text-left"><Label className="text-[9px] font-black uppercase text-slate-400">Official Hub Name</Label><input value={editingBoard?.name || ""} onChange={e => setEditingBoard({...editingBoard, name: e.target.value})} className="w-full bg-slate-50 border-none rounded-xl h-12 font-bold px-4 outline-none text-[#0F172A]" /></div>
-            </div>
-
-            {editingBoard?.id && (
-               <div className="pt-6 border-t border-slate-50">
-                  <Button variant="ghost" className="w-full h-14 text-rose-500 hover:bg-rose-50 hover:text-rose-600 rounded-xl font-black uppercase text-[10px] tracking-widest gap-3" onClick={(e) => handleDelete(e, editingBoard.id)} disabled={isDeleting === editingBoard.id}>
-                     <Trash2 className="h-4 w-4" /> Purge Hub from Registry
-                  </Button>
-               </div>
-            )}
+          <div className="p-10 space-y-8">
+             <div className="flex flex-col items-center gap-6">
+                <div className="h-32 w-32 rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden group shadow-inner">
+                   {editingBoard?.iconUrl ? <img src={editingBoard.iconUrl} className="h-full w-full object-contain p-4" /> : <ImageIcon className="h-10 w-10 text-slate-300" />}
+                </div>
+                <Button variant="outline" className="h-11 px-8 rounded-xl font-black uppercase text-[9px] gap-2 border-slate-200" onClick={() => fileInputRef.current?.click()}>
+                   <Upload className="h-4 w-4" /> Upload Hub Logo
+                </Button>
+                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={async (e) => {
+                   const file = e.target.files?.[0];
+                   if (file && storage) {
+                      setIsUploading(true);
+                      const uploadRef = ref(storage, `authority_logos/${Date.now()}_${file.name}`);
+                      const snap = await uploadBytes(uploadRef, file);
+                      const url = await getDownloadURL(snap.ref);
+                      setEditingBoard({...editingBoard, iconUrl: url});
+                      setIsUploading(false);
+                   }
+                }} />
+             </div>
+             <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Short Code</Label><Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value.toUpperCase()})} className="h-12 rounded-xl font-black uppercase" /></div>
+                <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Official Hub Name</Label><Input value={editingBoard?.name || ""} onChange={e => setEditingBoard({...editingBoard, name: e.target.value})} className="h-12 rounded-xl font-bold" /></div>
+             </div>
+             <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Vertical Category</Label><select value={editingBoard?.categoryId || ""} onChange={e => setEditingBoard({...editingBoard, categoryId: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-black uppercase text-[10px] outline-none shadow-inner"><option value="">Select Category</option>{categories?.map((c: any) => <option key={c.id} value={c.id}>{c.title}</option>)}</select></div>
           </div>
-
-          <DialogFooter className="p-10 pt-4 flex gap-4 border-t border-slate-50">
+          <DialogFooter className="p-10 pt-4 bg-slate-50 flex gap-4">
             <Button variant="ghost" onClick={() => setEditingBoard(null)} className="rounded-xl h-12 px-6 font-bold text-slate-400">Cancel</Button>
-            <Button className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-12 px-10 font-black uppercase tracking-widest text-[10px] gap-3 flex-1" onClick={handleSave} disabled={isSaving || isUploading}>
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit Registry
+            <Button className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-12 px-10 font-black uppercase tracking-widest text-[10px] flex-1 shadow-xl" onClick={handleSave} disabled={isSaving}>
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit Hub Node
             </Button>
           </DialogFooter>
         </DialogContent>

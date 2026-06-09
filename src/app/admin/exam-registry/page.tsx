@@ -6,18 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { 
-  Plus, 
-  Trash2, 
-  Edit, 
-  Search, 
-  Loader2, 
-  Landmark, 
-  GraduationCap,
-  Save,
-  Shield,
-  Zap
-} from "lucide-react"
+import { Plus, Trash2, Edit, Search, Loader2, Landmark, GraduationCap, Save, Shield, Zap, SearchCode } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, doc, deleteDoc, setDoc, serverTimestamp, orderBy } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -28,8 +17,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Master Registry v8.3.
- * UPDATED: Strict deduplication by name to prevent discovery sprawl.
+ * @fileOverview Exam Vertical Registry v9.0.
+ * UPDATED: High-Fidelity UI matching institutional standards.
  */
 
 export default function ExamRegistryPage() {
@@ -39,9 +28,7 @@ export default function ExamRegistryPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [editingExam, setEditingExam] = useState<any>(null)
-  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
 
-  // STABILIZED LISTENERS
   const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db]);
   const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
   const catsQuery = useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]);
@@ -50,121 +37,90 @@ export default function ExamRegistryPage() {
   const { data: boards } = useCollection<any>(boardsQuery)
   const { data: categories } = useCollection<any>(catsQuery)
 
-  const exams = useMemo(() => {
-    if (!rawExams) return [];
-    // STRICT UNIQUENESS PROTOCOL
-    const unique = new Map();
-    rawExams.forEach(e => {
-       const key = e.name?.toLowerCase().trim();
-       if (!unique.has(key)) unique.set(key, e);
-    });
-    return Array.from(unique.values());
-  }, [rawExams]);
-
   const filteredExams = useMemo(() => {
-    if (!exams) return []
-    return exams.filter(e => 
+    if (!rawExams) return []
+    return rawExams.filter(e => 
       e.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       e.boardId?.toLowerCase().includes(searchTerm.toLowerCase())
     ).sort((a, b) => a.name.localeCompare(b.name))
-  }, [exams, searchTerm])
+  }, [rawExams, searchTerm])
 
   const handleSaveExam = async () => {
     if (!db || !editingExam.name || !editingExam.boardId || !editingExam.categoryId) {
-       toast({ variant: "destructive", title: "Audit Blocked", description: "Name, Hub, and Category are required." })
+       toast({ variant: "destructive", title: "Audit Blocked", description: "Config incomplete." })
        return
     }
     setIsSaving(true)
     const id = editingExam.id || editingExam.name.toLowerCase().replace(/\s+/g, '-')
     try {
       await setDoc(doc(db, "exams", id), { ...editingExam, id, updatedAt: serverTimestamp() }, { merge: true })
-      toast({ title: "Hub Synced" })
+      toast({ title: "Vertical Synced" })
       setEditingExam(null)
     } finally { setIsSaving(false) }
   }
 
   return (
-    <div className="space-y-12 pb-24 text-left px-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
+    <div className="space-y-10 pb-32 text-left pt-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-4">
         <div>
            <div className="flex items-center gap-3 mb-2">
-              <Landmark className="h-6 w-6 text-amber-500" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Exam Master Registry</span>
+              <GraduationCap className="h-6 w-6 text-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Recruitment Vertical Registry</span>
            </div>
-          <h1 className="text-5xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Recruitment Verticals</h1>
-          <p className="text-slate-500 mt-2 text-lg font-medium">Manage specific exam verticals mapped to Boards and Categories.</p>
+          <h1 className="text-4xl md:text-6xl font-black font-headline text-[#0F172A] uppercase tracking-tight">Exam Registry</h1>
+          <p className="text-slate-500 font-medium text-lg">Manage specific exam verticals mapped to Board Hubs.</p>
         </div>
-        <div className="flex gap-4">
-           <Button onClick={() => setEditingExam({ name: "", boardId: "", categoryId: "", category: "STATE" })} className="bg-primary hover:bg-orange-600 h-16 px-10 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-2xl transition-all active:scale-95">
-              Plus Register New Vertical
-           </Button>
+        <Button onClick={() => setEditingExam({ name: "", boardId: "", categoryId: "", displayOrder: 1 })} className="bg-[#0F172A] hover:bg-black text-white h-16 px-12 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-3xl gap-3 transition-all active:scale-95 border-none">
+          <Plus className="h-5 w-5 text-primary" /> Register New Vertical
+        </Button>
+      </div>
+
+      <div className="px-4">
+        <div className="relative group max-w-2xl">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+          <Input 
+            className="h-16 pl-16 rounded-[1.5rem] bg-white border-none shadow-2xl text-lg font-medium" 
+            placeholder="Search verticals by name..." 
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
         </div>
       </div>
 
-      <div className="relative group">
-         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-         <Input className="h-16 pl-16 rounded-[1.5rem] bg-white border-none shadow-2xl text-lg font-medium" placeholder="Search exam verticals..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
-      </div>
-
-      <Card className="border-none shadow-3xl bg-white rounded-[3rem] overflow-hidden">
+      <Card className="border-none shadow-3xl bg-white rounded-[3rem] overflow-hidden mx-4">
         <CardContent className="p-0">
           <Table>
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-slate-50 h-20">
                 <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Vertical Identity</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Board Hub</TableHead>
-                <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-slate-500">Registry Category</TableHead>
-                <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Actions</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Authority Board</TableHead>
+                <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Audit Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}><TableCell colSpan={4} className="px-10 py-8"><Skeleton className="h-12 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
+                  <TableRow key={i}><TableCell colSpan={3} className="px-10 py-8"><Skeleton className="h-12 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
                 ))
               ) : filteredExams.map((e) => {
                 const board = boards?.find((b: any) => b.id === e.boardId || b.abbreviation === e.boardId);
-                const category = categories?.find((c: any) => c.id === e.categoryId);
-                
-                const catId = e.categoryId;
-                const isTeaching = catId === 'punjab-teaching';
-                const isTechnical = catId === 'punjab-technical';
-                const isPolice = e.boardId?.toLowerCase().includes('police') || board?.id.toLowerCase().includes('police');
-
-                const effectiveLogo = e.iconUrl || board?.iconUrl || category?.iconUrl;
-
                 return (
                   <TableRow key={e.id} className="hover:bg-slate-50 border-slate-50 transition-colors group">
                     <TableCell className="px-10 py-8">
                       <div className="flex items-center gap-6">
-                        <div className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center overflow-hidden shrink-0 shadow-inner relative transition-transform group-hover:scale-110">
-                            {effectiveLogo && !failedImages[e.id] ? (
-                              <img 
-                                src={effectiveLogo} 
-                                className="h-full w-full object-contain p-2" 
-                                referrerPolicy="no-referrer" 
-                                onError={() => setFailedImages(p => ({ ...p, [e.id]: true }))} 
-                              />
-                            ) : (
-                              <div className="text-primary opacity-40">
-                                 {isPolice ? <Shield className="h-6 w-6" /> : 
-                                  isTeaching ? <GraduationCap className="h-6 w-6" /> : 
-                                  isTechnical ? <Zap className="h-6 w-6" /> :
-                                  <Landmark className="h-6 w-6" />}
-                              </div>
-                            )}
+                        <div className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 shadow-inner">
+                           <GraduationCap className="h-6 w-6 text-slate-300" />
                         </div>
                         <div>
-                            <p className="font-black text-[#0F172A] text-xl uppercase tracking-tight leading-none">{e.name}</p>
-                            <code className="text-[9px] font-mono text-slate-400 mt-2 block uppercase tracking-widest">ID: {e.id}</code>
+                           <p className="font-black text-[#0F172A] text-xl uppercase tracking-tight leading-none">{e.name}</p>
+                           <code className="text-[9px] font-mono text-slate-400 mt-2 block uppercase tracking-widest">ID: {e.id}</code>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="bg-white border-slate-100 text-primary text-[8px] font-black uppercase px-2 py-0.5">{board?.abbreviation || e.boardId || 'NONE'}</Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[8px] uppercase">{category?.title || "UNCATEGORIZED"}</Badge>
+                      <Badge variant="outline" className="bg-primary/5 border-none text-primary text-[8px] font-black uppercase px-3 py-1 rounded-lg">
+                        {board?.abbreviation || e.boardId || 'NONE'} HUB
+                      </Badge>
                     </TableCell>
                     <TableCell className="text-right px-10">
                       <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
@@ -182,7 +138,7 @@ export default function ExamRegistryPage() {
 
       <Dialog open={!!editingExam} onOpenChange={o => !o && setEditingExam(null)}>
          <DialogContent className="sm:max-w-xl rounded-[3rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
-            <div className="h-2 w-full bg-primary shrink-0" />
+            <div className="h-2 w-full bg-[#0F172A]" />
             <DialogHeader className="p-10 pb-0">
                <DialogTitle className="text-2xl font-black font-headline uppercase">Vertical Architect</DialogTitle>
             </DialogHeader>
