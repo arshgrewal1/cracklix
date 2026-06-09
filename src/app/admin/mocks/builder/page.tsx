@@ -49,8 +49,8 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview FINAL HIGH-FIDELITY Mock Architect v48.0.
- * UPDATED: Strictly matching the provided screenshot layout and card design.
+ * @fileOverview FINAL HIGH-FIDELITY Mock Architect v49.0.
+ * UPDATED: Relocated search, increased question font size, fixed button responsiveness.
  */
 
 export default function MockBuilderPage() {
@@ -466,79 +466,77 @@ function MockBuilderContent() {
            <div className="flex-1 flex flex-col space-y-8">
               {activeRightTab === 'BANK' ? (
                 <>
-                  <div className="bg-[#0B1528] rounded-[3rem] p-8 md:p-14 text-white space-y-8 shadow-4xl relative overflow-hidden flex flex-col">
+                  <div className="bg-[#0B1528] rounded-[3rem] p-8 md:p-12 text-white space-y-8 shadow-4xl relative overflow-hidden flex flex-col">
                     <div className="absolute top-0 right-0 p-10 opacity-5"><Zap className="h-48 w-48" /></div>
                     
                     <div className="relative z-10 flex flex-col space-y-8">
-                        {/* 1. TOP FILTERS */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
-                          <div className="space-y-3">
-                              <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">SOURCE BOARD HUB</Label>
-                              <Select value={filterBoard} onValueChange={setFilterBoard}>
-                                <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All Authorities" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Boards</SelectItem>
-                                    {boards?.map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Hub</SelectItem>)}
-                                </SelectContent>
-                              </Select>
-                          </div>
-                          <div className="space-y-3">
-                              <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">RECRUITMENT VERTICAL</Label>
-                              <Select value={filterExam} onValueChange={setFilterExam}>
-                                <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All Verticals" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Exams</SelectItem>
-                                    {uniqueExams.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
-                                </SelectContent>
-                              </Select>
-                          </div>
-                          <div className="space-y-3">
-                              <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">SUBJECT NODE</Label>
-                              <Select value={filterSubject} onValueChange={setFilterSubject}>
-                                <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All Subjects" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">All Subjects</SelectItem>
-                                    {subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
-                                </SelectContent>
-                              </Select>
-                          </div>
-                        </div>
+                        {/* 1. TOP FILTERS & SEARCH */}
+                        <div className="space-y-6">
+                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                              <div className="space-y-3">
+                                 <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">BOARD HUB</Label>
+                                 <Select value={filterBoard} onValueChange={setFilterBoard}>
+                                    <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All Authorities" /></SelectTrigger>
+                                    <SelectContent>
+                                       <SelectItem value="all">All Boards</SelectItem>
+                                       {boards?.map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Hub</SelectItem>)}
+                                    </SelectContent>
+                                 </Select>
+                              </div>
+                              <div className="space-y-3">
+                                 <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">VERTICAL</Label>
+                                 <Select value={filterExam} onValueChange={setFilterExam}>
+                                    <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All Verticals" /></SelectTrigger>
+                                    <SelectContent>
+                                       <SelectItem value="all">All Exams</SelectItem>
+                                       {uniqueExams.map(e => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
+                                    </SelectContent>
+                                 </Select>
+                              </div>
+                              <div className="space-y-3">
+                                 <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">NODE</Label>
+                                 <Select value={filterSubject} onValueChange={setFilterSubject}>
+                                    <SelectTrigger className="h-14 bg-white/5 border-white/10 rounded-2xl font-bold text-xs text-white px-6"><SelectValue placeholder="All Subjects" /></SelectTrigger>
+                                    <SelectContent>
+                                       <SelectItem value="all">All Subjects</SelectItem>
+                                       {subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                                    </SelectContent>
+                                 </Select>
+                              </div>
+                           </div>
 
-                        <div className="bg-white/5 rounded-[1.5rem] p-4 flex items-center justify-between border border-white/5 shadow-inner">
-                          <div className="relative flex-1">
-                              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                              <Input 
-                                placeholder="Search statements..." 
-                                value={searchTerm}
-                                onChange={e => setSearchTerm(e.target.value)}
-                                className="h-11 pl-11 bg-transparent border-none font-bold text-sm text-white focus-visible:ring-0" 
-                              />
-                          </div>
-                          <Badge className="bg-[#F97316]/20 text-[#F97316] border-none text-[8px] font-black px-4 py-1 rounded-lg shadow-lg">{filteredBank.length} ASSETS FOUND</Badge>
+                           <div className="bg-white/5 rounded-2xl p-4 flex items-center justify-between border border-white/10">
+                              <div className="relative flex-1">
+                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+                                 <Input 
+                                   placeholder="Search statements..." 
+                                   value={searchTerm}
+                                   onChange={e => setSearchTerm(e.target.value)}
+                                   className="h-11 pl-11 bg-transparent border-none font-bold text-sm text-white focus-visible:ring-0" 
+                                 />
+                              </div>
+                              <Badge className="bg-[#F97316]/20 text-[#F97316] border-none text-[8px] font-black px-4 py-1 rounded-lg">{filteredBank.length} ASSETS FOUND</Badge>
+                           </div>
                         </div>
 
                         {/* 3. TACTICAL COMMAND BAR */}
                         <div className="space-y-6 pt-6 border-t border-white/10">
                           
-                          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
+                          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
                               <div className="md:col-span-5 space-y-4 text-left">
                                 <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em] ml-1">TARGET SECTION HUB</Label>
-                                <select 
-                                  value={activeSectionId} 
-                                  onChange={e => setActiveSectionId(e.target.value)} 
-                                  className="w-full h-16 bg-[#F97316] text-white border-none rounded-2xl px-6 font-black uppercase text-[13px] md:text-[15px] outline-none shadow-3xl tracking-[0.1em] cursor-pointer appearance-none"
-                                >
-                                    {sections.map(s => <option key={s.id} value={s.id} className="bg-[#0B1528]">{s.name}</option>)}
-                                </select>
+                                <button className="w-full h-16 bg-[#F97316] hover:bg-orange-600 text-white rounded-2xl font-black uppercase text-[15px] shadow-3xl tracking-[0.1em] transition-all">
+                                   GENERAL
+                                </button>
                               </div>
                               
                               <div className="md:col-span-4 flex flex-col gap-4">
-                                <div className="flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/10 group">
-                                    <span className="text-[10px] font-black uppercase text-slate-300 tracking-widest">UNUSED ONLY</span>
+                                <div className="flex items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <span className="text-[10px] font-black uppercase text-slate-300">UNUSED ONLY</span>
                                     <Switch checked={hideUsed} onCheckedChange={setHideUsed} className="data-[state=checked]:bg-[#F97316]" />
                                 </div>
-                                <div className="flex items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/10 group">
-                                    <span className="text-[10px] font-black uppercase text-slate-300 tracking-widest">BLOCK DUPLICATES</span>
+                                <div className="flex items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10">
+                                    <span className="text-[10px] font-black uppercase text-slate-300">BLOCK DUPLICATES</span>
                                     <Switch checked={blockDuplicates} onCheckedChange={setBlockDuplicates} className="data-[state=checked]:bg-[#10B981]" />
                                 </div>
                               </div>
@@ -547,7 +545,7 @@ function MockBuilderContent() {
                                 <Button 
                                     onClick={handleSelectAllInBank} 
                                     variant="outline"
-                                    className="w-full h-16 border-white/20 bg-transparent hover:bg-white/10 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl shadow-xl"
+                                    className="w-full h-16 border-white/20 bg-transparent hover:bg-white/10 text-white font-black uppercase text-[9px] tracking-widest rounded-xl"
                                 >
                                     SELECT ALL FILTERED
                                 </Button>
@@ -579,21 +577,21 @@ function MockBuilderContent() {
                         <Card 
                           key={q.id} 
                           onClick={() => setBankSelection(prev => isSelected ? prev.filter(id => id !== q.id) : [...prev, q.id])}
-                          className="border-none shadow-xl rounded-[2rem] bg-white p-6 md:p-8 flex items-center gap-6 cursor-pointer transition-all hover:translate-y-[-4px] border border-slate-100 group"
+                          className="border-none shadow-xl rounded-[2.5rem] bg-white p-8 md:p-10 flex items-center gap-8 cursor-pointer transition-all hover:translate-y-[-4px] border border-slate-100 group"
                         >
                            <div className={cn(
-                              "h-8 w-8 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
+                              "h-10 w-10 md:h-12 md:w-12 rounded-full border-2 flex items-center justify-center shrink-0 transition-all",
                               isSelected ? "border-[#F97316] bg-[#F97316]/10 shadow-[0_0_15px_rgba(249,115,22,0.2)]" : "border-slate-200"
                            )}>
-                              {isSelected && <div className="h-3 w-3 rounded-full bg-[#F97316]" />}
+                              {isSelected && <div className="h-4 w-4 rounded-full bg-[#F97316]" />}
                            </div>
                            
-                           <div className="flex-1 min-w-0 space-y-3">
-                              <div className="flex items-center gap-2">
-                                 <Badge className="bg-[#0B1528] text-white border-none font-black text-[8px] px-2 py-0.5 rounded uppercase tracking-widest">{board?.abbreviation || 'PSSSB'}</Badge>
-                                 <Badge variant="outline" className="text-slate-400 border-slate-200 text-[8px] font-black uppercase px-2 py-0.5">{sub?.name || 'ICT'}</Badge>
+                           <div className="flex-1 min-w-0 space-y-4 text-left">
+                              <div className="flex items-center gap-3">
+                                 <Badge className="bg-[#0B1528] text-white border-none font-black text-[9px] px-3 py-1 rounded uppercase tracking-widest">{board?.abbreviation || 'PSSSB'}</Badge>
+                                 <Badge variant="outline" className="text-slate-400 border-slate-200 text-[9px] font-black uppercase px-3 py-1">{sub?.name || 'ICT'}</Badge>
                               </div>
-                              <p className="font-bold text-base md:text-xl text-[#0F172A] leading-tight truncate pr-4">
+                              <p className="font-bold text-lg md:text-2xl text-[#0F172A] leading-relaxed antialiased">
                                 {q.englishQuestion}
                               </p>
                            </div>
@@ -602,9 +600,9 @@ function MockBuilderContent() {
                               variant="ghost" 
                               size="icon" 
                               onClick={(e) => { e.stopPropagation(); handleDeleteFromBank(q.id); }}
-                              className="h-10 w-10 text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-opacity"
+                              className="h-12 w-12 text-rose-500 hover:bg-rose-50 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
                            >
-                              <Trash2 className="h-5 w-5" />
+                              <Trash2 className="h-6 w-6" />
                            </Button>
                         </Card>
                       )

@@ -5,24 +5,14 @@ import {
   LayoutDashboard, 
   LogOut, 
   ShieldCheck, 
-  Zap, 
   Menu, 
   HeartPulse, 
   Settings, 
-  Users, 
-  CreditCard, 
-  ShieldAlert, 
-  History, 
   User, 
-  FileText,
   FileStack,
   Newspaper,
   Megaphone,
-  Sparkles,
   SearchCode,
-  Bell,
-  Gem,
-  Plus,
   Landmark,
   GraduationCap,
   Rocket,
@@ -41,8 +31,8 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Institutional Security Protocol v105.0.
- * UPDATED: Sidebar labels strictly matching the provided screenshot.
+ * @fileOverview Institutional Security Protocol v106.0.
+ * UPDATED: Sidebar labels strictly matching the provided screenshot: DASHBOARD, CATEGORIES, HUBS (BOARDS), etc.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -109,8 +99,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <SidebarGroup className="mt-4">
             <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Integrity & Governance</SidebarGroupLabel>
             <SidebarMenu>
-              <AdminNavItem icon={<ShieldAlert className="text-rose-500" />} label="CBT INTEGRITY" href="/admin/qa" active={pathname === "/admin/qa"} />
-              <AdminNavItem icon={<History className="text-slate-400" />} label="AUDIT TRAIL" href="/admin/audit-logs" active={pathname === "/admin/audit-logs"} />
               <AdminNavItem icon={<HeartPulse className="text-rose-500" />} label="SYSTEM HEALTH" href="/admin/health" active={pathname === "/admin/health"} />
               <AdminNavItem icon={<Settings className="text-primary" />} label="SYSTEM PORTAL" href="/admin/settings" active={pathname === "/admin/settings"} />
             </SidebarMenu>
