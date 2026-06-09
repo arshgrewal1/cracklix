@@ -17,12 +17,24 @@ export type CurrentAffairType = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUIZ' | 'SPECI
 
 export type MockAssignmentMode = 'SINGLE' | 'MULTIPLE' | 'AUTHORITY';
 
+export interface Category {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+  bgColor: string;
+  highlight: string;
+  displayOrder: number;
+}
+
 export interface Board {
   id: string;
   abbreviation: string;
   name: string;
   region: string;
   category: string;
+  categoryId: string; // Relational link to Category
   iconUrl?: string;
   color?: string;
   updatedAt?: any;
@@ -124,4 +136,69 @@ export interface UserProfile {
     expiryDate: string;
     freePassClaimed: boolean;
   };
+}
+
+export interface Advertisement {
+  id: string;
+  title: string;
+  type: 'BANNER' | 'ADSENSE' | 'HTML';
+  status: 'ACTIVE' | 'PAUSED' | 'SCHEDULED';
+  placements: AdPlacementType[];
+  desktopImageUrl?: string;
+  mobileImageUrl?: string;
+  externalUrl?: string;
+  htmlCode?: string;
+  adSenseCode?: string;
+  priority: number;
+  targeting?: {
+    examIds?: string[];
+  };
+  stats?: {
+    impressions: number;
+    clicks: number;
+  };
+  createdAt: any;
+  updatedAt: any;
+}
+
+export type AdPlacementType = 
+  | 'HOMEPAGE_TOP' 
+  | 'HOMEPAGE_MIDDLE' 
+  | 'HOMEPAGE_BOTTOM' 
+  | 'EXAM_LISTING' 
+  | 'MOCK_LISTING' 
+  | 'NOTES_PAGE' 
+  | 'CA_PAGE' 
+  | 'RESULT_PAGE' 
+  | 'SIDEBAR' 
+  | 'FOOTER';
+
+export type AdType = 'BANNER' | 'ADSENSE' | 'HTML';
+export type AdStatus = 'ACTIVE' | 'PAUSED' | 'SCHEDULED';
+
+export interface CurrentAffairHubItem {
+  id: string;
+  title: string;
+  month: string;
+  year: string;
+  language: string;
+  type: CurrentAffairType;
+  pdfUrl?: string;
+  status: 'PUBLISHED' | 'DRAFT';
+  quizId?: string;
+  createdAt: any;
+  updatedAt: any;
+}
+
+export interface AttemptState {
+  answers: Record<number, number | null>;
+  status: Record<number, QuestionStatus>;
+  visited: number[];
+  bookmarks: number[];
+  timeLeft: number;
+  currentIdx: number;
+  currentSectionId: string;
+  violations: number;
+  startTime: number;
+  endTime: number;
 }

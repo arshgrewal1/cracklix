@@ -1,106 +1,96 @@
 
-import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { Firestore, doc, setDoc, serverTimestamp, collection, getDocs, writeBatch } from 'firebase/firestore';
 
 export async function seedInitialData(db: Firestore) {
-  console.log('[AUDIT] Initializing Cracklix Performance Hub Sync...');
+  console.log('[AUDIT] Initializing Hierarchical Registry Sync...');
 
-  await setDoc(doc(db, 'settings', 'global'), {
-    announcement: "🔥 Official Punjab 2026 Recruitment Calendar Live.",
-    showAnnouncement: true,
-    platformName: "Cracklix",
-    footerText: "Punjab's most advanced government exam portal.",
-    address: "Shergarh, Bathinda, Punjab",
-    upiId: "arshdeepgrewal1122-1@oksbi",
-    qrCodeUrl: "",
-    supportPhone: "+91 98881 88602",
-    supportEmail: "cracklixhelp@gmail.com",
-    telegramUrl: "https://t.me/cracklixapp",
-    playStoreUrl: "",
-    appStoreUrl: "",
-    adSenseEnabled: false,
-    adSenseClientCode: "",
-    shareUrl: "https://cracklix.com",
-    shareTitle: "CRACKLIX | Punjab Exam Hub",
-    shareDescription: "Practice Mock Tests and Prepare for Punjab Government Exams.",
-    freeTrialEnabled: true,
-    freeTrialDays: 7,
-    updatedAt: serverTimestamp()
-  }, { merge: true });
-
-  await setDoc(doc(db, 'settings', 'stats'), {
-    mcqCount: 12500,
-    userCount: 15400,
-    mockCount: 520,
-    avgAccuracy: 94,
-    updatedAt: serverTimestamp()
-  }, { merge: true });
-
-  const plans = [
+  // 1. Core Categories
+  const categories = [
     {
-      id: 'monthly-pass',
-      name: 'Monthly PASS',
-      price: 99,
-      durationDays: 30,
-      description: 'Institutional access for 1 month.',
-      features: ["Premium Mocks", "Subject Tests", "PYQ Archives", "State Rankings"],
-      displayOrder: 1,
-      type: 'PREMIUM',
-      active: true,
-      adFree: false
+      id: "punjab-govt",
+      title: "Punjab Government Exams",
+      description: "PSSSB, PPSC, Punjab Police, Revenue & State Departments.",
+      highlight: "STATE LEVEL",
+      color: "text-primary",
+      bgColor: "bg-orange-50",
+      displayOrder: 1
     },
     {
-      id: 'quarterly-pass',
-      name: 'Quarterly PASS',
-      price: 249,
-      durationDays: 90,
-      description: 'Strategic tier for final preparation.',
-      features: ["Everything in Monthly", "AI Rationale", "Priority Alerts"],
-      displayOrder: 2,
-      type: 'PREMIUM',
-      recommended: true,
-      active: true,
-      adFree: true
+      id: "punjab-teaching",
+      title: "Punjab Teaching Exams",
+      description: "PSTET, CTET, Master Cadre, ETT & Lecturer registries.",
+      highlight: "EDUCATIONAL",
+      color: "text-blue-600",
+      bgColor: "bg-blue-50",
+      displayOrder: 2
     },
     {
-      id: 'yearly-pass',
-      name: 'Yearly PASS',
-      price: 799,
-      durationDays: 365,
-      description: 'Total preparation node for 1 year.',
-      features: ["Everything in Quarterly", "Mentorship", "Ad-Free CBT"],
-      displayOrder: 3,
-      type: 'PREMIUM',
-      active: true,
-      adFree: true
+      id: "punjab-technical",
+      title: "Punjab Technical Exams",
+      description: "PSPCL, PSTCL, Junior Engineer & Technical Assistant nodes.",
+      highlight: "POWER & IT",
+      color: "text-amber-500",
+      bgColor: "bg-amber-50",
+      displayOrder: 3
+    },
+    {
+      id: "banking",
+      title: "Banking Exams",
+      description: "IBPS, PO, Clerk, SO, SBI, RBI & NABARD career prep.",
+      highlight: "FINANCIAL",
+      color: "text-emerald-600",
+      bgColor: "bg-emerald-50",
+      displayOrder: 4
+    },
+    {
+      id: "central-govt",
+      title: "Central Government Exams",
+      description: "SSC, Railways, Indian Army, Air Force & Navy Hubs.",
+      highlight: "NATIONAL",
+      color: "text-indigo-600",
+      bgColor: "bg-indigo-50",
+      displayOrder: 5
     }
   ];
 
-  for (const p of plans) {
-    await setDoc(doc(db, 'passes', p.id), { ...p, updatedAt: serverTimestamp() }, { merge: true });
+  for (const cat of categories) {
+    await setDoc(doc(db, 'categories', cat.id), { ...cat, updatedAt: serverTimestamp() }, { merge: true });
   }
 
+  // 2. Boards (Hubs) Migration
   const psssbLogo = "https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg";
   const psebLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
   
   const boards = [
-    { id: 'psssb', abbreviation: 'PSSSB', name: 'Punjab Subordinate Services Selection Board', region: 'Punjab', category: 'STATE_BOARD', iconUrl: psssbLogo },
-    { id: 'punjab-police', abbreviation: 'POLICE', name: 'Punjab Police Recruitment Board', region: 'Punjab', category: 'DEFENCE_BOARD', iconUrl: "https://www.punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png" },
-    { id: 'education', abbreviation: 'EDUCATION', name: 'Education Recruitment Board Punjab', region: 'Punjab', category: 'TEACHING_BOARD', iconUrl: psebLogo }
+    { id: 'psssb', abbreviation: 'PSSSB', name: 'Punjab Subordinate Services Selection Board', region: 'Punjab', category: 'STATE_BOARD', categoryId: 'punjab-govt', iconUrl: psssbLogo },
+    { id: 'punjab-police', abbreviation: 'POLICE', name: 'Punjab Police Recruitment Board', region: 'Punjab', category: 'DEFENCE_BOARD', categoryId: 'punjab-govt', iconUrl: "https://www.punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png" },
+    { id: 'education', abbreviation: 'EDUCATION', name: 'Education Recruitment Board Punjab', region: 'Punjab', category: 'TEACHING_BOARD', categoryId: 'punjab-teaching', iconUrl: psebLogo },
+    { id: 'pspcl', abbreviation: 'PSPCL', name: 'Punjab State Power Corporation Limited', region: 'Punjab', category: 'TECHNICAL', categoryId: 'punjab-technical', iconUrl: "https://pspcl.in/assets/images/logo.png" }
   ];
 
   for (const b of boards) {
     await setDoc(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  const subjects = [
-    { id: 'punjab-gk', name: 'Punjab History & Culture', aliases: ['Punjab GK'] },
-    { id: 'reasoning', name: 'Logical Reasoning', aliases: ['Reasoning'] },
-    { id: 'quant', name: 'Quantitative Aptitude', aliases: ['Maths'] }
-  ];
+  // 3. Exams (Verticals) Migration logic
+  const examsSnap = await getDocs(collection(db, "exams"));
+  const batch = writeBatch(db);
+  
+  examsSnap.docs.forEach(d => {
+    const data = d.data();
+    let catId = data.categoryId || 'punjab-govt';
+    
+    // Auto-inference for legacy data
+    const name = (data.name || "").toUpperCase();
+    if (name.includes('PSTET') || name.includes('CTET') || name.includes('CADRE') || name.includes('ETT')) catId = 'punjab-teaching';
+    if (name.includes('PSPCL') || name.includes('JE ') || name.includes('ALM') || name.includes('LINEMAN')) catId = 'punjab-technical';
+    if (name.includes('IBPS') || name.includes('BANK')) catId = 'banking';
+    if (name.includes('SSC') || name.includes('ARMY') || name.includes('RAILWAY')) catId = 'central-govt';
 
-  for (const s of subjects) {
-    await setDoc(doc(db, 'subjects', s.id), { ...s, updatedAt: serverTimestamp() }, { merge: true });
-  }
+    batch.update(d.ref, { categoryId: catId });
+  });
+  
+  await batch.commit();
 
-  console.log('[AUDIT] Performance Nodes Synchronized.');
+  console.log('[AUDIT] Hierarchical Registry Synchronized.');
 }

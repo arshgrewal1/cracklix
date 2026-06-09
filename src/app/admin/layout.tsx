@@ -1,3 +1,4 @@
+
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
@@ -35,7 +36,8 @@ import {
   FileWarning,
   Rocket,
   ArrowLeftRight,
-  ExternalLink
+  ExternalLink,
+  TableOfContents
 } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
@@ -48,12 +50,11 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Institutional Security Protocol v99.2.
- * HARDENED: Permanent Super Admin Authority for Arsh Grewal.
- * UPDATED: Added "Back to Student Side" navigation nodes.
+ * @fileOverview Institutional Security Protocol v99.3.
+ * UPDATED: Added Category management to the master registry node.
  */
 
-// FOUNDER WHITELIST - PERMANENT AUTHORITY (Absolute Security)
+// FOUNDER WHITELIST - PERMANENT AUTHORITY
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 export default function AdminLayout({ children }: { children: React.Node }) {
@@ -68,7 +69,6 @@ export default function AdminLayout({ children }: { children: React.Node }) {
     setMounted(true);
   }, []);
 
-  // PERMANENT AUTHORITY CHECK (Hardcoded Immunity)
   const userEmail = user?.email?.toLowerCase();
   const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
@@ -78,7 +78,6 @@ export default function AdminLayout({ children }: { children: React.Node }) {
       if (!user) {
         router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
       } else if (!isAdmin) {
-        // Strict guard: Only non-admins/non-founders are sent back to dashboard
         router.push('/dashboard');
       }
     }
@@ -89,7 +88,6 @@ export default function AdminLayout({ children }: { children: React.Node }) {
     router.push('/login')
   }
 
-  // Hydration Guard + Loading state
   if (!mounted || loading) return (
     <div className="h-screen w-full bg-[#0F172A] flex flex-col items-center justify-center space-y-6">
        <ShieldCheck className="h-12 w-12 text-primary animate-pulse" />
@@ -109,8 +107,9 @@ export default function AdminLayout({ children }: { children: React.Node }) {
             <SidebarGroupLabel className="px-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Master Registry</SidebarGroupLabel>
             <SidebarMenu>
               <AdminNavItem icon={<LayoutDashboard />} label="Dashboard" href="/admin" active={pathname === "/admin"} />
-              <AdminNavItem icon={<Landmark className="text-amber-400" />} label="Authority Hub" href="/admin/exams" active={pathname === "/admin/exams"} />
-              <AdminNavItem icon={<GraduationCap className="text-blue-400" />} label="Exam Registry" href="/admin/exam-registry" active={pathname === "/admin/exam-registry"} />
+              <AdminNavItem icon={<TableOfContents className="text-primary" />} label="Categories" href="/admin/categories" active={pathname === "/admin/categories"} />
+              <AdminNavItem icon={<Landmark className="text-amber-400" />} label="Authority Hubs" href="/admin/exams" active={pathname === "/admin/exams"} />
+              <AdminNavItem icon={<GraduationCap className="text-blue-400" />} label="Vertical Registry" href="/admin/exam-registry" active={pathname === "/admin/exam-registry"} />
               <AdminNavItem icon={<SearchCode className="text-emerald-400" />} label="Subject List" href="/admin/subjects" active={pathname === "/admin/subjects"} />
               <AdminNavItem icon={<Database />} label="Global Bank" href="/admin/questions" active={pathname === "/admin/questions"} />
               <AdminNavItem icon={<Rocket className="text-primary" />} label="Bulk Ingestion" href="/admin/bulk-import" active={pathname === "/admin/bulk-import"} />
@@ -234,7 +233,7 @@ export default function AdminLayout({ children }: { children: React.Node }) {
   )
 }
 
-function AdminNavItem({ icon, label, href, active, className }: { icon: React.ReactNode, label: string, href: string, active?: boolean, className?: string }) {
+function AdminNavItem({ icon, label, href, active, className }: { icon: React.Node, label: string, href: string, active?: boolean, className?: string }) {
   return (
     <SidebarMenuItem>
       <SidebarMenuButton 

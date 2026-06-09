@@ -5,70 +5,32 @@ import { useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection } from "firebase/firestore"
+import { collection, query, orderBy } from "firebase/firestore"
 import { ShieldCheck, GraduationCap, Zap, Wallet, Globe, ChevronRight, Landmark } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Category Registry Hub v15.0.
- * Reorganized into 5 discrete recruitment verticals for scalable discovery.
+ * @fileOverview RESTORED: Hierarchical Category Discovery.
+ * This is the root node showing the 5 major recruitment categories.
  */
 
-const MAIN_CATEGORIES = [
-  {
-    id: "punjab-govt",
-    title: "Punjab Government Exams",
-    desc: "PSSSB, PPSC, Punjab Police, Revenue & State Departments.",
-    icon: <ShieldCheck className="h-10 w-10 md:h-12 md:w-12" />,
-    color: "text-primary",
-    bgColor: "bg-orange-50",
-    highlight: "STATE LEVEL"
-  },
-  {
-    id: "punjab-teaching",
-    title: "Punjab Teaching Exams",
-    desc: "PSTET, CTET, Master Cadre, ETT & Lecturer registries.",
-    icon: <GraduationCap className="h-10 w-10 md:h-12 md:w-12" />,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
-    highlight: "EDUCATIONAL"
-  },
-  {
-    id: "punjab-technical",
-    title: "Punjab Technical Exams",
-    desc: "PSPCL, PSTCL, Junior Engineer & Technical Assistant nodes.",
-    icon: <Zap className="h-10 w-10 md:h-12 md:w-12" />,
-    color: "text-amber-500",
-    bgColor: "bg-amber-50",
-    highlight: "POWER & IT"
-  },
-  {
-    id: "banking",
-    title: "Banking Exams",
-    desc: "IBPS, PO, Clerk, SO, SBI, RBI & NABARD career prep.",
-    icon: <Wallet className="h-10 w-10 md:h-12 md:w-12" />,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50",
-    highlight: "FINANCIAL"
-  },
-  {
-    id: "central-govt",
-    title: "Central Government Exams",
-    desc: "SSC, Railways, Indian Army, Air Force & Navy Hubs.",
-    icon: <Globe className="h-10 w-10 md:h-12 md:w-12" />,
-    color: "text-indigo-600",
-    bgColor: "bg-indigo-50",
-    highlight: "NATIONAL"
-  }
-];
+const CATEGORY_ICONS: Record<string, any> = {
+  "punjab-govt": <ShieldCheck className="h-10 w-10 md:h-12 md:w-12" />,
+  "punjab-teaching": <GraduationCap className="h-10 w-10 md:h-12 md:w-12" />,
+  "punjab-technical": <Zap className="h-10 w-10 md:h-12 md:w-12" />,
+  "banking": <Wallet className="h-10 w-10 md:h-12 md:w-12" />,
+  "central-govt": <Globe className="h-10 w-10 md:h-12 md:w-12" />
+};
 
 export default function ExamsEntryPage() {
   const db = useFirestore();
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
-  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
+  
+  const catQuery = useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]);
+  const { data: categories, loading } = useCollection<any>(catQuery);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body">
@@ -86,25 +48,24 @@ export default function ExamsEntryPage() {
             Master <br/> <span className="text-primary">Registry</span>
           </h1>
           <p className="text-slate-500 font-medium text-lg md:text-2xl max-w-3xl leading-relaxed">
-            Select your recruitment category to find official boards and practice hubs.
+            Select a recruitment vertical to browse official hubs and vertical exam preparation.
           </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
-           {MAIN_CATEGORIES.map((cat, idx) => {
-             const boardCount = (boards || []).filter((b: any) => b.categoryId === cat.id).length;
-             const examCount = (exams || []).filter((e: any) => e.categoryId === cat.id).length;
-
-             return (
+           {loading ? (
+             Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3.5rem]" />)
+           ) : categories && categories.length > 0 ? (
+             categories.map((cat) => (
                 <Link key={cat.id} href={`/exams/category/${cat.id}`}>
                    <Card className="border-none shadow-xl hover:shadow-5xl hover:translate-y-[-12px] transition-all duration-700 rounded-[3.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100">
                       <CardContent className="p-10 md:p-14 flex flex-col h-full">
                          <div className="flex justify-between items-start mb-12">
-                            <div className={cn("h-20 w-20 md:h-24 md:w-24 rounded-[1.8rem] md:rounded-[2.2rem] flex items-center justify-center transition-all group-hover:shadow-2xl shadow-inner relative overflow-hidden shrink-0", cat.bgColor, cat.color)}>
-                               {cat.icon}
+                            <div className={cn("h-20 w-20 md:h-24 md:w-24 rounded-[1.8rem] md:rounded-[2.2rem] flex items-center justify-center transition-all group-hover:shadow-2xl shadow-inner relative overflow-hidden shrink-0", cat.bgColor || "bg-orange-50", cat.color || "text-primary")}>
+                               {CATEGORY_ICONS[cat.id] || <ShieldCheck className="h-10 w-10" />}
                             </div>
                             <Badge className="bg-[#0F172A] text-white border-none text-[8px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-xl shadow-lg">
-                               {cat.highlight}
+                               {cat.highlight || "VERTICAL"}
                             </Badge>
                          </div>
                          
@@ -113,7 +74,7 @@ export default function ExamsEntryPage() {
                                {cat.title}
                             </h3>
                             <p className="text-sm md:text-lg font-medium text-slate-400 leading-relaxed">
-                               {cat.desc}
+                               {cat.description}
                             </p>
                          </div>
 
@@ -125,8 +86,10 @@ export default function ExamsEntryPage() {
                       </CardContent>
                    </Card>
                 </Link>
-             )
-           })}
+             ))
+           ) : (
+             <div className="col-span-full py-20 text-center opacity-20 italic">No categories deployed. Run admin sync.</div>
+           )}
         </div>
       </main>
       <Footer />

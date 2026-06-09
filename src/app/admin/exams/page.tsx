@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Image as ImageIcon, Trash2, Save, Globe, Upload, Loader2, X } from "lucide-react"
+import { Plus, Edit, Image as ImageIcon, Trash2, Save, Globe, Upload, Loader2, X, Layers } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { useCollection, useFirestore, useStorage } from "@/firebase"
-import { collection, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore"
+import { collection, doc, setDoc, deleteDoc, serverTimestamp, query, orderBy } from "firebase/firestore"
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
@@ -19,8 +19,8 @@ import { FirestorePermissionError } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Authority Hub v40.0 - Hardened Mandatory Branding Engine.
- * FIXED: Strictly isolated CTET and PSTET logos.
+ * @fileOverview Authority Hub v41.0 - Assigned Categories Hub.
+ * UPDATED: Added categoryId relational mapping for board hubs.
  */
 
 export default function ExamManagement() {
@@ -29,7 +29,10 @@ export default function ExamManagement() {
   const { toast } = useToast()
   
   const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db])
+  const categoriesQuery = useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db])
+  
   const { data: boards, loading } = useCollection<any>(boardsQuery)
+  const { data: categories } = useCollection<any>(categoriesQuery)
   
   const [editingBoard, setEditingBoard] = useState<any>(null)
   const [isUploading, setIsUploading] = useState(false)
@@ -50,8 +53,8 @@ export default function ExamManagement() {
   const handleSave = async () => {
     if (!db || !editingBoard) return
     
-    if (!editingBoard.abbreviation || !editingBoard.name) {
-      toast({ variant: "destructive", title: "Audit Blocked", description: "Short Code and Full Name are mandatory." })
+    if (!editingBoard.abbreviation || !editingBoard.name || !editingBoard.categoryId) {
+      toast({ variant: "destructive", title: "Audit Blocked", description: "Short Code, Name, and Category are mandatory." })
       return
     }
 
@@ -146,7 +149,7 @@ export default function ExamManagement() {
           <h1 className="text-5xl font-headline font-black text-primary uppercase tracking-tight">Authority Hub</h1>
           <p className="text-slate-600 mt-1 font-medium">Manage institutional identities for all Punjab and National recruitment boards.</p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl gap-3" onClick={() => setEditingBoard({ abbreviation: "", name: "", description: "", iconUrl: "" })}>
+        <Button className="bg-primary hover:bg-primary/90 h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl gap-3" onClick={() => setEditingBoard({ abbreviation: "", name: "", description: "", iconUrl: "", categoryId: "" })}>
           <Plus className="h-5 w-5" /> Add New Authority
         </Button>
       </div>
@@ -157,7 +160,7 @@ export default function ExamManagement() {
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-white/5 h-20">
                 <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Identity</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Short Code</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Vertical Context</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authority Name</TableHead>
                 <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
               </TableRow>
@@ -168,6 +171,7 @@ export default function ExamManagement() {
                   <TableRow key={i} className="border-slate-50"><TableCell colSpan={4} className="px-10 py-5"><Skeleton className="h-14 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
                 ))
               ) : boards?.map((board: any) => {
+                const category = categories?.find(c => c.id === board.categoryId);
                 const isImageFailed = failedImages[board.id];
                 const abbrev = board.abbreviation?.toUpperCase();
                 const isPsssb = abbrev === 'PSSSB';
@@ -209,7 +213,12 @@ export default function ExamManagement() {
                           )}
                       </div>
                     </TableCell>
-                    <TableCell className="font-headline font-black text-primary text-xl tracking-tighter uppercase">{board.abbreviation}</TableCell>
+                    <TableCell>
+                       <div className="flex flex-col gap-1">
+                          <p className="font-headline font-black text-primary text-xl tracking-tighter uppercase leading-none">{board.abbreviation}</p>
+                          <Badge variant="outline" className="bg-white border-slate-100 text-slate-400 text-[8px] font-black uppercase w-fit px-1.5">{category?.title || "UNCATEGORIZED"}</Badge>
+                       </div>
+                    </TableCell>
                     <TableCell className="text-sm font-bold text-slate-800 leading-tight max-w-xs">{board.name}</TableCell>
                     <TableCell className="text-right px-10">
                       <div className="flex justify-end gap-2">
@@ -292,6 +301,17 @@ export default function ExamManagement() {
             </div>
 
             <div className="space-y-6 pt-4 border-t border-slate-50">
+              <div className="space-y-2">
+                <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1 flex items-center gap-2"><Layers className="h-3 w-3" /> Target Vertical Category</Label>
+                <select 
+                  value={editingBoard?.categoryId || ""} 
+                  onChange={e => setEditingBoard({...editingBoard, categoryId: e.target.value})}
+                  className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-black uppercase text-[10px] outline-none shadow-inner"
+                >
+                   <option value="">Select Category</option>
+                   {categories?.map((c: any) => <option key={c.id} value={c.id}>{c.title}</option>)}
+                </select>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-2">
                     <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Short Code</Label>
