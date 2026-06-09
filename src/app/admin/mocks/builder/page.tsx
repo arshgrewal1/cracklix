@@ -9,7 +9,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Switch } from "@/components/ui/switch"
 import { Checkbox } from "@/components/ui/checkbox"
 import { 
@@ -45,12 +44,12 @@ import { useToast } from "@/hooks/use-toast"
 import { MockType, Difficulty, AccessLevel, LanguageDisplayMode, MockAssignmentMode } from "@/types"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Institutional Mock Architect v22.0.
- * UPDATED: Integrated Searchable Subject Picker with ScrollBar in Active Assembly.
+ * @fileOverview Institutional Mock Architect v23.0.
+ * UPDATED: High-Fidelity Subject Picker matching user screenshot.
  */
 
 export default function MockBuilderPage() {
@@ -72,6 +71,7 @@ function MockBuilderContent() {
 
   // --- DATA LISTENERS ---
   const { data: existingMock } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
+  const { data: categories } = useCollection<any>(useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]))
   const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc")) : null), [db]))
   const { data: rawExams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
@@ -97,6 +97,7 @@ function MockBuilderContent() {
   const [mockData, setMockData] = useState<any>({
     title: "", 
     assignmentMode: "SINGLE" as MockAssignmentMode,
+    targetCategoryId: "",
     boardIds: [] as string[],
     examIds: [] as string[],
     mockType: "FULL" as MockType, 
@@ -158,17 +159,29 @@ function MockBuilderContent() {
     }
   }, [existingMock, questionBank])
 
-  // DEDUPLICATION HUB
+  // STRICT UNIQUENESS PROTOCOL
   const uniqueExams = useMemo(() => {
     if (!rawExams) return [];
     const seen = new Set();
-    return rawExams.filter((e: any) => {
+    const filtered = rawExams.filter((e: any) => {
       const key = e.name?.toLowerCase().trim();
       if (!key || seen.has(key)) return false;
       seen.add(key);
       return true;
     }).sort((a: any, b: any) => a.name.localeCompare(b.name));
-  }, [rawExams]);
+
+    // Filter by Board if boards are selected
+    if (mockData.boardIds.length > 0) {
+       return filtered.filter(e => mockData.boardIds.includes(e.boardId));
+    }
+    return filtered;
+  }, [rawExams, mockData.boardIds]);
+
+  const filteredBoardsByCat = useMemo(() => {
+     if (!boards) return [];
+     if (!mockData.targetCategoryId) return boards;
+     return boards.filter(b => b.categoryId === mockData.targetCategoryId);
+  }, [boards, mockData.targetCategoryId]);
 
   // --- BANK FILTER LOGIC ---
   const filteredBank = useMemo(() => {
@@ -368,6 +381,19 @@ function MockBuilderContent() {
                     
                     <div className="space-y-4">
                        <div className="space-y-2">
+                          <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Target Category</Label>
+                          <Select value={mockData.targetCategoryId} onValueChange={(v: any) => setMockData({...mockData, targetCategoryId: v, boardIds: []})}>
+                             <SelectTrigger className="h-12 rounded-xl bg-slate-50 border-none font-bold text-xs">
+                                <SelectValue placeholder="Select Category" />
+                             </SelectTrigger>
+                             <SelectContent>
+                                <SelectItem value="all">All Categories</SelectItem>
+                                {categories?.map(c => <SelectItem key={c.id} value={c.id}>{c.title}</SelectItem>)}
+                             </SelectContent>
+                          </Select>
+                       </div>
+
+                       <div className="space-y-2">
                           <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Distribution Mode</Label>
                           <Select 
                             value={mockData.assignmentMode || "SINGLE"} 
@@ -386,18 +412,18 @@ function MockBuilderContent() {
 
                        <div className="space-y-2">
                           <Label className="text-[9px] font-black uppercase text-slate-500 tracking-widest">
-                            {mockData.assignmentMode === 'AUTHORITY' ? 'Target Authority Boards' : 'Target Recruitment Verticals'}
+                            {mockData.assignmentMode === 'AUTHORITY' ? 'Target Authority Hubs' : 'Target Recruitment Verticals'}
                           </Label>
                           <div className="max-h-80 overflow-y-auto custom-scrollbar pr-2 space-y-1.5 bg-slate-50/50 p-4 rounded-2xl border border-slate-100 shadow-inner">
                              {mockData.assignmentMode === 'AUTHORITY' ? (
-                               boards?.map((b: any) => (
+                               filteredBoardsByCat.map((b: any) => (
                                   <div key={b.id} className="flex items-center space-x-3 p-3 bg-white rounded-xl hover:bg-slate-100 transition-colors cursor-pointer shadow-sm border border-slate-100" onClick={() => toggleBoardId(b.id)}>
                                      <Checkbox checked={mockData.boardIds?.includes(b.id)} className="border-slate-300" />
                                      <span className="text-[10px] font-black text-[#0F172A] uppercase tracking-tighter">{b.abbreviation} Hub</span>
                                   </div>
                                ))
                              ) : (
-                               uniqueExams?.map((e: any) => (
+                               uniqueExams.map((e: any) => (
                                   <div key={e.id} className="flex items-center space-x-3 p-3 bg-white rounded-xl hover:bg-slate-100 transition-colors cursor-pointer shadow-sm border border-slate-100" onClick={() => toggleExamId(e.id)}>
                                      <Checkbox checked={mockData.examIds?.includes(e.id)} className="border-slate-300" />
                                      <span className="text-[10px] font-black text-[#0F172A] uppercase tracking-tighter">{e.name}</span>
@@ -429,7 +455,7 @@ function MockBuilderContent() {
                     <Label className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Recruitment Vertical</Label>
                     <select value={filterExam} onChange={e => setFilterExam(e.target.value)} className="w-full h-14 bg-white/5 border border-white/10 rounded-xl px-4 font-black uppercase text-[10px] outline-none text-white focus:border-primary transition-all">
                        <option value="all" className="bg-[#0B1528]">All Exams</option>
-                       {uniqueExams?.map((ex:any) => <option key={ex.id} value={ex.id} className="bg-[#0B1528]">{ex.name}</option>)}
+                       {uniqueExams.map((ex:any) => <option key={ex.id} value={ex.id} className="bg-[#0B1528]">{ex.name}</option>)}
                     </select>
                  </div>
                  <div className="space-y-3">
@@ -527,7 +553,7 @@ function MockBuilderContent() {
                     </Card>
                   ))}
                   
-                  {/* SEARCHABLE SUBJECT PICKER WITH SCROLLBAR */}
+                  {/* SEARCHABLE SUBJECT PICKER (Matches User Screenshot) */}
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button className="h-20 w-full bg-white border-dashed border-2 border-slate-200 rounded-[2.5rem] shadow-xl hover:border-primary transition-all flex items-center justify-center gap-4 text-slate-400 font-black uppercase text-[11px] tracking-widest">
@@ -536,18 +562,18 @@ function MockBuilderContent() {
                     </PopoverTrigger>
                     <PopoverContent className="w-[320px] p-0 rounded-[2rem] bg-[#0F172A] text-white border-white/10 shadow-5xl overflow-hidden" align="center">
                        <div className="p-6 border-b border-white/5 space-y-4">
-                          <p className="text-[10px] font-black uppercase text-primary tracking-[0.3em] text-center">Select Subject Node</p>
+                          <p className="text-[11px] font-black uppercase text-[#F97316] tracking-[0.2em] text-center">SELECT SUBJECT NODE</p>
                           <div className="relative">
                              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                              <Input 
                                placeholder="Search registry..." 
                                value={subjectSearch}
                                onChange={(e) => setSubjectSearch(e.target.value)}
-                               className="h-12 pl-12 bg-white/5 border-white/10 rounded-xl font-bold text-sm focus-visible:ring-primary text-white" 
+                               className="h-12 pl-12 bg-white/5 border-white/10 rounded-xl font-bold text-sm focus-visible:ring-[#F97316] text-white placeholder:text-slate-500" 
                              />
                           </div>
                        </div>
-                       <ScrollArea className="h-[300px]">
+                       <ScrollArea className="h-[350px]">
                           <div className="p-3 space-y-1">
                              {filteredSubjectsForPicking.map((s: any) => (
                                 <button 
@@ -555,9 +581,9 @@ function MockBuilderContent() {
                                    onClick={() => addNewSection(s.name)}
                                    className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-white/5 transition-all text-left group"
                                 >
-                                   <div className="flex items-center gap-3">
-                                      <SearchCode className="h-3.5 w-3.5 text-slate-500 group-hover:text-primary" />
-                                      <span className="text-[11px] font-black uppercase tracking-tight text-slate-300 group-hover:text-white">{s.name}</span>
+                                   <div className="flex items-center gap-4">
+                                      <SearchCode className="h-3.5 w-3.5 text-slate-500 group-hover:text-[#F97316]" />
+                                      <span className="text-[11px] font-black uppercase tracking-tight text-slate-200 group-hover:text-white">{s.name}</span>
                                    </div>
                                    <Plus className="h-3 w-3 text-slate-600 opacity-0 group-hover:opacity-100 transition-opacity" />
                                 </button>
@@ -565,12 +591,13 @@ function MockBuilderContent() {
                              <div className="p-2 pt-4 border-t border-white/5 mt-2">
                                 <button 
                                    onClick={() => addNewSection(`Section ${sections.length + 1}`)}
-                                   className="w-full flex items-center justify-center h-12 rounded-xl bg-primary/10 border border-primary/20 text-primary font-black uppercase text-[9px] tracking-widest hover:bg-primary hover:text-white transition-all shadow-lg"
+                                   className="w-full flex items-center justify-center h-12 rounded-xl bg-primary/10 border border-[#F97316]/20 text-[#F97316] font-black uppercase text-[9px] tracking-widest hover:bg-[#F97316] hover:text-white transition-all shadow-lg"
                                 >
                                    + Custom Section
                                 </button>
                              </div>
                           </div>
+                          <ScrollBar className="bg-white/10" />
                        </ScrollArea>
                     </PopoverContent>
                   </Popover>

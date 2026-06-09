@@ -11,7 +11,7 @@ import { Plus, Search, Edit, Trash2, Database, Loader2, RefreshCw, Filter, Check
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, deleteDoc, doc, where, limit, getDocs, startAfter, writeBatch, serverTimestamp } from "firebase/firestore"
+import { collection, query, deleteDoc, doc, where, limit, getDocs, startAfter, writeBatch, serverTimestamp, orderBy } from "firebase/firestore"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
@@ -19,8 +19,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Paginated Question Bank Hub v30.1.
- * RESTORED: Status-based filtering (Unused, Used, Locked) and bulk actions.
+ * @fileOverview Paginated Question Bank Hub v31.0.
+ * UPDATED: Synchronized filters with the exhaustive Punjab Registry.
  */
 
 type QuestionFilterType = 'ALL' | 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
@@ -53,14 +53,10 @@ function QuestionBankContent() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [isBulkProcessing, setIsBulkProcessing] = useState(false)
 
-  // STABILIZED DATA LISTENERS
-  const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
-  const subjectsQuery = useMemo(() => (db ? collection(db, "subjects") : null), [db]);
-  const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db]);
-
-  const { data: boards } = useCollection<any>(boardsQuery)
-  const { data: subjects } = useCollection<any>(subjectsQuery)
-  const { data: exams } = useCollection<any>(examsQuery)
+  // LIVE REGISTRY LISTENERS
+  const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc")) : null), [db]));
+  const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]));
+  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
 
   const activeBoard = useMemo(() => boards?.find((b: any) => b.id === boardParam), [boards, boardParam]);
 
@@ -98,7 +94,7 @@ function QuestionBankContent() {
     setLastDoc(null)
     setHasMore(true)
     fetchQuestions(false)
-  }, [boardParam, activeTab]);
+  }, [boardParam, activeTab, fetchQuestions]);
 
   const filteredQuestions = useMemo(() => {
     if (!questions) return []
@@ -137,7 +133,9 @@ function QuestionBankContent() {
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <Select value={boardParam} onValueChange={(v) => router.push(`/admin/questions?board=${v}`)}>
-             <SelectTrigger className="h-11 rounded-xl bg-white border-slate-200 shadow-sm w-full sm:w-48 font-black uppercase text-[9px] tracking-widest"><div className="flex items-center gap-2"><Landmark className="h-3 w-3" /> <SelectValue placeholder="All Authorities" /></div></SelectTrigger>
+             <SelectTrigger className="h-11 rounded-xl bg-white border-slate-200 shadow-sm w-full sm:w-48 font-black uppercase text-[9px] tracking-widest">
+                <div className="flex items-center gap-2"><Landmark className="h-3 w-3" /> <SelectValue placeholder="All Authorities" /></div>
+             </SelectTrigger>
              <SelectContent><SelectItem value="all">All Authorities</SelectItem>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Hub</SelectItem>)}</SelectContent>
           </Select>
           <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="h-11 rounded-xl bg-white border-slate-200 shadow-sm"><Filter className="h-4 w-4 mr-2" /> Hub Filters</Button>
