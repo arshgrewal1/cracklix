@@ -36,10 +36,11 @@ import {
   Tags,
   SearchCode,
   Box,
-  Check
+  Check,
+  FileWarning
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
-import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch, where, documentId, orderBy } from "firebase/firestore"
+import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch, where, documentId, orderBy, deleteDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { MockType, Difficulty, AccessLevel, LanguageDisplayMode, MockAssignmentMode } from "@/types"
 import { cn } from "@/lib/utils"
@@ -48,8 +49,8 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Institutional Mock Architect v23.0.
- * UPDATED: High-Fidelity Subject Picker matching user screenshot.
+ * @fileOverview Institutional Mock Architect v25.0.
+ * UPDATED: Integrated Global Bank Question List with Delete Options.
  */
 
 export default function MockBuilderPage() {
@@ -118,18 +119,19 @@ function MockBuilderContent() {
   const [activeSectionId, setActiveSectionId] = useState('sec-1')
 
   // --- DATA SYNC ---
-  useEffect(() => {
-    async function fetchBank() {
-      if (!db) return
-      setBankLoading(true)
-      try {
-        const q = query(collection(db, "questions"), limit(2000))
-        const snap = await getDocs(q)
-        setQuestionBank(snap.docs.map(d => ({ ...d.data(), id: d.id })))
-      } finally {
-        setBankLoading(false)
-      }
+  const fetchBank = async () => {
+    if (!db) return
+    setBankLoading(true)
+    try {
+      const q = query(collection(db, "questions"), limit(1000))
+      const snap = await getDocs(q)
+      setQuestionBank(snap.docs.map(d => ({ ...d.data(), id: d.id })))
+    } finally {
+      setBankLoading(false)
     }
+  }
+
+  useEffect(() => {
     fetchBank()
   }, [db])
 
@@ -159,7 +161,6 @@ function MockBuilderContent() {
     }
   }, [existingMock, questionBank])
 
-  // STRICT UNIQUENESS PROTOCOL
   const uniqueExams = useMemo(() => {
     if (!rawExams) return [];
     const seen = new Set();
@@ -170,7 +171,6 @@ function MockBuilderContent() {
       return true;
     }).sort((a: any, b: any) => a.name.localeCompare(b.name));
 
-    // Filter by Board if boards are selected
     if (mockData.boardIds.length > 0) {
        return filtered.filter(e => mockData.boardIds.includes(e.boardId));
     }
@@ -179,11 +179,10 @@ function MockBuilderContent() {
 
   const filteredBoardsByCat = useMemo(() => {
      if (!boards) return [];
-     if (!mockData.targetCategoryId) return boards;
+     if (!mockData.targetCategoryId || mockData.targetCategoryId === 'all') return boards;
      return boards.filter(b => b.categoryId === mockData.targetCategoryId);
   }, [boards, mockData.targetCategoryId]);
 
-  // --- BANK FILTER LOGIC ---
   const filteredBank = useMemo(() => {
     const allSelectedIds = sections.flatMap(s => s.questions.map(q => q.id));
     const assemblyHashes = new Set(
@@ -229,6 +228,18 @@ function MockBuilderContent() {
       setBankSelection([]);
     } else {
       setBankSelection(filteredBank.map(q => q.id));
+    }
+  }
+
+  const handleDeleteFromBank = async (qId: string) => {
+    if (!db) return
+    if (!confirm("CRITICAL: Permanently purge this question from Global Bank?")) return
+    try {
+      await deleteDoc(doc(db, "questions", qId))
+      setQuestionBank(prev => prev.filter(q => q.id !== qId))
+      toast({ title: "Asset Purged" })
+    } catch (e) {
+      toast({ variant: "destructive", title: "Purge Failed" })
     }
   }
 
@@ -304,6 +315,7 @@ function MockBuilderContent() {
   const addNewSection = (name: string) => {
     setSections([...sections, { id: `sec-${Date.now()}`, name: name, questions: [] }]);
     setSubjectSearch("");
+    setActiveSectionId(`sec-${Date.now()}`);
   }
 
   return (
@@ -467,6 +479,53 @@ function MockBuilderContent() {
                  </div>
               </div>
 
+              <div className="flex flex-col space-y-6 pt-6 relative z-10">
+                 <div className="relative">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-500" />
+                    <Input 
+                      placeholder="Search question statements..." 
+                      value={searchTerm} 
+                      onChange={e => setSearchTerm(e.target.value)} 
+                      className="h-14 pl-12 bg-white/5 border-white/10 rounded-xl text-white placeholder:text-slate-500" 
+                    />
+                 </div>
+
+                 {/* GLOBAL BANK QUESTION LIST */}
+                 <div className="bg-white/5 rounded-2xl border border-white/5 overflow-hidden">
+                    <ScrollArea className="h-80 w-full">
+                       <div className="divide-y divide-white/5">
+                          {bankLoading ? (
+                             Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-20 w-full bg-white/5" />)
+                          ) : filteredBank.map((q) => (
+                             <div key={q.id} className="p-4 flex items-center justify-between group/q hover:bg-white/5 transition-all">
+                                <div className="flex items-center gap-4 min-w-0">
+                                   <Checkbox 
+                                     checked={bankSelection.includes(q.id)} 
+                                     onCheckedChange={(checked) => setBankSelection(prev => checked ? [...prev, q.id] : prev.filter(id => id !== q.id))}
+                                     className="border-white/20 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                                   />
+                                   <div className="min-w-0 text-left">
+                                      <p className="text-sm font-bold text-slate-100 truncate">{q.englishQuestion}</p>
+                                      <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1">{subjects?.find(s => s.id === q.subjectId)?.name || 'General'}</p>
+                                   </div>
+                                </div>
+                                <div className="flex items-center gap-2 opacity-0 group-hover/q:opacity-100 transition-all">
+                                   <Button 
+                                     variant="ghost" 
+                                     size="icon" 
+                                     onClick={() => handleDeleteFromBank(q.id)}
+                                     className="h-9 w-9 rounded-xl text-rose-500 hover:bg-rose-500/20"
+                                   >
+                                      <Trash2 className="h-4 w-4" />
+                                   </Button>
+                                </div>
+                             </div>
+                          ))}
+                       </div>
+                    </ScrollArea>
+                 </div>
+              </div>
+
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-10 border-t border-white/5 relative z-10">
                  <div className="lg:col-span-5 space-y-3 text-left">
                     <Label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] ml-1">Target Section Hub</Label>
@@ -546,23 +605,33 @@ function MockBuilderContent() {
                                    <span className="text-[10px] font-black text-slate-300 w-6 uppercase">#{qIdx + 1}</span>
                                    <p className="text-sm font-bold text-slate-600 truncate max-w-2xl text-left">{q.englishQuestion}</p>
                                 </div>
-                                <button onClick={() => setSections(p => p.map(s => s.id === sec.id ? { ...s, questions: s.questions.filter((item: any) => item.id !== q.id) } : s))} className="opacity-0 group-hover/item:opacity-100 text-rose-400 hover:text-rose-600 p-2"><X className="h-4 w-4" /></button>
+                                <button 
+                                  onClick={() => setSections(p => p.map(s => s.id === sec.id ? { ...s, questions: s.questions.filter((item: any) => item.id !== q.id) } : s))} 
+                                  className="text-rose-400 hover:text-rose-600 p-2 transition-all active:scale-90"
+                                >
+                                   <Trash2 className="h-4 w-4" />
+                                </button>
                              </div>
                           ))}
+                          {sec.questions.length === 0 && (
+                            <div className="py-10 text-center opacity-20 italic font-black uppercase text-[10px] tracking-widest">
+                               Awaiting link link nodes...
+                            </div>
+                          )}
                        </div>
                     </Card>
                   ))}
                   
-                  {/* SEARCHABLE SUBJECT PICKER (Matches User Screenshot) */}
+                  {/* SEARCHABLE SUBJECT PICKER */}
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button className="h-20 w-full bg-white border-dashed border-2 border-slate-200 rounded-[2.5rem] shadow-xl hover:border-primary transition-all flex items-center justify-center gap-4 text-slate-400 font-black uppercase text-[11px] tracking-widest">
-                         <Plus className="h-6 w-6" /> ADD NEW SUBJECT NODE
+                         <Plus className="h-6 w-6" /> ADD NEW SUBJECT HUB
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-[320px] p-0 rounded-[2rem] bg-[#0F172A] text-white border-white/10 shadow-5xl overflow-hidden" align="center">
                        <div className="p-6 border-b border-white/5 space-y-4">
-                          <p className="text-[11px] font-black uppercase text-[#F97316] tracking-[0.2em] text-center">SELECT SUBJECT NODE</p>
+                          <p className="text-[11px] font-black uppercase text-[#F97316] tracking-[0.2em] text-center">SELECT SUBJECT HUB</p>
                           <div className="relative">
                              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                              <Input 
