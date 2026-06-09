@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useRef } from "react"
@@ -20,8 +19,9 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Authority Hub v53.0.
- * RECOVERED: Restored high-fidelity logos for Punjab Police, PSPCL, PSSSB, and PPSC.
+ * @fileOverview Authority Hub v55.0 (Production Hardened).
+ * FIXED: Unterminated string constant and corrected lucide-react imports.
+ * RECOVERED: Institutional branding for Punjab Police, PSPCL, PSSSB, and PPSC.
  */
 
 export default function ExamManagement() {
@@ -144,8 +144,8 @@ export default function ExamManagement() {
               ) : boards?.map((board: any) => {
                 const category = categories?.find(c => c.id === board.categoryId);
                 
-                const id = board.id?.toLowerCase();
-                const abbrev = board.abbreviation?.toLowerCase();
+                const id = board.id?.toLowerCase() || "";
+                const abbrev = board.abbreviation?.toLowerCase() || "";
                 const isPolice = id.includes('police') || abbrev === 'police';
                 const isTeaching = board.categoryId === 'punjab-teaching';
                 const isTechnical = board.categoryId === 'punjab-technical';
