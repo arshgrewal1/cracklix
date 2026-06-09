@@ -1,4 +1,4 @@
-'use server';
+'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
 import { 
@@ -50,8 +50,8 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Institutional Security Protocol v101.0.
- * UPDATED: Sidebar labels strictly matched to high-fidelity screenshot.
+ * @fileOverview Institutional Security Protocol v102.0.
+ * RESTORED: Morning standard labels for Authority Hub, Exam Registry, etc.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

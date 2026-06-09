@@ -49,8 +49,8 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview RESTORED: Full-Fledge Yesterday's Mock Architect v35.0.
- * Perfectly matching the high-fidelity selection style in your screenshot.
+ * @fileOverview RESTORED: Full-Fledge 7:00 AM Mock Architect v40.0.
+ * Perfectly matching the high-fidelity selection style with two-tab right column.
  */
 
 export default function MockBuilderPage() {
@@ -178,12 +178,6 @@ function MockBuilderContent() {
     }
     return filtered;
   }, [rawExams, boards, mockData.targetCategoryId]);
-
-  const filteredBoardsByCat = useMemo(() => {
-     if (!boards) return [];
-     if (!mockData.targetCategoryId || mockData.targetCategoryId === 'all') return boards;
-     return boards.filter(b => b.categoryId === mockData.targetCategoryId);
-  }, [boards, mockData.targetCategoryId]);
 
   const filteredBank = useMemo(() => {
     const allSelectedIds = sections.flatMap(s => s.questions.map(q => q.id));
@@ -510,7 +504,7 @@ function MockBuilderContent() {
                                       variant="ghost" 
                                       size="icon" 
                                       onClick={(e) => { e.stopPropagation(); handleDeleteFromBank(q.id); }}
-                                      className="h-10 w-10 text-rose-500 hover:bg-rose-500/20 opacity-0 group-hover/q:opacity-100"
+                                      className="h-10 w-10 text-rose-500 hover:bg-rose-50/20 opacity-0 group-hover/q:opacity-100"
                                    >
                                       <Trash2 className="h-4 w-4" />
                                    </Button>
@@ -661,4 +655,3 @@ function MockBuilderContent() {
     </div>
   )
 }
-
