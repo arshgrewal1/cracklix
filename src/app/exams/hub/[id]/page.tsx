@@ -16,8 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Hub Explorer (Hub -> Exams).
- * UPDATED: Permanently set official Technical logo for relevant verticals.
+ * @fileOverview Institutional Hub Explorer (Hub -> Exams) v22.0.
+ * UPDATED: Permanently set official Emblem for all Punjab Government verticals.
  */
 
 export default function HubExamsPage() {
@@ -59,6 +59,7 @@ export default function HubExamsPage() {
   if (hubLoading) return <div className="h-screen bg-white flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
 
   // PERMANENT LOGO REGISTRY
+  const govtOfficialEmblem = "https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png";
   const teachingOfficialLogo = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT77AiJp2d3yn7Lwjk7LG6nDeLpQC_ZnFs6FZg4yAieypyMsmctxNGWRdk&s=10";
   const technicalOfficialLogo = "https://affiliation.pbteched.net/assets/images/banner-5.png";
 
@@ -75,7 +76,7 @@ export default function HubExamsPage() {
             <div className="flex flex-col md:flex-row items-center gap-10">
                <div className="h-24 w-24 md:h-36 md:w-36 rounded-[2rem] md:rounded-[3rem] bg-slate-50 border-4 border-white shadow-2xl flex items-center justify-center overflow-hidden shrink-0">
                   {hub?.iconUrl && !failedImages[hub.id] ? (
-                    <img src={hub.iconUrl} className="h-full w-full object-contain p-4" alt="Logo" onError={() => setFailedImages(p => ({...p, [hub.id]: true}))} />
+                    <img src={hub.iconUrl} className={cn("h-full w-full object-contain p-4", (hub.categoryId === 'punjab-govt' || hub.categoryId === 'punjab-teaching' || hub.categoryId === 'punjab-technical') ? "scale-140" : "")} alt="Logo" onError={() => setFailedImages(p => ({...p, [hub.id]: true}))} />
                   ) : (
                     <Shield className="h-12 w-12 text-slate-200" />
                   )}
@@ -104,11 +105,13 @@ export default function HubExamsPage() {
                   const abbrev = hub?.abbreviation?.toUpperCase() || "";
                   const categoryId = exam.categoryId;
                   
-                  const isTeaching = categoryId === 'punjab-teaching' || abbrev === 'CTET' || abbrev === 'PSTET' || abbrev === 'EDUCATION' || name.includes('TEACHER') || name.includes('PROFESSOR') || name.includes('PRINCIPAL');
-                  const isTechnical = categoryId === 'punjab-technical' || abbrev === 'PSPCL' || abbrev === 'PSTCL' || abbrev === 'PSBTE' || abbrev === 'TECHNICAL';
+                  const isGovt = categoryId === 'punjab-govt' || ['PSSSB', 'PPSC', 'POLICE'].includes(abbrev);
+                  const isTeaching = categoryId === 'punjab-teaching' || ['PSTET', 'CTET', 'EDUCATION'].includes(abbrev);
+                  const isTechnical = categoryId === 'punjab-technical' || ['PSPCL', 'PSTCL', 'PSBTE'].includes(abbrev);
 
                   let forcedLogo = exam.iconUrl || hub?.iconUrl;
-                  if (isTeaching) forcedLogo = teachingOfficialLogo;
+                  if (isGovt) forcedLogo = govtOfficialEmblem;
+                  else if (isTeaching) forcedLogo = teachingOfficialLogo;
                   else if (isTechnical) forcedLogo = technicalOfficialLogo;
 
                   return (
@@ -117,7 +120,7 @@ export default function HubExamsPage() {
                           <div className="flex justify-between items-start mb-10">
                              <div className="h-16 w-16 md:h-20 md:w-20 rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center transition-all group-hover:shadow-xl shadow-inner relative overflow-hidden shrink-0">
                                 {forcedLogo && !failedImages[exam.id] ? (
-                                   <img src={forcedLogo} className={cn("w-full h-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-110", (isTeaching || isTechnical) ? "scale-125" : "")} alt="Logo" referrerPolicy="no-referrer" onError={() => setFailedImages(p => ({...p, [exam.id]: true}))} />
+                                   <img src={forcedLogo} className={cn("w-full h-full object-contain p-2.5 transition-transform duration-500 group-hover:scale-110", (isGovt || isTeaching || isTechnical) ? "scale-140" : "")} alt="Logo" referrerPolicy="no-referrer" onError={() => setFailedImages(p => ({...p, [exam.id]: true}))} />
                                 ) : (
                                    <GraduationCap className="h-8 w-8 text-primary" />
                                 )}
