@@ -29,6 +29,7 @@ import {
   ShieldCheck,
   Settings2,
   CheckCircle2,
+  History,
   Landmark,
   GraduationCap,
   AlertTriangle,
@@ -38,7 +39,6 @@ import {
   BookOpen,
   Info,
   X,
-  History,
   Globe,
   LayoutGrid,
   Tags,
@@ -52,9 +52,9 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Mock Architect v12.6.
- * FIXED: Visibility of dropdown text and layout overlap in Dark Filter Hub.
- * STYLE: Optimized bottom action row for desktop stability.
+ * @fileOverview Institutional Mock Architect v12.7.
+ * FIXED: Link Assets button overlap resolved using flexible wrap layout.
+ * FIXED: Explicit dark text in dropdowns for cross-browser visibility.
  */
 
 export default function MockBuilderPage() {
@@ -96,7 +96,7 @@ function MockBuilderContent() {
     if (!exams) return [];
     const unique = new Map();
     exams.forEach(e => {
-      const key = e.id || e.name?.toLowerCase().trim();
+      const key = e.name?.toLowerCase().trim();
       if (!unique.has(key)) unique.set(key, e);
     });
     return Array.from(unique.values()).sort((a, b) => (a.name || "").localeCompare(b.name || ""));
@@ -492,8 +492,8 @@ function MockBuilderContent() {
                     </div>
 
                     <div className="pt-8 border-t border-white/5 relative z-10">
-                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
-                          <div className="space-y-3 text-left">
+                       <div className="flex flex-wrap items-end gap-6">
+                          <div className="space-y-3 text-left min-w-[240px]">
                              <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Target Section Hub</Label>
                              <select 
                                value={activeSectionId} 
@@ -504,25 +504,27 @@ function MockBuilderContent() {
                              </select>
                           </div>
                           
-                          <div className="flex items-center justify-between bg-white/5 px-6 h-12 rounded-xl border border-white/5 shadow-inner">
+                          <div className="flex items-center gap-4 bg-white/5 px-6 h-12 rounded-xl border border-white/5 shadow-inner">
                              <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Unused Only</span>
                              <Switch checked={hideUsed} onCheckedChange={setHideUsed} className="data-[state=checked]:bg-primary" />
                           </div>
 
                           <button 
                             onClick={handleSelectAllInBank} 
-                            className="h-12 px-6 bg-white/5 border border-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] text-slate-300 transition-all active:scale-95"
+                            className="h-12 px-6 bg-white/5 border border-white/5 hover:bg-white/10 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] text-slate-300 transition-all active:scale-95 whitespace-nowrap"
                           >
                              {bankSelection.length === filteredBank.length ? 'Deselect All' : 'Select All'}
                           </button>
 
-                          <Button 
-                            onClick={handleLinkQuestions}
-                            disabled={bankSelection.length === 0}
-                            className="h-16 px-6 bg-[#10B981] hover:bg-[#059669] text-white font-black uppercase text-[11px] tracking-[0.2em] rounded-2xl shadow-3xl shadow-emerald-500/20 border-none transition-all active:scale-95 w-full"
-                          >
-                             Link {bankSelection.length} Assets
-                          </Button>
+                          <div className="flex-1 flex justify-end">
+                            <Button 
+                              onClick={handleLinkQuestions}
+                              disabled={bankSelection.length === 0}
+                              className="h-16 px-10 bg-[#10B981] hover:bg-[#059669] text-white font-black uppercase text-[11px] tracking-[0.2em] rounded-2xl shadow-3xl shadow-emerald-500/20 border-none transition-all active:scale-95 min-w-[200px]"
+                            >
+                               Link {bankSelection.length} Assets
+                            </Button>
+                          </div>
                        </div>
                     </div>
                  </div>
@@ -676,17 +678,5 @@ function MockBuilderContent() {
         </div>
       </div>
     </div>
-  )
-}
-
-function MetricCard({ label, value, icon }: any) {
-  return (
-    <Card className="border-none shadow-2xl bg-white p-10 rounded-[3rem] relative overflow-hidden group border border-slate-100">
-       <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">{icon}</div>
-       <div className="space-y-4 relative z-10">
-          <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">{label}</p>
-          <p className="text-5xl font-headline font-black text-[#0F172A]">{value}</p>
-       </div>
-    </Card>
   )
 }
