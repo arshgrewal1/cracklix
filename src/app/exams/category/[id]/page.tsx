@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Category Explorer (Category -> Hubs).
+ * UPDATED: Implemented Strict Uniqueness Protocol to prevent duplicate Hub nodes.
  */
 
 const CATEGORY_META: Record<string, any> = {
@@ -40,26 +41,33 @@ export default function CategoryHubsPage() {
   const { data: boards, loading: boardsLoading } = useCollection<any>(boardsQuery);
   const { data: allExams } = useCollection<any>(examsQuery);
 
-  // MAPPING LOGIC (Strictly derived from IDs or CategoryId if present)
+  // MAPPING LOGIC (Strictly deduplicated by Abbreviation)
   const categoryHubs = useMemo(() => {
      if (!boards) return [];
      
-     return boards.filter((b: any) => {
-        // Option 1: Direct categoryId match
-        if (b.categoryId === catId) return true;
-        
-        // Option 2: Inference mapping for legacy boards
+     const hubMap = new Map();
+     
+     boards.forEach((b: any) => {
         const abbrev = (b.abbreviation || "").toUpperCase();
         const bid = (b.id || "").toLowerCase();
-
-        if (catId === 'punjab-govt') return ['PSSSB', 'PPSC', 'POLICE'].includes(abbrev) || bid.includes('police');
-        if (catId === 'punjab-teaching') return ['CTET', 'PSTET', 'EDUCATION'].includes(abbrev);
-        if (catId === 'punjab-technical') return ['PSPCL', 'PSTCL'].includes(abbrev);
-        if (catId === 'banking') return ['IBPS', 'SBI', 'RBI', 'NABARD'].includes(abbrev);
-        if (catId === 'central-govt') return ['SSC', 'RAILWAYS', 'ARMY', 'NAVY', 'AIRFORCE'].includes(abbrev) || bid.includes('army');
         
-        return false;
+        let matches = false;
+        if (b.categoryId === catId) matches = true;
+        else if (catId === 'punjab-govt' && (['PSSSB', 'PPSC', 'POLICE'].includes(abbrev) || bid.includes('police'))) matches = true;
+        else if (catId === 'punjab-teaching' && (['CTET', 'PSTET', 'EDUCATION'].includes(abbrev))) matches = true;
+        else if (catId === 'punjab-technical' && (['PSPCL', 'PSTCL'].includes(abbrev))) matches = true;
+        else if (catId === 'banking' && (['IBPS', 'SBI', 'RBI', 'NABARD'].includes(abbrev))) matches = true;
+        else if (catId === 'central-govt' && (['SSC', 'RAILWAYS', 'ARMY', 'NAVY', 'AIRFORCE'].includes(abbrev) || bid.includes('army'))) matches = true;
+
+        if (matches) {
+           const key = abbrev || b.id;
+           if (!hubMap.has(key)) {
+              hubMap.set(key, b);
+           }
+        }
      });
+
+     return Array.from(hubMap.values()).sort((a, b) => a.abbreviation.localeCompare(b.abbreviation));
   }, [boards, catId]);
 
   return (

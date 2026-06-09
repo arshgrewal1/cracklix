@@ -2,8 +2,8 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, getDocs, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Node v4.0.
- * UPDATED: Strictly implements Category -> Hub (Board) -> Exam (Vertical) hierarchy.
+ * @fileOverview Institutional Seeding Node v4.1.
+ * UPDATED: Strictly implements canonical Board IDs to prevent duplicate Hubs.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -62,14 +62,16 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'categories', cat.id), { ...cat, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 2. HUBS (Boards) - Mapped to Categories
+  // 2. HUBS (Boards) - Mapped to Categories using CANONICAL IDs
   const psssbLogo = "https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg";
   const psebLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
   
   const boards = [
     { id: 'psssb', abbreviation: 'PSSSB', name: 'Punjab Subordinate Services Selection Board', region: 'Punjab', category: 'STATE_BOARD', categoryId: 'punjab-govt', iconUrl: psssbLogo },
     { id: 'punjab-police', abbreviation: 'POLICE', name: 'Punjab Police Recruitment Board', region: 'Punjab', category: 'DEFENCE_BOARD', categoryId: 'punjab-govt', iconUrl: "https://www.punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png" },
-    { id: 'education', abbreviation: 'EDUCATION', name: 'Education Recruitment Board Punjab', region: 'Punjab', category: 'TEACHING_BOARD', categoryId: 'punjab-teaching', iconUrl: psebLogo },
+    { id: 'education-board', abbreviation: 'EDUCATION', name: 'Education Recruitment Board Punjab', region: 'Punjab', category: 'TEACHING_BOARD', categoryId: 'punjab-teaching', iconUrl: psebLogo },
+    { id: 'pstet-hub', abbreviation: 'PSTET', name: 'Punjab State Teacher Eligibility Test Hub', region: 'Punjab', category: 'TEACHING_BOARD', categoryId: 'punjab-teaching', iconUrl: psebLogo },
+    { id: 'ctet-hub', abbreviation: 'CTET', name: 'Central Teacher Eligibility Test Hub', region: 'Punjab', category: 'TEACHING_BOARD', categoryId: 'punjab-teaching', iconUrl: "https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png" },
     { id: 'pspcl', abbreviation: 'PSPCL', name: 'Punjab State Power Corporation Limited', region: 'Punjab', category: 'TECHNICAL', categoryId: 'punjab-technical', iconUrl: "https://pspcl.in/assets/images/logo.png" }
   ];
 
@@ -84,18 +86,20 @@ export async function seedInitialData(db: Firestore) {
   examsSnap.docs.forEach(d => {
     const data = d.data();
     let catId = data.categoryId || 'punjab-govt';
+    let boardId = data.boardId || 'psssb';
     
-    // Auto-inference logic for mapping legacy verticals to the new 5-tier system
     const name = (data.name || "").toUpperCase();
-    if (name.includes('PSTET') || name.includes('CTET') || name.includes('CADRE') || name.includes('ETT')) catId = 'punjab-teaching';
-    if (name.includes('PSPCL') || name.includes('JE ') || name.includes('ALM') || name.includes('LINEMAN')) catId = 'punjab-technical';
-    if (name.includes('IBPS') || name.includes('BANK')) catId = 'banking';
-    if (name.includes('SSC') || name.includes('ARMY') || name.includes('RAILWAY')) catId = 'central-govt';
+    if (name.includes('PSTET')) { catId = 'punjab-teaching'; boardId = 'pstet-hub'; }
+    else if (name.includes('CTET')) { catId = 'punjab-teaching'; boardId = 'ctet-hub'; }
+    else if (name.includes('CADRE') || name.includes('ETT') || name.includes('TEACHING')) { catId = 'punjab-teaching'; boardId = 'education-board'; }
+    else if (name.includes('PSPCL') || name.includes('JE ') || name.includes('ALM')) { catId = 'punjab-technical'; boardId = 'pspcl'; }
+    else if (name.includes('IBPS') || name.includes('BANK')) { catId = 'banking'; boardId = 'banking-hub'; }
+    else if (name.includes('SSC') || name.includes('ARMY')) { catId = 'central-govt'; boardId = 'central-hub'; }
 
-    batch.update(d.ref, { categoryId: catId });
+    batch.update(d.ref, { categoryId: catId, boardId: boardId });
   });
   
   await batch.commit();
 
-  console.log('[AUDIT] Hierarchical Registry Synchronized.');
+  console.log('[AUDIT] Hierarchical Registry Deduplicated and Synchronized.');
 }

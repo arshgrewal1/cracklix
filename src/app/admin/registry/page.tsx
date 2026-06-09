@@ -38,8 +38,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Consolidated Master Registry Hub v2.0 (Optimized).
- * PERFORMANCE: Removed full question bank fetch which caused 20s+ lag.
+ * @fileOverview Consolidated Master Registry Hub v2.1.
+ * UPDATED: Deduped Boards view to maintain authority hub integrity.
  */
 
 export default function MasterRegistryPage() {
@@ -67,8 +67,20 @@ export default function MasterRegistryPage() {
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Filtered Lists (Memoized)
-  const filteredBoards = useMemo(() => boards?.filter(b => b.name?.toLowerCase().includes(searchTerm.toLowerCase()) || b.abbreviation?.toLowerCase().includes(searchTerm.toLowerCase())).sort((a,b) => a.abbreviation.localeCompare(b.abbreviation)), [boards, searchTerm])
+  // Filtered Lists (Memoized & Deduped)
+  const filteredBoards = useMemo(() => {
+     if (!boards) return [];
+     const hubMap = new Map();
+     boards.forEach(b => {
+        const abbrev = (b.abbreviation || "").toUpperCase();
+        if (!searchTerm || b.name?.toLowerCase().includes(searchTerm.toLowerCase()) || b.abbreviation?.toLowerCase().includes(searchTerm.toLowerCase())) {
+           const key = abbrev || b.id;
+           if (!hubMap.has(key)) hubMap.set(key, b);
+        }
+     });
+     return Array.from(hubMap.values()).sort((a,b) => a.abbreviation.localeCompare(b.abbreviation));
+  }, [boards, searchTerm]);
+
   const filteredExams = useMemo(() => exams?.filter(e => e.name?.toLowerCase().includes(searchTerm.toLowerCase())).sort((a,b) => a.name.localeCompare(b.name)), [exams, searchTerm])
   const filteredSubjects = useMemo(() => subjects?.filter(s => s.name?.toLowerCase().includes(searchTerm.toLowerCase())).sort((a,b) => a.name.localeCompare(b.name)), [subjects, searchTerm])
 
@@ -289,7 +301,7 @@ export default function MasterRegistryPage() {
       </Tabs>
 
       {/* MERGE DIALOG */}
-      <Dialog open={mergeDialogOpen} onOpenChange={setMergeDialogOpen}>
+      <Dialog open={mergeDialogOpen} onOpenChange={mergeDialogOpen && !isMerging ? setMergeDialogOpen : undefined}>
          <DialogContent className="sm:max-w-xl rounded-[2.5rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left">
             <div className="h-2 w-full bg-emerald-500" />
             <DialogHeader className="p-10 pb-4">
