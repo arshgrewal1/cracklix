@@ -1,247 +1,135 @@
 
 "use client"
 
-import { useMemo, Suspense, useState } from "react"
+import { useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore"
-import { Input } from "@/components/ui/input"
-import { Search, GraduationCap, ChevronRight, Zap, BookOpen, Layers, FileText, Star, Shield } from "lucide-react"
-import { Card } from "@/components/ui/card"
+import { useCollection, useFirestore } from "@/firebase"
+import { collection } from "firebase/firestore"
+import { ShieldCheck, GraduationCap, Zap, Wallet, Globe, ChevronRight, Landmark } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Skeleton } from "@/components/ui/skeleton"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview High-Density Responsive Exam Catalog v14.2.
- * FIXED: Strictly isolated CTET and PSTET official logos with optimized scaling.
+ * @fileOverview Institutional Category Registry Hub v15.0.
+ * Reorganized into 5 discrete recruitment verticals for scalable discovery.
  */
 
-export default function ExamsCatalog() {
-  return (
-    <Suspense fallback={null}>
-      <CatalogContent />
-    </Suspense>
-  )
-}
+const MAIN_CATEGORIES = [
+  {
+    id: "punjab-govt",
+    title: "Punjab Government Exams",
+    desc: "PSSSB, PPSC, Punjab Police, Revenue & State Departments.",
+    icon: <ShieldCheck className="h-10 w-10 md:h-12 md:w-12" />,
+    color: "text-primary",
+    bgColor: "bg-orange-50",
+    highlight: "STATE LEVEL"
+  },
+  {
+    id: "punjab-teaching",
+    title: "Punjab Teaching Exams",
+    desc: "PSTET, CTET, Master Cadre, ETT & Lecturer registries.",
+    icon: <GraduationCap className="h-10 w-10 md:h-12 md:w-12" />,
+    color: "text-blue-600",
+    bgColor: "bg-blue-50",
+    highlight: "EDUCATIONAL"
+  },
+  {
+    id: "punjab-technical",
+    title: "Punjab Technical Exams",
+    desc: "PSPCL, PSTCL, Junior Engineer & Technical Assistant nodes.",
+    icon: <Zap className="h-10 w-10 md:h-12 md:w-12" />,
+    color: "text-amber-500",
+    bgColor: "bg-amber-50",
+    highlight: "POWER & IT"
+  },
+  {
+    id: "banking",
+    title: "Banking Exams",
+    desc: "IBPS, PO, Clerk, SO, SBI, RBI & NABARD career prep.",
+    icon: <Wallet className="h-10 w-10 md:h-12 md:w-12" />,
+    color: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+    highlight: "FINANCIAL"
+  },
+  {
+    id: "central-govt",
+    title: "Central Government Exams",
+    desc: "SSC, Railways, Indian Army, Air Force & Navy Hubs.",
+    icon: <Globe className="h-10 w-10 md:h-12 md:w-12" />,
+    color: "text-indigo-600",
+    bgColor: "bg-indigo-50",
+    highlight: "NATIONAL"
+  }
+];
 
-function CatalogContent() {
-  const db = useFirestore()
-  const { user, profile } = useUser()
-  const { toast } = useToast()
-  const router = useRouter()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({})
-
-  const examsQuery = useMemo(() => (db ? query(collection(db, 'exams')) : null), [db])
-  const boardsQuery = useMemo(() => (db ? query(collection(db, 'boards')) : null), [db])
-  const mocksQuery = useMemo(() => (db ? query(collection(db, 'mocks')) : null), [db])
-  const questionsQuery = useMemo(() => (db ? query(collection(db, 'questions')) : null), [db])
-
-  const { data: rawExams, loading: examsLoading } = useCollection<any>(examsQuery)
-  const { data: boards } = useCollection<any>(boardsQuery)
-  const { data: mocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
-  const { data: questions } = useCollection<any>(questionsQuery)
-
-  const statsMap = useMemo(() => {
-    if (!mocks) return {};
-    const map: Record<string, any> = {};
-    
-    mocks.forEach(m => {
-      const eids = m.examIds || (m.examId ? [m.examId] : []);
-      if (!eids.length) return;
-      
-      eids.forEach((eid: string) => {
-        if (!map[eid]) map[eid] = { full: 0, pyq: 0, sectional: 0, qCount: 0, subjects: new Set<string>() };
-        if (m.mockType === 'FULL') map[eid].full++;
-        if (m.mockType === 'PYQ') map[eid].pyq++;
-        if (m.mockType === 'SECTIONAL') map[eid].sectional++;
-        if (m.subjectId) map[eid].subjects.add(m.subjectId);
-      });
-    });
-
-    if (questions) {
-      questions.forEach(q => {
-        if (q.examId && map[q.examId]) {
-          map[q.examId].qCount++;
-        } else if (q.examId) {
-          map[q.examId] = { full: 0, pyq: 0, sectional: 0, qCount: 1, subjects: new Set<string>() };
-        }
-      })
-    }
-
-    return map;
-  }, [mocks, questions]);
-
-  const exams = useMemo(() => {
-    if (!rawExams) return [];
-    const unique = new Map();
-    rawExams.forEach(e => {
-       const key = e.name?.toLowerCase().trim();
-       if (!unique.has(key)) unique.set(key, e);
-    });
-    return Array.from(unique.values()).filter((e: any) => 
-       e.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [rawExams, searchTerm])
-
-  const togglePin = async (e: React.MouseEvent, examId: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (!user) {
-      router.push("/login?returnUrl=/exams");
-      return;
-    }
-
-    const isPinned = profile?.pinnedExams?.includes(examId);
-    try {
-      await updateDoc(doc(db!, "users", user.uid), {
-        pinnedExams: isPinned ? arrayRemove(examId) : arrayUnion(examId)
-      });
-      toast({ title: isPinned ? "Hub Unpinned" : "Pinned to My Exams" });
-    } catch (err) {
-      toast({ variant: "destructive", title: "Sync Failed" });
-    }
-  };
-
-  const ctetOfficialLogo = "https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png";
-  const pstetOfficialLogo = "https://pstet.pseb.ac.in/img/main-logo-2.png";
-  const psebOfficialLogo = "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png";
+export default function ExamsEntryPage() {
+  const db = useFirestore();
+  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
+  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50/50 pb-safe overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-slate-50/50 font-body">
       <Navbar />
-      <main className="container mx-auto px-4 py-6 md:py-16 max-w-7xl">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-8 md:mb-16 gap-4 text-left">
-          <div className="space-y-1">
-             <div className="flex items-center gap-2">
-                <GraduationCap className="h-3.5 w-3.5 text-primary" />
-                <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Official Registry 2026</span>
+      
+      <main className="container mx-auto px-4 md:px-6 py-12 md:py-24 max-w-7xl">
+        <div className="text-left mb-16 md:mb-24 space-y-6">
+          <div className="flex items-center gap-4">
+             <div className="h-12 w-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-inner">
+                <Landmark className="h-6 w-6" />
              </div>
-             <h1 className="text-2xl md:text-6xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none">MASTER <span className="text-primary">CATALOG</span></h1>
-             <p className="text-[11px] md:text-lg text-slate-500 font-medium">Explore and pin your target recruitment hubs.</p>
+             <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-slate-500">Official Exam Registry 2026</span>
           </div>
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
-            <Input 
-              className="pl-9 h-11 md:h-14 rounded-lg md:rounded-xl bg-white border-none shadow-sm text-sm" 
-              placeholder="Search recruitment hubs..." 
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-          </div>
+          <h1 className="text-4xl md:text-8xl font-headline font-black text-[#0F172A] uppercase tracking-tighter leading-[0.85]">
+            Master <br/> <span className="text-primary">Registry</span>
+          </h1>
+          <p className="text-slate-500 font-medium text-lg md:text-2xl max-w-3xl leading-relaxed">
+            Select your recruitment category to find official boards and practice hubs.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
-           {examsLoading || mocksLoading ? (
-              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3.5rem]" />)
-           ) : exams.map((exam: any) => {
-              const board = boards?.find((b: any) => 
-                b.id.toLowerCase() === exam.boardId?.toLowerCase() || 
-                b.abbreviation?.toLowerCase() === exam.boardId?.toLowerCase()
-              );
-              
-              const abbrev = board?.abbreviation?.toUpperCase() || exam.boardId?.toUpperCase();
-              let logoUrl = exam.iconUrl || board?.iconUrl;
-              
-              // STRICT BRANDING SYNC
-              const isCtet = abbrev === 'CTET' || abbrev === 'CBSE' || exam.name.toUpperCase().includes('CTET');
-              const isPstet = abbrev === 'PSTET' || (exam.name.toUpperCase().includes('PSTET') && !isCtet);
-              const isPseb = abbrev === 'PSEB' || abbrev === 'EDUCATION' || (exam.name.toUpperCase().includes('PSEB') && !isCtet && !isPstet);
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
+           {MAIN_CATEGORIES.map((cat, idx) => {
+             const boardCount = (boards || []).filter((b: any) => b.categoryId === cat.id).length;
+             const examCount = (exams || []).filter((e: any) => e.categoryId === cat.id).length;
 
-              if (isCtet) logoUrl = ctetOfficialLogo;
-              else if (isPstet) logoUrl = pstetOfficialLogo;
-              else if (isPseb) logoUrl = psebOfficialLogo;
+             return (
+                <Link key={cat.id} href={`/exams/category/${cat.id}`}>
+                   <Card className="border-none shadow-xl hover:shadow-5xl hover:translate-y-[-12px] transition-all duration-700 rounded-[3.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100">
+                      <CardContent className="p-10 md:p-14 flex flex-col h-full">
+                         <div className="flex justify-between items-start mb-12">
+                            <div className={cn("h-20 w-20 md:h-24 md:w-24 rounded-[1.8rem] md:rounded-[2.2rem] flex items-center justify-center transition-all group-hover:shadow-2xl shadow-inner relative overflow-hidden shrink-0", cat.bgColor, cat.color)}>
+                               {cat.icon}
+                            </div>
+                            <Badge className="bg-[#0F172A] text-white border-none text-[8px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-xl shadow-lg">
+                               {cat.highlight}
+                            </Badge>
+                         </div>
+                         
+                         <div className="space-y-5 flex-1">
+                            <h3 className="font-headline text-3xl md:text-4xl font-black text-[#0F172A] uppercase leading-[0.95] group-hover:text-primary transition-colors">
+                               {cat.title}
+                            </h3>
+                            <p className="text-sm md:text-lg font-medium text-slate-400 leading-relaxed">
+                               {cat.desc}
+                            </p>
+                         </div>
 
-              const stats = statsMap[exam.id] || { full: 0, pyq: 0, sectional: 0, qCount: 0, subjects: new Set() };
-              const isPinned = profile?.pinnedExams?.includes(exam.id);
-              const isImgFailed = failedImages[exam.id];
-              
-              const bid = exam.boardId?.toLowerCase() || "";
-              
-              const isArmy = bid === 'army' || exam.id?.toLowerCase().includes('army');
-              const isPolice = bid.includes('police') || abbrev?.includes('POLICE');
-              const isPower = bid.includes('pspcl') || bid.includes('pstcl') || abbrev?.includes('PSPCL');
-              const isSsc = bid === 'ssc' || exam.id?.toLowerCase().includes('ssc') || abbrev === 'SSC';
-              const isEdu = isPseb || exam.name?.toLowerCase().includes('ett') || exam.name?.toLowerCase().includes('master');
-
-              return (
-                <Card key={exam.id} className="border-none shadow-lg hover:shadow-2xl transition-all duration-300 rounded-xl md:rounded-[3rem] bg-white group overflow-hidden text-left h-full flex flex-col border border-slate-100 p-4 md:p-10 relative">
-                   <button 
-                     onClick={(e) => togglePin(e, exam.id)}
-                     className={`absolute top-4 right-4 md:top-8 md:right-8 z-20 p-2 rounded-full transition-all ${isPinned ? 'bg-amber-100 text-amber-600' : 'bg-slate-50 text-slate-300 hover:text-primary'}`}
-                   >
-                      <Star className={`h-4 w-4 md:h-5 md:w-5 ${isPinned ? 'fill-current' : ''}`} />
-                   </button>
-
-                   <Link href={`/exams/${exam.id}`} className="flex-1 flex flex-col">
-                       <div className="flex justify-between items-start mb-4 md:mb-10 pr-10">
-                          <div className="h-10 w-10 md:h-20 md:w-20 rounded-lg md:rounded-3xl bg-white border border-slate-100 flex items-center justify-center relative overflow-hidden shrink-0 shadow-inner">
-                             {logoUrl && !isImgFailed ? (
-                                <img 
-                                  src={logoUrl} 
-                                  className={cn("w-full h-full object-contain p-1.5 md:p-2 transition-transform duration-500 group-hover:scale-105", 
-                                    isArmy ? "scale-125" : (isPolice || isEdu || isCtet || isPstet) ? "scale-150 p-1" : (isPower || isSsc) ? "scale-110" : ""
-                                  )} 
-                                  alt="Board Logo" 
-                                  referrerPolicy="no-referrer" 
-                                  onError={() => setFailedImages(p => ({...p, [exam.id]: true}))}
-                                />
-                             ) : (
-                                isPolice ? <Shield className="h-5 w-5 md:h-10 md:w-10 text-primary" /> : <GraduationCap className="h-5 w-5 md:h-10 md:w-10 text-slate-300" />
-                             )}
-                          </div>
-                          <Badge className="bg-primary/5 text-primary border-none text-[6px] md:text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-md">
-                             {board?.abbreviation || 'GOVT'} Hub
-                          </Badge>
-                       </div>
-                       
-                       <div className="space-y-1 md:space-y-4 flex-1">
-                          <h3 className="text-[15px] md:text-3xl font-black text-[#0F172A] uppercase leading-tight tracking-tight group-hover:text-primary transition-colors">
-                            {exam.name}
-                          </h3>
-                          <p className="text-[10px] md:sm font-medium text-slate-400 leading-relaxed line-clamp-1 md:line-clamp-2">
-                            {exam.description || `Prepare for ${exam.name} with official patterns.`}
-                          </p>
-                       </div>
-
-                       <div className="grid grid-cols-2 gap-y-4 gap-x-2 mt-6 pt-6 border-t border-slate-50">
-                          <CounterNode icon={<Zap className="h-3 w-3 text-primary" />} val={stats.full} label="Full Mocks" />
-                          <CounterNode icon={<BookOpen className="h-3 w-3 text-blue-500" />} val={stats.subjects.size} label="Subject Hubs" />
-                          <CounterNode icon={<FileText className="h-3 w-3 text-emerald-500" />} val={stats.pyq} label="PYQ Archives" />
-                          <CounterNode icon={<Layers className="h-3 w-3 text-orange-500" />} val={stats.qCount} label="Active MCQs" />
-                       </div>
-
-                       <div className="mt-6 md:mt-10">
-                          <Button variant="ghost" className="w-full h-9 md:h-16 rounded-lg md:rounded-2xl bg-slate-900 text-white group-hover:bg-primary transition-all font-black uppercase text-[8px] md:text-[10px] tracking-widest gap-2 shadow-lg">
-                             Enter Hub <ChevronRight className="h-3 w-3 md:h-3.5 md:w-3.5" />
-                          </Button>
-                       </div>
-                   </Link>
-                </Card>
-              )
+                         <div className="mt-12 pt-8 border-t border-slate-50">
+                            <Button variant="ghost" className="w-full h-16 rounded-2xl bg-slate-900 text-white group-hover:bg-primary transition-all shadow-xl font-black uppercase text-[10px] tracking-widest gap-3">
+                               Open Category Hub <ChevronRight className="h-4 w-4" />
+                            </Button>
+                         </div>
+                      </CardContent>
+                   </Card>
+                </Link>
+             )
            })}
         </div>
       </main>
       <Footer />
-    </div>
-  )
-}
-
-function CounterNode({ icon, val, label }: { icon: React.ReactNode, val: number, label: string }) {
-  return (
-    <div className="space-y-0.5 text-left">
-       <div className="flex items-center gap-1.5">
-          {icon}
-          <p className="text-[10px] md:text-[12px] font-black text-[#0F172A]">{val}</p>
-       </div>
-       <p className="text-[6px] md:text-[8px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
     </div>
   )
 }

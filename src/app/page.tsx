@@ -4,7 +4,9 @@
 import React, { useMemo } from "react";
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/home/Hero";
-import PopularExams from "@/components/home/PopularExams";
+import FeaturedCategories from "@/components/home/FeaturedCategories";
+import ContinueLearning from "@/components/home/ContinueLearning";
+import TrendingExams from "@/components/home/TrendingExams";
 import LatestMocks from "@/components/home/LatestMocks";
 import Features from "@/components/home/Features";
 import AppPreview from "@/components/home/AppPreview";
@@ -16,8 +18,8 @@ import { BookOpen, Zap, Users, Target } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Optimized Institutional Landing Hub v36.0.
- * UPDATED: Replaced static stats doc with real live collection lengths for true synchronization.
+ * @fileOverview Optimized Institutional Landing Hub v41.0.
+ * UPDATED: Implemented 5-Category hierarchy and Discovery Persistence Hub.
  */
 
 export default function HomePage() {
@@ -34,7 +36,7 @@ export default function HomePage() {
     const mCount = mocks?.length || 0;
     const uCount = users?.length || 0;
     
-    let avgAcc = 94; // Default fallback
+    let avgAcc = 94; 
     if (results && results.length > 0) {
        const sum = results.reduce((acc: number, r: any) => acc + (r.accuracy || 0), 0);
        avgAcc = Math.round(sum / results.length);
@@ -55,6 +57,7 @@ export default function HomePage() {
       <Navbar />
       <Hero />
 
+      {/* Trust Stats Bar */}
       <section className="bg-white py-4 md:py-12 border-b border-slate-50">
          <div className="container mx-auto px-4 max-w-7xl">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-10">
@@ -86,8 +89,11 @@ export default function HomePage() {
          </div>
       </section>
 
-      <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl space-y-12 md:space-y-24">
-         <PopularExams />
+      {/* Main Persistent Discovery Hub */}
+      <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl space-y-16 md:space-y-32">
+         <ContinueLearning />
+         <FeaturedCategories />
+         <TrendingExams />
          <LatestMocks />
       </div>
 
