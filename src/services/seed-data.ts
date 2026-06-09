@@ -1,14 +1,25 @@
 
-import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
+import { Firestore, doc, setDoc, serverTimestamp, collection, deleteDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Punjab-Centric Seeding Node v52.0.
- * UPDATED: Locked official Punjab Police logo for Head Constable / ASI verticals.
- * LOCKED: Official institutional URLs for PSSSB, Police, PSPCL, and Teaching Hubs.
+ * @fileOverview Institutional Punjab-Centric Seeding Node v53.0.
+ * UPDATED: Consolidated PSTET/CTET hubs and purged legacy duplicates.
+ * LOCKED: Official institutional URLs for all Punjab boards and specific verticals.
  */
 
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Punjab-Focused Registry Sync...');
+
+  // 0. REGISTRY SANITIZATION: Purge legacy duplicate board nodes
+  const legacyBoardIds = ['pstet', 'ctet'];
+  for (const id of legacyBoardIds) {
+     try {
+        await deleteDoc(doc(db, 'boards', id));
+        console.log(`[CLEANUP] Purged legacy board node: ${id}`);
+     } catch (e) {
+        // Silent fail for non-existent nodes
+     }
+  }
 
   // 1. STRATEGIC CATEGORIES (Punjab Focused)
   const categories = [
@@ -138,13 +149,6 @@ export async function seedInitialData(db: Firestore) {
       categoryId: 'punjab-teaching',
       iconUrl: 'https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png',
       displayOrder: 9
-    },
-    { 
-      id: 'coop-bank', 
-      abbreviation: 'COOP', 
-      name: 'Punjab Cooperative Bank', 
-      categoryId: 'punjab-banking',
-      displayOrder: 10
     }
   ];
 
@@ -160,11 +164,17 @@ export async function seedInitialData(db: Firestore) {
     { id: 'police-si', name: 'Police Sub-Inspector', boardId: 'punjab-police', categoryId: 'punjab-govt', displayOrder: 2 },
     { id: 'pcs-prelims', name: 'PCS Prelims', boardId: 'ppsc', categoryId: 'punjab-govt', displayOrder: 3 },
     
-    // Teaching
+    // Teaching - Standardized Hubs
     { id: 'master-cadre', name: 'Master Cadre', boardId: 'teaching-hub', categoryId: 'punjab-teaching', displayOrder: 4 },
     { id: 'ett-cadre', name: 'ETT Cadre', boardId: 'teaching-hub', categoryId: 'punjab-teaching', displayOrder: 5 },
     { id: 'lecturer-cadre', name: 'Lecturer Cadre', boardId: 'teaching-hub', categoryId: 'punjab-teaching', displayOrder: 6 },
+    
+    // PSTET Hub (2 Verticals)
     { id: 'pstet-p1', name: 'PSTET Paper 1', boardId: 'pstet-hub', categoryId: 'punjab-teaching', displayOrder: 7 },
+    { id: 'pstet-p2', name: 'PSTET Paper 2', boardId: 'pstet-hub', categoryId: 'punjab-teaching', displayOrder: 7.1 },
+    
+    // CTET Hub (2 Verticals)
+    { id: 'ctet-p1', name: 'CTET Paper 1', boardId: 'ctet-hub', categoryId: 'punjab-teaching', displayOrder: 7.4 },
     { id: 'ctet-p2', name: 'CTET Paper 2', boardId: 'ctet-hub', categoryId: 'punjab-teaching', displayOrder: 7.5, iconUrl: 'https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png' },
     
     // Technical
