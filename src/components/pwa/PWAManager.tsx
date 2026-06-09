@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -38,7 +37,7 @@ export default function PWAManager() {
       e.preventDefault();
       setDeferredPrompt(e);
       
-      // Delay prompt visibility to ensure high-quality LCP
+      // Delay prompt visibility
       const timer = setTimeout(() => {
         // Only show prompt on non-critical pages
         if (!pathname?.includes('/attempt') && !pathname?.includes('/admin')) {
@@ -58,7 +57,6 @@ export default function PWAManager() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Check if already in standalone mode
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
     }
@@ -74,13 +72,12 @@ export default function PWAManager() {
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
     if (outcome === 'accepted') {
-      console.log('[PWA] User accepted the install prompt');
+      console.log('[PWA] User accepted install');
     }
     setDeferredPrompt(null);
     setShowPrompt(false);
   };
 
-  // Hide during active mock attempts for zero-distraction CBT
   if (pathname?.includes('/attempt')) return null;
 
   return (

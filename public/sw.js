@@ -1,35 +1,34 @@
-
 /**
  * @fileOverview Institutional Service Worker v1.0.
- * Features: Static asset caching, network-first for pages, and strict security bypass.
+ * Strategy: Cache static assets, Network-first for dynamic content.
+ * SECURITY: Explicitly bypasses caching for admin and auth routes.
  */
 
-const CACHE_NAME = 'cracklix-v1';
-const OFFLINE_URL = '/offline.html';
-
-const STATIC_ASSETS = [
+const CACHE_NAME = 'cracklix-cache-v1';
+const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png',
+  '/favicon.ico',
 ];
 
+// 1. Install Event: Cache essential assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      return cache.addAll(ASSETS_TO_CACHE);
     })
   );
   self.skipWaiting();
 });
 
+// 2. Activate Event: Cleanup old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
+        cacheNames.map((name) => {
+          if (name !== CACHE_NAME) {
+            return caches.delete(name);
           }
         })
       );
@@ -38,46 +37,48 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// 3. Fetch Event: Intelligent Routing
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // 1. Strict Security Guard: Never cache Admin, API, or Auth routes
+  // SECURITY GUARD: Never cache sensitive routes
   if (
-    url.pathname.startsWith('/admin') || 
+    url.pathname.startsWith('/admin') ||
     url.pathname.startsWith('/api') ||
-    url.hostname.includes('firebase') ||
-    url.hostname.includes('googleapis') ||
+    url.pathname.includes('firestore') ||
+    url.pathname.includes('identitytoolkit') ||
     request.method !== 'GET'
   ) {
     return;
   }
 
-  // 2. Navigation Preload / Network First for Pages
+  // STRATEGY: Network First for pages, Cache First for static assets
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(() => {
         return caches.match('/');
       })
     );
-    return;
+  } else {
+    event.respondWith(
+      caches.match(request).then((response) => {
+        return response || fetch(request).then((networkResponse) => {
+          // Cache fonts, scripts and styles
+          if (
+            url.origin === self.location.origin &&
+            (url.pathname.endsWith('.js') || 
+             url.pathname.endsWith('.css') || 
+             url.pathname.includes('/fonts/'))
+          ) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return networkResponse;
+        });
+      })
+    );
   }
-
-  // 3. Cache-First for Static Assets (Images, Fonts, Scripts)
-  event.respondWith(
-    caches.match(request).then((response) => {
-      return response || fetch(request).then((networkResponse) => {
-        if (
-          networkResponse.status === 200 && 
-          (url.pathname.includes('/_next/static') || url.pathname.includes('/icons/'))
-        ) {
-          const cacheCopy = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, cacheCopy);
-          });
-        }
-        return networkResponse;
-      });
-    })
-  );
 });
