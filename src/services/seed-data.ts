@@ -2,9 +2,9 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Seeding Node v36.0.
+ * @fileOverview Institutional Seeding Node v37.0.
  * RECOVERED & LOCKED: Verified official URLs for PSSSB, Police, PSPCL, PPSC, CTET, and PSTET Hubs.
- * UPDATED: Explicitly locked the PSSSB SVG and Punjab Police PNG assets.
+ * UPDATED: Explicitly locked the CTET Paper 2 vertical with its specific official logo.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -153,7 +153,13 @@ export async function seedInitialData(db: Firestore) {
     { id: 'pstet-p1', name: 'PSTET Paper 1', boardId: 'pstet', categoryId: 'punjab-teaching' },
     { id: 'pstet-p2', name: 'PSTET Paper 2', boardId: 'pstet', categoryId: 'punjab-teaching' },
     { id: 'ctet-p1', name: 'CTET Paper 1', boardId: 'ctet', categoryId: 'punjab-teaching' },
-    { id: 'ctet-p2', name: 'CTET Paper 2', boardId: 'ctet', categoryId: 'punjab-teaching' },
+    { 
+      id: 'ctet-p2', 
+      name: 'CTET Paper 2', 
+      boardId: 'ctet', 
+      categoryId: 'punjab-teaching', 
+      iconUrl: 'https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png' 
+    },
   ];
 
   for (const ex of mandatoryExams) {
