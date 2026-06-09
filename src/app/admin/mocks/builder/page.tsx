@@ -51,9 +51,9 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview FINAL HIGH-FIDELITY Mock Architect v51.0.
- * UPDATED: Permanently removed search bar from bank tactical box.
- * FIXED: Added Filtered vs Total bank statistics node.
+ * @fileOverview FINAL HIGH-FIDELITY Mock Architect v52.0.
+ * UPDATED: Registry Statistics moved to small boxes at the top.
+ * FIXED: Re-aligned all buttons and switches for proper spacing.
  */
 
 export default function MockBuilderPage() {
@@ -445,9 +445,25 @@ function MockBuilderContent() {
                     <div className="absolute top-0 right-0 p-10 opacity-5"><Zap className="h-48 w-48" /></div>
                     
                     <div className="relative z-10 flex flex-col space-y-8">
-                        {/* 1. TOP FILTERS */}
+                        {/* 1. TOP METRICS & FILTERS */}
                         <div className="space-y-6">
-                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+                           <div className="flex flex-wrap items-center justify-between gap-6 pb-6 border-b border-white/5">
+                              <div className="flex items-center gap-6">
+                                 <div className="bg-white/5 px-4 py-2.5 rounded-xl border border-white/10 flex items-center gap-3">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">REGISTRY FILTERED</span>
+                                    <span className="text-sm font-black text-primary">{filteredBank.length} ASSETS</span>
+                                 </div>
+                                 <div className="bg-white/5 px-4 py-2.5 rounded-xl border border-white/10 flex items-center gap-3">
+                                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">TOTAL BANK</span>
+                                    <span className="text-sm font-black text-white">{questionBank.length} ASSETS</span>
+                                 </div>
+                              </div>
+                              <Badge className="bg-[#F97316] text-white border-none text-[9px] font-black px-4 py-1.5 rounded-lg shadow-2xl uppercase tracking-tighter">
+                                 Verified Hub
+                              </Badge>
+                           </div>
+
+                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left pt-2">
                               <div className="space-y-3">
                                  <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em] ml-1">SOURCE BOARD HUB</Label>
                                  <Select value={filterBoard} onValueChange={setFilterBoard}>
@@ -479,43 +495,25 @@ function MockBuilderContent() {
                                  </Select>
                               </div>
                            </div>
-
-                           {/* REGISTRY STATISTICS NODE (REPLACES SEARCH BAR) */}
-                           <div className="bg-white/5 rounded-2xl p-5 md:p-7 flex items-center justify-between border border-white/10 shadow-inner">
-                              <div className="flex items-center gap-8 md:gap-12">
-                                 <div className="flex flex-col">
-                                    <span className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">REGISTRY FILTERED</span>
-                                    <span className="text-sm md:text-2xl font-black text-white">{filteredBank.length} ASSETS</span>
-                                 </div>
-                                 <div className="w-px h-10 bg-white/10" />
-                                 <div className="flex flex-col">
-                                    <span className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">TOTAL BANK</span>
-                                    <span className="text-sm md:text-2xl font-black text-white">{questionBank.length} ASSETS</span>
-                                 </div>
-                              </div>
-                              <Badge className="bg-[#F97316] text-white border-none text-[8px] md:text-[11px] font-black px-6 py-2 rounded-xl shadow-2xl uppercase tracking-tighter">
-                                 Verified Hub
-                              </Badge>
-                           </div>
                         </div>
 
                         {/* 3. TACTICAL COMMAND BAR */}
-                        <div className="space-y-6 pt-6 border-t border-white/10">
+                        <div className="space-y-8 pt-8 border-t border-white/10">
                           
-                          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center">
-                              <div className="md:col-span-6 space-y-4 text-left">
+                          <div className="flex flex-col md:flex-row items-end gap-8">
+                              <div className="flex-1 space-y-4 text-left w-full">
                                 <Label className="text-[10px] font-black uppercase text-slate-500 tracking-[0.3em] ml-1">TARGET SECTION HUB</Label>
                                 <button className="w-full h-16 bg-[#F97316] hover:bg-orange-600 text-white rounded-2xl font-black uppercase text-[15px] shadow-5xl tracking-[0.1em] transition-all">
                                    GENERAL HUB
                                 </button>
                               </div>
                               
-                              <div className="md:col-span-6 flex flex-col md:flex-row gap-4 md:items-center">
-                                <div className="flex-1 flex items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10">
+                              <div className="flex-1 flex flex-col sm:flex-row gap-4 w-full">
+                                <div className="flex-1 flex items-center justify-between bg-white/5 px-5 py-4 rounded-2xl border border-white/10 h-16">
                                     <span className="text-[10px] font-black uppercase text-slate-300 tracking-widest">UNUSED ONLY</span>
                                     <Switch checked={hideUsed} onCheckedChange={setHideUsed} className="data-[state=checked]:bg-[#F97316]" />
                                 </div>
-                                <div className="flex-1 flex items-center justify-between bg-white/5 p-4 rounded-xl border border-white/10">
+                                <div className="flex-1 flex items-center justify-between bg-white/5 px-5 py-4 rounded-2xl border border-white/10 h-16">
                                     <span className="text-[10px] font-black uppercase text-slate-300 tracking-widest">BLOCK DUPLICATES</span>
                                     <Switch checked={blockDuplicates} onCheckedChange={setBlockDuplicates} className="data-[state=checked]:bg-[#10B981]" />
                                 </div>
@@ -526,14 +524,14 @@ function MockBuilderContent() {
                               <Button 
                                   onClick={handleSelectAllInBank} 
                                   variant="outline"
-                                  className="h-16 flex-1 border-white/20 bg-transparent hover:bg-white/10 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-xl"
+                                  className="h-16 flex-1 border-white/10 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl"
                               >
                                   SELECT ALL FILTERED
                               </Button>
                               <Button 
                                 onClick={handleLinkQuestions}
                                 disabled={bankSelection.length === 0}
-                                className="h-16 flex-[2] bg-[#10B981] hover:bg-[#059669] text-white font-black uppercase text-[14px] tracking-[0.3em] rounded-xl shadow-5xl border-none transition-all active:scale-95 gap-4"
+                                className="h-16 flex-[2] bg-[#10B981] hover:bg-[#059669] text-white font-black uppercase text-[14px] tracking-[0.3em] rounded-2xl shadow-5xl border-none transition-all active:scale-95 gap-4"
                               >
                                 LINK {bankSelection.length} ASSETS <Zap className="h-6 w-6 fill-current" />
                               </Button>
