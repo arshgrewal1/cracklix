@@ -14,6 +14,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Cracklix | Punjab Exam Authority Hub',
   description: "Punjab's most trusted government exam preparation platform. PSSSB, PPSC, Punjab Police, and more.",
+  manifest: '/manifest.json',
   authors: [{ name: 'Arsh Grewal', url: 'https://cracklix.com' }],
   appleWebApp: {
     capable: true,
@@ -42,13 +43,14 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.Node;
 }>) {
   return (
     <html lang="en" className="light">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="manifest" href="/manifest.json" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>

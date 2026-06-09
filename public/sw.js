@@ -1,84 +1,60 @@
-/**
- * @fileOverview Institutional Service Worker v1.0.
- * Strategy: Cache static assets, Network-first for dynamic content.
- * SECURITY: Explicitly bypasses caching for admin and auth routes.
- */
+const CACHE_NAME = 'cracklix-v1';
+const OFFLINE_URL = '/offline.html';
 
-const CACHE_NAME = 'cracklix-cache-v1';
-const ASSETS_TO_CACHE = [
+// Assets to cache immediately
+const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/favicon.ico',
+  '/globals.css'
 ];
 
-// 1. Install Event: Cache essential assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(STATIC_ASSETS);
     })
   );
   self.skipWaiting();
 });
 
-// 2. Activate Event: Cleanup old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((name) => {
-          if (name !== CACHE_NAME) {
-            return caches.delete(name);
-          }
-        })
+        cacheNames.filter((name) => name !== CACHE_NAME).map((name) => caches.delete(name))
       );
     })
   );
   self.clients.claim();
 });
 
-// 3. Fetch Event: Intelligent Routing
 self.addEventListener('fetch', (event) => {
-  const { request } = event;
-  const url = new URL(request.url);
+  const url = new URL(event.request.url);
 
-  // SECURITY GUARD: Never cache sensitive routes
+  // SECURITY: Never cache sensitive nodes
   if (
-    url.pathname.startsWith('/admin') ||
+    url.pathname.startsWith('/admin') || 
     url.pathname.startsWith('/api') ||
-    url.pathname.includes('firestore') ||
-    url.pathname.includes('identitytoolkit') ||
-    request.method !== 'GET'
+    url.href.includes('google.com') ||
+    url.href.includes('firebase')
   ) {
     return;
   }
 
-  // STRATEGY: Network First for pages, Cache First for static assets
-  if (request.mode === 'navigate') {
+  // STRATEGY: Network First (ensures students see latest recruitment alerts)
+  if (event.request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(() => {
-        return caches.match('/');
+      fetch(event.request).catch(() => {
+        return caches.match(event.request);
       })
     );
-  } else {
-    event.respondWith(
-      caches.match(request).then((response) => {
-        return response || fetch(request).then((networkResponse) => {
-          // Cache fonts, scripts and styles
-          if (
-            url.origin === self.location.origin &&
-            (url.pathname.endsWith('.js') || 
-             url.pathname.endsWith('.css') || 
-             url.pathname.includes('/fonts/'))
-          ) {
-            const responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseToCache);
-            });
-          }
-          return networkResponse;
-        });
-      })
-    );
+    return;
   }
+
+  // STRATEGY: Cache First for assets
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
 });
