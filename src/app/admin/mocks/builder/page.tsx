@@ -52,8 +52,8 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview FINAL HIGH-FIDELITY Mock Architect v81.0.
- * UPDATED: Standardized Series Types to match Full Length Mock, Subject-Wise, etc.
+ * @fileOverview FINAL HIGH-FIDELITY Mock Architect v82.0.
+ * UPDATED: Fixed Tactical Hub layout to prevent button clipping and managed Block Repeats/Select All nodes.
  */
 
 export default function MockBuilderPage() {
@@ -554,7 +554,7 @@ function MockBuilderContent() {
                     <div className="absolute top-0 right-0 p-12 opacity-5"><Zap className="h-64 w-64" /></div>
                     
                     <div className="relative z-10 flex flex-col space-y-8">
-                        {/* 1. TOP STATS NODES (RECTANGLES @ 8PX) */}
+                        {/* 1. TOP STATS NODES */}
                         <div className="flex items-center justify-between gap-4 pb-6 border-b border-white/5">
                            <div className="flex gap-4">
                               <div className="bg-white/5 px-4 py-2 rounded-lg border border-white/10 flex flex-col items-start gap-1 shadow-inner min-w-[110px]">
@@ -596,7 +596,7 @@ function MockBuilderContent() {
                                  <SelectTrigger className="h-12 bg-white/5 border-white/10 rounded-xl font-black text-[14px] text-white px-4 focus:ring-0"><SelectValue placeholder="All..." /></SelectTrigger>
                                  <SelectContent className="bg-[#0B1528] text-white border-white/10 rounded-xl max-h-[350px]">
                                     <SelectItem value="all" className="font-bold uppercase text-[12px]">All Nodes</SelectItem>
-                                    {subjects?.map(s => <SelectItem key={s.id} value={s.id} className="font-bold uppercase text-[12px]">{s.name}</SelectItem>)}
+                                    {subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                                  </SelectContent>
                               </Select>
                            </div>
@@ -604,78 +604,84 @@ function MockBuilderContent() {
 
                         <div className="h-px w-full bg-white/10" />
 
-                        {/* 3. TACTICAL COMMAND BAR */}
-                        <div className="space-y-8">
-                          <div className="flex flex-col md:flex-row items-end gap-6">
-                              <div className="flex-1 space-y-2 text-left w-full">
-                                <Label className="text-[14px] font-black uppercase text-slate-500 tracking-tight ml-1 leading-tight">
-                                   TARGET SECTION HUB
-                                </Label>
-                                <Popover>
-                                   <PopoverTrigger asChild>
-                                      <button className="w-full h-14 bg-[#F97316] hover:bg-orange-600 text-white rounded-xl font-black uppercase text-[14px] shadow-5xl tracking-tight transition-all flex items-center justify-center px-6 border-none active:scale-95 group truncate">
-                                         {sections.find(s => s.id === activeSectionId)?.name || "GENERAL HUB"}
-                                      </button>
-                                   </PopoverTrigger>
-                                   <PopoverContent className="w-[320px] md:w-[400px] bg-[#0F172A] border-white/10 p-0 rounded-[2rem] shadow-5xl z-[1001] overflow-hidden text-left">
-                                      <div className="p-8 pb-4 border-b border-white/5 flex items-center justify-between">
-                                         <p className="text-[12px] font-black uppercase text-slate-500 tracking-widest">GENERAL HUB</p>
-                                         <Badge className="bg-primary/20 text-primary border-none text-[10px] font-black"> {sections.length} NODES</Badge>
-                                      </div>
-                                      <ScrollArea className="h-72">
-                                         <div className="space-y-1.5 p-4">
-                                            {sections.map(s => (
-                                               <button 
-                                                  key={s.id} 
-                                                  onClick={() => setActiveSectionId(s.id)}
-                                                  className={cn(
-                                                     "w-full p-4 rounded-xl text-left font-black uppercase text-[14px] tracking-tight transition-all",
-                                                     activeSectionId === s.id ? "bg-[#F97316] text-white shadow-xl" : "text-slate-400 hover:bg-white/5 hover:text-white"
-                                                  )}
-                                               >
-                                                  {s.name}
-                                               </button>
-                                            ))}
-                                         </div>
-                                      </ScrollArea>
-                                   </PopoverContent>
-                                </Popover>
-                              </div>
-                              
-                              <div className="flex-[2] flex gap-4 w-full">
-                                <div className="flex-1 flex items-center justify-between bg-white/5 px-6 py-3 rounded-xl border border-white/10 h-14 group hover:bg-white/10 transition-all cursor-pointer shadow-inner">
-                                    <div className="flex flex-col text-left">
-                                       <span className="text-[12px] font-black uppercase text-slate-300 leading-none">UNUSED</span>
-                                       <span className="text-[12px] font-black uppercase text-slate-300 leading-none mt-1">ONLY</span>
+                        {/* 3. HARDENED TACTICAL COMMAND BAR */}
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                           
+                           {/* SECTION PICKER */}
+                           <div className="md:col-span-4 space-y-2 text-left">
+                              <Label className="text-[14px] font-black uppercase text-slate-500 tracking-tight ml-1 leading-tight">
+                                 TARGET SECTION HUB
+                              </Label>
+                              <Popover>
+                                 <PopoverTrigger asChild>
+                                    <button className="w-full h-14 bg-[#F97316] hover:bg-orange-600 text-white rounded-xl font-black uppercase text-[14px] shadow-5xl tracking-tight transition-all flex items-center justify-center px-6 border-none active:scale-95 group truncate">
+                                       {sections.find(s => s.id === activeSectionId)?.name || "GENERAL HUB"}
+                                    </button>
+                                 </PopoverTrigger>
+                                 <PopoverContent className="w-[320px] md:w-[400px] bg-[#0F172A] border-white/10 p-0 rounded-[2rem] shadow-5xl z-[1001] overflow-hidden text-left">
+                                    <div className="p-8 pb-4 border-b border-white/5 flex items-center justify-between">
+                                       <p className="text-[12px] font-black uppercase text-slate-500 tracking-widest">SELECT HUB</p>
+                                       <Badge className="bg-primary/20 text-primary border-none text-[10px] font-black"> {sections.length} NODES</Badge>
                                     </div>
-                                    <Switch checked={hideUsed} onCheckedChange={setHideUsed} className="data-[state=checked]:bg-[#F97316] scale-110" />
-                                </div>
-                                <div className="flex-1 flex items-center justify-between bg-white/5 px-6 py-3 rounded-xl border border-white/10 h-14 group hover:bg-white/10 transition-all cursor-pointer shadow-inner">
-                                    <div className="flex flex-col text-left">
-                                       <span className="text-[12px] font-black uppercase text-slate-300 leading-none">BLOCK</span>
-                                       <span className="text-[12px] font-black uppercase text-slate-300 leading-none mt-1">REPEATS</span>
-                                    </div>
-                                    <Switch checked={blockDuplicates} onCheckedChange={setBlockDuplicates} className="data-[state=checked]:bg-[#10B981] scale-110" />
-                                </div>
-                              </div>
-                          </div>
+                                    <ScrollArea className="h-72">
+                                       <div className="space-y-1.5 p-4">
+                                          {sections.map(s => (
+                                             <button 
+                                                key={s.id} 
+                                                onClick={() => { setActiveSectionId(s.id); }}
+                                                className={cn(
+                                                   "w-full p-4 rounded-xl text-left font-black uppercase text-[14px] tracking-tight transition-all",
+                                                   activeSectionId === s.id ? "bg-[#F97316] text-white shadow-xl" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                                                )}
+                                             >
+                                                {s.name}
+                                             </button>
+                                          ))}
+                                       </div>
+                                    </ScrollArea>
+                                 </PopoverContent>
+                              </Popover>
+                           </div>
 
-                          <div className="flex flex-col md:flex-row gap-6">
+                           {/* TOGGLES GRID */}
+                           <div className="md:col-span-8 grid grid-cols-2 gap-4">
+                              <div className="flex items-center justify-between bg-white/5 px-5 py-3 rounded-xl border border-white/10 h-14 group hover:bg-white/10 transition-all cursor-pointer shadow-inner">
+                                 <div className="flex flex-col text-left">
+                                    <span className="text-[11px] font-black uppercase text-slate-300 leading-none">UNUSED</span>
+                                    <span className="text-[11px] font-black uppercase text-slate-300 leading-none mt-1">ONLY</span>
+                                 </div>
+                                 <Switch checked={hideUsed} onCheckedChange={setHideUsed} className="data-[state=checked]:bg-[#F97316] scale-100" />
+                              </div>
+                              <div className="flex items-center justify-between bg-white/5 px-5 py-3 rounded-xl border border-white/10 h-14 group hover:bg-white/10 transition-all cursor-pointer shadow-inner">
+                                 <div className="flex flex-col text-left">
+                                    <span className="text-[11px] font-black uppercase text-slate-300 leading-none">BLOCK</span>
+                                    <span className="text-[11px] font-black uppercase text-slate-300 leading-none mt-1">REPEATS</span>
+                                 </div>
+                                 <Switch checked={blockDuplicates} onCheckedChange={setBlockDuplicates} className="data-[state=checked]:bg-[#10B981] scale-100" />
+                              </div>
+                           </div>
+                        </div>
+
+                        {/* 4. PRIMARY ACTIONS BAR */}
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                           <div className="md:col-span-4">
                               <Button 
-                                  onClick={handleSelectAllInBank} 
-                                  variant="outline"
-                                  className="h-14 flex-1 border-white/10 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[14px] tracking-tight rounded-xl shadow-xl active:scale-95 truncate"
+                                 onClick={handleSelectAllInBank} 
+                                 variant="outline"
+                                 className="h-16 w-full border-white/10 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[12px] tracking-widest rounded-xl shadow-xl active:scale-95 truncate"
                               >
-                                  SELECT ALL FILTERED
+                                 SELECT ALL FILTERED
                               </Button>
+                           </div>
+                           <div className="md:col-span-8">
                               <Button 
-                                onClick={handleLinkQuestions}
-                                disabled={bankSelection.length === 0}
-                                className="h-14 flex-[2] bg-[#10B981] hover:bg-[#0E946A] text-white font-black uppercase text-[14px] tracking-tight rounded-xl shadow-5xl border-none transition-all active:scale-95 gap-3"
+                                 onClick={handleLinkQuestions}
+                                 disabled={bankSelection.length === 0}
+                                 className="h-16 w-full bg-[#10B981] hover:bg-[#0E946A] text-white font-black uppercase text-[14px] tracking-[0.2em] rounded-xl shadow-5xl border-none transition-all active:scale-95 gap-3"
                               >
-                                LINK {bankSelection.length} Q <Zap className="h-6 w-6 fill-current" />
+                                 LINK {bankSelection.length} ASSETS <Zap className="h-6 w-6 fill-current" />
                               </Button>
-                          </div>
+                           </div>
                         </div>
                     </div>
                   </div>
