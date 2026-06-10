@@ -35,9 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Hub v24.0.
- * UPDATED: Standardized gated button to "UNLOCK TEST" for Premium mocks.
- * HARDENED: Integrated Founder bypass in access firewall.
+ * @fileOverview Institutional Exam Hub v25.0.
+ * UPDATED: Standardized tab labels: Full Length Mock, Subject-Wise Test, Sectional Test, PYQ Paper.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -152,10 +151,10 @@ export default function ExamHubPage() {
          <Tabs defaultValue="FULL" className="space-y-12">
             <div className="bg-white border border-slate-100 rounded-[1.8rem] p-1.5 shadow-sm overflow-x-auto no-scrollbar">
                <TabsList className="bg-transparent border-none p-0 flex h-14 w-full justify-start gap-1">
-                  <DashboardTab value="FULL" label="Full Mocks" icon={<Zap />} />
-                  <DashboardTab value="SUBJECT" label="Subject Tests" icon={<BookOpen />} />
-                  <DashboardTab value="PYQ" label="PYQ Papers" icon={<Layers />} />
-                  <DashboardTab value="SECTIONAL" label="Sectional" icon={<ListTree />} />
+                  <DashboardTab value="FULL" label="Full Length Mock" icon={<Zap />} />
+                  <DashboardTab value="SUBJECT" label="Subject-Wise Test" icon={<BookOpen />} />
+                  <DashboardTab value="PYQ" label="PYQ Paper" icon={<Layers />} />
+                  <DashboardTab value="SECTIONAL" label="Sectional Test" icon={<ListTree />} />
                   <DashboardTab value="CA" label="Current Affairs" icon={<Newspaper />} />
                   <DashboardTab value="NOTES" label="Study Notes" icon={<FileText />} />
                   <DashboardTab value="ANALYTICS" label="Performance" icon={<BarChart3 />} />

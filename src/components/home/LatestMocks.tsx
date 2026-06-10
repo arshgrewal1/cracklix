@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { useRouter, usePathname } from "next/navigation"
 
 /**
- * @fileOverview High-Density Mock Feed v19.0.
- * UPDATED: Zero-baseline. Deleted hardcoded dummy mock array.
+ * @fileOverview High-Density Mock Feed v20.0.
+ * UPDATED: Standardized Series labels: Full Length, Subject-Wise, etc.
  */
 
 export default function LatestMocks() {
@@ -54,6 +54,16 @@ export default function LatestMocks() {
     router.push(`/mocks/${mockId}`);
   };
 
+  const formatMockType = (type: string) => {
+    const map: Record<string, string> = {
+      'FULL': 'Full Length Mock',
+      'SUBJECT': 'Subject-Wise Test',
+      'SECTIONAL': 'Sectional Test',
+      'PYQ': 'PYQ Paper'
+    };
+    return map[type] || type;
+  };
+
   return (
     <section className="py-8 md:py-16 bg-white">
       <div className="container mx-auto px-4 max-w-7xl">
@@ -86,7 +96,10 @@ export default function LatestMocks() {
                        {isPremium ? 'PREMIUM' : 'FREE'}
                     </Badge>
                   </div>
-                  <h3 className="font-black text-[13px] md:text-base text-[#000000] leading-tight mb-2 uppercase line-clamp-2 min-h-[32px] md:min-h-[40px] group-hover:text-primary transition-colors">{mock.title}</h3>
+                  <div className="mb-2">
+                    <p className="text-[7px] md:text-[8px] font-black text-primary uppercase tracking-widest mb-1">{formatMockType(mock.mockType)}</p>
+                    <h3 className="font-black text-[13px] md:text-base text-[#000000] leading-tight uppercase line-clamp-2 min-h-[32px] md:min-h-[40px] group-hover:text-primary transition-colors">{mock.title}</h3>
+                  </div>
                   <div className="flex items-center gap-3 mb-4 text-[7px] md:text-[9px] text-slate-400 font-bold uppercase tracking-widest border-t border-slate-50 pt-3">
                      <span className="flex items-center gap-1"><BookOpen className="h-2.5 w-2.5 text-primary" /> {mock.totalQuestions} Qs</span>
                      <span className="flex items-center gap-1"><Clock className="h-2.5 w-2.5 text-primary" /> {mock.duration}m</span>

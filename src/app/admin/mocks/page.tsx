@@ -43,8 +43,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Mock Management Hub v12.0.
- * UPDATED: Displaying standardized Test Type classification (Full, Subject, etc.)
+ * @fileOverview Institutional Mock Management Hub v13.0.
+ * UPDATED: Displaying standardized Series types: Full Length, Subject-Wise, etc.
  */
 
 export default function MockManagement() {
@@ -111,10 +111,11 @@ export default function MockManagement() {
 
   const formatMockType = (type: string) => {
     const map: Record<string, string> = {
-      'FULL': 'Full Mock',
-      'SUBJECT': 'Subject Test',
-      'SECTIONAL': 'Sectional',
-      'PYQ': 'PYQ Paper'
+      'FULL': 'Full Length Mock',
+      'SUBJECT': 'Subject-Wise Test',
+      'SECTIONAL': 'Sectional Test',
+      'PYQ': 'PYQ Paper',
+      'CA_QUIZ': 'CA Hub Quiz'
     };
     return map[type] || type;
   };
@@ -163,7 +164,7 @@ export default function MockManagement() {
             <TableHeader className="bg-slate-50/50">
               <TableRow className="h-20 border-slate-100">
                 <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Series Identity</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Test Type</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Series Type</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-500">Tier Governance</TableHead>
                 <TableHead className="text-center text-[10px] font-black uppercase tracking-widest text-slate-500">Status</TableHead>
                 <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Actions</TableHead>

@@ -52,9 +52,8 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview FINAL HIGH-FIDELITY Mock Architect v80.0.
- * FIXED: Standardized 14px managed typography and 8px rectangular stats.
- * ALIGNMENT: Target Section Hub positioned to left of switches.
+ * @fileOverview FINAL HIGH-FIDELITY Mock Architect v81.0.
+ * UPDATED: Standardized Series Types to match Full Length Mock, Subject-Wise, etc.
  */
 
 export default function MockBuilderPage() {
@@ -345,7 +344,10 @@ function MockBuilderContent() {
            <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-6 md:p-10 space-y-8 border border-slate-100">
               
               <div className="space-y-3">
-                 <Label className="text-[14px] font-black uppercase text-slate-500 tracking-tight ml-1">SERIES TITLE</Label>
+                 <div className="flex items-center justify-between ml-1">
+                    <Label className="text-[14px] font-black uppercase text-slate-500 tracking-tight leading-none">SERIES TITLE</Label>
+                    <Badge variant="outline" className="border-primary/20 text-primary text-[8px] font-black uppercase">Institutional</Badge>
+                 </div>
                  <Input 
                    value={mockData.title} 
                    onChange={e => setMockData({...mockData, title: e.target.value})}
@@ -356,16 +358,16 @@ function MockBuilderContent() {
 
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-3">
-                    <Label className="text-[14px] font-black uppercase text-slate-500 tracking-tight ml-1">TEST TYPE</Label>
+                    <Label className="text-[14px] font-black uppercase text-slate-500 tracking-tight ml-1">SERIES TYPE</Label>
                     <Select value={mockData.mockType} onValueChange={(v: MockType) => setMockData({...mockData, mockType: v})}>
                        <SelectTrigger className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-[12px] uppercase px-4">
                           <SelectValue />
                        </SelectTrigger>
                        <SelectContent className="rounded-xl">
-                          <SelectItem value="FULL">Full Length Mock</SelectItem>
-                          <SelectItem value="SUBJECT">Subject-Wise Test</SelectItem>
-                          <SelectItem value="SECTIONAL">Sectional Test</SelectItem>
-                          <SelectItem value="PYQ">PYQ Paper</SelectItem>
+                          <SelectItem value="FULL" className="font-bold">Full Length Mock</SelectItem>
+                          <SelectItem value="SUBJECT" className="font-bold">Subject-Wise Test</SelectItem>
+                          <SelectItem value="SECTIONAL" className="font-bold">Sectional Test</SelectItem>
+                          <SelectItem value="PYQ" className="font-bold">PYQ Paper</SelectItem>
                        </SelectContent>
                     </Select>
                  </div>
