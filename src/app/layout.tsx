@@ -1,3 +1,4 @@
+
 import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Inter } from "next/font/google";
@@ -16,9 +17,13 @@ export const metadata: Metadata = {
   description: "Punjab's most trusted government exam preparation platform. PSSSB, PPSC, Punjab Police, and more.",
   manifest: '/manifest.json',
   authors: [{ name: 'Arsh Grewal', url: 'https://cracklix.com' }],
+  icons: {
+    icon: '/icons/icon-192x192.png',
+    apple: '/icons/icon-192x192.png',
+  },
   appleWebApp: {
     capable: true,
-    statusBarStyle: 'default',
+    statusBarStyle: 'black-translucent',
     title: 'CRACKLIX',
   },
   formatDetection: {

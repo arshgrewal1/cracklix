@@ -1,7 +1,7 @@
 
 /**
- * @fileOverview Institutional CRACKLIX Service Worker v3.0.
- * Satisfies browser installability requirements and handles offline caching.
+ * @fileOverview Institutional Service Worker v1.0.
+ * Satisfies PWA Installability requirements and provides offline fallback.
  */
 
 const CACHE_NAME = 'cracklix-v1';
@@ -37,19 +37,13 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
+  // Only handle GET requests for internal assets
   if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).catch(() => {
-        // Fallback for failed fetches (offline)
-        if (event.request.mode === 'navigate') {
-          return caches.match('/');
-        }
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request).catch(() => {
+        // Optional: return offline page if needed
       });
     })
   );

@@ -2,7 +2,7 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Institutional PWA Manifest Configuration v3.0.
+ * @fileOverview Institutional PWA Manifest Configuration v4.0.
  * Hardened to meet strict Chrome/Android installability criteria.
  */
 export default function manifest(): MetadataRoute.Manifest {
@@ -13,7 +13,7 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: '/',
     id: '/',
     display: 'standalone',
-    background_color: '#FFFFFF',
+    background_color: '#0B1528',
     theme_color: '#0B1528',
     orientation: 'portrait',
     icons: [
