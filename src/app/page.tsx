@@ -19,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Optimized Institutional Landing Hub v53.0.
+ * @fileOverview Optimized Institutional Landing Hub v55.0.
  * UPDATED: Absolute 0-Baseline Sync. All placeholder figures removed.
  */
 
@@ -37,7 +37,7 @@ export default function HomePage() {
     const uCount = stats?.totalUsers || 0;
     const avgAcc = stats?.averageAccuracy || 0;
 
-    // 2. High-Fidelity Formatting (Only apply 'k+' if actually over 1000)
+    // 2. High-Fidelity Formatting
     const formatNumber = (num: number) => {
        if (num >= 1000) return (num / 1000).toFixed(1) + 'k+';
        return num.toString();

@@ -30,7 +30,8 @@ import {
   History,
   ShieldAlert,
   ClipboardCheck,
-  LayoutGrid
+  LayoutGrid,
+  BoxSelect
 } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
@@ -43,8 +44,8 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Institutional Sidebar Restoration v120.0.
- * UPDATED: Strictly verified institutional labels with color-coded high-fidelity icons.
+ * @fileOverview Institutional Sidebar Restoration v125.0.
+ * UPDATED: Strictly verified labels with "EXAM REGISTRY" and "ARCHITECTURE" nodes.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -101,7 +102,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <AdminNavItem icon={<LayoutDashboard />} label="DASHBOARD" href="/admin" active={pathname === "/admin"} />
               <AdminNavItem icon={<Layers />} label="CATEGORIES" href="/admin/categories" active={pathname === "/admin/categories"} />
               <AdminNavItem icon={<Landmark className="text-amber-400" />} label="HUBS (BOARDS)" href="/admin/exams" active={pathname === "/admin/exams"} />
-              <AdminNavItem icon={<GraduationCap className="text-emerald-400" />} label="VERTICAL REGISTRY" href="/admin/exam-registry" active={pathname === "/admin/exam-registry"} />
+              <AdminNavItem icon={<GraduationCap className="text-emerald-400" />} label="EXAM REGISTRY" href="/admin/exam-registry" active={pathname === "/admin/exam-registry"} />
+              <AdminNavItem icon={<BoxSelect className="text-blue-400" />} label="ARCHITECTURE" href="/admin/architecture" active={pathname === "/admin/architecture"} />
               <AdminNavItem icon={<SearchCode className="text-emerald-400" />} label="SUBJECT LIST" href="/admin/subjects" active={pathname === "/admin/subjects"} />
               <AdminNavItem icon={<Box />} label="GLOBAL BANK" href="/admin/questions" active={pathname === "/admin/questions"} />
               <AdminNavItem icon={<Rocket className="text-primary" />} label="BULK INGESTION" href="/admin/bulk-import" active={pathname === "/admin/bulk-import"} />

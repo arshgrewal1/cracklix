@@ -2,14 +2,14 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, deleteDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Punjab-Centric Seeding Node v64.0.
+ * @fileOverview Institutional Punjab-Centric Seeding Node v66.0.
  * UPDATED: Zero-baseline initialization. All placeholder counts reset to 0.
  */
 
 export async function seedInitialData(db: Firestore) {
   console.log('[AUDIT] Initializing Absolute Punjab Registry Sync...');
 
-  // 1. AUTHORITATIVE STATS HUB - 0 Baseline (No Dummy Data)
+  // 1. AUTHORITATIVE STATS HUB - 0 Baseline (Real Data Policy)
   await setDoc(doc(db, 'settings', 'stats'), {
      totalQuestions: 0,
      totalMocks: 0,
@@ -51,19 +51,19 @@ export async function seedInitialData(db: Firestore) {
       displayOrder: 3
     },
     {
-      id: "punjab-banking",
-      title: "Punjab Banking & Cooperative",
-      description: "State Cooperative, Agricultural Dev Bank & PGB nodes.",
+      id: "banking",
+      title: "Banking Exams",
+      description: "IBPS, PO, SO, SBI & RBI specialized mocks.",
       highlight: "FINANCIAL",
       color: "text-emerald-600",
       bgColor: "bg-emerald-50",
       displayOrder: 4
     },
     {
-      id: "punjab-general",
-      title: "Punjab General Recruitment",
-      description: "Clerk, DEO, Patwari, Excise and Food Supply verticals.",
-      highlight: "GENERAL",
+      id: "central-govt",
+      title: "Central Govt",
+      description: "SSC, Railways, Army & National registries.",
+      highlight: "NATIONAL",
       color: "text-indigo-600",
       bgColor: "bg-indigo-50",
       displayOrder: 5

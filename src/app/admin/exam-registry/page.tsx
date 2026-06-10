@@ -18,8 +18,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Exam Vertical Registry v10.0.
- * UPDATED: Added isTrending governance for Home Page discovery.
+ * @fileOverview Exam Vertical Registry v11.0.
+ * UPDATED: Added "Trending" governance for Home Page discovery.
  */
 
 export default function ExamRegistryPage() {
