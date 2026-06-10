@@ -82,13 +82,18 @@ export default function Navbar() {
             <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em]">
               {settings.announcement}
             </p>
-            {/* Repeat for seamless loop effect on mobile */}
-            <span className="mx-20" />
+            {/* Extended gap between repeated items to prevent overlap */}
+            <span className="mx-40 md:mx-80" />
             <Megaphone className="h-3 w-3 shrink-0" />
             <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em]">
               {settings.announcement}
             </p>
-            <span className="mx-20" />
+            <span className="mx-40 md:mx-80" />
+            <Megaphone className="h-3 w-3 shrink-0" />
+            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em]">
+              {settings.announcement}
+            </p>
+            <span className="mx-40 md:mx-80" />
           </div>
         </div>
       )}
@@ -131,7 +136,7 @@ export default function Navbar() {
             {user && passStatus && (
                <div className={cn(
                  "hidden lg:flex items-center gap-3 px-4 py-1.5 rounded-xl border-2 transition-all",
-                 passStatus.active ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-rose-500/10 border-rose-500/20 text-rose-400"
+                 passStatus.active ? "bg-emerald-50/10 border-emerald-500/20 text-emerald-400" : "bg-rose-50/10 border-rose-500/20 text-rose-400"
                )}>
                   {passStatus.active ? <Gem className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
                   <div className="flex flex-col text-left">
