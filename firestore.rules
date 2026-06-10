@@ -3,8 +3,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     /**
-     * @fileOverview Hardened Institutional RBAC Protocol v4.0.
-     * UPDATED: Standardized owner-based read access for collection queries.
+     * @fileOverview Hardened Institutional Security Protocol v5.0.
+     * PROTECTS: Student PII, Payment Requests, and Master Content Nodes.
      */
 
     function isAuthenticated() {
@@ -20,7 +20,7 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // --- 1. Master Content (Public Read, Admin Write) ---
+    // --- 1. Master Content (Public Read, Admin Write Only) ---
     match /boards/{boardId} {
       allow read: if true;
       allow write: if isAdmin();
@@ -45,23 +45,7 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
-    match /settings/{sId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
     match /categories/{catId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    match /ads/{adId} {
-      allow read: if true;
-      allow write: if true; // stats incrementation
-    }
-    match /notifications/{nId} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-    match /free_content/{fcId} {
       allow read: if true;
       allow write: if isAdmin();
     }
@@ -73,58 +57,46 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    match /settings/{sId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
 
-    // --- 2. Student Data (Private Nodes) ---
+    // --- 2. Student Data (Strictly Gated) ---
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow write: if isOwner(userId) || isAdmin();
     }
 
     match /attempts/{attemptId} {
-      // attemptId format is {userId}_{mockId}
+      // ID format: {userId}_{mockId}
       allow read: if isAuthenticated() && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
       allow create, update: if isAuthenticated() && attemptId.split('_')[0] == request.auth.uid;
       allow delete: if isAdmin();
     }
 
     match /results/{resultId} {
-      allow read: if isAuthenticated() && (resultId.split('_')[0] == request.auth.uid || resource.data.userId == request.auth.uid || isAdmin());
+      allow read: if isAuthenticated() && (resultId.split('_')[0] == request.auth.uid || isAdmin());
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
 
     match /bookmarks/{bId} {
-      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid);
-      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
-      allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read, write: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
     }
 
-    match /subscriptions/{sId} {
-      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create, update, delete: if isAdmin();
-    }
-
-    // --- 3. Management & Payment Audits ---
+    // --- 3. Monetization & Audit Trail ---
     match /payment_requests/{reqId} {
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
       allow update, delete: if isAdmin();
     }
-    match /payments/{pId} {
-      allow read: if isAdmin() || (resource.data.userId == request.auth.uid);
-      allow write: if isAdmin();
-    }
-    match /reports/{reportId} {
-      allow create: if isAuthenticated();
-      allow read: if isAdmin();
-      allow update, delete: if isAdmin();
-    }
-    match /support_tickets/{ticketId} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
-    }
     match /audit_logs/{logId} {
       allow read, write: if isAdmin();
+    }
+    match /subscriptions/{sId} {
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
     }
   }
 }

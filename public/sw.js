@@ -1,15 +1,15 @@
+
 /**
- * @fileOverview Institutional Service Worker v1.0.
- * Handles offline caching and background synchronization.
+ * @fileOverview Institutional PWA Service Worker v1.0.
+ * Strategy: Stale-While-Revalidate for maximum CBT engine stability.
  */
 
 const CACHE_NAME = 'cracklix-cache-v1';
-const OFFLINE_URL = '/offline.html';
-
 const ASSETS_TO_CACHE = [
   '/',
   '/manifest.json',
-  '/globals.css',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png'
 ];
 
 self.addEventListener('install', (event) => {
@@ -25,65 +25,56 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            return caches.delete(cache);
           }
         })
       );
     })
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
-  // Strategy: Stale-While-Revalidate
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request).catch(() => {
-        return caches.match('/');
-      })
-    );
-    return;
-  }
+  // Ignore non-GET requests (Firebase/Auth)
+  if (event.request.method !== 'GET') return;
 
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).then((fetchResponse) => {
-        return caches.open(CACHE_NAME).then((cache) => {
-          // Cache only successful GET requests
-          if (event.request.method === 'GET' && fetchResponse.status === 200) {
-            cache.put(event.request, fetchResponse.clone());
-          }
-          return fetchResponse;
-        });
+    caches.match(event.request).then((cachedResponse) => {
+      const fetchPromise = fetch(event.request).then((networkResponse) => {
+        // Cache successful GET responses for assets
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        }
+        return networkResponse;
+      }).catch(() => {
+        // Offline fallback for main navigation
+        if (event.request.mode === 'navigate') {
+          return caches.match('/');
+        }
       });
+
+      return cachedResponse || fetchPromise;
     })
   );
 });
 
-// Push Notification Listener
+// Foundational Listener for Push Notifications
 self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : { title: 'Cracklix Update', body: 'Check your new exam notifications.' };
-  
+  const data = event.data ? event.data.json() : { title: 'Exam Alert', body: 'New update from Cracklix.' };
   const options = {
     body: data.body,
     icon: '/icons/icon-192x192.png',
     badge: '/icons/icon-192x192.png',
-    vibrate: [100, 50, 100],
-    data: {
-      url: data.url || '/'
-    }
+    data: data.url
   };
-
-  event.waitUntil(
-    self.registration.showNotification(data.title, options)
-  );
+  event.waitUntil(self.registration.showNotification(data.title, options));
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  event.waitUntil(
-    clients.openWindow(event.notification.data.url)
-  );
+  event.waitUntil(clients.openWindow(event.notification.data || '/'));
 });

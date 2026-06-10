@@ -14,10 +14,11 @@ import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Download Hub v2.0.
- * Features: Real-time dynamic Firestore feed with Pass-gating logic.
+ * @fileOverview Institutional Download Hub v2.1.
+ * HARDENED: Secure Pass Gating for premium PDF nodes.
  */
 
 export default function NotesLibrary() {
@@ -54,7 +55,7 @@ export default function NotesLibrary() {
                 Download <br/> <span className="text-primary">Center</span>
               </h1>
               <p className="text-slate-500 font-medium text-base md:text-lg max-w-xl">
-                Verified high-fidelity study materials curated by Arsh Grewal Management for all upcoming Punjab verticals.
+                Verified study materials curated for all upcoming Punjab recruitment verticals.
               </p>
             </div>
             <div className="relative w-full md:w-96">
@@ -78,7 +79,7 @@ export default function NotesLibrary() {
                     <Info className="h-4 w-4" /> Exam Syllabus
                   </TabsTrigger>
                   <TabsTrigger value="archives" className="rounded-xl px-6 md:px-8 font-black uppercase text-[10px] gap-2 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">
-                    <FileArchive className="h-4 w-4" /> E-Book Node
+                    <FileArchive className="h-4 w-4" /> E-Book Hub
                   </TabsTrigger>
                </TabsList>
              </div>
@@ -101,11 +102,11 @@ export default function NotesLibrary() {
              <div className="relative z-10 max-w-2xl space-y-6 text-left">
                 <div className="flex items-center gap-4">
                    <ShieldCheck className="h-6 w-6 text-primary" />
-                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Arsh Grewal Management</span>
+                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Management Verified</span>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-headline font-black uppercase leading-tight">Master the <br/> Punjabi Qualifying Base</h2>
-                <p className="text-slate-400 text-base md:text-lg font-medium">Download our exclusive summary guide verified for upcoming PSSSB/PPSC exams.</p>
-                <Button asChild className="w-full md:w-auto h-16 px-12 bg-white text-black hover:bg-slate-200 font-black uppercase tracking-widest text-xs rounded-2xl gap-3 shadow-2xl mt-4">
+                <h2 className="text-3xl md:text-4xl font-headline font-black uppercase leading-tight">Master the <br/> Punjab Study Base</h2>
+                <p className="text-slate-400 text-base md:text-lg font-medium">Download our exclusive summary guides verified for upcoming state exams.</p>
+                <Button asChild className="w-full md:w-auto h-16 px-12 bg-white text-black hover:bg-slate-200 font-black uppercase tracking-widest text-xs rounded-2xl gap-3 shadow-2xl mt-4 border-none">
                    <Link href="/pass">Unlock Premium Repository <Zap className="h-5 w-5 fill-current" /></Link>
                 </Button>
              </div>
@@ -127,7 +128,7 @@ function NotesGrid({ data, loading, profile }: any) {
    if (!data || data.length === 0) return (
       <div className="h-80 flex flex-col items-center justify-center text-slate-300 bg-white rounded-[4rem] border-2 border-dashed border-slate-100">
          <FileArchive className="h-16 w-16 mb-6 opacity-10" />
-         <p className="font-headline font-black text-xl uppercase">Repository Node Empty</p>
+         <p className="font-headline font-black text-xl uppercase">Repository Empty</p>
          <p className="text-sm font-bold opacity-50 mt-1 uppercase tracking-widest">Awaiting official content push.</p>
       </div>
    );
@@ -142,10 +143,15 @@ function NotesGrid({ data, loading, profile }: any) {
 }
 
 function DownloadCard({ asset, profile }: { asset: any, profile: any }) {
-   const isLocked = !asset.isFree && (!profile || profile.status === 'Free');
+   const isPassValid = useMemo(() => {
+     if (!profile?.pass?.active) return false;
+     return new Date(profile.pass.expiryDate) > new Date();
+   }, [profile]);
+
+   const isLocked = !asset.isFree && !isPassValid;
 
    return (
-      <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden group hover:translate-y-[-8px] transition-all duration-500 text-left h-full flex flex-col">
+      <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden group hover:translate-y-[-8px] transition-all duration-500 text-left h-full flex flex-col border border-slate-100">
          <CardContent className="p-8 md:p-10 flex flex-col md:flex-row items-center gap-8 md:gap-10 flex-1">
             <div className={cn(
                "h-20 w-20 md:h-24 md:w-24 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
@@ -167,7 +173,7 @@ function DownloadCard({ asset, profile }: { asset: any, profile: any }) {
                      <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">ELITE HUB</span>
                   )}
                </div>
-               <h3 className="text-xl md:text-2xl font-headline font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors flex-1">
+               <h3 className="text-xl md:text-2xl font-headline font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors flex-1 uppercase">
                   {asset.title}
                </h3>
                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pt-4 border-t border-slate-50 mt-auto">
@@ -175,13 +181,13 @@ function DownloadCard({ asset, profile }: { asset: any, profile: any }) {
                      <Clock className="h-3.5 w-3.5" /> Registry Updated
                   </p>
                   {isLocked ? (
-                     <Button asChild className="w-full sm:w-auto h-12 px-8 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-[9px] rounded-xl gap-2 shadow-xl">
+                     <Button asChild className="w-full sm:w-auto h-12 px-8 bg-amber-500 hover:bg-amber-600 text-white font-black uppercase tracking-widest text-[9px] rounded-xl gap-2 shadow-xl border-none">
                         <Link href="/pass"><Lock className="h-4 w-4" /> Get Pass</Link>
                      </Button>
                   ) : (
-                     <Button asChild className="w-full sm:w-auto h-12 px-8 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest text-[9px] rounded-xl gap-2 shadow-xl">
+                     <Button asChild className="w-full sm:w-auto h-12 px-8 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest text-[9px] rounded-xl gap-2 shadow-xl border-none">
                         <a href={asset.pdfUrl} target="_blank" rel="noopener noreferrer">
-                           <Download className="h-4 w-4" /> Download Node
+                           <Download className="h-4 w-4" /> Download
                         </a>
                      </Button>
                   )}
