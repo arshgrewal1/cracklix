@@ -17,8 +17,8 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 
 /**
- * @fileOverview Hardened Production Checkout Hub v4.0.
- * UPDATED: Dynamic origin support and environment validation.
+ * @fileOverview Hardened Production Checkout Hub v4.1.
+ * UPDATED: Dynamic Cashfree mode detection.
  */
 
 export default function CheckoutPage() {
@@ -51,18 +51,14 @@ function CheckoutContent() {
   const isProductionDomain = useMemo(() => {
      if (typeof window === 'undefined') return true;
      const origin = window.location.origin;
-     const target = process.env.NEXT_PUBLIC_SITE_URL || "";
-     return target ? origin.includes(new URL(target).hostname) : true;
+     return !origin.includes('localhost') && !origin.includes('cloudworkstations.dev');
   }, []);
 
   const handleCashfreePayment = async () => {
     if (!user || !profile || !planData || onlineProcessing) return;
 
     setOnlineProcessing(true);
-    
-    // Dynamic Origin for wide-environment support
     const siteUrl = window.location.origin;
-    console.log(`[CHECKOUT] Initializing Cashfree Flow with origin: ${siteUrl}`);
 
     try {
       const orderRes = await fetch('/api/cashfree/create-order', {
@@ -78,8 +74,9 @@ function CheckoutContent() {
       const orderData = await orderRes.json();
       if (orderData.error) throw new Error(orderData.error);
 
-      // Force production mode for live keys
-      const cashfree = (window as any).Cashfree({ mode: 'production' });
+      // Match SDK mode with API environment
+      const mode = orderData.environment || (process.env.NEXT_PUBLIC_CASHFREE_ENV === 'production' ? 'production' : 'sandbox');
+      const cashfree = (window as any).Cashfree({ mode });
 
       await cashfree.checkout({
          paymentSessionId: orderData.payment_session_id,
@@ -114,8 +111,8 @@ function CheckoutContent() {
            <div className="mb-10 p-6 bg-rose-50 border-2 border-rose-100 rounded-3xl flex items-center gap-6 animate-in fade-in slide-in-from-top-4">
               <AlertTriangle className="h-8 w-8 text-rose-500 shrink-0" />
               <div className="text-left">
-                 <p className="text-[10px] font-black uppercase text-rose-600 tracking-widest">Environment Warning</p>
-                 <p className="text-sm font-medium text-rose-500">Non-whitelisted domain detected. Ensure this origin is added to your Cashfree Merchant Dashboard.</p>
+                 <p className="text-[10px] font-black uppercase text-rose-600 tracking-widest">Environment Notice</p>
+                 <p className="text-sm font-medium text-rose-500">Development mode active. Ensure keys match the environment.</p>
               </div>
            </div>
         )}
@@ -132,7 +129,6 @@ function CheckoutContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16 text-left">
            <div className="lg:col-span-7 space-y-10">
-              
               <Card className="border-none shadow-5xl rounded-[3rem] bg-[#0B1528] text-white overflow-hidden group">
                  <CardHeader className="p-10 pb-4">
                     <div className="flex items-center gap-4 mb-2">

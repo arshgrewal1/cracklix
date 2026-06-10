@@ -5,20 +5,26 @@ import { initializeFirebase } from '@/firebase';
 import { doc, updateDoc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Audited Cashfree Payment Verification Hub.
+ * @fileOverview Audited Cashfree Payment Verification Hub v2.0.
+ * UPDATED: Dynamic environment detection for verification node.
  */
-
-Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID!;
-Cashfree.XClientSecret = process.env.CASHFREE_CLIENT_SECRET!;
-const env = process.env.CASHFREE_ENV || 'production';
-Cashfree.XEnvironment = (env === 'production' || process.env.CASHFREE_CLIENT_SECRET?.includes('_prod_')) 
-  ? Cashfree.Environment.PRODUCTION 
-  : Cashfree.Environment.SANDBOX;
 
 export async function POST(req: Request) {
   try {
     const { order_id, userId, planId } = await req.json();
-    console.log(`[CASHFREE_VERIFY] Auditing Order: ${order_id}`);
+    
+    const clientId = process.env.CASHFREE_CLIENT_ID;
+    const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
+    const env = process.env.CASHFREE_ENV || 'production';
+
+    if (!clientId || !clientSecret) {
+      return NextResponse.json({ error: 'Auth keys missing.' }, { status: 500 });
+    }
+
+    Cashfree.XClientId = clientId;
+    Cashfree.XClientSecret = clientSecret;
+    const isProd = env === 'production' || clientSecret.startsWith('cf_prod_');
+    Cashfree.XEnvironment = isProd ? Cashfree.Environment.PRODUCTION : Cashfree.Environment.SANDBOX;
 
     if (!order_id || !userId || !planId) {
       return NextResponse.json({ error: 'Missing audit metadata.' }, { status: 400 });
@@ -29,7 +35,6 @@ export async function POST(req: Request) {
     const successfulPayment = payments?.find(p => p.payment_status === 'SUCCESS');
 
     if (!successfulPayment) {
-      console.warn(`[CASHFREE_VERIFY] No SUCCESS status for order ${order_id}`);
       return NextResponse.json({ error: 'Transaction pending or failed.' }, { status: 400 });
     }
 
@@ -51,7 +56,7 @@ export async function POST(req: Request) {
         plan: planData.id?.toUpperCase() || 'PREMIUM',
         purchaseDate: new Date().toISOString(),
         expiryDate: expiryDate.toISOString(),
-        freePassClaimed: false
+        freePassClaimed: planData.id === 'free-pass'
       },
       status: planData.id,
       updatedAt: serverTimestamp()

@@ -28,8 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Individual Mock Gateway v19.0.
- * FIXED: Resolved syntax errors in FeatureNode and main component closure.
+ * @fileOverview Individual Mock Gateway v19.1.
+ * FIXED: Resolved webpack compilation error by correctly closing sub-components.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -48,14 +48,12 @@ export default function MockOverviewPage() {
   const [accessChecked, setAccessChecked] = useState(false);
   const [previousAttempts, setPreviousAttempts] = useState<any[]>([]);
 
-  // 1. AUTHENTICATION FIREWALL
   useEffect(() => {
     if (!userLoading && !user) {
        router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
     }
   }, [user, userLoading, router, pathname]);
 
-  // 2. PREMIUM ACCESS AUDIT
   useEffect(() => {
     async function checkAccess() {
       if (mockLoading || !user) return;
@@ -69,12 +67,10 @@ export default function MockOverviewPage() {
         setPreviousAttempts(resSnap.docs.map(d => d.data()));
       } catch (e) {}
 
-      // ADMIN BYPASS
       const userEmail = user?.email?.toLowerCase();
       const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
       const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
       
-      // PASS HUB AUDIT
       let hasActivePass = false;
       if (isAdmin) {
          hasActivePass = true;
@@ -84,9 +80,7 @@ export default function MockOverviewPage() {
          if (expiry > now) hasActivePass = true;
       }
       
-      // LOCK LOGIC
       const locked = isPremium && !hasActivePass;
-
       setIsLocked(locked);
       setAccessChecked(true);
     }
@@ -163,8 +157,7 @@ export default function MockOverviewPage() {
               </div>
               <div className="w-full md:w-auto pt-6 md:pt-0">
                  {isLocked ? (
-                    <Button onClick={() => router.push('/pass')} className="w-full h-16 md:h-20 px-12 md:px-16 bg-orange-500 hover:bg-orange-600 text-white font-black uppercase tracking-[0.2em] text-[11px] md:text-sm rounded-[1.5rem] md:rounded-[2.5rem] shadow-4xl gap-4 border-none transition-all active:scale-95 flex items-center justify-center"
-                    >
+                    <Button onClick={() => router.push('/pass')} className="w-full h-16 md:h-20 px-12 md:px-16 bg-orange-500 hover:bg-orange-600 text-white font-black uppercase tracking-[0.2em] text-[11px] md:text-sm rounded-[1.5rem] md:rounded-[2.5rem] shadow-4xl gap-4 border-none transition-all active:scale-95 flex items-center justify-center">
                       <Lock className="h-5 w-5 md:h-7 md:w-7" /> UNLOCK TEST
                     </Button>
                  ) : isLimitReached ? (

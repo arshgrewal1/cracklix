@@ -11,6 +11,11 @@ import { motion } from "framer-motion"
 import { Suspense, useEffect, useState } from "react"
 import { useUser } from "@/firebase"
 
+/**
+ * @fileOverview Success Node v2.1.
+ * UPDATED: Hardened plan normalization for registry sync.
+ */
+
 export default function SuccessPage() {
   return (
     <Suspense fallback={null}>
@@ -23,7 +28,7 @@ function SuccessContent() {
   const searchParams = useSearchParams()
   const { user } = useUser()
   const orderId = searchParams.get("order_id")
-  const plan = searchParams.get("plan") || "Elite Pass"
+  const planName = searchParams.get("plan") || "Elite Pass"
   
   const [verifying, setVerifying] = useState(!!orderId)
   const [verified, setVerified] = useState(false)
@@ -32,13 +37,16 @@ function SuccessContent() {
     async function verify() {
       if (!orderId || !user) return;
       try {
+        // Robust ID normalization: handles underscores and hyphens
+        const planId = planName.toLowerCase().replace(/[\s_]+/g, '-');
+        
         const res = await fetch('/api/cashfree/verify-payment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             order_id: orderId, 
             userId: user.uid,
-            planId: plan.toLowerCase().replace(/\s+/g, '-') 
+            planId: planId
           })
         });
         const data = await res.json();
@@ -50,7 +58,7 @@ function SuccessContent() {
       }
     }
     verify();
-  }, [orderId, user, plan]);
+  }, [orderId, user, planName]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -94,7 +102,7 @@ function SuccessContent() {
                 </div>
                 <div className="flex justify-between items-center">
                    <span className="text-[10px] font-black uppercase text-slate-400">Hub Status</span>
-                   <span className="text-base font-bold text-[#0F172A] uppercase">{plan} Activated</span>
+                   <span className="text-base font-bold text-[#0F172A] uppercase">{planName} Activated</span>
                 </div>
              </div>
 

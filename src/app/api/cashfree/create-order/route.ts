@@ -5,25 +5,31 @@ import { initializeFirebase } from '@/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Production Order Node v4.0.
- * UPDATED: Dynamic origin handling with protocol enforcement.
+ * @fileOverview Hardened Production Order Node v5.0.
+ * UPDATED: Intelligent Environment Detection (Auto Sandbox/Prod).
  */
-
-const clientId = process.env.CASHFREE_CLIENT_ID;
-const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
-const env = process.env.CASHFREE_ENV || 'production';
-
-// Initialize SDK with Production/Sandbox detection
-Cashfree.XClientId = clientId!;
-Cashfree.XClientSecret = clientSecret!;
-Cashfree.XEnvironment = (env === 'production' || clientSecret?.includes('_prod_')) 
-  ? Cashfree.Environment.PRODUCTION 
-  : Cashfree.Environment.SANDBOX;
 
 export async function POST(req: Request) {
   try {
     const { planId, userId, origin } = await req.json();
     const { firestore: db } = initializeFirebase();
+
+    const clientId = process.env.CASHFREE_CLIENT_ID;
+    const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
+    const env = process.env.CASHFREE_ENV || 'production';
+
+    if (!clientId || !clientSecret) {
+      console.error('[CASHFREE_AUTH_ERR]: API Credentials missing from environment variables.');
+      return NextResponse.json({ error: 'Gateway authentication keys not configured.' }, { status: 500 });
+    }
+
+    // Initialize SDK inside handler for serverless stability
+    Cashfree.XClientId = clientId;
+    Cashfree.XClientSecret = clientSecret;
+    
+    // Auto-detect environment based on key prefix if not explicitly set
+    const isProd = env === 'production' || clientSecret.startsWith('cf_prod_');
+    Cashfree.XEnvironment = isProd ? Cashfree.Environment.PRODUCTION : Cashfree.Environment.SANDBOX;
 
     if (!userId || !planId) {
       return NextResponse.json({ error: 'Mandatory session data missing.' }, { status: 400 });
@@ -43,8 +49,6 @@ export async function POST(req: Request) {
     const userSnap = await getDoc(doc(db, "users", userId));
     const userData = userSnap.data();
 
-    // DYNAMIC DOMAIN ANCHORING
-    // Strictly prioritize NEXT_PUBLIC_SITE_URL for return path to maintain production stability
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin || new URL(req.url).origin;
     const baseOrigin = siteUrl.replace('http://', 'https://');
     const orderId = `order_${Date.now()}_${userId.slice(-4)}`;
@@ -60,7 +64,7 @@ export async function POST(req: Request) {
         customer_phone: userData?.phone?.replace(/\D/g, '').slice(-10) || "9999999999",
       },
       order_meta: {
-        return_url: `${baseOrigin}/payment/success?order_id={order_id}&plan=${encodeURIComponent(planData.name)}`,
+        return_url: `${baseOrigin}/payment/success?order_id={order_id}&plan=${encodeURIComponent(planData.id)}`,
         notify_url: `${baseOrigin}/api/cashfree/webhook`
       },
       order_note: `Institutional Pass: ${planData.name}`,
@@ -72,7 +76,7 @@ export async function POST(req: Request) {
       payment_session_id: response.data.payment_session_id,
       order_id: response.data.order_id,
       cf_order_id: response.data.cf_order_id,
-      environment: env
+      environment: isProd ? 'production' : 'sandbox'
     });
   } catch (error: any) {
     const errData = error?.response?.data || error;
