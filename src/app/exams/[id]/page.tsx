@@ -35,8 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Hub v27.1.
- * UPDATED: Reordered tabs: Sectional and CA moved after Subject-Wise.
+ * @fileOverview Institutional Exam Hub v28.0.
+ * UPDATED: Fixed live accuracy and attempt stats with loading skeletons.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -57,7 +57,7 @@ export default function ExamHubPage() {
 
   const { data: rawMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
   const { data: rawNotes, loading: notesLoading } = useCollection<any>(notesQuery)
-  const { data: userResults } = useCollection<any>(resultsQuery)
+  const { data: userResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: caHub } = useCollection<any>(hubQuery);
 
@@ -96,6 +96,8 @@ export default function ExamHubPage() {
 
   // HARDENED ATTEMPT AUDIT LOGIC
   const examPerformance = useMemo(() => {
+     if (!rawMocks || !userResults) return { attempted: 0, avgAcc: 0, bestScore: 0 };
+     
      const allAssociatedMocks = [...groupedContent.FULL, ...groupedContent.SUBJECT, ...groupedContent.SECTIONAL, ...groupedContent.PYQ];
      const mockIds = new Set(allAssociatedMocks.map(m => m.id));
 
@@ -107,7 +109,7 @@ export default function ExamHubPage() {
         avgAcc: Math.round(examResults.reduce((acc, r) => acc + (r.accuracy || 0), 0) / examResults.length),
         bestScore: Math.max(...examResults.map(r => r.score || 0))
      }
-  }, [userResults, groupedContent]);
+  }, [userResults, groupedContent, rawMocks]);
 
   if (examLoading || userLoading) return <div className="h-screen flex items-center justify-center bg-white"><Skeleton className="h-16 w-16 rounded-full animate-pulse" /></div>
   if (!exam) return null;
@@ -138,14 +140,22 @@ export default function ExamHubPage() {
                </div>
                
                <div className="flex items-center gap-8 bg-slate-50 px-8 py-4 rounded-3xl border border-slate-100">
-                  <div className="text-center">
+                  <div className="text-center min-w-[80px]">
                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">ACCURACY</p>
-                     <p className="text-2xl font-black text-[#0F172A]">{examPerformance.avgAcc}%</p>
+                     {resultsLoading || mocksLoading ? (
+                        <Skeleton className="h-7 w-12 bg-slate-200 mx-auto" />
+                     ) : (
+                        <p className="text-2xl font-black text-[#0F172A]">{examPerformance.avgAcc}%</p>
+                     )}
                   </div>
                   <div className="h-8 w-px bg-slate-200" />
-                  <div className="text-center">
+                  <div className="text-center min-w-[80px]">
                      <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest mb-1">ATTEMPTED</p>
-                     <p className="text-2xl font-black text-[#0F172A]">{examPerformance.attempted}</p>
+                     {resultsLoading || mocksLoading ? (
+                        <Skeleton className="h-7 w-12 bg-slate-200 mx-auto" />
+                     ) : (
+                        <p className="text-2xl font-black text-[#0F172A]">{examPerformance.attempted}</p>
+                     )}
                   </div>
                </div>
             </div>

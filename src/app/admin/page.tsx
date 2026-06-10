@@ -30,7 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Command Center v37.0.
+ * @fileOverview Institutional Command Center v38.0.
  * UPDATED: Hardened real-time statistics synchronization protocol.
  */
 
@@ -82,8 +82,9 @@ export default function AdminDashboard() {
            getDocs(collection(db, "results"))
         ]);
 
-        const avgAcc = rSnap.docs.length > 0 
-           ? Math.round(rSnap.docs.reduce((acc, d) => acc + (d.data().accuracy || 0), 0) / rSnap.docs.length)
+        const totalResults = rSnap.docs.length;
+        const avgAcc = totalResults > 0 
+           ? Math.round(rSnap.docs.reduce((acc, d) => acc + (Number(d.data().accuracy) || 0), 0) / totalResults)
            : 94;
 
         await setDoc(doc(db, "settings", "stats"), {
@@ -97,7 +98,7 @@ export default function AdminDashboard() {
         if (!silent) {
            toast({ 
              title: "Registry Audited", 
-             description: `Synced: ${qSnap.size} MCQs, ${mSnap.size} Mocks, ${uSnap.size} Aspirants.` 
+             description: `Synced: ${qSnap.size} MCQs, ${mSnap.size} Mocks, ${uSnap.size} Students.` 
            });
         }
      } catch (e) {
@@ -157,7 +158,7 @@ export default function AdminDashboard() {
          <MetricCard 
            label="Active Pass Holders" 
            value={finance.activePasses} 
-           subLabel="Premium Aspirants" 
+           subLabel="Premium Students" 
            icon={<CreditCard className="text-primary" />} 
            href="/admin/users"
          />
@@ -179,7 +180,7 @@ export default function AdminDashboard() {
             </CardHeader>
             <CardContent className="p-8 space-y-10">
                <div className="space-y-6">
-                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><Users className="h-4 w-4" /> Latest Aspirant Registrations</h4>
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><Users className="h-4 w-4" /> Latest Student Registrations</h4>
                   <div className="grid grid-cols-1 gap-3">
                      {recentUsers?.map((u: any) => (
                         <div key={u.id} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100">

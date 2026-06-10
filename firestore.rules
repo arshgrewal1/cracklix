@@ -3,8 +3,8 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     /**
-     * @fileOverview Hardened Institutional RBAC Protocol v3.0.
-     * UPDATED: Strict ownership for attempts and results to prevent bypass.
+     * @fileOverview Hardened Institutional RBAC Protocol v4.0.
+     * UPDATED: Standardized owner-based read access for collection queries.
      */
 
     function isAuthenticated() {
@@ -69,8 +69,12 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdmin();
     }
+    match /pyqs/{pyqId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
 
-    // --- 2. Aspirant Data (Private Nodes) ---
+    // --- 2. Student Data (Private Nodes) ---
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow write: if isOwner(userId) || isAdmin();
@@ -84,13 +88,13 @@ service cloud.firestore {
     }
 
     match /results/{resultId} {
-      allow read: if isAuthenticated() && (resultId.split('_')[0] == request.auth.uid || isAdmin());
+      allow read: if isAuthenticated() && (resultId.split('_')[0] == request.auth.uid || resource.data.userId == request.auth.uid || isAdmin());
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAdmin();
     }
 
     match /bookmarks/{bId} {
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid);
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow update, delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
