@@ -19,8 +19,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Optimized Institutional Landing Hub v55.0.
- * UPDATED: Absolute 0-Baseline Sync. All placeholder figures removed.
+ * @fileOverview Optimized Institutional Landing Hub v56.0.
+ * UPDATED: Strictly 0-Baseline. Pulls real-time original data only.
  */
 
 export default function HomePage() {
@@ -37,7 +37,7 @@ export default function HomePage() {
     const uCount = stats?.totalUsers || 0;
     const avgAcc = stats?.averageAccuracy || 0;
 
-    // 2. High-Fidelity Formatting
+    // 2. High-Fidelity Formatting (Only converts to k+ if count > 1000)
     const formatNumber = (num: number) => {
        if (num >= 1000) return (num / 1000).toFixed(1) + 'k+';
        return num.toString();
@@ -122,7 +122,7 @@ function TrustCard({ icon, label, val, loading, highlight = false }: any) {
             ) : (
                <p className="text-3xl md:text-6xl font-headline font-black text-[#0F172A] leading-none tracking-tighter tabular-nums">{val}</p>
             )}
-            <p className="text-[9px] md:text-[13px] font-black uppercase tracking-[0.3em] text-slate-400 truncate">{label}</p>
+            <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400 truncate">{label}</p>
          </div>
       </div>
    )
