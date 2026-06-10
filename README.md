@@ -5,7 +5,7 @@ Punjab's most advanced government exam preparation platform. Designed for aspira
 
 ## 🚀 Key Features
 - **High-Fidelity CBT Engine**: Real-time evaluation with bilingual support (EN/PA).
-- **Atomic Question Bank**: 10,000+ verified MCQs for PSSSB, PPSC, and Punjab Police.
+- **Atomic Question Bank**: Growing repository of verified MCQs for PSSSB, PPSC, and Punjab Police.
 - **Institutional Analytics**: Deep performance audit and state-level ranking.
 - **Elite Pass Registry**: Tiered access to premium mocks and AI rationalizations.
 

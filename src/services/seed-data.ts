@@ -2,9 +2,9 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, deleteDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Punjab-Centric Seeding Node v60.0.
- * UPDATED: Synchronized authoritative Stats Hub (10.0k, 500, 15000, 94%).
- * PURGED: All placeholder/fake numbers across registry.
+ * @fileOverview Institutional Punjab-Centric Seeding Node v61.0.
+ * UPDATED: Reset authoritative Stats Hub to 0-baseline.
+ * PURGED: All dummy/placeholder figures.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -16,12 +16,12 @@ export async function seedInitialData(db: Firestore) {
      try { await deleteDoc(doc(db, 'boards', id)); await deleteDoc(doc(db, 'exams', id)); } catch (e) { }
   }
 
-  // 1. AUTHORITATIVE STATS HUB - Real Production Values
+  // 1. AUTHORITATIVE STATS HUB - 0 Baseline (No Dummy Data)
   await setDoc(doc(db, 'settings', 'stats'), {
-     totalQuestions: 10000,
-     totalMocks: 500,
-     totalUsers: 15000,
-     averageAccuracy: 94,
+     totalQuestions: 0,
+     totalMocks: 0,
+     totalUsers: 0,
+     averageAccuracy: 0,
      updatedAt: serverTimestamp()
   }, { merge: true });
 
@@ -99,7 +99,7 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 4. EXAMS (INCLUDING TRENDING)
+  // 4. EXAMS
   const exams = [
     { id: 'p-police-constable', name: 'Police Constable', boardId: 'punjab-police', categoryId: 'punjab-govt', displayOrder: 1 },
     { id: 'p-police-si', name: 'Police Sub-Inspector', boardId: 'punjab-police', categoryId: 'punjab-govt', displayOrder: 2 },
@@ -108,7 +108,6 @@ export async function seedInitialData(db: Firestore) {
     { id: 'pstet-paper-1', name: 'PSTET Paper 1', boardId: 'pstet-hub', categoryId: 'punjab-teaching', displayOrder: 10 },
     { id: 'psssb-patwari', name: 'Revenue Patwari', boardId: 'psssb', categoryId: 'punjab-general', displayOrder: 30 },
     { id: 'psssb-clerk', name: 'Clerk / DEO', boardId: 'psssb', categoryId: 'punjab-general', displayOrder: 31 },
-    // TRENDING NODES FROM SCREENSHOT
     { id: 'punjab-anganwadi', name: 'PUNJAB ANGANWADI / NTT', boardId: 'psssb', categoryId: 'punjab-govt', isTrending: true, displayOrder: 0 },
     { id: 'army-gd', name: 'ARMY GD (GENERAL DUTY)', boardId: 'high-court', categoryId: 'punjab-govt', isTrending: true, displayOrder: 0 },
     { id: 'assistant-professor', name: 'ASSISTANT PROFESSOR', boardId: 'ppsc', categoryId: 'punjab-teaching', isTrending: true, displayOrder: 0 },
@@ -133,5 +132,5 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'subjects', s.id), { ...s, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  console.log('[AUDIT] Full Punjab Registry Synchronized Successfully with Real Data.');
+  console.log('[AUDIT] Full Punjab Registry Synchronized with 0-Baseline.');
 }

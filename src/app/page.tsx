@@ -19,8 +19,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Optimized Institutional Landing Hub v49.0.
- * UPDATED: Strictly implemented requested "Real Data" with 0 fallback.
+ * @fileOverview Optimized Institutional Landing Hub v50.0.
+ * UPDATED: Strictly real-time counts from database. Dummy "10k" removed.
  */
 
 export default function HomePage() {
@@ -31,21 +31,21 @@ export default function HomePage() {
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   const liveStats = useMemo(() => {
-    // 1. Audit Registry Values (Authoritative Baseline - fallback to 0)
+    // 1. Audit Registry Values (Absolute Reality from stats node)
     const qCount = stats?.totalQuestions || 0;
     const mCount = stats?.totalMocks || 0;
     const uCount = stats?.totalUsers || 0;
     const avgAcc = stats?.averageAccuracy || 0;
 
-    // 2. High-Fidelity Formatting (Match Screenshot)
+    // 2. High-Fidelity Formatting (Only apply 'k+' if over 1000)
     const formattedMCQ = qCount >= 1000 
       ? (qCount / 1000).toFixed(1) + 'k+' 
       : qCount.toLocaleString();
 
     return {
-      mcqs: qCount > 0 ? formattedMCQ : "0",
-      mocks: mCount > 0 ? mCount.toLocaleString() : "0",
-      users: uCount > 0 ? uCount.toLocaleString() : "0",
+      mcqs: formattedMCQ,
+      mocks: mCount.toLocaleString(),
+      users: uCount.toLocaleString(),
       accuracy: `${avgAcc}%`
     };
   }, [stats]);
