@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useSearchParams, useRouter } from "next/navigation"
@@ -16,8 +17,8 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 
 /**
- * @fileOverview Institutional Checkout Node v2.1.
- * FIXED: Added missing Label and Input component imports.
+ * @fileOverview Institutional Checkout Node v2.2.
+ * UPDATED: Dynamic environment detection for Cashfree SDK.
  */
 
 export default function CheckoutPage() {
@@ -61,10 +62,9 @@ function CheckoutContent() {
       const orderData = await orderRes.json();
       if (orderData.error) throw new Error(orderData.error);
 
-      // Initialize SDK
-      const cashfree = (window as any).Cashfree({
-         mode: process.env.NEXT_PUBLIC_CASHFREE_ENV === 'production' ? 'production' : 'sandbox'
-      });
+      // Initialize SDK with dynamic environment
+      const mode = process.env.NEXT_PUBLIC_CASHFREE_ENV === 'production' ? 'production' : 'sandbox';
+      const cashfree = (window as any).Cashfree({ mode });
 
       await cashfree.checkout({
          paymentSessionId: orderData.payment_session_id,

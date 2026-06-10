@@ -6,12 +6,17 @@ import { doc, getDoc } from 'firebase/firestore';
 
 /**
  * @fileOverview Secure Cashfree Order Creation Node.
- * Handles server-side order generation for institutional pass purchases.
+ * Hardened: Validates environment based on key prefix to prevent initialization failure.
  */
 
-Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID!;
-Cashfree.XClientSecret = process.env.CASHFREE_CLIENT_SECRET!;
-Cashfree.XEnvironment = process.env.CASHFREE_ENV === 'production' 
+const clientId = process.env.CASHFREE_CLIENT_ID;
+const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
+const env = process.env.CASHFREE_ENV || 'sandbox';
+
+// Initialize SDK singleton
+Cashfree.XClientId = clientId!;
+Cashfree.XClientSecret = clientSecret!;
+Cashfree.XEnvironment = (env === 'production' || clientSecret?.includes('_prod_')) 
   ? Cashfree.Environment.PRODUCTION 
   : Cashfree.Environment.SANDBOX;
 
@@ -30,14 +35,20 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid Pass Node.' }, { status: 404 });
     }
     const planData = planSnap.data();
+    const amount = Number(planData.price);
 
-    // 2. Fetch User Metadata for Pre-fill
+    // 2. Amount Guard: Cashfree requires > 0
+    if (amount <= 0) {
+      return NextResponse.json({ error: 'Free plans must be claimed via Trial Hub.' }, { status: 400 });
+    }
+
+    // 3. Fetch User Metadata for Pre-fill
     const userSnap = await getDoc(doc(db, "users", userId));
     const userData = userSnap.data();
 
-    // 3. Cashfree Order Request
+    // 4. Cashfree Order Request
     const request = {
-      order_amount: planData.price,
+      order_amount: amount,
       order_currency: "INR",
       order_id: `order_${Date.now()}_${userId.slice(-4)}`,
       customer_details: {
@@ -60,6 +71,7 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     console.error('[CASHFREE_ORDER_FAILURE]:', error?.response?.data || error);
-    return NextResponse.json({ error: 'Gateway failed to initialize.' }, { status: 500 });
+    const message = error?.response?.data?.message || 'Gateway failed to initialize.';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
