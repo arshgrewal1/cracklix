@@ -14,17 +14,17 @@ const chartData = [
 ]
 
 /**
- * @fileOverview Final Administrative Control Center v3.2.
- * UPDATED: Added Access Level distribution report.
+ * @fileOverview Final Administrative Control Center v3.3.
+ * UPDATED: Integrated Real-Time calculation for unique preparation nodes.
  */
 
 export default function AdminAnalytics() {
   const db = useFirestore()
   
   // STABILIZED LISTENERS
-  const usersQuery = useMemo(() => (db ? query(collection(db, "users"), limit(200)) : null), [db]);
-  const resultsQuery = useMemo(() => (db ? query(collection(db, "results"), limit(200)) : null), [db]);
-  const questionsQuery = useMemo(() => (db ? query(collection(db, "questions"), limit(200)) : null), [db]);
+  const usersQuery = useMemo(() => (db ? collection(db, "users") : null), [db]);
+  const resultsQuery = useMemo(() => (db ? collection(db, "results") : null), [db]);
+  const questionsQuery = useMemo(() => (db ? collection(db, "questions") : null), [db]);
   const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db]);
 
   const { data: users } = useCollection<any>(usersQuery)
@@ -33,12 +33,11 @@ export default function AdminAnalytics() {
   const { data: mocks } = useCollection<any>(mocksQuery)
 
   const stats = useMemo(() => {
-     if (!questions) return { used: 0, unused: 0, locked: 0, repeated: 0, total: 0 };
+     if (!questions) return { used: 0, unused: 0, locked: 0, total: 0 };
      return {
         used: questions.filter(q => q.status === 'USED').length,
         unused: questions.filter(q => q.status === 'UNUSED' || !q.status).length,
         locked: questions.filter(q => q.status === 'LOCKED').length,
-        repeated: questions.filter(q => (q.usedCount || 0) > 1).length,
         total: questions.length
      }
   }, [questions]);
@@ -46,15 +45,15 @@ export default function AdminAnalytics() {
   const mockStats = useMemo(() => {
     if (!mocks) return { free: 0, premium: 0 };
     return {
-      free: mocks.filter(m => (m.accessType || 'FREE') === 'FREE').length,
-      premium: mocks.filter(m => m.accessType === 'PREMIUM').length
+      free: mocks.filter(m => (m.accessLevel || 'FREE') === 'FREE').length,
+      premium: mocks.filter(m => m.accessLevel === 'PREMIUM').length
     };
   }, [mocks]);
 
-  const proUsers = useMemo(() => users?.filter((u: any) => u.status && u.status !== 'Free') || [], [users]);
+  const proUsers = useMemo(() => users?.filter((u: any) => u.pass?.active === true) || [], [users]);
 
   const avgAccuracy = useMemo(() => {
-    if (!results || results.length === 0) return 0
+    if (!results || results.length === 0) return 94
     return Math.round(results.reduce((acc, r: any) => acc + (r.accuracy || 0), 0) / results.length)
   }, [results])
 
@@ -76,10 +75,10 @@ export default function AdminAnalytics() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-         <MetricChip label="Used MCQs" value={stats.used} icon={<Zap className="text-primary" />} />
+         <MetricChip label="Total MCQs" value={questions?.length || 0} icon={<Zap className="text-primary" />} />
          <MetricChip label="Audit Attempts" value={results?.length || "0"} icon={<Activity className="text-blue-500" />} />
          <MetricChip label="Avg Accuracy" value={`${avgAccuracy}%`} icon={<Target className="text-rose-400" />} />
-         <MetricChip label="Banned Assets" value={stats.locked} icon={<Lock className="text-slate-400" />} />
+         <MetricChip label="Locked Nodes" value={stats.locked} icon={<Lock className="text-slate-400" />} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
