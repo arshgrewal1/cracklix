@@ -11,7 +11,8 @@ import { doc, updateDoc, setDoc, serverTimestamp, getDoc } from 'firebase/firest
 
 Cashfree.XClientId = process.env.CASHFREE_CLIENT_ID!;
 Cashfree.XClientSecret = process.env.CASHFREE_CLIENT_SECRET!;
-Cashfree.XEnvironment = process.env.CASHFREE_ENV === 'production' 
+// Hardened: Synchronized production check
+Cashfree.XEnvironment = (process.env.CASHFREE_ENV === 'production' || process.env.CASHFREE_CLIENT_SECRET?.includes('_prod_')) 
   ? Cashfree.Environment.PRODUCTION 
   : Cashfree.Environment.SANDBOX;
 

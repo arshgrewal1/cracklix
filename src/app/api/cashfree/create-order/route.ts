@@ -6,16 +6,17 @@ import { doc, getDoc } from 'firebase/firestore';
 
 /**
  * @fileOverview Secure Cashfree Order Creation Node.
- * Hardened: Validates environment based on key prefix to prevent initialization failure.
+ * Hardened: Forces https for return_url and validates environment based on key prefix.
  */
 
 const clientId = process.env.CASHFREE_CLIENT_ID;
 const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
-const env = process.env.CASHFREE_ENV || 'sandbox';
+const env = process.env.CASHFREE_ENV || 'production';
 
 // Initialize SDK singleton
 Cashfree.XClientId = clientId!;
 Cashfree.XClientSecret = clientSecret!;
+// Hardened: Always use Production if the secret key contains the production identifier
 Cashfree.XEnvironment = (env === 'production' || clientSecret?.includes('_prod_')) 
   ? Cashfree.Environment.PRODUCTION 
   : Cashfree.Environment.SANDBOX;
@@ -47,6 +48,10 @@ export async function POST(req: Request) {
     const userData = userSnap.data();
 
     // 4. Cashfree Order Request
+    // FIX: Cashfree strictly requires return_url to be HTTPS. 
+    // In dev clusters, we must manually force the protocol.
+    const origin = new URL(req.url).origin.replace('http://', 'https://');
+
     const request = {
       order_amount: amount,
       order_currency: "INR",
@@ -58,7 +63,7 @@ export async function POST(req: Request) {
         customer_phone: userData?.phone?.replace(/\D/g, '').slice(-10) || "9999999999",
       },
       order_meta: {
-        return_url: `${new URL(req.url).origin}/payment/success?order_id={order_id}&plan=${encodeURIComponent(planData.name)}`,
+        return_url: `${origin}/payment/success?order_id={order_id}&plan=${encodeURIComponent(planData.name)}`,
       },
       order_note: `Purchase: ${planData.name} Elite Pass`,
     };
