@@ -1,12 +1,13 @@
+
 /**
- * @fileOverview Institutional Service Worker for CRACKLIX.
- * Strategy: Stale-While-Revalidate for ultra-fast boots and offline availability.
+ * @fileOverview Institutional CRACKLIX Service Worker v3.0.
+ * Satisfies browser installability requirements and handles offline caching.
  */
 
-const CACHE_NAME = 'cracklix-cache-v2';
+const CACHE_NAME = 'cracklix-v1';
 const ASSETS_TO_CACHE = [
   '/',
-  '/offline',
+  '/manifest.json',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png'
 ];
@@ -36,42 +37,20 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests
-  if (!event.request.url.startsWith(self.location.origin)) return;
+  // Only handle GET requests
+  if (event.request.method !== 'GET') return;
 
-  // Stale-While-Revalidate strategy
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        // Cache successful GET responses
-        if (networkResponse && networkResponse.status === 200 && event.request.method === 'GET') {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return networkResponse;
-      }).catch(() => {
-        // Offline fallback for navigation requests
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request).catch(() => {
+        // Fallback for failed fetches (offline)
         if (event.request.mode === 'navigate') {
-          return caches.match('/offline') || caches.match('/');
+          return caches.match('/');
         }
       });
-
-      return cachedResponse || fetchPromise;
-    })
-  );
-});
-
-// Push notification listener
-self.addEventListener('push', (event) => {
-  const data = event.data ? event.data.json() : { title: 'Exam Alert', body: 'New update from Cracklix.' };
-  
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: '/icons/icon-192x192.png',
-      badge: '/icons/icon-192x192.png'
     })
   );
 });

@@ -1,14 +1,15 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { Download, X, ShieldCheck, Zap } from 'lucide-react';
+import { Download, X, ShieldCheck, Zap, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Institutional PWA Lifecycle Manager v3.0.
- * UPDATED: Fixed installation flow and prompt triggers.
+ * @fileOverview Institutional PWA Lifecycle Manager v3.1.
+ * UPDATED: Optimized installation flow and refined event listeners.
  */
 export default function PWAManager() {
   const pathname = usePathname();
@@ -20,7 +21,7 @@ export default function PWAManager() {
     // 1. Service Worker registration
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(
+        navigator.serviceWorker.register('/sw.js').then(
           (reg) => console.log('[PWA] ServiceWorker registered'),
           (err) => console.log('[PWA] ServiceWorker failed:', err)
         );
@@ -29,23 +30,20 @@ export default function PWAManager() {
 
     // 2. Install prompt listener
     const handleBeforeInstallPrompt = (e: any) => {
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later.
       setDeferredPrompt(e);
       
-      // Delay visibility to ensure engagement
+      // Show prompt after a short delay on non-critical pages
       const timer = setTimeout(() => {
         if (!pathname?.includes('/attempt') && !pathname?.startsWith('/admin')) {
           setShowPrompt(true);
         }
-      }, 8000);
+      }, 5000);
       
       return () => clearTimeout(timer);
     };
 
     const handleAppInstalled = () => {
-      console.log('[PWA] App successfully installed');
       setDeferredPrompt(null);
       setShowPrompt(false);
       setIsInstalled(true);
@@ -54,7 +52,6 @@ export default function PWAManager() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // Initial check for display mode
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
     }
@@ -68,22 +65,15 @@ export default function PWAManager() {
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
 
-    // Show the native install prompt
     deferredPrompt.prompt();
-
-    // Wait for the user to respond to the prompt
     const { outcome } = await deferredPrompt.userChoice;
-    console.log(`[PWA] User choice: ${outcome}`);
+    console.log(`[PWA] Install choice: ${outcome}`);
     
-    // We've used the prompt, and can't use it again, throw it away
     setDeferredPrompt(null);
     setShowPrompt(false);
   };
 
-  // Guard: Hide UI on critical pages or if already installed/not prompted
-  if (pathname?.includes('/attempt') || pathname?.startsWith('/admin') || isInstalled || !deferredPrompt) {
-    return null;
-  }
+  if (isInstalled || !deferredPrompt) return null;
 
   return (
     <AnimatePresence>
@@ -105,7 +95,7 @@ export default function PWAManager() {
 
             <div className="flex-1 min-w-0 text-left">
                <h4 className="text-[13px] font-black uppercase tracking-tight leading-none mb-1">Install CRACKLIX App</h4>
-               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Offline Access & Fast Loading</p>
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Fast Offline Access</p>
             </div>
 
             <div className="flex items-center gap-2">

@@ -30,7 +30,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Individual Mock Gateway v19.6.
- * FIXED: Resolved syntax errors and hardened production access firewall.
+ * FIXED: Resolved JSX syntax errors and unmatched brackets.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

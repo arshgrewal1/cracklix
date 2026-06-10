@@ -1,7 +1,5 @@
 
 import { NextResponse } from 'next/server';
-import { initializeFirebase } from '@/firebase';
-import { doc, getDoc } from 'firebase/firestore';
 
 /**
  * @fileOverview Razorpay Order Logic (Archived).
@@ -11,19 +9,6 @@ import { doc, getDoc } from 'firebase/firestore';
 
 export async function POST(req: Request) {
   try {
-    const { planId, userId } = await req.json();
-    const { firestore: db } = initializeFirebase();
-
-    if (!userId || !planId) {
-      return NextResponse.json({ error: 'Missing mandatory session data.' }, { status: 400 });
-    }
-
-    const planSnap = await getDoc(doc(db, "passes", planId));
-    if (!planSnap.exists()) {
-      return NextResponse.json({ error: 'Invalid Pass Node.' }, { status: 404 });
-    }
-
-    // Razorpay logic disabled in favor of Cashfree.
     return NextResponse.json({ 
       error: 'Legacy gateway archived. Please utilize the Cashfree preparation node for transactions.',
       status: 'ARCHIVED'

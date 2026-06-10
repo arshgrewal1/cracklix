@@ -1,7 +1,8 @@
+
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Institutional PWA Manifest Configuration v2.0.
+ * @fileOverview Institutional PWA Manifest Configuration v3.0.
  * Hardened to meet strict Chrome/Android installability criteria.
  */
 export default function manifest(): MetadataRoute.Manifest {
