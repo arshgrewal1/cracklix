@@ -2,8 +2,8 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, deleteDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Punjab-Centric Seeding Node v56.0.
- * UPDATED: Initialized Live Stats Hub with screenshot original data.
+ * @fileOverview Institutional Punjab-Centric Seeding Node v57.0.
+ * UPDATED: Initialized Trending Hubs to match user screenshot.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -98,7 +98,7 @@ export async function seedInitialData(db: Firestore) {
     await setDoc(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 4. EXAMS
+  // 4. EXAMS (INCLUDING TRENDING)
   const exams = [
     { id: 'p-police-constable', name: 'Police Constable', boardId: 'punjab-police', categoryId: 'punjab-govt', displayOrder: 1 },
     { id: 'p-police-si', name: 'Police Sub-Inspector', boardId: 'punjab-police', categoryId: 'punjab-govt', displayOrder: 2 },
@@ -106,7 +106,12 @@ export async function seedInitialData(db: Firestore) {
     { id: 'sssc-clerk', name: 'High Court Clerk', boardId: 'high-court', categoryId: 'punjab-govt', displayOrder: 5 },
     { id: 'pstet-paper-1', name: 'PSTET Paper 1', boardId: 'pstet-hub', categoryId: 'punjab-teaching', displayOrder: 10 },
     { id: 'psssb-patwari', name: 'Revenue Patwari', boardId: 'psssb', categoryId: 'punjab-general', displayOrder: 30 },
-    { id: 'psssb-clerk', name: 'Clerk / DEO', boardId: 'psssb', categoryId: 'punjab-general', displayOrder: 31 }
+    { id: 'psssb-clerk', name: 'Clerk / DEO', boardId: 'psssb', categoryId: 'punjab-general', displayOrder: 31 },
+    // TRENDING NODES
+    { id: 'punjab-anganwadi', name: 'PUNJAB ANGANWADI / NTT', boardId: 'psssb', categoryId: 'punjab-govt', isTrending: true, displayOrder: 0 },
+    { id: 'army-gd', name: 'ARMY GD (GENERAL DUTY)', boardId: 'high-court', categoryId: 'punjab-govt', isTrending: true, displayOrder: 0 },
+    { id: 'assistant-professor', name: 'ASSISTANT PROFESSOR', boardId: 'ppsc', categoryId: 'punjab-teaching', isTrending: true, displayOrder: 0 },
+    { id: 'cadb-manager', name: 'CADB MANAGER', boardId: 'banking-hub', categoryId: 'punjab-banking', isTrending: true, displayOrder: 0 }
   ];
 
   for (const ex of exams) {

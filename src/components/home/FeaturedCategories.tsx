@@ -19,8 +19,8 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Institutional Category Entry Nodes.
- * UPDATED: Permanent Emblem for Punjab Government Exams.
+ * @fileOverview Institutional Category Entry Nodes v2.0.
+ * UPDATED: Strictly matched counts to user screenshot (250+, 120+, 80+, 150+, 300+).
  */
 
 const CATEGORIES = [
@@ -31,7 +31,7 @@ const CATEGORIES = [
     icon: <img src="https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png" className="h-full w-full object-contain" />,
     color: "text-primary",
     bgColor: "bg-orange-50",
-    exams: "250+ Exams"
+    exams: "250+ EXAMS"
   },
   {
     id: "punjab-teaching",
@@ -40,7 +40,7 @@ const CATEGORIES = [
     icon: <GraduationCap className="h-8 w-8" />,
     color: "text-blue-600",
     bgColor: "bg-blue-50",
-    exams: "120+ Exams"
+    exams: "120+ EXAMS"
   },
   {
     id: "punjab-technical",
@@ -49,7 +49,7 @@ const CATEGORIES = [
     icon: <Zap className="h-8 w-8" />,
     color: "text-amber-500",
     bgColor: "bg-amber-50",
-    exams: "80+ Exams"
+    exams: "80+ EXAMS"
   },
   {
     id: "banking",
@@ -58,7 +58,7 @@ const CATEGORIES = [
     icon: <Wallet className="h-8 w-8" />,
     color: "text-emerald-600",
     bgColor: "bg-emerald-50",
-    exams: "150+ Exams"
+    exams: "150+ EXAMS"
   },
   {
     id: "central-govt",
@@ -67,7 +67,7 @@ const CATEGORIES = [
     icon: <Globe className="h-8 w-8" />,
     color: "text-indigo-600",
     bgColor: "bg-indigo-50",
-    exams: "300+ Exams"
+    exams: "300+ EXAMS"
   }
 ];
 

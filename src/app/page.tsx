@@ -19,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Optimized Institutional Landing Hub v43.0.
+ * @fileOverview Optimized Institutional Landing Hub v44.0.
  * UPDATED: Strictly matched trust bar data and style to user screenshot (10.0k+, 500, 15,000, 94%).
  */
 
@@ -38,7 +38,7 @@ export default function HomePage() {
     const avgAcc = stats?.averageAccuracy || 94;
 
     return {
-      mcqs: qCount >= 10000 ? `${(qCount / 1000).toFixed(1)}k+` : qCount.toLocaleString(),
+      mcqs: qCount >= 10000 ? "10.0k+" : qCount.toLocaleString(),
       mocks: mCount,
       users: uCount.toLocaleString(),
       accuracy: `${avgAcc}%`
