@@ -17,8 +17,8 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 
 /**
- * @fileOverview Institutional Checkout Node v2.2.
- * UPDATED: Dynamic environment detection for Cashfree SDK.
+ * @fileOverview Institutional Checkout Node v2.3.
+ * UPDATED: Passes window.location.origin to order creation for precise return_url construction.
  */
 
 export default function CheckoutPage() {
@@ -56,7 +56,11 @@ function CheckoutContent() {
       const orderRes = await fetch('/api/cashfree/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId, userId: user.uid })
+        body: JSON.stringify({ 
+          planId, 
+          userId: user.uid,
+          origin: window.location.origin // PASS ORIGIN FOR WHITELIST SYNC
+        })
       });
 
       const orderData = await orderRes.json();
