@@ -28,8 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Individual Mock Gateway v18.1.
- * UPDATED: Replaced blank state with a helpful error node.
+ * @fileOverview Individual Mock Gateway v18.2.
+ * FIXED: Resolved JSX syntax errors in FeatureNode and main component closure.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -204,4 +204,5 @@ function FeatureNode({ icon, title, desc }: any) {
          <h3 className="text-xl font-black text-[#0F172A] uppercase">{title}</h3>
          <p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest">{desc}</p>
       </div>
+   );
 }
