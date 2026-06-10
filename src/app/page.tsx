@@ -19,8 +19,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Optimized Institutional Landing Hub v50.0.
- * UPDATED: Strictly real-time counts from database. Dummy "10k" removed.
+ * @fileOverview Optimized Institutional Landing Hub v51.0.
+ * UPDATED: Zero-baseline sync. Removed all dummy/placeholder fallbacks.
  */
 
 export default function HomePage() {
@@ -37,7 +37,7 @@ export default function HomePage() {
     const uCount = stats?.totalUsers || 0;
     const avgAcc = stats?.averageAccuracy || 0;
 
-    // 2. High-Fidelity Formatting (Only apply 'k+' if over 1000)
+    // 2. High-Fidelity Formatting (Only apply 'k+' if actually over 1000)
     const formattedMCQ = qCount >= 1000 
       ? (qCount / 1000).toFixed(1) + 'k+' 
       : qCount.toLocaleString();

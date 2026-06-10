@@ -14,8 +14,8 @@ import { doc } from "firebase/firestore"
 import { useMemo } from "react"
 
 /**
- * @fileOverview Institutional About Hub v3.9.
- * UPDATED: Replaced hardcoded fallback statistics with 0 baseline.
+ * @fileOverview Institutional About Hub v4.0.
+ * UPDATED: Zero-baseline sync. Removed placeholder fallbacks.
  */
 
 export default function AboutPage() {

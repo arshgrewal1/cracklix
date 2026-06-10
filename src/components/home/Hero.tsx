@@ -12,8 +12,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview High-Density Mobile-First Hero v36.0.
- * UPDATED: strictly real-time aspirant count (Synced with Stats Hub: 15,000+).
+ * @fileOverview High-Density Mobile-First Hero v37.0.
+ * UPDATED: Zero-baseline aspirant count. Removed 15k fallback.
  */
 
 export default function Hero() {
@@ -26,7 +26,7 @@ export default function Hero() {
   const { data: stats } = useDoc<any>(statsRef);
 
   const liveAspirantCount = useMemo(() => {
-    const count = stats?.totalUsers || 15000;
+    const count = stats?.totalUsers || 0;
     return count.toLocaleString();
   }, [stats]);
 

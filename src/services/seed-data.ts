@@ -2,19 +2,12 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, deleteDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Punjab-Centric Seeding Node v61.0.
- * UPDATED: Reset authoritative Stats Hub to 0-baseline.
- * PURGED: All dummy/placeholder figures.
+ * @fileOverview Institutional Punjab-Centric Seeding Node v62.0.
+ * UPDATED: Zero-baseline initialization. All dummy/fake counts deleted.
  */
 
 export async function seedInitialData(db: Firestore) {
-  console.log('[AUDIT] Initializing Comprehensive Punjab Registry Sync...');
-
-  // 0. REGISTRY SANITIZATION
-  const legacyIds = ['pstet', 'ctet', 'exam-psssb', 'exam-ppsc', 'exam-police', 'pstet-p1', 'pstet-p2', 'ctet-p1', 'ctet-p2'];
-  for (const id of legacyIds) {
-     try { await deleteDoc(doc(db, 'boards', id)); await deleteDoc(doc(db, 'exams', id)); } catch (e) { }
-  }
+  console.log('[AUDIT] Initializing Absolute Punjab Registry Sync...');
 
   // 1. AUTHORITATIVE STATS HUB - 0 Baseline (No Dummy Data)
   await setDoc(doc(db, 'settings', 'stats'), {
@@ -90,46 +83,10 @@ export async function seedInitialData(db: Firestore) {
     { id: 'pstcl', abbreviation: 'PSTCL', name: 'Punjab State Transmission Corporation Limited', categoryId: 'punjab-technical', iconUrl: 'https://pstcl.org/images/logo.png', displayOrder: 5 },
     { id: 'pstet-hub', abbreviation: 'PSTET', name: 'PSTET Preparation Hub', categoryId: 'punjab-teaching', iconUrl: 'https://pstet.pseb.ac.in/img/main-logo-2.png', displayOrder: 6 },
     { id: 'ctet-hub', abbreviation: 'CTET', name: 'CTET Preparation Hub', categoryId: 'punjab-teaching', iconUrl: 'https://cdnbbsr.s3waas.gov.in/s3443dec3062d0286986e21dc0631734c9/uploads/2023/03/2023032156.png', displayOrder: 7 },
-    { id: 'teaching-hub', abbreviation: 'CADRE', name: 'Teaching Cadre Board', categoryId: 'punjab-teaching', displayOrder: 8 },
-    { id: 'banking-hub', abbreviation: 'BANK', name: 'Cooperative Banking Hub', categoryId: 'punjab-banking', displayOrder: 9 },
-    { id: 'high-court', abbreviation: 'COURT', name: 'High Court Recruitment Hub', categoryId: 'punjab-govt', displayOrder: 10 }
   ];
 
   for (const b of boards) {
     await setDoc(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() }, { merge: true });
-  }
-
-  // 4. EXAMS
-  const exams = [
-    { id: 'p-police-constable', name: 'Police Constable', boardId: 'punjab-police', categoryId: 'punjab-govt', displayOrder: 1 },
-    { id: 'p-police-si', name: 'Police Sub-Inspector', boardId: 'punjab-police', categoryId: 'punjab-govt', displayOrder: 2 },
-    { id: 'ppsc-pcs', name: 'PCS Executive', boardId: 'ppsc', categoryId: 'punjab-govt', displayOrder: 4 },
-    { id: 'sssc-clerk', name: 'High Court Clerk', boardId: 'high-court', categoryId: 'punjab-govt', displayOrder: 5 },
-    { id: 'pstet-paper-1', name: 'PSTET Paper 1', boardId: 'pstet-hub', categoryId: 'punjab-teaching', displayOrder: 10 },
-    { id: 'psssb-patwari', name: 'Revenue Patwari', boardId: 'psssb', categoryId: 'punjab-general', displayOrder: 30 },
-    { id: 'psssb-clerk', name: 'Clerk / DEO', boardId: 'psssb', categoryId: 'punjab-general', displayOrder: 31 },
-    { id: 'punjab-anganwadi', name: 'PUNJAB ANGANWADI / NTT', boardId: 'psssb', categoryId: 'punjab-govt', isTrending: true, displayOrder: 0 },
-    { id: 'army-gd', name: 'ARMY GD (GENERAL DUTY)', boardId: 'high-court', categoryId: 'punjab-govt', isTrending: true, displayOrder: 0 },
-    { id: 'assistant-professor', name: 'ASSISTANT PROFESSOR', boardId: 'ppsc', categoryId: 'punjab-teaching', isTrending: true, displayOrder: 0 },
-    { id: 'cadb-manager', name: 'CADB MANAGER', boardId: 'banking-hub', categoryId: 'punjab-banking', isTrending: true, displayOrder: 0 }
-  ];
-
-  for (const ex of exams) {
-    await setDoc(doc(db, 'exams', ex.id), { ...ex, updatedAt: serverTimestamp() }, { merge: true });
-  }
-
-  // 5. SUBJECTS
-  const subjects = [
-    { id: 'punjab-gk', name: 'PUNJAB GENERAL KNOWLEDGE', aliases: ['GK', 'Static GK'] },
-    { id: 'reasoning', name: 'MENTAL ABILITY & REASONING', aliases: ['Logic'] },
-    { id: 'quant', name: 'QUANTITATIVE APTITUDE', aliases: ['Maths'] },
-    { id: 'punjabi-lang', name: 'PUNJABI LANGUAGE', aliases: ['Gurmukhi'] },
-    { id: 'english-lang', name: 'ENGLISH LANGUAGE', aliases: ['Grammar'] },
-    { id: 'ict', name: 'INFORMATION TECHNOLOGY', aliases: ['Computer'] }
-  ];
-
-  for (const s of subjects) {
-    await setDoc(doc(db, 'subjects', s.id), { ...s, updatedAt: serverTimestamp() }, { merge: true });
   }
 
   console.log('[AUDIT] Full Punjab Registry Synchronized with 0-Baseline.');

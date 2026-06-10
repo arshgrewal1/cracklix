@@ -5,32 +5,22 @@ import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, limit, where } from 'firebase/firestore';
 import { Card, CardContent } from '@/components/ui/card';
-import { TrendingUp, GraduationCap, ChevronRight, Zap } from 'lucide-react';
+import { TrendingUp, GraduationCap, ChevronRight, Zap, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Fidelity Trending Grid v2.0.
- * UPDATED: Strictly matched data and UI to user screenshot.
+ * @fileOverview High-Fidelity Trending Grid v3.0.
+ * UPDATED: Zero-baseline. Removed all fallback dummy data.
  */
-
-const FALLBACK_TRENDING = [
-  { id: 'trending-1', name: 'PUNJAB ANGANWADI / NTT' },
-  { id: 'trending-2', name: 'ARMY GD (GENERAL DUTY)' },
-  { id: 'trending-3', name: 'ASSISTANT PROFESSOR' },
-  { id: 'trending-4', name: 'CADB MANAGER' }
-];
 
 export default function TrendingExams() {
   const db = useFirestore();
   const examsQuery = useMemo(() => (db ? query(collection(db, "exams"), where("isTrending", "==", true), limit(4)) : null), [db]);
-  const { data: rawExams, loading } = useCollection<any>(examsQuery);
+  const { data: exams, loading } = useCollection<any>(examsQuery);
 
-  const exams = useMemo(() => {
-    if (!rawExams || rawExams.length === 0) return FALLBACK_TRENDING;
-    return rawExams;
-  }, [rawExams]);
+  if (!loading && (!exams || exams.length === 0)) return null;
 
   return (
     <section className="space-y-10 text-left">
@@ -42,7 +32,7 @@ export default function TrendingExams() {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-         {exams.map((exam, idx) => (
+         {exams?.map((exam: any, idx: number) => (
             <motion.div 
                key={exam.id}
                initial={{ opacity: 0, y: 20 }}
@@ -50,8 +40,8 @@ export default function TrendingExams() {
                viewport={{ once: true }}
                transition={{ delay: idx * 0.1 }}
             >
-               <Link href={exam.id.startsWith('trending') ? '/exams' : `/exams/${exam.id}`}>
-                  <Card className="border-none shadow-xl hover:shadow-4xl rounded-[2.5rem] bg-white p-8 md:p-10 flex flex-col items-center text-center transition-all hover:translate-y-[-8px] group border border-slate-100">
+               <Link href={`/exams/${exam.id}`}>
+                  <Card className="border-none shadow-xl hover:shadow-4xl rounded-[2.5rem] bg-white p-8 md:p-10 flex flex-col items-center text-center transition-all hover:translate-y-[-8px] group border border-slate-100 h-full">
                      <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-slate-50 flex items-center justify-center mb-6 shadow-inner group-hover:scale-110 transition-transform">
                         <GraduationCap className="h-8 md:h-10 text-slate-300" />
                      </div>

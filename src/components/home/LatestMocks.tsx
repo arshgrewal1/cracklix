@@ -3,7 +3,7 @@
 
 import { useMemo, useState, useEffect } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, Clock, ChevronRight, Zap, Lock } from "lucide-react"
+import { BookOpen, Clock, ChevronRight, Zap, Lock, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
@@ -14,21 +14,19 @@ import { cn } from "@/lib/utils"
 import { useRouter, usePathname } from "next/navigation"
 
 /**
- * @fileOverview High-Density Mock Feed v18.0.
- * UPDATED: Authentication firewall on "Attempt Now" click.
+ * @fileOverview High-Density Mock Feed v19.0.
+ * UPDATED: Zero-baseline. Deleted hardcoded dummy mock array.
  */
 
 export default function LatestMocks() {
   const db = useFirestore()
   const { user, profile } = useUser()
   const router = useRouter()
-  const pathname = usePathname()
   
   const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true), limit(8)) : null), [db])
   const { data: rawMocks, loading } = useCollection<any>(mocksQuery)
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
 
-  // VERIFIED PASS HUB logic
   const hasActivePass = useMemo(() => {
      if (!profile) return false;
      const isAdmin = profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN';
@@ -71,10 +69,8 @@ export default function LatestMocks() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {loading ? (
              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 md:h-64 w-full rounded-2xl" />)
-          ) : mocks.map((mock, i) => {
+          ) : mocks.length > 0 ? mocks.map((mock, i) => {
             const board = boards?.find((b: any) => b.id === (mock.boardIds?.[0] || mock.boardId));
-            
-            // NORMALIZATION Audit
             const tier = (mock.accessLevel || mock.accessType || 'FREE').trim().toUpperCase();
             const isPremium = tier === 'PREMIUM';
             const locked = isPremium && user && !hasActivePass;
@@ -109,7 +105,12 @@ export default function LatestMocks() {
                 </div>
               </motion.div>
             )
-          })}
+          }) : !loading && (
+            <div className="col-span-full py-20 text-center opacity-20 flex flex-col items-center gap-4">
+               <Sparkles className="h-10 w-10 text-slate-300" />
+               <p className="font-black uppercase tracking-widest text-[10px]">Awaiting Mock Node Deployment</p>
+            </div>
+          )}
         </div>
       </div>
     </section>
