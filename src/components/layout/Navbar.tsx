@@ -76,11 +76,20 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-[1000] w-full pointer-events-auto">
       {settings?.showAnnouncement && (
-        <div className="bg-primary text-white py-1.5 px-4 flex items-center justify-center gap-2 overflow-hidden relative shadow-2xl pointer-events-none">
-          <Megaphone className="h-3 w-3 shrink-0 animate-bounce" />
-          <p className="text-[9px] font-black uppercase tracking-[0.3em] whitespace-nowrap overflow-hidden text-ellipsis">
-            {settings.announcement}
-          </p>
+        <div className="bg-primary text-white py-1 md:py-1.5 flex items-center overflow-hidden relative shadow-2xl pointer-events-none h-6 md:h-8">
+          <div className="flex items-center gap-2 animate-marquee whitespace-nowrap min-w-full">
+            <Megaphone className="h-3 w-3 shrink-0 ml-4" />
+            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em]">
+              {settings.announcement}
+            </p>
+            {/* Repeat for seamless loop effect on mobile */}
+            <span className="mx-20" />
+            <Megaphone className="h-3 w-3 shrink-0" />
+            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em]">
+              {settings.announcement}
+            </p>
+            <span className="mx-20" />
+          </div>
         </div>
       )}
 
