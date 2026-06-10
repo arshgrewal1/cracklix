@@ -26,11 +26,10 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Optimized Login Hub v6.0.
- * UPDATED: Default redirect set to Home Page (/) for seamless discovery.
+ * @fileOverview Optimized Login Hub v7.0.
+ * UPDATED: Default redirect strictly set to Home Page (/) per high-fidelity logic.
  */
 
-// PERMANENT AUTHORITY WHITELIST
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 export default function LoginPage() {
@@ -64,7 +63,6 @@ function LoginContent() {
 
   const returnUrl = searchParams.get("returnUrl") || "/"
 
-  // Prefetch routes to eliminate navigation lag
   useEffect(() => {
     router.prefetch('/');
     router.prefetch('/admin');
@@ -90,7 +88,6 @@ function LoginContent() {
         const user = userCredential.user
         await updateProfile(user, { displayName: name })
         
-        // PERMANENT SUPER ADMIN AUDIT
         const isSuperAdmin = email && SUPER_ADMIN_WHITELIST.includes(email.toLowerCase());
         
         await setDoc(doc(db, 'users', user.uid), {
@@ -131,7 +128,6 @@ function LoginContent() {
           pinnedExams: []
         })
       } else if (isSuperAdmin && userSnap.data().role !== 'SUPER_ADMIN') {
-        // Auto-upgrade if DB role is out of sync for Founder
         await setDoc(doc(db, 'users', user.uid), { role: 'SUPER_ADMIN' }, { merge: true });
       }
 
@@ -149,7 +145,6 @@ function LoginContent() {
       toast({ variant: "destructive", title: "Wait", description: "Please enter your registered email." });
       return;
     }
-
     setResetLoading(true);
     try {
       await sendPasswordResetEmail(auth, resetEmail);
@@ -253,7 +248,7 @@ function LoginContent() {
                 </div>
               )}
               
-              <Button type="submit" className="w-full h-14 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.2em] text-[10px] rounded-xl shadow-xl border-none transition-all active:scale-95" disabled={isActuallyLoading}>
+              <Button type="submit" className="w-full h-14 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.2em] text-[14px] rounded-xl shadow-xl border-none transition-all active:scale-95" disabled={isActuallyLoading}>
                 {isActuallyLoading ? <Loader2 className="h-5 w-5 animate-spin mr-2" /> : null}
                 {isActuallyLoading ? "Redirecting..." : (mode === 'login' ? "Login" : "Sign Up")}
               </Button>

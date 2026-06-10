@@ -43,8 +43,8 @@ import { Button } from "@/components/ui/button";
 import BackButton from "@/components/navigation/BackButton";
 
 /**
- * @fileOverview Institutional Sidebar Restoration v118.0.
- * UPDATED: Verified all modules with canonical institutional labels.
+ * @fileOverview Institutional Sidebar Restoration v120.0.
+ * UPDATED: Strictly verified institutional labels with color-coded high-fidelity icons.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
