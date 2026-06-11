@@ -1,4 +1,3 @@
-
 'use client';
 
 import { 
@@ -39,8 +38,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Institutional Mobile Sidebar v7.0.
- * UPDATED: Integrated Bulletproof PWA Install Node and Live Pass Status.
+ * @fileOverview Institutional Mobile Sidebar v8.0.
+ * UPDATED: Bulletproof PWA Install trigger and live pass integration.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {

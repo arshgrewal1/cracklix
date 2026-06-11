@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -27,8 +26,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v15.0.
- * UPDATED: Integrated Live Pass Status and Bulletproof PWA Install triggers.
+ * @fileOverview Institutional Navbar v16.0.
+ * UPDATED: Optimized PWA Install button visibility for Desktop and Mobile.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);

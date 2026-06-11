@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -8,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Institutional PWA Lifecycle Manager v9.0.
- * HARDENED: Reliable 'beforeinstallprompt' capture for production environments.
+ * @fileOverview Institutional PWA Lifecycle Manager v10.0.
+ * HARDENED: Reliable 'beforeinstallprompt' capture and Service Worker registration.
  */
 export default function PWAManager() {
   const pathname = usePathname();
