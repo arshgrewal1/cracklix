@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -25,9 +24,9 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Hardened CBT Engine v23.0.
- * UPDATED: Precise scoring logic Subtraction allows raw negative marks to be stored.
- * RELIABILITY: Implemented double-click prevention on submission.
+ * @fileOverview Hardened CBT Engine v24.0.
+ * UPDATED: Precise scoring logic with real-time time tracking and submission locking.
+ * FIXED: Score, Accuracy, and Time usage now accurately recorded in registry.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -118,47 +117,69 @@ export default function MockAttemptPage() {
   }, [isInitializing, tick]);
 
   const handleSubmitFinal = useCallback(async () => {
-    if (!db || isSubmittingFinal || !user) return;
+    if (!db || isSubmittingFinal || !user || !mockData) return;
     setIsSubmittingFinal(true);
     
-    let score = 0;
-    const positiveMarks = Number(mockData?.positiveMarks) || 1;
-    const negativeMarks = Number(mockData?.negativeMarks) || 0.25;
-    
+    let correctCount = 0;
+    let wrongCount = 0;
+    const attemptedIndices = Object.keys(answers).map(Number);
+    const attemptedCount = attemptedIndices.length;
+
+    const posMarks = parseFloat(mockData.positiveMarks) || 1;
+    const negMarks = parseFloat(mockData.negativeMarks) || 0.25;
+
     questions.forEach((q, idx) => {
       const studentAnsIdx = answers[idx];
       if (studentAnsIdx === undefined || studentAnsIdx === null) return;
-      if (['A', 'B', 'C', 'D'].indexOf(q.correctAnswer) === studentAnsIdx) {
-        score += positiveMarks;
+      
+      const correctOptIdx = ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer);
+      if (correctOptIdx === studentAnsIdx) {
+        correctCount++;
       } else {
-        score -= negativeMarks;
+        wrongCount++;
       }
     });
 
+    const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
+    const timeTaken = Math.round((Date.now() - startTime) / 1000);
+    const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
+
     const resultPayload = {
       userId: user.uid, 
-      userName: user.displayName || 'Aspirant', 
+      userName: profile?.name || user.displayName || 'Aspirant', 
       mockId, 
-      mockTitle,
-      score: score, // NO FLOORING: Preserve raw negative values
+      mockTitle: mockData.title || mockTitle,
+      score: parseFloat(rawScore.toFixed(2)),
+      correctCount,
+      wrongCount,
+      attemptedCount,
       totalQuestions: questions.length, 
-      accuracy: Math.max(0, Math.round((score / (Object.keys(answers).length * positiveMarks || 1)) * 100)),
-      timeTaken: Math.round((Date.now() - startTime) / 1000), 
+      accuracy,
+      timeTaken, 
       answers, 
       timestamp: new Date().toISOString(), 
       createdAt: serverTimestamp(),
-      accessLevel: mockData?.accessLevel || 'FREE' 
+      accessLevel: mockData.accessLevel || 'FREE' 
     };
 
     try {
+      // 1. Save Result
       await setDoc(doc(db, "results", `${user.uid}_${mockId}`), resultPayload);
-      await updateDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { status: 'COMPLETED', updatedAt: serverTimestamp() });
+      
+      // 2. Mark Attempt Completed
+      await updateDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { 
+        status: 'COMPLETED', 
+        updatedAt: serverTimestamp() 
+      });
+
+      // 3. Navigate
       router.push(`/results/${mockId}`);
     } catch (e) {
-      toast({ variant: "destructive", title: "Sync Failed", description: "Could not save result to cloud." });
+      console.error("Submission Error:", e);
+      toast({ variant: "destructive", title: "Sync Failed", description: "Registry update interrupted." });
       setIsSubmittingFinal(false);
     }
-  }, [db, user, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime, toast]);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime, toast]);
 
   if (isInitializing) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8"><Zap className="h-16 w-16 text-primary animate-pulse" /><p className="text-[11px] font-black uppercase tracking-[0.5em] text-primary">Synchronizing Access Registry...</p></div>;
 

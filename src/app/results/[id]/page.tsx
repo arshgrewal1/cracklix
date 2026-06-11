@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -27,7 +26,10 @@ import {
   Lock,
   ChevronLeft,
   XCircle,
-  HelpCircle
+  HelpCircle,
+  Users,
+  Medal,
+  Award
 } from "lucide-react"
 import { useUser, useFirestore, useCollection } from "@/firebase"
 import { collection, query, where, doc, getDoc, documentId, getDocs, limit, orderBy } from "firebase/firestore"
@@ -39,9 +41,9 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Test Results Hub v17.0.
- * UPDATED: High-fidelity score display with explicit negative mark support.
- * PERFORMANCE: Rose-colored warning for negative scores.
+ * @fileOverview Test Results Hub v18.0.
+ * UPDATED: Optimized percentile and rank calculations for institutional accuracy.
+ * PERFORMANCE: Real-time global benchmark comparison.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -61,7 +63,7 @@ export default function ResultPage() {
   const [isShareOpen, setIsShareOpen] = useState(false)
   const [isLocked, setIsLocked] = useState(false);
 
-  // USER SESSION LISTENER
+  // 1. FETCH USER RESULT
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
     return query(collection(db, "results"), where("userId", "==", user.uid), where("mockId", "==", mockId), limit(1))
@@ -74,9 +76,10 @@ export default function ResultPage() {
     return rawResultDocs[0]
   }, [rawResultDocs])
 
+  // 2. FETCH GLOBAL BENCHMARKS
   const globalResultsQuery = useMemo(() => {
     if (!db || !mockId) return null
-    return query(collection(db, "results"), where("mockId", "==", mockId), limit(100))
+    return query(collection(db, "results"), where("mockId", "==", mockId), limit(500))
   }, [db, mockId])
 
   const { data: rawGlobalResults } = useCollection<any>(globalResultsQuery)
@@ -90,13 +93,18 @@ export default function ResultPage() {
      if (!sortedGlobalResults || sortedGlobalResults.length === 0 || !sessionData) {
         return { rank: '?', total: 0, percentile: 0, topper: null };
      }
-     const rank = sortedGlobalResults.findIndex((r: any) => r.userId === user?.uid) + 1 || 1;
+     const rank = sortedGlobalResults.findIndex((r: any) => r.userId === user?.uid) + 1;
+     const actualRank = rank > 0 ? rank : 1;
      const total = sortedGlobalResults.length;
-     const percentile = Math.round(((total - rank) / (total || 1)) * 1000) / 10;
+     
+     // Competitive Percentile Formula: ((Total - Rank) / Total) * 100
+     const percentile = Math.max(0, Math.round(((total - actualRank) / (total || 1)) * 1000) / 10);
      const topper = sortedGlobalResults[0];
-     return { rank, total, percentile, topper };
+     
+     return { rank: actualRank, total, percentile, topper };
   }, [sortedGlobalResults, sessionData, user]);
 
+  // 3. LOAD QUESTIONS FOR REVIEW
   useEffect(() => {
     async function loadQuestions() {
       if (!db || !sessionData || !mockId) {
@@ -131,6 +139,7 @@ export default function ResultPage() {
           }
           
           const questionIds = mData.questionIds || []
+          const fetchedQuestions: any[] = []
           const chunks = []
           for (let i = 0; i < questionIds.length; i += 30) {
             chunks.push(questionIds.slice(i, i + 30))
@@ -140,9 +149,9 @@ export default function ResultPage() {
             chunks.map(chunk => getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk))))
           )
 
-          const fetchedQuestions: any[] = []
-          chunkSnaps.forEach(snap => snap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id })))
-          setQuestions(questionIds.map(id => fetchedQuestions.find(q => q.id === id)).filter(Boolean))
+          const allFetched: any[] = []
+          chunkSnaps.forEach(snap => snap.docs.forEach(d => allFetched.push({ ...d.data(), id: d.id })))
+          setQuestions(questionIds.map(id => allFetched.find(q => q.id === id)).filter(Boolean))
         }
       } finally {
         setLoadingContent(false)
@@ -150,27 +159,6 @@ export default function ResultPage() {
     }
     loadQuestions()
   }, [db, sessionData, mockId, resultsLoading, profile, user]);
-
-  const stats = useMemo(() => {
-    if (!questions.length || !sessionData?.answers) return { correct: 0, wrong: 0, skipped: 0 };
-    
-    let correct = 0;
-    let wrong = 0;
-    let skipped = 0;
-
-    questions.forEach((q, i) => {
-      const userAns = sessionData.answers[i];
-      if (userAns === undefined || userAns === null) {
-        skipped++;
-      } else {
-        const correctOptIdx = ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer);
-        if (userAns === correctOptIdx) correct++;
-        else wrong++;
-      }
-    });
-
-    return { correct, wrong, skipped };
-  }, [questions, sessionData]);
 
   const filteredQuestions = useMemo(() => {
      return questions.map((q, i) => ({ ...q, index: i })).filter((q) => {
@@ -222,6 +210,7 @@ export default function ResultPage() {
       <Navbar />
       <main className="container mx-auto px-4 md:px-6 py-6 md:py-12 max-w-7xl space-y-8 md:space-y-12">
         
+        {/* SUMMARY CARD */}
         <Card className="border-none shadow-5xl rounded-[2.5rem] bg-[#0B1528] text-white overflow-hidden relative">
            <CardContent className="p-8 md:p-14 lg:p-16 space-y-10 relative z-10">
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-10">
@@ -254,21 +243,33 @@ export default function ResultPage() {
                  <div className="text-left space-y-1">
                     <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">SCORE</p>
                     <p className={cn("text-3xl md:text-5xl font-headline font-black", isNegativeScore ? "text-rose-500" : "text-primary")}>
-                       {Number(sessionData.score).toFixed(2)}
+                       {parseFloat(sessionData.score || 0).toFixed(2)}
                     </p>
-                    {isNegativeScore && <Badge className="bg-rose-500/20 text-rose-400 border-none text-[8px] font-black uppercase px-2 py-0.5 mt-1">Negative Range</Badge>}
+                    {isNegativeScore && <Badge className="bg-rose-500/20 text-rose-400 border-none text-[8px] font-black uppercase px-2 py-0.5 mt-1">Penalty Zone</Badge>}
                  </div>
-                 <div className="text-left space-y-1"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">TOTAL QUESTIONS</p><p className="text-3xl md:text-5xl font-headline font-black text-blue-400">{sessionData.totalQuestions}</p></div>
-                 <div className="text-left space-y-1"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">TIME TAKEN</p><p className="text-3xl md:text-5xl font-headline font-black text-white">{Math.floor(sessionData.timeTaken / 60)}m</p></div>
-                 <div className="text-left space-y-1"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PERCENTILE</p><p className="text-3xl md:text-5xl font-headline font-black text-emerald-400">{merit.percentile}%</p></div>
+                 <div className="text-left space-y-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">ATTEMPTED</p>
+                    <p className="text-3xl md:text-5xl font-headline font-black text-blue-400">{sessionData.attemptedCount}/{sessionData.totalQuestions}</p>
+                 </div>
+                 <div className="text-left space-y-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">TIME USED</p>
+                    <p className="text-3xl md:text-5xl font-headline font-black text-white">
+                       {Math.floor(sessionData.timeTaken / 60)}m {sessionData.timeTaken % 60}s
+                    </p>
+                 </div>
+                 <div className="text-left space-y-1">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">PERCENTILE</p>
+                    <p className="text-3xl md:text-5xl font-headline font-black text-emerald-400">{merit.percentile}%</p>
+                 </div>
               </div>
            </CardContent>
         </Card>
 
+        {/* REVIEW TABS */}
         <Tabs defaultValue="SOLUTIONS" className="space-y-8">
-           <TabsList className="bg-white border border-slate-100 p-1 h-14 rounded-2xl shadow-sm inline-flex">
-              <TabsTrigger value="SOLUTIONS" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">Answer Review</TabsTrigger>
-              <TabsTrigger value="TOPPER" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">Top 100 Merit</TabsTrigger>
+           <TabsList className="bg-white border border-slate-100 p-1.5 h-14 rounded-2xl shadow-sm inline-flex">
+              <TabsTrigger value="SOLUTIONS" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">Analysis</TabsTrigger>
+              <TabsTrigger value="TOPPER" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">Merit List</TabsTrigger>
            </TabsList>
 
            <TabsContent value="SOLUTIONS" className="space-y-8">
@@ -276,7 +277,7 @@ export default function ResultPage() {
                  <FilterBtn 
                     active={activeReviewFilter === 'ALL'} 
                     onClick={() => setActiveReviewFilter('ALL')} 
-                    label="ALL QUESTIONS" 
+                    label="TOTAL" 
                     count={questions.length} 
                     icon={<BarChart3 className="h-3 w-3" />}
                     activeColor="bg-primary border-primary"
@@ -285,7 +286,7 @@ export default function ResultPage() {
                     active={activeReviewFilter === 'CORRECT'} 
                     onClick={() => setActiveReviewFilter('CORRECT')} 
                     label="CORRECT" 
-                    count={stats.correct} 
+                    count={sessionData.correctCount || 0} 
                     icon={<CheckCircle2 className="h-3 w-3" />}
                     activeColor="bg-emerald-500 border-emerald-500"
                     textColor="text-emerald-500"
@@ -293,8 +294,8 @@ export default function ResultPage() {
                  <FilterBtn 
                     active={activeReviewFilter === 'WRONG'} 
                     onClick={() => setActiveReviewFilter('WRONG')} 
-                    label="WRONG" 
-                    count={stats.wrong} 
+                    label="INCORRECT" 
+                    count={sessionData.wrongCount || 0} 
                     icon={<XCircle className="h-3 w-3" />}
                     activeColor="bg-rose-500 border-rose-500"
                     textColor="text-rose-500"
@@ -303,7 +304,7 @@ export default function ResultPage() {
                     active={activeReviewFilter === 'SKIPPED'} 
                     onClick={() => setActiveReviewFilter('SKIPPED')} 
                     label="SKIPPED" 
-                    count={stats.skipped} 
+                    count={sessionData.totalQuestions - (sessionData.attemptedCount || 0)} 
                     icon={<HelpCircle className="h-3 w-3" />}
                     activeColor="bg-slate-500 border-slate-500"
                     textColor="text-slate-400"
@@ -369,14 +370,14 @@ export default function ResultPage() {
            <TabsContent value="TOPPER" className="space-y-4">
               <Card className="border-none shadow-3xl rounded-[3rem] bg-white overflow-hidden p-8">
                  <div className="space-y-4">
-                    {sortedGlobalResults.slice(0, 10).map((r: any, i: number) => (
+                    {sortedGlobalResults.slice(0, 100).map((r: any, i: number) => (
                        <div key={r.id} className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 group hover:bg-white hover:shadow-xl transition-all">
                           <div className="flex items-center gap-4">
                              <span className="font-black text-slate-300 w-6 text-lg">#{i+1}</span>
                              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black uppercase text-xs">
                                 {r.userName?.[0] || 'A'}
                              </div>
-                             <p className="font-bold text-[#0F172A] uppercase tracking-tight">{r.userName}</p>
+                             <p className="font-bold text-[#0F172A] uppercase tracking-tight">{r.userName || "Aspirant"}</p>
                           </div>
                           <div className="flex gap-8 items-center">
                              <div className="text-right hidden sm:block">

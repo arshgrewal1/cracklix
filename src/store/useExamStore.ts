@@ -1,4 +1,3 @@
-
 'use client';
 
 import { create } from 'zustand';
@@ -9,9 +8,9 @@ import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
 /**
- * @fileOverview Elite CBT Global Store v32.0 (Production Optimized).
- * PERFORMANCE: Removed blocking awaits from database updates to ensure UI fluidness.
- * FIXED: Stabilized timestamp recalibration for pause/resume cycles.
+ * @fileOverview Elite CBT Global Store v33.0 (Production Optimized).
+ * PERFORMANCE: Synchronized timestamp management for high-fidelity time usage tracking.
+ * FIXED: startTime is now preserved strictly to ensure accurate test duration results.
  */
 
 interface ExamStore extends AttemptState {
@@ -64,12 +63,15 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const now = Date.now();
     const state = get();
     
+    // Prevent re-initialization if already in progress for the same mock
     if (state.mockId === mockId && state.questions.length > 0 && !savedState) return;
 
     const isCompleted = savedState?.status === 'COMPLETED';
     const isTimedOut = savedState?.endTime && now >= savedState.endTime;
     const isStale = isCompleted || isTimedOut;
 
+    // Preserve the original start time if we're resuming, otherwise use now.
+    const actualStartTime = isStale ? now : (savedState?.startTime || now);
     const finalEndTime = isStale ? (now + (duration * 60 * 1000)) : (savedState?.endTime || (now + (duration * 60 * 1000)));
     const timeLeft = Math.max(0, Math.floor((finalEndTime - now) / 1000));
     const finalBaseMode = languageMode || 'ENGLISH_PUNJABI';
@@ -86,7 +88,7 @@ export const useExamStore = create<ExamStore>((set, get) => ({
       mockId, mockTitle, userId, questions, timeLeft,
       baseLanguageMode: finalBaseMode,
       language: initialLang as LanguageDisplayMode, 
-      startTime: isStale ? now : (savedState?.startTime || now),
+      startTime: actualStartTime,
       endTime: finalEndTime,
       answers: isStale ? {} : (savedState?.answers || {}),
       status: isStale ? {} : (savedState?.status || {}),
@@ -101,9 +103,8 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     if (userId && mockId && !savedState) {
       const { firestore: db } = initializeFirebase();
       const attemptRef = doc(db, 'attempts', `${userId}_${mockId}`);
-      // OPTIMISTIC: Do not await
       setDoc(attemptRef, {
-        userId, mockId, startTime: now, endTime: finalEndTime,
+        userId, mockId, startTime: actualStartTime, endTime: finalEndTime,
         status: 'IN_PROGRESS', updatedAt: serverTimestamp()
       }, { merge: true }).catch((err) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: attemptRef.path, operation: 'create' }));
