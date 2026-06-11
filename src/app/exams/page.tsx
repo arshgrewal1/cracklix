@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Master Registry Landing v2.6.
- * UPDATED: Applied new permanent logo for Banking Exams category.
+ * @fileOverview Institutional Master Registry Landing v2.7.
+ * UPDATED: Locked permanent logo for Central Govt category.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -23,7 +23,7 @@ const CATEGORY_ICONS: Record<string, any> = {
   "punjab-teaching": <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbNnoge6pNWx1HZYrUJKM58qWk1dDw85xvKPBoG-O4ew&s=10" className="h-full w-full object-contain p-2" />,
   "punjab-technical": <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRo0ZK9JI5KMfg9RoNdIwcsNlpx5IcPBWuKZw&s" className="h-full w-full object-contain p-2" />,
   "banking": <img src="https://3.imimg.com/data3/KV/NL/MY-14548641/bank-exams.png" className="h-full w-full object-contain p-2" />,
-  "central-govt": <Globe className="h-10 w-10 md:h-12 md:w-12" />
+  "central-govt": <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmRNHVIV2W9Pn_87u6EQmluADidwUQWhOotUwQUV_VWtEBWqoxjf-OBEt4&s=10" className="h-full w-full object-contain p-2" />
 };
 
 export default function ExamsEntryPage() {
