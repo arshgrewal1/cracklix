@@ -15,15 +15,15 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Explorer v7.5.
- * UPDATED: Applied new locked logo for Punjab Technical category.
+ * @fileOverview Institutional Category Explorer v7.6.
+ * UPDATED: Applied new locked logo for Banking category.
  */
 
 const CATEGORY_META: Record<string, any> = {
   "punjab-govt": { title: "Punjab Government", icon: <img src="https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png" className="h-full w-full object-contain" /> },
   "punjab-teaching": { title: "Punjab Teaching", icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbNnoge6pNWx1HZYrUJKM58qWk1dDw85xvKPBoG-O4ew&s=10" className="h-full w-full object-contain" /> },
   "punjab-technical": { title: "Punjab Technical", icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRo0ZK9JI5KMfg9RoNdIwcsNlpx5IcPBWuKZw&s" className="h-full w-full object-contain" /> },
-  "banking": { title: "Banking Exams", icon: <Wallet className="h-full w-full" /> },
+  "banking": { title: "Banking Exams", icon: <img src="https://3.imimg.com/data3/KV/NL/MY-14548641/bank-exams.png" className="h-full w-full object-contain" /> },
   "central-govt": { title: "Central Govt", icon: <Globe className="h-full w-full" /> }
 };
 

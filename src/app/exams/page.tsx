@@ -14,15 +14,15 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Master Registry Landing v2.5.
- * UPDATED: Applied new permanent logo for Punjab Technical category.
+ * @fileOverview Institutional Master Registry Landing v2.6.
+ * UPDATED: Applied new permanent logo for Banking Exams category.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
   "punjab-govt": <img src="https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png" className="h-full w-full object-contain p-2" />,
-  "punjab-teaching": <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbNnoge6pNWx1HZYrUJKM58qWk1dDw85xvKPBoG-O4ew", className="h-full w-full object-contain p-2" />,
+  "punjab-teaching": <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbNnoge6pNWx1HZYrUJKM58qWk1dDw85xvKPBoG-O4ew&s=10" className="h-full w-full object-contain p-2" />,
   "punjab-technical": <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRo0ZK9JI5KMfg9RoNdIwcsNlpx5IcPBWuKZw&s" className="h-full w-full object-contain p-2" />,
-  "banking": <Wallet className="h-10 w-10 md:h-12 md:w-12" />,
+  "banking": <img src="https://3.imimg.com/data3/KV/NL/MY-14548641/bank-exams.png" className="h-full w-full object-contain p-2" />,
   "central-govt": <Globe className="h-10 w-10 md:h-12 md:w-12" />
 };
 
