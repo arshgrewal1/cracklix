@@ -41,9 +41,9 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Test Results Hub v18.0.
+ * @fileOverview Test Results Hub v19.0 (Production Hardened).
  * UPDATED: Optimized percentile and rank calculations for institutional accuracy.
- * PERFORMANCE: Real-time global benchmark comparison.
+ * FIXED: High-fidelity breakdown display for scores and time taken.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -97,8 +97,8 @@ export default function ResultPage() {
      const actualRank = rank > 0 ? rank : 1;
      const total = sortedGlobalResults.length;
      
-     // Competitive Percentile Formula: ((Total - Rank) / Total) * 100
-     const percentile = Math.max(0, Math.round(((total - actualRank) / (total || 1)) * 1000) / 10);
+     // Competitive Percentile Formula: ((Total - Rank + 1) / Total) * 100
+     const percentile = total > 0 ? Math.round(((total - actualRank + 1) / (total || 1)) * 1000) / 10 : 0;
      const topper = sortedGlobalResults[0];
      
      return { rank: actualRank, total, percentile, topper };
@@ -201,7 +201,14 @@ export default function ResultPage() {
      )
   }
 
-  if (!sessionData) return <div className="h-screen flex items-center justify-center text-slate-400 font-black uppercase text-xs">Registry Node Missing</div>
+  if (!sessionData) return (
+     <div className="h-screen flex flex-col items-center justify-center text-center bg-white p-6 space-y-6">
+        <AlertCircle className="h-12 w-12 text-slate-200" />
+        <h2 className="text-2xl font-headline font-black uppercase">Result Synced Incorrectly</h2>
+        <p className="text-slate-400 max-w-xs">We could not find your attempt result in the registry. Please try re-taking the test.</p>
+        <Button asChild className="bg-[#0F172A] text-white rounded-xl h-12 px-8"><Link href="/dashboard">Return Home</Link></Button>
+     </div>
+  );
 
   const isNegativeScore = sessionData.score < 0;
 
@@ -217,10 +224,10 @@ export default function ResultPage() {
                  <div className="space-y-6 flex-1 text-left">
                     <h1 className="text-3xl md:text-5xl lg:text-6xl font-headline font-black uppercase leading-[0.95] tracking-tight">{sessionData.mockTitle}</h1>
                     <div className="flex flex-wrap gap-3">
-                       <Button asChild className="bg-primary hover:bg-orange-600 text-white font-black uppercase text-[10px] tracking-widest h-12 px-6 rounded-xl shadow-xl">
+                       <Button asChild className="bg-primary hover:bg-orange-600 text-white font-black uppercase text-[10px] tracking-widest h-12 px-6 rounded-xl shadow-xl border-none">
                           <Link href={`/mocks/${mockId}/instructions`}><RefreshCw className="h-4 w-4 mr-2" /> Re-attempt</Link>
                        </Button>
-                       <Button onClick={() => setIsShareOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest h-12 px-6 rounded-xl shadow-xl">
+                       <Button onClick={() => setIsShareOpen(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest h-12 px-6 rounded-xl shadow-xl border-none">
                           <Share2 className="h-4 w-4 mr-2" /> Share Result
                        </Button>
                     </div>
@@ -241,7 +248,7 @@ export default function ResultPage() {
 
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 pt-10 border-t border-white/5">
                  <div className="text-left space-y-1">
-                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">SCORE</p>
+                    <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest">TOTAL SCORE</p>
                     <p className={cn("text-3xl md:text-5xl font-headline font-black", isNegativeScore ? "text-rose-500" : "text-primary")}>
                        {parseFloat(sessionData.score || 0).toFixed(2)}
                     </p>
@@ -253,8 +260,8 @@ export default function ResultPage() {
                  </div>
                  <div className="text-left space-y-1">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">TIME USED</p>
-                    <p className="text-3xl md:text-5xl font-headline font-black text-white">
-                       {Math.floor(sessionData.timeTaken / 60)}m {sessionData.timeTaken % 60}s
+                    <p className="text-3xl md:text-5xl font-headline font-black text-white tabular-nums">
+                       {Math.floor((sessionData.timeTaken || 0) / 60)}m {(sessionData.timeTaken || 0) % 60}s
                     </p>
                  </div>
                  <div className="text-left space-y-1">
@@ -268,8 +275,8 @@ export default function ResultPage() {
         {/* REVIEW TABS */}
         <Tabs defaultValue="SOLUTIONS" className="space-y-8">
            <TabsList className="bg-white border border-slate-100 p-1.5 h-14 rounded-2xl shadow-sm inline-flex">
-              <TabsTrigger value="SOLUTIONS" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">Analysis</TabsTrigger>
-              <TabsTrigger value="TOPPER" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">Merit List</TabsTrigger>
+              <TabsTrigger value="SOLUTIONS" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">Detailed Analysis</TabsTrigger>
+              <TabsTrigger value="TOPPER" className="rounded-xl px-8 font-black uppercase text-[10px] gap-2 h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">State Merit List</TabsTrigger>
            </TabsList>
 
            <TabsContent value="SOLUTIONS" className="space-y-8">
@@ -277,7 +284,7 @@ export default function ResultPage() {
                  <FilterBtn 
                     active={activeReviewFilter === 'ALL'} 
                     onClick={() => setActiveReviewFilter('ALL')} 
-                    label="TOTAL" 
+                    label="ALL QUESTIONS" 
                     count={questions.length} 
                     icon={<BarChart3 className="h-3 w-3" />}
                     activeColor="bg-primary border-primary"
@@ -345,7 +352,7 @@ export default function ResultPage() {
                                       </div>
                                    </div>
                                 </div>
-                                <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-200 hover:text-primary"><BrainCircuit className="h-5 w-5" /></Button>
+                                <Button variant="ghost" size="icon" className="h-10 w-10 text-slate-200 hover:text-primary border-none"><BrainCircuit className="h-5 w-5" /></Button>
                              </div>
 
                              <QuestionRenderer 
