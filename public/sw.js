@@ -1,9 +1,7 @@
 /**
- * Cracklix Institutional Service Worker v1.0
- * Provides mandatory fetch listener for PWA installability.
+ * @fileOverview Institutional Service Worker v2.0.
+ * Mandatory for PWA Installability Criteria.
  */
-
-const CACHE_NAME = 'cracklix-cache-v1';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -13,15 +11,12 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(clients.claim());
 });
 
+// Browsers require a fetch listener to trigger the "Add to Home Screen" prompt
 self.addEventListener('fetch', (event) => {
-  // Browsers require a fetch listener to enable "Add to Home Screen"
-  // We use a network-first strategy for dynamic Next.js chunks
-  if (event.request.mode === 'navigate') {
-    event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
-    return;
-  }
-
+  // Priority: Network-First to prevent ChunkLoadErrors in Next.js
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
+    })
   );
 });

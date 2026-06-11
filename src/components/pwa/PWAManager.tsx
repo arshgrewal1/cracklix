@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Institutional PWA Lifecycle Manager v10.0.
- * HARDENED: Reliable 'beforeinstallprompt' capture and Service Worker registration.
+ * @fileOverview Institutional PWA Lifecycle Manager v12.0.
+ * HARDENED: Reliable 'beforeinstallprompt' capture and prominent mobile floating banner.
  */
 export default function PWAManager() {
   const pathname = usePathname();
@@ -45,7 +45,8 @@ export default function PWAManager() {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
       
       if (!isExcluded && !isStandalone) {
-        const timer = setTimeout(() => setShowPrompt(true), 5000);
+        // Show after a brief delay to not interrupt the user immediately
+        const timer = setTimeout(() => setShowPrompt(true), 4000);
         return () => clearTimeout(timer);
       }
     };

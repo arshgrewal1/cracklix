@@ -26,8 +26,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v16.0.
- * UPDATED: Optimized PWA Install button visibility for Desktop and Mobile.
+ * @fileOverview Institutional Navbar v17.0.
+ * UPDATED: Optimized PWA Install button visibility and live status nodes.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -162,7 +162,7 @@ export default function Navbar() {
               <Button 
                 onClick={handleInstallApp}
                 variant="outline" 
-                className="hidden sm:flex h-10 px-4 rounded-xl border-emerald-500/20 bg-emerald-500/10 text-emerald-400 font-black uppercase text-[9px] tracking-widest gap-2 hover:bg-emerald-500 hover:text-white transition-all shadow-lg animate-pulse"
+                className="h-10 px-4 rounded-xl border-emerald-500/20 bg-emerald-500/10 text-emerald-400 font-black uppercase text-[9px] tracking-widest gap-2 hover:bg-emerald-500 hover:text-white transition-all shadow-lg animate-pulse"
               >
                  <Download className="h-3.5 w-3.5" /> Install App
               </Button>
