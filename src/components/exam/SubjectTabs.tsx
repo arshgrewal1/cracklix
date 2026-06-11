@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useExamStore } from '@/store/useExamStore';
@@ -5,8 +6,8 @@ import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
 
 /**
- * @fileOverview Refined Subject Switching Hub.
- * UPDATED: Fixed horizontal width for mobile to prevent overflow/cutting.
+ * @fileOverview Refined Subject Switching Hub (Compact).
+ * UPDATED: Slimmer height and reduced font-sizes for high-density UI.
  */
 export default function SubjectTabs() {
   const questions = useExamStore(s => s.questions);
@@ -43,7 +44,7 @@ export default function SubjectTabs() {
   const activeSectionId = questions[currentIdx]?.sectionId || 'General Hub';
 
   return (
-    <nav className="bg-white border-b border-slate-100 h-14 md:h-16 flex items-center px-3 overflow-x-auto no-scrollbar gap-2 shrink-0 sticky top-0 z-40 shadow-sm">
+    <nav className="bg-white border-b border-slate-100 h-11 md:h-12 flex items-center px-2 overflow-x-auto no-scrollbar gap-1.5 shrink-0 sticky top-0 z-40">
       {sections.map((s) => {
         const isActive = activeSectionId === s.id;
         return (
@@ -51,13 +52,13 @@ export default function SubjectTabs() {
             key={s.id}
             onClick={() => setCurrentIdx(s.startIdx)}
             className={cn(
-              "h-10 md:h-11 flex items-center justify-center px-4 rounded-xl border-2 transition-all whitespace-nowrap min-w-[130px] md:min-w-[180px]",
+              "h-8 md:h-9 flex items-center justify-center px-3 rounded-md border transition-all whitespace-nowrap min-w-[110px] md:min-w-[140px]",
               isActive 
-                ? "border-primary text-primary bg-white shadow-sm" 
-                : "border-slate-100 text-slate-400 bg-white"
+                ? "border-primary text-primary bg-orange-50/30" 
+                : "border-slate-50 text-slate-400 bg-white hover:bg-slate-50"
             )}
           >
-            <span className="text-[9px] md:text-[10px] font-[900] uppercase tracking-tighter leading-tight text-center truncate">
+            <span className="text-[8px] md:text-[9px] font-[900] uppercase tracking-tight truncate">
                {s.name.replace(/-/g, ' ')}
             </span>
           </button>
