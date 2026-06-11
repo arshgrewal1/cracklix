@@ -2,8 +2,8 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Punjab-Centric Seeding Node v68.0.
- * UPDATED: Populates initial questions and mocks to ensure non-zero live stats.
+ * @fileOverview Institutional Punjab-Centric Seeding Node v68.1.
+ * UPDATED: Locked permanent logo for Punjab Teaching Exams.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -29,7 +29,7 @@ export async function seedInitialData(db: Firestore) {
       highlight: "EDUCATIONAL",
       color: "text-blue-600",
       bgColor: "bg-blue-50",
-      iconUrl: "https://static.pseb.ac.in/uploads/1648628722_PSEBlogo_2.png",
+      iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSImf0nQvnFzmw2RVmPBwlZRspEC_fe2x13SGwzIbYBdw&s=10",
       displayOrder: 2
     }
   ];

@@ -19,13 +19,13 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Governance Node v12.2.
- * RESTORED: Simplified management view without drill-down links.
+ * @fileOverview Institutional Category Governance Node v12.3.
+ * UPDATED: Locked permanent logo for Teaching category.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
   "punjab-govt": <img src="https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png" className="h-full w-full object-contain p-1" />,
-  "punjab-teaching": <GraduationCap className="h-6 w-6" />,
+  "punjab-teaching": <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSImf0nQvnFzmw2RVmPBwlZRspEC_fe2x13SGwzIbYBdw&s=10" className="h-full w-full object-contain p-1" />,
   "punjab-technical": <Zap className="h-6 w-6" />,
   "banking": <Wallet className="h-6 w-6" />,
   "central-govt": <Globe className="h-6 w-6" />
@@ -122,7 +122,7 @@ export default function CategoryManagement() {
               <TableHeader className="bg-slate-50/50">
                 <TableRow className="border-slate-100 h-20">
                   <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Vertical Identity</TableHead>
-                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-center text-slate-500">Order</TableHead>
+                  <TableHead className="text-[10px) font-black uppercase tracking-widest text-center text-slate-500">Order</TableHead>
                   <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Audit Control</TableHead>
                 </TableRow>
               </TableHeader>

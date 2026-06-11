@@ -15,13 +15,13 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Master Registry Landing v2.0.
- * UPDATED: Dynamic counts for hubs (Boards) instead of placeholder figures.
+ * @fileOverview Institutional Master Registry Landing v2.1.
+ * UPDATED: Locked permanent logo for Punjab Teaching category.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
   "punjab-govt": <img src="https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png" className="h-full w-full object-contain p-2" />,
-  "punjab-teaching": <GraduationCap className="h-10 w-10 md:h-12 md:w-12" />,
+  "punjab-teaching": <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSImf0nQvnFzmw2RVmPBwlZRspEC_fe2x13SGwzIbYBdw&s=10" className="h-full w-full object-contain p-2" />,
   "punjab-technical": <Zap className="h-10 w-10 md:h-12 md:w-12" />,
   "banking": <Wallet className="h-10 w-10 md:h-12 md:w-12" />,
   "central-govt": <Globe className="h-10 w-10 md:h-12 md:w-12" />

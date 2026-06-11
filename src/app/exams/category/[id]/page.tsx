@@ -16,13 +16,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Explorer v7.0.
- * UPDATED: Dynamic exam counts replaced hardcoded placeholders.
+ * @fileOverview Institutional Category Explorer v7.1.
+ * UPDATED: Locked permanent logo for Teaching category.
  */
 
 const CATEGORY_META: Record<string, any> = {
   "punjab-govt": { title: "Punjab Government", icon: <img src="https://static.pseb.ac.in/psebwebsite/front_assets/sites/default/files/inline-images/emblem.png" className="h-full w-full object-contain" /> },
-  "punjab-teaching": { title: "Punjab Teaching", icon: <GraduationCap className="h-full w-full" /> },
+  "punjab-teaching": { title: "Punjab Teaching", icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSImf0nQvnFzmw2RVmPBwlZRspEC_fe2x13SGwzIbYBdw&s=10" className="h-full w-full object-contain" /> },
   "punjab-technical": { title: "Punjab Technical", icon: <Zap className="h-full w-full" /> },
   "banking": { title: "Banking Exams", icon: <Wallet className="h-full w-full" /> },
   "central-govt": { title: "Central Govt", icon: <Globe className="h-full w-full" /> }
@@ -67,7 +67,9 @@ export default function CategoryHubsPage() {
                </button>
                <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                     {meta.icon}
+                     <div className="h-full w-full flex items-center justify-center">
+                        {meta.icon}
+                     </div>
                   </div>
                   <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-slate-500">Registry Nodes</span>
                </div>
