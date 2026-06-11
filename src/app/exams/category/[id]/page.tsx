@@ -15,8 +15,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Explorer v7.3.
- * UPDATED: Applied new logo for Teaching category.
+ * @fileOverview Institutional Category Explorer v7.4.
+ * UPDATED: Applied new locked logo for Punjab Teaching category.
  */
 
 const CATEGORY_META: Record<string, any> = {

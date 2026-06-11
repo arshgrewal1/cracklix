@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Plus, Trash2, Edit, Save, Layers, Search, Loader2, Landmark, GraduationCap, Zap, Wallet, Globe, MoveUp, MoveDown } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, doc, setDoc, deleteDoc, serverTimestamp, query, orderBy } from "firebase/firestore"
+import { collection, query, doc, setDoc, deleteDoc, serverTimestamp, orderBy } from "firebase/firestore"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -18,8 +18,8 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Governance Node v12.4.
- * UPDATED: Applied new logo for Teaching category.
+ * @fileOverview Institutional Category Governance Node v12.5.
+ * UPDATED: Locked permanent logo for Teaching category.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -121,7 +121,7 @@ export default function CategoryManagement() {
               <TableHeader className="bg-slate-50/50">
                 <TableRow className="border-slate-100 h-20">
                   <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Vertical Identity</TableHead>
-                  <TableHead className="text-[10px) font-black uppercase tracking-widest text-center text-slate-500">Order</TableHead>
+                  <TableHead className="text-[10px] font-black uppercase tracking-widest text-center text-slate-500">Order</TableHead>
                   <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-500">Audit Control</TableHead>
                 </TableRow>
               </TableHeader>

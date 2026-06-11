@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview RESTORED: Hierarchical Category Discovery v2.3.
- * UPDATED: Applied new logo for Punjab Teaching category.
+ * @fileOverview RESTORED: Hierarchical Category Discovery v2.4.
+ * UPDATED: Applied new permanent logo for Punjab Teaching category.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {

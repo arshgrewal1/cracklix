@@ -1,8 +1,8 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Punjab-Centric Seeding Node v68.2.
- * UPDATED: Applied new logo for Punjab Teaching Exams.
+ * @fileOverview Institutional Punjab-Centric Seeding Node v68.3.
+ * UPDATED: Applied new permanent logo for Punjab Teaching Exams.
  */
 
 export async function seedInitialData(db: Firestore) {

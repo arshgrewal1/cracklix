@@ -1,4 +1,4 @@
-'use client';
+"use client"
 
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
@@ -21,8 +21,8 @@ import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview Institutional Category Entry Nodes v4.3.
- * UPDATED: Replaced Punjab Teaching logo with provided institutional image.
+ * @fileOverview Institutional Category Entry Nodes v4.4.
+ * UPDATED: Locked permanent logo for Punjab Teaching Exams.
  */
 
 const CATEGORY_META = [
