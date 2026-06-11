@@ -22,7 +22,8 @@ import {
   Newspaper,
   Award,
   FileStack,
-  Download
+  Download,
+  AlertCircle
 } from "lucide-react";
 import Link from "next/link";
 import { useUser, useAuth } from "@/firebase";
@@ -30,15 +31,15 @@ import { signOut } from "firebase/auth";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import StudentAvatar from "@/components/brand/StudentAvatar";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Institutional Mobile Sidebar v6.0.
- * UPDATED: Integrated PWA Install button for discovery.
+ * @fileOverview Institutional Mobile Sidebar v6.1.
+ * UPDATED: Integrated Live Pass Status with Expiry.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
@@ -65,6 +66,19 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
     
     return () => window.removeEventListener('pwa-installable', checkInstall);
   }, []);
+
+  const passStatus = useMemo(() => {
+    if (!profile?.pass) return null;
+    const active = profile.pass.active;
+    const expiry = new Date(profile.pass.expiryDate);
+    const isExpired = expiry < new Date();
+    
+    return {
+      active: active && !isExpired,
+      label: isExpired ? "PASS EXPIRED" : `ACTIVE PASS`,
+      expiry: expiry.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    };
+  }, [profile]);
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -138,15 +152,25 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
                 </div>
              </div>
              
-             <div className="flex-1 min-w-0 text-left">
+             <div className="flex-1 min-w-0 text-left space-y-1">
                 <h2 className="text-base font-black text-white leading-tight uppercase tracking-tight truncate">
                    {profile?.name || "Student"}
                 </h2>
-                <div className="flex items-center gap-2">
-                   <span className="bg-primary text-white border-none px-2 py-0.5 rounded-md font-black uppercase text-[7px] tracking-widest shadow-lg">
-                      {(profile?.status || 'Free').toUpperCase()} PASS
-                   </span>
-                </div>
+                {passStatus ? (
+                   <div className="flex flex-col gap-1">
+                      <Badge className={cn(
+                        "border-none px-2 py-0.5 rounded-md font-black uppercase text-[7px] tracking-widest shadow-lg w-fit",
+                        passStatus.active ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"
+                      )}>
+                         {passStatus.label}
+                      </Badge>
+                      <p className="text-[7px] font-bold text-slate-500 uppercase tracking-widest">EXP: {passStatus.expiry}</p>
+                   </div>
+                ) : (
+                   <Badge className="bg-white/10 text-slate-300 border-none px-2 py-0.5 rounded-md font-black uppercase text-[7px] tracking-widest shadow-lg w-fit">
+                      FREE PASS
+                   </Badge>
+                )}
              </div>
           </div>
 

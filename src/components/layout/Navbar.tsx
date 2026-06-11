@@ -172,7 +172,7 @@ export default function Navbar() {
                   {passStatus.active ? <Gem className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
                   <div className="flex flex-col text-left">
                      <span className="text-[8px] font-black uppercase leading-none tracking-widest">{passStatus.label}</span>
-                     <span className="text-[7px] font-bold opacity-60 leading-none mt-1">EXP: {passStatus.expiry}</span>
+                     <span className="text-[7px] font-bold opacity-60 leading-none mt-1 uppercase">EXP: {passStatus.expiry}</span>
                   </div>
                </div>
             )}
