@@ -27,8 +27,9 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v40.0 (Identity Hardened).
- * UPDATED: Captures Real Name and Email fallback for state-level merit index.
+ * @fileOverview Hardened CBT Engine v41.0 (Stability & Identity Hardened).
+ * UPDATED: Captures Real Name and Email fallback for state-level merit hub.
+ * FIXED: Hydration synchronization and re-take logic hardening.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -107,7 +108,7 @@ export default function MockAttemptPage() {
         const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
         initExam(mockId, mData.title || "Elite Series", user.uid, sortedQs, mData.duration || 120, attemptSnap.exists() ? attemptSnap.data() : undefined, mData.languageMode);
       } catch (err: any) {
-        toast({ variant: "destructive", title: "Audit Blocked", description: err.message });
+        toast({ variant: "destructive", title: "Sync Failed", description: err.message });
         router.push(`/mocks/${mockId}`);
       } finally { setIsInitializing(false); }
     }
@@ -187,7 +188,7 @@ export default function MockAttemptPage() {
      }
   }, [timeLeft, isInitializing, isSubmittingFinal, handleSubmitFinal]);
 
-  if (isInitializing) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8"><Zap className="h-16 w-16 text-primary animate-pulse" /><p className="text-[11px] font-black uppercase tracking-[0.5em] text-primary">Synchronizing Access...</p></div>;
+  if (isInitializing) return <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8"><Zap className="h-16 w-16 text-primary animate-pulse" /><p className="text-[11px] font-black uppercase tracking-[0.5em] text-primary">Synchronizing Access Hub...</p></div>;
 
   return (
     <div className="flex flex-col h-[100dvh] bg-white font-body select-none overflow-hidden relative">

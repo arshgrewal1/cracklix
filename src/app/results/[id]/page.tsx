@@ -14,36 +14,26 @@ import {
   Target, 
   Zap, 
   Loader2, 
-  BrainCircuit, 
   ShieldCheck,
   BarChart3,
   Trophy,
   RefreshCw,
-  Share2,
-  X,
-  Clock,
-  Printer,
-  AlertCircle,
-  Lock,
-  ChevronLeft,
   XCircle,
-  HelpCircle,
-  Users,
-  Medal,
-  Award
+  AlertCircle,
+  Users
 } from "lucide-react"
 import { useUser, useFirestore, useCollection } from "@/firebase"
-import { collection, query, where, doc, getDoc, documentId, getDocs, limit, orderBy } from "firebase/firestore"
+import { collection, query, where, doc, getDoc, documentId, getDocs, limit } from "firebase/firestore"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Test Results Hub v25.0.
- * UPDATED: Hardened State Rank names logic (Email fallback) and broader merit list.
+ * @fileOverview Test Results Hub v26.0 (Hardened).
+ * UPDATED: Replaced technical jargon with easy student-friendly language.
+ * FIXED: Identity hub prioritizes Real Name with Email fallback for State Rank.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -82,22 +72,17 @@ export default function ResultPage() {
 
   const { data: rawGlobalResults } = useCollection<any>(globalResultsQuery)
 
-  const sortedGlobalResults = useMemo(() => {
-    if (!rawGlobalResults) return [];
-    return [...rawGlobalResults].sort((a, b) => (b.score || 0) - (a.score || 0));
-  }, [rawGlobalResults]);
-
   const meritList = useMemo(() => {
-     if (!sortedGlobalResults) return [];
-     // Filter unique users taking their best score
+     if (!rawGlobalResults) return [];
+     // Get unique users best score
      const uniqueMap = new Map();
-     sortedGlobalResults.forEach(r => {
+     [...rawGlobalResults].sort((a, b) => (b.score || 0) - (a.score || 0)).forEach(r => {
         if (!uniqueMap.has(r.userId) || uniqueMap.get(r.userId).score < r.score) {
            uniqueMap.set(r.userId, r);
         }
      });
      return Array.from(uniqueMap.values()).sort((a,b) => b.score - a.score);
-  }, [sortedGlobalResults]);
+  }, [rawGlobalResults]);
 
   const merit = useMemo(() => {
      if (!meritList || meritList.length === 0 || !sessionData) {

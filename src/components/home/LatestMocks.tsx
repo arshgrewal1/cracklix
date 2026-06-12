@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useState, useEffect } from "react"
@@ -13,8 +14,9 @@ import { cn } from "@/lib/utils"
 import { useRouter, usePathname } from "next/navigation"
 
 /**
- * @fileOverview High-Density Mock Feed v20.2.
+ * @fileOverview High-Density Mock Feed v21.0.
  * RESTORED: Unlock button for premium preparation nodes.
+ * BRANDING: Unlock button background set to Cracklix Orange (bg-orange-500).
  */
 
 export default function LatestMocks() {

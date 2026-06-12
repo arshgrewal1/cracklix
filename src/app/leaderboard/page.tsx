@@ -5,19 +5,19 @@ import { useMemo, useState } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, orderBy, limit, where } from "firebase/firestore"
+import { collection, query, limit } from "firebase/firestore"
+import { Trophy, ShieldCheck, Search, Activity, ChevronRight } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
-import { Trophy, ShieldCheck, Search, Zap, Target, Users, Medal, Activity, ChevronRight } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Punjab Merit Hub.
- * UPDATED: Hardened real name display with email fallback logic for all rankings.
+ * @fileOverview Official Punjab Merit Hub v12.0.
+ * FIXED: Hardened real name display with email fallback logic for all rankings.
+ * LANGUAGE: Replaced difficult terms with student-friendly words.
  */
 
 export default function LeaderboardPage() {
@@ -35,7 +35,7 @@ export default function LeaderboardPage() {
     if (!results) return []
     const lowerSearch = searchTerm.toLowerCase();
     
-    // Sort client-side to avoid Firestore composite index requirement
+    // Sort client-side for immediate feedback
     const sortedResults = [...results].sort((a, b) => (b.score || 0) - (a.score || 0));
     const uniqueRankers = new Map();
     
@@ -43,7 +43,7 @@ export default function LeaderboardPage() {
       if (!uniqueRankers.has(r.userId)) {
         const userProfile = users?.find(u => u.id === r.userId);
         
-        // IDENTITY PRIORITY: 1. Profile Name, 2. Result Name (if not 'Student'), 3. User Email, 4. Placeholder
+        // IDENTITY HUB: 1. Profile Name, 2. Result Name (verified), 3. Email ID, 4. Student
         const name = userProfile?.name || 
                      (r.userName && r.userName !== 'Aspirant' && r.userName !== 'Student' && !r.userName.includes('@') ? r.userName : null) || 
                      userProfile?.email || 
@@ -99,7 +99,7 @@ export default function LeaderboardPage() {
            <CardContent className="p-0">
               <div className="p-8 md:p-10 border-b border-slate-50 bg-slate-50/30 grid grid-cols-12 text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-500"><div className="col-span-2 md:col-span-1">RANK</div><div className="col-span-6 md:col-span-7">STUDENT IDENTITY</div><div className="col-span-2 text-center">SCORE</div><div className="col-span-2 text-right">ACCURACY</div></div>
               <div className="divide-y divide-slate-50">
-                 {resultsLoading ? Array.from({ length: 5 }).map((_, i) => (<div key={i} className="p-8 grid grid-cols-12 gap-6 items-center"><Skeleton className="h-6 w-8 rounded-md col-span-1" /><div className="col-span-7 flex items-center gap-4"><Skeleton className="h-12 w-12 rounded-xl" /><div className="space-y-2"><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-20" /></div></div><Skeleton className="h-8 w-full rounded-md col-span-2" /><Skeleton className="h-8 w-full rounded-md col-span-2" /></div>)) : 
+                 {resultsLoading || usersLoading ? Array.from({ length: 5 }).map((_, i) => (<div key={i} className="p-8 grid grid-cols-12 gap-6 items-center"><Skeleton className="h-6 w-8 rounded-md col-span-1" /><div className="col-span-7 flex items-center gap-4"><Skeleton className="h-12 w-12 rounded-xl" /><div className="space-y-2"><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-20" /></div></div><Skeleton className="h-8 w-full rounded-md col-span-2" /><Skeleton className="h-8 w-full rounded-md col-span-2" /></div>)) : 
                  meritList.length > 0 ? meritList.map((entry, idx) => (
                       <div key={entry.id} className="p-8 md:p-10 grid grid-cols-12 items-center hover:bg-slate-50/50 transition-all group cursor-pointer border-l-[4px] border-transparent hover:border-primary">
                          <div className="col-span-2 md:col-span-1 font-headline font-black text-xl md:text-3xl text-slate-300 group-hover:text-primary transition-colors">#{idx + 1}</div>

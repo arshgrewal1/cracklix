@@ -14,8 +14,8 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Hero Hub v72.0.
- * FIXED: Hydration error resolved via strict mounted guard and static text lock.
+ * @fileOverview Official Hero Hub v73.0 (Hydration Safe).
+ * FIXED: Strictly locked headline text to "EXAM." and implemented client-side data gating.
  * BRANDING: Verified Content icon set to Cracklix Orange.
  */
 

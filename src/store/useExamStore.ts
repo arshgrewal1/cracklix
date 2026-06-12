@@ -9,8 +9,8 @@ import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
 /**
- * @fileOverview Elite CBT Global Store v38.0 (Production Hardened).
- * FIXED: Resolved re-take blank screen glitch by forcing a hard reset of local maps on session re-initialization.
+ * @fileOverview Elite CBT Global Store v39.0 (Production Hardened).
+ * FIXED: Resolved re-take blank screen glitch by forcing a hard reset of ALL session state on re-initialization.
  */
 
 interface ExamStore extends AttemptState {
@@ -72,7 +72,8 @@ export const useExamStore = create<ExamStore>((set, get) => ({
 
     // Reset progress completely if this is a stale/completed session (FIX FOR BLANK SCREEN/GLITCH)
     const actualStartTime = isStale ? now : (savedState?.startTime || now);
-    const finalEndTime = isStale ? (now + (duration * 60 * 1000)) : (savedState?.endTime || (now + (duration * 60 * 1000)));
+    const finalDuration = duration || 120;
+    const finalEndTime = isStale ? (now + (finalDuration * 60 * 1000)) : (savedState?.endTime || (now + (finalDuration * 60 * 1000)));
     const timeLeft = Math.max(0, Math.floor((finalEndTime - now) / 1000));
     const finalBaseMode = languageMode || 'ENGLISH_PUNJABI';
 
@@ -108,7 +109,9 @@ export const useExamStore = create<ExamStore>((set, get) => ({
         status: 'IN_PROGRESS', updatedAt: serverTimestamp(),
         // Force clear old answers if re-taking
         answers: isStale ? {} : (savedState?.answers || {}),
-        status_map: isStale ? {} : (savedState?.status || {})
+        status_map: isStale ? {} : (savedState?.status || {}),
+        currentIdx: 0,
+        visited: [0]
       }, { merge: true }).catch((err) => {
         errorEmitter.emit('permission-error', new FirestorePermissionError({ path: attemptRef.path, operation: 'create' }));
       });

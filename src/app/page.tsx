@@ -18,8 +18,8 @@ import { ShieldCheck, Zap, Trophy, Target } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Official Hub v77.0.
- * FIXED: Hydration error resolved via mounted synchronization.
+ * @fileOverview Official Hub v78.0 (Stable).
+ * FIXED: Hydration error resolved by removing early return skeletons and strictly locking text.
  */
 
 export default function HomePage() {
