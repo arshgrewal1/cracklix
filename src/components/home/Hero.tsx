@@ -1,7 +1,8 @@
+
 'use client';
 
 import { motion } from "framer-motion";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Search, Sparkles, Zap, ShieldCheck } from "lucide-react";
@@ -13,8 +14,8 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Refined Institutional Hero Hub v45.0.
- * RESTORED: Punjab Police photo node for Desktop views.
+ * @fileOverview Refined Institutional Hero Hub v46.0.
+ * RESTORED: Punjab Police photo node for Desktop views with Hydration Guard.
  * UPDATED: Uses centralized placeholder image registry for high-fidelity asset delivery.
  */
 
@@ -22,9 +23,14 @@ export default function Hero() {
   const router = useRouter();
   const db = useFirestore();
   const [queryText, setQueryText] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   // Use official registry for the police asset
-  const policeImage = PlaceHolderImages.find(img => img.id === 'hero-police')?.imageUrl || "https://punjabpolice.gov.in/media/images/pp10.original.jpg";
+  const policeImage = PlaceHolderImages.find(img => img.id === 'hero-police')?.imageUrl || "https://picsum.photos/seed/police/800/600";
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
@@ -42,6 +48,10 @@ export default function Hero() {
     }
   };
 
+  if (!mounted) {
+    return <section className="min-h-[600px] bg-[#08152D] w-full" />;
+  }
+
   return (
     <section className="relative pt-8 pb-12 md:pt-20 md:pb-32 bg-[#08152D] overflow-hidden min-h-[600px] flex items-center">
       {/* Institutional Background Pattern */}
@@ -49,14 +59,14 @@ export default function Hero() {
          <div className="h-full w-full bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:30px_30px]" />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10 max-w-7xl text-left">
-        <div className="grid lg:grid-cols-2 gap-10 md:gap-20 items-center">
+      <div className="container mx-auto px-4 relative z-20 max-w-7xl text-left">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-20 items-center">
           
           {/* LEFT: CONTENT HUB */}
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6 }}
             className="space-y-6 md:space-y-10"
           >
             <div className="space-y-4 md:space-y-6">
@@ -102,8 +112,8 @@ export default function Hero() {
 
           {/* RIGHT: DESKTOP POLICE PHOTO NODE */}
           <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            initial={{ opacity: 0, x: 30 }}
+            animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative hidden lg:block"
           >
