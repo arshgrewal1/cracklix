@@ -22,10 +22,11 @@ import { useState, useEffect, useMemo } from "react";
 import { doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import Image from "next/image";
 
 /**
- * @fileOverview High-Fidelity Institutional Hero v147.0 (Clean Hub).
- * UPDATED: Removed background imagery for a focused, distraction-free command center.
+ * @fileOverview High-Fidelity Institutional Hero v148.0.
+ * UPDATED: Integrated user-provided visual hub imagery with professional dark-navy masks.
  * Features: Integrated stats hub and floating readiness dashboard.
  */
 export default function Hero() {
@@ -51,13 +52,23 @@ export default function Hero() {
 
   if (!mounted) return null;
 
+  const heroImageUrl = "https://i.ibb.co/gZCGMQNJ/IMG-20260612-WA0010.jpg";
+
   return (
     <section className="relative pt-12 pb-16 md:pt-24 md:pb-36 bg-[#0B1528] overflow-hidden text-left">
-      {/* CLEAN NAVY HUB - BACKGROUND IMAGE REMOVED */}
+      {/* INSTITUTIONAL VISUAL HUB */}
       <div className="absolute inset-0 z-0">
-         <div className="absolute inset-0 bg-gradient-to-br from-[#0B1528] via-[#0F172A] to-[#0B1528]" />
-         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full" />
-         <div className="absolute bottom-0 left-0 w-[300px] h-[300px] bg-blue-500/5 blur-[100px] rounded-full" />
+         <Image 
+            src={heroImageUrl}
+            alt="Punjab Exam Hub"
+            fill
+            className="object-cover opacity-40 grayscale-[0.2]"
+            priority
+            data-ai-hint="punjab police"
+         />
+         {/* Sophisticated Gradient Masks for Legibility */}
+         <div className="absolute inset-0 bg-gradient-to-r from-[#0B1528] via-[#0B1528]/80 to-transparent" />
+         <div className="absolute inset-0 bg-gradient-to-t from-[#0B1528] via-transparent to-transparent" />
       </div>
 
       <div className="container mx-auto px-4 md:px-6 max-w-7xl relative z-10">
