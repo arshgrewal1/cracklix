@@ -1,10 +1,11 @@
+
 {
   "placeholderImages": [
     {
       "id": "hero-police",
-      "description": "Punjab Police Strategic Asset",
-      "imageUrl": "https://punjabpolice.gov.in/media/images/pp10.original.jpg",
-      "imageHint": "punjab police"
+      "description": "Punjab Police Strategic Asset HD",
+      "imageUrl": "https://picsum.photos/seed/pp-hero-ultra/1920/1280",
+      "imageHint": "police officer"
     },
     {
       "id": "promo-psssb",
@@ -21,7 +22,7 @@
     {
       "id": "hero-punjab",
       "description": "Punjab Heritage Hero",
-      "imageUrl": "https://picsum.photos/seed/punjab-hero/1200/800",
+      "imageUrl": "https://picsum.photos/seed/punjab-hero-hd/1920/1280",
       "imageHint": "punjab heritage"
     },
     {

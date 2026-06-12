@@ -11,11 +11,12 @@ import { useDoc, useFirestore, useUser } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 /**
- * @fileOverview High-Fidelity Hero Hub v86.0.
+ * @fileOverview High-Fidelity Hero Hub v87.0.
+ * UPDATED: Implemented next/image for ultra-sharp HD rendering.
  * FIXED: Hydration error resolved by strictly locking "EXAM." headline.
- * STABILITY: Live counts are protected by mounted guard.
  */
 
 export default function Hero() {
@@ -29,7 +30,7 @@ export default function Hero() {
     setMounted(true);
   }, []);
   
-  const policeImage = PlaceHolderImages.find(img => img.id === 'hero-police')?.imageUrl || "https://punjabpolice.gov.in/media/images/pp10.original.jpg";
+  const policeImage = PlaceHolderImages.find(img => img.id === 'hero-police');
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
@@ -121,12 +122,16 @@ export default function Hero() {
                <div className="absolute -inset-6 md:-inset-10 bg-primary/10 blur-[100px] rounded-full opacity-50" />
                
                <div className="relative h-full w-full rounded-[2rem] md:rounded-[3.5rem] overflow-hidden border-[4px] md:border-[10px] border-white/5 shadow-5xl bg-slate-800 group">
-                  <img 
-                    src={policeImage} 
-                    alt="Punjab Police Preparation" 
-                    className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" 
-                    referrerPolicy="no-referrer"
-                  />
+                  {mounted && policeImage && (
+                    <Image 
+                      src={policeImage.imageUrl} 
+                      alt="Punjab Police HD Preparation" 
+                      fill
+                      priority
+                      className="object-cover transition-transform duration-[2s] group-hover:scale-110"
+                      data-ai-hint={policeImage.imageHint}
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#08152D] via-transparent to-transparent opacity-60" />
                   
                   <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 flex items-center justify-between">
