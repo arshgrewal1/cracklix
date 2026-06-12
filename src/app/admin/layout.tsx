@@ -44,8 +44,8 @@ import BackButton from "@/components/navigation/BackButton";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Sidebar Restoration v133.1.
- * UPDATED: Logo positioned immediately to the left of the sidebar triggers.
+ * @fileOverview Institutional Sidebar Restoration v133.2.
+ * UPDATED: Sidebar triggers restored to the left of the logo.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -180,8 +180,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <SidebarInset className="flex flex-col bg-white min-w-0 max-w-full relative">
           <header className="h-32 md:h-52 border-b border-slate-200 flex items-center px-4 md:px-6 justify-between bg-white sticky top-0 z-[100] shrink-0">
             <div className="flex items-center gap-0 overflow-hidden">
-              <Logo variant="dark" className="origin-left" href="/admin" />
-
               <div className="lg:hidden">
                  <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                     <SheetTrigger asChild>
@@ -196,6 +194,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                  </Sheet>
               </div>
               <SidebarTrigger className="hidden lg:flex text-[#0F172A] hover:bg-slate-50 cursor-pointer" />
+              
+              <Logo variant="dark" className="origin-left" href="/admin" />
               
               <div className="h-4 w-[1px] bg-slate-200 mx-2 hidden md:block" />
               <BackButton label="Dashboard" fallback="/admin" className="hidden xs:flex" />
