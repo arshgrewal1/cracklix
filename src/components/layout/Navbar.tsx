@@ -26,8 +26,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v23.2.
- * UPDATED: Sidebar trigger restored to the left of the logo.
+ * @fileOverview Institutional Navbar v24.0.
+ * RESTORED: Optimized header height and spacing for a professional look.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -113,10 +113,9 @@ export default function Navbar() {
         </div>
       )}
 
-      <nav className="w-full bg-[#0B1528] border-b border-white/5 h-28 md:h-52 flex items-center shadow-xl backdrop-blur-md bg-opacity-95">
+      <nav className="w-full bg-[#0B1528] border-b border-white/5 h-20 md:h-24 flex items-center shadow-xl backdrop-blur-md bg-opacity-95">
         <div className="container mx-auto max-w-full flex items-center justify-between px-3 md:px-6">
-          <div className="flex items-center gap-0">
-            <div className="flex items-center gap-0">
+          <div className="flex items-center gap-2 md:gap-4">
                <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                  <SheetTrigger asChild>
                    <button className="text-white p-2.5 hover:bg-white/5 rounded-2xl transition-all active:scale-90 cursor-pointer border border-white/10 focus:outline-none shrink-0 z-10">
@@ -129,7 +128,6 @@ export default function Navbar() {
                  </SheetContent>
                </Sheet>
                <Logo variant="light" className="origin-left" />
-            </div>
 
             <div className="hidden xl:flex items-center gap-10 text-[12px] font-black uppercase tracking-[0.2em] text-[#7A8B9E] ml-10">
               <Link href="/my-exams" className={cn("transition-colors flex items-center gap-2 hover:text-white pointer-events-auto", pathname === '/my-exams' ? 'text-white' : '')}>
