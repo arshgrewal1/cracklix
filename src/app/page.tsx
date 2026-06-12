@@ -11,8 +11,8 @@ import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
 
 /**
- * @fileOverview Official Home Hub v105.0 (Simplified Restoration).
- * RESTORED: Clean sequential flow centered on Punjab Police/Institutional Hub.
+ * @fileOverview Official Home Hub v106.0 (Streamlined Restoration).
+ * RESTORED: Direct sequential flow perfectly matched to the provided UI reference.
  */
 
 export default function HomePage() {
@@ -26,17 +26,22 @@ export default function HomePage() {
     <main className="min-h-screen bg-white font-body pb-safe overflow-x-hidden text-left">
       <Navbar />
       
-      {/* 1. PRIMARY HERO HUB (Punjab Police Style) */}
+      {/* 1. SCREENSHOT MATCHED HERO HUB */}
       <Hero />
 
       <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl space-y-16 md:space-y-32">
+         {/* 2. USER ANCHORS */}
          <ContinueLearning />
          <FeaturedCategories />
+         
+         {/* 3. RECENT CONTENT */}
          <LatestMocks />
       </div>
 
+      {/* 4. TRUST & IDENTITY NODES */}
       <AppPreview />
       <MeetFounder />
+      
       <Footer />
     </main>
   );

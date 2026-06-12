@@ -4,37 +4,34 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { 
-  Trophy, 
   ShieldCheck,
-  Star,
-  Download,
-  ArrowRight
+  Zap,
+  Search,
+  ChevronRight
 } from "lucide-react";
 import { useUser } from "@/firebase";
-import Link from "next/link";
 import Image from "next/image";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
 
 /**
- * @fileOverview Official Punjab Police Restoration v50.0.
- * RESTORED: High-impact dark-navy theme with massive Punjabi headline.
+ * @fileOverview High-Fidelity Hero Restoration v60.0.
+ * STYLED: Perfectly matched to user-provided screenshot reference.
+ * FEATURES: Integrated search node, large orange CTA, and Police visual hub.
  */
 export default function Hero() {
   const router = useRouter();
   const { user } = useUser();
   const [mounted, setMounted] = useState(false);
-  const [canInstall, setCanInstall] = useState(false);
+  const [searchQuery, setSearchTerm] = useState("");
 
   useEffect(() => {
     setMounted(true);
-    const handleInstallable = () => setCanInstall(true);
-    window.addEventListener('pwa-installable', handleInstallable);
-    return () => window.removeEventListener('pwa-installable', handleInstallable);
   }, []);
 
-  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-police')?.imageUrl || "https://picsum.photos/seed/police/1200/800";
+  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-police')?.imageUrl || "https://punjabpolice.gov.in/media/images/pp10.original.jpg";
 
   const handleAction = (path: string) => {
     if (!user) {
@@ -44,116 +41,108 @@ export default function Hero() {
     router.push(path);
   };
 
-  const handleInstall = () => {
-    const prompt = (window as any).deferredPrompt;
-    if (prompt) prompt.prompt();
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
+    }
   };
 
+  if (!mounted) return null;
+
   return (
-    <section className="relative pt-12 pb-16 md:pt-24 md:pb-32 bg-[#0B1528] overflow-hidden text-left min-h-[85vh] flex items-center">
-      {/* Decorative Blobs */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
+    <section className="relative pt-12 pb-16 md:pt-20 md:pb-24 bg-[#0B1528] overflow-hidden text-left">
+      {/* Subtle Grid Background */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
       <div className="container mx-auto px-4 md:px-8 relative z-10 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20 items-center">
           
           {/* LEFT: CONTENT HUB */}
-          <div className="lg:col-span-7 space-y-8 md:space-y-12">
-            <motion.div 
-               initial={{ opacity: 0, y: -10 }}
-               animate={{ opacity: 1, y: 0 }}
-               className="inline-flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-2.5 rounded-full text-[10px] md:text-xs font-black tracking-tight text-white shadow-2xl"
-            >
-              <Star className="h-4 w-4 text-primary fill-current" />
-              <span className="tracking-[0.2em] uppercase">PUNJAB&apos;S NO.1 STUDY HUB</span>
-            </motion.div>
+          <div className="lg:col-span-6 space-y-8 md:space-y-12">
+            <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-1.5 rounded-full shadow-2xl">
+              <Zap className="h-3 w-3 text-primary fill-current" />
+              <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-primary">PUNJAB&apos;S NO. 1 STUDY CENTER</span>
+            </div>
 
             <div className="space-y-6">
-               <motion.h1 
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="text-[3.5rem] sm:text-[5rem] md:text-[8rem] font-black leading-[0.85] tracking-tighter uppercase text-white flex flex-col"
-               >
-                  <span>ਤਿਆਰੀ ਪੰਜਾਬ ਦੀ,</span>
-                  <span className="text-primary">ਸੁਪਨਾ ਸਰਕਾਰੀ</span>
-                  <span className="text-primary">ਅਫ਼ਸਰ ਦਾ!</span>
-               </motion.h1>
-               <p className="text-lg md:text-2xl font-bold text-slate-400 uppercase tracking-tight max-w-2xl">
-                  CRACK PSSSB, POLICE, PSPCL, PSTET, CTET, ETT & MASTER CADRE
+               <h1 className="text-[3.5rem] md:text-[6rem] font-black leading-[0.9] tracking-tighter uppercase text-white flex flex-col">
+                  <span>CRACK EVERY</span>
+                  <span className="text-primary">EXAM.</span>
+               </h1>
+               <p className="text-lg md:text-2xl font-medium text-slate-400 max-w-xl leading-relaxed">
+                  The most trusted practice tests for PSSSB, PPSC, Police, and Army. Latest pattern based study plans for guaranteed success.
                </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+            {/* INTEGRATED SEARCH HUB */}
+            <form onSubmit={handleSearch} className="relative w-full max-w-xl group">
+               <div className="relative flex items-center bg-white rounded-2xl md:rounded-[1.5rem] overflow-hidden p-1 shadow-2xl">
+                  <Search className="absolute left-6 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                  <Input 
+                    value={searchQuery}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search Patwari, SI, Army..." 
+                    className="h-14 md:h-16 pl-14 border-none bg-transparent text-slate-900 font-bold text-base md:text-lg focus-visible:ring-0 placeholder:text-slate-400"
+                  />
+                  <Button type="submit" className="bg-[#0B1528] hover:bg-black text-white px-8 md:px-12 h-12 md:h-14 rounded-xl md:rounded-lg font-black uppercase text-[10px] md:text-xs tracking-widest border-none ml-2">
+                     SEARCH
+                  </Button>
+               </div>
+            </form>
+
+            <div className="pt-4">
               <Button 
                 onClick={() => handleAction('/mocks')}
-                className="bg-primary hover:bg-orange-600 transition-all font-black px-12 h-16 md:h-20 rounded-2xl text-white flex items-center justify-center gap-4 shadow-3xl uppercase text-[11px] tracking-[0.2em] border-none active:scale-95"
+                className="bg-primary hover:bg-orange-600 transition-all font-black px-12 h-16 md:h-20 rounded-2xl text-white flex items-center justify-center gap-4 shadow-4xl uppercase text-[11px] md:text-sm tracking-[0.2em] border-none active:scale-95"
               >
-                🚀 Start Free Mock
+                START PRACTICE <Zap className="h-5 w-5 fill-current" />
               </Button>
-              
-              {mounted && canInstall && (
-                <Button 
-                  onClick={handleInstall}
-                  className="bg-emerald-600 hover:bg-emerald-700 transition-all font-black px-10 h-16 md:h-20 rounded-2xl text-white flex items-center justify-center gap-4 shadow-3xl uppercase text-[11px] tracking-[0.2em] border-none active:scale-95 group"
-                >
-                  <Download className="h-5 w-5" /> INSTALL APP
-                </Button>
-              )}
-
-              {!canInstall && (
-                 <Button 
-                  onClick={() => handleAction('/exams')}
-                  className="border-2 border-white/10 hover:border-primary/20 bg-white/5 text-white font-black px-10 h-16 md:h-20 rounded-2xl transition-all uppercase text-[11px] tracking-[0.2em] shadow-xl gap-3 active:scale-95"
-                >
-                  <Trophy className="h-5 w-5 text-primary" /> Explore Exams
-                </Button>
-              )}
             </div>
           </div>
 
-          {/* RIGHT: POLICE VISUAL HUB */}
-          <div className="lg:col-span-5 relative group">
-             <motion.div
-               initial={{ opacity: 0, scale: 0.95 }}
-               animate={{ opacity: 1, scale: 1 }}
-               transition={{ duration: 0.8 }}
-               className="relative aspect-[4/5] rounded-[3.5rem] md:rounded-[5rem] overflow-hidden shadow-5xl border-[12px] border-white/5 bg-[#0F172A]"
-             >
+          {/* RIGHT: VISUAL HUB */}
+          <div className="lg:col-span-6 relative group">
+             <div className="relative aspect-[4/3] md:aspect-[16/11] rounded-[3rem] md:rounded-[4rem] overflow-hidden shadow-5xl border-[8px] border-white/5 bg-[#0F172A]">
                 <Image 
                   src={heroImage} 
                   fill 
-                  alt="Punjab Police Hub" 
-                  className="object-cover opacity-80 transition-transform duration-[3s] group-hover:scale-110" 
+                  alt="Punjab Police Official Hub" 
+                  className="object-cover opacity-90 transition-transform duration-[3s] group-hover:scale-105" 
                   priority
-                  data-ai-hint="punjab police"
+                  data-ai-hint="punjab police officers"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0B1528] via-transparent to-transparent opacity-60" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                 
-                {/* Floating Trust Badge */}
-                <div className="absolute bottom-10 left-8 right-8">
-                   <div className="bg-white/10 backdrop-blur-xl px-8 py-6 rounded-[2rem] border border-white/10 shadow-4xl group-hover:bg-white/15 transition-all">
-                      <div className="flex items-center gap-4">
-                         <ShieldCheck className="h-10 w-10 text-primary" />
-                         <div className="text-left">
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-primary mb-1">Live Status</p>
-                            <p className="text-2xl font-black text-white leading-none">15,000+ Selections</p>
-                         </div>
+                {/* STATUS OVERLAY */}
+                <div className="absolute bottom-10 left-10">
+                   <div className="bg-black/30 backdrop-blur-xl px-8 py-5 rounded-[2rem] border border-white/10 shadow-4xl flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-xl">
+                         <ShieldCheck className="h-7 w-7" />
+                      </div>
+                      <div className="text-left">
+                         <p className="text-[10px] font-black uppercase tracking-widest text-white/60 mb-0.5">OFFICIAL HUB</p>
+                         <p className="text-xl font-black text-white uppercase tracking-tight">VERIFIED CONTENT</p>
                       </div>
                    </div>
                 </div>
 
-                {/* Regional Badge */}
-                <div className="absolute top-10 right-8">
-                   <div className="bg-primary p-4 rounded-[1.5rem] shadow-2xl flex flex-col items-center gap-1 border-4 border-[#0B1528] scale-110">
-                      <Trophy className="h-6 w-6 text-white fill-current" />
-                      <span className="text-[10px] font-black text-white uppercase leading-none">RANK 1</span>
+                {/* LIVE STUDENT OVERLAY */}
+                <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 animate-in fade-in zoom-in duration-700">
+                   <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 flex items-center gap-6 shadow-5xl border border-white shadow-orange-500/10">
+                      <div className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-orange-50 flex items-center justify-center shrink-0">
+                         <Zap className="h-6 w-6 md:h-8 md:w-8 text-primary fill-current" />
+                      </div>
+                      <div className="text-left pr-4">
+                         <p className="text-[9px] md:text-[11px] font-black uppercase text-slate-400 tracking-widest mb-1">LIVE STUDENTS</p>
+                         <p className="text-3xl md:text-5xl font-black text-[#0B1528] leading-none tabular-nums">5</p>
+                      </div>
                    </div>
                 </div>
-             </motion.div>
+             </div>
 
              {/* Background Decoration */}
-             <div className="absolute -inset-10 bg-primary/5 blur-[100px] rounded-full -z-10 opacity-50" />
+             <div className="absolute -inset-10 bg-primary/10 blur-[120px] rounded-full -z-10 opacity-30 pointer-events-none" />
           </div>
 
         </div>
