@@ -29,8 +29,8 @@ import { doc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Simplified Founder's Story Hub v7.0.
- * FIXED: Hydration-safe logic for live status nodes.
+ * @fileOverview Final Founder's Story Hub v8.5.
+ * FIXED: Hydration-safe logic and accurate hub count.
  */
 
 export default function AboutPage() {
@@ -48,7 +48,7 @@ export default function AboutPage() {
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   const liveStats = useMemo(() => {
-    if (!mounted || !stats) return { aspirants: "15k+", mcqs: "10k+", hubs: "8+" };
+    if (!mounted || !stats) return { students: "15k+", mcqs: "10k+", hubs: "8+" };
     
     const formatNumber = (num: number) => {
        if (!num) return "0";
@@ -57,7 +57,7 @@ export default function AboutPage() {
     }
     
     return {
-      aspirants: formatNumber(stats.totalUsers || 15000),
+      students: formatNumber(stats.totalUsers || 15000),
       mcqs: formatNumber(stats.totalQuestions || 10000),
       hubs: (stats.totalBoards || 8).toString() + "+"
     };
@@ -162,7 +162,7 @@ export default function AboutPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6">
                        <ImpactNode 
                           label="LIVE STUDENTS" 
-                          val={mounted ? liveStats.aspirants : "---"} 
+                          val={mounted ? liveStats.students : "---"} 
                           icon={<Users className="text-primary" />} 
                           loading={statsLoading || !mounted}
                        />
@@ -173,7 +173,7 @@ export default function AboutPage() {
                           loading={statsLoading || !mounted}
                        />
                        <ImpactNode 
-                          label="OFFICIAL CENTERS" 
+                          label="OFFICIAL HUBS" 
                           val={mounted ? liveStats.hubs : "---"} 
                           icon={<Landmark className="text-blue-500" />} 
                           loading={statsLoading || !mounted}

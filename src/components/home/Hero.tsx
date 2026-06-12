@@ -13,9 +13,8 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Hero Hub v56.0.
- * FIXED: Hydration text mismatch resolved by forcing EXAM. across all branches.
- * BRANDING: Updated Verified Content icon background to Orange.
+ * @fileOverview Official Hero Hub v58.0.
+ * FIXED: Synchronized heading text to strictly use "EXAM." and implemented stable mounting logic.
  */
 
 export default function Hero() {
@@ -64,19 +63,9 @@ export default function Hero() {
                </div>
                
                <div className="min-h-[60px] md:min-h-[140px]">
-                  {mounted ? (
-                    <motion.h1 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight break-words"
-                    >
-                        CRACK EVERY <br className="hidden sm:block" /> <span className="text-primary">EXAM.</span>
-                    </motion.h1>
-                  ) : (
-                    <h1 className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight">
-                       CRACK EVERY <br className="hidden sm:block" /> <span className="text-primary">EXAM.</span>
-                    </h1>
-                  )}
+                  <h1 className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight break-words">
+                     CRACK EVERY <br className="hidden sm:block" /> <span className="text-primary">EXAM.</span>
+                  </h1>
                </div>
 
                <p className="text-sm md:text-xl text-slate-400 font-medium max-w-lg leading-relaxed">
@@ -143,7 +132,7 @@ export default function Hero() {
                   <div className="text-left md:pr-4">
                      <p className="text-[7px] md:text-[9px] font-black uppercase text-slate-400 leading-none mb-1 md:mb-1.5">Live Students</p>
                      <p className="text-lg md:text-2xl font-headline font-black text-[#0F172A] leading-none uppercase">
-                        {liveStudentCount}
+                        {mounted ? liveStudentCount : "---"}
                      </p>
                   </div>
                </div>

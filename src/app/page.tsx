@@ -17,8 +17,8 @@ import { ShieldCheck, Zap, Trophy, Target } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Official Institutional Hub v68.0.
- * FIXED: Extreme Hydration Hardening. Server renders a consistent skeleton.
+ * @fileOverview Official Institutional Hub v70.0.
+ * FIXED: Resolved hydration mismatches by removing early skeletal returns.
  */
 
 export default function HomePage() {
@@ -55,13 +55,6 @@ export default function HomePage() {
     };
   }, [stats, mounted]);
 
-  if (!mounted) return (
-     <main className="min-h-screen bg-white">
-        <Navbar />
-        <div className="h-[600px] w-full bg-[#08152D] animate-pulse" />
-     </main>
-  );
-
   return (
     <main className="min-h-screen bg-white font-body pb-safe overflow-x-hidden text-left">
       <Navbar />
@@ -70,10 +63,10 @@ export default function HomePage() {
       <section className="bg-white py-6 md:py-10 border-b border-slate-50 relative overflow-hidden">
          <div className="container mx-auto px-3 md:px-6 max-w-7xl">
             <div className="flex flex-wrap lg:flex-nowrap gap-3 md:gap-6 justify-center">
-               <TrustCard loading={statsLoading} icon={<ShieldCheck className="text-emerald-500 h-4 w-4 md:h-5 md:w-5" />} label="OFFICIAL HUBS" val={liveStats.hubs} />
-               <TrustCard loading={statsLoading} icon={<Zap className="text-primary h-4 w-4 md:h-5 md:w-5" />} label="STEP SOLUTIONS" val={liveStats.solutions} />
-               <TrustCard loading={statsLoading} icon={<Trophy className="text-amber-500 h-4 w-4 md:h-5 md:w-5" />} label="STATE RANKING" val={liveStats.rankers} isLive={true} />
-               <TrustCard loading={statsLoading} icon={<Target className="text-blue-500 h-4 w-4 md:h-5 md:w-5" />} label="AVG ACCURACY" val={liveStats.accuracy} />
+               <TrustCard loading={statsLoading || !mounted} icon={<ShieldCheck className="text-emerald-500 h-4 w-4 md:h-5 md:w-5" />} label="OFFICIAL HUBS" val={liveStats.hubs} />
+               <TrustCard loading={statsLoading || !mounted} icon={<Zap className="text-primary h-4 w-4 md:h-5 md:w-5" />} label="STEP SOLUTIONS" val={liveStats.solutions} />
+               <TrustCard loading={statsLoading || !mounted} icon={<Trophy className="text-amber-500 h-4 w-4 md:h-5 md:w-5" />} label="STATE RANKING" val={liveStats.rankers} isLive={true} />
+               <TrustCard loading={statsLoading || !mounted} icon={<Target className="text-blue-500 h-4 w-4 md:h-5 md:w-5" />} label="AVG ACCURACY" val={liveStats.accuracy} />
             </div>
          </div>
       </section>

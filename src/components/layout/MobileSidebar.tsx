@@ -38,7 +38,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Institutional Mobile Sidebar v8.6.
+ * @fileOverview Institutional Mobile Sidebar v9.0.
  * FIXED: High-contrast Orange background for Active Pass status.
  */
 
@@ -125,10 +125,10 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
   const menuItems = [
     { label: "Home Page", href: "/", icon: Home },
-    { label: "Exam Hub", href: "/my-exams", icon: Target },
+    { label: "Official List", href: "/my-exams", icon: Target },
     { label: "Elite Pass", href: "/pass", icon: Gem, badge: "PRO" },
     { label: "Practice Tests", href: "/mocks", icon: Zap },
-    { label: "Current Affairs", href: "/current-affairs", icon: Newspaper },
+    { label: "Updates Hub", href: "/current-affairs", icon: Newspaper },
     { label: "Share App", icon: Share2, onClick: () => setIsShareOpen(true) },
     { label: "Contact Us", href: "/contact", icon: MessageCircleQuestion },
   ];
@@ -181,7 +181,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
           >
             <div className="flex items-center gap-3">
                <User className="h-4 w-4 text-primary" />
-               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Profile Settings</span>
+               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Profile Hub</span>
             </div>
             <ChevronRight className="h-3.5 w-3.5 text-slate-500 group-hover:text-primary transition-all" />
           </Link>
