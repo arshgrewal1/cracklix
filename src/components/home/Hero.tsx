@@ -1,4 +1,3 @@
-
 'use client';
 
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,8 +14,8 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 /**
- * @fileOverview Refined Hero Hub v154.0.
- * UPDATED: Added PPSC after PSSSB in the marketing headline.
+ * @fileOverview Refined Hero Hub v155.0.
+ * UPDATED: Removed PPSC as requested.
  * STYLE: Dark Navy & Vibrant Orange Brand Identity.
  */
 
@@ -89,7 +88,7 @@ export default function Hero() {
           <div className="lg:col-span-5 space-y-10 text-left">
             <div className="space-y-6">
                <h1 className="text-4xl md:text-6xl font-headline font-black leading-[0.95] text-white uppercase tracking-tighter">
-                  CRACK PSSSB, PPSC, POLICE, <br />
+                  CRACK PSSSB, POLICE, <br />
                   PSPCL, PSTET, CTET, <br />
                   <span className="text-primary">ETT & MASTER CADRE</span>
                </h1>
@@ -162,4 +161,3 @@ export default function Hero() {
     </section>
   );
 }
-
