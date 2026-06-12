@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Optimized Official Hero Hub v50.0.
- * FIXED: Resolved hydration error by moving animation conditions and stats display to post-mount.
+ * @fileOverview Optimized Official Hero Hub v50.2.
+ * FIXED: Resolved hydration mismatch by ensuring static text consistency and robust mounting guards.
  */
 
 export default function Hero() {
@@ -57,7 +57,7 @@ export default function Hero() {
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            animate={mounted ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
             className="space-y-6 md:space-y-10"
           >
@@ -101,7 +101,7 @@ export default function Hero() {
 
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
+            animate={mounted ? { opacity: 1, scale: 1 } : {}}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative w-full block"
           >

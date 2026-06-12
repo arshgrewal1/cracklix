@@ -19,8 +19,8 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Optimized Institutional Landing Hub v63.0.
- * FIXED: Hydration error with live stats via isMounted guard.
+ * @fileOverview Optimized Institutional Landing Hub v63.1.
+ * FIXED: Hydration error with live stats via isMounted guard and text synchronization.
  */
 
 export default function HomePage() {
@@ -43,6 +43,7 @@ export default function HomePage() {
     const avgAcc = stats.averageAccuracy || 94;
     
     const formatNumber = (num: number) => {
+       if (!num) return "0";
        if (num >= 1000) return (num / 1000).toFixed(1) + 'k+';
        return num.toString();
     }
