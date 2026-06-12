@@ -14,9 +14,9 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Refined Institutional Hero Hub v46.0.
- * RESTORED: Punjab Police photo node for Desktop views with Hydration Guard.
- * UPDATED: Uses centralized placeholder image registry for high-fidelity asset delivery.
+ * @fileOverview Refined Institutional Hero Hub v47.0.
+ * UPDATED: Optimized for universal visibility across Mobile and Desktop.
+ * FIXED: Removed hidden classes to ensure the Punjab Police asset renders in all modes.
  */
 
 export default function Hero() {
@@ -29,7 +29,6 @@ export default function Hero() {
     setMounted(true);
   }, []);
   
-  // Use official registry for the police asset
   const policeImage = PlaceHolderImages.find(img => img.id === 'hero-police')?.imageUrl || "https://picsum.photos/seed/police/800/600";
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
@@ -110,18 +109,18 @@ export default function Hero() {
             </div>
           </motion.div>
 
-          {/* RIGHT: DESKTOP POLICE PHOTO NODE */}
+          {/* RIGHT: PHOTO NODE (Now visible on all screens) */}
           <motion.div 
-            initial={{ opacity: 0, x: 30 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative hidden lg:block"
+            className="relative w-full"
           >
-            <div className="relative aspect-[4/3] w-full max-w-[620px] ml-auto">
+            <div className="relative aspect-video sm:aspect-[4/3] w-full max-w-[620px] lg:ml-auto mx-auto mt-6 lg:mt-0">
                {/* Background Glow */}
-               <div className="absolute -inset-10 bg-primary/10 blur-[100px] rounded-full opacity-50" />
+               <div className="absolute -inset-6 md:-inset-10 bg-primary/10 blur-[100px] rounded-full opacity-50" />
                
-               <div className="relative h-full w-full rounded-[3.5rem] overflow-hidden border-[10px] border-white/5 shadow-5xl bg-slate-800 group">
+               <div className="relative h-full w-full rounded-[2rem] md:rounded-[3.5rem] overflow-hidden border-[6px] md:border-[10px] border-white/5 shadow-5xl bg-slate-800 group">
                   <img 
                     src={policeImage} 
                     alt="Punjab Police Preparation" 
@@ -132,27 +131,27 @@ export default function Hero() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#08152D] via-transparent to-transparent opacity-60" />
                   
                   {/* Floating Identity Node */}
-                  <div className="absolute bottom-8 left-8 right-8 flex items-center justify-between">
-                     <div className="bg-white/10 backdrop-blur-xl px-6 py-4 rounded-2xl border border-white/20 shadow-2xl flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg">
-                           <ShieldCheck className="h-5 w-5 text-white" />
+                  <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 flex items-center justify-between">
+                     <div className="bg-white/10 backdrop-blur-xl px-4 py-2 md:px-6 md:py-4 rounded-xl md:rounded-2xl border border-white/20 shadow-2xl flex items-center gap-3 md:gap-4">
+                        <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-emerald-500 flex items-center justify-center shadow-lg">
+                           <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 text-white" />
                         </div>
                         <div className="text-left">
-                           <p className="text-[8px] font-black uppercase text-white/60 leading-none mb-1">Official Registry</p>
-                           <p className="text-lg font-black text-white leading-none uppercase">VERIFIED CONTENT</p>
+                           <p className="text-[7px] md:text-[8px] font-black uppercase text-white/60 leading-none mb-1">Official Registry</p>
+                           <p className="text-sm md:text-lg font-black text-white leading-none uppercase">VERIFIED CONTENT</p>
                         </div>
                      </div>
                   </div>
                </div>
 
                {/* Stats Overlay Node */}
-               <div className="absolute -bottom-6 -right-6 bg-white p-6 md:p-8 rounded-[2.5rem] shadow-3xl flex items-center gap-4 border border-slate-50 animate-in fade-in slide-in-from-right-4 duration-1000 delay-500">
-                  <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center shadow-inner">
-                     <Zap className="h-7 w-7 text-primary fill-current" />
+               <div className="absolute -bottom-4 -right-2 md:-bottom-6 md:-right-6 bg-white p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] shadow-3xl flex items-center gap-3 md:gap-4 border border-slate-50 animate-in fade-in slide-in-from-right-4 duration-1000 delay-500">
+                  <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center shadow-inner">
+                     <Zap className="h-5 w-5 md:h-7 md:w-7 text-primary fill-current" />
                   </div>
-                  <div className="text-left pr-4">
-                     <p className="text-[9px] font-black uppercase text-slate-400 leading-none mb-1.5">Live Aspirants</p>
-                     <p className="text-2xl font-headline font-black text-[#0F172A] leading-none uppercase">{liveAspirantCount}</p>
+                  <div className="text-left md:pr-4">
+                     <p className="text-[7px] md:text-[9px] font-black uppercase text-slate-400 leading-none mb-1 md:mb-1.5">Live Aspirants</p>
+                     <p className="text-lg md:text-2xl font-headline font-black text-[#0F172A] leading-none uppercase">{liveAspirantCount}</p>
                   </div>
                </div>
             </div>
