@@ -1,4 +1,3 @@
-
 'use client';
 
 import { motion } from "framer-motion";
@@ -15,27 +14,41 @@ import {
   GraduationCap,
   Star
 } from "lucide-react";
-import { useUser } from "@/firebase";
+import { useUser, useFirestore, useDoc } from "@/firebase";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Premium Hero Command Center v81.0 (Syntax Hardened).
- * DESIGN: Staggered "Floating Node" layout with institutional command bar.
- * FIX: Balanced JSX tags and ensured strict motion.div closing.
+ * @fileOverview Premium Hero Command Center v82.0 (Real Data Sync).
+ * INTEGRATION: Connected to settings/stats to display real student counts and accuracy.
  */
 export default function Hero() {
   const router = useRouter();
   const { user } = useUser();
+  const db = useFirestore();
   const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchTerm] = useState("");
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // REAL DATA LISTENERS
+  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
+  const { data: stats } = useDoc<any>(statsRef);
+
+  const studentCount = useMemo(() => {
+     if (!mounted || !stats?.totalUsers) return "15,000+";
+     return stats.totalUsers.toLocaleString() + "+";
+  }, [stats, mounted]);
+
+  const accuracyIndex = useMemo(() => {
+     return stats?.averageAccuracy || 94;
+  }, [stats]);
 
   const heroImage = "https://grppunjab.org/wp-content/uploads/2025/09/PP10_slider.jpg";
 
@@ -161,13 +174,13 @@ export default function Hero() {
           </div>
 
           {/* RIGHT: FLOATING VISUAL HUB */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="lg:col-span-5 relative"
-          >
-             <div className="relative group">
+          <div className="lg:col-span-5 relative">
+             <motion.div 
+               initial={{ opacity: 0, scale: 0.95 }}
+               animate={{ opacity: 1, scale: 1 }}
+               transition={{ duration: 0.8, delay: 0.2 }}
+               className="relative group"
+             >
                 {/* Visual Anchor Container */}
                 <div className="relative aspect-[4/3] md:aspect-[16/11] rounded-[3rem] md:rounded-[4rem] overflow-hidden shadow-6xl border-[1px] border-white/10 bg-[#0F172A] z-10">
                    <Image 
@@ -199,15 +212,15 @@ export default function Hero() {
                          className="bg-white rounded-[2rem] p-6 flex items-center gap-4 shadow-5xl border border-white"
                       >
                          <div className="h-12 w-12 rounded-2xl bg-orange-50 flex items-center justify-center shrink-0 shadow-inner">
-                            <Zap className="h-6 w-6 text-primary fill-current" />
+                            <Users className="h-6 w-6 text-primary" />
                          </div>
                          <div className="text-left pr-4 text-black">
                             <div className="flex items-center gap-1.5 mb-0.5">
                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-ping" />
-                               <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Real-Time Prep</p>
+                               <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Live Aspirants</p>
                             </div>
-                            <p className="text-3xl font-headline font-black text-[#0B1528] leading-none tabular-nums">94%</p>
-                            <p className="text-[8px] font-bold text-slate-500 uppercase mt-1">Accuracy Index</p>
+                            <p className="text-3xl font-headline font-black text-[#0B1528] leading-none tabular-nums">{studentCount}</p>
+                            <p className="text-[8px] font-bold text-slate-500 uppercase mt-1">Platform Density</p>
                          </div>
                       </motion.div>
                    </div>
@@ -217,14 +230,17 @@ export default function Hero() {
                 <div className="absolute -inset-12 bg-primary/5 blur-[100px] rounded-full -z-10" />
                 
                 <div className="absolute -top-6 -right-6 h-20 w-20 bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl flex items-center justify-center shadow-2xl z-[12] animate-in zoom-in duration-1000 delay-500">
-                   <Target className="h-8 w-8 text-primary" />
+                   <div className="flex flex-col items-center">
+                      <span className="text-xs font-black text-primary">{accuracyIndex}%</span>
+                      <Target className="h-5 w-5 text-primary" />
+                   </div>
                 </div>
                 
                 <div className="absolute -bottom-6 -left-6 h-24 w-24 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] flex items-center justify-center shadow-2xl z-[12] animate-in zoom-in duration-1000 delay-700">
                    <Award className="h-10 w-10 text-primary" />
                 </div>
-             </div>
-          </motion.div>
+             </motion.div>
+          </div>
 
         </div>
       </div>
