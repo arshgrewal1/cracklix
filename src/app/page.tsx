@@ -14,14 +14,14 @@ import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
-import { BookOpen, Zap, Users, Target, Activity } from "lucide-react";
+import { ShieldCheck, Zap, Trophy, Target, Activity } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Optimized Institutional Landing Hub v61.0.
- * UPDATED: Optimized Stats Bar to be compact and space-efficient.
+ * @fileOverview Optimized Institutional Landing Hub v62.0.
+ * UPDATED: Ultra-compact "One-Line" Stats bar with real terminologies and live updates.
  */
 
 export default function HomePage() {
@@ -32,19 +32,21 @@ export default function HomePage() {
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   const liveStats = useMemo(() => {
-    if (!stats) return { mcqs: "0", mocks: "0", users: "0", accuracy: "94%" };
+    if (!stats) return { hubs: "0", solutions: "0", rankers: "0", accuracy: "94%" };
+    const hubs = stats.totalBoards || 0;
     const qCount = stats.totalQuestions || 0;
-    const mCount = stats.totalMocks || 0;
     const uCount = stats.totalUsers || 0;
     const avgAcc = stats.averageAccuracy || 94;
+    
     const formatNumber = (num: number) => {
        if (num >= 1000) return (num / 1000).toFixed(1) + 'k+';
        return num.toString();
     }
+    
     return {
-      mcqs: formatNumber(qCount),
-      mocks: mCount.toLocaleString(),
-      users: uCount.toLocaleString(),
+      hubs: hubs.toString(),
+      solutions: formatNumber(qCount),
+      rankers: formatNumber(uCount),
       accuracy: `${avgAcc}%`
     };
   }, [stats]);
@@ -54,14 +56,14 @@ export default function HomePage() {
       <Navbar />
       <Hero />
 
-      {/* Trust Stats Bar - Space Efficient Row */}
-      <section className="bg-white py-8 md:py-16 border-b border-slate-50 relative overflow-hidden">
-         <div className="container mx-auto px-4 max-w-7xl">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-               <TrustCard loading={statsLoading} icon={<BookOpen className="text-primary h-5 w-5 md:h-6 md:w-6" />} label="MCQs" val={liveStats.mcqs} />
-               <TrustCard loading={statsLoading} icon={<Zap className="text-blue-500 h-5 w-5 md:h-6 md:w-6" />} label="MOCKS" val={liveStats.mocks} />
-               <TrustCard loading={statsLoading} icon={<Users className="text-emerald-500 h-5 w-5 md:h-6 md:w-6" />} label="STUDENTS" val={liveStats.users} isLive />
-               <TrustCard loading={statsLoading} icon={<Target className="text-amber-500 h-5 w-5 md:h-6 md:w-6" />} label="ACCURACY" val={liveStats.accuracy} />
+      {/* Trust Stats Bar - Ultra Compact Horizontal Strip */}
+      <section className="bg-white py-6 md:py-10 border-b border-slate-50 relative overflow-hidden">
+         <div className="container mx-auto px-3 md:px-6 max-w-7xl">
+            <div className="flex flex-wrap lg:flex-nowrap gap-3 md:gap-6 justify-center">
+               <TrustCard loading={statsLoading} icon={<ShieldCheck className="text-emerald-500 h-4 w-4 md:h-5 md:w-5" />} label="VERIFIED HUBS" val={liveStats.hubs} />
+               <TrustCard loading={statsLoading} icon={<Zap className="text-primary h-4 w-4 md:h-5 md:w-5" />} label="LOGIC SOLUTIONS" val={liveStats.solutions} />
+               <TrustCard loading={statsLoading} icon={<Trophy className="text-amber-500 h-4 w-4 md:h-5 md:w-5" />} label="STATE RANKING" val={liveStats.rankers} isLive />
+               <TrustCard loading={statsLoading} icon={<Target className="text-blue-500 h-4 w-4 md:h-5 md:w-5" />} label="AVG ACCURACY" val={liveStats.accuracy} />
             </div>
          </div>
       </section>
@@ -83,15 +85,24 @@ export default function HomePage() {
 
 function TrustCard({ icon, label, val, loading, isLive }: any) {
    return (
-      <div className="bg-white p-5 md:p-10 rounded-[1.5rem] md:rounded-[3rem] border border-slate-100 shadow-lg hover:shadow-2xl transition-all group relative flex items-center gap-4 md:flex-col md:text-center md:justify-center">
-         <div className="h-10 w-10 md:h-16 md:w-16 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+      <div className="bg-white p-3 md:p-6 rounded-xl md:rounded-[2rem] border border-slate-100 shadow-md hover:shadow-xl transition-all group relative flex items-center gap-3 md:gap-5 flex-1 min-w-[140px] max-w-full lg:max-w-none">
+         <div className="h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
             {icon}
          </div>
-         <div className="space-y-0.5">
-            {loading ? <Skeleton className="h-6 w-16 bg-slate-100" /> : <p className="text-lg md:text-4xl font-headline font-black text-[#0F172A] leading-none tabular-nums">{val}</p>}
-            <p className="text-[7px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 md:mt-2">{label}</p>
+         <div className="space-y-0.5 min-w-0">
+            {loading ? (
+               <Skeleton className="h-4 w-12 bg-slate-100" />
+            ) : (
+               <p className="text-sm md:text-2xl font-headline font-black text-[#0F172A] leading-none tabular-nums truncate">{val}</p>
+            )}
+            <p className="text-[6px] md:text-[9px] font-black uppercase tracking-widest text-slate-400 md:mt-1 truncate">{label}</p>
          </div>
-         {isLive && <div className="absolute top-3 right-4 h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse hidden md:block" />}
+         {isLive && (
+            <div className="absolute top-2 right-2 flex items-center gap-1.5">
+               <span className="text-[6px] font-black text-emerald-500 hidden md:inline uppercase tracking-tighter">LIVE</span>
+               <div className="h-1 w-1 rounded-full bg-emerald-500 animate-pulse" />
+            </div>
+         )}
       </div>
    )
 }

@@ -30,8 +30,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Command Center v38.0.
- * UPDATED: Hardened real-time statistics synchronization protocol.
+ * @fileOverview Institutional Command Center v39.0.
+ * UPDATED: Added totalBoards to master statistics synchronization.
  */
 
 export default function AdminDashboard() {
@@ -75,11 +75,12 @@ export default function AdminDashboard() {
      if (!db) return;
      if (!silent) setIsStatsSyncing(true);
      try {
-        const [qSnap, mSnap, uSnap, rSnap] = await Promise.all([
+        const [qSnap, mSnap, uSnap, rSnap, bSnap] = await Promise.all([
            getDocs(collection(db, "questions")),
            getDocs(collection(db, "mocks")),
            getDocs(collection(db, "users")),
-           getDocs(collection(db, "results"))
+           getDocs(collection(db, "results")),
+           getDocs(collection(db, "boards"))
         ]);
 
         const totalResults = rSnap.docs.length;
@@ -91,6 +92,7 @@ export default function AdminDashboard() {
            totalQuestions: qSnap.size,
            totalMocks: mSnap.size,
            totalUsers: uSnap.size,
+           totalBoards: bSnap.size,
            averageAccuracy: avgAcc,
            updatedAt: serverTimestamp()
         }, { merge: true });
@@ -98,7 +100,7 @@ export default function AdminDashboard() {
         if (!silent) {
            toast({ 
              title: "Registry Audited", 
-             description: `Synced: ${qSnap.size} MCQs, ${mSnap.size} Mocks, ${uSnap.size} Students.` 
+             description: `Synced: ${qSnap.size} MCQs, ${bSnap.size} Hubs, ${uSnap.size} Students.` 
            });
         }
      } catch (e) {

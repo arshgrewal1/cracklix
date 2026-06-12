@@ -30,8 +30,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Individual Mock Gateway v19.8.
- * UPDATED: Integrated Resume/Reattempt logic with attemptLimit checks.
+ * @fileOverview Individual Mock Gateway v19.9.
+ * UPDATED: Shrunk FeatureNode section for a more professional "Testbook" style.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -194,12 +194,12 @@ export default function MockOverviewPage() {
           </div>
         </section>
 
-        <section className="py-20 bg-white">
+        <section className="py-12 md:py-20 bg-white">
            <div className="container mx-auto px-4 max-w-6xl">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                 <FeatureNode icon={<ShieldCheck className="text-emerald-500" />} title="Verified Hub" desc="Official board patterns" />
-                 <FeatureNode icon={<Zap className="text-primary" />} title="Logic Solutions" desc="Step-by-step explanations" />
-                 <FeatureNode icon={<Target className="text-blue-500" />} title="State Rankings" desc="See where you stand" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
+                 <FeatureNode icon={<ShieldCheck className="text-emerald-500 h-5 w-5" />} title="Verified Hub" desc="Official board patterns" />
+                 <FeatureNode icon={<Zap className="text-primary h-5 w-5" />} title="Logic Solutions" desc="Step-by-step explanations" />
+                 <FeatureNode icon={<Target className="text-blue-500 h-5 w-5" />} title="State Rankings" desc="See where you stand" />
               </div>
            </div>
         </section>
@@ -211,10 +211,10 @@ export default function MockOverviewPage() {
 
 function FeatureNode({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
   return (
-    <div className="p-10 rounded-[2.5rem] bg-slate-50 border border-slate-100 space-y-4 text-center">
-      <div className="h-14 w-14 bg-white rounded-2xl flex items-center justify-center mx-auto shadow-xl">{icon}</div>
-      <h3 className="text-xl font-black text-[#0F172A] uppercase">{title}</h3>
-      <p className="text-slate-400 font-bold uppercase text-[9px] tracking-widest">{desc}</p>
+    <div className="p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-slate-50 border border-slate-100 space-y-3 text-center group hover:bg-white hover:shadow-xl transition-all">
+      <div className="h-10 w-10 md:h-12 md:w-12 bg-white rounded-xl flex items-center justify-center mx-auto shadow-sm group-hover:scale-110 transition-transform">{icon}</div>
+      <h3 className="text-sm md:text-lg font-black text-[#0F172A] uppercase tracking-tight">{title}</h3>
+      <p className="text-slate-400 font-bold uppercase text-[7px] md:text-[9px] tracking-widest">{desc}</p>
     </div>
   );
 }
