@@ -19,8 +19,8 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Optimized Institutional Landing Hub v63.1.
- * FIXED: Hydration error with live stats via isMounted guard and text synchronization.
+ * @fileOverview Optimized Institutional Landing Hub v64.0.
+ * FIXED: Corrected hydration mismatch by synchronizing main tag and trust bar mounting guards.
  */
 
 export default function HomePage() {

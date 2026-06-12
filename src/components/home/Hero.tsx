@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Optimized Official Hero Hub v50.2.
- * FIXED: Resolved hydration mismatch by ensuring static text consistency and robust mounting guards.
+ * @fileOverview Optimized Official Hero Hub v51.0.
+ * FIXED: Resolved hydration mismatch by ensuring static text consistency ("EXAM.") and robust mounting guards.
  */
 
 export default function Hero() {
@@ -57,7 +57,7 @@ export default function Hero() {
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={mounted ? { opacity: 1, y: 0 } : {}}
+            animate={mounted ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
             transition={{ duration: 0.6 }}
             className="space-y-6 md:space-y-10"
           >
@@ -67,7 +67,7 @@ export default function Hero() {
                   <span className="text-[8px] md:text-[10px] font-black text-primary uppercase tracking-widest">Punjab's No. 1 Study Hub</span>
                </div>
                <h1 className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight break-words">
-                  CRACK EVERY <br className="hidden sm:block"/> <span className="text-primary">EXAM.</span>
+                  CRACK EVERY <br className="hidden sm:block" /> <span className="text-primary">EXAM.</span>
                </h1>
                <p className="text-sm md:text-xl text-slate-400 font-medium max-w-lg leading-relaxed">
                   The most trusted practice tests for PSSSB, PPSC, Police, and Army. Latest pattern based study plans for guaranteed success.
@@ -101,7 +101,7 @@ export default function Hero() {
 
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
-            animate={mounted ? { opacity: 1, scale: 1 } : {}}
+            animate={mounted ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative w-full block"
           >
