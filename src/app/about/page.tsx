@@ -29,8 +29,8 @@ import { doc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Simplified Founder's Story Hub v6.0.
- * SIMPLIFIED: Replaced difficult words with easy words (Registry -> List, Area, History).
+ * @fileOverview Simplified Founder's Story Hub v7.0.
+ * FIXED: Hydration-safe logic for live status nodes.
  */
 
 export default function AboutPage() {
@@ -48,7 +48,7 @@ export default function AboutPage() {
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   const liveStats = useMemo(() => {
-    if (!stats) return { aspirants: "15k+", mcqs: "10k+", hubs: "8+" };
+    if (!mounted || !stats) return { aspirants: "15k+", mcqs: "10k+", hubs: "8+" };
     
     const formatNumber = (num: number) => {
        if (!num) return "0";
@@ -61,7 +61,7 @@ export default function AboutPage() {
       mcqs: formatNumber(stats.totalQuestions || 10000),
       hubs: (stats.totalBoards || 8).toString() + "+"
     };
-  }, [stats]);
+  }, [stats, mounted]);
 
   return (
     <div className="min-h-screen bg-[#020817] text-white font-body overflow-x-hidden selection:bg-primary/30 text-left">
@@ -342,7 +342,7 @@ function TimelineItem({ icon, title, desc, right = false }: any) {
          </div>
          <div className="md:w-1/2 space-y-3">
             <h4 className="text-2xl md:text-3xl font-headline font-black text-white uppercase tracking-tight">{title}</h4>
-            <p className="text-slate-400 text-sm md:text-lg font-medium leading-relaxed max-w-sm mx-auto md:mx-0">{desc}</p>
+            <p className="text-slate-400 text-sm md:text-lg font-medium leading-relaxed max-sm mx-auto md:mx-0">{desc}</p>
          </div>
       </motion.div>
    )

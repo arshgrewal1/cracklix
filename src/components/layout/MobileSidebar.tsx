@@ -38,8 +38,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Institutional Mobile Sidebar v8.4.
- * UPDATED: Set Active Pass background to Orange.
+ * @fileOverview Institutional Mobile Sidebar v8.5.
+ * FIXED: High-contrast Orange background for Active Pass status.
  */
 
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
@@ -152,19 +152,19 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
                 </div>
              </div>
              
-             <div className="flex-1 min-w-0 text-left space-y-1.5">
+             <div className="flex-1 min-w-0 text-left space-y-2">
                 <h2 className="text-base font-black text-white leading-tight uppercase tracking-tight truncate">
                    {profile?.name || "Student"}
                 </h2>
                 {passStatus ? (
-                   <div className="flex flex-col gap-1">
+                   <div className="flex flex-col gap-1.5">
                       <Badge className={cn(
-                        "border-none px-2 py-0.5 rounded-md font-black uppercase text-[7px] tracking-widest shadow-lg w-fit text-white",
+                        "border-none px-3 py-1 rounded-md font-black uppercase text-[7px] tracking-widest shadow-xl w-fit text-white",
                         passStatus.active ? "bg-primary" : "bg-rose-600"
                       )}>
                          {passStatus.label}
                       </Badge>
-                      <p className="text-[7px] font-bold text-slate-500 uppercase tracking-widest">EXP: {passStatus.expiry}</p>
+                      <p className="text-[7px] font-bold text-slate-500 uppercase tracking-widest ml-1">EXP: {passStatus.expiry}</p>
                    </div>
                 ) : (
                    <Badge className="bg-white/10 text-slate-300 border-none px-2 py-0.5 rounded-md font-black uppercase text-[7px] tracking-widest shadow-lg w-fit">

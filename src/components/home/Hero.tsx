@@ -13,8 +13,9 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Simplified Official Hero Hub v54.0.
- * UPDATED: Changed Verified Content icon background to Orange.
+ * @fileOverview Official Institutional Hero Hub v55.0.
+ * FIXED: Hydration-safe logic for dynamic text and motion props.
+ * BRANDING: Updated Verified Content icon background to Orange.
  */
 
 export default function Hero() {
@@ -62,17 +63,21 @@ export default function Hero() {
                   <span className="text-[8px] md:text-[10px] font-black text-primary uppercase tracking-widest">Punjab's No. 1 Study Center</span>
                </div>
                
-               {mounted ? (
-                 <motion.h1 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight break-words"
-                 >
-                    CRACK EVERY <br className="hidden sm:block" /> <span className="text-primary">EXAM.</span>
-                 </motion.h1>
-               ) : (
-                 <div className="h-20 md:h-32 w-full bg-white/5 animate-pulse rounded-2xl" />
-               )}
+               <div className="min-h-[60px] md:min-h-[140px]">
+                  {mounted ? (
+                    <motion.h1 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight break-words"
+                    >
+                        CRACK EVERY <br className="hidden sm:block" /> <span className="text-primary">EXAM.</span>
+                    </motion.h1>
+                  ) : (
+                    <h1 className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight">
+                       CRACK EVERY <br className="hidden sm:block" /> <span className="text-primary">EXAM.</span>
+                    </h1>
+                  )}
+               </div>
 
                <p className="text-sm md:text-xl text-slate-400 font-medium max-w-lg leading-relaxed">
                   The most trusted practice tests for PSSSB, PPSC, Police, and Army. Latest pattern based study plans for guaranteed success.
@@ -119,12 +124,12 @@ export default function Hero() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#08152D] via-transparent to-transparent opacity-60" />
                   
                   <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 flex items-center justify-between">
-                     <div className="bg-white/20 backdrop-blur-xl px-4 py-2 md:px-6 md:py-4 rounded-xl md:rounded-2xl border border-white/20 shadow-2xl flex items-center gap-3 md:gap-4">
+                     <div className="bg-white/30 backdrop-blur-xl px-4 py-2 md:px-6 md:py-4 rounded-xl md:rounded-2xl border border-white/20 shadow-2xl flex items-center gap-3 md:gap-4">
                         <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-primary flex items-center justify-center shadow-lg">
                            <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 text-white" />
                         </div>
                         <div className="text-left">
-                           <p className="text-[7px] md:text-[8px] font-black uppercase text-white/80 leading-none mb-1">Official Hub</p>
+                           <p className="text-[7px] md:text-[8px] font-black uppercase text-white leading-none mb-1">Official Hub</p>
                            <p className="text-sm md:text-lg font-black text-white leading-none uppercase">VERIFIED CONTENT</p>
                         </div>
                      </div>
