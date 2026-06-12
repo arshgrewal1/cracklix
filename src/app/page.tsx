@@ -9,10 +9,13 @@ import LatestMocks from "@/components/home/LatestMocks";
 import AppPreview from "@/components/home/AppPreview";
 import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
+import TrendingExams from "@/components/home/TrendingExams";
+import StatsBar from "@/components/home/StatsBar";
+import Features from "@/components/home/Features";
 
 /**
- * @fileOverview Official Home Hub v106.0 (Streamlined Restoration).
- * RESTORED: Direct sequential flow perfectly matched to the provided UI reference.
+ * @fileOverview Official Home Hub v110.0 (Wireframe Aligned).
+ * ORDER: Hero -> Trending -> Stats -> Why Cracklix -> Anchor Zone (Continue Learning -> Categories).
  */
 
 export default function HomePage() {
@@ -26,19 +29,28 @@ export default function HomePage() {
     <main className="min-h-screen bg-white font-body pb-safe overflow-x-hidden text-left">
       <Navbar />
       
-      {/* 1. SCREENSHOT MATCHED HERO HUB */}
+      {/* 1. HERO HUB */}
       <Hero />
 
+      {/* 2. TRENDING EXAMS (MATCHED TO WIREFRAME) */}
+      <TrendingExams />
+
+      {/* 3. LIVE STATS */}
+      <StatsBar />
+
+      {/* 4. WHY CRACKLIX? */}
+      <Features />
+
       <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl space-y-16 md:space-y-32">
-         {/* 2. USER ANCHORS */}
+         {/* 5. ANCHOR ZONE (NO CHANGE) */}
          <ContinueLearning />
          <FeaturedCategories />
          
-         {/* 3. RECENT CONTENT */}
+         {/* 6. RECENT CONTENT */}
          <LatestMocks />
       </div>
 
-      {/* 4. TRUST & IDENTITY NODES */}
+      {/* 7. TRUST & IDENTITY NODES */}
       <AppPreview />
       <MeetFounder />
       

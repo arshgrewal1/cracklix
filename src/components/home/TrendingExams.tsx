@@ -1,16 +1,14 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, limit, where } from 'firebase/firestore';
-import { TrendingUp, Zap, ChevronRight } from 'lucide-react';
+import { TrendingUp, Zap, ChevronRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { motion } from 'framer-motion';
 
 /**
- * @fileOverview High-Fidelity Trending Exam Badges v7.0.
+ * @fileOverview High-Fidelity Trending Badges v8.0.
  */
 export default function TrendingExams() {
   const db = useFirestore();
@@ -29,11 +27,13 @@ export default function TrendingExams() {
   if (!loading && (!exams || exams.length === 0)) return null;
 
   return (
-    <section className="py-10 bg-slate-50/50 border-y border-slate-100">
+    <section className="py-8 bg-slate-50 border-y border-slate-100">
       <div className="container mx-auto px-4 max-w-7xl">
          <div className="flex flex-col md:flex-row items-center gap-8">
             <div className="flex items-center gap-3 shrink-0">
-               <TrendingUp className="h-5 w-5 text-rose-500" />
+               <div className="h-8 w-8 bg-rose-50 rounded-lg flex items-center justify-center text-rose-500">
+                  <TrendingUp className="h-4 w-4" />
+               </div>
                <h2 className="text-[11px] md:text-sm font-black text-[#0F172A] uppercase tracking-[0.2em]">Trending Exams</h2>
             </div>
 
@@ -42,8 +42,8 @@ export default function TrendingExams() {
                   Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-10 w-32 bg-white animate-pulse rounded-xl border border-slate-100" />)
                ) : exams?.map((exam: any) => (
                   <Link key={exam.id} href={`/exams/${exam.id}`}>
-                     <Badge className="bg-white border-slate-200 text-[#0F172A] hover:border-primary/30 hover:text-primary transition-all px-4 py-2.5 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-sm cursor-pointer active:scale-95">
-                        {exam.name}
+                     <Badge className="bg-white border-slate-200 text-[#0F172A] hover:border-primary hover:text-primary transition-all px-4 py-3 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-sm cursor-pointer active:scale-95 gap-2">
+                        <Sparkles className="h-3 w-3 text-primary" /> {exam.name}
                      </Badge>
                   </Link>
                ))}
