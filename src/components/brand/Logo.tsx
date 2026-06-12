@@ -2,7 +2,6 @@
 'use client';
 
 import Link from "next/link";
-import { Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -13,32 +12,65 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Stylized Brand Identity Node v2.1.
- * RESTORED: Reverted to SVG-based logo for immediate visual stability.
+ * @fileOverview Official Cracklix Brand Identity Node v3.0.
+ * RECONSTRUCTED: Matches the provided "C-Check" emblem and typography from the user image.
  */
 export default function Logo({ className = "", variant = 'light', showTagline = true, href = "/" }: LogoProps) {
+  const isDark = variant === 'dark';
+
   return (
-    <Link href={href} className={cn("flex items-center gap-2.5 group pointer-events-auto select-none", className)}>
-      <div className="relative shrink-0">
-        {/* Bolt Icon Hub */}
-        <div className="h-9 w-9 md:h-10 md:w-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 rotate-3 group-hover:rotate-0 transition-transform duration-500">
-          <Zap className="h-5 w-5 md:h-6 md:w-6 text-white fill-current" />
-        </div>
-        {/* Glow Effect */}
-        <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+    <Link href={href} className={cn("flex items-center gap-3 group pointer-events-auto select-none shrink-0", className)}>
+      {/* C-CHECK EMBLEM NODE */}
+      <div className="relative shrink-0 w-10 h-10 md:w-12 md:h-12">
+        <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full drop-shadow-2xl">
+          {/* Orange Outer Arc */}
+          <path 
+            d="M85 50C85 69.33 69.33 85 50 85C30.67 85 15 69.33 15 50C15 30.67 30.67 15 50 15" 
+            stroke="#F97316" 
+            strokeWidth="10" 
+            strokeLinecap="round"
+          />
+          {/* White Main 'C' */}
+          <path 
+            d="M75 50C75 63.8071 63.8071 75 50 75C36.1929 75 25 63.8071 25 50C25 36.1929 36.1929 25 50 25" 
+            stroke={isDark ? "#0F172A" : "white"} 
+            strokeWidth="12" 
+            strokeLinecap="round"
+          />
+          {/* Integrated Orange Checkmark */}
+          <path 
+            d="M40 50L50 60L75 35" 
+            stroke="#F97316" 
+            strokeWidth="10" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+            className="group-hover:translate-y-[-2px] transition-transform duration-300"
+          />
+        </svg>
       </div>
 
-      <div className="flex flex-col items-start leading-none">
-        <span className={cn(
-          "text-xl md:text-2xl font-headline font-[900] tracking-tighter uppercase",
-          variant === 'light' ? "text-white" : "text-[#0F172A]"
-        )}>
-          CRACKLIX
-        </span>
-        {showTagline && (
-          <span className="text-[7px] md:text-[8px] font-black uppercase tracking-[0.4em] text-primary/80 mt-1 md:mt-1.5">
-            Punjab Exam Hub
+      {/* BRAND TEXT NODE */}
+      <div className="flex flex-col items-start justify-center leading-none">
+        <div className="flex items-baseline">
+          <span className={cn(
+            "text-2xl md:text-3xl font-headline font-[900] tracking-tighter uppercase",
+            isDark ? "text-[#0F172A]" : "text-white"
+          )}>
+            CRACK
           </span>
+          <span className="text-2xl md:text-3xl font-headline font-[900] tracking-tighter uppercase text-primary">
+            LIX
+          </span>
+        </div>
+        
+        {showTagline && (
+          <div className="flex items-center gap-1.5 w-full mt-1">
+            <div className="h-[1px] flex-1 bg-primary/40" />
+            <span className="text-[6px] md:text-[8px] font-black uppercase tracking-[0.2em] text-slate-400 whitespace-nowrap">
+              PUNJAB'S <span className="text-primary">NO.1</span> STUDY HUB
+            </span>
+            <div className="h-[1px] flex-1 bg-primary/40" />
+          </div>
         )}
       </div>
     </Link>
