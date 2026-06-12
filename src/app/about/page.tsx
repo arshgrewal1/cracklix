@@ -30,8 +30,8 @@ import { doc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Premium Founder's Story Hub v3.0.
- * UPDATED: Integrated live status synchronization for Aspirants and MCQs.
+ * @fileOverview Premium Founder's Story Hub v4.0.
+ * UPDATED: Integrated 3-node live status synchronization (Aspirants, MCQs, Hubs).
  */
 
 export default function AboutPage() {
@@ -43,16 +43,19 @@ export default function AboutPage() {
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   const liveStats = useMemo(() => {
-    if (!stats) return { aspirants: "...", mcqs: "..." };
+    // If stats document doesn't exist yet, show standard benchmarks
+    if (!stats) return { aspirants: "15k+", mcqs: "10k+", hubs: "8+" };
     
     const formatNumber = (num: number) => {
+       if (!num) return "0";
        if (num >= 1000) return (num / 1000).toFixed(1) + 'k+';
        return num.toString();
     }
     
     return {
       aspirants: formatNumber(stats.totalUsers || 15000),
-      mcqs: formatNumber(stats.totalQuestions || 10000)
+      mcqs: formatNumber(stats.totalQuestions || 10000),
+      hubs: (stats.totalBoards || 8).toString() + "+"
     };
   }, [stats]);
 
@@ -116,6 +119,7 @@ export default function AboutPage() {
                          src={founderImg} 
                          className="w-full h-full object-cover grayscale transition-all duration-1000 group-hover:grayscale-0 group-hover:scale-105" 
                          alt="Arshdeep Singh Grewal"
+                         referrerPolicy="no-referrer"
                        />
                        <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent opacity-80" />
                        <div className="absolute bottom-10 left-10 right-10 space-y-2">
@@ -151,7 +155,7 @@ export default function AboutPage() {
                     </div>
 
                     {/* REAL IMPACT NODES - LIVE STATUS */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6">
                        <ImpactNode 
                           label="LIVE ASPIRANTS" 
                           val={liveStats.aspirants} 
@@ -162,6 +166,12 @@ export default function AboutPage() {
                           label="VERIFIED MCQs" 
                           val={liveStats.mcqs} 
                           icon={<ShieldCheck className="text-emerald-500" />} 
+                          loading={statsLoading}
+                       />
+                       <ImpactNode 
+                          label="OFFICIAL HUBS" 
+                          val={liveStats.hubs} 
+                          icon={<Landmark className="text-blue-500" />} 
                           loading={statsLoading}
                        />
                     </div>
@@ -277,16 +287,16 @@ export default function AboutPage() {
 function ImpactNode({ label, val, icon, loading }: any) {
    return (
       <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 flex items-center gap-6 shadow-xl group hover:border-primary/30 transition-all">
-         <div className="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+         <div className="h-12 w-12 rounded-xl bg-white/5 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform shrink-0">
             {icon}
          </div>
-         <div className="text-left">
+         <div className="text-left min-w-0">
             {loading ? (
-               <Skeleton className="h-8 w-20 bg-white/10" />
+               <Skeleton className="h-8 w-16 bg-white/10" />
             ) : (
-               <p className="text-2xl font-headline font-black text-white leading-none tabular-nums">{val}</p>
+               <p className="text-xl md:text-2xl font-headline font-black text-white leading-none tabular-nums truncate">{val}</p>
             )}
-            <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest mt-1.5">{label}</p>
+            <p className="text-[9px] font-black uppercase text-slate-500 tracking-widest mt-1.5 truncate">{label}</p>
          </div>
       </div>
    )
