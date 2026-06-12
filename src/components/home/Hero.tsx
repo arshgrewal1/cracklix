@@ -2,7 +2,7 @@
 'use client';
 
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,12 +15,14 @@ import {
   RefreshCw,
   Star,
   CheckCircle2,
-  ChevronRight
+  ChevronRight,
+  Target
 } from "lucide-react";
 import { useFirestore, useUser } from "@/firebase";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 interface ActivityItem {
   id: number;
@@ -32,9 +34,8 @@ interface ActivityItem {
 }
 
 /**
- * @fileOverview Institutional Hero Hub v180.0.
- * Redesigned for elite "Teaching Website" aesthetic with massive responsive typography.
- * UPDATED: Fixed scaling to prevent overflow while maintaining high impact.
+ * @fileOverview Institutional Hero Hub v185.0.
+ * UPDATED: Fixed non-study bridge image with high-fidelity academy visual.
  */
 export default function Hero() {
   const router = useRouter();
@@ -42,6 +43,11 @@ export default function Hero() {
   const [mounted, setMounted] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
   
+  const heroImage = useMemo(() => 
+    PlaceHolderImages.find(img => img.id === 'hero-academy')?.imageUrl || 
+    "https://picsum.photos/seed/academy-students/1200/800", []
+  );
+
   const [activities] = useState<ActivityItem[]>([
     { id: 1, initials: 'AM', name: 'Amanpreet M.', action: 'cleared Mock Test #12', status: 'Rank #2', isRank: true },
     { id: 2, initials: 'KS', name: 'Kuldeep Singh', action: 'joined Police Batch', status: 'Active' },
@@ -95,7 +101,7 @@ export default function Hero() {
                className="inline-flex items-center gap-3 bg-white/5 border border-white/10 backdrop-blur-xl px-5 py-2 rounded-full text-[10px] font-black tracking-[0.3em] text-primary shadow-2xl"
             >
               <Sparkles className="h-3 w-3 animate-pulse" />
-              PUNJAB&apos;S NO.1 PREP HUB
+              PUNJAB'S NO.1 STUDY HUB
             </motion.div>
 
             <div className="space-y-8">
@@ -110,7 +116,7 @@ export default function Hero() {
                      CRACK PSSSB, POLICE, PSPCL, PSTET, CTET, ETT & MASTER CADRE
                   </p>
                   <p className="text-base md:text-xl text-slate-400 font-medium leading-relaxed">
-                     Get official pattern mock tests, verified answer keys, and real-time state rankings. Prepare with India&apos;s most accurate CBT engine.
+                     Get official pattern mock tests, verified answer keys, and real-time state rankings. Prepare with India's most accurate CBT engine.
                   </p>
                </div>
             </div>
@@ -183,7 +189,7 @@ export default function Hero() {
                 {/* Main Visual Image Hub */}
                 <div className="relative aspect-[4/5] rounded-[3.5rem] overflow-hidden border border-white/10 shadow-6xl bg-[#0F172A] group-hover:border-primary/30 transition-all duration-700">
                    <Image 
-                      src="https://picsum.photos/seed/punjab-study-hub/800/1000" 
+                      src={heroImage} 
                       alt="Academy Success" 
                       fill 
                       className="object-cover grayscale-[0.3] group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
@@ -227,4 +233,3 @@ export default function Hero() {
     </section>
   );
 }
-

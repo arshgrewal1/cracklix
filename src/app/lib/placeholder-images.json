@@ -5,7 +5,7 @@
       "id": "hero-students",
       "description": "Happy Punjabi students with tablets and laptops",
       "imageUrl": "https://picsum.photos/seed/punjab-students-elite/1200/800",
-      "imageHint": "punjabi students"
+      "imageHint": "students studying"
     },
     {
       "id": "hero-police",
@@ -17,13 +17,13 @@
       "id": "hero-academy",
       "description": "Punjab Govt Exams Academy Students",
       "imageUrl": "https://picsum.photos/seed/academy-students/1200/800",
-      "imageHint": "students classroom"
+      "imageHint": "classroom students"
     },
     {
       "id": "promo-psssb",
       "description": "PSSSB Official Institutional Promotion",
       "imageUrl": "https://picsum.photos/seed/sssb-hub/1920/1080",
-      "imageHint": "psssb official"
+      "imageHint": "office building"
     },
     {
       "id": "hero-army",
@@ -34,8 +34,8 @@
     {
       "id": "hero-punjab",
       "description": "Punjab Heritage Hero",
-      "imageUrl": "https://picsum.photos/seed/punjab-hero-hd/1920/1280",
-      "imageHint": "punjab heritage"
+      "imageUrl": "https://picsum.photos/seed/punjab-education/1200/800",
+      "imageHint": "university students"
     },
     {
       "id": "map-punjab",
@@ -53,7 +53,7 @@
       "id": "mock-police",
       "description": "Punjab Police Operational Readiness",
       "imageUrl": "https://picsum.photos/seed/police-training/800/600",
-      "imageHint": "punjab police"
+      "imageHint": "police training"
     },
     {
       "id": "founder-arsh",
