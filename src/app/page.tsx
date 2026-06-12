@@ -19,8 +19,8 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Optimized Institutional Landing Hub v64.0.
- * FIXED: Corrected hydration mismatch by synchronizing main tag and trust bar mounting guards.
+ * @fileOverview Optimized Institutional Landing Hub v65.0.
+ * FIXED: Robust hydration guard for dynamic counts and trust cards.
  */
 
 export default function HomePage() {
@@ -36,7 +36,7 @@ export default function HomePage() {
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   const liveStats = useMemo(() => {
-    if (!stats) return { hubs: "0", solutions: "0", rankers: "0", accuracy: "94%" };
+    if (!mounted || !stats) return { hubs: "---", solutions: "---", rankers: "---", accuracy: "---" };
     const hubs = stats.totalBoards || 0;
     const qCount = stats.totalQuestions || 0;
     const uCount = stats.totalUsers || 0;
@@ -54,7 +54,7 @@ export default function HomePage() {
       rankers: formatNumber(uCount),
       accuracy: `${avgAcc}%`
     };
-  }, [stats]);
+  }, [stats, mounted]);
 
   return (
     <main className="min-h-screen bg-white font-body pb-safe overflow-x-hidden text-left">
@@ -65,20 +65,22 @@ export default function HomePage() {
       <section className="bg-white py-6 md:py-10 border-b border-slate-50 relative overflow-hidden">
          <div className="container mx-auto px-3 md:px-6 max-w-7xl">
             <div className="flex flex-wrap lg:flex-nowrap gap-3 md:gap-6 justify-center">
-               <TrustCard loading={statsLoading || !mounted} icon={<ShieldCheck className="text-emerald-500 h-4 w-4 md:h-5 md:w-5" />} label="VERIFIED HUBS" val={mounted ? liveStats.hubs : "---"} />
-               <TrustCard loading={statsLoading || !mounted} icon={<Zap className="text-primary h-4 w-4 md:h-5 md:w-5" />} label="LOGIC SOLUTIONS" val={mounted ? liveStats.solutions : "---"} />
-               <TrustCard loading={statsLoading || !mounted} icon={<Trophy className="text-amber-500 h-4 w-4 md:h-5 md:w-5" />} label="STATE RANKING" val={mounted ? liveStats.rankers : "---"} isLive />
-               <TrustCard loading={statsLoading || !mounted} icon={<Target className="text-blue-500 h-4 w-4 md:h-5 md:w-5" />} label="AVG ACCURACY" val={mounted ? liveStats.accuracy : "---"} />
+               <TrustCard loading={statsLoading || !mounted} icon={<ShieldCheck className="text-emerald-500 h-4 w-4 md:h-5 md:w-5" />} label="VERIFIED HUBS" val={liveStats.hubs} />
+               <TrustCard loading={statsLoading || !mounted} icon={<Zap className="text-primary h-4 w-4 md:h-5 md:w-5" />} label="LOGIC SOLUTIONS" val={liveStats.solutions} />
+               <TrustCard loading={statsLoading || !mounted} icon={<Trophy className="text-amber-500 h-4 w-4 md:h-5 md:w-5" />} label="STATE RANKING" val={liveStats.rankers} isLive />
+               <TrustCard loading={statsLoading || !mounted} icon={<Target className="text-blue-500 h-4 w-4 md:h-5 md:w-5" />} label="AVG ACCURACY" val={liveStats.accuracy} />
             </div>
          </div>
       </section>
 
-      <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl space-y-16 md:space-y-32">
-         <ContinueLearning />
-         <FeaturedCategories />
-         <TrendingExams />
-         <LatestMocks />
-      </div>
+      {mounted && (
+        <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl space-y-16 md:space-y-32">
+           <ContinueLearning />
+           <FeaturedCategories />
+           <TrendingExams />
+           <LatestMocks />
+        </div>
+      )}
 
       <AppPreview />
       <Features />

@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Optimized Official Hero Hub v51.1.
- * FIXED: Visibility for Verified Content card and icon contrast.
+ * @fileOverview Optimized Official Hero Hub v52.0.
+ * FIXED: Hydration mismatch by deferring dynamic text and motion props until mounted.
  */
 
 export default function Hero() {
@@ -34,10 +34,11 @@ export default function Hero() {
   const { data: stats } = useDoc<any>(statsRef);
 
   const liveAspirantCount = useMemo(() => {
+    if (!mounted || !stats) return "---";
     const count = stats?.totalUsers || 0;
     if (count > 999) return `${(count / 1000).toFixed(1)}k+`;
     return count.toLocaleString();
-  }, [stats]);
+  }, [stats, mounted]);
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -57,7 +58,8 @@ export default function Hero() {
           
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            animate={mounted ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             className="space-y-6 md:space-y-10"
           >
@@ -66,9 +68,15 @@ export default function Hero() {
                   <Sparkles className="h-3 w-3 text-primary" />
                   <span className="text-[8px] md:text-[10px] font-black text-primary uppercase tracking-widest">Punjab's No. 1 Study Hub</span>
                </div>
-               <h1 className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight break-words">
-                  CRACK EVERY <br className="hidden sm:block" /> <span className="text-primary">EXAM.</span>
-               </h1>
+               
+               {mounted ? (
+                 <h1 className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight break-words">
+                    CRACK EVERY <br className="hidden sm:block" /> <span className="text-primary">EXAM.</span>
+                 </h1>
+               ) : (
+                 <div className="h-20 md:h-32 w-full bg-white/5 animate-pulse rounded-2xl" />
+               )}
+
                <p className="text-sm md:text-xl text-slate-400 font-medium max-w-lg leading-relaxed">
                   The most trusted practice tests for PSSSB, PPSC, Police, and Army. Latest pattern based study plans for guaranteed success.
                </p>
@@ -101,7 +109,8 @@ export default function Hero() {
 
           <motion.div 
             initial={{ opacity: 0, scale: 0.95 }}
-            animate={mounted ? { opacity: 1, scale: 1 } : { opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="relative w-full block"
           >
@@ -138,7 +147,7 @@ export default function Hero() {
                   <div className="text-left md:pr-4">
                      <p className="text-[7px] md:text-[9px] font-black uppercase text-slate-400 leading-none mb-1 md:mb-1.5">Live Students</p>
                      <p className="text-lg md:text-2xl font-headline font-black text-[#0F172A] leading-none uppercase">
-                        {mounted ? liveAspirantCount : "---"}
+                        {liveAspirantCount}
                      </p>
                   </div>
                </div>
