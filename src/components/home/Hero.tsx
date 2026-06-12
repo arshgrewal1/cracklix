@@ -6,8 +6,8 @@ import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Zap, ShieldCheck, Download, Target, Sparkles, Activity, Users, LayoutGrid, ArrowRight, Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Zap, ShieldCheck, Download, Target, Sparkles, Activity, Users, LayoutGrid, ArrowRight, Play } from "lucide-react";
 import { useDoc, useFirestore, useUser } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -15,9 +15,9 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 /**
- * @fileOverview Premium UI/UX Hero Hub v151.0 (Dependency Fixed).
+ * @fileOverview Premium UI/UX Hero Hub v152.0.
+ * UPDATED: Optimized marketing text for PSSSB, PSPCL, and Teaching Cadres.
  * STYLE: Dark Navy & Vibrant Orange Brand Identity.
- * FEATURES: Futuristic dashboard, real-time tickers, and bilingual impact banners.
  */
 
 export default function Hero() {
@@ -71,7 +71,7 @@ export default function Hero() {
         >
            <div className="inline-flex items-center gap-3 bg-white/5 backdrop-blur-xl px-6 py-2 rounded-full border border-white/10 mb-8">
               <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-              <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-primary">PUNJAB'S NO.1 STUDY HUB</span>
+              <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-primary">PUNJAB'S NO.1 STUDY HUB</span>
            </div>
            
            <h2 className="text-4xl sm:text-5xl md:text-8xl font-black text-white leading-[0.95] tracking-tighter uppercase mb-6 drop-shadow-2xl">
@@ -89,9 +89,9 @@ export default function Hero() {
           <div className="lg:col-span-5 space-y-10 text-left">
             <div className="space-y-6">
                <h1 className="text-4xl md:text-6xl font-headline font-black leading-[0.95] text-white uppercase tracking-tighter">
-                  CRACK PPSC, <br />
-                  PUNJAB POLICE, <br />
-                  <span className="text-primary">PATWARI & MORE</span>
+                  CRACK PSSSB, POLICE, <br />
+                  PSPCL, PSTET, CTET, <br />
+                  <span className="text-primary">ETT & MASTER CADRE</span>
                </h1>
                <p className="text-base md:text-xl text-slate-400 font-medium leading-relaxed max-w-lg">
                   Access institutional grade mock tests with real-time state rankings and AI-powered logic rationalizations.
