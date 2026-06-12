@@ -11,7 +11,7 @@ interface LogoProps {
 
 /**
  * @fileOverview Official Cracklix Logo Component.
- * UPDATED: Removed all text elements (Brand Name & Tagline) to feature only the emblem.
+ * UPDATED: Significantly increased emblem dimensions for mobile and desktop prominence.
  */
 export function LogoIcon({ className = "" }: { className?: string }) {
   return (
@@ -29,8 +29,8 @@ export function LogoIcon({ className = "" }: { className?: string }) {
 export default function Logo({ className = "", variant = 'light', href = "/" }: LogoProps) {
   return (
     <Link href={href} className={cn("flex items-center group pointer-events-auto select-none shrink-0", className)}>
-      {/* Official Emblem Node - Now standalone as per institutional request */}
-      <LogoIcon className="w-12 h-12 md:w-20 md:h-20" />
+      {/* Official Emblem Node - Dimensions increased significantly as requested */}
+      <LogoIcon className="w-20 h-20 md:w-36 md:h-36" />
     </Link>
   );
 }
