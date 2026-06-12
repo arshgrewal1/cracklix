@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Zap, ShieldCheck, Download, Target, Sparkles, Activity, Users, LayoutGrid, ArrowRight, Play } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useDoc, useFirestore, useUser } from "@/firebase";
@@ -14,7 +15,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 /**
- * @fileOverview Premium UI/UX Hero Hub v150.0.
+ * @fileOverview Premium UI/UX Hero Hub v151.0 (Dependency Fixed).
  * STYLE: Dark Navy & Vibrant Orange Brand Identity.
  * FEATURES: Futuristic dashboard, real-time tickers, and bilingual impact banners.
  */
@@ -214,4 +215,3 @@ function TrendingUpIcon({ className }: { className?: string }) {
       </svg>
    )
 }
-
