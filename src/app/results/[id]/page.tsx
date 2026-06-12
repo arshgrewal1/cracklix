@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -42,8 +41,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Test Results Hub v21.0 (Production Hardened).
- * UPDATED: Optimized One-Line summary strip and fixed score reference logic.
+ * @fileOverview Test Results Hub v21.0.
+ * SIMPLIFIED: Replaced technical jargon with easy words (Answer, Explanations, State Rank).
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -60,7 +59,6 @@ export default function ResultPage() {
   const [mockData, setMockData] = useState<any>(null)
   const [loadingContent, setLoadingContent] = useState(true)
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
-  const [isShareOpen, setIsShareOpen] = useState(false)
   const [isLocked, setIsLocked] = useState(false);
 
   // 1. FETCH USER RESULT
@@ -171,7 +169,7 @@ export default function ResultPage() {
       <Navbar />
       <main className="container mx-auto px-4 md:px-6 py-6 md:py-10 max-w-7xl space-y-6">
         
-        {/* ONE-LINE COMPACT SUMMARY STRIP */}
+        {/* COMPACT SUMMARY STRIP */}
         <div className="bg-[#0B1528] rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row items-center justify-between p-4 md:px-8 md:py-5 gap-4">
            <div className="flex items-center gap-4 min-w-0 flex-1">
               <div className="h-10 w-10 bg-primary/20 rounded-lg flex items-center justify-center text-primary shrink-0">
@@ -190,7 +188,7 @@ export default function ResultPage() {
               <div className="w-px h-8 bg-white/10" />
               <ResultPill label="ACCURACY" val={`${sessionData.accuracy}%`} color="text-emerald-400" />
               <div className="w-px h-8 bg-white/10 hidden sm:block" />
-              <ResultPill label="PERCENTILE" val={`${merit.percentile}%`} color="text-blue-400" className="hidden sm:flex" />
+              <ResultPill label="LEVEL" val={`${merit.percentile}%`} color="text-blue-400" className="hidden sm:flex" />
            </div>
 
            <div className="flex gap-2 shrink-0 ml-0 md:ml-4">
@@ -204,8 +202,8 @@ export default function ResultPage() {
         <Tabs defaultValue="SOLUTIONS" className="space-y-6">
            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <TabsList className="bg-white border border-slate-100 p-1 h-12 rounded-xl shadow-sm inline-flex">
-                 <TabsTrigger value="SOLUTIONS" className="rounded-lg px-6 font-black uppercase text-[9px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">Review Solutions</TabsTrigger>
-                 <TabsTrigger value="TOPPER" className="rounded-lg px-6 font-black uppercase text-[9px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">State Merit</TabsTrigger>
+                 <TabsTrigger value="SOLUTIONS" className="rounded-lg px-6 font-black uppercase text-[9px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">Check Solutions</TabsTrigger>
+                 <TabsTrigger value="TOPPER" className="rounded-lg px-6 font-black uppercase text-[9px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white">State Rank</TabsTrigger>
               </TabsList>
               
               <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
@@ -244,7 +242,7 @@ export default function ResultPage() {
                        <div key={r.id} className="flex items-center justify-between p-3 bg-slate-50/50 rounded-xl border border-slate-50">
                           <div className="flex items-center gap-3">
                              <span className="font-black text-slate-300 w-5 text-xs">#{i+1}</span>
-                             <p className="font-bold text-[#0F172A] text-xs uppercase">{r.userName || "Aspirant"}</p>
+                             <p className="font-bold text-[#0F172A] text-xs uppercase">{r.userName || "Student"}</p>
                           </div>
                           <div className="flex gap-4 items-center">
                              <span className="text-[10px] font-black text-primary">{r.score.toFixed(1)} Pts</span>

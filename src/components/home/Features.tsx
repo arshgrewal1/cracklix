@@ -4,33 +4,33 @@ import { motion } from "framer-motion";
 import { Clipboard, Search, TrendingUp, Smartphone } from "lucide-react";
 
 /**
- * @fileOverview Responsive Features Section.
- * UPDATED: Replaced 2026 with Latest Pattern terminology.
+ * @fileOverview Responsive Features Hub.
+ * SIMPLIFIED: Replaced technical jargon with easy words (Solutions, Report).
  */
 
 const features = [
   { 
     icon: <Clipboard className="h-5 w-5 md:h-6 md:w-6" />, 
     title: "Pattern Based Mocks", 
-    desc: "Mocks designed exactly as per the latest pattern norms.",
+    desc: "Practice tests designed exactly like real government exams.",
     variant: "blue"
   },
   { 
     icon: <Search className="h-5 w-5 md:h-6 md:w-6" />, 
-    title: "Detailed Solutions", 
-    desc: "Step-by-step rationalizations to fix logic gaps.",
+    title: "Step-by-step Solutions", 
+    desc: "Detailed explanations to help you understand every answer.",
     variant: "orange"
   },
   { 
     icon: <TrendingUp className="h-5 w-5 md:h-6 md:w-6" />, 
-    title: "Performance Index", 
-    desc: "All Punjab state ranking and readiness audit.",
+    title: "Progress Report", 
+    desc: "Check your Punjab state rank and overall preparation level.",
     variant: "blue"
   },
   { 
     icon: <Smartphone className="h-5 w-5 md:h-6 md:w-6" />, 
-    title: "On-The-Go Learning", 
-    desc: "Access verified content from mobile or desktop hub.",
+    title: "Easy Learning", 
+    desc: "Study anywhere, anytime from your mobile or desktop hub.",
     variant: "orange"
   },
 ];

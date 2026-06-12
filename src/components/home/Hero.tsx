@@ -14,8 +14,9 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Refined Institutional Hero Hub v49.1.
+ * @fileOverview Refined Official Hero Hub v49.1.
  * UPDATED: Replaced 2026 with Latest Pattern terminology.
+ * SIMPLIFIED: Replaced technical terms with easy words.
  */
 
 export default function Hero() {
@@ -48,7 +49,7 @@ export default function Hero() {
 
   return (
     <section className="relative pt-8 pb-12 md:pt-20 md:pb-32 bg-[#08152D] overflow-hidden min-h-[600px] flex items-center">
-      {/* Institutional Background Pattern */}
+      {/* Background Pattern */}
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
          <div className="h-full w-full bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:30px_30px]" />
       </div>
@@ -69,10 +70,10 @@ export default function Hero() {
                   <span className="text-[8px] md:text-[10px] font-black text-primary uppercase tracking-widest">Punjab's No. 1 Study Hub</span>
                </div>
                <h1 className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight break-words">
-                  CRACK EVERY <br className="hidden sm:block"/> <span className="text-primary">RECRUITMENT.</span>
+                  CRACK EVERY <br className="hidden sm:block"/> <span className="text-primary">EXAM.</span>
                </h1>
                <p className="text-sm md:text-xl text-slate-400 font-medium max-w-lg leading-relaxed">
-                  The most trusted practice series for PSSSB, PPSC, Police, and Army. Latest pattern based study plans for guaranteed success.
+                  The most trusted practice tests for PSSSB, PPSC, Police, and Army. Latest pattern based study plans for guaranteed success.
                </p>
             </div>
 
@@ -122,27 +123,27 @@ export default function Hero() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#08152D] via-transparent to-transparent opacity-60" />
                   
-                  {/* Floating Identity Node */}
+                  {/* Floating ID Hub */}
                   <div className="absolute bottom-4 left-4 right-4 md:bottom-8 md:left-8 md:right-8 flex items-center justify-between">
                      <div className="bg-white/10 backdrop-blur-xl px-4 py-2 md:px-6 md:py-4 rounded-xl md:rounded-2xl border border-white/20 shadow-2xl flex items-center gap-3 md:gap-4">
                         <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl bg-emerald-50 flex items-center justify-center shadow-lg">
                            <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 text-white" />
                         </div>
                         <div className="text-left">
-                           <p className="text-[7px] md:text-[8px] font-black uppercase text-white/60 leading-none mb-1">Official Registry</p>
+                           <p className="text-[7px] md:text-[8px] font-black uppercase text-white/60 leading-none mb-1">Official Hub</p>
                            <p className="text-sm md:text-lg font-black text-white leading-none uppercase">VERIFIED CONTENT</p>
                         </div>
                      </div>
                   </div>
                </div>
 
-               {/* Stats Overlay Node */}
+               {/* Stats Hub */}
                <div className="absolute -bottom-4 -right-2 md:-bottom-6 md:-right-6 bg-white p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] shadow-3xl flex items-center gap-3 md:gap-4 border border-slate-50 animate-in fade-in slide-in-from-right-4 duration-1000 delay-500">
                   <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center shadow-inner">
                      <Zap className="h-5 w-5 md:h-7 md:w-7 text-primary fill-current" />
                   </div>
                   <div className="text-left md:pr-4">
-                     <p className="text-[7px] md:text-[9px] font-black uppercase text-slate-400 leading-none mb-1 md:mb-1.5">Live Aspirants</p>
+                     <p className="text-[7px] md:text-[9px] font-black uppercase text-slate-400 leading-none mb-1 md:mb-1.5">Live Students</p>
                      {mounted ? (
                         <p className="text-lg md:text-2xl font-headline font-black text-[#0F172A] leading-none uppercase">{liveAspirantCount}</p>
                      ) : (

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -25,7 +24,8 @@ import {
   Loader2,
   Calendar,
   Download,
-  BookOpen
+  BookOpen,
+  Layers
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,16 +36,16 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Current Affairs Hub v10.2.
- * UPDATED: Implemented Login-First redirect for Quiz attempts.
+ * @fileOverview Official Current Affairs Hub v10.2.
+ * SIMPLIFIED: Replaced technical jargon with easy words (Hub, Daily Updates).
  */
 
 const HUB_TYPES = [
-  { id: "DAILY", label: "Daily Hub", icon: <Calendar className="h-5 w-5" /> },
-  { id: "WEEKLY", label: "Weekly Hub", icon: <Layers className="h-5 w-5" /> },
-  { id: "MONTHLY", label: "Monthly Hub", icon: <Newspaper className="h-5 w-5" /> },
+  { id: "DAILY", label: "Daily Updates", icon: <Calendar className="h-5 w-5" /> },
+  { id: "WEEKLY", label: "Weekly Updates", icon: <Layers className="h-5 w-5" /> },
+  { id: "MONTHLY", label: "Monthly Updates", icon: <Newspaper className="h-5 w-5" /> },
   { id: "QUIZ", label: "Live Quizzes", icon: <Zap className="h-5 w-5" /> },
-  { id: "PDF", label: "PDF Archives", icon: <FileText className="h-5 w-5" /> }
+  { id: "PDF", label: "PDF Notes", icon: <FileText className="h-5 w-5" /> }
 ]
 
 export default function FreeContentHub() {
@@ -109,17 +109,17 @@ export default function FreeContentHub() {
               </div>
               <h1 className="text-4xl md:text-8xl font-headline font-black tracking-tighter uppercase leading-[0.85]">
                 PUNJAB <br/>
-                <span className="text-primary">PREP HUB</span>
+                <span className="text-primary">STUDY HUB</span>
               </h1>
               <p className="text-slate-400 font-medium text-base md:text-xl max-w-2xl leading-relaxed">
-                Strategic Daily, Weekly, and Monthly coverage verified for all upcoming Punjab recruitment cycles.
+                Daily, Weekly, and Monthly exam updates verified for all upcoming Punjab recruitment exams.
               </p>
               
               <div className="relative w-full md:w-[480px]">
                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-500" />
                  <Input 
                    className="h-16 pl-16 rounded-[1.5rem] bg-white/10 border-white/10 text-white placeholder:text-slate-500 text-lg font-medium backdrop-blur-md shadow-2xl" 
-                   placeholder="Search CA archives..." 
+                   placeholder="Search updates..." 
                    value={searchTerm}
                    onChange={e => setSearchTerm(e.target.value)}
                  />
@@ -187,7 +187,7 @@ export default function FreeContentHub() {
                    ) : (
                       <div className="py-24 text-center border-2 border-dashed border-slate-100 rounded-[3rem] opacity-20">
                          <Sparkles className="h-12 w-12 mx-auto mb-4" />
-                         <p className="font-headline font-black text-xl uppercase tracking-widest">Repository Empty</p>
+                         <p className="font-headline font-black text-xl uppercase tracking-widest">Hub Empty</p>
                       </div>
                    )}
                 </div>
@@ -197,9 +197,9 @@ export default function FreeContentHub() {
                       <div className="bg-[#0F172A] p-8 text-white">
                          <div className="flex items-center gap-4 mb-2">
                             <Medal className="h-6 w-6 text-primary" />
-                            <h3 className="font-headline font-black text-xl uppercase">State Merit Index</h3>
+                            <h3 className="font-headline font-black text-xl uppercase">Top Students</h3>
                          </div>
-                         <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Aspirant Rankings</p>
+                         <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Rankings Hub</p>
                       </div>
                       <CardContent className="p-8 space-y-6">
                          {topRankers?.map((res: any, idx: number) => (
@@ -209,7 +209,7 @@ export default function FreeContentHub() {
                                     #{idx + 1}
                                  </div>
                                  <div>
-                                    <p className="font-bold text-[#0F172A] text-sm uppercase truncate max-w-[120px]">{res.userName || "Aspirant"}</p>
+                                    <p className="font-bold text-[#0F172A] text-sm uppercase truncate max-w-[120px]">{res.userName || "Student"}</p>
                                     <p className="text-[8px] font-black text-slate-400 uppercase">Score: {res.score}</p>
                                  </div>
                               </div>
@@ -218,7 +218,7 @@ export default function FreeContentHub() {
                          ))}
                          <div className="pt-4 border-t border-slate-50">
                             <Button asChild variant="ghost" className="w-full font-black uppercase text-[9px] tracking-widest text-primary gap-2">
-                               <Link href="/leaderboard">Full Registry Hub <ChevronRight className="h-3 w-3" /></Link>
+                               <Link href="/leaderboard">Full Merit List <ChevronRight className="h-3 w-3" /></Link>
                             </Button>
                          </div>
                       </CardContent>
@@ -231,9 +231,9 @@ export default function FreeContentHub() {
                             <MessageCircle className="h-8 w-8 fill-current" />
                          </div>
                          <h3 className="text-3xl font-headline font-black uppercase leading-tight">Join Official <br/> Telegram</h3>
-                         <p className="text-white/80 text-sm font-medium leading-relaxed">Direct recruitment updates verified by Arsh Grewal Management.</p>
+                         <p className="text-white/80 text-sm font-medium leading-relaxed">Direct recruitment updates verified by Arsh Grewal.</p>
                          <Button asChild className="w-full h-14 bg-white text-black hover:bg-slate-100 font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-2xl border-none">
-                            <a href="https://t.me/cracklixapp" target="_blank">Join Aspirant Node</a>
+                            <a href="https://t.me/cracklixapp" target="_blank">Join Channel</a>
                          </Button>
                       </div>
                    </Card>
@@ -245,14 +245,4 @@ export default function FreeContentHub() {
       <Footer />
     </div>
   )
-}
-
-function Layers({ className }: { className?: string }) {
-   return (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-         <polygon points="12 2 2 7 12 12 22 7 12 2" />
-         <polyline points="2 17 12 22 22 17" />
-         <polyline points="2 12 12 17 22 12" />
-      </svg>
-   );
 }

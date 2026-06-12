@@ -38,7 +38,7 @@ import ShareButton from "@/components/navigation/ShareButton"
 
 /**
  * @fileOverview Optimized Student Dashboard v18.0 (Production Verified).
- * FIXED: Real-time accuracy and time tracking metrics.
+ * SIMPLIFIED: Replaced technical terms with easy words (History, Score, Check).
  */
 
 export default function StudentDashboard() {
@@ -50,7 +50,7 @@ export default function StudentDashboard() {
     if (!loading && !user) router.push("/login")
   }, [user, loading, router])
 
-  // STABILIZED QUERY (Limited to latest 15 for dashboard performance)
+  // STABILIZED QUERY
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
     return query(collection(db, "results"), where("userId", "==", user.uid), limit(15))
@@ -72,7 +72,6 @@ export default function StudentDashboard() {
     const hoursSpent = totalSeconds / 3600
     const timeFormatted = hoursSpent >= 1 ? `${hoursSpent.toFixed(1)}h` : `${Math.round(totalSeconds / 60)}m`
     
-    // Readiness calculation based on consistency and recent performance
     const uniqueDays = new Set(results.map(r => new Date(r.timestamp).toDateString()))
     const streak = uniqueDays.size
     const readiness = Math.min(100, Math.round((avgAcc * 0.7) + (Math.min(total, 30) * 1)))
@@ -83,7 +82,7 @@ export default function StudentDashboard() {
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-4">
        <Loader2 className="h-10 w-10 text-primary animate-spin" />
-       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Synchronizing Hub...</p>
+       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Syncing Hub...</p>
     </div>
   );
 
@@ -130,20 +129,20 @@ export default function StudentDashboard() {
                 </div>
               </section>
 
-              {/* STATS MATRIX */}
+              {/* STATS HUB */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
                  <MetricItem label="PREP SCORE" val={`${stats.readiness}%`} icon={<TrendingUp className="text-primary h-4 w-4" />} />
                  <MetricItem label="ACCURACY" val={`${stats.avgAccuracy}%`} icon={<Target className="text-emerald-500 h-4 w-4" />} />
                  <MetricItem label="TESTS DONE" val={stats.total} icon={<ClipboardList className="text-blue-500 h-4 w-4" />} />
-                 <MetricItem label="TIME INVESTED" val={stats.hours} icon={<Clock className="text-amber-500 h-4 w-4" />} />
+                 <MetricItem label="TIME SPENT" val={stats.hours} icon={<Clock className="text-amber-500 h-4 w-4" />} />
               </div>
 
               {/* RECENT FEED */}
               <Card className="border-none shadow-3xl rounded-[3rem] bg-white overflow-hidden text-left border border-slate-100">
                  <CardHeader className="p-8 md:p-12 border-b border-slate-50 bg-slate-50/30 flex flex-row items-center justify-between">
                     <div className="space-y-1">
-                       <h3 className="font-headline text-xl md:text-2xl font-black text-[#0F172A] uppercase">Attempt Ledger</h3>
-                       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Verified performance history</p>
+                       <h3 className="font-headline text-xl md:text-2xl font-black text-[#0F172A] uppercase">Test History</h3>
+                       <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Your recent test performance</p>
                     </div>
                     <Button asChild variant="ghost" className="h-10 text-[9px] font-black uppercase tracking-widest text-primary gap-2">
                        <Link href="/my-exams">View All <ChevronRight className="h-4 w-4" /></Link>
@@ -172,7 +171,7 @@ export default function StudentDashboard() {
                              </Link>
                           ))
                        ) : (
-                          <div className="p-24 text-center opacity-30 italic text-[11px] uppercase font-black tracking-widest text-slate-400">Registry hub empty. Start your first mock.</div>
+                          <div className="p-24 text-center opacity-30 italic text-[11px] uppercase font-black tracking-widest text-slate-400">No tests done yet. Start your first mock.</div>
                        )}
                     </div>
                  </CardContent>
@@ -185,7 +184,7 @@ export default function StudentDashboard() {
               <Card className="border-none shadow-4xl bg-gradient-to-br from-orange-500 to-primary text-white p-10 rounded-[3rem] relative overflow-hidden group">
                  <div className="absolute bottom-0 right-0 p-8 opacity-10 group-hover:scale-125 transition-transform" style={{ transitionDuration: '2000ms' }}><Flame className="h-64 w-64" /></div>
                  <div className="relative z-10 space-y-6">
-                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/70">Learning Streak</p>
+                    <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/70">Study Streak</p>
                     <div className="flex items-baseline gap-4">
                        <p className="text-7xl md:text-9xl font-headline font-black leading-none">{stats.streak}</p>
                        <div className="space-y-1">
@@ -203,9 +202,9 @@ export default function StudentDashboard() {
 
               <div className="grid grid-cols-2 gap-4 md:gap-6">
                  <DashboardTile icon={<Bookmark className="text-primary" />} label="REVISION" href="/revision" />
-                 <DashboardTile icon={<Trophy className="text-amber-500" />} label="MERIT LIST" href="/leaderboard" />
+                 <DashboardTile icon={<Trophy className="text-amber-500" />} label="RANKINGS" href="/leaderboard" />
                  <DashboardTile icon={<LayoutGrid className="text-blue-500" />} label="ALL HUBS" href="/exams" />
-                 <DashboardTile icon={<Activity className="text-emerald-500" />} label="ANALYTICS" href="/analytics" />
+                 <DashboardTile icon={<Activity className="text-emerald-500" />} label="REPORT" href="/analytics" />
               </div>
 
               <Card className="border-none shadow-xl bg-white p-10 rounded-[3rem] text-left space-y-8 border border-slate-100">
@@ -215,7 +214,7 @@ export default function StudentDashboard() {
                     </div>
                     <div className="space-y-1">
                        <h4 className="text-lg font-black uppercase text-[#0B1528]">Spread Success</h4>
-                       <p className="text-[9px] font-bold uppercase text-slate-400">Share with aspirants</p>
+                       <p className="text-[9px] font-bold uppercase text-slate-400">Share with other students</p>
                     </div>
                  </div>
                  <ShareButton 
