@@ -19,8 +19,9 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Optimized Institutional Landing Hub v65.0.
- * FIXED: Robust hydration guard for dynamic counts and trust cards.
+ * @fileOverview Simplified Institutional Landing Hub v66.0.
+ * FIXED: Robust hydration guard for all page segments.
+ * SIMPLIFIED: Replaced difficult words with easy words.
  */
 
 export default function HomePage() {
@@ -56,6 +57,13 @@ export default function HomePage() {
     };
   }, [stats, mounted]);
 
+  if (!mounted) return (
+     <main className="min-h-screen bg-white">
+        <Navbar />
+        <div className="h-[600px] bg-[#08152D] animate-pulse" />
+     </main>
+  );
+
   return (
     <main className="min-h-screen bg-white font-body pb-safe overflow-x-hidden text-left">
       <Navbar />
@@ -65,22 +73,20 @@ export default function HomePage() {
       <section className="bg-white py-6 md:py-10 border-b border-slate-50 relative overflow-hidden">
          <div className="container mx-auto px-3 md:px-6 max-w-7xl">
             <div className="flex flex-wrap lg:flex-nowrap gap-3 md:gap-6 justify-center">
-               <TrustCard loading={statsLoading || !mounted} icon={<ShieldCheck className="text-emerald-500 h-4 w-4 md:h-5 md:w-5" />} label="VERIFIED HUBS" val={liveStats.hubs} />
-               <TrustCard loading={statsLoading || !mounted} icon={<Zap className="text-primary h-4 w-4 md:h-5 md:w-5" />} label="LOGIC SOLUTIONS" val={liveStats.solutions} />
-               <TrustCard loading={statsLoading || !mounted} icon={<Trophy className="text-amber-500 h-4 w-4 md:h-5 md:w-5" />} label="STATE RANKING" val={liveStats.rankers} isLive />
-               <TrustCard loading={statsLoading || !mounted} icon={<Target className="text-blue-500 h-4 w-4 md:h-5 md:w-5" />} label="AVG ACCURACY" val={liveStats.accuracy} />
+               <TrustCard loading={statsLoading} icon={<ShieldCheck className="text-emerald-500 h-4 w-4 md:h-5 md:w-5" />} label="VERIFIED CENTERS" val={liveStats.hubs} />
+               <TrustCard loading={statsLoading} icon={<Zap className="text-primary h-4 w-4 md:h-5 md:w-5" />} label="STEP SOLUTIONS" val={liveStats.solutions} />
+               <TrustCard loading={statsLoading} icon={<Trophy className="text-amber-500 h-4 w-4 md:h-5 md:w-5" />} label="STATE RANKING" val={liveStats.rankers} isLive />
+               <TrustCard loading={statsLoading} icon={<Target className="text-blue-500 h-4 w-4 md:h-5 md:w-5" />} label="AVG ACCURACY" val={liveStats.accuracy} />
             </div>
          </div>
       </section>
 
-      {mounted && (
-        <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl space-y-16 md:space-y-32">
-           <ContinueLearning />
-           <FeaturedCategories />
-           <TrendingExams />
-           <LatestMocks />
-        </div>
-      )}
+      <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl space-y-16 md:space-y-32">
+         <ContinueLearning />
+         <FeaturedCategories />
+         <TrendingExams />
+         <LatestMocks />
+      </div>
 
       <AppPreview />
       <Features />

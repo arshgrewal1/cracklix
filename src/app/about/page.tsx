@@ -29,8 +29,8 @@ import { doc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Premium Founder's Story Hub v5.0.
- * FIXED: Hydration error with live stats via isMounted guard.
+ * @fileOverview Simplified Founder's Story Hub v6.0.
+ * SIMPLIFIED: Replaced difficult words with easy words (Registry -> List, Area, History).
  */
 
 export default function AboutPage() {
@@ -48,7 +48,6 @@ export default function AboutPage() {
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   const liveStats = useMemo(() => {
-    // If stats document doesn't exist yet, show standard benchmarks
     if (!stats) return { aspirants: "15k+", mcqs: "10k+", hubs: "8+" };
     
     const formatNumber = (num: number) => {
@@ -101,13 +100,13 @@ export default function AboutPage() {
                     transition={{ delay: 0.2 }}
                     className="text-lg md:text-2xl text-slate-400 font-medium max-w-2xl mx-auto leading-relaxed"
                  >
-                    The journey of one student&apos;s vision to empower thousands of aspirants across Punjab.
+                    The journey of one student&apos;s vision to empower thousands of students across Punjab.
                  </motion.p>
               </div>
            </div>
         </section>
 
-        {/* 2. FOUNDER PROFILE HUB - REAL DATA INGESTION */}
+        {/* 2. FOUNDER PROFILE AREA */}
         <section className="py-20 md:py-32 relative">
            <div className="container mx-auto px-4 md:px-6 max-w-7xl">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20 items-center">
@@ -152,17 +151,17 @@ export default function AboutPage() {
                           Every meaningful journey begins with a challenge, and <span className="text-white font-bold">Cracklix</span> is no exception.
                        </p>
                        <p>
-                          As a student navigating the demanding world of competitive examinations, <span className="text-white font-bold italic underline decoration-primary underline-offset-8">Arshdeep Singh Grewal</span> witnessed a common struggle shared by countless aspirants — the lack of a single, reliable destination for quality educational resources.
+                          As a student navigating the demanding world of competitive examinations, <span className="text-white font-bold italic underline decoration-primary underline-offset-8">Arshdeep Singh Grewal</span> witnessed a common struggle shared by countless students — the lack of a single, reliable destination for quality educational resources.
                        </p>
                        <p>
                           Students spent hours searching across multiple platforms for previous year papers and authentic study material, often losing valuable time and motivation. Driven by a belief that every student deserves equal access, he founded Cracklix to simplify preparation.
                        </p>
                     </div>
 
-                    {/* REAL IMPACT NODES - LIVE STATUS */}
+                    {/* LIVE IMPACT AREA */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6">
                        <ImpactNode 
-                          label="LIVE ASPIRANTS" 
+                          label="LIVE STUDENTS" 
                           val={mounted ? liveStats.aspirants : "---"} 
                           icon={<Users className="text-primary" />} 
                           loading={statsLoading || !mounted}
@@ -174,7 +173,7 @@ export default function AboutPage() {
                           loading={statsLoading || !mounted}
                        />
                        <ImpactNode 
-                          label="OFFICIAL HUBS" 
+                          label="OFFICIAL CENTERS" 
                           val={mounted ? liveStats.hubs : "---"} 
                           icon={<Landmark className="text-blue-500" />} 
                           loading={statsLoading || !mounted}
@@ -185,7 +184,7 @@ export default function AboutPage() {
            </div>
         </section>
 
-        {/* 3. INTERACTIVE TIMELINE */}
+        {/* 3. INTERACTIVE HISTORY */}
         <section className="py-24 md:py-40 bg-white/5 border-y border-white/5">
            <div className="container mx-auto px-4 max-w-6xl">
               <div className="text-center space-y-4 mb-20 md:mb-32">
@@ -202,7 +201,7 @@ export default function AboutPage() {
                  <TimelineItem 
                     icon={<Compass />} 
                     title="The Vision" 
-                    desc="Envisioning a centralized hub where technology and educational precision eliminate all preparation barriers." 
+                    desc="Envisioning a centralized area where technology and educational precision eliminate all preparation barriers." 
                     right 
                  />
                  <TimelineItem 
@@ -219,13 +218,13 @@ export default function AboutPage() {
                  <TimelineItem 
                     icon={<History />} 
                     title="Future Growth" 
-                    desc="Building India's most trusted educational ecosystem, ensuring quality learning for all." 
+                    desc="Building India's most trusted educational area, ensuring quality learning for all." 
                  />
               </div>
            </div>
         </section>
 
-        {/* 4. QUOTE HUB */}
+        {/* 4. QUOTE AREA */}
         <section className="py-32 md:py-60 relative overflow-hidden text-center">
            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[400px] bg-primary/20 blur-[160px] rounded-full opacity-30" />
            <div className="container mx-auto px-4 relative z-10">
@@ -247,7 +246,7 @@ export default function AboutPage() {
            </div>
         </section>
 
-        {/* 5. MISSION & VISION NODES */}
+        {/* 5. MISSION & VISION AREAS */}
         <section className="py-20 md:pb-40">
            <div className="container mx-auto px-4 md:px-6 max-w-7xl">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16">
@@ -258,7 +257,7 @@ export default function AboutPage() {
                  />
                  <ValueCard 
                     title="Our Vision" 
-                    desc="To build one of India's most trusted educational ecosystems, empowering learners to achieve their aspirations through technology-driven solutions." 
+                    desc="To build one of India's most trusted educational areas, empowering learners to achieve their goals through technology solutions." 
                     icon={<Target className="h-8 w-8 text-blue-500" />}
                  />
               </div>
@@ -274,7 +273,7 @@ export default function AboutPage() {
                  </div>
                  <div className="relative z-10 space-y-6">
                     <h2 className="text-4xl md:text-7xl font-headline font-black uppercase text-white tracking-tight">Ready to start <br/> your journey?</h2>
-                    <p className="text-white/80 text-lg md:text-xl font-medium max-w-xl mx-auto">Join the Cracklix ecosystem today and experience institutional grade preparation.</p>
+                    <p className="text-white/80 text-lg md:text-xl font-medium max-w-xl mx-auto">Join the Cracklix hub today and experience high-quality preparation.</p>
                     <Button asChild className="h-16 md:h-20 px-12 md:px-16 bg-white text-[#0B1528] hover:bg-slate-100 font-black uppercase text-xs md:text-sm tracking-[0.2em] rounded-2xl md:rounded-3xl shadow-3xl gap-4 transition-all active:scale-95 border-none">
                        <Link href="/login">Join the Cracklix Journey <ChevronRight className="h-6 w-6" /></Link>
                     </Button>

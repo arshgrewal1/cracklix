@@ -11,11 +11,11 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Optimized Official Hero Hub v52.0.
- * FIXED: Hydration mismatch by deferring dynamic text and motion props until mounted.
+ * @fileOverview Simplified Official Hero Hub v53.0.
+ * FIXED: Resolved hydration mismatch by ensuring server/client render parity.
+ * SIMPLIFIED: Replaced technical terms with student-friendly words.
  */
 
 export default function Hero() {
@@ -33,7 +33,7 @@ export default function Hero() {
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
 
-  const liveAspirantCount = useMemo(() => {
+  const liveStudentCount = useMemo(() => {
     if (!mounted || !stats) return "---";
     const count = stats?.totalUsers || 0;
     if (count > 999) return `${(count / 1000).toFixed(1)}k+`;
@@ -56,23 +56,21 @@ export default function Hero() {
       <div className="container mx-auto px-4 relative z-20 max-w-7xl text-left">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 md:gap-20 items-center">
           
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="space-y-6 md:space-y-10"
-          >
+          <div className="space-y-6 md:space-y-10">
             <div className="space-y-4 md:space-y-6">
                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20">
                   <Sparkles className="h-3 w-3 text-primary" />
-                  <span className="text-[8px] md:text-[10px] font-black text-primary uppercase tracking-widest">Punjab's No. 1 Study Hub</span>
+                  <span className="text-[8px] md:text-[10px] font-black text-primary uppercase tracking-widest">Punjab's No. 1 Study Center</span>
                </div>
                
                {mounted ? (
-                 <h1 className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight break-words">
+                 <motion.h1 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-3xl sm:text-5xl lg:text-7xl font-headline font-black leading-[1.1] text-white uppercase tracking-tight break-words"
+                 >
                     CRACK EVERY <br className="hidden sm:block" /> <span className="text-primary">EXAM.</span>
-                 </h1>
+                 </motion.h1>
                ) : (
                  <div className="h-20 md:h-32 w-full bg-white/5 animate-pulse rounded-2xl" />
                )}
@@ -105,15 +103,9 @@ export default function Hero() {
                  <Link href="/exams" className="flex items-center justify-center gap-3">START PRACTICE <Zap className="h-4 w-4 fill-current" /></Link>
               </Button>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.95 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative w-full block"
-          >
+          <div className="relative w-full block">
             <div className="relative aspect-video sm:aspect-[4/3] w-full max-w-[620px] lg:ml-auto mx-auto mt-10 lg:mt-0">
                <div className="absolute -inset-6 md:-inset-10 bg-primary/10 blur-[100px] rounded-full opacity-50" />
                
@@ -147,12 +139,12 @@ export default function Hero() {
                   <div className="text-left md:pr-4">
                      <p className="text-[7px] md:text-[9px] font-black uppercase text-slate-400 leading-none mb-1 md:mb-1.5">Live Students</p>
                      <p className="text-lg md:text-2xl font-headline font-black text-[#0F172A] leading-none uppercase">
-                        {liveAspirantCount}
+                        {liveStudentCount}
                      </p>
                   </div>
                </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

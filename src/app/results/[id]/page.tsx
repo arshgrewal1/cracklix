@@ -41,8 +41,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Test Results Hub v21.0.
- * SIMPLIFIED: Replaced technical jargon with easy words (Answer, Explanations, State Rank).
+ * @fileOverview Test Results Hub v22.0.
+ * SIMPLIFIED: Replaced technical jargon with easy words (History, Explanation, Merit).
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
