@@ -26,8 +26,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v20.1.
- * UPDATED: Logo positioned exactly 2 units (gap-2) to the right of the menu trigger.
+ * @fileOverview Institutional Navbar v21.0.
+ * UPDATED: Increased vertical padding to accommodate a larger logo.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -113,7 +113,7 @@ export default function Navbar() {
         </div>
       )}
 
-      <nav className="w-full bg-[#0B1528] border-b border-white/5 py-2 md:py-3 shadow-xl backdrop-blur-md bg-opacity-95">
+      <nav className="w-full bg-[#0B1528] border-b border-white/5 py-3 md:py-5 shadow-xl backdrop-blur-md bg-opacity-95">
         <div className="container mx-auto max-w-full flex items-center justify-between px-3 md:px-6">
           <div className="flex items-center gap-2 md:gap-8">
             <div className="flex items-center gap-2">

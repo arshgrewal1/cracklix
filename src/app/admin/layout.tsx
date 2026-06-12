@@ -44,8 +44,8 @@ import BackButton from "@/components/navigation/BackButton";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Sidebar Restoration v130.0.
- * UPDATED: Logo added to Admin Header, 2 spaces (gap-2) to the right of the trigger.
+ * @fileOverview Institutional Sidebar Restoration v131.0.
+ * UPDATED: Admin header height increased and logo scale reset for a bolder look.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -178,7 +178,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </Sidebar>
         
         <SidebarInset className="flex flex-col bg-white min-w-0 max-w-full relative">
-          <header className="h-14 md:h-16 border-b border-slate-200 flex items-center px-4 md:px-6 justify-between bg-white sticky top-0 z-[100] shrink-0">
+          <header className="h-16 md:h-24 border-b border-slate-200 flex items-center px-4 md:px-6 justify-between bg-white sticky top-0 z-[100] shrink-0">
             <div className="flex items-center gap-2 overflow-hidden">
               <div className="lg:hidden">
                  <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
@@ -195,7 +195,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </div>
               <SidebarTrigger className="hidden lg:flex text-[#0F172A] hover:bg-slate-50 cursor-pointer" />
               
-              <Logo variant="dark" className="scale-75 origin-left" href="/admin" />
+              <Logo variant="dark" className="origin-left" href="/admin" />
 
               <div className="h-4 w-[1px] bg-slate-200 mx-2 hidden md:block" />
               <BackButton label="Dashboard" fallback="/admin" className="hidden xs:flex" />

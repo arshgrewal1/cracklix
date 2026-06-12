@@ -11,8 +11,7 @@ interface LogoProps {
 
 /**
  * @fileOverview Official Cracklix Master Logo Hub.
- * UPDATED: Set logo size to exactly 1024x1024px as requested.
- * Positioning: Optimized for high-fidelity rendering in navigation nodes.
+ * UPDATED: Increased max dimensions for a bolder brand presence while maintaining 1024px fidelity.
  */
 export function LogoIcon({ className = "" }: { className?: string }) {
   return (
@@ -34,10 +33,9 @@ export default function Logo({ className = "", variant = 'light', href = "/" }: 
     <Link href={href} className={cn("flex items-center group pointer-events-auto select-none shrink-0", className)}>
       {/* 
          STRICT REQUIREMENT: 1024x1024px display scale.
-         The logo is rendered at full size while the parent containers (Navbar/Sidebar) 
-         handle the layout flow to ensure standard usability.
+         Updated max-w and max-h to significantly increase visibility in navigation bars.
       */}
-      <LogoIcon className="w-[1024px] h-[1024px] max-w-[120px] md:max-w-[180px] max-h-12 md:max-h-16" />
+      <LogoIcon className="w-[1024px] h-[1024px] max-w-[200px] md:max-w-[320px] max-h-16 md:max-h-24" />
     </Link>
   );
 }
