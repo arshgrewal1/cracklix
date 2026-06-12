@@ -1,4 +1,9 @@
-const CACHE_NAME = 'cracklix-v1';
+/**
+ * @fileOverview Production-Grade PWA Service Worker for Cracklix.
+ * Strategy: Network-First for chunks, Cache-First for assets.
+ */
+
+const CACHE_NAME = 'cracklix-v2';
 const PRECACHE_ASSETS = [
   '/',
   '/manifest.webmanifest',
@@ -8,27 +13,42 @@ const PRECACHE_ASSETS = [
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(PRECACHE_ASSETS);
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)));
     })
   );
+  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  
-  // Network-First strategy for Next.js chunks to prevent ChunkLoadError
-  if (request.url.includes('/_next/static/')) {
+  const url = new URL(request.url);
+
+  // 1. Network-First for Next.js Chunks (Fixes ChunkLoadError)
+  if (url.pathname.startsWith('/_next/static/')) {
     event.respondWith(
       fetch(request).catch(() => caches.match(request))
     );
     return;
   }
 
-  // Stale-while-revalidate for other assets
+  // 2. Cache-First for static assets
+  if (PRECACHE_ASSETS.includes(url.pathname) || url.pathname.startsWith('/icons/')) {
+    event.respondWith(
+      caches.match(request).then((cached) => cached || fetch(request))
+    );
+    return;
+  }
+
+  // Default: Network-First
   event.respondWith(
-    caches.match(request).then((response) => {
-      return response || fetch(request);
-    })
+    fetch(request).catch(() => caches.match(request))
   );
 });

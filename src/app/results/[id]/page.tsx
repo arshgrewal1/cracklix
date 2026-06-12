@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -42,8 +41,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Test Results Hub v20.0 (Space Optimized).
- * UPDATED: Consolidated summary into a single horizontal strip.
+ * @fileOverview Test Results Hub v21.0 (Production Hardened).
+ * UPDATED: Optimized One-Line summary strip and fixed score reference logic.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -184,7 +183,7 @@ export default function ResultPage() {
            </div>
 
            <div className="flex items-center gap-6 md:gap-10 shrink-0">
-              <ResultPill label="SCORE" val={sessionData.score.toFixed(1)} color="text-primary" />
+              <ResultPill label="SCORE" val={sessionData.score.toFixed(1)} color={sessionData.score < 0 ? "text-rose-400" : "text-primary"} />
               <div className="w-px h-8 bg-white/10" />
               <ResultPill label="RANK" val={`#${merit.rank}`} color="text-white" />
               <div className="w-px h-8 bg-white/10" />

