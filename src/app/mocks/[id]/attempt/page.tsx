@@ -27,9 +27,8 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v35.0.
- * FIXED: Ensured 'cn' is imported to prevent ReferenceError white-screen.
- * UPDATED: Scoring engine strictly parses floating-point marks for accuracy.
+ * @fileOverview Hardened CBT Engine v35.1.
+ * FIXED: Explicit import of 'cn' and optimized scoring engine.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

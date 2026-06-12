@@ -1,11 +1,11 @@
 
 /**
- * @fileOverview Institutional Cracklix Service Worker v1.0.
- * Mandatory node for PWA installability and offline readiness.
+ * @fileOverview Hardened Institutional PWA Service Worker v4.0.
+ * Strategy: Cache-First for static assets, Network-First for core API nodes.
  */
 
-const CACHE_NAME = 'cracklix-registry-v1';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'cracklix-hub-v4';
+const STATIC_ASSETS = [
   '/',
   '/manifest.webmanifest',
   'https://i.ibb.co/5WjGyLhn/1000110132-removebg-preview.png',
@@ -15,7 +15,8 @@ const ASSETS_TO_CACHE = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      console.log('[SW] Pre-caching static assets');
+      return cache.addAll(STATIC_ASSETS);
     })
   );
   self.skipWaiting();
@@ -23,13 +24,9 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then((keys) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
+        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
       );
     })
   );
@@ -37,10 +34,27 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Simple network-first strategy for dynamic content, cache-fallback for assets
-  event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
-    })
-  );
+  // Only cache GET requests
+  if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+
+  // Strategy: Cache-First for internal static images and manifest
+  if (url.origin === self.location.origin || url.hostname === 'i.ibb.co') {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        return cachedResponse || fetch(event.request).then((fetchResponse) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, fetchResponse.clone());
+            return fetchResponse;
+          });
+        });
+      })
+    );
+  } else {
+    // Strategy: Network-First with fallback to cache for everything else
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request))
+    );
+  }
 });
