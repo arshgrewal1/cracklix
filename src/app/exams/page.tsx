@@ -1,9 +1,11 @@
+
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useCollection, useFirestore } from "@/firebase"
+import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import { ShieldCheck, GraduationCap, Zap, Wallet, Globe, ChevronRight, Landmark } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
@@ -14,8 +16,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Master Registry Landing v3.3.
- * UPDATED: Replaced specific year with Latest Pattern branding.
+ * @fileOverview Institutional Master Registry Landing v3.4 (Hardened).
+ * GATED: Access restricted to authenticated students only.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -28,14 +30,28 @@ const CATEGORY_ICONS: Record<string, any> = {
 
 export default function ExamsEntryPage() {
   const db = useFirestore();
+  const router = useRouter();
+  const { user, loading: authLoading } = useUser();
   
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push(`/login?returnUrl=${encodeURIComponent('/exams')}`);
+    }
+  }, [user, authLoading, router]);
+
   const catQuery = useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]);
   const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
 
   const { data: categories, loading: catLoading } = useCollection<any>(catQuery);
   const { data: boards, loading: boardsLoading } = useCollection<any>(boardsQuery);
 
-  const loading = catLoading || boardsLoading;
+  const loading = catLoading || boardsLoading || authLoading;
+
+  if (authLoading || !user) return (
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-white">
+       <Zap className="h-10 w-10 text-primary animate-pulse" />
+    </div>
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body">

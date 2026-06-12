@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -9,7 +10,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { 
   Search, 
-  ArrowRight, 
   Zap, 
   FileText, 
   Globe, 
@@ -36,8 +36,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Official Current Affairs Hub v12.0.
- * UPDATED: Optimized student name display with professional fallback logic.
+ * @fileOverview Official Current Affairs Hub v12.1 (Hardened).
+ * GATED: Access restricted to authenticated students only.
  */
 
 const HUB_TYPES = [
@@ -50,10 +50,16 @@ const HUB_TYPES = [
 
 export default function FreeContentHub() {
   const db = useFirestore()
-  const { user } = useUser()
+  const { user, loading: authLoading } = useUser()
   const router = useRouter()
   const [activeType, setActiveType] = useState("DAILY")
   const [searchTerm, setSearchTerm] = useState("")
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push(`/login?returnUrl=${encodeURIComponent('/current-affairs')}`);
+    }
+  }, [user, authLoading, router]);
 
   const hubQuery = useMemo(() => (db ? query(collection(db, "current_affairs_hub"), where("status", "==", "PUBLISHED")) : null), [db])
   const { data: hubItems, loading } = useCollection<any>(hubQuery)
@@ -63,7 +69,6 @@ export default function FreeContentHub() {
 
   const topRankers = useMemo(() => {
      if (!results) return [];
-     // Get unique users best score
      const map = new Map();
      results.forEach(r => {
         if (!map.has(r.userId) || map.get(r.userId).score < r.score) {
@@ -78,10 +83,8 @@ export default function FreeContentHub() {
     return hubItems
       .filter(item => {
         const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase())
-        
         if (activeType === 'QUIZ') return matchesSearch && !!item.quizId
         if (activeType === 'PDF') return matchesSearch && !!item.pdfUrl
-        
         return matchesSearch && item.type === activeType
       })
       .sort((a, b) => {
@@ -98,6 +101,12 @@ export default function FreeContentHub() {
      }
      router.push(`/mocks/${quizId}/instructions`);
   };
+
+  if (authLoading || !user) return (
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-white">
+       <Zap className="h-10 w-10 text-primary animate-pulse" />
+    </div>
+  );
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body">

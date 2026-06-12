@@ -1,3 +1,4 @@
+
 'use client';
 
 import { motion } from "framer-motion";
@@ -7,20 +8,20 @@ import { Button } from "@/components/ui/button";
 import { Search, Sparkles, Zap, ShieldCheck } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { useDoc, useFirestore } from "@/firebase";
+import { useDoc, useFirestore, useUser } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Hero Hub v80.0 (Hardened).
- * FIXED: Strictly locked headline to "EXAM." with client-side mounting guard to eliminate hydration mismatches.
- * BRANDING: Verified Content icon set to Cracklix Orange (bg-primary).
+ * @fileOverview Official Hero Hub v80.1 (Hardened).
+ * GATED: Access restricted to authenticated students only.
  */
 
 export default function Hero() {
   const router = useRouter();
   const db = useFirestore();
+  const { user } = useUser();
   const [queryText, setQueryText] = useState("");
   const [mounted, setMounted] = useState(false);
 
@@ -42,9 +43,21 @@ export default function Hero() {
 
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
+    if (!user) {
+      router.push(`/login?returnUrl=${encodeURIComponent('/search?q=' + queryText.trim())}`);
+      return;
+    }
     if (queryText.trim()) {
       router.push(`/search?q=${encodeURIComponent(queryText.trim())}`);
     }
+  };
+
+  const handleActionClick = (path: string) => {
+    if (!user) {
+      router.push(`/login?returnUrl=${encodeURIComponent(path)}`);
+      return;
+    }
+    router.push(path);
   };
 
   return (
@@ -94,8 +107,11 @@ export default function Hero() {
             </form>
 
             <div className="flex flex-wrap gap-4 mt-8">
-              <Button asChild className="bg-primary hover:bg-orange-600 text-white px-8 md:px-12 rounded-xl font-black uppercase tracking-[0.1em] text-[10px] md:text-[11px] h-14 md:h-16 shadow-2xl transition-all active:scale-95 border-none group">
-                 <Link href="/exams" className="flex items-center justify-center gap-3">START PRACTICE <Zap className="h-4 w-4 fill-current" /></Link>
+              <Button 
+                onClick={() => handleActionClick('/exams')}
+                className="bg-primary hover:bg-orange-600 text-white px-8 md:px-12 rounded-xl font-black uppercase tracking-[0.1em] text-[10px] md:text-[11px] h-14 md:h-16 shadow-2xl transition-all active:scale-95 border-none group cursor-pointer"
+              >
+                 <span className="flex items-center justify-center gap-3">START PRACTICE <Zap className="h-4 w-4 fill-current" /></span>
               </Button>
             </div>
           </div>

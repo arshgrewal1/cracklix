@@ -1,3 +1,4 @@
+
 "use client"
 
 import Navbar from "@/components/layout/Navbar"
@@ -11,24 +12,30 @@ import { motion } from "framer-motion"
 import { useUser, useFirestore, useCollection, useDoc } from "@/firebase"
 import { doc, updateDoc, serverTimestamp, collection } from "firebase/firestore"
 import { useMemo, useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Elite PASS Registry Hub v12.0 (Mobile Mode Optimized).
- * UPDATED: Enhanced mobile responsiveness and purchase node reliability.
+ * @fileOverview Elite PASS Registry Hub v12.1 (Hardened).
+ * GATED: Access restricted to authenticated students only.
  */
+
 export default function PassPage() {
   const { user, profile, loading: userLoading } = useUser()
   const db = useFirestore()
+  const router = useRouter()
   const { toast } = useToast()
   const [claiming, setClaiming] = useState(false)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+    if (!userLoading && !user) {
+      router.push(`/login?returnUrl=${encodeURIComponent('/pass')}`);
+    }
+  }, [user, userLoading, router]);
 
   const { data: settings } = useDoc<any>(useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]));
   const passQuery = useMemo(() => (db ? collection(db, "passes") : null), [db])
@@ -88,6 +95,12 @@ export default function PassPage() {
      if (!mounted) return false;
      return settings?.freeTrialEnabled !== false && !profile?.pass?.freePassClaimed;
   }, [settings, profile, mounted]);
+
+  if (userLoading || !user) return (
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-[#020817]">
+       <Zap className="h-10 w-10 text-primary animate-pulse" />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#020817] font-body pb-safe overflow-x-hidden text-white">

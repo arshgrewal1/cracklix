@@ -1,28 +1,37 @@
+
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useCollection, useFirestore } from "@/firebase"
+import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, limit } from "firebase/firestore"
-import { Trophy, ShieldCheck, Search, Activity, ChevronRight } from "lucide-react"
+import { Trophy, ShieldCheck, Search, Activity, ChevronRight, Zap } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Official Punjab Merit Hub v15.0 (Hardened).
- * FIXED: Displaying student's real names with email fallback for ranking hub.
+ * @fileOverview Official Punjab Merit Hub v15.1 (Hardened).
+ * GATED: Access restricted to authenticated students only.
  */
 
 export default function LeaderboardPage() {
   const db = useFirestore()
+  const { user, loading: authLoading } = useUser()
+  const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
   
-  // STABILIZED LISTENERS
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push(`/login?returnUrl=${encodeURIComponent('/leaderboard')}`);
+    }
+  }, [user, authLoading, router]);
+
   const meritQuery = useMemo(() => (db ? query(collection(db, "results"), limit(500)) : null), [db])
   const usersQuery = useMemo(() => (db ? query(collection(db, "users"), limit(500)) : null), [db])
 
@@ -32,22 +41,17 @@ export default function LeaderboardPage() {
   const meritList = useMemo(() => {
     if (!results) return []
     const lowerSearch = searchTerm.toLowerCase();
-    
-    // Sort client-side for immediate performance
     const sortedResults = [...results].sort((a, b) => (b.score || 0) - (a.score || 0));
     const uniqueRankers = new Map();
     
     sortedResults.forEach((r: any) => {
       if (!uniqueRankers.has(r.userId)) {
         const userProfile = users?.find(u => u.id === r.userId);
-        
-        // IDENTITY HUB: 1. Profile Name, 2. Result Name (verified), 3. Email ID, 4. Student
         const name = userProfile?.name || 
                      (r.userName && r.userName !== 'Aspirant' && r.userName !== 'Student' && !r.userName.includes('@') ? r.userName : null) || 
                      userProfile?.email || 
                      r.userEmail || 
                      "Student";
-
         const email = userProfile?.email || r.userEmail || "---";
 
         if (!searchTerm || (name.toLowerCase().includes(lowerSearch) || email.toLowerCase().includes(lowerSearch))) {
@@ -68,6 +72,12 @@ export default function LeaderboardPage() {
   }, [results, users, searchTerm]);
 
   const podium = useMemo(() => meritList.slice(0, 3), [meritList]);
+
+  if (authLoading || !user) return (
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-white">
+       <Zap className="h-10 w-10 text-primary animate-pulse" />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-slate-50/30 font-body text-left">
