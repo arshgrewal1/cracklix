@@ -1,10 +1,9 @@
-
 {
   "placeholderImages": [
     {
       "id": "hero-police",
       "description": "Punjab Police Strategic Asset HD",
-      "imageUrl": "https://picsum.photos/seed/pp-hero-ultra/1920/1280",
+      "imageUrl": "https://punjabpolice.gov.in/media/images/pp10.original.jpg",
       "imageHint": "police officer"
     },
     {

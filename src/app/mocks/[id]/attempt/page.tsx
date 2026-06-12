@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -27,9 +26,9 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v41.0 (Stability & Identity Hardened).
+ * @fileOverview Hardened CBT Engine v42.0 (Auto-Submit Enabled).
+ * UPDATED: Integrated auto-submit logic on timer expiration.
  * UPDATED: Captures Real Name and Email fallback for state-level merit hub.
- * FIXED: Hydration synchronization and re-take logic hardening.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -182,6 +181,7 @@ export default function MockAttemptPage() {
     }
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime, toast]);
 
+  // CRITICAL: AUTO-SUBMIT TRIGGER
   useEffect(() => {
      if (!isInitializing && timeLeft === 0 && !isSubmittingFinal) {
         handleSubmitFinal();

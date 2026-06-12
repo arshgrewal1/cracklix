@@ -1,4 +1,3 @@
-
 'use client';
 
 import { motion } from "framer-motion";
@@ -14,9 +13,9 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 /**
- * @fileOverview High-Fidelity Hero Hub v89.0.
- * UPDATED: Optimized high-definition image rendering and hardened "Install App" trigger.
- * FIXED: Hydration error by strictly locking the "EXAM." headline.
+ * @fileOverview High-Fidelity Hero Hub v90.0 (High-Definition Hardened).
+ * UPDATED: Explicit priority rendering for high-definition assets.
+ * FIXED: Persistent "Install App" trigger logic.
  */
 
 export default function Hero() {
