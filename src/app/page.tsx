@@ -13,7 +13,7 @@ import PopularExams from "@/components/home/PopularExams";
 import TrendingExams from "@/components/home/TrendingExams";
 
 /**
- * @fileOverview Official Home Hub v145.0 (Strict Design Reference Match).
+ * @fileOverview Official Home Hub v146.0 (Strict Design Reference Match).
  * FLOW: Hero (Integrated Stats & Readiness) -> Popular Exams Card Hub -> Categories -> Content.
  */
 

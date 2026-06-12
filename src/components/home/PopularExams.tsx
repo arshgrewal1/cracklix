@@ -22,8 +22,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Final Institutional Popular Exams Card v18.5.
- * MATCHED: Perfectly aligned with the reference (ibb.co/F4D0JLHP).
+ * @fileOverview Final Institutional Popular Exams Card v18.5 (Locked).
+ * MATCHED: Perfectly aligned with the reference (ibb.co/F4D0JLHP bottom card).
  * Features: High-fidelity authority grid and institutional trust checklist.
  */
 
@@ -52,11 +52,11 @@ export default function PopularExams() {
            initial={{ opacity: 0, y: 30 }}
            whileInView={{ opacity: 1, y: 0 }}
            viewport={{ once: true }}
-           className="bg-white shadow-4xl rounded-[3rem] md:rounded-[4rem] overflow-hidden border border-slate-100 flex flex-col lg:flex-row"
+           className="bg-white shadow-4xl rounded-[3rem] md:rounded-[4rem] overflow-hidden border border-slate-100 flex flex-col lg:grid lg:grid-cols-12"
          >
             
-            {/* LEFT: AUTHORITY LOGO GRID */}
-            <div className="flex-1 p-8 md:p-16 space-y-12 text-left">
+            {/* LEFT: AUTHORITY LOGO GRID (Col-7) */}
+            <div className="lg:col-span-7 p-8 md:p-16 space-y-12 text-left">
                <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                      <div className="h-10 w-10 bg-orange-50 rounded-xl flex items-center justify-center text-primary shadow-inner">
@@ -93,8 +93,8 @@ export default function PopularExams() {
                </div>
             </div>
 
-            {/* RIGHT: INSTITUTIONAL TRUST CHECKLIST */}
-            <div className="w-full lg:w-[450px] bg-slate-50 border-l border-slate-100 p-10 md:p-16 flex flex-col justify-center text-left relative overflow-hidden">
+            {/* RIGHT: INSTITUTIONAL TRUST CHECKLIST (Col-5) */}
+            <div className="lg:col-span-5 bg-slate-50 border-l border-slate-100 p-10 md:p-16 flex flex-col justify-center text-left relative overflow-hidden">
                <div className="absolute top-0 right-0 p-8 opacity-[0.03] rotate-12"><ShieldCheck className="h-64 w-64" /></div>
                
                <div className="relative z-10 space-y-10">

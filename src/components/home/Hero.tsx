@@ -25,8 +25,8 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
 /**
- * @fileOverview High-Fidelity Institutional Hero v145.0.
- * MATCHED: Perfectly aligned with the reference (ibb.co/F4D0JLHP).
+ * @fileOverview High-Fidelity Institutional Hero v146.0 (Locked).
+ * MATCHED: Strictly aligned with the reference (ibb.co/F4D0JLHP).
  * Features: Background image hub, floating readiness node, and real-time stats integration.
  */
 export default function Hero() {
@@ -54,13 +54,13 @@ export default function Hero() {
 
   return (
     <section className="relative pt-12 pb-16 md:pt-24 md:pb-36 bg-[#0B1528] overflow-hidden text-left">
-      {/* BACKGROUND IMAGE HUB */}
+      {/* BACKGROUND IMAGE HUB - LOCKED TO OFFICIAL PUNJAB POLICE SLIDER */}
       <div className="absolute inset-0 z-0">
          <Image 
            src="https://grppunjab.org/wp-content/uploads/2025/09/PP10_slider.jpg" 
            fill 
            className="object-cover opacity-30 grayscale-[0.2]" 
-           alt="Punjab Police Institutional"
+           alt="Punjab Police Institutional Background"
            priority
          />
          <div className="absolute inset-0 bg-gradient-to-r from-[#0B1528] via-[#0B1528]/95 to-transparent" />
@@ -87,7 +87,7 @@ export default function Hero() {
                 </span>
               </div>
 
-              {/* Master Headline */}
+              {/* Master Headline - Matched to Design */}
               <div className="space-y-4">
                  <h1 className="text-4xl md:text-8xl font-headline font-black leading-[0.95] tracking-tight text-white uppercase">
                     Prepare For Punjab <br />
@@ -123,7 +123,7 @@ export default function Hero() {
               </Button>
             </div>
 
-            {/* Trending Quick Links */}
+            {/* Hot Exams Quick Links (Trending) */}
             <div className="flex flex-wrap items-center gap-4 pt-4">
                <span className="text-[10px] font-black uppercase text-primary tracking-widest">Hot Exams:</span>
                {['PSSSB Patwari', 'Punjab Police SI', 'PSTET Hub', 'Master Cadre', 'Excise'].map((t) => (
@@ -136,7 +136,7 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* RIGHT: FLOATING READINESS HUB */}
+          {/* RIGHT: FLOATING READINESS HUB (Matched to ibb.co/F4D0JLHP) */}
           <div className="lg:col-span-4 relative hidden lg:block">
              <motion.div 
                initial={{ opacity: 0, scale: 0.95 }}
@@ -170,7 +170,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* BOTTOM STATS STRIP (MATCHED TO REFERENCE) */}
+        {/* BOTTOM STATS STRIP (Matched to ibb.co/F4D0JLHP bottom part) */}
         <div className="mt-20 md:mt-32 bg-[#0F172A] rounded-[2rem] md:rounded-[3rem] border border-white/5 shadow-5xl overflow-hidden p-6 md:p-12">
            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
               <LegacyStatNode 
