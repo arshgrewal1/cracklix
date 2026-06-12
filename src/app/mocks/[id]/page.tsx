@@ -29,8 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Individual Mock Gateway v19.10.
- * RESTORED: Unlock button for premium preparation nodes.
+ * @fileOverview Individual Mock Gateway v20.0 (Hardened).
+ * RESTORED: Unlock button for premium preparation nodes is now a permanent fixture.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

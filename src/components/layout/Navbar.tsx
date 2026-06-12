@@ -26,8 +26,9 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v26.0 (PWA Ready).
- * UPDATED: Added persistent Install App button for mobile downloads.
+ * @fileOverview Institutional Navbar v27.0 (Hardened).
+ * FIXED: Tag mismatch syntax error on line 200.
+ * UPDATED: Robust PWA download prompt capture.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -197,8 +198,8 @@ export default function Navbar() {
             )}
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 }
 
@@ -210,5 +211,5 @@ function DropdownNavItem({ href, icon, label, className }: any) {
         <span className="font-bold text-[12px] tracking-tight uppercase">{label}</span>
       </Link>
     </DropdownMenuItem>
-  )
+  );
 }

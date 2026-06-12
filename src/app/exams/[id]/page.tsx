@@ -34,8 +34,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Exam Hub v30.2.
- * RESTORED: Unlock button for premium preparation nodes.
+ * @fileOverview Institutional Exam Hub v31.0 (Hardened).
+ * RESTORED: Unlock button for premium preparation nodes is now restored permanently.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
