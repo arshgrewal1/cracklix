@@ -8,9 +8,9 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Institutional PWA Lifecycle Manager v24.0 (Design Match).
- * FIXED: Close button event propagation resolved.
- * MATCHED: High-fidelity dark pill design from user screenshot.
+ * @fileOverview Institutional PWA Lifecycle Manager v25.0 (Ultra-Compact).
+ * FIXED: Close button logic hardened with propagation stop.
+ * UPDATED: Miniature design for non-intrusive student experience.
  */
 export default function PWAManager() {
   const pathname = usePathname();
@@ -23,7 +23,6 @@ export default function PWAManager() {
   useEffect(() => {
     setMounted(true);
 
-    // 1. Service Worker registration
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').then(
         () => console.log('[PWA] Service Worker Active'),
@@ -31,7 +30,6 @@ export default function PWAManager() {
       );
     }
 
-    // 2. Capture Install Prompt
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
       (window as any).deferredPrompt = e;
@@ -42,7 +40,6 @@ export default function PWAManager() {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
       const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin');
       
-      // Only show if not dismissed in this session
       if (!isExcluded && !isStandalone && !isDismissed) {
         const timer = setTimeout(() => setShowPrompt(true), 3000);
         return () => clearTimeout(timer);
@@ -69,7 +66,9 @@ export default function PWAManager() {
     };
   }, [pathname, isDismissed]);
 
-  const handleInstallClick = async () => {
+  const handleInstallClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const prompt = deferredPrompt || (window as any).deferredPrompt;
     if (!prompt) return;
 
@@ -87,7 +86,7 @@ export default function PWAManager() {
     e.preventDefault();
     e.stopPropagation();
     setShowPrompt(false);
-    setIsDismissed(true); // Prevent re-showing in this session
+    setIsDismissed(true);
   };
 
   if (!mounted || isInstalled || !showPrompt) return null;
@@ -95,44 +94,44 @@ export default function PWAManager() {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ y: 100, opacity: 0, scale: 0.9 }}
+        initial={{ y: 50, opacity: 0, scale: 0.95 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
-        exit={{ y: 100, opacity: 0, scale: 0.9 }}
-        className="fixed bottom-24 md:bottom-12 right-4 md:right-12 z-[2000] w-[calc(100%-2rem)] md:w-auto max-w-md pointer-events-auto"
+        exit={{ y: 50, opacity: 0, scale: 0.95 }}
+        className="fixed bottom-24 md:bottom-10 right-4 md:right-10 z-[2000] w-[calc(100%-2rem)] md:w-auto max-w-sm pointer-events-auto"
       >
-        <div className="bg-[#0F172A] text-white p-4 md:p-6 rounded-[2rem] md:rounded-[3rem] shadow-5xl border border-white/10 flex items-center gap-4 md:gap-8 relative overflow-hidden group">
-          {/* Background Decoration */}
-          <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000">
-            <ShieldCheck className="h-24 w-24" />
+        <div className="bg-[#0F172A] text-white p-3 md:p-4 rounded-[1.5rem] md:rounded-[2rem] shadow-5xl border border-white/10 flex items-center gap-4 relative overflow-hidden group">
+          {/* Subtle Background Watermark */}
+          <div className="absolute top-0 right-0 p-2 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000 pointer-events-none">
+            <ShieldCheck className="h-16 w-16" />
           </div>
           
-          {/* Left Icon Node */}
-          <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner">
-             <Zap className="h-6 w-6 md:h-8 md:w-8 text-[#F97316] fill-current" />
+          {/* Miniature Icon Node */}
+          <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner">
+             <Zap className="h-5 w-5 md:h-6 md:w-6 text-[#F97316] fill-current" />
           </div>
 
-          {/* Content Node */}
+          {/* Miniature Content Hub */}
           <div className="flex-1 min-w-0 text-left">
-             <h4 className="text-sm md:text-lg font-black uppercase tracking-tight leading-none mb-1 md:mb-2">Download Cracklix</h4>
-             <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Install for fast, easy learning</p>
+             <h4 className="text-[11px] md:text-[13px] font-black uppercase tracking-tight leading-none mb-1">Download App</h4>
+             <p className="text-[7px] md:text-[8px] font-bold text-slate-500 uppercase tracking-widest leading-tight truncate">Get fast, easy learning</p>
           </div>
 
-          {/* Action Node */}
-          <div className="flex items-center gap-4">
+          {/* Action Hub */}
+          <div className="flex items-center gap-2">
              <Button 
               onClick={handleInstallClick}
-              className="h-10 md:h-12 px-5 md:px-8 bg-gradient-to-r from-[#F97316] to-orange-600 hover:to-orange-700 text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-xl border-none transition-all active:scale-95 gap-2 flex items-center"
+              className="h-9 md:h-10 px-3 md:px-5 bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[8px] md:text-[9px] tracking-widest rounded-lg shadow-xl border-none transition-all active:scale-95 gap-1.5 flex items-center"
              >
-                <Download className="h-3.5 w-3.5" /> INSTALL
+                <Download className="h-3 w-3" /> INSTALL
              </Button>
              
-             {/* Close Button - FIXED Logic */}
+             {/* Close Button - Hardened logic */}
              <button 
               onClick={handleClose}
-              className="p-2 text-slate-500 hover:text-white transition-colors cursor-pointer active:scale-90"
+              className="h-8 w-8 flex items-center justify-center text-slate-500 hover:text-white transition-colors cursor-pointer active:scale-90 shrink-0"
               aria-label="Close notification"
              >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
              </button>
           </div>
         </div>
@@ -140,3 +139,4 @@ export default function PWAManager() {
     </AnimatePresence>
   );
 }
+
