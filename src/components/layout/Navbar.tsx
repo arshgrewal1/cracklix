@@ -24,8 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Header v186.0.
- * FIXED: Logo height set to exactly 40px (h-10) for student side.
+ * @fileOverview Professional Header v187.0.
+ * FIXED: Logo height set to exactly 48px (h-12) for student side.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -131,7 +131,7 @@ export default function Navbar() {
             
             <div className="flex items-center shrink-0 h-full">
                <Logo 
-                 imgClassName="h-10 origin-left" 
+                 imgClassName="h-12 origin-left" 
                  className="active:scale-95 transition-transform" 
                />
             </div>

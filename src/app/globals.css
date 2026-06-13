@@ -25,13 +25,13 @@
     --ring: 24 95% 53%;
     --radius: 0.75rem;
 
-    /* Global Geometry Node - Calibrated for ultra-compact 40px logo */
-    --header-height: 52px;
+    /* Global Geometry Node - Calibrated for compact 48px logo */
+    --header-height: 60px;
   }
 
   @media (min-width: 1024px) {
     :root {
-      --header-height: 60px;
+      --header-height: 68px;
     }
   }
 }
