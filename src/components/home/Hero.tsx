@@ -20,7 +20,7 @@ import {
   FileStack
 } from "lucide-react";
 import { useUser, useFirestore, useDoc } from "@/firebase";
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
@@ -28,9 +28,9 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Elite Institutional Hero Hub v200.0.
+ * @fileOverview Elite Institutional Hero Hub v205.0.
  * DESIGN: High-converting command center matching provided reference.
- * TARGET: PSSSB, Police, PPSC, PSPCL, PSTET, CTET, ETT.
+ * TARGET: PSSSB, Police, PPSC, PSPCL, PSTET, CTET, ETT, Master Cadre.
  */
 export default function Hero() {
   const router = useRouter();
@@ -59,7 +59,7 @@ export default function Hero() {
 
   return (
     <section className="relative pt-12 pb-20 md:pt-24 md:pb-32 bg-[#0B1528] overflow-hidden text-left">
-      {/* BACKGROUND ATMOSPHERE */}
+      {/* 1. INSTITUTIONAL BACKGROUND NODE */}
       <div className="absolute inset-0 z-0">
          <Image 
             src={heroImageUrl}
@@ -75,7 +75,7 @@ export default function Hero() {
       <div className="container mx-auto px-4 md:px-6 max-w-7xl relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
           
-          {/* LEFT: COMMAND CONTENT */}
+          {/* 2. COMMAND CONTENT HUB (LEFT) */}
           <div className="lg:col-span-7 space-y-10">
             <motion.div 
               initial={{ opacity: 0, x: -20 }}
@@ -84,7 +84,7 @@ export default function Hero() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl mb-4">
                  <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-                 <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-primary">🏆 Punjab's Most Trusted Preparation Hub</span>
+                 <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-primary">🏆 Punjab's Most Trusted Selection Hub</span>
               </div>
 
               <div className="space-y-4 md:space-y-6">
@@ -93,21 +93,21 @@ export default function Hero() {
                     <span className="text-primary italic">Government Exams.</span>
                  </h1>
                  <p className="text-slate-400 text-base md:text-xl font-medium max-w-2xl leading-relaxed antialiased">
-                    Unlock your selection potential with institutional-grade mock tests, verified exam patterns, and AI-powered logic solutions.
+                    Prepare with institutional precision. Access high-fidelity mock tests, verified patterns, and AI-powered logic solutions for selection success.
                  </p>
               </div>
 
-              {/* TACTICAL EXAM REGISTRY CHIPS */}
+              {/* RECRUITMENT REGISTRY CHIPS */}
               <div className="flex flex-wrap gap-2.5">
-                 {['PSSSB', 'POLICE', 'PPSC', 'PSPCL', 'PSTET', 'CTET', 'ETT', 'MASTER CADRE'].map((board) => (
-                    <div key={board} className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-black text-[10px] tracking-widest hover:border-primary/50 transition-all cursor-default">
+                 {['PSSSB', 'PUNJAB POLICE', 'PPSC', 'PSPCL', 'PSTET', 'CTET', 'ETT', 'MASTER CADRE'].map((board) => (
+                    <div key={board} className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-black text-[10px] tracking-widest hover:border-primary/50 transition-all cursor-default hover:text-white">
                        {board}
                     </div>
                  ))}
               </div>
             </motion.div>
 
-            {/* CTAs */}
+            {/* CONVERSION CTAs */}
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
               <Button 
                 onClick={() => handleAction('/mocks')}
@@ -139,28 +139,28 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* RIGHT: READINESS DASHBOARD VISUALIZATION */}
+          {/* 3. PERFORMANCE DASHBOARD (RIGHT) */}
           <div className="lg:col-span-5 relative">
              <motion.div 
                initial={{ opacity: 0, scale: 0.95 }}
                animate={{ opacity: 1, scale: 1 }}
                className="relative"
              >
-                {/* Dashboard Aura */}
+                {/* Visual Aura */}
                 <div className="absolute -inset-2 bg-gradient-to-br from-primary/20 to-blue-500/10 rounded-[4rem] blur-3xl opacity-50" />
                 
                 <div className="relative bg-white/5 backdrop-blur-3xl border border-white/10 rounded-[3.5rem] p-10 md:p-12 space-y-10 shadow-5xl overflow-hidden">
                    <div className="absolute top-0 right-0 p-8 opacity-5"><Target className="h-64 w-64" /></div>
                    
-                   <div className="flex items-center justify-between relative z-10">
+                   <div className="flex items-center justify-between relative z-10 text-left">
                       <div className="space-y-1">
                          <p className="text-[10px] font-black uppercase text-primary tracking-widest leading-none">PREPARATION AUDIT</p>
-                         <h3 className="text-xl font-headline font-black text-white uppercase">Selection Hub</h3>
+                         <h3 className="text-xl font-headline font-black text-white uppercase">Exam Readiness</h3>
                       </div>
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-none px-4 py-1 font-black uppercase text-[10px]">Live Data</Badge>
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-none px-4 py-1 font-black uppercase text-[10px]">Registry Benchmarked</Badge>
                    </div>
                    
-                   {/* READINESS GAUGE */}
+                   {/* READINESS GAUGE HUB */}
                    <div className="flex items-center gap-10 relative z-10">
                       <div className="relative h-32 w-32 md:h-40 md:w-40 flex items-center justify-center">
                          <svg className="h-full w-full transform -rotate-90">
@@ -179,11 +179,11 @@ export default function Hero() {
                       </div>
                    </div>
 
-                   {/* VERIFIED STATUS */}
+                   {/* VERIFIED NODES */}
                    <div className="pt-8 border-t border-white/10 relative z-10">
                       <div className="grid grid-cols-1 gap-4">
-                         <FeatureNode icon={<CheckCircle2 className="text-emerald-500" />} label="Pattern Verified Content" />
-                         <FeatureNode icon={<Zap className="text-primary" />} label="AI Step-by-Step Solutions" />
+                         <FeatureNode icon={<CheckCircle2 className="text-emerald-500" />} label="Official Exam Patterns" />
+                         <FeatureNode icon={<Zap className="text-primary" />} label="AI Step-by-Step Logic Solutions" />
                       </div>
                    </div>
                 </div>
@@ -191,7 +191,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* BOTTOM PREMIUM FEATURES STRIP */}
+        {/* 4. PREMIUM FEATURES STRIP */}
         <div className="mt-16 md:mt-24 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
            <FeatureStripNode icon={<Globe />} label="Full Bilingual Support" />
            <FeatureStripNode icon={<Award />} label="Real-Time State Merit" />
