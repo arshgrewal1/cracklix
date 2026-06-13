@@ -24,10 +24,10 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Final High-Fidelity "Master Interface" Hero v35.0.
+ * @fileOverview Final High-Fidelity "Master Interface" Hero v36.0.
  * MATCHED: Exact pixel-perfect alignment with reference screenshot.
- * FEATURES: Punjab map overlay (left-aligned), Cinematic sky background, Glassy horizontal Stat Cards.
- * DATA: Real-time Firestore synchronization for "Questions", "Mocks", and "Exams".
+ * FIXED: Text casing for subtext and labels (Sentence/Title case).
+ * FEATURES: Blueish gradient overlay, Punjab map silhouette, Glassy horizontal Stat Cards.
  */
 
 export default function Hero() {
@@ -79,8 +79,8 @@ export default function Hero() {
            <div className="absolute top-[45%] left-[22%] -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] md:w-[650px] md:h-[650px] bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ea/Outline_Map_of_Punjab_India.svg')] bg-contain bg-no-repeat grayscale invert" />
         </div>
 
-        {/* Subtle Side Overlay for readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050B19]/60 via-transparent to-transparent z-[15]" />
+        {/* BLUE SHADE OVERLAY (MATCHED TO SCREENSHOT) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/50 to-transparent z-[15]" />
         
         {/* MAIN CONTENT HUB */}
         <div className="container mx-auto px-6 md:px-12 max-w-7xl relative z-20">
@@ -94,7 +94,7 @@ export default function Hero() {
               >
                  <Star className="h-3 w-3 md:h-4 md:w-4 text-orange-500 fill-current" />
                  <span className="text-[8px] md:text-[11px] font-black text-white uppercase tracking-[0.25em]">
-                    #1 Punjab Exam Preparation Platform
+                    #1 PUNJAB EXAM PREPARATION PLATFORM
                  </span>
               </motion.div>
 
@@ -106,9 +106,10 @@ export default function Hero() {
                  className="space-y-1 md:space-y-2"
               >
                  <h1 className="text-3xl sm:text-5xl md:text-[85px] font-black text-white leading-[1.05] tracking-tight uppercase drop-shadow-2xl antialiased">
-                    Prepare Smarter.<br/>
-                    <span className="text-[#F97316]">Score Higher.</span>
+                    PREPARE SMARTER.<br/>
+                    <span className="text-[#F97316]">SCORE HIGHER.</span>
                  </h1>
+                 {/* FIXED: SENTENCE CASE SUBTEXT */}
                  <p className="text-[12px] md:text-2xl text-slate-100 font-medium max-w-xs md:max-w-2xl leading-relaxed opacity-90">
                     Punjab Government Exams di Complete Preparation ik hi Platform te.
                  </p>
@@ -123,12 +124,12 @@ export default function Hero() {
               >
                  <Button asChild className="h-12 md:h-16 px-8 md:px-14 bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[10px] md:text-[14px] tracking-[0.2em] rounded-xl md:rounded-2xl shadow-3xl gap-3 transition-all active:scale-95 border-none">
                     <Link href="/mocks" className="flex items-center">
-                       Start Free Mock <ArrowRight className="h-4 w-4 md:h-5 md:w-5 ml-1" />
+                       START FREE MOCK <ArrowRight className="h-4 w-4 md:h-5 md:w-5 ml-1" />
                     </Link>
                  </Button>
                  <Button asChild variant="outline" className="h-12 md:h-16 px-8 md:px-14 border-white/40 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[10px] md:text-[14px] tracking-[0.2em] rounded-xl md:rounded-2xl transition-all backdrop-blur-xl border-[2px]">
                     <Link href="/exams">
-                       Explore Exams
+                       EXPLORE EXAMS
                     </Link>
                  </Button>
               </motion.div>
@@ -175,7 +176,8 @@ function HeroStatCard({ icon, val, label }: { icon: React.ReactNode, val: string
        </div>
        <div className="min-w-0 flex flex-col justify-center">
           <p className="text-xl md:text-[34px] font-black text-white leading-none tracking-tight tabular-nums">{val}</p>
-          <p className="text-[7px] md:text-[12px] font-bold uppercase text-slate-500 tracking-widest mt-1 md:mt-2 truncate group-hover:text-slate-400 transition-colors">{label}</p>
+          {/* FIXED: TITLE CASE FOR LABELS */}
+          <p className="text-[7px] md:text-[12px] font-bold text-slate-500 tracking-widest mt-1 md:mt-2 truncate group-hover:text-slate-400 transition-colors">{label}</p>
        </div>
     </Card>
   )
