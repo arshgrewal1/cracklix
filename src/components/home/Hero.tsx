@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { 
@@ -29,7 +30,8 @@ import {
   Flame,
   Globe,
   TrendingUp,
-  Smartphone
+  Smartphone,
+  Lock
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -39,20 +41,26 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Institutional Punjab Government Exam Hero v22.0.
- * UPDATED: Optimized stats display and institutional checklist.
+ * @fileOverview Institutional Punjab Government Exam Hero v23.0 (Hydration Fixed).
+ * UPDATED: Integrated mounted guard for live stats to prevent hydration mismatch.
  */
 
 export default function Hero() {
   const router = useRouter();
   const db = useFirestore();
+  const [mounted, setMounted] = useState(false);
   const heroImage = "https://punjabpolice.gov.in/media/images/pp10.original.jpg";
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // LIVE STATS LISTENER
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
-  const { data: stats } = useDoc<any>(statsRef);
+  const { data: stats, loading } = useDoc<any>(statsRef);
 
   const displayStats = useMemo(() => {
     const format = (num: number) => {
@@ -60,13 +68,16 @@ export default function Hero() {
       return num >= 1000 ? `${(num / 1000).toFixed(1)}k+` : num.toString();
     };
 
+    // Use placeholder values if not mounted or loading to ensure SSR matches initial hydration
+    const s = mounted ? stats : null;
+
     return {
-      questions: format(stats?.totalQuestions || 50000),
-      mocks: format(stats?.totalMocks || 500),
-      aspirants: format(stats?.totalUsers || 15000),
-      accuracy: `${stats?.averageAccuracy || 94}%`
+      questions: format(s?.totalQuestions || 50000),
+      mocks: format(s?.totalMocks || 500),
+      aspirants: format(s?.totalUsers || 15000),
+      accuracy: `${s?.averageAccuracy || 94}%`
     };
-  }, [stats]);
+  }, [stats, mounted]);
 
   return (
     <div className="flex flex-col w-full bg-white font-body">

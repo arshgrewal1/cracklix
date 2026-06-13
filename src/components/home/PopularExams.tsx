@@ -1,6 +1,7 @@
+
 'use client';
 
-import React, { useMemo } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import { motion } from "framer-motion";
 import { 
   ChevronRight, 
@@ -25,7 +26,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Final Institutional Popular Exams Hub v21.0.
+ * @fileOverview Final Institutional Popular Exams Hub v22.0 (Hydration Guarded).
  * MATCHED: High-density board list with breakdown links for each prep node.
  */
 
@@ -42,14 +43,21 @@ const BOARD_ICONS: Record<string, React.ReactNode> = {
 
 export default function PopularExams() {
   const db = useFirestore();
-  const { data: boards, loading } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc")) : null), [db]));
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const boardsQuery = useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc")) : null), [db]);
+  const { data: boards, loading } = useCollection<any>(boardsQuery);
 
   const filteredBoards = useMemo(() => {
-    if (!boards) return [];
-    // Prioritize popular ones for homepage mapping to the 8 specific nodes requested
+    if (!boards || !mounted) return [];
+    // Prioritize popular ones for homepage mapping
     const targetAbbrevs = ['PSSSB', 'POLICE', 'PPSC', 'PSPCL', 'PSTET', 'CTET', 'ETT', 'MASTER CADRE'];
     return boards.filter((b: any) => targetAbbrevs.includes(b.abbreviation?.toUpperCase()));
-  }, [boards]);
+  }, [boards, mounted]);
 
   return (
     <section className="py-12 md:py-24 bg-slate-50/50">
@@ -69,8 +77,8 @@ export default function PopularExams() {
          </div>
 
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-            {loading ? (
-               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[3rem]" />)
+            {loading || !mounted ? (
+               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[2.5rem]" />)
             ) : filteredBoards.map((board, idx) => (
               <motion.div 
                  key={board.id}

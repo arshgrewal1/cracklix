@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Landmark, 
@@ -21,8 +22,8 @@ import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview Institutional Category Entry Nodes v5.2.
- * UPDATED: Optimized button size and text for high-density layouts.
+ * @fileOverview Institutional Category Entry Nodes v5.3 (Hydration Hardened).
+ * FIXED: Wrapped Firestore derivations in a mount guard to prevent SSR/CSR mismatch.
  */
 
 const CATEGORY_META = [
@@ -70,17 +71,25 @@ const CATEGORY_META = [
 
 export default function FeaturedCategories() {
   const db = useFirestore();
-  const { data: exams, loading } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db]);
+  const { data: exams, loading } = useCollection<any>(examsQuery);
 
   const categoriesWithCounts = useMemo(() => {
     return CATEGORY_META.map(cat => {
-      const count = (exams || []).filter(e => e.categoryId === cat.id).length;
+      // Only derive counts if mounted to keep server and client matching initially
+      const count = mounted && exams ? exams.filter((e: any) => e.categoryId === cat.id).length : 0;
       return {
         ...cat,
         countLabel: `${count} EXAMS LIVE`
       };
     });
-  }, [exams]);
+  }, [exams, mounted]);
 
   return (
     <section className="space-y-12">
@@ -111,10 +120,6 @@ export default function FeaturedCategories() {
           >
              <Link href={`/exams/category/${cat.id}`}>
                 <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100 p-8 text-left relative">
-                   <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:scale-110 transition-transform">
-                      {cat.id !== 'punjab-govt' && cat.id !== 'punjab-teaching' && cat.id !== 'punjab-technical' && cat.id !== 'banking' && cat.id !== 'central-govt' && cat.icon}
-                   </div>
-                   
                    <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center mb-8 shadow-inner transition-transform group-hover:scale-110", cat.bgColor, cat.color)}>
                       <div className="h-full w-full flex items-center justify-center overflow-hidden rounded-xl">
                         {cat.icon}
@@ -127,7 +132,7 @@ export default function FeaturedCategories() {
                    </div>
 
                    <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
-                      {loading ? (
+                      {loading || !mounted ? (
                         <Skeleton className="h-3 w-20 bg-slate-100" />
                       ) : (
                         <span className="text-[10px] font-black text-[#0F172A] uppercase tracking-widest">{cat.countLabel}</span>
