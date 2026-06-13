@@ -24,8 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Header v183.0 (Compact Reset).
- * UPDATED: Reduced logo height to h-10 (40px) for a sleek, small footprint.
+ * @fileOverview Professional Header v185.0 (Ultra-Compact).
+ * UPDATED: Reduced header height and removed redundant Safe Area padding for a tighter fit.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -112,7 +112,6 @@ export default function Navbar() {
     <div className="sticky top-0 z-[1000] w-full pointer-events-auto font-body text-left">
       <nav className={cn(
         "w-full flex items-center bg-[#0B1528] border-b border-white/5 px-2 md:px-4 lg:px-8 shadow-2xl overflow-hidden backdrop-blur-xl",
-        "pt-[env(safe-area-inset-top)]",
         headerHeightClass
       )}>
         <div className="container mx-auto max-w-[1536px] flex items-center justify-between h-full gap-1 md:gap-2">
