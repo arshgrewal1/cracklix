@@ -51,9 +51,9 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview FINAL HIGH-FIDELITY Mock Architect v86.0.
- * FIXED: Refined Marking Cards (POS/NEG) into vertical capsules for better visibility.
- * FIXED: Improved layout and centering of marking inputs.
+ * @fileOverview FINAL HIGH-FIDELITY Mock Architect v87.0.
+ * FIXED: Reduced Question Card sizes for better density.
+ * FIXED: Fixed Select All button text overflow.
  */
 
 export default function MockBuilderPage() {
@@ -649,9 +649,9 @@ function MockBuilderContent() {
                               <Button 
                                  onClick={handleSelectAllInBank} 
                                  variant="outline"
-                                 className="h-16 w-full border-white/10 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[12px] tracking-widest rounded-xl shadow-xl active:scale-95"
+                                 className="h-16 w-full border-white/10 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-xl active:scale-95 px-2"
                               >
-                                 SELECT ALL FILTERED
+                                 SELECT ALL
                               </Button>
                            </div>
                            <div className="md:col-span-8">
@@ -668,9 +668,9 @@ function MockBuilderContent() {
                   </div>
 
                   {/* QUESTION LIST HUB */}
-                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-6 duration-700">
+                  <div className="space-y-4 animate-in fade-in slide-in-from-bottom-6 duration-700">
                     {bankLoading ? (
-                      Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-[2.5rem] bg-slate-50" />)
+                      Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-[1.5rem] bg-slate-50" />)
                     ) : visibleBank.map((q) => {
                       const isSelected = bankSelection.includes(q.id);
                       const board = boards?.find(b => b.id === q.boardId);
@@ -680,24 +680,24 @@ function MockBuilderContent() {
                           key={q.id} 
                           onClick={() => setBankSelection(prev => isSelected ? prev.filter(id => id !== q.id) : [...prev, q.id])}
                           className={cn(
-                            "border-none shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 flex items-center gap-6 md:gap-10 cursor-pointer transition-all duration-500 hover:translate-y-[-6px] border border-slate-100 group overflow-hidden relative",
+                            "border-none shadow-lg rounded-[1.5rem] bg-white p-4 md:p-6 flex items-center gap-4 md:gap-6 cursor-pointer transition-all duration-500 hover:translate-y-[-4px] border border-slate-100 group overflow-hidden relative",
                             isSelected && "ring-2 ring-primary/20 bg-primary/5"
                           )}
                         >
                            <div className={cn(
-                              "h-10 w-10 md:h-14 md:w-14 rounded-full border-[3px] flex items-center justify-center shrink-0 transition-all duration-500",
-                              isSelected ? "border-[#F97316] bg-[#F97316] shadow-2xl" : "border-slate-200 bg-white"
+                              "h-8 w-8 md:h-10 md:w-10 rounded-full border-[2px] flex items-center justify-center shrink-0 transition-all duration-500",
+                              isSelected ? "border-[#F97316] bg-[#F97316] shadow-xl" : "border-slate-200 bg-white"
                            )}>
-                              {isSelected && <Check className="h-5 w-5 md:h-6 md:w-6 text-white stroke-[4px]" />}
+                              {isSelected && <Check className="h-4 w-4 md:h-5 md:w-5 text-white stroke-[4px]" />}
                            </div>
                            
-                           <div className="flex-1 min-w-0 space-y-4 text-left">
-                              <div className="flex flex-wrap items-center gap-3">
-                                 <Badge className="bg-[#0B1528] text-white border-none font-black text-[10px] px-3 py-1 rounded-lg uppercase shadow-lg">{board?.abbreviation || 'PSSSB'}</Badge>
-                                 <Badge variant="outline" className="text-slate-400 border-slate-200 text-[10px] font-black uppercase px-3 py-1 rounded-lg bg-slate-50">{sub?.name || 'ICT'}</Badge>
-                                 {q.status === 'USED' && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[10px] font-black uppercase">USED</Badge>}
+                           <div className="flex-1 min-w-0 space-y-3 text-left">
+                              <div className="flex flex-wrap items-center gap-2">
+                                 <Badge className="bg-[#0B1528] text-white border-none font-black text-[8px] px-2 py-0.5 rounded shadow-md uppercase">{board?.abbreviation || 'PSSSB'}</Badge>
+                                 <Badge variant="outline" className="text-slate-400 border-slate-200 text-[8px] font-black uppercase px-2 py-0.5 rounded bg-slate-50">{sub?.name || 'ICT'}</Badge>
+                                 {q.status === 'USED' && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase px-2 py-0.5">USED</Badge>}
                               </div>
-                              <p className="font-black text-lg md:text-2xl text-[#0F172A] leading-[1.2] antialiased break-words tracking-tight group-hover:text-primary transition-colors">
+                              <p className="font-bold text-sm md:text-base text-[#0F172A] leading-tight antialiased break-words tracking-tight group-hover:text-primary transition-colors">
                                 {q.englishQuestion}
                               </p>
                            </div>
@@ -705,12 +705,12 @@ function MockBuilderContent() {
                       )
                     })}
                     {filteredBank.length > displayLimit && (
-                      <div className="flex justify-center pt-10">
+                      <div className="flex justify-center pt-6">
                         <Button 
                           onClick={() => setDisplayLimit(prev => prev + 100)}
-                          className="h-16 px-12 rounded-2xl bg-white border-2 border-slate-100 text-[#0F172A] font-black uppercase tracking-widest text-[14px] hover:bg-slate-50 shadow-xl"
+                          className="h-12 px-10 rounded-xl bg-white border-2 border-slate-100 text-[#0F172A] font-black uppercase tracking-widest text-[11px] hover:bg-slate-50 shadow-md"
                         >
-                          Load More Questions ({filteredBank.length - displayLimit} Remaining)
+                          Load More ({filteredBank.length - displayLimit} Remaining)
                         </Button>
                       </div>
                     )}
