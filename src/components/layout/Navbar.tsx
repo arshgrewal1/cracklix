@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { Menu, Search, Zap, LogOut, ShieldCheck, Download, Calendar, User } from "lucide-react";
+import { Menu, Search, Zap, LogOut, ShieldCheck, Download, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import { useState, useMemo, useEffect } from "react";
@@ -23,8 +23,8 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview High-Fidelity Restored Navbar v50.0.
- * MATCHED: Header layout from user screenshot (Menu -> Logo -> Pass Node -> Search -> Profile).
+ * @fileOverview High-Fidelity Restored Navbar v55.0.
+ * MATCHED: Layout exactly to user screenshot (Menu | Logo | Pass Hub | Search | Profile).
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -39,18 +39,12 @@ export default function Navbar() {
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== 'undefined' && (window as any).deferredPrompt) {
+      setCanInstall(true);
+    }
+    const handleInstallable = () => setCanInstall(true);
+    window.addEventListener('pwa-installable', handleInstallable);
     
-    // 1. Service Worker & Install Logic
-    const checkInstall = () => {
-      if (typeof window !== 'undefined' && (window as any).deferredPrompt) {
-        setCanInstall(true);
-      }
-    };
-    window.addEventListener('pwa-installable', () => setCanInstall(true));
-    window.addEventListener('pwa-installed', () => setCanInstall(false));
-    checkInstall();
-
-    // 2. Announcements Listener
     if (db) {
        return onSnapshot(doc(db, 'settings', 'global'), (snap) => {
           if (snap.exists()) setAnnouncement(snap.data());
@@ -66,7 +60,6 @@ export default function Navbar() {
     
     return {
       active: active && !isExpired,
-      isExpired,
       label: isExpired ? "PASS EXPIRED" : "PASS ACTIVE",
       expiry: expiry.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
     };
@@ -75,11 +68,6 @@ export default function Navbar() {
   const handleLogout = async () => {
     await signOut(auth);
     router.push('/');
-  };
-
-  const handleInstallApp = async () => {
-    const prompt = (window as any).deferredPrompt;
-    if (prompt) prompt.prompt();
   };
 
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
@@ -106,45 +94,45 @@ export default function Navbar() {
           <div className="flex items-center gap-4 md:gap-8">
             <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
               <SheetTrigger asChild>
-                <button className="bg-white/5 text-white p-2.5 md:p-3 rounded-xl border border-white/10 hover:bg-white/10 transition-all cursor-pointer focus:outline-none">
-                  <Menu className="h-5 w-5 md:h-6 md:w-6" />
+                <button className="bg-white/5 text-white p-2.5 md:p-3 rounded-xl border border-white/10 hover:bg-white/10 transition-all cursor-pointer">
+                  <Menu className="h-6 w-6" />
                 </button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 border-none w-[280px] bg-[#0F172A] z-[2001]">
-                <SheetHeader className="sr-only"><SheetTitle>Navigation Menu</SheetTitle></SheetHeader>
+              <SheetContent side="left" className="p-0 border-none w-[300px] bg-[#0F172A] z-[2001]">
+                <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle></SheetHeader>
                 <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
               </SheetContent>
             </Sheet>
-            <Logo variant="light" className="origin-left scale-90 md:scale-100" />
+            <Logo variant="light" className="scale-90 md:scale-100" />
           </div>
 
-          {/* RIGHT: PASS -> SEARCH -> USER */}
-          <div className="flex items-center gap-2 md:gap-6">
+          {/* RIGHT: ACTION NODES */}
+          <div className="flex items-center gap-3 md:gap-6">
             
             {/* 1. PASS STATUS NODE (SCREENSHOT MATCH) */}
             {mounted && user && passStatus && (
-               <div className="flex items-center gap-4">
-                  <div className="hidden sm:flex flex-col items-end gap-0.5">
+               <div className="flex items-center gap-6">
+                  <div className="flex flex-col items-end gap-1">
                      <Badge className={cn(
                        "border-none px-4 py-1 rounded-full font-black uppercase text-[8px] md:text-[9px] tracking-widest shadow-lg text-white",
-                       passStatus.active ? "bg-emerald-500" : "bg-rose-600"
+                       passStatus.active ? "bg-[#10B981]" : "bg-rose-600"
                      )}>
                         {passStatus.label}
                      </Badge>
-                     <p className="text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none mt-1">
+                     <p className="text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] leading-none">
                         VALID TILL {passStatus.expiry}
                      </p>
                   </div>
-                  <div className="h-8 w-px bg-white/10 hidden sm:block mx-1" />
+                  <div className="h-10 w-px bg-white/10 hidden md:block" />
                </div>
             )}
 
             {/* 2. INSTALL APP HUB */}
             {mounted && canInstall && (
               <Button 
-                onClick={handleInstallApp}
+                onClick={() => (window as any).deferredPrompt?.prompt()}
                 variant="ghost" 
-                className="hidden lg:flex h-11 px-6 rounded-xl border border-emerald-500/20 bg-emerald-500/5 text-emerald-400 font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-emerald-500 hover:text-white transition-all shadow-md"
+                className="hidden lg:flex h-12 px-6 rounded-xl border border-[#10B981]/20 bg-[#10B981]/5 text-[#10B981] font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-[#10B981] hover:text-white transition-all shadow-md"
               >
                  <Download className="h-4 w-4" /> Install App
               </Button>
@@ -153,7 +141,7 @@ export default function Navbar() {
             {/* 3. SEARCH NODE */}
             <Link 
                href="/search" 
-               className="bg-white/5 text-slate-400 hover:text-white p-2.5 md:p-3 rounded-xl border border-white/10 transition-all hover:bg-white/10 shrink-0"
+               className="bg-white/5 text-slate-400 hover:text-white p-2.5 md:p-3 rounded-xl border border-white/10 transition-all hover:bg-white/10"
             >
               <Search className="h-5 w-5 md:h-6 md:w-6" />
             </Link>
@@ -179,21 +167,12 @@ export default function Navbar() {
                     </div>
                     
                     <DropdownMenuSeparator className="bg-white/5" />
-                    
                     <DropdownMenuItem asChild className="flex items-center gap-3 px-4 py-4 cursor-pointer rounded-xl transition-all focus:bg-white/5">
                       <Link href="/profile" className="w-full flex items-center gap-3">
                         <User className="h-4 w-4 text-primary" />
                         <span className="font-bold text-[13px] tracking-tight uppercase">My Profile</span>
                       </Link>
                     </DropdownMenuItem>
-
-                    <DropdownMenuItem asChild className="flex items-center gap-3 px-4 py-4 cursor-pointer rounded-xl transition-all focus:bg-white/5">
-                      <Link href="/pass" className="w-full flex items-center gap-3">
-                        <ShieldCheck className="h-4 w-4 text-emerald-400" />
-                        <span className="font-bold text-[13px] tracking-tight uppercase">Elite Pass Hub</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    
                     {isAdmin && (
                       <DropdownMenuItem asChild className="flex items-center gap-3 px-4 py-4 cursor-pointer rounded-xl transition-all focus:bg-white/5">
                         <Link href="/admin" className="w-full flex items-center gap-3 text-primary">
@@ -202,7 +181,6 @@ export default function Navbar() {
                         </Link>
                       </DropdownMenuItem>
                     )}
-
                     <DropdownMenuSeparator className="bg-white/5" />
                     <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-3 px-4 py-4 cursor-pointer rounded-xl transition-all focus:bg-rose-500/10 focus:text-rose-500 text-rose-500/80">
                       <LogOut className="h-4 w-4 shrink-0" />
