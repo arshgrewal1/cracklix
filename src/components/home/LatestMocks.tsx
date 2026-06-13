@@ -18,8 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Latest Mock Hub v36.0 (Hardened).
- * FIXED: ReferenceError: Card is not defined by adding explicit imports.
+ * @fileOverview Official Latest Mock Hub v37.0 (Hardened).
+ * FIXED: ReferenceError by adding explicit UI component imports.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

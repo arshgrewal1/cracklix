@@ -22,9 +22,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Final Screenshot-Matched Hero v3.0.
- * UPDATED: Decreased headline font size for professional balance.
- * MATCHED: Full 1024x576 background image visibility.
+ * @fileOverview Final Screenshot-Matched Hero v5.0.
+ * UPDATED: Live Data Integration & High-Visibility Icons.
  */
 
 export default function Hero() {
@@ -38,11 +37,26 @@ export default function Hero() {
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
 
+  const liveStats = useMemo(() => {
+    const formatNumber = (num: number, fallback: string) => {
+      if (!num) return fallback;
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'k+';
+      return num.toString() + '+';
+    };
+
+    return {
+      questions: formatNumber(stats?.totalQuestions, "10,000+"),
+      mocks: formatNumber(stats?.totalMocks, "500+"),
+      exams: formatNumber(stats?.totalBoards, "50+"),
+      analytics: "Detailed"
+    };
+  }, [stats]);
+
   if (!mounted) return null;
 
   return (
     <section className="relative w-full bg-[#020817] overflow-hidden flex flex-col items-center">
-      {/* 1. FULL ASPECT BACKGROUND LAYER - No Cropping */}
+      {/* 1. FULL ASPECT BACKGROUND LAYER */}
       <div className="w-full relative aspect-[1024/576] min-h-[400px] md:min-h-0">
         <img 
           src="https://i.ibb.co/LXgcLVVq/Gemini-Generated-Image-n1so6on1so6on1so.png" 
@@ -51,25 +65,15 @@ export default function Hero() {
           referrerPolicy="no-referrer"
         />
         
-        {/* PAIRED OVERLAYS FOR TEXT CONTRAST */}
+        {/* PAIRED OVERLAYS */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#020817] via-[#020817]/40 to-transparent z-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent z-10" />
         
-        {/* PUNJAB MAP TEXTURE OVERLAY */}
-        <div className="absolute top-0 left-0 w-1/2 h-full opacity-10 pointer-events-none z-10 overflow-hidden">
-           <img 
-              src="https://www.mapsofindia.com/maps/punjab/punjab-map.jpg" 
-              className="h-full w-full object-contain object-left scale-150 grayscale invert" 
-              alt=""
-           />
-        </div>
-
-        {/* 2. TEXT CONTENT HUB */}
+        {/* TEXT CONTENT HUB */}
         <div className="absolute inset-0 z-20 flex items-center">
            <div className="container mx-auto px-4 md:px-12 max-w-7xl">
               <div className="max-w-3xl space-y-6 md:space-y-8 text-left">
                  
-                 {/* Top Badge Node */}
                  <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -81,7 +85,6 @@ export default function Hero() {
                     </span>
                  </motion.div>
 
-                 {/* Refined Typography Node (Smaller Size) */}
                  <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -97,7 +100,6 @@ export default function Hero() {
                     </p>
                  </motion.div>
 
-                 {/* Command Buttons */}
                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -120,28 +122,32 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* 3. BOTTOM STATS BAR HUB (Glassmorphism) */}
+      {/* 3. BOTTOM STATS BAR HUB (High-Visibility Icons) */}
       <div className="w-full bg-[#020817] pt-0 pb-12 md:pb-16 -mt-10 md:-mt-24 relative z-30">
          <div className="container mx-auto px-4 md:px-12 max-w-7xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                <HeroStatCard 
-                 icon={<BookOpen className="text-[#1E5EFF]" />} 
-                 val="10,000+" 
+                 icon={<BookOpen className="text-blue-400 h-5 w-5 md:h-7 md:w-7" />} 
+                 iconBg="bg-blue-400/10 border border-blue-400/20"
+                 val={liveStats.questions} 
                  label="Practice Questions" 
                />
                <HeroStatCard 
-                 icon={<ClipboardList className="text-[#F97316]" />} 
-                 val="500+" 
+                 icon={<ClipboardList className="text-orange-400 h-5 w-5 md:h-7 md:w-7" />} 
+                 iconBg="bg-orange-400/10 border border-orange-400/20"
+                 val={liveStats.mocks} 
                  label="Mock Tests" 
                />
                <HeroStatCard 
-                 icon={<ShieldCheck className="text-[#1E5EFF]" />} 
-                 val="50+" 
+                 icon={<ShieldCheck className="text-blue-400 h-5 w-5 md:h-7 md:w-7" />} 
+                 iconBg="bg-blue-400/10 border border-blue-400/20"
+                 val={liveStats.exams} 
                  label="Exams Covered" 
                />
                <HeroStatCard 
-                 icon={<BarChart3 className="text-[#10B981]" />} 
-                 val="Detailed" 
+                 icon={<BarChart3 className="text-emerald-400 h-5 w-5 md:h-7 md:w-7" />} 
+                 iconBg="bg-emerald-400/10 border border-emerald-400/20"
+                 val={liveStats.analytics} 
                  label="Analytics" 
                />
             </div>
@@ -151,11 +157,11 @@ export default function Hero() {
   );
 }
 
-function HeroStatCard({ icon, val, label }: { icon: React.ReactNode, val: string, label: string }) {
+function HeroStatCard({ icon, val, label, iconBg }: { icon: React.ReactNode, val: string, label: string, iconBg: string }) {
   return (
     <Card className="bg-[#0B1528]/80 backdrop-blur-2xl border border-white/10 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] text-left flex items-center gap-4 md:gap-6 group hover:bg-[#0B1528] transition-all duration-500 shadow-2xl">
-       <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
-          {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-7 md:w-7" })}
+       <div className={cn("h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform", iconBg)}>
+          {icon}
        </div>
        <div className="min-w-0">
           <p className="text-lg md:text-3xl font-black text-white leading-none mb-1 md:mb-2">{val}</p>
