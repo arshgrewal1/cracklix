@@ -11,8 +11,8 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Fidelity "Continue Learning" Hub v7.1.
- * FIXED: Reliable hydration shell prevents displacement of siblings.
+ * @fileOverview High-Fidelity "Continue Learning" Hub v7.2.
+ * FIXED: Ensured root tag is always <section> to prevent hydration mismatch.
  */
 
 export default function ContinueLearning() {
@@ -25,17 +25,17 @@ export default function ContinueLearning() {
   }, []);
 
   const resultsQuery = useMemo(() => {
-    if (!db || !user) return null;
+    if (!db || !user || !mounted) return null;
     return query(collection(db, "results"), where("userId", "==", user.uid), limit(2));
-  }, [db, user]);
+  }, [db, user, mounted]);
 
   const { data: recentAttempts, loading } = useCollection<any>(resultsQuery);
 
-  // Return consistent empty div for server/initial pass to keep tree structure stable
-  if (!mounted || !user || (!loading && (!recentAttempts || recentAttempts.length === 0))) {
-     return <div className="hidden" />;
+  // STABILITY: Always return a <section> to maintain component tree order
+  if (!mounted || !user) {
+    return <section className="hidden" />;
   }
-  
+
   if (loading) {
     return (
       <section className="space-y-6 md:space-y-10">
@@ -46,6 +46,10 @@ export default function ContinueLearning() {
         </div>
       </section>
     );
+  }
+
+  if (!recentAttempts || recentAttempts.length === 0) {
+    return <section className="hidden" />;
   }
 
   return (
@@ -59,7 +63,7 @@ export default function ContinueLearning() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
          {recentAttempts.map((res: any) => (
-            <Card key={res.id} className="border-none shadow-2xl rounded-[2rem] md:rounded-[3rem] bg-[#0B1528] text-white p-6 md:p-10 lg:p-12 overflow-hidden relative group">
+            <Card key={res.id} className="border-none shadow-2xl rounded-[2rem] md:rounded-[3rem] bg-[#0B1528] text-white p-6 md:p-10 lg:p-12 overflow-hidden relative group text-left">
                <div className="absolute bottom-0 right-0 p-8 opacity-[0.03] rotate-12 group-hover:scale-110 transition-transform duration-1000">
                   <Trophy className="h-48 w-48" />
                </div>
@@ -67,7 +71,7 @@ export default function ContinueLearning() {
                   <div className="h-14 w-14 md:h-20 md:w-20 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-500">
                      <Zap className="h-7 w-7 md:h-10 md:w-10 text-primary fill-current" />
                   </div>
-                  <div className="flex-1 min-w-0 space-y-4 md:space-y-6 text-left">
+                  <div className="flex-1 min-w-0 space-y-4 md:space-y-6">
                      <div className="space-y-1">
                         <p className="text-primary font-black text-[9px] md:text-[11px] uppercase tracking-[0.4em] leading-none">RESUME PREP</p>
                         <h3 className="text-lg md:text-2xl lg:text-3xl font-black uppercase text-white tracking-tight leading-tight line-clamp-2">
@@ -79,7 +83,7 @@ export default function ContinueLearning() {
                            <Link href={`/results/${res.id || res.mockId}`}>REVIEW RESULT <ArrowRight className="ml-2 h-3 w-3" /></Link>
                         </Button>
                         <div className="flex items-center gap-3 shrink-0">
-                           <div className="flex flex-col text-left">
+                           <div className="flex flex-col">
                               <span className="text-[6px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">MASTERY</span>
                               <span className="text-[6px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1 leading-none">INDEX</span>
                            </div>

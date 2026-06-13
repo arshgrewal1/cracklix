@@ -10,8 +10,8 @@ import Footer from "@/components/layout/Footer";
 import PopularExams from "@/components/home/PopularExams";
 
 /**
- * @fileOverview Official Home Hub v149.0 (Server Component Conversion).
- * STABILITY: Converted to Server Component to eliminate hydration displacement.
+ * @fileOverview Official Home Hub v150.0 (Server Component).
+ * STABILITY: Maintain a rigid structural tree to prevent hydration displacement.
  */
 
 export default function HomePage() {
@@ -24,17 +24,11 @@ export default function HomePage() {
       <PopularExams />
 
       <div className="container mx-auto px-4 py-12 md:py-24 max-w-7xl space-y-16 md:space-y-32">
-         {/* CONTINUITY HUB */}
          <ContinueLearning />
-         
-         {/* DISCOVERY HUB */}
          <FeaturedCategories />
-         
-         {/* RECENT CONTENT FEED */}
          <LatestMocks />
       </div>
 
-      {/* TRUST & BRAND IDENTITY */}
       <AppPreview />
       <MeetFounder />
       

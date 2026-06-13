@@ -16,8 +16,8 @@ import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview Institutional Category Entry Nodes v5.5 (Hydration Hardened).
- * FIXED: Standardized initial render for Category Hubs to prevent displacement.
+ * @fileOverview Institutional Category Entry Nodes v5.6 (Hydration Hardened).
+ * FIXED: Ensured root tag is always <section> and child elements match strictly on first render.
  */
 
 const CATEGORY_META = [
@@ -76,7 +76,6 @@ export default function FeaturedCategories() {
 
   const categoriesWithCounts = useMemo(() => {
     return CATEGORY_META.map(cat => {
-      // Use 0 as default to match server-side placeholder
       const count = (mounted && exams) ? exams.filter((e: any) => e.categoryId === cat.id).length : 0;
       return {
         ...cat,
@@ -86,8 +85,8 @@ export default function FeaturedCategories() {
   }, [exams, mounted]);
 
   return (
-    <section className="space-y-12">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 text-left">
+    <section className="space-y-12 text-left">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
         <div className="space-y-2">
            <div className="flex items-center gap-2">
               <Landmark className="h-4 w-4 text-primary" />
@@ -105,13 +104,9 @@ export default function FeaturedCategories() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         {categoriesWithCounts.map((cat, idx) => (
-          <motion.div
-            key={cat.id}
-            initial={false}
-            animate={{ opacity: 1, y: 0 }}
-          >
+          <div key={cat.id}>
              <Link href={`/exams/category/${cat.id}`}>
-                <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100 p-8 text-left relative">
+                <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100 p-8 relative">
                    <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center mb-8 shadow-inner transition-transform group-hover:scale-110", cat.bgColor, cat.color)}>
                       <div className="h-full w-full flex items-center justify-center overflow-hidden rounded-xl">
                         <img src={cat.icon} className="h-full w-full object-contain p-2" alt="Icon" />
@@ -125,7 +120,7 @@ export default function FeaturedCategories() {
 
                    <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
                       {!mounted || loading ? (
-                        <Skeleton className="h-3 w-20 bg-slate-100" />
+                        <div className="h-3 w-20 bg-slate-100 animate-pulse rounded" />
                       ) : (
                         <span className="text-[10px] font-black text-[#0F172A] uppercase tracking-widest">{cat.countLabel}</span>
                       )}
@@ -135,7 +130,7 @@ export default function FeaturedCategories() {
                    </div>
                 </Card>
              </Link>
-          </motion.div>
+          </div>
         ))}
       </div>
     </section>

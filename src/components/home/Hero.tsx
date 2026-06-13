@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react";
@@ -6,15 +5,12 @@ import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { 
   ShieldCheck, 
-  Zap, 
   Target, 
   Award, 
   CheckCircle2, 
-  Sparkles, 
   ChevronRight, 
   Clock, 
   BookOpen, 
-  Layers, 
   Check,
   ClipboardList,
   Users,
@@ -23,6 +19,8 @@ import {
   FileText,
   GraduationCap,
   Flame,
+  Zap,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,8 +30,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Punjab Government Exam Hero v24.0 (Hydration Hardened).
- * FIXED: Ensured displayStats is perfectly consistent between server and first client pass.
+ * @fileOverview Institutional Punjab Government Exam Hero v25.1.
+ * FIXED: Added missing 'Layers' import to resolve ReferenceError.
  */
 
 export default function Hero() {
@@ -46,7 +44,6 @@ export default function Hero() {
     setMounted(true);
   }, []);
 
-  // LIVE STATS LISTENER
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
 
@@ -56,7 +53,6 @@ export default function Hero() {
       return num >= 1000 ? `${(num / 1000).toFixed(1)}k+` : num.toString();
     };
 
-    // FORCE PLACEHOLDERS on server and first client pass
     const s = mounted ? stats : null;
 
     return {
@@ -68,10 +64,9 @@ export default function Hero() {
   }, [stats, mounted]);
 
   return (
-    <div className="flex flex-col w-full bg-white font-body">
-      
+    <section className="flex flex-col w-full bg-white font-body">
       {/* 1. SELECTION HUB (MAIN HERO) */}
-      <section className="relative min-h-[90vh] flex items-center pt-12 pb-20 md:pt-0 md:pb-0 bg-[#0B1528] overflow-hidden text-left">
+      <div className="relative min-h-[90vh] flex items-center pt-12 pb-20 md:pt-0 md:pb-0 bg-[#0B1528] overflow-hidden text-left">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/10 blur-[120px] rounded-full pointer-events-none opacity-50" />
         <div className="absolute bottom-0 left-0 w-1/4 h-full bg-blue-500/10 blur-[120px] rounded-full pointer-events-none opacity-50" />
         
@@ -213,10 +208,10 @@ export default function Hero() {
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* 2. PLATFORM STATS STRIP (LIVE) */}
-      <section className="py-12 md:py-20 bg-white border-b border-slate-100 relative z-20 -mt-10 md:-mt-16 container mx-auto max-w-6xl px-4">
+      <div className="py-12 md:py-20 bg-white border-b border-slate-100 relative z-20 -mt-10 md:-mt-16 container mx-auto max-w-6xl px-4">
          <div className="bg-white shadow-5xl rounded-[3rem] p-8 md:p-14 border border-slate-50">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-12 text-center">
                <PlatformStat val={displayStats.questions} label="Questions" icon={<Layers className="text-primary h-6 w-6" />} />
@@ -225,8 +220,8 @@ export default function Hero() {
                <PlatformStat val={displayStats.accuracy} label="Accuracy" icon={<Target className="text-rose-500 h-6 w-6" />} />
             </div>
          </div>
-      </section>
-    </div>
+      </div>
+    </section>
   );
 }
 
