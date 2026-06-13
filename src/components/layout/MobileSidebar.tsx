@@ -29,8 +29,8 @@ import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Hardened Production Sidebar Center v53.0.
- * UPDATED: Replaced Hub with contextually correct terms.
+ * @fileOverview Hardened Production Sidebar Center v54.0.
+ * UPDATED: Increased Logo size to h-36.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -90,7 +90,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
       
       {/* BRAND LOGO */}
       <div className="px-6 pt-10 pb-4 flex justify-start shrink-0 overflow-visible pt-safe">
-         <Logo imgClassName="h-28 origin-left" />
+         <Logo imgClassName="h-36 origin-left" />
       </div>
 
       {/* IDENTITY HEADER */}
@@ -114,7 +114,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
               <div className="flex items-center gap-2">
                  <Badge className={cn(
                     "border-none px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest",
-                    profile?.pass?.active ? "bg-emerald-500 text-white" : "bg-white/10 text-slate-400"
+                    profile?.pass?.active ? "bg-emerald-50 text-white" : "bg-white/10 text-slate-400"
                  )}>
                     {profile?.pass?.active ? (profile.pass.plan || 'ELITE') : 'FREE NODE'}
                  </Badge>
