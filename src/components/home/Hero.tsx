@@ -68,10 +68,10 @@ export default function Hero() {
           referrerPolicy="no-referrer"
         />
         
-        {/* Tighter shading focused ONLY on text side (Left) */}
+        {/* Tight shading strictly for the left side text contrast */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/70 to-transparent z-[10]" />
         
-        {/* TARGETED STAR ARTIFACT MASK */}
+        {/* TARGETED STAR ARTIFACT MASK - Erases the sparkle */}
         <div className="absolute top-[15%] left-[35%] w-[100px] h-[100px] bg-[#050B19] blur-[80px] z-[11] opacity-95 rounded-full pointer-events-none" />
 
         {/* PUNJAB MAP WATERMARK */}
@@ -94,7 +94,7 @@ export default function Hero() {
                <span className="text-[7px] md:text-[10px] font-bold text-white tracking-widest uppercase">#1 Punjab exam preparation platform</span>
             </motion.div>
 
-            {/* HEADINGS - STRICT SENTENCE CASE */}
+            {/* HEADINGS - SENTENCE CASE */}
             <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
@@ -141,7 +141,7 @@ export default function Hero() {
          </div>
       </div>
 
-      {/* 3. INTEGRATED BOTTOM DATA BAR - HIGH DENSITY */}
+      {/* 3. INTEGRATED BOTTOM DATA BAR - PILL STYLE */}
       <div className="absolute bottom-4 md:bottom-12 left-0 right-0 z-[40]">
          <div className="container mx-auto px-4 md:px-12 max-w-7xl overflow-hidden">
             <div className="flex flex-row md:grid md:grid-cols-4 gap-2 md:gap-4 overflow-x-auto no-scrollbar pb-2 pe-12 md:pe-0">
@@ -153,8 +153,8 @@ export default function Hero() {
                      transition={{ delay: 0.4 + (idx * 0.1) }}
                      className="shrink-0 flex-1 md:flex-none"
                   >
-                     <Card className="bg-[#0B1528]/80 backdrop-blur-2xl border border-white/10 p-1 md:p-4 rounded-2xl md:rounded-[2rem] text-left flex items-center gap-2 md:gap-4 group hover:bg-[#0B1528] transition-all duration-300 shadow-2xl overflow-hidden h-9 md:h-20 w-full min-w-[100px] md:min-w-none">
-                        <div className="shrink-0 h-5 w-5 md:h-12 md:w-12 rounded-lg md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-transform group-hover:scale-105 shadow-inner">
+                     <Card className="bg-[#0B1528]/80 backdrop-blur-2xl border border-white/10 p-1 md:p-4 rounded-2xl md:rounded-full text-left flex items-center gap-2 md:gap-4 group hover:bg-[#0B1528] transition-all duration-300 shadow-2xl overflow-hidden h-9 md:h-20 w-full min-w-[100px] md:min-w-none">
+                        <div className="shrink-0 h-5 w-5 md:h-12 md:w-12 rounded-lg md:rounded-full bg-white/5 border border-white/10 flex items-center justify-center transition-transform group-hover:scale-105 shadow-inner">
                            {stat.icon}
                         </div>
                         <div className="min-w-0 flex flex-col justify-center leading-tight">
