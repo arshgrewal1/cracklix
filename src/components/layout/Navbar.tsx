@@ -24,8 +24,9 @@ import { useToast } from "@/hooks/use-toast";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Header v173.0 (PWA Optimized).
- * UPDATED: Added pt-[env(safe-area-inset-top)] for non-cut PWA experience on mobile.
+ * @fileOverview Professional Header v174.0 (Compact Optimized).
+ * UPDATED: Simplified "Login Hub" to "Login" and reduced button size.
+ * UPDATED: Increased Logo scale for mobile devices.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -111,13 +112,13 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-[1000] w-full pointer-events-auto font-body text-left">
       <nav className={cn(
-        "w-full flex items-center bg-[#0B1528] border-b border-white/5 px-4 lg:px-8 shadow-2xl overflow-hidden backdrop-blur-xl",
+        "w-full flex items-center bg-[#0B1528] border-b border-white/5 px-2 md:px-4 lg:px-8 shadow-2xl overflow-hidden backdrop-blur-xl",
         "pt-[env(safe-area-inset-top)]",
         headerHeightClass
       )}>
-        <div className="container mx-auto max-w-[1536px] flex items-center justify-between h-full gap-2">
+        <div className="container mx-auto max-w-[1536px] flex items-center justify-between h-full gap-1 md:gap-2">
           
-          <div className="flex items-center gap-2 shrink-0 h-full">
+          <div className="flex items-center gap-1 md:gap-2 shrink-0 h-full">
             <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
               <SheetTrigger asChild>
                 <button className="w-10 h-10 md:w-12 md:h-12 bg-white/5 text-white rounded-[14px] border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center cursor-pointer active:scale-90 outline-none">
@@ -131,7 +132,7 @@ export default function Navbar() {
             </Sheet>
             
             <div className="flex items-center shrink-0 h-full">
-               <Logo imgClassName="h-40" className="active:scale-95 transition-transform" />
+               <Logo imgClassName="h-40 scale-110 md:scale-100 origin-left" className="active:scale-95 transition-transform" />
             </div>
           </div>
 
@@ -171,7 +172,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-4 shrink-0 h-full">
+          <div className="flex items-center gap-1.5 md:gap-4 shrink-0 h-full">
              {user && (
                 <div 
                   onClick={() => router.push('/pass')}
@@ -193,17 +194,17 @@ export default function Navbar() {
              )}
 
              <Link href="/search" className={cn(
-               "w-[40px] h-[40px] rounded-xl border border-white/10 transition-all flex items-center justify-center shadow-lg active:scale-90 shrink-0",
+               "w-9 h-9 md:w-[40px] md:h-[40px] rounded-xl border border-white/10 transition-all flex items-center justify-center shadow-lg active:scale-90 shrink-0",
                pathname === "/search" ? "bg-white/10 text-white border-white/30" : "bg-white/5 text-slate-400 hover:text-white"
              )}>
-                <Search className="h-[18px] w-[18px]" />
+                <Search className="h-[16px] w-[16px] md:h-[18px] md:w-[18px]" />
              </Link>
 
              <div className="relative">
                {user ? (
                  <DropdownMenu>
                    <DropdownMenuTrigger asChild>
-                     <button className="w-[42px] h-[42px] rounded-full overflow-hidden border-[3px] border-white/10 hover:border-primary transition-all bg-white shadow-2xl focus:outline-none flex items-center justify-center active:scale-90 cursor-pointer shrink-0">
+                     <button className="w-9 h-9 md:w-[42px] md:h-[42px] rounded-full overflow-hidden border-[3px] border-white/10 hover:border-primary transition-all bg-white shadow-2xl focus:outline-none flex items-center justify-center active:scale-90 cursor-pointer shrink-0">
                        <StudentAvatar profile={profile} className="h-full w-full border-none" iconClassName="text-[#0B1528]" />
                      </button>
                    </DropdownMenuTrigger>
@@ -237,8 +238,8 @@ export default function Navbar() {
                    </DropdownMenuContent>
                  </DropdownMenu>
                ) : (
-                 <Button asChild className="bg-primary hover:bg-orange-600 text-white font-black px-6 h-10 uppercase text-[11px] tracking-widest shadow-xl border-none transition-all active:scale-95">
-                   <Link href="/login">Login Hub</Link>
+                 <Button asChild className="bg-primary hover:bg-orange-600 text-white font-black px-3 md:px-6 h-8 md:h-11 uppercase text-[10px] md:text-[11px] tracking-widest shadow-xl border-none transition-all active:scale-95">
+                   <Link href="/login">Login</Link>
                  </Button>
                )}
              </div>
