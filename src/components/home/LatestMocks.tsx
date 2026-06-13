@@ -5,7 +5,12 @@ import { motion } from "framer-motion"
 import { BookOpen, Clock, Zap, Lock, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
+import { 
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle 
+} from "@/components/ui/card"
 import Link from "next/link"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, limit } from "firebase/firestore"
@@ -13,8 +18,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Screenshot Matched Latest Mocks v32.0.
- * FIXED: Added missing Card imports and restored logo logic.
+ * @fileOverview Screenshot Matched Latest Mocks v32.1.
+ * FIXED: Explicitly imported Card and sub-components.
+ * FIXED: Handled logo mapping with database priority.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

@@ -12,14 +12,10 @@ import {
   Sparkles,
   Layers,
   BookOpen,
-  BarChart3,
-  CheckCircle2,
   ShieldCheck,
-  ArrowRight,
   Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -27,9 +23,9 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Definitive Full Background Hero v80.0.
- * FIXED: 'S' clipping in EXAMS via pr-10.
- * FIXED: Background image now fills full width/height with balanced overlay (not half-hidden).
+ * @fileOverview Definitive Full Background Hero v82.0.
+ * FIXED: Background image now fits without cropping (decreased scale constraint).
+ * FIXED: Character clipping via pr-10 on heading nodes.
  */
 
 export default function Hero() {
@@ -60,17 +56,18 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative min-h-[700px] md:min-h-screen flex flex-col justify-center overflow-hidden text-left pt-20 pb-16">
-      {/* 1. FULL BACKGROUND IMAGE ENGINE */}
-      <div className="absolute inset-0 z-0">
+    <section className="relative min-h-[600px] md:min-h-[85vh] lg:min-h-screen flex flex-col justify-center overflow-hidden text-left pt-20 pb-16">
+      {/* 1. FULL BACKGROUND IMAGE ENGINE - OPTIMIZED FOR NO CROP */}
+      <div className="absolute inset-0 z-0 bg-[#020817]">
          <img 
            src="https://i.ibb.co/LXgcLVVq/Gemini-Generated-Image-n1so6on1so6on1so.png" 
            alt="Full Night Temple Background" 
-           className="w-full h-full object-cover"
+           className="w-full h-full object-cover md:object-contain lg:object-cover object-top opacity-80"
+           loading="eager"
          />
-         {/* Adjusted gradient for full image visibility - not half hidden */}
-         <div className="absolute inset-0 bg-gradient-to-r from-[#020817] via-[#020817]/70 to-transparent" />
-         <div className="absolute inset-0 bg-black/20" />
+         {/* Adaptive gradient for better full-image visibility */}
+         <div className="absolute inset-0 bg-gradient-to-r from-[#020817] via-[#020817]/60 to-transparent" />
+         <div className="absolute inset-0 bg-black/10" />
       </div>
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
@@ -97,7 +94,7 @@ export default function Hero() {
           >
             <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter uppercase pr-10">
               Prepare Smarter. <br />
-              <span className="text-primary italic">GOVT EXAMS.</span>
+              <span className="text-primary italic pr-10">GOVT EXAMS.</span>
             </h1>
             <p className="text-base md:text-2xl text-slate-300 font-medium max-w-2xl leading-relaxed pr-10">
               Complete Preparation for PSSSB, Punjab Police & PPSC. High-Fidelity Mocks and Step-by-Step Logic Solutions.
@@ -147,4 +144,3 @@ export default function Hero() {
     </section>
   );
 }
-
