@@ -20,8 +20,8 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Final "Same to Same" Master Hero v50.0.
- * MATCHED: Exact alignment, typography, and colors from the user reference screenshot.
+ * @fileOverview Final "Same to Same" Master Hero v60.0.
+ * MATCHED: Exact alignment, typography (Title Case), and colors from the user reference.
  * FEATURES: Punjab map watermark, Blue cinematic shading, Integrated glassy cards.
  */
 
@@ -84,16 +84,16 @@ export default function Hero() {
       <div className="container mx-auto px-6 md:px-12 max-w-7xl relative z-20 pt-10 md:pt-0">
          <div className="max-w-full md:max-w-4xl space-y-6 md:space-y-10 text-left">
             
-            {/* PIXEL-PERFECT HEADINGS */}
+            {/* PIXEL-PERFECT HEADINGS - Title Case as requested */}
             <motion.div
                initial={{ opacity: 0, y: 30 }}
                animate={{ opacity: 1, y: 0 }}
                className="space-y-0"
             >
-               <h1 className="text-5xl sm:text-6xl md:text-[100px] font-black text-white leading-[0.95] tracking-tighter uppercase antialiased">
-                  PREPARE<br/>
-                  SMARTER.<br/>
-                  <span className="text-[#F97316]">SCORE HIGHER.</span>
+               <h1 className="text-5xl sm:text-6xl md:text-[100px] font-black text-white leading-[0.95] tracking-tighter antialiased">
+                  Prepare<br/>
+                  Smarter.<br/>
+                  <span className="text-[#F97316]">Score Higher.</span>
                </h1>
             </motion.div>
 
@@ -134,22 +134,22 @@ export default function Hero() {
                <HeroStatCard 
                  icon={<BookOpen className="text-blue-400 h-5 w-5 md:h-8 md:w-8" />} 
                  val={liveStats.questions} 
-                 label="PRACTICE QUESTIO..." 
+                 label="Practice Questions" 
                />
                <HeroStatCard 
                  icon={<ClipboardList className="text-orange-400 h-5 w-5 md:h-8 md:w-8" />} 
                  val={liveStats.mocks} 
-                 label="MOCK TESTS" 
+                 label="Mock Tests" 
                />
                <HeroStatCard 
                  icon={<ShieldCheck className="text-blue-500 h-5 w-5 md:h-8 md:w-8" />} 
                  val={liveStats.exams} 
-                 label="EXAMS COVERED" 
+                 label="Exams Covered" 
                />
                <HeroStatCard 
                  icon={<BarChart3 className="text-emerald-400 h-5 w-5 md:h-8 md:w-8" />} 
                  val={liveStats.analytics} 
-                 label="ANALYTICS" 
+                 label="Analytics Hub" 
                />
             </div>
          </div>
@@ -166,7 +166,7 @@ function HeroStatCard({ icon, val, label }: { icon: React.ReactNode, val: string
        </div>
        <div className="min-w-0 flex flex-col justify-center">
           <p className="text-2xl md:text-[48px] font-black text-white leading-none tracking-tight tabular-nums">{val}</p>
-          <p className="text-[7px] md:text-[11px] font-black text-slate-500 tracking-[0.2em] mt-2 md:mt-4 truncate uppercase leading-none">{label}</p>
+          <p className="text-[7px] md:text-[11px] font-black text-slate-500 tracking-[0.1em] mt-2 md:mt-4 truncate uppercase leading-none">{label}</p>
        </div>
     </Card>
   )
