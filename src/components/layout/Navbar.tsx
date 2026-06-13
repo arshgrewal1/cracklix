@@ -23,8 +23,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Header v156.0.
- * RESTORED: Scaled back to standard proportions (h-20) for optimal usability.
+ * @fileOverview Professional Header v157.0 (Text Fix).
+ * FIXED: Adjusted button widths to prevent text overflow in Pass labels.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -117,13 +117,13 @@ export default function Navbar() {
 
             <Link href="/pass" className="transition-all active:scale-95 group h-full flex items-center">
               <div className={cn(
-                "w-[150px] h-[44px] rounded-[14px] border flex items-center justify-center gap-3 transition-all",
+                "px-6 h-[44px] min-w-[140px] rounded-[14px] border flex items-center justify-center gap-3 transition-all",
                 pathname === "/pass" 
                   ? "bg-[#F97316]/20 border-[#F97316]" 
                   : "bg-[#F97316]/10 border-[#F97316]/30 hover:bg-[#F97316]/20"
               )}>
                 <Gem className={cn("h-3.5 w-3.5", pathname === "/pass" ? "text-white fill-[#F97316]" : "text-[#F97316]")} />
-                <span className="text-[11px] font-black uppercase tracking-widest text-white">GET PASS</span>
+                <span className="text-[11px] font-black uppercase tracking-widest text-white whitespace-nowrap">GET PASS</span>
               </div>
             </Link>
 
@@ -145,16 +145,16 @@ export default function Navbar() {
                 <div 
                   onClick={() => router.push('/pass')}
                   className={cn(
-                    "hidden sm:flex h-[44px] w-[140px] rounded-xl items-center justify-center gap-3 shadow-xl shrink-0 group border transition-all cursor-pointer active:scale-95",
+                    "hidden sm:flex h-[44px] px-4 min-w-[135px] rounded-xl items-center justify-center gap-3 shadow-xl shrink-0 group border transition-all cursor-pointer active:scale-95",
                     passStatus.active ? "bg-emerald-500/10 border-emerald-500/30" : "bg-rose-500/10 border-rose-500/30"
                   )}
                 >
                    <Gem className={cn("h-4 w-4 fill-current", passStatus.active ? "text-emerald-400" : "text-rose-400")} />
                    <div className="flex flex-col text-left leading-none gap-0.5">
-                      <span className={cn("text-[8px] font-black uppercase", passStatus.active ? "text-emerald-400" : "text-rose-400")}>
+                      <span className={cn("text-[9px] font-black uppercase whitespace-nowrap", passStatus.active ? "text-emerald-400" : "text-rose-400")}>
                         {passStatus.label}
                       </span>
-                      <span className="text-[7px] text-slate-500 font-bold uppercase">
+                      <span className="text-[8px] text-slate-500 font-bold uppercase whitespace-nowrap">
                          {passStatus.active ? `EXP: ${passStatus.expiry}` : "UNLOCK NOW"}
                       </span>
                    </div>
