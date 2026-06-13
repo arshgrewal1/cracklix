@@ -18,7 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Latest Mock Hub v34.0.
+ * @fileOverview Official Latest Mock Hub v34.1.
  * FIXED: Explicitly added all Card UI imports to resolve ReferenceError.
  */
 
