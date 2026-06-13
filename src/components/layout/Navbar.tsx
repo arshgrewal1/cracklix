@@ -23,14 +23,14 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Performance-Hardened Header v154.0.
- * UPDATED: Increased logo and navbar size for maximum brand impact.
+ * @fileOverview Final Performance-Hardened Header v155.0.
+ * UPDATED: Re-scaled navbar and logo to massive proportions (h-44 / h-40).
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { user, profile, loading } = useUser();
-  const auth = useAuth();
+  const auth = auth();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -70,8 +70,8 @@ export default function Navbar() {
     }
   };
 
-  // Increased height to accommodate the larger logo
-  const headerHeight = "h-28 md:h-36";
+  // Increased height to accommodate the massive logo
+  const headerHeight = "h-32 md:h-44";
 
   if (!mounted) {
     return (
@@ -106,8 +106,8 @@ export default function Navbar() {
               </SheetContent>
             </Sheet>
             
-            {/* Increased logo size container */}
-            <div className="h-28 md:h-32 flex items-center shrink-0">
+            {/* Massive logo size container (h-40) */}
+            <div className="h-32 md:h-40 flex items-center shrink-0">
                <Logo className="h-full !gap-0 active:scale-95 transition-transform" />
             </div>
           </div>

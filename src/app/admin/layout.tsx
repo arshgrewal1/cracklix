@@ -42,10 +42,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Admin Layout v170.0.
- * UPDATED: Strictly equalized vertical spacing between Logo, Group Headers, and Menu Items.
- * FIXED: Removed all overlapping margins to ensure a clean, rhythmic scroll.
- * FIXED: Perfectly cropped top spacing for logo.
+ * @fileOverview Institutional Admin Layout v171.0.
+ * UPDATED: Increased logo sizes in sidebar and header for bold branding.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -93,10 +91,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex flex-col h-full bg-[#0F172A] pointer-events-auto select-none">
        <div className="flex-1 custom-scrollbar overflow-y-auto overflow-x-hidden pb-10">
           
-          {/* SIDEBAR LOGO: Zero top spacing, rhythmic bottom spacing to match items */}
+          {/* SIDEBAR LOGO: Increased to h-40 for massive visibility */}
           <div className="px-4 pt-0 pb-2 flex justify-center shrink-0">
-             <div className="h-32 flex items-start justify-center transition-all duration-500">
-               <Logo href="/admin" imgClassName="h-32" />
+             <div className="h-40 flex items-start justify-center transition-all duration-500">
+               <Logo href="/admin" imgClassName="h-40" />
              </div>
           </div>
 
@@ -175,8 +173,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarTrigger className="text-[#0F172A] hover:bg-slate-50 cursor-pointer" />
               
               <div className="flex items-center gap-4">
-                 <div className="bg-[#0B1528] rounded-xl px-4 h-14 flex items-center justify-center overflow-hidden shadow-sm">
-                    <Logo variant="dark" href="/admin" imgClassName="h-14" />
+                 <div className="bg-[#0B1528] rounded-xl px-4 h-16 flex items-center justify-center overflow-hidden shadow-sm">
+                    <Logo variant="dark" href="/admin" imgClassName="h-16" />
                  </div>
                  
                  <div className="h-10 w-[1.5px] bg-slate-200 mx-1 md:block" />
