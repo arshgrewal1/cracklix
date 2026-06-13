@@ -42,7 +42,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Admin Layout v167.0.
+ * @fileOverview Institutional Admin Layout v168.0.
  * UPDATED: Strictly equalized vertical spacing between Logo, Group Headers, and Menu Items.
  * FIXED: Removed all overlapping margins to ensure a clean, rhythmic scroll.
  */
