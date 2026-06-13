@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -12,13 +11,13 @@ import { collection, query, doc, deleteDoc, writeBatch, updateDoc, setDoc, serve
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Subject Master Registry v10.0.
- * UPDATED: High-Fidelity UI matching institutional standards.
+ * @fileOverview Institutional Subject Master Registry v10.1.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 
 export default function SubjectRegistryPage() {
@@ -140,7 +139,7 @@ export default function SubjectRegistryPage() {
                           <SearchCode className="h-6 w-6 text-slate-300" />
                        </div>
                        <div>
-                          <p className="font-black text-[#0F172A] text-xl uppercase tracking-tight leading-none">{s.name}</p>
+                          <p className="font-black text-[#0F172A] text-xl uppercase leading-none">{s.name}</p>
                           <code className="text-[9px] font-mono text-slate-400 mt-2 block uppercase tracking-widest">ID: {s.id}</code>
                        </div>
                     </div>
@@ -172,6 +171,7 @@ export default function SubjectRegistryPage() {
             <div className="h-2 w-full bg-[#0F172A]" />
             <DialogHeader className="p-10 pb-0">
                <DialogTitle className="text-2xl font-black font-headline uppercase">Subject Architect</DialogTitle>
+               <DialogDescription className="sr-only">Update the canonical name and aliases for this subject node.</DialogDescription>
             </DialogHeader>
             <div className="p-10 space-y-6">
                <div className="space-y-2 text-left">
@@ -196,7 +196,7 @@ export default function SubjectRegistryPage() {
             <DialogHeader className="text-center space-y-4">
                <div className="h-20 w-20 bg-emerald-500/20 rounded-[2rem] flex items-center justify-center mx-auto text-emerald-500"><GitMerge className="h-10 w-10" /></div>
                <DialogTitle className="text-3xl font-headline font-black uppercase">Deep Merge Hub</DialogTitle>
-               <p className="text-slate-400 text-sm">Consolidate preparation nodes across the global registry.</p>
+               <DialogDescription className="text-slate-400 text-sm">Consolidate preparation nodes across the global registry.</DialogDescription>
             </DialogHeader>
             <div className="py-8 space-y-6">
                <div className="space-y-2 text-left">

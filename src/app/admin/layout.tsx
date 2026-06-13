@@ -37,10 +37,11 @@ import { useEffect, useState } from "react"
 import { signOut } from "firebase/auth"
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 
 /**
- * @fileOverview Hardened Mobile-First Admin Layout v189.0.
- * UPDATED: Zero-margin high-density sidebar for institutional precision.
+ * @fileOverview Hardened Mobile-First Admin Layout v189.1.
+ * ACCESSIBILITY: Added SheetDescription for ARIA compliance.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

@@ -40,12 +40,12 @@ import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 import StudentAvatar from "@/components/brand/StudentAvatar"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Student Profile Center v21.0 (Micro Scale).
- * UPDATED: Reduced typography and element sizes for a tighter mobile feel.
+ * @fileOverview Student Profile Center v21.1 (Accessibility Hardened).
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 export default function ProfilePage() {
   const { user, profile, loading } = useUser()
@@ -345,6 +345,7 @@ export default function ProfilePage() {
                   <DialogTitle className="text-xl md:text-3xl font-black font-headline uppercase text-[#0F172A] flex items-center gap-4">
                      <ShieldCheck className="h-6 w-6 md:h-8 md:w-8 text-primary" /> Edit Profile
                   </DialogTitle>
+                  <DialogDescription className="sr-only">Update your personal information to maintain an accurate preparation registry.</DialogDescription>
                   <button onClick={() => setIsEditing(false)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors"><X className="h-5 w-5 text-slate-400" /></button>
                </div>
             </DialogHeader>
@@ -402,7 +403,7 @@ export default function ProfilePage() {
                     value={editForm?.address || ""} 
                     onChange={e => setEditForm({...editForm, address: e.target.value})} 
                     className="min-h-[80px] md:min-h-[120px] rounded-2xl bg-slate-50 border-none font-medium p-3 md:p-4 text-[11px] md:text-sm leading-relaxed shadow-inner resize-none" 
-                    placeholder="Enter your home address..." 
+                    placeholder="Enter your full home address..." 
                   />
                </div>
             </div>

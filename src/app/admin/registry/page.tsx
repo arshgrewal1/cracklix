@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useRef } from "react"
@@ -38,8 +37,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Consolidated Master Registry Hub v2.1.
- * UPDATED: Deduped Boards view to maintain authority hub integrity.
+ * @fileOverview Consolidated Master Registry Hub v2.2.
+ * ACCESSIBILITY: Added DialogDescription to all modals.
  */
 
 export default function MasterRegistryPage() {
@@ -180,7 +179,7 @@ export default function MasterRegistryPage() {
       </div>
 
       <div className="mx-4 relative group">
-         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
          <Input className="h-16 pl-16 rounded-[1.5rem] bg-white border-none shadow-2xl text-lg font-medium" placeholder="Search master hub..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
       </div>
 
@@ -306,7 +305,7 @@ export default function MasterRegistryPage() {
             <div className="h-2 w-full bg-emerald-500" />
             <DialogHeader className="p-10 pb-4">
                <DialogTitle className="text-2xl font-black font-headline uppercase flex items-center gap-3"><GitMerge className="h-6 w-6 text-emerald-500" /> Normalization Engine</DialogTitle>
-               <p className="text-slate-400 text-sm font-medium">Consolidate duplicate {activeTab} into one canonical hub.</p>
+               <DialogDescription className="text-slate-400 text-sm font-medium">Consolidate duplicate {activeTab} into one canonical hub.</DialogDescription>
             </DialogHeader>
             <div className="p-10 space-y-8">
                <div className="space-y-2">
@@ -336,40 +335,72 @@ export default function MasterRegistryPage() {
          </DialogContent>
       </Dialog>
 
-      {/* BOARD EDIT DIALOG */}
-      <Dialog open={!!editingBoard} onOpenChange={o => !o && setEditingBoard(null)}>
+      {/* HUB EDIT DIALOG */}
+      <Dialog open={!!editingBoard || !!editingExam || !!editingSubject} onOpenChange={() => { setEditingBoard(null); setEditingExam(null); setEditingSubject(null); }}>
          <DialogContent className="sm:max-w-xl rounded-[2.5rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left">
             <div className="h-2 w-full bg-[#0F172A]" />
             <DialogHeader className="p-10 pb-0">
-               <DialogTitle className="text-2xl font-black font-headline uppercase">Authority Registry</DialogTitle>
+               <DialogTitle className="text-2xl font-black font-headline uppercase">Registry Node Architect</DialogTitle>
+               <DialogDescription className="sr-only">Update the specific registry node details in the database.</DialogDescription>
             </DialogHeader>
-            <div className="p-10 space-y-8">
-               <div className="flex flex-col items-center gap-6">
-                  <div className="h-32 w-32 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden group shadow-inner">
-                     {isUploading ? <Loader2 className="h-6 w-6 text-primary animate-spin" /> : 
-                      editingBoard?.iconUrl ? <img src={editingBoard.iconUrl} className="h-full w-full object-contain p-4" /> : <ImageIcon className="h-10 w-10 text-slate-300" />}
+            
+            {editingBoard && (
+               <div className="p-10 space-y-8">
+                  <div className="flex flex-col items-center gap-6">
+                     <div className="h-32 w-32 rounded-[2rem] bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center relative overflow-hidden group shadow-inner">
+                        {isUploading ? <Loader2 className="h-6 w-6 text-primary animate-spin" /> : 
+                         editingBoard?.iconUrl ? <img src={editingBoard.iconUrl} className="h-full w-full object-contain p-4" /> : <ImageIcon className="h-10 w-10 text-slate-300" />}
+                     </div>
+                     <Button variant="outline" className="h-11 px-8 rounded-xl font-black uppercase text-[9px] gap-2 border-slate-200" onClick={() => fileInputRef.current?.click()}>
+                        <Upload className="h-4 w-4" /> {isUploading ? 'Syncing...' : 'Upload Logo'}
+                     </Button>
+                     <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
                   </div>
-                  <Button variant="outline" className="h-11 px-8 rounded-xl font-black uppercase text-[9px] gap-2 border-slate-200" onClick={() => fileInputRef.current?.click()}>
-                     <Upload className="h-4 w-4" /> {isUploading ? 'Syncing...' : 'Upload Logo'}
-                  </Button>
-                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileUpload} />
+                  <div className="grid grid-cols-2 gap-6">
+                     <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Short Code</Label>
+                        <Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value})} className="h-12 rounded-xl font-black uppercase" />
+                     </div>
+                     <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Full Name</Label>
+                        <Input value={editingBoard?.name || ""} onChange={e => setEditingBoard({...editingBoard, name: e.target.value})} className="h-12 rounded-xl font-bold" />
+                     </div>
+                  </div>
+                  <DialogFooter className="pt-0 px-0">
+                     <Button onClick={handleSaveBoard} disabled={isSaving || isUploading} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl">
+                        {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Commit Authority Node"}
+                     </Button>
+                  </DialogFooter>
                </div>
-               <div className="grid grid-cols-2 gap-6">
+            )}
+
+            {editingExam && (
+               <div className="p-10 space-y-6">
                   <div className="space-y-2">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Short Code</Label>
-                     <Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value})} className="h-12 rounded-xl font-black uppercase" />
+                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Vertical Name</Label>
+                     <Input value={editingExam.name} onChange={e => setEditingExam({...editingExam, name: e.target.value})} className="h-12 rounded-xl font-bold" />
                   </div>
-                  <div className="space-y-2">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Full Name</Label>
-                     <Input value={editingBoard?.name || ""} onChange={e => setEditingBoard({...editingBoard, name: e.target.value})} className="h-12 rounded-xl font-bold" />
-                  </div>
+                  <DialogFooter className="pt-4 px-0">
+                     <Button onClick={handleSaveExam} disabled={isSaving} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl">
+                        {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Commit Vertical Node"}
+                     </Button>
+                  </DialogFooter>
                </div>
-            </div>
-            <DialogFooter className="p-10 pt-0">
-               <Button onClick={handleSaveBoard} disabled={isSaving || isUploading} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl">
-                  {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Commit Authority Node"}
-               </Button>
-            </DialogFooter>
+            )}
+
+            {editingSubject && (
+               <div className="p-10 space-y-6">
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Subject Name</Label>
+                     <Input value={editingSubject.name} onChange={e => setEditingSubject({...editingSubject, name: e.target.value})} className="h-12 rounded-xl font-bold" />
+                  </div>
+                  <DialogFooter className="pt-4 px-0">
+                     <Button onClick={handleSaveSubject} disabled={isSaving} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl">
+                        {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Commit Subject Node"}
+                     </Button>
+                  </DialogFooter>
+               </div>
+            )}
          </DialogContent>
       </Dialog>
     </div>

@@ -15,7 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import StudentAvatar from "@/components/brand/StudentAvatar";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,8 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview High-Fidelity Mobile-First Navbar v197.0.
- * UPDATED: Increased Logo size to 140px (Desktop) / 120px (Mobile) with overflow enabled.
+ * @fileOverview High-Fidelity Mobile-First Navbar v197.1.
+ * ACCESSIBILITY: Added SheetDescription for ARIA compliance in mobile sidebar.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -210,7 +210,10 @@ export default function Navbar() {
 
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="p-0 border-none w-[300px] bg-[#0F172A] z-[2001]">
-          <SheetHeader className="sr-only"><SheetTitle>Sidebar Navigation</SheetTitle></SheetHeader>
+          <SheetHeader className="sr-only">
+             <SheetTitle>Mobile Navigation Sidebar</SheetTitle>
+             <SheetDescription>Main navigation menu for mobile users to access practice tests, results and profile.</SheetDescription>
+          </SheetHeader>
           <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
         </SheetContent>
       </Sheet>

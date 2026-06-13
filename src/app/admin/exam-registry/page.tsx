@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -13,13 +12,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Exam Vertical Registry v11.0.
- * UPDATED: Added "Trending" governance for Home Page discovery.
+ * @fileOverview Exam Vertical Registry v11.1.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 
 export default function ExamRegistryPage() {
@@ -163,6 +162,7 @@ export default function ExamRegistryPage() {
             <div className="h-2 w-full bg-[#0F172A]" />
             <DialogHeader className="p-10 pb-0">
                <DialogTitle className="text-2xl font-black font-headline uppercase">Vertical Architect</DialogTitle>
+               <DialogDescription className="sr-only">Create or modify a recruitment vertical node in the registry.</DialogDescription>
             </DialogHeader>
             <div className="p-10 space-y-6">
                <div className="space-y-2 text-left">
@@ -173,7 +173,7 @@ export default function ExamRegistryPage() {
                   </select>
                </div>
                <div className="space-y-2 text-left">
-                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Relational Category</Label>
+                  <Label className="text-[10px) font-black uppercase text-slate-500 ml-1">Relational Category</Label>
                   <select value={editingExam?.categoryId || ""} onChange={e => setEditingExam({...editingExam, categoryId: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none">
                      <option value="">Select Category</option>
                      {categories?.map((c:any) => <option key={c.id} value={c.id}>{c.title}</option>)}

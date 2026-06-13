@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect, Suspense } from "react"
@@ -21,19 +20,20 @@ import {
   CheckCircle2, 
   AlertTriangle,
   Search,
-  BookOpen
+  BookOpen,
+  X
 } from "lucide-react"
 import { useFirestore, useDoc, useUser } from "@/firebase"
 import { doc, setDoc, serverTimestamp, collection, query, where, documentId, getDocs } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview High-Fidelity Manual Content Editor v1.2.
- * FIXED: Explicit Badge import added.
+ * @fileOverview High-Fidelity Manual Content Editor v1.3.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 
 export default function ManualMockEditPage() {
@@ -194,6 +194,7 @@ function ManualEditContent() {
                         <Edit className="h-6 w-6" />
                      </div>
                      <DialogTitle className="text-3xl font-black font-headline uppercase text-[#0F172A]">Edit Question {editingQuestion?.originalIndex}</DialogTitle>
+                     <DialogDescription className="sr-only">Edit question statement, options and rationalization for this mock asset.</DialogDescription>
                   </div>
                   <TabsList className="bg-slate-100 p-1 h-12 rounded-xl">
                      <TabsTrigger value="punjabi" className="rounded-lg px-6 font-black uppercase text-[9px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Punjab Hub</TabsTrigger>
@@ -260,7 +261,7 @@ function ManualEditContent() {
                            <Label className="text-[10px] font-black uppercase text-slate-500">{activeLangTab === 'punjabi' ? 'Punjabi Logic' : 'Hindi Logic'}</Label>
                            <Textarea 
                               value={activeLangTab === 'punjabi' ? (editingQuestion?.punjabiExplanation || "") : (editingQuestion?.hindiExplanation || "")} 
-                              onChange={e => setEditingQuestion({...editingQuestion, [activeLangTab === 'punjabi' ? 'punjabiExplanation' : 'hindiExplanation']: e.target.value})} 
+                              onChange={e => setEditingQuestion({...editingQuestion, [activeLangTab === 'punjabi' ? `punjabiExplanation' : `hindiExplanation`]: e.target.value})} 
                               className="h-32 rounded-2xl bg-slate-900 text-blue-400 font-medium p-6 shadow-2xl" 
                            />
                         </div>

@@ -31,7 +31,7 @@ import {
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, serverTimestamp, writeBatch, query, where } from "firebase/firestore"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CurrentAffairHubItem, LanguageDisplayMode, CurrentAffairType } from "@/types"
@@ -40,8 +40,8 @@ import { parseBulkQuestions } from "@/lib/parser"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Institutional Current Affairs Management Hub v19.8.
- * UPDATED: Replaced specific year with Latest Pattern branding.
+ * @fileOverview Institutional Current Affairs Management Hub v19.9.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 
 export default function AdminCurrentAffairs() {
@@ -278,7 +278,10 @@ export default function AdminCurrentAffairs() {
         <DialogContent className="sm:max-w-[98vw] w-[98vw] h-[95vh] max-h-[95vh] rounded-2xl md:rounded-[2rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
           <div className="h-1 w-full bg-primary shrink-0" />
           <DialogHeader className="px-6 py-4 shrink-0 flex flex-row items-center justify-between border-b border-slate-50">
-            <DialogTitle className="text-lg md:text-2xl font-black font-headline uppercase text-[#0F172A] truncate pr-4">Direct Mock Architect (Current Affairs)</DialogTitle>
+            <div className="min-w-0">
+               <DialogTitle className="text-lg md:text-2xl font-black font-headline uppercase text-[#0F172A] truncate pr-4">Direct Mock Architect (Current Affairs)</DialogTitle>
+               <DialogDescription className="sr-only">Assemble or modify a current affairs quiz Hub.</DialogDescription>
+            </div>
             <button onClick={() => setEditingItem(null)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors shrink-0"><X className="h-5 w-5 md:h-6 md:w-6 text-slate-400" /></button>
           </DialogHeader>
           

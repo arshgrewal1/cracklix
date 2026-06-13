@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Trash2, Edit, Send, AlertTriangle, ShieldCheck, Zap, TrendingUp, Bell } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, query, orderBy, serverTimestamp } from "firebase/firestore"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
@@ -19,7 +19,7 @@ import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/e
 
 /**
  * @fileOverview Admin Exam Gazette (Notifications) Console.
- * Allows institutional broadcasts for results, admit cards, and job alerts.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 
 export default function AdminNotifications() {
@@ -153,6 +153,7 @@ export default function AdminNotifications() {
                </div>
                Alert Composition
             </DialogTitle>
+            <DialogDescription className="sr-only">Compose and broadcast a new institutional alert to all aspirants.</DialogDescription>
           </DialogHeader>
           <div className="space-y-6 py-8 px-10 max-h-[70vh] overflow-y-auto custom-scrollbar">
             <div className="space-y-2">

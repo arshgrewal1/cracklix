@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Trash2, Edit, Save, Layers, Search, Loader2, Landmark, GraduationCap, Zap, Wallet, Globe, MoveUp, MoveDown } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, doc, setDoc, deleteDoc, serverTimestamp, orderBy } from "firebase/firestore"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
@@ -18,8 +18,8 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Governance Node v13.0.
- * UPDATED: Locked permanent logo for Punjab General category.
+ * @fileOverview Institutional Category Governance Node v13.1.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -172,6 +172,7 @@ export default function CategoryManagement() {
                   </div>
                   Category Hub Architect
                </DialogTitle>
+               <DialogDescription className="sr-only">Configure the identity and display settings for this exam category node.</DialogDescription>
             </DialogHeader>
             <div className="p-10 space-y-6">
                <div className="grid grid-cols-2 gap-6">

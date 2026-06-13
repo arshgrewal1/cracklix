@@ -31,12 +31,12 @@ import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions } from "@/lib/parser"
 import { Difficulty, ContentStatus } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Bulk Ingestion Hub v9.1.
- * FIXED: JSX syntax error on SelectValue tags.
+ * @fileOverview Institutional Bulk Ingestion Hub v9.2.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 
 export default function BulkImportPage() {
@@ -251,6 +251,7 @@ export default function BulkImportPage() {
                <div className="flex items-center gap-4">
                   <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600"><SearchCode className="h-7 w-7" /></div>
                   <DialogTitle className="text-3xl font-black font-headline uppercase text-[#0F172A]">Modify Explicit Fields</DialogTitle>
+                  <DialogDescription className="sr-only">Edit the details of the staged question block.</DialogDescription>
                </div>
                <Button variant="ghost" size="icon" onClick={() => setEditingIndex(null)} className="rounded-xl h-12 w-12"><X className="h-6 w-6 text-slate-400" /></Button>
             </DialogHeader>

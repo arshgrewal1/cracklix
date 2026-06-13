@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -25,14 +24,15 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Student Hub v20.0.
- * Dynamic Pass management allows admins to activate, extend, and reset student registries.
+ * @fileOverview Institutional Student Hub v20.1.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 export default function AspirantsManagement() {
   const db = useFirestore()
@@ -204,7 +204,7 @@ export default function AspirantsManagement() {
          <DialogContent className="bg-[#0F172A] text-white border-white/10 rounded-[3rem] max-w-md p-10 shadow-5xl text-left">
             <DialogHeader className="text-center space-y-4">
                <DialogTitle className="text-2xl font-headline font-black uppercase text-primary">Aspirant Pass Architect</DialogTitle>
-               <p className="text-slate-400 text-sm">Modify subscription node for {grantDialogUser?.name}.</p>
+               <DialogDescription className="text-slate-400 text-sm">Modify subscription node for {grantDialogUser?.name}.</DialogDescription>
             </DialogHeader>
             <div className="py-8 space-y-6">
                <div className="space-y-2">

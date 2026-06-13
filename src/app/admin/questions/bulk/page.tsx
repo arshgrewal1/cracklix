@@ -17,12 +17,12 @@ import { Zap, Database, ChevronLeft, Rocket, CheckCircle2, Settings2, ClipboardC
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError } from "@/firebase/errors"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { MockType } from "@/types"
 
 /**
- * @fileOverview Institutional Bulk Ingestion Hub v4.1.
- * FIXED: JSX syntax error on SelectValue tags.
+ * @fileOverview Institutional Bulk Ingestion Hub v4.2.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 
 export default function BulkImportPage() {
@@ -246,8 +246,8 @@ Correct Answer: (B) West / ਸਹੀ ਉੱਤਰ: ਪੱਛਮ * English Explan
           <div className="p-12 space-y-12">
             <div className="text-center space-y-4">
                <div className="h-20 w-20 bg-primary/20 rounded-[2.5rem] flex items-center justify-center mx-auto text-primary shadow-2xl"><Rocket className="h-10 w-10" /></div>
-               <h2 className="text-4xl font-headline font-black uppercase tracking-tight">Deploy Series</h2>
-               <p className="text-slate-400 text-lg font-medium">{parsedQuestions.length} questions saved. Initialize mock test now?</p>
+               <DialogTitle className="text-4xl font-headline font-black uppercase tracking-tight">Deploy Series</DialogTitle>
+               <DialogDescription className="text-slate-400 text-lg font-medium">{parsedQuestions.length} questions saved. Initialize mock test now?</DialogDescription>
             </div>
             <DialogFooter className="flex flex-col sm:flex-row gap-4">
                <Button variant="ghost" onClick={() => router.push("/admin/questions")} className="h-14 px-8 rounded-2xl text-slate-400 hover:text-white font-bold uppercase text-[10px]">View Bank</Button>

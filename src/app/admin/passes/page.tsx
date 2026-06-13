@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo } from "react"
@@ -9,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Plus, Trash2, Edit, Save, Gem, Zap, Lock, X, ChevronRight, ShieldOff, ListPlus, Loader2, CheckCircle2 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
@@ -18,8 +17,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Pass Registry Hub v2.0.
- * Allows dynamic management of subscription tiers without code modifications.
+ * @fileOverview Institutional Pass Registry Hub v2.1.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 export default function PassManagement() {
   const db = useFirestore()
@@ -141,6 +140,7 @@ export default function PassManagement() {
           <div className="h-2 w-full bg-[#0F172A] shrink-0" />
           <DialogHeader className="p-10 pb-4">
              <DialogTitle className="text-3xl font-black font-headline uppercase">Pass Node Architect</DialogTitle>
+             <DialogDescription className="sr-only">Configure pricing, duration and features for an institutional preparation pass.</DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto custom-scrollbar px-10 pb-10 space-y-8">
              <div className="grid grid-cols-2 gap-6">

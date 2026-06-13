@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -12,14 +11,14 @@ import { Badge } from "@/components/ui/badge"
 import { Plus, Trash2, Edit, Save, Search, Sparkles, FileText, Zap, TrendingUp, FileStack, Loader2, X, Link as LinkIcon, Newspaper } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, query, orderBy, serverTimestamp } from "firebase/firestore"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Free Hub CMS v5.0.
- * UPDATED: Added Current Affairs and Study Notes to explicit ingestion types.
+ * @fileOverview Institutional Free Hub CMS v5.1.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 
 export default function AdminFreeContent() {
@@ -174,6 +173,7 @@ export default function AdminFreeContent() {
           <div className="h-2 w-full bg-[#0F172A] shrink-0" />
           <DialogHeader className="p-10 pb-0">
             <DialogTitle className="text-3xl font-black font-headline uppercase text-[#0F172A]">Free Asset Registry</DialogTitle>
+            <DialogDescription className="sr-only">Add or edit public study materials and mock tests.</DialogDescription>
           </DialogHeader>
           
           <div className="p-10 space-y-6 overflow-y-auto">

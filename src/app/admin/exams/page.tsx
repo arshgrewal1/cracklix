@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useRef } from "react"
@@ -8,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Plus, Edit, Image as ImageIcon, Trash2, Save, Globe, Upload, Loader2, X, Layers, Shield, GraduationCap, Zap, Landmark, MoveUp, MoveDown, Search } from "lucide-react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useCollection, useFirestore, useStorage } from "@/firebase"
 import { collection, query, doc, deleteDoc, setDoc, serverTimestamp, orderBy } from "firebase/firestore"
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
@@ -20,8 +19,8 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Authority Hub v64.0.
- * UPDATED: High-Fidelity layout matching Mock Architect.
+ * @fileOverview Authority Hub v64.1.
+ * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
  */
 
 export default function ExamManagement() {
@@ -173,9 +172,10 @@ export default function ExamManagement() {
 
       <Dialog open={!!editingBoard} onOpenChange={(open) => !open && !isSaving && setEditingBoard(null)}>
         <DialogContent className="sm:max-w-xl rounded-[3rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
-          <div className="h-2 w-full bg-[#0F172A]" />
+          <div className="h-2 w-full bg-[#0F172A] shrink-0" />
           <DialogHeader className="p-10 pb-0">
              <DialogTitle className="text-2xl font-black font-headline uppercase text-[#0F172A]">Authority Registry</DialogTitle>
+             <DialogDescription className="sr-only">Deploy or modify a recruitment authority hub node in the master registry.</DialogDescription>
           </DialogHeader>
           <div className="p-10 space-y-8">
              <div className="flex flex-col items-center gap-6">

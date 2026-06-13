@@ -14,20 +14,20 @@ import SubjectTabs from "@/components/exam/SubjectTabs";
 import { Button } from "@/components/ui/button";
 import { Loader2, Play, ShieldCheck, CheckCircle2, Zap, LogOut, Cloud, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v46.0 (Production Integrity).
- * DEFENSIVE: Multi-layer null safety for exam initialization.
- * STABILITY: Guaranteed auto-submit on timeout.
+ * @fileOverview Hardened CBT Engine v46.1 (Accessibility Hardened).
+ * ACCESSIBILITY: Added descriptions to all modals and sheets.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -239,7 +239,10 @@ export default function MockAttemptPage() {
 
       <Sheet open={isPaletteOpen} onOpenChange={setIsPaletteOpen}>
         <SheetContent side="right" className="p-0 border-none w-[88vw] md:w-[400px] h-full shadow-5xl z-[1200]">
-          <SheetHeader className="sr-only"><SheetTitle>Navigation Palette</SheetTitle></SheetHeader>
+          <SheetHeader className="sr-only">
+             <SheetTitle>Navigation Palette</SheetTitle>
+             <SheetDescription>View and navigate through all questions in the current mock test.</SheetDescription>
+          </SheetHeader>
           <QuestionPalette onSelect={(idx) => { useExamStore.getState().setCurrentIdx(idx); setIsPaletteOpen(false); }} onSubmit={() => { setIsPaletteOpen(false); setShowSubmitModal(true); }} />
         </SheetContent>
       </Sheet>
@@ -252,7 +255,7 @@ export default function MockAttemptPage() {
               <LogOut className="h-6 w-6" />
             </div>
             <DialogTitle className="text-2xl font-headline font-black uppercase text-[#0F172A]">Save & Exit?</DialogTitle>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Your current attempt state is safely cached in the cloud.</p>
+            <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Your current attempt state is safely cached in the cloud.</DialogDescription>
             <div className="flex gap-3 pt-2">
               <Button variant="ghost" onClick={() => setShowExitModal(false)} className="flex-1 h-12 font-black uppercase text-[10px] tracking-widest">Stay</Button>
               <Button onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/dashboard'); }} className="flex-1 h-12 bg-primary text-white rounded-xl font-black uppercase text-[10px] shadow-lg border-none">Exit</Button>
@@ -269,7 +272,7 @@ export default function MockAttemptPage() {
               <ShieldCheck className="h-10 w-10" />
             </div>
             <DialogTitle className="text-2xl font-headline font-black uppercase text-white tracking-tight">Final Submission</DialogTitle>
-            <p className="text-slate-400 text-xs font-medium px-2 leading-relaxed">Ensure all sections have been reviewed. Once submitted, your scores will be committed to the state merit list.</p>
+            <DialogDescription className="text-slate-400 text-xs font-medium px-2 leading-relaxed">Ensure all sections have been reviewed. Once submitted, your scores will be committed to the state merit list.</DialogDescription>
             <div className="flex flex-col gap-3 pt-4">
               <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-14 bg-primary hover:bg-orange-600 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-2xl border-none">
                 {isSubmittingFinal ? <Loader2 className="h-4 w-4 animate-spin" /> : "Finish & Score Test"}
