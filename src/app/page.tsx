@@ -1,7 +1,4 @@
-
-"use client"
-
-import React, { useState, useEffect } from "react";
+import React from "react";
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/home/Hero";
 import FeaturedCategories from "@/components/home/FeaturedCategories";
@@ -13,8 +10,8 @@ import Footer from "@/components/layout/Footer";
 import PopularExams from "@/components/home/PopularExams";
 
 /**
- * @fileOverview Official Home Hub v148.0 (Hydration Hardened).
- * FIXED: Removed unused mounted state to keep root structure stable.
+ * @fileOverview Official Home Hub v149.0 (Server Component Conversion).
+ * STABILITY: Converted to Server Component to eliminate hydration displacement.
  */
 
 export default function HomePage() {

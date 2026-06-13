@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -17,8 +16,8 @@ import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview Institutional Category Entry Nodes v5.4 (Hydration Hardened).
- * FIXED: Ensured content is perfectly stable during hydration to prevent tree shifts.
+ * @fileOverview Institutional Category Entry Nodes v5.5 (Hydration Hardened).
+ * FIXED: Standardized initial render for Category Hubs to prevent displacement.
  */
 
 const CATEGORY_META = [
@@ -26,7 +25,7 @@ const CATEGORY_META = [
     id: "punjab-govt",
     title: "Punjab General Exam",
     desc: "Police, PSSSB, PPSC & general state board recruitments.",
-    icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR8W5eTBPdzztA7cziqnMmtWk9InL1yflUD_xb4vAsLw&s=10" className="h-full w-full object-contain p-2" />,
+    icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR8W5eTBPdzztA7cziqnMmtWk9InL1yflUD_xb4vAsLw&s=10",
     color: "text-primary",
     bgColor: "bg-orange-50"
   },
@@ -34,7 +33,7 @@ const CATEGORY_META = [
     id: "punjab-teaching",
     title: "Punjab Teaching Exam",
     desc: "PSTET, CTET, Master Cadre, ETT & Lecturer recruitment nodes.",
-    icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbNnoge6pNWx1HZYrUJKM58qWk1dDw85xvKPBoG-O4ew&s=10" className="h-full w-full object-contain p-2" />,
+    icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbNnoge6pNWx1HZYrUJKM58qWk1dDw85xvKPBoG-O4ew&s=10",
     color: "text-blue-600",
     bgColor: "bg-blue-50"
   },
@@ -42,7 +41,7 @@ const CATEGORY_META = [
     id: "punjab-technical",
     title: "Punjab Technical Exam",
     desc: "PSPCL, PSTCL, ALM & Technical Assistant posts.",
-    icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRo0ZK9JI5KMfg9RoNdIwcsNlpx5IcPBWuKZw&s" className="h-full w-full object-contain p-2" />,
+    icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRo0ZK9JI5KMfg9RoNdIwcsNlpx5IcPBWuKZw&s",
     color: "text-amber-500",
     bgColor: "bg-amber-50"
   },
@@ -50,7 +49,7 @@ const CATEGORY_META = [
     id: "banking",
     title: "Punjab Banking Corporation Exam",
     desc: "State Cooperative Bank, Apex, PADB and Central Bank nodes.",
-    icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7McWqZqOgKy-BakccvR02WQdEQFrwuvmHBG5rYJzuEg&s=10" className="h-full w-full object-contain p-2" />,
+    icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7McWqZqOgKy-BakccvR02WQdEQFrwuvmHBG5rYJzuEg&s=10",
     color: "text-emerald-600",
     bgColor: "bg-emerald-50"
   },
@@ -58,7 +57,7 @@ const CATEGORY_META = [
     id: "central-govt",
     title: "Central Govt",
     desc: "SSC, Railways, Army & National exams.",
-    icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmRNHVIV2W9Pn_87u6EQmluADidwUQWhOotUwQUV_VWtEBWqoxjf-OBEt4&s=10" className="h-full w-full object-contain p-2" />,
+    icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmRNHVIV2W9Pn_87u6EQmluADidwUQWhOotUwQUV_VWtEBWqoxjf-OBEt4&s=10",
     color: "text-indigo-600",
     bgColor: "bg-indigo-50"
   }
@@ -77,8 +76,8 @@ export default function FeaturedCategories() {
 
   const categoriesWithCounts = useMemo(() => {
     return CATEGORY_META.map(cat => {
-      // FORCE 0 on server and first client pass to match skeleton state
-      const count = mounted && exams ? exams.filter((e: any) => e.categoryId === cat.id).length : 0;
+      // Use 0 as default to match server-side placeholder
+      const count = (mounted && exams) ? exams.filter((e: any) => e.categoryId === cat.id).length : 0;
       return {
         ...cat,
         countLabel: `${count} EXAMS LIVE`
@@ -108,16 +107,14 @@ export default function FeaturedCategories() {
         {categoriesWithCounts.map((cat, idx) => (
           <motion.div
             key={cat.id}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: idx * 0.1 }}
+            initial={false}
+            animate={{ opacity: 1, y: 0 }}
           >
              <Link href={`/exams/category/${cat.id}`}>
                 <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100 p-8 text-left relative">
                    <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center mb-8 shadow-inner transition-transform group-hover:scale-110", cat.bgColor, cat.color)}>
                       <div className="h-full w-full flex items-center justify-center overflow-hidden rounded-xl">
-                        {cat.icon}
+                        <img src={cat.icon} className="h-full w-full object-contain p-2" alt="Icon" />
                       </div>
                    </div>
                    
@@ -135,12 +132,6 @@ export default function FeaturedCategories() {
                       <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
                          <ChevronRight className="h-4 w-4" />
                       </div>
-                   </div>
-                   
-                   <div className="mt-6">
-                      <Button variant="ghost" className="w-full h-11 rounded-xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black uppercase text-[8px] tracking-[0.15em] gap-2 border-none">
-                         OPEN HUB <ChevronRight className="h-3 w-3" />
-                      </Button>
                    </div>
                 </Card>
              </Link>
