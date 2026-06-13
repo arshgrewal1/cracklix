@@ -1,13 +1,13 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { 
   ShieldCheck, 
   Zap, 
   Target, 
+  Trophy,
   Award, 
   CheckCircle2, 
   Sparkles, 
@@ -19,29 +19,20 @@ import {
   ClipboardList,
   Users,
   Landmark,
-  Scale,
-  FileText,
-  GraduationCap,
-  X,
-  Newspaper,
-  LayoutGrid,
-  Star,
-  BarChart3,
-  TrendingUp,
-  Search
+  Search,
+  Newspaper
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Official CRACKLIX Punjab Government Exam Hero v20.0 (Stability Hardened).
- * FIXED: Resolved all ReferenceErrors for missing icons.
- * FIXED: Structural cleanup removes overlapping "page on top" layout.
+ * @fileOverview Official CRACKLIX Punjab Government Exam Hero v21.0.
+ * STABILITY: Aligned fallback to match server pre-render exactly.
  */
 
 export default function Hero() {
@@ -72,8 +63,13 @@ export default function Hero() {
     ];
   }, [stats]);
 
+  // STABILITY GUARD: Match server fallback signature
   if (!mounted) {
-    return <section className="min-h-screen bg-[#0B1528] w-full" />;
+    return (
+      <section className="min-h-[90vh] bg-[#0B1528] flex items-center justify-center w-full">
+         <Zap className="h-10 w-10 text-primary animate-pulse" />
+      </section>
+    );
   }
 
   return (
@@ -154,7 +150,6 @@ export default function Hero() {
                transition={{ duration: 0.8 }}
                className="relative"
              >
-                {/* Main Visual Node */}
                 <div className="relative aspect-square rounded-[4rem] bg-gradient-to-tr from-primary/20 to-blue-500/10 border border-white/10 overflow-hidden shadow-5xl group">
                    <img 
                      src="https://punjabpolice.gov.in/media/images/pp10.original.jpg" 
@@ -164,7 +159,6 @@ export default function Hero() {
                    <div className="absolute inset-0 bg-gradient-to-t from-[#0B1528] via-transparent to-transparent" />
                 </div>
 
-                {/* Floating Performance Cards */}
                 <FloatingCard 
                    icon={<Target className="text-emerald-400" />} 
                    label="Accuracy" 

@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -12,18 +11,17 @@ interface LogoProps {
 
 /**
  * @fileOverview Official Cracklix Master Logo Hub.
- * UPDATED: Hardened dimensions to prevent viewport expansion.
+ * HARDENED: Strict dimensions to prevent hydration mismatch and oversized rendering.
  */
 export function LogoIcon({ className = "" }: { className?: string }) {
   return (
-    <div className={cn("relative shrink-0 flex items-center justify-center", className)}>
+    <div className={cn("relative shrink-0 flex items-center justify-center", className)} style={{ height: '40px', width: 'auto' }}>
       <img 
         src="https://i.ibb.co/5WjGyLhn/1000110132-removebg-preview.png" 
         alt="Cracklix" 
-        className="w-full h-full object-contain"
+        className="h-full w-auto object-contain"
         referrerPolicy="no-referrer"
-        width={180}
-        height={40}
+        style={{ maxHeight: '40px' }}
       />
     </div>
   );
@@ -31,8 +29,8 @@ export function LogoIcon({ className = "" }: { className?: string }) {
 
 export default function Logo({ className = "", variant = 'light', href = "/" }: LogoProps) {
   return (
-    <Link href={href} className={cn("flex items-center group pointer-events-auto select-none shrink-0 -ml-2 md:-ml-4", className)}>
-      <LogoIcon className="w-auto h-8 md:h-10" />
+    <Link href={href} className={cn("flex items-center group pointer-events-auto select-none shrink-0", className)}>
+      <LogoIcon className="md:h-10 h-8" />
     </Link>
   );
 }
