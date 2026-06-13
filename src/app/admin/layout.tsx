@@ -40,8 +40,8 @@ import { cn } from "@/lib/utils"
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet"
 
 /**
- * @fileOverview Hardened Mobile-First Admin Layout v189.1.
- * ACCESSIBILITY: Added SheetDescription for ARIA compliance.
+ * @fileOverview Hardened Mobile-First Admin Layout v190.0.
+ * UPDATED: Removed all vertical spacing (margins/padding) for a strictly high-density sidebar.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -86,16 +86,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!user || !isAdmin) return null
 
   const SideNavContent = () => (
-    <div className="flex flex-col h-full bg-[#0F172A] pointer-events-auto select-none overflow-y-auto custom-scrollbar pt-safe">
-       <div className="flex-1 pb-4">
+    <div className="flex flex-col h-full bg-[#0F172A] pointer-events-auto select-none overflow-y-auto custom-scrollbar">
+       <div className="flex-1">
           
-          <div className="px-6 py-2 flex justify-start shrink-0 overflow-visible">
+          <div className="px-6 py-0 flex justify-start shrink-0 overflow-visible">
              <Logo href="/admin" imgClassName="h-32 origin-left" />
           </div>
 
-          <SidebarGroup className="p-0">
-            <SidebarGroupLabel className="px-6 py-0 h-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 text-left mt-2">MANAGEMENT CENTER</SidebarGroupLabel>
-            <SidebarMenu className="gap-0.5 mt-0.5">
+          <SidebarGroup className="p-0 m-0">
+            <SidebarGroupLabel className="px-6 py-0 h-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 text-left mt-0">MANAGEMENT CENTER</SidebarGroupLabel>
+            <SidebarMenu className="gap-0 mt-0">
               <AdminNavItem icon={<LayoutDashboard />} label="DASHBOARD" href="/admin" active={pathname === "/admin"} />
               <AdminNavItem icon={<Layers />} label="CATEGORIES" href="/admin/categories" active={pathname === "/admin/categories"} />
               <AdminNavItem icon={<Landmark />} label="BOARDS CENTER" href="/admin/exams" active={pathname === "/admin/exams"} />
@@ -106,9 +106,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarMenu>
           </SidebarGroup>
 
-          <SidebarGroup className="p-0">
-            <SidebarGroupLabel className="px-6 py-0 h-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 text-left mt-2">CONTENT PULSE</SidebarGroupLabel>
-            <SidebarMenu className="gap-0.5 mt-0.5">
+          <SidebarGroup className="p-0 m-0">
+            <SidebarGroupLabel className="px-6 py-0 h-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 text-left mt-0">CONTENT PULSE</SidebarGroupLabel>
+            <SidebarMenu className="gap-0 mt-0">
               <AdminNavItem icon={<Wand2 />} label="BRAND MAGIC" href="/admin/brand-magic" active={pathname === "/admin/brand-magic"} />
               <AdminNavItem icon={<LayoutGrid />} label="MOCK BUILDER" href="/admin/mocks/builder" active={pathname === "/admin/mocks/builder"} />
               <AdminNavItem icon={<Zap />} label="MOCK MANAGER" href="/admin/mocks" active={pathname === "/admin/mocks"} />
@@ -119,9 +119,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarMenu>
           </SidebarGroup>
 
-          <SidebarGroup className="p-0">
-            <SidebarGroupLabel className="px-6 py-0 h-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 text-left mt-2">GOVERNANCE</SidebarGroupLabel>
-            <SidebarMenu className="gap-0.5 mt-0.5">
+          <SidebarGroup className="p-0 m-0">
+            <SidebarGroupLabel className="px-6 py-0 h-4 text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 text-left mt-0">GOVERNANCE</SidebarGroupLabel>
+            <SidebarMenu className="gap-0 mt-0">
               <AdminNavItem icon={<Users />} label="STUDENT LIST" href="/admin/users" active={pathname === "/admin/users"} />
               <AdminNavItem icon={<DollarSign />} label="REVENUE CENTER" href="/admin/payments" active={pathname === "/admin/payments"} />
               <AdminNavItem icon={<ShieldCheck />} label="VERIFY UPI" href="/admin/payments/verify" active={pathname === "/admin/payments/verify"} />

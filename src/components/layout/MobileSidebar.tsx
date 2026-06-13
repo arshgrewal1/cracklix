@@ -29,8 +29,8 @@ import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Hardened Production Sidebar Center v56.0.
- * UPDATED: Zero vertical spacing for a high-density institutional menu.
+ * @fileOverview Hardened Production Sidebar Center v57.0.
+ * UPDATED: Zero vertical spacing for a strictly high-density institutional menu.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -89,15 +89,15 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
     <div className="flex flex-col h-full bg-[#0B1528] text-white overflow-y-auto no-scrollbar font-body select-none text-left">
       
       {/* BRAND LOGO */}
-      <div className="px-6 pt-2 pb-0 flex justify-start shrink-0 overflow-visible pt-safe">
+      <div className="px-6 py-0 flex justify-start shrink-0 overflow-visible">
          <Logo imgClassName="h-36 origin-left" />
       </div>
 
       {/* IDENTITY HEADER */}
-      <div className="px-6 pt-2 pb-2 flex flex-col gap-2 relative overflow-hidden shrink-0">
-        <Shield className="absolute top-10 right-4 h-40 w-40 text-white/[0.03] pointer-events-none" />
+      <div className="px-6 py-0 flex flex-col gap-0 relative overflow-hidden shrink-0">
+        <Shield className="absolute top-0 right-4 h-40 w-40 text-white/[0.03] pointer-events-none" />
         
-        <div className="relative z-10 flex items-center gap-3">
+        <div className="relative z-10 flex items-center gap-3 py-2">
            <div className="relative shrink-0">
               <div className="h-10 w-10 rounded-lg border-[2px] border-white/20 flex items-center justify-center bg-[#1E293B] shadow-2xl overflow-hidden">
                  <User className="h-5 w-5 text-slate-400" />
@@ -124,7 +124,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
         <button 
            onClick={() => { router.push('/profile'); onClose(); }}
-           className="w-full h-8 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-between px-3 group active:scale-95 transition-all relative z-10"
+           className="w-full h-8 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-between px-3 group active:scale-95 transition-all relative z-10 mb-2"
         >
            <div className="flex items-center gap-2">
               <User className="h-3 w-3 text-[#F97316]" />
@@ -160,7 +160,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* NAV MENU */}
-      <div className="flex flex-col py-0.5">
+      <div className="flex flex-col py-0">
         {menuItems.map((item) => {
           const isActive = mounted && pathname === item.href;
           const Icon = item.icon;
