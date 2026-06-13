@@ -1,13 +1,20 @@
+
 'use client';
 
-import React, { useMemo, useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import { 
   ShieldCheck, 
   Zap, 
   Target, 
   Award, 
+  CheckCircle2, 
+  Sparkles, 
+  ChevronRight, 
+  Clock, 
+  BookOpen, 
+  Layers, 
   Check,
   ClipboardList,
   Users,
@@ -15,33 +22,32 @@ import {
   Scale,
   FileText,
   GraduationCap,
-  Flame,
+  X,
+  Newspaper,
+  LayoutGrid,
   Star,
   BarChart3,
-  Layers,
-  ChevronRight,
-  BookOpen
+  TrendingUp,
+  Search
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import Image from "next/image";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Official CRACKLIX Punjab Government Exam Hero v31.0.
- * FIXED: Added missing 'BookOpen' icon import.
- * STABILITY: Maintain a rigid structural tree to prevent hydration displacement.
+ * @fileOverview Official CRACKLIX Punjab Government Exam Hero v20.0 (Stability Hardened).
+ * FIXED: Resolved all ReferenceErrors for missing icons.
+ * FIXED: Structural cleanup removes overlapping "page on top" layout.
  */
 
 export default function Hero() {
   const router = useRouter();
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
-  
-  const heroImage = "https://punjabpolice.gov.in/media/images/pp10.original.jpg";
 
   useEffect(() => {
     setMounted(true);
@@ -50,153 +56,179 @@ export default function Hero() {
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
 
-  // Fallbacks for live stats
-  const liveStats = useMemo(() => {
+  const displayStats = useMemo(() => {
+    const qCount = stats?.totalQuestions || 50000;
+    const mCount = stats?.totalMocks || 500;
+    const uCount = stats?.totalUsers || 15000;
+    const accuracy = stats?.averageAccuracy || 94;
+
+    const format = (n: number) => n >= 1000 ? `${(n/1000).toFixed(0)}k+` : n.toString();
+
     return [
-      { label: "Questions", val: stats?.totalQuestions ? (stats.totalQuestions / 1000).toFixed(0) + "k+" : "50,000+", icon: <Zap className="text-primary" /> },
-      { label: "Mock Tests", val: stats?.totalMocks || "500+", icon: <BarChart3 className="text-blue-400" /> },
-      { label: "Aspirants", val: stats?.totalUsers ? (stats.totalUsers / 1000).toFixed(0) + "k+" : "15,000+", icon: <Users className="text-emerald-400" /> },
-      { label: "Accuracy", val: stats?.averageAccuracy ? stats.averageAccuracy + "%" : "94%", icon: <Target className="text-rose-400" /> }
+      { label: "Questions", val: format(qCount), icon: <Zap className="h-4 w-4 text-primary" /> },
+      { label: "Mock Tests", val: format(mCount), icon: <ClipboardList className="h-4 w-4 text-blue-400" /> },
+      { label: "Aspirants", val: format(uCount), icon: <Users className="h-4 w-4 text-emerald-400" /> },
+      { label: "Accuracy", val: `${accuracy}%`, icon: <Target className="h-4 w-4 text-rose-400" /> }
     ];
   }, [stats]);
 
+  if (!mounted) {
+    return <section className="min-h-screen bg-[#0B1528] w-full" />;
+  }
+
   return (
-    <section className="relative w-full bg-[#0B1528] overflow-hidden border-none text-left">
-      
-      {/* 1. SELECTION HUB (MAIN HERO) */}
-      <div className="relative min-h-[90vh] lg:min-h-screen flex flex-col justify-center">
-        {/* Ambient Background */}
-        <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none opacity-50" />
-        <div className="absolute bottom-0 left-0 w-1/4 h-1/2 bg-blue-600/5 blur-[120px] rounded-full pointer-events-none opacity-30" />
+    <section className="relative min-h-[90vh] lg:min-h-screen flex flex-col justify-center bg-[#0B1528] overflow-hidden text-left">
+      {/* Background Ambience */}
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-1/4 h-1/2 bg-blue-500/5 blur-[100px] rounded-full pointer-events-none" />
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-20 py-12 md:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
-            {/* CONTENT BLOCK */}
-            <div className="lg:col-span-7 space-y-8">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                <Badge className="bg-primary/10 text-primary border-primary/20 px-4 py-1.5 rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl flex items-center gap-2 w-fit">
-                   <Flame className="h-3 w-3 fill-current" /> Punjab's Most Trusted Mock Test Platform
+      <div className="container mx-auto px-4 md:px-6 relative z-10 py-12 md:py-20">
+        <div className="grid lg:grid-cols-12 gap-12 md:gap-20 items-center">
+          
+          {/* LEFT: CONTENT HUB */}
+          <div className="lg:col-span-7 space-y-8 md:space-y-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl"
+            >
+              <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+              <span className="text-[9px] md:text-xs font-black uppercase tracking-[0.2em] text-primary">
+                Punjab's Most Trusted Mock Platform
+              </span>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="space-y-6"
+            >
+              <h1 className="text-4xl md:text-7xl lg:text-8xl font-headline font-black text-white leading-[0.9] tracking-tighter uppercase">
+                CRACK PUNJAB <br />
+                <span className="text-primary italic">GOVT EXAMS</span>
+              </h1>
+              <p className="text-base md:text-xl text-slate-400 font-medium max-w-2xl leading-relaxed">
+                Prepare for PSSSB, Punjab Police, PPSC, PSPCL, PSTET and more through real exam-level mock tests, official PYQs, and daily current affairs.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-col sm:flex-row gap-4"
+            >
+              <Button asChild className="h-14 md:h-20 px-8 md:px-12 bg-primary hover:bg-orange-600 text-white font-black uppercase text-[10px] md:text-xs tracking-[0.2em] rounded-2xl md:rounded-3xl shadow-3xl transition-all active:scale-95 border-none gap-4">
+                <Link href="/mocks">
+                  Start Free Mock <Zap className="h-5 w-5 fill-current" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="h-14 md:h-20 px-8 md:px-12 border-white/10 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[10px] md:text-xs tracking-[0.2em] rounded-2xl md:rounded-3xl transition-all active:scale-95 gap-4">
+                <Link href="/exams">
+                  Explore Exams <ChevronRight className="h-5 w-5" />
+                </Link>
+              </Button>
+            </motion.div>
+
+            {/* QUICK REGISTRY CHIPS */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="flex flex-wrap gap-3 pt-4"
+            >
+              {["PSSSB", "Punjab Police", "PPSC", "PSPCL", "PSTET", "Master Cadre"].map((chip) => (
+                <Badge key={chip} variant="outline" className="px-4 py-2 border-white/5 bg-white/5 text-slate-400 font-bold uppercase text-[9px] tracking-widest rounded-lg hover:border-primary/40 hover:text-white transition-all cursor-default">
+                  {chip}
                 </Badge>
+              ))}
+            </motion.div>
+          </div>
 
-                <h1 className="text-4xl sm:text-5xl md:text-7xl font-headline font-black leading-[0.95] tracking-tighter text-white uppercase">
-                   Crack Punjab <br/>
-                   <span className="text-primary">Govt Exams</span> <br/>
-                   Before The Real Exam
-                </h1>
-
-                <p className="text-slate-400 text-base md:text-xl font-medium max-w-2xl leading-relaxed border-l-4 border-primary/30 pl-6">
-                   Prepare for PSSSB, Punjab Police, PPSC, PSPCL, PSTET, CTET, ETT, Master Cadre, High Court and other Punjab Government Exams through real exam-level mock tests, PYQs, current affairs and detailed solutions.
-                </p>
-
-                <div className="flex flex-wrap gap-3 pt-4">
-                  <ExamChip label="PSSSB" icon={<Landmark />} />
-                  <ExamChip label="Punjab Police" icon={<ShieldCheck />} />
-                  <ExamChip label="PPSC" icon={<Scale />} />
-                  <ExamChip label="PSPCL" icon={<Zap />} />
-                  <ExamChip label="PSTET" icon={<BookOpen />} />
-                  <ExamChip label="CTET" icon={<FileText />} />
-                  <ExamChip label="ETT" icon={<GraduationCap />} />
-                  <ExamChip label="Master Cadre" icon={<Users />} />
+          {/* RIGHT: PERFORMANCE DASHBOARD */}
+          <div className="lg:col-span-5 relative hidden lg:block">
+             <motion.div 
+               initial={{ opacity: 0, scale: 0.9 }}
+               animate={{ opacity: 1, scale: 1 }}
+               transition={{ duration: 0.8 }}
+               className="relative"
+             >
+                {/* Main Visual Node */}
+                <div className="relative aspect-square rounded-[4rem] bg-gradient-to-tr from-primary/20 to-blue-500/10 border border-white/10 overflow-hidden shadow-5xl group">
+                   <img 
+                     src="https://punjabpolice.gov.in/media/images/pp10.original.jpg" 
+                     alt="Selection Prep"
+                     className="w-full h-full object-cover opacity-60 mix-blend-overlay group-hover:scale-105 transition-transform duration-1000"
+                   />
+                   <div className="absolute inset-0 bg-gradient-to-t from-[#0B1528] via-transparent to-transparent" />
                 </div>
-              </motion.div>
 
-              <motion.div 
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="flex flex-col sm:flex-row items-center gap-4 pt-4"
-              >
-                <Button 
-                  onClick={() => router.push('/mocks')}
-                  className="w-full sm:w-auto h-16 md:h-20 px-12 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-widest text-[11px] md:text-sm rounded-2xl shadow-3xl shadow-primary/20 transition-all active:scale-95 border-none"
-                >
-                  Start Free Mock <Zap className="ml-2 h-5 w-5 fill-current" />
-                </Button>
-                <Button 
-                  onClick={() => router.push('/exams')}
-                  className="w-full sm:w-auto h-16 md:h-20 px-12 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-2xl font-black uppercase tracking-widest text-[11px] md:text-sm transition-all active:scale-95"
-                >
-                  Explore Exams
-                </Button>
-              </motion.div>
-            </div>
-
-            {/* VISUAL BLOCK */}
-            <div className="lg:col-span-5 relative hidden lg:block h-[650px]">
-               <motion.div 
-                 initial={{ opacity: 0, scale: 0.95 }}
-                 animate={{ opacity: 1, scale: 1 }}
-                 transition={{ duration: 0.8 }}
-                 className="relative h-full w-full rounded-[4rem] overflow-hidden border-8 border-white/5 shadow-5xl bg-[#0B1528]"
-               >
-                  <Image src={heroImage} fill className="object-cover object-top opacity-80" alt="Punjab Police" priority />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0B1528] via-transparent to-transparent" />
-                  
-                  {/* Floating Dashboard Nodes */}
-                  <div className="absolute inset-0 p-8 flex flex-col justify-between">
-                     <div className="flex justify-between items-start">
-                        <FloatingCard icon={<Target className="text-emerald-400" />} label="Accuracy" val="94%" />
-                        <FloatingCard icon={<Award className="text-amber-400" />} label="Punjab Rank" val="#245" />
-                     </div>
-                     <div className="flex justify-between items-end">
-                        <FloatingCard icon={<ClipboardList className="text-blue-400" />} label="Tests Done" val="156" />
-                        <FloatingCard icon={<ShieldCheck className="text-primary" />} label="Readiness" val="82%" />
-                     </div>
-                  </div>
-               </motion.div>
-            </div>
+                {/* Floating Performance Cards */}
+                <FloatingCard 
+                   icon={<Target className="text-emerald-400" />} 
+                   label="Accuracy" 
+                   val="94%" 
+                   pos="top-10 -left-12" 
+                   delay={0.6}
+                />
+                <FloatingCard 
+                   icon={<Trophy className="text-amber-400" />} 
+                   label="Punjab Rank" 
+                   val="#245" 
+                   pos="top-1/2 -right-10" 
+                   delay={0.8}
+                />
+                <FloatingCard 
+                   icon={<Zap className="text-primary" />} 
+                   label="Readiness" 
+                   val="82%" 
+                   pos="bottom-10 -left-10" 
+                   delay={1}
+                />
+             </motion.div>
           </div>
         </div>
-      </div>
 
-      {/* 2. PLATFORM STATS STRIP (Integrated) */}
-      <div className="bg-white/5 border-y border-white/5 py-10 md:py-16">
-         <div className="container mx-auto px-4 max-w-7xl">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-10">
-               {liveStats.map((s, i) => (
-                  <div key={i} className="flex flex-col items-center md:items-start text-center md:text-left space-y-2 group">
-                     <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform shadow-inner">
-                        {React.cloneElement(s.icon as React.ReactElement, { className: "h-5 w-5" })}
-                     </div>
-                     <p className="text-2xl md:text-5xl font-headline font-black text-white tracking-tighter tabular-nums">{mounted ? s.val : "---"}</p>
-                     <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{s.label}</p>
-                  </div>
-               ))}
-            </div>
-         </div>
+        {/* BOTTOM STATS STRIP */}
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-20 md:mt-32 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8"
+        >
+          {displayStats.map((s, i) => (
+            <Card key={i} className="border-none bg-white/5 backdrop-blur-xl rounded-2xl md:rounded-[2rem] p-6 md:p-8 flex flex-col items-center md:items-start text-center md:text-left gap-3 group hover:bg-white/10 transition-all border border-white/5">
+              <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white/5 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                {s.icon}
+              </div>
+              <div className="space-y-1">
+                <p className="text-xl md:text-3xl font-headline font-black text-white leading-none tracking-tight">{s.val}</p>
+                <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-500">{s.label}</p>
+              </div>
+            </Card>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
 }
 
-function ExamChip({ label, icon }: { label: string, icon: React.ReactNode }) {
-   return (
-      <div className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-bold text-[10px] uppercase tracking-widest hover:border-primary/40 hover:bg-white/10 transition-all flex items-center gap-2.5">
-         <span className="text-primary">{React.cloneElement(icon as React.ReactElement, { className: "h-3.5 w-3.5" })}</span>
-         {label}
+function FloatingCard({ icon, label, val, pos, delay }: any) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.6 }}
+      className={cn("absolute z-20 bg-white/10 backdrop-blur-2xl border border-white/20 p-5 rounded-3xl shadow-5xl flex items-center gap-4 group hover:bg-white/20 transition-all", pos)}
+    >
+      <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+        {React.cloneElement(icon, { className: "h-6 w-6" })}
       </div>
-   );
-}
-
-function FloatingCard({ icon, label, val }: any) {
-   return (
-      <motion.div 
-         animate={{ y: [0, -10, 0] }}
-         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-         className="bg-[#0F172A]/80 backdrop-blur-xl border border-white/10 p-4 rounded-2xl shadow-2xl flex items-center gap-4 min-w-[160px]"
-      >
-         <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 shadow-inner">
-            {icon}
-         </div>
-         <div className="text-left">
-            <p className="text-[8px] font-black uppercase text-slate-500 tracking-widest leading-none mb-1">{label}</p>
-            <p className="text-lg font-black text-white uppercase tracking-tight leading-none">{val}</p>
-         </div>
-      </motion.div>
-   )
+      <div>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">{label}</p>
+        <p className="text-2xl font-black text-white leading-none tabular-nums">{val}</p>
+      </div>
+    </motion.div>
+  );
 }

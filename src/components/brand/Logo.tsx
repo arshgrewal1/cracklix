@@ -12,7 +12,7 @@ interface LogoProps {
 
 /**
  * @fileOverview Official Cracklix Master Logo Hub.
- * UPDATED: Ultra-compact scale for high-density professional navigation.
+ * UPDATED: Hardened dimensions to prevent viewport expansion.
  */
 export function LogoIcon({ className = "" }: { className?: string }) {
   return (
@@ -22,8 +22,8 @@ export function LogoIcon({ className = "" }: { className?: string }) {
         alt="Cracklix" 
         className="w-full h-full object-contain"
         referrerPolicy="no-referrer"
-        width={1024}
-        height={1024}
+        width={180}
+        height={40}
       />
     </div>
   );
@@ -32,7 +32,7 @@ export function LogoIcon({ className = "" }: { className?: string }) {
 export default function Logo({ className = "", variant = 'light', href = "/" }: LogoProps) {
   return (
     <Link href={href} className={cn("flex items-center group pointer-events-auto select-none shrink-0 -ml-2 md:-ml-4", className)}>
-      <LogoIcon className="w-full h-full max-w-[110px] md:max-w-[160px] max-h-6 md:max-h-8" />
+      <LogoIcon className="w-auto h-8 md:h-10" />
     </Link>
   );
 }
