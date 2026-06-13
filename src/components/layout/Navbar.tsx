@@ -18,10 +18,11 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Definitive Header Restoration v113.0.
- * UPDATED: Reduced gap between Menu and Logo, removed logo scaling for maximum visibility.
+ * @fileOverview Definitive Header Restoration v114.0.
+ * UPDATED: Reduced the size of the Pass Active status hub for a tighter UI.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -82,18 +83,18 @@ export default function Navbar() {
           {/* 3. RIGHT SECTION: PASS HUB, SEARCH, USER */}
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
              
-             {/* PASS ACTIVE BADGE */}
+             {/* COMPACT PASS ACTIVE BADGE */}
              {mounted && user && (
-                <div className="h-10 md:h-14 px-3 md:px-6 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center gap-2 md:gap-3 shadow-xl">
-                   <Gem className="h-4 w-4 md:h-6 md:w-6 text-emerald-400 fill-current opacity-80" />
+                <div className="h-9 md:h-11 px-2.5 md:px-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl flex items-center gap-2 md:gap-2.5 shadow-xl">
+                   <Gem className="h-3.5 w-3.5 md:h-5 md:w-5 text-emerald-400 fill-current opacity-80" />
                    <div className="flex flex-col items-start leading-none text-left">
                       <span className={cn(
-                        "text-[7px] md:text-[11px] font-black uppercase tracking-widest",
+                        "text-[6px] md:text-[9.5px] font-black uppercase tracking-widest",
                         passStatus.active ? "text-emerald-400" : "text-rose-400"
                       )}>
                          {passStatus.label}
                       </span>
-                      <span className="text-[6px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest mt-0.5 md:mt-1">
+                      <span className="text-[5px] md:text-[7.5px] font-black text-slate-500 uppercase tracking-widest mt-0.5 md:mt-1">
                          EXP: {passStatus.expiry}
                       </span>
                    </div>
