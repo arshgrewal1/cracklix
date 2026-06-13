@@ -42,8 +42,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Admin Layout v160.0.
- * UPDATED: Integrated Logo into full scroll area and cropped spacing.
+ * @fileOverview Institutional Admin Layout v162.0.
+ * UPDATED: Increased sidebar logo size to h-24 and synchronized spacing.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -92,15 +92,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
        {/* WHOLE SIDEBAR SCROLL AREA */}
        <div className="flex-1 custom-scrollbar overflow-y-auto overflow-x-hidden pb-10">
           
-          {/* SIDEBAR LOGO: CROPPED SPACING AND INTEGRATED INTO SCROLL */}
-          <div className="p-4 pt-8 flex justify-center shrink-0">
-             <div className="h-16 flex items-center justify-center transition-all duration-500">
+          {/* SIDEBAR LOGO: INCREASED SIZE AND INTEGRATED INTO SCROLL */}
+          <div className="px-4 pt-6 pb-2 flex justify-center shrink-0">
+             <div className="h-24 flex items-center justify-center transition-all duration-500">
                <Logo href="/admin" />
              </div>
           </div>
 
           <SidebarGroup>
-            <SidebarGroupLabel className="px-6 pt-4 pb-2 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Main Database</SidebarGroupLabel>
+            <SidebarGroupLabel className="px-6 pt-2 pb-4 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Main Database</SidebarGroupLabel>
             <SidebarMenu className="gap-3">
               <AdminNavItem icon={<LayoutDashboard />} label="DASHBOARD" href="/admin" active={pathname === "/admin"} />
               <AdminNavItem icon={<Layers />} label="CATEGORIES" href="/admin/categories" active={pathname === "/admin/categories"} />
@@ -170,13 +170,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </Sidebar>
         
         <SidebarInset className="flex flex-col bg-white min-w-0 max-w-full relative">
-          <header className="h-20 border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white sticky top-0 z-[100] shrink-0 overflow-hidden">
+          <header className="h-20 border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white sticky top-0 z-10 shrink-0">
             <div className="flex items-center gap-4 overflow-hidden">
               <SidebarTrigger className="text-[#0F172A] hover:bg-slate-50 cursor-pointer" />
               
               <div className="flex items-center gap-4">
                  {/* HEADER LOGO: TIGHT BOXED BRANDING */}
-                 <div className="bg-[#0B1528] rounded-xl px-4 h-12 flex items-center justify-center overflow-hidden shadow-sm">
+                 <div className="bg-[#0B1528] rounded-xl px-2 h-14 flex items-center justify-center overflow-hidden shadow-sm">
                     <Logo variant="dark" href="/admin" />
                  </div>
                  
