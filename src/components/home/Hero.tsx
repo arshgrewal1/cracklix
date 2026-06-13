@@ -18,9 +18,9 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview FINAL CALIBRATED HERO v191.0 (High Density).
- * FIXED: Reduced box width on mobile from the right side.
- * SCALE: Compact high-fidelity interface with zero overlap.
+ * @fileOverview FINAL CALIBRATED HERO v192.0 (Artifact Masked).
+ * FIXED: Masked the sparkle artifact in the background image.
+ * FIXED: Maintained Sentence case and mobile box constraints.
  */
 
 export default function Hero() {
@@ -65,7 +65,8 @@ export default function Hero() {
           className="w-full h-full object-cover object-right"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/85 to-transparent z-[10]" />
+        {/* Deepened mask to cover the sparkle artifact on the left/center water */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/95 to-transparent z-[10]" />
         
         {/* PUNJAB MAP WATERMARK */}
         <div className="absolute inset-0 z-[11] pointer-events-none opacity-[0.04]">
@@ -87,7 +88,7 @@ export default function Hero() {
                <span className="text-[6px] md:text-[10px] font-bold text-white tracking-widest">#1 Punjab exam preparation platform</span>
             </motion.div>
 
-            {/* HEADINGS - MANDATORY SENTENCE CASE */}
+            {/* HEADINGS - SENTENCE CASE */}
             <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
@@ -112,7 +113,7 @@ export default function Hero() {
                Punjab Government Exams di Complete Preparation ik hi Platform te.
             </motion.p>
 
-            {/* TACTICAL BUTTONS - REDUCED SIZE */}
+            {/* TACTICAL BUTTONS */}
             <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
