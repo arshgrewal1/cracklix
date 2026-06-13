@@ -25,6 +25,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import React, { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * @fileOverview Hardened Production Sidebar Hub v50.0.
