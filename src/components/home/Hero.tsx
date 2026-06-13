@@ -17,7 +17,8 @@ import {
   Search,
   Globe,
   FileStack,
-  ChevronRight
+  ChevronRight,
+  Gem
 } from "lucide-react";
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useState, useEffect, useMemo } from "react";
@@ -28,7 +29,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Elite Institutional Hero Hub v170.0.
+ * @fileOverview Elite Institutional Hero Hub v180.0.
  * DESIGN: Better than Testbook/Adda247 using a "Command Center" visual language.
  * FOCUS: Trust, Readiness, and selection-driven CTAs.
  */
@@ -65,7 +66,7 @@ export default function Hero() {
             src={heroImageUrl}
             alt="Punjab Exam Hub"
             fill
-            className="object-cover opacity-30 grayscale-[0.5]"
+            className="object-cover opacity-20 grayscale-[0.3]"
             priority
          />
          <div className="absolute inset-0 bg-gradient-to-r from-[#0B1528] via-[#0B1528]/95 to-transparent" />
@@ -84,7 +85,7 @@ export default function Hero() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl mb-4">
                  <Sparkles className="h-3.5 w-3.5 text-primary animate-pulse" />
-                 <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-primary">🏆 Punjab&apos;s Smartest Preparation Hub</span>
+                 <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-primary">🏆 Punjab's Most Trusted Preparation Hub</span>
               </div>
 
               <div className="space-y-4 md:space-y-6">
@@ -93,13 +94,13 @@ export default function Hero() {
                     <span className="text-primary italic">Starts Here.</span>
                  </h1>
                  <p className="text-slate-400 text-base md:text-xl font-medium max-w-2xl leading-relaxed antialiased">
-                    Master Punjab Government Exams with high-fidelity mock tests, verified previous year papers, and real-time performance analytics.
+                    Prepare for Punjab Government Exams with high-fidelity mock tests, expert-verified patterns, and AI-powered step-by-step logic.
                  </p>
               </div>
 
               {/* TACTICAL EXAM CHIPS */}
               <div className="flex flex-wrap gap-2.5">
-                 {['PSSSB', 'POLICE', 'PPSC', 'PSPCL', 'TEACHING'].map((board) => (
+                 {['PSSSB', 'POLICE', 'PPSC', 'PSPCL', 'PSTET', 'CTET', 'ETT'].map((board) => (
                     <div key={board} className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-black text-[10px] tracking-widest hover:border-primary/50 transition-all cursor-default">
                        {board}
                     </div>
@@ -119,7 +120,7 @@ export default function Hero() {
                 onClick={() => handleAction('/pass')}
                 className="w-full sm:w-auto h-16 md:h-20 px-12 rounded-[1.5rem] md:rounded-[2.5rem] bg-white/5 text-white hover:bg-white/10 font-black uppercase text-[12px] md:text-[14px] tracking-[0.2em] transition-all active:scale-95 gap-4 border border-white/10 backdrop-blur-xl"
               >
-                <Gem className="h-5 w-5 text-primary" /> Unlock Premium
+                <Gem className="h-5 w-5 text-primary" /> Unlock Elite Pass
               </Button>
             </div>
 
@@ -130,7 +131,7 @@ export default function Hero() {
                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">MOST ATTEMPTED THIS WEEK</span>
                </div>
                <div className="flex flex-wrap gap-4">
-                  {['Patwari Full Mock 1', 'Police SI 2025 Prep', 'Master Cadre Maths'].map((exam) => (
+                  {['Revenue Patwari Mock', 'Police SI Prep', 'Master Cadre Hub'].map((exam) => (
                      <Link key={exam} href="/mocks" className="text-[11px] font-bold text-slate-300 hover:text-primary transition-all flex items-center gap-2 group">
                         {exam} <ChevronRight className="h-3 w-3 text-slate-600 group-hover:translate-x-1 transition-transform" />
                      </Link>
@@ -157,7 +158,7 @@ export default function Hero() {
                          <p className="text-[10px] font-black uppercase text-primary tracking-widest leading-none">SELECTION PREVIEW</p>
                          <h3 className="text-xl font-headline font-black text-white uppercase">Your Readiness</h3>
                       </div>
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-none px-4 py-1 font-black">LIVE AUDIT</Badge>
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-none px-4 py-1 font-black uppercase text-[10px]">Live Audit</Badge>
                    </div>
                    
                    {/* READINESS GAUGE */}
@@ -181,20 +182,9 @@ export default function Hero() {
 
                    {/* VERIFIED STATUS */}
                    <div className="pt-8 border-t border-white/10 relative z-10">
-                      <div className="flex items-center justify-between bg-white/5 p-5 rounded-[2rem] border border-white/5">
-                         <div className="flex items-center gap-4">
-                            <div className="h-11 w-11 rounded-2xl bg-primary flex items-center justify-center shadow-xl">
-                               <ShieldCheck className="h-6 w-6 text-white" />
-                            </div>
-                            <div className="text-left">
-                               <p className="text-[11px] font-black text-white uppercase tracking-tight">Institutional Access</p>
-                               <p className="text-[9px] text-slate-500 font-medium uppercase">Verified Registry Node</p>
-                            </div>
-                         </div>
-                         <div className="text-right">
-                            <p className="text-2xl font-black text-primary tabular-nums">{stats?.totalUsers?.toLocaleString() || '15,000'}</p>
-                            <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">STUDENTS</p>
-                         </div>
+                      <div className="grid grid-cols-1 gap-4">
+                         <FeatureNode icon={<CheckCircle2 className="text-emerald-500" />} label="Official Exam Patterns" />
+                         <FeatureNode icon={<Zap className="text-primary" />} label="AI Step-by-Step Logic" />
                       </div>
                    </div>
                 </div>
@@ -202,12 +192,12 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* PREMIUM FEATURES PREVIEW STRIP */}
+        {/* BOTTOM PREMIUM FEATURES STRIP */}
         <div className="mt-16 md:mt-24 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
-           <FeatureNode icon={<CheckCircle2 />} label="Official Exam Patterns" />
-           <FeatureNode icon={<Zap />} label="AI Step-by-Step Logic" />
-           <FeatureNode icon={<Globe />} label="Full Bilingual Support" />
-           <FeatureNode icon={<Award />} label="Real-Time State Merit" />
+           <FeatureStripNode icon={<Globe />} label="Full Bilingual Support" />
+           <FeatureStripNode icon={<Award />} label="Real-Time State Merit" />
+           <FeatureStripNode icon={<FileStack />} label="PYQ Official Hub" />
+           <FeatureStripNode icon={<Smartphone />} label="Mobile-First Experience" />
         </div>
       </div>
     </section>
@@ -230,8 +220,8 @@ function DashboardMetric({ label, val, icon }: any) {
 
 function FeatureNode({ icon, label }: any) {
    return (
-      <div className="flex items-center gap-4 px-6 py-4 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all cursor-default group">
-         <div className="text-primary group-hover:scale-110 transition-transform">
+      <div className="flex items-center gap-4 px-5 py-3 bg-white/5 border border-white/5 rounded-2xl hover:bg-white/10 transition-all cursor-default group">
+         <div className="shrink-0 group-hover:scale-110 transition-transform">
             {React.cloneElement(icon, { className: "h-5 w-5" })}
          </div>
          <span className="text-[10px] md:text-xs font-black uppercase tracking-tight text-slate-400 group-hover:text-white transition-colors">{label}</span>
@@ -239,5 +229,13 @@ function FeatureNode({ icon, label }: any) {
    )
 }
 
-import React from "react"
-import { Gem } from "lucide-react";
+function FeatureStripNode({ icon, label }: any) {
+   return (
+      <div className="flex flex-col items-center md:flex-row gap-4 p-6 bg-white/5 border border-white/5 rounded-[2.5rem] hover:bg-white/10 transition-all cursor-default group shadow-inner">
+         <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-xl">
+            {React.cloneElement(icon, { className: "h-5 w-5 md:h-6 md:w-6" })}
+         </div>
+         <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400 group-hover:text-white transition-colors text-center md:text-left">{label}</span>
+      </div>
+   )
+}
