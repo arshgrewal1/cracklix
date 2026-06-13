@@ -24,9 +24,8 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview Final Screenshot Replica Sidebar v42.0.
- * UPDATED: Renamed 'OFFICIAL LIST' to 'EXAM LIST' as requested.
- * UPDATED: Compact mode enabled for higher visual density.
+ * @fileOverview Final Screenshot Replica Sidebar v43.0.
+ * UPDATED: Simplified 'OFFICIAL LIST' to 'EXAM LIST'.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -69,11 +68,9 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
       
       {/* 1. USER IDENTITY HEADER (COMPACT) */}
       <div className="px-6 pt-12 pb-6 flex flex-col gap-5 relative overflow-hidden shrink-0">
-        {/* Background Shield Watermark */}
         <Shield className="absolute top-10 right-4 h-40 w-40 text-white/[0.02] pointer-events-none" />
         
         <div className="relative z-10 flex items-center gap-4">
-           {/* Avatar with Verified Badge */}
            <div className="relative">
               <div className="h-16 w-16 rounded-[1.5rem] border-[2px] border-white/20 flex items-center justify-center bg-[#1E293B] shadow-2xl overflow-hidden">
                  <User className="h-8 w-8 text-slate-400" />
@@ -85,20 +82,16 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
            <div className="space-y-1 text-left">
               <h2 className="text-xl font-black text-white leading-none uppercase tracking-tight">
-                 {profile?.name || "ARSH GREWAL"}
+                 {profile?.name || "STUDENT"}
               </h2>
               <div className="flex flex-col items-start gap-1.5">
                  <div className="bg-[#F97316] text-white px-3 py-1 rounded-full font-black uppercase text-[8px] tracking-widest shadow-xl">
                     PASS ACTIVE
                  </div>
-                 <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest ml-0.5">
-                    EXP: 16/06/2026
-                 </p>
               </div>
            </div>
         </div>
 
-        {/* PROFILE HUB BUTTON (COMPACT) */}
         <button 
            onClick={() => { router.push('/profile'); onClose(); }}
            className="w-full h-12 rounded-xl border border-white/10 bg-white/[0.03] flex items-center justify-between px-5 group active:scale-95 transition-all relative z-10"

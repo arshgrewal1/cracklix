@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Fidelity "My Exams" Hub v8.0.
+ * @fileOverview High-Fidelity "My Exams" Hub v9.0.
  * UPDATED: Renamed section header from 'CONTINUE LEARNING' to 'MY EXAMS' as requested.
  * UPDATED: Positioned as a prominent homepage block for returning students.
  */
@@ -75,7 +75,7 @@ export default function ContinueLearning() {
                        <Zap className="h-7 w-7 md:h-10 md:w-10 text-primary fill-current" />
                     </div>
                     <div className="flex-1 min-w-0 space-y-4 md:space-y-6">
-                       <div className="space-y-1">
+                       <div className="space-y-1 text-left">
                           <p className="text-primary font-black text-[9px] md:text-[11px] uppercase tracking-[0.4em] leading-none">RESUME PREP</p>
                           <h3 className="text-lg md:text-2xl lg:text-3xl font-black uppercase text-white tracking-tight leading-tight line-clamp-2">
                              {res.mockTitle || 'OFFICIAL MOCK'}
@@ -86,7 +86,7 @@ export default function ContinueLearning() {
                              <Link href={`/results/${res.id || res.mockId}`}>REVIEW RESULT <ArrowRight className="ml-2 h-3 w-3" /></Link>
                           </Button>
                           <div className="flex items-center gap-3 shrink-0">
-                             <div className="flex flex-col">
+                             <div className="flex flex-col text-left">
                                 <span className="text-[6px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest leading-none">MASTERY</span>
                                 <span className="text-[6px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest mt-1 leading-none">INDEX</span>
                              </div>

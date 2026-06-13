@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Exam List Landing v4.0.
- * UPDATED: Renamed from 'Master Registry' to 'Exam List' for simplicity.
+ * @fileOverview Institutional Exam List Landing v5.0.
+ * UPDATED: Renamed header to 'Exam List' for simplicity.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -62,13 +62,13 @@ export default function ExamsEntryPage() {
              <div className="h-12 w-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-inner">
                 <Landmark className="h-6 w-6" />
              </div>
-             <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-slate-500">Official Exam Registry Latest Pattern</span>
+             <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-slate-500">Official Exam List</span>
           </div>
           <h1 className="text-4xl md:text-8xl font-headline font-black text-[#0F172A] uppercase tracking-tighter leading-[0.85]">
             Exam <br/> <span className="text-primary">List</span>
           </h1>
           <p className="text-slate-500 font-medium text-lg md:text-2xl max-w-3xl leading-relaxed">
-            Select a recruitment vertical to browse official hubs and vertical exam preparation.
+            Select a recruitment vertical to browse official centers and specific exam preparation nodes.
           </p>
         </div>
 
@@ -102,7 +102,7 @@ export default function ExamsEntryPage() {
 
                            <div className="mt-12 pt-8 border-t border-slate-50">
                               <Button variant="ghost" className="w-full h-12 md:h-14 rounded-2xl bg-[#0F172A] text-white group-hover:bg-primary transition-all shadow-xl font-black uppercase text-[8px] md:text-[9px] tracking-[0.2em] gap-3 border-none">
-                                 OPEN CATEGORY HUB <ChevronRight className="h-4 w-4" />
+                                 OPEN EXAM CENTER <ChevronRight className="h-4 w-4" />
                               </Button>
                            </div>
                         </CardContent>

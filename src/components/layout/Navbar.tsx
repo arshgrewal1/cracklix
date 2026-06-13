@@ -21,9 +21,10 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Final Performance-Hardened Header v136.0.
+ * @fileOverview Final Performance-Hardened Header v137.0.
  * UPDATED: Replaced 'MY EXAMS' with 'HOME PAGE' block.
  * UPDATED: Added click-feel scaling and active state indicators.
+ * FIXED: Hydration guard for all dynamic nodes.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -120,7 +121,7 @@ export default function Navbar() {
                   <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30 text-emerald-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
                      <Download className="h-4 w-4" />
                   </div>
-                  <div className="flex flex-col leading-tight">
+                  <div className="flex flex-col leading-tight text-left">
                      <span className="text-[12px] font-black uppercase tracking-widest text-white">INSTALL</span>
                      <span className="text-[12px] font-black uppercase tracking-widest text-white">APP</span>
                   </div>
