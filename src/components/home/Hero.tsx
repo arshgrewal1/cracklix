@@ -18,50 +18,19 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
+import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Final Calibrated Hero v238.0.
- * UPDATED: Integrated PWA Install CTA directly into the action hub.
+ * @fileOverview Final Calibrated Hero v239.0.
  */
 
 export default function Hero() {
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
-  const [canInstall, setCanInstall] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-
-    const checkInstallability = () => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      if (window.deferredPrompt && !isStandalone) {
-        setCanInstall(true);
-      } else {
-        setCanInstall(false);
-      }
-    };
-
-    checkInstallability();
-    window.addEventListener('pwa-installable', checkInstallability);
-    window.addEventListener('pwa-installed', checkInstallability);
-    
-    return () => {
-      window.removeEventListener('pwa-installable', checkInstallability);
-      window.removeEventListener('pwa-installed', checkInstallability);
-    };
   }, []);
-
-  const handleInstall = async () => {
-    const prompt = (window as any).deferredPrompt;
-    if (prompt) {
-      prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-      if (outcome === 'accepted') {
-        (window as any).deferredPrompt = null;
-        setCanInstall(false);
-      }
-    }
-  };
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
@@ -86,7 +55,6 @@ export default function Hero() {
   return (
     <section className="relative w-full bg-[#050B19] overflow-hidden min-h-[480px] md:min-h-[500px] lg:h-[600px] flex flex-col justify-start text-left border-b border-white/5 pb-8 md:pb-12">
       
-      {/* 1. BACKGROUND ENGINE */}
       <div className="absolute top-0 left-0 right-0 h-[180px] md:h-[420px] lg:h-[500px] z-0 overflow-hidden bg-[#050B19]">
         <motion.img 
           initial={{ opacity: 0 }}
@@ -101,7 +69,6 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/80 to-transparent z-[10] hidden md:block" />
       </div>
 
-      {/* 2. CONTENT HUB */}
       <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl relative z-[30] pt-10 md:pt-16">
          <div className="max-w-3xl space-y-4 md:space-y-5">
             
@@ -146,31 +113,23 @@ export default function Hero() {
             >
                <Button asChild className="h-11 md:h-14 px-6 md:px-10 bg-[#F97316] hover:bg-orange-600 text-white font-black text-[10px] md:text-xs tracking-[0.1em] rounded-xl md:rounded-2xl shadow-3xl transition-all border-none uppercase active:scale-95">
                   <Link href="/mocks" className="flex items-center gap-2">
-                     Free Mock <ArrowRight className="h-3 w-3" />
+                     Free Mock <ArrowRight className="h-4 w-4" />
                   </Link>
                </Button>
                
-               {canInstall && (
-                 <Button 
-                   onClick={handleInstall}
-                   className="h-11 md:h-14 px-6 md:px-10 bg-white text-[#0B1528] hover:bg-slate-100 font-black text-[10px] md:text-xs tracking-[0.1em] rounded-xl md:rounded-2xl shadow-3xl transition-all border-none uppercase active:scale-95 gap-3"
-                 >
-                    <Download className="h-4 w-4 text-primary" /> Install App
-                 </Button>
-               )}
+               <PWAInstallButton 
+                className="h-11 md:h-14 px-6 md:px-10 bg-white text-[#0B1528] hover:bg-slate-100 font-black text-[10px] md:text-xs tracking-[0.1em] rounded-xl md:rounded-2xl shadow-3xl border-none"
+               />
 
-               {!canInstall && (
-                 <Button asChild variant="outline" className="h-11 md:h-14 px-6 md:px-10 border-white/20 bg-white/5 text-white font-black text-[10px] md:text-xs tracking-[0.1em] rounded-xl md:rounded-2xl transition-all backdrop-blur-md hover:bg-white/10 uppercase active:scale-95">
-                    <Link href="/exams">
-                       Exams
-                    </Link>
-                 </Button>
-               )}
+               <Button asChild variant="outline" className="h-11 md:h-14 px-6 md:px-10 border-white/20 bg-white/5 text-white font-black text-[10px] md:text-xs tracking-[0.1em] rounded-xl md:rounded-2xl transition-all backdrop-blur-md hover:bg-white/10 uppercase active:scale-95">
+                  <Link href="/exams">
+                     Exams
+                  </Link>
+               </Button>
             </motion.div>
          </div>
       </div>
 
-      {/* 3. STATS GRID */}
       <div className="mt-6 md:mt-10 z-[40]">
          <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 lg:gap-8">

@@ -20,56 +20,24 @@ import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import PWAInstallButton from "@/components/PWAInstallButton";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview High-Fidelity Mobile-First Navbar v199.0.
- * UPDATED: Reduced size of action elements (Pills, Search, Avatar).
+ * @fileOverview High-Fidelity Mobile-First Navbar v200.0.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [canInstall, setCanInstall] = useState(false);
   const { user, profile, loading } = useUser();
   const auth = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-  const { toast } = useToast();
 
   useEffect(() => {
     setMounted(true);
-    
-    const checkInstallability = () => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      if (window.deferredPrompt && !isStandalone) {
-        setCanInstall(true);
-      } else {
-        setCanInstall(false);
-      }
-    };
-
-    checkInstallability();
-    window.addEventListener('pwa-installable', checkInstallability);
-    window.addEventListener('pwa-installed', checkInstallability);
-    
-    return () => {
-      window.removeEventListener('pwa-installable', checkInstallability);
-      window.removeEventListener('pwa-installed', checkInstallability);
-    };
   }, []);
-
-  const handleInstall = async () => {
-    const prompt = (window as any).deferredPrompt;
-    if (prompt) {
-      prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-      if (outcome === 'accepted') {
-        (window as any).deferredPrompt = null;
-        setCanInstall(false);
-      }
-    }
-  };
 
   const isAdmin = useMemo(() => {
     if (!user) return false;
@@ -118,7 +86,6 @@ export default function Navbar() {
       )}>
         <div className="container mx-auto max-w-[1536px] flex items-center justify-between h-full gap-2">
           
-          {/* MOBILE MENU & LOGO */}
           <div className="flex items-center gap-2 md:gap-4 lg:gap-6 shrink-0 h-full">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
@@ -135,7 +102,6 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* DESKTOP LINKS */}
           <div className="hidden lg:flex flex-1 items-center justify-center gap-6 xl:gap-10 h-full">
             <NavLink icon={<Home />} label1="HOME" label2="PAGE" href="/" active={pathname === "/"} />
             <NavLink icon={<Zap />} label1="PRACTICE" label2="TESTS" href="/mocks" active={pathname.startsWith("/mocks")} />
@@ -154,17 +120,10 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* ACTIONS & USER */}
           <div className="flex items-center gap-2 md:gap-4 lg:gap-5 shrink-0 h-full">
-             {/* PWA INSTALL BUTTON (DESKTOP) */}
-             {canInstall && (
-               <Button 
-                onClick={handleInstall}
-                className="hidden md:flex h-[38px] px-5 rounded-xl bg-primary hover:bg-orange-600 text-white font-black uppercase text-[9px] tracking-widest gap-2 shadow-xl border-none transition-all active:scale-95"
-               >
-                  <Download className="h-3.5 w-3.5" /> Install App
-               </Button>
-             )}
+             <div className="hidden md:block">
+               <PWAInstallButton className="h-[38px] px-5 rounded-xl border-none bg-primary hover:bg-orange-600 text-white" />
+             </div>
 
              {user && (
                 <div 

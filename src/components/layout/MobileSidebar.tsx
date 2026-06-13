@@ -26,39 +26,21 @@ import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/brand/Logo";
+import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Hardened High-Density Mobile Sidebar v69.0.
- * UPDATED: Logo size reduced to h-28 and margins recalibrated.
+ * @fileOverview Hardened High-Density Mobile Sidebar v70.0.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
-  const [canInstall, setCanInstall] = useState(false);
   const { profile } = useUser();
   const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const { toast } = useToast();
 
   useEffect(() => {
     setMounted(true);
-    const updateInstallable = () => {
-      if ((window as any).deferredPrompt) setCanInstall(true);
-    };
-    updateInstallable();
-    window.addEventListener('pwa-installable', updateInstallable);
-    return () => window.removeEventListener('pwa-installable', updateInstallable);
   }, []);
-
-  const handleInstall = async () => {
-    const prompt = (window as any).deferredPrompt;
-    if (prompt) {
-      prompt.prompt();
-      onClose();
-    } else {
-      toast({ title: "Install Tip", description: "Use the browser 'Add to Home Screen' option." });
-    }
-  };
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -79,12 +61,10 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col h-full bg-[#0B1528] text-white overflow-y-auto no-scrollbar font-body select-none text-left pt-0">
       
-      {/* 1. LOGO NODE - RECALIBRATED SIZE */}
       <div className="px-6 flex justify-start shrink-0 overflow-visible -mt-6 mb-[-25px]">
          <Logo imgClassName="h-28 origin-left" />
       </div>
 
-      {/* 2. USER PROFILE HUB - MOVED HIGHER */}
       <div className="px-6 flex flex-col gap-0 relative overflow-hidden shrink-0 mt-0 pt-0">
         <Shield className="absolute top-0 right-4 h-40 w-40 text-white/[0.03] pointer-events-none" />
         <div className="relative z-10 flex items-center gap-3 py-1">
@@ -117,12 +97,13 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
       <div className="px-6 mb-0 mt-1"><p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">MANAGEMENT CENTER</p></div>
 
       <div className="flex flex-col py-0">
-        {canInstall && (
-          <button onClick={handleInstall} className="flex items-center gap-4 px-6 h-[40px] bg-primary/10 text-primary transition-all border-l-[3px] border-primary mb-1">
-             <Download className="h-4 w-4 shrink-0" />
-             <span className="text-[11px] font-black uppercase tracking-tight">INSTALL APP</span>
-          </button>
-        )}
+        <div className="px-6 mb-2">
+          <PWAInstallButton 
+            className="w-full h-10 bg-primary/10 text-primary border-l-[3px] border-primary rounded-none justify-start px-4" 
+            variant="ghost" 
+          />
+        </div>
+
         {menuItems.map((item) => {
           const isActive = mounted && pathname === item.href;
           const Icon = item.icon;

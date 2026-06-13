@@ -11,7 +11,7 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const brandIcon = 'https://i.ibb.co/5WjGyLhn/1000110132-removebg-preview.png';
+const brandIcon = 'https://i.ibb.co/S76nk4XG/IMG-20260613-215742.jpg';
 
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Mock Test Platform",
@@ -20,9 +20,9 @@ export const metadata: Metadata = {
   authors: [{ name: 'Arsh Grewal', url: 'https://cracklix.com' }],
   icons: {
     icon: [
-      { url: brandIcon, sizes: '32x32', type: 'image/png' },
-      { url: brandIcon, sizes: '192x192', type: 'image/png' },
-      { url: brandIcon, sizes: '512x512', type: 'image/png' },
+      { url: brandIcon, sizes: '32x32', type: 'image/jpeg' },
+      { url: brandIcon, sizes: '192x192', type: 'image/jpeg' },
+      { url: brandIcon, sizes: '512x512', type: 'image/jpeg' },
     ],
     apple: brandIcon,
   },
@@ -72,26 +72,21 @@ export default function RootLayout({
             __html: `
               window.deferredPrompt = null;
               
-              const capturePrompt = (e) => {
+              window.addEventListener('beforeinstallprompt', (e) => {
                 e.preventDefault();
                 window.deferredPrompt = e;
-                console.log('[PWA] beforeinstallprompt captured.');
                 window.dispatchEvent(new CustomEvent('pwa-installable'));
-              };
-
-              window.addEventListener('beforeinstallprompt', capturePrompt);
+              });
 
               window.addEventListener('appinstalled', (e) => {
-                console.log('[PWA] App successfully installed.');
                 window.deferredPrompt = null;
                 window.dispatchEvent(new CustomEvent('pwa-installed'));
               });
 
-              // Service Worker Registration Node
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                   navigator.serviceWorker.register('/sw.js').then(reg => {
-                    console.log('[PWA] Service Worker Active:', reg.scope);
+                    console.log('[PWA] Service Worker Active');
                   }).catch(err => {
                     console.error('[PWA] SW Registration Failed:', err);
                   });
