@@ -31,19 +31,6 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'Cracklix',
   },
-  formatDetection: {
-    telephone: false,
-  },
-  other: {
-    'mobile-web-app-capable': 'yes',
-    'apple-mobile-web-app-capable': 'yes',
-    'application-name': 'Cracklix',
-    'apple-mobile-web-app-title': 'Cracklix',
-    'theme-color': '#0B1528',
-    'msapplication-navbutton-color': '#0B1528',
-    'apple-mobile-web-app-status-bar-style': 'black-translucent',
-    'msapplication-starturl': '/'
-  }
 };
 
 export const viewport: Viewport = {
@@ -72,17 +59,17 @@ export default function RootLayout({
             __html: `
               window.deferredPrompt = null;
               
-              console.log('[PWA] Lifecycle listener initialized');
+              console.log('[PWA_AUDIT] Initializing event lifecycle');
 
               window.addEventListener('beforeinstallprompt', (e) => {
-                console.log('[PWA] beforeinstallprompt fired');
+                console.log('[PWA_AUDIT] beforeinstallprompt event captured');
                 e.preventDefault();
                 window.deferredPrompt = e;
                 window.dispatchEvent(new CustomEvent('pwa-installable'));
               });
 
               window.addEventListener('appinstalled', (e) => {
-                console.log('[PWA] appinstalled successfully');
+                console.log('[PWA_AUDIT] Application installed successfully');
                 window.deferredPrompt = null;
                 window.dispatchEvent(new CustomEvent('pwa-installed'));
               });
@@ -90,9 +77,9 @@ export default function RootLayout({
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                   navigator.serviceWorker.register('/sw.js').then(reg => {
-                    console.log('[PWA] Service Worker registered and active');
+                    console.log('[PWA_AUDIT] Service Worker registered at:', reg.scope);
                   }).catch(err => {
-                    console.error('[PWA] SW Registration Failed:', err);
+                    console.error('[PWA_AUDIT] SW Registration Failed:', err);
                   });
                 });
               }

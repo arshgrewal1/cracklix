@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Smartphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,8 +13,8 @@ interface PWAInstallButtonProps {
 }
 
 /**
- * @fileOverview Universal PWA Installation Trigger v3.0 (Native Optimized).
- * FIXED: Reliable native prompt execution and display detection.
+ * @fileOverview Institutional PWA Trigger v4.0.
+ * AUDIT: Strictly triggers native browser prompt.
  */
 export default function PWAInstallButton({ 
   className, 
@@ -26,44 +26,39 @@ export default function PWAInstallButton({
   const { toast } = useToast();
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-      console.log('[PWA] Button: beforeinstallprompt captured');
-    };
+    const checkState = () => {
+      if (typeof window === 'undefined') return;
 
-    const handleAppInstalled = () => {
-      setDeferredPrompt(null);
-      setIsInstalled(true);
-      console.log('[PWA] Button: Application installed');
-    };
+      // 1. Check if captured in layout.tsx
+      if ((window as any).deferredPrompt) {
+        setDeferredPrompt((window as any).deferredPrompt);
+        console.log('[PWA_BUTTON] Prompt detected in global state');
+      }
 
-    const checkInstalled = () => {
+      // 2. Check standalone mode
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
       if (isStandalone) {
         setIsInstalled(true);
-        console.log('[PWA] Button: Standalone mode detected');
       }
     };
 
-    if (typeof window !== 'undefined') {
-      // Pick up prompt if layout.tsx already captured it
-      if ((window as any).deferredPrompt) {
-        setDeferredPrompt((window as any).deferredPrompt);
-      }
-      
-      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.addEventListener('appinstalled', handleAppInstalled);
-      window.addEventListener('pwa-installable', () => {
-        setDeferredPrompt((window as any).deferredPrompt);
-      });
-      
-      checkInstalled();
-    }
+    const handleInstallable = () => {
+      setDeferredPrompt((window as any).deferredPrompt);
+      console.log('[PWA_BUTTON] pwa-installable event received');
+    };
+
+    const handleInstalled = () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+    };
+
+    checkState();
+    window.addEventListener('pwa-installable', handleInstallable);
+    window.addEventListener('pwa-installed', handleInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('pwa-installable', handleInstallable);
+      window.removeEventListener('pwa-installed', handleInstalled);
     };
   }, []);
 
@@ -72,26 +67,26 @@ export default function PWAInstallButton({
     e.stopPropagation();
 
     if (!deferredPrompt) {
-      console.log('[PWA] Button: Install clicked but no deferredPrompt available');
+      console.warn('[PWA_BUTTON] Attempted install but prompt is null');
       toast({
-        title: "Installation Tip",
-        description: "To install: Tap the browser's menu (3 dots or Share) and select 'Add to Home Screen'.",
+        title: "Install from Menu",
+        description: "To install Cracklix, tap the 3-dots menu or Share icon and select 'Add to Home Screen'.",
       });
       return;
     }
 
     try {
-      console.log('[PWA] Button: Triggering native prompt');
+      console.log('[PWA_BUTTON] Triggering native install dialog');
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      console.log(`[PWA] Button: User response to install: ${outcome}`);
+      console.log(`[PWA_BUTTON] User choice: ${outcome}`);
       
       if (outcome === 'accepted') {
         setDeferredPrompt(null);
         (window as any).deferredPrompt = null;
       }
     } catch (err) {
-      console.error('[PWA] Button: Installation prompt failed:', err);
+      console.error('[PWA_BUTTON] Prompt execution error:', err);
     }
   };
 

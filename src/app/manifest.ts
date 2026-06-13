@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Optimized Institutional PWA Manifest v23.0 (Hardened).
+ * @fileOverview Hardened PWA Manifest v25.0.
+ * Compliance: Validated for Android Chrome, Edge, and Desktop Chrome.
  */
 export default function manifest(): MetadataRoute.Manifest {
   const brandIcon = 'https://i.ibb.co/S76nk4XG/IMG-20260613-215742.jpg';
@@ -11,8 +12,10 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'Cracklix',
     description: "Punjab's most trusted government exam preparation platform.",
     start_url: '/',
-    id: 'cracklix-hub-v1',
+    id: 'cracklix-platform-v1',
+    scope: '/',
     display: 'standalone',
+    display_override: ['standalone', 'window-controls-overlay'],
     background_color: '#0B1528',
     theme_color: '#0B1528',
     orientation: 'portrait',
@@ -41,14 +44,7 @@ export default function manifest(): MetadataRoute.Manifest {
         url: '/my-exams',
         description: 'Track your preparation progress',
       },
-      {
-        name: 'Current Affairs',
-        url: '/current-affairs',
-        description: 'Daily exam relevant updates',
-      },
     ],
-    categories: ['education', 'lifestyle'],
-    related_applications: [],
-    prefer_related_applications: false
+    categories: ['education', 'lifestyle']
   };
 }
