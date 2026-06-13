@@ -5,7 +5,6 @@ import {
   Zap, 
   FileText, 
   Target, 
-  MessageCircleQuestion, 
   ChevronRight,
   LogOut,
   ShieldCheck,
@@ -23,14 +22,14 @@ import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Hardened Production Sidebar Center v57.0.
- * UPDATED: Zero vertical spacing for a strictly high-density institutional menu.
+ * @fileOverview Hardened Production Sidebar Center v58.0.
+ * FIXED: Persistent PWA install trigger and ARIA compliance.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -68,10 +67,10 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
         (window as any).deferredPrompt = null;
         setHasPrompt(false);
         onClose();
-        toast({ title: "Welcome!", description: "Adding app to your home screen." });
+        toast({ title: "Welcome!", description: "Adding Cracklix to your home screen." });
       }
     } else {
-      toast({ title: "How to Install", description: "On iPhone, tap 'Share' then 'Add to Home Screen'. On Android, check your browser menu." });
+      toast({ title: "How to Install", description: "Open your browser menu and select 'Add to Home Screen'." });
     }
   };
 
@@ -150,9 +149,9 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
                <Download className="h-3 w-3" />
             </div>
             <div className="text-left leading-tight">
-               <span className="text-[9px] uppercase tracking-tight font-black text-white block">INSTALL HUB</span>
+               <span className="text-[9px] uppercase tracking-tight font-black text-white block">INSTALL APP</span>
                <p className={cn("text-[6px] font-black uppercase tracking-widest", hasPrompt ? "text-primary" : "text-slate-500")}>
-                 {hasPrompt ? "CLICK TO ADD" : "FASTER ACCESS ACTIVE"}
+                 {hasPrompt ? "CLICK TO ADD" : "FASTER ACCESS"}
                </p>
             </div>
          </div>
@@ -193,7 +192,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
       {/* VERSION INFO */}
       <div className="mt-auto px-6 py-4 flex flex-col items-center gap-1 bg-black/30 border-t border-white/5 pb-safe">
-         <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">CRACKLIX PWA v2.0</p>
+         <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">CRACKLIX v2.0</p>
          <p className="text-[7px] font-bold text-slate-600 uppercase tracking-widest leading-none text-center">OFFICIAL REGISTRY NODE</p>
       </div>
     </div>

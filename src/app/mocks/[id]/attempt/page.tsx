@@ -26,8 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v46.1 (Accessibility Hardened).
- * ACCESSIBILITY: Added descriptions to all modals and sheets.
+ * @fileOverview Hardened CBT Engine v47.0 (Production Verified).
+ * STABILITY: Enhanced null guards for answers and section data.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -70,7 +70,6 @@ export default function MockAttemptPage() {
         const mData = mockSnap.data();
         setMockData(mData);
 
-        // Security Firewall
         const tier = (mData.accessLevel || 'FREE').toUpperCase();
         const userEmail = user.email?.toLowerCase();
         const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
@@ -119,13 +118,13 @@ export default function MockAttemptPage() {
     try {
       let correctCount = 0;
       let wrongCount = 0;
-      const attemptedCount = Object.keys(answers).length;
+      const attemptedCount = Object.keys(answers || {}).length;
 
       const posMarks = Number(mockData.positiveMarks) || 1;
       const negMarks = Number(mockData.negativeMarks) || 0.25;
 
       questions.forEach((q, idx) => {
-        const studentAnsIdx = answers[idx];
+        const studentAnsIdx = answers?.[idx];
         if (studentAnsIdx === undefined || studentAnsIdx === null) return;
         const correctOptIdx = ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer);
         if (correctOptIdx === studentAnsIdx) correctCount++;
@@ -145,7 +144,7 @@ export default function MockAttemptPage() {
         score: parseFloat(rawScore.toFixed(2)),
         correctCount, wrongCount, attemptedCount,
         totalQuestions: questions.length, 
-        accuracy, timeTaken, answers, 
+        accuracy, timeTaken, answers: answers || {}, 
         timestamp: new Date().toISOString(), 
         createdAt: serverTimestamp(),
         accessLevel: (mockData.accessLevel || 'FREE').toUpperCase() 
@@ -215,7 +214,7 @@ export default function MockAttemptPage() {
                   <QuestionRenderer 
                     language={language} 
                     question={{...questions[currentIdx], displayId: (currentIdx + 1).toString()}} 
-                    selectedAnswer={answers[currentIdx]} 
+                    selectedAnswer={answers?.[currentIdx]} 
                     onSelect={(idx) => setAnswer(currentIdx, idx, db)} 
                     className="shadow-xl border-none p-6 md:p-10 rounded-2xl md:rounded-[3rem]" 
                   />
@@ -247,15 +246,18 @@ export default function MockAttemptPage() {
         </SheetContent>
       </Sheet>
 
-      {/* HARDENED EXIT DIALOG */}
       <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
         <DialogContent className="max-w-[360px] rounded-[2.5rem] p-8 bg-white text-center shadow-5xl border-none z-[1300]">
           <div className="space-y-8">
+            <DialogHeader className="sr-only">
+               <DialogTitle>Save & Exit?</DialogTitle>
+               <DialogDescription>Your current attempt state is safely cached in the cloud.</DialogDescription>
+            </DialogHeader>
             <div className="h-14 w-14 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto text-blue-500 shadow-inner">
               <LogOut className="h-6 w-6" />
             </div>
-            <DialogTitle className="text-2xl font-headline font-black uppercase text-[#0F172A]">Save & Exit?</DialogTitle>
-            <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Your current attempt state is safely cached in the cloud.</DialogDescription>
+            <h2 className="text-2xl font-headline font-black uppercase text-[#0F172A]">Save & Exit?</h2>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">Your current attempt state is safely cached in the cloud registry node.</p>
             <div className="flex gap-3 pt-2">
               <Button variant="ghost" onClick={() => setShowExitModal(false)} className="flex-1 h-12 font-black uppercase text-[10px] tracking-widest">Stay</Button>
               <Button onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/dashboard'); }} className="flex-1 h-12 bg-primary text-white rounded-xl font-black uppercase text-[10px] shadow-lg border-none">Exit</Button>
@@ -264,20 +266,23 @@ export default function MockAttemptPage() {
         </DialogContent>
       </Dialog>
 
-      {/* HARDENED SUBMIT DIALOG */}
       <Dialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
         <DialogContent className="max-w-[360px] rounded-[3rem] p-10 bg-[#0F172A] text-white text-center border-none shadow-5xl z-[1300]">
           <div className="space-y-8">
+            <DialogHeader className="sr-only">
+               <DialogTitle>Final Submission</DialogTitle>
+               <DialogDescription>Finish and score your test to commit it to the state merit list.</DialogDescription>
+            </DialogHeader>
             <div className="h-20 w-20 bg-primary/20 rounded-[2rem] flex items-center justify-center mx-auto text-primary shadow-2xl">
               <ShieldCheck className="h-10 w-10" />
             </div>
-            <DialogTitle className="text-2xl font-headline font-black uppercase text-white tracking-tight">Final Submission</DialogTitle>
-            <DialogDescription className="text-slate-400 text-xs font-medium px-2 leading-relaxed">Ensure all sections have been reviewed. Once submitted, your scores will be committed to the state merit list.</DialogDescription>
+            <h2 className="text-2xl font-headline font-black uppercase text-white tracking-tight">Final Submission</h2>
+            <p className="text-slate-400 text-xs font-medium px-2 leading-relaxed uppercase">Ensure all sections have been reviewed. Once submitted, your scores will be committed to the state merit list.</p>
             <div className="flex flex-col gap-3 pt-4">
               <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-14 bg-primary hover:bg-orange-600 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-2xl border-none">
                 {isSubmittingFinal ? <Loader2 className="h-4 w-4 animate-spin" /> : "Finish & Score Test"}
               </Button>
-              <Button variant="ghost" onClick={() => setShowSubmitModal(false)} disabled={isSubmittingFinal} className="h-10 text-slate-500 font-bold uppercase text-[9px] tracking-widest hover:text-white transition-colors">Back to Questions</Button>
+              <button onClick={() => setShowSubmitModal(false)} disabled={isSubmittingFinal} className="h-10 text-slate-500 font-bold uppercase text-[9px] tracking-widest hover:text-white transition-colors cursor-pointer">Back to Questions</button>
             </div>
           </div>
         </DialogContent>

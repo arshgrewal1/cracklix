@@ -31,7 +31,6 @@ export default function AdminFreeContent() {
   const [editingItem, setEditingItem] = useState<any>(null)
   const [searchTerm, setSearchTerm] = useState("")
 
-  // Auto-generate slug from title
   useEffect(() => {
     if (editingItem && !editingItem.id && editingItem.title) {
        const slug = editingItem.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');

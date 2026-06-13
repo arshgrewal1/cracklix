@@ -56,8 +56,8 @@ export const viewport: Viewport = {
 };
 
 /**
- * @fileOverview Master Layout v25.0 (PWA Persistent).
- * UPDATED: Refined native script for more robust PWA event persistence and installability.
+ * @fileOverview Master Layout v26.0 (Hardened).
+ * UPDATED: Persistent PWA event capture script to ensure install button reliability.
  */
 export default function RootLayout({
   children,
@@ -71,7 +71,6 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        {/* Early capture and persistent storage of PWA install prompt */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
