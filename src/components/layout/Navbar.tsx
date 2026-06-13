@@ -23,8 +23,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Header v160.0.
- * UPDATED: Increased logo scaling to h-18 within h-20 container for massive visibility.
+ * @fileOverview Professional Header v161.0.
+ * UPDATED: Increased header height to h-24 and logo scaling to h-22 for massive visibility.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -70,7 +70,7 @@ export default function Navbar() {
     }
   };
 
-  const headerHeight = "h-20";
+  const headerHeight = "h-24";
 
   if (!mounted) {
     return (
@@ -105,8 +105,8 @@ export default function Navbar() {
               </SheetContent>
             </Sheet>
             
-            <div className="h-20 flex items-center shrink-0">
-               <Logo imgClassName="h-18" className="active:scale-95 transition-transform" />
+            <div className="h-24 flex items-center shrink-0">
+               <Logo imgClassName="h-22" className="active:scale-95 transition-transform" />
             </div>
           </div>
 
@@ -199,7 +199,7 @@ export default function Navbar() {
                        </DropdownMenuItem>
                      )}
                      <DropdownMenuSeparator className="bg-white/5 my-3" />
-                     <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-5 px-5 py-4 cursor-pointer rounded-xl transition-all focus:bg-rose-500/10 group">
+                     <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-5 px-5 py-4 cursor-pointer rounded-xl transition-all focus:bg-rose-50/10 group">
                        <LogOut className="h-5 w-5 shrink-0 text-rose-500" />
                        <span className="font-bold text-[15px] tracking-tight uppercase text-rose-500">LOGOUT</span>
                      </DropdownMenuItem>
