@@ -28,8 +28,9 @@ import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Hardened High-Density Mobile Sidebar v64.0.
+ * @fileOverview Hardened High-Density Mobile Sidebar v65.0.
  * UPDATED: Zero vertical spacing between logo, labels and items for a strictly continuous flow.
+ * UPDATED: Increased Logo scale to h-48.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -41,7 +42,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const { toast } = useToast();
 
   useEffect(() => {
-    mounted && setMounted(true);
+    setMounted(true);
     if (typeof window !== 'undefined' && (window as any).deferredPrompt) {
       setHasPrompt(true);
     }
@@ -70,8 +71,8 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
     <div className="flex flex-col h-full bg-[#0B1528] text-white overflow-y-auto no-scrollbar font-body select-none text-left">
       
       {/* BRAND LOGO - ABSOLUTE TIGHT */}
-      <div className="px-6 flex justify-start shrink-0 overflow-visible mt-0 mb-0">
-         <Logo imgClassName="h-32 origin-left" />
+      <div className="px-6 flex justify-start shrink-0 overflow-visible mt-0 mb-[-12px]">
+         <Logo imgClassName="h-48 origin-left" />
       </div>
 
       {/* IDENTITY HEADER - COMPACT */}
@@ -115,7 +116,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      <div className="px-6 mb-1">
+      <div className="px-6 mb-0">
          <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">MANAGEMENT CENTER</p>
       </div>
 
