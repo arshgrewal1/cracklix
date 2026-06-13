@@ -24,8 +24,8 @@ import { useToast } from "@/hooks/use-toast";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Header v177.0 (Scale Reduced).
- * UPDATED: Reduced desktop height and scaled down all UI elements for a compact institutional look.
+ * @fileOverview Professional Header v178.0 (Logo 40px Fix).
+ * UPDATED: Set logo height to exactly 40px (h-10) as requested.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -132,7 +132,7 @@ export default function Navbar() {
             
             <div className="flex items-center shrink-0 h-full py-0.5 md:py-1">
                <Logo 
-                 imgClassName="h-full origin-left scale-[1.1] md:scale-100" 
+                 imgClassName="h-10 origin-left" 
                  className="active:scale-95 transition-transform" 
                />
             </div>

@@ -39,8 +39,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Institutional Admin Layout v178.0.
- * UPDATED: Optimized logo height in sidebar for full visibility.
+ * @fileOverview Hardened Institutional Admin Layout v179.0.
+ * UPDATED: Set sidebar and header logos to exactly 40px (h-10).
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -89,8 +89,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
        <div className="flex-1 custom-scrollbar overflow-y-auto overflow-x-hidden pb-10">
           
           {/* BRANDING SECTION */}
-          <div className="px-6 pt-4 pb-2 flex justify-center shrink-0">
-             <Logo href="/admin" imgClassName="h-32" />
+          <div className="px-6 pt-8 pb-4 flex justify-center shrink-0">
+             <Logo href="/admin" imgClassName="h-10" />
           </div>
 
           <SidebarGroup className="pt-0">
@@ -168,8 +168,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarTrigger className="text-[#0F172A] hover:bg-slate-50 cursor-pointer" />
               
               <div className="flex items-center gap-4">
-                 <div className="bg-[#0B1528] rounded-xl px-4 h-16 flex items-center justify-center overflow-hidden shadow-sm">
-                    <Logo variant="dark" href="/admin" imgClassName="h-12" />
+                 <div className="bg-[#0B1528] rounded-xl px-4 h-14 flex items-center justify-center overflow-hidden shadow-sm">
+                    <Logo variant="dark" href="/admin" imgClassName="h-10" />
                  </div>
                  
                  <div className="h-10 w-[1.5px] bg-slate-200 mx-1 md:block" />
