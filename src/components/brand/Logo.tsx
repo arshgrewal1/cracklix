@@ -4,25 +4,18 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Master Logo Hub v10.0.
- * RESTORED: Matched tagline and text styling exactly from screenshot.
+ * @fileOverview Official Master Logo Hub v11.0.
+ * UPDATED: Increased logo size and removed tagline as per specific request.
  */
 export function LogoIcon({ className = "" }: { className?: string }) {
   return (
-    <div className={cn("relative shrink-0 flex flex-col items-center gap-0", className)}>
+    <div className={cn("relative shrink-0 flex items-center justify-center", className)}>
       <img 
         src="https://i.ibb.co/5WjGyLhn/1000110132-removebg-preview.png" 
         alt="Cracklix Logo" 
-        className="h-10 md:h-12 w-auto object-contain"
+        className="h-16 md:h-24 w-auto object-contain"
         referrerPolicy="no-referrer"
       />
-      <div className="flex items-center gap-2 mt-[-4px]">
-         <div className="h-[1px] w-3 bg-primary/30" />
-         <span className="text-[7px] md:text-[8px] font-black uppercase text-primary tracking-[0.2em] whitespace-nowrap">
-            PUNJAB'S NO.1 STUDY HUB
-         </span>
-         <div className="h-[1px] w-3 bg-primary/30" />
-      </div>
     </div>
   );
 }
