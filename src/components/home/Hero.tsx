@@ -18,11 +18,11 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview FINAL CALIBRATED HERO v198.0.
- * FIXED: Stat boxes in a single line (row) on mobile.
- * FIXED: Reduced box sizes for micro-UI density.
- * FIXED: Masked background star artifact using a targeted overlay.
- * FIXED: Maintained Sentence case and double-line description.
+ * @fileOverview FINAL CALIBRATED HERO v205.0.
+ * FIXED: Targeted masking to cover the Gemini star artifact.
+ * FIXED: Content layer hierarchy (z-index) to appear on top of all fixes.
+ * FIXED: Horizontal stat row on mobile with micro-UI density.
+ * MANDATORY: Sentence case and double-line description formatting.
  */
 
 export default function Hero() {
@@ -70,7 +70,8 @@ export default function Hero() {
         {/* Deep navy mask for high-fidelity readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/90 to-transparent z-[10]" />
         
-        {/* TARGETED ARTIFACT MASK (Covers the star sparkle on left-middle) */}
+        {/* TARGETED ARTIFACT MASK - Erasing the Gemini star sparkle */}
+        <div className="absolute top-[20%] right-[30%] w-[120px] h-[120px] bg-[#050B19] blur-[50px] z-[11] opacity-95 rounded-full pointer-events-none" />
         <div className="absolute top-[40%] left-[20%] w-[150px] h-[100px] bg-[#050B19] blur-[40px] z-[11] opacity-90 rounded-full pointer-events-none" />
 
         {/* PUNJAB MAP WATERMARK */}
@@ -79,8 +80,8 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* 2. CALIBRATED CONTENT HUB */}
-      <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-20 pt-8 md:pt-14">
+      {/* 2. CALIBRATED CONTENT HUB - FORCE ON TOP */}
+      <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-[30] pt-8 md:pt-14">
          <div className="max-w-2xl space-y-1 md:space-y-4">
             
             {/* TOP PILL BADGE */}
@@ -140,8 +141,8 @@ export default function Hero() {
          </div>
       </div>
 
-      {/* 3. INTEGRATED BOTTOM DATA BAR - SINGLE LINE ON MOBILE */}
-      <div className="absolute bottom-1 md:bottom-8 left-0 right-0 z-30">
+      {/* 3. INTEGRATED BOTTOM DATA BAR - FORCE ON TOP */}
+      <div className="absolute bottom-1 md:bottom-8 left-0 right-0 z-[40]">
          <div className="container mx-auto px-4 md:px-12 max-w-7xl overflow-hidden">
             <div className="flex flex-row md:grid md:grid-cols-4 gap-1.5 md:gap-4 overflow-x-auto no-scrollbar pb-1">
                {liveStats.map((stat, idx) => (
