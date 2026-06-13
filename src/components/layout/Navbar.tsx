@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from "next/link";
-import { Menu, Search, User, Gem, LogOut, Target, Newspaper, Download, Zap, Home, ShieldCheck, Settings } from "lucide-react";
+import { Menu, Search, User, Gem, LogOut, Target, Newspaper, Download, Zap, Home, ShieldCheck, Settings, Award } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -23,9 +23,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Performance-Hardened Header v140.0.
- * RESTORED: Profile Hub circular button and explicit Admin Panel access.
- * UPDATED: Added direct Admin Node in main strip for easier management.
+ * @fileOverview Final Performance-Hardened Header v141.0.
+ * RESTORED: Profile Hub circular button and explicit screenshot-matched dropdown.
+ * REMOVED: Admin Panel button moved from main strip to profile dropdown.
  * FIXED: Hydration guard for all dynamic nodes.
  */
 export default function Navbar() {
@@ -108,10 +108,6 @@ export default function Navbar() {
             <NavLink icon={<Home />} label1="HOME" label2="PAGE" href="/" active={pathname === "/"} />
             <NavLink icon={<Zap />} label1="PRACTICE" label2="TESTS" href="/mocks" active={pathname.startsWith("/mocks")} />
             <NavLink icon={<Newspaper />} label1="CURRENT" label2="AFFAIRS" href="/current-affairs" active={pathname === "/current-affairs"} />
-            
-            {isAdmin && (
-              <NavLink icon={<Settings className="text-primary" />} label1="ADMIN" label2="PANEL" href="/admin" active={pathname.startsWith("/admin")} />
-            )}
 
             {/* GET PASS CTA */}
             <Link href="/pass" className="transition-all active:scale-95 group">
@@ -181,33 +177,44 @@ export default function Navbar() {
                           <StudentAvatar profile={profile} className="h-full w-full border-none" iconClassName="text-[#0B1528]" />
                         </button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="w-72 bg-[#0F172A] border-white/10 text-white rounded-[2.5rem] p-3 shadow-5xl z-[2001]" align="end">
-                        <div className="px-5 py-6 flex items-center gap-4 text-left">
-                           <StudentAvatar profile={profile} className="h-12 w-12" />
-                           <div className="min-w-0">
-                              <p className="text-[12px] font-black uppercase tracking-tight truncate leading-none mb-1.5">{profile?.name || "Aspirant"}</p>
-                              <p className="text-[9px] font-bold text-slate-500 truncate">{user.email}</p>
-                           </div>
-                        </div>
-                        <DropdownMenuSeparator className="bg-white/5" />
-                        <DropdownMenuItem asChild className="flex items-center gap-4 px-5 py-4 cursor-pointer rounded-xl transition-all focus:bg-white/5">
-                          <Link href="/profile" className="w-full flex items-center gap-4">
-                            <User className="h-5 w-5 text-primary" />
-                            <span className="font-bold text-[14px] tracking-tight uppercase">Profile Hub</span>
+                      <DropdownMenuContent className="w-72 bg-[#0F172A] border-white/10 text-white rounded-[2rem] p-3 shadow-5xl z-[2001] animate-in slide-in-from-top-2 duration-300" align="end">
+                        <div className="px-5 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">STUDENT AREA</div>
+                        
+                        <DropdownMenuItem asChild className="flex items-center gap-5 px-5 py-4 cursor-pointer rounded-xl transition-all focus:bg-white/5 focus:text-white group">
+                          <Link href="/profile" className="w-full flex items-center gap-5">
+                            <User className="h-5 w-5 text-blue-400 group-hover:scale-110 transition-transform" />
+                            <span className="font-bold text-[15px] tracking-tight uppercase">MY PROFILE</span>
                           </Link>
                         </DropdownMenuItem>
+
+                        <DropdownMenuItem asChild className="flex items-center gap-5 px-5 py-4 cursor-pointer rounded-xl transition-all focus:bg-white/5 focus:text-white group">
+                          <Link href="/my-exams" className="w-full flex items-center gap-5">
+                            <Award className="h-5 w-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+                            <span className="font-bold text-[15px] tracking-tight uppercase">MY RESULTS</span>
+                          </Link>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem asChild className="flex items-center gap-5 px-5 py-4 cursor-pointer rounded-xl transition-all focus:bg-white/5 focus:text-white group">
+                          <Link href="/pass" className="w-full flex items-center gap-5">
+                            <Gem className="h-5 w-5 text-orange-400 group-hover:scale-110 transition-transform" />
+                            <span className="font-bold text-[15px] tracking-tight uppercase">ELITE PASS</span>
+                          </Link>
+                        </DropdownMenuItem>
+
                         {isAdmin && (
-                          <DropdownMenuItem asChild className="flex items-center gap-4 px-5 py-4 cursor-pointer rounded-xl transition-all focus:bg-white/5 text-primary">
-                            <Link href="/admin" className="w-full flex items-center gap-4">
-                              <ShieldCheck className="h-5 w-5 fill-current" />
-                              <span className="font-bold text-[14px] tracking-tight uppercase">Master Admin</span>
+                          <DropdownMenuItem asChild className="flex items-center gap-5 px-5 py-4 cursor-pointer rounded-xl transition-all bg-white/5 focus:bg-white/10 group mt-1">
+                            <Link href="/admin" className="w-full flex items-center gap-5">
+                              <ShieldCheck className="h-5 w-5 text-rose-500 group-hover:scale-110 transition-transform" />
+                              <span className="font-bold text-[15px] tracking-tight uppercase text-white">ADMIN PANEL</span>
                             </Link>
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuSeparator className="bg-white/5" />
-                        <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-4 px-5 py-4 cursor-pointer rounded-xl transition-all focus:bg-rose-500/10 focus:text-rose-500 text-rose-500/80">
-                          <LogOut className="h-5 w-5 shrink-0" />
-                          <span className="font-bold text-[14px] tracking-tight uppercase">Logout Session</span>
+
+                        <DropdownMenuSeparator className="bg-white/5 my-3" />
+
+                        <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-5 px-5 py-4 cursor-pointer rounded-xl transition-all focus:bg-rose-500/10 group">
+                          <LogOut className="h-5 w-5 shrink-0 text-rose-500 group-hover:translate-x-1 transition-transform" />
+                          <span className="font-bold text-[15px] tracking-tight uppercase text-rose-500">LOGOUT</span>
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
