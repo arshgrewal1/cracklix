@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from "next/link";
-import { Menu, Search, User, Gem, LogOut, Target, Newspaper, Download, Zap, Home, ShieldCheck } from "lucide-react";
+import { Menu, Search, User, Gem, LogOut, Target, Newspaper, Download, Zap, Home, ShieldCheck, Settings } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -20,10 +20,12 @@ import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
+
 /**
- * @fileOverview Final Performance-Hardened Header v137.0.
- * UPDATED: Replaced 'MY EXAMS' with 'HOME PAGE' block.
- * UPDATED: Added click-feel scaling and active state indicators.
+ * @fileOverview Final Performance-Hardened Header v140.0.
+ * RESTORED: Profile Hub circular button and explicit Admin Panel access.
+ * UPDATED: Added direct Admin Node in main strip for easier management.
  * FIXED: Hydration guard for all dynamic nodes.
  */
 export default function Navbar() {
@@ -37,6 +39,13 @@ export default function Navbar() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const isAdmin = useMemo(() => {
+    if (!user) return false;
+    const email = user.email?.toLowerCase();
+    const isFounder = email && SUPER_ADMIN_WHITELIST.includes(email);
+    return profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
+  }, [user, profile]);
 
   const passStatus = useMemo(() => {
     if (!profile?.pass) return { active: false, label: "NO PASS", expiry: "N/A" };
@@ -63,8 +72,6 @@ export default function Navbar() {
     }
   };
 
-  const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
-
   // Base height specs: Desktop 82px, Mobile 72px
   const headerHeight = "h-[72px] lg:h-[82px]";
 
@@ -76,7 +83,7 @@ export default function Navbar() {
       )}>
         <div className="container mx-auto max-w-[1536px] flex items-center justify-between h-full gap-2">
           
-          {/* 1. LEFT SECTION: MENU & LOGO PROXIMITY */}
+          {/* 1. LEFT SECTION: MENU & LOGO */}
           <div className="flex items-center gap-2 shrink-0">
             {mounted ? (
               <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -102,6 +109,10 @@ export default function Navbar() {
             <NavLink icon={<Zap />} label1="PRACTICE" label2="TESTS" href="/mocks" active={pathname.startsWith("/mocks")} />
             <NavLink icon={<Newspaper />} label1="CURRENT" label2="AFFAIRS" href="/current-affairs" active={pathname === "/current-affairs"} />
             
+            {isAdmin && (
+              <NavLink icon={<Settings className="text-primary" />} label1="ADMIN" label2="PANEL" href="/admin" active={pathname.startsWith("/admin")} />
+            )}
+
             {/* GET PASS CTA */}
             <Link href="/pass" className="transition-all active:scale-95 group">
               <div className={cn(
@@ -154,19 +165,19 @@ export default function Navbar() {
 
              {/* SEARCH TRIGGER */}
              <Link href="/search" className={cn(
-               "w-[42px] h-[42px] rounded-xl border border-white/10 transition-all flex items-center justify-center shadow-lg active:scale-90",
+               "w-[40px] h-[40px] rounded-xl border border-white/10 transition-all flex items-center justify-center shadow-lg active:scale-90 shrink-0",
                pathname === "/search" ? "bg-white/10 text-white border-white/30" : "bg-white/5 text-slate-400 hover:text-white"
              )}>
-                <Search className="h-[20px] w-[22px]" />
+                <Search className="h-[18px] w-[20px]" />
              </Link>
 
-             {/* USER PROFILE HUB */}
+             {/* USER PROFILE HUB (White Circle Container) */}
              {mounted ? (
                 <div className="relative">
                   {user ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="w-[44px] h-[44px] rounded-full overflow-hidden border-[3px] border-white/10 hover:border-primary transition-all bg-white shadow-2xl focus:outline-none flex items-center justify-center active:scale-90 cursor-pointer">
+                        <button className="w-[42px] h-[44px] rounded-full overflow-hidden border-[3px] border-white/10 hover:border-primary transition-all bg-white shadow-2xl focus:outline-none flex items-center justify-center active:scale-90 cursor-pointer shrink-0">
                           <StudentAvatar profile={profile} className="h-full w-full border-none" iconClassName="text-[#0B1528]" />
                         </button>
                       </DropdownMenuTrigger>
@@ -207,7 +218,7 @@ export default function Navbar() {
                   )}
                 </div>
              ) : (
-                <div className="w-[44px] h-[44px] rounded-full bg-white/5 animate-pulse" />
+                <div className="w-[42px] h-[44px] rounded-full bg-white/5 animate-pulse" />
              )}
           </div>
         </div>
