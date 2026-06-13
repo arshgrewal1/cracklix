@@ -42,9 +42,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Admin Layout v146.0.
- * FIXED: Tightened logo backgrounds to '2-space' padding (px-2).
- * UPDATED: Increased logo scale for maximum visibility in headers.
+ * @fileOverview Institutional Admin Layout v148.0.
+ * UPDATED: Increased Logo size (h-28 in sidebar, h-12 in header).
+ * UPDATED: Maintained tight horizontal padding (px-3 sidebar, px-2 header).
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -91,7 +91,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const SideNavContent = () => (
     <div className="flex flex-col h-full bg-[#0F172A] pointer-events-auto select-none">
        <div className="p-6 flex justify-center">
-          <div className="bg-[#0B1528] w-fit h-20 md:h-24 px-3 rounded-2xl shadow-2xl flex items-center justify-center border border-white/5 group hover:bg-[#081121] transition-all duration-500 overflow-hidden mx-auto">
+          <div className="bg-[#0B1528] w-fit h-28 md:h-32 px-3 rounded-2xl shadow-2xl flex items-center justify-center border border-white/5 group hover:bg-[#081121] transition-all duration-500 overflow-hidden mx-auto">
             <Logo href="/admin" />
           </div>
        </div>
@@ -172,7 +172,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarTrigger className="text-[#0F172A] hover:bg-slate-50 cursor-pointer" />
               
               <div className="flex items-center gap-4">
-                 <div className="bg-[#0B1528] h-11 md:h-12 px-2 rounded-xl shadow-xl flex items-center justify-center border border-white/5 overflow-hidden">
+                 <div className="bg-[#0B1528] h-12 md:h-14 px-2 rounded-xl shadow-xl flex items-center justify-center border border-white/5 overflow-hidden">
                     <Logo variant="light" href="/admin" />
                  </div>
                  

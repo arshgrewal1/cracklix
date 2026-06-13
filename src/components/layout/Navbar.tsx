@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/dropdown-menu";
 import StudentAvatar from "@/components/brand/StudentAvatar";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import MobileSidebar from "./MobileSidebar";
@@ -23,9 +23,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Performance-Hardened Header v145.0.
- * FIXED: Added explicit height constraints on Logo usage to prevent vertical navbar expansion.
- * SAFE-RENDER: Profile data accessed via optional chaining to prevent blank screen crashes.
+ * @fileOverview Final Performance-Hardened Header v146.0.
+ * UPDATED: Increased Logo size (h-14) to match high-fidelity visibility requirements.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -73,7 +72,6 @@ export default function Navbar() {
 
   const headerHeight = "h-[72px] lg:h-[82px]";
 
-  // Prevent any dynamic rendering until client-side hydration is confirmed
   if (!mounted) {
     return (
       <nav className={cn("w-full flex items-center bg-[#0B1528] px-4 lg:px-8", headerHeight)}>
@@ -106,7 +104,9 @@ export default function Navbar() {
                 <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
               </SheetContent>
             </Sheet>
-            <Logo className="h-10 md:h-12 !gap-0 active:scale-95 transition-transform" />
+            <div className="h-12 md:h-14 flex items-center shrink-0">
+               <Logo className="h-full !gap-0 active:scale-95 transition-transform" />
+            </div>
           </div>
 
           <div className="hidden lg:flex flex-1 items-center justify-center gap-4 xl:gap-8 h-full">
