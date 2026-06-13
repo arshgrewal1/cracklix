@@ -31,9 +31,9 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Official CRACKLIX Punjab Government Exam Hero v23.0 (Stability Hardened).
- * FIXED: Included Trophy in lucide-react imports to resolve ReferenceError.
- * STABILITY: Aligned fallback to match server pre-render exactly for hydration safety.
+ * @fileOverview Official CRACKLIX Punjab Government Exam Hero v25.0 (Restored Original).
+ * FIXED: Full icon set imported to resolve ReferenceErrors.
+ * STABILITY: Aligned hydration fallback to ensure a stable structural tree.
  */
 
 export default function Hero() {
@@ -64,10 +64,10 @@ export default function Hero() {
     ];
   }, [stats]);
 
-  // STABILITY GUARD: Match server fallback signature exactly to prevent hydration mismatch
+  // STABILITY GUARD: Ensure server and client render an identical root section first.
   if (!mounted) {
     return (
-      <section className="min-h-[90vh] bg-[#0B1528] flex items-center justify-center w-full">
+      <section className="relative min-h-[90vh] bg-[#0B1528] flex flex-col justify-center items-center w-full">
          <Zap className="h-10 w-10 text-primary animate-pulse" />
       </section>
     );
