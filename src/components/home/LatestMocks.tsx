@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import { BookOpen, Clock, ChevronRight, Zap, Lock, Sparkles, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Card } from "@/components/ui/card"
 import Link from "next/link"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, limit } from "firebase/firestore"
@@ -13,13 +14,13 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Screenshot Matched Latest Mocks v30.0.
- * MATCHED: Clean white vertical cards with center aligned branding.
+ * @fileOverview Screenshot Matched Latest Mocks v31.0.
+ * FIXED: Added missing Card import to resolve ReferenceError.
  */
 
 export default function LatestMocks() {
   const db = useFirestore()
-  const { user, profile } = useUser()
+  const { user } = useUser()
   const router = useRouter()
   
   const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true), limit(5)) : null), [db])
@@ -35,26 +36,28 @@ export default function LatestMocks() {
     <section className="py-16 md:py-24 bg-white">
       <div className="container mx-auto px-4 max-w-7xl">
         
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6 text-left">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6 text-left">
            <div className="space-y-2">
-              <h2 className="text-3xl md:text-4xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Latest Mock Tests</h2>
+              <h2 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Latest Mock Tests</h2>
+              <p className="text-slate-500 font-medium">Recently deployed preparation nodes.</p>
            </div>
-           <Link href="/mocks" className="text-orange-500 font-bold uppercase text-[10px] md:text-sm hover:underline">View All</Link>
+           <Link href="/mocks" className="text-primary font-black uppercase text-[10px] md:text-xs tracking-widest hover:underline flex items-center gap-2">
+              View All Series <ArrowRight className="h-4 w-4" />
+           </Link>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {loading ? (
-             Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-2xl" />)
+             Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[2.5rem]" />)
           ) : mocks.map((mock, i) => {
             const board = boards?.find((b: any) => b.id === (mock.boardIds?.[0] || mock.boardId));
             const difficulty = mock.difficulty || "Medium";
             
             return (
               <motion.div key={mock.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>
-                <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2rem] bg-white p-6 text-center flex flex-col h-full group">
+                <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2.5rem] bg-white p-6 text-center flex flex-col h-full group">
                   
-                  {/* HUB LOGO */}
-                  <div className="h-16 w-16 mx-auto rounded-full bg-slate-50 flex items-center justify-center p-3 shadow-inner group-hover:scale-105 transition-transform mb-6">
+                  <div className="h-16 w-16 mx-auto rounded-full bg-slate-50 flex items-center justify-center p-3 shadow-inner group-hover:scale-110 transition-transform mb-6">
                      {board?.iconUrl ? (
                        <img src={board.iconUrl} className="h-full w-full object-contain" alt="Logo" referrerPolicy="no-referrer" />
                      ) : (
@@ -68,15 +71,15 @@ export default function LatestMocks() {
                      </h3>
 
                      <div className="flex items-center justify-center gap-3 text-[9px] font-bold text-slate-400 uppercase tracking-tight">
-                        <span className="flex items-center gap-1.5"><BookOpen className="h-3 w-3 text-slate-300" /> {mock.totalQuestions} Questions</span>
+                        <span className="flex items-center gap-1.5"><BookOpen className="h-3 w-3 text-slate-300" /> {mock.totalQuestions} Qs</span>
                         <div className="h-3 w-px bg-slate-100" />
-                        <span className="flex items-center gap-1.5"><Clock className="h-3 w-3 text-slate-300" /> {mock.duration} min</span>
+                        <span className="flex items-center gap-1.5"><Clock className="h-3 w-3 text-slate-300" /> {mock.duration}m</span>
                      </div>
 
                      <Badge className={cn(
                         "border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded shadow-sm",
                         difficulty === 'Hard' ? "bg-rose-50 text-rose-500" :
-                        difficulty === 'Easy' ? "bg-emerald-50 text-emerald-500" :
+                        difficulty === 'Easy' ? "bg-emerald-50 text-emerald-600" :
                         "bg-orange-50 text-orange-500"
                      )}>
                         {difficulty}
@@ -84,7 +87,7 @@ export default function LatestMocks() {
                   </div>
 
                   <div className="mt-8 pt-4">
-                     <Button asChild className="w-full h-11 bg-white border border-slate-200 text-[#0F172A] hover:bg-[#0F172A] hover:text-white font-black text-[9px] uppercase tracking-widest rounded-xl transition-all shadow-sm active:scale-95">
+                     <Button asChild className="w-full h-11 bg-[#0B1528] text-white hover:bg-black font-black text-[9px] uppercase tracking-widest rounded-xl transition-all shadow-sm active:scale-95 border-none">
                         <Link href={`/mocks/${mock.id}`}>Attempt Now</Link>
                      </Button>
                   </div>

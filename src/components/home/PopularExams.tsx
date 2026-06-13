@@ -28,8 +28,8 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Screenshot Matched Popular Hubs v40.0.
- * MATCHED: Clean white cards with left-aligned branding and dual stat footer.
+ * @fileOverview Screenshot Matched Popular Hubs v41.0.
+ * FIXED: Verified all component and icon imports.
  */
 
 function getBoardIcon(id: string, abbrev: string) {
@@ -60,7 +60,6 @@ export default function PopularExams() {
 
   const filteredBoards = useMemo(() => {
     if (!boards || !mounted) return [];
-    // Force specific boards from screenshot if they exist, or just take first 8
     return boards.slice(0, 8);
   }, [boards, mounted]);
 
@@ -72,42 +71,42 @@ export default function PopularExams() {
          
          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6 text-left">
             <div className="space-y-2">
-               <h2 className="text-3xl md:text-4xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Popular Exams</h2>
-               <p className="text-slate-500 font-medium text-sm md:text-lg">Complete preparation for all major Punjab government exams</p>
+               <h2 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none">Popular Exams</h2>
+               <p className="text-slate-500 font-medium text-sm md:text-lg">Complete preparation for all major Punjab government exams.</p>
             </div>
-            <Link href="/exams" className="flex items-center gap-1.5 text-orange-500 font-bold uppercase text-[10px] md:text-sm hover:underline">
+            <Link href="/exams" className="flex items-center gap-2 text-primary font-black uppercase text-[10px] md:text-sm hover:underline tracking-widest">
                View All Exams <ChevronRight className="h-4 w-4" />
             </Link>
          </div>
 
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {loading ? (
-               Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-2xl" />)
+               Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-44 w-full rounded-[2.5rem]" />)
             ) : filteredBoards.map((board) => {
                const examCount = allExams?.filter(e => e.boardId === board.id || e.boardId === board.abbreviation).length || 0;
                const mockCount = mocks?.filter(m => (m.boardIds && m.boardIds.includes(board.id)) || m.boardId === board.id).length || 0;
                
                return (
                   <Link key={board.id} href={`/exams/hub/${board.id}`}>
-                     <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-2xl md:rounded-[1.8rem] bg-white group p-6 text-left">
-                        <div className="flex items-center gap-5">
-                           <div className="h-16 w-16 md:h-18 md:w-18 rounded-xl bg-slate-50 flex items-center justify-center p-3 shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                     <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group p-8 text-left h-full flex flex-col">
+                        <div className="flex items-center gap-6">
+                           <div className="h-16 w-16 md:h-20 md:w-20 rounded-[1.5rem] bg-slate-50 flex items-center justify-center p-4 shrink-0 shadow-inner group-hover:scale-105 transition-transform">
                               {getBoardIcon(board.id, board.abbreviation)}
                            </div>
                            <div className="min-w-0">
-                              <h3 className="text-lg md:text-xl font-black text-[#0F172A] uppercase leading-tight group-hover:text-primary transition-colors">{board.abbreviation}</h3>
-                              <p className="text-[10px] font-bold text-slate-400 mt-1 truncate">{board.name}</p>
+                              <h3 className="text-xl md:text-2xl font-black text-[#0F172A] uppercase leading-none group-hover:text-primary transition-colors">{board.abbreviation}</h3>
+                              <p className="text-[10px] font-bold text-slate-400 mt-2 truncate uppercase tracking-widest">{board.name}</p>
                            </div>
                         </div>
 
-                        <div className="mt-8 pt-4 border-t border-slate-50 grid grid-cols-2 gap-4">
-                           <div className="flex items-center gap-2">
-                              <BookOpen className="h-3.5 w-3.5 text-blue-500" />
-                              <span className="text-[10px] font-bold text-slate-600 uppercase">{examCount} Exams</span>
+                        <div className="mt-10 pt-6 border-t border-slate-50 grid grid-cols-2 gap-4">
+                           <div className="flex items-center gap-2.5">
+                              <BookOpen className="h-4 w-4 text-blue-500" />
+                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">{examCount} Hubs</span>
                            </div>
-                           <div className="flex items-center gap-2">
-                              <Zap className="h-3.5 w-3.5 text-orange-500" />
-                              <span className="text-[10px] font-bold text-slate-600 uppercase">{mockCount} Mocks</span>
+                           <div className="flex items-center gap-2.5">
+                              <Zap className="h-4 w-4 text-orange-500" />
+                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">{mockCount} Tests</span>
                            </div>
                         </div>
                      </Card>
@@ -119,4 +118,3 @@ export default function PopularExams() {
     </section>
   );
 }
-

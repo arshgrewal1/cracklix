@@ -26,8 +26,9 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview High-Fidelity Screenshot Matched Hero v70.0.
- * MATCHED: Night Temple Background, Typography, and Stat Hubs.
+ * @fileOverview High-Fidelity Screenshot Matched Hero v72.0.
+ * FIXED: Added pr-10 padding guards to prevent character clipping (like the 'S' in EXAMS).
+ * MATCHED: Night Temple Background and glassmorphism stat nodes.
  */
 
 export default function Hero() {
@@ -58,46 +59,46 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative min-h-[600px] md:min-h-[85vh] flex flex-col justify-center overflow-hidden text-left pt-20 pb-16">
+    <section className="relative min-h-[650px] md:min-h-[90vh] flex flex-col justify-center overflow-hidden text-left pt-20 pb-16">
       {/* 1. BACKGROUND ENGINE */}
       <div className="absolute inset-0 z-0">
          <img 
            src="https://i.ibb.co/LXgcLVVq/Gemini-Generated-Image-n1so6on1so6on1so.png" 
-           alt="Temple Background" 
+           alt="Night Temple Background" 
            className="w-full h-full object-cover"
          />
-         <div className="absolute inset-0 bg-gradient-to-r from-[#020817] via-[#020817]/90 to-transparent" />
-         <div className="absolute inset-0 bg-black/20" />
+         <div className="absolute inset-0 bg-gradient-to-r from-[#020817] via-[#020817]/95 to-transparent" />
+         <div className="absolute inset-0 bg-black/30" />
       </div>
 
       <div className="container mx-auto px-4 md:px-6 relative z-10">
-        <div className="max-w-4xl space-y-8 md:space-y-10">
+        <div className="max-w-4xl space-y-10 md:space-y-12">
           
           {/* HEADER BADGE */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl"
+            className="inline-flex items-center gap-2.5 px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl"
           >
             <StarIcon className="h-4 w-4 text-orange-500 fill-current" />
-            <span className="text-[10px] md:text-xs font-bold text-white uppercase tracking-tight">
-              #1 Punjab Exam Preparation Platform
+            <span className="text-[10px] md:text-xs font-black text-white uppercase tracking-widest">
+              Punjab's #1 Exam Preparation Hub
             </span>
           </motion.div>
 
-          {/* MAIN HEADLINE */}
+          {/* MAIN HEADLINE WITH CLIPPING GUARD */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
             className="space-y-6"
           >
-            <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.95] tracking-tight uppercase">
+            <h1 className="text-5xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter uppercase pr-10">
               Prepare Smarter. <br />
-              <span className="text-primary">Score Higher.</span>
+              <span className="text-primary italic">Score Higher.</span>
             </h1>
-            <p className="text-base md:text-xl text-slate-200 font-medium max-w-xl leading-relaxed">
-              Punjab Government Exams di Complete Preparation ik hi Platform te.
+            <p className="text-base md:text-2xl text-slate-300 font-medium max-w-2xl leading-relaxed pr-10">
+              Punjab Government Exams di Complete Preparation ik hi Hub te. Official Pattern Mocks and Verified Solutions.
             </p>
           </motion.div>
 
@@ -106,16 +107,16 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="flex flex-col sm:flex-row gap-4 pt-4"
+            className="flex flex-col sm:flex-row gap-4 pt-6"
           >
-            <Button asChild className="h-14 md:h-16 px-10 bg-primary hover:bg-orange-600 text-white font-black uppercase text-xs md:text-sm tracking-widest rounded-xl shadow-2xl gap-3 border-none transition-all active:scale-95">
+            <Button asChild className="h-16 md:h-20 px-10 md:px-14 bg-primary hover:bg-orange-600 text-white font-black uppercase text-xs md:text-sm tracking-[0.2em] rounded-2xl shadow-4xl gap-4 border-none transition-all active:scale-95">
               <Link href="/mocks">
-                Start Free Mock <ArrowRight className="h-5 w-5" />
+                Start Free Mock <Zap className="h-5 w-5 md:h-6 md:w-6 fill-current" />
               </Link>
             </Button>
-            <Button asChild variant="outline" className="h-14 md:h-16 px-10 border-white/20 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-xs md:text-sm tracking-widest rounded-xl transition-all backdrop-blur-md">
+            <Button asChild variant="outline" className="h-16 md:h-20 px-10 md:px-14 border-white/20 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-xs md:text-sm tracking-[0.2em] rounded-2xl transition-all backdrop-blur-md">
               <Link href="/exams">
-                Explore Exams
+                Explore Hubs
               </Link>
             </Button>
           </motion.div>
@@ -125,16 +126,16 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="pt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            className="pt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
           >
             {displayStats.map((s, i) => (
-              <Card key={i} className="border-none bg-white/[0.03] backdrop-blur-2xl rounded-2xl p-6 flex items-center gap-6 border border-white/10 shadow-2xl group hover:bg-white/[0.06] transition-all">
-                <div className="h-12 w-12 rounded-xl bg-white/[0.02] border border-white/5 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+              <Card key={i} className="border-none bg-white/[0.03] backdrop-blur-2xl rounded-[1.5rem] p-6 md:p-8 flex items-center gap-6 border border-white/10 shadow-4xl group hover:bg-white/[0.06] transition-all">
+                <div className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-white/[0.02] border border-white/5 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
                   {s.icon}
                 </div>
-                <div className="text-left space-y-0.5">
-                  <p className="text-xl md:text-2xl font-black text-white leading-none tracking-tight">{s.val}</p>
-                  <p className="text-[10px] md:text-xs font-bold uppercase text-slate-400 tracking-tight">{s.label}</p>
+                <div className="text-left space-y-0.5 min-w-0">
+                  <p className="text-2xl md:text-3xl font-black text-white leading-none tracking-tighter truncate">{s.val}</p>
+                  <p className="text-[10px] font-bold uppercase text-slate-400 tracking-widest truncate">{s.label}</p>
                 </div>
               </Card>
             ))}
