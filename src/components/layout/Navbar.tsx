@@ -27,7 +27,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
  * @fileOverview Institutional Navbar v38.0.
- * FIXED: Mobile overlap fix for Install App button.
+ * FIXED: Mobile overlap fix for Install App button via responsive text and sizing.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -116,7 +116,7 @@ export default function Navbar() {
               <Button 
                 onClick={handleInstallApp}
                 variant="outline" 
-                className="h-8 md:h-10 px-2.5 md:px-4 rounded-xl border-emerald-500/20 bg-emerald-500/10 text-emerald-400 font-black uppercase text-[8px] md:text-[9px] tracking-widest gap-1.5 md:gap-2 hover:bg-emerald-500 hover:text-white transition-all shadow-lg animate-pulse"
+                className="h-8 md:h-10 px-2 md:px-4 rounded-xl border-emerald-500/20 bg-emerald-500/10 text-emerald-400 font-black uppercase text-[8px] md:text-[9px] tracking-widest gap-1.5 md:gap-2 hover:bg-emerald-500 hover:text-white transition-all shadow-lg shrink-0"
               >
                  <Download className="h-3 w-3 md:h-3.5 md:w-3.5" /> 
                  <span className="hidden sm:inline">Install App</span>

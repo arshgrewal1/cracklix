@@ -25,8 +25,8 @@ import { doc } from "firebase/firestore";
 
 /**
  * @fileOverview Final High-Fidelity "Command Center" Hero v45.0.
- * DESIGN: Clean visual design with zero text overlays on the image area. 
- * STYLE: Advanced 3D-effect designed image wrapper with cinematic frame.
+ * DESIGN: Clean visual design with zero text overlays on the image area as requested.
+ * STYLE: Advanced 3D-effect designed image wrapper with cinematic frame and glow nodes.
  * STABILITY: Resolved ReferenceErrors and Hydration mismatches.
  */
 

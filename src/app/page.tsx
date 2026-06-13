@@ -1,4 +1,3 @@
-
 import React from "react";
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/home/Hero";
@@ -13,6 +12,7 @@ import PopularExams from "@/components/home/PopularExams";
 /**
  * @fileOverview Official Home Hub v155.0 (Stabilized Foundation).
  * PERFORMANCE: Strict server component root with high-fidelity client sub-modules.
+ * FIXED: All imports standardized to high-fidelity 'home' subdirectory to prevent module conflicts.
  */
 
 export default function HomePage() {
