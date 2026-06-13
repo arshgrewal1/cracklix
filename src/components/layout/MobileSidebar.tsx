@@ -28,8 +28,8 @@ import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Hardened Production Sidebar Center v62.0.
- * UPDATED: Optimized logo-to-label spacing and tightened label-to-item gaps to match user screenshot.
+ * @fileOverview Hardened High-Density Mobile Sidebar v63.0.
+ * UPDATED: Zero vertical spacing between logo, labels and items for a strictly continuous flow.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -56,24 +56,6 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
     router.push('/');
   };
 
-  const handleInstallClick = async () => {
-    if (typeof window === 'undefined') return;
-    
-    const prompt = (window as any).deferredPrompt;
-    if (prompt) {
-      prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-      if (outcome === 'accepted') {
-        (window as any).deferredPrompt = null;
-        setHasPrompt(false);
-        onClose();
-        toast({ title: "Welcome!", description: "Adding Cracklix to your home screen." });
-      }
-    } else {
-      toast({ title: "How to Install", description: "Open your browser menu and select 'Add to Home Screen'." });
-    }
-  };
-
   const menuItems = [
     { label: "Home Page", href: "/", icon: Home },
     { label: "My Registry", href: "/my-exams", icon: Target },
@@ -88,7 +70,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
     <div className="flex flex-col h-full bg-[#0B1528] text-white overflow-y-auto no-scrollbar font-body select-none text-left">
       
       {/* BRAND LOGO - TIGHTENED */}
-      <div className="px-6 py-2 flex justify-start shrink-0 overflow-visible">
+      <div className="px-6 py-0 -mb-8 flex justify-start shrink-0 overflow-visible">
          <Logo imgClassName="h-48 origin-left" />
       </div>
 
@@ -96,7 +78,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
       <div className="px-6 py-0 flex flex-col gap-0 relative overflow-hidden shrink-0">
         <Shield className="absolute top-0 right-4 h-40 w-40 text-white/[0.03] pointer-events-none" />
         
-        <div className="relative z-10 flex items-center gap-3 py-2">
+        <div className="relative z-10 flex items-center gap-3 py-1">
            <div className="relative shrink-0">
               <div className="h-10 w-10 rounded-lg border-[2px] border-white/20 flex items-center justify-center bg-[#1E293B] shadow-2xl overflow-hidden">
                  <User className="h-5 w-5 text-slate-400" />
@@ -123,7 +105,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
         <button 
            onClick={() => { router.push('/profile'); onClose(); }}
-           className="w-full h-8 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-between px-3 group active:scale-95 transition-all relative z-10 mb-4"
+           className="w-full h-8 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-between px-3 group active:scale-95 transition-all relative z-10 mb-2"
         >
            <div className="flex items-center gap-2">
               <User className="h-3 w-3 text-[#F97316]" />
@@ -148,7 +130,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
               href={item.href}
               onClick={onClose}
               className={cn(
-                "flex items-center gap-4 px-6 h-[44px] transition-all border-l-[3px]",
+                "flex items-center gap-4 px-6 h-[40px] transition-all border-l-[3px]",
                 isActive ? "bg-white/[0.05] border-primary text-white" : "hover:bg-white/[0.02] border-transparent text-slate-400"
               )}
             >
@@ -162,7 +144,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
         <button 
           onClick={handleLogout}
-          className="flex items-center gap-4 px-6 h-[44px] text-rose-500 hover:bg-rose-50/5 transition-all w-full text-left active:scale-95"
+          className="flex items-center gap-4 px-6 h-[40px] text-rose-500 hover:bg-rose-50/5 transition-all w-full text-left active:scale-95"
         >
           <LogOut className="h-4 w-4 shrink-0" />
           <span className="text-[11px] font-black uppercase tracking-tight">LOG OUT SESSION</span>
