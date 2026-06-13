@@ -18,9 +18,8 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview FINAL CALIBRATED HERO v190.0 (High Density).
- * FIXED: Balanced vertical alignment (Down on mobile, Up on desktop).
- * FIXED: Mandatory Sentence case for all text.
+ * @fileOverview FINAL CALIBRATED HERO v191.0 (High Density).
+ * FIXED: Reduced box width on mobile from the right side.
  * SCALE: Compact high-fidelity interface with zero overlap.
  */
 
@@ -145,7 +144,7 @@ export default function Hero() {
                      animate={{ opacity: 1, y: 0 }}
                      transition={{ delay: 0.4 + (idx * 0.1) }}
                   >
-                     <Card className="bg-[#0B1528]/60 backdrop-blur-2xl border border-white/10 p-1 md:p-4 rounded-md md:rounded-2xl text-left flex items-center gap-1.5 md:gap-4 group hover:bg-[#0B1528]/80 transition-all duration-300 shadow-2xl overflow-hidden h-8 md:h-20">
+                     <Card className="bg-[#0B1528]/60 backdrop-blur-2xl border border-white/10 p-1 md:p-4 rounded-md md:rounded-2xl text-left flex items-center gap-1.5 md:gap-4 group hover:bg-[#0B1528]/80 transition-all duration-300 shadow-2xl overflow-hidden h-8 md:h-20 w-full max-w-[145px] md:max-w-none">
                         <div className="shrink-0 h-5 w-5 md:h-12 md:w-12 rounded md:rounded-xl bg-white/5 border border-white/10 flex items-center justify-center transition-transform group-hover:scale-105 shadow-inner">
                            {stat.icon}
                         </div>
