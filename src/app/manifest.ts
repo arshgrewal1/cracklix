@@ -1,9 +1,8 @@
-
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Hardened PWA Manifest v28.0.
- * Compliance: Using provided institutional icon URL.
+ * @fileOverview Hardened PWA Manifest v29.0.
+ * Compliance: Explicit id and purpose for cross-platform installability.
  */
 export default function manifest(): MetadataRoute.Manifest {
   const brandIcon = 'https://i.ibb.co/S76nk4XG/IMG-20260613-215742.jpg';

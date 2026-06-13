@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -9,18 +8,20 @@ import {
   ClipboardList,
   ShieldCheck,
   Star,
-  Users
+  Users,
+  Download
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
+import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Final Restoration Hero v305.0.
- * RESTORED: Golden Temple background with full visibility (Opacity 1.0).
- * REMOVED: Redundant Install button from the hero row.
+ * @fileOverview Final Restoration Hero v308.0.
+ * FIXED: Background imge shifted up to eliminate blank line gap.
+ * RESTORED: Full vibrancy for Golden Temple asset.
  */
 
 export default function Hero() {
@@ -52,7 +53,7 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative w-full bg-[#050B19] overflow-hidden min-h-[500px] md:min-h-[600px] lg:h-[700px] flex flex-col justify-start text-left border-b border-white/5 pb-12">
+    <section className="relative w-full bg-[#050B19] overflow-hidden min-h-[500px] md:min-h-[600px] lg:h-[750px] flex flex-col justify-start text-left border-b border-white/5 pb-12 mt-[-100px] pt-[100px]">
       
       {/* RESTORED HIGH-VISIBILITY GOLDEN TEMPLE BACKGROUND */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-[#050B19]">
@@ -62,15 +63,15 @@ export default function Hero() {
           transition={{ duration: 1.5 }}
           src="https://images.unsplash.com/photo-1594913366159-1832ffef8171?q=80&w=1920&auto=format&fit=crop" 
           alt="Golden Temple" 
-          className="w-full h-full object-cover object-[center_35%] scale-105"
+          className="w-full h-full object-cover object-[center_30%] scale-105"
           referrerPolicy="no-referrer"
         />
         {/* Softened gradients for maximum temple visibility */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/60 to-transparent z-[1]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050B19]/40 via-transparent to-transparent z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/50 to-transparent z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050B19]/30 via-transparent to-transparent z-[1]" />
       </div>
 
-      <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl relative z-[30] pt-16 md:pt-32">
+      <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl relative z-[30] pt-12 md:pt-24">
          <div className="max-w-3xl space-y-6 md:space-y-8">
             
             <motion.div
@@ -110,24 +111,29 @@ export default function Hero() {
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: 0.3 }}
-               className="flex flex-wrap items-center gap-4 pt-8"
+               className="flex flex-wrap items-center gap-4 pt-4 md:pt-8"
             >
-               <Button asChild className="h-14 md:h-16 px-10 md:px-14 bg-[#F97316] hover:bg-orange-600 text-white font-black text-xs md:text-sm tracking-[0.1em] rounded-2xl shadow-2xl transition-all border-none uppercase active:scale-95">
+               <Button asChild className="h-14 md:h-16 px-10 md:px-14 bg-[#F97316] hover:bg-orange-600 text-white font-black text-xs md:text-sm tracking-[0.1em] rounded-2xl shadow-3xl transition-all border-none uppercase active:scale-95">
                   <Link href="/mocks" className="flex items-center gap-3">
                      Free Mock <ArrowRight className="h-5 w-5" />
                   </Link>
                </Button>
                
+               <PWAInstallButton 
+                 className="h-14 md:h-16 px-10 md:px-14 bg-white text-[#0B1528] hover:bg-slate-100 font-black text-xs md:text-sm tracking-[0.1em] rounded-2xl shadow-3xl transition-all border-none uppercase active:scale-95" 
+                 variant="secondary"
+               />
+
                <Button asChild variant="outline" className="h-14 md:h-16 px-10 md:px-14 border-white text-white font-black text-xs md:text-sm tracking-[0.1em] rounded-2xl transition-all backdrop-blur-md hover:bg-white/10 uppercase border-2 shadow-2xl">
                   <Link href="/exams">
-                     View All Exams
+                     Exams
                   </Link>
                </Button>
             </motion.div>
          </div>
       </div>
 
-      <div className="mt-16 md:mt-24 z-[40]">
+      <div className="mt-auto md:mt-24 z-[40]">
          <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
                {liveStats.map((stat, idx) => (

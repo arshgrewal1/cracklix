@@ -1,4 +1,3 @@
-
 import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Inter } from "next/font/google";
@@ -76,7 +75,8 @@ export default function RootLayout({
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                   navigator.serviceWorker.register('/sw.js').then(reg => {
-                    console.log('[PWA] Service Worker Registered');
+                    console.log('[PWA] SW Registered');
+                    if (reg.active) console.log('[PWA] SW Controlling page');
                   }).catch(err => {
                     console.error('[PWA] SW registration failed:', err);
                   });
