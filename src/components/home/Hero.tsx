@@ -22,9 +22,9 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Final High-Fidelity Hero v17.0 (Vibrant & Permanent).
- * FIXED: Permanently fixed background URL with high-vibrancy daylight asset.
- * FIXED: Reduced gradient density to 30-40% to prevent "black" appearance.
+ * @fileOverview Final High-Fidelity Hero v18.0 (Vibrant & Permanent).
+ * FIXED: Permanently set background to user-provided high-vibrancy asset.
+ * FIXED: Reduced gradient opacity to 20% to prevent "black" look.
  * SCALE: Strictly 200px height on mobile for a slim website interface.
  */
 
@@ -64,15 +64,15 @@ export default function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}
-          src="https://images.unsplash.com/photo-1594993872457-3150b4ef22ba?q=80&w=2000&auto=format&fit=crop" 
-          alt="Golden Temple Vibrant" 
+          src="https://i.ibb.co/fYJttX5d/Gemini-Generated-Image-n1so6on1so6on1so.png" 
+          alt="Punjab Prep Background" 
           className="absolute inset-0 w-full h-full object-cover object-[center_35%]"
           referrerPolicy="no-referrer"
         />
         
-        {/* ULTRA-LIGHT OVERLAYS - Prevent "Black" look while keeping text readable */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/30 via-transparent to-transparent z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent z-10" />
+        {/* ULTRA-LIGHT OVERLAYS - Bare minimum for readability, prevents "black" look */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10" />
         
         {/* TEXT CONTENT HUB */}
         <div className="absolute inset-0 z-20 flex items-center">
