@@ -8,21 +8,17 @@ import {
   ClipboardList,
   ShieldCheck,
   Star,
-  Users,
-  Download,
-  Smartphone
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Final Calibrated Hero v250.0.
- * UPDATED: Removed PWA Install Button from this row as requested.
- * FIXED: Reliable background image URL to prevent black screen on deployment.
+ * @fileOverview Final Calibrated Hero v251.0.
+ * RESTORED: Golden Temple background image with optimized positioning.
  */
 
 export default function Hero() {
@@ -56,17 +52,17 @@ export default function Hero() {
   return (
     <section className="relative w-full bg-[#050B19] overflow-hidden min-h-[500px] md:min-h-[550px] lg:h-[650px] flex flex-col justify-start text-left border-b border-white/5 pb-8 md:pb-12">
       
-      {/* BACKGROUND IMAGE - CALIBRATED FOR PRODUCTION */}
-      <div className="absolute top-0 left-0 right-0 h-full z-0 overflow-hidden bg-[#050B19]">
+      {/* RESTORED GOLDEN TEMPLE BACKGROUND */}
+      <div className="absolute top-[-40px] left-0 right-0 h-[calc(100%+40px)] z-0 overflow-hidden bg-[#050B19]">
         <motion.img 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.5 }}
-          src="https://picsum.photos/seed/punjab-heritage-center/1920/1080" 
-          alt="Official Punjab Prep Center" 
-          className="w-full h-full object-cover object-center opacity-40"
+          src="https://images.unsplash.com/photo-1594913366159-1832ffef8171?auto=format&fit=crop&q=80&w=1920" 
+          alt="Golden Temple Punjab" 
+          className="w-full h-full object-cover object-[center_30%] opacity-40 scale-105"
           referrerPolicy="no-referrer"
-          data-ai-hint="punjab heritage"
+          data-ai-hint="golden temple"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-[#050B19]/40 via-[#050B19]/80 to-[#050B19] z-[10]" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-transparent to-transparent z-[10] hidden md:block" />
