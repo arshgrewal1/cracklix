@@ -25,9 +25,9 @@ import { doc } from "firebase/firestore";
 
 /**
  * @fileOverview Final High-Fidelity "Command Center" Hero v45.0.
- * DESIGN: Zero text on the URL image as requested. 
+ * DESIGN: Clean visual design with zero text overlays on the image area. 
  * STYLE: Advanced 3D-effect designed image wrapper with cinematic frame.
- * STABILITY: Aligned hydration fallback to prevent "call" and mismatch errors.
+ * STABILITY: Resolved ReferenceErrors and Hydration mismatches.
  */
 
 export default function Hero() {
@@ -57,7 +57,6 @@ export default function Hero() {
     ];
   }, [stats]);
 
-  // Initial SSR / Hydration state - Must match server exactly to prevent "call" error
   if (!mounted) {
     return (
       <section className="relative min-h-[90vh] bg-[#070D19] flex flex-col justify-center items-center w-full">
@@ -141,14 +140,14 @@ export default function Hero() {
                initial={{ opacity: 0, scale: 0.9 }}
                animate={{ opacity: 1, scale: 1 }}
                transition={{ duration: 0.8, ease: "easeOut" }}
-               className="relative w-full perspective-1000"
+               className="relative w-full"
              >
                 {/* Visual Decoration Nodes */}
                 <div className="absolute -top-12 -right-12 w-64 h-64 bg-primary/20 blur-[100px] rounded-full pointer-events-none" />
                 <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-blue-500/10 blur-[80px] rounded-full pointer-events-none" />
 
                 {/* Primary Designed Image Wrapper */}
-                <div className="relative group transition-all duration-700 hover:rotate-y-[-5deg]">
+                <div className="relative group transition-all duration-700">
                    <div className="absolute -inset-1 bg-gradient-to-tr from-primary/30 to-blue-500/20 rounded-[3rem] blur-sm opacity-50 group-hover:opacity-100 transition-opacity" />
                    
                    <div className="relative aspect-[4/5] rounded-[2.5rem] md:rounded-[3rem] bg-[#0F172A] border-[8px] border-white/5 overflow-hidden shadow-5xl ring-1 ring-white/10">

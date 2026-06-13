@@ -28,7 +28,6 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 /**
  * @fileOverview Institutional Navbar v38.0.
  * FIXED: Mobile overlap fix for Install App button.
- * FIXED: Compact rendering on small viewports.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -70,29 +69,11 @@ export default function Navbar() {
     const prompt = (window as any).deferredPrompt;
     if (prompt) {
       prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-      if (outcome === 'accepted') {
-        setCanInstall(false);
-        (window as any).deferredPrompt = null;
-      }
     }
   };
 
   const isFounder = user?.email && SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase());
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
-
-  const passStatus = useMemo(() => {
-    if (!profile?.pass) return null;
-    const active = profile.pass.active;
-    const expiry = new Date(profile.pass.expiryDate);
-    const isExpired = expiry < new Date();
-    
-    return {
-      active: active && !isExpired,
-      label: isExpired ? "PASS EXPIRED" : `PASS ACTIVE`,
-      expiry: expiry.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
-    };
-  }, [profile]);
 
   return (
     <div className="sticky top-0 z-[1000] w-full pointer-events-auto">
@@ -128,21 +109,6 @@ export default function Navbar() {
               </SheetContent>
             </Sheet>
             <Logo variant="light" className="origin-left scale-90 md:scale-100" />
-
-            <div className="hidden lg:flex items-center gap-10 text-[12px] font-black uppercase tracking-[0.2em] text-[#7A8B9E] ml-10">
-              <Link href="/my-exams" className={cn("transition-colors flex items-center gap-2 hover:text-white", pathname === '/my-exams' ? 'text-white' : '')}>
-                <Target className="h-4 w-4 text-primary" /> My Exams
-              </Link>
-              <Link href="/mocks" className={cn("transition-colors hover:text-white", pathname === '/mocks' ? 'text-white' : '')}>
-                Practice Tests
-              </Link>
-              <Link href="/pass" className={cn("transition-all flex items-center gap-2 px-5 py-2 rounded-xl border", pathname === '/pass' ? 'bg-primary border-primary text-white shadow-xl' : 'bg-primary/10 border-primary/20 text-primary/80 hover:text-primary')}>
-                <Gem className="h-4 w-4" /> GET PASS
-              </Link>
-              <Link href="/current-affairs" className={cn("transition-colors flex items-center gap-2 hover:text-white", pathname === '/current-affairs' ? 'text-white' : '')}>
-                <Newspaper className="h-4 w-4 text-primary" /> Current Affairs
-              </Link>
-            </div>
           </div>
 
           <div className="flex items-center gap-1.5 md:gap-4 shrink-0">
@@ -155,19 +121,6 @@ export default function Navbar() {
                  <Download className="h-3 w-3 md:h-3.5 md:w-3.5" /> 
                  <span className="hidden sm:inline">Install App</span>
               </Button>
-            )}
-
-            {mounted && user && passStatus && (
-               <div className={cn(
-                 "hidden md:flex items-center gap-3 px-4 py-1.5 rounded-xl border-2 transition-all",
-                 passStatus.active ? "bg-emerald-50/10 border-emerald-500/20 text-emerald-400" : "bg-rose-50/10 border-rose-500/20 text-rose-400"
-               )}>
-                  {passStatus.active ? <Gem className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
-                  <div className="flex flex-col text-left">
-                     <span className="text-[8px] font-black uppercase leading-none tracking-widest">{passStatus.label}</span>
-                     <span className="text-[7px] font-bold opacity-60 leading-none mt-1 uppercase">EXP: {passStatus.expiry}</span>
-                  </div>
-               </div>
             )}
 
             <Link href="/search" className="text-slate-400 hover:text-white p-1.5 md:p-2 rounded-lg md:rounded-xl hover:bg-white/5 transition-all border border-white/5">
@@ -185,23 +138,10 @@ export default function Navbar() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent className="w-60 bg-[#0F172A] border-white/10 text-white rounded-[2rem] p-2 shadow-5xl z-[2001]" align="end">
-                    <DropdownMenuLabel className="px-4 py-2 text-[9px] font-black uppercase tracking-[0.2em] text-slate-500">Student Area</DropdownMenuLabel>
                     <DropdownMenuItem asChild className="flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all focus:bg-white/5">
                       <Link href="/profile" className="w-full flex items-center gap-3">
                         <User className="h-4 w-4 text-blue-400" />
                         <span className="font-bold text-[12px] tracking-tight uppercase">My Profile</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all focus:bg-white/5">
-                      <Link href="/dashboard" className="w-full flex items-center gap-3">
-                        <Award className="h-4 w-4 text-emerald-400" />
-                        <span className="font-bold text-[12px] tracking-tight uppercase">My Results</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild className="flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all focus:bg-white/5">
-                      <Link href="/pass" className="w-full flex items-center gap-3">
-                        <Gem className="h-4 w-4 text-primary" />
-                        <span className="font-bold text-[12px] tracking-tight uppercase">Elite Pass</span>
                       </Link>
                     </DropdownMenuItem>
                     {isAdmin && (

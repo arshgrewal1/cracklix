@@ -3,15 +3,9 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-interface LogoProps {
-  className?: string;
-  variant?: 'light' | 'dark';
-  href?: string;
-}
-
 /**
  * @fileOverview Official Cracklix Master Logo Hub.
- * HARDENED: Strict dimensions and CSS-driven sizing to prevent hydration mismatch and oversized rendering.
+ * HARDENED: Strict dimensions and CSS-driven sizing to prevent giant logo issues and hydration mismatches.
  */
 export function LogoIcon({ className = "" }: { className?: string }) {
   return (
@@ -35,4 +29,10 @@ export default function Logo({ className = "", variant = 'light', href = "/" }: 
       <LogoIcon />
     </Link>
   );
+}
+
+interface LogoProps {
+  className?: string;
+  variant?: 'light' | 'dark';
+  href?: string;
 }

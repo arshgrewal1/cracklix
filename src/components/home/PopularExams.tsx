@@ -66,7 +66,6 @@ export default function PopularExams() {
 
   const boardsQuery = useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc")) : null), [db]);
   const { data: boards, loading } = useCollection<any>(boardsQuery);
-  const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]));
 
   const filteredBoards = useMemo(() => {
     if (!boards || !mounted) return [];

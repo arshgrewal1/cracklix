@@ -10,12 +10,11 @@ import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, limit } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter } from "next/navigation"
 
 /**
  * @fileOverview High-Density Mock Feed v22.0 (Premium Restore).
  * RESTORED: Prominent Unlock button for premium preparation nodes.
- * BRANDING: Unlock button set to Cracklix Orange (bg-orange-500).
  */
 
 export default function LatestMocks() {
@@ -36,10 +35,8 @@ export default function LatestMocks() {
 
      if (profile.pass && profile.pass.active === true) {
         const expiry = new Date(profile.pass.expiryDate);
-        const now = new Date();
-        return expiry > now;
+        return expiry > new Date();
      }
-     
      return false;
   }, [profile, user]);
 
@@ -47,24 +44,6 @@ export default function LatestMocks() {
     if (!rawMocks) return []
     return [...rawMocks].sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
   }, [rawMocks])
-
-  const handleAttemptClick = (mockId: string) => {
-    if (!user) {
-       router.push(`/login?returnUrl=${encodeURIComponent(`/mocks/${mockId}`)}`);
-       return;
-    }
-    router.push(`/mocks/${mockId}`);
-  };
-
-  const formatMockType = (type: string) => {
-    const map: Record<string, string> = {
-      'FULL': 'Full Length Mock',
-      'SUBJECT': 'Subject-Wise Test',
-      'SECTIONAL': 'Sectional Test',
-      'PYQ': 'PYQ Paper'
-    };
-    return map[type] || type;
-  };
 
   return (
     <section className="py-8 md:py-16 bg-white">
@@ -99,7 +78,6 @@ export default function LatestMocks() {
                     </Badge>
                   </div>
                   <div className="mb-2">
-                    <p className="text-[7px] md:text-[8px] font-black text-primary uppercase tracking-widest mb-1">{formatMockType(mock.mockType)}</p>
                     <h3 className="font-black text-[13px] md:text-base text-[#000000] leading-tight uppercase line-clamp-2 min-h-[32px] md:min-h-[40px] group-hover:text-primary transition-colors">{mock.title}</h3>
                   </div>
                   <div className="flex items-center gap-3 mb-4 text-[7px] md:text-[9px] text-slate-400 font-bold uppercase tracking-widest border-t border-slate-50 pt-3">
@@ -112,7 +90,7 @@ export default function LatestMocks() {
                           <Lock className="h-3 w-3" /> UNLOCK
                        </Button>
                     ) : (
-                       <Button onClick={() => handleAttemptClick(mock.id)} className="w-full h-9 md:h-11 bg-[#0F172A] hover:bg-black text-white font-black text-[8px] md:text-[9px] uppercase tracking-widest rounded-lg shadow-lg border-none active:scale-95">
+                       <Button onClick={() => router.push(user ? `/mocks/${mock.id}` : `/login?returnUrl=/mocks/${mock.id}`)} className="w-full h-9 md:h-11 bg-[#0F172A] hover:bg-black text-white font-black text-[8px] md:text-[9px] uppercase tracking-widest rounded-lg shadow-lg border-none active:scale-95">
                           ATTEMPT NOW
                        </Button>
                     )}
@@ -120,7 +98,7 @@ export default function LatestMocks() {
                 </div>
               </motion.div>
             )
-          }) : !loading && (
+          }) : (
             <div className="col-span-full py-20 text-center opacity-20 flex flex-col items-center gap-4">
                <Sparkles className="h-10 w-10 text-slate-300" />
                <p className="font-black uppercase tracking-widest text-[10px]">Awaiting Mock Deployment</p>
