@@ -42,9 +42,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Admin Layout v151.0.
- * UPDATED: Reduced height of logo containers to h-11 (sidebar) and h-7 (header) for a tight vertical crop.
- * FIXED: Maintained 'two-space' horizontal padding for brand focus.
+ * @fileOverview Institutional Admin Layout v153.0.
+ * UPDATED: Doubled logo size in sidebar (h-22) and header (h-14) while maintaining strict crop.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -91,8 +90,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const SideNavContent = () => (
     <div className="flex flex-col h-full bg-[#0F172A] pointer-events-auto select-none">
        <div className="p-6 flex justify-center">
-          {/* SIDEBAR LOGO: TIGHT VERTICAL CROP (h-11) */}
-          <div className="bg-[#0B1528] w-fit h-11 px-3 rounded-xl shadow-2xl flex items-center justify-center border border-white/5 group hover:bg-[#081121] transition-all duration-500 overflow-hidden mx-auto">
+          {/* SIDEBAR LOGO: DOUBLED SIZE (h-22) WITH TIGHT CROP */}
+          <div className="bg-[#0B1528] w-fit h-22 px-6 rounded-2xl shadow-2xl flex items-center justify-center border border-white/5 group hover:bg-[#081121] transition-all duration-500 overflow-hidden mx-auto">
             <Logo href="/admin" />
           </div>
        </div>
@@ -129,7 +128,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <SidebarGroupLabel className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Users & Revenue</SidebarGroupLabel>
             <SidebarMenu className="gap-3">
               <AdminNavItem icon={<Users className="text-blue-400" />} label="STUDENT LIST" href="/admin/users" active={pathname === "/admin/users"} />
-              <AdminNavItem icon={<DollarSign className="text-emerald-400" />} label="REVENUE HUB" href="/admin/payments" active={pathname === "/admin/payments"} />
+              <AdminNavItem icon={<DollarSign className="text-emerald-400" />} label="REVENUE HUB" href="/admin/payments" active={pathname === "/admin"} />
               <AdminNavItem icon={<ShieldCheck className="text-primary" />} label="MANUAL VERIFY" href="/admin/payments/verify" active={pathname === "/admin/payments/verify"} />
               <AdminNavItem icon={<Gem className="text-amber-400" />} label="PASS MANAGER" href="/admin/passes" active={pathname === "/admin/passes"} />
             </SidebarMenu>
@@ -168,27 +167,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </Sidebar>
         
         <SidebarInset className="flex flex-col bg-white min-w-0 max-w-full relative">
-          <header className="h-16 border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white sticky top-0 z-[100] shrink-0 overflow-hidden">
+          <header className="h-20 border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white sticky top-0 z-[100] shrink-0 overflow-hidden">
             <div className="flex items-center gap-4 overflow-hidden">
               <SidebarTrigger className="text-[#0F172A] hover:bg-slate-50 cursor-pointer" />
               
               <div className="flex items-center gap-4">
-                 {/* HEADER LOGO: TIGHT VERTICAL CROP (h-7) */}
-                 <div className="bg-[#0B1528] h-7 px-2 rounded-lg shadow-xl flex items-center justify-center border border-white/5 overflow-hidden">
+                 {/* HEADER LOGO: DOUBLED SIZE (h-14) WITH TIGHT CROP */}
+                 <div className="bg-[#0B1528] h-14 px-4 rounded-xl shadow-xl flex items-center justify-center border border-white/5 overflow-hidden">
                     <Logo variant="light" href="/admin" />
                  </div>
                  
-                 <div className="h-6 w-[1px] bg-slate-200 mx-1 md:block" />
+                 <div className="h-10 w-[1.5px] bg-slate-200 mx-1 md:block" />
                  
                  <div className="flex items-center gap-3">
-                    <ShieldCheck className="h-4 w-4 text-primary" />
-                    <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.2em] text-[#0F172A] truncate">Admin Hub</span>
+                    <ShieldCheck className="h-5 w-5 text-primary" />
+                    <span className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] text-[#0F172A] truncate">Admin Hub</span>
                  </div>
               </div>
             </div>
             
             <div className="flex items-center gap-2 md:gap-6">
-               <Button asChild variant="outline" className="h-11 px-6 rounded-xl border-slate-200 font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-slate-50 shadow-sm transition-all active:scale-95">
+               <Button asChild variant="outline" className="h-12 px-6 rounded-xl border-slate-200 font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-slate-50 shadow-sm transition-all active:scale-95">
                   <Link href="/">
                      <ArrowLeftRight className="h-4 w-4 text-primary" /> View Home
                   </Link>
