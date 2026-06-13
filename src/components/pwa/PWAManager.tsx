@@ -1,14 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { X, Zap, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Institutional PWA Lifecycle Manager v29.0 (Persistent).
- * UPDATED: Banner logic allows re-display on revisit if installation is dismissed.
+ * @fileOverview Hardened Institutional PWA Lifecycle Manager v30.0.
+ * UPDATED: Persistent event capture with immediate mount check for deferredPrompt.
  */
 export default function PWAManager() {
   const pathname = usePathname();
@@ -17,44 +17,50 @@ export default function PWAManager() {
   const [mounted, setMounted] = useState(false);
   const [sessionDismissed, setSessionDismissed] = useState(false);
 
+  const checkInstallability = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+    const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin');
+    const hasPrompt = !!(window as any).deferredPrompt;
+    
+    if (!isExcluded && !isStandalone && !sessionDismissed && hasPrompt) {
+      setShowPrompt(true);
+    } else {
+      setShowPrompt(false);
+    }
+  }, [pathname, sessionDismissed]);
+
   useEffect(() => {
     setMounted(true);
 
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/sw.js').then(
-        (reg) => console.log('[PWA] SW Registered:', reg.scope),
-        (err) => console.log('[PWA] SW Failed:', err)
+      navigator.serviceWorker.register('/sw.js').catch(err => 
+        console.error('[PWA] SW Registration Failed:', err)
       );
     }
 
-    const checkInstallability = () => {
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-      const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin');
-      
-      // If we have a prompt and aren't in a standalone app, show it
-      if (!isExcluded && !isStandalone && !sessionDismissed && (window as any).deferredPrompt) {
-        setShowPrompt(true);
-      }
-    };
+    // Immediate check on mount
+    checkInstallability();
 
+    // Listen for future availability
     window.addEventListener('pwa-installable', checkInstallability);
+    window.addEventListener('beforeinstallprompt', checkInstallability);
     
-    // Initial check with delay to allow background capture
-    const timer = setTimeout(checkInstallability, 3000);
-
     const handleAppInstalled = () => {
       setShowPrompt(false);
       setIsInstalled(true);
+      (window as any).deferredPrompt = null;
     };
 
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
       window.removeEventListener('pwa-installable', checkInstallability);
+      window.removeEventListener('beforeinstallprompt', checkInstallability);
       window.removeEventListener('appinstalled', handleAppInstalled);
-      clearTimeout(timer);
     };
-  }, [pathname, sessionDismissed]);
+  }, [checkInstallability]);
 
   const handleInstallClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -75,7 +81,6 @@ export default function PWAManager() {
     e.preventDefault();
     e.stopPropagation();
     setShowPrompt(false);
-    // Only dismiss for this specific session view
     setSessionDismissed(true);
   };
 
@@ -90,16 +95,13 @@ export default function PWAManager() {
         className="fixed bottom-24 md:bottom-8 left-4 md:left-auto md:right-8 z-[2000] w-[calc(100%-2rem)] md:w-auto max-w-[280px] pointer-events-auto"
       >
         <div className="bg-[#0B1528] text-white p-2.5 rounded-2xl shadow-5xl border border-white/10 flex items-center gap-3 relative overflow-hidden group">
-          
           <div className="h-9 w-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner">
              <Zap className="h-4 w-4 text-[#F97316] fill-current" />
           </div>
-
           <div className="flex-1 min-w-0 text-left">
              <h4 className="text-[11px] font-black uppercase tracking-tight leading-none mb-1">Install Hub</h4>
              <p className="text-[7px] font-bold text-slate-500 uppercase tracking-widest leading-tight truncate">Quick access for exams</p>
           </div>
-
           <div className="flex items-center gap-1.5">
              <Button 
               onClick={handleInstallClick}
@@ -107,7 +109,6 @@ export default function PWAManager() {
              >
                 <Download className="h-3 w-3" /> INSTALL
              </Button>
-             
              <button 
               onClick={handleClose}
               className="h-7 w-7 flex items-center justify-center text-slate-500 hover:text-white transition-colors cursor-pointer active:scale-90 shrink-0 bg-white/5 rounded-md"

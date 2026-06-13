@@ -28,13 +28,13 @@ import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Hardened High-Density Mobile Sidebar v66.0.
- * UPDATED: Zero vertical spacing between logo, labels and items for a strictly continuous flow.
- * UPDATED: Massive Logo scale increased to h-56 with aggressive negative margins.
+ * @fileOverview Hardened High-Density Mobile Sidebar v67.0.
+ * UPDATED: Zero vertical spacing between logo, labels and items.
+ * UPDATED: Added PWA Install trigger to the menu if available.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
-  const [hasPrompt, setHasPrompt] = useState(false);
+  const [canInstall, setCanInstall] = useState(false);
   const { profile } = useUser();
   const auth = useAuth();
   const router = useRouter();
@@ -43,13 +43,23 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     setMounted(true);
-    if (typeof window !== 'undefined' && (window as any).deferredPrompt) {
-      setHasPrompt(true);
-    }
-    const handleInstallable = () => setHasPrompt(true);
-    window.addEventListener('pwa-installable', handleInstallable);
-    return () => window.removeEventListener('pwa-installable', handleInstallable);
+    const updateInstallable = () => {
+      if ((window as any).deferredPrompt) setCanInstall(true);
+    };
+    updateInstallable();
+    window.addEventListener('pwa-installable', updateInstallable);
+    return () => window.removeEventListener('pwa-installable', updateInstallable);
   }, []);
+
+  const handleInstall = async () => {
+    const prompt = (window as any).deferredPrompt;
+    if (prompt) {
+      prompt.prompt();
+      onClose();
+    } else {
+      toast({ title: "Install Tip", description: "Use the browser 'Add to Home Screen' option." });
+    }
+  };
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -70,15 +80,12 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col h-full bg-[#0B1528] text-white overflow-y-auto no-scrollbar font-body select-none text-left">
       
-      {/* BRAND LOGO - ABSOLUTE TIGHT MASSIVE */}
       <div className="px-6 flex justify-start shrink-0 overflow-visible mt-0 mb-[-15px] -mt-2">
          <Logo imgClassName="h-56 origin-left" />
       </div>
 
-      {/* IDENTITY HEADER - COMPACT */}
       <div className="px-6 flex flex-col gap-0 relative overflow-hidden shrink-0 mt-0 pt-0">
         <Shield className="absolute top-0 right-4 h-40 w-40 text-white/[0.03] pointer-events-none" />
-        
         <div className="relative z-10 flex items-center gap-3 py-1">
            <div className="relative shrink-0">
               <div className="h-10 w-10 rounded-lg border-[2px] border-white/20 flex items-center justify-center bg-[#1E293B] shadow-2xl overflow-hidden">
@@ -88,71 +95,45 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
                  <ShieldCheck className="h-1.5 w-1.5" />
               </div>
            </div>
-
            <div className="space-y-0 text-left min-w-0">
-              <h2 className="text-[13px] font-black text-white leading-none uppercase tracking-tight truncate">
-                 {profile?.name || "ASPIRANT"}
-              </h2>
+              <h2 className="text-[13px] font-black text-white leading-none uppercase tracking-tight truncate">{profile?.name || "ASPIRANT"}</h2>
               <div className="flex items-center gap-2 mt-0.5">
-                 <Badge className={cn(
-                    "border-none px-2 py-0.5 rounded text-[6px] font-black uppercase tracking-widest",
-                    profile?.pass?.active ? "bg-emerald-50 text-white" : "bg-white/10 text-slate-400"
-                 )}>
+                 <Badge className={cn("border-none px-2 py-0.5 rounded text-[6px] font-black uppercase tracking-widest", profile?.pass?.active ? "bg-emerald-50 text-white" : "bg-white/10 text-slate-400")}>
                     {profile?.pass?.active ? (profile.pass.plan || 'ELITE') : 'FREE NODE'}
                  </Badge>
               </div>
            </div>
         </div>
-
-        <button 
-           onClick={() => { router.push('/profile'); onClose(); }}
-           className="w-full h-8 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-between px-3 group active:scale-95 transition-all relative z-10 mb-2"
-        >
-           <div className="flex items-center gap-2">
-              <User className="h-3 w-3 text-[#F97316]" />
-              <span className="text-[7px] font-black uppercase tracking-[0.2em] text-slate-200">PROFILE SETTINGS</span>
-           </div>
+        <button onClick={() => { router.push('/profile'); onClose(); }} className="w-full h-8 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-between px-3 group active:scale-95 transition-all relative z-10 mb-2">
+           <div className="flex items-center gap-2"><User className="h-3 w-3 text-[#F97316]" /><span className="text-[7px] font-black uppercase tracking-[0.2em] text-slate-200">PROFILE SETTINGS</span></div>
            <ChevronRight className="h-3 w-3 text-slate-600" />
         </button>
       </div>
 
-      <div className="px-6 mb-0">
-         <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">MANAGEMENT CENTER</p>
-      </div>
+      <div className="px-6 mb-0"><p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">MANAGEMENT CENTER</p></div>
 
-      {/* NAV MENU - HIGH DENSITY */}
       <div className="flex flex-col py-0">
+        {canInstall && (
+          <button onClick={handleInstall} className="flex items-center gap-4 px-6 h-[40px] bg-primary/10 text-primary transition-all border-l-[3px] border-primary mb-1">
+             <Download className="h-4 w-4 shrink-0" />
+             <span className="text-[11px] font-black uppercase tracking-tight">INSTALL APP</span>
+          </button>
+        )}
         {menuItems.map((item) => {
           const isActive = mounted && pathname === item.href;
           const Icon = item.icon;
           return (
-            <Link 
-              key={item.label}
-              href={item.href}
-              onClick={onClose}
-              className={cn(
-                "flex items-center gap-4 px-6 h-[40px] transition-all border-l-[3px]",
-                isActive ? "bg-white/[0.05] border-primary text-white" : "hover:bg-white/[0.02] border-transparent text-slate-400"
-              )}
-            >
+            <Link key={item.label} href={item.href} onClick={onClose} className={cn("flex items-center gap-4 px-6 h-[40px] transition-all border-l-[3px]", isActive ? "bg-white/[0.05] border-primary text-white" : "hover:bg-white/[0.02] border-transparent text-slate-400")}>
                <Icon className={cn("h-4 w-4 shrink-0", isActive ? "text-primary" : "text-slate-600")} />
-               <span className={cn("text-[11px] font-black uppercase tracking-tight", isActive ? "text-white" : "text-slate-400")}>
-                 {item.label}
-               </span>
+               <span className={cn("text-[11px] font-black uppercase tracking-tight", isActive ? "text-white" : "text-slate-400")}>{item.label}</span>
             </Link>
           )
         })}
-
-        <button 
-          onClick={handleLogout}
-          className="flex items-center gap-4 px-6 h-[40px] text-rose-500 hover:bg-rose-50/5 transition-all w-full text-left active:scale-95"
-        >
-          <LogOut className="h-4 w-4 shrink-0" />
-          <span className="text-[11px] font-black uppercase tracking-tight">LOG OUT SESSION</span>
+        <button onClick={handleLogout} className="flex items-center gap-4 px-6 h-[40px] text-rose-500 hover:bg-rose-50/5 transition-all w-full text-left active:scale-95">
+          <LogOut className="h-4 w-4 shrink-0" /><span className="text-[11px] font-black uppercase tracking-tight">LOG OUT SESSION</span>
         </button>
       </div>
 
-      {/* VERSION INFO */}
       <div className="mt-auto px-6 py-4 flex flex-col items-center gap-1 bg-black/30 border-t border-white/5 pb-safe">
          <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">CRACKLIX v2.0</p>
          <p className="text-[7px] font-bold text-slate-600 uppercase tracking-widest leading-none text-center">OFFICIAL REGISTRY NODE</p>

@@ -55,10 +55,6 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 };
 
-/**
- * @fileOverview Master Layout v26.0 (Hardened).
- * UPDATED: Persistent PWA event capture script to ensure install button reliability.
- */
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -75,12 +71,13 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               window.deferredPrompt = null;
-              window.addEventListener('beforeinstallprompt', (e) => {
+              const capturePrompt = (e) => {
                 e.preventDefault();
                 window.deferredPrompt = e;
                 window.dispatchEvent(new CustomEvent('pwa-installable'));
                 console.log('[PWA] Installation prompt captured.');
-              });
+              };
+              window.addEventListener('beforeinstallprompt', capturePrompt);
               window.addEventListener('appinstalled', (e) => {
                 console.log('[PWA] App successfully installed.');
                 window.deferredPrompt = null;

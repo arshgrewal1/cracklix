@@ -10,8 +10,8 @@ import { doc } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview Final Regional Hub Section v9.0 (Hardened Install).
- * UPDATED: Activated PWA installation trigger for Android/Chrome users.
+ * @fileOverview Final Regional Hub Section v10.0 (Hardened Install).
+ * UPDATED: Enhanced PWA trigger with robust event check.
  */
 
 export default function AppPreview() {
@@ -24,15 +24,22 @@ export default function AppPreview() {
   const { data: settings } = useDoc<any>(useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]));
 
   useEffect(() => {
-    // Check if prompt is already available
-    if (typeof window !== 'undefined' && (window as any).deferredPrompt) {
-      setCanInstall(true);
-    }
+    if (typeof window === 'undefined') return;
     
-    // Listen for future availability
-    const handleInstallable = () => setCanInstall(true);
-    window.addEventListener('pwa-installable', handleInstallable);
-    return () => window.removeEventListener('pwa-installable', handleInstallable);
+    const updateInstallable = () => {
+      if ((window as any).deferredPrompt) {
+        setCanInstall(true);
+      }
+    };
+
+    updateInstallable();
+    window.addEventListener('pwa-installable', updateInstallable);
+    window.addEventListener('beforeinstallprompt', updateInstallable);
+    
+    return () => {
+      window.removeEventListener('pwa-installable', updateInstallable);
+      window.removeEventListener('beforeinstallprompt', updateInstallable);
+    };
   }, []);
 
   const handleInstallClick = async () => {
@@ -48,7 +55,6 @@ export default function AppPreview() {
         toast({ title: "Installation Started", description: "Cracklix is being added to your home screen." });
       }
     } else {
-      // Fallback for iOS or non-Chrome users
       toast({ 
         title: "Installation Guide", 
         description: "Tap the 'Share' button in your browser and select 'Add to Home Screen' for faster access.",
@@ -112,17 +118,10 @@ export default function AppPreview() {
                  </a>
               </div>
             </div>
-            {!canInstall && (
-               <div className="flex items-center gap-2 text-slate-400">
-                  <Info className="h-3 w-3" />
-                  <p className="text-[9px] font-bold uppercase tracking-widest">App is installable via browser menu on iOS/Safari</p>
-               </div>
-            )}
           </motion.div>
 
           <div className="space-y-12 md:space-y-16 mt-12 lg:mt-0">
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12 relative">
-                
                 <motion.div 
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -130,25 +129,16 @@ export default function AppPreview() {
                   className="group flex flex-col items-center gap-4 md:gap-6"
                 >
                    <div className="w-full h-auto min-h-[250px] md:min-h-[350px] relative rounded-3xl group-hover:scale-105 transition-transform duration-700 flex items-center justify-center">
-                      <img 
-                        src={punjabMap} 
-                        className="w-full h-full object-contain" 
-                        referrerPolicy="no-referrer"
-                        alt="Punjab Hub"
-                      />
+                      <img src={punjabMap} className="w-full h-full object-contain" referrerPolicy="no-referrer" alt="Punjab Hub" />
                    </div>
-                   
                    <div className="flex items-center gap-4 px-6 md:px-8 py-3 bg-white border border-slate-100 rounded-2xl shadow-xl transition-all hover:border-primary/20 w-full sm:w-auto">
-                      <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                         <MapIcon className="h-4 w-4" />
-                      </div>
+                      <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><MapIcon className="h-4 w-4" /></div>
                       <div className="text-left">
                          <p className="text-[10px] font-black uppercase text-[#0F172A] tracking-[0.2em] leading-none">Punjab Hub</p>
                          <p className="text-[8px] font-bold text-slate-400 uppercase mt-1">State Exams Covered</p>
                       </div>
                    </div>
                 </motion.div>
-
                 <motion.div 
                   initial={{ opacity: 0, y: 50 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -157,18 +147,10 @@ export default function AppPreview() {
                   className="group flex flex-col items-center gap-4 md:gap-6 sm:mt-12"
                 >
                    <div className="w-full h-auto min-h-[250px] md:min-h-[350px] relative rounded-3xl group-hover:scale-105 transition-transform duration-700 flex items-center justify-center">
-                      <img 
-                        src={indiaMap} 
-                        className="w-full h-full object-contain" 
-                        referrerPolicy="no-referrer"
-                        alt="National Hub"
-                      />
+                      <img src={indiaMap} className="w-full h-full object-contain" referrerPolicy="no-referrer" alt="National Hub" />
                    </div>
-                   
                    <div className="flex items-center gap-4 px-6 md:px-8 py-3 bg-white border border-slate-100 rounded-2xl shadow-xl transition-all hover:border-blue-200 w-full sm:w-auto">
-                      <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500">
-                         <Globe className="h-4 w-4" />
-                      </div>
+                      <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500"><Globe className="h-4 w-4" /></div>
                       <div className="text-left">
                          <p className="text-[10px] font-black uppercase text-[#0F172A] tracking-[0.2em] leading-none">National Hub</p>
                          <p className="text-[8px] font-bold text-slate-400 uppercase mt-1">Central Exams Covered</p>
@@ -176,21 +158,11 @@ export default function AppPreview() {
                    </div>
                 </motion.div>
              </div>
-
-             <motion.div 
-               initial={{ opacity: 0 }}
-               whileInView={{ opacity: 1 }}
-               viewport={{ once: true }}
-               className="flex items-center justify-center gap-4 bg-slate-50/50 py-6 md:py-8 rounded-[2rem] md:rounded-[3rem] border border-slate-100/50"
-             >
-                <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl border-2 border-white bg-primary flex items-center justify-center text-white shadow-xl">
-                   <ShieldCheck className="h-5 w-5 md:h-6 md:w-6" />
-                </div>
+             <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="flex items-center justify-center gap-4 bg-slate-50/50 py-6 md:py-8 rounded-[2rem] md:rounded-[3rem] border border-slate-100/50">
+                <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl border-2 border-white bg-primary flex items-center justify-center text-white shadow-xl"><ShieldCheck className="h-5 w-5 md:h-6 md:w-6" /></div>
                 <div className="text-left">
                    <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1 md:mb-1.5">Platform Founder</p>
-                   <p className="text-sm md:text-base font-bold text-[#0F172A]">
-                      Developed by <span className="text-primary font-black uppercase tracking-tighter ml-1 transition-colors">Arsh Grewal</span>
-                   </p>
+                   <p className="text-sm md:text-base font-bold text-[#0F172A]">Developed by <span className="text-primary font-black uppercase tracking-tighter ml-1 transition-colors">Arsh Grewal</span></p>
                 </div>
              </motion.div>
           </div>
