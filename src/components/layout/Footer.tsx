@@ -9,9 +9,9 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Final Screenshot-Matched Footer Hub v10.0.
- * MATCHED: Left-aligned brand info, 3-column link grid, and centered bottom credits.
- * MATCHED: Large Orange Phone Number (+91 98881 88602) in the Connect section.
+ * @fileOverview Final Screenshot-Matched Footer Hub v11.0.
+ * MATCHED: Left-aligned brand info with "No. 1 Study Hub" tagline.
+ * MATCHED: 3-column link grid with signature Telegram icon and Large Orange Phone.
  */
 export default function Footer() {
   const db = useFirestore();
@@ -33,8 +33,11 @@ export default function Footer() {
           
           {/* 1. BRAND HUB (LEFT) */}
           <div className="lg:col-span-5 space-y-8">
-            <div className="h-12 flex items-center">
-               <Logo imgClassName="h-full" />
+            <div className="space-y-4">
+               <div className="h-12 flex items-center">
+                  <Logo imgClassName="h-full" />
+               </div>
+               <p className="text-primary font-black uppercase text-[10px] tracking-[0.4em] ml-1">Punjab's No. 1 Study Hub</p>
             </div>
             
             <p className="text-slate-400 text-lg md:text-xl font-medium max-w-sm leading-relaxed">
@@ -42,12 +45,12 @@ export default function Footer() {
             </p>
 
             <div className="space-y-4">
-               <div className="flex items-center gap-3 text-primary">
-                  <MapPin className="h-4 w-4" />
+               <div className="flex items-center gap-3 text-slate-500">
+                  <MapPin className="h-4 w-4 text-primary" />
                   <span className="text-[11px] font-black uppercase tracking-widest">{content.address}</span>
                </div>
-               <div className="flex items-center gap-3 text-primary">
-                  <ShieldCheck className="h-4 w-4" />
+               <div className="flex items-center gap-3 text-slate-500">
+                  <ShieldCheck className="h-4 w-4 text-primary" />
                   <span className="text-[11px] font-black uppercase tracking-widest">Institutional Registry Verified</span>
                </div>
             </div>
@@ -92,7 +95,7 @@ export default function Footer() {
                  </a>
                  
                  <div className="space-y-2">
-                    <p className="text-3xl md:text-4xl font-headline font-black text-primary leading-tight uppercase tracking-tight">
+                    <p className="text-3xl md:text-4xl font-headline font-black text-primary leading-[1.1] uppercase tracking-tight">
                       {content.phone.split(' ')[0]} {content.phone.split(' ')[1]}<br/>
                       {content.phone.split(' ')[2]}
                     </p>

@@ -51,9 +51,9 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview FINAL HIGH-FIDELITY Mock Architect v89.0.
- * FIXED: Minimalist selection circles in Question Bank.
- * FIXED: POS/NEG data in square boxes with 12px font.
+ * @fileOverview FINAL HIGH-FIDELITY Mock Architect v90.0.
+ * FIXED: Marking boxes are now true SQUARE profile with strict 12px visibility.
+ * FIXED: Select All label reduction to prevent button overflow.
  */
 
 export default function MockBuilderPage() {
@@ -473,7 +473,7 @@ function MockBuilderContent() {
                  </div>
               </div>
 
-              {/* REFINED MARKING HUB: SQUARE BOX POS/NEG */}
+              {/* REFINED MARKING HUB: SQUARE BOX POS/NEG (STRICT 12PX) */}
               <div className="grid grid-cols-2 gap-4 pt-4">
                  <div className="bg-[#F0FDF4] p-4 md:p-6 rounded-[3rem] border border-[#DCFCE7] text-center flex flex-col items-center justify-start h-[180px] md:h-[220px] shadow-inner group transition-all hover:border-[#10B981]/30">
                     <div className="pt-2">
@@ -486,7 +486,7 @@ function MockBuilderContent() {
                           step="0.1"
                           value={isNaN(mockData.positiveMarks) ? "" : mockData.positiveMarks} 
                           onChange={e => setMockData({...mockData, positiveMarks: parseFloat(e.target.value) || 0})}
-                          className="w-14 h-12 md:w-16 md:h-14 bg-white border-2 border-[#DCFCE7] rounded-xl text-center font-black text-[12px] p-0 focus-visible:ring-primary shadow-sm" 
+                          className="w-14 h-12 md:w-16 md:h-14 bg-white border-2 border-[#DCFCE7] rounded-lg text-center font-black text-[12px] p-0 focus-visible:ring-primary shadow-sm" 
                        />
                     </div>
                  </div>
@@ -501,7 +501,7 @@ function MockBuilderContent() {
                           step="0.01"
                           value={isNaN(mockData.negativeMarks) ? "" : mockData.negativeMarks} 
                           onChange={e => setMockData({...mockData, negativeMarks: parseFloat(e.target.value) || 0})}
-                          className="w-14 h-12 md:w-16 md:h-14 bg-white border-2 border-[#FEE2E2] rounded-xl text-center font-black text-[12px] p-0 focus-visible:ring-primary shadow-sm" 
+                          className="w-14 h-12 md:w-16 md:h-14 bg-white border-2 border-[#FEE2E2] rounded-lg text-center font-black text-[12px] p-0 focus-visible:ring-primary shadow-sm" 
                        />
                     </div>
                  </div>
@@ -649,7 +649,7 @@ function MockBuilderContent() {
                               <Button 
                                  onClick={handleSelectAllInBank} 
                                  variant="outline"
-                                 className="h-16 w-full border-white/10 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[9px] tracking-tight rounded-xl shadow-xl active:scale-95 px-1"
+                                 className="h-16 w-full border-white/10 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[8px] tracking-tight rounded-xl shadow-xl active:scale-95 px-1 whitespace-nowrap"
                               >
                                  SELECT ALL
                               </Button>

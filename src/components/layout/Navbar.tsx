@@ -23,8 +23,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Header v157.0 (Text Fix).
- * FIXED: Adjusted button widths to prevent text overflow in Pass labels.
+ * @fileOverview Professional Header v158.0 (Text Overflow Fix).
+ * FIXED: Pass buttons use min-widths and small fonts to accommodate long plan names.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -117,13 +117,13 @@ export default function Navbar() {
 
             <Link href="/pass" className="transition-all active:scale-95 group h-full flex items-center">
               <div className={cn(
-                "px-6 h-[44px] min-w-[140px] rounded-[14px] border flex items-center justify-center gap-3 transition-all",
+                "px-6 h-[44px] min-w-[145px] rounded-[14px] border flex items-center justify-center gap-3 transition-all",
                 pathname === "/pass" 
                   ? "bg-[#F97316]/20 border-[#F97316]" 
                   : "bg-[#F97316]/10 border-[#F97316]/30 hover:bg-[#F97316]/20"
               )}>
                 <Gem className={cn("h-3.5 w-3.5", pathname === "/pass" ? "text-white fill-[#F97316]" : "text-[#F97316]")} />
-                <span className="text-[11px] font-black uppercase tracking-widest text-white whitespace-nowrap">GET PASS</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">GET PASS</span>
               </div>
             </Link>
 
@@ -133,8 +133,8 @@ export default function Navbar() {
                      <Download className="h-4 w-4" />
                   </div>
                   <div className="flex flex-col leading-tight text-left">
-                     <span className="text-[10px] font-black text-white">INSTALL</span>
-                     <span className="text-[10px] font-black text-white">APP</span>
+                     <span className="text-[10px] font-black text-white leading-none">INSTALL</span>
+                     <span className="text-[10px] font-black text-white leading-none">APP</span>
                   </div>
                </div>
             </div>
@@ -145,7 +145,7 @@ export default function Navbar() {
                 <div 
                   onClick={() => router.push('/pass')}
                   className={cn(
-                    "hidden sm:flex h-[44px] px-4 min-w-[135px] rounded-xl items-center justify-center gap-3 shadow-xl shrink-0 group border transition-all cursor-pointer active:scale-95",
+                    "hidden sm:flex h-[44px] px-4 min-w-[145px] rounded-xl items-center justify-center gap-3 shadow-xl shrink-0 group border transition-all cursor-pointer active:scale-95",
                     passStatus.active ? "bg-emerald-500/10 border-emerald-500/30" : "bg-rose-500/10 border-rose-500/30"
                   )}
                 >
@@ -231,8 +231,8 @@ function NavLink({ icon, label1, label2, href, active }: { icon: React.ReactNode
         {React.cloneElement(icon as React.ReactElement, { className: "h-4 w-4" })}
       </div>
       <div className="flex flex-col text-left leading-tight">
-        <span className={cn("text-[11px] font-black uppercase tracking-widest", active ? "text-[#F97316]" : "text-white")}>{label1}</span>
-        <span className={cn("text-[11px] font-black uppercase tracking-widest", active ? "text-[#F97316]" : "text-white")}>{label2}</span>
+        <span className={cn("text-[11px] font-black uppercase tracking-widest leading-none", active ? "text-[#F97316]" : "text-white")}>{label1}</span>
+        <span className={cn("text-[11px] font-black uppercase tracking-widest leading-none", active ? "text-[#F97316]" : "text-white")}>{label2}</span>
       </div>
     </Link>
   )
