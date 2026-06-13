@@ -42,8 +42,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Admin Layout v159.0.
- * UPDATED: Further increased logo sizes for premium brand presence.
+ * @fileOverview Institutional Admin Layout v160.0.
+ * UPDATED: Integrated Logo into full scroll area and cropped spacing.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -89,16 +89,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const SideNavContent = () => (
     <div className="flex flex-col h-full bg-[#0F172A] pointer-events-auto select-none">
-       <div className="p-8 flex justify-center">
-          {/* SIDEBAR LOGO: INCREASED SIZE (h-24) FOR ELITE BRANDING */}
-          <div className="h-24 flex items-center justify-center transition-all duration-500">
-            <Logo href="/admin" />
-          </div>
-       </div>
-
+       {/* WHOLE SIDEBAR SCROLL AREA */}
        <div className="flex-1 custom-scrollbar overflow-y-auto overflow-x-hidden pb-10">
+          
+          {/* SIDEBAR LOGO: CROPPED SPACING AND INTEGRATED INTO SCROLL */}
+          <div className="p-4 pt-8 flex justify-center shrink-0">
+             <div className="h-16 flex items-center justify-center transition-all duration-500">
+               <Logo href="/admin" />
+             </div>
+          </div>
+
           <SidebarGroup>
-            <SidebarGroupLabel className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Main Database</SidebarGroupLabel>
+            <SidebarGroupLabel className="px-6 pt-4 pb-2 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Main Database</SidebarGroupLabel>
             <SidebarMenu className="gap-3">
               <AdminNavItem icon={<LayoutDashboard />} label="DASHBOARD" href="/admin" active={pathname === "/admin"} />
               <AdminNavItem icon={<Layers />} label="CATEGORIES" href="/admin/categories" active={pathname === "/admin/categories"} />
@@ -110,8 +112,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarMenu>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-8">
-            <SidebarGroupLabel className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Content Hub</SidebarGroupLabel>
+          <SidebarGroup className="mt-4">
+            <SidebarGroupLabel className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Content Hub</SidebarGroupLabel>
             <SidebarMenu className="gap-3">
               <AdminNavItem icon={<Wand2 className="text-emerald-400" />} label="BRAND MAGIC" href="/admin/brand-magic" active={pathname === "/brand-magic"} />
               <AdminNavItem icon={<LayoutGrid className="text-orange-500" />} label="MOCK BUILDER" href="/admin/mocks/builder" active={pathname === "/admin/mocks/builder"} />
@@ -124,8 +126,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarMenu>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-8">
-            <SidebarGroupLabel className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Users & Revenue</SidebarGroupLabel>
+          <SidebarGroup className="mt-4">
+            <SidebarGroupLabel className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Users & Revenue</SidebarGroupLabel>
             <SidebarMenu className="gap-3">
               <AdminNavItem icon={<Users className="text-blue-400" />} label="STUDENT LIST" href="/admin/users" active={pathname === "/admin/users"} />
               <AdminNavItem icon={<DollarSign className="text-emerald-400" />} label="REVENUE HUB" href="/admin/payments" active={pathname === "/admin"} />
@@ -134,8 +136,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarMenu>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-8">
-            <SidebarGroupLabel className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">System Health</SidebarGroupLabel>
+          <SidebarGroup className="mt-4">
+            <SidebarGroupLabel className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">System Health</SidebarGroupLabel>
             <SidebarMenu className="gap-3">
               <AdminNavItem icon={<History className="text-slate-400" />} label="ACTIVITY LOGS" href="/admin/audit-logs" active={pathname === "/admin/audit-logs"} />
               <AdminNavItem icon={<ShieldAlert className="text-rose-500" />} label="ERROR CHECK" href="/admin/qa" active={pathname === "/admin/qa"} />
@@ -145,6 +147,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </SidebarGroup>
        </div>
 
+       {/* FIXED FOOTER */}
        <div className="p-6 border-t border-white/5 bg-black/20 shrink-0">
           <div className="flex items-center gap-3">
              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -172,8 +175,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarTrigger className="text-[#0F172A] hover:bg-slate-50 cursor-pointer" />
               
               <div className="flex items-center gap-4">
-                 {/* HEADER LOGO: INCREASED BOX SIZE (h-16) WITH NAVY BACKGROUND */}
-                 <div className="bg-[#0B1528] rounded-xl px-4 h-16 flex items-center justify-center overflow-hidden shadow-sm">
+                 {/* HEADER LOGO: TIGHT BOXED BRANDING */}
+                 <div className="bg-[#0B1528] rounded-xl px-4 h-12 flex items-center justify-center overflow-hidden shadow-sm">
                     <Logo variant="dark" href="/admin" />
                  </div>
                  
