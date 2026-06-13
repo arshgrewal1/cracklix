@@ -5,26 +5,24 @@ import { cn } from "@/lib/utils";
 
 /**
  * @fileOverview Official Cracklix Master Logo Hub.
- * MATCHED TO SCREENSHOT: Includes specific tagline "PUNJAB'S NO.1 STUDY HUB".
+ * UPDATED: Removed "CRACKLIX" text and increased icon size as per user request.
+ * Tagline "PUNJAB'S NO.1 STUDY HUB" is preserved and centered below the larger icon.
  */
 export function LogoIcon({ className = "" }: { className?: string }) {
   return (
-    <div className={cn("relative shrink-0 flex items-center gap-3", className)}>
+    <div className={cn("relative shrink-0 flex flex-col items-center justify-center", className)}>
       <img 
         src="https://i.ibb.co/5WjGyLhn/1000110132-removebg-preview.png" 
-        alt="Cracklix" 
-        className="h-10 md:h-14 w-auto object-contain"
+        alt="Logo" 
+        className="h-12 md:h-16 w-auto object-contain"
         referrerPolicy="no-referrer"
       />
-      <div className="flex flex-col items-start justify-center -space-y-1">
-         <span className="text-white font-black text-xl md:text-3xl tracking-tighter uppercase leading-none">Cracklix</span>
-         <div className="flex items-center gap-1.5 w-full">
-            <div className="h-px bg-primary flex-1" />
-            <span className="text-[6px] md:text-[7px] font-black text-white/60 uppercase tracking-[0.2em] whitespace-nowrap">
-               Punjab's No.1 Study Hub
-            </span>
-            <div className="h-px bg-primary flex-1" />
-         </div>
+      <div className="flex items-center gap-1.5 w-full mt-1">
+         <div className="h-px bg-primary/40 flex-1" />
+         <span className="text-[6px] md:text-[7px] font-black text-white/60 uppercase tracking-[0.2em] whitespace-nowrap">
+            Punjab's No.1 Study Hub
+         </span>
+         <div className="h-px bg-primary/40 flex-1" />
       </div>
     </div>
   );
