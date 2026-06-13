@@ -11,11 +11,11 @@ interface LogoProps {
 
 /**
  * @fileOverview Official Cracklix Master Logo Hub.
- * HARDENED: Strict dimensions to prevent hydration mismatch and oversized rendering.
+ * HARDENED: Strict dimensions and CSS-driven sizing to prevent hydration mismatch and oversized rendering.
  */
 export function LogoIcon({ className = "" }: { className?: string }) {
   return (
-    <div className={cn("relative shrink-0 flex items-center justify-center", className)} style={{ height: '40px', width: 'auto' }}>
+    <div className={cn("relative shrink-0 flex items-center justify-center h-8 md:h-10 w-auto", className)}>
       <img 
         src="https://i.ibb.co/5WjGyLhn/1000110132-removebg-preview.png" 
         alt="Cracklix" 
@@ -30,7 +30,7 @@ export function LogoIcon({ className = "" }: { className?: string }) {
 export default function Logo({ className = "", variant = 'light', href = "/" }: LogoProps) {
   return (
     <Link href={href} className={cn("flex items-center group pointer-events-auto select-none shrink-0", className)}>
-      <LogoIcon className="md:h-10 h-8" />
+      <LogoIcon />
     </Link>
   );
 }
