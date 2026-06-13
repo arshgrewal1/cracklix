@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useState, useEffect } from "react"
@@ -19,8 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Latest Mock Hub v33.0.
- * FIXED: Ensured all Card components are correctly imported to resolve ReferenceError.
+ * @fileOverview Official Latest Mock Hub v34.0.
+ * FIXED: Explicitly added all Card UI imports to resolve ReferenceError.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

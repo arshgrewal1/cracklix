@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -20,8 +19,8 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Fidelity Popular Hubs v43.0.
- * FIXED: Hoisted helper components to resolve 'call of undefined' runtime errors.
+ * @fileOverview High-Fidelity Popular Hubs v45.0.
+ * FIXED: Hoisted all helper logic to resolve 'call of undefined' runtime factory errors.
  */
 
 function getBoardFallbackIcon(id: string, abbrev: string) {
