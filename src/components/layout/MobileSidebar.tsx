@@ -29,8 +29,7 @@ import Logo from "@/components/brand/Logo";
 
 /**
  * @fileOverview Hardened High-Density Mobile Sidebar v69.0.
- * UPDATED: Logo and Profile moved higher via aggressive negative margins.
- * UPDATED: Fixed badge visibility and reduced section gaps.
+ * UPDATED: Logo size reduced to h-28 and margins recalibrated.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -80,9 +79,9 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col h-full bg-[#0B1528] text-white overflow-y-auto no-scrollbar font-body select-none text-left pt-0">
       
-      {/* 1. LOGO NODE - AGGRESSIVE UPLIFT */}
-      <div className="px-6 flex justify-start shrink-0 overflow-visible -mt-12 mb-[-50px]">
-         <Logo imgClassName="h-44 origin-left" />
+      {/* 1. LOGO NODE - RECALIBRATED SIZE */}
+      <div className="px-6 flex justify-start shrink-0 overflow-visible -mt-6 mb-[-25px]">
+         <Logo imgClassName="h-28 origin-left" />
       </div>
 
       {/* 2. USER PROFILE HUB - MOVED HIGHER */}

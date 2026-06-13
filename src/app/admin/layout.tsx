@@ -40,7 +40,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Final Hardened High-Density Admin Layout v199.0.
- * UPDATED: Logo and navigation shifted higher via aggressive negative margins.
+ * UPDATED: Logo size reduced to h-32.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -88,8 +88,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex flex-col h-full bg-[#0F172A] pointer-events-auto select-none overflow-y-auto no-scrollbar pt-0">
        <div className="flex-1 flex flex-col">
           
-          <div className="px-6 flex justify-start shrink-0 overflow-visible -mt-10 mb-[-45px]">
-             <Logo href="/admin" imgClassName="h-48 origin-left" />
+          <div className="px-6 flex justify-start shrink-0 overflow-visible -mt-6 mb-[-30px]">
+             <Logo href="/admin" imgClassName="h-32 origin-left" />
           </div>
 
           <SidebarGroup className="p-0 m-0 border-none space-y-0">
