@@ -10,9 +10,8 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Final Screenshot-Matched Footer Hub v19.0.
- * MATCHED: 4-column layout exactly as per user image.
- * MAINTAINED: Logo height h-44.
+ * @fileOverview Final Screenshot-Matched Footer Hub v20.0.
+ * UPDATED: Reduced font size of the phone number and support label for a more refined look.
  */
 export default function Footer() {
   const db = useFirestore();
@@ -25,6 +24,8 @@ export default function Footer() {
     address: settings?.address || "Shergarh, Bathinda, Punjab",
     tg: settings?.telegramUrl || "https://t.me/cracklixapp"
   };
+
+  const phoneParts = content.phone.split(' ');
 
   return (
     <footer className="bg-[#08152D] text-white pt-20 pb-12 border-t border-white/5 font-body text-left">
@@ -93,12 +94,16 @@ export default function Footer() {
                  <Send className="h-6 w-6 fill-current text-white" />
                </a>
                
-               <div className="space-y-2">
-                  <p className="text-3xl md:text-4xl font-headline font-black text-primary leading-tight uppercase tracking-tight">
-                    {content.phone.split(' ')[0]} {content.phone.split(' ')[1]}<br/>
-                    {content.phone.split(' ')[2]}
+               <div className="space-y-3">
+                  <p className="text-xl md:text-2xl font-headline font-black text-primary leading-none uppercase tracking-tight">
+                    {phoneParts[0]}<br/>
+                    {phoneParts[1]}<br/>
+                    {phoneParts[2]}
                   </p>
-                  <p className="text-[7px] font-black text-slate-500 uppercase tracking-[0.3em]">OFFICIAL SUPPORT CHANNEL</p>
+                  <div className="space-y-1">
+                    <p className="text-[7px] font-black text-slate-500 uppercase tracking-[0.3em] leading-none">OFFICIAL SUPPORT</p>
+                    <p className="text-[7px] font-black text-slate-500 uppercase tracking-[0.3em] leading-none">CHANNEL</p>
+                  </div>
                </div>
             </div>
           </div>
