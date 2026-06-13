@@ -42,8 +42,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Admin Layout v157.0.
- * UPDATED: Slightly increased logo sizes for better visibility.
+ * @fileOverview Institutional Admin Layout v158.0.
+ * UPDATED: Increased logo size for bolder branding.
  * UPDATED: Maintained background only for admin header logo.
  */
 
@@ -91,8 +91,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const SideNavContent = () => (
     <div className="flex flex-col h-full bg-[#0F172A] pointer-events-auto select-none">
        <div className="p-8 flex justify-center">
-          {/* SIDEBAR LOGO: SLIGHTLY INCREASED SIZE (h-16) NO BACKGROUND */}
-          <div className="h-16 flex items-center justify-center transition-all duration-500">
+          {/* SIDEBAR LOGO: INCREASED SIZE (h-20) NO BACKGROUND */}
+          <div className="h-20 flex items-center justify-center transition-all duration-500">
             <Logo href="/admin" />
           </div>
        </div>
@@ -173,8 +173,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarTrigger className="text-[#0F172A] hover:bg-slate-50 cursor-pointer" />
               
               <div className="flex items-center gap-4">
-                 {/* HEADER LOGO: SLIGHTLY INCREASED SIZE (h-12) WITH NAVY BACKGROUND BOX */}
-                 <div className="bg-[#0B1528] rounded-xl px-4 h-12 flex items-center justify-center overflow-hidden shadow-sm">
+                 {/* HEADER LOGO: INCREASED BOX SIZE (h-14) WITH NAVY BACKGROUND */}
+                 <div className="bg-[#0B1528] rounded-xl px-4 h-14 flex items-center justify-center overflow-hidden shadow-sm">
                     <Logo variant="dark" href="/admin" />
                  </div>
                  
