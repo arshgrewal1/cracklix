@@ -18,10 +18,11 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview FINAL CALIBRATED HERO v210.0.
- * FIXED: Reduced mobile box size to prevent clipping.
- * FIXED: Shading restricted to text-side only.
- * FIXED: Unified rounded corners across all elements.
+ * @fileOverview FINAL CALIBRATED HERO v220.0.
+ * FIXED: Reduced mobile box size and text scale to fit 4 items in a row.
+ * FIXED: Shifted stats bar towards bottom (bottom-4).
+ * FIXED: Unified rounded corners (rounded-2xl) for all cards.
+ * FIXED: Background shading strictly restricted to text-side.
  */
 
 export default function Hero() {
@@ -53,7 +54,7 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative w-full bg-[#050B19] overflow-hidden h-[260px] md:h-[550px] flex flex-col justify-start text-left border-b border-white/5">
+    <section className="relative w-full bg-[#050B19] overflow-hidden h-[280px] md:h-[550px] flex flex-col justify-start text-left border-b border-white/5">
       
       {/* 1. BACKGROUND ENGINE */}
       <div className="absolute inset-0 z-0">
@@ -67,11 +68,11 @@ export default function Hero() {
           referrerPolicy="no-referrer"
         />
         
-        {/* Tighter shading focused ONLY on text side */}
+        {/* Tighter shading focused ONLY on text side (Left) */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/70 to-transparent z-[10]" />
         
         {/* TARGETED STAR ARTIFACT MASK */}
-        <div className="absolute top-[10%] left-[40%] w-[120px] h-[120px] bg-[#050B19] blur-[100px] z-[11] opacity-90 rounded-full pointer-events-none" />
+        <div className="absolute top-[15%] left-[35%] w-[100px] h-[100px] bg-[#050B19] blur-[80px] z-[11] opacity-95 rounded-full pointer-events-none" />
 
         {/* PUNJAB MAP WATERMARK */}
         <div className="absolute inset-0 z-[12] pointer-events-none opacity-[0.03]">
@@ -100,10 +101,10 @@ export default function Hero() {
                transition={{ delay: 0.1 }}
                className="space-y-0"
             >
-               <h1 className="text-[18px] md:text-5xl lg:text-6xl font-headline font-black text-white leading-tight tracking-tight uppercase">
+               <h1 className="text-[18px] md:text-5xl lg:text-6xl font-headline font-black text-white leading-tight tracking-tight">
                   Prepare smarter.
                </h1>
-               <h1 className="text-[18px] md:text-5xl lg:text-6xl font-headline font-black text-[#F97316] leading-tight tracking-tight uppercase">
+               <h1 className="text-[18px] md:text-5xl lg:text-6xl font-headline font-black text-[#F97316] leading-tight tracking-tight">
                   Score higher.
                </h1>
             </motion.div>
@@ -141,9 +142,9 @@ export default function Hero() {
       </div>
 
       {/* 3. INTEGRATED BOTTOM DATA BAR - HIGH DENSITY */}
-      <div className="absolute bottom-6 md:bottom-20 left-0 right-0 z-[40]">
+      <div className="absolute bottom-4 md:bottom-12 left-0 right-0 z-[40]">
          <div className="container mx-auto px-4 md:px-12 max-w-7xl overflow-hidden">
-            <div className="flex flex-row md:grid md:grid-cols-4 gap-2 md:gap-4 overflow-x-auto no-scrollbar pb-1 pe-12 md:pe-0">
+            <div className="flex flex-row md:grid md:grid-cols-4 gap-2 md:gap-4 overflow-x-auto no-scrollbar pb-2 pe-12 md:pe-0">
                {liveStats.map((stat, idx) => (
                   <motion.div
                      key={stat.id}
@@ -152,7 +153,7 @@ export default function Hero() {
                      transition={{ delay: 0.4 + (idx * 0.1) }}
                      className="shrink-0 flex-1 md:flex-none"
                   >
-                     <Card className="bg-[#0B1528]/80 backdrop-blur-2xl border border-white/10 p-1.5 md:p-4 rounded-2xl md:rounded-[2rem] text-left flex items-center gap-2 md:gap-4 group hover:bg-[#0B1528] transition-all duration-300 shadow-2xl overflow-hidden h-9 md:h-20 w-full min-w-[110px] md:min-w-none">
+                     <Card className="bg-[#0B1528]/80 backdrop-blur-2xl border border-white/10 p-1 md:p-4 rounded-2xl md:rounded-[2rem] text-left flex items-center gap-2 md:gap-4 group hover:bg-[#0B1528] transition-all duration-300 shadow-2xl overflow-hidden h-9 md:h-20 w-full min-w-[100px] md:min-w-none">
                         <div className="shrink-0 h-5 w-5 md:h-12 md:w-12 rounded-lg md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-transform group-hover:scale-105 shadow-inner">
                            {stat.icon}
                         </div>
