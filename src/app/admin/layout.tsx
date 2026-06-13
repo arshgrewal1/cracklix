@@ -42,8 +42,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Admin Layout v162.0.
- * UPDATED: Increased sidebar logo size to h-24 and synchronized spacing.
+ * @fileOverview Institutional Admin Layout v163.0.
+ * UPDATED: Optimized sidebar spacing for "Main Database" and sub-hubs.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -92,16 +92,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
        {/* WHOLE SIDEBAR SCROLL AREA */}
        <div className="flex-1 custom-scrollbar overflow-y-auto overflow-x-hidden pb-10">
           
-          {/* SIDEBAR LOGO: INCREASED SIZE AND INTEGRATED INTO SCROLL */}
-          <div className="px-4 pt-6 pb-2 flex justify-center shrink-0">
+          {/* SIDEBAR LOGO: COMPACT CONTAINER */}
+          <div className="px-4 pt-4 pb-2 flex justify-center shrink-0">
              <div className="h-24 flex items-center justify-center transition-all duration-500">
                <Logo href="/admin" />
              </div>
           </div>
 
-          <SidebarGroup>
-            <SidebarGroupLabel className="px-6 pt-2 pb-4 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Main Database</SidebarGroupLabel>
-            <SidebarMenu className="gap-3">
+          <SidebarGroup className="pt-0">
+            <SidebarGroupLabel className="px-6 pt-0 pb-3 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Main Database</SidebarGroupLabel>
+            <SidebarMenu className="gap-2">
               <AdminNavItem icon={<LayoutDashboard />} label="DASHBOARD" href="/admin" active={pathname === "/admin"} />
               <AdminNavItem icon={<Layers />} label="CATEGORIES" href="/admin/categories" active={pathname === "/admin/categories"} />
               <AdminNavItem icon={<Landmark className="text-amber-400" />} label="HUBS (BOARDS)" href="/admin/exams" active={pathname === "/admin/exams"} />
@@ -112,9 +112,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarMenu>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-4">
-            <SidebarGroupLabel className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Content Hub</SidebarGroupLabel>
-            <SidebarMenu className="gap-3">
+          <SidebarGroup className="mt-2">
+            <SidebarGroupLabel className="px-6 pt-2 pb-3 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Content Hub</SidebarGroupLabel>
+            <SidebarMenu className="gap-2">
               <AdminNavItem icon={<Wand2 className="text-emerald-400" />} label="BRAND MAGIC" href="/admin/brand-magic" active={pathname === "/brand-magic"} />
               <AdminNavItem icon={<LayoutGrid className="text-orange-500" />} label="MOCK BUILDER" href="/admin/mocks/builder" active={pathname === "/admin/mocks/builder"} />
               <AdminNavItem icon={<Zap className="text-primary" />} label="MOCK MANAGER" href="/admin/mocks" active={pathname === "/admin/mocks"} />
@@ -126,9 +126,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarMenu>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-4">
-            <SidebarGroupLabel className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Users & Revenue</SidebarGroupLabel>
-            <SidebarMenu className="gap-3">
+          <SidebarGroup className="mt-2">
+            <SidebarGroupLabel className="px-6 pt-2 pb-3 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">Users & Revenue</SidebarGroupLabel>
+            <SidebarMenu className="gap-2">
               <AdminNavItem icon={<Users className="text-blue-400" />} label="STUDENT LIST" href="/admin/users" active={pathname === "/admin/users"} />
               <AdminNavItem icon={<DollarSign className="text-emerald-400" />} label="REVENUE HUB" href="/admin/payments" active={pathname === "/admin"} />
               <AdminNavItem icon={<ShieldCheck className="text-primary" />} label="MANUAL VERIFY" href="/admin/payments/verify" active={pathname === "/admin/payments/verify"} />
@@ -136,9 +136,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </SidebarMenu>
           </SidebarGroup>
 
-          <SidebarGroup className="mt-4">
-            <SidebarGroupLabel className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">System Health</SidebarGroupLabel>
-            <SidebarMenu className="gap-3">
+          <SidebarGroup className="mt-2">
+            <SidebarGroupLabel className="px-6 pt-2 pb-3 text-[10px] font-black uppercase tracking-widest text-white/20 text-left">System Health</SidebarGroupLabel>
+            <SidebarMenu className="gap-2">
               <AdminNavItem icon={<History className="text-slate-400" />} label="ACTIVITY LOGS" href="/admin/audit-logs" active={pathname === "/admin/audit-logs"} />
               <AdminNavItem icon={<ShieldAlert className="text-rose-500" />} label="ERROR CHECK" href="/admin/qa" active={pathname === "/admin/qa"} />
               <AdminNavItem icon={<HeartPulse className="text-rose-500" />} label="PLATFORM STATUS" href="/admin/health" active={pathname === "/admin/health"} />
@@ -219,7 +219,7 @@ function AdminNavItem({ icon, label, href, active, className }: { icon: React.Re
         asChild 
         isActive={active}
         className={cn(
-          "px-6 transition-all font-medium h-12 group cursor-pointer",
+          "px-6 transition-all font-medium h-10 group cursor-pointer",
           active ? "bg-white/5 text-primary" : "hover:bg-white/5 hover:text-primary text-white/60",
           className
         )}
@@ -228,7 +228,7 @@ function AdminNavItem({ icon, label, href, active, className }: { icon: React.Re
           <div className="shrink-0 flex items-center justify-center size-5">
             {icon}
           </div>
-          <span className="font-bold tracking-tight truncate text-left text-[13px] uppercase">{label}</span>
+          <span className="font-bold tracking-tight truncate text-left text-[12px] uppercase">{label}</span>
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
