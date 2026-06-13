@@ -26,8 +26,8 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v26.0 (Stabilized).
- * FIXED: Definitions moved to top to prevent 'call' resolution errors.
+ * @fileOverview Institutional Popular Exams Hub v27.0 (Hardened).
+ * PERFORMANCE: Hoisted helper components and functions to the top to prevent runtime errors.
  */
 
 function PrepNode({ label, icon, href }: { label: string, icon: React.ReactNode, href: string }) {
