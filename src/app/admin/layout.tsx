@@ -42,9 +42,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Admin Layout v150.0.
- * UPDATED: Ultra-tight vertical crop for logo containers (h-14 in sidebar, h-8 in header).
- * FIXED: Removed excess top/bottom padding to achieve a sleek rectangular look.
+ * @fileOverview Institutional Admin Layout v151.0.
+ * UPDATED: Reduced height of logo containers to h-11 (sidebar) and h-7 (header) for a tight vertical crop.
+ * FIXED: Maintained 'two-space' horizontal padding for brand focus.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -91,8 +91,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const SideNavContent = () => (
     <div className="flex flex-col h-full bg-[#0F172A] pointer-events-auto select-none">
        <div className="p-6 flex justify-center">
-          {/* SIDEBAR LOGO: ULTRA-TIGHT RECTANGULAR CROP (h-14) */}
-          <div className="bg-[#0B1528] w-fit h-14 px-3 rounded-xl shadow-2xl flex items-center justify-center border border-white/5 group hover:bg-[#081121] transition-all duration-500 overflow-hidden mx-auto">
+          {/* SIDEBAR LOGO: TIGHT VERTICAL CROP (h-11) */}
+          <div className="bg-[#0B1528] w-fit h-11 px-3 rounded-xl shadow-2xl flex items-center justify-center border border-white/5 group hover:bg-[#081121] transition-all duration-500 overflow-hidden mx-auto">
             <Logo href="/admin" />
           </div>
        </div>
@@ -173,8 +173,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <SidebarTrigger className="text-[#0F172A] hover:bg-slate-50 cursor-pointer" />
               
               <div className="flex items-center gap-4">
-                 {/* HEADER LOGO: ULTRA-TIGHT RECTANGULAR CROP (h-8) */}
-                 <div className="bg-[#0B1528] h-8 px-2 rounded-lg shadow-xl flex items-center justify-center border border-white/5 overflow-hidden">
+                 {/* HEADER LOGO: TIGHT VERTICAL CROP (h-7) */}
+                 <div className="bg-[#0B1528] h-7 px-2 rounded-lg shadow-xl flex items-center justify-center border border-white/5 overflow-hidden">
                     <Logo variant="light" href="/admin" />
                  </div>
                  
