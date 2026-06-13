@@ -18,11 +18,10 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview FINAL CALIBRATED HERO v206.0.
- * FIXED: Shifted bottom stats bar higher (thoda uper).
+ * @fileOverview FINAL CALIBRATED HERO v207.0.
+ * FIXED: Shifted bottom stats bar even higher for better visual balance.
+ * FIXED: Added end-padding to the stats container to prevent last card corner clipping.
  * FIXED: Targeted masking to cover the Gemini star artifact.
- * FIXED: Content layer hierarchy (z-index) to appear on top of all fixes.
- * FIXED: Horizontal stat row on mobile with micro-UI density.
  */
 
 export default function Hero() {
@@ -80,7 +79,7 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* 2. CALIBRATED CONTENT HUB - FORCE ON TOP */}
+      {/* 2. CONTENT HUB */}
       <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-[30] pt-10 md:pt-14">
          <div className="max-w-2xl space-y-1 md:space-y-4">
             
@@ -91,10 +90,10 @@ export default function Hero() {
                className="inline-flex items-center gap-1 px-2 py-0.5 md:px-4 md:py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-0.5 md:mb-1"
             >
                <Star className="h-2 w-2 md:h-3.5 md:w-3.5 text-[#F97316] fill-current" />
-               <span className="text-[6px] md:text-[10px] font-bold text-white tracking-widest">#1 Punjab exam preparation platform</span>
+               <span className="text-[6px] md:text-[10px] font-bold text-white tracking-widest uppercase">#1 Punjab exam preparation platform</span>
             </motion.div>
 
-            {/* HEADINGS - SENTENCE CASE */}
+            {/* HEADINGS */}
             <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
@@ -109,7 +108,7 @@ export default function Hero() {
                </h1>
             </motion.div>
 
-            {/* DESCRIPTION - SENTENCE CASE (DOUBLE LINE) */}
+            {/* DESCRIPTION */}
             <motion.p
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
@@ -141,11 +140,10 @@ export default function Hero() {
          </div>
       </div>
 
-      {/* 3. INTEGRATED BOTTOM DATA BAR - FORCE ON TOP */}
-      {/* SHIFTED HIGHER: bottom-4 on mobile and bottom-14 on desktop */}
-      <div className="absolute bottom-4 md:bottom-14 left-0 right-0 z-[40]">
+      {/* 3. INTEGRATED BOTTOM DATA BAR */}
+      <div className="absolute bottom-6 md:bottom-20 left-0 right-0 z-[40]">
          <div className="container mx-auto px-4 md:px-12 max-w-7xl overflow-hidden">
-            <div className="flex flex-row md:grid md:grid-cols-4 gap-1.5 md:gap-4 overflow-x-auto no-scrollbar pb-1">
+            <div className="flex flex-row md:grid md:grid-cols-4 gap-1.5 md:gap-4 overflow-x-auto no-scrollbar pb-1 pe-6 md:pe-0">
                {liveStats.map((stat, idx) => (
                   <motion.div
                      key={stat.id}
