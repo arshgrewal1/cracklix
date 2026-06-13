@@ -53,10 +53,10 @@
     -webkit-text-size-adjust: 100%;
   }
   
-  h1 { @apply text-xl md:text-3xl font-black uppercase tracking-tight leading-tight; }
-  h2 { @apply text-lg md:text-2xl font-black uppercase tracking-tight; }
-  h3 { @apply text-base md:text-xl font-black uppercase tracking-tight; }
-  p { @apply text-[11px] md:text-[13px] text-slate-500 font-medium; }
+  h1 { @apply text-2xl md:text-4xl lg:text-6xl font-black uppercase tracking-tight leading-tight; }
+  h2 { @apply text-xl md:text-3xl lg:text-5xl font-black uppercase tracking-tight; }
+  h3 { @apply text-lg md:text-2xl lg:text-3xl font-black uppercase tracking-tight; }
+  p { @apply text-[13px] md:text-[15px] lg:text-lg text-slate-500 font-medium; }
 }
 
 .mobile-app-shell {
