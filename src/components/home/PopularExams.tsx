@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -23,22 +22,37 @@ import { collection, query, orderBy } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Final Institutional Popular Exams Hub v23.0 (Hydration Hardened).
- * MATCHED: High-density board list with breakdown links for each prep node.
+ * @fileOverview Institutional Popular Exams Hub v25.0.
+ * HARDENED: Defined helpers before main component to resolve 'call' TypeErrors.
  */
 
-const BOARD_ICONS: Record<string, React.ReactNode> = {
-  'psssb': <Landmark className="h-full w-full p-4" />,
-  'punjab-police': <Shield className="h-full w-full p-4" />,
-  'ppsc': <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR8W5eTBPdzztA7cziqnMmtWk9InL1yflUD_xb4vAsLw&s=10" className="h-full w-full object-contain p-4" />,
-  'pstet': <BookOpen className="h-full w-full p-4" />,
-  'pspcl': <Zap className="h-full w-full p-4" />,
-  'high-court': <Scale className="h-full w-full p-4" />,
-  'army': <GraduationCap className="h-full w-full p-4" />,
-  'teaching': <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbNnoge6pNWx1HZYrUJKM58qWk1dDw85xvKPBoG-O4ew&s=10" className="h-full w-full object-contain p-4" />
-};
+function PrepNode({ label, icon, href }: { label: string, icon: React.ReactNode, href: string }) {
+   return (
+      <Link href={href} className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg hover:bg-primary/5 transition-all group/node">
+         <span className="text-slate-300 group-hover/node:text-primary shrink-0">
+            {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-3 w-3" }) : icon}
+         </span>
+         <span className="text-[8px] font-black text-slate-500 uppercase tracking-tighter truncate group-hover/node:text-[#0F172A]">{label}</span>
+      </Link>
+   )
+}
+
+function getBoardIcon(id: string, abbrev: string) {
+  const key = (abbrev || id || "").toLowerCase();
+  
+  if (key.includes('psssb')) return <Landmark className="h-full w-full p-4" />;
+  if (key.includes('police')) return <Shield className="h-full w-full p-4" />;
+  if (key.includes('ppsc')) return <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR8W5eTBPdzztA7cziqnMmtWk9InL1yflUD_xb4vAsLw&s=10" className="h-full w-full object-contain p-4" />;
+  if (key.includes('pstet') || key.includes('ctet')) return <BookOpen className="h-full w-full p-4" />;
+  if (key.includes('pspcl') || key.includes('pstcl')) return <Zap className="h-full w-full p-4" />;
+  if (key.includes('court')) return <Scale className="h-full w-full p-4" />;
+  if (key.includes('army') || key.includes('cadre') || key.includes('ett')) return <GraduationCap className="h-full w-full p-4" />;
+  
+  return <Landmark className="h-full w-full p-4" />;
+}
 
 export default function PopularExams() {
   const db = useFirestore();
@@ -52,9 +66,7 @@ export default function PopularExams() {
   const { data: boards, loading } = useCollection<any>(boardsQuery);
 
   const filteredBoards = useMemo(() => {
-    // Return empty during SSR and first client pass to match skeleton layout
     if (!boards || !mounted) return [];
-    // Prioritize popular ones for homepage mapping
     const targetAbbrevs = ['PSSSB', 'POLICE', 'PPSC', 'PSPCL', 'PSTET', 'CTET', 'ETT', 'MASTER CADRE'];
     return boards.filter((b: any) => targetAbbrevs.includes(b.abbreviation?.toUpperCase()));
   }, [boards, mounted]);
@@ -90,7 +102,9 @@ export default function PopularExams() {
                  <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100 p-8 text-left">
                     <div className="flex justify-between items-start mb-8">
                        <div className="h-16 w-16 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-300 group-hover:text-primary transition-all duration-500 shrink-0 shadow-inner relative overflow-hidden">
-                          {BOARD_ICONS[board.id] || BOARD_ICONS[board.abbreviation?.toLowerCase()] || <Landmark className="h-full w-full p-4" />}
+                          {board.iconUrl ? (
+                             <img src={board.iconUrl} className="h-full w-full object-contain p-4" alt="Hub Logo" referrerPolicy="no-referrer" />
+                          ) : getBoardIcon(board.id, board.abbreviation)}
                        </div>
                        <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-100 text-slate-400">OFFICIAL HUB</Badge>
                     </div>
@@ -121,15 +135,4 @@ export default function PopularExams() {
       </div>
     </section>
   );
-}
-
-function PrepNode({ label, icon, href }: { label: string, icon: React.ReactNode, href: string }) {
-   return (
-      <Link href={href} className="flex items-center gap-2 px-3 py-2 bg-slate-50 rounded-lg hover:bg-primary/5 transition-all group/node">
-         <span className="text-slate-300 group-hover/node:text-primary shrink-0">
-            {React.cloneElement(icon as React.ReactElement, { className: "h-3 w-3" })}
-         </span>
-         <span className="text-[8px] font-black text-slate-500 uppercase tracking-tighter truncate group-hover/node:text-[#0F172A]">{label}</span>
-      </Link>
-   )
 }

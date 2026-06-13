@@ -10,8 +10,8 @@ import Footer from "@/components/layout/Footer";
 import PopularExams from "@/components/home/PopularExams";
 
 /**
- * @fileOverview Official Home Hub v150.0 (Server Component).
- * STABILITY: Maintain a rigid structural tree to prevent hydration displacement.
+ * @fileOverview Official Home Hub v151.0 (Server Component).
+ * STABILITY: Removed use client to provide a stable SSR root for hydration.
  */
 
 export default function HomePage() {

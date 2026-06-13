@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
-import { useRouter } from "next/navigation";
 import { 
   ShieldCheck, 
   Zap, 
@@ -31,13 +30,30 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Official CRACKLIX Punjab Government Exam Hero v25.0 (Restored Original).
- * FIXED: Full icon set imported to resolve ReferenceErrors.
- * STABILITY: Aligned hydration fallback to ensure a stable structural tree.
+ * @fileOverview Official CRACKLIX Punjab Government Exam Hero v26.0 (Hardened).
+ * STABILITY: Refactored sub-components to top level to resolve resolution call errors.
  */
 
+function FloatingCard({ icon, label, val, pos, delay }: any) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay, duration: 0.6 }}
+      className={cn("absolute z-20 bg-white/10 backdrop-blur-2xl border border-white/20 p-5 rounded-3xl shadow-5xl flex items-center gap-4 group hover:bg-white/20 transition-all", pos)}
+    >
+      <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6" }) : icon}
+      </div>
+      <div>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">{label}</p>
+        <p className="text-2xl font-black text-white leading-none tabular-nums">{val}</p>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Hero() {
-  const router = useRouter();
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
 
@@ -64,7 +80,6 @@ export default function Hero() {
     ];
   }, [stats]);
 
-  // STABILITY GUARD: Ensure server and client render an identical root section first.
   if (!mounted) {
     return (
       <section className="relative min-h-[90vh] bg-[#0B1528] flex flex-col justify-center items-center w-full">
@@ -75,14 +90,12 @@ export default function Hero() {
 
   return (
     <section className="relative min-h-[90vh] lg:min-h-screen flex flex-col justify-center bg-[#0B1528] overflow-hidden text-left">
-      {/* Background Ambience */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-1/4 h-1/2 bg-blue-500/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="container mx-auto px-4 md:px-6 relative z-10 py-12 md:py-20">
         <div className="grid lg:grid-cols-12 gap-12 md:gap-20 items-center">
           
-          {/* LEFT: CONTENT HUB */}
           <div className="lg:col-span-7 space-y-8 md:space-y-12">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -128,7 +141,6 @@ export default function Hero() {
               </Button>
             </motion.div>
 
-            {/* QUICK REGISTRY CHIPS */}
             <motion.div 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -143,7 +155,6 @@ export default function Hero() {
             </motion.div>
           </div>
 
-          {/* RIGHT: PERFORMANCE DASHBOARD */}
           <div className="lg:col-span-5 relative hidden lg:block">
              <motion.div 
                initial={{ opacity: 0, scale: 0.9 }}
@@ -185,7 +196,6 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* BOTTOM STATS STRIP */}
         <motion.div 
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
@@ -206,24 +216,5 @@ export default function Hero() {
         </motion.div>
       </div>
     </section>
-  );
-}
-
-function FloatingCard({ icon, label, val, pos, delay }: any) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.6 }}
-      className={cn("absolute z-20 bg-white/10 backdrop-blur-2xl border border-white/20 p-5 rounded-3xl shadow-5xl flex items-center gap-4 group hover:bg-white/20 transition-all", pos)}
-    >
-      <div className="h-12 w-12 rounded-2xl bg-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-        {React.cloneElement(icon, { className: "h-6 w-6" })}
-      </div>
-      <div>
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1.5">{label}</p>
-        <p className="text-2xl font-black text-white leading-none tabular-nums">{val}</p>
-      </div>
-    </motion.div>
   );
 }
