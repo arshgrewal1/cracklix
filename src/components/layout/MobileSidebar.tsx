@@ -28,8 +28,8 @@ import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Hardened Production Sidebar Center v60.0.
- * UPDATED: Significantly increased Logo size and eliminated all gaps.
+ * @fileOverview Hardened Production Sidebar Center v61.0.
+ * UPDATED: Optimized logo-to-label spacing and tightened label-to-item gaps to match user screenshot.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -87,9 +87,9 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col h-full bg-[#0B1528] text-white overflow-y-auto no-scrollbar font-body select-none text-left">
       
-      {/* BRAND LOGO - MAXIMIZED */}
-      <div className="px-6 py-0 flex justify-start shrink-0 overflow-visible -mb-12">
-         <Logo imgClassName="h-40 origin-left" />
+      {/* BRAND LOGO - MAXIMIZED & SPACED */}
+      <div className="px-6 py-6 flex justify-start shrink-0 overflow-visible mb-4">
+         <Logo imgClassName="h-48 origin-left" />
       </div>
 
       {/* IDENTITY HEADER - COMPACT */}
@@ -123,7 +123,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
         <button 
            onClick={() => { router.push('/profile'); onClose(); }}
-           className="w-full h-8 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-between px-3 group active:scale-95 transition-all relative z-10 mb-2"
+           className="w-full h-8 rounded-lg border border-white/10 bg-white/[0.03] flex items-center justify-between px-3 group active:scale-95 transition-all relative z-10 mb-4"
         >
            <div className="flex items-center gap-2">
               <User className="h-3 w-3 text-[#F97316]" />
@@ -133,29 +133,8 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
         </button>
       </div>
 
-      {/* PWA INSTALL ACTION */}
-      <div 
-         onClick={handleInstallClick}
-         className={cn(
-           "flex items-center justify-between px-6 py-1.5 border-y border-white/5 cursor-pointer transition-all shrink-0",
-           hasPrompt ? "bg-primary/10 active:bg-primary/20" : "bg-black/20 opacity-50"
-         )}
-      >
-         <div className="flex items-center gap-3">
-            <div className={cn(
-              "h-7 w-7 rounded-lg flex items-center justify-center shadow-lg transition-colors",
-              hasPrompt ? "bg-primary text-white" : "bg-white/5 text-slate-500"
-            )}>
-               <Download className="h-3 w-3" />
-            </div>
-            <div className="text-left leading-tight">
-               <span className="text-[9px] uppercase tracking-tight font-black text-white block">INSTALL APP</span>
-               <p className={cn("text-[6px] font-black uppercase tracking-widest", hasPrompt ? "text-primary" : "text-slate-500")}>
-                 {hasPrompt ? "CLICK TO ADD" : "FASTER ACCESS"}
-               </p>
-            </div>
-         </div>
-         {hasPrompt && <Badge className="bg-primary text-white border-none animate-pulse h-4 text-[6px]">GET</Badge>}
+      <div className="px-6 py-0 mb-1">
+         <p className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500">MANAGEMENT CENTER</p>
       </div>
 
       {/* NAV MENU - HIGH DENSITY */}
