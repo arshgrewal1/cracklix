@@ -15,8 +15,6 @@ import {
   FileStack, 
   BookOpen, 
   Layers, 
-  BarChart3,
-  Newspaper,
   Check,
   ClipboardList,
   Users,
@@ -28,27 +26,24 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
 import Image from "next/image";
-import { cn } from "@/lib/utils";
-import placeholderData from "@/app/lib/placeholder-images.json";
 
 /**
- * @fileOverview Official CRACKLIX Selection Hub v7.0.
- * REPLACED: Entire Hero UI with high-converting Punjab Govt Exam Hub.
- * THEME: Navy Blue (#0B1528) + Cracklix Orange (Primary).
+ * @fileOverview Official CRACKLIX Punjab Government Exam Hero v10.0.
+ * Replaces entire content with a premium, selection-driven Command Center.
+ * Theme: Navy Blue (#0B1528) + Cracklix Orange (Primary).
  */
 
 export default function Hero() {
   const router = useRouter();
-  const heroImage = placeholderData.placeholderImages.find(img => img.id === 'hero-police-premium')?.imageUrl || "https://punjabpolice.gov.in/media/images/pp10.original.jpg";
+  const heroImage = "https://punjabpolice.gov.in/media/images/pp10.original.jpg";
 
   return (
     <div className="flex flex-col w-full bg-white">
       
-      {/* 1. SELECTION COMMAND CENTER (MAIN HERO) */}
+      {/* 1. SELECTION HUB (MAIN HERO) */}
       <section className="relative min-h-[90vh] flex items-center pt-10 pb-20 md:pt-20 md:pb-32 bg-[#0B1528] overflow-hidden text-left">
-        {/* Advanced Background Node */}
+        {/* Background Visual Nodes */}
         <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/10 blur-[120px] rounded-full pointer-events-none opacity-50" />
         <div className="absolute bottom-0 left-0 w-1/4 h-full bg-blue-500/10 blur-[120px] rounded-full pointer-events-none opacity-50" />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
@@ -56,7 +51,7 @@ export default function Hero() {
         <div className="container mx-auto px-4 md:px-6 max-w-7xl relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
             
-            {/* LEFT HUB: BRANDING & CTAs */}
+            {/* LEFT COLUMN: BRANDING & CTAs */}
             <div className="lg:col-span-7 space-y-8 md:space-y-10">
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
@@ -66,7 +61,7 @@ export default function Hero() {
               >
                 <div className="inline-flex items-center gap-3 bg-primary/10 border border-primary/20 px-5 py-2 rounded-full shadow-2xl">
                   <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-                  <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-primary">Punjab&apos;s Most Trusted Mock Test Platform</span>
+                  <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-primary">Punjab's Most Trusted Mock Test Platform</span>
                 </div>
 
                 <h1 className="text-4xl md:text-8xl font-headline font-black leading-[0.9] tracking-tighter text-white uppercase">
@@ -77,18 +72,18 @@ export default function Hero() {
                   Prepare for PSSSB, Punjab Police, PPSC, PSPCL, PSTET, CTET, ETT, Master Cadre, High Court and other Punjab Government Exams through real exam-level mock tests, PYQs, current affairs and detailed solutions.
                 </p>
 
-                {/* TRUST CHIPS CHECKLIST */}
+                {/* TRUST CHIPS */}
                 <div className="flex flex-wrap gap-x-8 gap-y-4 pt-2">
                   <TrustChip text="Full-Length Mocks" />
-                  <TrustChip text="Official PYQs" />
+                  <TrustChip text="PYQs" />
                   <TrustChip text="Current Affairs" />
                   <TrustChip text="Detailed Solutions" />
                   <TrustChip text="Bilingual Tests" />
-                  <TrustChip text="Analytics Hub" />
+                  <TrustChip text="Performance Analytics" />
                 </div>
               </motion.div>
 
-              {/* ACTION COMMANDS */}
+              {/* ACTION BUTTONS */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -109,7 +104,7 @@ export default function Hero() {
                 </Button>
               </motion.div>
 
-              {/* POPULAR EXAMS CHIPS */}
+              {/* EXAM REGISTRY CHIPS */}
               <motion.div 
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -130,7 +125,7 @@ export default function Hero() {
               </motion.div>
             </div>
 
-            {/* RIGHT HUB: DASHBOARD VISUAL */}
+            {/* RIGHT COLUMN: VISUAL DASHBOARD */}
             <div className="lg:col-span-5 relative hidden lg:block">
                <motion.div 
                  initial={{ opacity: 0, scale: 0.9 }}
@@ -144,11 +139,10 @@ export default function Hero() {
                     alt="Punjab Selection Hub" 
                     className="object-cover grayscale-[0.2] group-hover:grayscale-0 transition-all duration-[2000ms] group-hover:scale-105"
                     priority
-                    data-ai-hint="punjab police"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0B1528] via-[#0B1528]/40 to-transparent" />
                   
-                  {/* FLOATING GLASS PERFORMANCE CARDS */}
+                  {/* FLOATING PERFORMANCE CARDS */}
                   <motion.div 
                     animate={{ y: [0, -15, 0] }} 
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -199,7 +193,7 @@ export default function Hero() {
         </div>
       </section>
 
-      {/* 2. LIVE PLATFORM STATS STRIP */}
+      {/* 2. PLATFORM STATS STRIP */}
       <section className="py-12 md:py-20 bg-white border-b border-slate-100 relative z-20 -mt-10 md:-mt-16 container mx-auto max-w-6xl px-4">
          <div className="bg-white shadow-5xl rounded-[3rem] p-8 md:p-14 border border-slate-50">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-10 md:gap-12 text-center">
