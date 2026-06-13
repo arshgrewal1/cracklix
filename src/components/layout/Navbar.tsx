@@ -24,12 +24,13 @@ import { useToast } from "@/hooks/use-toast";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Header v171.0 (PWA Fix).
- * UPDATED: Improved install app button feedback.
+ * @fileOverview Professional Header v172.0 (Persistent PWA).
+ * UPDATED: Improved "Install App" responsiveness with re-trigger support.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [hasPrompt, setHasPrompt] = useState(false);
   const { user, profile, loading } = useUser();
   const auth = useAuth();
   const pathname = usePathname();
@@ -38,6 +39,16 @@ export default function Navbar() {
 
   useEffect(() => {
     setMounted(true);
+    
+    // Initial check
+    if (typeof window !== 'undefined' && (window as any).deferredPrompt) {
+      setHasPrompt(true);
+    }
+
+    // Listen for new prompts
+    const handleInstallable = () => setHasPrompt(true);
+    window.addEventListener('pwa-installable', handleInstallable);
+    return () => window.removeEventListener('pwa-installable', handleInstallable);
   }, []);
 
   const isAdmin = useMemo(() => {
@@ -65,15 +76,21 @@ export default function Navbar() {
     router.push('/');
   };
 
-  const handleInstallClick = () => {
+  const handleInstallClick = async () => {
     if (typeof window !== 'undefined') {
       const prompt = (window as any).deferredPrompt;
       if (prompt) {
         prompt.prompt();
+        const { outcome } = await prompt.userChoice;
+        if (outcome === 'accepted') {
+          (window as any).deferredPrompt = null;
+          setHasPrompt(false);
+          toast({ title: "Welcome!", description: "Cracklix app is being added to your device." });
+        }
       } else {
         toast({ 
-          title: "Check Browser", 
-          description: "If the install option is missing, the app might already be installed or your browser doesn't support direct installation." 
+          title: "Install Service", 
+          description: "If you don't see a prompt, the app might already be installed. Look for Cracklix on your home screen." 
         });
       }
     }
@@ -137,8 +154,14 @@ export default function Navbar() {
             </Link>
 
             <div onClick={handleInstallClick} className="cursor-pointer transition-all active:scale-95 group h-full flex items-center">
-               <div className="flex items-center gap-3 opacity-80 hover:opacity-100 transition-all">
-                  <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/30 text-emerald-400">
+               <div className={cn(
+                 "flex items-center gap-3 transition-all",
+                 hasPrompt ? "opacity-100" : "opacity-60 grayscale hover:opacity-100 hover:grayscale-0"
+               )}>
+                  <div className={cn(
+                    "h-8 w-8 rounded-lg flex items-center justify-center border",
+                    hasPrompt ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" : "bg-white/5 border-white/10 text-slate-400"
+                  )}>
                      <Download className="h-4 w-4" />
                   </div>
                   <div className="flex flex-col leading-tight text-left">

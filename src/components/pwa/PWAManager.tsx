@@ -7,15 +7,15 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Institutional PWA Lifecycle Manager v28.0 (Hardened).
- * UPDATED: Focused on UI display logic for the prompt banner.
+ * @fileOverview Institutional PWA Lifecycle Manager v29.0 (Persistent).
+ * UPDATED: Banner logic allows re-display on revisit if installation is dismissed.
  */
 export default function PWAManager() {
   const pathname = usePathname();
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(false);
+  const [sessionDismissed, setSessionDismissed] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -31,15 +31,15 @@ export default function PWAManager() {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
       const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin');
       
-      if (!isExcluded && !isStandalone && !isDismissed && (window as any).deferredPrompt) {
+      // If we have a prompt and aren't in a standalone app, show it
+      if (!isExcluded && !isStandalone && !sessionDismissed && (window as any).deferredPrompt) {
         setShowPrompt(true);
       }
     };
 
-    // Listen for the custom event from our early capture script
     window.addEventListener('pwa-installable', checkInstallability);
     
-    // Check immediately in case it already fired
+    // Initial check with delay to allow background capture
     const timer = setTimeout(checkInstallability, 3000);
 
     const handleAppInstalled = () => {
@@ -54,7 +54,7 @@ export default function PWAManager() {
       window.removeEventListener('appinstalled', handleAppInstalled);
       clearTimeout(timer);
     };
-  }, [pathname, isDismissed]);
+  }, [pathname, sessionDismissed]);
 
   const handleInstallClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -75,7 +75,8 @@ export default function PWAManager() {
     e.preventDefault();
     e.stopPropagation();
     setShowPrompt(false);
-    setIsDismissed(true);
+    // Only dismiss for this specific session view
+    setSessionDismissed(true);
   };
 
   if (!mounted || isInstalled || !showPrompt) return null;
@@ -95,8 +96,8 @@ export default function PWAManager() {
           </div>
 
           <div className="flex-1 min-w-0 text-left">
-             <h4 className="text-[11px] font-black uppercase tracking-tight leading-none mb-1">Download App</h4>
-             <p className="text-[7px] font-bold text-slate-500 uppercase tracking-widest leading-tight truncate">Install for easy learning</p>
+             <h4 className="text-[11px] font-black uppercase tracking-tight leading-none mb-1">Install Hub</h4>
+             <p className="text-[7px] font-bold text-slate-500 uppercase tracking-widest leading-tight truncate">Quick access for exams</p>
           </div>
 
           <div className="flex items-center gap-1.5">

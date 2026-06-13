@@ -25,11 +25,12 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview Final Screenshot Replica Sidebar v45.0.
- * UPDATED: Enhanced install app feedback logic.
+ * @fileOverview Final Sidebar Hub v46.0 (Persistent PWA).
+ * UPDATED: Enhanced installation handler for "Install Again" retry support.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
+  const [hasPrompt, setHasPrompt] = useState(false);
   const { profile } = useUser();
   const auth = useAuth();
   const router = useRouter();
@@ -38,6 +39,12 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== 'undefined' && (window as any).deferredPrompt) {
+      setHasPrompt(true);
+    }
+    const handleInstallable = () => setHasPrompt(true);
+    window.addEventListener('pwa-installable', handleInstallable);
+    return () => window.removeEventListener('pwa-installable', handleInstallable);
   }, []);
 
   const handleLogout = async () => {
@@ -46,15 +53,22 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
     router.push('/');
   };
 
-  const handleInstallClick = () => {
+  const handleInstallClick = async () => {
     if (typeof window !== 'undefined') {
       const prompt = (window as any).deferredPrompt;
       if (prompt) {
         prompt.prompt();
+        const { outcome } = await prompt.userChoice;
+        if (outcome === 'accepted') {
+          (window as any).deferredPrompt = null;
+          setHasPrompt(false);
+          onClose();
+          toast({ title: "Installation Started", description: "Adding Cracklix to your home screen." });
+        }
       } else {
         toast({ 
           title: "App Status", 
-          description: "If this button doesn't respond, the app is likely already installed. Check your home screen or browser settings." 
+          description: "If this button is inactive, the app is likely already installed. Check your device's home screen." 
         });
       }
     }
@@ -114,18 +128,32 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
       {/* 2. DOWNLOAD APP HUB (COMPACT) */}
       <div 
          onClick={handleInstallClick}
-         className="flex items-center justify-between px-6 py-4 bg-[#0D242F] border-y border-white/5 cursor-pointer active:bg-[#11313d] transition-all shrink-0"
+         className={cn(
+           "flex items-center justify-between px-6 py-4 border-y border-white/5 cursor-pointer transition-all shrink-0",
+           hasPrompt ? "bg-[#0D242F] active:bg-[#11313d]" : "bg-black/20 opacity-60"
+         )}
       >
          <div className="flex items-center gap-4">
-            <div className="h-11 w-11 rounded-xl bg-[#10B981] text-white flex items-center justify-center shadow-lg shadow-emerald-500/20">
+            <div className={cn(
+              "h-11 w-11 rounded-xl flex items-center justify-center shadow-lg transition-colors",
+              hasPrompt ? "bg-[#10B981] text-white shadow-emerald-500/20" : "bg-white/5 text-slate-500"
+            )}>
                <Download className="h-5 w-5" />
             </div>
             <div className="text-left">
                <span className="text-[14px] uppercase tracking-tight font-black text-white block leading-none mb-0.5">DOWNLOAD APP</span>
-               <p className="text-[8px] font-black text-[#10B981] uppercase tracking-widest leading-tight">INSTALL FOR FAST ACCESS</p>
+               <p className={cn(
+                 "text-[8px] font-black uppercase tracking-widest leading-tight",
+                 hasPrompt ? "text-[#10B981]" : "text-slate-500"
+               )}>
+                 {hasPrompt ? "INSTALL FOR FAST ACCESS" : "ALREADY INSTALLED"}
+               </p>
             </div>
          </div>
-         <button className="bg-[#10B981] text-white px-4 py-2 rounded-full font-black text-[8px] uppercase tracking-tighter shadow-xl border-none">
+         <button className={cn(
+           "text-white px-4 py-2 rounded-full font-black text-[8px] uppercase tracking-tighter shadow-xl border-none transition-all",
+           hasPrompt ? "bg-[#10B981]" : "bg-white/10 text-slate-600"
+         )}>
             INSTALL
          </button>
       </div>

@@ -56,8 +56,8 @@ export const viewport: Viewport = {
 };
 
 /**
- * @fileOverview Master Layout v23.0 (Hardened).
- * FIXED: Replaced Script component with native script tag to resolve 'call of undefined' runtime error.
+ * @fileOverview Master Layout v24.0 (PWA Persistent).
+ * UPDATED: Refined native script for more robust PWA event persistence and installability.
  */
 export default function RootLayout({
   children,
@@ -71,15 +71,23 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-        {/* Early capture of PWA install prompt via native script to avoid webpack hydration issues */}
+        {/* Early capture and persistent storage of PWA install prompt */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              window.deferredPrompt = null;
+              window.deferredPrompt = window.deferredPrompt || null;
               window.addEventListener('beforeinstallprompt', (e) => {
+                // Prevent Chrome 67 and earlier from automatically showing the prompt
                 e.preventDefault();
+                // Stash the event so it can be triggered later.
                 window.deferredPrompt = e;
+                // Update UI notify that the PWA is installable
                 window.dispatchEvent(new CustomEvent('pwa-installable'));
+                console.log('[PWA] Installation prompt captured and stored.');
+              });
+              window.addEventListener('appinstalled', (e) => {
+                console.log('[PWA] App successfully installed.');
+                window.deferredPrompt = null;
               });
             `,
           }}
