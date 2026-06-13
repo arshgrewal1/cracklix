@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -8,20 +9,18 @@ import {
   ClipboardList,
   ShieldCheck,
   Star,
-  Users,
-  Download
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
-import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Final Screenshot-Matched Hero v300.0.
- * RESTORED: Golden Temple night-shot with specific reflection layering.
- * MATCHED: Buttons (Orange Free Mock, White Install, Outline Exams).
+ * @fileOverview Final Restoration Hero v305.0.
+ * RESTORED: Golden Temple background with full visibility (Opacity 1.0).
+ * REMOVED: Redundant Install button from the hero row.
  */
 
 export default function Hero() {
@@ -55,20 +54,20 @@ export default function Hero() {
   return (
     <section className="relative w-full bg-[#050B19] overflow-hidden min-h-[500px] md:min-h-[600px] lg:h-[700px] flex flex-col justify-start text-left border-b border-white/5 pb-12">
       
-      {/* SCREENSHOT-MATCHED GOLDEN TEMPLE BACKGROUND */}
+      {/* RESTORED HIGH-VISIBILITY GOLDEN TEMPLE BACKGROUND */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-[#050B19]">
         <motion.img 
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.8 }}
-          transition={{ duration: 1.2 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.5 }}
           src="https://images.unsplash.com/photo-1594913366159-1832ffef8171?q=80&w=1920&auto=format&fit=crop" 
           alt="Golden Temple" 
-          className="w-full h-full object-cover object-[center_35%]"
+          className="w-full h-full object-cover object-[center_35%] scale-105"
           referrerPolicy="no-referrer"
         />
-        {/* Layered gradients for text contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/80 to-transparent z-[1]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050B19] via-transparent to-transparent z-[1]" />
+        {/* Softened gradients for maximum temple visibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/60 to-transparent z-[1]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050B19]/40 via-transparent to-transparent z-[1]" />
       </div>
 
       <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl relative z-[30] pt-16 md:pt-32">
@@ -77,7 +76,7 @@ export default function Hero() {
             <motion.div
                initial={{ opacity: 0, y: 5 }}
                animate={{ opacity: 1, y: 0 }}
-               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-1"
+               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md mb-1"
             >
                <Star className="h-3.5 w-3.5 text-[#F97316] fill-current" />
                <span className="text-[10px] font-black text-white tracking-[0.2em] uppercase">#1 PUNJAB PREP PLATFORM</span>
@@ -89,10 +88,10 @@ export default function Hero() {
                transition={{ delay: 0.1 }}
                className="space-y-1"
             >
-               <h1 className="text-4xl md:text-6xl lg:text-[80px] font-headline font-black text-white leading-[1] tracking-tighter uppercase">
+               <h1 className="text-4xl md:text-6xl lg:text-[80px] font-headline font-black text-white leading-[1] tracking-tighter uppercase drop-shadow-2xl">
                   PREPARE SMARTER.
                </h1>
-               <h1 className="text-4xl md:text-6xl lg:text-[80px] font-headline font-black text-[#F97316] leading-[1] tracking-tighter uppercase">
+               <h1 className="text-4xl md:text-6xl lg:text-[80px] font-headline font-black text-[#F97316] leading-[1] tracking-tighter uppercase drop-shadow-2xl">
                   SCORE HIGHER.
                </h1>
             </motion.div>
@@ -101,13 +100,12 @@ export default function Hero() {
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: 0.2 }}
-               className="text-base md:text-xl lg:text-2xl text-slate-200 font-medium max-w-2xl leading-relaxed antialiased"
+               className="text-base md:text-xl lg:text-2xl text-slate-100 font-bold max-w-2xl leading-relaxed antialiased drop-shadow-lg"
             >
                Punjab Government Exams di Complete Preparation <br className="hidden sm:block" />
                ik hi Center te, Latest Official Patterns de Naal.
             </motion.p>
 
-            {/* SCREENSHOT-MATCHED BUTTON TRIFECTA */}
             <motion.div
                initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
@@ -120,20 +118,15 @@ export default function Hero() {
                   </Link>
                </Button>
                
-               <PWAInstallButton 
-                 className="h-14 md:h-16 px-10 md:px-14 bg-white hover:bg-slate-100 text-black font-black text-xs md:text-sm tracking-[0.1em] rounded-2xl shadow-2xl transition-all border-none uppercase" 
-               />
-
-               <Button asChild variant="outline" className="h-14 md:h-16 px-10 md:px-14 border-white/20 bg-white/5 text-white font-black text-xs md:text-sm tracking-[0.1em] rounded-2xl transition-all backdrop-blur-md hover:bg-white/10 uppercase border-2">
+               <Button asChild variant="outline" className="h-14 md:h-16 px-10 md:px-14 border-white text-white font-black text-xs md:text-sm tracking-[0.1em] rounded-2xl transition-all backdrop-blur-md hover:bg-white/10 uppercase border-2 shadow-2xl">
                   <Link href="/exams">
-                     Exams
+                     View All Exams
                   </Link>
                </Button>
             </motion.div>
          </div>
       </div>
 
-      {/* STATS STRIP */}
       <div className="mt-16 md:mt-24 z-[40]">
          <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
@@ -144,13 +137,13 @@ export default function Hero() {
                      animate={{ opacity: 1, y: 0 }}
                      transition={{ delay: 0.4 + (idx * 0.1) }}
                   >
-                     <Card className="bg-[#0B1528]/60 backdrop-blur-3xl border border-white/10 p-5 md:p-8 rounded-[2rem] text-left flex items-center gap-4 md:gap-6 group hover:bg-[#0B1528] transition-all duration-300 shadow-2xl overflow-hidden h-24 md:h-32">
+                     <Card className="bg-[#0B1528]/80 backdrop-blur-3xl border border-white/20 p-5 md:p-8 rounded-[2rem] text-left flex items-center gap-4 md:gap-6 group hover:bg-[#0B1528] transition-all duration-300 shadow-2xl overflow-hidden h-24 md:h-32">
                         <div className="shrink-0 h-10 w-10 md:h-14 md:w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-transform group-hover:scale-110 shadow-inner">
                            {stat.icon}
                         </div>
                         <div className="min-w-0 flex flex-col justify-center leading-tight">
                            <p className="text-2xl md:text-4xl font-headline font-black text-white tabular-nums leading-none mb-1">{stat.val}</p>
-                           <p className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] truncate">
+                           <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] truncate">
                               {stat.label}
                            </p>
                         </div>

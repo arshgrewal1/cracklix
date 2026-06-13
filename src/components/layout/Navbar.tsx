@@ -1,8 +1,9 @@
+
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from "next/link";
-import { Menu, Search, User, Gem, LogOut, Newspaper, Download, Zap, Home, ShieldCheck, Smartphone } from "lucide-react";
+import { Menu, Search, User, Gem, LogOut, Newspaper, Zap, Home, ShieldCheck, Smartphone } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -15,23 +16,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import StudentAvatar from "@/components/brand/StudentAvatar";
-import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Screenshot-Matched Navbar v251.0 (Fixed Logout).
- * FIXED: Defined handleLogout function to prevent ReferenceError.
+ * @fileOverview Final Screenshot-Matched Navbar v252.0.
+ * FIXED: handleLogout defined.
+ * RESTORED: Prominent logo scale.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const { user, profile, loading } = useUser();
+  const { user, profile } = useUser();
   const auth = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -100,7 +101,8 @@ export default function Navbar() {
           <div className="flex items-center gap-2 md:gap-4 shrink-0 h-full">
              <div className="hidden md:block">
                <PWAInstallButton 
-                 className="h-10 px-6 rounded-xl bg-primary hover:bg-orange-600 text-white font-black uppercase text-[10px] tracking-widest border-none shadow-2xl gap-3" 
+                 className="h-10 px-6 rounded-xl bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[10px] tracking-widest border-none shadow-2xl gap-3" 
+                 variant="primary"
                />
              </div>
 
@@ -147,7 +149,7 @@ export default function Navbar() {
                    </DropdownMenuContent>
                  </DropdownMenu>
                ) : (
-                 <Button asChild className="bg-primary hover:bg-orange-600 text-white font-black px-7 h-11 uppercase text-[11px] tracking-widest shadow-2xl border-none transition-all active:scale-95">
+                 <Button asChild className="bg-[#F97316] hover:bg-orange-600 text-white font-black px-7 h-11 uppercase text-[11px] tracking-widest shadow-2xl border-none transition-all active:scale-95">
                    <Link href="/login">LOGIN</Link>
                  </Button>
                )}
@@ -179,7 +181,7 @@ function NavLink({ icon, label1, label2, href, active }: { icon: React.ReactNode
         "h-10 w-10 rounded-[12px] flex items-center justify-center shadow-lg transition-all",
         active ? "bg-[#F97316] text-white" : "bg-white/5 text-slate-400 group-hover:text-[#F97316]"
       )}>
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" }) : icon}
+        {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
       </div>
       <div className="flex flex-col text-left leading-none gap-0.5">
         <span className={cn("text-[11px] font-black uppercase tracking-widest", active ? "text-[#F97316]" : "text-white")}>{label1}</span>

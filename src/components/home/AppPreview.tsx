@@ -1,66 +1,25 @@
+
 'use client';
 
 import { useMemo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Smartphone, CheckCircle2, Map as MapIcon, Globe, ShieldCheck, Download, Zap, Info } from "lucide-react";
+import { Smartphone, CheckCircle2, Map as MapIcon, Globe, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Apple, Play } from "lucide-react";
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview Final Regional Hub Section v10.0 (Hardened Install).
- * UPDATED: Enhanced PWA trigger with robust event check.
+ * @fileOverview Regional Hub Section v10.5.
+ * UPDATED: Removed redundant PWA "INSTALL APP" button and Guide card ("delete karo").
  */
 
 export default function AppPreview() {
   const db = useFirestore();
-  const { toast } = useToast();
-  const [canInstall, setCanInstall] = useState(false);
   const punjabMap = "https://www.mapsofindia.com/maps/punjab/punjab-map.jpg";
   const indiaMap = "https://www.mapsofindia.com/images2/india-map.jpg";
 
   const { data: settings } = useDoc<any>(useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]));
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    const updateInstallable = () => {
-      if ((window as any).deferredPrompt) {
-        setCanInstall(true);
-      }
-    };
-
-    updateInstallable();
-    window.addEventListener('pwa-installable', updateInstallable);
-    window.addEventListener('beforeinstallprompt', updateInstallable);
-    
-    return () => {
-      window.removeEventListener('pwa-installable', updateInstallable);
-      window.removeEventListener('beforeinstallprompt', updateInstallable);
-    };
-  }, []);
-
-  const handleInstallClick = async () => {
-    if (typeof window === 'undefined') return;
-    
-    const prompt = (window as any).deferredPrompt;
-    if (prompt) {
-      prompt.prompt();
-      const { outcome } = await prompt.userChoice;
-      if (outcome === 'accepted') {
-        (window as any).deferredPrompt = null;
-        setCanInstall(false);
-        toast({ title: "Installation Started", description: "Cracklix is being added to your home screen." });
-      }
-    } else {
-      toast({ 
-        title: "Installation Guide", 
-        description: "Tap the 'Share' button in your browser and select 'Add to Home Screen' for faster access.",
-      });
-    }
-  };
 
   const playStoreLink = settings?.playStoreUrl || "#";
   const appStoreLink = settings?.appStoreUrl || "#";
@@ -84,39 +43,26 @@ export default function AppPreview() {
               <span className="text-primary">MOBILE APP</span>
             </h2>
             <p className="text-base md:text-xl text-slate-500 font-medium leading-relaxed max-w-lg">
-              Install the official Cracklix app on your phone to get instant notifications and access tests offline.
+              Download the official Cracklix app on your phone to get instant notifications and access tests offline.
             </p>
 
             <ul className="space-y-3 md:space-y-5 pt-2">
-               <FeatureItem text="Direct Home Screen Access" />
+               <FeatureItem text="Direct Mobile Access" />
                <FeatureItem text="Bilingual Tests (English & Punjabi)" />
                <FeatureItem text="Instant Admit Card & Result Alerts" />
             </ul>
 
-            <div className="flex flex-col sm:flex-row gap-4 pt-4 md:pt-8">
-              <Button 
-                onClick={handleInstallClick}
-                className="w-full sm:w-auto h-16 md:h-20 px-10 bg-[#0F172A] hover:bg-black text-white rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center gap-4 shadow-3xl transition-all active:scale-95 border-none"
-              >
-                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary flex items-center justify-center shadow-xl">
-                   {canInstall ? <Download className="h-5 w-5 md:h-6 md:w-6 text-white" /> : <Zap className="h-5 w-5 md:h-6 md:w-6 text-white" />}
-                </div>
-                <div className="text-left">
-                  <p className="text-[10px] md:text-[11px] uppercase font-black tracking-widest text-primary leading-none">
-                    {canInstall ? "AVAILABLE NOW" : "PWA ENABLED"}
-                  </p>
-                  <p className="text-lg md:text-xl font-black uppercase text-white mt-1 leading-none tracking-tight">INSTALL APP</p>
-                </div>
-              </Button>
-              
-              <div className="flex gap-4">
-                 <a href={appStoreLink} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-none">
-                   <Button variant="outline" size="icon" className="h-16 w-16 md:h-20 md:w-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-white shadow-lg"><Apple className="h-6 w-6 md:h-8 md:w-8" /></Button>
-                 </a>
-                 <a href={playStoreLink} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-none">
-                   <Button variant="outline" size="icon" className="h-16 w-16 md:h-20 md:w-20 rounded-2xl border-slate-100 bg-slate-50 hover:bg-white shadow-lg"><Play className="h-6 w-6 md:h-8 md:w-8" /></Button>
-                 </a>
-              </div>
+            <div className="flex gap-4 pt-4 md:pt-8">
+               <a href={appStoreLink} target="_blank" rel="noopener noreferrer">
+                 <Button className="h-16 px-8 bg-slate-900 hover:bg-black text-white rounded-2xl shadow-xl gap-3">
+                    <Apple className="h-6 w-6" /> App Store
+                 </Button>
+               </a>
+               <a href={playStoreLink} target="_blank" rel="noopener noreferrer">
+                 <Button className="h-16 px-8 bg-slate-900 hover:bg-black text-white rounded-2xl shadow-xl gap-3">
+                    <Play className="h-6 w-6" /> Play Store
+                 </Button>
+               </a>
             </div>
           </motion.div>
 
