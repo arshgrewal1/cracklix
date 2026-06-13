@@ -18,12 +18,12 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { useDoc, useFirestore } from "@/firebase";
+import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Final Screenshot-Matched Hero v5.0.
- * UPDATED: Live Data Integration & High-Visibility Icons.
+ * @fileOverview Final Screenshot-Matched Hero v6.0.
+ * UPDATED: Live Data Integration & High-Visibility Icons with optimized backgrounds.
  */
 
 export default function Hero() {
@@ -45,7 +45,7 @@ export default function Hero() {
     };
 
     return {
-      questions: formatNumber(stats?.totalQuestions, "10,000+"),
+      questions: formatNumber(stats?.totalQuestions, "10k+"),
       mocks: formatNumber(stats?.totalMocks, "500+"),
       exams: formatNumber(stats?.totalBoards, "50+"),
       analytics: "Detailed"

@@ -7,7 +7,7 @@ import {
   ChevronRight,
   ArrowRight
 } from 'lucide-react';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -16,8 +16,8 @@ import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview Institutional Category Entry Nodes v5.6 (Hydration Hardened).
- * FIXED: Ensured root tag is always <section> and child elements match strictly on first render.
+ * @fileOverview Institutional Category Entry Nodes v6.0 (Self-Contained).
+ * UPDATED: Added standalone container and section padding for reordering flexibility.
  */
 
 const CATEGORY_META = [
@@ -85,53 +85,61 @@ export default function FeaturedCategories() {
   }, [exams, mounted]);
 
   return (
-    <section className="space-y-12 text-left">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-        <div className="space-y-2">
-           <div className="flex items-center gap-2">
-              <Landmark className="h-4 w-4 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">EXAM CATEGORIES</span>
-           </div>
-           <h2 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none">
-              STUDY BY <span className="text-primary">CATEGORY</span>
-           </h2>
-           <p className="text-slate-500 text-sm md:text-lg font-medium">Browse tests for your target exams.</p>
-        </div>
-        <Button asChild variant="ghost" className="text-primary font-black uppercase text-[10px] tracking-widest gap-2">
-           <Link href="/exams">View All Categories <ArrowRight className="h-4 w-4" /></Link>
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-        {categoriesWithCounts.map((cat, idx) => (
-          <div key={cat.id}>
-             <Link href={`/exams/category/${cat.id}`}>
-                <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100 p-8 relative">
-                   <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center mb-8 shadow-inner transition-transform group-hover:scale-110", cat.bgColor, cat.color)}>
-                      <div className="h-full w-full flex items-center justify-center overflow-hidden rounded-xl">
-                        <img src={cat.icon} className="h-full w-full object-contain p-2" alt="Icon" />
-                      </div>
-                   </div>
-                   
-                   <div className="space-y-3 flex-1">
-                      <h3 className="text-xl font-black text-[#0F172A] uppercase leading-tight group-hover:text-primary transition-colors">{cat.title}</h3>
-                      <p className="text-xs font-medium text-slate-400 leading-relaxed line-clamp-2">{cat.desc}</p>
-                   </div>
-
-                   <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
-                      {!mounted || loading ? (
-                        <div className="h-3 w-20 bg-slate-100 animate-pulse rounded" />
-                      ) : (
-                        <span className="text-[10px] font-black text-[#0F172A] uppercase tracking-widest">{cat.countLabel}</span>
-                      )}
-                      <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
-                         <ChevronRight className="h-4 w-4" />
-                      </div>
-                   </div>
-                </Card>
-             </Link>
+    <section className="py-16 md:py-24 bg-white">
+      <div className="container mx-auto px-4 max-w-7xl space-y-12 text-left">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <div className="space-y-2">
+             <div className="flex items-center gap-2">
+                <Landmark className="h-4 w-4 text-primary" />
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">EXAM CATEGORIES</span>
+             </div>
+             <h2 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none">
+                STUDY BY <span className="text-primary">CATEGORY</span>
+             </h2>
+             <p className="text-slate-500 text-sm md:text-lg font-medium">Browse tests for your target exams.</p>
           </div>
-        ))}
+          <Button asChild variant="ghost" className="text-primary font-black uppercase text-[10px] tracking-widest gap-2">
+             <Link href="/exams">View All Categories <ArrowRight className="h-4 w-4" /></Link>
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          {categoriesWithCounts.map((cat, idx) => (
+            <motion.div 
+              key={cat.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.05 }}
+            >
+               <Link href={`/exams/category/${cat.id}`}>
+                  <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col border border-slate-100 p-8 relative">
+                     <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center mb-8 shadow-inner transition-transform group-hover:scale-110", cat.bgColor, cat.color)}>
+                        <div className="h-full w-full flex items-center justify-center overflow-hidden rounded-xl">
+                          <img src={cat.icon} className="h-full w-full object-contain p-2" alt={cat.title} />
+                        </div>
+                     </div>
+                     
+                     <div className="space-y-3 flex-1">
+                        <h3 className="text-xl font-black text-[#0F172A] uppercase leading-tight group-hover:text-primary transition-colors">{cat.title}</h3>
+                        <p className="text-xs font-medium text-slate-400 leading-relaxed line-clamp-2">{cat.desc}</p>
+                     </div>
+
+                     <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
+                        {!mounted || loading ? (
+                          <div className="h-3 w-20 bg-slate-100 animate-pulse rounded" />
+                        ) : (
+                          <span className="text-[10px] font-black text-[#0F172A] uppercase tracking-widest">{cat.countLabel}</span>
+                        )}
+                        <div className="h-8 w-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+                           <ChevronRight className="h-4 w-4" />
+                        </div>
+                     </div>
+                  </Card>
+               </Link>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   );
