@@ -22,9 +22,10 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Final Screenshot-Matched Hero v1.0.
+ * @fileOverview Final Screenshot-Matched Hero v2.0.
  * MATCHED: "Prepare Smarter. Score Higher." headline and night-temple background.
  * MATCHED: 4-Column bottom stats bar with glassmorphism design.
+ * FIXED: Typography character clipping and precise color mapping.
  */
 
 export default function Hero() {
@@ -43,7 +44,7 @@ export default function Hero() {
   return (
     <section className="relative w-full bg-[#020817] overflow-hidden flex flex-col items-center">
       {/* 1. FULL ASPECT BACKGROUND LAYER */}
-      <div className="w-full relative aspect-[1024/576] min-h-[550px] md:min-h-0">
+      <div className="w-full relative aspect-[1024/576] min-h-[600px] md:min-h-0">
         <img 
           src="https://i.ibb.co/LXgcLVVq/Gemini-Generated-Image-n1so6on1so6on1so.png" 
           alt="Golden Temple Night" 
@@ -51,16 +52,25 @@ export default function Hero() {
           referrerPolicy="no-referrer"
         />
         
-        {/* SCREENSHOT MATCHED GRADIENTS */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#020817] via-[#020817]/60 to-transparent z-10" />
+        {/* PAIRED OVERLAYS FOR TEXT CONTRAST */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#020817] via-[#020817]/40 to-transparent z-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent z-10" />
         
+        {/* PUNJAB MAP TEXTURE OVERLAY (OPTIONAL STYLING) */}
+        <div className="absolute top-0 left-0 w-1/2 h-full opacity-10 pointer-events-none z-10 overflow-hidden">
+           <img 
+              src="https://www.mapsofindia.com/maps/punjab/punjab-map.jpg" 
+              className="h-full w-full object-contain object-left scale-150 grayscale invert" 
+              alt=""
+           />
+        </div>
+
         {/* 2. TEXT CONTENT HUB */}
         <div className="absolute inset-0 z-20 flex items-center">
            <div className="container mx-auto px-4 md:px-12 max-w-7xl">
-              <div className="max-w-3xl space-y-6 md:space-y-10 text-left">
+              <div className="max-w-3xl space-y-6 md:space-y-8 text-left">
                  
-                 {/* Top Badge */}
+                 {/* Top Badge Node */}
                  <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -72,35 +82,35 @@ export default function Hero() {
                     </span>
                  </motion.div>
 
-                 {/* Main Headline */}
+                 {/* Precise Typography Node */}
                  <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="space-y-2 md:space-y-4"
+                    className="space-y-4 md:space-y-6"
                  >
-                    <h1 className="text-4xl md:text-8xl font-black text-white leading-[0.95] tracking-tighter uppercase pr-10">
+                    <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-white leading-[0.95] tracking-tighter uppercase pr-10">
                        Prepare Smarter.<br/>
-                       <span className="text-primary">Score Higher.</span>
+                       <span className="text-primary italic pr-14">Score Higher.</span>
                     </h1>
                     <p className="text-sm md:text-2xl text-slate-200 font-medium max-w-xl leading-relaxed pr-6 drop-shadow-lg">
                        Punjab Government Exams di Complete Preparation ik hi Platform te.
                     </p>
                  </motion.div>
 
-                 {/* Buttons Row */}
+                 {/* Command Buttons */}
                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
-                    className="flex flex-col sm:flex-row gap-4 pt-4"
+                    className="flex flex-col sm:flex-row gap-4 pt-6"
                  >
-                    <Button asChild className="h-14 md:h-16 px-10 bg-primary hover:bg-orange-600 text-white font-black uppercase text-xs md:text-sm tracking-[0.1em] rounded-2xl shadow-4xl gap-3 border-none transition-all active:scale-95">
+                    <Button asChild className="h-14 md:h-16 px-10 bg-primary hover:bg-orange-600 text-white font-black uppercase text-xs md:text-sm tracking-[0.1em] rounded-xl md:rounded-2xl shadow-4xl gap-3 border-none transition-all active:scale-95">
                        <Link href="/mocks">
                           Start Free Mock <ArrowRight className="h-4 w-4 md:h-5 md:w-5" />
                        </Link>
                     </Button>
-                    <Button asChild variant="outline" className="h-14 md:h-16 px-10 border-white/20 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-xs md:text-sm tracking-[0.1em] rounded-2xl transition-all backdrop-blur-md">
+                    <Button asChild variant="outline" className="h-14 md:h-16 px-10 border-white/40 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-xs md:text-sm tracking-[0.1em] rounded-xl md:rounded-2xl transition-all backdrop-blur-md">
                        <Link href="/exams">
                           Explore Exams
                        </Link>
@@ -111,27 +121,27 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* 3. BOTTOM STATS BAR HUB (SCREENSHOT MATCHED) */}
-      <div className="w-full bg-[#020817] pt-0 pb-12 md:pb-16 -mt-10 md:-mt-20 relative z-30">
+      {/* 3. BOTTOM STATS BAR HUB (SCREENSHOT MATCHED GLASSMORPHISM) */}
+      <div className="w-full bg-[#020817] pt-0 pb-12 md:pb-16 -mt-10 md:-mt-24 relative z-30">
          <div className="container mx-auto px-4 md:px-12 max-w-7xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                <HeroStatCard 
-                 icon={<BookOpen className="text-primary" />} 
+                 icon={<BookOpen className="text-[#1E5EFF]" />} 
                  val="10,000+" 
                  label="Practice Questions" 
                />
                <HeroStatCard 
-                 icon={<ClipboardList className="text-orange-400" />} 
+                 icon={<ClipboardList className="text-[#F97316]" />} 
                  val="500+" 
                  label="Mock Tests" 
                />
                <HeroStatCard 
-                 icon={<ShieldCheck className="text-blue-400" />} 
+                 icon={<ShieldCheck className="text-[#1E5EFF]" />} 
                  val="50+" 
                  label="Exams Covered" 
                />
                <HeroStatCard 
-                 icon={<BarChart3 className="text-emerald-500" />} 
+                 icon={<BarChart3 className="text-[#10B981]" />} 
                  val="Detailed" 
                  label="Analytics" 
                />
@@ -144,13 +154,13 @@ export default function Hero() {
 
 function HeroStatCard({ icon, val, label }: { icon: React.ReactNode, val: string, label: string }) {
   return (
-    <Card className="bg-[#0B1528]/80 backdrop-blur-xl border border-white/5 p-4 md:p-8 rounded-2xl md:rounded-[2rem] text-left flex items-center gap-4 md:gap-6 group hover:bg-[#0B1528] transition-all duration-500">
+    <Card className="bg-[#0B1528]/80 backdrop-blur-2xl border border-white/10 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2rem] text-left flex items-center gap-4 md:gap-6 group hover:bg-[#0B1528] transition-all duration-500 shadow-2xl">
        <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
           {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-7 md:w-7" })}
        </div>
        <div className="min-w-0">
-          <p className="text-lg md:text-2xl font-black text-white leading-none mb-1">{val}</p>
-          <p className="text-[8px] md:text-[10px] font-black uppercase text-slate-500 tracking-widest truncate">{label}</p>
+          <p className="text-lg md:text-3xl font-black text-white leading-none mb-1 md:mb-2">{val}</p>
+          <p className="text-[7px] md:text-[10px] font-black uppercase text-slate-500 tracking-widest truncate">{label}</p>
        </div>
     </Card>
   )

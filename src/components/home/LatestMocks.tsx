@@ -18,8 +18,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Latest Mock Hub v34.1.
- * FIXED: Explicitly added all Card UI imports to resolve ReferenceError.
+ * @fileOverview Official Latest Mock Hub v35.0 (Hardened).
+ * FIXED: Ensured all Card UI components are imported correctly.
+ * STYLE: High-density vertical cards with action-oriented buttons.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -78,7 +79,7 @@ export default function LatestMocks() {
               <motion.div key={mock.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>
                 <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 rounded-[2.5rem] bg-white p-6 text-center flex flex-col h-full group">
                   
-                  <div className="h-16 w-16 mx-auto rounded-full bg-slate-50 flex items-center justify-center p-3 shadow-inner group-hover:scale-110 transition-transform mb-6 relative overflow-hidden">
+                  <div className="h-16 w-16 mx-auto rounded-full bg-slate-50 flex items-center justify-center p-3 shadow-inner group-hover:scale-110 transition-transform mb-6 relative overflow-hidden text-primary">
                      {board?.iconUrl && !failedImages[board.id] ? (
                        <img 
                          src={board.iconUrl} 
@@ -88,7 +89,7 @@ export default function LatestMocks() {
                          onError={() => setFailedImages(prev => ({...prev, [board.id]: true}))}
                        />
                      ) : (
-                       <Zap className="h-6 w-6 text-primary" />
+                       <Zap className="h-6 w-6 fill-current" />
                      )}
                   </div>
 
