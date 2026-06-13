@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { 
   ShieldCheck,
   Zap,
-  ArrowRight,
   Target,
   TrendingUp,
   Award,
@@ -14,11 +13,11 @@ import {
   Play,
   CheckCircle2,
   Sparkles,
-  Search,
-  Globe,
-  FileStack,
   ChevronRight,
-  Gem
+  Gem,
+  Smartphone,
+  Globe,
+  FileStack
 } from "lucide-react";
 import { useUser, useFirestore, useDoc } from "@/firebase";
 import { useState, useEffect, useMemo } from "react";
@@ -29,9 +28,9 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Elite Institutional Hero Hub v180.0.
- * DESIGN: Better than Testbook/Adda247 using a "Command Center" visual language.
- * FOCUS: Trust, Readiness, and selection-driven CTAs.
+ * @fileOverview Elite Institutional Hero Hub v200.0.
+ * DESIGN: High-converting command center matching provided reference.
+ * TARGET: PSSSB, Police, PPSC, PSPCL, PSTET, CTET, ETT.
  */
 export default function Hero() {
   const router = useRouter();
@@ -60,7 +59,7 @@ export default function Hero() {
 
   return (
     <section className="relative pt-12 pb-20 md:pt-24 md:pb-32 bg-[#0B1528] overflow-hidden text-left">
-      {/* 1. INSTITUTIONAL ATMOSPHERE */}
+      {/* BACKGROUND ATMOSPHERE */}
       <div className="absolute inset-0 z-0">
          <Image 
             src={heroImageUrl}
@@ -90,17 +89,17 @@ export default function Hero() {
 
               <div className="space-y-4 md:space-y-6">
                  <h1 className="text-4xl md:text-7xl font-headline font-black leading-[0.9] tracking-tighter text-white uppercase">
-                    Your Selection <br />
-                    <span className="text-primary italic">Starts Here.</span>
+                    Master Punjab <br />
+                    <span className="text-primary italic">Government Exams.</span>
                  </h1>
                  <p className="text-slate-400 text-base md:text-xl font-medium max-w-2xl leading-relaxed antialiased">
-                    Prepare for Punjab Government Exams with high-fidelity mock tests, expert-verified patterns, and AI-powered step-by-step logic.
+                    Unlock your selection potential with institutional-grade mock tests, verified exam patterns, and AI-powered logic solutions.
                  </p>
               </div>
 
-              {/* TACTICAL EXAM CHIPS */}
+              {/* TACTICAL EXAM REGISTRY CHIPS */}
               <div className="flex flex-wrap gap-2.5">
-                 {['PSSSB', 'POLICE', 'PPSC', 'PSPCL', 'PSTET', 'CTET', 'ETT'].map((board) => (
+                 {['PSSSB', 'POLICE', 'PPSC', 'PSPCL', 'PSTET', 'CTET', 'ETT', 'MASTER CADRE'].map((board) => (
                     <div key={board} className="px-4 py-1.5 rounded-lg bg-white/5 border border-white/10 text-slate-300 font-black text-[10px] tracking-widest hover:border-primary/50 transition-all cursor-default">
                        {board}
                     </div>
@@ -112,7 +111,7 @@ export default function Hero() {
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-4">
               <Button 
                 onClick={() => handleAction('/mocks')}
-                className="w-full sm:w-auto h-16 md:h-20 px-12 bg-primary hover:bg-orange-600 text-white rounded-[1.5rem] md:rounded-[2rem] font-black uppercase text-[12px] md:text-[14px] tracking-[0.2em] shadow-3xl shadow-primary/20 border-none transition-all active:scale-95 gap-4"
+                className="w-full sm:w-auto h-16 md:h-20 px-12 bg-primary hover:bg-orange-600 text-white rounded-[1.5rem] md:rounded-[2.5rem] font-black uppercase text-[12px] md:text-[14px] tracking-[0.2em] shadow-3xl shadow-primary/20 border-none transition-all active:scale-95 gap-4"
               >
                 Start Free Mock <Zap className="h-5 w-5 fill-current" />
               </Button>
@@ -131,7 +130,7 @@ export default function Hero() {
                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">MOST ATTEMPTED THIS WEEK</span>
                </div>
                <div className="flex flex-wrap gap-4">
-                  {['Revenue Patwari Mock', 'Police SI Prep', 'Master Cadre Hub'].map((exam) => (
+                  {['Revenue Patwari Mock', 'Police SI Prep', 'PSPCL Clerk Series', 'Master Cadre Hub'].map((exam) => (
                      <Link key={exam} href="/mocks" className="text-[11px] font-bold text-slate-300 hover:text-primary transition-all flex items-center gap-2 group">
                         {exam} <ChevronRight className="h-3 w-3 text-slate-600 group-hover:translate-x-1 transition-transform" />
                      </Link>
@@ -140,7 +139,7 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* RIGHT: DATA VISUALIZATION DASHBOARD */}
+          {/* RIGHT: READINESS DASHBOARD VISUALIZATION */}
           <div className="lg:col-span-5 relative">
              <motion.div 
                initial={{ opacity: 0, scale: 0.95 }}
@@ -155,10 +154,10 @@ export default function Hero() {
                    
                    <div className="flex items-center justify-between relative z-10">
                       <div className="space-y-1">
-                         <p className="text-[10px] font-black uppercase text-primary tracking-widest leading-none">SELECTION PREVIEW</p>
-                         <h3 className="text-xl font-headline font-black text-white uppercase">Your Readiness</h3>
+                         <p className="text-[10px] font-black uppercase text-primary tracking-widest leading-none">PREPARATION AUDIT</p>
+                         <h3 className="text-xl font-headline font-black text-white uppercase">Selection Hub</h3>
                       </div>
-                      <Badge className="bg-emerald-500/20 text-emerald-400 border-none px-4 py-1 font-black uppercase text-[10px]">Live Audit</Badge>
+                      <Badge className="bg-emerald-500/20 text-emerald-400 border-none px-4 py-1 font-black uppercase text-[10px]">Live Data</Badge>
                    </div>
                    
                    {/* READINESS GAUGE */}
@@ -183,8 +182,8 @@ export default function Hero() {
                    {/* VERIFIED STATUS */}
                    <div className="pt-8 border-t border-white/10 relative z-10">
                       <div className="grid grid-cols-1 gap-4">
-                         <FeatureNode icon={<CheckCircle2 className="text-emerald-500" />} label="Official Exam Patterns" />
-                         <FeatureNode icon={<Zap className="text-primary" />} label="AI Step-by-Step Logic" />
+                         <FeatureNode icon={<CheckCircle2 className="text-emerald-500" />} label="Pattern Verified Content" />
+                         <FeatureNode icon={<Zap className="text-primary" />} label="AI Step-by-Step Solutions" />
                       </div>
                    </div>
                 </div>
@@ -196,8 +195,8 @@ export default function Hero() {
         <div className="mt-16 md:mt-24 grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
            <FeatureStripNode icon={<Globe />} label="Full Bilingual Support" />
            <FeatureStripNode icon={<Award />} label="Real-Time State Merit" />
-           <FeatureStripNode icon={<FileStack />} label="PYQ Official Hub" />
-           <FeatureStripNode icon={<Smartphone />} label="Mobile-First Experience" />
+           <FeatureStripNode icon={<FileStack />} label="Official PYQ Hub" />
+           <FeatureStripNode icon={<Smartphone />} label="Advanced Mobile Interface" />
         </div>
       </div>
     </section>
