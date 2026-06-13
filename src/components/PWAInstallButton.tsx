@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Smartphone } from 'lucide-react';
+import { Download, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
@@ -13,8 +13,8 @@ interface PWAInstallButtonProps {
 }
 
 /**
- * @fileOverview Institutional PWA Trigger v4.0.
- * AUDIT: Strictly triggers native browser prompt.
+ * @fileOverview Hardened PWA Native Prompt Trigger v5.0.
+ * UPDATED: Enhanced listener for state synchronization.
  */
 export default function PWAInstallButton({ 
   className, 
@@ -26,16 +26,15 @@ export default function PWAInstallButton({
   const { toast } = useToast();
 
   useEffect(() => {
-    const checkState = () => {
-      if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
 
-      // 1. Check if captured in layout.tsx
+    const checkState = () => {
+      // 1. Capture from global window (Next.js layout may have already caught it)
       if ((window as any).deferredPrompt) {
         setDeferredPrompt((window as any).deferredPrompt);
-        console.log('[PWA_BUTTON] Prompt detected in global state');
       }
 
-      // 2. Check standalone mode
+      // 2. Check if already running in standalone mode
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
       if (isStandalone) {
         setIsInstalled(true);
@@ -43,8 +42,8 @@ export default function PWAInstallButton({
     };
 
     const handleInstallable = () => {
+      console.log('[PWA_BUTTON] Syncing deferredPrompt from global state');
       setDeferredPrompt((window as any).deferredPrompt);
-      console.log('[PWA_BUTTON] pwa-installable event received');
     };
 
     const handleInstalled = () => {
@@ -67,30 +66,30 @@ export default function PWAInstallButton({
     e.stopPropagation();
 
     if (!deferredPrompt) {
-      console.warn('[PWA_BUTTON] Attempted install but prompt is null');
+      console.warn('[PWA_BUTTON] Native prompt not available. Showing instructions.');
       toast({
         title: "Install from Menu",
-        description: "To install Cracklix, tap the 3-dots menu or Share icon and select 'Add to Home Screen'.",
+        description: "To install Cracklix, tap your browser's menu (3 dots or share icon) and select 'Add to Home Screen'.",
       });
       return;
     }
 
     try {
-      console.log('[PWA_BUTTON] Triggering native install dialog');
+      console.log('[PWA_BUTTON] Triggering native install prompt');
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      console.log(`[PWA_BUTTON] User choice: ${outcome}`);
+      console.log(`[PWA_BUTTON] User choice outcome: ${outcome}`);
       
       if (outcome === 'accepted') {
         setDeferredPrompt(null);
         (window as any).deferredPrompt = null;
       }
     } catch (err) {
-      console.error('[PWA_BUTTON] Prompt execution error:', err);
+      console.error('[PWA_BUTTON] Error triggering prompt:', err);
     }
   };
 
-  // Hide if already installed
+  // Hide the button if the app is already installed
   if (isInstalled) return null;
 
   return (
@@ -102,7 +101,7 @@ export default function PWAInstallButton({
         className
       )}
     >
-      <Download className="h-4 w-4" />
+      {deferredPrompt ? <Download className="h-4 w-4" /> : <Zap className="h-4 w-4" />}
       {showLabel && "Install App"}
     </Button>
   );

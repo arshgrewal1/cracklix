@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Hardened PWA Manifest v25.0.
- * Compliance: Validated for Android Chrome, Edge, and Desktop Chrome.
+ * @fileOverview Hardened PWA Manifest v26.0.
+ * Compliance: Separate 'any' and 'maskable' purposes for maximum compatibility.
  */
 export default function manifest(): MetadataRoute.Manifest {
   const brandIcon = 'https://i.ibb.co/S76nk4XG/IMG-20260613-215742.jpg';
@@ -24,13 +24,25 @@ export default function manifest(): MetadataRoute.Manifest {
         src: brandIcon,
         sizes: '192x192',
         type: 'image/jpeg',
-        purpose: 'any maskable',
+        purpose: 'any',
       },
       {
         src: brandIcon,
         sizes: '512x512',
         type: 'image/jpeg',
-        purpose: 'any maskable',
+        purpose: 'any',
+      },
+      {
+        src: brandIcon,
+        sizes: '192x192',
+        type: 'image/jpeg',
+        purpose: 'maskable',
+      },
+      {
+        src: brandIcon,
+        sizes: '512x512',
+        type: 'image/jpeg',
+        purpose: 'maskable',
       },
     ],
     shortcuts: [
