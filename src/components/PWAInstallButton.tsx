@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Zap } from 'lucide-react';
+import { Download, Smartphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 interface PWAInstallButtonProps {
   className?: string;
@@ -12,9 +13,8 @@ interface PWAInstallButtonProps {
 }
 
 /**
- * @fileOverview Hardened PWA Native Trigger v6.0.
- * REMOVED: Fallback messages and menu tips.
- * AUDIT: Strictly triggers native browser install prompt.
+ * @fileOverview Production PWA Trigger v7.0.
+ * Handles Native Browser Prompts (Android/Chrome) and Add to Home Screen (iOS).
  */
 export default function PWAInstallButton({ 
   className, 
@@ -22,62 +22,69 @@ export default function PWAInstallButton({
   showLabel = true 
 }: PWAInstallButtonProps) {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isIOS, setIsIOS] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const checkState = () => {
-      if ((window as any).deferredPrompt) {
-        setDeferredPrompt((window as any).deferredPrompt);
-      }
+    // 1. Detect Standalone Mode
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
+    setIsInstalled(isStandalone);
 
-      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone;
-      if (isStandalone) {
-        setIsInstalled(true);
-      }
-    };
+    // 2. Detect iOS
+    const ios = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+    setIsIOS(ios);
 
+    // 3. Sync initial prompt
+    if ((window as any).deferredPrompt) {
+      setDeferredPrompt((window as any).deferredPrompt);
+    }
+
+    // 4. Listen for availability
     const handleInstallable = () => {
+      console.log('[PWA] Install available');
       setDeferredPrompt((window as any).deferredPrompt);
     };
 
-    const handleInstalled = () => {
-      setIsInstalled(true);
-      setDeferredPrompt(null);
-    };
-
-    checkState();
     window.addEventListener('pwa-installable', handleInstallable);
-    window.addEventListener('pwa-installed', handleInstalled);
-
-    return () => {
-      window.removeEventListener('pwa-installable', handleInstallable);
-      window.removeEventListener('pwa-installed', handleInstalled);
-    };
+    return () => window.removeEventListener('pwa-installable', handleInstallable);
   }, []);
 
   const handleInstall = async (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation();
+    
+    if (isIOS) {
+       toast({
+         title: "Add to Home Screen",
+         description: "Tap 'Share' button in Safari and select 'Add to Home Screen' for direct access.",
+       });
+       return;
+    }
 
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      console.log('[PWA] Prompt not available yet');
+      return;
+    }
 
     try {
+      console.log('[PWA] PWA install triggered');
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      console.log(`[PWA] Install choice: ${outcome}`);
       
       if (outcome === 'accepted') {
         setDeferredPrompt(null);
         (window as any).deferredPrompt = null;
       }
     } catch (err) {
-      console.error('[PWA] Error triggering native prompt:', err);
+      console.error('[PWA] Installation failed:', err);
     }
   };
 
-  if (isInstalled || !deferredPrompt) return null;
+  if (isInstalled) return null;
+  // If not iOS and no prompt, hide button unless we want to show it for debugging
+  if (!isIOS && !deferredPrompt) return null;
 
   return (
     <Button
@@ -88,8 +95,8 @@ export default function PWAInstallButton({
         className
       )}
     >
-      <Download className="h-4 w-4" />
-      {showLabel && "Install App"}
+      {isIOS ? <Smartphone className="h-4 w-4" /> : <Download className="h-4 w-4" />}
+      {showLabel && (isIOS ? "Install App" : "Install App")}
     </Button>
   );
 }

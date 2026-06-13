@@ -8,8 +8,7 @@ import {
   ClipboardList,
   ShieldCheck,
   Star,
-  Users,
-  Download
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,9 +18,8 @@ import { doc } from "firebase/firestore";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Final Restoration Hero v308.0.
- * FIXED: Background imge shifted up to eliminate blank line gap.
- * RESTORED: Full vibrancy for Golden Temple asset.
+ * @fileOverview Final Restoration Hero v309.0.
+ * FIXED: Background image alignment and PWA Install integration.
  */
 
 export default function Hero() {
@@ -55,7 +53,6 @@ export default function Hero() {
   return (
     <section className="relative w-full bg-[#050B19] overflow-hidden min-h-[500px] md:min-h-[600px] lg:h-[750px] flex flex-col justify-start text-left border-b border-white/5 pb-12 mt-[-100px] pt-[100px]">
       
-      {/* RESTORED HIGH-VISIBILITY GOLDEN TEMPLE BACKGROUND */}
       <div className="absolute inset-0 z-0 overflow-hidden bg-[#050B19]">
         <motion.img 
           initial={{ opacity: 0 }}
@@ -63,10 +60,9 @@ export default function Hero() {
           transition={{ duration: 1.5 }}
           src="https://images.unsplash.com/photo-1594913366159-1832ffef8171?q=80&w=1920&auto=format&fit=crop" 
           alt="Golden Temple" 
-          className="w-full h-full object-cover object-[center_30%] scale-105"
+          className="w-full h-full object-cover object-[center_35%] scale-105"
           referrerPolicy="no-referrer"
         />
-        {/* Softened gradients for maximum temple visibility */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/50 to-transparent z-[1]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#050B19]/30 via-transparent to-transparent z-[1]" />
       </div>
@@ -103,8 +99,7 @@ export default function Hero() {
                transition={{ delay: 0.2 }}
                className="text-base md:text-xl lg:text-2xl text-slate-100 font-bold max-w-2xl leading-relaxed antialiased drop-shadow-lg"
             >
-               Punjab Government Exams di Complete Preparation <br className="hidden sm:block" />
-               ik hi Center te, Latest Official Patterns de Naal.
+               Punjab Government Exams di Complete Preparation ik hi Center te, Latest Official Patterns de Naal.
             </motion.p>
 
             <motion.div
@@ -125,9 +120,7 @@ export default function Hero() {
                />
 
                <Button asChild variant="outline" className="h-14 md:h-16 px-10 md:px-14 border-white text-white font-black text-xs md:text-sm tracking-[0.1em] rounded-2xl transition-all backdrop-blur-md hover:bg-white/10 uppercase border-2 shadow-2xl">
-                  <Link href="/exams">
-                     Exams
-                  </Link>
+                  <Link href="/exams">Exams</Link>
                </Button>
             </motion.div>
          </div>
@@ -137,21 +130,14 @@ export default function Hero() {
          <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 lg:gap-8">
                {liveStats.map((stat, idx) => (
-                  <motion.div
-                     key={stat.id}
-                     initial={{ opacity: 0, y: 10 }}
-                     animate={{ opacity: 1, y: 0 }}
-                     transition={{ delay: 0.4 + (idx * 0.1) }}
-                  >
-                     <Card className="bg-[#0B1528]/80 backdrop-blur-3xl border border-white/20 p-5 md:p-8 rounded-[2rem] text-left flex items-center gap-4 md:gap-6 group hover:bg-[#0B1528] transition-all duration-300 shadow-2xl overflow-hidden h-24 md:h-32">
+                  <motion.div key={stat.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 + (idx * 0.1) }}>
+                     <Card className="bg-[#0B1528]/80 backdrop-blur-3xl border border-white/20 p-5 md:p-8 rounded-[2rem] text-left flex items-center gap-4 md:gap-6 group transition-all duration-300 shadow-2xl overflow-hidden h-24 md:h-32">
                         <div className="shrink-0 h-10 w-10 md:h-14 md:w-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center transition-transform group-hover:scale-110 shadow-inner">
                            {stat.icon}
                         </div>
                         <div className="min-w-0 flex flex-col justify-center leading-tight">
                            <p className="text-2xl md:text-4xl font-headline font-black text-white tabular-nums leading-none mb-1">{stat.val}</p>
-                           <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] truncate">
-                              {stat.label}
-                           </p>
+                           <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] truncate">{stat.label}</p>
                         </div>
                      </Card>
                   </motion.div>

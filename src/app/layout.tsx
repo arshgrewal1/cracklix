@@ -34,7 +34,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0B1528',
+  themeColor: '#081a3a',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -54,6 +54,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <meta name="apple-mobile-web-app-title" content="Cracklix" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -67,7 +68,7 @@ export default function RootLayout({
               });
 
               window.addEventListener('appinstalled', (e) => {
-                console.log('[PWA] appinstalled fired');
+                console.log('[PWA] PWA installed successfully');
                 window.deferredPrompt = null;
                 window.dispatchEvent(new CustomEvent('pwa-installed'));
               });
@@ -75,8 +76,8 @@ export default function RootLayout({
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
                   navigator.serviceWorker.register('/sw.js').then(reg => {
-                    console.log('[PWA] SW Registered');
-                    if (reg.active) console.log('[PWA] SW Controlling page');
+                    console.log('[PWA] SW registered');
+                    if (reg.active) console.log('[PWA] SW active and controlling page');
                   }).catch(err => {
                     console.error('[PWA] SW registration failed:', err);
                   });
