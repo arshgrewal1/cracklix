@@ -23,8 +23,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Performance-Hardened Header v153.0.
- * UPDATED: Significantly increased logo size and navbar height on student side.
+ * @fileOverview Final Performance-Hardened Header v154.0.
+ * UPDATED: Increased logo and navbar size for maximum brand impact.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -71,7 +71,7 @@ export default function Navbar() {
   };
 
   // Increased height to accommodate the larger logo
-  const headerHeight = "h-24 md:h-32";
+  const headerHeight = "h-28 md:h-36";
 
   if (!mounted) {
     return (
@@ -107,7 +107,7 @@ export default function Navbar() {
             </Sheet>
             
             {/* Increased logo size container */}
-            <div className="h-24 md:h-28 flex items-center shrink-0">
+            <div className="h-28 md:h-32 flex items-center shrink-0">
                <Logo className="h-full !gap-0 active:scale-95 transition-transform" />
             </div>
           </div>
