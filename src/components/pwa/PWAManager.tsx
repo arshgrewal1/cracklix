@@ -8,8 +8,9 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Institutional PWA Lifecycle Manager v23.0.
- * HARDENED: Reliable 'deferredPrompt' capture for home-screen installation.
+ * @fileOverview Institutional PWA Lifecycle Manager v24.0 (Design Match).
+ * FIXED: Close button event propagation resolved.
+ * MATCHED: High-fidelity dark pill design from user screenshot.
  */
 export default function PWAManager() {
   const pathname = usePathname();
@@ -17,6 +18,7 @@ export default function PWAManager() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -24,27 +26,25 @@ export default function PWAManager() {
     // 1. Service Worker registration
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').then(
-        (reg) => console.log('[PWA] Service Worker Active'),
-        (err) => console.log('[PWA] Service Worker Offline')
+        () => console.log('[PWA] Service Worker Active'),
+        () => console.log('[PWA] Service Worker Offline')
       );
     }
 
     // 2. Capture Install Prompt
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
-      // Store event globally for other UI nodes (like Hero button)
       (window as any).deferredPrompt = e;
       setDeferredPrompt(e);
       
-      // Notify components like Navbar/Hero that app is installable
       window.dispatchEvent(new CustomEvent('pwa-installable'));
       
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
       const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin');
       
-      if (!isExcluded && !isStandalone) {
-        // Show prompt after a short delay for better UX
-        const timer = setTimeout(() => setShowPrompt(true), 4000);
+      // Only show if not dismissed in this session
+      if (!isExcluded && !isStandalone && !isDismissed) {
+        const timer = setTimeout(() => setShowPrompt(true), 3000);
         return () => clearTimeout(timer);
       }
     };
@@ -54,7 +54,6 @@ export default function PWAManager() {
       (window as any).deferredPrompt = null;
       setShowPrompt(false);
       setIsInstalled(true);
-      window.dispatchEvent(new CustomEvent('pwa-installed'));
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -68,7 +67,7 @@ export default function PWAManager() {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
-  }, [pathname]);
+  }, [pathname, isDismissed]);
 
   const handleInstallClick = async () => {
     const prompt = deferredPrompt || (window as any).deferredPrompt;
@@ -84,48 +83,60 @@ export default function PWAManager() {
     }
   };
 
-  if (!mounted || isInstalled) return null;
+  const handleClose = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowPrompt(false);
+    setIsDismissed(true); // Prevent re-showing in this session
+  };
+
+  if (!mounted || isInstalled || !showPrompt) return null;
 
   return (
     <AnimatePresence>
-      {showPrompt && (
-        <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
-          className="fixed bottom-24 md:bottom-10 left-4 right-4 md:left-auto md:right-10 z-[2000] md:w-96 pointer-events-auto"
-        >
-          <div className="bg-[#0F172A] text-white p-5 rounded-[2.5rem] shadow-5xl border border-white/10 flex items-center gap-4 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000">
-              <ShieldCheck className="h-20 w-20" />
-            </div>
-            
-            <div className="h-12 w-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0 border border-white/20">
-               <Zap className="h-6 w-6 text-primary fill-current" />
-            </div>
-
-            <div className="flex-1 min-w-0 text-left">
-               <h4 className="text-[13px] font-black uppercase tracking-tight leading-none mb-1">Download Cracklix</h4>
-               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Install for easy learning</p>
-            </div>
-
-            <div className="flex items-center gap-2">
-               <Button 
-                onClick={handleInstallClick}
-                className="h-10 px-4 bg-primary hover:bg-orange-600 text-white font-black uppercase text-[9px] tracking-widest rounded-xl shadow-lg border-none transition-all active:scale-95 gap-2"
-               >
-                  <Download className="h-3.5 w-3.5" /> Install
-               </Button>
-               <button 
-                onClick={() => setShowPrompt(false)}
-                className="p-2 text-slate-500 hover:text-white transition-colors"
-               >
-                  <X className="h-4 w-4" />
-               </button>
-            </div>
+      <motion.div
+        initial={{ y: 100, opacity: 0, scale: 0.9 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 100, opacity: 0, scale: 0.9 }}
+        className="fixed bottom-24 md:bottom-12 right-4 md:right-12 z-[2000] w-[calc(100%-2rem)] md:w-auto max-w-md pointer-events-auto"
+      >
+        <div className="bg-[#0F172A] text-white p-4 md:p-6 rounded-[2rem] md:rounded-[3rem] shadow-5xl border border-white/10 flex items-center gap-4 md:gap-8 relative overflow-hidden group">
+          {/* Background Decoration */}
+          <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000">
+            <ShieldCheck className="h-24 w-24" />
           </div>
-        </motion.div>
-      )}
+          
+          {/* Left Icon Node */}
+          <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner">
+             <Zap className="h-6 w-6 md:h-8 md:w-8 text-[#F97316] fill-current" />
+          </div>
+
+          {/* Content Node */}
+          <div className="flex-1 min-w-0 text-left">
+             <h4 className="text-sm md:text-lg font-black uppercase tracking-tight leading-none mb-1 md:mb-2">Download Cracklix</h4>
+             <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-tight">Install for fast, easy learning</p>
+          </div>
+
+          {/* Action Node */}
+          <div className="flex items-center gap-4">
+             <Button 
+              onClick={handleInstallClick}
+              className="h-10 md:h-12 px-5 md:px-8 bg-gradient-to-r from-[#F97316] to-orange-600 hover:to-orange-700 text-white font-black uppercase text-[10px] tracking-widest rounded-xl shadow-xl border-none transition-all active:scale-95 gap-2 flex items-center"
+             >
+                <Download className="h-3.5 w-3.5" /> INSTALL
+             </Button>
+             
+             {/* Close Button - FIXED Logic */}
+             <button 
+              onClick={handleClose}
+              className="p-2 text-slate-500 hover:text-white transition-colors cursor-pointer active:scale-90"
+              aria-label="Close notification"
+             >
+                <X className="h-5 w-5" />
+             </button>
+          </div>
+        </div>
+      </motion.div>
     </AnimatePresence>
   );
 }
