@@ -20,9 +20,10 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Final "Same to Same" Master Hero v60.0.
- * MATCHED: Exact alignment, typography (Title Case), and colors from the user reference.
- * FEATURES: Punjab map watermark, Blue cinematic shading, Integrated glassy cards.
+ * @fileOverview Final "Same to Same" Master Hero v70.0.
+ * MATCHED: Exact alignment, typography (Title Case), and colors.
+ * MOBILE: Strictly set to 230px height.
+ * FEATURES: Punjab map watermark, Blue cinematic shading, Glassy integrated cards.
  */
 
 export default function Hero() {
@@ -54,7 +55,7 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative w-full bg-[#050B19] overflow-hidden h-[700px] md:h-[850px] flex flex-col justify-center">
+    <section className="relative w-full bg-[#050B19] overflow-hidden h-[230px] md:h-[850px] flex flex-col justify-center">
       
       {/* 1. BACKGROUND LAYER STACK */}
       <div className="absolute inset-0 z-0">
@@ -68,31 +69,30 @@ export default function Hero() {
           referrerPolicy="no-referrer"
         />
         
-        {/* LARGE PUNJAB MAP WATERMARK (MATCHED POSITION) */}
+        {/* LARGE PUNJAB MAP WATERMARK (PIXEL PERFECT OFFSET) */}
         <div className="absolute inset-0 z-10 pointer-events-none opacity-[0.12]">
-           <div className="absolute top-[45%] left-[25%] -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] md:w-[800px] md:h-[800px] bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ea/Outline_Map_of_Punjab_India.svg')] bg-contain bg-no-repeat grayscale invert" />
+           <div className="absolute top-[45%] left-[25%] -translate-x-1/2 -translate-y-1/2 w-[250px] h-[250px] md:w-[800px] md:h-[800px] bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ea/Outline_Map_of_Punjab_India.svg')] bg-contain bg-no-repeat grayscale invert" />
         </div>
 
-        {/* BLUE CINEMATIC SHADING OVERLAY */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/85 to-transparent z-[15]" />
+        {/* BLUE CINEMATIC SHADING OVERLAY (LEFT TO RIGHT) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/80 to-transparent z-[15]" />
         
-        {/* Bottom blending for cards */}
-        <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-[#050B19]/50 to-transparent z-[15]" />
+        {/* BOTTOM BLENDING FOR STAT CARDS */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 md:h-64 bg-gradient-to-t from-[#050B19]/60 to-transparent z-[15]" />
       </div>
 
       {/* 2. PRIMARY CONTENT HUB */}
-      <div className="container mx-auto px-6 md:px-12 max-w-7xl relative z-20 pt-10 md:pt-0">
-         <div className="max-w-full md:max-w-4xl space-y-6 md:space-y-10 text-left">
+      <div className="container mx-auto px-4 md:px-12 max-w-7xl relative z-20">
+         <div className="max-w-full md:max-w-4xl space-y-3 md:space-y-10 text-left">
             
-            {/* PIXEL-PERFECT HEADINGS - Title Case as requested */}
+            {/* PIXEL-PERFECT HEADINGS - Title Case matches reference exactly */}
             <motion.div
-               initial={{ opacity: 0, y: 30 }}
+               initial={{ opacity: 0, y: 15 }}
                animate={{ opacity: 1, y: 0 }}
                className="space-y-0"
             >
-               <h1 className="text-5xl sm:text-6xl md:text-[100px] font-black text-white leading-[0.95] tracking-tighter antialiased">
-                  Prepare<br/>
-                  Smarter.<br/>
+               <h1 className="text-2xl sm:text-4xl md:text-[100px] font-black text-white leading-[1.1] md:leading-[0.95] tracking-tighter antialiased">
+                  Prepare Smarter.<br/>
                   <span className="text-[#F97316]">Score Higher.</span>
                </h1>
             </motion.div>
@@ -101,53 +101,53 @@ export default function Hero() {
                initial={{ opacity: 0 }}
                animate={{ opacity: 1 }}
                transition={{ delay: 0.2 }}
-               className="text-[15px] md:text-2xl text-slate-100 font-medium max-w-2xl leading-relaxed opacity-95"
+               className="text-[9px] md:text-2xl text-slate-100 font-medium max-w-2xl leading-relaxed opacity-90"
             >
                Punjab Government Exams di Complete Preparation ik hi Platform te.
             </motion.p>
 
-            {/* TACTICAL BUTTONS */}
+            {/* TACTICAL BUTTONS (MOBILE SCALED) */}
             <motion.div
-               initial={{ opacity: 0, y: 15 }}
+               initial={{ opacity: 0, y: 10 }}
                animate={{ opacity: 1, y: 0 }}
                transition={{ delay: 0.3 }}
-               className="flex flex-row flex-wrap gap-4 md:gap-8 pt-4"
+               className="flex flex-row flex-wrap gap-2 md:gap-8 pt-1 md:pt-4"
             >
-               <Button asChild className="h-12 md:h-16 px-8 md:px-14 bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[10px] md:text-[14px] tracking-[0.2em] rounded-xl md:rounded-2xl shadow-3xl gap-3 transition-all active:scale-95 border-none">
+               <Button asChild className="h-8 md:h-16 px-4 md:px-14 bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[8px] md:text-[14px] tracking-[0.1em] md:tracking-[0.2em] rounded-lg md:rounded-2xl shadow-3xl transition-all active:scale-95 border-none">
                   <Link href="/mocks" className="flex items-center">
-                     START FREE MOCK <ArrowRight className="h-4 w-4 md:h-5 md:w-5 ml-1" />
+                     FREE MOCK <ArrowRight className="h-2.5 w-2.5 md:h-5 md:w-5 ml-1" />
                   </Link>
                </Button>
-               <Button asChild variant="outline" className="h-12 md:h-16 px-8 md:px-14 border-white/30 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[10px] md:text-[14px] tracking-[0.2em] rounded-xl md:rounded-2xl transition-all backdrop-blur-xl border-[2px]">
+               <Button asChild variant="outline" className="h-8 md:h-16 px-4 md:px-14 border-white/30 bg-white/5 hover:bg-white/10 text-white font-black uppercase text-[8px] md:text-[14px] tracking-[0.1em] md:tracking-[0.2em] rounded-lg md:rounded-2xl transition-all backdrop-blur-xl border-[1.5px] md:border-[2px]">
                   <Link href="/exams">
-                     EXPLORE EXAMS
+                     EXAM HUB
                   </Link>
                </Button>
             </motion.div>
          </div>
       </div>
 
-      {/* 3. INTEGRATED BOTTOM STATS HUB (OVERLAY MATCH) */}
-      <div className="absolute bottom-10 md:bottom-12 left-0 right-0 z-30">
+      {/* 3. INTEGRATED BOTTOM STATS HUB (GLASSY OVERLAY) */}
+      <div className="absolute bottom-4 md:bottom-12 left-0 right-0 z-30">
          <div className="container mx-auto px-4 md:px-12 max-w-7xl">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6">
                <HeroStatCard 
-                 icon={<BookOpen className="text-blue-400 h-5 w-5 md:h-8 md:w-8" />} 
+                 icon={<BookOpen className="text-blue-400 h-3.5 w-3.5 md:h-8 md:w-8" />} 
                  val={liveStats.questions} 
                  label="Practice Questions" 
                />
                <HeroStatCard 
-                 icon={<ClipboardList className="text-orange-400 h-5 w-5 md:h-8 md:w-8" />} 
+                 icon={<ClipboardList className="text-orange-400 h-3.5 w-3.5 md:h-8 md:w-8" />} 
                  val={liveStats.mocks} 
                  label="Mock Tests" 
                />
                <HeroStatCard 
-                 icon={<ShieldCheck className="text-blue-500 h-5 w-5 md:h-8 md:w-8" />} 
+                 icon={<ShieldCheck className="text-blue-500 h-3.5 w-3.5 md:h-8 md:w-8" />} 
                  val={liveStats.exams} 
                  label="Exams Covered" 
                />
                <HeroStatCard 
-                 icon={<BarChart3 className="text-emerald-400 h-5 w-5 md:h-8 md:w-8" />} 
+                 icon={<BarChart3 className="text-emerald-400 h-3.5 w-3.5 md:h-8 md:w-8" />} 
                  val={liveStats.analytics} 
                  label="Analytics Hub" 
                />
@@ -160,13 +160,13 @@ export default function Hero() {
 
 function HeroStatCard({ icon, val, label }: { icon: React.ReactNode, val: string, label: string }) {
   return (
-    <Card className="bg-black/30 backdrop-blur-3xl border border-white/10 p-5 md:p-10 rounded-[2rem] md:rounded-[3rem] text-left flex items-center gap-4 md:gap-8 group hover:bg-black/50 transition-all duration-500 shadow-5xl">
+    <Card className="bg-black/30 backdrop-blur-3xl border border-white/10 p-2.5 md:p-10 rounded-xl md:rounded-[3rem] text-left flex items-center gap-2 md:gap-8 group hover:bg-black/50 transition-all duration-500 shadow-5xl overflow-hidden">
        <div className="shrink-0 transition-transform group-hover:scale-110">
           {icon}
        </div>
        <div className="min-w-0 flex flex-col justify-center">
-          <p className="text-2xl md:text-[48px] font-black text-white leading-none tracking-tight tabular-nums">{val}</p>
-          <p className="text-[7px] md:text-[11px] font-black text-slate-500 tracking-[0.1em] mt-2 md:mt-4 truncate uppercase leading-none">{label}</p>
+          <p className="text-xs md:text-[48px] font-black text-white leading-none tracking-tight tabular-nums">{val}</p>
+          <p className="text-[6px] md:text-[11px] font-black text-slate-500 tracking-[0.1em] mt-1 md:mt-4 truncate uppercase leading-none">{label}</p>
        </div>
     </Card>
   )
