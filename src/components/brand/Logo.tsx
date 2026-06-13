@@ -12,13 +12,13 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Official Master Logo Hub v16.0.
- * FIXED: Predictable height rendering and max-size constraints to prevent layout shifts.
- * UPDATED: Enforced h-full on Link and container for strict parent-controlled scaling.
+ * @fileOverview Official Master Logo Hub v17.0.
+ * FIXED: Removed overflow-hidden to ensure bottom taglines are never cut off.
+ * UPDATED: Enforced h-full on container for parent-controlled scaling.
  */
 export function LogoIcon({ className = "", imgClassName = "" }: { className?: string, imgClassName?: string }) {
   return (
-    <div className={cn("relative shrink-0 flex items-center justify-center h-full w-auto overflow-hidden", className)}>
+    <div className={cn("relative shrink-0 flex items-center justify-center h-full w-auto", className)}>
       <img 
         src="https://i.ibb.co/5WjGyLhn/1000110132-removebg-preview.png" 
         alt="Cracklix Logo" 

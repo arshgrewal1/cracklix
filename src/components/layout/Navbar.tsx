@@ -24,9 +24,9 @@ import { useToast } from "@/hooks/use-toast";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Header v174.0 (Compact Optimized).
- * UPDATED: Simplified "Login Hub" to "Login" and reduced button size.
- * UPDATED: Increased Logo scale for mobile devices.
+ * @fileOverview Professional Header v175.0 (Logo Visibility Fix).
+ * FIXED: Removed scale-110 and h-40 to prevent logo tagline from being cut off.
+ * UPDATED: Increased vertical padding for better logo framing.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -131,8 +131,8 @@ export default function Navbar() {
               </SheetContent>
             </Sheet>
             
-            <div className="flex items-center shrink-0 h-full">
-               <Logo imgClassName="h-40 scale-110 md:scale-100 origin-left" className="active:scale-95 transition-transform" />
+            <div className="flex items-center shrink-0 h-full py-1.5 md:py-3">
+               <Logo imgClassName="h-full origin-left" className="active:scale-95 transition-transform" />
             </div>
           </div>
 

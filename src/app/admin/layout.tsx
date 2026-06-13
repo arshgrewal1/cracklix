@@ -39,8 +39,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Institutional Admin Layout v177.0.
- * UPDATED: Synchronized header height with the global --header-height variable (145px desktop).
+ * @fileOverview Hardened Institutional Admin Layout v178.0.
+ * UPDATED: Optimized logo height in sidebar for full visibility.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -88,9 +88,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex flex-col h-full bg-[#0F172A] pointer-events-auto select-none">
        <div className="flex-1 custom-scrollbar overflow-y-auto overflow-x-hidden pb-10">
           
-          {/* BRANDING SECTION: CROP & SCALE */}
+          {/* BRANDING SECTION */}
           <div className="px-6 pt-4 pb-2 flex justify-center shrink-0">
-             <Logo href="/admin" imgClassName="h-40" />
+             <Logo href="/admin" imgClassName="h-32" />
           </div>
 
           <SidebarGroup className="pt-0">
