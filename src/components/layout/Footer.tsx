@@ -9,8 +9,8 @@ import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Final Screenshot-Matched Footer Hub v16.0.
- * UPDATED: Massively increased logo scale to h-44 for massive brand presence.
+ * @fileOverview Final Screenshot-Matched Footer Hub v17.0.
+ * UPDATED: Massively increased logo scale to h-60 for dominant brand identity.
  */
 export default function Footer() {
   const db = useFirestore();
@@ -31,10 +31,10 @@ export default function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-16 mb-24">
           
           {/* 1. BRAND HUB (LEFT) */}
-          <div className="lg:col-span-4 space-y-8">
-            <div className="space-y-6">
-               <div className="h-44 flex items-center">
-                  <Logo imgClassName="h-44" />
+          <div className="lg:col-span-4 space-y-10">
+            <div className="space-y-8">
+               <div className="h-60 flex items-center">
+                  <Logo imgClassName="h-60" />
                </div>
                <p className="text-slate-400 text-lg font-medium max-w-xs leading-relaxed">
                   {content.description}
