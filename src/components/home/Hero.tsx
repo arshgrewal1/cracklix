@@ -21,7 +21,8 @@ import { doc } from "firebase/firestore";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Final Calibrated Hero v239.0.
+ * @fileOverview Final Calibrated Hero v240.0.
+ * UPDATED: Moved background image higher and eliminated the top gap.
  */
 
 export default function Hero() {
@@ -55,7 +56,8 @@ export default function Hero() {
   return (
     <section className="relative w-full bg-[#050B19] overflow-hidden min-h-[480px] md:min-h-[500px] lg:h-[600px] flex flex-col justify-start text-left border-b border-white/5 pb-8 md:pb-12">
       
-      <div className="absolute top-0 left-0 right-0 h-[180px] md:h-[420px] lg:h-[500px] z-0 overflow-hidden bg-[#050B19]">
+      {/* BACKGROUND IMAGE - PULLED UP */}
+      <div className="absolute top-[-20px] left-0 right-0 h-[200px] md:h-[440px] lg:h-[520px] z-0 overflow-hidden bg-[#050B19]">
         <motion.img 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -69,7 +71,7 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19]/80 to-transparent z-[10] hidden md:block" />
       </div>
 
-      <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl relative z-[30] pt-10 md:pt-16">
+      <div className="container mx-auto px-4 md:px-8 lg:px-12 max-w-7xl relative z-[30] pt-4 md:pt-10">
          <div className="max-w-3xl space-y-4 md:space-y-5">
             
             <motion.div
