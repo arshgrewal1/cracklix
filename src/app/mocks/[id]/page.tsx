@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
@@ -30,8 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Individual Mock Gateway v24.0 (Compact UI).
- * UPDATED: Reduced font sizes and container heights for maximum mobile visibility.
+ * @fileOverview Individual Mock Gateway v25.0 (Ultra-Compact).
+ * UPDATED: Drastically reduced typography and padding for mobile visibility.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -104,7 +103,7 @@ export default function MockOverviewPage() {
   const isResumable = activeAttempt && activeAttempt.status === 'IN_PROGRESS';
 
   if (mockLoading || userLoading || (user && !accessChecked)) return (
-    <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
        <Zap className="h-12 w-12 text-primary animate-pulse" />
        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Syncing Prep Item...</p>
     </div>
@@ -135,55 +134,41 @@ export default function MockOverviewPage() {
     <div className="min-h-screen bg-white flex flex-col font-body">
       <Navbar />
       <main className="flex-1 text-left">
-        <section className="bg-slate-50 border-b border-slate-100 py-6 md:py-12 lg:py-16">
+        <section className="bg-slate-50 border-b border-slate-100 py-4 md:py-8 lg:py-10">
           <div className="container mx-auto px-4 max-w-6xl">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="flex items-start gap-4 flex-1">
-                <Button variant="ghost" onClick={() => router.back()} className="rounded-full h-10 w-10 border border-slate-200 bg-white p-0 shadow-sm shrink-0"><ChevronLeft className="h-5 w-5" /></Button>
-                <div className="space-y-3">
+                <Button variant="ghost" onClick={() => router.back()} className="rounded-full h-8 w-8 md:h-10 md:w-10 border border-slate-200 bg-white p-0 shadow-sm shrink-0"><ChevronLeft className="h-4 w-4" /></Button>
+                <div className="space-y-1.5">
                   <div className="flex flex-wrap items-center gap-2">
                       <Badge className={cn(
-                        "border-none text-[7px] md:text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-md", 
+                        "border-none text-[6px] md:text-[9px] font-black px-2 py-0.5 rounded-full uppercase tracking-widest shadow-md", 
                         isPremium ? "bg-amber-100 text-amber-600" : "bg-emerald-50 text-emerald-600"
                       )}>
-                        {isPremium ? '🔒 PREMIUM TEST' : 'FREE TEST'}
+                        {isPremium ? '🔒 PREMIUM' : 'FREE'}
                       </Badge>
-                      {mock.attemptLimit > 0 && (
-                        <Badge variant="outline" className="text-[7px] font-black uppercase border-slate-200 text-slate-400 px-2 py-0.5 rounded-full">
-                           Limit: {mock.attemptLimit}
-                        </Badge>
-                      )}
                   </div>
-                  <h1 className="text-xl md:text-4xl lg:text-5xl font-headline font-black text-[#0F172A] uppercase leading-[1] tracking-tight max-w-2xl">{mock.title}</h1>
-                  <div className="flex items-center gap-6 pt-2 text-slate-500 font-bold text-[9px] md:text-sm uppercase tracking-widest">
-                      <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /> {mock.duration} Mins</span>
-                      <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> {mock.totalQuestions} Qs</span>
-                      {!isLocked && mock.attemptLimit > 0 && (
-                        <span className="flex items-center gap-2"><Target className="h-4 w-4 text-emerald-500" /> {attemptsLeft} Left</span>
-                      )}
+                  <h1 className="text-lg md:text-3xl lg:text-4xl font-headline font-black text-[#0F172A] uppercase leading-[1.1] tracking-tight max-w-2xl">{mock.title}</h1>
+                  <div className="flex items-center gap-4 pt-1 text-slate-500 font-bold text-[8px] md:text-sm uppercase tracking-widest">
+                      <span className="flex items-center gap-1.5"><Clock className="h-3 w-3 text-primary" /> {mock.duration}m</span>
+                      <span className="flex items-center gap-1.5"><BookOpen className="h-3 w-3 text-primary" /> {mock.totalQuestions} Qs</span>
                   </div>
                 </div>
               </div>
-              <div className="w-full md:w-auto pt-4 md:pt-0">
+              <div className="w-full md:w-auto pt-2 md:pt-0">
                  {isLocked ? (
-                    <Button onClick={() => router.push('/pass')} className="w-full h-12 md:h-14 px-8 md:px-12 bg-orange-500 hover:bg-orange-600 text-white font-black uppercase tracking-widest text-[9px] md:text-[10px] rounded-xl shadow-xl gap-3 border-none transition-all active:scale-95 flex items-center justify-center">
-                      <Lock className="h-4 w-4" /> UNLOCK TEST
+                    <Button onClick={() => router.push('/pass')} className="w-full h-10 md:h-12 px-6 bg-orange-500 hover:bg-orange-600 text-white font-black uppercase tracking-widest text-[8px] md:text-[10px] rounded-lg shadow-lg border-none transition-all active:scale-95">
+                      <Lock className="h-3.5 w-3.5 mr-2" /> UNLOCK TEST
                     </Button>
                  ) : isLimitReached ? (
-                    <div className="flex flex-col gap-2">
-                       <div className="bg-rose-50 border border-rose-100 p-4 md:p-6 rounded-xl flex items-center gap-4 text-left shadow-lg">
-                          <AlertCircle className="h-6 w-6 text-rose-600" />
-                          <div><p className="text-[8px] font-black uppercase text-rose-700 tracking-widest leading-none mb-1">Limit Reached</p><p className="text-xs font-bold text-rose-500 uppercase leading-none">Max attempts reviewed.</p></div>
-                       </div>
-                       <Button asChild variant="outline" className="h-10 rounded-xl border-slate-200 font-black uppercase text-[8px] tracking-widest gap-2">
-                          <Link href={`/results/${mockId}`}><Target className="h-3 w-3" /> View Last Result</Link>
-                       </Button>
-                    </div>
+                    <Button asChild variant="outline" className="w-full h-10 rounded-lg border-slate-200 font-black uppercase text-[8px] tracking-widest gap-2">
+                       <Link href={`/results/${mockId}`}><Target className="h-3 w-3" /> View Result</Link>
+                    </Button>
                  ) : (
-                    <Button asChild className="w-full h-12 md:h-16 px-10 md:px-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[9px] md:text-[11px] rounded-xl shadow-2xl border-none transition-all active:scale-95">
-                      <Link href={`/mocks/${mockId}/instructions`} className="flex items-center justify-center gap-3">
-                        {isResumable ? <RefreshCw className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current text-primary" />} 
-                        {isResumable ? 'RESUME TEST' : 'START TEST'} <ArrowRight className="h-4 w-4" />
+                    <Button asChild className="w-full h-11 md:h-14 px-8 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[9px] md:text-[10px] rounded-xl shadow-2xl border-none transition-all active:scale-95">
+                      <Link href={`/mocks/${mockId}/instructions`} className="flex items-center justify-center gap-2">
+                        {isResumable ? <RefreshCw className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5 fill-current text-primary" />} 
+                        {isResumable ? 'RESUME' : 'START TEST'}
                       </Link>
                     </Button>
                  )}
@@ -192,12 +177,12 @@ export default function MockOverviewPage() {
           </div>
         </section>
 
-        <section className="py-10 md:py-16 bg-white">
+        <section className="py-6 md:py-10 bg-white">
            <div className="container mx-auto px-4 max-w-6xl">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
-                 <FeatureNode icon={<ShieldCheck className="text-emerald-500 h-4 w-4" />} title="Official Hub" desc="Official board patterns" />
-                 <FeatureNode icon={<Zap className="text-primary h-4 w-4" />} title="Logic Solutions" desc="Step-by-step explanations" />
-                 <FeatureNode icon={<Target className="text-blue-500 h-4 w-4" />} title="State Rankings" desc="See where you stand" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6">
+                 <FeatureNode icon={<ShieldCheck className="text-emerald-500 h-4 w-4" />} title="Official Hub" desc="Official Patterns" />
+                 <FeatureNode icon={<Zap className="text-primary h-4 w-4" />} title="Solutions" desc="Logic Explained" />
+                 <FeatureNode icon={<Target className="text-blue-500 h-4 w-4" />} title="Rankings" desc="State Merit" />
               </div>
            </div>
         </section>
@@ -209,10 +194,10 @@ export default function MockOverviewPage() {
 
 function FeatureNode({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
   return (
-    <div className="p-4 md:p-6 rounded-xl bg-slate-50 border border-slate-100 space-y-2 text-center group hover:bg-white hover:shadow-lg transition-all">
-      <div className="h-8 w-8 md:h-10 md:w-10 bg-white rounded-lg flex items-center justify-center mx-auto shadow-sm group-hover:scale-110 transition-transform">{icon}</div>
-      <h3 className="text-[11px] md:text-sm font-black text-[#0F172A] uppercase tracking-tight">{title}</h3>
-      <p className="text-slate-400 font-bold uppercase text-[7px] md:text-[8px] tracking-widest">{desc}</p>
+    <div className="p-3 md:p-5 rounded-xl bg-slate-50 border border-slate-100 space-y-1 text-center group hover:bg-white hover:shadow-lg transition-all">
+      <div className="h-7 w-7 md:h-9 md:w-9 bg-white rounded-lg flex items-center justify-center mx-auto shadow-sm group-hover:scale-110 transition-transform">{icon}</div>
+      <h3 className="text-[10px] md:text-xs font-black text-[#0F172A] uppercase tracking-tight">{title}</h3>
+      <p className="text-slate-400 font-bold uppercase text-[6px] md:text-[8px] tracking-widest">{desc}</p>
     </div>
   );
 }

@@ -16,8 +16,8 @@ import { LanguageDisplayMode } from "@/types";
 import Link from "next/link";
 
 /**
- * @fileOverview Hardened Instructions Hub v6.5.
- * FIXED: ChunkLoadError mitigation via optimized imports and state management.
+ * @fileOverview Hardened Instructions Hub v7.0 (Ultra-Compact).
+ * UPDATED: Drastically reduced typography and padding for mobile visibility.
  */
 export default function InstructionsPage() {
   const params = useParams();
@@ -89,33 +89,33 @@ export default function InstructionsPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 font-body select-none">
       <Navbar />
-      <main className="container mx-auto px-4 md:px-6 py-12 md:py-24 max-w-5xl text-left">
-        <div className="space-y-12">
-           <div className="flex flex-col md:row items-start md:items-center justify-between gap-6">
-              <div className="space-y-2">
+      <main className="container mx-auto px-4 md:px-6 py-6 md:py-12 max-w-5xl text-left">
+        <div className="space-y-6 md:space-y-10">
+           <div className="flex flex-col md:row items-start md:items-center justify-between gap-4">
+              <div className="space-y-1">
                  <div className="flex items-center gap-3">
-                    <ShieldCheck className="h-6 w-6 text-[#F97316]" />
-                    <Badge className="bg-orange-50 text-[#F97316] border-none px-4 py-1.5 rounded-full font-black uppercase text-[10px] tracking-widest shadow-sm">Official Evaluation Engine</Badge>
+                    <ShieldCheck className="h-5 w-5 text-[#F97316]" />
+                    <Badge className="bg-orange-50 text-[#F97316] border-none px-3 py-1 rounded-full font-black uppercase text-[8px] md:text-[10px] tracking-widest shadow-sm">Official Evaluation Engine</Badge>
                  </div>
-                 <h1 className="text-4xl md:text-7xl font-headline font-black text-[#0F172A] uppercase leading-[0.9] tracking-tighter">{mock.title}</h1>
+                 <h1 className="text-xl md:text-5xl font-headline font-black text-[#0F172A] uppercase leading-[1] tracking-tighter">{mock.title}</h1>
               </div>
            </div>
 
-           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <StatPlate icon={<Clock />} label="DURATION" val={`${mock.duration} Mins`} />
               <StatPlate icon={<BookOpen />} label="QUESTIONS" val={mock.totalQuestions} />
               <StatPlate icon={<Zap />} label="MAX MARKS" val={mock.totalQuestions * (mock.positiveMarks || 1)} />
               <StatPlate icon={<ShieldCheck />} label="PENALTY" val={`-${mock.negativeMarks || 0.25}`} />
            </div>
 
-           <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[3rem] bg-white overflow-hidden">
-              <CardHeader className="p-10 md:p-16 bg-slate-50/50 border-b border-slate-100">
-                 <CardTitle className="text-3xl font-headline font-black uppercase text-[#0F172A] flex items-center gap-6">
-                    <Info className="h-8 w-8 text-[#F97316]" /> Instructions Hub
+           <Card className="border-none shadow-3xl shadow-slate-900/5 rounded-[2rem] md:rounded-[3rem] bg-white overflow-hidden">
+              <CardHeader className="p-6 md:p-10 bg-slate-50/50 border-b border-slate-100">
+                 <CardTitle className="text-xl md:text-2xl font-headline font-black uppercase text-[#0F172A] flex items-center gap-4">
+                    <Info className="h-6 w-6 text-[#F97316]" /> Instructions Hub
                  </CardTitle>
               </CardHeader>
-              <CardContent className="p-10 md:p-16 space-y-12">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-6">
+              <CardContent className="p-6 md:p-10 space-y-8">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-4">
                     <Instruction text="All questions are compulsory and carry equal weightage." />
                     <Instruction text="Negative marking is applied for incorrect audit choices." />
                     <Instruction text="The test will auto-submit exactly when the timer hits zero." />
@@ -125,33 +125,33 @@ export default function InstructionsPage() {
                  </div>
 
                  {availableLangs.length > 1 && (
-                    <div className="pt-12 border-t border-slate-100 flex flex-col items-center gap-8">
+                    <div className="pt-8 border-t border-slate-100 flex flex-col items-center gap-6">
                        <div className="flex items-center gap-3">
-                          <Globe className="h-5 w-5 text-slate-400" />
-                          <p className="text-sm font-black text-[#0F172A] uppercase tracking-widest">Select Default Assessment Language</p>
+                          <Globe className="h-4 w-4 text-slate-400" />
+                          <p className="text-[11px] font-black text-[#0F172A] uppercase tracking-widest">Select Default Language</p>
                        </div>
-                       <div className="flex flex-wrap justify-center gap-4">
-                          {availableLangs.includes('ENGLISH') && <LangBtn label="English Only" val="ENGLISH" active={prefLang === 'ENGLISH'} onClick={setPrefLang} />}
-                          {availableLangs.includes('PUNJABI') && <LangBtn label="ਪੰਜਾਬੀ Only" val="PUNJABI" active={prefLang === 'PUNJABI'} onClick={setPrefLang} />}
-                          {availableLangs.includes('HINDI') && <LangBtn label="हिन्दी Only" val="HINDI" active={prefLang === 'HINDI'} onClick={setPrefLang} />}
+                       <div className="flex flex-wrap justify-center gap-3">
+                          {availableLangs.includes('ENGLISH') && <LangBtn label="English" val="ENGLISH" active={prefLang === 'ENGLISH'} onClick={setPrefLang} />}
+                          {availableLangs.includes('PUNJABI') && <LangBtn label="ਪੰਜਾਬੀ" val="PUNJABI" active={prefLang === 'PUNJABI'} onClick={setPrefLang} />}
+                          {availableLangs.includes('HINDI') && <LangBtn label="हिन्दी" val="HINDI" active={prefLang === 'HINDI'} onClick={setPrefLang} />}
                           {availableLangs.includes('ENGLISH_PUNJABI') && <LangBtn label="English & ਪੰਜਾਬੀ" val="ENGLISH_PUNJABI" active={prefLang === 'ENGLISH_PUNJABI'} onClick={setPrefLang} />}
                           {availableLangs.includes('ENGLISH_HINDI') && <LangBtn label="English & हिन्दी" val="ENGLISH_HINDI" active={prefLang === 'ENGLISH_HINDI'} onClick={setPrefLang} />}
                        </div>
                     </div>
                  )}
 
-                 <div className="bg-emerald-50 border-2 border-emerald-100 p-8 rounded-[2rem] flex items-start gap-4">
-                    <CheckCircle2 className="h-6 w-6 text-emerald-600 shrink-0 mt-1" />
-                    <p className="text-xs md:text-sm font-bold text-emerald-800 leading-relaxed uppercase">
-                       I have read and understood all the institutional guidelines. I am aware that using multiple tabs or external aid will result in immediate disqualification.
+                 <div className="bg-emerald-50 border-2 border-emerald-100 p-6 rounded-2xl flex items-start gap-4">
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
+                    <p className="text-[9px] md:text-xs font-bold text-emerald-800 leading-relaxed uppercase">
+                       I have read and understood all the guidelines. switching tabs will result in disqualification.
                     </p>
                  </div>
 
                  <Button 
                     onClick={handleStart}
-                    className="w-full h-20 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-[1.5rem] shadow-4xl group transition-all"
+                    className="w-full h-14 md:h-18 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-[11px] rounded-xl shadow-4xl group transition-all"
                  >
-                    Agree & Continue <ChevronRight className="ml-4 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+                    Agree & Continue <ChevronRight className="ml-3 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                  </Button>
               </CardContent>
            </Card>
@@ -164,21 +164,21 @@ export default function InstructionsPage() {
 
 function StatPlate({ icon, label, val }: any) {
   return (
-    <div className="p-8 bg-white rounded-[2rem] border border-slate-100 shadow-xl text-center space-y-2 group hover:border-[#F97316]/30 transition-all">
-       <div className="h-14 w-14 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto text-[#F97316] mb-3 shadow-inner">{icon}</div>
-       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
-       <p className="text-2xl font-black text-[#0F172A] uppercase tracking-tighter">{val}</p>
+    <div className="p-4 md:p-6 bg-white rounded-2xl border border-slate-100 shadow-lg text-center space-y-1 group hover:border-[#F97316]/30 transition-all">
+       <div className="h-10 w-10 bg-slate-50 rounded-xl flex items-center justify-center mx-auto text-[#F97316] mb-2 shadow-inner">{icon}</div>
+       <p className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">{label}</p>
+       <p className="text-sm md:text-xl font-black text-[#0F172A] uppercase tracking-tighter">{val}</p>
     </div>
   )
 }
 
 function Instruction({ text }: { text: string }) {
   return (
-    <div className="flex items-start gap-4 group">
-       <div className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-[#F97316] transition-colors">
-          <CheckCircle2 className="h-3.5 w-3.5 text-slate-400 group-hover:text-white" />
+    <div className="flex items-start gap-3 group">
+       <div className="h-5 w-5 rounded-full bg-slate-100 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-[#F97316] transition-colors">
+          <CheckCircle2 className="h-3 w-3 text-slate-400 group-hover:text-white" />
        </div>
-       <p className="text-slate-600 font-bold uppercase text-[11px] leading-relaxed tracking-tight">{text}</p>
+       <p className="text-slate-600 font-bold uppercase text-[9px] leading-snug tracking-tight">{text}</p>
     </div>
   )
 }
@@ -188,8 +188,8 @@ function LangBtn({ label, val, active, onClick }: any) {
     <button 
       onClick={() => onClick(val)}
       className={cn(
-        "px-6 py-4 rounded-xl border-2 font-black uppercase text-[9px] tracking-widest transition-all shadow-sm active:scale-95",
-        active ? "border-[#F97316] bg-orange-50 text-[#F97316] shadow-lg shadow-orange-500/10" : "border-slate-100 text-slate-400 hover:border-slate-300"
+        "px-4 py-2 rounded-lg border font-black uppercase text-[8px] tracking-widest transition-all shadow-sm active:scale-95",
+        active ? "border-[#F97316] bg-orange-50 text-[#F97316] shadow-lg" : "border-slate-100 text-slate-400 hover:border-slate-300"
       )}
     >
        {label}
