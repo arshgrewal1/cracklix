@@ -8,10 +8,10 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Fidelity Hero Node v18.0.
- * REFINED: Punjab Map on Left with Sky-Blue shading.
- * REFINED: Golden Temple on Right (Unshaded).
- * REFINED: Box text restored over the shaded map area.
+ * @fileOverview High-Fidelity Hero Node v20.0.
+ * MATCHED: Full Golden Temple background with left-side shading and map overlay.
+ * POSITIONING: Content anchored to Top-Left.
+ * SIZING: Focused 200px height for mobile background assets.
  */
 
 export default function Hero() {
@@ -31,64 +31,64 @@ export default function Hero() {
   return (
     <section className="relative w-full overflow-hidden flex flex-col bg-white">
       
-      {/* 1. BACKGROUND HUB - DUAL ASSET NODE */}
-      <div className="absolute top-0 left-0 right-0 h-[200px] md:h-[450px] z-0 flex overflow-hidden">
-         {/* LEFT HALF: PUNJAB MAP NODE WITH SKY-BLUE SHADING */}
-         <div className="relative w-full md:w-1/2 h-full bg-sky-50">
+      {/* 1. BACKGROUND HUB - LAYERED ASSETS */}
+      <div className="relative w-full h-[200px] md:h-[450px] overflow-hidden">
+         {/* LAYER 1: FULL GOLDEN TEMPLE BACKGROUND */}
+         <img 
+            src={goldenTempleImg} 
+            alt="Golden Temple" 
+            className="absolute inset-0 w-full h-full object-cover object-top"
+            referrerPolicy="no-referrer"
+         />
+
+         {/* LAYER 2: LEFT-SIDE SKY BLUE SHADING */}
+         <div className="absolute left-0 top-0 h-full w-full md:w-[60%] bg-gradient-to-r from-sky-100/90 via-sky-50/40 to-transparent z-10" />
+
+         {/* LAYER 3: LEFT-SIDE PUNJAB MAP WATERMARK */}
+         <div className="absolute left-0 top-0 h-full w-full md:w-[40%] z-20 pointer-events-none opacity-[0.15] mix-blend-multiply">
             <img 
-              src={punjabMap} 
-              className="w-full h-full object-cover opacity-20 contrast-125 saturate-150 mix-blend-multiply" 
-              alt="Punjab Map"
-            />
-            {/* SKY BLUE GRADIENT OVERLAY */}
-            <div className="absolute inset-0 bg-gradient-to-r from-sky-200/60 via-sky-100/40 to-transparent" />
-         </div>
-         
-         {/* RIGHT HALF: GOLDEN TEMPLE NODE - CLEAR & UNSHADED */}
-         <div className="relative w-full md:w-1/2 h-full">
-            <img 
-              src={goldenTempleImg} 
-              alt="Golden Temple" 
-              className="w-full h-full object-cover object-top"
-              referrerPolicy="no-referrer"
+               src={punjabMap} 
+               className="w-full h-full object-contain object-left" 
+               alt="Punjab Map overlay"
             />
          </div>
       </div>
 
-      {/* 2. CONTENT HUB - BOX TEXT OVER SHADED MAP */}
-      <div className="container mx-auto px-4 md:px-16 max-w-7xl relative z-10 pt-10 md:pt-16 flex-1 flex flex-col">
+      {/* 2. CONTENT HUB - TOP-LEFT ALIGNMENT */}
+      <div className="container mx-auto px-4 md:px-16 max-w-7xl relative z-30">
+         {/* NEGATIVE MARGIN TO PUSH TEXT UP OVER THE ASSETS */}
          <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="max-w-xl text-left space-y-5 md:space-y-8 bg-[#050B19]/85 backdrop-blur-xl p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] border border-white/10 shadow-5xl mt-[120px] md:mt-10"
+            className="max-w-xl text-left space-y-4 md:space-y-6 -mt-[180px] md:-mt-[400px] pb-12"
          >
             {/* BRAND BADGE */}
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/40 backdrop-blur-md border border-white/20 shadow-sm">
                <Star className="h-3 w-3 text-primary fill-current" />
-               <span className="text-[8px] md:text-[10px] font-black text-white uppercase tracking-widest">#1 Punjab Exam Prep Node</span>
+               <span className="text-[8px] md:text-[10px] font-black text-[#0F172A] uppercase tracking-widest">#1 Punjab Exam Prep</span>
             </div>
 
-            {/* HEADLINES */}
-            <div className="space-y-1.5 md:space-y-3">
-               <h1 className="text-[20px] sm:text-3xl md:text-5xl lg:text-6xl font-headline font-black text-white leading-none tracking-tighter uppercase">
+            {/* HEADLINES - COMPACT SCALE */}
+            <div className="space-y-1 md:space-y-2">
+               <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-headline font-black text-[#0F172A] leading-none tracking-tighter uppercase">
                   PREPARE SMARTER.
                </h1>
-               <h1 className="text-[20px] sm:text-3xl md:text-5xl lg:text-6xl font-headline font-black text-primary leading-none tracking-tighter uppercase">
+               <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-headline font-black text-primary leading-none tracking-tighter uppercase">
                   SCORE HIGHER.
                </h1>
             </div>
 
-            <p className="text-slate-400 font-bold uppercase text-[8px] md:text-sm tracking-[0.2em] max-w-md leading-relaxed antialiased">
+            <p className="text-[#0F172A] font-bold uppercase text-[9px] md:text-sm tracking-[0.2em] max-w-md leading-relaxed antialiased opacity-80">
                Official CBT engine verified by <br className="hidden md:block" />
                Arsh Grewal Management.
             </p>
 
             {/* ACTION BUTTONS */}
             <div className="flex flex-wrap gap-3 pt-2">
-               <Button asChild className="h-10 md:h-16 px-6 md:px-10 bg-primary hover:bg-orange-600 text-white font-black uppercase text-[9px] md:text-xs tracking-widest rounded-xl md:rounded-2xl shadow-3xl border-none transition-all active:scale-95">
+               <Button asChild className="h-10 md:h-14 px-6 md:px-10 bg-primary hover:bg-orange-600 text-white font-black uppercase text-[9px] md:text-xs tracking-widest rounded-xl md:rounded-2xl shadow-3xl border-none transition-all active:scale-95">
                   <Link href="/mocks">Start Free Mock <ArrowRight className="h-3.5 w-3.5 ml-1" /></Link>
                </Button>
-               <Button asChild variant="outline" className="h-10 md:h-16 px-6 md:px-10 border-white/20 bg-white/5 text-white hover:bg-white/10 font-black uppercase text-[9px] md:text-xs tracking-widest rounded-xl md:rounded-2xl shadow-xl transition-all active:scale-95">
+               <Button asChild variant="outline" className="h-10 md:h-14 px-6 md:px-10 border-[#0F172A]/20 bg-white/20 backdrop-blur-md text-[#0F172A] hover:bg-white/40 font-black uppercase text-[9px] md:text-xs tracking-widest rounded-xl md:rounded-2xl shadow-xl transition-all active:scale-95">
                   <Link href="/exams">Explore Exams</Link>
                </Button>
             </div>
@@ -96,7 +96,7 @@ export default function Hero() {
       </div>
 
       {/* 3. INSTITUTIONAL STATS HUB - BOTTOM ANCHORED */}
-      <div className="w-full bg-white py-12 md:py-20 border-t border-slate-50 mt-10 md:mt-20">
+      <div className="w-full bg-white py-12 md:py-20 border-t border-slate-50 mt-4">
          <div className="container mx-auto px-4 md:px-16 max-w-7xl">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
                <StatCard icon={<BookOpen />} label="QUESTIONS" val="50k+" color="text-blue-500" />
