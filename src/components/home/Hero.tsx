@@ -8,20 +8,21 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Final Screenshot-Matched Hero Hub v58.0.
- * UPDATED: Moved background image to the very top (immediately below header) on desktop.
- * UPDATED: Adjusted object positioning to ensure visual integrity.
+ * @fileOverview Final Screenshot-Matched Hero Hub v62.0.
+ * UPDATED: Moved whole content block up (pt-16 md:pt-24).
+ * UPDATED: Shrunken background image size on desktop (w-[60%]).
+ * FIXED: Added the brand bubble "N" to the primary button.
  */
 
 export default function Hero() {
   const templeImg = "https://i.ibb.co/LXgcLVVq/Gemini-Generated-Image-n1so6on1so6on1so.png";
 
   return (
-    <section className="relative w-full min-h-[700px] lg:min-h-[800px] bg-[#0B0F19] flex flex-col justify-start overflow-hidden font-body text-left">
+    <section className="relative w-full min-h-[600px] lg:min-h-[750px] bg-[#0B0F19] flex flex-col justify-start overflow-hidden font-body text-left">
       
       {/* 1. BACKGROUND LAYERS - PRECISE POSITIONING */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 right-0 w-full lg:w-[70%] h-[200px] lg:h-full lg:top-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-full lg:w-[60%] h-[200px] lg:h-full lg:top-0 pointer-events-none">
            <img 
               src={templeImg} 
               alt="Golden Temple" 
@@ -34,8 +35,8 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* 2. MAIN CONTENT HUB - INCREASED PADDING TO MOVE CONTENT DOWN */}
-      <div className="container mx-auto px-6 relative z-10 max-w-7xl pt-40 md:pt-60 pb-20">
+      {/* 2. MAIN CONTENT HUB - REDUCED PADDING TO MOVE CONTENT UP */}
+      <div className="container mx-auto px-6 relative z-10 max-w-7xl pt-16 md:pt-24 pb-20">
         <div className="max-w-4xl space-y-6 md:space-y-8 text-left">
           
            {/* BRAND BADGE */}
@@ -78,16 +79,19 @@ export default function Hero() {
               ik hi Center te, Latest Official Patterns de Naal.
            </motion.p>
 
-           {/* ACTIONS - SCREENSHOT MATCHED */}
+           {/* ACTIONS - SCREENSHOT MATCHED WITH BRAND BUBBLE */}
            <motion.div 
              initial={{ opacity: 0, y: 20 }}
              animate={{ opacity: 1, y: 0 }}
              transition={{ delay: 0.3 }}
              className="flex flex-col sm:flex-row gap-3 pt-6 md:pt-10"
            >
-              <Button asChild className="h-12 md:h-14 px-8 bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] rounded-xl shadow-3xl transition-all active:scale-95 border-none gap-3">
-                 <Link href="/mocks">
-                    FREE MOCK <ArrowRight className="h-4 w-4" />
+              <Button asChild className="h-12 md:h-14 pl-1 pr-8 bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] rounded-xl shadow-3xl transition-all active:scale-95 border-none gap-4">
+                 <Link href="/mocks" className="flex items-center">
+                    <div className="h-10 w-10 rounded-full bg-black/30 flex items-center justify-center shrink-0">
+                       <span className="text-white text-[11px] font-black">N</span>
+                    </div>
+                    FREE MOCK <ArrowRight className="h-4 w-4 ml-1" />
                  </Link>
               </Button>
               <Button asChild className="h-12 md:h-14 px-8 bg-white hover:bg-slate-50 text-[#0F172A] font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] rounded-xl transition-all active:scale-95 border-none gap-3 shadow-xl">
