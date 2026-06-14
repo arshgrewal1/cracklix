@@ -8,10 +8,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Unified Hero Node v22.0.
- * MATCHED: Content (Text + Stats) layered over Golden Temple background.
- * SHADING: Sky-blue Punjab map watermark on the left.
- * POSITIONING: Top-Left anchored text, Bottom-anchored stats.
+ * @fileOverview Refined Unified Hero Node v24.0.
+ * MATCHED: Text moved down, compact box size, and full sky-blue shading mix.
  */
 
 export default function Hero() {
@@ -29,11 +27,11 @@ export default function Hero() {
   }
 
   return (
-    <section className="relative w-full overflow-hidden flex flex-col bg-[#020817] min-h-[600px] md:min-h-[700px]">
+    <section className="relative w-full overflow-hidden flex flex-col bg-[#020817] min-h-[600px] md:min-h-[800px]">
       
-      {/* 1. UNIFIED BACKGROUND LAYER */}
+      {/* 1. UNIFIED BACKGROUND STACK */}
       <div className="absolute inset-0 z-0">
-         {/* BASE: GOLDEN TEMPLE */}
+         {/* BASE LAYER: GOLDEN TEMPLE */}
          <img 
             src={goldenTempleImg} 
             alt="Golden Temple" 
@@ -41,63 +39,63 @@ export default function Hero() {
             referrerPolicy="no-referrer"
          />
 
-         {/* OVERLAY: SKY BLUE SHADING (LEFT) */}
-         <div className="absolute left-0 top-0 h-full w-full md:w-[70%] bg-gradient-to-r from-sky-100/90 via-sky-50/50 to-transparent z-10" />
+         {/* SHADING LAYER: FULL SKY BLUE MIX (LEFT) */}
+         <div className="absolute left-0 top-0 h-full w-full md:w-[75%] bg-gradient-to-r from-sky-200/95 via-sky-100/80 to-transparent z-10" />
 
-         {/* OVERLAY: PUNJAB MAP WATERMARK (LEFT) */}
-         <div className="absolute left-0 top-0 h-full w-full md:w-[40%] z-20 pointer-events-none opacity-[0.12] mix-blend-multiply">
+         {/* TEXTURE LAYER: PUNJAB MAP (MIXED IN SHADING) */}
+         <div className="absolute left-0 top-0 h-full w-full md:w-[45%] z-20 pointer-events-none opacity-[0.1] mix-blend-multiply">
             <img 
                src={punjabMap} 
                className="w-full h-full object-contain object-left" 
-               alt="Punjab Map overlay"
+               alt="Punjab Map watermark"
             />
          </div>
       </div>
 
-      {/* 2. CONTENT HUB - ALL LAYERED OVER BACKGROUND */}
-      <div className="container mx-auto px-4 md:px-16 max-w-7xl relative z-30 flex flex-col justify-between flex-1 py-12 md:py-20">
+      {/* 2. CONTENT HUB - COMPACT & POSITIONED */}
+      <div className="container mx-auto px-4 md:px-12 lg:px-16 max-w-7xl relative z-30 flex flex-col justify-between flex-1">
          
-         {/* TOP-LEFT BRAND AREA */}
+         {/* TOP-LEFT COMPACT BOX (Moved Down slightly) */}
          <motion.div 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="max-w-xl text-left space-y-6 md:space-y-8"
+            className="pt-20 md:pt-32 max-w-lg text-left space-y-6 md:space-y-8"
          >
             {/* BRAND BADGE */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/40 backdrop-blur-md border border-white/20 shadow-sm">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/40 backdrop-blur-md border border-white/20 shadow-sm w-fit">
                <Star className="h-3 w-3 text-[#F97316] fill-current" />
-               <span className="text-[8px] md:text-[10px] font-black text-[#0F172A] uppercase tracking-widest">#1 Punjab Exam Preparation Platform</span>
+               <span className="text-[8px] md:text-[10px] font-black text-[#0F172A] uppercase tracking-widest">#1 Punjab Exam Preparation</span>
             </div>
 
-            {/* HEADLINES */}
+            {/* HEADLINES (Reduced Size) */}
             <div className="space-y-1 md:space-y-2">
-               <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-headline font-black text-[#0F172A] leading-none tracking-tighter uppercase">
+               <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-headline font-black text-[#0F172A] leading-none tracking-tighter uppercase">
                   PREPARE SMARTER.
                </h1>
-               <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-7xl font-headline font-black text-[#F97316] leading-none tracking-tighter uppercase">
+               <h1 className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-headline font-black text-[#F97316] leading-none tracking-tighter uppercase">
                   SCORE HIGHER.
                </h1>
             </div>
 
-            <p className="text-[#0F172A] font-bold uppercase text-[9px] md:text-sm tracking-[0.2em] max-w-md leading-relaxed antialiased opacity-90">
+            <p className="text-[#0F172A] font-bold uppercase text-[9px] md:text-xs tracking-[0.2em] max-w-xs leading-relaxed antialiased opacity-90">
                Official CBT engine verified by <br className="hidden md:block" />
                Arsh Grewal Management.
             </p>
 
-            {/* ACTION BUTTONS */}
+            {/* ACTION BUTTONS (Compact) */}
             <div className="flex flex-wrap gap-3 md:gap-4 pt-2">
-               <Button asChild className="h-10 md:h-16 px-6 md:px-12 bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[9px] md:text-xs tracking-widest rounded-xl md:rounded-2xl shadow-3xl border-none transition-all active:scale-95">
+               <Button asChild className="h-10 md:h-14 px-6 md:px-10 bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[9px] md:text-[10px] tracking-widest rounded-xl shadow-xl border-none transition-all active:scale-95">
                   <Link href="/mocks">Start Free Mock <ArrowRight className="h-4 w-4 ml-1" /></Link>
                </Button>
-               <Button asChild variant="outline" className="h-10 md:h-16 px-6 md:px-12 border-[#0F172A]/20 bg-white/30 backdrop-blur-md text-[#0F172A] hover:bg-white/50 font-black uppercase text-[9px] md:text-xs tracking-widest rounded-xl md:rounded-2xl shadow-xl transition-all active:scale-95">
-                  <Link href="/exams">Explore Exams</Link>
+               <Button asChild variant="outline" className="h-10 md:h-14 px-6 md:px-10 border-[#0F172A]/20 bg-white/30 backdrop-blur-md text-[#0F172A] hover:bg-white/50 font-black uppercase text-[9px] md:text-[10px] tracking-widest rounded-xl shadow-lg transition-all active:scale-95">
+                  <Link href="/exams">Explore Hub</Link>
                </Button>
             </div>
          </motion.div>
 
-         {/* BOTTOM STATS AREA - NO WHITE BACKGROUND */}
-         <div className="pt-12 md:pt-20">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+         {/* BOTTOM STATS HUB (Floating Over Mixed Background) */}
+         <div className="pb-12 md:pb-20">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6">
                <StatCard icon={<BookOpen />} label="QUESTIONS" val="50k+" color="text-blue-600" />
                <StatCard icon={<ClipboardList />} label="MOCK TESTS" val="500+" color="text-[#F97316]" />
                <StatCard icon={<ShieldCheck />} label="ASPIRANTS" val="15k+" color="text-emerald-600" />
@@ -111,13 +109,13 @@ export default function Hero() {
 
 function StatCard({ icon, label, val, color }: any) {
    return (
-      <div className="p-4 md:p-8 bg-white/20 backdrop-blur-sm border border-white/20 rounded-[1.5rem] md:rounded-[2.5rem] space-y-3 shadow-inner group hover:bg-white/40 transition-all text-left">
-         <div className={cn("h-8 w-8 md:h-12 md:w-12 rounded-xl bg-white/80 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm", color)}>
-            {React.cloneElement(icon, { className: "h-4 w-4 md:h-6 md:w-6" })}
+      <div className="p-4 md:p-6 bg-white/20 backdrop-blur-sm border border-white/20 rounded-[1.2rem] md:rounded-[2rem] space-y-2 shadow-inner group hover:bg-white/40 transition-all text-left">
+         <div className={cn("h-7 w-7 md:h-10 md:w-10 rounded-lg bg-white/80 flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm", color)}>
+            {React.cloneElement(icon, { className: "h-3.5 w-3.5 md:h-5 md:w-5" })}
          </div>
          <div className="space-y-0.5">
-            <p className="text-xl md:text-4xl font-headline font-black text-[#0F172A] leading-none tracking-tighter">{val}</p>
-            <p className="text-[7px] md:text-[10px] font-black text-[#0F172A]/60 uppercase tracking-widest">{label}</p>
+            <p className="text-lg md:text-3xl font-headline font-black text-[#0F172A] leading-none tracking-tighter">{val}</p>
+            <p className="text-[6.5px] md:text-[9px] font-black text-[#0F172A]/60 uppercase tracking-widest">{label}</p>
          </div>
       </div>
    )
