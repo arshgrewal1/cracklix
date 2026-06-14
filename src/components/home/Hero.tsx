@@ -9,8 +9,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened Screenshot-Matched Hero Hub v92.0.
- * UPDATED: Calibrated metric registry for equal spacing and right-side end alignment.
+ * @fileOverview Hardened Screenshot-Matched Hero Hub v93.0.
+ * UPDATED: Slightly reduced top padding to move text upward for better framing.
  */
 
 export default function Hero() {
@@ -33,8 +33,8 @@ export default function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-transparent to-transparent lg:hidden" />
       </div>
 
-      {/* 2. MAIN CONTENT HUB - LEFT ANCHORED, REPOSITIONED LOWER */}
-      <div className="container mx-auto px-6 relative z-10 max-w-7xl pt-20 md:pt-32 lg:pt-40">
+      {/* 2. MAIN CONTENT HUB - LEFT ANCHORED, REPOSITIONED SLIGHTLY UP */}
+      <div className="container mx-auto px-6 relative z-10 max-w-7xl pt-14 md:pt-24 lg:pt-28">
         <div className="max-w-3xl space-y-6 md:space-y-8 text-left">
           
            {/* BRAND BADGE */}
