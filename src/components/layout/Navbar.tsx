@@ -23,8 +23,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Screenshot-Matched Navbar v260.0.
- * UPDATED: Exact replica of navigation items, button styles, and colors from user screenshot.
+ * @fileOverview Final Screenshot-Matched Navbar v261.0.
+ * UPDATED: Exact replica of navigation items, orange active state background, and button styles.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -69,17 +69,20 @@ export default function Navbar() {
               <Menu className="h-6 w-6" />
             </button>
             
-            <Logo imgClassName="h-10 md:h-12 origin-left" />
+            {/* Logo positioned slightly lower per user request */}
+            <div className="pt-1">
+              <Logo imgClassName="h-10 md:h-12 origin-left" />
+            </div>
           </div>
 
           <div className="hidden lg:flex items-center gap-6 xl:gap-8 h-full">
-            <NavLink icon={<Home />} label="HOME PAGE" href="/" active={pathname === "/"} />
-            <NavLink icon={<Zap />} label="PRACTICE TESTS" href="/mocks" active={pathname.startsWith("/mocks")} />
-            <NavLink icon={<Newspaper />} label="CURRENT AFFAIRS" href="/current-affairs" active={pathname === "/current-affairs"} />
+            <NavLink icon={<Home className="h-4 w-4" />} label="HOME PAGE" href="/" active={pathname === "/"} />
+            <NavLink icon={<Zap className="h-4 w-4" />} label="PRACTICE TESTS" href="/mocks" active={pathname.startsWith("/mocks")} />
+            <NavLink icon={<Newspaper className="h-4 w-4" />} label="CURRENT AFFAIRS" href="/current-affairs" active={pathname === "/current-affairs"} />
 
             <Link href="/pass" className="transition-all active:scale-95 h-full flex items-center">
               <div className={cn(
-                "px-4 h-10 rounded-lg border flex items-center justify-center gap-2 transition-all",
+                "px-5 h-10 rounded-lg border flex items-center justify-center gap-2 transition-all",
                 "bg-white/5 border-white/10 hover:bg-white/10 text-white"
               )}>
                 <Gem className="h-4 w-4 text-[#F97316]" />
@@ -95,7 +98,7 @@ export default function Navbar() {
                </Link>
              </Button>
 
-             <Link href="/search" className="w-10 h-10 rounded-xl border border-white/10 transition-all flex items-center justify-center bg-white/5 text-slate-400 hover:text-white">
+             <Link href="/search" className="w-11 h-11 rounded-xl border border-white/10 transition-all flex items-center justify-center bg-white/5 text-slate-400 hover:text-white">
                 <Search className="h-5 w-5" />
              </Link>
 
@@ -103,7 +106,7 @@ export default function Navbar() {
                {user ? (
                  <DropdownMenu>
                    <DropdownMenuTrigger asChild>
-                     <button className="w-10 h-10 rounded-full overflow-hidden border-2 border-white/10 hover:border-primary transition-all bg-white shadow-2xl flex items-center justify-center cursor-pointer">
+                     <button className="w-11 h-11 rounded-full overflow-hidden border-2 border-white/10 hover:border-primary transition-all bg-white shadow-2xl flex items-center justify-center cursor-pointer">
                        <StudentAvatar profile={profile} className="h-full w-full border-none" iconClassName="text-[#0B1528]" />
                      </button>
                    </DropdownMenuTrigger>
@@ -130,7 +133,7 @@ export default function Navbar() {
                    </DropdownMenuContent>
                  </DropdownMenu>
                ) : (
-                 <Button asChild className="bg-[#F97316] hover:bg-orange-600 text-white font-black px-8 h-11 uppercase text-[11px] tracking-widest shadow-2xl border-none">
+                 <Button asChild className="bg-[#F97316] hover:bg-orange-600 text-white font-black px-8 h-11 rounded-xl uppercase text-[11px] tracking-widest shadow-2xl border-none">
                    <Link href="/login">LOGIN</Link>
                  </Button>
                )}
@@ -155,13 +158,13 @@ export default function Navbar() {
 function NavLink({ icon, label, href, active }: { icon: React.ReactNode, label: string, href: string, active: boolean }) {
   return (
     <Link href={href} className={cn(
-      "flex items-center gap-3 transition-all h-10 px-4 rounded-lg",
-      active ? "bg-[#F97316] text-white" : "text-slate-400 hover:text-white"
+      "flex items-center gap-3 transition-all h-11 px-4 rounded-xl",
+      active ? "bg-[#F97316] text-white shadow-xl shadow-orange-500/20" : "text-slate-400 hover:text-white"
     )}>
-      <span className={cn("h-4 w-4", active ? "text-white" : "text-slate-500")}>
-        {React.cloneElement(icon as React.ReactElement, { className: "h-full w-full" })}
+      <span className={cn("shrink-0", active ? "text-white" : "text-slate-500")}>
+        {icon}
       </span>
-      <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
+      <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">{label}</span>
     </Link>
   )
 }
