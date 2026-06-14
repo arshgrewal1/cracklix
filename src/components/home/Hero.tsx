@@ -7,12 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { useDoc, useFirestore } from "@/firebase";
+import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Refined Official Hero Hub v125.0.
- * MATCHED: Header style to user reference image (Icon + Spaced Label + Split Heading).
+ * @fileOverview Refined Official Hero Hub v126.0 (Logo Calibration).
+ * UPDATED: Increased logo container size and scaling for PSPCL and PSTET visibility.
  */
 
 export default function Hero() {
@@ -52,7 +52,7 @@ export default function Hero() {
                 <Landmark className="h-5 w-5 md:h-6 md:w-6" />
               </div>
               <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-slate-400">
-                OFFICIAL EXAM PORTAL
+                OFFICIAL EXAM LIST
               </span>
             </motion.div>
 
@@ -119,6 +119,7 @@ export default function Hero() {
                desc="Technical banks & Power papers."
                color="emerald"
                href="/exams/category/punjab-technical"
+               isDetailedLogo
              />
              <ExamPortalCard 
                logoUrl="https://static.pseb.ac.in/newweb/images/pseb-logo.png"
@@ -127,6 +128,7 @@ export default function Hero() {
                desc="Pedagogy & subject master series."
                color="purple"
                href="/exams/category/punjab-teaching"
+               isDetailedLogo
              />
           </div>
         </div>
@@ -145,7 +147,7 @@ export default function Hero() {
   );
 }
 
-function ExamPortalCard({ logoUrl, tag, title, desc, color, href }: any) {
+function ExamPortalCard({ logoUrl, tag, title, desc, color, href, isDetailedLogo = false }: any) {
   const colorStyles: any = {
     orange: "text-orange-400 bg-orange-500/10 border-orange-500/20",
     blue: "text-blue-400 bg-blue-500/10 border-blue-500/20",
@@ -160,8 +162,16 @@ function ExamPortalCard({ logoUrl, tag, title, desc, color, href }: any) {
     >
        <div className="space-y-5">
           <div className="flex items-center justify-between">
-             <div className="h-12 w-12 rounded-xl bg-white flex items-center justify-center p-2 shadow-inner overflow-hidden">
-                <img src={logoUrl} alt={tag} className="w-full h-full object-contain" />
+             <div className="h-14 w-14 rounded-2xl bg-white flex items-center justify-center p-1.5 shadow-inner overflow-hidden shrink-0">
+                <img 
+                  src={logoUrl} 
+                  alt={tag} 
+                  className={cn(
+                    "w-full h-full object-contain",
+                    isDetailedLogo && "scale-110"
+                  )} 
+                  referrerPolicy="no-referrer"
+                />
              </div>
              <Badge className={cn("border-none text-[8px] font-black uppercase tracking-widest px-2.5 py-0.5 rounded shadow-sm", colorStyles[color])}>
                 {tag}
