@@ -3,14 +3,16 @@ import React from "react";
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/home/Hero";
 import ContinueLearning from "@/components/home/ContinueLearning";
+import FeaturedCategories from "@/components/home/FeaturedCategories";
+import PopularExams from "@/components/home/PopularExams";
 import LatestMocks from "@/components/home/LatestMocks";
 import AppPreview from "@/components/home/AppPreview";
 import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
 
 /**
- * @fileOverview Official Home Hub v172.0.
- * UPDATED: Removed FeaturedCategories section and prioritized LatestMocks below student context.
+ * @fileOverview Official Home Hub v173.0 (Full Restoration).
+ * RESTORED: FeaturedCategories and PopularExams to provide full discovery coverage.
  */
 
 export default function HomePage() {
@@ -26,6 +28,8 @@ export default function HomePage() {
 
       {/* PHASE 3: DISCOVERY LAYERS */}
       <div className="bg-white rounded-t-[3rem] md:rounded-t-[5rem] -mt-10 relative z-20 overflow-hidden">
+        <FeaturedCategories />
+        <PopularExams />
         <LatestMocks />
         <AppPreview />
         <MeetFounder />
