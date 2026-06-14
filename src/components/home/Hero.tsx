@@ -9,8 +9,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened Screenshot-Matched Hero Hub v91.0.
- * UPDATED: Moved all content (text + boxes) downward as per user request.
+ * @fileOverview Hardened Screenshot-Matched Hero Hub v92.0.
+ * UPDATED: Calibrated metric registry for equal spacing and right-side end alignment.
  */
 
 export default function Hero() {
@@ -107,12 +107,12 @@ export default function Hero() {
            </motion.div>
         </div>
 
-        {/* METRICS REGISTRY - LOWERED AND SHIFTED RIGHT */}
+        {/* METRICS REGISTRY - ADJUSTED GAPS AND END ALIGNMENT */}
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 md:mt-20 md:translate-x-20 lg:translate-x-32 max-w-5xl"
+          className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 lg:gap-10 mt-16 md:mt-20 md:translate-x-20 lg:translate-x-40 max-w-6xl"
         >
            <MetricCard 
              icon={<BookOpen className="text-blue-500 h-5 w-5" />} 
@@ -142,13 +142,13 @@ export default function Hero() {
 
 function MetricCard({ icon, count, label }: { icon: React.ReactNode, count: string, label: string }) {
   return (
-    <Card className="border-none bg-[#0B1528]/80 backdrop-blur-2xl rounded-[2rem] p-6 flex items-center gap-5 border border-white/5 shadow-2xl group hover:bg-[#0B1528] transition-all text-left">
+    <Card className="border-none bg-[#0B1528]/80 backdrop-blur-2xl rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-6 flex items-center gap-4 md:gap-5 border border-white/5 shadow-2xl group hover:bg-[#0B1528] transition-all text-left">
        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
           {icon}
        </div>
        <div className="min-w-0">
-          <p className="text-xl md:text-2xl font-headline font-black text-white leading-none tracking-tight truncate">{count}</p>
-          <p className="text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">{label}</p>
+          <p className="text-lg md:text-2xl font-headline font-black text-white leading-none tracking-tight truncate">{count}</p>
+          <p className="text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1.5">{label}</p>
        </div>
     </Card>
   )
