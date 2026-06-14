@@ -3,15 +3,15 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Star, ArrowRight } from "lucide-react";
+import { Star, ArrowRight, BookOpen, ClipboardList, ShieldCheck, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official High-Fidelity Hero Center v42.0.
- * UPDATED: Removed metric cards at the bottom to focus strictly on the map border identity as requested.
- * FEATURES: Multi-layer background (Temple + Map), Precision typography.
+ * @fileOverview Official High-Fidelity Hero Center v43.0.
+ * RESTORED: Metric boxes at the bottom to match the premium institutional layout.
+ * FEATURES: Multi-layer background (Temple + Map), Precision typography, Glass-morphism cards.
  */
 
 export default function Hero() {
@@ -19,11 +19,11 @@ export default function Hero() {
   const punjabMap = "https://www.mapsofindia.com/maps/punjab/punjab-map.jpg";
 
   return (
-    <section className="relative w-full min-h-[600px] lg:min-h-[750px] bg-[#0B1528] flex flex-col justify-center overflow-hidden font-body">
+    <section className="relative w-full min-h-[700px] lg:min-h-[850px] bg-[#0B1528] flex flex-col justify-center overflow-hidden font-body">
       
       {/* 1. BACKGROUND LAYERS */}
       <div className="absolute inset-0 z-0">
-        {/* RIGHT SIDE: GOLDEN TEMPLE (Matched to Screenshot) */}
+        {/* RIGHT SIDE: GOLDEN TEMPLE */}
         <div className="absolute top-0 right-0 w-full lg:w-[70%] h-full">
            <img 
               src={templeImg} 
@@ -36,8 +36,8 @@ export default function Hero() {
            <div className="absolute inset-0 bg-gradient-to-t from-[#0B1528] via-transparent to-transparent lg:hidden" />
         </div>
 
-        {/* LEFT SIDE: PUNJAB MAP WATERMARK (Subtle outline as seen in image) */}
-        <div className="absolute left-[5%] top-1/2 -translate-y-1/2 w-full lg:w-1/2 h-full opacity-[0.05] pointer-events-none mix-blend-lighten">
+        {/* LEFT SIDE: PUNJAB MAP WATERMARK */}
+        <div className="absolute left-[5%] top-1/2 -translate-y-1/2 w-full lg:w-1/2 h-full opacity-[0.04] pointer-events-none mix-blend-lighten">
            <img 
               src={punjabMap} 
               className="w-full h-full object-contain object-left scale-110" 
@@ -48,7 +48,7 @@ export default function Hero() {
 
       {/* 2. MAIN CONTENT HUB */}
       <div className="container mx-auto px-6 relative z-10 max-w-7xl pt-24 pb-20">
-        <div className="max-w-4xl space-y-6 md:space-y-8 text-left">
+        <div className="max-w-4xl space-y-8 text-left">
           
            {/* BRAND BADGE */}
            <motion.div 
@@ -104,8 +104,35 @@ export default function Hero() {
                  <Link href="/exams">Explore Exams</Link>
               </Button>
            </motion.div>
+
+           {/* 3. RESTORED METRIC GRID (Same as screenshot) */}
+           <motion.div 
+             initial={{ opacity: 0, y: 30 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ delay: 0.4 }}
+             className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 pt-12 md:pt-20"
+           >
+              <HeroMetric icon={<BookOpen />} value="10,000+" label="QUESTIONS" />
+              <HeroMetric icon={<ClipboardList />} value="500+" label="MOCK TESTS" />
+              <HeroMetric icon={<ShieldCheck />} value="50+" label="STATE EXAMS" />
+              <HeroMetric icon={<BarChart3 />} value="DETAILED" label="ANALYTICS" />
+           </motion.div>
         </div>
       </div>
     </section>
+  );
+}
+
+function HeroMetric({ icon, value, label }: { icon: React.ReactNode, value: string, label: string }) {
+  return (
+    <div className="bg-white/5 border border-white/10 backdrop-blur-md p-4 md:p-6 rounded-2xl md:rounded-3xl flex items-center gap-4 group hover:bg-white/10 transition-all shadow-xl">
+       <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-[#F97316]/20 flex items-center justify-center text-[#F97316] shadow-inner group-hover:scale-110 transition-transform">
+          {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}
+       </div>
+       <div className="text-left">
+          <p className="text-lg md:text-2xl font-headline font-black text-white leading-none tracking-tight">{value}</p>
+          <p className="text-[7px] md:text-[9px] font-black text-slate-500 uppercase tracking-widest mt-1.5">{label}</p>
+       </div>
+    </div>
   );
 }
