@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -16,8 +17,9 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview High-Fidelity Hero Reconstruction v400.0.
- * MATCHED: Screenshot layout with Golden Temple, Punjab map, and 4-column stats.
+ * @fileOverview High-Fidelity Hero Reconstruction v500.0.
+ * UPDATED: Integrated user-provided stylized Golden Temple background.
+ * MATCHED: Screenshot layout with Punjab map overlay and 4-column stats.
  */
 
 export default function Hero() {
@@ -31,7 +33,6 @@ export default function Hero() {
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
 
-  // Stats for the bottom cards
   const statsItems = useMemo(() => [
     { 
       icon: <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />, 
@@ -62,19 +63,19 @@ export default function Hero() {
       
       {/* 1. BACKGROUND IMAGE HUB */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        {/* Golden Temple Image */}
+        {/* User-Provided Golden Temple Image */}
         <motion.img 
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          animate={{ opacity: 0.8 }}
           transition={{ duration: 1 }}
-          src="https://images.unsplash.com/photo-1594913366159-1832ffef8171?q=80&w=1920&auto=format&fit=crop" 
-          alt="Golden Temple" 
+          src="https://i.ibb.co/LXgcLVVq/Gemini-Generated-Image-n1so6on1so6on1so.png" 
+          alt="Golden Temple Hub" 
           className="absolute right-0 top-0 w-full h-full object-cover object-[center_35%] lg:object-[right_35%] lg:w-3/4"
           referrerPolicy="no-referrer"
         />
         
         {/* Punjab Map Overlay (Faint) */}
-        <div className="absolute inset-y-0 left-0 w-full lg:w-1/2 z-10 pointer-events-none opacity-[0.03]">
+        <div className="absolute inset-y-0 left-0 w-full lg:w-1/2 z-10 pointer-events-none opacity-[0.04]">
            <svg viewBox="0 0 100 100" className="w-full h-full fill-white scale-150 -translate-x-1/4">
               <path d="M45,10 Q50,5 60,10 T75,20 T80,40 T70,60 T50,80 T30,70 T20,40 T30,20 Z" />
            </svg>
