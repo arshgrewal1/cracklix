@@ -2,16 +2,16 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Star, ArrowRight, Download, BookOpen, ClipboardList, ShieldCheck, Users } from "lucide-react";
+import { Star, ArrowRight, Download, BookOpen, ClipboardList, ShieldCheck, Users, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Final Absolute Screenshot-Matched Hero Hub v77.0.
- * UPDATED: Realigned temple to the right side with 100% visibility.
- * FIXED: Matched exact metric card data (439+, 8+, 92+, 5+) and icon colors.
+ * @fileOverview Hardened Screenshot-Matched Hero Hub v82.0.
+ * UPDATED: Shrunken desktop background width to 45% for a refined institutional profile.
+ * FIXED: Precise button sequence (Orange/White/Dark) and metric data (439+/8+/92+/5+).
  */
 
 export default function Hero() {
@@ -20,8 +20,8 @@ export default function Hero() {
   return (
     <section className="relative w-full min-h-[600px] lg:min-h-[750px] bg-[#0B0F19] flex flex-col justify-start overflow-hidden font-body text-left">
       
-      {/* 1. BACKGROUND LAYERS - RIGHT ALIGNED & FULLY VISIBLE */}
-      <div className="absolute top-0 right-0 w-full lg:w-[65%] h-[300px] lg:h-full z-0 pointer-events-none">
+      {/* 1. BACKGROUND LAYERS - RIGHT ALIGNED & COMPRESSED ON DESKTOP */}
+      <div className="absolute top-0 right-0 w-full lg:w-[45%] h-[200px] lg:h-full z-0 pointer-events-none">
         <img 
           src={templeImg} 
           alt="Golden Temple" 
@@ -29,13 +29,13 @@ export default function Hero() {
           referrerPolicy="no-referrer"
         />
         {/* Gradient for desktop: Left edge of image container fades from navy to transparent */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0F19] via-[#0B0F19]/60 to-transparent lg:block hidden" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0F19] via-[#0B0F19]/40 to-transparent lg:block hidden" />
         {/* Gradient for mobile: Bottom edge fades into content area */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-transparent to-transparent lg:hidden" />
       </div>
 
       {/* 2. MAIN CONTENT HUB */}
-      <div className="container mx-auto px-6 relative z-10 max-w-7xl pt-16 md:pt-24 lg:pt-32">
+      <div className="container mx-auto px-6 relative z-10 max-w-7xl pt-12 md:pt-24 lg:pt-32">
         <div className="max-w-3xl space-y-6 md:space-y-8 text-left">
           
            {/* BRAND BADGE */}
@@ -77,34 +77,42 @@ export default function Hero() {
               Punjab Government Exams di Complete Preparation ik hi Center te, Latest Official Patterns de Naal.
            </motion.p>
 
-           {/* ACTION HUB - SCREENSHOT MATCHED */}
+           {/* ACTION HUB - SCREENSHOT MATCHED SEQUENCE */}
            <motion.div 
              initial={{ opacity: 0, y: 20 }}
              animate={{ opacity: 1, y: 0 }}
              transition={{ delay: 0.3 }}
              className="flex flex-wrap items-center gap-4 pt-4 md:pt-6"
            >
-              <Button asChild className="h-12 md:h-14 px-8 bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-3xl transition-all active:scale-95 border-none gap-2">
-                 <Link href="/mocks">
-                    FREE MOCK <ArrowRight className="h-4 w-4" />
+              {/* BUTTON 1: ORANGE FREE MOCK WITH 'N' BUBBLE */}
+              <Button asChild className="h-12 md:h-14 px-8 bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-3xl transition-all active:scale-95 border-none gap-1">
+                 <Link href="/mocks" className="flex items-center">
+                    <div className="h-5 w-5 rounded-full bg-[#0B1528]/40 flex items-center justify-center shrink-0 mr-2 border border-white/10">
+                       <span className="text-[8px] font-black text-white">N</span>
+                    </div>
+                    FREE MOCK <ArrowRight className="h-4 w-4 ml-1" />
                  </Link>
               </Button>
+
+              {/* BUTTON 2: WHITE INSTALL APP */}
               <Button asChild className="h-12 md:h-14 px-8 bg-white hover:bg-slate-50 text-[#0F172A] font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl transition-all active:scale-95 border-none gap-2 shadow-2xl">
                  <Link href="/download">
                     <Download className="h-4 w-4" /> INSTALL APP
                  </Link>
               </Button>
+
+              {/* BUTTON 3: DARK EXAMS */}
               <Button asChild variant="outline" className="h-12 md:h-14 px-10 bg-white/5 border-white/10 text-white hover:bg-white/10 font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl transition-all active:scale-95">
                  <Link href="/exams">EXAMS</Link>
               </Button>
            </motion.div>
 
-           {/* METRICS REGISTRY - EXACT SCREENSHOT DATA & COLORS */}
+           {/* METRICS REGISTRY - EXACT SCREENSHOT DATA (439+/8+/92+/5+) */}
            <motion.div 
              initial={{ opacity: 0, y: 30 }}
              animate={{ opacity: 1, y: 0 }}
              transition={{ delay: 0.4 }}
-             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-16 md:pt-24"
+             className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-16 md:pt-24"
            >
               <MetricCard 
                 icon={<BookOpen className="text-blue-500 h-5 w-5" />} 
@@ -135,13 +143,13 @@ export default function Hero() {
 
 function MetricCard({ icon, count, label }: { icon: React.ReactNode, count: string, label: string }) {
   return (
-    <Card className="border-none bg-[#0B1528]/80 backdrop-blur-2xl rounded-[2.5rem] p-6 flex items-center gap-5 border border-white/5 shadow-2xl group hover:bg-[#0B1528] transition-all">
-       <div className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+    <Card className="border-none bg-[#0B1528]/80 backdrop-blur-2xl rounded-[2rem] p-6 flex items-center gap-5 border border-white/5 shadow-2xl group hover:bg-[#0B1528] transition-all text-left">
+       <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
           {icon}
        </div>
-       <div className="text-left space-y-0.5">
-          <p className="text-2xl md:text-3xl font-headline font-black text-white leading-none tracking-tight">{count}</p>
-          <p className="text-[8px] md:text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">{label}</p>
+       <div className="min-w-0">
+          <p className="text-xl md:text-2xl font-headline font-black text-white leading-none tracking-tight truncate">{count}</p>
+          <p className="text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-[0.2em] mt-1">{label}</p>
        </div>
     </Card>
   )
