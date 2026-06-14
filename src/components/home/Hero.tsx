@@ -9,9 +9,9 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Refined Hero Hub v75.0.
- * UPDATED: Shrunken background image width and reduced typography scaling for a more compact desktop view.
- * FIXED: Maintained top-0 header alignment.
+ * @fileOverview Refined Hero Hub v76.0.
+ * UPDATED: Moved Golden Temple background to the left side.
+ * FIXED: Balanced readability with dark overlays over the left-positioned image.
  */
 
 export default function Hero() {
@@ -20,15 +20,17 @@ export default function Hero() {
   return (
     <section className="relative w-full min-h-[600px] lg:min-h-[750px] bg-[#0B0F19] flex flex-col justify-start overflow-hidden font-body text-left">
       
-      {/* 1. BACKGROUND LAYERS - SHRUNKEN WIDTH */}
-      <div className="absolute top-0 right-0 w-full lg:w-[45%] h-[200px] lg:h-full z-0 pointer-events-none">
+      {/* 1. BACKGROUND LAYERS - MOVED TO LEFT */}
+      <div className="absolute top-0 left-0 w-full lg:w-[45%] h-[200px] lg:h-full z-0 pointer-events-none">
         <img 
           src={templeImg} 
           alt="Golden Temple" 
-          className="w-full h-full object-cover object-right-bottom opacity-80"
+          className="w-full h-full object-cover object-left-bottom opacity-70"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0F19] via-[#0B0F19]/80 to-transparent lg:block hidden" />
+        {/* Gradient for desktop: Right edge of image container fades into section background */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0F19]/40 via-transparent to-[#0B0F19] lg:block hidden" />
+        {/* Gradient for mobile: Bottom edge fades into content area */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#0B0F19] via-transparent to-transparent lg:hidden" />
       </div>
 
@@ -50,7 +52,7 @@ export default function Hero() {
               </span>
            </motion.div>
 
-           {/* HEADLINES - SHRUNKEN SCALE */}
+           {/* HEADLINES */}
            <motion.div 
              initial={{ opacity: 0, x: -20 }}
              animate={{ opacity: 1, x: 0 }}
