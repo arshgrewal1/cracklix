@@ -1,13 +1,12 @@
-
 'use client';
 
 import { useExamStore } from '@/store/useExamStore';
 import { cn } from '@/lib/utils';
-import { useMemo } from 'react';
+import { useMemo; } from 'react';
 
 /**
- * @fileOverview Refined Subject Switching Hub (Compact).
- * UPDATED: Slimmer height and reduced font-sizes for high-density UI.
+ * @fileOverview Refined Subject Switching Hub (Absolute Minimum).
+ * UPDATED: Reduced height to h-9 and font sizes to text-[7px].
  */
 export default function SubjectTabs() {
   const questions = useExamStore(s => s.questions);
@@ -19,7 +18,7 @@ export default function SubjectTabs() {
     const map = new Map<string, { id: string, name: string, startIdx: number, total: number, answered: number }>();
     
     (questions || []).forEach((q, idx) => {
-      const sid = q.sectionId || 'General Hub';
+      const sid = q.sectionId || 'General';
       const st = status[idx];
       const isAnswered = st === 'answered' || st === 'answered-marked';
 
@@ -41,10 +40,10 @@ export default function SubjectTabs() {
     return Array.from(map.values());
   }, [questions, status]);
 
-  const activeSectionId = questions[currentIdx]?.sectionId || 'General Hub';
+  const activeSectionId = questions[currentIdx]?.sectionId || 'General';
 
   return (
-    <nav className="bg-white border-b border-slate-100 h-11 md:h-12 flex items-center px-2 overflow-x-auto no-scrollbar gap-1.5 shrink-0 sticky top-0 z-40">
+    <nav className="bg-white border-b border-slate-100 h-9 md:h-11 flex items-center px-1 overflow-x-auto no-scrollbar gap-1 shrink-0 sticky top-0 z-40">
       {sections.map((s) => {
         const isActive = activeSectionId === s.id;
         return (
@@ -52,14 +51,14 @@ export default function SubjectTabs() {
             key={s.id}
             onClick={() => setCurrentIdx(s.startIdx)}
             className={cn(
-              "h-8 md:h-9 flex items-center justify-center px-3 rounded-md border transition-all whitespace-nowrap min-w-[110px] md:min-w-[140px]",
+              "h-6 md:h-8 flex items-center justify-center px-2 rounded border transition-all whitespace-nowrap min-w-[90px] md:min-w-[120px]",
               isActive 
-                ? "border-primary text-primary bg-orange-50/30" 
+                ? "border-primary text-primary bg-orange-50/20" 
                 : "border-slate-50 text-slate-400 bg-white hover:bg-slate-50"
             )}
           >
-            <span className="text-[8px] md:text-[9px] font-[900] uppercase tracking-tight truncate">
-               {s.name.replace(/-/g, ' ')}
+            <span className="text-[7px] md:text-[8px] font-black uppercase tracking-tighter truncate">
+               {s.name}
             </span>
           </button>
         );

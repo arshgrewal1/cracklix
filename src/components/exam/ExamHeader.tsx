@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useExamStore } from '@/store/useExamStore';
@@ -24,8 +23,8 @@ const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
 ];
 
 /**
- * @fileOverview Hardened CBT Header v30.0 (Compact Optimized).
- * UPDATED: Ultra-compact fixed height for more question real estate.
+ * @fileOverview Hardened CBT Header v31.0 (Absolute Minimum).
+ * UPDATED: Reduced height to h-10 for maximum viewport usage.
  */
 export default function ExamHeader({ 
   onPaletteToggle, 
@@ -54,30 +53,30 @@ export default function ExamHeader({
   }, [baseLanguageMode]);
 
   return (
-    <header className="bg-[#0B1528] text-white flex flex-col shrink-0 z-[100] border-b border-white/5 shadow-md relative h-12 md:h-14">
+    <header className="bg-[#0B1528] text-white flex flex-col shrink-0 z-[100] border-b border-white/5 shadow-md relative h-10 md:h-12">
       <div className="h-full flex items-center justify-between px-2 md:px-6">
         
         {/* LEFT: BACK & PROGRESS */}
         <div className="flex items-center gap-1 md:gap-3 shrink-0 flex-1">
            <button 
              onClick={onExitRequest} 
-             className="p-1.5 text-slate-400 hover:text-white transition-all cursor-pointer"
+             className="p-1 text-slate-400 hover:text-white transition-all cursor-pointer"
            >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-4 w-4" />
            </button>
            
-           <div className="flex items-baseline gap-1 bg-white/5 px-2 py-0.5 rounded-md border border-white/10">
-              <span className="text-xs md:text-lg font-black text-primary tabular-nums">
+           <div className="flex items-baseline gap-1 bg-white/5 px-1.5 py-0.5 rounded border border-white/10">
+              <span className="text-[10px] md:text-base font-black text-primary tabular-nums">
                  {currentIdx + 1}
               </span>
-              <span className="text-[8px] md:text-xs font-bold uppercase text-slate-500 opacity-60">
+              <span className="text-[7px] md:text-[10px] font-bold uppercase text-slate-600">
                  /{questionsCount}
               </span>
            </div>
         </div>
 
         {/* CENTER: TIMER */}
-        <div className="flex justify-center px-1 shrink-0 scale-90 md:scale-100">
+        <div className="flex justify-center px-1 shrink-0 scale-75 md:scale-90">
            <Timer 
              onTimeUp={() => {}} 
              initialSeconds={timeLeft} 
@@ -86,21 +85,21 @@ export default function ExamHeader({
         </div>
 
         {/* RIGHT: COMMANDS */}
-        <div className="flex items-center justify-end gap-1 md:gap-3 flex-1">
+        <div className="flex items-center justify-end gap-1 md:gap-2 flex-1">
            {availableModes.length > 1 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                   <button className="h-8 w-8 md:h-10 md:w-10 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded-lg flex items-center justify-center">
-                      <Languages className="h-3.5 w-3.5 text-primary" />
+                   <button className="h-7 w-7 md:h-9 md:w-9 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded flex items-center justify-center">
+                      <Languages className="h-3 w-3 text-primary" />
                    </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48 bg-[#0F172A] border-white/10 text-white rounded-xl shadow-2xl p-1 z-[2000]">
+                <DropdownMenuContent align="end" className="w-40 bg-[#0F172A] border-white/10 text-white rounded-lg shadow-2xl p-1 z-[2000]">
                    {availableModes.map((mode) => (
                       <DropdownMenuItem 
                         key={mode.value} 
                         onSelect={() => setLanguage(mode.value)}
                         className={cn(
-                          "text-[9px] font-black uppercase px-4 py-3 rounded-lg cursor-pointer tracking-wider",
+                          "text-[8px] font-black uppercase px-3 py-2 rounded cursor-pointer tracking-wider",
                           language === mode.value ? "bg-primary text-white" : "hover:bg-white/5 text-slate-400"
                         )}
                       >
@@ -113,14 +112,14 @@ export default function ExamHeader({
 
            <button 
              onClick={() => setPaused(!isPaused)}
-             className="h-8 w-8 md:h-10 md:w-10 bg-white/5 text-white border border-white/10 rounded-lg flex items-center justify-center"
+             className="h-7 w-7 md:h-9 md:w-9 bg-white/5 text-white border border-white/10 rounded flex items-center justify-center"
            >
-             {isPaused ? <Play className="h-3.5 w-3.5 fill-current text-primary" /> : <Pause className="h-3.5 w-3.5 fill-current" />}
+             {isPaused ? <Play className="h-3 w-3 fill-current text-primary" /> : <Pause className="h-3 w-3 fill-current" />}
            </button>
            
            <button 
              onClick={onPaletteToggle}
-             className="bg-[#F97316] text-white h-8 px-3 md:px-5 rounded-lg font-black uppercase text-[9px] tracking-widest flex items-center justify-center shadow-lg active:scale-95 border-none"
+             className="bg-[#F97316] text-white h-7 px-2 md:px-4 rounded font-black uppercase text-[7px] md:text-[9px] tracking-tighter flex items-center justify-center shadow-md active:scale-95 border-none"
            >
               <span>MAP</span>
            </button>
