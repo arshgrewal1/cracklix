@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -19,8 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Mobile-First Question Hub v41.0.
- * UPDATED: Responsive typography for statements and fluid option spacing.
+ * @fileOverview Precision Mobile-First Question Hub v42.0 (High Density).
+ * UPDATED: Reduced padding and font sizes for a more compact results view.
  * FIXED: High-density layouts for 320px-360px devices.
  */
 export default function QuestionRenderer({ 
@@ -67,7 +68,11 @@ export default function QuestionRenderer({
   const OPT_LABELS = ['A', 'B', 'C', 'D'];
 
   return (
-    <div className={cn("w-full text-left font-body bg-white text-[#0F172A] p-4 md:p-10 lg:p-14 flex flex-col select-none rounded-[1.5rem] md:rounded-[3rem] shadow-sm", className)}>
+    <div className={cn(
+      "w-full text-left font-body bg-white text-[#0F172A] flex flex-col select-none",
+      showSolution ? "p-0" : "p-4 md:p-10 lg:p-14 rounded-[1.5rem] md:rounded-[3rem] shadow-sm",
+      className
+    )}>
       
       {/* 1. METADATA STRIP */}
       {!showSolution && (
@@ -87,22 +92,22 @@ export default function QuestionRenderer({
       )}
 
       {/* 2. STATEMENTS HUB - RESPONSIVE SCALING */}
-      <div className="space-y-4 mb-8 px-1">
+      <div className={cn("space-y-2 mb-6 px-1", showSolution ? "mb-4" : "mb-8")}>
          {showEn && englishQ && (
-           <div className="font-bold text-[15px] sm:text-lg md:text-2xl lg:text-3xl text-[#0F172A] antialiased leading-snug md:leading-relaxed">
+           <div className={cn("font-bold text-[#0F172A] antialiased leading-snug md:leading-relaxed", showSolution ? "text-[14px] md:text-lg" : "text-[15px] sm:text-lg md:text-2xl lg:text-3xl")}>
              <MathText text={englishQ} />
            </div>
          )}
          {showPa && punjabiQ && (
-           <div className="font-bold text-[15px] sm:text-lg md:text-2xl lg:text-3xl text-[#0F172A] antialiased leading-snug md:leading-relaxed">
+           <div className={cn("font-bold text-[#0F172A] antialiased leading-snug md:leading-relaxed", showSolution ? "text-[14px] md:text-lg" : "text-[15px] sm:text-lg md:text-2xl lg:text-3xl")}>
              <MathText text={punjabiQ} />
            </div>
          )}
       </div>
 
-      {/* 3. INTERACTIVE OPTIONS - FLUID PADDING */}
+      {/* 3. INTERACTIVE OPTIONS - COMPACT PADDING */}
       {!hideOptions && (
-        <div className="flex flex-col space-y-3">
+        <div className={cn("flex flex-col", showSolution ? "space-y-1.5" : "space-y-3")}>
           {OPT_LABELS.map((key, idx) => {
             const en = q[`option${key}English`];
             const pa = q[`option${key}Punjabi`];
@@ -110,24 +115,22 @@ export default function QuestionRenderer({
             return (
               <div 
                 key={key} 
-                onClick={() => onSelect?.(idx)} 
+                onClick={() => !showSolution && onSelect?.(idx)} 
                 className={cn(
-                  "flex items-center gap-4 md:gap-8 p-4 md:p-8 rounded-2xl border transition-all cursor-pointer group/opt active:scale-[0.98]",
+                  "flex items-center gap-4 transition-all transition-all border",
                   showSolution 
-                    ? q.correctAnswer === key ? "bg-emerald-50 border-emerald-500 shadow-xl" 
-                      : isSelected ? "bg-rose-50 border-rose-500 shadow-xl"
-                      : "bg-white border-slate-100"
-                    : isSelected ? "bg-orange-50 border-primary ring-4 ring-primary/5 shadow-2xl" 
-                      : "bg-white border-slate-100 hover:border-slate-300 shadow-sm"
+                    ? `p-2.5 md:p-4 rounded-xl ${q.correctAnswer === key ? "bg-emerald-50 border-emerald-500 shadow-sm" : isSelected ? "bg-rose-50 border-rose-500" : "bg-white border-slate-100"}`
+                    : `p-4 md:p-8 rounded-2xl cursor-pointer group/opt active:scale-[0.98] ${isSelected ? "bg-orange-50 border-primary ring-4 ring-primary/5 shadow-2xl" : "bg-white border-slate-100 hover:border-slate-300 shadow-sm"}`
                 )}
               >
                 <span className={cn(
-                  "font-black text-lg md:text-2xl lg:text-3xl shrink-0 w-6 md:w-8 text-center",
+                  "font-black shrink-0 w-6 md:w-8 text-center",
+                  showSolution ? "text-sm md:text-lg" : "text-lg md:text-2xl lg:text-3xl",
                   isSelected ? "text-primary" : "text-slate-300 group-hover/opt:text-slate-500"
                 )}>{key}</span>
                 <div className="flex flex-col flex-1 min-w-0">
-                  {showEn && en && <div className={cn("font-bold text-[14px] md:text-xl lg:text-2xl", isSelected ? "text-primary" : "text-slate-600")}><MathText text={en} /></div>}
-                  {showPa && pa && <div className={cn("font-bold text-[14px] md:text-xl lg:text-2xl", isSelected ? "text-primary" : "text-slate-600")}><MathText text={pa} /></div>}
+                  {showEn && en && <div className={cn("font-bold leading-tight", showSolution ? "text-[11px] md:text-sm" : "text-[14px] md:text-xl lg:text-2xl", isSelected ? "text-primary" : "text-slate-600")}><MathText text={en} /></div>}
+                  {showPa && pa && <div className={cn("font-bold leading-tight", showSolution ? "text-[11px] md:text-sm" : "text-[14px] md:text-xl lg:text-2xl", isSelected ? "text-primary" : "text-slate-600")}><MathText text={pa} /></div>}
                 </div>
               </div>
             )
@@ -135,13 +138,13 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      {/* 4. RATIONALIZATION HUB */}
+      {/* 4. RATIONALIZATION HUB - REDUCED PADDING */}
       {showSolution && (
-        <div className="mt-10 pt-10 border-t border-slate-100 space-y-6">
-           <Badge className="bg-[#0F172A] text-white border-none font-black text-[10px] md:text-xs uppercase px-6 py-2 rounded-xl shadow-2xl tracking-[0.2em]">Institutional Rationalization</Badge>
-           <div className="bg-slate-50 p-6 md:p-12 rounded-[2rem] md:rounded-[3.5rem] border border-slate-100 text-slate-600 leading-relaxed font-medium text-[13px] md:text-lg lg:text-xl space-y-6 shadow-inner">
-              <p className="font-black text-[11px] md:text-sm uppercase text-[#0B1528] pb-4 border-b border-slate-200/50 flex items-center gap-3">
-                 <ShieldCheck className="h-5 w-5 text-emerald-500" /> Correct Key: {q.correctAnswer}
+        <div className="mt-6 pt-6 border-t border-slate-100 space-y-4">
+           <Badge className="bg-[#0F172A] text-white border-none font-black text-[7px] md:text-[9px] uppercase px-3 py-1 rounded-lg tracking-[0.1em]">Rationale</Badge>
+           <div className="bg-slate-50 p-4 md:p-6 rounded-xl border border-slate-100 text-slate-500 leading-relaxed font-medium text-[11px] md:text-sm space-y-3 shadow-inner">
+              <p className="font-black text-[9px] md:text-[10px] uppercase text-[#0B1528] pb-2 border-b border-slate-200/50 flex items-center gap-2">
+                 <ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> Answer: {q.correctAnswer}
               </p>
               {showEn && q.englishExplanation && <MathText text={q.englishExplanation} className="text-inherit" />}
               {showPa && q.punjabiExplanation && <MathText text={q.punjabiExplanation} className="text-inherit" />}
@@ -151,3 +154,4 @@ export default function QuestionRenderer({
     </div>
   );
 }
+
