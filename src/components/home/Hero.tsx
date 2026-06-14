@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -17,9 +16,9 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview High-Fidelity Hero Reconstruction v500.0.
- * UPDATED: Integrated user-provided stylized Golden Temple background.
- * MATCHED: Screenshot layout with Punjab map overlay and 4-column stats.
+ * @fileOverview High-Fidelity Hero Reconstruction v501.0.
+ * FIXED: Cleaned template literal logic to prevent SyntaxError.
+ * RESTORED: Stylized Golden Temple background and Punjab branding.
  */
 
 export default function Hero() {
@@ -36,8 +35,8 @@ export default function Hero() {
   const statsItems = useMemo(() => [
     { 
       icon: <BookOpen className="h-5 w-5 md:h-6 md:w-6 text-blue-400" />, 
-      val: stats?.totalQuestions ? (stats.totalQuestions >= 1000 ? `${(stats.totalQuestions/1000).toFixed(0)},000+` : `${stats.totalQuestions}+`) : "10,000+", 
-      label: "Practice Questions" 
+      val: stats?.totalQuestions ? (stats.totalQuestions >= 1000 ? `${(stats.totalQuestions/1000).toFixed(0)}k+` : `${stats.totalQuestions}+`) : "10,000+", 
+      label: "Questions" 
     },
     { 
       icon: <ClipboardList className="h-5 w-5 md:h-6 md:w-6 text-orange-400" />, 
@@ -61,9 +60,7 @@ export default function Hero() {
   return (
     <section className="relative w-full bg-[#050B19] overflow-hidden min-h-[700px] lg:h-[800px] flex flex-col justify-center text-left pt-20">
       
-      {/* 1. BACKGROUND IMAGE HUB */}
       <div className="absolute inset-0 z-0 overflow-hidden">
-        {/* User-Provided Golden Temple Image */}
         <motion.img 
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.8 }}
@@ -74,23 +71,19 @@ export default function Hero() {
           referrerPolicy="no-referrer"
         />
         
-        {/* Punjab Map Overlay (Faint) */}
         <div className="absolute inset-y-0 left-0 w-full lg:w-1/2 z-10 pointer-events-none opacity-[0.04]">
            <svg viewBox="0 0 100 100" className="w-full h-full fill-white scale-150 -translate-x-1/4">
               <path d="M45,10 Q50,5 60,10 T75,20 T80,40 T70,60 T50,80 T30,70 T20,40 T30,20 Z" />
            </svg>
         </div>
 
-        {/* Dynamic Gradient Masks */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19] to-transparent lg:via-[#050B19]/80 z-[5]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#050B19] via-transparent to-transparent z-[5]" />
       </div>
 
-      {/* 2. CONTENT HUB */}
       <div className="container mx-auto px-4 md:px-8 lg:px-16 max-w-[1440px] relative z-[20]">
         <div className="max-w-4xl space-y-8 md:space-y-10">
            
-           {/* Top Badge */}
            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -102,7 +95,6 @@ export default function Hero() {
               <span className="text-[10px] md:text-xs font-black text-white/90 tracking-widest uppercase">#1 Punjab Exam Preparation Platform</span>
            </motion.div>
 
-           {/* Main Headlines */}
            <div className="space-y-2 md:space-y-4">
               <motion.h1 
                 initial={{ opacity: 0, y: 30 }}
@@ -122,7 +114,6 @@ export default function Hero() {
               </motion.h1>
            </div>
 
-           {/* Subheadline */}
            <motion.p 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -133,7 +124,6 @@ export default function Hero() {
               Preparation ik hi Platform te.
            </motion.p>
 
-           {/* CTA Action Row */}
            <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -150,7 +140,6 @@ export default function Hero() {
               </Button>
            </motion.div>
 
-           {/* 3. STATS NODES GRID */}
            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 pt-12 md:pt-20">
               {statsItems.map((item, idx) => (
                  <motion.div 

@@ -59,28 +59,17 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               window.deferredPrompt = null;
-              
-              window.addEventListener('beforeinstallprompt', (e) => {
-                console.log('[PWA] beforeinstallprompt fired');
+              window.addEventListener('beforeinstallprompt', function(e) {
                 e.preventDefault();
                 window.deferredPrompt = e;
                 window.dispatchEvent(new CustomEvent('pwa-installable'));
               });
-
-              window.addEventListener('appinstalled', (e) => {
-                console.log('[PWA] PWA installed successfully');
+              window.addEventListener('appinstalled', function() {
                 window.deferredPrompt = null;
-                window.dispatchEvent(new CustomEvent('pwa-installed'));
               });
-
               if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                  navigator.serviceWorker.register('/sw.js').then(reg => {
-                    console.log('[PWA] SW registered');
-                    if (reg.active) console.log('[PWA] SW active and controlling page');
-                  }).catch(err => {
-                    console.error('[PWA] SW registration failed:', err);
-                  });
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js');
                 });
               }
             `,

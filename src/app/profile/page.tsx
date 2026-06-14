@@ -42,8 +42,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Student Profile Center v21.2 (Hardened).
- * ARIA: Added DialogTitle and DialogDescription for accessibility compliance.
+ * @fileOverview Student Profile Center v21.3 (Hardened).
+ * FIXED: Corrected setEditForm reference in profile dialog.
  */
 export default function ProfilePage() {
   const { user, profile, loading } = useUser()
@@ -212,11 +212,43 @@ export default function ProfilePage() {
                  </div>
                  <Card className="border-none shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-6 md:p-10 space-y-6 md:space-y-8">
                     <div className="flex items-center justify-between border-b border-slate-50 pb-4 md:pb-6"><h3 className="font-headline font-black text-lg md:text-2xl uppercase flex items-center gap-3 md:gap-4 text-[#0F172A]"><UserIcon className="h-5 w-5 md:h-6 md:w-6 text-primary" /> My Profile</h3></div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 md:gap-y-8"><ProfileDataNode icon={<Calendar className="text-blue-500" />} label="DATE OF BIRTH" value={formatDOB(profile.dob)} /><ProfileDataNode icon={<Phone className="text-emerald-500" />} label="MOBILE NUMBER" value={formatPhone(profile.phone)} /><ProfileDataNode icon={<MapPin className="text-rose-500" />} label="HOME ADDRESS" value={profile.address || "Not Added"} colSpan={2} /><ProfileDataNode icon={<ShieldCheck className="text-primary" />} label="ACCOUNT TYPE" value={`${profile.role || 'STUDENT'}`} /><ProfileDataNode icon={<Activity className="text-orange-500" />} label="JOINED" value={new Date(profile.createdAt).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })} /></div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 md:gap-y-8">
+                       <ProfileDataNode icon={<Calendar className="text-blue-500" />} label="DATE OF BIRTH" value={formatDOB(profile.dob)} />
+                       <ProfileDataNode icon={<Phone className="text-emerald-500" />} label="MOBILE NUMBER" value={formatPhone(profile.phone)} />
+                       <ProfileDataNode icon={<MapPin className="text-rose-500" />} label="HOME ADDRESS" value={profile.address || "Not Added"} colSpan={2} />
+                       <ProfileDataNode icon={<ShieldCheck className="text-primary" />} label="ACCOUNT TYPE" value={`${profile.role || 'STUDENT'}`} />
+                       <ProfileDataNode icon={<Activity className="text-orange-500" />} label="JOINED" value={new Date(profile.createdAt).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })} />
+                    </div>
                  </Card>
-                 <Card className="border-none shadow-xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-white"><CardHeader className="p-6 md:p-10 border-b border-slate-50 flex flex-row items-center justify-between"><h3 className="text-[11px] md:text-lg font-black uppercase tracking-tight text-[#0F172A] flex items-center gap-2"><History className="h-4 w-4 md:h-5 md:w-5 text-primary" /> History</h3><Button asChild variant="ghost" className="h-8 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary gap-1"><Link href="/dashboard">View All <ChevronRight className="h-3 w-3" /></Link></Button></CardHeader><CardContent className="p-0"><div className="divide-y divide-slate-50">{resultsLoading ? (Array.from({ length: 2 }).map((_, i) => <div key={i} className="p-6"><Skeleton className="h-10 w-full rounded-xl" /></div>)) : results.length > 0 ? (results.slice(0, 3).map((r: any) => (<Link key={r.id} href={`/results/${r.mockId}`} className="p-5 md:p-10 flex items-center justify-between hover:bg-slate-50/50 transition-colors"><div className="flex items-center gap-4 md:gap-6 min-w-0"><div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0"><Zap className="h-4 w-4 md:h-6 md:w-6 text-primary" /></div><div className="min-w-0 space-y-1"><p className="font-black text-[#0B1528] text-xs md:text-lg uppercase truncate leading-none">{r.mockTitle}</p><p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(r.timestamp).toLocaleDateString()} • {r.accuracy}%</p></div></div><ChevronRight className="h-4 w-4 text-slate-200" /></Link>))) : (<div className="p-12 text-center text-slate-300 font-bold uppercase text-[10px]">No activity found.</div>)}</div></CardContent></Card>
+                 <Card className="border-none shadow-xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-white">
+                    <CardHeader className="p-6 md:p-10 border-b border-slate-50 flex flex-row items-center justify-between">
+                       <h3 className="text-[11px] md:text-lg font-black uppercase tracking-tight text-[#0F172A] flex items-center gap-2"><History className="h-4 w-4 md:h-5 md:w-5 text-primary" /> History</h3>
+                       <Button asChild variant="ghost" className="h-8 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary gap-1"><Link href="/dashboard">View All <ChevronRight className="h-3 w-3" /></Link></Button>
+                    </CardHeader>
+                    <CardContent className="p-0">
+                       <div className="divide-y divide-slate-50">
+                          {resultsLoading ? (Array.from({ length: 2 }).map((_, i) => <div key={i} className="p-6"><Skeleton className="h-10 w-full rounded-xl" /></div>)) : results.length > 0 ? (results.slice(0, 3).map((r: any) => (<Link key={r.id} href={`/results/${r.mockId}`} className="p-5 md:p-10 flex items-center justify-between hover:bg-slate-50/50 transition-colors"><div className="flex items-center gap-4 md:gap-6 min-w-0"><div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0"><Zap className="h-4 w-4 md:h-6 md:w-6 text-primary" /></div><div className="min-w-0 space-y-1"><p className="font-black text-[#0B1528] text-xs md:text-lg uppercase truncate leading-none">{r.mockTitle}</p><p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(r.timestamp).toLocaleDateString()} • {r.accuracy}%</p></div></div><ChevronRight className="h-4 w-4 text-slate-200" /></Link>))) : (<div className="p-12 text-center text-slate-300 font-bold uppercase text-[10px]">No activity found.</div>)}
+                       </div>
+                    </CardContent>
+                 </Card>
               </div>
-              <div className="lg:col-span-4 space-y-5 md:space-y-8"><Card className="border-none shadow-xl rounded-[2rem] bg-white p-6 md:p-8 space-y-6 md:space-y-8"><h3 className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Quick Actions</h3><div className="space-y-3 md:space-y-4"><Button asChild className="w-full h-11 md:h-14 bg-[#0F172A] hover:bg-black text-white rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-xl gap-2"><Link href="/pass"><CreditCard className="h-4 w-4 text-primary" /> Unlock Elite Pass</Link></Button><Button asChild variant="outline" className="w-full h-11 md:h-14 border-slate-100 bg-slate-50/50 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest text-slate-600 gap-2"><Link href="/dashboard"><History className="h-4 w-4" /> Global Report</Link></Button></div></Card><div className="bg-primary rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-10 text-white space-y-5 relative overflow-hidden group"><div className="absolute top-0 right-0 p-6 opacity-10 rotate-12 group-hover:scale-110 transition-transform" style={{ transitionDuration: '2000ms' }}><Award className="h-32 w-32 md:h-40 md:w-40" /></div><div className="relative z-10 space-y-3 md:space-y-4"><h4 className="text-xl md:text-2xl font-headline font-black uppercase leading-tight">State <br/> Rankings</h4><p className="text-white/70 text-[9px] md:text-[11px] font-bold uppercase tracking-tight">Compare with toppers.</p><Button asChild className="w-full mt-4 md:mt-8 bg-white text-primary hover:bg-slate-50 font-black h-10 md:h-12 rounded-xl text-[9px] md:text-[10px] uppercase shadow-lg"><Link href="/leaderboard">See rankings</Link></Button></div></div></div>
+              <div className="lg:col-span-4 space-y-5 md:space-y-8">
+                 <Card className="border-none shadow-xl rounded-[2rem] bg-white p-6 md:p-8 space-y-6 md:space-y-8">
+                    <h3 className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Quick Actions</h3>
+                    <div className="space-y-3 md:space-y-4">
+                       <Button asChild className="w-full h-11 md:h-14 bg-[#0F172A] hover:bg-black text-white rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-xl gap-2"><Link href="/pass"><CreditCard className="h-4 w-4 text-primary" /> Unlock Elite Pass</Link></Button>
+                       <Button asChild variant="outline" className="w-full h-11 md:h-14 border-slate-100 bg-slate-50/50 rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest text-slate-600 gap-2"><Link href="/dashboard"><History className="h-4 w-4" /> Global Report</Link></Button>
+                    </div>
+                 </Card>
+                 <div className="bg-primary rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-10 text-white space-y-5 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-6 opacity-10 rotate-12 group-hover:scale-110 transition-transform" style={{ transitionDuration: '2000ms' }}><Award className="h-32 w-32 md:h-40 md:w-40" /></div>
+                    <div className="relative z-10 space-y-3 md:space-y-4">
+                       <h4 className="text-xl md:text-2xl font-headline font-black uppercase leading-tight">State <br/> Rankings</h4>
+                       <p className="text-white/70 text-[9px] md:text-[11px] font-bold uppercase tracking-tight">Compare with toppers.</p>
+                       <Button asChild className="w-full mt-4 md:mt-8 bg-white text-primary hover:bg-slate-50 font-black h-10 md:h-12 rounded-xl text-[9px] md:text-[10px] uppercase shadow-lg"><Link href="/leaderboard">See rankings</Link></Button>
+                    </div>
+                 </div>
+              </div>
            </div>
         </div>
       </main>
@@ -235,12 +267,41 @@ export default function ProfilePage() {
                </div>
             </DialogHeader>
             <div className="px-6 md:px-8 pb-6 md:pb-8 space-y-4 md:space-y-5 overflow-y-auto custom-scrollbar flex-1">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"><div className="space-y-1.5 text-left"><Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Full Name</Label><Input value={editForm?.name || ""} onChange={e => setResult(prev => ({...prev, name: e.target.value}))} className="h-10 md:h-11 rounded-xl bg-slate-50 border-none font-bold text-xs md:text-sm" /></div><div className="space-y-1.5 text-left"><Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Email Address</Label><Input type="email" value={editForm?.email || ""} onChange={e => setEditForm({...editForm, email: e.target.value})} className="h-10 md:h-11 rounded-xl bg-slate-50 border-none font-bold text-xs md:text-sm" /></div></div>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4"><div className="space-y-1.5 text-left"><Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Date of Birth</Label><Input type="date" value={editForm?.dob || ""} onChange={e => setEditForm({...editForm, dob: e.target.value})} className="h-10 md:h-11 rounded-xl bg-slate-50 border-none font-bold text-xs md:text-sm" /></div><div className="space-y-1.5 text-left"><Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Target Exam Board</Label><select value={editForm?.targetExam || ""} onChange={e => setEditForm({...editForm, targetExam: e.target.value})} className="w-full h-10 md:h-11 rounded-xl bg-slate-50 border-none font-bold text-xs md:text-sm px-4 outline-none"><option value="" disabled>Select Board</option><option value="PSSSB">PSSSB</option><option value="PPSC">PPSC</option><option value="Punjab Police">Punjab Police</option><option value="Army">Indian Army</option><option value="High Court">High Court</option></select></div></div>
-               <div className="space-y-1.5 text-left"><Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Mobile Number</Label><div className="relative"><span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs md:text-sm font-black text-slate-400">+91</span><Input value={editForm?.phone || ""} onChange={e => setEditForm({...editForm, phone: e.target.value.replace(/\D/g, '').slice(0,10)})} className="h-10 md:h-11 pl-12 md:pl-14 rounded-xl bg-slate-50 border-none font-black text-base md:text-lg tracking-wider" placeholder="10-digit number" /></div></div>
-               <div className="space-y-1.5 text-left"><Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Home Address</Label><Textarea value={editForm?.address || ""} onChange={e => setEditForm({...editForm, address: e.target.value})} className="min-h-[80px] md:min-h-[120px] rounded-2xl bg-slate-50 border-none font-medium p-3 md:p-4 text-[11px] md:text-sm leading-relaxed shadow-inner resize-none" placeholder="Enter your full home address..." /></div>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                  <div className="space-y-1.5 text-left">
+                     <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Full Name</Label>
+                     <Input value={editForm?.name || ""} onChange={e => setEditForm(prev => ({...prev, name: e.target.value}))} className="h-10 md:h-11 rounded-xl bg-slate-50 border-none font-bold text-xs md:text-sm" />
+                  </div>
+                  <div className="space-y-1.5 text-left">
+                     <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Email Address</Label>
+                     <Input type="email" value={editForm?.email || ""} onChange={e => setEditForm(prev => ({...prev, email: e.target.value}))} className="h-10 md:h-11 rounded-xl bg-slate-50 border-none font-bold text-xs md:text-sm" />
+                  </div>
+               </div>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                  <div className="space-y-1.5 text-left">
+                     <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Date of Birth</Label>
+                     <Input type="date" value={editForm?.dob || ""} onChange={e => setEditForm(prev => ({...prev, dob: e.target.value}))} className="h-10 md:h-11 rounded-xl bg-slate-50 border-none font-bold text-xs md:text-sm" />
+                  </div>
+                  <div className="space-y-1.5 text-left">
+                     <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Target Exam Board</Label>
+                     <select value={editForm?.targetExam || ""} onChange={e => setEditForm(prev => ({...prev, targetExam: e.target.value}))} className="w-full h-10 md:h-11 rounded-xl bg-slate-50 border-none font-bold text-xs md:text-sm px-4 outline-none"><option value="" disabled>Select Board</option><option value="PSSSB">PSSSB</option><option value="PPSC">PPSC</option><option value="Punjab Police">Punjab Police</option><option value="Army">Indian Army</option><option value="High Court">High Court</option></select></div>
+               </div>
+               <div className="space-y-1.5 text-left">
+                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Mobile Number</Label>
+                  <div className="relative">
+                     <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs md:text-sm font-black text-slate-400">+91</span>
+                     <Input value={editForm?.phone || ""} onChange={e => setEditForm(prev => ({...prev, phone: e.target.value.replace(/\D/g, '').slice(0,10)}))} className="h-10 md:h-11 pl-12 md:pl-14 rounded-xl bg-slate-50 border-none font-black text-base md:text-lg tracking-wider" placeholder="10-digit number" />
+                  </div>
+               </div>
+               <div className="space-y-1.5 text-left">
+                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Home Address</Label>
+                  <Textarea value={editForm?.address || ""} onChange={e => setEditForm(prev => ({...prev, address: e.target.value}))} className="min-h-[80px] md:min-h-[120px] rounded-2xl bg-slate-50 border-none font-medium p-3 md:p-4 text-[11px] md:text-sm leading-relaxed shadow-inner resize-none" placeholder="Enter your full home address..." />
+               </div>
             </div>
-            <DialogFooter className="p-5 md:p-8 pt-3 md:pt-6 bg-slate-50 border-t border-slate-100 shrink-0 flex flex-row gap-3 md:gap-4 items-center justify-between"><Button variant="ghost" onClick={() => setIsEditing(false)} className="h-10 md:h-14 px-4 md:px-8 font-black uppercase text-[8px] md:text-[10px] text-slate-400 tracking-widest hover:text-slate-900 transition-colors">Cancel</Button><Button onClick={handleUpdateProfile} disabled={isSaving} className="bg-primary hover:bg-orange-600 text-white h-10 md:h-14 px-6 md:px-12 rounded-xl font-black uppercase text-[9px] md:text-[11px] tracking-[0.2em] flex-1 shadow-xl transition-all active:scale-95 gap-2">{isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />} Save Profile</Button></DialogFooter>
+            <DialogFooter className="p-5 md:p-8 pt-3 md:pt-6 bg-slate-50 border-t border-slate-100 shrink-0 flex flex-row gap-3 md:gap-4 items-center justify-between">
+               <Button variant="ghost" onClick={() => setIsEditing(false)} className="h-10 md:h-14 px-4 md:px-8 font-black uppercase text-[8px] md:text-[10px] text-slate-400 tracking-widest hover:text-slate-900 transition-colors">Cancel</Button>
+               <Button onClick={handleUpdateProfile} disabled={isSaving} className="bg-primary hover:bg-orange-600 text-white h-10 md:h-14 px-6 md:px-12 rounded-xl font-black uppercase text-[9px] md:text-[11px] tracking-[0.2em] flex-1 shadow-xl transition-all active:scale-95 gap-2">{isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />} Save Profile</Button>
+            </DialogFooter>
          </DialogContent>
       </Dialog>
     </div>
