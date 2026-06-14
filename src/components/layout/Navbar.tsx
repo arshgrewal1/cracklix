@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from "next/link";
-import { Menu, Search, User, Gem, LogOut, Newspaper, Zap, Home, ShieldCheck, Smartphone } from "lucide-react";
+import { Menu, Search, User, Gem, LogOut, Newspaper, Zap, Home, Download, Smartphone } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -19,13 +19,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import PWAInstallButton from "@/components/PWAInstallButton";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Screenshot-Matched Navbar v254.2.
- * UPDATED: Logo height shrunken to h-10/h-12 for a compact, professional look.
+ * @fileOverview Final Screenshot-Matched Navbar v260.0.
+ * UPDATED: Exact replica of navigation items, button styles, and colors from user screenshot.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -55,22 +54,17 @@ export default function Navbar() {
     return profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
   }, [user, profile]);
 
-  const headerHeightClass = "h-[var(--header-height)]";
-
-  if (!mounted) return <div className={cn("w-full bg-[#0B1528]", headerHeightClass)} />;
+  if (!mounted) return <div className="w-full h-20 bg-[#0B1528]" />;
 
   return (
     <div className="sticky top-0 z-[1000] w-full pointer-events-auto font-body text-left">
-      <nav className={cn(
-        "w-full flex items-center bg-[#0B1528] border-b border-white/5 px-4 md:px-8 shadow-2xl backdrop-blur-2xl",
-        headerHeightClass
-      )}>
+      <nav className="w-full flex items-center bg-[#0B1528] border-b border-white/5 h-20 lg:h-24 px-4 md:px-8 shadow-2xl">
         <div className="container mx-auto max-w-[1536px] flex items-center justify-between h-full gap-4">
           
-          <div className="flex items-center gap-4 md:gap-8 shrink-0 h-full">
+          <div className="flex items-center gap-4 lg:gap-8 shrink-0">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
-              className="w-10 h-10 bg-white/5 text-white rounded-xl border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center cursor-pointer"
+              className="w-10 h-10 bg-white/5 text-white rounded-lg border border-white/10 hover:bg-white/10 transition-all flex items-center justify-center cursor-pointer"
             >
               <Menu className="h-6 w-6" />
             </button>
@@ -78,35 +72,30 @@ export default function Navbar() {
             <Logo imgClassName="h-10 md:h-12 origin-left" />
           </div>
 
-          <div className="hidden lg:flex flex-1 items-center justify-center gap-8 xl:gap-12 h-full">
-            <NavLink icon={<Home />} label1="HOME" label2="PAGE" href="/" active={pathname === "/"} />
-            <NavLink icon={<Zap />} label1="PRACTICE" label2="TESTS" href="/mocks" active={pathname.startsWith("/mocks")} />
-            <NavLink icon={<Newspaper />} label1="CURRENT" label2="AFFAIRS" href="/current-affairs" active={pathname === "/current-affairs"} />
+          <div className="hidden lg:flex items-center gap-6 xl:gap-8 h-full">
+            <NavLink icon={<Home />} label="HOME PAGE" href="/" active={pathname === "/"} />
+            <NavLink icon={<Zap />} label="PRACTICE TESTS" href="/mocks" active={pathname.startsWith("/mocks")} />
+            <NavLink icon={<Newspaper />} label="CURRENT AFFAIRS" href="/current-affairs" active={pathname === "/current-affairs"} />
 
-            <Link href="/pass" className="transition-all active:scale-95 group h-full flex items-center">
+            <Link href="/pass" className="transition-all active:scale-95 h-full flex items-center">
               <div className={cn(
-                "px-5 h-10 min-w-[130px] rounded-xl border flex items-center justify-center gap-3 transition-all shadow-xl",
-                pathname === "/pass" 
-                  ? "bg-[#F97316] border-[#F97316] text-white" 
-                  : "bg-white/5 border-white/10 hover:bg-white/10 text-primary"
+                "px-4 h-10 rounded-lg border flex items-center justify-center gap-2 transition-all",
+                "bg-white/5 border-white/10 hover:bg-white/10 text-white"
               )}>
-                <Gem className="h-4 w-4 fill-current text-primary" />
-                <span className="text-[10px] font-black uppercase tracking-widest text-white whitespace-nowrap">GET PASS</span>
+                <Gem className="h-4 w-4 text-[#F97316]" />
+                <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">GET PASS</span>
               </div>
             </Link>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-4 shrink-0 h-full">
-             <div className="hidden md:block">
-               <PWAInstallButton 
-                 className="h-10 px-6 rounded-xl bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[10px] tracking-widest border-none shadow-2xl gap-3" 
-                 variant="primary"
-               />
-             </div>
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
+             <Button asChild className="hidden md:flex h-11 px-6 rounded-xl bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[10px] tracking-widest border-none shadow-xl gap-2">
+               <Link href="/pwa-install">
+                 <Download className="h-4 w-4" /> INSTALL APP
+               </Link>
+             </Button>
 
-             <Link href="/search" className={cn(
-               "w-10 h-10 rounded-xl border border-white/10 transition-all flex items-center justify-center shadow-lg bg-white/5 text-slate-400 hover:text-white"
-             )}>
+             <Link href="/search" className="w-10 h-10 rounded-xl border border-white/10 transition-all flex items-center justify-center bg-white/5 text-slate-400 hover:text-white">
                 <Search className="h-5 w-5" />
              </Link>
 
@@ -125,12 +114,6 @@ export default function Navbar() {
                          <span className="font-bold text-[14px] tracking-tight uppercase">MY PROFILE</span>
                        </Link>
                      </DropdownMenuItem>
-                     <DropdownMenuItem asChild className="px-4 py-3.5 cursor-pointer rounded-xl focus:bg-white/5 group">
-                       <Link href="/my-exams" className="w-full flex items-center gap-4">
-                         <ShieldCheck className="h-5 w-5 text-emerald-400" />
-                         <span className="font-bold text-[14px] tracking-tight uppercase">MY RESULTS</span>
-                       </Link>
-                     </DropdownMenuItem>
                      {isAdmin && (
                        <DropdownMenuItem asChild className="px-4 py-3.5 cursor-pointer rounded-xl focus:bg-white/10 group mt-1 border border-white/5">
                          <Link href="/admin" className="w-full flex items-center gap-4">
@@ -147,7 +130,7 @@ export default function Navbar() {
                    </DropdownMenuContent>
                  </DropdownMenu>
                ) : (
-                 <Button asChild className="bg-[#F97316] hover:bg-orange-600 text-white font-black px-7 h-11 uppercase text-[11px] tracking-widest shadow-2xl border-none transition-all active:scale-95">
+                 <Button asChild className="bg-[#F97316] hover:bg-orange-600 text-white font-black px-8 h-11 uppercase text-[11px] tracking-widest shadow-2xl border-none">
                    <Link href="/login">LOGIN</Link>
                  </Button>
                )}
@@ -159,8 +142,8 @@ export default function Navbar() {
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="p-0 border-none w-[300px] bg-[#0F172A] z-[2001]">
           <SheetHeader className="sr-only">
-             <SheetTitle>Mobile Navigation Sidebar</SheetTitle>
-             <SheetDescription>Main navigation menu for mobile users to access practice tests, results and profile.</SheetDescription>
+             <SheetTitle>Navigation Sidebar</SheetTitle>
+             <SheetDescription>Access all preparation resources.</SheetDescription>
           </SheetHeader>
           <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
         </SheetContent>
@@ -169,22 +152,16 @@ export default function Navbar() {
   );
 }
 
-function NavLink({ icon, label1, label2, href, active }: { icon: React.ReactNode, label1: string, label2: string, href: string, active: boolean }) {
+function NavLink({ icon, label, href, active }: { icon: React.ReactNode, label: string, href: string, active: boolean }) {
   return (
     <Link href={href} className={cn(
-      "flex items-center gap-4 group transition-all active:scale-95 h-full",
-      active ? "opacity-100" : "opacity-60 hover:opacity-100"
+      "flex items-center gap-3 transition-all h-10 px-4 rounded-lg",
+      active ? "bg-[#F97316] text-white" : "text-slate-400 hover:text-white"
     )}>
-      <div className={cn(
-        "h-10 w-10 rounded-[12px] flex items-center justify-center shadow-lg transition-all",
-        active ? "bg-[#F97316] text-white" : "bg-white/5 text-slate-400 group-hover:text-[#F97316]"
-      )}>
-        {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5" })}
-      </div>
-      <div className="flex flex-col text-left leading-none gap-0.5">
-        <span className={cn("text-[11px] font-black uppercase tracking-widest", active ? "text-[#F97316]" : "text-white")}>{label1}</span>
-        <span className={cn("text-[11px] font-black uppercase tracking-widest", active ? "text-[#F97316]" : "text-white")}>{label2}</span>
-      </div>
+      <span className={cn("h-4 w-4", active ? "text-white" : "text-slate-500")}>
+        {React.cloneElement(icon as React.ReactElement, { className: "h-full w-full" })}
+      </span>
+      <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
     </Link>
   )
 }
