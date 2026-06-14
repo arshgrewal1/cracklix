@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import Link from "next/link";
-import { Menu, Search, User, Gem, LogOut, Newspaper, Zap, Home } from "lucide-react";
+import { Menu, Search, User, Gem, LogOut, Newspaper, Zap, Home, Download } from "lucide-react";
 import Logo from "@/components/brand/Logo";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -23,8 +23,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Screenshot-Matched Navbar v263.0.
- * UPDATED: Removed INSTALL APP button from the header area.
+ * @fileOverview Final Screenshot-Matched Navbar v264.0.
+ * UPDATED: Restored INSTALL APP and LOGIN button styles from the reference image.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -91,6 +91,13 @@ export default function Navbar() {
           </div>
 
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
+             {/* RESTORED INSTALL APP BUTTON */}
+             <Button asChild className="hidden sm:flex bg-[#F97316] hover:bg-orange-600 text-white font-black px-6 h-10 rounded-lg uppercase text-[10px] tracking-widest shadow-2xl border-none gap-2">
+                <Link href="/download">
+                   <Download className="h-3.5 w-3.5" /> INSTALL APP
+                </Link>
+             </Button>
+
              <Link href="/search" className="w-10 h-10 rounded-lg border border-white/10 transition-all flex items-center justify-center bg-white/5 text-slate-400 hover:text-white">
                 <Search className="h-4.5 w-4.5" />
              </Link>
