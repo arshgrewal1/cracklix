@@ -28,6 +28,7 @@ import { cn } from "@/lib/utils";
 /**
  * @fileOverview Hardened CBT Engine v47.0 (Production Verified).
  * STABILITY: Enhanced null guards for answers and section data.
+ * UPDATED: Minimized mobile palette width for better ergonomics.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -237,7 +238,7 @@ export default function MockAttemptPage() {
       </main>
 
       <Sheet open={isPaletteOpen} onOpenChange={setIsPaletteOpen}>
-        <SheetContent side="right" className="p-0 border-none w-[88vw] md:w-[400px] h-full shadow-5xl z-[1200]">
+        <SheetContent side="right" className="p-0 border-none w-[260px] md:w-[400px] h-full shadow-5xl z-[1200]">
           <SheetHeader className="sr-only">
              <SheetTitle>Navigation Palette</SheetTitle>
              <SheetDescription>View and navigate through all questions in the current mock test.</SheetDescription>
@@ -266,7 +267,7 @@ export default function MockAttemptPage() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showSubmitModal} onOpenChange={setShowSubmitModal}>
+      <Dialog open={showSubmitModal} onOpenChange={showSubmitModal && !isSubmittingFinal ? setShowSubmitModal : undefined}>
         <DialogContent className="max-w-[360px] rounded-[3rem] p-10 bg-[#0F172A] text-white text-center border-none shadow-5xl z-[1300]">
           <div className="space-y-8">
             <DialogHeader className="sr-only">
