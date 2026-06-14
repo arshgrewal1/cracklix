@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -25,9 +24,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Screenshot-Matched Navbar v252.0.
- * FIXED: handleLogout defined.
- * RESTORED: Prominent logo scale.
+ * @fileOverview Final Screenshot-Matched Navbar v253.0.
+ * UPDATED: Logo height calibrated to 230px as requested.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -77,7 +75,7 @@ export default function Navbar() {
               <Menu className="h-6 w-6" />
             </button>
             
-            <Logo imgClassName="h-[120px] md:h-[140px] origin-left" />
+            <Logo imgClassName="h-[180px] md:h-[230px] origin-left" />
           </div>
 
           <div className="hidden lg:flex flex-1 items-center justify-center gap-8 xl:gap-12 h-full">

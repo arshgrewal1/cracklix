@@ -16,9 +16,9 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview High-Fidelity Hero Reconstruction v501.0.
- * FIXED: Cleaned template literal logic to prevent SyntaxError.
- * RESTORED: Stylized Golden Temple background and Punjab branding.
+ * @fileOverview High-Fidelity Hero v502.0 (Shading Fix & Map Node).
+ * FIXED: Removed blue shading from the left.
+ * FIXED: Integrated geographical map overlay.
  */
 
 export default function Hero() {
@@ -60,6 +60,7 @@ export default function Hero() {
   return (
     <section className="relative w-full bg-[#050B19] overflow-hidden min-h-[700px] lg:h-[800px] flex flex-col justify-center text-left pt-20">
       
+      {/* 1. BACKGROUND HUB */}
       <div className="absolute inset-0 z-0 overflow-hidden">
         <motion.img 
           initial={{ opacity: 0 }}
@@ -71,12 +72,16 @@ export default function Hero() {
           referrerPolicy="no-referrer"
         />
         
-        <div className="absolute inset-y-0 left-0 w-full lg:w-1/2 z-10 pointer-events-none opacity-[0.04]">
-           <svg viewBox="0 0 100 100" className="w-full h-full fill-white scale-150 -translate-x-1/4">
-              <path d="M45,10 Q50,5 60,10 T75,20 T80,40 T70,60 T50,80 T30,70 T20,40 T30,20 Z" />
-           </svg>
+        {/* GEOGRAPHICAL MAP OVERLAY - LEFT SIDE */}
+        <div className="absolute inset-y-0 left-0 w-full lg:w-1/2 z-10 pointer-events-none opacity-[0.05]">
+           <img 
+             src="https://www.mapsofindia.com/maps/punjab/punjab-map.jpg" 
+             className="w-full h-full object-cover grayscale invert" 
+             alt="Punjab Node"
+           />
         </div>
 
+        {/* INSTITUTIONAL GRADIENT MASKS - NO BLUE SHADING */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-[#050B19] to-transparent lg:via-[#050B19]/80 z-[5]" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#050B19] via-transparent to-transparent z-[5]" />
       </div>
@@ -100,7 +105,7 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="text-5xl md:text-7xl lg:text-[88px] font-headline font-black text-white leading-[0.95] tracking-tight uppercase"
+                className="text-4xl sm:text-5xl md:text-7xl lg:text-[88px] font-headline font-black text-white leading-[0.95] tracking-tight uppercase"
               >
                  Prepare Smarter.
               </motion.h1>
@@ -108,7 +113,7 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="text-5xl md:text-7xl lg:text-[88px] font-headline font-black text-primary leading-[0.95] tracking-tight uppercase"
+                className="text-4xl sm:text-5xl md:text-7xl lg:text-[88px] font-headline font-black text-primary leading-[0.95] tracking-tight uppercase"
               >
                  Score Higher.
               </motion.h1>
@@ -118,7 +123,7 @@ export default function Hero() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="text-lg md:text-2xl text-slate-300 font-medium max-w-2xl leading-relaxed antialiased"
+              className="text-base sm:text-lg md:text-2xl text-slate-300 font-medium max-w-2xl leading-relaxed antialiased"
            >
               Punjab Government Exams di Complete <br className="hidden md:block" />
               Preparation ik hi Platform te.

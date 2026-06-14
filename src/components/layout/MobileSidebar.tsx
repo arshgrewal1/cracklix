@@ -29,7 +29,8 @@ import Logo from "@/components/brand/Logo";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Hardened High-Density Mobile Sidebar v70.0.
+ * @fileOverview Hardened High-Density Mobile Sidebar v71.0.
+ * UPDATED: Logo height set to 230px as requested.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -62,7 +63,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
     <div className="flex flex-col h-full bg-[#0B1528] text-white overflow-y-auto no-scrollbar font-body select-none text-left pt-0">
       
       <div className="px-6 flex justify-start shrink-0 overflow-visible -mt-6 mb-[-25px]">
-         <Logo imgClassName="h-28 origin-left" />
+         <Logo imgClassName="h-[230px] origin-left" />
       </div>
 
       <div className="px-6 flex flex-col gap-0 relative overflow-hidden shrink-0 mt-0 pt-0">
