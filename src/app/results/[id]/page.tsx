@@ -30,9 +30,9 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Test Results Hub v30.0 (Production Hardened).
+ * @fileOverview Test Results Hub v30.1 (Production Hardened).
+ * FIXED: ReferenceError resolved by exposing merit list from analytical memo.
  * DEFENSIVE: Robust handling for missing results and malformed session data.
- * STABILITY: Prevents white-screen crashes via multi-layer null guards.
  */
 
 export default function ResultPage() {
@@ -94,7 +94,7 @@ function ResultContent() {
   const { data: rawGlobalResults } = useCollection<any>(globalResultsQuery)
 
   const merit = useMemo(() => {
-     if (!rawGlobalResults || !sessionData) return { rank: '?', total: 0, percentile: 0 };
+     if (!rawGlobalResults || !sessionData) return { rank: '?', total: 0, percentile: 0, list: [] };
      
      const uniqueMap = new Map();
      [...rawGlobalResults].sort((a, b) => (b.score || 0) - (a.score || 0)).forEach(r => {
@@ -109,7 +109,7 @@ function ResultContent() {
      const total = meritList.length;
      const percentile = total > 0 ? Math.round(((total - actualRank + 1) / (total || 1)) * 1000) / 10 : 0;
      
-     return { rank: actualRank, total, percentile };
+     return { rank: actualRank, total, percentile, list: meritList };
   }, [rawGlobalResults, sessionData, user]);
 
   // 3. Question Node Hydration
@@ -270,7 +270,7 @@ function ResultContent() {
                     </div>
 
                     <div className="divide-y divide-slate-50">
-                       {meritList.slice(0, 100).map((r: any, i: number) => {
+                       {merit.list?.slice(0, 100).map((r: any, i: number) => {
                           const name = (r.userName && r.userName !== 'Aspirant' && !r.userName.includes('@')) ? r.userName : (r.userEmail?.split('@')[0] || "Student");
                           const isCurrentUser = r.userId === user?.uid;
                           
