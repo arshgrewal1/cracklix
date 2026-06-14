@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * @fileOverview Institutional Sticky Bottom Navigation for Mobile.
- * UPDATED: Compacted height and elements for better viewport efficiency.
+ * @fileOverview Institutional Bottom Navigation (Screenshot Matched).
+ * UPDATED: Implemented the exact icons and top-border active indicator from reference image.
  */
 
 export default function MobileNav() {
@@ -18,23 +18,23 @@ export default function MobileNav() {
   if (!pathname || pathname.includes('/attempt') || pathname.startsWith('/admin')) return null;
 
   const navItems = [
-    { label: "Home", href: "/", icon: Home },
-    { label: "My Hub", href: "/my-exams", icon: Target },
-    { label: "Practice", href: "/mocks", icon: Zap },
-    { label: "Stats", href: "/dashboard", icon: BarChart3 },
-    { label: "Pass", href: "/pass", icon: Gem },
+    { label: "HOME", href: "/", icon: Home },
+    { label: "MY HUB", href: "/my-exams", icon: Target },
+    { label: "PRACTICE", href: "/mocks", icon: Zap },
+    { label: "STATS", href: "/dashboard", icon: BarChart3 },
+    { label: "PASS", href: "/pass", icon: Gem },
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[1100] bg-[#0F172A] border-t border-white/10 pb-[env(safe-area-inset-bottom)] md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.5)] pointer-events-auto">
-      <div className="flex items-center justify-around h-[64px] px-2 relative">
+    <nav className="fixed bottom-0 left-0 right-0 z-[1100] bg-[#0F172A] border-t border-white/5 pb-[env(safe-area-inset-bottom)] md:hidden shadow-[0_-8px_30px_rgba(0,0,0,0.5)] pointer-events-auto">
+      <div className="flex items-center justify-around h-[68px] px-2 relative">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
           return (
             <Link key={item.href} href={item.href} className="flex-1 h-full touch-manipulation focus:outline-none">
-              <div className="relative flex flex-col items-center justify-center gap-1 h-full py-1">
+              <div className="relative flex flex-col items-center justify-center gap-1.5 h-full py-1">
                 <AnimatePresence>
                   {isActive && (
                     <motion.div
@@ -42,7 +42,7 @@ export default function MobileNav() {
                       animate={{ opacity: 1, scaleX: 1 }}
                       exit={{ opacity: 0, scaleX: 0 }}
                       layoutId="active-nav-indicator"
-                      className="absolute top-0 w-8 h-1 bg-[#F97316] rounded-full shadow-[0_0_15px_rgba(249,115,22,1)]"
+                      className="absolute top-0 w-10 h-[3px] bg-[#F97316] rounded-full shadow-[0_0_15px_rgba(249,115,22,0.8)]"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -56,7 +56,7 @@ export default function MobileNav() {
                 />
                 
                 <span className={cn(
-                  "text-[8px] font-[900] uppercase tracking-widest transition-colors duration-300",
+                  "text-[8px] font-black uppercase tracking-[0.1em] transition-colors duration-300",
                   isActive ? "text-white" : "text-slate-500"
                 )}>
                   {item.label}
