@@ -23,8 +23,8 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Cracklix Majestic Hero v5.0.
- * UPDATED: Synchronized bottom stats with high-fidelity screenshot design.
+ * @fileOverview Official Cracklix Majestic Hero v5.1.
+ * UPDATED: Calibrated floating nodes to prevent edge clipping on mobile.
  * DATA: Real-time Firestore binding with themed icons and sub-labels.
  */
 
@@ -141,10 +141,10 @@ export default function Hero() {
 
           {/* RIGHT: ILLUSTRATION HUB */}
           <div className="relative flex justify-center lg:pl-12">
-            <FloatingNode icon={<Zap className="text-blue-600 h-5 w-5" />} label="MOCK TESTS" className="top-[18%] -left-10 md:left-0" />
-            <FloatingNode icon={<Target className="text-purple-600 h-5 w-5" />} label="DAILY PRACTICE" className="bottom-[2%] -left-10 md:-left-5" />
-            <FloatingNode icon={<FileStack className="text-emerald-500 h-5 w-5" />} label="PREVIOUS PAPERS" className="bottom-[2%] -right-10 md:right-0" />
-            <FloatingNode icon={<Trophy className="text-orange-500 h-5 w-5" />} label="PUNJAB EXAMS" className="top-[18%] -right-10 md:right-0" />
+            <FloatingNode icon={<Zap className="text-blue-600 h-5 w-5" />} label="MOCK TESTS" className="top-[18%] left-0 md:left-4" />
+            <FloatingNode icon={<Target className="text-purple-600 h-5 w-5" />} label="DAILY PRACTICE" className="bottom-[2%] left-0 md:left-0" />
+            <FloatingNode icon={<FileStack className="text-emerald-500 h-5 w-5" />} label="PREVIOUS PAPERS" className="bottom-[2%] right-0 md:right-0" />
+            <FloatingNode icon={<Trophy className="text-orange-500 h-5 w-5" />} label="PUNJAB EXAMS" className="top-[18%] right-0 md:right-4" />
 
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-100/50 rounded-full blur-3xl -z-10" />
             
@@ -159,7 +159,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* BOTTOM: STATS REGISTRY - MATCHED TO SCREENSHOT */}
+        {/* BOTTOM: STATS REGISTRY */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pt-10 border-t border-slate-100">
            {liveStats.map((stat) => (
              <Card key={stat.id} className="p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl flex items-center gap-6 group hover:shadow-2xl hover:translate-y-[-4px] transition-all text-left">
