@@ -48,9 +48,9 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
   
-  h1 { @apply text-[32px] md:text-6xl lg:text-7xl font-black uppercase tracking-tight leading-tight; }
-  h2 { @apply text-2xl md:text-5xl font-black uppercase tracking-tight; }
-  h3 { @apply text-xl md:text-3xl font-black uppercase tracking-tight; }
+  h1 { @apply text-[32px] md:text-6xl lg:text-7xl font-black tracking-tight leading-tight; }
+  h2 { @apply text-2xl md:text-5xl font-black tracking-tight; }
+  h3 { @apply text-xl md:text-3xl font-black tracking-tight; }
   p { @apply text-[14px] md:text-lg text-slate-500 font-medium; }
 }
 

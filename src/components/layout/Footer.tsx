@@ -6,8 +6,8 @@ import ShareButton from "@/components/navigation/ShareButton";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Final Screenshot-Matched Institutional Footer v5.1.
- * UPDATED: Replaced all orange icons and text highlights with primary Blue.
+ * @fileOverview Final Screenshot-Matched Institutional Footer v5.2.
+ * UPDATED: Removed 'uppercase' for a premium Title Case look.
  */
 
 export default function Footer() {
@@ -33,48 +33,48 @@ export default function Footer() {
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-slate-400">
                 <MapPin className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">HQS: SHERGARH, BATHINDA, PUNJAB</span>
+                <span className="text-[10px] font-black tracking-[0.2em]">HQs: Shergarh, Bathinda, Punjab</span>
               </div>
               <div className="flex items-center gap-3 text-slate-400">
                 <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">INSTITUTIONAL REGISTRY VERIFIED</span>
+                <span className="text-[10px] font-black tracking-[0.2em]">Institutional Registry Verified</span>
               </div>
             </div>
 
             <div className="pt-4">
                <ShareButton 
                  variant="dark" 
-                 className="h-14 px-8 bg-white/5 border border-white/10 hover:bg-white/10 rounded-2xl shadow-2xl uppercase text-[10px] font-black tracking-widest" 
+                 className="h-14 px-8 bg-white/5 border border-white/10 hover:bg-white/10 rounded-2xl shadow-2xl text-[10px] font-black tracking-widest" 
                />
             </div>
           </div>
 
           {/* COLUMN 2: EXAM VERTICALS */}
           <div className="space-y-10">
-            <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em]">EXAM VERTICALS</h4>
+            <h4 className="text-[11px] font-black text-slate-500 tracking-[0.4em]">Exam Verticals</h4>
             <ul className="flex flex-col gap-6">
-              <FooterLink href="/exams">PSSSB BOARDS</FooterLink>
-              <FooterLink href="/exams">PPSC GAZETTED</FooterLink>
-              <FooterLink href="/exams">PUNJAB POLICE</FooterLink>
-              <FooterLink href="/exams">TEACHING CADRE</FooterLink>
+              <FooterLink href="/exams">PSSSB Boards</FooterLink>
+              <FooterLink href="/exams">PPSC Gazetted</FooterLink>
+              <FooterLink href="/exams">Punjab Police</FooterLink>
+              <FooterLink href="/exams">Teaching Cadre</FooterLink>
             </ul>
           </div>
 
           {/* COLUMN 3: RESOURCES */}
           <div className="space-y-10">
-            <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em]">RESOURCES</h4>
+            <h4 className="text-[11px] font-black text-slate-500 tracking-[0.4em]">Resources</h4>
             <ul className="flex flex-col gap-6">
-              <FooterLink href="/mocks">FREE MOCK TESTS</FooterLink>
-              <FooterLink href="/pyqs">PREVIOUS YEAR PAPERS</FooterLink>
-              <FooterLink href="/notes">STUDY NOTES</FooterLink>
-              <FooterLink href="/about">ORIGIN STORY</FooterLink>
+              <FooterLink href="/mocks">Free Mock Tests</FooterLink>
+              <FooterLink href="/pyqs">Previous Year Papers</FooterLink>
+              <FooterLink href="/notes">Study Notes</FooterLink>
+              <FooterLink href="/about">Origin Story</FooterLink>
             </ul>
           </div>
 
           {/* COLUMN 4: CONNECT & SUPPORT */}
           <div className="space-y-10 flex flex-col items-start lg:items-end text-left lg:text-right">
             <div className="space-y-4 flex flex-col items-start lg:items-end">
-               <h4 className="text-[11px] font-black text-slate-500 uppercase tracking-[0.4em]">CONNECT</h4>
+               <h4 className="text-[11px] font-black text-slate-500 tracking-[0.4em]">Connect</h4>
                <Link 
                  href="https://t.me/cracklixapp" 
                  target="_blank"
@@ -92,8 +92,8 @@ export default function Footer() {
                      <span className="text-4xl md:text-5xl">88602</span>
                   </div>
                </a>
-               <p className="text-[9px] font-black text-slate-500 uppercase tracking-[0.4em] pt-2">
-                  OFFICIAL SUPPORT CHANNEL
+               <p className="text-[9px] font-black text-slate-500 tracking-[0.4em] pt-2">
+                  Official Support Channel
                </p>
             </div>
 
@@ -101,7 +101,7 @@ export default function Footer() {
                <a href="mailto:cracklixhelp@gmail.com" className="block group">
                   <div className="inline-flex items-center gap-3 px-6 py-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-all shadow-xl">
                      <Mail className="h-4 w-4 text-primary" />
-                     <span className="text-[11px] font-black uppercase tracking-widest">cracklixhelp@gmail.com</span>
+                     <span className="text-[11px] font-black tracking-widest">cracklixhelp@gmail.com</span>
                   </div>
                </a>
             </div>
@@ -112,24 +112,24 @@ export default function Footer() {
         {/* 2. BOTTOM BAR */}
         <div className="pt-10 border-t border-white/5 space-y-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] text-center md:text-left">
-              © LATEST PATTERN CRACKLIX | ALL RIGHTS RESERVED.
+            <div className="text-[10px] font-black text-slate-500 tracking-[0.3em] text-center md:text-left">
+              © Latest Pattern Cracklix | All Rights Reserved.
             </div>
 
             <div className="flex items-center gap-8 md:gap-12">
-              <Link href="/privacy" className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors">Privacy</Link>
-              <Link href="/terms" className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors">Terms</Link>
-              <Link href="/refund" className="text-[10px] font-black text-slate-500 hover:text-white uppercase tracking-widest transition-colors">Refund</Link>
+              <Link href="/privacy" className="text-[10px] font-black text-slate-500 hover:text-white tracking-widest transition-colors">Privacy</Link>
+              <Link href="/terms" className="text-[10px] font-black text-slate-500 hover:text-white tracking-widest transition-colors">Terms</Link>
+              <Link href="/refund" className="text-[10px] font-black text-slate-500 hover:text-white tracking-widest transition-colors">Refund</Link>
             </div>
 
-            <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] flex items-center gap-2">
-              MADE IN PUNJAB <span className="text-white brightness-125">🇮🇳</span>
+            <div className="text-[10px] font-black text-slate-500 tracking-[0.3em] flex items-center gap-2">
+              Made In Punjab <span className="text-white brightness-125">🇮🇳</span>
             </div>
           </div>
 
           <div className="text-center pt-4">
-             <p className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.5em] text-slate-400">
-                FOUNDER & LEAD DEVELOPER: <span className="text-primary ml-1">ARSH GREWAL</span>
+             <p className="text-[10px] md:text-[11px] font-black tracking-[0.5em] text-slate-400">
+                Founder & Lead Developer: <span className="text-primary ml-1">Arsh Grewal</span>
              </p>
           </div>
         </div>
@@ -144,7 +144,7 @@ function FooterLink({ href, children }: { href: string, children: React.ReactNod
     <li>
       <Link 
         href={href} 
-        className="text-[15px] font-black text-white hover:text-primary transition-all duration-200 uppercase tracking-tight"
+        className="text-[15px] font-black text-white hover:text-primary transition-all duration-200 tracking-tight"
       >
         {children}
       </Link>

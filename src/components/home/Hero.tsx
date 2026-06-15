@@ -24,8 +24,8 @@ import { cn } from "@/lib/utils";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Final Screenshot-Matched Hero Hub v8.0.
- * UPDATED: Precise mobile layout with end-to-end alignment and Cracklix branding.
+ * @fileOverview Final Screenshot-Matched Hero Hub v9.0.
+ * UPDATED: Removed 'uppercase' for a premium Title Case look.
  */
 
 export default function Hero() {
@@ -67,7 +67,7 @@ export default function Hero() {
               <Star className="h-3.5 w-3.5 text-amber-400 fill-current" />
               <div className="text-left">
                  <p className="text-[10px] font-black text-[#0F172A] leading-none">10,000+</p>
-                 <p className="text-[7px] font-bold text-slate-400 uppercase tracking-tighter">Students Trust Us</p>
+                 <p className="text-[7px] font-bold text-slate-400 tracking-tighter">Students Trust Us</p>
               </div>
            </div>
         </div>
@@ -76,10 +76,10 @@ export default function Hero() {
           
           <div className="space-y-6 md:space-y-8 order-2 lg:order-1">
             <div className="space-y-3 md:space-y-4">
-               <h1 className="text-3xl md:text-6xl font-black text-[#0F172A] leading-[1.1] tracking-tight uppercase">
-                 Your Journey to <br />
-                 <span className="text-blue-600">Government Job</span> <br />
-                 Starts Here!
+               <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05]">
+                 Crack Punjab <br />
+                 <span className="text-blue-600">Government Exams</span> <br />
+                 With Confidence
                </h1>
                <p className="text-sm md:text-lg text-slate-500 font-medium max-w-xl">
                  Best preparation platform for all major <br className="hidden md:block" /> Punjab Government Exams
@@ -87,7 +87,7 @@ export default function Hero() {
             </div>
 
             {/* BOARD PILLS */}
-            <div className="flex flex-wrap items-center gap-2 md:gap-4 text-[10px] md:text-sm font-bold text-slate-400 uppercase tracking-widest bg-white/50 p-2 rounded-2xl border border-slate-100 w-fit">
+            <div className="flex flex-wrap items-center gap-2 md:gap-4 text-[10px] md:text-sm font-bold text-slate-400 bg-white/50 p-2 rounded-2xl border border-slate-100 w-fit">
                <span>PSSSB</span> <span className="text-slate-200">•</span>
                <span>PCS</span> <span className="text-slate-200">•</span>
                <span>PSPCL</span> <span className="text-slate-200">•</span>
@@ -95,7 +95,7 @@ export default function Hero() {
                <span>PSTET</span>
             </div>
 
-            {/* 3. ILLUSTRATION HUB - CENTERED & EXPANDED FOR MOBILE */}
+            {/* 3. ILLUSTRATION HUB */}
             <div className="relative flex justify-center py-6 w-full">
               <div className="relative w-full max-w-[320px] sm:max-w-[420px] lg:max-w-[560px] xl:max-w-[620px]">
                  
@@ -111,7 +111,7 @@ export default function Hero() {
                    className="w-full h-auto object-contain relative z-10 drop-shadow-2xl"
                  />
 
-                 {/* FLOATING FEATURE CARDS - SCREENSHOT POSITIONS */}
+                 {/* FLOATING FEATURE CARDS */}
                  <FloatingNode icon={<MonitorPlay className="text-blue-600 h-3 w-3 md:h-4 md:w-4" />} label="Live Classes" className="top-4 -left-4 md:-left-12" />
                  <FloatingNode icon={<Zap className="text-indigo-600 h-3 w-3 md:h-4 md:w-4" />} label="Mock Tests" className="bottom-24 -left-6 md:-left-16" />
                  <FloatingNode icon={<FileText className="text-purple-600 h-3 w-3 md:h-4 md:w-4" />} label="Study Material" className="top-8 -right-4 md:-right-12" />
@@ -121,7 +121,7 @@ export default function Hero() {
 
             {/* ACTION BUTTONS */}
             <div className="flex flex-col gap-3 md:pt-4">
-              <Button asChild className="w-full md:w-80 h-14 md:h-16 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-xs md:text-sm rounded-2xl shadow-xl shadow-blue-500/20 gap-4 group border-none">
+              <Button asChild className="w-full md:w-80 h-14 md:h-16 bg-blue-600 hover:bg-blue-700 text-white font-black tracking-widest text-xs md:text-sm rounded-2xl shadow-xl shadow-blue-500/20 gap-4 group border-none">
                 <Link href="/mocks">
                   <div className="flex-1 flex items-center justify-center gap-3">
                      <BookOpen className="h-5 w-5" /> Start Learning
@@ -132,7 +132,7 @@ export default function Hero() {
                 </Link>
               </Button>
 
-              <Button asChild variant="outline" className="w-full md:w-80 h-14 md:h-16 rounded-2xl border-2 border-blue-600 bg-white text-blue-600 font-black uppercase tracking-widest text-xs md:text-sm hover:bg-blue-50 transition-all gap-3">
+              <Button asChild variant="outline" className="w-full md:w-80 h-14 md:h-16 rounded-2xl border-2 border-blue-600 bg-white text-blue-600 font-black tracking-widest text-xs md:text-sm hover:bg-blue-50 transition-all gap-3">
                 <Link href="/mocks">
                   <CheckSquare className="h-5 w-5" /> Take Free Mock Test
                 </Link>
@@ -141,7 +141,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* 4. STATS GRID - WHITE CARDS */}
+        {/* 4. STATS GRID */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-16 md:mt-24">
           {liveStats.map((stat) => (
             <Card key={stat.id} className="p-4 md:p-8 rounded-[1.5rem] md:rounded-[2rem] bg-white border border-slate-100 shadow-xl flex flex-col items-center text-center gap-2 md:gap-3 group hover:shadow-2xl transition-all">
@@ -149,8 +149,8 @@ export default function Hero() {
                 {stat.icon}
               </div>
               <div className="space-y-0.5">
-                <p className="text-lg md:text-3xl font-black text-[#0F172A] leading-none tracking-tighter uppercase">{stat.val}</p>
-                <p className="text-[7px] md:text-sm font-black text-slate-400 uppercase tracking-tight">{stat.label}</p>
+                <p className="text-lg md:text-3xl font-black text-[#0F172A] leading-none tracking-tighter">{stat.val}</p>
+                <p className="text-[7px] md:text-sm font-black text-slate-400 tracking-tight">{stat.label}</p>
               </div>
             </Card>
           ))}
@@ -164,8 +164,8 @@ export default function Hero() {
               ))}
            </div>
            <div className="text-center md:text-right text-white space-y-1">
-              <p className="text-xs md:text-lg font-black uppercase tracking-tight">Join 10,000+ Successful Aspirants Today!</p>
-              <p className="text-[8px] md:text-xs font-bold text-white/70 uppercase tracking-widest">Punjab's #1 Dedicated Learning Center</p>
+              <p className="text-xs md:text-lg font-black tracking-tight">Join 10,000+ Successful Aspirants Today!</p>
+              <p className="text-[8px] md:text-xs font-bold text-white/70 tracking-widest">Punjab's #1 Dedicated Learning Center</p>
            </div>
         </div>
 
@@ -184,8 +184,7 @@ function FloatingNode({ icon, label, className }: { icon: React.ReactNode, label
        <div className="h-5 w-5 md:h-8 md:w-8 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
           {icon}
        </div>
-       <span className="text-[7px] md:text-xs font-black text-[#0F172A] uppercase tracking-tight whitespace-nowrap">{label}</span>
+       <span className="text-[7px] md:text-xs font-black text-[#0F172A] tracking-tight whitespace-nowrap">{label}</span>
     </motion.div>
   );
 }
-

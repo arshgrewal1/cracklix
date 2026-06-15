@@ -34,8 +34,8 @@ import Logo from "@/components/brand/Logo";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview High-Density Master Navbar Hub v54.0.
- * UPDATED: Optimized for Blue SaaS theme matching Hero redesign.
+ * @fileOverview High-Density Master Navbar Hub v55.0.
+ * UPDATED: Removed 'uppercase' for a premium Title Case look.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -109,21 +109,21 @@ export default function Navbar() {
           <div className="flex items-center gap-1.5 md:gap-3 shrink-0">
              
              <div className="hidden sm:block">
-               <Button asChild className="h-9 md:h-11 px-3 md:px-5 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[8px] md:text-[9px] tracking-widest rounded-lg md:rounded-xl gap-2 shadow-lg border-none">
-                  <Link href="/pass"><Gem className="h-3.5 w-3.5 text-blue-500" /> PASS</Link>
+               <Button asChild className="h-9 md:h-11 px-3 md:px-5 bg-[#0F172A] hover:bg-black text-white font-black text-[8px] md:text-[9px] tracking-widest rounded-lg md:rounded-xl gap-2 shadow-lg border-none">
+                  <Link href="/pass"><Gem className="h-3.5 w-3.5 text-blue-500" /> Pass</Link>
                </Button>
              </div>
 
              <div className="hidden md:block">
-               <Button asChild className="h-11 px-5 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[9px] tracking-widest rounded-xl gap-2 shadow-lg border-none">
-                  <Link href="/install"><Download className="h-3.5 w-3.5" /> APP</Link>
+               <Button asChild className="h-11 px-5 bg-blue-600 hover:bg-blue-700 text-white font-black text-[9px] tracking-widest rounded-xl gap-2 shadow-lg border-none">
+                  <Link href="/install"><Download className="h-3.5 w-3.5" /> App</Link>
                </Button>
              </div>
 
              {isActivePass && (
                 <div className="hidden xs:flex items-center gap-1.5 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-lg">
                    <div className="h-1.5 w-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                   <span className="text-[8px] font-black text-emerald-600 uppercase">ACTIVE</span>
+                   <span className="text-[8px] font-black text-emerald-600">Active</span>
                 </div>
              )}
 
@@ -142,26 +142,26 @@ export default function Navbar() {
                     <DropdownMenuItem asChild className="px-4 py-3 cursor-pointer rounded-xl focus:bg-slate-50">
                        <Link href="/profile" className="flex items-center gap-3">
                           <User className="h-5 w-5 text-blue-500" />
-                          <span className="font-black text-xs uppercase tracking-tight text-slate-700">My Profile</span>
+                          <span className="font-black text-xs tracking-tight text-slate-700">My Profile</span>
                        </Link>
                     </DropdownMenuItem>
                     {isAdmin && (
                       <DropdownMenuItem asChild className="px-4 py-3 cursor-pointer rounded-xl focus:bg-rose-50 mt-1 border border-rose-50">
                         <Link href="/admin" className="flex items-center gap-3">
                           <ShieldCheck className="h-5 w-5 text-rose-500" />
-                          <span className="font-black text-xs uppercase tracking-tight text-rose-600">Admin Hub</span>
+                          <span className="font-black text-xs tracking-tight text-rose-600">Admin Hub</span>
                         </Link>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator className="bg-slate-50 my-1" />
                     <DropdownMenuItem onClick={handleLogout} className="px-4 py-3 cursor-pointer rounded-xl focus:bg-rose-50 text-rose-500">
                        <LogOut className="h-5 w-5 shrink-0" />
-                       <span className="font-black text-xs uppercase tracking-tight">Log Out</span>
+                       <span className="font-black text-xs tracking-tight">Log Out</span>
                     </DropdownMenuItem>
                  </DropdownMenuContent>
                </DropdownMenu>
              ) : (
-               <Button asChild className="px-4 md:px-5 h-9 md:h-10 bg-[#0F172A] hover:bg-black text-white font-black text-[9px] md:text-[10px] rounded-lg md:rounded-xl transition-all uppercase tracking-widest border-none">
+               <Button asChild className="px-4 md:px-5 h-9 md:h-10 bg-[#0F172A] hover:bg-black text-white font-black text-[9px] md:text-[10px] rounded-lg md:rounded-xl transition-all tracking-widest border-none">
                  <Link href="/login">Login</Link>
                </Button>
              )}
@@ -185,7 +185,7 @@ export default function Navbar() {
 function NavLink({ href, icon, label, active }: { href: string, icon: React.ReactNode, label: string, active?: boolean }) {
   return (
     <Link href={href} className={cn(
-      "flex items-center gap-2 px-3 xl:px-4 py-1.5 rounded-lg font-black uppercase text-[9px] tracking-widest transition-all shrink-0",
+      "flex items-center gap-2 px-3 xl:px-4 py-1.5 rounded-lg font-black text-[9px] tracking-widest transition-all shrink-0",
       active ? "bg-blue-50 text-blue-600 shadow-sm" : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
     )}>
        {icon}

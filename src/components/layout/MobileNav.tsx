@@ -7,8 +7,8 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 
 /**
- * @fileOverview Institutional Bottom Navigation (Screenshot Matched).
- * UPDATED: Replaced all orange highlights with primary Blue.
+ * @fileOverview Institutional Bottom Navigation.
+ * UPDATED: Removed 'uppercase' for a cleaner Title Case look.
  */
 
 export default function MobileNav() {
@@ -18,11 +18,11 @@ export default function MobileNav() {
   if (!pathname || pathname.includes('/attempt') || pathname.startsWith('/admin')) return null;
 
   const navItems = [
-    { label: "HOME", href: "/", icon: Home },
-    { label: "MY HUB", href: "/my-exams", icon: Target },
-    { label: "PRACTICE", href: "/mocks", icon: Zap },
-    { label: "STATS", href: "/dashboard", icon: BarChart3 },
-    { label: "PASS", href: "/pass", icon: Gem },
+    { label: "Home", href: "/", icon: Home },
+    { label: "My Hub", href: "/my-exams", icon: Target },
+    { label: "Practice", href: "/mocks", icon: Zap },
+    { label: "Stats", href: "/dashboard", icon: BarChart3 },
+    { label: "Pass", href: "/pass", icon: Gem },
   ];
 
   return (
@@ -56,7 +56,7 @@ export default function MobileNav() {
                 />
                 
                 <span className={cn(
-                  "text-[8px] font-black uppercase tracking-[0.1em] transition-colors duration-300",
+                  "text-[8px] font-black tracking-[0.1em] transition-colors duration-300",
                   isActive ? "text-white" : "text-slate-500"
                 )}>
                   {item.label}
