@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -31,12 +32,13 @@ import MobileSidebar from "./MobileSidebar";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview High-Density Master Navbar Hub v56.0.
- * UPDATED: Optimized for Premium Blue sidebar integration.
+ * @fileOverview High-Density Master Navbar Hub v57.0.
+ * UPDATED: Hardened auth rendering to eliminate login button flicker.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -126,10 +128,9 @@ export default function Navbar() {
                 <Search className="h-4.5 w-4.5 md:h-5 md:w-5" />
              </Link>
 
+             {/* AUTHENTICATION ACTION BLOCK - FLICKER-FREE */}
              {loading ? (
-                <div className="w-9 h-9 md:w-11 md:h-11 rounded-full flex items-center justify-center bg-slate-50">
-                   <Loader2 className="h-4 w-4 text-slate-300 animate-spin" />
-                </div>
+                <Skeleton className="w-9 h-9 md:w-11 md:h-11 rounded-full bg-slate-100" />
              ) : user ? (
                <DropdownMenu>
                  <DropdownMenuTrigger asChild>
