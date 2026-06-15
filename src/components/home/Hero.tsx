@@ -14,10 +14,8 @@ import {
   Target,
   FileStack,
   ArrowRight,
-  MonitorPlay,
   Trophy,
   CheckCircle2,
-  GraduationCap,
   Landmark
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,8 +27,10 @@ import { cn } from "@/lib/utils";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Final High-Fidelity Hero Hub v11.0.
- * UPDATED: Precise icons and colors for mini-feature cards matching the screenshot.
+ * @fileOverview Final High-Fidelity Hero Hub v12.0.
+ * UPDATED: Reconstructed the Statistics Bar to perfectly match the user's screenshot.
+ * ICONS: Switched to solid colored circles with white icons.
+ * TYPOGRAPHY: Set colored values and bold black labels with sub-text.
  */
 
 export default function Hero() {
@@ -52,10 +52,42 @@ export default function Hero() {
     };
 
     return [
-      { id: "q", icon: <Zap className="h-6 w-6 text-blue-600" />, val: formatNumber(stats?.totalQuestions, "50K+"), label: "Questions", sub: "High quality practice questions" },
-      { id: "m", icon: <ClipboardCheck className="h-6 w-6 text-indigo-600" />, val: formatNumber(stats?.totalMocks, "500+"), label: "Mock Tests", sub: "Topic wise & full length mocks" },
-      { id: "e", icon: <CheckCircle2 className="h-6 w-6 text-emerald-600" />, val: formatNumber(stats?.totalBoards, "50+"), label: "Exams", sub: "All major Punjab exams" },
-      { id: "u", icon: <Users className="h-6 w-6 text-orange-500" />, val: formatNumber(stats?.totalUsers, "15K+"), label: "Aspirants", sub: "Trust Cracklix for preparation" }
+      { 
+        id: "q", 
+        icon: <Zap className="h-6 w-6 text-white fill-current" />, 
+        circleBg: "bg-blue-600",
+        valColor: "text-blue-600",
+        val: formatNumber(stats?.totalQuestions, "50K+"), 
+        label: "Questions", 
+        sub: "High quality practice questions" 
+      },
+      { 
+        id: "m", 
+        icon: <ClipboardCheck className="h-6 w-6 text-white" />, 
+        circleBg: "bg-indigo-600",
+        valColor: "text-indigo-600",
+        val: formatNumber(stats?.totalMocks, "500+"), 
+        label: "Mock Tests", 
+        sub: "Topic wise & full length mocks" 
+      },
+      { 
+        id: "e", 
+        icon: <ShieldCheck className="h-6 w-6 text-white" />, 
+        circleBg: "bg-emerald-600",
+        valColor: "text-emerald-600",
+        val: formatNumber(stats?.totalBoards, "50+"), 
+        label: "Exams", 
+        sub: "All major Punjab exams" 
+      },
+      { 
+        id: "u", 
+        icon: <Users className="h-6 w-6 text-white" />, 
+        circleBg: "bg-orange-500",
+        valColor: "text-orange-500",
+        val: formatNumber(stats?.totalUsers, "15K+"), 
+        label: "Aspirants", 
+        sub: "Trust Cracklix for preparation" 
+      }
     ];
   }, [stats]);
 
@@ -193,16 +225,16 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* BOTTOM STATS REGISTRY */}
+        {/* BOTTOM STATS REGISTRY - SCREENSHOT MATCHED */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-20 md:mt-32">
           {liveStats.map((stat) => (
             <Card key={stat.id} className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl flex items-center gap-5 md:gap-6 group hover:shadow-2xl hover:translate-y-[-4px] transition-all">
-              <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+              <div className={cn("h-12 w-12 md:h-16 md:w-16 rounded-full flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 transition-transform", stat.circleBg)}>
                 {stat.icon}
               </div>
               <div className="text-left space-y-0.5">
-                <p className="text-2xl md:text-3xl font-black text-[#0F172A] leading-none tracking-tighter">{stat.val}</p>
-                <p className="text-xs md:text-sm font-bold text-slate-800 tracking-tight">{stat.label}</p>
+                <p className={cn("text-2xl md:text-3xl font-black leading-none tracking-tighter", stat.valColor)}>{stat.val}</p>
+                <p className="text-sm md:text-base font-bold text-slate-900 tracking-tight">{stat.label}</p>
                 <p className="text-[9px] md:text-[10px] font-medium text-slate-400 leading-tight line-clamp-1">{stat.sub}</p>
               </div>
             </Card>
