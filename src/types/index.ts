@@ -17,6 +17,15 @@ export type CurrentAffairType = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUIZ' | 'SPECI
 
 export type MockAssignmentMode = 'SINGLE' | 'MULTIPLE' | 'AUTHORITY';
 
+export interface UserDevice {
+  id: string;
+  browser: string;
+  platform: string;
+  lastActive: any;
+  firstLogin: any;
+  deviceName: string;
+}
+
 export interface DeviceLock {
   deviceId: string;
   deviceName: string;
@@ -137,6 +146,7 @@ export interface UserProfile {
   pinnedExams?: string[];
   unlockedMocks?: string[];
   deviceLock?: DeviceLock;
+  deviceCount?: number;
   pass?: {
     active: boolean;
     plan: 'FREE_PASS' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';

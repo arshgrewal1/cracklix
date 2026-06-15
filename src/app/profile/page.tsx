@@ -1,10 +1,11 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore } from "@/firebase"
-import { collection, query, where, doc, updateDoc, serverTimestamp } from "firebase/firestore"
+import { collection, query, where, doc, updateDoc, serverTimestamp, deleteDoc } from "firebase/firestore"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -32,7 +33,11 @@ import {
   CreditCard,
   Loader2,
   X,
-  Gem
+  Gem,
+  Smartphone,
+  Trash2,
+  CheckCircle2,
+  Clock
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -42,11 +47,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Student Profile Center v21.3 (Hardened).
- * FIXED: Corrected setEditForm reference in profile dialog.
+ * @fileOverview Student Profile Center v22.0 (Device Management).
  */
 export default function ProfilePage() {
-  const { user, profile, loading } = useUser()
+  const { user, profile, loading, currentDeviceId } = useUser()
   const db = useFirestore()
   const router = useRouter()
   const { toast } = useToast()
@@ -61,6 +65,13 @@ export default function ProfilePage() {
     targetExam: ""
   })
   const [isSaving, setIsSaving] = useState(false)
+
+  const devicesQuery = useMemo(() => {
+    if (!db || !user) return null
+    return collection(db, "users", user.uid, "devices")
+  }, [db, user])
+
+  const { data: devices, loading: devicesLoading } = useCollection<any>(devicesQuery)
 
   useEffect(() => {
     if (!loading && !user) {
@@ -140,6 +151,19 @@ export default function ProfilePage() {
     }
   }
 
+  const handleRemoveDevice = async (deviceId: string) => {
+    if (!db || !user) return;
+    if (!confirm("Permanently remove this device? You will need to login again if you want to use it.")) return;
+
+    try {
+      await deleteDoc(doc(db, "users", user.uid, "devices", deviceId));
+      await updateDoc(doc(db, "users", user.uid), { deviceCount: (devices?.length || 1) - 1 });
+      toast({ title: "Device Removed", description: "Slot cleared for a new device." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Action Failed" });
+    }
+  }
+
   const formatPhone = (phone: string) => {
     if (!phone) return "Not Added";
     if (phone.startsWith('+91')) return phone;
@@ -210,8 +234,64 @@ export default function ProfilePage() {
                     <StatsCard icon={<Target />} label="AVG ACCURACY" value={`${stats.avgAccuracy}%`} color="text-primary" bgColor="bg-primary/10" />
                     <StatsCard icon={<Trophy />} label="RANK" value={stats.rank} color="text-emerald-500" bgColor="bg-emerald-50" className="hidden sm:flex" />
                  </div>
+
+                 {/* DEVICE MANAGEMENT HUB */}
                  <Card className="border-none shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-6 md:p-10 space-y-6 md:space-y-8">
-                    <div className="flex items-center justify-between border-b border-slate-50 pb-4 md:pb-6"><h3 className="font-headline font-black text-lg md:text-2xl uppercase flex items-center gap-3 md:gap-4 text-[#0F172A]"><UserIcon className="h-5 w-5 md:h-6 md:w-6 text-primary" /> My Profile</h3></div>
+                    <div className="flex items-center justify-between border-b border-slate-50 pb-4 md:pb-6">
+                       <h3 className="font-headline font-black text-lg md:text-2xl uppercase flex items-center gap-3 md:gap-4 text-[#0F172A]">
+                          <Smartphone className="h-5 w-5 md:h-6 md:w-6 text-primary" /> Manage Devices
+                       </h3>
+                       <Badge className="bg-primary/5 text-primary border-none text-[8px] font-black uppercase px-2 py-0.5 rounded">LIMIT: 2</Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                       {devicesLoading ? (
+                          <Skeleton className="h-24 w-full rounded-2xl" />
+                       ) : devices && devices.length > 0 ? (
+                          devices.map((device: any) => {
+                             const isCurrent = device.id === currentDeviceId;
+                             return (
+                                <div key={device.id} className={cn("p-4 md:p-6 rounded-[1.5rem] border-2 flex items-center justify-between transition-all", isCurrent ? "bg-blue-50 border-primary" : "bg-white border-slate-100 shadow-sm")}>
+                                   <div className="flex items-center gap-4">
+                                      <div className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl flex items-center justify-center shrink-0 shadow-inner", isCurrent ? "bg-primary text-white" : "bg-slate-50 text-slate-400")}>
+                                         <Smartphone className="h-5 w-5 md:h-6 md:w-6" />
+                                      </div>
+                                      <div className="min-w-0 text-left">
+                                         <div className="flex items-center gap-2">
+                                            <p className="font-black text-xs md:text-base text-[#0F172A] uppercase truncate">{device.deviceName || 'Authorized Device'}</p>
+                                            {isCurrent && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[6px] font-black px-1.5 py-0">CURRENT</Badge>}
+                                         </div>
+                                         <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                                            Last Active: {device.lastActive ? new Date(device.lastActive.seconds * 1000).toLocaleString() : 'N/A'}
+                                         </p>
+                                      </div>
+                                   </div>
+                                   <Button 
+                                      variant="ghost" 
+                                      size="icon" 
+                                      onClick={() => handleRemoveDevice(device.id)}
+                                      className="h-10 w-10 rounded-xl text-rose-500 hover:bg-rose-50 shrink-0"
+                                   >
+                                      <Trash2 className="h-5 w-5" />
+                                   </Button>
+                                </div>
+                             )
+                          })
+                       ) : (
+                          <div className="text-center py-8 opacity-20 italic uppercase font-black text-[10px]">No recognized devices in registry.</div>
+                       )}
+                    </div>
+                    
+                    <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 flex items-start gap-4">
+                       <CheckCircle2 className="h-4 w-4 text-primary mt-1 shrink-0" />
+                       <p className="text-[9px] font-bold text-slate-500 uppercase leading-relaxed">
+                          Your account is protected by hardware fingerprinting. Only 2 devices are allowed to access paid content. Removal is immediate.
+                       </p>
+                    </div>
+                 </Card>
+
+                 <Card className="border-none shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white p-6 md:p-10 space-y-6 md:space-y-8">
+                    <div className="flex items-center justify-between border-b border-slate-50 pb-4 md:pb-6"><h3 className="font-headline font-black text-lg md:text-2xl uppercase flex items-center gap-3 md:gap-4 text-[#0F172A]"><UserIcon className="h-5 w-5 md:h-6 md:w-6 text-primary" /> Profile Data</h3></div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 md:gap-y-8">
                        <ProfileDataNode icon={<Calendar className="text-blue-500" />} label="DATE OF BIRTH" value={formatDOB(profile.dob)} />
                        <ProfileDataNode icon={<Phone className="text-emerald-500" />} label="MOBILE NUMBER" value={formatPhone(profile.phone)} />
@@ -219,17 +299,6 @@ export default function ProfilePage() {
                        <ProfileDataNode icon={<ShieldCheck className="text-primary" />} label="ACCOUNT TYPE" value={`${profile.role || 'STUDENT'}`} />
                        <ProfileDataNode icon={<Activity className="text-orange-500" />} label="JOINED" value={new Date(profile.createdAt).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })} />
                     </div>
-                 </Card>
-                 <Card className="border-none shadow-xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-white">
-                    <CardHeader className="p-6 md:p-10 border-b border-slate-50 flex flex-row items-center justify-between">
-                       <h3 className="text-[11px] md:text-lg font-black uppercase tracking-tight text-[#0F172A] flex items-center gap-2"><History className="h-4 w-4 md:h-5 md:w-5 text-primary" /> History</h3>
-                       <Button asChild variant="ghost" className="h-8 text-[8px] md:text-[9px] font-black uppercase tracking-widest text-primary gap-1"><Link href="/dashboard">View All <ChevronRight className="h-3 w-3" /></Link></Button>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                       <div className="divide-y divide-slate-50">
-                          {resultsLoading ? (Array.from({ length: 2 }).map((_, i) => <div key={i} className="p-6"><Skeleton className="h-10 w-full rounded-xl" /></div>)) : results.length > 0 ? (results.slice(0, 3).map((r: any) => (<Link key={r.id} href={`/results/${r.mockId}`} className="p-5 md:p-10 flex items-center justify-between hover:bg-slate-50/50 transition-colors"><div className="flex items-center gap-4 md:gap-6 min-w-0"><div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0"><Zap className="h-4 w-4 md:h-6 md:w-6 text-primary" /></div><div className="min-w-0 space-y-1"><p className="font-black text-[#0B1528] text-xs md:text-lg uppercase truncate leading-none">{r.mockTitle}</p><p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{new Date(r.timestamp).toLocaleDateString()} • {r.accuracy}%</p></div></div><ChevronRight className="h-4 w-4 text-slate-200" /></Link>))) : (<div className="p-12 text-center text-slate-300 font-bold uppercase text-[10px]">No activity found.</div>)}
-                       </div>
-                    </CardContent>
                  </Card>
               </div>
               <div className="lg:col-span-4 space-y-5 md:space-y-8">

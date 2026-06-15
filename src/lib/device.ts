@@ -3,7 +3,7 @@ import FingerprintJS from '@fingerprintjs/fingerprintjs';
 
 /**
  * @fileOverview High-Fidelity Device Identity Utility.
- * Uses hardware fingerprinting to identify browser sessions.
+ * Uses hardware fingerprinting to identify browser sessions for device locking.
  */
 
 export async function getDeviceId(): Promise<string> {
@@ -34,4 +34,12 @@ export function getDeviceName(): string {
   else if (userAgent.indexOf("Mac") > -1) os = "MacOS";
 
   return `${browser} on ${os}`;
+}
+
+export function getBrowserInfo() {
+  if (typeof window === 'undefined') return { browser: 'Server', platform: 'Server' };
+  return {
+    browser: getDeviceName(),
+    platform: navigator.platform || 'Unknown'
+  };
 }

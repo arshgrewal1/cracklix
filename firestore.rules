@@ -3,7 +3,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     /**
-     * @fileOverview Hardened Institutional Security Protocol v6.0 (Device Locked).
+     * @fileOverview Hardened Institutional Security Protocol v7.0 (Device Management).
      */
 
     function isAuthenticated() {
@@ -35,9 +35,13 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin() || (isOwner(userId) && (
-        // Prevent users from manually resetting enforcementLevel or device cooldown logic via UI
         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'pass'])
       ));
+
+      // Device Registry Rules
+      match /devices/{deviceId} {
+        allow read, write: if isOwner(userId) || isAdmin();
+      }
     }
 
     match /attempts/{attemptId} {

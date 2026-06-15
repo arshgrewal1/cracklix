@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import Logo from "@/components/brand/Logo"
-import { ShieldCheck, Mail, Lock, ChevronLeft, User, Phone, AlertCircle, RefreshCw, Eye, EyeOff, Loader2 } from "lucide-react"
+import { ShieldCheck, Mail, Lock, ChevronLeft, User, Phone, AlertCircle, RefreshCw, Eye, EyeOff, Loader2, Smartphone } from "lucide-react"
 import { useAuth, useFirestore, useUser } from "@/firebase"
 import { 
   signInWithEmailAndPassword, 
@@ -16,16 +16,18 @@ import {
   signInWithPopup, 
   GoogleAuthProvider,
   sendPasswordResetEmail,
-  updateProfile
+  updateProfile,
+  signOut
 } from "firebase/auth"
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore"
+import { doc, setDoc, getDoc, serverTimestamp, collection, getDocs } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { DeviceService } from "@/services/device-service"
+import { getDeviceId, getBrowserInfo } from "@/lib/device"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Hardened Login Hub v13.0 (Device Aware).
+ * @fileOverview Hardened Login Hub v14.0 (Multi-Device Aware).
+ * ENFORCEMENT: Max 2 devices per student account.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -51,6 +53,7 @@ function LoginContent() {
   const [loading, setLoading] = useState(false)
   const [resetLoading, setResetLoading] = useState(false)
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
+  const [deviceError, setDeviceError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   
   const { user, loading: authLoading } = useUser()
@@ -63,27 +66,55 @@ function LoginContent() {
   const returnUrl = searchParams.get("returnUrl") || "/"
 
   useEffect(() => {
-    if (!authLoading && user) {
+    if (!authLoading && user && !deviceError) {
        router.replace(returnUrl);
     }
-  }, [user, authLoading, router, returnUrl]);
+  }, [user, authLoading, router, returnUrl, deviceError]);
 
-  const onAuthSuccess = async (userId: string, userEmail: string) => {
+  const onAuthSuccess = async (userId: string) => {
     if (!db) return;
-    const userRef = doc(db, 'users', userId);
-    const userSnap = await getDoc(userRef);
     
-    if (userSnap.exists()) {
-      const profile = userSnap.data();
-      // Auto-bind device for premium users who don't have one set yet
-      if (profile.pass?.active && !profile.deviceLock?.deviceId) {
-        await DeviceService.bindCurrentDevice(db, userId, 3);
+    setLoading(true);
+    const deviceId = await getDeviceId();
+    const { browser, platform } = getBrowserInfo();
+    
+    const deviceRef = doc(db, 'users', userId, 'devices', deviceId);
+    const deviceSnap = await getDoc(deviceRef);
+    
+    if (deviceSnap.exists()) {
+      // Recognized device: update activity
+      await setDoc(deviceRef, { lastActive: serverTimestamp() }, { merge: true });
+    } else {
+      // New device: check count
+      const devicesSnap = await getDocs(collection(db, 'users', userId, 'devices'));
+      if (devicesSnap.size >= 2) {
+        // BLOCKED: Sign out and show error
+        await signOut(auth);
+        setDeviceError("Device limit exceeded. Your account is already active on 2 other devices. Please remove an existing device from your profile settings on an authorized device.");
+        setLoading(false);
+        return false;
+      } else {
+        // Register new device
+        await setDoc(deviceRef, {
+          id: deviceId,
+          browser,
+          platform,
+          deviceName: browser,
+          firstLogin: serverTimestamp(),
+          lastActive: serverTimestamp()
+        });
+        // Update user profile count for admin monitoring
+        await setDoc(doc(db, 'users', userId), { deviceCount: devicesSnap.size + 1 }, { merge: true });
       }
     }
+    
+    setLoading(false);
+    return true;
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
+    setDeviceError(null);
     if (mode === 'register' && password !== confirmPassword) {
       toast({ variant: "destructive", title: "Wait", description: "Passwords must match." })
       return
@@ -93,20 +124,26 @@ function LoginContent() {
     try {
       if (mode === 'login') {
         const creds = await signInWithEmailAndPassword(auth, email, password)
-        await onAuthSuccess(creds.user.uid, creds.user.email!);
-        toast({ title: "Login Successful", description: "Welcome back!" })
-        startTransition(() => { router.replace(returnUrl) })
+        const authorized = await onAuthSuccess(creds.user.uid);
+        if (authorized) {
+          toast({ title: "Login Successful", description: "Welcome back!" })
+          startTransition(() => { router.replace(returnUrl) })
+        }
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
         const user = userCredential.user
         await updateProfile(user, { displayName: name })
         const isSuperAdmin = email && SUPER_ADMIN_WHITELIST.includes(email.toLowerCase());
-        await setDoc(doc(db, 'users', user.uid), {
+        
+        await setDoc(doc(db!, 'users', user.uid), {
           id: user.uid, name, email, phone: `+91 ${phone}`,
           role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
           state: "Punjab", createdAt: new Date().toISOString(),
-          updatedAt: serverTimestamp(), status: 'Free', pinnedExams: []
+          updatedAt: serverTimestamp(), status: 'Free', pinnedExams: [],
+          deviceCount: 0
         })
+
+        await onAuthSuccess(user.uid);
         toast({ title: "Account Created", description: "Welcome to Cracklix!" })
         startTransition(() => { router.replace(returnUrl) })
       }
@@ -118,6 +155,7 @@ function LoginContent() {
 
   const handleGoogleSignIn = async () => {
     if (loading) return;
+    setDeviceError(null);
     setLoading(true)
     try {
       const provider = new GoogleAuthProvider()
@@ -126,7 +164,7 @@ function LoginContent() {
       const user = result.user
       if (!user.email) throw new Error("Google account email is mandatory.");
       
-      const userRef = doc(db, 'users', user.uid)
+      const userRef = doc(db!, 'users', user.uid)
       const userSnap = await getDoc(userRef)
       const isSuperAdmin = SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase());
       
@@ -135,14 +173,16 @@ function LoginContent() {
           id: user.uid, name: user.displayName || "Aspirant",
           email: user.email, role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
           state: "Punjab", createdAt: new Date().toISOString(),
-          updatedAt: serverTimestamp(), status: 'Free', pinnedExams: [], phone: ""
+          updatedAt: serverTimestamp(), status: 'Free', pinnedExams: [], phone: "",
+          deviceCount: 0
         })
-      } else {
-        await onAuthSuccess(user.uid, user.email);
       }
       
-      toast({ title: "Welcome", description: `Signed in as ${user.displayName}` })
-      startTransition(() => { router.replace(returnUrl) })
+      const authorized = await onAuthSuccess(user.uid);
+      if (authorized) {
+        toast({ title: "Welcome", description: `Signed in as ${user.displayName}` })
+        startTransition(() => { router.replace(returnUrl) })
+      }
     } catch (error: any) {
       toast({ variant: "destructive", title: "Login Failed", description: error.message })
       setLoading(false)
@@ -166,7 +206,7 @@ function LoginContent() {
     }
   };
 
-  if (!authLoading && user) return null;
+  if (!authLoading && user && !deviceError) return null;
 
   const isActuallyLoading = loading || isPending;
 
@@ -177,11 +217,23 @@ function LoginContent() {
         <div className="flex flex-col items-center mb-8 h-12 md:h-16 w-full">
           <Logo variant="light" imgClassName="h-full" />
         </div>
+
+        {deviceError && (
+          <div className="mb-6 bg-rose-500/10 border border-rose-500/20 p-6 rounded-2xl flex items-start gap-4 animate-in slide-in-from-top-4 duration-500">
+            <Smartphone className="h-6 w-6 text-rose-500 shrink-0" />
+            <div className="space-y-2">
+              <p className="text-sm font-black uppercase text-rose-500 tracking-widest">Security Lock</p>
+              <p className="text-xs text-slate-400 leading-relaxed font-medium">{deviceError}</p>
+              <Button onClick={() => setDeviceError(null)} variant="ghost" className="h-8 px-0 text-white font-bold text-[10px] hover:bg-transparent hover:text-white uppercase tracking-widest">Try Another Account</Button>
+            </div>
+          </div>
+        )}
+
         <Card className="border-white/10 bg-white/[0.03] backdrop-blur-2xl shadow-2xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden">
           <div className="h-1 w-full bg-primary" />
           <CardHeader className="text-center pt-8 md:pt-10">
             <CardTitle className="text-xl md:text-2xl font-headline font-black uppercase tracking-tight text-white">{mode === 'login' ? "Login" : "Create Account"}</CardTitle>
-            <CardDescription className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">MANAGE YOUR STUDY PROGRESS.</CardDescription>
+            <CardDescription className="text-slate-400 font-bold uppercase text-[8px] md:text-[10px] tracking-widest mt-2">SECURE DEVICE PROTOCOL ACTIVE.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 md:space-y-6 pb-10 md:pb-12">
             <form onSubmit={handleEmailAuth} className="space-y-3 md:space-y-4">

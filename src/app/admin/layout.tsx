@@ -1,3 +1,4 @@
+
 'use client';
 
 import { SidebarProvider, Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupLabel, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar"
@@ -27,7 +28,8 @@ import {
   Wand2,
   HeartPulse,
   Settings,
-  Box
+  Box,
+  Smartphone
 } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
@@ -39,8 +41,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Final Hardened High-Density Admin Layout v199.1.
- * UPDATED: Admin logo height shrunken to h-10 for a cleaner sidebar.
+ * @fileOverview Final Hardened High-Density Admin Layout v199.2.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -122,6 +123,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <SidebarGroupLabel className="px-6 h-fit py-0 text-[9px] font-black uppercase tracking-widest text-slate-500 text-left mt-0 mb-0">GOVERNANCE</SidebarGroupLabel>
             <SidebarMenu className="gap-0 mt-0 p-0">
               <AdminNavItem icon={<Users />} label="STUDENT LIST" href="/admin/users" active={pathname === "/admin/users"} />
+              <AdminNavItem icon={<Smartphone />} label="DEVICE AUDIT" href="/admin/devices" active={pathname === "/admin/devices"} />
               <AdminNavItem icon={<DollarSign />} label="REVENUE CENTER" href="/admin/payments" active={pathname === "/admin/payments"} />
               <AdminNavItem icon={<ShieldCheck />} label="VERIFY UPI" href="/admin/payments/verify" active={pathname === "/admin/payments/verify"} />
               <AdminNavItem icon={<Gem />} label="PASS MANAGER" href="/admin/passes" active={pathname === "/admin/passes"} />
