@@ -26,9 +26,9 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Majestic Hero Hub v23.0 (Precision Calibration).
- * UPDATED: Floating nodes now match screenshot with full labels and framing positioning.
- * UPDATED: Increased mobile scale for Papers and Practice nodes.
+ * @fileOverview Majestic Hero Hub v24.0 (Uniform Node Calibration).
+ * UPDATED: Standardized icon node sizes and shifted vertical positions downwards.
+ * UPDATED: Bottom nodes positioned at the base (2%) and top nodes lowered to 18%.
  */
 
 export default function Hero() {
@@ -52,8 +52,8 @@ export default function Hero() {
     return [
       { 
         id: "q", 
-        icon: <Zap className="h-6 w-6 text-white fill-current" />, 
-        circleBg: "bg-blue-600",
+        icon: <Zap className="h-6 w-6 text-blue-600 fill-current" />, 
+        circleBg: "bg-blue-50",
         valColor: "text-blue-600",
         val: formatNumber(stats?.totalQuestions, "50K+"), 
         label: "Questions", 
@@ -61,8 +61,8 @@ export default function Hero() {
       },
       { 
         id: "m", 
-        icon: <ClipboardCheck className="h-6 w-6 text-white" />, 
-        circleBg: "bg-blue-700",
+        icon: <ClipboardCheck className="h-6 w-6 text-blue-700" />, 
+        circleBg: "bg-blue-50",
         valColor: "text-blue-700",
         val: formatNumber(stats?.totalMocks, "500+"), 
         label: "Mock Tests", 
@@ -70,8 +70,8 @@ export default function Hero() {
       },
       { 
         id: "e", 
-        icon: <ShieldCheck className="h-6 w-6 text-white" />, 
-        circleBg: "bg-blue-600",
+        icon: <ShieldCheck className="h-6 w-6 text-blue-600" />, 
+        circleBg: "bg-blue-50",
         valColor: "text-blue-600",
         val: formatNumber(stats?.totalBoards, "50+"), 
         label: "Exams", 
@@ -79,8 +79,8 @@ export default function Hero() {
       },
       { 
         id: "u", 
-        icon: <Users className="h-6 w-6 text-white" />, 
-        circleBg: "bg-blue-500",
+        icon: <Users className="h-6 w-6 text-blue-500" />, 
+        circleBg: "bg-blue-50",
         valColor: "text-blue-500",
         val: formatNumber(stats?.totalUsers, "15K+"), 
         label: "Aspirants", 
@@ -161,13 +161,12 @@ export default function Hero() {
                   alt="Cracklix Student"
                />
                
-               {/* DESKTOP TOP ROW: FRAMING HEAD */}
-               <FloatingNode icon={<Zap className="text-blue-600 h-6 w-6 fill-current" />} label="MOCK TESTS" className="lg:top-[12%] lg:left-[5%]" link="/mocks" />
-               <FloatingNode icon={<Landmark className="text-blue-600 h-6 w-6" />} label="PUNJAB EXAMS" className="lg:top-[12%] lg:right-[5%]" link="/exams" />
+               {/* DESKTOP FLOATING NODES - SHIFTED DOWN */}
+               <FloatingNode icon={<Zap className="text-blue-600 h-6 w-6 fill-current" />} label="MOCK TESTS" className="lg:top-[18%] lg:left-[5%]" link="/mocks" />
+               <FloatingNode icon={<Landmark className="text-blue-600 h-6 w-6" />} label="PUNJAB EXAMS" className="lg:top-[18%] lg:right-[5%]" link="/exams" />
                
-               {/* DESKTOP BOTTOM ROW: BASE LEVEL */}
-               <FloatingNode icon={<FileStack className="text-blue-600 h-6 w-6" />} label="PREVIOUS PAPERS" className="lg:bottom-[8%] lg:left-[2%]" link="/pyqs" />
-               <FloatingNode icon={<Target className="text-blue-600 h-6 w-6" />} label="DAILY PRACTICE" className="lg:bottom-[12%] lg:right-[2%]" link="/current-affairs" />
+               <FloatingNode icon={<FileStack className="text-blue-600 h-6 w-6" />} label="PREVIOUS PAPERS" className="lg:bottom-[2%] lg:left-[2%]" link="/pyqs" />
+               <FloatingNode icon={<Target className="text-blue-600 h-6 w-6" />} label="DAILY PRACTICE" className="lg:bottom-[2%] lg:right-[2%]" link="/current-affairs" />
             </div>
          </div>
 
@@ -176,13 +175,12 @@ export default function Hero() {
                <div className="absolute inset-0 bg-blue-100/30 rounded-full blur-2xl -z-10" />
                <img src="/images/hero-student.png" className="w-full h-full object-contain relative z-10" alt="Student" />
                
-               {/* MOBILE TOP ROW: FRAMING HEAD */}
-               <FloatingNode icon={<Zap className="text-blue-600 h-4 w-4 fill-current" />} label="MOCK TESTS" className="top-[8%] left-[2%]" link="/mocks" />
-               <FloatingNode icon={<Landmark className="text-blue-600 h-4 w-4" />} label="PUNJAB EXAMS" className="top-[8%] right-[2%]" link="/exams" />
+               {/* MOBILE FLOATING NODES - SHIFTED DOWN */}
+               <FloatingNode icon={<Zap className="text-blue-600 h-5 w-5 fill-current" />} label="MOCK TESTS" className="top-[12%] left-[2%]" link="/mocks" />
+               <FloatingNode icon={<Landmark className="text-blue-600 h-5 w-5" />} label="PUNJAB EXAMS" className="top-[12%] right-[2%]" link="/exams" />
 
-               {/* MOBILE BOTTOM ROW: INCREASED SIZE */}
-               <FloatingNode icon={<FileStack className="text-blue-600 h-5 w-5" />} label="PREVIOUS PAPERS" className="bottom-[15%] left-[0%]" link="/pyqs" isLarge />
-               <FloatingNode icon={<Target className="text-blue-600 h-5 w-5" />} label="DAILY PRACTICE" className="bottom-[15%] right-[0%]" link="/current-affairs" isLarge />
+               <FloatingNode icon={<FileStack className="text-blue-600 h-5 w-5" />} label="PREVIOUS PAPERS" className="bottom-[2%] left-[0%]" link="/pyqs" />
+               <FloatingNode icon={<Target className="text-blue-600 h-5 w-5" />} label="DAILY PRACTICE" className="bottom-[2%] right-[0%]" link="/current-affairs" />
             </div>
 
             <div className="w-full px-4 flex flex-col gap-3 mt-8">
@@ -238,22 +236,21 @@ export default function Hero() {
   );
 }
 
-function FloatingNode({ icon, label, className, link, isLarge = false }: { icon: React.ReactNode, label: string, className: string, link: string, isLarge?: boolean }) {
+function FloatingNode({ icon, label, className, link }: { icon: React.ReactNode, label: string, className: string, link: string }) {
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       className={cn(
-        "absolute z-20 bg-white p-2.5 md:p-4 rounded-xl md:rounded-[1.5rem] shadow-2xl border border-slate-100 flex flex-col items-center gap-1.5 md:gap-3 cursor-pointer transition-all hover:border-blue-200",
-        isLarge ? "scale-110 md:scale-100" : "scale-100",
+        "absolute z-20 bg-white p-3 md:p-5 rounded-xl md:rounded-[1.5rem] shadow-2xl border border-slate-100 flex flex-col items-center gap-2 md:gap-4 cursor-pointer transition-all hover:border-blue-200 min-w-[80px] md:min-w-[120px]",
         className
       )}
     >
-       <Link href={link} className="flex flex-col items-center gap-1 md:gap-2 w-full h-full">
-          <div className="h-9 w-9 md:h-12 md:w-12 rounded-full bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
-             {icon}
+       <Link href={link} className="flex flex-col items-center gap-2 md:gap-3 w-full h-full">
+          <div className="h-10 w-10 md:h-14 md:w-14 rounded-full bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+             {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-7 md:w-7" })}
           </div>
-          <span className="text-[8px] md:text-[10px] font-black text-[#0F172A] tracking-tighter uppercase whitespace-nowrap text-center leading-none">{label}</span>
+          <span className="text-[8px] md:text-[11px] font-black text-[#0F172A] tracking-tighter uppercase whitespace-nowrap text-center leading-none">{label}</span>
        </Link>
     </motion.div>
   );
