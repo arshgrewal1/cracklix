@@ -1,4 +1,3 @@
-
 "use client"
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -11,8 +10,8 @@ import { useFirestore, useCollection } from "@/firebase"
 import { collection } from "firebase/firestore"
 
 /**
- * @fileOverview Hardened Operational Node Monitor v4.0.
- * UPDATED: Uses real-time Firestore counts and simulated live heartbeat.
+ * @fileOverview Hardened Operational Node Monitor v4.1.
+ * Layout refactor: Removed redundant horizontal padding.
  */
 
 export default function PlatformHealth() {
@@ -62,7 +61,7 @@ export default function PlatformHealth() {
   if (!mounted) return null;
 
   return (
-    <div className="space-y-12 pb-20 text-[#0F172A]">
+    <div className="space-y-12 text-[#0F172A]">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div className="text-left">
            <div className="flex items-center gap-3 mb-2">

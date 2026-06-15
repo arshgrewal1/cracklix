@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo } from "react"
@@ -13,7 +12,7 @@ import { Button } from "@/components/ui/button"
 
 /**
  * @fileOverview Optimized Audit Trail Console.
- * PERFORMANCE: Removed server-side orderBy to prevent index requirements and bypass query deadlocks.
+ * Layout refactor: Removed redundant horizontal padding.
  */
 
 export default function AuditLogsPage() {

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState } from "react"
@@ -44,8 +43,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Mock Management Hub v15.0.
- * UPDATED: Desktop View hardened to ensure all actions are visible without sub-menus.
+ * @fileOverview Institutional Mock Management Hub v16.0.
+ * Layout refactor: Removed redundant horizontal padding.
  */
 
 export default function MockManagement() {
@@ -123,7 +122,7 @@ export default function MockManagement() {
 
   return (
     <div className="space-y-12 text-left pb-32">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div>
            <div className="flex items-center gap-3 mb-2">
               <Layers className="h-6 w-6 text-primary" />
@@ -137,7 +136,7 @@ export default function MockManagement() {
         </Button>
       </div>
 
-      <Card className="border-none shadow-3xl bg-white rounded-[3rem] overflow-hidden mx-4">
+      <Card className="border-none shadow-3xl bg-white rounded-[3rem] overflow-hidden">
         <CardHeader className="p-10 border-b border-slate-50 bg-slate-50/30 flex flex-col lg:flex-row gap-6 justify-between items-center">
            <div className="relative w-full lg:w-[40%]">
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />

@@ -25,7 +25,8 @@ import {
   HeartPulse,
   Settings,
   FileCode2,
-  NotebookPen
+  NotebookPen,
+  Box
 } from "lucide-react"
 import Link from "next/link"
 import Logo from "@/components/brand/Logo"
@@ -37,9 +38,9 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Majestic Admin Sidebar Hub v3.1.
- * FIXED: Missing NotebookPen import resolved.
- * THEME: bg-[#0F172A] with Blue-600 Active States.
+ * @fileOverview Hardened Admin Layout Hub v4.0.
+ * Stabilized widths: 280px (Expanded), 80px (Collapsed).
+ * Global layout transitions: 250ms.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -84,24 +85,25 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!user || !isAdmin) return null
 
   return (
-    <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-white font-body overflow-x-hidden text-left">
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex min-h-screen w-full bg-white font-body overflow-x-hidden">
         <Sidebar 
           collapsible="icon"
           className="border-r border-[#1E293B] bg-[#0F172A] z-[50]"
-          style={{ "--sidebar-width": "300px", "--sidebar-width-icon": "88px" } as React.CSSProperties}
+          style={{ 
+            "--sidebar-width": "280px", 
+            "--sidebar-width-icon": "80px",
+            transition: "width 250ms ease-in-out" 
+          } as React.CSSProperties}
         >
           <div className="flex flex-col h-full bg-gradient-to-b from-[#0F172A] to-[#111827]">
             
-            {/* 1. LOGO HUB */}
             <div className="h-24 px-6 flex items-center shrink-0">
                <Logo href="/admin" variant="light" imgClassName="h-12 w-auto" />
             </div>
 
-            {/* 2. NAVIGATION REGISTRY */}
             <div className="flex-1 overflow-y-auto custom-scrollbar-admin px-4 pb-10">
                
-               {/* SECTION: MANAGEMENT */}
                <SidebarGroup className="p-0 mb-6">
                  <SidebarGroupLabel className="px-4 h-fit py-0 text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500 mb-3 group-data-[state=collapsed]:hidden">
                    MANAGEMENT CENTER
@@ -117,7 +119,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                  </SidebarMenu>
                </SidebarGroup>
 
-               {/* SECTION: CONTENT PULSE */}
                <SidebarGroup className="p-0 mb-6">
                  <SidebarGroupLabel className="px-4 h-fit py-0 text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500 mb-3 group-data-[state=collapsed]:hidden">
                    CONTENT PULSE
@@ -134,7 +135,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                  </SidebarMenu>
                </SidebarGroup>
 
-               {/* SECTION: GOVERNANCE */}
                <SidebarGroup className="p-0">
                  <SidebarGroupLabel className="px-4 h-fit py-0 text-[11px] font-bold uppercase tracking-[0.25em] text-slate-500 mb-3 group-data-[state=collapsed]:hidden">
                    GOVERNANCE
@@ -152,7 +152,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                </SidebarGroup>
             </div>
 
-            {/* 3. LOGOUT NODE */}
             <div className="p-4 border-t border-[#1E293B] bg-[#020617]/50 shrink-0">
                <button 
                  onClick={handleLogout}
@@ -165,7 +164,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </Sidebar>
         
-        <SidebarInset className="flex flex-col bg-white min-w-0 max-w-full relative">
+        <SidebarInset className="flex flex-col bg-white min-w-0 max-w-full relative transition-all duration-250 ease-in-out">
           <header className="h-[72px] md:h-20 border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white sticky top-0 z-40 shrink-0 shadow-sm">
             <div className="flex items-center gap-4">
               <SidebarTrigger className="bg-blue-600 text-white hover:bg-blue-700 h-11 w-11 rounded-xl shadow-lg shadow-blue-600/20 transition-all active:scale-95 cursor-pointer" />
@@ -194,7 +193,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </header>
 
-          <main className="flex-1 p-4 md:p-12 bg-white overflow-y-auto overflow-x-hidden min-w-0 pointer-events-auto">
+          <main className="flex-1 p-4 md:p-8 lg:p-12 bg-white overflow-y-auto overflow-x-hidden min-w-0 pointer-events-auto">
              <div className="max-w-full">
                 {children}
              </div>

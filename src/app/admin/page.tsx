@@ -29,8 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Command Center v41.0.
- * TEXT: Replaced Hub with Center.
+ * @fileOverview Institutional Command Center v42.0.
+ * Layout refactor: Removed redundant horizontal padding.
  */
 
 export default function AdminDashboard() {
@@ -125,8 +125,8 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-12 pb-20 text-[#0F172A] text-left pt-6">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 md:gap-8 px-2 md:px-4">
+    <div className="space-y-6 md:space-y-12 text-[#0F172A] text-left">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 md:gap-8">
         <div className="min-w-0 flex-1">
            <div className="flex items-center gap-3 mb-2 flex-wrap">
               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-100 shrink-0">
@@ -148,8 +148,7 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* FINANCIAL PULSE */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 px-2 md:px-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
          <MetricCard 
            label="Gross Collection" 
            value={`₹${finance.totalRevenue.toLocaleString()}`} 
@@ -174,7 +173,7 @@ export default function AdminDashboard() {
          />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-2 md:px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
          <Card className="lg:col-span-8 border-none shadow-3xl bg-white rounded-3xl overflow-hidden text-left border border-slate-100">
             <CardHeader className="p-8 border-b border-slate-50 bg-slate-50/30">
                <CardTitle className="text-2xl font-headline font-black uppercase text-[#0F172A]">Audit Stream</CardTitle>

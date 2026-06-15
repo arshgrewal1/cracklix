@@ -17,8 +17,8 @@ import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Pass Registry Hub v2.1.
- * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
+ * @fileOverview Institutional Pass Registry Hub v2.2.
+ * Layout refactor: Removed redundant horizontal padding.
  */
 export default function PassManagement() {
   const db = useFirestore()
@@ -82,7 +82,7 @@ export default function PassManagement() {
   }
 
   return (
-    <div className="space-y-12 pb-24 text-left px-4">
+    <div className="space-y-12 text-left">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div>
            <div className="flex items-center gap-3 mb-2">

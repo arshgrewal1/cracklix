@@ -31,8 +31,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Student Hub v20.1.
- * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
+ * @fileOverview Institutional Student Hub v21.0.
+ * Layout refactor: Removed redundant horizontal padding.
  */
 export default function AspirantsManagement() {
   const db = useFirestore()
@@ -118,8 +118,8 @@ export default function AspirantsManagement() {
   }
 
   return (
-    <div className="space-y-12 pb-20 text-[#0F172A] text-left pt-6">
-      <div className="flex justify-between items-center px-4">
+    <div className="space-y-12 text-[#0F172A] text-left">
+      <div className="flex justify-between items-center">
         <div>
            <div className="flex items-center gap-3 mb-2">
               <ShieldCheck className="h-6 w-6 text-primary" />
@@ -130,7 +130,7 @@ export default function AspirantsManagement() {
         </div>
       </div>
 
-      <Card className="border-none shadow-3xl rounded-[3rem] overflow-hidden bg-white mx-4">
+      <Card className="border-none shadow-3xl rounded-[3rem] overflow-hidden bg-white">
         <CardHeader className="p-10 border-b border-slate-50 bg-slate-50/30">
           <div className="relative w-full md:w-[45%]">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />

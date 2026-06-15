@@ -1,20 +1,20 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Smartphone, ShieldAlert, User, Clock, Search, ShieldCheck, Activity, Loader2 } from "lucide-react"
+import { Smartphone, ShieldAlert, User, Clock, Search, ShieldCheck, Activity, Loader2, ChevronRight } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, orderBy, limit, where } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import Link from "next/link"
 
 /**
- * @fileOverview Institutional Device Monitoring Console v1.0.
- * Tracking hardware density and flagging account sharing patterns.
+ * @fileOverview Institutional Device Monitoring Console v1.1.
+ * Layout refactor: Removed redundant horizontal padding.
  */
 
 export default function DeviceMonitoringPage() {
@@ -45,8 +45,8 @@ export default function DeviceMonitoringPage() {
   }, [userNodes]);
 
   return (
-    <div className="space-y-12 pb-20 text-[#0F172A] text-left">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-4">
+    <div className="space-y-12 text-[#0F172A] text-left">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div>
            <div className="flex items-center gap-3 mb-2">
               <ShieldAlert className="h-6 w-6 text-rose-500" />
@@ -66,7 +66,7 @@ export default function DeviceMonitoringPage() {
         </div>
       </div>
 
-      <div className="mx-4 relative group">
+      <div className="relative group">
          <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-hover:text-primary transition-colors" />
          <Input 
            className="h-16 pl-16 rounded-[1.5rem] bg-white border-slate-100 shadow-2xl text-lg font-medium text-[#0F172A]" 
@@ -76,7 +76,7 @@ export default function DeviceMonitoringPage() {
          />
       </div>
 
-      <Card className="border-slate-100 shadow-3xl bg-white rounded-[3rem] overflow-hidden mx-4">
+      <Card className="border-slate-100 shadow-3xl bg-white rounded-[3rem] overflow-hidden">
         <CardContent className="p-0 text-left">
           <Table>
             <TableHeader className="bg-slate-50/50">

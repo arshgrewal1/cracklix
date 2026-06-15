@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -15,8 +14,8 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview Institutional Administrative Portal v10.1.
- * UPDATED: Replaced specific year with Latest Pattern terminology.
+ * @fileOverview Institutional Administrative Portal v10.2.
+ * Layout refactor: Removed redundant horizontal padding.
  */
 
 export default function AdminSettings() {
@@ -61,8 +60,8 @@ export default function AdminSettings() {
   if (loading) return <div className="h-screen flex items-center justify-center bg-white"><RefreshCw className="h-10 w-10 text-primary animate-spin" /></div>
 
   return (
-    <div className="space-y-6 md:space-y-8 pb-20 text-[#0F172A] text-left pt-2 md:pt-6">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-2 md:px-4">
+    <div className="space-y-6 md:space-y-8 text-[#0F172A] text-left">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
            <div className="flex items-center gap-3 mb-1.5">
               <ShieldCheck className="h-5 w-5 text-primary" />
@@ -75,7 +74,7 @@ export default function AdminSettings() {
         </Button>
       </div>
 
-      <Tabs defaultValue="monetization" className="px-2 md:px-4">
+      <Tabs defaultValue="monetization">
         <TabsList className="bg-slate-100 border border-slate-200 p-1 h-14 rounded-xl mb-8 flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start">
           <TabsTrigger value="monetization" className="rounded-lg px-4 md:px-6 font-black uppercase text-[10px] h-full whitespace-nowrap">Pass & Payments</TabsTrigger>
           <TabsTrigger value="homepage" className="rounded-lg px-4 md:px-6 font-black uppercase text-[10px] h-full whitespace-nowrap">Global Content</TabsTrigger>
@@ -85,7 +84,6 @@ export default function AdminSettings() {
 
         <TabsContent value="monetization" className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* FREE TRIAL HUB */}
               <Card className="border-none shadow-lg rounded-[2rem] bg-white p-6 md:p-8 space-y-8">
                  <div className="flex items-center gap-3 mb-4">
                     <Gift className="h-6 w-6 text-emerald-500" />
@@ -114,7 +112,6 @@ export default function AdminSettings() {
                  </div>
               </Card>
 
-              {/* M-PAYMENT GATEWAY */}
               <Card className="border-none shadow-lg rounded-[2rem] bg-white p-6 md:p-8 space-y-8">
                  <div className="flex items-center gap-3 mb-4">
                     <QrCode className="h-6 w-6 text-primary" />

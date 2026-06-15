@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -27,8 +26,8 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Revenue Hub v4.0.
- * UPDATED: Integrated Razorpay gateway audit and advanced transaction search.
+ * @fileOverview Institutional Revenue Hub v5.0.
+ * Layout refactor: Removed redundant horizontal padding.
  */
 
 export default function AdminPayments() {
@@ -64,8 +63,8 @@ export default function AdminPayments() {
   }, [approvedPayments, pendingPayments])
 
   return (
-    <div className="space-y-12 pb-20 text-[#0F172A] text-left">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-4">
+    <div className="space-y-12 text-[#0F172A] text-left">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
         <div>
            <div className="flex items-center gap-3 mb-2">
               <BarChart3 className="h-6 w-6 text-emerald-500" />
@@ -79,14 +78,14 @@ export default function AdminPayments() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8 px-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
          <FinanceCard label="Gross Revenue" value={`₹${stats.total.toLocaleString()}`} trend="+ Verified" icon={<DollarSign className="text-emerald-500" />} />
          <FinanceCard label="Approved Nodes" value={stats.count} trend="Registry Sync" icon={<CheckCircle2 className="text-blue-500" />} />
          <FinanceCard label="Razorpay Flow" value={stats.razorpayCount} trend="Online Auto" icon={<Globe className="text-primary" />} />
          <FinanceCard label="Pending Audit" value={stats.pending} trend="Action Req." icon={<Zap className={stats.pending > 0 ? "text-primary animate-pulse" : "text-slate-300"} />} highlight={stats.pending > 0} />
       </div>
 
-      <div className="mx-4 relative group">
+      <div className="relative group">
          <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
          <Input 
            className="h-16 pl-16 rounded-[1.5rem] bg-white border-none shadow-2xl text-lg font-medium" 
@@ -96,7 +95,7 @@ export default function AdminPayments() {
          />
       </div>
 
-      <Card className="border-none shadow-3xl bg-white rounded-[3rem] overflow-hidden mx-4">
+      <Card className="border-none shadow-3xl bg-white rounded-[3rem] overflow-hidden">
         <CardHeader className="p-10 border-b border-slate-50 bg-slate-50/30">
            <CardTitle className="font-headline font-black text-2xl uppercase">Transaction Audit Ledger</CardTitle>
         </CardHeader>

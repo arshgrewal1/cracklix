@@ -18,8 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Paginated Question Bank Hub v36.0 (High Density Responsive).
- * UPDATED: Optimized horizontal scrolling and fluid typography for 320px-480px.
+ * @fileOverview Paginated Question Bank Hub v37.0.
+ * Layout refactor: Removed redundant horizontal padding.
  */
 
 type QuestionFilterType = 'ALL' | 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
@@ -126,7 +126,7 @@ function QuestionBankContent() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-12 text-[#0F172A] text-left relative pb-32 pt-2 md:pt-4 px-1 md:px-4 lg:px-8">
+    <div className="space-y-6 md:space-y-12 text-[#0F172A] text-left relative pb-32">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="text-left space-y-2">
           <div className="flex items-center gap-3"><Database className="h-5 w-5 text-primary" /><span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-slate-500">Registry Audit Hub</span></div>
@@ -204,8 +204,8 @@ function QuestionBankContent() {
       )}
 
       {selectedIds.length > 0 && (
-         <div className="fixed bottom-24 md:bottom-12 left-4 right-4 md:left-1/2 md:-translate-x-1/2 z-[100] animate-in slide-in-from-bottom-12 duration-500">
-            <div className="bg-[#0F172A] text-white px-8 md:px-12 py-5 md:py-8 rounded-[2.5rem] md:rounded-full shadow-5xl flex flex-col md:flex-row items-center gap-6 md:gap-16 border border-white/10 ring-8 ring-primary/5">
+         <div className="fixed bottom-12 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-12 duration-500">
+            <div className="bg-[#0F172A] text-white px-8 md:px-12 py-5 md:py-8 rounded-full shadow-5xl flex flex-col md:flex-row items-center gap-6 md:gap-16 border border-white/10 ring-8 ring-primary/5">
                <div className="flex items-center gap-5"><div className="h-12 w-12 md:h-16 md:w-16 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black shadow-inner text-xl">{selectedIds.length}</div><p className="text-[11px] font-black uppercase tracking-[0.3em] text-slate-300">Nodes Selected</p></div>
                <div className="h-12 w-px bg-white/10 hidden md:block" /><div className="flex flex-wrap items-center justify-center gap-3 md:gap-6"><BulkActionBtn icon={<Lock className="h-4 w-4" />} label="Lock" onClick={() => handleBulkStatusChange('LOCKED')} disabled={isBulkProcessing} /><BulkActionBtn icon={<Unlock className="h-4 w-4" />} label="Unlock" onClick={() => handleBulkStatusChange('UNUSED')} disabled={isBulkProcessing} /><BulkActionBtn icon={<CheckCircle2 className="h-4 w-4" />} label="Mark Used" onClick={() => handleBulkStatusChange('USED')} disabled={isBulkProcessing} /><Button onClick={() => setSelectedIds([])} variant="ghost" className="text-slate-500 hover:text-white h-12 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest">Cancel</Button></div>
             </div>
