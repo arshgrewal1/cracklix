@@ -12,10 +12,10 @@ import {
   Users,
   FileText,
   Target,
-  Landmark,
-  ChevronRight,
   Trophy,
-  FileStack
+  FileStack,
+  ChevronRight,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -26,8 +26,9 @@ import { doc } from "firebase/firestore";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Majestic High-Fidelity Hero Hub v6.0.
- * RECREATED: Exact match to image_0.png with floating cards and dotted paths.
+ * @fileOverview Majestic High-Fidelity Hero Hub v8.0.
+ * FIXED: Hook order consistency to prevent "Rendered more hooks" error.
+ * RECREATED: Exact match to image_0.png with floating cards and curvy dotted paths.
  */
 
 export default function Hero() {
@@ -56,7 +57,8 @@ export default function Hero() {
     ];
   }, [stats]);
 
-  if (!mounted) return null;
+  // Safety Return after all hooks are initialized
+  if (!mounted) return <div className="min-h-[700px] bg-[#F8FAFC]" />;
 
   return (
     <section className="relative w-full bg-[#F8FAFC] overflow-hidden pt-12 pb-16 md:py-24 border-b border-slate-100">
@@ -138,7 +140,7 @@ export default function Hero() {
           <div className="relative flex justify-center items-center mt-12 lg:mt-0 min-h-[500px]">
              
              {/* DOTTED PATH SVG (BACKDROP) */}
-             <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+             <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-30" viewBox="0 0 600 600" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M120 150C180 80 420 80 480 150" stroke="#2563EB" strokeWidth="2" strokeDasharray="6 6" />
                 <path d="M100 350C150 420 450 420 500 350" stroke="#2563EB" strokeWidth="2" strokeDasharray="6 6" />
                 <path d="M150 150C100 200 100 300 150 350" stroke="#2563EB" strokeWidth="2" strokeDasharray="6 6" />
@@ -156,15 +158,13 @@ export default function Hero() {
                   transition={{ duration: 0.8 }}
                   src="/images/hero-student.png"
                   alt="Cracklix Student"
-                  className="w-full max-w-[320px] sm:max-w-[420px] lg:max-w-[520px] xl:max-w-[560px] mx-auto object-contain relative z-10 drop-shadow-2xl"
+                  className="w-full max-w-[320px] sm:max-w-[420px] lg:max-w-[520px] xl:max-w-[620px] mx-auto object-contain relative z-10 drop-shadow-2xl"
                   onError={(e) => {
                      (e.target as HTMLImageElement).src = "https://picsum.photos/seed/student/800/800";
                   }}
                 />
 
-                {/* FLOATING ACTION CARDS - PRECISE POSITIONING */}
-                
-                {/* Top Left: Mock Tests */}
+                {/* FLOATING ACTION CARDS */}
                 <FloatingCard 
                    icon={<ClipboardList className="text-blue-600 h-5 w-5" />} 
                    label="Mock Tests" 
@@ -174,7 +174,6 @@ export default function Hero() {
                    iconColor="bg-blue-50"
                 />
                 
-                {/* Middle Left: Daily Practice */}
                 <FloatingCard 
                    icon={<Target className="text-purple-600 h-5 w-5" />} 
                    label="Daily Practice" 
@@ -184,7 +183,6 @@ export default function Hero() {
                    iconColor="bg-purple-50"
                 />
                 
-                {/* Top Right: Previous Papers */}
                 <FloatingCard 
                    icon={<FileStack className="text-green-600 h-5 w-5" />} 
                    label="Previous Papers" 
@@ -194,7 +192,6 @@ export default function Hero() {
                    iconColor="bg-green-50"
                 />
                 
-                {/* Middle Right: Punjab Exams */}
                 <FloatingCard 
                    icon={<Trophy className="text-orange-600 h-5 w-5" />} 
                    label="Punjab Exams" 
@@ -244,7 +241,7 @@ function FloatingCard({ icon, label, className, delay, href, iconColor }: { icon
          animate={{ 
             opacity: 1, 
             scale: 1,
-            y: [0, -10, 0] // Gentle floating motion
+            y: [0, -10, 0] 
          }}
          transition={{ 
             opacity: { delay, duration: 0.5 },
