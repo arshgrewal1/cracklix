@@ -29,10 +29,8 @@ import { cn } from "@/lib/utils";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Majestic Hero Hub v15.0 (Screenshot Perfect).
- * FIXED: Mobile PWA mode now matches screenshot exactly.
- * FIXED: Floating cards and buttons active on mobile.
- * FIXED: Illustration hub touches mobile edges.
+ * @fileOverview Majestic Hero Hub v15.1 (Bug Fix).
+ * FIXED: Resolved "React.Children.only" error by wrapping Button asChild content in a single Link node.
  */
 
 export default function Hero() {
@@ -133,7 +131,7 @@ export default function Hero() {
                </p>
             </div>
 
-            {/* EXAM LIST (Matches Screenshot) */}
+            {/* EXAM LIST */}
             <div className="flex flex-wrap items-center gap-x-2 md:gap-x-4 gap-y-2 text-[10px] md:text-sm font-black text-slate-400 uppercase tracking-widest bg-white/50 backdrop-blur-sm p-3 rounded-2xl border border-slate-100 w-fit lg:w-full lg:justify-start justify-center mx-auto lg:mx-0">
                <span>PSSSB</span> <span className="text-blue-200 opacity-50">•</span>
                <span>PCS</span> <span className="text-blue-200 opacity-50">•</span>
@@ -145,12 +143,12 @@ export default function Hero() {
             {/* DESKTOP CTA (Hidden on Mobile) */}
             <div className="hidden lg:flex flex-col sm:flex-row gap-4 pt-4">
                <Button asChild className="h-16 px-10 bg-blue-600 hover:bg-blue-700 text-white font-black text-sm tracking-widest rounded-2xl shadow-xl shadow-blue-600/20 gap-3 group transition-all active:scale-95 border-none">
-                  <Link href="/exams">
+                  <Link href="/exams" className="flex items-center gap-2">
                      Start Learning <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                   </Link>
                </Button>
                <Button asChild variant="outline" className="h-16 px-10 border-2 border-blue-600 bg-white text-blue-600 font-black text-sm tracking-widest rounded-2xl hover:bg-blue-50 transition-all gap-3">
-                  <Link href="/mocks">
+                  <Link href="/mocks" className="flex items-center gap-2">
                      Take Free Mock Test <ArrowRight className="h-5 w-5" />
                   </Link>
                </Button>
@@ -172,7 +170,7 @@ export default function Hero() {
                  className="w-full h-auto object-contain relative z-10"
                />
 
-               {/* FLOATING CARDS (Visible on both Mobile & Desktop) */}
+               {/* FLOATING CARDS */}
                <FloatingNode 
                   icon={<MonitorPlay className="text-blue-600 h-4 w-4 md:h-5 md:w-5" />} 
                   label="Live Classes" 
@@ -204,30 +202,34 @@ export default function Hero() {
         {/* MOBILE CTA BUTTONS (Matching Screenshot) */}
         <div className="lg:hidden flex flex-col gap-3 mt-8">
            <Button asChild className="w-full h-14 md:h-16 bg-blue-600 hover:bg-blue-700 text-white font-black text-sm tracking-widest rounded-full shadow-xl shadow-blue-600/20 flex items-center justify-between px-6 border-none group transition-all active:scale-95">
-              <Link href="/exams" className="flex items-center gap-3">
-                 <BookOpen className="h-5 w-5 fill-current" />
-                 <span>Start Learning</span>
+              <Link href="/exams">
+                 <div className="flex items-center gap-3">
+                   <BookOpen className="h-5 w-5 fill-current" />
+                   <span>Start Learning</span>
+                 </div>
+                 <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
+                    <ChevronRight className="h-5 w-5" />
+                 </div>
               </Link>
-              <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
-                 <ChevronRight className="h-5 w-5" />
-              </div>
            </Button>
            
            <Button asChild variant="outline" className="w-full h-14 md:h-16 border-2 border-blue-600 bg-white text-blue-600 font-black text-sm tracking-widest rounded-full flex items-center justify-between px-6 group transition-all active:scale-95">
-              <Link href="/mocks" className="flex items-center gap-3">
-                 <ClipboardCheck className="h-5 w-5" />
-                 <span>Take Free Mock Test</span>
+              <Link href="/mocks">
+                 <div className="flex items-center gap-3">
+                   <ClipboardCheck className="h-5 w-5" />
+                   <span>Take Free Mock Test</span>
+                 </div>
+                 <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                    <ChevronRight className="h-5 w-5" />
+                 </div>
               </Link>
-              <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
-                 <ChevronRight className="h-5 w-5" />
-              </div>
            </Button>
         </div>
 
         {/* BOTTOM STATS REGISTRY */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12 md:mt-24">
           {liveStats.map((stat) => (
-            <Card key={stat.id} className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl flex items-center gap-5 md:gap-6 group hover:shadow-2xl hover:translate-y-[-4px] transition-all">
+            <Card key={stat.id} className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl flex items-center gap-5 md:gap-6 group hover:shadow-2xl hover:translate-y-[-4px] transition-all text-left">
               <div className={cn("h-12 w-12 md:h-16 md:w-16 rounded-full flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 transition-transform", stat.circleBg)}>
                 {stat.icon}
               </div>
