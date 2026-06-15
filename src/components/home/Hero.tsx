@@ -29,9 +29,9 @@ import { cn } from "@/lib/utils";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Majestic Hero Hub v16.0 (High Fidelity).
- * FIXED: Resolved Trophy ReferenceError and synchronized mobile layout with screenshot.
- * BRANDING: Full transition to Primary Blue (#2563EB).
+ * @fileOverview Majestic Hero Hub v17.0 (Position Fix).
+ * FIXED: Adjusted right-side floating nodes to prevent horizontal overflow/clipping.
+ * REFINED: Increased inner spacing for floating elements.
  */
 
 export default function Hero() {
@@ -98,10 +98,8 @@ export default function Hero() {
     <section className="relative overflow-hidden bg-[#F8FAFC] pb-12 md:pb-24 border-b border-slate-100 text-left">
       <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-blue-50/50 blur-[120px] rounded-full -z-10" />
 
-      {/* HEADER NODES (Mobile Sequence Match) */}
       <div className="max-w-7xl mx-auto px-4 pt-4 md:pt-8 space-y-8">
          
-         {/* 1. Logo & Trust Row */}
          <div className="flex items-center justify-between lg:hidden mb-2">
             <Logo imgClassName="h-8" />
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-100 shadow-sm">
@@ -110,7 +108,6 @@ export default function Hero() {
             </div>
          </div>
 
-         {/* 2. Heading Hub */}
          <div className="lg:hidden text-center space-y-4">
             <h1 className="text-[28px] sm:text-4xl font-extrabold tracking-tight text-slate-900 leading-[1.1]">
               Your Journey to <br />
@@ -119,7 +116,6 @@ export default function Hero() {
             </h1>
          </div>
 
-         {/* 3. Exam Registry Hub (Pills) */}
          <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-[10px] font-black text-slate-400 uppercase tracking-widest bg-white/50 backdrop-blur-sm p-3 rounded-2xl border border-slate-100 w-full lg:hidden">
             <span>PSSSB</span> <span className="text-blue-200 opacity-50">•</span>
             <span>PCS</span> <span className="text-blue-200 opacity-50">•</span>
@@ -128,7 +124,6 @@ export default function Hero() {
             <span>PSTET</span>
          </div>
 
-         {/* DESKTOP LAYOUT */}
          <div className="hidden lg:grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-10">
                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
@@ -174,25 +169,23 @@ export default function Hero() {
                   className="w-full max-w-[620px] h-auto object-contain relative z-10"
                   alt="Cracklix Student"
                />
-               <FloatingNode icon={<Zap className="text-blue-600 h-5 w-5" />} label="Mock Tests" className="top-[5%] left-0" link="/mocks" />
-               <FloatingNode icon={<BookOpen className="text-indigo-600 h-5 w-5" />} label="Punjab Exams" className="top-[15%] right-0" link="/exams" />
-               <FloatingNode icon={<FileStack className="text-emerald-600 h-5 w-5" />} label="Previous Papers" className="bottom-[35%] left-[-5%]" link="/pyqs" />
-               <FloatingNode icon={<Target className="text-rose-500 h-5 w-5" />} label="Daily Practice" className="bottom-[25%] right-[-5%]" link="/current-affairs" />
+               <FloatingNode icon={<Zap className="text-blue-600 h-5 w-5" />} label="Mock Tests" className="top-[5%] left-[5%]" link="/mocks" />
+               <FloatingNode icon={<BookOpen className="text-indigo-600 h-5 w-5" />} label="Punjab Exams" className="top-[15%] right-[8%]" link="/exams" />
+               <FloatingNode icon={<FileStack className="text-emerald-600 h-5 w-5" />} label="Previous Papers" className="bottom-[35%] left-[2%]" link="/pyqs" />
+               <FloatingNode icon={<Target className="text-rose-500 h-5 w-5" />} label="Daily Practice" className="bottom-[25%] right-[8%]" link="/current-affairs" />
             </div>
          </div>
 
-         {/* MOBILE ILLUSTRATION HUB (Edge-to-Edge) */}
          <div className="lg:hidden relative flex flex-col items-center w-full px-0 -mx-4">
             <div className="relative w-full max-w-[420px] aspect-square flex items-center justify-center">
                <div className="absolute inset-0 bg-blue-100/30 rounded-full blur-2xl -z-10" />
                <img src="/images/hero-student.png" className="w-full h-full object-contain relative z-10" alt="Student" />
-               <FloatingNode icon={<Zap className="text-blue-600 h-3 w-3" />} label="Mocks" className="top-[10%] left-[5%]" link="/mocks" />
-               <FloatingNode icon={<BookOpen className="text-indigo-600 h-3 w-3" />} label="Exams" className="top-[15%] right-[5%]" link="/exams" />
-               <FloatingNode icon={<FileStack className="text-emerald-600 h-3 w-3" />} label="Papers" className="bottom-[40%] left-0" link="/pyqs" />
-               <FloatingNode icon={<Target className="text-rose-500 h-3 w-3" />} label="Practice" className="bottom-[30%] right-0" link="/current-affairs" />
+               <FloatingNode icon={<Zap className="text-blue-600 h-3 w-3" />} label="Mocks" className="top-[10%] left-[8%]" link="/mocks" />
+               <FloatingNode icon={<BookOpen className="text-indigo-600 h-3 w-3" />} label="Exams" className="top-[15%] right-[10%]" link="/exams" />
+               <FloatingNode icon={<FileStack className="text-emerald-600 h-3 w-3" />} label="Papers" className="bottom-[40%] left-[5%]" link="/pyqs" />
+               <FloatingNode icon={<Target className="text-rose-500 h-3 w-3" />} label="Practice" className="bottom-[30%] right-[10%]" link="/current-affairs" />
             </div>
 
-            {/* Mobile Action Buttons */}
             <div className="w-full px-4 flex flex-col gap-3 mt-4">
                <Button asChild className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white font-black text-sm tracking-widest rounded-full shadow-xl shadow-blue-600/20 border-none transition-all active:scale-95">
                   <Link href="/exams" className="flex items-center justify-between w-full px-6">
@@ -209,7 +202,6 @@ export default function Hero() {
             </div>
          </div>
 
-         {/* STATS REGISTRY */}
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12 md:mt-24">
             {liveStats.map((stat) => (
                <Card key={stat.id} className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl flex items-center gap-5 group hover:shadow-2xl hover:translate-y-[-4px] transition-all text-left">
@@ -225,7 +217,6 @@ export default function Hero() {
             ))}
          </div>
 
-         {/* SUCCESS RIBBON */}
          <div className="mt-12 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-[2rem] md:rounded-full p-4 md:p-2 flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8 shadow-2xl relative overflow-hidden">
             <div className="absolute inset-0 bg-white/5 opacity-50 animate-pulse pointer-events-none" />
             <div className="flex items-center gap-4 relative z-10 pl-6">
