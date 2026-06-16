@@ -30,9 +30,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Hardened Header v105.0.
+ * @fileOverview Hardened Header v106.0.
  * LAYOUT: [Menu + Logo] Zero Gap. Tightened to absolute left end.
- * SIZING: Mobile 92px / Desktop 108px (Maximized per user request).
+ * SIZING: Mobile 112px / Desktop 128px (Maximized per user request).
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -58,12 +58,12 @@ export default function Navbar() {
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (user?.email && SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
 
   if (!mounted) return (
-    <nav className="w-full border-b border-[#E5E7EB] bg-white h-[92px] lg:h-[108px]" />
+    <nav className="w-full border-b border-[#E5E7EB] bg-white h-[112px] lg:h-[128px]" />
   );
 
   return (
     <div className="w-full sticky top-0 z-50 font-body">
-      <nav className="w-full border-b border-[#E5E7EB] bg-white h-[92px] lg:h-[108px] px-0 lg:px-4 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex items-center overflow-hidden">
+      <nav className="w-full border-b border-[#E5E7EB] bg-white h-[112px] lg:h-[128px] px-0 lg:px-4 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex items-center overflow-hidden">
         <div className="w-full max-w-7xl mx-auto flex items-center justify-between h-full">
           
           {/* LEFT GROUP: MENU + LOGO (TIGHTENED TO FAR LEFT END WITH ZERO GAP) */}

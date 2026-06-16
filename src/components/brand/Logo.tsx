@@ -13,8 +13,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Official Cracklix Brand Hub v25.0.
- * HARDENED: Maximized to absolute vertical limits (92px/108px) per user request (+10px from previous).
+ * @fileOverview Official Cracklix Brand Hub v26.0.
+ * HARDENED: Maximized to absolute vertical limits (112px/128px) per user request (+20px from previous).
  * PLACEMENT: Designed to be anchored exactly next to the sidebar trigger.
  */
 export default function Logo({ className = "", href = "/", variant = 'light', imgClassName = "" }: LogoProps) {
@@ -32,11 +32,11 @@ export default function Logo({ className = "", href = "/", variant = 'light', im
       <Image 
         src={logoSrc} 
         alt="Cracklix" 
-        width={240}
-        height={108}
+        width={260}
+        height={128}
         priority
         className={cn(
-          "h-[92px] w-auto lg:h-[108px] object-contain transition-all group-hover:scale-110 shrink-0",
+          "h-[112px] w-auto lg:h-[128px] object-contain transition-all group-hover:scale-110 shrink-0",
           imgClassName
         )}
       />
