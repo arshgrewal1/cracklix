@@ -20,56 +20,41 @@
         "status": { "type": "string", "description": "The ID of the active pass or 'Free'" },
         "passExpiryDate": { "type": "string", "format": "date-time" },
         "pinnedExams": { "type": "array", "items": { "type": "string" } },
-        "unlockedMocks": { "type": "array", "items": { "type": "string" }, "description": "Specific mocks unlocked for this user manually." }
+        "deviceCount": { "type": "number" }
       },
       "required": ["id", "name", "email", "phone", "role"]
     },
-    "Pass": {
-      "title": "Institutional Pass",
-      "description": "A tiered access node.",
+    "SupportTicket": {
+      "title": "Support Ticket",
+      "description": "Student issue report and admin resolution node.",
       "type": "object",
       "properties": {
         "id": { "type": "string" },
-        "name": { "type": "string" },
-        "price": { "type": "number" },
-        "durationDays": { "type": "number" },
-        "description": { "type": "string" },
-        "features": { "type": "array", "items": { "type": "string" } },
-        "displayOrder": { "type": "number" },
-        "type": { "type": "string", "enum": ["FREE", "PREMIUM"] },
-        "adFree": { "type": "boolean" },
-        "active": { "type": "boolean" }
-      }
-    },
-    "Category": {
-      "title": "Exam Category",
-      "description": "Top-level exam grouping (e.g., Banking, Punjab Govt).",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "description": { "type": "string" },
-        "displayOrder": { "type": "number" },
-        "highlight": { "type": "string" }
-      }
-    },
-    "CurrentAffairHubItem": {
-      "title": "Current Affair Hub Item",
-      "description": "Daily, weekly, or monthly current affairs package.",
-      "type": "object",
-      "properties": {
-        "id": { "type": "string" },
-        "title": { "type": "string" },
-        "month": { "type": "string" },
-        "year": { "type": "string" },
-        "language": { "type": "string" },
-        "category": { "type": "string" },
-        "type": { "type": "string", "enum": ["DAILY", "WEEKLY", "MONTHLY", "SPECIAL"] },
-        "pdfUrl": { "type": "string" },
-        "status": { "type": "string", "enum": ["PUBLISHED", "DRAFT"] },
-        "quizId": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "subject": { "type": "string" },
+        "type": { "type": "string", "enum": ["PAYMENT", "PASS", "MOCK_TEST", "TECHNICAL", "ACCOUNT", "OTHER"] },
+        "message": { "type": "string" },
+        "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] },
+        "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+        "adminReply": { "type": "string" },
+        "screenshotUrl": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "HelpArticle": {
+      "title": "Help Article",
+      "description": "Self-service knowledge base article.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "category": { "type": "string", "enum": ["PAYMENTS", "PASS", "PWA", "TECHNICAL", "ACCOUNT"] },
+        "content": { "type": "string" },
+        "published": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
       }
     }
   },
@@ -80,14 +65,11 @@
     "/users/{userId}": {
       "schema": { "$ref": "#/backend/entities/UserProfile" }
     },
-    "/passes/{passId}": {
-      "schema": { "$ref": "#/backend/entities/Pass" }
+    "/support_tickets/{ticketId}": {
+      "schema": { "$ref": "#/backend/entities/SupportTicket" }
     },
-    "/categories/{categoryId}": {
-      "schema": { "$ref": "#/backend/entities/Category" }
-    },
-    "/current_affairs_hub/{caId}": {
-      "schema": { "$ref": "#/backend/entities/CurrentAffairHubItem" }
+    "/help_articles/{articleId}": {
+      "schema": { "$ref": "#/backend/entities/HelpArticle" }
     }
   }
 }

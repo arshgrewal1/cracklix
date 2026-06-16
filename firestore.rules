@@ -2,10 +2,6 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    /**
-     * @fileOverview Hardened Institutional Security Protocol v7.0 (Device Management).
-     */
-
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -29,6 +25,7 @@ service cloud.firestore {
     match /categories/{catId} { allow read: if true; allow write: if isAdmin(); }
     match /current_affairs_hub/{caId} { allow read: if true; allow write: if isAdmin(); }
     match /pyqs/{pyqId} { allow read: if true; allow write: if isAdmin(); }
+    match /help_articles/{articleId} { allow read: if true; allow write: if isAdmin(); }
     match /settings/{sId} { allow read: if true; allow write: if isAdmin(); }
 
     // --- 2. Student Data ---
@@ -37,23 +34,22 @@ service cloud.firestore {
       allow write: if isAdmin() || (isOwner(userId) && (
         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'pass'])
       ));
+    }
 
-      // Device Registry Rules
-      match /devices/{deviceId} {
-        allow read, write: if isOwner(userId) || isAdmin();
-      }
+    match /support_tickets/{ticketId} {
+      allow create: if isAuthenticated();
+      allow read: if isAdmin() || (resource.data.userId == request.auth.uid);
+      allow update: if isAdmin() || (resource.data.userId == request.auth.uid && request.resource.data.status == resource.data.status);
     }
 
     match /attempts/{attemptId} {
       allow read: if isAuthenticated() && (attemptId.split('_')[0] == request.auth.uid || isAdmin());
       allow create, update: if isAuthenticated() && attemptId.split('_')[0] == request.auth.uid;
-      allow delete: if isAdmin();
     }
 
     match /results/{resultId} {
       allow read: if isAuthenticated() && (resultId.split('_')[0] == request.auth.uid || isAdmin());
       allow create, update: if isAuthenticated() && (request.resource.data.userId == request.auth.uid || resultId.split('_')[0] == request.auth.uid);
-      allow delete: if isAdmin();
     }
 
     match /bookmarks/{bId} {
@@ -64,9 +60,8 @@ service cloud.firestore {
     match /payment_requests/{reqId} {
       allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
       allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
-      allow update, delete: if isAdmin();
+      allow update: if isAdmin();
     }
-    match /audit_logs/{logId} { allow read, write: if isAdmin(); }
     match /subscriptions/{sId} {
       allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
       allow write: if isAdmin();

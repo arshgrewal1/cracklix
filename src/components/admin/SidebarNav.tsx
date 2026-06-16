@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -25,7 +26,9 @@ import {
   HeartPulse,
   Settings,
   FileCode2,
-  NotebookPen
+  NotebookPen,
+  MessageCircle,
+  HelpCircle
 } from "lucide-react";
 import {
   Tooltip,
@@ -70,6 +73,7 @@ const NAV_GROUPS = [
     items: [
       { label: "Student List", href: "/admin/users", icon: Users },
       { label: "Device Audit", href: "/admin/devices", icon: Smartphone },
+      { label: "Support Nodes", href: "/admin/support", icon: MessageCircle },
       { label: "Revenue Center", href: "/admin/payments", icon: DollarSign },
       { label: "Verify UPI", href: "/admin/payments/verify", icon: Gem },
       { label: "Pass Manager", href: "/admin/passes", icon: Gem },
@@ -89,7 +93,7 @@ export default function SidebarNav({ isOpen, pathname }: SidebarNavProps) {
             {isOpen ? (
               <h5 className="px-4 text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] animate-in fade-in duration-500">
                 {group.label}
-              </h5>
+              h5>
             ) : (
               <div className="h-4" />
             )}
