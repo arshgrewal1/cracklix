@@ -30,8 +30,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Hardened Header v101.0.
- * LAYOUT: [Menu + Logo] Locked to far left end.
+ * @fileOverview Hardened Header v102.0.
+ * LAYOUT: [Menu + Logo] Tightened to far left end with zero/minimal gap.
  * SIZING: Mobile 72px / Desktop 88px.
  */
 export default function Navbar() {
@@ -66,8 +66,8 @@ export default function Navbar() {
       <nav className="w-full border-b border-[#E5E7EB] bg-white h-[72px] lg:h-[88px] px-0 lg:px-4 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex items-center overflow-hidden">
         <div className="w-full max-w-7xl mx-auto flex items-center justify-between h-full">
           
-          {/* LEFT GROUP: MENU + LOGO (LOCKED TO FAR LEFT END) */}
-          <div className="flex items-center gap-0.5 lg:gap-2 shrink-0">
+          {/* LEFT GROUP: MENU + LOGO (TIGHTENED TO FAR LEFT END) */}
+          <div className="flex items-center gap-0.5 lg:gap-1 shrink-0">
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="w-11 h-11 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl bg-gray-50 flex items-center justify-center text-slate-700 active:scale-95 transition-all shadow-sm"
