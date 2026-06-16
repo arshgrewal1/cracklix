@@ -47,9 +47,9 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
   
-  h1 { @apply font-black tracking-tight leading-tight; }
-  h2 { @apply font-black tracking-tight; }
-  h3 { @apply font-black tracking-tight; }
+  h1 { @apply font-black tracking-tight leading-[0.95]; }
+  h2 { @apply font-black tracking-tight leading-[0.95]; }
+  h3 { @apply font-black tracking-tight leading-tight; }
   p { @apply font-medium; }
 
   /* Enforce 16px minimum font size for inputs to prevent iOS zoom */

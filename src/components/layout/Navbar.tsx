@@ -8,8 +8,7 @@ import {
   LogOut, 
   Menu, 
   Gem, 
-  ShieldCheck,
-  Loader2
+  ShieldCheck
 } from "lucide-react";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -32,8 +31,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional White Navbar v68.0.
- * DESIGN: Restored clean white aesthetic with premium dark pass button.
+ * @fileOverview Professional White Navbar v69.0.
+ * DESIGN: Restored clean white aesthetic with scaled mobile height (72px).
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -65,54 +64,39 @@ export default function Navbar() {
   return (
     <div className="w-full sticky top-0 z-[1000] font-body">
       <nav className="w-full border-b border-gray-200 bg-white h-[72px] md:h-20 px-4 md:px-6 shadow-sm flex items-center overflow-hidden">
-        <div className="w-full max-w-[1600px] mx-auto flex items-center justify-between h-full gap-2 md:gap-4">
+        <div className="w-full max-w-7xl mx-auto flex items-center justify-between h-full gap-2 md:gap-4">
           
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
-              className="w-12 h-12 md:w-12 md:h-12 bg-gray-50 text-slate-400 rounded-2xl border border-gray-100 flex items-center justify-center cursor-pointer active:scale-90 transition-all hover:bg-gray-100"
+              className="w-10 h-10 md:w-12 md:h-12 bg-gray-50 text-slate-400 rounded-xl md:rounded-2xl border border-gray-100 flex items-center justify-center cursor-pointer active:scale-90 transition-all hover:bg-gray-100"
             >
               <Menu className="h-5 w-5" />
             </button>
-            <Logo imgClassName="h-10 md:h-12" />
+            <Logo imgClassName="h-8 md:h-12" />
           </div>
 
           <div className="hidden lg:flex items-center gap-2 xl:gap-4">
-             <NavLink 
-               href="/" 
-               label="Home" 
-               active={pathname === '/'} 
-             />
-             <NavLink 
-               href="/mocks" 
-               label="Practice" 
-               active={pathname === '/mocks'} 
-             />
-             <NavLink 
-               href="/current-affairs" 
-               label="Updates" 
-               active={pathname === '/current-affairs'} 
-             />
+             <NavLink href="/" label="Home" active={pathname === '/'} />
+             <NavLink href="/mocks" label="Practice" active={pathname === '/mocks'} />
+             <NavLink href="/current-affairs" label="Updates" active={pathname === '/current-affairs'} />
           </div>
 
           <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0">
-             
-             <div>
-               <Button asChild className="h-12 md:h-[52px] px-4 md:px-7 bg-[#04102B] hover:bg-[#0B1736] text-white font-bold text-[14px] md:text-[11px] tracking-widest rounded-2xl md:rounded-2xl gap-2 shadow-lg border-none transition-all active:scale-95">
-                  <Link href="/pass"><Gem className="h-4 w-4 text-[#2F6BFF]" /> <span className="hidden xs:inline">Pass</span></Link>
-               </Button>
-             </div>
+             <Button asChild className="h-10 md:h-[52px] px-4 md:px-7 bg-[#04102B] hover:bg-[#0B1736] text-white font-bold text-[12px] md:text-[11px] tracking-widest rounded-xl md:rounded-2xl gap-2 shadow-lg border-none transition-all active:scale-95">
+                <Link href="/pass"><Gem className="h-4 w-4 text-[#2F6BFF]" /> <span className="hidden sm:inline">Pass</span></Link>
+             </Button>
 
-             <Link href="/search" className="w-12 h-12 md:w-12 md:h-12 rounded-2xl md:rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-center text-slate-400 hover:text-[#2F6BFF] transition-all">
+             <Link href="/search" className="w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl bg-[#F8FAFC] border border-[#E2E8F0] flex items-center justify-center text-slate-400 hover:text-[#2F6BFF] transition-all">
                 <Search className="h-5 w-5" />
              </Link>
 
              {loading ? (
-                <Skeleton className="w-12 h-12 md:w-12 md:h-12 rounded-full bg-gray-100" />
+                <Skeleton className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-100" />
              ) : user ? (
                <DropdownMenu>
                  <DropdownMenuTrigger asChild>
-                   <button className="w-12 h-12 md:w-12 md:h-12 rounded-full border border-[#E2E8F0] overflow-hidden shadow-sm cursor-pointer bg-[#F8FAFC] active:scale-95 transition-transform flex items-center justify-center">
+                   <button className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-[#E2E8F0] overflow-hidden shadow-sm cursor-pointer bg-[#F8FAFC] active:scale-95 transition-transform flex items-center justify-center">
                       <StudentAvatar profile={profile} className="h-full w-full border-none" />
                    </button>
                  </DropdownMenuTrigger>
@@ -139,7 +123,7 @@ export default function Navbar() {
                  </DropdownMenuContent>
                </DropdownMenu>
              ) : (
-               <Button asChild className="px-5 md:px-8 h-12 md:h-12 bg-[#2F6BFF] hover:bg-[#1F5BFF] text-white font-bold text-[11px] rounded-2xl md:rounded-xl transition-all tracking-widest border-none active:scale-95">
+               <Button asChild className="px-5 md:px-8 h-10 md:h-12 bg-[#2F6BFF] hover:bg-[#1F5BFF] text-white font-bold text-[11px] rounded-xl md:rounded-xl transition-all tracking-widest border-none active:scale-95">
                  <Link href="/login">Login</Link>
                </Button>
              )}
