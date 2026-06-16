@@ -25,8 +25,9 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Cracklix Majestic Hero v12.0.
- * RECALIBRATED: Moved top floating nodes higher to top-[2%] to fix overlap with student illustration.
+ * @fileOverview Official Cracklix Majestic Hero v13.0.
+ * RESTORED: Trust badge now visible on mobile/PWA.
+ * CALIBRATED: Top floating nodes at top-[2%] to prevent student overlap.
  */
 
 export default function Hero() {
@@ -107,10 +108,10 @@ export default function Hero() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
           
           {/* LEFT: CONTENT HUB */}
-          <div className="space-y-8 md:space-y-10 z-20">
-            <div className="hidden lg:inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm">
+          <div className="space-y-8 md:space-y-10 z-20 flex flex-col items-center md:items-start text-center md:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-slate-200 shadow-sm mx-auto lg:mx-0">
               <Star className="h-4 w-4 text-blue-600 fill-current" />
-              <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">10,000+ Aspirants Trust Cracklix</span>
+              <span className="text-[10px] md:text-xs font-bold text-slate-600 uppercase tracking-widest">10,000+ Aspirants Trust Cracklix</span>
             </div>
 
             <div className="space-y-6">
@@ -138,7 +139,7 @@ export default function Hero() {
           <div className="relative flex flex-col items-center justify-center w-full overflow-visible">
             <div className="relative w-full max-w-[320px] sm:max-w-[400px] md:max-w-[500px] lg:max-w-[650px] xl:max-w-[750px] aspect-square flex items-center justify-center">
                 
-                {/* FLOATING NODES - EQUAL CENTERED SPACING */}
+                {/* FLOATING NODES - CENTERED SPACING FIXED */}
                 <FloatingNode 
                    icon={<Zap className="text-blue-600 h-5 w-5 fill-current" />} 
                    label="Mock Tests" 
