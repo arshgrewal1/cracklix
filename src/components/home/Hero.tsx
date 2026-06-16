@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -16,13 +17,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
 /**
- * @fileOverview Elite Hero Hub v79.0 (Final Production Scale).
- * SIZING: Title 40px (Mobile) / 72px (Desktop). Image 220px / 420px. Height 520px / 680px.
+ * @fileOverview Elite Hero Hub v80.0 (Hardened with next/image).
  */
 export default function Hero() {
   const db = useFirestore();
@@ -38,34 +39,10 @@ export default function Hero() {
   const heroImage = "/images/hero-student.png";
 
   const features = [
-    { 
-      title: "Mock Tests", 
-      sub: "Exam-focused mock tests", 
-      icon: <ClipboardList className="h-4 w-4 md:h-5 md:w-5" />, 
-      color: "text-blue-600", 
-      bgColor: "bg-blue-50" 
-    },
-    { 
-      title: "Previous Papers", 
-      sub: "Previous year question papers", 
-      icon: <Files className="h-4 w-4 md:h-5 md:w-5" />, 
-      color: "text-emerald-600", 
-      bgColor: "bg-emerald-50" 
-    },
-    { 
-      title: "Daily Practice", 
-      sub: "Practice daily & stay ahead", 
-      icon: <Target className="h-4 w-4 md:h-5 md:w-5" />, 
-      color: "text-purple-600", 
-      bgColor: "bg-purple-50" 
-    },
-    { 
-      title: "Punjab Exams", 
-      sub: "All major Punjab exams at one place", 
-      icon: <Landmark className="h-4 w-4 md:h-5 md:w-5" />, 
-      color: "text-orange-600", 
-      bgColor: "bg-orange-50" 
-    }
+    { title: "Mock Tests", sub: "Exam-focused mock tests", icon: <ClipboardList className="h-4 w-4 md:h-5 md:w-5" />, color: "text-blue-600", bgColor: "bg-blue-50" },
+    { title: "Previous Papers", sub: "Previous year question papers", icon: <Files className="h-4 w-4 md:h-5 md:w-5" />, color: "text-emerald-600", bgColor: "bg-emerald-50" },
+    { title: "Daily Practice", sub: "Practice daily & stay ahead", icon: <Target className="h-4 w-4 md:h-5 md:w-5" />, color: "text-purple-600", bgColor: "bg-purple-50" },
+    { title: "Punjab Exams", sub: "All major Punjab exams at one place", icon: <Landmark className="h-4 w-4 md:h-5 md:w-5" />, color: "text-orange-600", bgColor: "bg-orange-50" }
   ];
 
   const liveStats = useMemo(() => {
@@ -76,38 +53,10 @@ export default function Hero() {
     };
 
     return [
-      { 
-        val: format(stats?.totalQuestions, "50K+"), 
-        label: "Questions", 
-        desc: "High quality practice questions",
-        color: "text-blue-600", 
-        circleBg: "bg-blue-600",
-        icon: <Zap className="h-4 w-4 md:h-5 md:w-5 fill-current" /> 
-      },
-      { 
-        val: format(stats?.totalMocks, "500+"), 
-        label: "Mock Tests", 
-        desc: "Topic wise & full length mocks",
-        color: "text-purple-600", 
-        circleBg: "bg-purple-600",
-        icon: <ClipboardList className="h-4 w-4 md:h-5 md:w-5" /> 
-      },
-      { 
-        val: format(stats?.totalBoards, "50+"), 
-        label: "Exams", 
-        desc: "All major Punjab exams",
-        color: "text-emerald-500", 
-        circleBg: "bg-emerald-500",
-        icon: <ShieldCheck className="h-4 w-4 md:h-5 md:w-5" /> 
-      },
-      { 
-        val: format(stats?.totalUsers, "15K+"), 
-        label: "Aspirants", 
-        desc: "Trust Cracklix for preparation",
-        color: "text-orange-500", 
-        circleBg: "bg-orange-500",
-        icon: <Users className="h-4 w-4 md:h-5 md:w-5" /> 
-      }
+      { val: format(stats?.totalQuestions, "50K+"), label: "Questions", desc: "High quality practice questions", color: "text-blue-600", circleBg: "bg-blue-600", icon: <Zap className="h-4 w-4 md:h-5 md:w-5 fill-current" /> },
+      { val: format(stats?.totalMocks, "500+"), label: "Mock Tests", desc: "Topic wise & full length mocks", color: "text-purple-600", circleBg: "bg-purple-600", icon: <ClipboardList className="h-4 w-4 md:h-5 md:w-5" /> },
+      { val: format(stats?.totalBoards, "50+"), label: "Exams", desc: "All major Punjab exams", color: "text-emerald-500", circleBg: "bg-emerald-500", icon: <ShieldCheck className="h-4 w-4 md:h-5 md:w-5" /> },
+      { val: format(stats?.totalUsers, "15K+"), label: "Aspirants", desc: "Trust Cracklix for preparation", color: "text-orange-500", circleBg: "bg-orange-500", icon: <Users className="h-4 w-4 md:h-5 md:w-5" /> }
     ];
   }, [stats]);
 
@@ -143,9 +92,15 @@ export default function Hero() {
                initial={{ opacity: 0, scale: 0.95 }} 
                animate={{ opacity: 1, scale: 1 }} 
                transition={{ duration: 0.8 }} 
-               className="relative z-10 w-full max-w-[220px] sm:max-w-[280px] lg:max-w-[420px]"
+               className="relative z-10 w-full max-w-[220px] sm:max-w-[280px] lg:max-w-[420px] aspect-[4/3]"
              >
-                <img src={heroImage} alt="Cracklix Prep" className="w-full h-auto object-contain" />
+                <Image 
+                  src={heroImage} 
+                  alt="Cracklix Prep" 
+                  fill
+                  priority
+                  className="object-contain"
+                />
              </motion.div>
           </div>
 
@@ -180,11 +135,11 @@ export default function Hero() {
         <div className="mt-10 md:mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
            {liveStats.map((stat, idx) => (
              <motion.div key={stat.label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} viewport={{ once: true }}>
-               <Card className="border-none shadow-sm rounded-xl md:rounded-2xl p-4 md:p-6 bg-white border border-slate-100 flex items-center gap-4 md:gap-5 group h-full">
+               <Card className="border-none shadow-sm rounded-xl md:rounded-2xl p-4 md:p-6 bg-white border border-slate-100 flex items-center gap-4 md:gap-5 group h-full text-left">
                  <div className={cn("h-10 w-10 md:h-16 md:w-16 rounded-full flex items-center justify-center shrink-0 shadow-lg text-white transition-transform group-hover:scale-110", stat.circleBg)}>
                     {stat.icon}
                  </div>
-                 <div className="min-w-0 text-left space-y-0.5">
+                 <div className="min-w-0 flex-1 space-y-0.5">
                    <p className={cn("text-lg md:text-2xl font-black tabular-nums leading-none tracking-tight", stat.color)}>{stat.val}</p>
                    <p className="text-[10px] md:text-sm font-bold text-slate-900 leading-none uppercase tracking-tight">{stat.label}</p>
                    <p className="text-[8px] md:text-[10px] font-medium text-slate-400 uppercase tracking-tight truncate">{stat.desc}</p>

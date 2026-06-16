@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -12,13 +13,14 @@ import {
   CardTitle 
 } from "@/components/ui/card"
 import Link from "next/link"
+import Image from "next/image"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, limit } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Elite Latest Mock Hub v41.0 (Title Case).
+ * @fileOverview Elite Latest Mock Hub v42.0 (next/image optimized).
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -88,7 +90,6 @@ export default function LatestMocks() {
               <motion.div key={mock.id} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} viewport={{ once: true }}>
                 <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:translate-y-[-6px] transition-all duration-500 rounded-[32px] bg-white p-8 md:p-10 text-center flex flex-col h-[420px] group relative overflow-hidden">
                   
-                  {/* TOP BADGE */}
                   <div className="absolute top-6 right-6 flex flex-col gap-2 items-end">
                     {(i === 0 || i === 1) && (
                       <Badge className="bg-orange-50 text-[#D97706] border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 shadow-sm">🔥 Popular</Badge>
@@ -98,13 +99,13 @@ export default function LatestMocks() {
                     )}
                   </div>
 
-                  {/* BOARD LOGO HUB */}
-                  <div className="h-[70px] w-[70px] mx-auto rounded-full bg-[#F8FAFC] flex items-center justify-center p-3.5 shrink-0 shadow-inner group-hover:scale-110 transition-transform duration-500 mb-8 overflow-hidden border border-slate-100">
+                  <div className="h-[70px] w-[70px] mx-auto rounded-full bg-[#F8FAFC] flex items-center justify-center p-1 shrink-0 shadow-inner group-hover:scale-110 transition-transform duration-500 mb-8 overflow-hidden border border-slate-100 relative">
                      {board?.iconUrl && !failedImages[board.id] ? (
-                       <img 
+                       <Image 
                          src={board.iconUrl} 
-                         className="h-full w-full object-contain" 
                          alt="Logo" 
+                         fill
+                         className="object-contain p-3.5"
                          referrerPolicy="no-referrer"
                          onError={() => setFailedImages(prev => ({...prev, [board.id]: true}))}
                        />
@@ -119,9 +120,9 @@ export default function LatestMocks() {
                      </CardTitle>
 
                      <div className="flex items-center justify-center gap-4 text-[14px] font-bold text-[#64748B] tracking-tight">
-                        <span className="flex items-center gap-1.5"><BookOpen className="h-4 w-4 text-primary opacity-50" /> {mock.totalQuestions} Questions</span>
+                        <span className="flex items-center gap-1.5"><BookOpen className="h-4 w-4 text-primary opacity-50" /> {mock.totalQuestions} Qs</span>
                         <div className="h-4 w-px bg-slate-100" />
-                        <span className="flex items-center gap-1.5"><Clock className="h-4 w-4 text-primary opacity-50" /> {mock.duration} Minutes</span>
+                        <span className="flex items-center gap-1.5"><Clock className="h-4 w-4 text-primary opacity-50" /> {mock.duration} Min</span>
                      </div>
 
                      <div className="flex items-center justify-center gap-3">
@@ -155,9 +156,7 @@ export default function LatestMocks() {
 
 function DifficultyBadge({ level, isPremium }: { level: string, isPremium: boolean }) {
   if (isPremium) return <Badge className="bg-[#EEF2FF] text-[#2F6BFF] border-none text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">PREMIUM</Badge>;
-  
   if (level === 'Easy') return <Badge className="bg-[#DCFCE7] text-[#16A34A] border-none text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">EASY</Badge>;
   if (level === 'Hard') return <Badge className="bg-[#FEE2E2] text-[#DC2626] border-none text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">HARD</Badge>;
-  
   return <Badge className="bg-[#FEF3C7] text-[#D97706] border-none text-[9px] font-black px-3 py-1 rounded-lg uppercase tracking-widest">MEDIUM</Badge>;
 }
