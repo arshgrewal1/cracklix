@@ -12,8 +12,8 @@ interface SidebarHeaderProps {
 }
 
 /**
- * @fileOverview High-Fidelity Sidebar Header v4.0.
- * FIXED: Updated collapsed logo path to include '/logo/' prefix.
+ * @fileOverview High-Fidelity Admin Sidebar Header v5.0.
+ * FIXED: Uses variant="dark" (White text) for the dark navy sidebar.
  */
 export default function SidebarHeader({ isOpen, onToggle }: SidebarHeaderProps) {
   return (
@@ -35,7 +35,7 @@ export default function SidebarHeader({ isOpen, onToggle }: SidebarHeaderProps) 
           ) : (
             <div className="relative h-8 w-8">
                <Image 
-                  src="/logo/cracklix-logo-dark.png" 
+                  src="/logo/cracklix-icon.png" 
                   alt="C" 
                   fill
                   className="object-contain"

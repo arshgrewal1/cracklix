@@ -13,13 +13,15 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Official Cracklix Brand Hub v4.0.
- * FIXED: Updated paths to include '/logo/' prefix for correct asset resolution.
+ * @fileOverview Official Cracklix Brand Hub v5.0.
+ * LOGIC:
+ * - variant='light': Navy text logo for light/white backgrounds.
+ * - variant='dark': White text logo for dark/navy backgrounds.
  */
 export default function Logo({ className = "", href = "/", variant = 'light', imgClassName = "" }: LogoProps) {
-  // light variant = Dark text for light backgrounds (Header)
-  // dark variant = White text for dark backgrounds (Footer/Sidebar)
-  const logoSrc = variant === 'light' ? '/logo/cracklix-logo-light.png' : '/logo/cracklix-logo-dark.png';
+  // light variant = Dark text logo for light backgrounds (Header/White bg)
+  // dark variant = White text logo for dark backgrounds (Footer/Sidebar)
+  const logoSrc = variant === 'light' ? '/logo/cracklix-logo-dark.png' : '/logo/cracklix-logo-light.png';
 
   return (
     <Link href={href} className={cn("flex items-center group pointer-events-auto select-none shrink-0", className)}>

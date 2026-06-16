@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Production-Grade PWA Manifest v5.0.
- * FIXED: Updated icon paths to include '/logo/' prefix.
+ * @fileOverview Production-Grade PWA Manifest v6.0.
+ * FIXED: Uses cracklix-icon.png for all app icon entries.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
