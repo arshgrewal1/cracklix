@@ -5,7 +5,10 @@ import { motion } from "framer-motion";
 import { 
   ArrowRight,
   Star,
-  ChevronRight
+  Zap,
+  LayoutGrid,
+  ShieldCheck,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -17,10 +20,9 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
 /**
- * @fileOverview Official Cracklix High-Fidelity Hero v55.0.
- * UPDATED: Icons removed from preparation nodes and stats cards.
+ * @fileOverview Official Cracklix High-Fidelity Hero v56.0.
+ * UPDATED: Stat cards reconstructed with icons and equal sizing as per user screenshot.
  * FIXED: Mobile hierarchy with illustration above action grid.
- * POSITIONAL: Top & Bottom corner spread for floating nodes.
  */
 
 export default function Hero() {
@@ -42,10 +44,34 @@ export default function Hero() {
       return n >= 1000 ? `${(n/1000).toFixed(0)}K+` : n.toString() + "+";
     };
     return [
-      { label: "Questions", sub: "Verified MCQs", val: format(stats?.totalQuestions, "50K+"), color: "text-blue-600" },
-      { label: "Mock Tests", sub: "Topic wise tests", val: format(stats?.totalMocks, "500+"), color: "text-indigo-600" },
-      { label: "Exams", sub: "All state boards", val: format(stats?.totalBoards, "50+"), color: "text-emerald-600" },
-      { label: "Aspirants", sub: "Preparing currently", val: format(stats?.totalUsers, "15K+"), color: "text-orange-500" }
+      { 
+        label: "QUESTIONS", 
+        sub: "VERIFIED MCQS", 
+        val: format(stats?.totalQuestions, "439+"), 
+        bgColor: "bg-blue-600", 
+        icon: <Zap className="h-5 w-5 md:h-7 md:w-7 fill-current" /> 
+      },
+      { 
+        label: "MOCK TESTS", 
+        sub: "TOPIC WISE TESTS", 
+        val: format(stats?.totalMocks, "8+"), 
+        bgColor: "bg-indigo-600", 
+        icon: <LayoutGrid className="h-5 w-5 md:h-7 md:w-7 fill-current" /> 
+      },
+      { 
+        label: "EXAMS", 
+        sub: "ALL STATE BOARDS", 
+        val: format(stats?.totalBoards, "92+"), 
+        bgColor: "bg-emerald-600", 
+        icon: <ShieldCheck className="h-5 w-5 md:h-7 md:w-7 fill-current" /> 
+      },
+      { 
+        label: "ASPIRANTS", 
+        sub: "PREPARING CURRENTLY", 
+        val: format(stats?.totalUsers, "5+"), 
+        bgColor: "bg-orange-500", 
+        icon: <Users className="h-5 w-5 md:h-7 md:w-7 fill-current" /> 
+      }
     ];
   }, [stats]);
 
@@ -64,7 +90,7 @@ export default function Hero() {
         
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           
-          {/* 1. HEADER TEXT (order-1) */}
+          {/* 1. HEADER TEXT */}
           <div className="order-1 space-y-8 text-center lg:text-left">
             <div className="space-y-6">
               <motion.div
@@ -97,9 +123,9 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* 2. ILLUSTRATION HUB (order-2) */}
+          {/* 2. ILLUSTRATION HUB */}
           <div className="order-2 relative flex items-center justify-center lg:justify-end w-full">
-             <div className="relative w-full max-w-[400px] md:max-w-[650px] lg:max-w-[770px] xl:max-w-[850px] flex items-center justify-center">
+             <div className="relative w-full max-w-[400px] md:max-w-[770px] lg:max-w-[850px] flex items-center justify-center">
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -116,7 +142,7 @@ export default function Hero() {
                    />
                 </motion.div>
 
-                {/* Floating Navigation Nodes - Text Centric */}
+                {/* Floating Navigation Nodes */}
                 <div className="absolute inset-0 pointer-events-none hidden lg:block">
                   <FloatingNode position="top-[2%] left-[-4%]" title="MOCK TESTS" delay={0.3} href="/mocks" />
                   <FloatingNode position="top-[2%] right-[-4%]" title="PUNJAB EXAMS" delay={0.6} href="/exams" />
@@ -126,9 +152,8 @@ export default function Hero() {
              </div>
           </div>
 
-          {/* 3. PREPARATION GRID & CTA HUB (order-3) */}
+          {/* 3. PREPARATION GRID & CTA HUB */}
           <div className="order-3 lg:col-span-2 w-full space-y-10">
-             {/* Feature Hub (No Icons) */}
              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
                 {prepFeatures.map((feat) => (
                   <Link key={feat.label} href={feat.href}>
@@ -142,7 +167,6 @@ export default function Hero() {
                 ))}
              </div>
 
-             {/* CTA Buttons */}
              <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 max-w-[400px] lg:max-w-none mx-auto">
                 <Button asChild className="h-16 px-10 bg-blue-600 hover:bg-blue-700 text-white font-black text-sm tracking-widest rounded-full shadow-2xl shadow-blue-600/30 gap-3 border-none transition-all active:scale-95 flex-1">
                   <Link href="/mocks">Start Free Mock Test <ArrowRight className="h-5 w-5" /></Link>
@@ -154,9 +178,9 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* 4. STATS REGISTRY (order-4) */}
+        {/* 4. STATS REGISTRY - EQUAL SIZE CARDS WITH ICONS */}
         <div className="mt-16 md:mt-24">
-           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 items-stretch">
               {liveStats.map((stat, idx) => (
                 <motion.div
                   key={stat.label}
@@ -164,16 +188,20 @@ export default function Hero() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: idx * 0.1 }}
                   viewport={{ once: true }}
+                  className="flex"
                 >
-                  <Card className="border-none shadow-xl rounded-3xl p-6 md:p-10 bg-white hover:translate-y-[-4px] transition-all border border-slate-100 group text-center md:text-left">
-                    <div className="space-y-1.5 min-w-0">
+                  <Card className="border-none shadow-xl rounded-[2rem] p-5 md:p-8 bg-white hover:translate-y-[-4px] transition-all border border-slate-100 group text-left flex items-center gap-4 md:gap-6 w-full">
+                    <div className={cn("h-12 w-12 md:h-16 md:w-16 rounded-2xl flex items-center justify-center shrink-0 shadow-lg text-white", stat.bgColor)}>
+                       {stat.icon}
+                    </div>
+                    <div className="min-w-0 space-y-1">
                       {statsLoading ? (
-                        <Skeleton className="h-8 w-24 bg-slate-100" />
+                        <Skeleton className="h-8 w-20 bg-slate-100" />
                       ) : (
-                        <p className={cn("text-2xl md:text-4xl font-black tracking-tighter leading-none tabular-nums truncate", stat.color)}>{stat.val}</p>
+                        <p className="text-xl md:text-3xl lg:text-4xl font-black text-slate-900 tracking-tighter leading-none tabular-nums">{stat.val}</p>
                       )}
-                      <p className="text-[10px] md:text-sm font-black text-slate-900 uppercase tracking-widest leading-none">{stat.label}</p>
-                      <p className="text-[8px] md:text-[10px] font-medium text-slate-400 leading-tight hidden md:block uppercase tracking-wider">{stat.sub}</p>
+                      <p className="text-[9px] md:text-[11px] font-black text-slate-900 uppercase tracking-widest leading-none">{stat.label}</p>
+                      <p className="text-[7px] md:text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-tight">{stat.sub}</p>
                     </div>
                   </Card>
                 </motion.div>
