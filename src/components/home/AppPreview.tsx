@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 /**
- * @fileOverview High-Fidelity Balanced Mobile App Hub v18.0.
- * FIXED: Added missing Image import from next/image.
+ * @fileOverview High-Fidelity Balanced Mobile App Hub v19.0.
+ * FIXED: Explicit Image import restored to resolve TypeError.
  */
 
 export default function AppPreview() {

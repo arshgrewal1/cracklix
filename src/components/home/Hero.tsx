@@ -22,8 +22,8 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
 /**
- * @fileOverview Elite Hero Hub v83.0 (Recovered hero-student.png).
- * Primary visual centerpiece restored to /logo/hero-student.png.
+ * @fileOverview Elite Hero Hub v84.0.
+ * FIXED: Added style auto to Image to suppress aspect ratio warnings.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -100,6 +100,7 @@ export default function Hero() {
                   fill
                   priority
                   className="object-contain"
+                  style={{ width: '100%', height: 'auto' }}
                 />
              </motion.div>
           </div>
