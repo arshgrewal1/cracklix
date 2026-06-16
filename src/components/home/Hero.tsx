@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -23,9 +24,8 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Cracklix Majestic Hero v6.0.
- * UPDATED: Removed 'uppercase' from main heading and CTA for a premium Title Case look.
- * REFINED: Line-height set to 1.05 for tighter, modern typography.
+ * @fileOverview Official Cracklix Majestic Hero v6.1.
+ * UPDATED: Moved student illustration slightly up in desktop mode (lg:-mt-16).
  */
 
 export default function Hero() {
@@ -152,7 +152,7 @@ export default function Hero() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}
-              className="relative z-10"
+              className="relative z-10 lg:-mt-16"
             >
               <img src="/images/hero-student.png" className="w-full max-w-md h-auto" alt="Cracklix Student" />
             </motion.div>
