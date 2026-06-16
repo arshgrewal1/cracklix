@@ -13,9 +13,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Official Cracklix Brand Hub v10.0.
- * SIZING: Standardized to 44px height (h-11) as per latest management request.
- * FIXED: Added style width/height auto to maintain aspect ratio and suppress Next.js warnings.
+ * @fileOverview Official Cracklix Brand Hub v11.0.
+ * FIXED: Removed height from style prop to maintain aspect ratio and prevent Next.js warnings.
  */
 export default function Logo({ className = "", href = "/", variant = 'light', imgClassName = "" }: LogoProps) {
   const logoSrc = variant === 'light' ? '/logo/cracklix-logo-dark.png' : '/logo/cracklix-logo-light.png';
@@ -32,7 +31,6 @@ export default function Logo({ className = "", href = "/", variant = 'light', im
           "object-contain transition-transform group-hover:scale-105",
           imgClassName
         )}
-        style={{ width: 'auto', height: '44px' }}
       />
     </Link>
   );

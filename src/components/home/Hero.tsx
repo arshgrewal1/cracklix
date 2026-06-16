@@ -22,8 +22,8 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
 /**
- * @fileOverview Elite Hero Hub v84.0.
- * FIXED: Added style auto to Image to suppress aspect ratio warnings.
+ * @fileOverview Elite Hero Hub v85.0.
+ * FIXED: Removed conflicting style prop from Image with fill property.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -100,7 +100,6 @@ export default function Hero() {
                   fill
                   priority
                   className="object-contain"
-                  style={{ width: '100%', height: 'auto' }}
                 />
              </motion.div>
           </div>
