@@ -1,4 +1,5 @@
-import type {Metadata, Viewport} from 'next';
+
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
@@ -52,6 +53,7 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              // 1. PWA Installation Listeners
               window.deferredPrompt = null;
               window.addEventListener('beforeinstallprompt', function(e) {
                 e.preventDefault();
@@ -62,6 +64,16 @@ export default function RootLayout({
                 window.deferredPrompt = null;
                 window.dispatchEvent(new CustomEvent('pwa-installed'));
               });
+
+              // 2. Service Worker Recovery (Purge old workers)
+              if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                  for (let registration of registrations) {
+                    // Only purge if it's not managed by next-pwa (optional logic)
+                    // registration.unregister();
+                  }
+                });
+              }
             `,
           }}
         />

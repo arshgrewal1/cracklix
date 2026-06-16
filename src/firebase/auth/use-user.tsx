@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
@@ -8,8 +9,8 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth & Profile Hook v7.0.
- * OPTIMIZED: Granular loading states to prevent full-page blocking.
+ * @fileOverview Hardened Auth & Profile Hook v8.0.
+ * HARDENED: Implemented 10-second hydration timeout to prevent infinite loading screens.
  */
 export function useUser() {
   const auth = useAuth();
@@ -27,13 +28,22 @@ export function useUser() {
     getDeviceId().then(setCurrentDeviceId);
   }, []);
 
-  // 1. Handle Firebase Auth Session
+  // 1. Auth Sync Hub with 10s "Panic Timeout"
   useEffect(() => {
     if (!auth) return;
+
+    const timeoutId = setTimeout(() => {
+       if (!authResolved) {
+          console.warn("[AUTH_PANIC]: Handshake timed out. Bypassing blocker.");
+          setAuthResolved(true);
+          setProfileLoading(false);
+       }
+    }, 10000);
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       setAuthResolved(true);
+      clearTimeout(timeoutId);
       if (firebaseUser) {
         setProfileLoading(!profileLoaded.current);
       } else {
@@ -44,12 +54,16 @@ export function useUser() {
       console.error("[AUTH_SYNC_FAILURE]:", err);
       setAuthResolved(true);
       setProfileLoading(false);
+      clearTimeout(timeoutId);
     });
 
-    return () => unsubscribeAuth();
-  }, [auth]);
+    return () => {
+       unsubscribeAuth();
+       clearTimeout(timeoutId);
+    };
+  }, [auth, authResolved]);
 
-  // 2. Handle Firestore Profile Real-time Sync
+  // 2. Firestore Profile Real-time Sync
   useEffect(() => {
     if (!user || !db) {
       setProfile(null);
@@ -85,8 +99,8 @@ export function useUser() {
   return { 
     user, 
     profile, 
-    loading: !authResolved, // Main loading only tracks the auth handshake
-    profileLoading,         // Profile loading is separate for UI skeletons
+    loading: !authResolved, 
+    profileLoading,         
     currentDeviceId,
     isDeviceAuthorized
   };

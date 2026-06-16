@@ -1,7 +1,13 @@
-import type {NextConfig} from 'next';
+
+import type { NextConfig } from 'next';
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+});
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -10,82 +16,9 @@ const nextConfig: NextConfig = {
   },
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: '**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'upload.wikimedia.org',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'sssb.punjab.gov.in',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'punjabpolice.gov.in',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'pspcl.in',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'pstcl.org',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'highcourtchd.gov.in',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'static.pseb.ac.in',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'pstet.pseb.ac.in',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.punjabteched.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'joinindianarmy.nic.in',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.indianarmy.nic.in',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdnbbsr.s3waas.gov.in',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cdn.s3waas.gov.in',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'www.mapsofindia.com',
-        pathname: '/**',
-      }
+      { protocol: 'https', hostname: '**' }
     ],
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);
