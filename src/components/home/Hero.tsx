@@ -21,10 +21,9 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
 /**
- * @fileOverview Elite Hero Hub v78.0 (PWA Refinement).
- * UPDATED: Pure white background, removed vertical bars, Title Case headers.
+ * @fileOverview Elite Hero Hub v79.0 (Final Production Scale).
+ * SIZING: Title 40px (Mobile) / 72px (Desktop). Image 220px / 420px. Height 520px / 680px.
  */
-
 export default function Hero() {
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
@@ -115,10 +114,10 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden bg-white pt-6 pb-12 md:pt-16 md:pb-24 text-center lg:text-left w-full border-b border-slate-100">
+    <section className="relative overflow-hidden bg-white pt-6 pb-12 md:pt-16 md:pb-24 text-center lg:text-left w-full border-b border-slate-100 min-h-[520px] lg:min-h-[680px]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        <div className="flex flex-col items-center lg:items-start space-y-6 md:space-y-8">
+        <div className="flex flex-col items-center lg:items-start space-y-6 md:space-y-10">
           
           <div className="space-y-4 md:space-y-6 max-w-4xl min-w-0">
             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 shadow-sm mx-auto lg:mx-0">
@@ -128,7 +127,7 @@ export default function Hero() {
               </span>
             </motion.div>
 
-            <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-slate-900 leading-[1.05] tracking-tight antialiased break-words">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-slate-900 leading-[1.05] tracking-tight antialiased break-words">
               Crack Punjab <br />
               <span className="text-blue-600">Government Exams</span> <br />
               With Confidence
@@ -144,7 +143,7 @@ export default function Hero() {
                initial={{ opacity: 0, scale: 0.95 }} 
                animate={{ opacity: 1, scale: 1 }} 
                transition={{ duration: 0.8 }} 
-               className="relative z-10 w-full max-w-[220px] xs:max-w-[260px] md:max-w-[400px]"
+               className="relative z-10 w-full max-w-[220px] sm:max-w-[280px] lg:max-w-[420px]"
              >
                 <img src={heroImage} alt="Cracklix Prep" className="w-full h-auto object-contain" />
              </motion.div>
@@ -165,12 +164,12 @@ export default function Hero() {
           </div>
 
           <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 w-full sm:w-auto pt-6 pb-12 md:pb-16 border-b border-slate-50">
-            <Button asChild className="h-12 xs:h-14 md:h-16 px-8 md:px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-black text-[10px] xs:text-xs md:text-sm tracking-widest rounded-xl md:rounded-2xl shadow-xl shadow-blue-600/20 border-none transition-all active:scale-95">
+            <Button asChild className="h-14 md:h-16 px-8 md:px-12 bg-[#2563EB] hover:bg-blue-700 text-white font-black text-[10px] xs:text-xs md:text-sm tracking-widest rounded-xl md:rounded-2xl shadow-xl shadow-blue-600/20 border-none transition-all active:scale-95">
               <Link href="/mocks" className="flex items-center justify-center gap-2 md:gap-3">
                 Start Free Mock Test <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <Button asChild variant="outline" className="h-12 xs:h-14 md:h-16 px-8 md:px-10 border-2 border-[#2563EB] bg-white text-[#2563EB] font-black text-[10px] xs:text-xs md:text-sm tracking-widest rounded-xl md:rounded-2xl transition-all active:scale-95 hover:bg-blue-50">
+            <Button asChild variant="outline" className="h-14 md:h-16 px-8 md:px-12 border-2 border-[#2563EB] bg-white text-[#2563EB] font-black text-[10px] xs:text-xs md:text-sm tracking-widest rounded-xl md:rounded-2xl transition-all active:scale-95 hover:bg-blue-50">
               <Link href="/exams" className="flex items-center justify-center gap-2 md:gap-3">
                 Browse Exams <ArrowRight className="h-4 w-4" />
               </Link>
