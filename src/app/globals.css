@@ -10,7 +10,7 @@
     --card-foreground: 221 83% 9%;
     --popover: 0 0% 100%;
     --popover-foreground: 221 83% 9%;
-    --primary: 223 100% 59%; /* #2F6BFF */
+    --primary: 221 83% 53%; /* #2563EB */
     --primary-foreground: 0 0% 100%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -22,7 +22,7 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 223 100% 59%;
+    --ring: 221 83% 53%;
     --radius: 1rem;
 
     --header-height: 80px;
@@ -82,7 +82,7 @@
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(47, 107, 255, 0.1);
+  background: rgba(37, 99, 235, 0.1);
   border-radius: 10px;
 }
 
@@ -95,7 +95,7 @@
 }
 
 .shadow-4xl {
-  box-shadow: 0 20px 40px -10px rgba(47, 107, 255, 0.15);
+  box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.15);
 }
 
 .shadow-5xl {

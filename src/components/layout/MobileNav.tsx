@@ -6,8 +6,8 @@ import { Zap, Home, BarChart3, Target, Gem } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Premium Mobile Navigation Hub v3.1.
- * DESIGN: Updated to use Cracklix Blue (#2F6BFF).
+ * @fileOverview Production PWA Bottom Navigation v4.0.
+ * DESIGN: Active = Blue/White | Inactive = Transparent/Gray | Pass = Blue CTA.
  */
 
 export default function MobileNav() {
@@ -25,7 +25,7 @@ export default function MobileNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[1100] bg-[#04102B]/95 backdrop-blur-xl border-t border-white/5 pb-[env(safe-area-inset-bottom)] md:hidden shadow-[0_-10px_40px_rgba(0,0,0,0.2)] pointer-events-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-[1100] bg-white/95 backdrop-blur-xl border-t border-[#E2E8F0] pb-[env(safe-area-inset-bottom)] md:hidden shadow-[0_-10px_40px_rgba(0,0,0,0.05)] pointer-events-auto">
       <div className="flex items-center justify-around h-[72px] px-2 max-w-md mx-auto relative">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -37,11 +37,11 @@ export default function MobileNav() {
                 <div className={cn(
                   "flex flex-col items-center justify-center gap-0.5 w-full h-[52px] rounded-2xl transition-all shadow-lg",
                   isActive 
-                    ? "bg-[#2F6BFF] ring-2 ring-[#2F6BFF]/20" 
-                    : "bg-gradient-to-br from-[#2F6BFF] to-[#1F5BFF] shadow-[#2F6BFF]/20"
+                    ? "bg-[#2563EB] text-white ring-4 ring-[#2563EB]/10" 
+                    : "bg-[#2563EB] text-white shadow-[#2563EB]/20"
                 )}>
-                  <Icon className="h-5 w-5 text-white" />
-                  <span className="text-[10px] font-bold text-white tracking-tighter">
+                  <Icon className="h-5 w-5 fill-current" />
+                  <span className="text-[10px] font-black uppercase tracking-tighter">
                     {item.label}
                   </span>
                 </div>
@@ -53,18 +53,18 @@ export default function MobileNav() {
             <Link key={item.href} href={item.href} className="flex-1 h-full touch-manipulation focus:outline-none">
               <div className="flex flex-col items-center justify-center gap-1 h-full">
                 <div className={cn(
-                  "flex flex-col items-center justify-center gap-1 transition-all duration-300 px-3 py-1.5 rounded-xl",
-                  isActive ? "bg-[#2F6BFF]/10" : "bg-transparent"
+                  "flex flex-col items-center justify-center gap-1 transition-all duration-300 px-3 py-2 rounded-2xl w-full",
+                  isActive ? "bg-[#2563EB] text-white shadow-lg shadow-[#2563EB]/20 scale-105" : "bg-transparent text-[#94A3B8]"
                 )}>
                   <Icon 
                     className={cn(
                       "h-5 w-5 transition-colors duration-300",
-                      isActive ? "text-[#2F6BFF]" : "text-slate-400"
+                      isActive ? "text-white" : "text-[#94A3B8]"
                     )} 
                   />
                   <span className={cn(
-                    "text-[11px] font-bold transition-colors duration-300 tracking-tight",
-                    isActive ? "text-[#2F6BFF]" : "text-slate-500"
+                    "text-[10px] font-black uppercase transition-colors duration-300 tracking-tighter",
+                    isActive ? "text-white" : "text-[#94A3B8]"
                   )}>
                     {item.label}
                   </span>

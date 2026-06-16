@@ -32,9 +32,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Production-Grade Responsive PWA Header v80.0.
- * Desktop (≥1024px): Logo Left | Nav Center | Actions Right | H=96px
- * Mobile (<1024px): Hamburger + Logo Left | Actions Right | H=80px
+ * @fileOverview Production-Grade Responsive PWA Header v81.0.
+ * UPDATED: Simplified mobile pass button to a single Gem icon.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -72,9 +71,9 @@ export default function Navbar() {
           <div className="flex items-center gap-3 lg:gap-6 shrink-0">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="flex lg:hidden w-12 h-12 rounded-2xl bg-gray-50 border border-gray-100 items-center justify-center text-slate-600 active:scale-95 transition-all"
+              className="flex lg:hidden w-11 h-11 rounded-2xl bg-slate-50 border border-slate-100 items-center justify-center text-slate-600 active:scale-95 transition-all"
             >
-              <Menu className="h-6 w-6" />
+              <Menu className="h-5 w-5" />
             </button>
             <Logo imgClassName="h-8 lg:h-10 w-auto" />
           </div>
@@ -88,38 +87,38 @@ export default function Navbar() {
 
           {/* RIGHT: ACTIONS */}
           <div className="flex items-center justify-end gap-2 lg:gap-4 shrink-0">
-             <Button asChild className="h-12 lg:h-16 px-6 lg:px-10 bg-[#2F6BFF] hover:bg-blue-700 text-white font-black text-[10px] lg:text-[11px] tracking-widest rounded-2xl lg:rounded-3xl gap-2 shadow-lg shadow-blue-600/20 border-none transition-all active:scale-95">
+             <Button asChild className="h-11 lg:h-16 px-4 lg:px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-black text-[10px] lg:text-[11px] tracking-widest rounded-2xl lg:rounded-3xl gap-2 shadow-lg shadow-blue-600/20 border-none transition-all active:scale-95">
                 <Link href="/pass">
                   <Gem className="h-4 w-4 text-white" /> 
-                  <span className="hidden sm:inline">PASS</span>
+                  <span className="hidden lg:inline">PASS</span>
                 </Link>
              </Button>
 
-             <Link href="/search" className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl bg-gray-50 border border-gray-100 flex items-center justify-center text-slate-400 hover:text-[#2F6BFF] hover:bg-blue-50/50 transition-all active:scale-95">
+             <Link href="/search" className="w-11 h-11 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-[#2563EB] hover:bg-blue-50/50 transition-all active:scale-95">
                 <Search className="h-5 w-5 lg:h-6 lg:w-6" />
              </Link>
 
              {loading ? (
-                <Skeleton className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl bg-gray-100" />
+                <Skeleton className="w-11 h-11 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl bg-gray-100" />
              ) : user ? (
                <DropdownMenu>
                  <DropdownMenuTrigger asChild>
-                   <button className="w-12 h-12 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl border border-gray-100 overflow-hidden shadow-sm cursor-pointer bg-gray-50 active:scale-95 transition-transform flex items-center justify-center">
+                   <button className="w-11 h-11 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl border border-slate-100 overflow-hidden shadow-sm cursor-pointer bg-slate-50 active:scale-95 transition-transform flex items-center justify-center">
                       <StudentAvatar profile={profile} className="h-full w-full border-none" />
                    </button>
                  </DropdownMenuTrigger>
                  <DropdownMenuContent align="end" className="w-64 bg-white border border-gray-200 text-[#04102B] rounded-[2rem] p-2 shadow-5xl z-[2001] mt-4">
                     <DropdownMenuItem asChild className="px-4 py-3 cursor-pointer rounded-xl focus:bg-gray-50">
                        <Link href="/profile" className="flex items-center gap-3">
-                          <User className="h-5 w-5 text-[#2F6BFF]" />
+                          <User className="h-5 w-5 text-[#2563EB]" />
                           <span className="font-bold text-sm tracking-tight">My Profile</span>
                        </Link>
                     </DropdownMenuItem>
                     {isAdmin && (
-                      <DropdownMenuItem asChild className="px-4 py-3 cursor-pointer rounded-xl focus:bg-[#2F6BFF]/5 mt-1 border border-[#2F6BFF]/10">
+                      <DropdownMenuItem asChild className="px-4 py-3 cursor-pointer rounded-xl focus:bg-[#2563EB]/5 mt-1 border border-[#2563EB]/10">
                         <Link href="/admin" className="flex items-center gap-3">
-                          <ShieldCheck className="h-5 w-5 text-[#2F6BFF]" />
-                          <span className="font-bold text-sm tracking-tight text-[#2F6BFF]">Admin Center</span>
+                          <ShieldCheck className="h-5 w-5 text-[#2563EB]" />
+                          <span className="font-bold text-sm tracking-tight text-[#2563EB]">Admin Center</span>
                         </Link>
                       </DropdownMenuItem>
                     )}
@@ -131,7 +130,7 @@ export default function Navbar() {
                  </DropdownMenuContent>
                </DropdownMenu>
              ) : (
-               <Button asChild className="px-5 lg:px-8 h-12 lg:h-16 bg-[#2F6BFF] hover:bg-blue-700 text-white font-black text-[10px] lg:text-[11px] rounded-2xl lg:rounded-3xl transition-all tracking-widest border-none active:scale-95 shadow-lg">
+               <Button asChild className="px-5 lg:px-8 h-11 lg:h-16 bg-[#2563EB] hover:bg-blue-700 text-white font-black text-[10px] lg:text-[11px] rounded-2xl lg:rounded-3xl transition-all tracking-widest border-none active:scale-95 shadow-lg">
                  <Link href="/login">LOGIN</Link>
                </Button>
              )}
@@ -158,7 +157,7 @@ function NavLink({ href, label, active }: { href: string, label: string, active?
     <Link href={href} className={cn(
       "flex items-center px-8 py-4 rounded-2xl font-semibold text-[15px] transition-all shrink-0 uppercase tracking-widest",
       active 
-        ? "bg-blue-50 text-[#2F6BFF] shadow-sm" 
+        ? "bg-blue-50 text-[#2563EB] shadow-sm" 
         : "text-slate-400 hover:text-[#04102B] hover:bg-gray-50"
     )}>
        <span>{label}</span>
