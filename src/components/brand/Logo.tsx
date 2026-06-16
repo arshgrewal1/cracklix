@@ -13,7 +13,7 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Official Cracklix Brand Hub v28.0.
+ * @fileOverview Official Cracklix Brand Hub v30.0.
  * HARDENED: Maximized dimensions (112px/128px) for dominant brand presence.
  * LAYOUT: Zero-constraint wrapper for precision header positioning.
  */
@@ -32,11 +32,11 @@ export default function Logo({ className = "", href = "/", variant = 'light', im
       <Image 
         src={logoSrc} 
         alt="Cracklix" 
-        width={260}
+        width={320}
         height={128}
         priority
         className={cn(
-          "h-[112px] w-auto lg:h-[128px] object-contain transition-all group-hover:scale-105 shrink-0",
+          "h-[112px] w-auto lg:h-[128px] object-contain transition-all group-hover:scale-110 shrink-0",
           imgClassName
         )}
       />

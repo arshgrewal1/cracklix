@@ -30,7 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Hardened Header v108.0.
+ * @fileOverview Hardened Header v110.0.
  * LAYOUT: Absolute Far-Left [Menu + Logo] with Zero Spacing.
  * SIZING: Mobile 112px / Desktop 128px.
  */
@@ -64,10 +64,10 @@ export default function Navbar() {
   return (
     <div className="w-full sticky top-0 z-50 font-body">
       <nav className="w-full border-b border-[#E5E7EB] bg-white h-[112px] lg:h-[128px] px-0 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex items-center overflow-hidden">
-        <div className="w-full flex items-center justify-between h-full px-1 lg:px-2">
+        <div className="w-full flex items-center justify-between h-full px-0">
           
-          {/* LEFT GROUP: MENU + LOGO (ABSOLUTE LEFT END) */}
-          <div className="flex items-center shrink-0">
+          {/* LEFT GROUP: MENU + LOGO (ABSOLUTE LEFT END - ZERO SPACE) */}
+          <div className="flex items-center shrink-0 gap-0">
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="w-11 h-11 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl bg-gray-50 flex items-center justify-center text-slate-700 active:scale-95 transition-all shadow-sm z-10"
@@ -75,7 +75,10 @@ export default function Navbar() {
             >
               <Menu className="w-6 h-6 lg:w-8 lg:h-8" />
             </button>
-            <Logo variant="light" className="-ml-3 lg:-ml-6" />
+            <Logo 
+              variant="light" 
+              className="-ml-[10px] lg:-ml-[16px]" 
+            />
           </div>
 
           {/* CENTER: DESKTOP NAVIGATION (Hidden on Mobile) */}
@@ -86,7 +89,7 @@ export default function Navbar() {
           </nav>
 
           {/* RIGHT GROUP: SEARCH + PROFILE */}
-          <div className="flex items-center gap-2 md:gap-3 shrink-0">
+          <div className="flex items-center gap-2 md:gap-3 shrink-0 px-2 lg:px-4">
              <Link href="/search" className="w-11 h-11 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl bg-gray-50 flex items-center justify-center text-slate-700 hover:text-[#2563EB] transition-all active:scale-95 shadow-sm">
                 <Search className="w-6 h-6 lg:w-8 lg:h-8" />
              </Link>
