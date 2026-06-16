@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -10,13 +11,15 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview Elite Exam Categories Hub v11.0 (Restored Punjab Icon).
+ * @fileOverview Elite Exam Categories Hub v12.0.
+ * UPDATED: Optimized icons with next/image for better performance and data usage.
  */
 
 const CATEGORY_META = [
@@ -56,7 +59,7 @@ const CATEGORY_META = [
     id: "central-govt",
     title: "Central Govt Exams",
     desc: "SSC • Railways • Army • National",
-    icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmRNHVIV2W9Pn_87u6EQmluADidwUQWhOotUwQUV_VWtEBWqoxjf-OBEt4&s=10",
+    icon: "https://upload.wikimedia.org/wikipedia/commons/b/bc/Emblem_of_India.svg",
     color: "text-indigo-600",
     bgColor: "bg-indigo-50"
   }
@@ -115,9 +118,14 @@ export default function FeaturedCategories() {
             >
                <Link href={`/exams/category/${cat.id}`}>
                   <Card className="border-none shadow-lg hover:shadow-3xl transition-all duration-500 rounded-[1.5rem] md:rounded-[2rem] bg-white group overflow-hidden h-[240px] xs:h-[260px] md:h-[320px] flex flex-col border border-slate-100 p-6 md:p-8 relative">
-                     <div className={cn("h-10 w-10 xs:h-12 xs:w-12 md:h-16 md:w-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-5 md:mb-8 shadow-inner transition-transform group-hover:scale-110", cat.bgColor, cat.color)}>
-                        <div className="h-full w-full flex items-center justify-center overflow-hidden rounded-lg md:rounded-xl">
-                          <img src={cat.icon} className="h-full w-full object-contain p-2 md:p-2.5" alt={cat.title} />
+                     <div className={cn("h-10 w-10 xs:h-12 xs:w-12 md:h-16 md:w-16 rounded-xl md:rounded-2xl flex items-center justify-center mb-5 md:mb-8 shadow-inner transition-transform group-hover:scale-110 relative", cat.bgColor, cat.color)}>
+                        <div className="h-full w-full flex items-center justify-center overflow-hidden rounded-lg md:rounded-xl relative">
+                          <Image 
+                            src={cat.icon} 
+                            alt={cat.title}
+                            fill
+                            className="object-contain p-2 md:p-2.5"
+                          />
                         </div>
                      </div>
                      
@@ -128,7 +136,7 @@ export default function FeaturedCategories() {
 
                      <div className="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between">
                         {loading ? (
-                          <div className="h-2.5 w-16 bg-slate-50 animate-pulse rounded" />
+                          <Skeleton className="h-2.5 w-16 bg-slate-50 rounded" />
                         ) : (
                           <span className="text-[8px] xs:text-[9px] md:text-[10px] font-black text-[#0F172A] uppercase tracking-widest">{cat.countLabel}</span>
                         )}

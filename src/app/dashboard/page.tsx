@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -33,23 +34,23 @@ import ShareButton from "@/components/navigation/ShareButton"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview High-Performance Student Dashboard v25.1.
- * UPDATED: Steady Shell pattern - Navbar is always visible.
+ * @fileOverview High-Performance Student Dashboard v26.0 (Hardened).
+ * UPDATED: Implemented Skeleton Screens to prevent layout shifts during hydration.
  */
 export default function StudentDashboard() {
-  const { user, profile, loading, profileLoading } = useUser()
+  const { user, profile, loading, profileLoading, authResolved } = useUser() as any;
   const db = useFirestore()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
-    if (!loading && !user) router.push("/login")
-  }, [user, loading, router])
+    if (authResolved && !user) router.push("/login")
+  }, [user, authResolved, router])
 
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null
-    return query(collection(db, "results"), where("userId", "==", user.uid), limit(20))
+    return query(collection(db, "results"), where("userId", "==", user.uid), limit(5))
   }, [db, user, mounted])
 
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
@@ -93,15 +94,19 @@ export default function StudentDashboard() {
       <Navbar />
       
       {!mounted || loading ? (
-        <div className="flex-1 flex flex-col items-center justify-center space-y-6 py-20">
-          <Loader2 className="h-10 w-10 text-primary animate-spin" />
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Synchronizing Prep Node...</p>
+        <div className="container mx-auto px-4 md:px-8 py-6 md:py-12 max-w-7xl space-y-12">
+           <Skeleton className="h-64 w-full rounded-[3.5rem] bg-slate-200" />
+           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <Skeleton className="h-32 w-full rounded-[2.5rem] bg-slate-200" />
+              <Skeleton className="h-32 w-full rounded-[2.5rem] bg-slate-200" />
+              <Skeleton className="h-32 w-full rounded-[2.5rem] bg-slate-200" />
+              <Skeleton className="h-32 w-full rounded-[2.5rem] bg-slate-200" />
+           </div>
         </div>
       ) : (
         <main className="container mx-auto px-4 md:px-8 py-6 md:py-12 max-w-7xl space-y-8 md:space-y-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
             
-            {/* IDENTITY & MAIN METRICS */}
             <div className="lg:col-span-8 space-y-8">
                 <section className="bg-[#0B1528] text-white p-8 md:p-14 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl relative overflow-hidden group text-left">
                   <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
@@ -199,7 +204,6 @@ export default function StudentDashboard() {
                 </Card>
             </div>
 
-            {/* SIDEBAR: STREAK & QUICK LAUNCH */}
             <div className="lg:col-span-4 space-y-6 md:space-y-10">
                 <Card className="border-none shadow-4xl bg-gradient-to-br from-orange-500 to-primary text-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[3rem] relative overflow-hidden group">
                   <div className="absolute bottom-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Flame className="h-48 w-48 md:h-64 md:w-64" /></div>

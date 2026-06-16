@@ -9,8 +9,8 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth & Profile Hook v8.0.
- * HARDENED: Implemented 10-second hydration timeout to prevent infinite loading screens.
+ * @fileOverview Hardened Auth & Profile Hook v9.0.
+ * UPDATED: Optimized 10-second hydration timeout to resolve infinite loading scenarios.
  */
 export function useUser() {
   const auth = useAuth();
@@ -28,47 +28,55 @@ export function useUser() {
     getDeviceId().then(setCurrentDeviceId);
   }, []);
 
-  // 1. Auth Sync Hub with 10s "Panic Timeout"
+  // 1. Auth Sync Hub with explicit 10s "Panic Timeout"
   useEffect(() => {
     if (!auth) return;
 
-    const timeoutId = setTimeout(() => {
-       if (!authResolved) {
-          console.warn("[AUTH_PANIC]: Handshake timed out. Bypassing blocker.");
-          setAuthResolved(true);
-          setProfileLoading(false);
-       }
-    }, 10000);
+    let timeoutId: NodeJS.Timeout;
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       setAuthResolved(true);
-      clearTimeout(timeoutId);
+      
       if (firebaseUser) {
         setProfileLoading(!profileLoaded.current);
       } else {
         setProfileLoading(false);
         profileLoaded.current = true;
       }
+      
+      if (timeoutId) clearTimeout(timeoutId);
     }, (err) => {
       console.error("[AUTH_SYNC_FAILURE]:", err);
       setAuthResolved(true);
       setProfileLoading(false);
-      clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
     });
+
+    // Panic Timeout: Resolve loading state if Firebase takes too long
+    timeoutId = setTimeout(() => {
+       if (!authResolved) {
+          console.warn("[AUTH_PANIC]: Handshake timed out after 10s. Bypassing blocker for UX.");
+          setAuthResolved(true);
+          setProfileLoading(false);
+       }
+    }, 10000);
 
     return () => {
        unsubscribeAuth();
-       clearTimeout(timeoutId);
+       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [auth, authResolved]);
+  }, [auth]);
 
-  // 2. Firestore Profile Real-time Sync
+  // 2. Firestore Profile Real-time Sync with mandatory cleanup
   useEffect(() => {
     if (!user || !db) {
       setProfile(null);
+      setProfileLoading(false);
       return;
     }
+
+    setProfileLoading(!profileLoaded.current);
 
     const unsubscribeProfile = onSnapshot(doc(db, 'users', user.uid), (docSnap) => {
       if (docSnap.exists()) {
