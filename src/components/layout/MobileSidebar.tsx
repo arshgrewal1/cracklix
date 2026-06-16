@@ -23,14 +23,14 @@ import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import Logo from "@/components/brand/Logo";
+import Image from "next/image";
 import StudentAvatar from "@/components/brand/StudentAvatar";
 import { TELEGRAM_GROUP, INSTAGRAM_PROFILE } from "@/lib/constants";
 
 /**
- * @fileOverview Premium Sidebar Hub v12.0.
- * FIXED: Student name truncation and duplicate close button removal.
- * SIZING: Width fixed at 280px, Profile Card 32px rounding.
+ * @fileOverview Premium Sidebar Hub v14.0.
+ * UPDATED: Optimized Sidebar Logo to 36px (h-9) as per institutional specs.
+ * FIXED: Removed Logo component to allow explicit dimension control.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -73,7 +73,16 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
       
       {/* 1. BRAND HEADER - 88px */}
       <div className="flex items-center justify-between px-5 h-[88px] border-b shrink-0 bg-white">
-        <Logo variant="light" />
+        <Link href="/" onClick={onClose} className="flex items-center">
+          <Image
+            src="/logo/cracklix-logo-dark.png"
+            alt="Cracklix"
+            width={150}
+            height={42}
+            className="h-9 w-auto"
+            priority
+          />
+        </Link>
         <button 
           onClick={onClose}
           className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all shadow-sm"
