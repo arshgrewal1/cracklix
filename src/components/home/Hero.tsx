@@ -25,9 +25,9 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Cracklix Majestic Hero v14.0 (Stabilized).
- * HARDENED: Fixed preparation node positions to prevent overlap.
- * SYNCED: Proportional scaling for all illustration elements.
+ * @fileOverview Official Cracklix Majestic Hero v15.0.
+ * UPDATED: Integrated horizontal Exam Registry Pill (PSSSB, PCS, etc.) below description.
+ * ALIGNED: Matched headline and sub-headline typography to user reference.
  */
 
 export default function Hero() {
@@ -91,20 +91,11 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden bg-[#F8FAFC] py-8 md:py-24 border-b border-slate-100 text-left">
+    <section className="relative overflow-hidden bg-[#F8FAFC] py-12 md:py-24 border-b border-slate-100 text-left">
       <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-blue-50/50 blur-[120px] rounded-full -z-10" />
 
       <div className="max-w-7xl mx-auto px-4 space-y-12 md:space-y-16">
         
-        {/* MOBILE TAGS REGISTRY */}
-        <div className="flex lg:hidden overflow-x-auto no-scrollbar gap-2 pb-2">
-           {["PSSSB", "Punjab Police", "PSTET", "PSPCL", "PPSC"].map((item) => (
-              <Badge key={item} variant="outline" className="px-5 py-2 whitespace-nowrap rounded-full bg-white border-slate-200 text-slate-700 font-bold text-[10px] shadow-sm uppercase tracking-widest">
-                {item}
-              </Badge>
-           ))}
-        </div>
-
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-0 items-center">
           
           {/* LEFT: CONTENT HUB */}
@@ -116,13 +107,23 @@ export default function Hero() {
 
             <div className="space-y-6">
                <h1 className="text-4xl md:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.05]">
-                  Crack Punjab <br />
-                  <span className="text-blue-600">Government Exams</span> <br />
-                  With Confidence
+                  Your Journey to <br />
+                  <span className="text-blue-600">Government Job</span> <br />
+                  Starts Here!
                </h1>
                <p className="text-base md:text-lg text-slate-500 font-medium max-w-xl leading-relaxed">
-                  Practice with high-quality mock tests, previous papers and exam-focused preparation for top Punjab exams.
+                  Best preparation platform for all major Punjab Government Exams.
                </p>
+
+               {/* EXAM REGISTRY PILL - MATCHED TO SCREENSHOT */}
+               <div className="inline-flex items-center bg-white border border-slate-200 px-6 py-3 rounded-full shadow-sm gap-4 overflow-x-auto no-scrollbar max-w-full">
+                  {["PSSSB", "PCS", "PSPCL", "CTET", "PSTET"].map((item, idx) => (
+                    <React.Fragment key={item}>
+                      <span className="text-[10px] md:text-xs font-black text-slate-700 uppercase tracking-widest whitespace-nowrap">{item}</span>
+                      {idx < 4 && <span className="text-slate-300 font-bold">•</span>}
+                    </React.Fragment>
+                  ))}
+               </div>
             </div>
 
             <div className="hidden lg:flex flex-wrap gap-4 pt-4">
@@ -143,25 +144,25 @@ export default function Hero() {
                 <FloatingNode 
                    icon={<Zap className="text-blue-600 h-5 w-5 fill-current" />} 
                    label="Mock Tests" 
-                   className="top-[2%] left-[-5%] sm:left-[0%] md:left-[2%] lg:left-[5%]" 
+                   className="top-[2%] left-[0%] sm:left-[2%] md:left-[5%] lg:left-[8%]" 
                 />
 
                 <FloatingNode 
                    icon={<Target className="text-purple-600 h-5 w-5" />} 
                    label="Daily Practice" 
-                   className="bottom-[5%] left-[-5%] sm:left-[0%] md:left-[2%] lg:left-[5%]" 
+                   className="bottom-[5%] left-[0%] sm:left-[2%] md:left-[5%] lg:left-[8%]" 
                 />
 
                 <FloatingNode 
                    icon={<Landmark className="text-orange-500 h-5 w-5" />} 
                    label="Punjab Exams" 
-                   className="top-[2%] right-[-5%] sm:right-[0%] md:right-[2%] lg:right-[5%]" 
+                   className="top-[2%] right-[0%] sm:right-[2%] md:right-[5%] lg:right-[8%]" 
                 />
 
                 <FloatingNode 
                    icon={<FileStack className="text-emerald-500 h-5 w-5" />} 
                    label="Previous Papers" 
-                   className="bottom-[5%] right-[-5%] sm:right-[0%] md:right-[2%] lg:right-[5%]" 
+                   className="bottom-[5%] right-[0%] sm:right-[2%] md:right-[5%] lg:right-[8%]" 
                 />
 
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-100/30 rounded-full blur-3xl -z-10" />
