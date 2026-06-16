@@ -23,8 +23,8 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Cracklix Majestic Hero v7.1.
- * REFACTORED: Moved Daily Practice and Previous Papers nodes to the absolute bottom.
+ * @fileOverview Official Cracklix Majestic Hero v8.0.
+ * UPDATED: Expanded vertical span of floating nodes for a more cinematic framing.
  */
 
 export default function Hero() {
@@ -137,33 +137,33 @@ export default function Hero() {
             {/* CENTRAL ILLUSTRATION WRAPPER */}
             <div className="relative w-full max-w-[320px] sm:max-w-[400px] md:max-w-[500px] lg:max-w-[650px] xl:max-w-[750px] aspect-square flex items-center justify-center">
                 
-                {/* FLOATING NODES - 4 CORNER MAPPING */}
+                {/* FLOATING NODES - EXPANDED VERTICAL MAPPING */}
                 {/* TOP LEFT: MOCK TESTS */}
                 <FloatingNode 
                    icon={<Zap className="text-blue-600 h-5 w-5" />} 
                    label="Mock Tests" 
-                   className="top-[5%] left-[-10%] sm:left-[-5%] lg:left-[5%] xl:left-[10%]" 
+                   className="top-[-8%] left-[-10%] sm:left-[-5%] lg:left-[5%] xl:left-[10%]" 
                 />
 
                 {/* BOTTOM LEFT: DAILY PRACTICE */}
                 <FloatingNode 
                    icon={<Target className="text-purple-600 h-5 w-5" />} 
                    label="Daily Practice" 
-                   className="bottom-[2%] left-[-10%] sm:left-[-5%] lg:left-[5%] xl:left-[10%]" 
+                   className="bottom-[-18%] left-[-10%] sm:left-[-5%] lg:left-[5%] xl:left-[10%]" 
                 />
 
                 {/* TOP RIGHT: PUNJAB EXAMS */}
                 <FloatingNode 
                    icon={<Trophy className="text-orange-500 h-5 w-5" />} 
                    label="Punjab Exams" 
-                   className="top-[5%] right-[-10%] sm:right-[-5%] lg:right-[5%] xl:right-[10%]" 
+                   className="top-[-8%] right-[-10%] sm:right-[-5%] lg:right-[5%] xl:right-[10%]" 
                 />
 
                 {/* BOTTOM RIGHT: PREVIOUS PAPERS */}
                 <FloatingNode 
                    icon={<FileStack className="text-emerald-500 h-5 w-5" />} 
                    label="Previous Papers" 
-                   className="bottom-[2%] right-[-10%] sm:right-[-5%] lg:right-[5%] xl:right-[10%]" 
+                   className="bottom-[-18%] right-[-10%] sm:right-[-5%] lg:right-[5%] xl:right-[10%]" 
                 />
 
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-100/30 rounded-full blur-3xl -z-10" />
