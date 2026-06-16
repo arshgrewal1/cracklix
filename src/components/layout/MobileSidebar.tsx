@@ -29,9 +29,8 @@ import Logo from "@/components/brand/Logo";
 import { TELEGRAM_GROUP, INSTAGRAM_PROFILE } from "@/lib/constants";
 
 /**
- * @fileOverview Premium Sidebar Hub v17.0.
- * UPDATED: Synchronized Logo Size (112px/128px) with Header Standard.
- * FIXED: Clean Logo component integration with click-to-close handler.
+ * @fileOverview Premium Sidebar Hub v18.0.
+ * UPDATED: Synchronized Header height (72px) and branding alignment.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -72,16 +71,18 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col h-full bg-white font-body select-none text-left relative overflow-hidden">
       
-      {/* 1. BRAND HEADER - 112px/128px (SYNCHRONIZED) */}
-      <div className="flex items-center justify-between px-2 h-[112px] lg:h-[128px] border-b shrink-0 bg-white">
-        <Logo variant="light" href="/" onClick={onClose} />
-        <button 
-          onClick={onClose}
-          className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all shadow-sm z-10 mr-4"
-          aria-label="Close menu"
-        >
-          <X className="w-6 h-6" />
-        </button>
+      {/* 1. BRAND HEADER - 72px (SYNCHRONIZED WITH NAVBAR) */}
+      <div className="flex items-center justify-between px-0 h-[72px] border-b shrink-0 bg-white">
+        <div className="flex items-center h-full">
+           <button 
+             onClick={onClose}
+             className="w-[72px] h-[72px] flex items-center justify-center text-slate-700 active:bg-gray-50 transition-all shrink-0"
+             aria-label="Close menu"
+           >
+             <X className="w-6 h-6" />
+           </button>
+           <Logo variant="light" href="/" onClick={onClose} className="-ml-2" />
+        </div>
       </div>
 
       {/* 2. NAVIGATION HUB */}
