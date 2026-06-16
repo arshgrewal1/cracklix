@@ -113,7 +113,7 @@ export default function CategoryHubsPage() {
                           </div>
                           
                           <div className="space-y-2 flex-1">
-                             <h3 className="text-2xl font-black text-[#0F172A] uppercase tracking-tight leading-none group-hover:text-primary transition-colors">{hub.abbreviation} CENTER</h3>
+                             <h3 className="text-2xl font-black text-[#0F172A] uppercase tracking-tight leading-none group-hover:text-primary transition-colors">{hub.abbreviation} Exams</h3>
                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest line-clamp-2 min-h-[25px]">{hub.name}</p>
                           </div>
 

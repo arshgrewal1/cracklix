@@ -8,7 +8,8 @@ import {
   Zap, 
   ShieldCheck, 
   GraduationCap, 
-  Activity
+  Activity,
+  ArrowRight
 } from "lucide-react";
 import Link from "next/link";
 import { useCollection, useFirestore } from "@/firebase";
@@ -18,8 +19,8 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Fidelity Popular Hubs v52.0 (Hydration Fix).
- * FIXED: Added mounted state guard to ensure stable hydration.
+ * @fileOverview High-Fidelity Popular Hubs v53.0 (Cracklix Style).
+ * UPDATED: Replaced HUB with Exams and implemented the 32px/15px typography structure.
  */
 
 function getBoardFallbackIcon(id: string, abbrev: string) {
@@ -57,19 +58,19 @@ export default function PopularExams() {
     <section className="py-16 md:py-24 bg-white">
       <div className="container mx-auto px-4 max-7xl">
          
-         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6 text-left">
+         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6 text-left">
             <div className="space-y-2">
-               <h2 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none">Popular Exams</h2>
-               <p className="text-slate-500 font-medium text-sm md:text-lg">Complete preparation for all major Punjab government exams.</p>
+               <h2 className="text-3xl md:text-5xl font-headline font-black text-[#04102B] uppercase tracking-tight leading-none">Popular Punjab Exams</h2>
+               <p className="text-[#94A3B8] font-bold uppercase tracking-widest text-[10px] md:text-xs">Most Targeted Recruitment Exams</p>
             </div>
-            <Link href="/exams" className="flex items-center gap-2 text-primary font-black uppercase text-[10px] md:text-sm hover:underline tracking-widest">
-               View All Exams <ChevronRight className="h-4 w-4" />
+            <Link href="/exams" className="flex items-center gap-2 text-[#2F6BFF] font-black uppercase text-[10px] md:text-sm hover:underline tracking-widest group">
+               View All Exams <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
          </div>
 
          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
             {loading ? (
-               Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-44 w-full rounded-[2.5rem]" />)
+               Array.from({ length: 8 }).map((_, i) => <Skeleton key={i} className="h-[300px] w-full rounded-[32px]" />)
             ) : filteredBoards.map((board) => {
                const examCount = allExams?.filter(e => e.boardId === board.id || e.boardId === board.abbreviation).length || 0;
                const mockCount = mocks?.filter(m => (m.boardIds && m.boardIds.includes(board.id)) || m.boardId === board.id).length || 0;
@@ -79,9 +80,9 @@ export default function PopularExams() {
 
                return (
                   <Link key={board.id} href={`/exams/hub/${board.id}`}>
-                     <Card className="border border-slate-100 shadow-sm hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white group p-8 text-left h-full flex flex-col">
-                        <div className="flex items-center gap-6">
-                           <div className="h-16 w-16 md:h-20 md:w-20 rounded-[1.5rem] bg-slate-50 flex items-center justify-center p-3 shrink-0 shadow-inner group-hover:scale-105 transition-transform overflow-hidden relative">
+                     <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:translate-y-[-6px] transition-all duration-500 rounded-[32px] bg-white group p-8 text-left h-full min-h-[300px] flex flex-col relative overflow-hidden">
+                        <div className="flex flex-col space-y-4 flex-1">
+                           <div className="h-16 w-16 md:h-20 md:w-20 rounded-full bg-[#F8FAFC] flex items-center justify-center p-3.5 shrink-0 shadow-inner group-hover:scale-105 transition-transform overflow-hidden relative border border-slate-100 mb-2">
                               {hasImage ? (
                                 <img 
                                   src={logoUrl} 
@@ -96,23 +97,30 @@ export default function PopularExams() {
                                 </div>
                               )}
                            </div>
-                           <div className="min-w-0 flex-1">
-                              <h3 className="text-xl md:text-2xl font-black text-[#0F172A] uppercase leading-none group-hover:text-primary transition-colors">{board.abbreviation} Hub</h3>
-                              <p className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest line-clamp-2 min-h-[30px]">
+                           
+                           <div className="min-w-0">
+                              <h3 className="text-[28px] md:text-[32px] font-black text-[#04102B] uppercase leading-[1.1] tracking-tight group-hover:text-[#2F6BFF] transition-colors">{board.abbreviation} Exams</h3>
+                              <p className="text-[15px] font-semibold text-[#94A3B8] leading-tight mt-1 line-clamp-1">
                                 {board.name}
                               </p>
                            </div>
                         </div>
 
-                        <div className="mt-10 pt-6 border-t border-slate-50 grid grid-cols-2 gap-4">
-                           <div className="flex items-center gap-2.5">
-                              <BookOpen className="h-4 w-4 text-blue-500" />
-                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">{examCount} Exams</span>
+                        <div className="mt-8 space-y-3">
+                           <div className="flex items-center gap-3">
+                              <BookOpen className="h-4 w-4 text-[#2F6BFF]" />
+                              <span className="text-[14px] font-bold text-[#64748B] uppercase tracking-tight">{examCount} Active Exams</span>
                            </div>
-                           <div className="flex items-center gap-2.5">
-                              <Zap className="h-4 w-4 text-orange-500" />
-                              <span className="text-[10px] font-black text-slate-600 uppercase tracking-tight">{mockCount} Tests</span>
+                           <div className="flex items-center gap-3">
+                              <Zap className="h-4 w-4 text-[#F97316]" />
+                              <span className="text-[14px] font-bold text-[#64748B] uppercase tracking-tight">{mockCount} Mock Tests</span>
                            </div>
+                        </div>
+
+                        <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
+                           <span className="text-[#2F6BFF] font-black uppercase text-[12px] tracking-widest flex items-center gap-2">
+                              Explore Exams <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                           </span>
                         </div>
                      </Card>
                   </Link>

@@ -88,8 +88,7 @@ export default function HubExamsPage() {
                </div>
                <div className="space-y-3 text-center md:text-left">
                   <div className="flex items-center justify-center md:justify-start gap-4">
-                     {/* SIMPLIFIED: Replaced HUB with EXAMS */}
-                     <Badge className="bg-primary text-white border-none font-black px-4 py-1 rounded-xl text-[10px] tracking-widest shadow-lg">{hub?.abbreviation} EXAMS</Badge>
+                     <Badge className="bg-primary text-white border-none font-black px-4 py-1 rounded-xl text-[10px] tracking-widest shadow-lg">{hub?.abbreviation} Exams</Badge>
                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em]">Official verticals</span>
                   </div>
                   <h1 className="text-4xl md:text-7xl font-headline font-black text-[#0F172A] uppercase tracking-tighter leading-none">{hub?.name}</h1>
@@ -133,7 +132,6 @@ export default function HubExamsPage() {
                                   </div>
                                 )}
                              </div>
-                             {/* SIMPLIFIED: Hub to Vertical */}
                              <Badge variant="outline" className="text-[8px] font-black uppercase tracking-widest border-slate-100 text-slate-400">
                                 {hub?.abbreviation} EXAM LIST
                              </Badge>
