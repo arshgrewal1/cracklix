@@ -30,9 +30,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Hardened Header v106.0.
- * LAYOUT: [Menu + Logo] Zero Gap. Tightened to absolute left end.
- * SIZING: Mobile 112px / Desktop 128px (Maximized per user request).
+ * @fileOverview Hardened Header v107.0.
+ * LAYOUT: Absolute Far-Left [Menu + Logo]. Container centering removed.
+ * SIZING: Mobile 112px / Desktop 128px.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -63,19 +63,19 @@ export default function Navbar() {
 
   return (
     <div className="w-full sticky top-0 z-50 font-body">
-      <nav className="w-full border-b border-[#E5E7EB] bg-white h-[112px] lg:h-[128px] px-0 lg:px-4 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex items-center overflow-hidden">
-        <div className="w-full max-w-7xl mx-auto flex items-center justify-between h-full">
+      <nav className="w-full border-b border-[#E5E7EB] bg-white h-[112px] lg:h-[128px] px-0 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex items-center overflow-hidden">
+        <div className="w-full flex items-center justify-between h-full px-2 lg:px-4">
           
-          {/* LEFT GROUP: MENU + LOGO (TIGHTENED TO FAR LEFT END WITH ZERO GAP) */}
-          <div className="flex items-center gap-0 shrink-0">
+          {/* LEFT GROUP: MENU + LOGO (TIGHTENED TO FAR LEFT END) */}
+          <div className="flex items-center shrink-0">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="w-11 h-11 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl bg-gray-50 flex items-center justify-center text-slate-700 active:scale-95 transition-all shadow-sm"
+              className="w-11 h-11 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl bg-gray-50 flex items-center justify-center text-slate-700 active:scale-95 transition-all shadow-sm z-10"
               aria-label="Open menu"
             >
               <Menu className="w-6 h-6 lg:w-8 lg:h-8" />
             </button>
-            <Logo variant="light" />
+            <Logo variant="light" className="-ml-2 lg:-ml-4" />
           </div>
 
           {/* CENTER: DESKTOP NAVIGATION (Hidden on Mobile) */}
@@ -86,7 +86,7 @@ export default function Navbar() {
           </nav>
 
           {/* RIGHT GROUP: SEARCH + PROFILE */}
-          <div className="flex items-center gap-2 md:gap-3 shrink-0 px-2 lg:px-0">
+          <div className="flex items-center gap-2 md:gap-3 shrink-0">
              <Link href="/search" className="w-11 h-11 lg:w-16 lg:h-16 rounded-2xl lg:rounded-3xl bg-gray-50 flex items-center justify-center text-slate-700 hover:text-[#2563EB] transition-all active:scale-95 shadow-sm">
                 <Search className="w-6 h-6 lg:w-8 lg:h-8" />
              </Link>

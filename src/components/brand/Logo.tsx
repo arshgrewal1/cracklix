@@ -13,9 +13,9 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Official Cracklix Brand Hub v26.0.
- * HARDENED: Maximized to absolute vertical limits (112px/128px) per user request (+20px from previous).
- * PLACEMENT: Designed to be anchored exactly next to the sidebar trigger.
+ * @fileOverview Official Cracklix Brand Hub v27.0.
+ * HARDENED: Maximized dimensions (112px/128px).
+ * LAYOUT: Removed forced min-width to allow tighter left-alignment.
  */
 export default function Logo({ className = "", href = "/", variant = 'light', imgClassName = "" }: LogoProps) {
   // Use dark logo for light background, and light logo for dark background
@@ -25,7 +25,7 @@ export default function Logo({ className = "", href = "/", variant = 'light', im
     <Link 
       href={href} 
       className={cn(
-        "flex items-center group pointer-events-auto select-none shrink-0 min-w-[200px]", 
+        "flex items-center group pointer-events-auto select-none shrink-0", 
         className
       )}
     >
