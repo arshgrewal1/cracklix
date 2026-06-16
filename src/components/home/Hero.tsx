@@ -17,23 +17,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
 /**
- * @fileOverview Native-Scaled Elite Hero Hub v63.0.
- * REQUIREMENTS: 
- * - Mobile radius 32px, padding 24px.
- * - Title clamp(42px, 12vw, 64px).
- * - Image max-w 300px on mobile.
+ * @fileOverview Native-Scaled Elite Hero Hub v64.0.
+ * FIXED: Permanently removed external Golden Temple URL.
+ * ASSET: Using local /logo/hero-student.png for clean focal point.
  */
 
 export default function Hero() {
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
-  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setMounted(true);
@@ -42,6 +38,7 @@ export default function Hero() {
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
+  // Strictly local asset node
   const heroImage = "/logo/hero-student.png";
 
   const liveStats = useMemo(() => {
@@ -138,9 +135,9 @@ export default function Hero() {
                 >
                    <img 
                      src={heroImage}
-                     alt="Cracklix" 
+                     alt="Cracklix Preparation" 
                      className="w-full h-auto object-contain drop-shadow-3xl"
-                     onError={(e) => { (e.target as HTMLImageElement).src = 'https://i.ibb.co/fYJttX5d/Gemini-Generated-Image-n1so6on1so6on1so.png' }}
+                     // Purged external fallback URL
                    />
                 </motion.div>
              </div>
@@ -180,7 +177,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* BOTTOM STATS HUB - EQUAL SIZED CARDS */}
+        {/* BOTTOM STATS HUB */}
         <div className="mt-12 md:mt-24 order-4">
            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 items-stretch">
               {liveStats.map((stat, idx) => (

@@ -1,10 +1,10 @@
 {
   "placeholderImages": [
     {
-      "id": "hero-police",
-      "description": "Punjab Police Strategic Asset",
-      "imageUrl": "https://punjabpolice.gov.in/media/images/pp10.original.jpg",
-      "imageHint": "punjab police"
+      "id": "hero-student",
+      "description": "Professional Student Preparation Hero",
+      "imageUrl": "/logo/hero-student.png",
+      "imageHint": "student studying"
     },
     {
       "id": "promo-psssb",
