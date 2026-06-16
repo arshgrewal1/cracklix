@@ -29,7 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Hardened Header v115.0 (Title Case Update).
+ * @fileOverview Final Hardened Header v116.0.
+ * UPDATED: Reduced width via max-w-7xl and synchronized brand spacing.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -60,14 +61,14 @@ export default function Navbar() {
 
   return (
     <div className="w-full sticky top-0 z-50 font-body">
-      <nav className="w-full border-b border-[#E5E7EB] bg-white h-[140px] px-0 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex items-center overflow-hidden">
-        <div className="w-full flex items-center justify-between h-full px-2 lg:px-6">
+      <nav className="w-full border-b border-[#E5E7EB] bg-white h-[140px] shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex items-center overflow-hidden">
+        <div className="w-full max-w-7xl mx-auto flex items-center justify-between h-full px-4 md:px-8">
           
-          {/* LEFT GROUP: MENU + LOGO (ABSOLUTE LEFT END) */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* LEFT GROUP: MENU + LOGO (SYNCHRONIZED SPACING) */}
+          <div className="flex items-center gap-4 md:gap-8 shrink-0">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 active:bg-gray-50 transition-all z-10 shrink-0 shadow-sm"
+              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 active:bg-gray-50 transition-all shrink-0 shadow-sm"
               aria-label="Open menu"
             >
               <Menu className="w-6 h-6" />
