@@ -13,11 +13,11 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Official Cracklix Brand Hub v7.0.
+ * @fileOverview Official Cracklix Brand Hub v8.0.
  * LOGIC:
  * - variant='light': Navy text logo for light/white backgrounds.
  * - variant='dark': White text logo for dark/navy backgrounds.
- * SIZING: Mobile: 28px height | Desktop: 32px height
+ * SIZING: Standardized to 44px height for professional presence.
  */
 export default function Logo({ className = "", href = "/", variant = 'light', imgClassName = "" }: LogoProps) {
   const logoSrc = variant === 'light' ? '/logo/cracklix-logo-dark.png' : '/logo/cracklix-logo-light.png';
@@ -27,12 +27,12 @@ export default function Logo({ className = "", href = "/", variant = 'light', im
       <Image 
         src={logoSrc} 
         alt="Cracklix" 
-        width={120}
-        height={32}
+        width={160}
+        height={44}
         priority
         className={cn(
           "w-auto object-contain transition-transform group-hover:scale-105",
-          "h-7 md:h-8", 
+          "h-11", // Standardized to 44px (11 * 4)
           imgClassName
         )}
       />
