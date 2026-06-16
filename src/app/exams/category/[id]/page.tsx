@@ -15,16 +15,15 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Explorer v9.0 (Responsive).
- * FIXED: Oversized headlines and logos on narrow viewports.
+ * @fileOverview Institutional Category Explorer v10.0 (Restored Punjab Icon).
  */
 
 const CATEGORY_META: Record<string, any> = {
-  "punjab-govt": { title: "Punjab General Exam", icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR8W5eTBPdzztA7cziqnMmtWk9InL1yflUD_xb4vAsLw&s=10" className="h-full w-full object-contain" /> },
+  "punjab-govt": { title: "Punjab General Exam", icon: <img src="https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg" className="h-full w-full object-contain" /> },
   "punjab-teaching": { title: "Punjab Teaching Exam", icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbNnoge6pNWx1HZYrUJKM58qWk1dDw85xvKPBoG-O4ew&s=10" className="h-full w-full object-contain" /> },
   "punjab-technical": { title: "Punjab Technical Exam", icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRo0ZK9JI5KMfg9RoNdIwcsNlpx5IcPBWuKZw&s" className="h-full w-full object-contain" /> },
   "banking": { title: "Punjab Banking Corporation Exam", icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7McWqZqOgKy-BakccvR02WQdEQFrwuvmHBG5rYJzuEg&s=10" className="h-full w-full object-contain" /> },
-  "central-govt": { title: "Central Govt", icon: <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmRNHVIV2W9Pn_87u6EQmluADidwUQWhOotUwQUV_VWtEBWqoxjf-OBEt4&s=10" className="h-full w-full object-contain" /> }
+  "central-govt": { title: "Central Govt", icon: <img src="https://upload.wikimedia.org/wikipedia/commons/b/bc/Emblem_of_India.svg" className="h-full w-full object-contain" /> }
 };
 
 export default function CategoryHubsPage() {

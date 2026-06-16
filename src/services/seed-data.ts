@@ -1,7 +1,7 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Punjab-Centric Seeding Node v70.5.
+ * @fileOverview Institutional Punjab-Centric Seeding Node v70.6.
  * UPDATED: Corrected official board logo URLs for PSSSB and PPSC.
  */
 
@@ -18,7 +18,7 @@ export async function seedInitialData(db: Firestore) {
       highlight: "STATE LEVEL",
       color: "text-primary",
       bgColor: "bg-orange-50",
-      iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR8W5eTBPdzztA7cziqnMmtWk9InL1yflUD_xb4vAsLw&s=10",
+      iconUrl: "https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg",
       displayOrder: 1
     },
     {
@@ -58,7 +58,7 @@ export async function seedInitialData(db: Firestore) {
       highlight: "NATIONAL",
       color: "text-indigo-600",
       bgColor: "bg-indigo-50",
-      iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmRNHVIV2W9Pn_87u6EQmluADidwUQWhOotUwQUV_VWtEBWqoxjf-OBEt4&s=10",
+      iconUrl: "https://upload.wikimedia.org/wikipedia/commons/b/bc/Emblem_of_India.svg",
       displayOrder: 5
     }
   ];
@@ -90,7 +90,7 @@ export async function seedInitialData(db: Firestore) {
       abbreviation: 'PPSC',
       name: 'Punjab Public Service Commission',
       categoryId: 'punjab-govt',
-      iconUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR8W5eTBPdzztA7cziqnMmtWk9InL1yflUD_xb4vAsLw&s=10',
+      iconUrl: 'https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg',
       displayOrder: 3
     },
     {

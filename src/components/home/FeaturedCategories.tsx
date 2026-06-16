@@ -16,7 +16,7 @@ import { collection } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview Elite Exam Categories Hub v10.0 (Title Case).
+ * @fileOverview Elite Exam Categories Hub v11.0 (Restored Punjab Icon).
  */
 
 const CATEGORY_META = [
@@ -24,7 +24,7 @@ const CATEGORY_META = [
     id: "punjab-govt",
     title: "Punjab General Exams",
     desc: "Police • PSSSB • PPSC • Revenue",
-    icon: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSR8W5eTBPdzztA7czinmtWk9InL1yflUD_xb4vAsLw&s=10",
+    icon: "https://sssb.punjab.gov.in/wp-content/themes/ssbtheme/images/punjab-gov.svg",
     color: "text-primary",
     bgColor: "bg-orange-50"
   },
