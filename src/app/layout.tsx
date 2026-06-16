@@ -1,4 +1,3 @@
-
 import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import { Inter } from "next/font/google";
@@ -69,7 +68,7 @@ export default function RootLayout({
       </head>
       <body className={`${inter.variable} font-body antialiased bg-white text-[#0F172A] min-h-screen pb-20 md:pb-0`}>
         <FirebaseClientProvider>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex flex-col min-h-screen app-content-wrapper">
             {children}
           </div>
           <MobileNav />

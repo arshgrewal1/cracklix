@@ -32,8 +32,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview High-Density Master Navbar Hub v65.0.
- * UPDATED: Icons removed from desktop navigation links for a cleaner look.
+ * @fileOverview Native-Scaled Navbar Hub v66.0.
+ * UPDATED: Mobile height set to 72px with 48x48 icon targets and 48px pass button.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -64,19 +64,19 @@ export default function Navbar() {
   }, [profile]);
 
   if (!mounted) return (
-    <nav className="w-full border-b border-slate-100 bg-white h-16 md:h-20" />
+    <nav className="w-full border-b border-slate-100 bg-white h-[72px] md:h-20" />
   );
 
   return (
     <div className="w-full sticky top-0 z-[1000] font-body">
-      <nav className="w-full border-b border-slate-100 bg-white/80 backdrop-blur-xl h-16 md:h-20 px-4 md:px-6 shadow-sm flex items-center overflow-hidden">
-        <div className="w-full max-w-[1600px] mx-auto flex items-center justify-between h-full gap-4">
+      <nav className="w-full border-b border-slate-100 bg-white/80 backdrop-blur-xl h-[72px] md:h-20 px-4 md:px-6 shadow-sm flex items-center overflow-hidden">
+        <div className="w-full max-w-[1600px] mx-auto flex items-center justify-between h-full gap-2 md:gap-4">
           
           {/* LEFT: TRIGGER + LOGO */}
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
-              className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 text-slate-400 rounded-xl border border-slate-100 flex items-center justify-center cursor-pointer active:scale-90 transition-all hover:bg-slate-100"
+              className="w-12 h-12 md:w-12 md:h-12 bg-slate-50 text-slate-400 rounded-2xl border border-slate-100 flex items-center justify-center cursor-pointer active:scale-90 transition-all hover:bg-slate-100"
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -105,30 +105,23 @@ export default function Navbar() {
           {/* RIGHT: ACTION NODES */}
           <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0">
              
-             <div className="hidden sm:block">
-               <Button asChild className="h-10 md:h-12 px-4 md:px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] md:text-[11px] tracking-widest rounded-xl gap-2 shadow-lg border-none transition-all active:scale-95">
-                  <Link href="/pass"><Gem className="h-4 w-4" /> Pass</Link>
+             <div>
+               <Button asChild className="h-12 md:h-12 px-4 md:px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[14px] md:text-[11px] tracking-widest rounded-2xl md:rounded-xl gap-2 shadow-lg border-none transition-all active:scale-95">
+                  <Link href="/pass"><Gem className="h-4 w-4" /> <span className="hidden xs:inline">Pass</span></Link>
                </Button>
              </div>
 
-             {isActivePass && (
-                <div className="hidden xs:flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl shadow-sm">
-                   <div className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" />
-                   <span className="text-[9px] font-bold text-emerald-600">Active</span>
-                </div>
-             )}
-
-             <Link href="/search" className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-all">
+             <Link href="/search" className="w-12 h-12 md:w-12 md:h-12 rounded-2xl md:rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 hover:text-blue-600 transition-all">
                 <Search className="h-5 w-5" />
              </Link>
 
              {/* AUTHENTICATION ACTION BLOCK */}
              {loading ? (
-                <Skeleton className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-100" />
+                <Skeleton className="w-12 h-12 md:w-12 md:h-12 rounded-full bg-slate-100" />
              ) : user ? (
                <DropdownMenu>
                  <DropdownMenuTrigger asChild>
-                   <button className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-slate-100 overflow-hidden shadow-sm cursor-pointer bg-white active:scale-95 transition-transform flex items-center justify-center">
+                   <button className="w-12 h-12 md:w-12 md:h-12 rounded-full border border-slate-100 overflow-hidden shadow-sm cursor-pointer bg-white active:scale-95 transition-transform flex items-center justify-center">
                       <StudentAvatar profile={profile} className="h-full w-full border-none" />
                    </button>
                  </DropdownMenuTrigger>
@@ -155,7 +148,7 @@ export default function Navbar() {
                  </DropdownMenuContent>
                </DropdownMenu>
              ) : (
-               <Button asChild className="px-5 md:px-8 h-10 md:h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] md:text-[11px] rounded-xl transition-all tracking-widest border-none active:scale-95">
+               <Button asChild className="px-5 md:px-8 h-12 md:h-12 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[11px] rounded-2xl md:rounded-xl transition-all tracking-widest border-none active:scale-95">
                  <Link href="/login">Login</Link>
                </Button>
              )}

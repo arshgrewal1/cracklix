@@ -44,6 +44,10 @@
     pointer-events: auto;
     -webkit-text-size-adjust: 100%;
     
+    /* Native App Feel */
+    overscroll-behavior-y: none;
+    touch-action: pan-y;
+    
     /* PWA Safe Area Support */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
@@ -57,6 +61,16 @@
   /* Enforce 16px minimum font size for inputs to prevent iOS zoom */
   input, textarea, select {
     font-size: 16px !important;
+  }
+}
+
+/* Mobile-First App Container */
+@media (max-width: 768px) {
+  .app-content-wrapper {
+    max-width: 430px;
+    margin: 0 auto;
+    width: 100%;
+    overflow-x: hidden;
   }
 }
 
