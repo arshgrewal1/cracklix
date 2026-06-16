@@ -30,8 +30,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Hardened Header v107.0.
- * LAYOUT: Absolute Far-Left [Menu + Logo]. Container centering removed.
+ * @fileOverview Hardened Header v108.0.
+ * LAYOUT: Absolute Far-Left [Menu + Logo] with Zero Spacing.
  * SIZING: Mobile 112px / Desktop 128px.
  */
 export default function Navbar() {
@@ -64,9 +64,9 @@ export default function Navbar() {
   return (
     <div className="w-full sticky top-0 z-50 font-body">
       <nav className="w-full border-b border-[#E5E7EB] bg-white h-[112px] lg:h-[128px] px-0 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex items-center overflow-hidden">
-        <div className="w-full flex items-center justify-between h-full px-2 lg:px-4">
+        <div className="w-full flex items-center justify-between h-full px-1 lg:px-2">
           
-          {/* LEFT GROUP: MENU + LOGO (TIGHTENED TO FAR LEFT END) */}
+          {/* LEFT GROUP: MENU + LOGO (ABSOLUTE LEFT END) */}
           <div className="flex items-center shrink-0">
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -75,7 +75,7 @@ export default function Navbar() {
             >
               <Menu className="w-6 h-6 lg:w-8 lg:h-8" />
             </button>
-            <Logo variant="light" className="-ml-2 lg:-ml-4" />
+            <Logo variant="light" className="-ml-3 lg:-ml-6" />
           </div>
 
           {/* CENTER: DESKTOP NAVIGATION (Hidden on Mobile) */}

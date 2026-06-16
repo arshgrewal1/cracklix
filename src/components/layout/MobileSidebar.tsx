@@ -28,9 +28,9 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import { TELEGRAM_GROUP, INSTAGRAM_PROFILE } from "@/lib/constants";
 
 /**
- * @fileOverview Premium Sidebar Hub v14.0.
- * UPDATED: Optimized Sidebar Logo to 36px (h-9) as per institutional specs.
- * FIXED: Removed Logo component to allow explicit dimension control.
+ * @fileOverview Premium Sidebar Hub v15.0.
+ * UPDATED: Prominent Sidebar Logo (h-16/64px) for high visibility.
+ * FIXED: Standardized rounded containers for a cohesive preparation ecosystem.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -71,15 +71,15 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col h-full bg-white font-body select-none text-left relative overflow-hidden">
       
-      {/* 1. BRAND HEADER - 88px */}
-      <div className="flex items-center justify-between px-5 h-[88px] border-b shrink-0 bg-white">
+      {/* 1. BRAND HEADER - 88px/112px */}
+      <div className="flex items-center justify-between px-5 h-[88px] lg:h-[112px] border-b shrink-0 bg-white">
         <Link href="/" onClick={onClose} className="flex items-center">
           <Image
             src="/logo/cracklix-logo-dark.png"
             alt="Cracklix"
-            width={150}
-            height={42}
-            className="h-9 w-auto"
+            width={200}
+            height={64}
+            className="h-14 lg:h-16 w-auto object-contain max-w-[180px]"
             priority
           />
         </Link>
