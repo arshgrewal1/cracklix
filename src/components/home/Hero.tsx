@@ -8,7 +8,10 @@ import {
   Zap,
   LayoutGrid,
   ShieldCheck,
-  Users
+  Users,
+  Landmark,
+  BookOpen,
+  Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,9 +23,9 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
 /**
- * @fileOverview Official Cracklix High-Fidelity Hero v56.0.
- * UPDATED: Stat cards reconstructed with icons and equal sizing as per user screenshot.
- * FIXED: Mobile hierarchy with illustration above action grid.
+ * @fileOverview Official Cracklix High-Fidelity Hero v57.0.
+ * UPDATED: Restored icons to the preparation features grid as requested.
+ * FIXED: Matched "PUNJAB EXAMS" blue styling from user screenshot.
  */
 
 export default function Hero() {
@@ -76,10 +79,10 @@ export default function Hero() {
   }, [stats]);
 
   const prepFeatures = [
-    { label: "MOCK TESTS", sub: "Exam-focused mock tests", href: "/mocks" },
-    { label: "PUNJAB EXAMS", sub: "All major Punjab exams", href: "/exams" },
-    { label: "FREE PRACTICE", sub: "Daily study practice", href: "/practice" },
-    { label: "PREVIOUS PAPERS", sub: "Official year papers", href: "/pyqs" },
+    { label: "MOCK TESTS", sub: "Exam-focused mock tests", href: "/mocks", icon: <Zap className="h-5 w-5 text-blue-600" /> },
+    { label: "PUNJAB EXAMS", sub: "All major Punjab exams", href: "/exams", icon: <Landmark className="h-5 w-5 text-blue-600" />, isBlue: true },
+    { label: "FREE PRACTICE", sub: "Daily study practice", href: "/practice", icon: <BookOpen className="h-5 w-5 text-indigo-600" /> },
+    { label: "PREVIOUS PAPERS", sub: "Official year papers", href: "/pyqs", icon: <Layers className="h-5 w-5 text-emerald-600" /> },
   ];
 
   if (!mounted) return null;
@@ -144,10 +147,10 @@ export default function Hero() {
 
                 {/* Floating Navigation Nodes */}
                 <div className="absolute inset-0 pointer-events-none hidden lg:block">
-                  <FloatingNode position="top-[2%] left-[-4%]" title="MOCK TESTS" delay={0.3} href="/mocks" />
-                  <FloatingNode position="top-[2%] right-[-4%]" title="PUNJAB EXAMS" delay={0.6} href="/exams" />
-                  <FloatingNode position="bottom-[8%] left-[-6%]" title="FREE PRACTICE" delay={0.5} href="/practice" />
-                  <FloatingNode position="bottom-[8%] right-[-6%]" title="PREVIOUS PAPERS" delay={0.4} href="/pyqs" />
+                  <FloatingNode position="top-[2%] left-[-4%]" title="MOCK TESTS" icon={<Zap className="h-4 w-4 text-blue-600" />} delay={0.3} href="/mocks" />
+                  <FloatingNode position="top-[2%] right-[-4%]" title="PUNJAB EXAMS" icon={<Landmark className="h-4 w-4 text-blue-600" />} delay={0.6} href="/exams" isBlue />
+                  <FloatingNode position="bottom-[8%] left-[-6%]" title="FREE PRACTICE" icon={<BookOpen className="h-4 w-4 text-indigo-600" />} delay={0.5} href="/practice" />
+                  <FloatingNode position="bottom-[8%] right-[-6%]" title="PREVIOUS PAPERS" icon={<Layers className="h-4 w-4 text-emerald-600" />} delay={0.4} href="/pyqs" />
                 </div>
              </div>
           </div>
@@ -158,10 +161,16 @@ export default function Hero() {
                 {prepFeatures.map((feat) => (
                   <Link key={feat.label} href={feat.href}>
                     <Card className="border border-slate-100 bg-white p-6 rounded-2xl md:rounded-[2rem] shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer h-full">
-                       <div className="min-w-0 text-left">
-                          <h4 className="font-black text-sm md:text-base text-[#0F172A] uppercase tracking-tight leading-none mb-2 group-hover:text-blue-600 transition-colors">{feat.label}</h4>
-                          <p className="text-[10px] md:text-[11px] font-medium text-slate-400 leading-tight line-clamp-1">{feat.sub}</p>
+                       <div className="flex items-center gap-4 mb-3">
+                          {feat.icon}
+                          <h4 className={cn(
+                            "font-black text-sm md:text-base uppercase tracking-tight leading-none transition-colors",
+                            feat.isBlue ? "text-blue-600" : "text-[#0F172A] group-hover:text-blue-600"
+                          )}>
+                            {feat.label}
+                          </h4>
                        </div>
+                       <p className="text-[10px] md:text-[11px] font-medium text-slate-400 leading-tight line-clamp-1">{feat.sub}</p>
                     </Card>
                   </Link>
                 ))}
@@ -178,7 +187,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* 4. STATS REGISTRY - EQUAL SIZE CARDS WITH ICONS */}
+        {/* 4. STATS REGISTRY */}
         <div className="mt-16 md:mt-24">
            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 items-stretch">
               {liveStats.map((stat, idx) => (
@@ -214,7 +223,7 @@ export default function Hero() {
   );
 }
 
-function FloatingNode({ position, title, delay, href }: { position: string, title: string, delay: number, href: string }) {
+function FloatingNode({ position, title, icon, delay, href, isBlue }: { position: string, title: string, icon?: React.ReactNode, delay: number, href: string, isBlue?: boolean }) {
    return (
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
@@ -223,8 +232,14 @@ function FloatingNode({ position, title, delay, href }: { position: string, titl
         className={cn("absolute z-20 w-[210px] xl:w-[250px]", position)}
       >
          <Link href={href}>
-            <Card className="p-5 md:p-6 rounded-2xl md:rounded-3xl bg-white/95 backdrop-blur-xl border-none shadow-2xl flex items-center justify-center group hover:shadow-primary/10 hover:translate-y-[-4px] transition-all cursor-pointer pointer-events-auto">
-               <p className="text-[11px] md:text-[12px] font-black text-slate-900 tracking-widest truncate leading-none uppercase text-center">{title}</p>
+            <Card className="p-5 md:p-6 rounded-2xl md:rounded-3xl bg-white/95 backdrop-blur-xl border-none shadow-2xl flex items-center justify-center gap-3 group hover:shadow-primary/10 hover:translate-y-[-4px] transition-all cursor-pointer pointer-events-auto">
+               {icon}
+               <p className={cn(
+                 "text-[11px] md:text-[12px] font-black tracking-widest truncate leading-none uppercase text-center",
+                 isBlue ? "text-blue-600" : "text-slate-900"
+               )}>
+                 {title}
+               </p>
             </Card>
          </Link>
       </motion.div>
