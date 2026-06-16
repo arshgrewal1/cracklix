@@ -30,9 +30,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Hardened Header v111.0.
- * LAYOUT: Absolute Far-Left [Menu + Logo] with Zero Spacing.
+ * @fileOverview Final Hardened Header v112.0.
+ * LAYOUT: Absolute Far-Left [Menu + Logo] with Minimal Spacing.
  * SIZING: Mobile 72px / Desktop 88px.
+ * LOGO: 40px standard.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -64,20 +65,20 @@ export default function Navbar() {
   return (
     <div className="w-full sticky top-0 z-50 font-body">
       <nav className="w-full border-b border-[#E5E7EB] bg-white h-[72px] lg:h-[88px] px-0 shadow-[0_2px_10px_rgba(0,0,0,0.06)] flex items-center overflow-hidden">
-        <div className="w-full flex items-center justify-between h-full px-0">
+        <div className="w-full flex items-center justify-between h-full px-2 lg:px-6">
           
           {/* LEFT GROUP: MENU + LOGO (ABSOLUTE LEFT END - ZERO SPACE) */}
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center gap-2 lg:gap-4 shrink-0">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="w-[72px] h-[72px] lg:w-[88px] lg:h-[88px] flex items-center justify-center text-slate-700 active:bg-gray-50 transition-all z-10 shrink-0"
+              className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 active:bg-gray-50 transition-all z-10 shrink-0 shadow-sm"
               aria-label="Open menu"
             >
-              <Menu className="w-6 h-6 lg:w-8 lg:h-8" />
+              <Menu className="w-6 h-6" />
             </button>
             <Logo 
               variant="light" 
-              className="-ml-2 lg:-ml-4" 
+              className="shrink-0"
             />
           </div>
 
@@ -89,7 +90,7 @@ export default function Navbar() {
           </nav>
 
           {/* RIGHT GROUP: SEARCH + PROFILE */}
-          <div className="flex items-center gap-1 md:gap-3 shrink-0 px-2 lg:px-6">
+          <div className="flex items-center gap-1 md:gap-3 shrink-0">
              <Link href="/search" className="w-11 h-11 lg:w-14 lg:h-14 rounded-2xl flex items-center justify-center text-slate-700 hover:text-[#2563EB] transition-all active:scale-95">
                 <Search className="w-5 h-5 lg:w-6 lg:h-6" />
              </Link>

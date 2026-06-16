@@ -12,8 +12,8 @@ interface SidebarHeaderProps {
 }
 
 /**
- * @fileOverview High-Fidelity Admin Sidebar Header v7.0.
- * FIXED: Synchronized with 72px/88px header height standards.
+ * @fileOverview High-Fidelity Admin Sidebar Header v8.0.
+ * FIXED: Synchronized with 72px/88px header height standards and 40px logo.
  */
 export default function SidebarHeader({ isOpen, onToggle }: SidebarHeaderProps) {
   return (

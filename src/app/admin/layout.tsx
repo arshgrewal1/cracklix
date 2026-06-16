@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 /**
- * @fileOverview Hardened Admin Hub Layout v11.0.
- * UPDATED: Header height synchronized to 72px/88px.
+ * @fileOverview Hardened Admin Hub Layout v12.0.
+ * UPDATED: Header height synchronized to 72px (Mobile) and 88px (Desktop).
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -93,7 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden bg-blue-600 text-white h-12 w-12 rounded-2xl shadow-lg flex items-center justify-center active:scale-95 transition-all"
+              className="lg:hidden bg-white border border-slate-200 text-slate-700 h-12 w-12 rounded-2xl shadow-sm flex items-center justify-center active:scale-95 transition-all"
             >
               <Menu className="h-6 w-6" />
             </button>

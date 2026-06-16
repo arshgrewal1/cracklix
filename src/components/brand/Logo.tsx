@@ -14,7 +14,7 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Official Cracklix Brand Hub v32.0.
+ * @fileOverview Official Cracklix Brand Hub v33.0.
  * UPDATED: Optimized dimensions for tight header integration (40px/48px).
  */
 export default function Logo({ className = "", href = "/", variant = 'light', imgClassName = "", onClick }: LogoProps) {
