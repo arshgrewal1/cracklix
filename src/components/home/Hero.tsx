@@ -23,7 +23,8 @@ import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 
 /**
- * @fileOverview Elite Hero Hub v81.0 (next/image Optimized).
+ * @fileOverview Elite Hero Hub v82.0 (Restored Student Image).
+ * Primary visual: /logo/hero-student.png
  */
 export default function Hero() {
   const db = useFirestore();
