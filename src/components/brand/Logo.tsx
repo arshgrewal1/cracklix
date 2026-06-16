@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from "next/link";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface LogoProps {
@@ -12,8 +13,9 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Official Cracklix Brand Hub v2.0.
- * UPDATED: Dual-variant engine for light/dark backgrounds using transparent PNGs.
+ * @fileOverview Official Cracklix Brand Hub v3.0.
+ * UPDATED: Optimized with next/image for production-grade path handling and LCP priority.
+ * PATHS: Always served from root / to match public/ directory structure.
  */
 export default function Logo({ className = "", href = "/", variant = 'light', imgClassName = "" }: LogoProps) {
   // light variant = Dark text for light backgrounds (Header)
@@ -22,15 +24,17 @@ export default function Logo({ className = "", href = "/", variant = 'light', im
 
   return (
     <Link href={href} className={cn("flex items-center group pointer-events-auto select-none shrink-0", className)}>
-      <img 
+      <Image 
         src={logoSrc} 
         alt="Cracklix" 
+        width={180}
+        height={55}
+        priority
         className={cn(
           "w-auto object-contain transition-transform group-hover:scale-105",
-          "h-[32px] md:h-[42px]", // User specified height logic
+          "h-[32px] md:h-[42px]", 
           imgClassName
         )}
-        referrerPolicy="no-referrer"
       />
     </Link>
   );

@@ -4,6 +4,7 @@ import React from 'react';
 import { cn } from "@/lib/utils";
 import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
+import Image from 'next/image';
 
 interface SidebarHeaderProps {
   isOpen: boolean;
@@ -11,8 +12,8 @@ interface SidebarHeaderProps {
 }
 
 /**
- * @fileOverview High-Fidelity Sidebar Header v2.0.
- * UPDATED: Toggle button is now strictly internal to the sidebar layout.
+ * @fileOverview High-Fidelity Sidebar Header v3.0.
+ * UPDATED: Synchronized with root-relative logo paths for production stability.
  */
 export default function SidebarHeader({ isOpen, onToggle }: SidebarHeaderProps) {
   return (
@@ -30,9 +31,16 @@ export default function SidebarHeader({ isOpen, onToggle }: SidebarHeaderProps) 
           isOpen ? "w-[160px]" : "w-[44px]"
         )}>
           {isOpen ? (
-            <Logo href="/admin" variant="light" imgClassName="h-8 w-auto" />
+            <Logo href="/admin" variant="dark" imgClassName="h-8 w-auto" />
           ) : (
-            <img src="/logo/cracklix-logo.png" className="h-8 w-auto min-w-[32px] object-contain" alt="C" />
+            <div className="relative h-8 w-8">
+               <Image 
+                  src="/cracklix-logo-dark.png" 
+                  alt="C" 
+                  fill
+                  className="object-contain"
+               />
+            </div>
           )}
         </div>
 
