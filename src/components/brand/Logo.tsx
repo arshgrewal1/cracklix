@@ -13,16 +13,16 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Official Cracklix Brand Hub v14.0.
- * SIZING: Locked to 28px height with 110px min-width to prevent scaling issues.
- * REGISTRY: Prevents auto-centering in the mobile header.
+ * @fileOverview Official Cracklix Brand Hub v15.0.
+ * SIZING: Permanently locked to 44px height with 140px min-width.
+ * DIMENSIONS: Standardized across all headers and sidebars.
  */
 export default function Logo({ className = "", href = "/", variant = 'light', imgClassName = "" }: LogoProps) {
   const logoSrc = variant === 'light' ? '/logo/cracklix-logo-dark.png' : '/logo/cracklix-logo-light.png';
 
   return (
     <Link href={href} className={cn("flex items-center group pointer-events-auto select-none shrink-0", className)}>
-      <div className="relative h-7 md:h-8 w-auto min-w-[110px] md:min-w-[130px]">
+      <div className="relative h-[44px] w-auto min-w-[140px]">
         <Image 
           src={logoSrc} 
           alt="Cracklix" 
@@ -33,7 +33,6 @@ export default function Logo({ className = "", href = "/", variant = 'light', im
             "object-contain transition-transform group-hover:scale-105 h-full w-auto",
             imgClassName
           )}
-          style={{ width: 'auto', height: '100%' }}
         />
       </div>
     </Link>

@@ -4,12 +4,10 @@ import React, { useState, useEffect } from "react";
 import { 
   Home, 
   Zap, 
-  FileText, 
   Target, 
   ChevronRight,
   LogOut,
   ShieldCheck,
-  Gem,
   Newspaper,
   User,
   Trophy,
@@ -18,7 +16,6 @@ import {
   HelpCircle,
   MessageCircle,
   Instagram,
-  Settings,
   X
 } from "lucide-react";
 import Link from "next/link";
@@ -26,16 +23,14 @@ import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 import Logo from "@/components/brand/Logo";
 import StudentAvatar from "@/components/brand/StudentAvatar";
 import { TELEGRAM_GROUP, INSTAGRAM_PROFILE } from "@/lib/constants";
-import Image from "next/image";
 
 /**
- * @fileOverview Premium Sidebar Hub v9.0.
- * SIZING: Width fixed at 280px, Header 80px, Profile Card 28px rounding.
- * LOGO: Locked to 32px height in sidebar for professional fit.
+ * @fileOverview Premium Sidebar Hub v10.0.
+ * SIZING: Width fixed at 280px, Header 88px, Profile Card 32px rounding.
+ * LOGO: Locked to 44px height for professional fit.
  */
 export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   const [mounted, setMounted] = useState(false);
@@ -76,47 +71,39 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
   return (
     <div className="flex flex-col h-full bg-white font-body select-none text-left relative overflow-hidden">
       
-      {/* 1. BRAND HEADER - 80px */}
-      <div className="flex items-center justify-between px-5 h-20 border-b shrink-0">
-        <div className="relative h-8 w-auto min-w-[120px]">
-          <Image 
-            src="/logo/cracklix-logo-dark.png"
-            alt="Cracklix"
-            width={130}
-            height={36}
-            className="h-full w-auto object-contain"
-            priority
-          />
-        </div>
+      {/* 1. BRAND HEADER - 88px */}
+      <div className="flex items-center justify-between px-5 h-[88px] border-b shrink-0 bg-white">
+        <Logo variant="light" className="h-[44px]" />
         <button 
           onClick={onClose}
-          className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-50 transition-colors"
+          className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all"
+          aria-label="Close menu"
         >
-          <X className="w-6 h-6 text-gray-500" />
+          <X className="w-6 h-6" />
         </button>
       </div>
 
       {/* 2. NAVIGATION HUB */}
       <div className="flex-1 flex flex-col overflow-y-auto no-scrollbar py-2">
         
-        {/* PROFILE CARD - 28px ROUNDING */}
-        <div className="mx-4 mt-6">
+        {/* PROFILE CARD - 32px ROUNDING */}
+        <div className="mx-5 mt-6">
            <Link href="/profile" onClick={onClose} className="block active:scale-[0.98] transition-all">
-              <div className="p-4 rounded-[28px] border border-blue-100 bg-white flex items-center gap-4 shadow-sm hover:shadow-md transition-all">
-                 <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center overflow-hidden border border-slate-50 shrink-0">
-                    <StudentAvatar profile={profile} className="h-full w-full border-none" iconClassName="w-7 h-7" />
+              <div className="p-5 rounded-[32px] border border-blue-100 bg-white flex items-center gap-4 shadow-sm hover:shadow-md transition-all">
+                 <div className="w-16 h-16 rounded-3xl bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                    <StudentAvatar profile={profile} className="h-full w-full border-none" iconClassName="w-8 h-8" />
                  </div>
-                 <div className="min-w-0 flex-1">
-                    <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight leading-none truncate">
+                 <div className="min-w-0 flex-1 space-y-1.5">
+                    <h3 className="text-lg font-bold text-slate-900 uppercase tracking-tight leading-tight break-words">
                       {profile?.name || "Aspirant"}
                     </h3>
-                    <div className="mt-2">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#2563EB] text-white text-[10px] font-semibold uppercase tracking-wider shadow-sm">
+                    <div>
+                      <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#2563EB] text-white text-[10px] font-black uppercase tracking-widest shadow-sm">
                         {profile?.pass?.active ? (profile.pass.plan || 'ELITE') : 'FREE_PASS'}
                       </span>
                     </div>
                  </div>
-                 <ChevronRight className="w-5 h-5 text-gray-300 ml-auto shrink-0" />
+                 <ChevronRight className="w-6 h-6 text-slate-300 ml-auto shrink-0" />
               </div>
            </Link>
         </div>
@@ -154,15 +141,6 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
               </Link>
            ))}
         </div>
-
-        {/* SOCIAL NODE */}
-        <h4 className="px-6 mt-8 mb-4 text-xs font-bold tracking-[0.25em] text-slate-400 uppercase">
-          Community Nodes
-        </h4>
-        <div className="px-4 mb-10 space-y-1">
-           <SocialItem href={TELEGRAM_GROUP} icon={<MessageCircle />} label="Telegram Center" sub="15k+ Aspirants" />
-           <SocialItem href={INSTAGRAM_PROFILE} icon={<Instagram />} label="Follow Hub" sub="@arshgrewal_official" />
-        </div>
       </div>
 
       {/* 3. SYSTEM FOOTER - 56px HEIGHT */}
@@ -177,18 +155,4 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
       </div>
     </div>
   );
-}
-
-function SocialItem({ href, icon, label, sub }: any) {
-   return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className="h-14 flex items-center gap-4 px-4 rounded-2xl text-slate-600 hover:bg-slate-50 transition-all group active:scale-[0.98]">
-         <div className="h-10 w-10 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 shadow-inner text-slate-400 group-hover:text-[#2563EB] transition-colors">
-            {React.cloneElement(icon, { className: "h-5 w-5" })}
-         </div>
-         <div className="min-w-0 text-left">
-            <p className="text-[13px] font-bold uppercase tracking-tight text-[#0F172A] leading-none">{label}</p>
-            <p className="text-[9px] font-medium text-slate-400 uppercase tracking-widest mt-1.5">{sub}</p>
-         </div>
-      </a>
-   )
 }

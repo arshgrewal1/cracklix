@@ -8,8 +8,7 @@ import {
   LogOut, 
   Menu, 
   Gem, 
-  ShieldCheck,
-  X
+  ShieldCheck
 } from "lucide-react";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -32,7 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Hardened Header v92.0.
+ * @fileOverview Hardened Header v93.0.
  * LAYOUT: [Menu] [Logo] --- [Search] [Profile]
  * SIZING: Fixed 72px height, 44px (w-11) buttons.
  */
@@ -73,6 +72,7 @@ export default function Navbar() {
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="flex lg:hidden w-11 h-11 rounded-2xl bg-gray-50 items-center justify-center text-slate-600 active:scale-95 transition-all"
+              aria-label="Open menu"
             >
               <Menu className="w-6 h-6" />
             </button>
