@@ -28,7 +28,7 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import { TELEGRAM_GROUP, INSTAGRAM_PROFILE } from "@/lib/constants";
 
 /**
- * @fileOverview Premium Sidebar Hub v10.0.
+ * @fileOverview Premium Sidebar Hub v11.0.
  * SIZING: Width fixed at 280px, Header 88px, Profile Card 32px rounding.
  * LOGO: Locked to 44px height for professional fit.
  */
@@ -73,10 +73,10 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
       
       {/* 1. BRAND HEADER - 88px */}
       <div className="flex items-center justify-between px-5 h-[88px] border-b shrink-0 bg-white">
-        <Logo variant="light" className="h-[44px]" />
+        <Logo variant="light" />
         <button 
           onClick={onClose}
-          className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all"
+          className="w-11 h-11 flex items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all shadow-sm"
           aria-label="Close menu"
         >
           <X className="w-6 h-6" />
@@ -113,7 +113,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
           Personalized Prep
         </h4>
 
-        {/* MENU ITEMS - 56px HEIGHT */}
+        {/* MENU ITEMS */}
         <div className="flex flex-col gap-1 px-4">
            {[{ label: "My Profile", href: "/profile", icon: User }, ...mainItems].map((item: any) => {
               const isActive = pathname === item.href;
@@ -143,7 +143,7 @@ export default function MobileSidebar({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
-      {/* 3. SYSTEM FOOTER - 56px HEIGHT */}
+      {/* 3. SYSTEM FOOTER */}
       <div className="p-4 border-t border-slate-100 bg-white mt-auto pb-[env(safe-area-inset-bottom)]">
          <button 
            onClick={handleLogout} 
