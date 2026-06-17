@@ -20,7 +20,8 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Fidelity Popular Exams v57.0 (Title Case Update).
+ * @fileOverview High-Fidelity Popular Exams v58.0 (Un-truncated High Density).
+ * UPDATED: Removed truncation, reduced text sizes, and optimized logo padding.
  */
 
 function getBoardFallbackIcon(id: string, abbrev: string) {
@@ -78,15 +79,15 @@ export default function PopularExams() {
 
                return (
                   <Link key={board.id} href={`/exams/hub/${board.id}`}>
-                     <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:translate-y-[-4px] transition-all duration-500 rounded-[2rem] bg-white group p-6 md:p-8 text-left h-full min-h-[200px] md:min-h-[260px] flex flex-col relative overflow-hidden">
-                        <div className="flex items-center gap-4 mb-6">
-                           <div className="h-14 w-14 md:h-16 md:w-16 rounded-full bg-[#F8FAFC] flex items-center justify-center p-0.5 shrink-0 shadow-inner group-hover:scale-105 transition-transform overflow-hidden border border-slate-100 relative">
+                     <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:translate-y-[-4px] transition-all duration-500 rounded-[2rem] bg-white group p-6 md:p-8 text-left h-full min-h-[220px] md:min-h-[280px] flex flex-col relative overflow-hidden">
+                        <div className="flex items-start gap-4 mb-6">
+                           <div className="h-12 w-12 md:h-16 md:w-16 rounded-full bg-[#F8FAFC] flex items-center justify-center p-1.5 shrink-0 shadow-inner group-hover:scale-105 transition-transform overflow-hidden border border-slate-100 relative">
                               {logoUrl && !failedImages[board.id] ? (
                                 <Image 
                                   src={logoUrl} 
                                   alt={board.abbreviation} 
                                   fill
-                                  className="object-contain p-2.5"
+                                  className="object-contain p-2"
                                   referrerPolicy="no-referrer"
                                   onError={() => setFailedImages(prev => ({ ...prev, [board.id]: true }))} 
                                 />
@@ -94,26 +95,30 @@ export default function PopularExams() {
                                 <div className="p-1 w-full h-full opacity-40">{getBoardFallbackIcon(board.id, board.abbreviation)}</div>
                               )}
                            </div>
-                           <div className="min-w-0">
-                              <h3 className="text-xl md:text-2xl font-bold text-[#04102B] tracking-tight group-hover:text-blue-600 transition-colors truncate">{board.abbreviation} Exams</h3>
-                              <p className="text-[12px] font-semibold text-[#94A3B8] leading-tight line-clamp-1">{board.name}</p>
+                           <div className="min-w-0 flex-1 space-y-1">
+                              <h3 className="text-base md:text-lg font-bold text-[#04102B] tracking-tight group-hover:text-blue-600 transition-colors leading-tight">
+                                 {board.abbreviation} Exams
+                              </h3>
+                              <p className="text-[10px] md:text-[11px] font-semibold text-[#94A3B8] leading-snug">
+                                 {board.name}
+                              </p>
                            </div>
                         </div>
 
                         <div className="flex items-center gap-6 mt-auto">
                            <div className="flex items-center gap-2">
-                              <BookOpen className="h-4 w-4 text-blue-600" />
-                              <span className="text-[12px] font-bold text-[#64748B]">{examCount} Exams</span>
+                              <BookOpen className="h-3.5 w-3.5 text-blue-600" />
+                              <span className="text-[11px] font-bold text-[#64748B]">{examCount} Exams</span>
                            </div>
                            <div className="flex items-center gap-2">
-                              <Zap className="h-4 w-4 text-blue-600" />
-                              <span className="text-[12px] font-bold text-[#64748B]">{mockCount} Mocks</span>
+                              <Zap className="h-3.5 w-3.5 text-blue-600" />
+                              <span className="text-[11px] font-bold text-[#64748B]">{mockCount} Mocks</span>
                            </div>
                         </div>
 
                         <div className="mt-6 pt-4 border-t border-slate-50">
-                           <span className="text-blue-600 font-bold text-sm tracking-tight flex items-center gap-2 group-hover:translate-x-1 transition-transform">
-                              Explore Exams <ArrowRight className="h-3 w-3" />
+                           <span className="text-blue-600 font-bold text-[13px] tracking-tight flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                              Explore Exams <ArrowRight className="h-3.5 w-3.5" />
                            </span>
                         </div>
                      </Card>
