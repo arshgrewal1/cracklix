@@ -27,8 +27,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Mobile Sidebar Drawer v1.3
- * Standardized Header height to 140px and Logo to 120px.
+ * @fileOverview Mobile Sidebar Drawer v1.5.
+ * UPDATED: Synchronized Header height to 80px for a seamless transition.
  */
 export default function MobileSidebar({
   onClose,
@@ -85,8 +85,8 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body">
 
-      {/* HEADER: Standardized at 140px with 120px Logo */}
-      <div className="flex h-[140px] items-center justify-between border-b px-4 shrink-0">
+      {/* HEADER: Standardized at 80px */}
+      <div className="flex h-20 items-center justify-between border-b px-4 shrink-0">
         <Logo
           variant="light"
           href="/"
@@ -96,9 +96,9 @@ export default function MobileSidebar({
         <button
           onClick={onClose}
           aria-label="Close sidebar"
-          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-700 active:scale-95 transition-all"
+          className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-50 text-slate-700 active:scale-95 transition-all"
         >
-          <X className="h-6 w-6" />
+          <X className="h-5 w-5" />
         </button>
       </div>
 
@@ -112,12 +112,12 @@ export default function MobileSidebar({
             onClick={onClose}
             className="block active:scale-[0.98] transition-all"
           >
-            <div className="flex items-center gap-4 rounded-[28px] border border-blue-100 bg-white p-4 shadow-sm">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-3xl bg-slate-50">
+            <div className="flex items-center gap-4 rounded-[28px] border border-slate-100 bg-white p-4 shadow-sm">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl">
                 <StudentAvatar
                   profile={profile}
                   className="h-full w-full border-none"
-                  iconClassName="w-8 h-8"
+                  iconClassName="w-7 h-7"
                 />
               </div>
 
@@ -125,14 +125,9 @@ export default function MobileSidebar({
                 <h3 className="truncate text-base font-bold text-slate-900">
                   {profile?.name || "Aspirant"}
                 </h3>
-                <p className="mt-1 text-xs text-slate-500">
-                  Continue your preparation
+                <p className="mt-0.5 text-xs text-slate-400">
+                  Manage preparation
                 </p>
-                <div className="mt-2 inline-flex rounded-full bg-[#2563EB] px-3 py-1 text-[10px] font-bold text-white">
-                  {profile?.pass?.active
-                    ? profile.pass.plan || "Elite"
-                    : "Free Pass"}
-                </div>
               </div>
 
               <ChevronRight className="h-5 w-5 shrink-0 text-slate-300" />
@@ -142,8 +137,8 @@ export default function MobileSidebar({
 
         {/* MAIN MENU */}
         <div className="px-4 pb-2">
-          <p className="mb-3 px-2 text-xs font-bold uppercase tracking-wide text-slate-400">
-            Preparation
+          <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            Preparation Hub
           </p>
 
           <div className="space-y-1">
@@ -165,20 +160,20 @@ export default function MobileSidebar({
                   className={cn(
                     "flex h-14 items-center gap-4 rounded-2xl px-5 transition-all active:scale-[0.98]",
                     isActive
-                      ? "bg-blue-50 text-[#2563EB]"
+                      ? "bg-blue-50 text-primary"
                       : "text-slate-700 hover:bg-slate-50"
                   )}
                 >
                   <item.icon
                     className={cn(
-                      "h-6 w-6 shrink-0",
+                      "h-5 w-5 shrink-0",
                       isActive
-                        ? "text-[#2563EB]"
-                        : "text-slate-500"
+                        ? "text-primary"
+                        : "text-slate-400"
                     )}
                   />
 
-                  <span className="font-semibold text-sm">
+                  <span className="font-bold text-sm">
                     {item.label}
                   </span>
                 </Link>
@@ -188,9 +183,9 @@ export default function MobileSidebar({
         </div>
 
         {/* SUPPORT */}
-        <div className="px-4 pb-6">
-          <p className="mb-3 px-2 text-xs font-bold uppercase tracking-wide text-slate-400">
-            Support
+        <div className="px-4 pb-6 mt-4">
+          <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            Institutional Support
           </p>
 
           <div className="space-y-1">
@@ -201,8 +196,8 @@ export default function MobileSidebar({
                 onClick={onClose}
                 className="flex h-14 items-center gap-4 rounded-2xl px-5 text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.98]"
               >
-                <item.icon className="h-6 w-6 shrink-0 text-slate-500" />
-                <span className="font-semibold text-sm">
+                <item.icon className="h-5 w-5 shrink-0 text-slate-400" />
+                <span className="font-bold text-sm">
                   {item.label}
                 </span>
               </Link>

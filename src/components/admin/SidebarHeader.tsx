@@ -12,8 +12,8 @@ interface SidebarHeaderProps {
 }
 
 /**
- * Cracklix Admin Sidebar Header v1.2
- * Standardized at 140px height with 120px Logo for high-impact branding.
+ * Cracklix Admin Sidebar Header v1.5.
+ * Standardized at 80px height for ecosystem consistency.
  */
 export default function SidebarHeader({
   isOpen,
@@ -22,7 +22,7 @@ export default function SidebarHeader({
   return (
     <div
       className={cn(
-        "h-[140px] border-b border-white/5 px-4 shrink-0 flex items-center",
+        "h-20 border-b border-white/5 px-4 shrink-0 flex items-center",
         isOpen ? "justify-between" : "justify-center"
       )}
     >
@@ -30,7 +30,7 @@ export default function SidebarHeader({
       <div
         className={cn(
           "flex items-center overflow-hidden transition-all duration-300",
-          isOpen ? "w-[180px]" : "w-11 justify-center"
+          isOpen ? "w-[160px]" : "w-10 justify-center"
         )}
       >
         {isOpen ? (
@@ -39,7 +39,7 @@ export default function SidebarHeader({
             variant="dark"
           />
         ) : (
-          <div className="relative h-11 w-11 shrink-0">
+          <div className="relative h-10 w-10 shrink-0">
             <Image
               src="/logo/cracklix-icon.png"
               alt="Cracklix"
@@ -52,17 +52,12 @@ export default function SidebarHeader({
       </div>
 
       {/* TOGGLE BUTTON */}
-      <div
-        className={cn(
-          "flex items-center",
-          !isOpen && "absolute bottom-4"
-        )}
-      >
+      {isOpen && (
         <SidebarToggle
           isOpen={isOpen}
           onToggle={onToggle}
         />
-      </div>
+      )}
     </div>
   );
 }

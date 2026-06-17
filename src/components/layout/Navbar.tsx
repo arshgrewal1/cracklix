@@ -35,8 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Header Hub v46.0.
- * UPDATED: Standardized Header height to 140px with 120px Logo.
+ * @fileOverview Compact Professional Header v50.0.
+ * UPDATED: Reduced max-width to 5xl and tightened spacing for a high-density look.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -69,21 +69,21 @@ export default function Navbar() {
 
   if (!mounted) {
     return (
-      <nav className="w-full border-b border-[#E5E7EB] bg-white h-[140px]" />
+      <nav className="w-full border-b border-slate-100 bg-white h-20" />
     );
   }
 
   return (
     <div className="sticky top-0 z-50 w-full font-body">
-      <nav className="w-full h-[140px] bg-white border-b border-[#E5E7EB] shadow-sm">
-        <div className="w-full max-w-7xl mx-auto px-4 md:px-8 h-full flex items-center justify-between">
+      <nav className="w-full h-20 bg-white border-b border-slate-100 shadow-sm">
+        <div className="w-full max-w-5xl mx-auto px-2 md:px-6 h-full flex items-center justify-between">
 
           {/* LEFT SIDE: Brand Group */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-14 h-14 rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0"
+              className="flex items-center justify-center w-12 h-12 rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0"
             >
               <Menu className="w-6 h-6" />
             </button>
@@ -95,7 +95,7 @@ export default function Navbar() {
           </div>
 
           {/* DESKTOP NAVIGATION */}
-          <div className="hidden lg:flex items-center justify-center gap-8 flex-1 px-8">
+          <div className="hidden lg:flex items-center justify-center gap-8 flex-1 px-4">
             <NavLink
               href="/"
               label="Home"
@@ -116,31 +116,31 @@ export default function Navbar() {
           </div>
 
           {/* RIGHT SIDE: Actions */}
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 shrink-0">
             <Link
               href="/search"
-              className="w-11 h-11 rounded-2xl flex items-center justify-center bg-gray-50 text-slate-700 hover:text-[#2563EB] transition-all active:scale-95"
+              className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
             >
               <Search className="w-5 h-5" />
             </Link>
 
             {loading ? (
-              <Skeleton className="w-11 h-11 rounded-2xl bg-gray-100" />
+              <Skeleton className="w-10 h-10 rounded-xl bg-slate-100" />
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-11 h-11 rounded-2xl overflow-hidden border border-slate-100 bg-gray-50 shadow-sm flex items-center justify-center active:scale-95 transition-all">
+                  <button className="w-10 h-10 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all">
                     <StudentAvatar
                       profile={profile}
                       className="w-full h-full border-none"
-                      iconClassName="w-6 h-6"
+                      iconClassName="w-5 h-5"
                     />
                   </button>
                 </DropdownMenuTrigger>
 
                 <DropdownMenuContent
                   align="end"
-                  className="w-64 mt-4 rounded-[2rem] border border-gray-200 bg-white p-2 shadow-2xl z-[2001]"
+                  className="w-56 mt-4 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl z-[2001]"
                 >
                   <DropdownMenuItem
                     asChild
@@ -150,7 +150,7 @@ export default function Navbar() {
                       href="/profile"
                       className="flex items-center gap-3"
                     >
-                      <User className="w-5 h-5 text-[#2563EB]" />
+                      <User className="w-4 h-4 text-primary" />
                       <span className="font-bold text-sm">
                         My Profile
                       </span>
@@ -160,28 +160,28 @@ export default function Navbar() {
                   {isAdmin && (
                     <DropdownMenuItem
                       asChild
-                      className="rounded-xl px-4 py-3 mt-1 border border-[#2563EB]/10 cursor-pointer"
+                      className="rounded-xl px-4 py-3 mt-1 border border-primary/10 cursor-pointer"
                     >
                       <Link
                         href="/admin"
                         className="flex items-center gap-3"
                       >
-                        <ShieldCheck className="w-5 h-5 text-[#2563EB]" />
-                        <span className="font-bold text-sm text-[#2563EB]">
-                          Admin Center
+                        <ShieldCheck className="w-4 h-4 text-primary" />
+                        <span className="font-bold text-sm text-primary">
+                          Admin Hub
                         </span>
                       </Link>
                     </DropdownMenuItem>
                   )}
 
-                  <DropdownMenuSeparator className="my-1 bg-gray-100" />
+                  <DropdownMenuSeparator className="my-1 bg-slate-100" />
 
                   <DropdownMenuItem
                     onClick={handleLogout}
-                    className="rounded-xl px-4 py-3 cursor-pointer text-rose-500"
+                    className="rounded-xl px-4 py-3 cursor-pointer text-rose-500 font-bold text-sm flex items-center gap-3"
                   >
-                    <LogOut className="w-5 h-5 shrink-0" />
-                    <span className="font-bold text-sm">
+                    <LogOut className="w-4 h-4 shrink-0" />
+                    <span>
                       Log Out
                     </span>
                   </DropdownMenuItem>
@@ -190,7 +190,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="w-11 h-11 rounded-2xl bg-gray-50 flex items-center justify-center text-slate-700 hover:text-[#2563EB] transition-all active:scale-95"
+                className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 hover:text-primary transition-all active:scale-95"
               >
                 <User className="w-5 h-5" />
               </Link>
@@ -208,8 +208,8 @@ export default function Navbar() {
           className="w-[280px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden"
         >
           <SheetHeader className="sr-only">
-            <SheetTitle>Navigation Sidebar</SheetTitle>
-            <SheetDescription>Cracklix mobile navigation menu.</SheetDescription>
+            <SheetTitle>Menu</SheetTitle>
+            <SheetDescription>Main navigation and profile menu.</SheetDescription>
           </SheetHeader>
 
           <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
@@ -232,10 +232,10 @@ function NavLink({
     <Link
       href={href}
       className={cn(
-        "flex items-center px-4 py-2 rounded-xl font-bold text-[14px] tracking-tight transition-all",
+        "text-[13px] font-bold tracking-tight transition-all",
         active
-          ? "bg-blue-50 text-[#2563EB] shadow-sm"
-          : "text-slate-400 hover:text-[#04102B] hover:bg-gray-50"
+          ? "text-primary"
+          : "text-slate-500 hover:text-[#04102B]"
       )}
     >
       {label}

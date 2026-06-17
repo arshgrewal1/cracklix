@@ -14,9 +14,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix Official Logo Component v1.5
- * Standardized at 120px height for premium brand visibility.
- * FIXED: Resolved unterminated string and unexpected EOF errors.
+ * Cracklix Official Logo Component
+ * Standardized at 40px height for high-density app headers.
  */
 export default function Logo({
   className = "",
@@ -25,56 +24,48 @@ export default function Logo({
   imgClassName = "",
   onClick,
 }: LogoProps) {
-
   const logoSrc =
     variant === "light"
       ? "/logo/cracklix-logo-dark.png"
       : "/logo/cracklix-logo-light.png";
 
-  const logo = (
+  const content = (
     <Image
       src={logoSrc}
       alt="Cracklix"
-      width={400}
-      height={120}
+      width={160}
+      height={40}
       priority
       className={cn(
-        "h-[120px] w-auto object-contain shrink-0 select-none",
+        "h-10 w-auto object-contain shrink-0",
         imgClassName
       )}
     />
   );
 
-  const handleClick = (e: React.MouseEvent) => {
-    if (onClick && typeof onClick === 'function') {
-      onClick();
-    }
-  };
-
-  if (!href) {
+  if (onClick || href) {
     return (
-      <div
+      <Link
+        href={href || "#"}
+        onClick={onClick}
         className={cn(
-          "flex items-center",
+          "flex items-center shrink-0 select-none",
           className
         )}
-        onClick={handleClick}
       >
-        {logo}
-      </div>
+        {content}
+      </Link>
     );
   }
 
   return (
-    <Link
-      href={href}
+    <div
       className={cn(
-        "flex items-center group transition-transform active:scale-95",
+        "flex items-center shrink-0 select-none",
         className
       )}
-      onClick={handleClick}
     >
-      {logo}
-    </Link>
+      {content}
+    </div>
   );
 }
