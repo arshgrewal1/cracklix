@@ -29,8 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Final Hardened Header v117.0.
- * UPDATED: Left-aligned branding with 40px/48px logo standard.
+ * @fileOverview Final Hardened Header v118.0.
+ * UPDATED: Synchronized with 140px height to accommodate the 120px logo standard.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -56,16 +56,16 @@ export default function Navbar() {
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (user?.email && SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
 
   if (!mounted) return (
-    <nav className="w-full border-b border-[#E5E7EB] bg-white h-20" />
+    <nav className="w-full border-b border-[#E5E7EB] bg-white h-[140px]" />
   );
 
   return (
     <div className="w-full sticky top-0 z-50 font-body">
-      <nav className="w-full border-b border-[#E5E7EB] bg-white h-20 shadow-sm flex items-center overflow-hidden">
+      <nav className="w-full border-b border-[#E5E7EB] bg-white h-[140px] shadow-sm flex items-center overflow-hidden">
         <div className="w-full max-w-7xl mx-auto flex items-center justify-between h-full px-4 md:px-8">
           
-          {/* LEFT GROUP: MENU + LOGO (8-12px GAP) */}
-          <div className="flex items-center gap-3 md:gap-4 shrink-0">
+          {/* LEFT GROUP: MENU + LOGO (Tight 12px gap) */}
+          <div className="flex items-center gap-3 shrink-0">
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 active:bg-gray-50 transition-all shrink-0 shadow-sm"

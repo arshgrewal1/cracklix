@@ -12,13 +12,13 @@ interface SidebarHeaderProps {
 }
 
 /**
- * @fileOverview High-Fidelity Admin Sidebar Header v11.0.
- * FIXED: Synchronized with 80px header height and 48px desktop logo.
+ * @fileOverview High-Fidelity Admin Sidebar Header v12.0.
+ * UPDATED: Synchronized with 140px header height and 120px logo standard.
  */
 export default function SidebarHeader({ isOpen, onToggle }: SidebarHeaderProps) {
   return (
     <div className={cn(
-      "h-20 px-4 flex flex-col shrink-0 relative border-b border-white/5",
+      "h-[140px] px-4 flex flex-col shrink-0 relative border-b border-white/5",
       isOpen ? "items-stretch justify-center" : "items-center justify-center gap-4"
     )}>
       <div className={cn(

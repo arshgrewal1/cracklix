@@ -7,7 +7,8 @@ import Logo from "@/components/brand/Logo";
 import { TELEGRAM_GROUP, INSTAGRAM_PROFILE, SUPPORT_EMAIL, SUPPORT_PHONE } from "@/lib/constants";
 
 /**
- * @fileOverview High-Fidelity Institutional Footer v13.3 (Title Case Update).
+ * @fileOverview High-Fidelity Institutional Footer v13.4.
+ * UPDATED: Hardened logo node to the 120px platform standard.
  */
 
 export default function Footer() {
@@ -21,7 +22,7 @@ export default function Footer() {
           
           <div className="space-y-8">
             <div className="flex justify-start">
-               <Logo variant="dark" imgClassName="h-[120px] w-auto" />
+               <Logo variant="dark" />
             </div>
             
             <p className="text-[15px] text-[#CBD5E1] leading-relaxed max-w-[300px]">

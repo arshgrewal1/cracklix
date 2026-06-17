@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 /**
- * @fileOverview Hardened Admin Hub Layout v16.0.
- * UPDATED: Synchronized header style with main site (h-20).
+ * @fileOverview Hardened Admin Hub Layout v17.0.
+ * UPDATED: Synchronized with 140px header height for consistent platform branding.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -88,7 +88,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? sidebarWidth : 0 
         }}
       >
-        <header className="h-20 border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
+        <header className="h-[140px] border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
           <div className="flex items-center gap-4 md:gap-8">
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -98,19 +98,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
 
             <div className="flex flex-col text-left">
-               <span className="text-[11px] font-black uppercase text-blue-600 tracking-[0.2em] leading-none">ADMIN HUB</span>
-               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 hidden xs:block">REGISTRY AUDIT ACTIVE</span>
+               <span className="text-[11px] font-black uppercase text-blue-600 tracking-[0.2em] leading-none">Admin Hub</span>
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 hidden xs:block">Registry Audit Active</span>
             </div>
           </div>
           
           <div className="flex items-center gap-4">
              <Button asChild variant="outline" className="h-12 px-7 rounded-2xl border-slate-200 font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-slate-50 transition-all active:scale-95">
-                <Link href="/">VIEW SITE</Link>
+                <Link href="/">View Site</Link>
              </Button>
              <div className="flex items-center gap-3 pl-4 border-l border-slate-100">
                 <div className="text-right hidden sm:block">
                    <p className="text-[10px] font-black text-slate-900 leading-none">{profile?.name || 'ADMIN'}</p>
-                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">SUPER_ADMIN</p>
+                   <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Super_Admin</p>
                 </div>
                 <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-xs shadow-lg">
                   {profile?.name?.[0] || 'A'}

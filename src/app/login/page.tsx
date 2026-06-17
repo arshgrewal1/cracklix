@@ -25,7 +25,8 @@ import { getDeviceId, getBrowserInfo } from "@/lib/device"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Hardened Login Hub v16.3 (Premium Title Case).
+ * @fileOverview Hardened Login Hub v16.4.
+ * UPDATED: Logo node synchronized to the 120px platform standard.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
