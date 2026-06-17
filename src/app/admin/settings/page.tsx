@@ -14,8 +14,8 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview Institutional Administrative Portal v10.2.
- * Layout refactor: Removed redundant horizontal padding.
+ * @fileOverview Institutional Administrative Portal v11.0.
+ * UPDATED: Explicit labels for Share Schema to guide admin configuration.
  */
 
 export default function AdminSettings() {
@@ -163,9 +163,14 @@ export default function AdminSettings() {
               <Card className="border-none shadow-lg rounded-[2rem] bg-white p-6 md:p-8 space-y-6 text-left">
                  <div className="flex items-center gap-3 mb-4"><Share2 className="h-5 w-5 text-primary" /><h3 className="font-headline font-black text-lg uppercase">Global Share Schema</h3></div>
                  <div className="space-y-4">
-                    <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Share Canonical URL</Label><Input value={formData.shareUrl} onChange={e => setFormData({...formData, shareUrl: e.target.value})} className="h-12 rounded-xl font-bold text-primary" /></div>
-                    <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Meta Title</Label><Input value={formData.shareTitle} onChange={e => setFormData({...formData, shareTitle: e.target.value})} className="h-12 rounded-xl font-bold" /></div>
-                    <div className="space-y-2 text-left"><Label className="text-[10px) font-black uppercase text-slate-500 ml-1">Meta Abstract</Label><Textarea value={formData.shareDescription} onChange={e => setFormData({...formData, shareDescription: e.target.value})} className="min-h-[100px] rounded-xl" /></div>
+                    <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Share Canonical URL (Live App Link)</Label><Input value={formData.shareUrl} onChange={e => setFormData({...formData, shareUrl: e.target.value})} className="h-12 rounded-xl font-bold text-primary" placeholder="https://cracklix.com" /></div>
+                    <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Share Message Title</Label><Input value={formData.shareTitle} onChange={e => setFormData({...formData, shareTitle: e.target.value})} className="h-12 rounded-xl font-bold" placeholder="Join Cracklix" /></div>
+                    <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Share Message Abstract</Label><Textarea value={formData.shareDescription} onChange={e => setFormData({...formData, shareDescription: e.target.value})} className="min-h-[100px] rounded-xl" placeholder="Prepare for Punjab exams..." /></div>
+                 </div>
+                 <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl">
+                    <p className="text-[9px] font-bold text-blue-600 uppercase leading-relaxed">
+                       This metadata is used when students click the "Share App" button in the sidebar or dashboard.
+                    </p>
                  </div>
               </Card>
 

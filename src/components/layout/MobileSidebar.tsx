@@ -15,6 +15,8 @@ import {
   HelpCircle,
   MessageCircle,
   X,
+  Share2,
+  Award
 } from "lucide-react";
 
 import Link from "next/link";
@@ -26,9 +28,11 @@ import { cn } from "@/lib/utils";
 import StudentAvatar from "@/components/brand/StudentAvatar";
 import Logo from "@/components/brand/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
+import ShareButton from "@/components/navigation/ShareButton";
 
 /**
- * @fileOverview Mobile Sidebar Realignment v17.0.
+ * @fileOverview Mobile Sidebar Realignment v18.0.
+ * UPDATED: Integrated high-impact Share App node for viral preparation growth.
  * FIXED: Name flickering (Aspirant issue) by adding Auth DisplayName fallback.
  * LOCKED: Logo scale synchronized with maximized 78px standard.
  */
@@ -190,8 +194,27 @@ export default function MobileSidebar({
           </div>
         </div>
 
+        {/* SHARE NODE */}
+        <div className="px-6 py-6">
+           <div className="bg-slate-50 rounded-[2rem] p-6 space-y-4 border border-slate-100">
+              <div className="flex items-center gap-3">
+                 <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
+                    <Award className="h-5 w-5" />
+                 </div>
+                 <div className="text-left">
+                    <h4 className="text-xs font-black uppercase text-[#0F172A]">Elite Network</h4>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-0.5">Invite fellow aspirants</p>
+                 </div>
+              </div>
+              <ShareButton 
+                variant="dark" 
+                className="w-full h-12 rounded-xl bg-[#0F172A] hover:bg-black text-white text-[10px]" 
+              />
+           </div>
+        </div>
+
         {/* SUPPORT */}
-        <div className="px-4 pb-8 mt-6">
+        <div className="px-4 pb-8 mt-2">
           <p className="mb-4 px-4 text-[11px] font-black uppercase tracking-widest text-slate-400">
             Institutional Support
           </p>
