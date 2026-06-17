@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, Suspense, useEffect, useTransition } from "react"
@@ -25,8 +26,8 @@ import { getDeviceId, getBrowserInfo } from "@/lib/device"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Hardened Login Hub v16.5.
- * UPDATED: Logo node maximized at 120px.
+ * @fileOverview Hardened Login Hub v17.0.
+ * UPDATED: Integrated "1 Account = 1 Active Device" session handover logic.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -80,13 +81,15 @@ function LoginContent() {
     const deviceRef = doc(db, 'users', userId, 'devices', deviceId);
     const deviceSnap = await getDoc(deviceRef);
     
+    // 1. Session Registry Update (Audit Trail)
     if (deviceSnap.exists()) {
       await setDoc(deviceRef, { lastActive: serverTimestamp() }, { merge: true });
     } else {
       const devicesSnap = await getDocs(collection(db, 'users', userId, 'devices'));
+      // Keep hard limit of 2 devices in history, but session guard handles "Active" state
       if (devicesSnap.size >= 2) {
         await signOut(auth);
-        setDeviceError("Device limit exceeded. Maximum 2 devices allowed. Please remove a device from your profile on an authorized device.");
+        setDeviceError("Device limit exceeded. Maximum 2 registered devices allowed. Please remove a device from your profile settings on your primary device.");
         setLoading(false);
         return false;
       } else {
@@ -101,6 +104,16 @@ function LoginContent() {
         await setDoc(doc(db, 'users', userId), { deviceCount: devicesSnap.size + 1 }, { merge: true });
       }
     }
+
+    // 2. ONE ACTIVE SESSION HANDOVER (Critical Security Node)
+    // By setting activeDeviceId on the root user doc, any other active listener will trigger a logout.
+    await setDoc(doc(db, 'users', userId), {
+      activeDeviceId: deviceId,
+      lastLoginAt: serverTimestamp(),
+      activeBrowser: browser,
+      activePlatform: platform,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
     
     setLoading(false);
     return true;
@@ -216,7 +229,7 @@ function LoginContent() {
         {deviceError && (
           <div className="bg-rose-500/10 border border-rose-500/20 p-5 md:p-8 rounded-[2rem] flex items-start gap-5 animate-in slide-in-from-top-6 duration-700">
             <Smartphone className="h-7 w-7 text-rose-500 shrink-0" />
-            <div className="space-y-2">
+            <div className="space-y-2 text-left">
               <p className="text-sm font-bold text-rose-500 tracking-tight">Security Guard</p>
               <p className="text-[13px] text-slate-400 leading-relaxed font-medium">{deviceError}</p>
               <Button onClick={() => setDeviceError(null)} variant="ghost" className="h-8 px-0 text-white font-bold text-[11px] hover:bg-transparent hover:text-white tracking-tight">Switch Account</Button>
@@ -228,7 +241,7 @@ function LoginContent() {
           <div className="h-1.5 w-full bg-blue-600" />
           <CardHeader className="text-center pt-10 md:pt-14 pb-4 px-8 md:px-16">
             <CardTitle className="text-2xl md:text-4xl font-extrabold tracking-tight text-white">{mode === 'login' ? "Login" : "Sign Up"}</CardTitle>
-            <CardDescription className="text-slate-500 font-bold text-[10px] md:text-[12px] tracking-tight mt-3">Registry Access v16.0</CardDescription>
+            <CardDescription className="text-slate-500 font-bold text-[10px] md:text-[12px] tracking-tight mt-3">Registry Access v17.0</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 md:space-y-10 pb-12 md:pb-20 px-8 md:px-16">
             <form onSubmit={handleEmailAuth} className="space-y-4 md:space-y-6">

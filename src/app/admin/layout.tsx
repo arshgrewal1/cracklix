@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from "react";
@@ -11,8 +12,8 @@ import Logo from "@/components/brand/Logo";
 import Link from "next/link";
 
 /**
- * @fileOverview Maximized Admin Hub Layout v35.0.
- * FIXED: Shifted logo 48px to left and synchronized symmetric gap-4 spacing.
+ * @fileOverview Maximized Admin Hub Layout v36.0.
+ * FIXED: Header height 150px and Logo shift -ml-12 preserved.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

@@ -147,6 +147,10 @@ export interface UserProfile {
   unlockedMocks?: string[];
   deviceLock?: DeviceLock;
   deviceCount?: number;
+  activeDeviceId?: string;
+  activeBrowser?: string;
+  activePlatform?: string;
+  lastLoginAt?: any;
   pass?: {
     active: boolean;
     plan: 'FREE_PASS' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
