@@ -35,8 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Balanced Premium Header v56.0.
- * UPDATED: Optimized spacing for 100px Desktop Height and 64px Logo scale.
+ * @fileOverview Balanced Premium Header v57.0.
+ * UPDATED: Synchronized to 140px Height to support 120px Logo branding.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -69,13 +69,13 @@ export default function Navbar() {
 
   if (!mounted) {
     return (
-      <nav className="w-full border-b border-slate-100 bg-white h-[88px] lg:h-[100px]" />
+      <nav className="w-full border-b border-slate-100 bg-white h-[140px]" />
     );
   }
 
   return (
     <div className="sticky top-0 z-50 w-full font-body">
-      <nav className="w-full h-[88px] lg:h-[100px] bg-white border-b border-slate-100 shadow-sm">
+      <nav className="w-full h-[140px] bg-white border-b border-slate-100 shadow-sm">
         <div className="w-full max-w-5xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
 
           {/* LEFT SIDE: Brand Group */}

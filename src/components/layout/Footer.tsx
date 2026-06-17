@@ -20,9 +20,9 @@ import {
 } from "@/lib/constants";
 
 /**
- * Production Footer v1.1
+ * Production Footer v1.2
  * Cracklix Official Footer
- * UPDATED: Logo height set to 120px.
+ * UPDATED: Logo height synchronized to 120px standard.
  */
 
 export default function Footer() {

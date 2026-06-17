@@ -12,8 +12,8 @@ interface SidebarHeaderProps {
 }
 
 /**
- * Cracklix Admin Sidebar Header v1.6.
- * Standardized at 88px/100px height for ecosystem consistency.
+ * Cracklix Admin Sidebar Header v1.7.
+ * Standardized at 140px height for 120px branding prominence.
  */
 export default function SidebarHeader({
   isOpen,
@@ -22,7 +22,7 @@ export default function SidebarHeader({
   return (
     <div
       className={cn(
-        "h-[88px] lg:h-[100px] border-b border-white/5 px-4 shrink-0 flex items-center",
+        "h-[140px] border-b border-white/5 px-4 shrink-0 flex items-center",
         isOpen ? "justify-between" : "justify-center"
       )}
     >
@@ -30,17 +30,16 @@ export default function SidebarHeader({
       <div
         className={cn(
           "flex items-center overflow-hidden transition-all duration-300",
-          isOpen ? "w-[180px]" : "w-12 justify-center"
+          isOpen ? "w-[240px]" : "w-16 justify-center"
         )}
       >
         {isOpen ? (
           <Logo
             href="/admin"
             variant="dark"
-            imgClassName="h-[52px] lg:h-[64px]"
           />
         ) : (
-          <div className="relative h-12 w-12 shrink-0">
+          <div className="relative h-16 w-16 shrink-0">
             <Image
               src="/logo/cracklix-icon.png"
               alt="Cracklix"
