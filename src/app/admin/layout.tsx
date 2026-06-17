@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 /**
- * @fileOverview Maximized Admin Hub Layout v24.0.
- * UPDATED: Increased header height to 160px for the 140px logo standard.
+ * @fileOverview Maximized Admin Hub Layout v25.0.
+ * UPDATED: Synchronized gaps to 16px (gap-4) for left and right header groups.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -89,7 +89,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }}
       >
         <header className="h-[160px] border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
-          <div className="flex items-center gap-4 md:gap-8">
+          {/* LEFT: Branding Group - Gap set to 16px */}
+          <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(true)}
               className="lg:hidden bg-white border border-slate-200 text-slate-700 h-12 w-12 rounded-2xl shadow-sm flex items-center justify-center active:scale-95 transition-all"
@@ -103,6 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </div>
           </div>
           
+          {/* RIGHT: Action Hub - Gap set to 16px */}
           <div className="flex items-center gap-4">
              <Button asChild variant="outline" className="h-12 px-6 rounded-xl border-slate-200 font-bold text-sm tracking-tight gap-2 hover:bg-slate-50 transition-all active:scale-95">
                 <Link href="/">View Site</Link>

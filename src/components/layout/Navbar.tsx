@@ -35,8 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Maximized Premium Header v60.0.
- * UPDATED: Increased height to 160px to support the high-impact 140px Logo.
+ * @fileOverview Maximized Premium Header v61.0.
+ * UPDATED: Synchronized gaps between brand elements and actions to gap-4 (16px).
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -78,8 +78,8 @@ export default function Navbar() {
       <nav className="w-full h-[160px] bg-white border-b border-slate-100 shadow-sm">
         <div className="w-full max-w-5xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
 
-          {/* LEFT SIDE: Brand Group */}
-          <div className="flex items-center gap-3">
+          {/* LEFT SIDE: Brand Group - Gap matched to right side */}
+          <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -115,8 +115,8 @@ export default function Navbar() {
             />
           </div>
 
-          {/* RIGHT SIDE: Actions */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* RIGHT SIDE: Actions - Gap matched to left side */}
+          <div className="flex items-center gap-4 shrink-0">
             <Link
               href="/search"
               className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
