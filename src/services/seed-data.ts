@@ -1,8 +1,8 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Punjab-Centric Seeding Node v70.6.
- * UPDATED: Corrected official board logo URLs for PSSSB and PPSC.
+ * @fileOverview Institutional Punjab-Centric Seeding Node v70.8.
+ * UPDATED: Restored official logos for Police, PSTCL, PSPCL and Central Govt.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -67,7 +67,7 @@ export async function seedInitialData(db: Firestore) {
     batch.set(doc(db, 'categories', cat.id), { ...cat, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 2. HUBS (Boards) with Official Logos
+  // 2. HUBS (Boards) with Restored Official Logos
   const boards = [
     { 
       id: 'punjab-police', 
@@ -100,6 +100,14 @@ export async function seedInitialData(db: Firestore) {
       categoryId: 'punjab-technical',
       iconUrl: 'https://www.pspcl.in/images/logo.png',
       displayOrder: 4
+    },
+    {
+      id: 'pstcl',
+      abbreviation: 'PSTCL',
+      name: 'Punjab State Transmission Corporation Limited',
+      categoryId: 'punjab-technical',
+      iconUrl: 'https://www.pstcl.org/images/logo.png',
+      displayOrder: 5
     }
   ];
 
@@ -183,7 +191,7 @@ export async function seedInitialData(db: Firestore) {
      totalQuestions: 2,
      totalMocks: 1,
      totalUsers: 1,
-     totalBoards: 4,
+     totalBoards: 5,
      averageAccuracy: 94,
      updatedAt: serverTimestamp()
   }, { merge: true });

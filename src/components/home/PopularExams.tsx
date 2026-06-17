@@ -20,8 +20,8 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Fidelity Popular Exams v58.0 (Un-truncated High Density).
- * UPDATED: Removed truncation, reduced text sizes, and optimized logo padding.
+ * @fileOverview High-Fidelity Popular Exams v59.0 (High Density).
+ * UPDATED: Reduced font sizes and removed all text truncation for full visibility.
  */
 
 function getBoardFallbackIcon(id: string, abbrev: string) {
@@ -30,7 +30,7 @@ function getBoardFallbackIcon(id: string, abbrev: string) {
   if (key.includes('police')) return <ShieldCheck className="h-full w-full text-blue-800" />;
   if (key.includes('ppsc')) return <Landmark className="h-full w-full text-emerald-700" />;
   if (key.includes('teaching')) return <GraduationCap className="h-full w-full text-orange-500" />;
-  if (key.includes('pspcl')) return <Zap className="h-full w-full text-blue-500" />;
+  if (key.includes('pspcl') || key.includes('pstcl')) return <Zap className="h-full w-full text-blue-500" />;
   return <Activity className="h-full w-full text-slate-300" />;
 }
 
