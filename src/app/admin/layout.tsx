@@ -11,8 +11,8 @@ import Logo from "@/components/brand/Logo";
 import Link from "next/link";
 
 /**
- * @fileOverview Maximized Admin Hub Layout v39.0.
- * REALIGNED: Synchronized header height to 150px.
+ * @fileOverview Maximized Admin Hub Layout v40.0.
+ * RESTORED: Header height to standard 80px.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -89,7 +89,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? sidebarWidth : 0 
         }}
       >
-        <header className="h-[150px] border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
+        <header className="h-20 border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -100,7 +100,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
             <Logo
               variant="light"
-              className="shrink-0"
+              className="shrink-0 -ml-4"
+              imgClassName="h-12 lg:h-16"
             />
           </div>
           

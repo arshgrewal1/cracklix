@@ -35,9 +35,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v76.0.
- * REALIGNED: Maximized height to 150px to accommodate 140px logo.
- * ALIGNMENT: Logo shifted left via -ml-12 for edge-to-edge branding.
+ * @fileOverview Institutional Header v77.0.
+ * RESTORED: Height to standard 80px (h-20).
+ * ALIGNMENT: Logo optimized with responsive scale in Logo.tsx.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -70,13 +70,13 @@ export default function Navbar() {
 
   if (!mounted) {
     return (
-      <nav className="w-full border-b border-slate-100 bg-white h-[150px]" />
+      <nav className="w-full border-b border-slate-100 bg-white h-20" />
     );
   }
 
   return (
     <div className="sticky top-0 z-50 w-full font-body">
-      <nav className="w-full h-[150px] bg-white border-b border-slate-100 shadow-sm">
+      <nav className="w-full h-20 bg-white border-b border-slate-100 shadow-sm">
         <div className="w-full max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
 
           {/* LEFT SIDE: Branding Hub */}
@@ -91,7 +91,7 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="shrink-0 -ml-12"
+              className="shrink-0 -ml-6 lg:-ml-12"
             />
           </div>
 

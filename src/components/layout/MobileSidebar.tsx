@@ -27,8 +27,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Mobile Sidebar Realignment v13.0.
- * REALIGNED: Match the new 150px header height and standard alignment.
+ * @fileOverview Mobile Sidebar Realignment v14.0.
+ * RESTORED: Standard 80px header height and mobile-first logo scaling.
  */
 export default function MobileSidebar({
   onClose,
@@ -85,21 +85,22 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body">
 
-      {/* HEADER: Symmetric gap, 150px height */}
-      <div className="flex h-[150px] items-center justify-between border-b px-4 shrink-0 gap-4">
+      {/* HEADER: Standard 80px height */}
+      <div className="flex h-20 items-center justify-between border-b px-4 shrink-0 gap-4">
         <Logo
           variant="light"
           href="/"
           onClick={onClose}
-          className="shrink-0 -ml-8"
+          className="shrink-0 -ml-4"
+          imgClassName="h-10" // Compact for mobile drawer
         />
 
         <button
           onClick={onClose}
           aria-label="Close sidebar"
-          className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-700 active:scale-95 transition-all shrink-0"
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-700 active:scale-95 transition-all shrink-0"
         >
-          <X className="h-6 w-6" />
+          <X className="h-5 w-5" />
         </button>
       </div>
 
