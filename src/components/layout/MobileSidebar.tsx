@@ -27,8 +27,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Maximized Mobile Sidebar Drawer v4.0.
- * UPDATED: Shifted logo significantly left (-ml-10) in the drawer header.
+ * @fileOverview Maximized Mobile Sidebar Drawer v5.0.
+ * UPDATED: Reduced header height to 144px for tighter vertical profile.
  */
 export default function MobileSidebar({
   onClose,
@@ -86,7 +86,7 @@ export default function MobileSidebar({
     <div className="flex h-full flex-col bg-white font-body">
 
       {/* HEADER: Logo shifted significantly left to close gap */}
-      <div className="flex h-[160px] items-center justify-between border-b px-4 shrink-0">
+      <div className="flex h-[144px] items-center justify-between border-b px-4 shrink-0">
         <Logo
           variant="light"
           href="/"

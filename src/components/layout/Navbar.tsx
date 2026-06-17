@@ -35,8 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Maximized Premium Header v64.0.
- * UPDATED: Stronger negative margin (-ml-10) to close visual gap between sidebar and logo.
+ * @fileOverview Maximized Premium Header v65.0.
+ * UPDATED: Reduced height to 144px for tighter vertical profile while keeping 140px logo.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -69,16 +69,16 @@ export default function Navbar() {
 
   if (!mounted) {
     return (
-      <nav className="w-full border-b border-slate-100 bg-white h-[160px]" />
+      <nav className="w-full border-b border-slate-100 bg-white h-[144px]" />
     );
   }
 
   return (
     <div className="sticky top-0 z-50 w-full font-body">
-      <nav className="w-full h-[160px] bg-white border-b border-slate-100 shadow-sm">
+      <nav className="w-full h-[144px] bg-white border-b border-slate-100 shadow-sm">
         <div className="w-full max-w-5xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
 
-          {/* LEFT SIDE: Brand Group - Logo shifted 40px left for closer visual proximity */}
+          {/* LEFT SIDE: Brand Group */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
