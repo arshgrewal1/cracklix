@@ -12,9 +12,9 @@ interface SidebarHeaderProps {
 }
 
 /**
- * Cracklix Admin Sidebar Header v15.0.
+ * Cracklix Admin Sidebar Header v16.0.
  * RESTORED: Height matched to standard 80px (h-20).
- * UPDATED: Logo size increased for maximum visibility.
+ * MAXIMIZED: Logo scaled to 78px to match main site dominance.
  */
 export default function SidebarHeader({
   isOpen,
@@ -39,7 +39,7 @@ export default function SidebarHeader({
             href="/admin"
             variant="dark"
             className="shrink-0"
-            imgClassName="h-16 lg:h-16" // Increased for admin hub dominance
+            imgClassName="h-[78px]"
           />
         ) : (
           <div className="relative h-10 w-10 shrink-0">

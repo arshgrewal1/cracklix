@@ -15,9 +15,8 @@ interface LogoProps {
 
 /**
  * Cracklix Official Logo Component
- * SCALE: Maximized to the absolute limits of the 80px (h-20) header.
- * MOBILE: 74px height for extreme brand visibility on small screens.
- * DESKTOP: 78px height for near-seamless vertical presence.
+ * SCALE: Maximized to the absolute technical limits of the 80px (h-20) header.
+ * UNIFIED: 78px height across all breakpoints for consistent brand dominance.
  */
 export default function Logo({
   className = "",
@@ -39,7 +38,7 @@ export default function Logo({
       height={80}
       priority
       className={cn(
-        "h-[74px] lg:h-[78px] w-auto object-contain shrink-0 transition-all duration-300",
+        "h-[78px] w-auto object-contain shrink-0 transition-all duration-300",
         imgClassName
       )}
       style={{ width: "auto" }}

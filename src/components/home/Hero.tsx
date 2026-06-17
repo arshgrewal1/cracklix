@@ -21,8 +21,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Hero Hub v102.0.
- * UPDATED: Synchronized trust badge with real-time student registry data.
+ * @fileOverview Institutional Hero Hub v105.0.
+ * UPDATED: Real-time student registry data sync.
  * UPDATED: Student illustration positioned directly above feature cards.
  */
 export default function Hero() {
