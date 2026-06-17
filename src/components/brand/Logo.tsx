@@ -15,8 +15,8 @@ interface LogoProps {
 
 /**
  * Cracklix Official Logo Component
- * REALIGNED: Height optimized to 32px for a professional compact header.
- * FIXED: Added style width:auto to resolve Next.js optimization warnings.
+ * SCALE: Increased height to 48px for high-impact branding.
+ * FIXED: Maintained 'width: auto' to satisfy Next.js dimension audits.
  */
 export default function Logo({
   className = "",
@@ -34,14 +34,14 @@ export default function Logo({
     <Image
       src={logoSrc}
       alt="Cracklix"
-      width={140}
-      height={32}
+      width={210}
+      height={48}
       priority
       className={cn(
-        "h-8 w-auto object-contain shrink-0",
+        "h-12 w-auto object-contain shrink-0",
         imgClassName
       )}
-      style={{ width: "auto", height: "32px" }}
+      style={{ width: "auto", height: "48px" }}
     />
   );
 
