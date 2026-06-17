@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -36,7 +35,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Maximized Premium Header v72.0.
+ * @fileOverview Maximized Premium Header v73.0.
  * FIXED: Shifted logo further left (-ml-12) and synchronized symmetric gap-4 spacing.
  * FIXED: Header height locked at 150px to tightly frame 140px logo.
  */

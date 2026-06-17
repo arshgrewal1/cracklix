@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, Suspense, useEffect, useTransition } from "react"
@@ -8,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import Logo from "@/components/brand/Logo"
-import { ShieldCheck, Mail, Lock, ChevronLeft, User, Phone, AlertCircle, RefreshCw, Eye, EyeOff, Loader2, Smartphone } from "lucide-react"
+import { ShieldCheck, Mail, Lock, ChevronLeft, User, Phone, AlertCircle, RefreshCw, Eye, EyeOff, Loader2, Smartphone, ShieldAlert } from "lucide-react"
 import { useAuth, useFirestore, useUser } from "@/firebase"
 import { 
   signInWithEmailAndPassword, 
@@ -26,8 +25,8 @@ import { getDeviceId, getBrowserInfo } from "@/lib/device"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Hardened Login Hub v17.0.
- * UPDATED: Integrated "1 Account = 1 Active Device" session handover logic.
+ * @fileOverview Hardened Login Hub v18.0.
+ * UPDATED: Integrated Session Termination Warning for "1 Device Policy".
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -64,6 +63,7 @@ function LoginContent() {
   const { toast } = useToast()
 
   const returnUrl = searchParams.get("returnUrl") || "/"
+  const sessionTerminated = searchParams.get('session') === 'terminated';
 
   useEffect(() => {
     if (!authLoading && user && !deviceError) {
@@ -82,11 +82,8 @@ function LoginContent() {
     const deviceSnap = await getDoc(deviceRef);
     
     // 1. Session Registry Update (Audit Trail)
-    if (deviceSnap.exists()) {
-      await setDoc(deviceRef, { lastActive: serverTimestamp() }, { merge: true });
-    } else {
+    if (!deviceSnap.exists()) {
       const devicesSnap = await getDocs(collection(db, 'users', userId, 'devices'));
-      // Keep hard limit of 2 devices in history, but session guard handles "Active" state
       if (devicesSnap.size >= 2) {
         await signOut(auth);
         setDeviceError("Device limit exceeded. Maximum 2 registered devices allowed. Please remove a device from your profile settings on your primary device.");
@@ -103,10 +100,11 @@ function LoginContent() {
         });
         await setDoc(doc(db, 'users', userId), { deviceCount: devicesSnap.size + 1 }, { merge: true });
       }
+    } else {
+      await setDoc(deviceRef, { lastActive: serverTimestamp() }, { merge: true });
     }
 
-    // 2. ONE ACTIVE SESSION HANDOVER (Critical Security Node)
-    // By setting activeDeviceId on the root user doc, any other active listener will trigger a logout.
+    // 2. ONE ACTIVE SESSION HANDOVER
     await setDoc(doc(db, 'users', userId), {
       activeDeviceId: deviceId,
       lastLoginAt: serverTimestamp(),
@@ -226,6 +224,15 @@ function LoginContent() {
           <Logo variant="dark" />
         </div>
 
+        {sessionTerminated && (
+          <div className="bg-rose-500/10 border border-rose-500/20 p-5 md:p-6 rounded-[2rem] flex items-center gap-4 animate-in slide-in-from-top-6 duration-700">
+            <ShieldAlert className="h-6 w-6 text-rose-500 shrink-0" />
+            <p className="text-sm font-bold text-rose-400 tracking-tight leading-snug text-left">
+              This account was just logged in on another device. Your previous session has been terminated for security.
+            </p>
+          </div>
+        )}
+
         {deviceError && (
           <div className="bg-rose-500/10 border border-rose-500/20 p-5 md:p-8 rounded-[2rem] flex items-start gap-5 animate-in slide-in-from-top-6 duration-700">
             <Smartphone className="h-7 w-7 text-rose-500 shrink-0" />
@@ -241,7 +248,7 @@ function LoginContent() {
           <div className="h-1.5 w-full bg-blue-600" />
           <CardHeader className="text-center pt-10 md:pt-14 pb-4 px-8 md:px-16">
             <CardTitle className="text-2xl md:text-4xl font-extrabold tracking-tight text-white">{mode === 'login' ? "Login" : "Sign Up"}</CardTitle>
-            <CardDescription className="text-slate-500 font-bold text-[10px] md:text-[12px] tracking-tight mt-3">Registry Access v17.0</CardDescription>
+            <CardDescription className="text-slate-500 font-bold text-[10px] md:text-[12px] tracking-tight mt-3">Registry Access v18.0</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 md:space-y-10 pb-12 md:pb-20 px-8 md:px-16">
             <form onSubmit={handleEmailAuth} className="space-y-4 md:space-y-6">
