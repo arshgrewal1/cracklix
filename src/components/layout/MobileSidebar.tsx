@@ -27,8 +27,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Mobile Sidebar Drawer v1.5.
- * UPDATED: Synchronized Header height to 80px for a seamless transition.
+ * @fileOverview Mobile Sidebar Drawer v1.6.
+ * UPDATED: Synchronized Header height to 88px for a seamless transition.
  */
 export default function MobileSidebar({
   onClose,
@@ -85,20 +85,21 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body">
 
-      {/* HEADER: Standardized at 80px */}
-      <div className="flex h-20 items-center justify-between border-b px-4 shrink-0">
+      {/* HEADER: Standardized at 88px for mobile */}
+      <div className="flex h-[88px] items-center justify-between border-b px-4 shrink-0">
         <Logo
           variant="light"
           href="/"
           onClick={onClose}
+          imgClassName="h-[44px]"
         />
 
         <button
           onClick={onClose}
           aria-label="Close sidebar"
-          className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-50 text-slate-700 active:scale-95 transition-all"
+          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-700 active:scale-95 transition-all"
         >
-          <X className="h-5 w-5" />
+          <X className="h-6 w-6" />
         </button>
       </div>
 

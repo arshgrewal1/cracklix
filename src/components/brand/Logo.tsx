@@ -15,7 +15,8 @@ interface LogoProps {
 
 /**
  * Cracklix Official Logo Component
- * Standardized at 40px height for high-density app headers.
+ * UPDATED: Responsive scaling support for premium branding.
+ * Default size: 40px (Mobile) / 48px (Desktop).
  */
 export default function Logo({
   className = "",
@@ -33,11 +34,11 @@ export default function Logo({
     <Image
       src={logoSrc}
       alt="Cracklix"
-      width={160}
-      height={40}
+      width={240}
+      height={80}
       priority
       className={cn(
-        "h-10 w-auto object-contain shrink-0",
+        "h-10 lg:h-12 w-auto object-contain shrink-0",
         imgClassName
       )}
     />

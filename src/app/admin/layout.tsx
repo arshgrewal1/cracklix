@@ -10,8 +10,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 /**
- * @fileOverview Hardened Admin Hub Layout v20.0.
- * UPDATED: Synchronized with 80px header height for consistency.
+ * @fileOverview Hardened Admin Hub Layout v21.0.
+ * UPDATED: Synchronized with 100px desktop header height for branding strength.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -88,13 +88,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? sidebarWidth : 0 
         }}
       >
-        <header className="h-20 border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
+        <header className="h-[88px] lg:h-[100px] border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
           <div className="flex items-center gap-4 md:gap-8">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden bg-white border border-slate-200 text-slate-700 h-11 w-11 rounded-2xl shadow-sm flex items-center justify-center active:scale-95 transition-all"
+              className="lg:hidden bg-white border border-slate-200 text-slate-700 h-14 w-14 rounded-2xl shadow-sm flex items-center justify-center active:scale-95 transition-all"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-6 h-6" />
             </button>
 
             <div className="flex flex-col text-left">
@@ -104,11 +104,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
           
           <div className="flex items-center gap-4">
-             <Button asChild variant="outline" className="h-10 px-6 rounded-xl border-slate-200 font-black uppercase text-[10px] tracking-widest gap-2 hover:bg-slate-50 transition-all active:scale-95">
+             <Button asChild variant="outline" className="h-12 px-6 rounded-xl border-slate-200 font-bold text-sm tracking-tight gap-2 hover:bg-slate-50 transition-all active:scale-95">
                 <Link href="/">View Site</Link>
              </Button>
              <div className="flex items-center gap-3 pl-4 border-l border-slate-100">
-                <div className="h-10 w-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-xs shadow-lg">
+                <div className="h-12 w-12 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-sm shadow-lg">
                   {profile?.name?.[0] || 'A'}
                 </div>
              </div>
