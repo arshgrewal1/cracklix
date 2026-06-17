@@ -27,8 +27,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Maximized Mobile Sidebar Drawer v11.0.
- * FIXED: Shifted logo 48px to left and synchronized symmetric gap-4 spacing.
+ * @fileOverview Mobile Sidebar Realignment v12.0.
+ * REALIGNED: Match the new 80px header height and standard alignment.
  */
 export default function MobileSidebar({
   onClose,
@@ -85,19 +85,19 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body">
 
-      {/* HEADER: gap-4 symmetric, Logo shifted left */}
-      <div className="flex h-[150px] items-center justify-between border-b px-4 shrink-0 gap-4">
+      {/* HEADER: gap-4 symmetric, Logo standardized */}
+      <div className="flex h-20 items-center justify-between border-b px-4 shrink-0 gap-4">
         <Logo
           variant="light"
           href="/"
           onClick={onClose}
-          className="shrink-0 -ml-12"
+          className="shrink-0"
         />
 
         <button
           onClick={onClose}
           aria-label="Close sidebar"
-          className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-50 text-slate-700 active:scale-95 transition-all shrink-0"
+          className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-700 active:scale-95 transition-all shrink-0"
         >
           <X className="h-5 w-5" />
         </button>
@@ -113,12 +113,12 @@ export default function MobileSidebar({
             onClick={onClose}
             className="block active:scale-[0.98] transition-all"
           >
-            <div className="flex items-center gap-4 rounded-[28px] border border-slate-100 bg-white p-4 shadow-sm">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-2xl">
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl">
                 <StudentAvatar
                   profile={profile}
                   className="h-full w-full border-none"
-                  iconClassName="w-7 h-7"
+                  iconClassName="w-6 h-6"
                 />
               </div>
 

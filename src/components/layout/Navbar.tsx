@@ -35,9 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Maximized Premium Header v74.0.
- * FIXED: Locked 150px height with -ml-12 Logo shift.
- * FIXED: Symmetric gap-4 (16px) for sidebar-logo and search-profile pairs.
+ * @fileOverview Institutional Header v75.0 (Adda247 Realignment).
+ * REALIGNED: Reduced height to 80px. Removed negative logo margins.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -70,40 +69,41 @@ export default function Navbar() {
 
   if (!mounted) {
     return (
-      <nav className="w-full border-b border-slate-100 bg-white h-[150px]" />
+      <nav className="w-full border-b border-slate-100 bg-white h-20" />
     );
   }
 
   return (
     <div className="sticky top-0 z-50 w-full font-body">
-      <nav className="w-full h-[150px] bg-white border-b border-slate-100 shadow-sm">
-        <div className="w-full max-w-5xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
+      <nav className="w-full h-20 bg-white border-b border-slate-100 shadow-sm">
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
 
-          {/* LEFT SIDE: Branding Hub (gap-4 symmetric) */}
+          {/* LEFT SIDE: Branding Hub */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-12 h-12 rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0"
+              className="flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5" />
             </button>
 
             <Logo
               variant="light"
-              className="shrink-0 -ml-12"
+              className="shrink-0"
             />
           </div>
 
           {/* DESKTOP NAVIGATION */}
-          <div className="hidden lg:flex items-center justify-center gap-8 flex-1 px-4">
+          <div className="hidden lg:flex items-center justify-center gap-8 flex-1 px-8">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/mocks" label="Practice" active={pathname === '/mocks'} />
-            <NavLink href="/current-affairs" label="Updates" active={pathname === '/current-affairs'} />
+            <NavLink href="/pyqs" label="Previous Papers" active={pathname === '/pyqs'} />
+            <NavLink href="/current-affairs" label="Study Center" active={pathname === '/current-affairs'} />
           </div>
 
-          {/* RIGHT SIDE: Action Hub (gap-4 symmetric) */}
-          <div className="flex items-center gap-4 shrink-0">
+          {/* RIGHT SIDE: Action Hub */}
+          <div className="flex items-center gap-3 shrink-0">
             <Link
               href="/search"
               className="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
@@ -154,8 +154,8 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login" className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-600 hover:text-primary transition-all active:scale-95">
-                <User className="w-4 h-4" />
+              <Link href="/login" className="px-6 h-10 rounded-xl bg-primary text-white font-bold text-sm flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-primary/20">
+                Login
               </Link>
             )}
           </div>
@@ -174,7 +174,7 @@ export default function Navbar() {
 
 function NavLink({ href, label, active }: { href: string; label: string; active?: boolean; }) {
   return (
-    <Link href={href} className={cn("text-sm font-bold tracking-tight transition-all", active ? "text-primary" : "text-slate-500 hover:text-[#04102B]")}>
+    <Link href={href} className={cn("text-[15px] font-bold tracking-tight transition-all", active ? "text-primary" : "text-slate-500 hover:text-[#04102B]")}>
       {label}
     </Link>
   );
