@@ -12,8 +12,8 @@ interface SidebarHeaderProps {
 }
 
 /**
- * Cracklix Admin Sidebar Header v12.0.
- * REALIGNED: Reduced height to 80px and removed negative logo margins.
+ * Cracklix Admin Sidebar Header v13.0.
+ * REALIGNED: Height matched to 150px for branding consistency.
  */
 export default function SidebarHeader({
   isOpen,
@@ -22,7 +22,7 @@ export default function SidebarHeader({
   return (
     <div
       className={cn(
-        "h-20 border-b border-white/5 px-4 shrink-0 flex items-center",
+        "h-[150px] border-b border-white/5 px-4 shrink-0 flex items-center",
         isOpen ? "justify-between gap-4" : "justify-center"
       )}
     >
@@ -30,7 +30,7 @@ export default function SidebarHeader({
       <div
         className={cn(
           "flex items-center overflow-hidden transition-all duration-300",
-          isOpen ? "w-[180px]" : "w-10 justify-center"
+          isOpen ? "w-[240px]" : "w-16 justify-center"
         )}
       >
         {isOpen ? (
@@ -40,13 +40,13 @@ export default function SidebarHeader({
             className="shrink-0"
           />
         ) : (
-          <div className="relative h-10 w-10 shrink-0">
+          <div className="relative h-12 w-12 shrink-0">
             <Image
               src="/logo/cracklix-icon.png"
               alt="Cracklix"
               fill
               priority
-              sizes="40px"
+              sizes="48px"
               className="object-contain"
             />
           </div>

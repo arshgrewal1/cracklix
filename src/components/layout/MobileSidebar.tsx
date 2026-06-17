@@ -27,8 +27,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Mobile Sidebar Realignment v12.0.
- * REALIGNED: Match the new 80px header height and standard alignment.
+ * @fileOverview Mobile Sidebar Realignment v13.0.
+ * REALIGNED: Match the new 150px header height and standard alignment.
  */
 export default function MobileSidebar({
   onClose,
@@ -85,21 +85,21 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body">
 
-      {/* HEADER: gap-4 symmetric, Logo standardized */}
-      <div className="flex h-20 items-center justify-between border-b px-4 shrink-0 gap-4">
+      {/* HEADER: Symmetric gap, 150px height */}
+      <div className="flex h-[150px] items-center justify-between border-b px-4 shrink-0 gap-4">
         <Logo
           variant="light"
           href="/"
           onClick={onClose}
-          className="shrink-0"
+          className="shrink-0 -ml-8"
         />
 
         <button
           onClick={onClose}
           aria-label="Close sidebar"
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-700 active:scale-95 transition-all shrink-0"
+          className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-700 active:scale-95 transition-all shrink-0"
         >
-          <X className="h-5 w-5" />
+          <X className="h-6 w-6" />
         </button>
       </div>
 
@@ -107,38 +107,38 @@ export default function MobileSidebar({
       <div className="flex-1 overflow-y-auto no-scrollbar">
 
         {/* PROFILE CARD */}
-        <div className="p-4">
+        <div className="p-6">
           <Link
             href="/profile"
             onClick={onClose}
             className="block active:scale-[0.98] transition-all"
           >
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl">
+            <div className="flex items-center gap-4 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl">
                 <StudentAvatar
                   profile={profile}
                   className="h-full w-full border-none"
-                  iconClassName="w-6 h-6"
+                  iconClassName="w-7 h-7"
                 />
               </div>
 
               <div className="min-w-0 flex-1">
-                <h3 className="truncate text-base font-bold text-slate-900">
+                <h3 className="truncate text-lg font-bold text-slate-900">
                   {profile?.name || "Aspirant"}
                 </h3>
-                <p className="mt-0.5 text-xs text-slate-400">
+                <p className="mt-0.5 text-sm text-slate-400">
                   Manage preparation
                 </p>
               </div>
 
-              <ChevronRight className="h-5 w-5 shrink-0 text-slate-300" />
+              <ChevronRight className="h-6 w-6 shrink-0 text-slate-300" />
             </div>
           </Link>
         </div>
 
         {/* MAIN MENU */}
         <div className="px-4 pb-2">
-          <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <p className="mb-4 px-4 text-[11px] font-black uppercase tracking-widest text-slate-400">
             Preparation Hub
           </p>
 
@@ -159,22 +159,22 @@ export default function MobileSidebar({
                   href={item.href}
                   onClick={onClose}
                   className={cn(
-                    "flex h-14 items-center gap-4 rounded-2xl px-5 transition-all active:scale-[0.98]",
+                    "flex h-16 items-center gap-5 rounded-2xl px-6 transition-all active:scale-[0.98]",
                     isActive
-                      ? "bg-blue-50 text-primary"
+                      ? "bg-blue-50 text-primary shadow-sm"
                       : "text-slate-700 hover:bg-slate-50"
                   )}
                 >
                   <item.icon
                     className={cn(
-                      "h-5 w-5 shrink-0",
+                      "h-6 w-6 shrink-0",
                       isActive
                         ? "text-primary"
                         : "text-slate-400"
                     )}
                   />
 
-                  <span className="font-bold text-sm">
+                  <span className="font-bold text-base">
                     {item.label}
                   </span>
                 </Link>
@@ -184,8 +184,8 @@ export default function MobileSidebar({
         </div>
 
         {/* SUPPORT */}
-        <div className="px-4 pb-6 mt-4">
-          <p className="mb-3 px-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+        <div className="px-4 pb-8 mt-6">
+          <p className="mb-4 px-4 text-[11px] font-black uppercase tracking-widest text-slate-400">
             Institutional Support
           </p>
 
@@ -195,10 +195,10 @@ export default function MobileSidebar({
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
-                className="flex h-14 items-center gap-4 rounded-2xl px-5 text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.98]"
+                className="flex h-16 items-center gap-5 rounded-2xl px-6 text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.98]"
               >
-                <item.icon className="h-5 w-5 shrink-0 text-slate-400" />
-                <span className="font-bold text-sm">
+                <item.icon className="h-6 w-6 shrink-0 text-slate-400" />
+                <span className="font-bold text-base">
                   {item.label}
                 </span>
               </Link>
@@ -208,10 +208,10 @@ export default function MobileSidebar({
       </div>
 
       {/* FOOTER */}
-      <div className="border-t border-slate-100 bg-white p-4 pb-[env(safe-area-inset-bottom)]">
+      <div className="border-t border-slate-100 bg-white p-6 pb-[env(safe-area-inset-bottom)]">
         <button
           onClick={handleLogout}
-          className="flex h-12 w-full items-center justify-center gap-3 rounded-2xl bg-slate-900 text-sm font-bold text-white shadow-lg transition-all active:scale-95"
+          className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-slate-900 text-base font-bold text-white shadow-xl transition-all active:scale-95"
         >
           <LogOut className="h-5 w-5" />
           <span>Log Out</span>
