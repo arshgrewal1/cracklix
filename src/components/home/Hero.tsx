@@ -21,9 +21,9 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Hero Hub v98.0.
+ * @fileOverview Institutional Hero Hub v102.0.
  * UPDATED: Synchronized trust badge with real-time student registry data.
- * UPDATED: Moved student illustration above feature cards per user request.
+ * UPDATED: Student illustration positioned directly above feature cards.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -116,7 +116,7 @@ export default function Hero() {
             )}
           </div>
 
-          {/* STUDENT ILLUSTRATION - PLACED ABOVE CARDS AS REQUESTED */}
+          {/* STUDENT ILLUSTRATION - POSITIONED ABOVE CARDS */}
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
