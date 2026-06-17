@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import {
   ClipboardList,
   ShieldCheck,
+<<<<<<< HEAD
   Users,
   Zap,
   ChevronRight,
@@ -12,6 +13,10 @@ import {
   FileText,
   BarChart3,
   Star
+=======
+  Star,
+  Users
+>>>>>>> 581e85c1 (restore golden temple background url link)
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,9 +26,14 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
+<<<<<<< HEAD
  * @fileOverview Institutional Hero Hub v105.0.
  * UPDATED: Real-time student registry data sync.
  * UPDATED: Student illustration positioned directly above feature cards.
+=======
+ * @fileOverview Final Calibrated Hero v251.0.
+ * RESTORED: Golden Temple background image with optimized positioning.
+>>>>>>> 581e85c1 (restore golden temple background url link)
  */
 export default function Hero() {
   const db = useFirestore();
@@ -78,6 +88,7 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
+<<<<<<< HEAD
     <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-blue-50 py-12 md:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-left">
@@ -88,6 +99,25 @@ export default function Hero() {
               {stats?.totalUsers ? stats.totalUsers.toLocaleString() : "15,000"}+ Aspirants Trust Cracklix
             </span>
           </div>
+=======
+    <section className="relative w-full bg-[#050B19] overflow-hidden min-h-[500px] md:min-h-[550px] lg:h-[650px] flex flex-col justify-start text-left border-b border-white/5 pb-8 md:pb-12">
+      
+      {/* RESTORED GOLDEN TEMPLE BACKGROUND */}
+      <div className="absolute top-[-40px] left-0 right-0 h-[calc(100%+40px)] z-0 overflow-hidden bg-[#050B19]">
+        <motion.img 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.5 }}
+          src="https://images.unsplash.com/photo-1594913366159-1832ffef8171?auto=format&fit=crop&q=80&w=1920" 
+          alt="Golden Temple Punjab" 
+          className="w-full h-full object-cover object-[center_30%] opacity-40 scale-105"
+          referrerPolicy="no-referrer"
+          data-ai-hint="golden temple"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050B19]/40 via-[#050B19]/80 to-[#050B19] z-[10]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050B19] via-transparent to-transparent z-[10] hidden md:block" />
+      </div>
+>>>>>>> 581e85c1 (restore golden temple background url link)
 
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-slate-900 leading-tight">
             Crack Punjab
