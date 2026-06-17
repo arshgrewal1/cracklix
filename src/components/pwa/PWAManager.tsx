@@ -7,9 +7,9 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Smart Institutional PWA Install Node v4.0.
- * LOGIC: Only appears after 30s of engagement or if the user interacts.
- * CONVERSION: Uses "High-Impact" copywriting and premium floating UI.
+ * @fileOverview Smart Institutional PWA Install Node v5.0.
+ * LOGIC: Only appears after engagement threshold or if the user interacts.
+ * TESTING: Threshold reduced to 1000ms as requested for immediate audit.
  */
 export default function PWAManager() {
   const pathname = usePathname();
@@ -42,10 +42,10 @@ export default function PWAManager() {
   useEffect(() => {
     setMounted(true);
 
-    // Engagement Logic: Wait 30 seconds before showing the "Smart" prompt
+    // Engagement Logic: Reduced to 1 second for testing as requested
     const timer = setTimeout(() => {
       setEngagementThresholdMet(true);
-    }, 30000);
+    }, 1000);
 
     checkInstallability();
 

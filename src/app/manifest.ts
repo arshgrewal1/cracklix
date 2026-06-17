@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Production-Grade PWA Manifest v7.0.
- * HARDENED: Locked categories and added launch screenshots for Android/OS support.
+ * @fileOverview Production-Grade PWA Manifest v8.0.
+ * HARDENED: Synchronized icon registry with standard public/icons/ directory.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -13,24 +13,54 @@ export default function manifest(): MetadataRoute.Manifest {
     id: '/',
     scope: '/',
     display: 'standalone',
-    background_color: '#020617',
-    theme_color: '#2563eb',
+    background_color: '#FFFFFF',
+    theme_color: '#2563EB',
     orientation: 'portrait',
     icons: [
       {
-        src: '/logo/cracklix-icon.png',
+        src: '/icons/icon-72x72.png',
+        sizes: '72x72',
+        type: 'image/png',
+      },
+      {
+        src: '/icons/icon-96x96.png',
+        sizes: '96x96',
+        type: 'image/png',
+      },
+      {
+        src: '/icons/icon-128x128.png',
+        sizes: '128x128',
+        type: 'image/png',
+      },
+      {
+        src: '/icons/icon-144x144.png',
+        sizes: '144x144',
+        type: 'image/png',
+      },
+      {
+        src: '/icons/icon-152x152.png',
+        sizes: '152x152',
+        type: 'image/png',
+      },
+      {
+        src: '/icons/icon-192x192.png',
         sizes: '192x192',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/logo/cracklix-icon.png',
+        src: '/icons/icon-384x384.png',
+        sizes: '384x384',
+        type: 'image/png',
+      },
+      {
+        src: '/icons/icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/logo/cracklix-icon.png',
+        src: '/icons/maskable-icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',
