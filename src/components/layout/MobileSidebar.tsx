@@ -25,10 +25,12 @@ import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import StudentAvatar from "@/components/brand/StudentAvatar";
 import Logo from "@/components/brand/Logo";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Mobile Sidebar Realignment v16.0.
- * UPDATED: Logo scale synchronized with main site maximation.
+ * @fileOverview Mobile Sidebar Realignment v17.0.
+ * FIXED: Name flickering (Aspirant issue) by adding Auth DisplayName fallback.
+ * LOCKED: Logo scale synchronized with maximized 78px standard.
  */
 export default function MobileSidebar({
   onClose,
@@ -37,7 +39,7 @@ export default function MobileSidebar({
 }) {
   const [mounted, setMounted] = useState(false);
 
-  const { profile } = useUser();
+  const { user, profile, profileLoading } = useUser();
   const auth = useAuth();
 
   const router = useRouter();
@@ -53,7 +55,7 @@ export default function MobileSidebar({
       onClose();
       router.push("/");
     } catch (error) {
-      console.error(error);
+      console.error('[MOBILE_SIDEBAR_LOGOUT_FAILURE]:', error);
     }
   };
 
@@ -92,6 +94,7 @@ export default function MobileSidebar({
           href="/"
           onClick={onClose}
           className="shrink-0 -ml-4"
+          imgClassName="h-[78px]"
         />
 
         <button
@@ -113,20 +116,24 @@ export default function MobileSidebar({
             onClick={onClose}
             className="block active:scale-[0.98] transition-all"
           >
-            <div className="flex items-center gap-4 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm">
+            <div className="flex items-center gap-4 rounded-[2rem] border border-slate-100 bg-white p-5 shadow-sm hover:border-primary/20 transition-all">
               <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl">
-                <StudentAvatar
-                  profile={profile}
-                  className="h-full w-full border-none"
-                  iconClassName="w-7 h-7"
-                />
+                {profileLoading ? (
+                  <Skeleton className="h-full w-full rounded-xl bg-slate-100" />
+                ) : (
+                  <StudentAvatar
+                    profile={profile}
+                    className="h-full w-full border-none"
+                    iconClassName="w-7 h-7"
+                  />
+                )}
               </div>
 
               <div className="min-w-0 flex-1">
-                <h3 className="truncate text-lg font-bold text-slate-900">
-                  {profile?.name || "Aspirant"}
+                <h3 className="truncate text-lg font-bold text-slate-900 uppercase tracking-tight">
+                  {profile?.name || user?.displayName || "Aspirant"}
                 </h3>
-                <p className="mt-0.5 text-sm text-slate-400">
+                <p className="mt-0.5 text-sm text-slate-400 font-medium">
                   Manage preparation
                 </p>
               </div>
@@ -174,7 +181,7 @@ export default function MobileSidebar({
                     )}
                   />
 
-                  <span className="font-bold text-base">
+                  <span className="font-bold text-base uppercase tracking-tight">
                     {item.label}
                   </span>
                 </Link>
@@ -198,7 +205,7 @@ export default function MobileSidebar({
                 className="flex h-16 items-center gap-5 rounded-2xl px-6 text-slate-700 transition-all hover:bg-slate-50 active:scale-[0.98]"
               >
                 <item.icon className="h-6 w-6 shrink-0 text-slate-400" />
-                <span className="font-bold text-base">
+                <span className="font-bold text-base uppercase tracking-tight">
                   {item.label}
                 </span>
               </Link>
@@ -211,7 +218,7 @@ export default function MobileSidebar({
       <div className="border-t border-slate-100 bg-white p-6 pb-[env(safe-area-inset-bottom)]">
         <button
           onClick={handleLogout}
-          className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-slate-900 text-base font-bold text-white shadow-xl transition-all active:scale-95"
+          className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#0F172A] text-base font-black uppercase tracking-widest text-white shadow-xl transition-all active:scale-95"
         >
           <LogOut className="h-5 w-5" />
           <span>Log Out</span>
