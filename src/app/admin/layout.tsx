@@ -11,8 +11,9 @@ import Logo from "@/components/brand/Logo";
 import Link from "next/link";
 
 /**
- * @fileOverview Maximized Admin Hub Layout v31.0.
- * UPDATED: Reduced header height to 80px (h-20) for tighter vertical profile.
+ * @fileOverview Maximized Admin Hub Layout v32.0.
+ * UPDATED: Synchronized header height to 150px to accommodate 140px logo.
+ * FIXED: Removed negative margin on logo to prevent overlap with menu button.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -89,23 +90,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           marginLeft: typeof window !== 'undefined' && window.innerWidth >= 1024 ? sidebarWidth : 0 
         }}
       >
-        <header className="h-20 border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
-          {/* LEFT: Branding Group */}
+        <header className="h-[150px] border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
+          {/* LEFT: Branding Group (Gap synchronized at 16px) */}
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden bg-white border border-slate-200 text-slate-700 h-11 w-11 rounded-2xl shadow-sm flex items-center justify-center active:scale-95 transition-all"
+              className="lg:hidden bg-white border border-slate-200 text-slate-700 h-12 w-12 rounded-2xl shadow-sm flex items-center justify-center active:scale-95 transition-all"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-6 h-6" />
             </button>
 
             <Logo
               variant="light"
-              className="shrink-0 -ml-10"
+              className="shrink-0"
             />
           </div>
           
-          {/* RIGHT: Action Hub */}
+          {/* RIGHT: Action Hub (Gap synchronized at 16px) */}
           <div className="flex items-center gap-4">
              <Button asChild variant="outline" className="h-11 px-6 rounded-xl border-slate-200 font-bold text-sm tracking-tight gap-2 hover:bg-slate-50 transition-all active:scale-95">
                 <Link href="/">View Site</Link>

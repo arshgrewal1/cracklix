@@ -35,8 +35,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Maximized Premium Header v67.0.
- * UPDATED: Reduced height to 80px (h-20) to eliminate vertical spacing.
+ * @fileOverview Maximized Premium Header v68.0.
+ * FIXED: Removed negative margin to prevent overlap; synchronized spacing at 16px.
+ * UPDATED: Set header height to 150px to perfectly frame the 140px logo.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -69,28 +70,28 @@ export default function Navbar() {
 
   if (!mounted) {
     return (
-      <nav className="w-full border-b border-slate-100 bg-white h-20" />
+      <nav className="w-full border-b border-slate-100 bg-white h-[150px]" />
     );
   }
 
   return (
     <div className="sticky top-0 z-50 w-full font-body">
-      <nav className="w-full h-20 bg-white border-b border-slate-100 shadow-sm">
+      <nav className="w-full h-[150px] bg-white border-b border-slate-100 shadow-sm">
         <div className="w-full max-w-5xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
 
-          {/* LEFT SIDE: Brand Group */}
+          {/* LEFT SIDE: Brand Group (Gap synchronized at 16px) */}
           <div className="flex items-center gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-11 h-11 rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0"
+              className="flex items-center justify-center w-12 h-12 rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0"
             >
-              <Menu className="w-5 h-5" />
+              <Menu className="w-6 h-6" />
             </button>
 
             <Logo
               variant="light"
-              className="shrink-0 -ml-10"
+              className="shrink-0"
             />
           </div>
 
@@ -115,7 +116,7 @@ export default function Navbar() {
             />
           </div>
 
-          {/* RIGHT SIDE: Actions */}
+          {/* RIGHT SIDE: Actions (Gap synchronized at 16px) */}
           <div className="flex items-center gap-4 shrink-0">
             <Link
               href="/search"

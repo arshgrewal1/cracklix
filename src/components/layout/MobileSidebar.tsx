@@ -27,8 +27,9 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Maximized Mobile Sidebar Drawer v7.0.
- * UPDATED: Reduced header height to 80px (h-20) to eliminate spacing.
+ * @fileOverview Maximized Mobile Sidebar Drawer v8.0.
+ * UPDATED: Synchronized header height to 150px to accommodate 140px logo.
+ * FIXED: Removed negative margin to eliminate menu button overlap.
  */
 export default function MobileSidebar({
   onClose,
@@ -85,13 +86,13 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body">
 
-      {/* HEADER: Compounded height to 80px */}
-      <div className="flex h-20 items-center justify-between border-b px-4 shrink-0">
+      {/* HEADER: Synchronized height to 150px */}
+      <div className="flex h-[150px] items-center justify-between border-b px-4 shrink-0">
         <Logo
           variant="light"
           href="/"
           onClick={onClose}
-          className="-ml-10"
+          className="shrink-0"
         />
 
         <button
