@@ -27,7 +27,7 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import Logo from "@/components/brand/Logo";
 
 /**
- * @fileOverview Mobile Sidebar Drawer v1.2
+ * @fileOverview Mobile Sidebar Drawer v1.3
  * Standardized Header height to 140px and Logo to 120px.
  */
 export default function MobileSidebar({

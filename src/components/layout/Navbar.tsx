@@ -35,9 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Header Hub v45.0.
- * UPDATED: Logo and sidebar button aligned to far-left with zero padding.
- * UPDATED: Header height increased to 140px for 120px branding.
+ * @fileOverview Professional Header Hub v46.0.
+ * UPDATED: Standardized Header height to 140px with 120px Logo.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -77,10 +76,10 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-50 w-full font-body">
       <nav className="w-full h-[140px] bg-white border-b border-[#E5E7EB] shadow-sm">
-        <div className="w-full max-w-7xl mx-auto px-4 md:px-8 h-full flex items-center">
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
-          {/* LEFT SIDE: Brand Group - Zero Space alignment */}
-          <div className="flex items-center gap-3 flex-1 min-w-0">
+          {/* LEFT SIDE: Brand Group */}
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -117,7 +116,7 @@ export default function Navbar() {
           </div>
 
           {/* RIGHT SIDE: Actions */}
-          <div className="flex items-center gap-3 ml-auto shrink-0">
+          <div className="flex items-center gap-3 shrink-0">
             <Link
               href="/search"
               className="w-11 h-11 rounded-2xl flex items-center justify-center bg-gray-50 text-slate-700 hover:text-[#2563EB] transition-all active:scale-95"

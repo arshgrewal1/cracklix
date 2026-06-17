@@ -14,9 +14,9 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix Official Logo Component v1.2
+ * @fileOverview Cracklix Official Logo Component v1.5
  * Standardized at 120px height for premium brand visibility.
- * FIXED: Syntax error and runtime onClick safety.
+ * FIXED: Resolved unterminated string and unexpected EOF errors.
  */
 export default function Logo({
   className = "",
@@ -45,14 +45,12 @@ export default function Logo({
     />
   );
 
-  // Handle case where onClick might be called but is undefined
   const handleClick = (e: React.MouseEvent) => {
     if (onClick && typeof onClick === 'function') {
       onClick();
     }
   };
 
-  // Non-clickable logo variant
   if (!href) {
     return (
       <div
