@@ -1,11 +1,11 @@
-
 import { NextResponse } from 'next/server';
 import { Cashfree } from 'cashfree-pg';
-import { initializeFirebase } from '@/firebase';
+import { initializeFirebase } from '@/firebase/app';
 import { doc, setDoc, serverTimestamp, updateDoc, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Cashfree Webhook Node.
+ * @fileOverview Institutional Cashfree Webhook Node v2.0.
+ * FIXED: Corrected initializeFirebase import path.
  */
 
 export async function POST(req: Request) {

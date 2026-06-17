@@ -21,8 +21,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Hero Hub v106.0.
- * FIXED: Removed Git merge conflict markers that caused build failure.
+ * @fileOverview Institutional Hero Hub v107.0.
+ * RESOLVED: Removed all Git merge conflict markers.
  * UPDATED: Real-time student registry data sync.
  * UPDATED: Student illustration positioned directly above feature cards.
  */

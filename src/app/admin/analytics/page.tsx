@@ -14,9 +14,8 @@ const chartData = [
 ]
 
 /**
- * @fileOverview Final Administrative Control Center v3.4.
- * UPDATED: Integrated Real-Time calculation for unique preparation nodes.
- * FIXED: Added null safety for charts and metrics.
+ * @fileOverview Final Administrative Control Center v3.5.
+ * FIXED: Removed duplicate x2 attribute in SVG linearGradient.
  */
 
 export default function AdminAnalytics() {
@@ -93,7 +92,7 @@ export default function AdminAnalytics() {
                   <ResponsiveContainer width="100%" height="100%">
                      <AreaChart data={chartData}>
                         <defs>
-                           <linearGradient id="colorUsers" x1="0" x2="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/><stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/></linearGradient>
+                           <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/><stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/></linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                         <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 12, fontWeight: 700}} />

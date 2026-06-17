@@ -9,7 +9,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Standalone Founder Leadership Node v4.1 (Title Case Update).
+ * @fileOverview Standalone Founder Leadership Node v4.2.
+ * FIXED: Updated duration class to prevent ambiguous utility warnings.
  */
 
 export default function MeetFounder() {
