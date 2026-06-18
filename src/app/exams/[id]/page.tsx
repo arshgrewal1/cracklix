@@ -38,8 +38,8 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Institutional Exam Hub v35.0 (Hardened Build).
- * FIXED: Integrated missing CardHeader/CardTitle imports and refactored cloneElement for type-safety.
+ * @fileOverview Institutional Exam Hub v35.1 (Hardened Build).
+ * FIXED: Integrated missing CardHeader/CardTitle imports and refactored icon rendering for type-safety.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -206,12 +206,12 @@ export default function ExamHubPage() {
          <Tabs defaultValue="FULL" className="space-y-8 md:space-y-12">
             <div className="bg-white border border-slate-100 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar relative">
                <TabsList className="bg-transparent border-none p-0 flex h-14 w-full justify-start gap-1 overflow-x-auto no-scrollbar">
-                  <DashboardTab value="FULL" label="Full Mock" icon={<Zap />} />
-                  <DashboardTab value="SUBJECT" label="Subjects" icon={<BookOpen />} />
-                  <DashboardTab value="SECTIONAL" label="Sectional" icon={<List />} />
-                  <DashboardTab value="CA" label="Current Affairs" icon={<Newspaper />} />
-                  <DashboardTab value="PYQ" label="PYQ" icon={<Layers />} />
-                  <DashboardTab value="NOTES" label="Notes" icon={<FileText />} />
+                  <DashboardTab value="FULL" label="Full Mock" icon={Zap} />
+                  <DashboardTab value="SUBJECT" label="Subjects" icon={BookOpen} />
+                  <DashboardTab value="SECTIONAL" label="Sectional" icon={List} />
+                  <DashboardTab value="CA" label="Current Affairs" icon={Newspaper} />
+                  <DashboardTab value="PYQ" label="PYQ" icon={Layers} />
+                  <DashboardTab value="NOTES" label="Notes" icon={FileText} />
                </TabsList>
             </div>
 
@@ -261,10 +261,10 @@ export default function ExamHubPage() {
   )
 }
 
-function DashboardTab({ value, label, icon }: any) {
+function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: LucideIcon }) {
    return (
       <TabsTrigger value={value} className="px-5 md:px-8 h-full font-black text-[9px] md:text-[10px] uppercase tracking-widest text-slate-400 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-xl transition-all whitespace-nowrap flex items-center gap-2">
-         {React.cloneElement(icon, { className: "h-3.5 w-3.5" })} {label}
+         <Icon className="h-3.5 w-3.5" /> {label}
       </TabsTrigger>
    )
 }
@@ -297,7 +297,7 @@ function MockList({ data, results, isPassActive, user, loading, boards }: any) {
             const difficulty = mock.difficulty || "Medium";
 
             return (
-               <Card key={mock.id} className="border border-[#E5E7EB] shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:translate-y-[-6px] transition-all duration-500 rounded-[32px] bg-white p-8 md:p-10 text-center flex flex-col h-[420px] group relative overflow-hidden">
+               <Card key={mock.id} className="border border-[#E5E7EB] shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:translate-y-[-4px] transition-all duration-500 rounded-[32px] bg-white p-8 md:p-10 text-center flex flex-col h-[420px] group relative overflow-hidden">
                   
                   <div className="absolute top-6 right-6 flex flex-col gap-2 items-end">
                     {result && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 shadow-sm">Attempted</Badge>}

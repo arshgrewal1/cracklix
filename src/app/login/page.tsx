@@ -26,8 +26,8 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Login Hub v24.0 (Full Synchronization).
- * FIXED: Added missing 'cn' utility import for robust animation rendering.
+ * @fileOverview Hardened Login Hub v24.1 (Full Synchronization).
+ * FIXED: Integrated missing 'cn' utility import for robust animation rendering.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

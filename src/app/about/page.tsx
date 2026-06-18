@@ -31,7 +31,7 @@ import { doc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Refined Founder's Story Hub v17.0 (Hardened Build).
+ * @fileOverview Refined Founder's Story Hub v17.1 (Hardened Build).
  * FIXED: Switched to type-safe component references for icons and explicitly typed reduction callbacks.
  */
 

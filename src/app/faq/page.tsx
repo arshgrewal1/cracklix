@@ -16,8 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { HelpArticle } from "@/types"
 
 /**
- * @fileOverview Official Institutional FAQ Hub v5.0 (Hardened Build).
- * FIXED: Replaced JSX-based icon mapping with Component References for type-safe rendering.
+ * @fileOverview Official Institutional FAQ Hub v5.1 (Hardened Build).
+ * FIXED: Explicit React import and refactored rendering for type-safe icon injection.
  */
 
 export default function FAQPage() {

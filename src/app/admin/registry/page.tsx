@@ -38,8 +38,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Master Registry Hub v17.7 (Build Fixed).
- * FIXED: Added missing 'cn' import for responsive layout consistency.
+ * @fileOverview Master Registry Hub v17.8 (Build Fixed).
+ * FIXED: Integrated missing 'cn' and 'Badge' components for responsive stability and strict typing.
  */
 
 export default function MasterRegistryPage() {

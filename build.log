@@ -13,21 +13,18 @@
 > [PWA] Service worker: /home/user/studio/public/sw.js
 > [PWA]   url: /sw.js
 > [PWA]   scope: /
-
-warn - The class `duration-[2000ms]` is ambiguous and matches multiple utilities.
-warn - If this is content and not a class, replace it with `duration-&lsqb;2000ms&rsqb;` to silence this warning.
- ✓ Compiled successfully in 94s
+ ✓ Compiled successfully in 47s
    Linting and checking validity of types ...
 Failed to compile.
 
-./src/app/mocks/[id]/page.tsx:244:26
-Type error: 'icon.props' is of type 'unknown'.
+./src/app/search/page.tsx:155:20
+Type error: 'React' refers to a UMD global, but the current file is a module. Consider adding an import instead.
 
-[0m [90m 242 |[39m       [33m<[39m[33mdiv[39m className[33m=[39m[32m"h-14 w-14 md:h-20 md:w-20 bg-white rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500"[39m[33m>[39m
- [90m 243 |[39m         {[33mReact[39m[33m.[39misValidElement(icon) [33m?[39m [33mReact[39m[33m.[39mcloneElement(icon [36mas[39m [33mReact[39m[33m.[39m[33mReactElement[39m[33m<[39m[33many[39m[33m>[39m[33m,[39m { 
-[31m[1m>[22m[39m[90m 244 |[39m            className[33m:[39m cn(icon[33m.[39mprops[33m.[39mclassName[33m,[39m [32m"h-6 w-6 md:h-10 md:w-10"[39m) 
- [90m     |[39m                          [31m[1m^[22m[39m
- [90m 245 |[39m         }) [33m:[39m icon}
- [90m 246 |[39m       [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
- [90m 247 |[39m       [33m<[39m[33mdiv[39m className[33m=[39m[32m"space-y-2 md:space-y-3"[39m[33m>[39m[0m
+[0m [90m 153 |[39m             [33m<[39m[33mdiv[39m className[33m=[39m[32m"flex items-center gap-4 min-w-0 flex-1"[39m[33m>[39m
+ [90m 154 |[39m                [33m<[39m[33mdiv[39m className[33m=[39m[32m"h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner"[39m[33m>[39m
+[31m[1m>[22m[39m[90m 155 |[39m                   {[33mReact[39m[33m.[39mcloneElement(icon[33m,[39m { className[33m:[39m [32m"h-5 w-5"[39m })}
+ [90m     |[39m                    [31m[1m^[22m[39m
+ [90m 156 |[39m                [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
+ [90m 157 |[39m                [33m<[39m[33mdiv[39m className[33m=[39m[32m"text-left min-w-0 flex-1 space-y-1"[39m[33m>[39m
+ [90m 158 |[39m                   [33m<[39m[33mp[39m className[33m=[39m[32m"font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate"[39m[33m>[39m{title}[33m<[39m[33m/[39m[33mp[39m[33m>[39m[0m
 Next.js build worker exited with code: 1 and signal: null

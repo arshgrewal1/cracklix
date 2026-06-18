@@ -29,8 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { HelpArticle } from "@/types"
 
 /**
- * @fileOverview Official Institutional Help Hub v3.0 (Hardened Build).
- * FIXED: Integrated missing Badge import and refactored cloneElement for type-safe rendering.
+ * @fileOverview Official Institutional Help Hub v3.2 (Hardened Build).
+ * FIXED: Integrated missing Badge import to prevent Vercel build-gate failure.
  */
 
 const HELP_CATEGORIES = [

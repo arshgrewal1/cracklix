@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useUser, useFirestore } from "@/firebase";
 import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc } from "firebase/firestore";
@@ -26,7 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v58.0 (Production Build).
+ * @fileOverview Hardened CBT Engine v58.1 (Production Build).
  * FIXED: Explicit typing for hydration callbacks and synchronized selectedAnswer to handle number | null.
  */
 

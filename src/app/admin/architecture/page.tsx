@@ -23,7 +23,7 @@ import { cn } from "@/lib/utils"
 import type { Category, Board, Exam } from "@/types"
 
 /**
- * @fileOverview Punjab Registry Architect v15.6.
+ * @fileOverview Punjab Registry Architect v15.7.
  * FIXED: Explicitly typed callbacks and implemented locally extended interfaces for nested property access.
  */
 

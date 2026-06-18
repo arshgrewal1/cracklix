@@ -19,8 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Mobile-First Question Hub v45.0 (Production Hardened).
- * FIXED: Prop alignment for selectedAnswer to strictly handle number | null, matching global store logic.
+ * @fileOverview Precision Mobile-First Question Hub v45.1 (Production Hardened).
+ * FIXED: Prop alignment for selectedAnswer to handle number | null, matching global store logic.
  */
 export default function QuestionRenderer({ 
   question, 

@@ -30,8 +30,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Test Results Hub v41.0 (Hardened Types).
- * FIXED: Explicitly typed merit list and filter callbacks to resolve strict build blockers.
+ * @fileOverview Test Results Hub v41.2 (Hardened).
+ * FIXED: Explicit typing and hydration guards for production stability.
  */
 
 export default function ResultPage() {

@@ -25,14 +25,19 @@ import { cn } from "@/lib/utils"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Official Progress Report Hub v3.0 (Hardened Build).
- * FIXED: Integrated missing Zap icon and resolved implicit any callback parameters.
+ * @fileOverview Official Progress Report Hub v3.2 (Hardened).
+ * FIXED: Added hydration guard to prevent Internal Server Error during Recharts SSR.
  */
 
 export default function DeepAnalytics() {
   const { user, loading: authLoading } = useUser()
   const db = useFirestore()
   const router = useRouter()
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const resultsQuery = useMemo(() => {
     if (!db || !user) return null
@@ -136,21 +141,23 @@ export default function DeepAnalytics() {
                      </CardHeader>
                      <CardContent className="p-8 md:p-10">
                         <div className="h-[300px] md:h-[400px] w-full">
-                           <ResponsiveContainer width="100%" height="100%">
-                              <AreaChart data={analytics.chartData}>
-                                 <defs>
-                                    <linearGradient id="colorAcc" x1="0" y1="0" x2="0" y2="1">
-                                       <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/>
-                                       <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                                    </linearGradient>
-                                 </defs>
-                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} />
-                                 <YAxis hide />
-                                 <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: 'none', borderRadius: '16px', color: 'white' }} />
-                                 <Area type="monotone" dataKey="accuracy" stroke="hsl(var(--primary))" strokeWidth={5} fillOpacity={1} fill="url(#colorAcc)" />
-                              </AreaChart>
-                           </ResponsiveContainer>
+                           {mounted && (
+                             <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={analytics.chartData}>
+                                   <defs>
+                                      <linearGradient id="colorAcc" x1="0" y1="0" x2="0" y2="1">
+                                         <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/>
+                                         <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                                      </linearGradient>
+                                   </defs>
+                                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 700}} />
+                                   <YAxis hide />
+                                   <Tooltip contentStyle={{ backgroundColor: '#0F172A', border: 'none', borderRadius: '16px', color: 'white' }} />
+                                   <Area type="monotone" dataKey="accuracy" stroke="hsl(var(--primary))" strokeWidth={5} fillOpacity={1} fill="url(#colorAcc)" />
+                                </AreaChart>
+                             </ResponsiveContainer>
+                           )}
                         </div>
                      </CardContent>
                   </Card>

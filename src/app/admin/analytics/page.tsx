@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Users, Zap, BarChart3, ShieldCheck, Target, CreditCard, Activity, Lock, Unlock } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
@@ -10,8 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import type { Question, MockTest } from "@/types"
 
 /**
- * @fileOverview Institutional Analytics Hub v16.8 (Hardened Build).
- * FIXED: Explicit typing for all reduction callbacks and chart data mapping to satisfy strict build requirements.
+ * @fileOverview Institutional Analytics Hub v16.9 (Hardened).
+ * FIXED: Explicit typing and hydration guard for production stability.
  */
 
 interface MetricCardProps {
@@ -34,6 +34,11 @@ interface UsageProgressProps {
 
 export default function AdminAnalytics() {
   const db = useFirestore()
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const usersQuery = useMemo(() => (db ? collection(db, "users") : null), [db]);
   const resultsQuery = useMemo(() => (db ? collection(db, "results") : null), [db]);
@@ -113,26 +118,28 @@ export default function AdminAnalytics() {
             </CardHeader>
             <CardContent className="p-12">
                <div className="h-[400px] w-full">
-                  <ResponsiveContainer width="100%" height="100%">
-                     <AreaChart data={dynamicChartData}>
-                        <defs>
-                           <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                             <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/>
-                             <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                           </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                        <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 12, fontWeight: 700}} />
-                        <YAxis hide />
-                        <Tooltip content={({active, payload}) => {
-                           if (active && payload && payload.length) {
-                              return <div className="bg-[#0F172A] text-white p-6 rounded-[1.5rem] shadow-4xl text-sm font-bold uppercase tracking-tight"><span className="text-primary mr-3">{(payload[0].value as number)}</span> Activity Node</div>
-                           }
-                           return null
-                        }} />
-                        <Area type="monotone" dataKey="users" stroke="hsl(var(--primary))" strokeWidth={5} fillOpacity={1} fill="url(#colorUsers)" />
-                     </AreaChart>
-                  </ResponsiveContainer>
+                  {mounted && (
+                    <ResponsiveContainer width="100%" height="100%">
+                       <AreaChart data={dynamicChartData}>
+                          <defs>
+                             <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                               <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2}/>
+                               <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                             </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
+                          <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 12, fontWeight: 700}} />
+                          <YAxis hide />
+                          <Tooltip content={({active, payload}) => {
+                             if (active && payload && payload.length) {
+                                return <div className="bg-[#0F172A] text-white p-6 rounded-[1.5rem] shadow-4xl text-sm font-bold uppercase tracking-tight"><span className="text-primary mr-3">{(payload[0].value as number)}</span> Activity Node</div>
+                             }
+                             return null
+                          }} />
+                          <Area type="monotone" dataKey="users" stroke="hsl(var(--primary))" strokeWidth={5} fillOpacity={1} fill="url(#colorUsers)" />
+                       </AreaChart>
+                    </ResponsiveContainer>
+                  )}
                </div>
             </CardContent>
          </Card>
