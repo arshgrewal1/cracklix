@@ -38,8 +38,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Master Registry Hub v17.5.
- * FIXED: Added missing Save icon import and explicitly typed all callbacks.
+ * @fileOverview Master Registry Hub v17.6.
+ * FIXED: Missing Save and GitMerge icon imports.
  */
 
 export default function MasterRegistryPage() {
@@ -295,7 +295,7 @@ export default function MasterRegistryPage() {
             <div className="h-2 w-full bg-emerald-500" />
             <DialogHeader className="p-10 pb-4">
                <DialogTitle className="text-2xl font-black font-headline uppercase flex items-center gap-3"><GitMerge className="h-6 w-6 text-emerald-500" /> Normalization Engine</DialogTitle>
-               <DialogDescription className="text-slate-400 text-sm font-medium">Consolidate duplicate {activeTab} into one canonical hub.</DialogDescription>
+               <DialogDescription className="text-slate-400 text-sm font-medium">Consolidate duplicate {activeTab} nodes into one canonical hub.</DialogDescription>
             </DialogHeader>
             <div className="p-10 space-y-8">
                <div className="space-y-2">
@@ -319,7 +319,7 @@ export default function MasterRegistryPage() {
             </div>
             <DialogFooter className="p-10 pt-0">
                <Button onClick={handleDeepMerge} disabled={isMerging || !mergeSource || !mergeTarget} className="w-full h-16 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl transition-all">
-                  {isMerging ? <Loader2 className="h-5 w-5 animate-spin" /> : "Authorize Deep Merge"}
+                  {isMerging ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-4 w-4" />} Authorize Deep Merge
                </Button>
             </DialogFooter>
          </DialogContent>
@@ -330,7 +330,7 @@ export default function MasterRegistryPage() {
             <div className="h-2 w-full bg-[#0F172A] shrink-0" />
             <DialogHeader className="p-10 pb-0">
                <DialogTitle className="text-2xl font-black font-headline uppercase">Registry Node Architect</DialogTitle>
-               <DialogDescription className="sr-only">Update registry node details.</DialogDescription>
+               <DialogDescription className="text-slate-400 text-sm font-medium">Update or modify institutional registry node details.</DialogDescription>
             </DialogHeader>
             
             {editingBoard && (

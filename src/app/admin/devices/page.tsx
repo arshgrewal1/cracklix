@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Device Monitoring v12.5.
- * FIXED: Integrated missing Button import and explicitly typed callbacks.
+ * @fileOverview Institutional Device Monitoring v12.6.
+ * FIXED: Explicitly typed callbacks and ensured Button is imported.
  */
 
 export default function DeviceMonitoringPage() {

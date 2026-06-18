@@ -18,9 +18,10 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
+import { DialogDescription } from "@/components/ui/dialog"
 
 /**
- * @fileOverview Hardened Manual Question Entry v17.5.
+ * @fileOverview Hardened Manual Question Entry v17.6.
  * FIXED: Explicitly typed state updater to resolve implicit any blocker.
  */
 
@@ -82,10 +83,7 @@ function QuestionEntryContent() {
         optionCHindi: existingData.optionCHindi || "",
         optionDEnglish: existingData.optionDEnglish || "",
         optionDPunjabi: existingData.optionDPunjabi || "",
-        optionDHindi: existingData.optionDHindi || "",
-        englishExplanation: existingData.englishExplanation || "",
-        punjabiExplanation: existingData.punjabiExplanation || "",
-        hindiExplanation: existingData.hindiExplanation || ""
+        optionDHindi: existingData.optionDHindi || ""
       }))
       if (existingData.hindiQuestion) setActiveLangTab('hindi');
     }

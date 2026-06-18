@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Plus, Trash2, Edit, Search, GitMerge, Loader2, SearchCode } from "lucide-react"
+import { Plus, Trash2, Edit, Search, GitMerge, Loader2, SearchCode, Save } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, doc, deleteDoc, writeBatch, setDoc, serverTimestamp, getDocs, where, limit } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -14,6 +14,11 @@ import { Label } from "@/components/ui/label"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Textarea } from "@/components/ui/textarea"
+
+/**
+ * @fileOverview Subject Registry Hub v15.6.
+ * FIXED: Missing Save icon import.
+ */
 
 export default function SubjectRegistryPage() {
   const db = useFirestore()
@@ -164,7 +169,7 @@ export default function SubjectRegistryPage() {
             <div className="h-2 w-full bg-[#0F172A] shrink-0" />
             <DialogHeader className="p-10 pb-0">
                <DialogTitle className="text-2xl font-black font-headline uppercase">Subject Architect</DialogTitle>
-               <DialogDescription className="sr-only">Update the canonical name and aliases.</DialogDescription>
+               <DialogDescription className="text-slate-400 font-medium">Update the canonical name and aliases.</DialogDescription>
             </DialogHeader>
             <div className="p-10 space-y-6">
                <div className="space-y-2 text-left">
@@ -177,7 +182,7 @@ export default function SubjectRegistryPage() {
                </div>
             </div>
             <DialogFooter className="p-10 pt-0">
-               <Button onClick={handleSaveSubject} disabled={isSaving} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl">
+               <Button onClick={handleSaveSubject} disabled={isSaving} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl transition-all">
                   {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit Hub
                </Button>
             </DialogFooter>
@@ -189,7 +194,7 @@ export default function SubjectRegistryPage() {
             <DialogHeader className="text-center space-y-4">
                <div className="h-20 w-20 bg-emerald-500/20 rounded-[2rem] flex items-center justify-center mx-auto text-emerald-500"><GitMerge className="h-10 w-10" /></div>
                <DialogTitle className="text-3xl font-headline font-black uppercase">Deep Merge Hub</DialogTitle>
-               <DialogDescription className="text-slate-400 text-sm">Consolidate nodes.</DialogDescription>
+               <DialogDescription className="text-slate-400 text-sm">Consolidate preparation nodes into one canonical entry.</DialogDescription>
             </DialogHeader>
             <div className="py-8 space-y-6">
                <div className="space-y-2 text-left">
