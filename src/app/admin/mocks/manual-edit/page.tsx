@@ -51,7 +51,6 @@ function ManualEditContent() {
   const { toast } = useToast()
   
   const mockId = searchParams.get("id")
-  const [isSavingAll, setIsSavingAll] = useState(false)
   const [questions, setQuestions] = useState<any[]>([])
   const [loadingContent, setLoadingContent] = useState(true)
   const [editingQuestion, setEditingQuestion] = useState<any>(null)
@@ -78,7 +77,7 @@ function ManualEditContent() {
         chunkSnaps.forEach(snap => snap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id })))
         
         // Match order
-        setQuestions(questionIds.map(id => fetched.find(q => q.id === id)).filter(Boolean))
+        setQuestions(questionIds.map((id: string) => fetched.find(q => q.id === id)).filter(Boolean))
       } finally {
         setLoadingContent(false)
       }
@@ -97,7 +96,7 @@ function ManualEditContent() {
 
     try {
       await setDoc(qRef, payload, { merge: true })
-      setQuestions(questions.map(q => q.id === editingQuestion.id ? editingQuestion : q))
+      setQuestions(questions.map((q: any) => q.id === editingQuestion.id ? editingQuestion : q))
       toast({ title: "Node Updated", description: "Bilingual content synced to bank." })
       setEditingQuestion(null)
     } catch (e: any) {
@@ -209,11 +208,11 @@ function ManualEditContent() {
                         <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">English Statement</Label>
                         <Textarea value={editingQuestion?.englishQuestion || ""} onChange={e => setEditingQuestion({...editingQuestion, englishQuestion: e.target.value})} className="h-32 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner" />
                      </div>
-                     <TabsContent value="punjabi" className="m-0 space-y-2">
+                     <TabsContent value="punjabi" className="m-0 space-y-2 animate-in fade-in duration-300">
                         <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Punjabi Statement</Label>
                         <Textarea value={editingQuestion?.punjabiQuestion || ""} onChange={e => setEditingQuestion({...editingQuestion, punjabiQuestion: e.target.value})} className="h-32 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner" />
                      </TabsContent>
-                     <TabsContent value="hindi" className="m-0 space-y-2">
+                     <TabsContent value="hindi" className="m-0 space-y-2 animate-in fade-in duration-300">
                         <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Hindi Statement</Label>
                         <Textarea value={editingQuestion?.hindiQuestion || ""} onChange={e => setEditingQuestion({...editingQuestion, hindiQuestion: e.target.value})} className="h-32 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner" />
                      </TabsContent>

@@ -58,11 +58,11 @@ function LinkerContent() {
 
   // 3. Current Links Analysis
   const linkedMocks = useMemo(() => 
-    mocks?.filter(m => m.examIds?.includes(examId) || m.examId === examId) || []
+    mocks?.filter((m: any) => (m.examIds || []).includes(examId) || m.examId === examId) || []
   , [mocks, examId])
 
   const linkedNotes = useMemo(() => 
-    notes?.filter(n => n.examId === examId) || []
+    notes?.filter((n: any) => n.examId === examId) || []
   , [notes, examId])
 
   const handleToggleLink = async (coll: string, docId: string, isLinked: boolean) => {
@@ -72,7 +72,7 @@ function LinkerContent() {
     try {
       const docRef = doc(db, coll, docId)
       if (coll === 'mocks') {
-         const mock = mocks?.find(m => m.id === docId)
+         const mock = mocks?.find((m: any) => m.id === docId)
          const currentIds = mock.examIds || (mock.examId ? [mock.examId] : [])
          const nextIds = isLinked 
             ? currentIds.filter((id: string) => id !== examId) 
@@ -98,7 +98,7 @@ function LinkerContent() {
   }
 
   const filteredMocks = useMemo(() => 
-    mocks?.filter(m => m.title?.toLowerCase().includes(searchTerm.toLowerCase())).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)) || []
+    (mocks || []).filter((m: any) => m.title?.toLowerCase().includes(searchTerm.toLowerCase())).sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
   , [mocks, searchTerm])
 
   if (examLoading) return <div className="h-screen flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>
@@ -131,8 +131,8 @@ function LinkerContent() {
                   </div>
                </div>
                <div className="grid grid-cols-1 gap-3">
-                  {filteredMocks.map(m => {
-                     const isLinked = linkedMocks.some(lm => lm.id === m.id);
+                  {filteredMocks.map((m: any) => {
+                     const isLinked = linkedMocks.some((lm: any) => lm.id === m.id);
                      return (
                         <div key={m.id} className={cn("p-6 rounded-[2rem] border-2 transition-all flex items-center justify-between", isLinked ? "bg-primary/5 border-primary" : "bg-white border-slate-100")}>
                            <div className="flex items-center gap-6">
@@ -161,7 +161,7 @@ function LinkerContent() {
             <section className="space-y-6">
                <h3 className="text-xl font-headline font-black uppercase flex items-center gap-3"><FileText className="h-5 w-5 text-blue-500" /> Study Materials Pool</h3>
                <div className="grid grid-cols-1 gap-3">
-                  {notes?.map(n => {
+                  {notes?.map((n: any) => {
                      const isLinked = n.examId === examId;
                      return (
                         <div key={n.id} className={cn("p-6 rounded-[2rem] border-2 transition-all flex items-center justify-between", isLinked ? "bg-blue-50/50 border-blue-500" : "bg-white border-slate-100")}>

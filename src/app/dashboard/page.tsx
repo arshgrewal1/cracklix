@@ -81,7 +81,7 @@ export default function StudentDashboard() {
       timeFormatted = `${totalSeconds}s`;
     }
     
-    const uniqueDays = new Set(results.filter(r => r.timestamp).map(r => new Date(r.timestamp).toDateString()))
+    const uniqueDays = new Set(results.filter((r: any) => r.timestamp).map((r: any) => new Date(r.timestamp).toDateString()))
     const streak = uniqueDays.size
     const readiness = Math.min(100, Math.round((avgAcc * 0.7) + (Math.min(total, 30) * 1)))
 
@@ -127,9 +127,9 @@ export default function StudentDashboard() {
                             <Badge className="bg-primary text-white border-none text-[8px] md:text-[10px] font-black uppercase px-4 py-1 rounded-full shadow-2xl">
                               {(profile?.status || 'Free').toUpperCase()} PASS
                             </Badge>
-                            <p className="text-slate-400 font-bold uppercase tracking-widest text-[9px] md:text-[11px] flex items-center gap-2">
+                            <div className="text-slate-400 font-bold uppercase tracking-widest text-[9px] md:text-[11px] flex items-center gap-2">
                               <Target className="h-4 w-4 text-primary" /> {profile?.targetExam || 'Punjab General'}
-                            </p>
+                            </div>
                           </div>
                       </div>
                     )}
@@ -211,7 +211,7 @@ export default function StudentDashboard() {
                 <div className="relative z-10 space-y-4 md:space-y-6 text-left">
                     <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.4em] text-white/70">STUDY STREAK</p>
                     <div className="flex items-baseline gap-4 md:gap-5">
-                      <p className="text-6xl md:text-8xl lg:text-9xl font-headline font-black leading-none">{resultsLoading ? "..." : stats.streak}</p>
+                      <div className="text-6xl md:text-8xl lg:text-9xl font-headline font-black leading-none">{resultsLoading ? "..." : stats.streak}</div>
                       <div className="space-y-0.5">
                           <p className="text-lg md:text-2xl font-black uppercase">Days</p>
                           <p className="text-[8px] md:text-[9px] font-bold uppercase text-white/60">Node Active</p>
