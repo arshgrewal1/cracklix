@@ -23,9 +23,8 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Fluid Hero Hub v15.0 (Desktop Corrected).
- * FIXED: 2-column desktop layout with centered illustration.
- * FIXED: Stats grid spans full container width.
+ * @fileOverview Official Fluid Hero Hub v15.1.
+ * UPDATED: Removed redundant feature cards from the hero body for a cleaner visual profile.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -134,7 +133,7 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* CTAS: Moved up with content for desktop usability */}
+            {/* CTAS */}
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button
                 asChild
@@ -155,12 +154,6 @@ export default function Hero() {
                   Browse Exams
                 </Link>
               </Button>
-            </div>
-
-            {/* QUICK FEATURE NODES */}
-            <div className="grid grid-cols-2 gap-4 md:gap-6 pt-6">
-              <HeroFeatureCard icon={ClipboardList} label="Mock Tests" color="text-blue-600" />
-              <HeroFeatureCard icon={FileText} label="Previous Papers" color="text-emerald-600" />
             </div>
           </div>
           
@@ -212,16 +205,5 @@ export default function Hero() {
         </div>
       </div>
     </section>
-  );
-}
-
-function HeroFeatureCard({ icon: Icon, label, color }: { icon: LucideIcon, label: string, color: string }) {
-  return (
-    <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 bg-white/50 backdrop-blur-sm shadow-sm group hover:border-blue-600/30 hover:shadow-xl transition-all text-left">
-      <div className={cn("h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center mb-3 shadow-inner bg-slate-50 transition-transform group-hover:scale-110", color)}>
-        <Icon className="h-4 w-4 md:h-5 md:w-5" />
-      </div>
-      <p className="font-black text-[#0F172A] text-[9px] md:text-[11px] uppercase tracking-widest">{label}</p>
-    </div>
   );
 }
