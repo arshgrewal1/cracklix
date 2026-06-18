@@ -19,8 +19,9 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Fluid Hero Hub v17.0.
- * UPDATED: Image positioned above cards on mobile; buttons moved below cards.
+ * @fileOverview Official Home Hero Hub v18.0.
+ * FIXED: Removed top-level mounted guard to prevent "missing hero" issue.
+ * ORDER: Image is above features on mobile; Buttons are at the bottom.
  */
 
 const CORE_FEATURES = [
@@ -46,29 +47,11 @@ export default function Hero() {
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   const liveAspirantCount = useMemo(() => {
-    if (statsLoading || !stats?.totalUsers) return "15,000+";
+    if (!mounted || statsLoading || !stats?.totalUsers) return "15,000+";
     const num = stats.totalUsers;
     if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + "k+";
     return num + "+";
-  }, [stats, statsLoading]);
-
-  const HeroImage = ({ className }: { className?: string }) => (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: 0.2, duration: 0.8 }}
-      className={cn("relative flex justify-center", className)}
-    >
-      <div className="absolute inset-0 bg-blue-600/5 blur-[100px] rounded-full scale-150" />
-      <img
-        src="/images/hero-student.png"
-        alt="Cracklix Student"
-        className="relative w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] max-w-[280px] xs:max-w-sm md:max-w-md lg:max-w-[560px] transform hover:scale-[1.02] transition-transform duration-700"
-      />
-    </motion.div>
-  );
-
-  if (!mounted) return null;
+  }, [stats, statsLoading, mounted]);
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-blue-50 py-12 md:py-20 lg:py-28 text-left">
@@ -99,8 +82,21 @@ export default function Hero() {
               </p>
             </div>
 
-            {/* MOBILE ONLY: Student Image positioned exactly above Feature Cards */}
-            <HeroImage className="lg:hidden py-4" />
+            {/* MOBILE ONLY: Student Image positioned above Feature Cards */}
+            <div className="lg:hidden py-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="relative flex justify-center"
+              >
+                <div className="absolute inset-0 bg-blue-600/5 blur-[60px] rounded-full scale-110" />
+                <img
+                  src="/images/hero-student.png"
+                  alt="Cracklix Student"
+                  className="relative w-full h-auto object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.1)] max-w-[280px] xs:max-w-sm"
+                />
+              </motion.div>
+            </div>
 
             {/* FEATURE CARDS GRID */}
             <div className="grid grid-cols-2 gap-4 md:gap-6">
@@ -118,7 +114,7 @@ export default function Hero() {
               ))}
             </div>
 
-            {/* CTAS (Positioned below cards) */}
+            {/* CTAS (Base of section) */}
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Button
                 asChild
@@ -143,8 +139,20 @@ export default function Hero() {
           </div>
           
           {/* COLUMN 2: DESKTOP VISUAL HUB */}
-          <div className="hidden lg:flex justify-end">
-            <HeroImage />
+          <div className="hidden lg:flex justify-end relative">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="relative w-full max-w-[560px]"
+            >
+              <div className="absolute inset-0 bg-blue-600/5 blur-[100px] rounded-full scale-150" />
+              <img
+                src="/images/hero-student.png"
+                alt="Cracklix Student"
+                className="relative w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] transform hover:scale-[1.02] transition-transform duration-700"
+              />
+            </motion.div>
           </div>
         </div>
       </div>
