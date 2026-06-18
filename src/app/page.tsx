@@ -6,6 +6,7 @@ import FeaturedCategories from "@/components/home/FeaturedCategories";
 import PopularExams from "@/components/home/PopularExams";
 import LatestMocks from "@/components/home/LatestMocks";
 import ContinueLearning from "@/components/home/ContinueLearning";
+import Features from "@/components/home/Features";
 import CurrentAffairsPreview from "@/components/home/CurrentAffairsPreview";
 import MeritPreview from "@/components/home/MeritPreview";
 import AppPreview from "@/components/home/AppPreview";
@@ -13,8 +14,7 @@ import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
 
 /**
- * @fileOverview Official Home Hub v176.0 (Optimized Layout).
- * FIXED: Removed redundant negative margin causing search/hero overlap.
+ * @fileOverview Official Home Hub v177.0 (Restored Features).
  */
 
 export default function HomePage() {
@@ -30,28 +30,31 @@ export default function HomePage() {
         <GlobalSearch />
       </div>
 
-      {/* 2. Exam Categories (Broad Discovery) */}
+      {/* 2. Core Feature Cards */}
+      <Features />
+
+      {/* 3. Exam Categories (Broad Discovery) */}
       <FeaturedCategories />
 
-      {/* 3. Popular Exams (Commission Nodes) */}
+      {/* 4. Popular Exams (Commission Nodes) */}
       <PopularExams />
 
-      {/* 4. Latest Mock Tests (Direct Practice) */}
+      {/* 5. Latest Mock Tests (Direct Practice) */}
       <LatestMocks />
 
-      {/* 5. Personal Prep (Logged-in context) */}
+      {/* 6. Personal Prep (Logged-in context) */}
       <ContinueLearning />
 
-      {/* 6. Knowledge Hub (Current Affairs) */}
+      {/* 7. Knowledge Hub (Current Affairs) */}
       <CurrentAffairsPreview />
 
-      {/* 7. Competitive Index (Merit List) */}
+      {/* 8. Competitive Index (Merit List) */}
       <MeritPreview />
 
-      {/* 8. Hardware Hub (Mobile App) */}
+      {/* 9. Hardware Hub (Mobile App) */}
       <AppPreview />
 
-      {/* 9. Leadership Node (Founder) */}
+      {/* 10. Leadership Node (Founder) */}
       <MeetFounder />
       
       <Footer />
