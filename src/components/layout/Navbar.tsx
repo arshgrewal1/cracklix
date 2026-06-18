@@ -35,9 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v88.0 (Maximized & Aligned).
- * FIXED: Logo height set to 78px to perfectly fill the 80px container.
- * FIXED: Removed leading gap with -ml-4 to push brand flush towards left menu.
+ * @fileOverview Institutional Header v89.0 (Maximized & Aligned).
+ * FIXED: DropdownMenuContent updated with requested responsive width and premium shadows.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -129,9 +128,23 @@ export default function Navbar() {
 
                 <DropdownMenuContent
                   align="end"
-                  className="w-64 mt-4 rounded-3xl border border-slate-200 bg-white p-3 shadow-2xl z-[2001]"
+                  sideOffset={12}
+                  className="
+                    w-[calc(100vw-32px)]
+                    max-w-[340px]
+                    sm:w-[380px]
+                    md:w-[420px]
+
+                    rounded-[28px]
+                    p-4 sm:p-6 md:p-8
+
+                    bg-white
+                    border border-slate-200
+                    shadow-[0_20px_60px_rgba(15,23,42,0.15)]
+                    z-[2001]
+                  "
                 >
-                  <DropdownMenuItem asChild className="rounded-2xl px-4 py-4 cursor-pointer">
+                  <DropdownMenuItem asChild className="rounded-2xl px-4 py-4 cursor-pointer focus:bg-slate-50">
                     <Link href="/profile" className="flex items-center gap-3">
                       <User className="w-5 h-5 text-primary" />
                       <span className="font-bold text-base">My Profile</span>
@@ -139,7 +152,7 @@ export default function Navbar() {
                   </DropdownMenuItem>
 
                   {isAdmin && (
-                    <DropdownMenuItem asChild className="rounded-2xl px-4 py-4 mt-1 border border-primary/10 cursor-pointer bg-primary/5">
+                    <DropdownMenuItem asChild className="rounded-2xl px-4 py-4 mt-1 border border-primary/10 cursor-pointer bg-primary/5 focus:bg-primary/10">
                       <Link href="/admin" className="flex items-center gap-3">
                         <ShieldCheck className="w-5 h-5 text-primary" />
                         <span className="font-bold text-base text-primary">Admin Hub</span>
@@ -149,7 +162,7 @@ export default function Navbar() {
 
                   <DropdownMenuSeparator className="my-2 bg-slate-100" />
 
-                  <DropdownMenuItem onClick={handleLogout} className="rounded-2xl px-4 py-4 cursor-pointer text-rose-500 font-bold text-base flex items-center gap-3">
+                  <DropdownMenuItem onClick={handleLogout} className="rounded-2xl px-4 py-4 cursor-pointer text-rose-500 font-bold text-base flex items-center gap-3 focus:bg-rose-50">
                     <LogOut className="w-5 h-5 shrink-0" />
                     <span>Log Out</span>
                   </DropdownMenuItem>
