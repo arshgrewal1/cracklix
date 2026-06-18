@@ -27,10 +27,11 @@ import StudentAvatar from "@/components/brand/StudentAvatar";
 import Logo from "@/components/brand/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import ShareButton from "@/components/navigation/ShareButton";
+import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Mobile Sidebar Hardened v31.0.
- * TYPOGRAPHY: Removed uppercase from labels for a cleaner look.
+ * @fileOverview Mobile Sidebar Hardened v33.0.
+ * UPDATED: Premium Logout Node with requested red-destructive aesthetic.
  */
 export default function MobileSidebar({
   onClose,
@@ -211,15 +212,28 @@ export default function MobileSidebar({
         </div>
       </div>
 
-      {/* FOOTER */}
+      {/* FOOTER - LOGOUT NODE */}
       <div className="border-t border-slate-100 bg-white p-4 pb-[calc(env(safe-area-inset-bottom)+16px)] shrink-0">
-        <button
+        <Button
+          variant="ghost"
           onClick={handleLogout}
-          className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#0F172A] text-[11px] font-black tracking-widest text-white shadow-xl transition-all active:scale-95 border-none"
+          className="
+            w-full
+            h-14 sm:h-16
+            justify-start
+            text-red-500
+            text-lg sm:text-xl
+            font-black
+            rounded-2xl
+            hover:bg-red-50
+            hover:text-red-600
+            transition-all
+            active:scale-95
+          "
         >
-          <LogOut className="h-4 w-4 text-primary" />
-          <span>Exit Account</span>
-        </button>
+          <LogOut className="h-5 w-5 sm:h-6 sm:w-6 mr-3" />
+          Log Out
+        </Button>
       </div>
     </div>
   );
