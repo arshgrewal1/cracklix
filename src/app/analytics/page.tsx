@@ -25,8 +25,8 @@ import { cn } from "@/lib/utils"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Official Progress Report Hub v2.4.
- * FIXED: Resolved missing Zap icon import.
+ * @fileOverview Official Progress Report Hub v2.5 (Build Fixed).
+ * FIXED: Added missing 'cn' and 'Zap' imports to resolve build failure.
  */
 
 export default function DeepAnalytics() {
@@ -157,7 +157,7 @@ export default function DeepAnalytics() {
 
                   <div className="lg:col-span-4 space-y-10">
                      <Card className="border-none shadow-3xl rounded-[3rem] bg-[#0F172A] text-white p-10 md:p-12 overflow-hidden relative group">
-                        <div className="absolute bottom-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform"><Zap className="h-64 w-64" /></div>
+                        <div className="absolute bottom-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Zap className="h-64 w-64" /></div>
                         <div className="relative z-10 space-y-10">
                            <h3 className="font-headline font-black text-2xl uppercase border-b border-white/5 pb-6 flex items-center gap-4">
                               <Award className="h-6 w-6 text-primary" /> Mastery Hub

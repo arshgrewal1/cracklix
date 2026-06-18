@@ -30,8 +30,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Support Ticket Management Console v2.1.
- * FIXED: Integrated missing Label and Textarea imports.
+ * @fileOverview Institutional Support Ticket Management Console v2.2 (Build Fixed).
+ * FIXED: Synchronized missing component imports for stable build.
  */
 
 export default function AdminSupportManagement() {

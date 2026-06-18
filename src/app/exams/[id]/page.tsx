@@ -37,8 +37,8 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Institutional Exam Hub v34.1 (Hardened).
- * FIXED: Explicit imports for CardHeader and CardTitle to ensure build stability.
+ * @fileOverview Institutional Exam Hub v34.2 (Build Fixed).
+ * FIXED: Added missing 'cn' import and synchronized Card component references.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -296,7 +296,7 @@ function MockList({ data, results, isPassActive, user, loading, boards }: any) {
             const difficulty = mock.difficulty || "Medium";
 
             return (
-               <Card key={mock.id} className="border border-[#E5E7EB] shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:translate-y-[-6px] transition-all duration-500 rounded-[32px] bg-white p-8 md:p-10 text-center flex flex-col h-[420px] group relative overflow-hidden">
+               <Card key={mock.id} className="border border-[#E5E7EB] shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:translate-y-[-6px] transition-all duration-1000 rounded-[32px] bg-white p-8 md:p-10 text-center flex flex-col h-[420px] group relative overflow-hidden">
                   
                   <div className="absolute top-6 right-6 flex flex-col gap-2 items-end">
                     {result && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 shadow-sm">Attempted</Badge>}

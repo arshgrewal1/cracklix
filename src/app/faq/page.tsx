@@ -14,10 +14,11 @@ import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { HelpArticle } from "@/types"
+import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Institutional FAQ Hub v4.0.
- * HARDENED: Resolved 'React refers to a UMD global' and component mismatch issues.
+ * @fileOverview Official Institutional FAQ Hub v4.1 (Build Fixed).
+ * FIXED: Added missing 'cn' import and explicitly typed React components.
  */
 
 export default function FAQPage() {

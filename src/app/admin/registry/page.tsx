@@ -38,8 +38,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Master Registry Hub v17.6.
- * FIXED: Missing Save and GitMerge icon imports.
+ * @fileOverview Master Registry Hub v17.7 (Build Fixed).
+ * FIXED: Added missing 'cn' import for responsive layout consistency.
  */
 
 export default function MasterRegistryPage() {

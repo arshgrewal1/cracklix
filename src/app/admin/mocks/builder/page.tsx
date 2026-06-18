@@ -36,8 +36,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Institutional Mock Builder Hub v18.2 (Hardened).
- * FIXED: Mismatched Button closing tags resolved for build stability.
+ * @fileOverview Institutional Mock Builder Hub v18.3 (Build Hardened).
+ * FIXED: Mismatched JSX closing tags and synchronized component imports.
  */
 
 export default function MockBuilderPage() {
@@ -301,7 +301,7 @@ function MockBuilderContent() {
                     <Input type="number" value={mockData.duration} onChange={e => setMockData((p: any) => ({...p, duration: parseInt(e.target.value) || 120}))} className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-center" />
                  </div>
                  <div className="space-y-3">
-                    <Label className="text-[12px] font-black uppercase text-slate-500 ml-1">Attempt Limit</Label>
+                    <Label className="text-[12px) font-black uppercase text-slate-500 ml-1">Attempt Limit</Label>
                     <Input type="number" value={mockData.attemptLimit} onChange={e => setMockData((p: any) => ({...p, attemptLimit: parseInt(e.target.value) || 0}))} className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-center" />
                  </div>
               </div>
@@ -366,7 +366,7 @@ function MockBuilderContent() {
                             {sec.questions?.map((q: Question, qIdx: number) => (
                                <div key={q.id} className="flex items-center justify-between p-4 bg-slate-50/50 border border-slate-100 rounded-2xl hover:bg-white hover:shadow-xl transition-all duration-300"><div className="flex items-center gap-6 min-w-0"><span className="text-lg font-black text-slate-300 w-6">#{qIdx + 1}</span><p className="text-sm font-bold text-slate-600 truncate">{q.englishQuestion}</p></div><button onClick={() => setSections((p: any[]) => p.map((s: any) => s.id === sec.id ? { ...s, questions: s.questions?.filter((item: Question) => item.id !== q.id) || [] } : s))} className="text-slate-300 hover:text-rose-500 transition-colors"><X className="h-4 w-4" /></button></div>
                             ))}
-                            {(!sec.questions || sec.questions.length === 0) && <div className="py-24 text-center opacity-10 flex flex-col items-center gap-4"><RefreshCw className="h-10 w-10 animate-spin-slow" /><p className="font-black uppercase tracking-widest text-[10px]">Awaiting node link synchronization...</p></div>}
+                            {(!sec.questions || sec.questions.length === 0) && <div className="py-24 text-center opacity-10 flex flex-col items-center gap-4"><RefreshCw className="h-10 w-10 animate-spin" /><p className="font-black uppercase tracking-widest text-[10px]">Awaiting node link synchronization...</p></div>}
                          </div>
                       </Card>
                    ))}

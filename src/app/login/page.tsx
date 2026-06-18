@@ -23,10 +23,11 @@ import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { getDeviceId, getBrowserInfo } from "@/lib/device"
 import { motion } from "framer-motion"
+import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Login Hub v23.0 (Responsive Fix).
- * FIXED: Reduced card padding for extra small screens (320px) to prevent layout break.
+ * @fileOverview Hardened Login Hub v23.1 (Build Fixed).
+ * FIXED: Added missing 'cn' import to resolve build failure.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -225,7 +226,7 @@ function LoginContent() {
         {sessionTerminated && (
           <div className="bg-rose-50 border border-rose-100 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] flex items-center gap-4 animate-in slide-in-from-top-6 duration-700 shadow-sm">
             <ShieldAlert className="h-6 w-6 text-rose-500 shrink-0" />
-            <p className="text-xs md:text-sm font-bold text-rose-600 tracking-tight leading-snug text-left">
+            <p className="text-xs md:sm font-bold text-rose-600 tracking-tight leading-snug text-left">
               This account was just logged in on another device.
             </p>
           </div>
@@ -248,7 +249,7 @@ function LoginContent() {
             <CardTitle className="text-xl md:text-4xl font-black tracking-tight text-[#0F172A] uppercase">
               {mode === 'login' ? "Login" : "Sign Up"}
             </CardTitle>
-            <CardDescription className="text-slate-400 font-bold text-[9px] md:text-[12px] tracking-widest mt-2 md:mt-3 uppercase">Registry Access v23.0</CardDescription>
+            <CardDescription className="text-slate-400 font-bold text-[9px] md:text-[12px] tracking-widest mt-2 md:mt-3 uppercase">Registry Access v23.1</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 md:space-y-10 pb-10 md:pb-20 px-4 md:px-16">
             <form onSubmit={handleEmailAuth} className="space-y-4 md:space-y-6">
@@ -334,7 +335,9 @@ function LoginContent() {
       <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
         <DialogContent className="bg-white rounded-[2rem] md:rounded-[3rem] max-w-[90vw] sm:max-w-[400px] p-8 md:p-10 shadow-5xl text-left border-none">
           <DialogHeader className="text-center space-y-4">
-            <div className="h-14 w-14 md:h-16 md:w-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary shadow-xl"><RefreshCw className={cn("h-7 w-7 md:h-8 md:w-8", resetLoading && "animate-spin")} /></div>
+            <div className="h-14 w-14 md:h-16 md:w-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary shadow-xl">
+              <RefreshCw className={cn("h-7 w-7 md:h-8 md:w-8", resetLoading && "animate-spin")} />
+            </div>
             <DialogTitle className="text-xl md:text-2xl font-black uppercase tracking-tight text-[#0F172A]">Recover Node</DialogTitle>
             <DialogDescription className="text-slate-400 text-[10px] md:text-[11px] font-bold tracking-widest uppercase leading-relaxed">Enter your email to receive a reset link.</DialogDescription>
           </DialogHeader>
