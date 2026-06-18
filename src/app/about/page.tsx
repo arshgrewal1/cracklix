@@ -31,8 +31,8 @@ import { doc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Refined Founder's Story Hub v15.0.
- * FIXED: Switched to type-safe icon components to resolve build errors.
+ * @fileOverview Refined Founder's Story Hub v16.0.
+ * HARDENED: Switched to type-safe icon components to resolve build errors.
  */
 
 export default function AboutPage() {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import React, { useMemo, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
@@ -20,8 +20,8 @@ import { cn } from "@/lib/utils"
 import type { Question } from "@/types"
 
 /**
- * @fileOverview CBT Integrity Hub v12.1.
- * FIXED: Added missing Button, Badge, and Skeleton imports for registry audit.
+ * @fileOverview CBT Integrity Hub v12.2.
+ * HARDENED: Resolved missing Badge and Button references causing build failures.
  */
 
 interface QAStatCardProps {
@@ -148,7 +148,7 @@ export default function QADashboard() {
                   <TableHeader className="bg-slate-50/50">
                      <TableRow className="border-slate-50 h-16">
                         <TableHead className="px-10 text-[10px] font-black uppercase text-slate-500">Conflict Statements</TableHead>
-                        <TableHead className="text-[10px] font-black uppercase text-center text-slate-500">Confidence</TableHead>
+                        <TableHead className="text-[10px) font-black uppercase text-center text-slate-500">Confidence</TableHead>
                         <TableHead className="text-right px-10 text-[10px] font-black uppercase text-slate-500">Audit Action</TableHead>
                      </TableRow>
                   </TableHeader>

@@ -16,8 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { HelpArticle } from "@/types"
 
 /**
- * @fileOverview Official Institutional FAQ Hub v3.2.
- * FIXED: Explicitly typed icon component to resolve cloneElement mismatch.
+ * @fileOverview Official Institutional FAQ Hub v4.0.
+ * HARDENED: Resolved 'React refers to a UMD global' and component mismatch issues.
  */
 
 export default function FAQPage() {
@@ -42,7 +42,7 @@ export default function FAQPage() {
           <div className="bg-white p-8 md:p-12 rounded-[2.5rem] md:rounded-[4rem] shadow-3xl border border-slate-100 space-y-8">
             <Accordion type="single" collapsible className="w-full">
               {loading ? (
-                 Array.from({ length: 4 }).map((_, i) => <Skeleton className="h-16 w-full rounded-xl mb-4" />)
+                 Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-16 w-full rounded-xl mb-4" />)
               ) : faqs && faqs.length > 0 ? (
                  faqs.map((faq, idx) => (
                   <AccordionItem key={faq.id} value={`item-${idx}`} className="border-b border-slate-50 py-4 last:border-0">

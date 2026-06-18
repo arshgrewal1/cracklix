@@ -36,8 +36,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Institutional Mock Builder Hub v18.1 (Production Hardened).
- * FIXED: Mismatched Button closing tag resolved to ensure build stability.
+ * @fileOverview Institutional Mock Builder Hub v18.2 (Hardened).
+ * FIXED: Mismatched Button closing tags resolved for build stability.
  */
 
 export default function MockBuilderPage() {
@@ -172,18 +172,18 @@ function MockBuilderContent() {
 
   const toggleBoardId = (id: string) => {
      const current = mockData.boardIds || [];
-     setMockData({
-        ...mockData,
+     setMockData((prev: any) => ({
+        ...prev,
         boardIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id]
-     });
+     }));
   };
 
   const toggleExamId = (id: string) => {
      const current = mockData.examIds || [];
-     setMockData({
-        ...mockData,
+     setMockData((prev: any) => ({
+        ...prev,
         examIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id]
-     });
+     }));
   };
 
   const handleLinkQuestions = () => {
@@ -267,16 +267,16 @@ function MockBuilderContent() {
            <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-6 md:p-10 space-y-8 border border-slate-100">
               <div className="space-y-3">
                  <div className="text-[12px] font-black uppercase text-slate-500 tracking-tight ml-1">Series Headline</div>
-                 <Input value={mockData.title} onChange={e => setMockData({...mockData, title: e.target.value})} className="h-14 md:h-16 rounded-2xl bg-slate-50/50 border-none font-black text-lg px-6 shadow-inner focus-visible:ring-primary text-[#0F172A]" placeholder="Patwari Mock Series 01" />
+                 <Input value={mockData.title} onChange={e => setMockData((p: any) => ({...p, title: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50/50 border-none font-black text-lg px-6 shadow-inner focus-visible:ring-primary text-[#0F172A]" placeholder="Patwari Mock Series 01" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-3">
                     <Label className="text-[12px] font-black uppercase text-slate-500 ml-1">Mock Type</Label>
-                    <Select value={mockData.mockType} onValueChange={(v: MockType) => setMockData({...mockData, mockType: v})}><SelectTrigger className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-[12px] uppercase"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="FULL">Full Length</SelectItem><SelectItem value="SUBJECT">Subject-Wise</SelectItem><SelectItem value="SECTIONAL">Sectional</SelectItem><SelectItem value="PYQ">Official PYQ</SelectItem></SelectContent></Select>
+                    <Select value={mockData.mockType} onValueChange={(v: MockType) => setMockData((p: any) => ({...p, mockType: v}))}><SelectTrigger className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-[12px] uppercase"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="FULL">Full Length</SelectItem><SelectItem value="SUBJECT">Subject-Wise</SelectItem><SelectItem value="SECTIONAL">Sectional</SelectItem><SelectItem value="PYQ">Official PYQ</SelectItem></SelectContent></Select>
                  </div>
                  <div className="space-y-3">
                     <Label className="text-[12px] font-black uppercase text-slate-500 ml-1">Access Level</Label>
-                    <Select value={mockData.accessLevel} onValueChange={(v: AccessLevel) => setMockData({...mockData, accessLevel: v})}><SelectTrigger className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-[12px] uppercase"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="FREE">FREE HUB</SelectItem><SelectItem value="PREMIUM">ELITE HUB</SelectItem></SelectContent></Select>
+                    <Select value={mockData.accessLevel} onValueChange={(v: AccessLevel) => setMockData((p: any) => ({...p, accessLevel: v}))}><SelectTrigger className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-[12px] uppercase"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="FREE">FREE HUB</SelectItem><SelectItem value="PREMIUM">ELITE HUB</SelectItem></SelectContent></Select>
                  </div>
               </div>
               <div className="space-y-4">
@@ -298,16 +298,16 @@ function MockBuilderContent() {
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-3">
                     <Label className="text-[12px] font-black uppercase text-slate-500 ml-1">Duration (Min)</Label>
-                    <Input type="number" value={mockData.duration} onChange={e => setMockData({...mockData, duration: parseInt(e.target.value) || 120})} className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-center" />
+                    <Input type="number" value={mockData.duration} onChange={e => setMockData((p: any) => ({...p, duration: parseInt(e.target.value) || 120}))} className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-center" />
                  </div>
                  <div className="space-y-3">
                     <Label className="text-[12px] font-black uppercase text-slate-500 ml-1">Attempt Limit</Label>
-                    <Input type="number" value={mockData.attemptLimit} onChange={e => setMockData({...mockData, attemptLimit: parseInt(e.target.value) || 0})} className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-center" />
+                    <Input type="number" value={mockData.attemptLimit} onChange={e => setMockData((p: any) => ({...p, attemptLimit: parseInt(e.target.value) || 0}))} className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-center" />
                  </div>
               </div>
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
-                 <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-emerald-600 ml-1">POS (+)</Label><Input type="number" step="0.1" value={mockData.positiveMarks} onChange={e => setMockData({...mockData, positiveMarks: parseFloat(e.target.value) || 1})} className="h-12 bg-emerald-50/50 border-emerald-100 text-center font-black rounded-xl" /></div>
-                 <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-rose-600 ml-1">NEG (-)</Label><Input type="number" step="0.01" value={mockData.negativeMarks} onChange={e => setMockData({...mockData, negativeMarks: parseFloat(e.target.value) || 0.25})} className="h-12 bg-rose-50/50 border-rose-100 text-center font-black rounded-xl" /></div>
+                 <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-emerald-600 ml-1">POS (+)</Label><Input type="number" step="0.1" value={mockData.positiveMarks} onChange={e => setMockData((p: any) => ({...p, positiveMarks: parseFloat(e.target.value) || 1}))} className="h-12 bg-emerald-50/50 border-emerald-100 text-center font-black rounded-xl" /></div>
+                 <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-rose-600 ml-1">NEG (-)</Label><Input type="number" step="0.01" value={mockData.negativeMarks} onChange={e => setMockData((p: any) => ({...p, negativeMarks: parseFloat(e.target.value) || 0.25}))} className="h-12 bg-rose-50/50 border-rose-100 text-center font-black rounded-xl" /></div>
               </div>
            </Card>
         </div>

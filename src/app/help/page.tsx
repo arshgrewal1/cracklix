@@ -28,8 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { HelpArticle } from "@/types"
 
 /**
- * @fileOverview Official Institutional Help Hub v2.2.
- * FIXED: Resolved TypeScript cloneElement mismatch by passing component references.
+ * @fileOverview Official Institutional Help Hub v2.3.
+ * HARDENED: Resolved React global reference errors and type mismatches.
  */
 
 const HELP_CATEGORIES = [

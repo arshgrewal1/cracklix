@@ -10,8 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import type { Question, MockTest } from "@/types"
 
 /**
- * @fileOverview Institutional Analytics Hub v16.5.
- * FIXED: Explicitly typed all callbacks and resolved hydration blockers in chart defs.
+ * @fileOverview Institutional Analytics Hub v16.6.
+ * HARDENED: Resolved hydration blockers and strictly typed all callbacks.
  */
 
 interface MetricCardProps {
@@ -83,7 +83,7 @@ export default function AdminAnalytics() {
 
   return (
     <div className="space-y-12 pb-20 text-left">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center px-4">
         <div className="text-left">
            <div className="flex items-center gap-3 mb-2"><BarChart3 className="h-5 w-5 text-primary" /><span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Institutional Governance Monitor</span></div>
           <h1 className="text-5xl font-black font-headline text-primary uppercase tracking-tight">Ecosystem Insights</h1>
@@ -91,23 +91,23 @@ export default function AdminAnalytics() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 px-4">
          <MetricCard label="Total Free Mocks" value={mLoading ? "..." : mockStats.free} trend="Public" icon={<Unlock className="text-emerald-500" />} />
          <MetricCard label="Total Premium Mocks" value={mLoading ? "..." : mockStats.premium} trend="Locked" icon={<Lock className="text-amber-500" />} />
          <MetricCard label="Active Aspirants" value={usersLoading ? "..." : (users?.length || "0")} trend="Live" icon={<Users className="text-blue-400" />} />
          <MetricCard label="Pro Pass Holders" value={usersLoading ? "..." : proUsers.length} trend="Elite" icon={<CreditCard className="text-emerald-400" />} />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 px-4">
          <MetricChip label="Total MCQs" value={qLoading ? "..." : (questions?.length || 0)} icon={<Zap className="text-primary" />} />
          <MetricChip label="Audit Attempts" value={resultsLoading ? "..." : (results?.length || "0")} icon={<Activity className="text-blue-500" />} />
          <MetricChip label="Avg Accuracy" value={resultsLoading ? "..." : `${avgAccuracy}%`} icon={<Target className="text-rose-400" />} />
          <MetricChip label="Locked Nodes" value={qLoading ? "..." : stats.locked} icon={<Lock className="text-slate-400" />} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-4">
          <Card className="lg:col-span-8 border-none shadow-3xl rounded-[3.5rem] bg-white overflow-hidden border border-slate-50">
-            <CardHeader className="p-12 border-b border-slate-50 bg-slate-50/30">
+            <CardHeader className="p-12 border-b border-slate-50 bg-slate-50/30 text-left">
                <CardTitle className="font-headline font-black text-3xl text-[#0F172A] uppercase">Engagement Flow</CardTitle>
                <CardDescription className="text-xs font-bold uppercase tracking-widest text-slate-400">Projected volume based on current registration nodes.</CardDescription>
             </CardHeader>
@@ -146,7 +146,7 @@ export default function AdminAnalytics() {
                <UsageProgress label="Banned Assets" value={qLoading ? 0 : Math.round((stats.locked / (stats.total || 1)) * 100)} />
             </div>
             <div className="pt-10 border-t border-white/5 relative z-10">
-               <div className="flex items-center gap-4 text-emerald-500"><Activity className="h-6 w-6" /><span className="text-[10px] font-black uppercase tracking-[0.2em]">Live Registry Audit Online</span></div>
+               <div className="flex items-center gap-4 text-emerald-500 text-left"><Activity className="h-6 w-6" /><span className="text-[10px] font-black uppercase tracking-[0.2em]">Live Registry Audit Online</span></div>
             </div>
          </Card>
       </div>
@@ -156,7 +156,7 @@ export default function AdminAnalytics() {
 
 function MetricCard({ label, value, trend, icon }: MetricCardProps) {
   return (
-    <Card className="border-none shadow-2xl rounded-[2.5rem] p-10 bg-white hover:translate-y-[-4px] transition-all group border border-slate-50">
+    <Card className="border-none shadow-2xl rounded-[2.5rem] p-10 bg-white hover:translate-y-[-4px] transition-all group border border-slate-50 text-left">
        <div className="flex items-center justify-between mb-8">
           <div className="h-16 w-16 rounded-[1.5rem] bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">{icon}</div>
           <div className={`text-[10px] font-black px-3 py-1 rounded-xl bg-slate-50 text-slate-400 uppercase tracking-widest`}>{trend}</div>
@@ -169,7 +169,7 @@ function MetricCard({ label, value, trend, icon }: MetricCardProps) {
 
 function MetricChip({ label, value, icon }: MetricChipProps) {
    return (
-      <Card className="border-none shadow-xl bg-white rounded-3xl p-8 flex items-center gap-6 border border-slate-50 hover:bg-slate-50/50 transition-colors">
+      <Card className="border-none shadow-xl bg-white rounded-3xl p-8 flex items-center gap-6 border border-slate-50 hover:bg-slate-50/50 transition-colors text-left">
          <div className="h-12 w-12 bg-slate-50 rounded-2xl flex items-center justify-center shadow-inner">{icon}</div>
          <div className="text-left">
             <div className="text-3xl font-headline font-black text-[#0F172A] leading-none tabular-nums">{value}</div>

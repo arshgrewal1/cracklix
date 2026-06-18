@@ -48,8 +48,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Profile Center v25.0.
- * FIXED: Resolved cloneElement TypeScript mismatch by using component references.
+ * @fileOverview Student Profile Center v26.0.
+ * HARDENED: Resolved type mismatches and missing React global references.
  */
 export default function ProfilePage() {
   const { user, profile, loading, profileLoading, currentDeviceId } = useUser()
@@ -343,37 +343,37 @@ export default function ProfilePage() {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Full Identity</Label>
-                     <Input value={editForm?.name || ""} onChange={e => setEditForm(prev => ({...prev, name: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner" />
+                     <Input value={editForm?.name || ""} onChange={e => setEditForm((prev: any) => ({...prev, name: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner" />
                   </div>
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Contact String</Label>
-                     <Input type="email" value={editForm?.email || ""} onChange={e => setEditForm(prev => ({...prev, email: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner" />
+                     <Input type="email" value={editForm?.email || ""} onChange={e => setEditForm((prev: any) => ({...prev, email: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner" />
                   </div>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Date of Birth</Label>
-                     <Input type="date" value={editForm?.dob || ""} onChange={e => setEditForm(prev => ({...prev, dob: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner" />
+                     <Input type="date" value={editForm?.dob || ""} onChange={e => setEditForm((prev: any) => ({...prev, dob: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner" />
                   </div>
                   <div className="space-y-2 text-left">
                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Authority</Label>
-                     <select value={editForm?.targetExam || ""} onChange={e => setEditForm(prev => ({...prev, targetExam: e.target.value}))} className="w-full h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 outline-none shadow-inner"><option value="" disabled>Select Board</option><option value="PSSSB">PSSSB</option><option value="PPSC">PPSC</option><option value="Punjab Police">Punjab Police</option><option value="Army">Indian Army</option><option value="High Court">High Court</option></select></div>
+                     <select value={editForm?.targetExam || ""} onChange={e => setEditForm((prev: any) => ({...prev, targetExam: e.target.value}))} className="w-full h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 outline-none shadow-inner"><option value="" disabled>Select Board</option><option value="PSSSB">PSSSB</option><option value="PPSC">PPSC</option><option value="Punjab Police">Punjab Police</option><option value="Army">Indian Army</option><option value="High Court">High Court</option></select></div>
                </div>
                <div className="space-y-2 text-left">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Verified Mobile Node</Label>
                   <div className="relative">
                      <span className="absolute left-6 top-1/2 -translate-y-1/2 text-sm md:text-lg font-black text-slate-400">+91</span>
-                     <Input value={editForm?.phone || ""} onChange={e => setEditForm(prev => ({...prev, phone: e.target.value.replace(/\D/g, '').slice(0,10)}))} className="h-14 md:h-16 pl-16 md:pl-20 rounded-2xl bg-slate-50 border-none font-black text-lg md:text-2xl tracking-[0.2em]" placeholder="10-digit number" />
+                     <Input value={editForm?.phone || ""} onChange={e => setEditForm((prev: any) => ({...prev, phone: e.target.value.replace(/\D/g, '').slice(0,10)}))} className="h-14 md:h-16 pl-16 md:pl-20 rounded-2xl bg-slate-50 border-none font-black text-lg md:text-2xl tracking-[0.2em]" placeholder="10-digit number" />
                   </div>
                </div>
                <div className="space-y-2 text-left">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Home Hub Address</Label>
-                  <Textarea value={editForm?.address || ""} onChange={e => setEditForm(prev => ({...prev, address: e.target.value}))} className="min-h-[120px] md:min-h-[160px] rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-50 border-none font-medium p-5 md:p-8 text-[13px] md:text-lg leading-relaxed shadow-inner resize-none" placeholder="Enter your full HQs address..." />
+                  <Textarea value={editForm?.address || ""} onChange={e => setEditForm((prev: any) => ({...prev, address: e.target.value}))} className="min-h-[120px] md:min-h-[160px] rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-50 border-none font-medium p-5 md:p-8 text-[13px] md:text-lg leading-relaxed shadow-inner resize-none" placeholder="Enter your full HQs address..." />
                </div>
             </div>
             <DialogFooter className="p-8 md:p-14 pt-4 md:pt-6 bg-slate-50 border-t border-slate-100 shrink-0 flex flex-row gap-4 md:gap-6 items-center justify-between">
                <Button variant="ghost" onClick={() => setIsEditing(false)} className="h-14 md:h-18 px-6 md:px-10 font-black uppercase text-[9px] md:text-[11px] text-slate-400 tracking-widest hover:text-slate-900 transition-colors">Discard</Button>
-               <Button onClick={handleUpdateProfile} disabled={isSaving} className="bg-primary hover:bg-orange-600 text-white h-14 md:h-18 px-8 md:px-14 rounded-2xl font-black uppercase text-[10px] md:text-[12px] tracking-[0.3em] flex-1 shadow-3xl transition-all active:scale-95 gap-3">{isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />} Sync Registry</Button>
+               <Button onClick={handleUpdateProfile} disabled={isSaving} className="bg-primary hover:bg-orange-600 text-white h-14 md:h-18 px-8 md:px-14 rounded-2xl font-black uppercase text-[10px] md:text-[12px] tracking-[0.3em] flex-1 shadow-3xl transition-all active:scale-95 gap-3">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Sync Registry</Button>
             </DialogFooter>
          </DialogContent>
       </Dialog>
