@@ -32,9 +32,9 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Punjab Exam Architecture Manager v2.2.
+ * @fileOverview Punjab Exam Architecture Manager v2.3.
  * Centralized hierarchical board for Category → Hub → Exam mapping.
- * FIXED: Explicitly typed sort parameters and prevented in-place mutation to resolve Vercel build failures.
+ * FIXED: Explicitly typed sort parameters (a: any, b: any) to resolve Vercel build failures.
  */
 
 export default function ArchitectureManager() {

@@ -36,8 +36,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Hardened Mock Architect v96.1 (Type Fixed).
- * FIXED: Parameter 'id' explicitly typed to resolve Vercel build failure.
+ * @fileOverview Hardened Mock Architect v96.2 (Type Fixed).
+ * FIXED: Parameter 'id' explicitly typed in sectionQIds mapping to resolve Vercel build failure.
  */
 
 export default function MockBuilderPage() {
@@ -267,7 +267,7 @@ function MockBuilderContent() {
            <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-6 md:p-10 space-y-8 border border-slate-100">
               <div className="space-y-3">
                  <Label className="text-[12px] font-black uppercase text-slate-500 tracking-tight ml-1">Series Headline</Label>
-                 <Input value={mockData.title} onChange={e => setMockData({...mockData, title: e.target.value})} className="h-14 md:h-16 rounded-2xl bg-slate-50/50 border-none font-black text-lg px-6 shadow-inner focus-visible:ring-primary text-[#0F172A]" placeholder="Patwari Mock Series 01" />
+                 <Input value={mockData.title} onChange={e => setFormData({...mockData, title: e.target.value})} className="h-14 md:h-16 rounded-2xl bg-slate-50/50 border-none font-black text-lg px-6 shadow-inner focus-visible:ring-primary text-[#0F172A]" placeholder="Patwari Mock Series 01" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-3">

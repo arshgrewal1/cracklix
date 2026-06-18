@@ -9,8 +9,8 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Final Administrative Control Center v4.0 (Type Fixed).
- * FIXED: Implicit 'any' types in chart mapping and reducers resolved.
+ * @fileOverview Final Administrative Control Center v4.1 (Type Fixed).
+ * FIXED: Explicit types added to higher-order callback parameters to resolve Vercel build failures.
  */
 
 export default function AdminAnalytics() {
@@ -109,7 +109,7 @@ export default function AdminAnalytics() {
                         <YAxis hide />
                         <Tooltip content={({active, payload}) => {
                            if (active && payload && payload.length) {
-                              return <div className="bg-[#0F172A] text-white p-6 rounded-[1.5rem] shadow-4xl text-sm font-bold uppercase tracking-tight"><span className="text-primary mr-3">{payload[0].value}</span> Activity Node</div>
+                              return <div className="bg-[#0F172A] text-white p-6 rounded-[1.5rem] shadow-4xl text-sm font-bold uppercase tracking-tight"><span className="text-primary mr-3">{(payload[0].value as number)}</span> Activity Node</div>
                            }
                            return null
                         }} />
