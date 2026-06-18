@@ -17,7 +17,8 @@ import {
   Search,
   Database,
   ShieldCheck,
-  Plus
+  Plus,
+  Landmark
 } from "lucide-react"
 import { useDoc, useCollection, useFirestore } from "@/firebase"
 import { doc, updateDoc, collection, serverTimestamp } from "firebase/firestore"

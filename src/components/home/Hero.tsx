@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -22,8 +23,7 @@ import { doc } from "firebase/firestore";
 
 /**
  * @fileOverview Institutional Hero Hub v107.0.
- * RESOLVED: Removed all Git merge conflict markers.
- * UPDATED: Real-time student registry data sync.
+ * CLEAN: Resolved all Git merge conflict markers.
  * UPDATED: Student illustration positioned directly above feature cards.
  */
 export default function Hero() {
