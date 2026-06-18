@@ -11,19 +11,23 @@ import {
   BookOpen,
   FileText,
   BarChart3,
-  Star
+  Star,
+  Loader2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Hero Hub v8.0.
- * LIVE SYNC: Trust badge now pulls live user count from settings/stats registry.
- * TYPOGRAPHY: Premium Title Case with font-extrabold and tracking-tight.
- * POSITIONING: Student illustration positioned exactly above feature cards.
+ * @fileOverview Official Fluid Hero Hub v9.0.
+ * HARDENED: Full responsive typography audit.
+ * ADAPTIVE: Fluid clamp-based headings and mobile-first scaling for 320px+ devices.
+ * LIVE SYNC: Synchronized with settings/stats registry.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -38,179 +42,172 @@ export default function Hero() {
     [db]
   );
 
-  const { data: stats } = useDoc<any>(statsRef);
+  const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   const liveAspirantCount = useMemo(() => {
-    if (!stats?.totalUsers) return "10,000+";
+    if (statsLoading || !stats?.totalUsers) return "15,000+";
     const num = stats.totalUsers;
     if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + "k+";
     return num + "+";
-  }, [stats]);
+  }, [stats, statsLoading]);
 
   const liveStats = useMemo(() => {
     const formatNumber = (num: number, fallback: string) => {
+      if (statsLoading) return null;
       if (!num) return fallback;
-      if (num >= 1000) return Math.floor(num / 1000) + "k+";
+      if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + "k+";
       return num + "+";
     };
 
     return [
       {
         id: "q",
-        icon: <Zap className="h-5 w-5 text-blue-600" />,
+        icon: <Zap className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />,
         val: formatNumber(stats?.totalQuestions, "50k+"),
         label: "Questions"
       },
       {
         id: "m",
-        icon: <ClipboardList className="h-5 w-5 text-indigo-600" />,
+        icon: <ClipboardList className="h-4 w-4 md:h-5 md:w-5 text-indigo-600" />,
         val: formatNumber(stats?.totalMocks, "500+"),
         label: "Mock Tests"
       },
       {
         id: "e",
-        icon: <ShieldCheck className="h-5 w-5 text-emerald-600" />,
+        icon: <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 text-emerald-600" />,
         val: formatNumber(stats?.totalBoards, "50+"),
         label: "Exams"
       },
       {
         id: "u",
-        icon: <Users className="h-5 w-5 text-orange-500" />,
+        icon: <Users className="h-4 w-4 md:h-5 md:w-5 text-orange-500" />,
         val: formatNumber(stats?.totalUsers, "15k+"),
         label: "Aspirants"
       }
     ];
-  }, [stats]);
+  }, [stats, statsLoading]);
 
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-blue-50 py-12 md:py-24 text-left">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          
-          {/* LEFT CONTENT COLUMN */}
-          <div className="space-y-8">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border shadow-sm mb-2">
-                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                <span className="text-sm font-semibold text-slate-700">
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-blue-50 py-8 md:py-16 lg:py-24 text-left">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="grid lg:grid-cols-[1fr_0.8fr] gap-8 md:gap-12 items-center">
+
+          {/* CONTENT COLUMN */}
+          <div className="space-y-6 md:space-y-10 max-w-full overflow-hidden">
+            
+            <div className="space-y-4 md:space-y-8">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="inline-flex items-center gap-2 px-3 py-1.5 md:px-5 md:py-2 rounded-full bg-white border border-slate-100 shadow-sm"
+              >
+                <Star className="h-3 w-3 md:h-4 md:w-4 text-yellow-500 fill-yellow-500" />
+                <span className="text-[10px] sm:text-xs md:text-sm font-bold text-slate-700 tracking-tight">
                   {liveAspirantCount} Aspirants Trust Cracklix
                 </span>
-              </div>
+              </motion.div>
 
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05] antialiased">
-                Crack Punjab <br/>
-                <span className="block text-blue-600">
-                  Government Exams
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.1] md:leading-[1.05] break-words antialiased">
+                <span className="text-[clamp(1.8rem,6vw,4.5rem)]">
+                  Crack Punjab <br/>
+                  <span className="text-blue-600">Government Exams</span> <br/>
+                  With Confidence
                 </span>
-                With Confidence
               </h1>
 
-              <p className="mt-6 text-base sm:text-lg text-slate-600 max-w-2xl font-medium leading-relaxed">
+              <p className="mt-4 md:mt-6 text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl font-medium leading-relaxed">
                 Practice with bilingual mock tests, previous papers and
                 exam-focused preparation for PSSSB, Punjab Police,
                 PSTET, PSPCL and more.
               </p>
 
-              <div className="flex flex-wrap gap-3 mt-6">
+              <div className="flex flex-wrap gap-2 md:gap-3 mt-4">
                 {["PSSSB", "Punjab Police", "PSTET", "PSPCL", "PPSC"].map(
                   (item) => (
-                    <span
+                    <Badge
                       key={item}
-                      className="px-4 py-2 rounded-full bg-white border text-sm font-bold text-slate-700 shadow-sm"
+                      variant="outline"
+                      className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white border-slate-200 text-[9px] md:text-xs font-bold text-slate-700 shadow-sm"
                     >
                       {item}
-                    </span>
+                    </Badge>
                   )
                 )}
               </div>
             </div>
 
-            {/* STUDENT HERO IMAGE: POSITIONED EXACTLY ABOVE FEATURE CARDS */}
-            <div className="relative flex justify-center lg:justify-start -mb-4">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
-                className="relative w-full max-w-sm md:max-w-md"
-              >
-                <img
-                  src="/images/hero-student.png"
-                  alt="Cracklix Student"
-                  className="w-full h-auto object-contain drop-shadow-2xl"
-                />
-              </motion.div>
+            {/* VISUAL BREAK: STUDENT HERO IMAGE */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="relative flex justify-center md:justify-start py-4"
+            >
+              <img
+                src="/images/hero-student.png"
+                alt="Cracklix Student"
+                className="w-full h-auto object-contain drop-shadow-2xl max-w-[280px] xs:max-w-xs md:max-w-md lg:max-w-lg"
+              />
+            </motion.div>
+
+            {/* QUICK FEATURE GRID */}
+            <div className="grid grid-cols-2 gap-3 md:gap-6 mt-4">
+              <FeatureCard icon={<ClipboardList />} label="Mock Tests" color="text-blue-600" />
+              <FeatureCard icon={<BookOpen />} label="Study Hub" color="text-indigo-600" />
+              <FeatureCard icon={<FileText />} label="PYQ Papers" color="text-emerald-600" />
+              <FeatureCard icon={<BarChart3 />} label="Analytics" color="text-orange-500" />
             </div>
 
-            {/* FEATURE GRID */}
-            <div className="grid grid-cols-2 gap-4">
-              <Card className="p-4 md:p-6 rounded-3xl border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-md transition-all text-left">
-                <ClipboardList className="h-6 w-6 text-blue-600 mb-3" />
-                <p className="font-bold text-[#0F172A] text-[10px] md:text-xs tracking-tight">Mock Tests</p>
-              </Card>
-
-              <Card className="p-4 md:p-6 rounded-3xl border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-md transition-all text-left">
-                <BookOpen className="h-6 w-6 text-indigo-600 mb-3" />
-                <p className="font-bold text-[#0F172A] text-[10px] md:text-xs tracking-tight">Study Material</p>
-              </Card>
-
-              <Card className="p-4 md:p-6 rounded-3xl border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-md transition-all text-left">
-                <FileText className="h-6 w-6 text-emerald-600 mb-3" />
-                <p className="font-bold text-[#0F172A] text-[10px] md:text-xs tracking-tight">Previous Papers</p>
-              </Card>
-
-              <Card className="p-4 md:p-6 rounded-3xl border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-md transition-all text-left">
-                <BarChart3 className="h-6 w-6 text-orange-500 mb-3" />
-                <p className="font-bold text-[#0F172A] text-[10px] md:text-xs tracking-tight">Performance Analytics</p>
-              </Card>
-            </div>
-
-            <div className="flex flex-wrap gap-4 pt-4">
+            {/* CTAS */}
+            <div className="flex flex-col sm:flex-row gap-3 md:gap-5 mt-8 md:mt-12">
               <Button
                 asChild
-                className="h-12 md:h-14 px-8 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border-none shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
+                className="w-full sm:w-auto h-12 md:h-16 px-8 md:px-10 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-xl shadow-blue-600/20 active:scale-95 border-none transition-all gap-2"
               >
                 <Link href="/mocks">
-                  Start Free Mock Test
-                  <ChevronRight className="ml-2 h-4 w-4" />
+                  Start Practice Now
+                  <ChevronRight className="h-4 w-4" />
                 </Link>
               </Button>
 
               <Button
                 asChild
                 variant="outline"
-                className="h-12 md:h-14 px-8 rounded-2xl border-2 font-bold hover:bg-slate-50 active:scale-95 transition-all"
+                className="w-full sm:w-auto h-12 md:h-16 px-8 md:px-10 border-2 border-slate-200 bg-white rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest hover:bg-slate-50 active:scale-95 transition-all text-slate-600"
               >
                 <Link href="/exams">
-                  Browse Exams
+                  Browse Exam List
                 </Link>
               </Button>
             </div>
           </div>
-
-          {/* RIGHT COLUMN (RESERVED FOR DESKTOP BALANCE) */}
-          <div className="hidden lg:block relative h-full min-h-[400px]">
-             {/* This column maintains grid balance on large screens */}
-          </div>
+          
+          {/* RIGHT COLUMN (DESKTOP BALANCE) */}
+          <div className="hidden lg:block"></div>
         </div>
 
-        {/* BOTTOM STATS GRID */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 md:mt-24">
+        {/* BOTTOM LIVE STATS GRID */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mt-16 md:mt-24 lg:mt-32">
           {liveStats.map((stat) => (
             <Card
               key={stat.id}
-              className="p-6 rounded-3xl bg-white border border-slate-100 shadow-sm group hover:shadow-md transition-shadow"
+              className="p-4 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl group hover:shadow-2xl transition-all duration-500"
             >
-              <div className="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
-                <div className="shrink-0 p-2 rounded-xl bg-slate-50 group-hover:bg-blue-50 transition-colors">
+              <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-5 text-center sm:text-left">
+                <div className="shrink-0 p-2 md:p-3 rounded-xl bg-slate-50 group-hover:bg-blue-50 transition-colors shadow-inner">
                   {stat.icon}
                 </div>
-                <div className="min-w-0">
-                  <div className="text-2xl md:text-3xl font-black text-slate-900 tabular-nums leading-none mb-1">
-                    {stat.val}
+                <div className="min-w-0 flex-1">
+                  <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 tabular-nums leading-none tracking-tighter mb-1.5">
+                    {statsLoading ? (
+                       <Skeleton className="h-6 w-12 bg-slate-100" />
+                    ) : (
+                       stat.val
+                    )}
                   </div>
-                  <div className="text-xs text-slate-500 font-bold uppercase tracking-wider">
+                  <div className="text-[8px] md:text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] leading-none">
                     {stat.label}
                   </div>
                 </div>
@@ -220,5 +217,16 @@ export default function Hero() {
         </div>
       </div>
     </section>
+  );
+}
+
+function FeatureCard({ icon, label, color }: { icon: React.ReactNode, label: string, color: string }) {
+  return (
+    <Card className="p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-2xl transition-all text-left">
+      <div className={cn("h-8 w-8 md:h-12 md:w-12 rounded-xl flex items-center justify-center mb-4 shadow-inner bg-slate-50 transition-transform group-hover:scale-110", color)}>
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" }) : icon}
+      </div>
+      <p className="font-black text-[#0F172A] text-[10px] md:text-[13px] uppercase tracking-widest">{label}</p>
+    </Card>
   );
 }
