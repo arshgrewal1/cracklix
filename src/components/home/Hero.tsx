@@ -21,9 +21,9 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Premium Clean Hero Hub v29.0.
- * FIXED: Synchronized CTA button alignment (Centered) to match reference screenshot.
- * FIXED: Updated typography to Uppercase for institutional focus.
+ * @fileOverview Premium Clean Hero Hub v30.0.
+ * FIXED: Trust badge synchronized with official screenshot design.
+ * RESTORED: Original data fallback values for statistics.
  */
 
 export default function Hero() {
@@ -43,7 +43,7 @@ export default function Hero() {
 
   const formatNumber = (num: number, fallback: string) => {
     if (!num) return fallback;
-    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + "k+";
+    if (num >= 1000) return Math.floor(num / 1000) + "k+";
     return num + "+";
   };
 
@@ -52,7 +52,7 @@ export default function Hero() {
       {
         id: "q",
         icon: <Zap className="h-5 w-5 text-blue-600 fill-current" />,
-        val: formatNumber(stats?.totalQuestions, "10k+"),
+        val: formatNumber(stats?.totalQuestions, "50k+"),
         label: "Questions"
       },
       {
@@ -70,7 +70,7 @@ export default function Hero() {
       {
         id: "u",
         icon: <Users className="h-5 w-5 text-indigo-500" />,
-        val: formatNumber(stats?.totalUsers, "10k+"),
+        val: formatNumber(stats?.totalUsers, "15k+"),
         label: "Aspirants"
       }
     ];
@@ -88,13 +88,14 @@ export default function Hero() {
           {/* LEFT: CONTENT HUB */}
           <div className="flex flex-col items-start text-left space-y-8 md:space-y-10">
             
+            {/* TRUST BADGE - SYNCHRONIZED WITH DESIGN */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-200 shadow-sm"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white border border-slate-100 shadow-sm"
             >
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              <span className="text-[11px] md:text-sm font-bold text-slate-700 uppercase tracking-tight">
+              <span className="text-[10px] md:text-[13px] font-black text-[#0F172A] uppercase tracking-wider">
                 10,000+ Aspirants Trust Cracklix
               </span>
             </motion.div>
@@ -133,7 +134,7 @@ export default function Hero() {
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-4">
               <Button
                 asChild
-                className="h-14 md:h-16 px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-black uppercase text-[11px] md:text-xs tracking-[0.2em] rounded-full shadow-xl transition-all active:scale-95 border-none group/btn"
+                className="h-14 md:h-16 px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-black uppercase text-[11px] md:text-xs tracking-[0.2em] rounded-full shadow-xl transition-all active:scale-95 border-none group/btn justify-center"
               >
                 <Link href="/mocks" className="flex items-center justify-center gap-3 w-full">
                   <span>START FREE MOCK TEST</span>
@@ -144,7 +145,7 @@ export default function Hero() {
               <Button
                 asChild
                 variant="outline"
-                className="h-14 md:h-16 px-10 border-2 border-slate-200 bg-white text-[#0F172A] font-black uppercase text-[11px] md:text-xs tracking-[0.2em] rounded-full shadow-sm hover:bg-slate-50 transition-all active:scale-95 group/btn2"
+                className="h-14 md:h-16 px-10 border-2 border-slate-200 bg-white text-[#0F172A] font-black uppercase text-[11px] md:text-xs tracking-[0.2em] rounded-full shadow-sm hover:bg-slate-50 transition-all active:scale-95 group/btn2 justify-center"
               >
                 <Link href="/exams" className="flex items-center justify-center gap-3 w-full">
                   <span>BROWSE EXAMS</span>
