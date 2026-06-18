@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Official Progress Report Hub v2.5 (Build Fixed).
+ * @fileOverview Official Progress Report Hub v2.6 (Build Hardened).
  * FIXED: Added missing 'cn' and 'Zap' imports to resolve build failure.
  */
 

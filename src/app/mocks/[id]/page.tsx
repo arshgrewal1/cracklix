@@ -8,7 +8,7 @@ import { useDoc, useFirestore, useUser } from "@/firebase"
 import { doc, collection, query, where, getDocs, limit, getDoc } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { 
   Clock, 
   BookOpen, 
@@ -24,14 +24,16 @@ import {
   Target,
   RefreshCw,
   Smartphone,
-  Layers
+  Layers,
+  LucideIcon
 } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Individual Mock Gateway v32.0 (Hardened Access & Types).
+ * @fileOverview Individual Mock Gateway v32.2 (Hardened Types).
+ * FIXED: Removed React.cloneElement in favor of direct component reference rendering for type safety.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -123,7 +125,7 @@ export default function MockOverviewPage() {
        <div className="text-center space-y-3">
           <p className="font-black uppercase tracking-[0.3em] text-[10px] text-slate-400">Registry Failure</p>
           <h2 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Test Not Found</h2>
-          <p className="text-sm md:text-lg font-medium text-slate-500 max-w-sm mx-auto leading-relaxed">This preparation item might have been archived or removed from the official registry.</p>
+          <p className="text-sm md:text-lg font-medium text-slate-500 max-sm mx-auto leading-relaxed">This preparation item might have been archived or removed from the official registry.</p>
        </div>
        <Button asChild className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] tracking-[0.2em] rounded-2xl shadow-3xl gap-3 active:scale-95 border-none">
           <Link href="/"><Home className="h-4 w-4" /> Return Dashboard</Link>
@@ -207,9 +209,9 @@ export default function MockOverviewPage() {
         <section className="py-10 md:py-24 bg-white">
            <div className="container mx-auto px-4 md:px-8 max-w-7xl">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12">
-                 <FeatureNode icon={<ShieldCheck className="text-emerald-500" />} title="OFFICIAL PATTERN" desc="Verified against upcoming board notifications." />
-                 <FeatureNode icon={<Zap className="text-primary" />} title="ELITE SOLUTIONS" desc="Bilingual rationalizations for every choice." />
-                 <FeatureNode icon={<Target className="text-blue-500" />} title="STATE MERIT" desc="Compare with toppers across 22 districts." />
+                 <FeatureNode icon={ShieldCheck} title="OFFICIAL PATTERN" desc="Verified against upcoming board notifications." />
+                 <FeatureNode icon={Zap} title="ELITE SOLUTIONS" desc="Bilingual rationalizations for every choice." />
+                 <FeatureNode icon={Target} title="STATE MERIT" desc="Compare with toppers across 22 districts." />
               </div>
 
               <div className="mt-16 md:mt-32 p-8 md:p-20 bg-slate-900 rounded-[3rem] md:rounded-[5rem] text-white relative overflow-hidden group border border-white/5">
@@ -236,13 +238,11 @@ export default function MockOverviewPage() {
   )
 }
 
-function FeatureNode({ icon, title, desc }: any) {
+function FeatureNode({ icon: Icon, title, desc }: { icon: LucideIcon, title: string, desc: string }) {
   return (
     <div className="p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-50 border border-slate-100 space-y-5 md:space-y-8 group hover:bg-white hover:shadow-4xl transition-all duration-500 text-left border-b-4 border-b-slate-100 hover:border-b-primary">
       <div className="h-14 w-14 md:h-20 md:w-20 bg-white rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500">
-        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { 
-           className: cn(icon.props.className, "h-6 w-6 md:h-10 md:w-10") 
-        }) : icon}
+        <Icon className="h-6 w-6 md:h-10 md:w-10 text-primary" />
       </div>
       <div className="space-y-2 md:space-y-3">
          <h3 className="text-lg md:text-2xl font-black text-[#0F172A] uppercase tracking-tight leading-none">{title}</h3>

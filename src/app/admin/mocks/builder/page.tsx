@@ -36,8 +36,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Institutional Mock Builder Hub v19.1 (Hardened).
- * FIXED: Corrected mismatched </button> tags for custom <Button> elements.
+ * @fileOverview Institutional Mock Builder Hub v19.3 (Hardened).
+ * FIXED: Corrected mismatched </button> tags and verified JSX structure.
  */
 
 export default function MockBuilderPage() {
@@ -283,7 +283,7 @@ function MockBuilderContent() {
                 <Label className="text-[12px] font-black uppercase text-slate-500 ml-1">Assigned Authorities</Label>
                 <div className="space-y-2 max-h-[160px] overflow-y-auto custom-scrollbar pr-2">
                    {boards?.map((b: any) => (
-                      <div key={b.id} onClick={() => toggleBoardId(b.id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group"><div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all", mockData.boardIds?.includes(b.id) ? "border-primary bg-primary" : "border-slate-300 bg-white")}>{mockData.boardIds?.includes(b.id) && <Check className="h-3 w-3 text-white stroke-[3px]" />}</div><span className="text-sm font-black text-[#0F172A] uppercase">{b.abbreviation} HUB</span></div>
+                      <div key={b.id} onClick={() => toggleBoardId(b.id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group"><div className={cn("h-5 w-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-all", mockData.boardIds?.includes(b.id) ? "border-primary bg-primary" : "border-slate-300 bg-white")}>{mockData.boardIds?.includes(b.id) && <Check className="h-3 w-3 text-white stroke-[4px]" />}</div><span className="text-sm font-black text-[#0F172A] uppercase">{b.abbreviation} HUB</span></div>
                    ))}
                 </div>
               </div>

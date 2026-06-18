@@ -26,8 +26,8 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Login Hub v23.3 (Build Hardened).
- * FIXED: Integrated missing 'cn' utility import for recovery node animations.
+ * @fileOverview Hardened Login Hub v23.5 (Build Fixed).
+ * FIXED: Explicitly added 'cn' import to resolve the ReferenceError in the recovery node.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

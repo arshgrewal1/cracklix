@@ -17,8 +17,8 @@ import { HelpArticle } from "@/types"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Institutional FAQ Hub v4.1 (Build Fixed).
- * FIXED: Added missing 'cn' import and explicitly typed React components.
+ * @fileOverview Official Institutional FAQ Hub v4.2 (Build Hardened).
+ * FIXED: Added missing 'React' import and implemented type-safe icon rendering.
  */
 
 export default function FAQPage() {

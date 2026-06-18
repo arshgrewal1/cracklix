@@ -19,8 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Mobile-First Question Hub v44.1 (Hardened Types).
- * FIXED: Updated selectedAnswer type to number | null for CBT store alignment.
+ * @fileOverview Precision Mobile-First Question Hub v44.3 (Hardened Types).
+ * FIXED: Prop alignment for selectedAnswer to strictly handle number | null.
  */
 export default function QuestionRenderer({ 
   question, 

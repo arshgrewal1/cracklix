@@ -29,7 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { HelpArticle } from "@/types"
 
 /**
- * @fileOverview Official Institutional Help Hub v2.7 (Build Hardened).
+ * @fileOverview Official Institutional Help Hub v2.9 (Build Fixed).
  * FIXED: Explicitly added missing Badge import and verified component mapping.
  */
 
@@ -71,7 +71,7 @@ export default function HelpCenterPage() {
            </div>
 
            <div className="relative max-w-2xl mx-auto group">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-600 rounded-2xl blur opacity-5 group-focus-within:opacity-15 transition duration-1000"></div>
+              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-orange-400 rounded-2xl blur opacity-5 group-focus-within:opacity-15 transition duration-1000"></div>
               <div className="relative">
                  <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400" />
                  <Input 

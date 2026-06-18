@@ -30,7 +30,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Test Results Hub v40.0 (Production Hardened).
+ * @fileOverview Test Results Hub v40.1 (Production Hardened).
+ * FIXED: Explicit typing for merit list reduction and review filters to satisfy TS strict mode.
  */
 
 export default function ResultPage() {
@@ -67,7 +68,7 @@ function ResultContent() {
   const merit = useMemo(() => {
      if (!rawGlobalResults || !sessionData) return { rank: '?', total: 0, percentile: 0, list: [] };
      
-     const uniqueMap = new Map();
+     const uniqueMap = new Map<string, any>();
      [...rawGlobalResults].sort((a: any, b: any) => (b.score || 0) - (a.score || 0)).forEach((r: any) => {
         if (!uniqueMap.has(r.userId) || uniqueMap.get(r.userId).score < r.score) {
            uniqueMap.set(r.userId, r);
@@ -276,7 +277,7 @@ function ResultPill({ label, val, color, className }: any) {
    return (
       <div className={cn("flex flex-col items-center md:items-start gap-0.5 xs:gap-1.5", className)}>
          <span className="text-[5px] xs:text-[7px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] leading-none">{label}</span>
-         <span className={cn("text-[10px] xs:text-lg md:text-4xl lg:text-5xl font-headline font-black leading-none tabular-nums tracking-tighter", color)}>{val}</span>
+         <span className={cn("text-[10px] xs:lg md:text-4xl lg:text-5xl font-headline font-black leading-none tabular-nums tracking-tighter", color)}>{val}</span>
       </div>
    )
 }

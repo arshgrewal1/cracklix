@@ -26,7 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v57.0 (Production Hardened).
+ * @fileOverview Hardened CBT Engine v57.2 (Production Hardened).
+ * FIXED: Explicit typing for hydration callbacks to resolve implicit any errors.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -214,7 +215,7 @@ export default function MockAttemptPage() {
                     language={language} 
                     question={{...questions[currentIdx], displayId: (currentIdx + 1).toString()}} 
                     selectedAnswer={answers?.[currentIdx] ?? null} 
-                    onSelect={(idx) => setAnswer(currentIdx, idx, db)} 
+                    onSelect={(idx: number) => setAnswer(currentIdx, idx, db)} 
                     className="shadow-md border-none p-4 md:p-10 rounded-xl md:rounded-[3rem]" 
                   />
                 </motion.div>

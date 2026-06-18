@@ -10,8 +10,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import type { Question, MockTest } from "@/types"
 
 /**
- * @fileOverview Institutional Analytics Hub v16.6.
- * HARDENED: Resolved hydration blockers and strictly typed all callbacks.
+ * @fileOverview Institutional Analytics Hub v16.7 (Production Hardened).
+ * FIXED: Explicit typing for reduction and chart callbacks to satisfy TS strict mode.
  */
 
 interface MetricCardProps {

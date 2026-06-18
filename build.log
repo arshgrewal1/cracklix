@@ -1,0 +1,33 @@
+
+> nextn@0.1.0 build
+> NODE_ENV=production next build
+
+   ▲ Next.js 15.5.9
+   - Environments: .env
+
+   Creating an optimized production build ...
+> [PWA] Compile server
+> [PWA] Compile server
+> [PWA] Compile client (static)
+> [PWA] Auto register service worker with: /home/user/studio/node_modules/next-pwa/register.js
+> [PWA] Service worker: /home/user/studio/public/sw.js
+> [PWA]   url: /sw.js
+> [PWA]   scope: /
+
+warn - The class `duration-[2000ms]` is ambiguous and matches multiple utilities.
+warn - If this is content and not a class, replace it with `duration-&lsqb;2000ms&rsqb;` to silence this warning.
+ ✓ Compiled successfully in 94s
+   Linting and checking validity of types ...
+Failed to compile.
+
+./src/app/mocks/[id]/page.tsx:244:26
+Type error: 'icon.props' is of type 'unknown'.
+
+[0m [90m 242 |[39m       [33m<[39m[33mdiv[39m className[33m=[39m[32m"h-14 w-14 md:h-20 md:w-20 bg-white rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500"[39m[33m>[39m
+ [90m 243 |[39m         {[33mReact[39m[33m.[39misValidElement(icon) [33m?[39m [33mReact[39m[33m.[39mcloneElement(icon [36mas[39m [33mReact[39m[33m.[39m[33mReactElement[39m[33m<[39m[33many[39m[33m>[39m[33m,[39m { 
+[31m[1m>[22m[39m[90m 244 |[39m            className[33m:[39m cn(icon[33m.[39mprops[33m.[39mclassName[33m,[39m [32m"h-6 w-6 md:h-10 md:w-10"[39m) 
+ [90m     |[39m                          [31m[1m^[22m[39m
+ [90m 245 |[39m         }) [33m:[39m icon}
+ [90m 246 |[39m       [33m<[39m[33m/[39m[33mdiv[39m[33m>[39m
+ [90m 247 |[39m       [33m<[39m[33mdiv[39m className[33m=[39m[32m"space-y-2 md:space-y-3"[39m[33m>[39m[0m
+Next.js build worker exited with code: 1 and signal: null
