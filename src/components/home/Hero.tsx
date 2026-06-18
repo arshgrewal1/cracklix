@@ -2,156 +2,211 @@
 
 import React, { useMemo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  ArrowRight,
-  Star,
-  Zap,
+import {
+  ClipboardList,
   ShieldCheck,
   Users,
-  ClipboardList,
-  Target,
-  Files,
-  Landmark
+  Zap,
+  ChevronRight,
+  Star,
+  Play
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import Image from "next/image";
+import { useDoc, useFirestore } from "@/firebase";
+import { doc } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useDoc, useFirestore } from '@/firebase';
-import { doc } from 'firebase/firestore';
+import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 /**
- * @fileOverview Elite Hero Hub v88.0 (Premium Title Case Update).
+ * @fileOverview High-Fidelity Hero Hub v81.0.
+ * FIXED: Integrated missing Badge import to resolve fatal ReferenceError.
  */
+
 export default function Hero() {
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
+  const heroImage = PlaceHolderImages.find(img => img.id === 'hero-student');
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
-  const { data: stats } = useDoc<any>(statsRef);
+  const statsRef = useMemo(
+    () => (db ? doc(db, "settings", "stats") : null),
+    [db]
+  );
 
-  // PERMANENT ASSET NODE
-  const heroImage = "/images/hero-student.png";
-  const fallbackIcon = "/logo/cracklix-icon.png";
-
-  const features = [
-    { title: "Mock Tests", sub: "Exam-focused mock tests", icon: <ClipboardList className="h-4 w-4 md:h-5 md:w-5" />, color: "text-blue-600", bgColor: "bg-blue-50" },
-    { title: "Previous Papers", sub: "Previous year question papers", icon: <Files className="h-4 w-4 md:h-5 md:w-5" />, color: "text-emerald-600", bgColor: "bg-emerald-50" },
-    { title: "Daily Practice", sub: "Practice daily & stay ahead", icon: <Target className="h-4 w-4 md:h-5 md:w-5" />, color: "text-purple-600", bgColor: "bg-purple-50" },
-    { title: "Punjab Exams", sub: "All major Punjab exams at one place", icon: <Landmark className="h-4 w-4 md:h-5 md:w-5" />, color: "text-orange-600", bgColor: "bg-orange-50" }
-  ];
+  const { data: stats, loading } = useDoc<any>(statsRef);
 
   const liveStats = useMemo(() => {
-    const format = (val: number, baseline: string) => {
-      if (!val || val === 0) return baseline;
-      if (val >= 1000) return (val / 1000).toFixed(0) + 'K+';
-      return val + '+';
+    const formatNumber = (num: number) => {
+      if (!num) return "0";
+      if (num >= 1000) return (num / 1000).toFixed(1) + "k+";
+      return num.toString() + "+";
     };
 
     return [
-      { val: format(stats?.totalQuestions, "50K+"), label: "Questions", desc: "High quality practice questions", color: "text-blue-600", circleBg: "bg-blue-600", icon: <Zap className="h-4 w-4 md:h-5 md:w-5 fill-current" /> },
-      { val: format(stats?.totalMocks, "500+"), label: "Mock Tests", desc: "Topic wise & full length mocks", color: "text-purple-600", circleBg: "bg-purple-600", icon: <ClipboardList className="h-4 w-4 md:h-5 md:w-5" /> },
-      { val: format(stats?.totalBoards, "50+"), label: "Exams", desc: "All major Punjab exams", color: "text-emerald-500", circleBg: "bg-emerald-500", icon: <ShieldCheck className="h-4 w-4 md:h-5 md:w-5" /> },
-      { val: format(stats?.totalUsers, "15K+"), label: "Aspirants", desc: "Trust Cracklix for preparation", color: "text-orange-500", circleBg: "bg-orange-500", icon: <Users className="h-4 w-4 md:h-5 md:w-5" /> }
+      {
+        id: "q",
+        icon: <Zap className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />,
+        val: stats ? formatNumber(stats.totalQuestions) : null,
+        label: "Questions"
+      },
+      {
+        id: "m",
+        icon: <ClipboardList className="h-4 w-4 md:h-5 md:w-5 text-indigo-600" />,
+        val: stats ? formatNumber(stats.totalMocks) : null,
+        label: "Mock Tests"
+      },
+      {
+        id: "e",
+        icon: <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 text-emerald-600" />,
+        val: stats ? formatNumber(stats.totalBoards) : null,
+        label: "Exams"
+      },
+      {
+        id: "u",
+        icon: <Users className="h-4 w-4 md:h-5 md:w-5 text-orange-500" />,
+        val: stats ? formatNumber(stats.totalUsers) : null,
+        label: "Aspirants"
+      }
     ];
   }, [stats]);
 
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden bg-white pt-6 pb-12 md:pt-16 md:pb-24 text-center lg:text-left w-full border-b border-slate-100 min-h-[520px] lg:min-h-[680px]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        <div className="flex flex-col items-center lg:items-start space-y-6 md:space-y-10">
+    <section className="relative overflow-hidden bg-gradient-to-b from-white to-blue-50 py-10 md:py-20 lg:py-28">
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           
-          <div className="space-y-4 md:space-y-6 max-w-4xl min-w-0">
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-100 shadow-sm mx-auto lg:mx-0">
-              <Star className="h-3 w-3 text-amber-500 fill-current" />
-              <span className="text-[10px] md:text-xs font-bold text-[#334155] tracking-tight truncate max-w-[220px] xs:max-w-none">
-                {stats?.totalUsers ? stats.totalUsers.toLocaleString() : "15,000"}+ Aspirants Trust Cracklix
-              </span>
+          <div className="text-left space-y-8 md:space-y-10 relative z-10">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-blue-600/5 border border-blue-600/10 shadow-sm"
+            >
+              <Star className="h-3.5 w-3.5 text-yellow-500 fill-yellow-500 animate-pulse" />
+              <div className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.2em] text-blue-600">
+                {loading ? <Skeleton className="h-4 w-24 bg-blue-600/10" /> : <span>{stats?.totalUsers?.toLocaleString() || "0"} Registered Aspirants</span>}
+              </div>
             </motion.div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.05] antialiased break-words">
-              Crack Punjab 
-              <span className="block text-blue-600">Government Exams</span> 
-              With Confidence
-            </h1>
-            
-            <p className="text-xs xs:text-sm md:text-lg text-slate-500 font-medium max-w-xl leading-relaxed mx-auto lg:mx-0">
-              Practice bilingual mock tests and prepare for Punjab Government Exams with verified patterns.
-            </p>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="space-y-4"
+            >
+              <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-[#0F172A] leading-[1.05] tracking-tight uppercase">
+                Crack Punjab <br />
+                <span className="text-blue-600">State Exams</span> <br />
+                With Precision.
+              </h1>
+              <p className="text-base md:text-xl text-slate-500 font-medium max-w-xl leading-relaxed">
+                Punjab's smarter preparation node. Access bilingual mock tests, official previous papers, and AI rationalizations verified by Arsh Grewal Management.
+              </p>
+            </motion.div>
+
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex flex-wrap gap-4 pt-4"
+            >
+              <Button
+                asChild
+                className="h-14 md:h-18 px-8 md:px-12 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[10px] md:text-[11px] shadow-3xl shadow-blue-600/20 transition-all active:scale-95 border-none"
+              >
+                <Link href="/mocks">
+                  Start Free Mock <ChevronRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                variant="outline"
+                className="h-14 md:h-18 px-8 md:px-12 rounded-2xl border-2 border-slate-100 bg-white text-slate-600 font-black uppercase tracking-widest text-[10px] md:text-[11px] transition-all active:scale-95 hover:bg-slate-50 shadow-sm"
+              >
+                <Link href="/exams">
+                  Browse Verticals
+                </Link>
+              </Button>
+            </motion.div>
           </div>
 
-          <div className="relative flex items-center justify-center w-full mt-2">
-             <motion.div 
-               initial={{ opacity: 0, scale: 0.95 }} 
-               animate={{ opacity: 1, scale: 1 }} 
-               transition={{ duration: 0.8 }} 
-               className="relative z-10 w-full max-w-[220px] sm:max-w-[280px] lg:max-w-[420px] aspect-[4/3]"
-             >
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="hidden lg:block relative"
+          >
+             <div className="absolute inset-0 bg-blue-600/10 blur-[100px] rounded-full scale-75" />
+             <div className="relative aspect-[4/3] rounded-[3.5rem] overflow-hidden shadow-5xl border border-white/20 bg-white">
                 <Image 
-                  src={heroImage} 
-                  alt="Cracklix Prep" 
+                  src={heroImage?.imageUrl || "https://picsum.photos/seed/hero/800/600"} 
+                  alt={heroImage?.description || "Cracklix Hero"}
                   fill
                   priority
-                  className="object-contain"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = fallbackIcon;
-                  }}
+                  sizes="(max-width: 768px) 100vw, 600px"
+                  data-ai-hint={heroImage?.imageHint || "student studying"}
+                  className="object-cover"
                 />
-             </motion.div>
-          </div>
-
-          <div className="w-full max-w-5xl grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6 pt-4">
-             {features.map((f, idx) => (
-                <Card key={idx} className="border-none shadow-xl shadow-slate-200/40 rounded-2xl md:rounded-[1.8rem] p-4 md:p-6 bg-white border border-slate-100 flex items-center gap-4 md:gap-6 group hover:translate-y-[-4px] transition-all duration-300 min-h-[72px] md:min-h-0 text-left">
-                   <div className={cn("h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform duration-500", f.bgColor, f.color)}>
-                      {f.icon}
+                <div className="absolute inset-0 bg-gradient-to-t from-blue-900/10 to-transparent" />
+                
+                <div className="absolute bottom-10 left-10 right-10">
+                   <div className="bg-white/80 backdrop-blur-xl p-6 rounded-[2rem] border border-white/50 shadow-2xl flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                         <div className="h-12 w-12 bg-primary rounded-xl flex items-center justify-center text-white shadow-xl">
+                            <Play className="h-6 w-6 fill-current" />
+                         </div>
+                         <div className="text-left">
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Experience Hub</p>
+                            <p className="text-sm font-black text-[#0F172A] uppercase">Virtual CBT Demo</p>
+                         </div>
+                      </div>
+                      <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] uppercase">LIVE NOW</Badge>
                    </div>
-                   <div className="text-left min-w-0">
-                      <h3 className="text-sm md:text-lg font-bold text-[#04102B] leading-none truncate">{f.title}</h3>
-                      <p className="text-[9px] xs:text-[10px] md:text-[11px] font-semibold text-slate-400 mt-1.5 truncate">{f.sub}</p>
-                   </div>
-                </Card>
-             ))}
-          </div>
-
-          <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3 w-full sm:w-auto pt-6 pb-12 md:pb-16 border-b border-slate-50">
-            <Button asChild className="h-14 md:h-16 px-8 md:px-12 bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-sm rounded-xl md:rounded-2xl shadow-xl shadow-blue-600/20 border-none transition-all active:scale-95">
-              <Link href="/mocks" className="flex items-center justify-center gap-2 md:gap-3">
-                Start Free Mock Test <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" className="h-14 md:h-16 px-8 md:px-12 border-2 border-[#2563EB] bg-white text-[#2563EB] font-bold text-sm rounded-xl md:rounded-2xl transition-all active:scale-95 hover:bg-blue-50">
-              <Link href="/exams" className="flex items-center justify-center gap-2 md:gap-3">
-                Browse Exams <ArrowRight className="h-4 w-4" />
-              </Link>
-            </Button>
-          </div>
+                </div>
+             </div>
+          </motion.div>
         </div>
 
-        <div className="mt-10 md:mt-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-           {liveStats.map((stat, idx) => (
-             <motion.div key={stat.label} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} viewport={{ once: true }}>
-               <Card className="border-none shadow-sm rounded-xl md:rounded-2xl p-4 md:p-6 bg-white border border-slate-100 flex items-center gap-4 md:gap-5 group h-full text-left">
-                 <div className={cn("h-10 w-10 md:h-16 md:w-16 rounded-full flex items-center justify-center shrink-0 shadow-lg text-white transition-transform group-hover:scale-110", stat.circleBg)}>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mt-16 md:mt-24 lg:mt-32">
+          {liveStats.map((stat, idx) => (
+            <motion.div
+              key={stat.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 + (idx * 0.1) }}
+            >
+              <Card
+                className="p-5 md:p-10 rounded-[1.8rem] md:rounded-[3rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/40 text-left group hover:translate-y-[-4px] transition-all overflow-hidden"
+              >
+                <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 md:gap-6 min-w-0">
+                  <div className="h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-[1.5rem] bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform duration-500">
                     {stat.icon}
-                 </div>
-                 <div className="min-w-0 flex-1 space-y-0.5 text-left">
-                   <p className={cn("text-lg md:text-2xl font-black tabular-nums leading-none tracking-tight", stat.color)}>{stat.val}</p>
-                   <p className="text-[10px] md:text-sm font-bold text-slate-900 leading-none tracking-tight">{stat.label}</p>
-                   <p className="text-[8px] md:text-[10px] font-medium text-slate-400 tracking-tight truncate">{stat.desc}</p>
-                 </div>
-               </Card>
-             </motion.div>
-           ))}
+                  </div>
+                  <div className="text-center sm:text-left min-w-0 flex-1">
+                    <div className="text-xl md:text-4xl lg:text-5xl font-headline font-black text-[#0F172A] tabular-nums leading-none tracking-tighter truncate">
+                      {loading ? <Skeleton className="h-6 w-12 md:h-10 md:w-24 bg-slate-100" /> : stat.val || "0"}
+                    </div>
+                    <div className="text-[7px] md:text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mt-2 md:mt-3 truncate">
+                      {stat.label}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>

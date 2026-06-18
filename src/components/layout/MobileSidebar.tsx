@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -29,9 +30,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ShareButton from "@/components/navigation/ShareButton";
 
 /**
- * @fileOverview Mobile Sidebar Realignment v26.0 (Overlap Hardened).
- * FIXED: Maximized logo visibility within fixed header.
- * FIXED: Reduced Elite card height to prevent support section overlap.
+ * @fileOverview Mobile Sidebar Realignment v28.0 (Overlap Hardened).
+ * FIXED: Standardized sectional padding and reduced card density to prevent content clipping.
  */
 export default function MobileSidebar({
   onClose,
@@ -87,7 +87,6 @@ export default function MobileSidebar({
 
         <button
           onClick={onClose}
-          aria-label="Close sidebar"
           className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 text-slate-400 active:scale-95 transition-all shrink-0 border border-slate-100"
         >
           <X className="h-5 w-5" />
@@ -171,22 +170,23 @@ export default function MobileSidebar({
           </div>
         </div>
 
-        {/* SHARE NODE - REDUCED VERTICAL BULK */}
-        <div className="px-4 py-4">
-           <div className="bg-[#0B1528] rounded-[1.8rem] p-4 space-y-3 border border-white/5 shadow-2xl relative overflow-hidden group">
+        {/* SHARE NODE - COMPACTED */}
+        <div className="px-4 py-6">
+           <div className="bg-[#0B1528] rounded-[1.8rem] p-5 space-y-4 border border-white/5 shadow-2xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12 group-hover:scale-110 transition-transform"><Award className="h-16 w-16" /></div>
               <div className="relative z-10 text-left">
-                <h4 className="text-[9px] font-black uppercase text-white leading-none">Elite Network</h4>
+                <h4 className="text-[10px] font-black uppercase text-white tracking-widest leading-none mb-1">Elite Network</h4>
+                <p className="text-[8px] font-bold text-slate-500 uppercase">Invite fellow aspirants</p>
               </div>
               <ShareButton 
                 variant="dark" 
-                className="w-full h-10 rounded-xl bg-primary hover:bg-blue-600 text-white text-[8px] border-none shadow-lg relative z-10" 
+                className="w-full h-11 rounded-xl bg-primary hover:bg-blue-600 text-white text-[9px] border-none shadow-lg relative z-10" 
               />
            </div>
         </div>
 
         {/* SUPPORT */}
-        <div className="px-2 pb-8">
+        <div className="px-2 pb-12">
           <p className="mb-2 px-6 text-[8px] font-black uppercase tracking-[0.3em] text-slate-400">
             Institutional Support
           </p>
@@ -213,12 +213,12 @@ export default function MobileSidebar({
       </div>
 
       {/* FOOTER */}
-      <div className="border-t border-slate-100 bg-white p-3 pb-[calc(env(safe-area-inset-bottom)+12px)] shrink-0">
+      <div className="border-t border-slate-100 bg-white p-4 pb-[calc(env(safe-area-inset-bottom)+16px)] shrink-0">
         <button
           onClick={handleLogout}
-          className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-[#0F172A] text-[10px] font-black uppercase tracking-widest text-white shadow-xl transition-all active:scale-95 border-none"
+          className="flex h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#0F172A] text-[10px] font-black uppercase tracking-widest text-white shadow-xl transition-all active:scale-95 border-none"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-4 w-4 text-primary" />
           <span>Exit Account</span>
         </button>
       </div>

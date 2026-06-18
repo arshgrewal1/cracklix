@@ -6,14 +6,15 @@ import { useUser, useCollection, useFirestore } from '@/firebase';
 import { collection, query, where, limit } from 'firebase/firestore';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Zap, History, Trophy, ArrowRight, Target, Star, GraduationCap, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Fidelity "My Exams" Hub v10.0.
- * UPDATED: Integrated Pinned Exams (Interests) alongside recent attempts.
+ * @fileOverview High-Fidelity "My Exams" Hub v10.1.
+ * FIXED: Added missing Badge import.
  */
 
 export default function ContinueLearning() {

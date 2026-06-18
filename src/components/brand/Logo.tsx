@@ -16,7 +16,6 @@ interface LogoProps {
 /**
  * Cracklix Official Logo Component
  * SCALE: Maximized to exactly 78px height to fill the h-20 (80px) header limit perfectly.
- * Ensures maximum brand dominance without causing layout overflow.
  */
 export default function Logo({
   className = "",

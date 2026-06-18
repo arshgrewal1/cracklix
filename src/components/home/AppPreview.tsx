@@ -1,17 +1,19 @@
+
 'use client';
 
 import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Smartphone, CheckCircle2, ShieldCheck, Download, Apple, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 /**
- * @fileOverview High-Fidelity Balanced Mobile App Hub v21.0.
- * UPDATED: Applied 'sizes' and 'w-auto' to resolve Next.js warnings.
+ * @fileOverview High-Fidelity Balanced Mobile App Hub v21.1.
+ * FIXED: Added missing Badge import.
  */
 
 export default function AppPreview() {
