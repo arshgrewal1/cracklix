@@ -35,8 +35,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v80.0 (Responsive Hardened).
- * FIXED: Logo scaling and margin logic for 320px devices to prevent icon overflow.
+ * @fileOverview Institutional Header v81.0 (Mobile Overlap Fixed).
+ * FIXED: Graduated logo scaling and negative margin adjustments for 320px-375px screens.
+ * ENSURED: Brand identity remains centered without pushing search/user icons off-screen.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -90,7 +91,7 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="shrink-0 -ml-8 xs:-ml-12 lg:-ml-16 scale-90 xs:scale-100 origin-left"
+              className="shrink-0 -ml-10 xs:-ml-12 lg:-ml-16 scale-[0.72] xs:scale-90 sm:scale-100 origin-left"
             />
           </div>
 

@@ -31,10 +31,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ShareButton from "@/components/navigation/ShareButton";
 
 /**
- * @fileOverview Mobile Sidebar Realignment v18.0.
- * UPDATED: Integrated high-impact Share App node for viral preparation growth.
- * FIXED: Name flickering (Aspirant issue) by adding Auth DisplayName fallback.
- * LOCKED: Logo scale synchronized with maximized 78px standard.
+ * @fileOverview Mobile Sidebar Realignment v19.0.
+ * UPDATED: Optimized logo scaling and close button positioning for small screens (320px).
  */
 export default function MobileSidebar({
   onClose,
@@ -91,13 +89,13 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body">
 
-      {/* HEADER: Standard 80px height */}
-      <div className="flex h-20 items-center justify-between border-b px-4 shrink-0 gap-4">
+      {/* HEADER: Responsive logo scaling to prevent X button overlap */}
+      <div className="flex h-20 items-center justify-between border-b px-4 shrink-0 gap-2">
         <Logo
           variant="light"
           href="/"
           onClick={onClose}
-          className="shrink-0 -ml-4"
+          className="shrink-0 -ml-4 scale-[0.85] xs:scale-100 origin-left"
           imgClassName="h-[78px]"
         />
 
