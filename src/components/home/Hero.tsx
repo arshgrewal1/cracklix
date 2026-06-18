@@ -4,27 +4,23 @@ import React, { useMemo, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   ClipboardList,
-  ShieldCheck,
-  Users,
   Zap,
   ChevronRight,
   BookOpen,
   FileText,
   BarChart3,
-  Star,
-  LucideIcon
+  Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Fluid Hero Hub v16.0.
- * RESTORED: Integrated Core Feature Cards directly into the content hub as per screenshot.
+ * @fileOverview Official Fluid Hero Hub v17.0.
+ * UPDATED: Image positioned above cards on mobile; buttons moved below cards.
  */
 
 const CORE_FEATURES = [
@@ -56,18 +52,33 @@ export default function Hero() {
     return num + "+";
   }, [stats, statsLoading]);
 
+  const HeroImage = ({ className }: { className?: string }) => (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ delay: 0.2, duration: 0.8 }}
+      className={cn("relative flex justify-center", className)}
+    >
+      <div className="absolute inset-0 bg-blue-600/5 blur-[100px] rounded-full scale-150" />
+      <img
+        src="/images/hero-student.png"
+        alt="Cracklix Student"
+        className="relative w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] max-w-[280px] xs:max-w-sm md:max-w-md lg:max-w-[560px] transform hover:scale-[1.02] transition-transform duration-700"
+      />
+    </motion.div>
+  );
+
   if (!mounted) return null;
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-blue-50 py-12 md:py-20 lg:py-28 text-left">
-      {/* Background Ambience */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-          {/* COLUMN 1: TEXT CONTENT */}
-          <div className="space-y-8 md:space-y-12 max-w-2xl order-2 lg:order-1">
+          {/* COLUMN 1: CONTENT HUB */}
+          <div className="space-y-8 md:space-y-12 max-w-2xl">
             <div className="space-y-4 md:space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-100 shadow-sm mb-2">
                 <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
@@ -88,7 +99,10 @@ export default function Hero() {
               </p>
             </div>
 
-            {/* FEATURE CARDS GRID (AS PER SCREENSHOT) */}
+            {/* MOBILE ONLY: Student Image positioned exactly above Feature Cards */}
+            <HeroImage className="lg:hidden py-4" />
+
+            {/* FEATURE CARDS GRID */}
             <div className="grid grid-cols-2 gap-4 md:gap-6">
               {CORE_FEATURES.map((feature, idx) => (
                 <Link key={idx} href={feature.href}>
@@ -104,7 +118,7 @@ export default function Hero() {
               ))}
             </div>
 
-            {/* CTAS (AS PER SCREENSHOT) */}
+            {/* CTAS (Positioned below cards) */}
             <div className="flex flex-col sm:flex-row gap-4 pt-2">
               <Button
                 asChild
@@ -128,20 +142,10 @@ export default function Hero() {
             </div>
           </div>
           
-          {/* COLUMN 2: VISUAL HUB */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
-            className="order-1 lg:order-2 flex justify-center lg:justify-end relative"
-          >
-            <div className="absolute inset-0 bg-blue-600/5 blur-[100px] rounded-full lg:scale-150" />
-            <img
-              src="/images/hero-student.png"
-              alt="Cracklix Student"
-              className="relative w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] max-w-[280px] xs:max-w-sm md:max-w-md lg:max-w-[560px] transform hover:scale-[1.02] transition-transform duration-700"
-            />
-          </motion.div>
+          {/* COLUMN 2: DESKTOP VISUAL HUB */}
+          <div className="hidden lg:flex justify-end">
+            <HeroImage />
+          </div>
         </div>
       </div>
     </section>
