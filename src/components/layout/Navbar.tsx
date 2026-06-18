@@ -35,9 +35,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v87.0 (Logo Maximized).
- * FIXED: Logo fills 78px of the 80px header.
- * FIXED: Removed gap between menu and logo with -ml-4.
+ * @fileOverview Institutional Header v88.0 (Maximized & Aligned).
+ * FIXED: Logo height set to 78px to perfectly fill the 80px container.
+ * FIXED: Removed leading gap with -ml-4 to push brand flush towards left menu.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);

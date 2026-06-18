@@ -15,16 +15,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Official Hero Hub v7.0.
- * TYPOGRAPHY: Title Case applied to main heading with extabold tracking-tight.
- * POSITIONING: Student Hero Image positioned EXACTLY above the feature cards.
- * HYDRATION: Replaced dynamic <p> tags with <div> for stat counters.
+ * @fileOverview Official Hero Hub v8.0.
+ * LIVE SYNC: Trust badge now pulls live user count from settings/stats registry.
+ * TYPOGRAPHY: Premium Title Case with font-extrabold and tracking-tight.
+ * POSITIONING: Student illustration positioned exactly above feature cards.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -40,6 +39,13 @@ export default function Hero() {
   );
 
   const { data: stats } = useDoc<any>(statsRef);
+
+  const liveAspirantCount = useMemo(() => {
+    if (!stats?.totalUsers) return "10,000+";
+    const num = stats.totalUsers;
+    if (num >= 1000) return (num / 1000).toFixed(1).replace(/\.0$/, '') + "k+";
+    return num + "+";
+  }, [stats]);
 
   const liveStats = useMemo(() => {
     const formatNumber = (num: number, fallback: string) => {
@@ -84,16 +90,15 @@ export default function Hero() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           
           {/* LEFT CONTENT COLUMN */}
-          <div className="space-y-10">
+          <div className="space-y-8">
             <div className="space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border shadow-sm mb-2">
                 <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                 <span className="text-sm font-semibold text-slate-700">
-                  10,000+ Aspirants Trust Cracklix
+                  {liveAspirantCount} Aspirants Trust Cracklix
                 </span>
               </div>
 
-              {/* REFINED TYPOGRAPHY: TITLE CASE + EXTRABOLD */}
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05] antialiased">
                 Crack Punjab <br/>
                 <span className="block text-blue-600">
@@ -140,13 +145,28 @@ export default function Hero() {
 
             {/* FEATURE GRID */}
             <div className="grid grid-cols-2 gap-4">
-              <FeatureCard icon={<ClipboardList className="h-6 w-6 text-blue-600" />} title="Mock Tests" />
-              <FeatureCard icon={<BookOpen className="h-6 w-6 text-indigo-600" />} title="Study Material" />
-              <FeatureCard icon={<FileText className="h-6 w-6 text-emerald-600" />} title="Previous Papers" />
-              <FeatureCard icon={<BarChart3 className="h-6 w-6 text-orange-500" />} title="Analytics Hub" />
+              <Card className="p-4 md:p-6 rounded-3xl border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-md transition-all text-left">
+                <ClipboardList className="h-6 w-6 text-blue-600 mb-3" />
+                <p className="font-bold text-[#0F172A] text-[10px] md:text-xs tracking-tight">Mock Tests</p>
+              </Card>
+
+              <Card className="p-4 md:p-6 rounded-3xl border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-md transition-all text-left">
+                <BookOpen className="h-6 w-6 text-indigo-600 mb-3" />
+                <p className="font-bold text-[#0F172A] text-[10px] md:text-xs tracking-tight">Study Material</p>
+              </Card>
+
+              <Card className="p-4 md:p-6 rounded-3xl border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-md transition-all text-left">
+                <FileText className="h-6 w-6 text-emerald-600 mb-3" />
+                <p className="font-bold text-[#0F172A] text-[10px] md:text-xs tracking-tight">Previous Papers</p>
+              </Card>
+
+              <Card className="p-4 md:p-6 rounded-3xl border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-md transition-all text-left">
+                <BarChart3 className="h-6 w-6 text-orange-500 mb-3" />
+                <p className="font-bold text-[#0F172A] text-[10px] md:text-xs tracking-tight">Performance Analytics</p>
+              </Card>
             </div>
 
-            <div className="flex flex-wrap gap-4 mt-8">
+            <div className="flex flex-wrap gap-4 pt-4">
               <Button
                 asChild
                 className="h-12 md:h-14 px-8 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold border-none shadow-lg shadow-blue-600/20 active:scale-95 transition-all"
@@ -200,14 +220,5 @@ export default function Hero() {
         </div>
       </div>
     </section>
-  );
-}
-
-function FeatureCard({ icon, title }: { icon: React.ReactNode, title: string }) {
-  return (
-    <Card className="p-4 md:p-6 rounded-3xl border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-md transition-all text-left">
-      <div className="mb-3">{icon}</div>
-      <p className="font-bold text-[#0F172A] uppercase text-[10px] md:text-xs tracking-tight">{title}</p>
-    </Card>
   );
 }
