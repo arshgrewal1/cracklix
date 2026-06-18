@@ -1,7 +1,7 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Production-Grade PWA Manifest v10.5 (Hardened).
+ * @fileOverview Production-Grade PWA Manifest v11.0 (Hardened).
  * FIXED: Strictly typed 'purpose' property to resolve Next.js 15 compilation errors.
  */
 export default function manifest(): MetadataRoute.Manifest {
@@ -61,12 +61,6 @@ export default function manifest(): MetadataRoute.Manifest {
       },
       {
         src: '/icons/icon-512x512.png',
-        sizes: '512x512',
-        type: 'image/png',
-        purpose: 'maskable',
-      },
-      {
-        src: '/icons/maskable-icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',

@@ -26,8 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v57.2 (Production Hardened).
- * FIXED: Explicit typing for hydration callbacks to resolve implicit any errors.
+ * @fileOverview Hardened CBT Engine v58.0 (Production Build).
+ * FIXED: Explicit typing for hydration callbacks and synchronized selectedAnswer to handle number | null.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

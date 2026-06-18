@@ -27,7 +27,8 @@ import {
   BarChart3,
   Newspaper,
   Star,
-  ArrowRight
+  ArrowRight,
+  LucideIcon
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
@@ -37,8 +38,8 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Institutional Exam Hub v34.2 (Build Fixed).
- * FIXED: Added missing 'cn' import and synchronized Card component references.
+ * @fileOverview Institutional Exam Hub v35.0 (Hardened Build).
+ * FIXED: Integrated missing CardHeader/CardTitle imports and refactored cloneElement for type-safety.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -296,7 +297,7 @@ function MockList({ data, results, isPassActive, user, loading, boards }: any) {
             const difficulty = mock.difficulty || "Medium";
 
             return (
-               <Card key={mock.id} className="border border-[#E5E7EB] shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:translate-y-[-6px] transition-all duration-1000 rounded-[32px] bg-white p-8 md:p-10 text-center flex flex-col h-[420px] group relative overflow-hidden">
+               <Card key={mock.id} className="border border-[#E5E7EB] shadow-sm hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:translate-y-[-6px] transition-all duration-500 rounded-[32px] bg-white p-8 md:p-10 text-center flex flex-col h-[420px] group relative overflow-hidden">
                   
                   <div className="absolute top-6 right-6 flex flex-col gap-2 items-end">
                     {result && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 shadow-sm">Attempted</Badge>}
@@ -394,4 +395,18 @@ function NotesList({ data, isPassActive, loading }: any) {
          ))}
       </div>
    )
+}
+
+function FeatureNode({ icon: Icon, title, desc }: { icon: LucideIcon, title: string, desc: string }) {
+  return (
+    <div className="p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-50 border border-slate-100 space-y-5 md:space-y-8 group hover:bg-white hover:shadow-4xl transition-all duration-500 text-left border-b-4 border-b-slate-100 hover:border-b-primary">
+      <div className="h-14 w-14 md:h-20 md:w-20 bg-white rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500">
+        <Icon className="h-6 w-6 md:h-10 md:w-10 text-primary" />
+      </div>
+      <div className="space-y-2 md:space-y-3">
+         <h3 className="text-lg md:text-2xl font-black text-[#0F172A] uppercase tracking-tight leading-none">{title}</h3>
+         <p className="text-slate-400 font-bold uppercase text-[10px] md:text-[12px] leading-relaxed tracking-widest">{desc}</p>
+      </div>
+    </div>
+  );
 }

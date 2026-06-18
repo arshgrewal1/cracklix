@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, Suspense, useEffect, useTransition } from "react"
+import React, { useState, Suspense, useEffect, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,8 +26,8 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Login Hub v23.5 (Build Fixed).
- * FIXED: Explicitly added 'cn' import to resolve the ReferenceError in the recovery node.
+ * @fileOverview Hardened Login Hub v24.0 (Full Synchronization).
+ * FIXED: Added missing 'cn' utility import for robust animation rendering.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

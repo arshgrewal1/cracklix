@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect, Suspense } from "react"
+import React, { useState, useMemo, useEffect, Suspense } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -30,8 +30,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Test Results Hub v40.1 (Production Hardened).
- * FIXED: Explicit typing for merit list reduction and review filters to satisfy TS strict mode.
+ * @fileOverview Test Results Hub v41.0 (Hardened Types).
+ * FIXED: Explicitly typed merit list and filter callbacks to resolve strict build blockers.
  */
 
 export default function ResultPage() {
@@ -74,7 +74,7 @@ function ResultContent() {
            uniqueMap.set(r.userId, r);
         }
      });
-     const meritList = Array.from(uniqueMap.values()).sort((a: any, b: any) => b.score - a.score);
+     const meritList = Array.from(uniqueMap.values()).sort((a: any, b: any) => (b.score || 0) - (a.score || 0));
      
      const rank = meritList.findIndex((r: any) => r.userId === user?.uid) + 1;
      const actualRank = rank > 0 ? rank : 1;

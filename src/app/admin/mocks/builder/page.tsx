@@ -36,8 +36,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Institutional Mock Builder Hub v19.3 (Hardened).
- * FIXED: Corrected mismatched </button> tags and verified JSX structure.
+ * @fileOverview Institutional Mock Builder Hub v19.5 (Hardened Build).
+ * FIXED: Resolved JSX tag mismatch by capitalized closing </Button> tags and explicitly typed all hydration callbacks.
  */
 
 export default function MockBuilderPage() {

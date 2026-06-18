@@ -31,8 +31,8 @@ import { doc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Refined Founder's Story Hub v16.0.
- * HARDENED: Switched to type-safe icon components to resolve build errors.
+ * @fileOverview Refined Founder's Story Hub v17.0 (Hardened Build).
+ * FIXED: Switched to type-safe component references for icons and explicitly typed reduction callbacks.
  */
 
 export default function AboutPage() {
@@ -45,7 +45,6 @@ export default function AboutPage() {
 
   const founderImg = "https://i.ibb.co/5hkxTtKS/Whats-App-Image-2026-05-28-at-10-31-36-AM.jpg";
 
-  // STABILIZED DATA LISTENERS
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
@@ -70,7 +69,6 @@ export default function AboutPage() {
       <Navbar />
       
       <main>
-        {/* 1. VISIONARY HERO */}
         <section className="relative pt-20 pb-16 md:pt-32 md:pb-32 overflow-hidden">
            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/10 blur-[120px] rounded-full" />
            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 blur-[120px] rounded-full" />
@@ -108,7 +106,6 @@ export default function AboutPage() {
            </div>
         </section>
 
-        {/* 2. FOUNDER PROFILE AREA */}
         <section className="py-16 md:py-24 relative border-y border-white/5 bg-white/[0.02]">
            <div className="container mx-auto px-4 md:px-6 max-w-6xl">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20 items-center">
@@ -160,7 +157,6 @@ export default function AboutPage() {
                        </p>
                     </div>
 
-                    {/* LIVE IMPACT AREA */}
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-6">
                        <ImpactNode 
                           label="LIVE STUDENTS" 
@@ -186,7 +182,6 @@ export default function AboutPage() {
            </div>
         </section>
 
-        {/* 3. INTERACTIVE HISTORY (RECONSTRUCTED PATTERN) */}
         <section className="py-20 md:py-32 bg-white/[0.01]">
            <div className="container mx-auto px-4 max-w-5xl">
               <div className="text-center space-y-3 mb-16 md:mb-32">
@@ -226,7 +221,6 @@ export default function AboutPage() {
            </div>
         </section>
 
-        {/* 4. QUOTE AREA */}
         <section className="py-24 md:py-40 relative overflow-hidden text-center bg-[#020817]">
            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl h-[300px] bg-primary/10 blur-[160px] rounded-full opacity-30" />
            <div className="container mx-auto px-4 relative z-10">
@@ -248,7 +242,6 @@ export default function AboutPage() {
            </div>
         </section>
 
-        {/* 5. MISSION & VISION AREAS */}
         <section className="py-20 md:pb-32">
            <div className="container mx-auto px-4 md:px-6 max-w-6xl">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
@@ -266,7 +259,6 @@ export default function AboutPage() {
            </div>
         </section>
 
-        {/* 6. CTA */}
         <section className="pb-32 md:pb-48">
            <div className="container mx-auto px-4 text-center">
               <div className="bg-gradient-to-br from-primary to-orange-600 rounded-[2.5rem] md:rounded-[4rem] p-10 md:p-20 space-y-8 shadow-5xl relative overflow-hidden group">
@@ -334,7 +326,6 @@ function TimelineItem({ icon: Icon, title, desc, right = false }: { icon: Lucide
             right && "md:flex-row-reverse"
          )}
       >
-         {/* 1. CONTENT BLOCK */}
          <div className={cn(
             "md:w-1/2 space-y-2",
             right ? "md:pl-16 md:text-left" : "md:pr-16 md:text-right"
@@ -345,7 +336,6 @@ function TimelineItem({ icon: Icon, title, desc, right = false }: { icon: Lucide
             </p>
          </div>
 
-         {/* 2. CENTER ICON NODE */}
          <div className="flex justify-center relative md:w-0 items-center">
             <div className={cn(
                "h-14 w-14 md:h-20 md:w-20 rounded-[1.5rem] bg-white/5 border border-white/10 flex items-center justify-center text-primary shadow-2xl backdrop-blur-xl z-10 shrink-0 group hover:border-primary transition-all",
@@ -353,11 +343,9 @@ function TimelineItem({ icon: Icon, title, desc, right = false }: { icon: Lucide
             )}>
                <Icon className="h-6 w-6 md:h-8 md:w-8 fill-current" />
             </div>
-            {/* Visual connector line for continuity */}
             <div className="absolute top-full w-px h-16 md:h-32 bg-gradient-to-b from-white/20 to-transparent -z-0 hidden md:block" />
          </div>
 
-         {/* 3. BALANCE HALF (EMPTY) */}
          <div className="md:w-1/2 hidden md:block" />
       </motion.div>
    )

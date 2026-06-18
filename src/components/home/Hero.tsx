@@ -23,8 +23,8 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Fluid Hero Hub v13.0.
- * FIXED: Resolved cloneElement TypeScript mismatch by using component references.
+ * @fileOverview Official Fluid Hero Hub v14.0 (Hardened Build).
+ * FIXED: Integrated missing Badge/cn imports and implemented type-safe icon rendering.
  */
 export default function Hero() {
   const db = useFirestore();

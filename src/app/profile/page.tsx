@@ -48,8 +48,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Profile Center v26.0.
- * HARDENED: Resolved type mismatches and missing React global references.
+ * @fileOverview Student Profile Center v27.0 (Hardened Build).
+ * FIXED: Explicitly typed React callbacks and sanitized icon injection pattern.
  */
 export default function ProfilePage() {
   const { user, profile, loading, profileLoading, currentDeviceId } = useUser()
@@ -110,7 +110,7 @@ export default function ProfilePage() {
   const stats = useMemo(() => {
     if (!results || results.length === 0) return { total: 0, avgAccuracy: 0, rank: "N/A" }
     const total = results.length
-    const avgAccuracy = Math.round(results.reduce((acc: number, curr: any) => acc + (curr.accuracy || 0), 0) / total)
+    const avgAccuracy = Math.round(results.reduce((acc: number, curr: any) => acc + (curr.accuracy || 0), 0) / (total || 1))
     return { total, avgAccuracy, rank: total > 5 ? "Top 12%" : "Awaiting" }
   }, [results])
 
@@ -233,7 +233,6 @@ export default function ProfilePage() {
                     <StatsCard icon={Trophy} label="RANK" value={resultsLoading ? "..." : stats.rank} color="text-emerald-500" bgColor="bg-emerald-50" className="hidden sm:flex" />
                  </div>
 
-                 {/* DEVICE MANAGEMENT HUB */}
                  <Card className="border-none shadow-3xl rounded-[2.5rem] md:rounded-[3.5rem] bg-white p-8 md:p-14 space-y-8 md:space-y-12 border border-slate-100">
                     <div className="flex items-center justify-between border-b border-slate-50 pb-6 md:pb-10">
                        <div className="space-y-1.5 md:space-y-2">
@@ -314,7 +313,7 @@ export default function ProfilePage() {
                     </div>
                  </Card>
                  <div className="bg-primary rounded-[3rem] md:rounded-[4rem] p-10 md:p-14 text-white space-y-6 relative overflow-hidden group shadow-5xl">
-                    <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-[2000ms]"><Award className="h-40 w-40 md:h-64 md:w-64" /></div>
+                    <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Award className="h-40 w-40 md:h-64 md:w-64" /></div>
                     <div className="relative z-10 space-y-4 md:space-y-6 text-left">
                        <h4 className="text-2xl md:text-4xl font-headline font-black uppercase leading-tight">Official <br/> Rankings</h4>
                        <p className="text-white/70 text-[10px] md:text-[12px] font-bold uppercase tracking-widest">Compare with toppers across Punjab.</p>

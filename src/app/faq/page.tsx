@@ -9,16 +9,15 @@ import {
   AccordionItem, 
   AccordionTrigger 
 } from "@/components/ui/accordion"
-import { HelpCircle, ShieldCheck, BookOpen, GraduationCap, Zap, LucideIcon } from "lucide-react"
+import { HelpCircle, ShieldCheck, BookOpen, GraduationCap, LucideIcon } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { HelpArticle } from "@/types"
-import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Institutional FAQ Hub v4.2 (Build Hardened).
- * FIXED: Added missing 'React' import and implemented type-safe icon rendering.
+ * @fileOverview Official Institutional FAQ Hub v5.0 (Hardened Build).
+ * FIXED: Replaced JSX-based icon mapping with Component References for type-safe rendering.
  */
 
 export default function FAQPage() {
