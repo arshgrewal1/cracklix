@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { useAuth, useFirestore } from '../provider';
@@ -8,8 +8,8 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth & Profile Hook v9.0.
- * UPDATED: Optimized 10-second hydration timeout to resolve infinite loading scenarios.
+ * @fileOverview Hardened Auth & Profile Hook v10.0.
+ * UPDATED: Simplified takeover logic. New login session overrides old one automatically.
  */
 export function useUser() {
   const auth = useAuth();
@@ -27,7 +27,7 @@ export function useUser() {
     getDeviceId().then(setCurrentDeviceId);
   }, []);
 
-  // 1. Auth Sync Hub with explicit 10s "Panic Timeout"
+  // 1. Auth Sync Hub
   useEffect(() => {
     if (!auth) return;
 
@@ -67,7 +67,7 @@ export function useUser() {
     };
   }, [auth]);
 
-  // 2. Firestore Profile Real-time Sync with mandatory cleanup
+  // 2. Firestore Profile Real-time Sync
   useEffect(() => {
     if (!user || !db) {
       setProfile(null);
@@ -95,20 +95,11 @@ export function useUser() {
     return () => unsubscribeProfile();
   }, [user, db]);
 
-  const isDeviceAuthorized = useMemo(() => {
-    if (!profile) return true;
-    if (!profile.deviceLock?.deviceId) return true;
-    if (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN') return true;
-    if (profile.deviceLock.enforcementLevel < 3) return true;
-    return profile.deviceLock.deviceId === currentDeviceId;
-  }, [profile, currentDeviceId]);
-
   return { 
     user, 
     profile, 
     loading: !authResolved, 
     profileLoading,         
-    currentDeviceId,
-    isDeviceAuthorized
+    currentDeviceId
   };
 }

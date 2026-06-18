@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import Logo from "@/components/brand/Logo"
-import { ShieldCheck, Mail, Lock, ChevronLeft, User, Phone, AlertCircle, RefreshCw, Eye, EyeOff, Loader2, Smartphone, ShieldAlert } from "lucide-react"
+import { Mail, Lock, User, Phone, Eye, EyeOff, Loader2, ShieldAlert } from "lucide-react"
 import { useAuth, useFirestore, useUser } from "@/firebase"
 import { 
   signInWithEmailAndPassword, 
@@ -16,9 +16,8 @@ import {
   GoogleAuthProvider,
   sendPasswordResetEmail,
   updateProfile,
-  signOut
 } from "firebase/auth"
-import { doc, setDoc, getDoc, serverTimestamp, collection, getDocs } from "firebase/firestore"
+import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { getDeviceId, getBrowserInfo } from "@/lib/device"
@@ -26,9 +25,8 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Login Hub v27.0 (UI Fixes).
- * FIXED: Mobile number padding increased to prevent overlap with +91 prefix.
- * FIXED: Suppressed native browser reveal buttons via globals.css.
+ * @fileOverview Hardened Login Hub v28.0 (Takeover Flow).
+ * IMPLEMENTED: Last-Login Wins policy. New login always terminates old session.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -54,7 +52,6 @@ function LoginContent() {
   const [loading, setLoading] = useState(false)
   const [resetLoading, setResetLoading] = useState(false)
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
-  const [deviceError, setDeviceError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   
   const { user, loading: authLoading } = useUser()
@@ -68,43 +65,17 @@ function LoginContent() {
   const sessionTerminated = searchParams.get('session') === 'terminated';
 
   useEffect(() => {
-    if (!authLoading && user && !sessionTerminated && !deviceError) {
+    if (!authLoading && user && !sessionTerminated) {
        router.replace(returnUrl);
     }
-  }, [user, authLoading, router, returnUrl, sessionTerminated, deviceError]);
+  }, [user, authLoading, router, returnUrl, sessionTerminated]);
 
-  const onAuthSuccess = async (userId: string) => {
+  const updateActiveDevice = async (userId: string) => {
     if (!db) return;
-    
-    setLoading(true);
     const deviceId = await getDeviceId();
     const { browser, platform } = getBrowserInfo();
     
-    const deviceRef = doc(db, 'users', userId, 'devices', deviceId);
-    const deviceSnap = await getDoc(deviceRef);
-    
-    if (!deviceSnap.exists()) {
-      const devicesSnap = await getDocs(collection(db, 'users', userId, 'devices'));
-      if (devicesSnap.size >= 2) {
-        await signOut(auth);
-        setDeviceError("Device limit exceeded. Maximum 2 registered devices allowed.");
-        setLoading(false);
-        return false;
-      } else {
-        await setDoc(deviceRef, {
-          id: deviceId,
-          browser,
-          platform,
-          deviceName: browser,
-          firstLogin: serverTimestamp(),
-          lastActive: serverTimestamp()
-        });
-        await setDoc(doc(db, 'users', userId), { deviceCount: devicesSnap.size + 1 }, { merge: true });
-      }
-    } else {
-      await setDoc(deviceRef, { lastActive: serverTimestamp() }, { merge: true });
-    }
-
+    // Overwrite active device in the registry - This is the "Last Login Wins" mechanism
     await setDoc(doc(db, 'users', userId), {
       activeDeviceId: deviceId,
       lastLoginAt: serverTimestamp(),
@@ -112,16 +83,12 @@ function LoginContent() {
       activePlatform: platform,
       updatedAt: serverTimestamp()
     }, { merge: true });
-    
-    setLoading(false);
-    return true;
   };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
-    setDeviceError(null);
     if (mode === 'register' && password !== confirmPassword) {
-      toast({ variant: "destructive", title: "Wait", description: "Passwords must match." })
+      toast({ variant: "destructive", title: "Validation Error", description: "Passwords must match." })
       return
     }
 
@@ -129,26 +96,23 @@ function LoginContent() {
     try {
       if (mode === 'login') {
         const creds = await signInWithEmailAndPassword(auth, email, password)
-        const authorized = await onAuthSuccess(creds.user.uid);
-        if (authorized) {
-          toast({ title: "Authorized", description: "Welcome to your preparation hub." })
-          startTransition(() => { router.replace(returnUrl) })
-        }
+        await updateActiveDevice(creds.user.uid);
+        toast({ title: "Authorized", description: "Welcome to your preparation hub." })
+        startTransition(() => { router.replace(returnUrl) })
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-        const user = userCredential.user
-        await updateProfile(user, { displayName: name })
+        const userNode = userCredential.user
+        await updateProfile(userNode, { displayName: name })
         const isSuperAdmin = email && SUPER_ADMIN_WHITELIST.includes(email.toLowerCase());
         
-        await setDoc(doc(db!, 'users', user.uid), {
-          id: user.uid, name, email, phone: `+91 ${phone}`,
+        await setDoc(doc(db!, 'users', userNode.uid), {
+          id: userNode.uid, name, email, phone: `+91 ${phone}`,
           role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
           state: "Punjab", createdAt: new Date().toISOString(),
-          updatedAt: serverTimestamp(), status: 'Free', pinnedExams: [],
-          deviceCount: 0
+          updatedAt: serverTimestamp(), status: 'Free', pinnedExams: []
         })
 
-        await onAuthSuccess(user.uid);
+        await updateActiveDevice(userNode.uid);
         toast({ title: "Account Created", description: "Welcome to Cracklix!" })
         startTransition(() => { router.replace(returnUrl) })
       }
@@ -160,34 +124,30 @@ function LoginContent() {
 
   const handleGoogleSignIn = async () => {
     if (loading) return;
-    setDeviceError(null);
     setLoading(true)
     try {
       const provider = new GoogleAuthProvider()
       provider.setCustomParameters({ prompt: 'select_account' })
       const result = await signInWithPopup(auth, provider)
-      const user = result.user
-      if (!user.email) throw new Error("Email mandatory.");
+      const userNode = result.user
+      if (!userNode.email) throw new Error("Email mandatory.");
       
-      const userRef = doc(db!, 'users', user.uid)
+      const userRef = doc(db!, 'users', userNode.uid)
       const userSnap = await getDoc(userRef)
-      const isSuperAdmin = SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase());
+      const isSuperAdmin = SUPER_ADMIN_WHITELIST.includes(userNode.email.toLowerCase());
       
       if (!userSnap.exists()) {
         await setDoc(userRef, {
-          id: user.uid, name: user.displayName || "Aspirant",
-          email: user.email, role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
+          id: userNode.uid, name: userNode.displayName || "Aspirant",
+          email: userNode.email, role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
           state: "Punjab", createdAt: new Date().toISOString(),
-          updatedAt: serverTimestamp(), status: 'Free', pinnedExams: [], phone: "",
-          deviceCount: 0
+          updatedAt: serverTimestamp(), status: 'Free', pinnedExams: [], phone: ""
         })
       }
       
-      const authorized = await onAuthSuccess(user.uid);
-      if (authorized) {
-        toast({ title: "Registry Synced", description: `Authorized as ${user.displayName}` })
-        startTransition(() => { router.replace(returnUrl) })
-      }
+      await updateActiveDevice(userNode.uid);
+      toast({ title: "Registry Synced", description: `Authorized as ${userNode.displayName}` })
+      startTransition(() => { router.replace(returnUrl) })
     } catch (error: any) {
       toast({ variant: "destructive", title: "Sync Error", description: error.message })
       setLoading(false)
@@ -196,7 +156,7 @@ function LoginContent() {
 
   const handleResetPassword = async () => {
     if (!resetEmail) {
-      toast({ variant: "destructive", title: "Wait", description: "Enter email." });
+      toast({ variant: "destructive", title: "Email Required", description: "Please enter your email." });
       return;
     }
     setResetLoading(true);
@@ -220,27 +180,16 @@ function LoginContent() {
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="z-10 w-full max-w-[440px] space-y-6 md:space-y-8">
         
         {/* LOGO NODE */}
-        <div className="flex flex-col items-center justify-center w-full mb-2 md:mb-6">
+        <div className="flex flex-col items-center justify-center w-full">
           <Logo variant="light" align="center" />
         </div>
 
         {sessionTerminated && (
           <div className="bg-amber-50 border border-amber-100 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] flex items-center gap-4 animate-in slide-in-from-top-6 duration-700 shadow-sm">
             <ShieldAlert className="h-6 w-6 text-amber-600 shrink-0" />
-            <p className="text-xs md:sm font-bold text-amber-700 tracking-tight leading-snug text-left">
-              Your session ended because this account was used on another device. Log in again to take control.
+            <p className="text-xs md:text-sm font-bold text-amber-700 tracking-tight leading-snug text-left">
+              Your session ended because this account was signed in on another device.
             </p>
-          </div>
-        )}
-
-        {deviceError && (
-          <div className="bg-rose-50 border border-rose-100 p-5 md:p-8 rounded-[2rem] md:rounded-[2.5rem] flex items-start gap-5 animate-in slide-in-from-top-6 duration-700 shadow-sm">
-            <Smartphone className="h-7 w-7 text-rose-500 shrink-0" />
-            <div className="space-y-2 text-left">
-              <p className="text-sm font-bold text-rose-600 tracking-tight uppercase">Security Guard</p>
-              <p className="text-[12px] md:text-[13px] text-slate-500 leading-relaxed font-medium">{deviceError}</p>
-              <button onClick={() => setDeviceError(null)} className="text-primary font-bold text-[11px] hover:underline tracking-tight">Try Another Account</button>
-            </div>
           </div>
         )}
 
@@ -350,7 +299,7 @@ function LoginContent() {
         <DialogContent className="bg-white rounded-[2rem] md:rounded-[3rem] max-w-[90vw] sm:max-w-[400px] p-8 md:p-10 shadow-5xl text-left border-none">
           <DialogHeader className="text-center space-y-4">
             <div className="h-14 w-14 md:h-16 md:w-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary shadow-xl">
-              <RefreshCw className={cn("h-7 w-7 md:h-8 md:w-8", resetLoading && "animate-spin")} />
+              <Loader2 className={cn("h-7 w-7 md:h-8 md:w-8", resetLoading && "animate-spin")} />
             </div>
             <DialogTitle className="text-xl md:text-2xl font-black uppercase tracking-tight text-[#0F172A]">Recover Node</DialogTitle>
             <DialogDescription className="text-slate-400 text-[10px] md:text-[11px] font-bold tracking-widest uppercase leading-relaxed">Enter your email to receive a reset link.</DialogDescription>
