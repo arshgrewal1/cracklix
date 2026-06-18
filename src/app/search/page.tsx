@@ -13,7 +13,7 @@ import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Elite Global Search Hub v2.8 (Production Hardened).
+ * @fileOverview Elite Global Search Hub v2.9 (Build Hardened).
  * FIXED: Explicit typing and element validation for icon cloning to resolve UMD and build errors.
  */
 

@@ -36,8 +36,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v94.0 (Hardened Branding).
- * FIXED: Normalized spacing for Logo and Menu button across all screens.
+ * @fileOverview Institutional Header v95.0 (Restored Branding).
+ * RESTORED: Canonical Logo and Menu spacing.
+ * FIXED: Normalized sizing for desktop/mobile brand nodes.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -79,8 +80,8 @@ export default function Navbar() {
       <nav className="w-full h-20 bg-white border-b border-slate-100 shadow-sm">
         <div className="w-full max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between gap-4">
 
-          {/* LEFT SIDE: Menu Hub + Logo */}
-          <div className="flex items-center gap-2 md:gap-4 shrink-0">
+          {/* LEFT SIDE: Menu Hub + Logo Node */}
+          <div className="flex items-center gap-4 shrink-0">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"

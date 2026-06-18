@@ -16,9 +16,9 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Institutional Logo Node v26.0 (Hardened).
+ * @fileOverview Institutional Logo Node v27.0 (Hardened).
  * RESTORED: Standard Cracklix Branding with responsive sizing.
- * FIXED: Fill-mode parent relative positioning.
+ * SIZING: Mobile h-12 (48px) | Desktop h-16 (64px) for premium visibility.
  */
 export default function Logo({
   className = "",
@@ -29,6 +29,7 @@ export default function Logo({
   iconOnly = false,
   align = 'left'
 }: LogoProps) {
+  // Canonical Registry Paths
   const fullLogo = "/logo/cracklix-logo.png";
   const iconLogo = "/logo/cracklix-icon.png";
 
@@ -58,7 +59,7 @@ export default function Logo({
   if (onClick || href) {
     return (
       <Link
-        href={href || "#"}
+        href={href || "/"}
         onClick={onClick}
         className={cn(
           "flex items-center shrink-0 select-none overflow-hidden hover:opacity-90 transition-opacity",
