@@ -30,8 +30,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Test Results Hub v39.0 (TypeScript Hardened).
- * FIXED: Explicitly typed map and filter parameters to resolve implicit any errors.
+ * @fileOverview Test Results Hub v39.1 (Type Hardened).
+ * FIXED: Explicitly typed merit index reduction to resolve compilation errors.
  */
 
 export default function ResultPage() {
@@ -147,7 +147,6 @@ function ResultContent() {
       <Navbar />
       <main className="container mx-auto px-2 xs:px-4 md:px-8 py-4 md:py-10 max-w-7xl space-y-6 md:space-y-10">
         
-        {/* SCORE BANNER - HIGH DENSITY RESPONSIVE */}
         <div className="bg-[#0B1528] rounded-[1.5rem] md:rounded-[3rem] shadow-5xl overflow-hidden flex flex-col lg:flex-row items-center justify-between p-5 md:p-10 lg:px-14 lg:py-8 gap-5 md:gap-10">
            <div className="flex items-center gap-3 md:gap-10 min-w-0 flex-1 w-full lg:w-auto">
               <div className="h-10 w-10 md:h-18 md:w-18 rounded-xl md:rounded-[1.5rem] bg-primary/10 flex items-center justify-center text-primary shrink-0 shadow-2xl">

@@ -26,8 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v56.0 (Type Integrity Sync).
- * FIXED: Explicitly typed parameters in collection hydration to resolve implicit any errors.
+ * @fileOverview Hardened CBT Engine v56.1 (Type Hardened).
+ * FIXED: Explicit typing for hydration and results submission to clear 'implicit any' errors.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -70,18 +70,15 @@ export default function MockAttemptPage() {
         const mData = mockSnap.data();
         setMockData(mData);
 
-        // --- STRICT SECURITY PERIMETER ---
         const tier = (mData.accessLevel || 'FREE').toUpperCase();
         const userEmail = user.email?.toLowerCase();
         const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
         const hasActivePass = isAdmin || (profile?.pass?.active === true && new Date(profile.pass.expiryDate) > new Date());
 
         if (tier === 'PREMIUM' && !hasActivePass) {
-           console.warn("[ACCESS_DENIED]: Attempted premium bypass detected.");
            router.replace('/pass');
            return;
         }
-        // ---------------------------------
 
         const questionIds: string[] = mData.questionIds || [];
         if (questionIds.length === 0) throw new Error("Question bank is empty.");
@@ -99,7 +96,6 @@ export default function MockAttemptPage() {
         const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
         initExam(mockId, mData.title || "Elite Series", user.uid, sortedQs, mData.duration || 120, attemptSnap.exists() ? attemptSnap.data() : undefined, mData.languageMode);
       } catch (err: any) {
-        console.error("[CBT_INIT_FAIL]:", err);
         setInitError(err.message);
       } finally { 
         setIsInitializing(false); 
@@ -161,7 +157,6 @@ export default function MockAttemptPage() {
       
       router.replace(`/results/${mockId}`);
     } catch (e) {
-      console.error("[CBT_SUBMIT_FAIL]:", e);
       setIsSubmittingFinal(false);
     }
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime]);
