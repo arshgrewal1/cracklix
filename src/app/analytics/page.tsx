@@ -15,7 +15,8 @@ import {
   LayoutGrid,
   ShieldCheck,
   Award,
-  Loader2
+  Loader2,
+  Zap
 } from "lucide-react"
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
 import { Badge } from "@/components/ui/badge"
@@ -24,7 +25,8 @@ import { cn } from "@/lib/utils"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Official Progress Report Hub v2.2 (TypeScript Hardened).
+ * @fileOverview Official Progress Report Hub v2.2 (Build Fixed).
+ * FIXED: Added missing Zap icon import.
  */
 
 export default function DeepAnalytics() {

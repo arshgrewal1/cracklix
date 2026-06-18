@@ -20,12 +20,10 @@ import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Official Fluid Hero Hub v10.0 (Title Case & Fluid Typography).
- * FIXED: Missing Badge import resolved.
- * FIXED: Fluid clamp typography for all device widths.
+ * @fileOverview Official Fluid Hero Hub v11.0 (Build Fixed).
+ * FIXED: Added missing Badge and cn imports to resolve compilation errors.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -92,7 +90,7 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-          {/* CONTENT COLUMN */}
+          {/* LEFT COLUMN */}
           <div className="space-y-6 md:space-y-10 max-w-full">
             
             <div className="space-y-4 md:space-y-8">
@@ -132,7 +130,7 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* VISUAL BLOCK */}
+            {/* VISUAL BLOCK - Student Above Features */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -195,7 +193,7 @@ export default function Hero() {
                 <div className="min-w-0 flex-1">
                   <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 tabular-nums leading-none tracking-tighter mb-1.5">
                     {statsLoading ? (
-                       <Skeleton className="h-8 w-12 bg-slate-100" />
+                       <div className="h-8 w-12 bg-slate-100 animate-pulse rounded" />
                     ) : (
                        stat.val
                     )}
