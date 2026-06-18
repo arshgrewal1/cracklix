@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v92.0 (Mobile UI Polished).
- * FIXED: Scaled Admin Hub button on mobile for better visual balance.
+ * @fileOverview Institutional Header v93.0 (Restored Layout).
+ * FIXED: Balanced spacing and centered desktop navigation.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -77,26 +77,26 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-50 w-full font-body">
       <nav className="w-full h-20 bg-white border-b border-slate-100 shadow-sm overflow-visible">
-        <div className="w-full max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
+        <div className="w-full max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between gap-4">
 
-          {/* LEFT SIDE: Menu Hub + Maximized Logo */}
+          {/* LEFT SIDE: Menu Hub + Logo */}
           <div className="flex items-center shrink-0">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-11 h-11 md:w-12 md:h-12 rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
+              className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5 md:w-6 md:h-6" />
             </button>
 
             <Logo
               variant="light"
-              className="shrink-0 -ml-3 md:-ml-4 transition-all duration-500 origin-left"
+              className="shrink-0 -ml-2 md:-ml-3 transition-all duration-500 origin-left scale-90 md:scale-100"
             />
           </div>
 
           {/* DESKTOP NAVIGATION (CENTERED) */}
-          <div className="hidden lg:flex items-center justify-center gap-8 flex-1 px-4">
+          <div className="hidden lg:flex items-center justify-center gap-8 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/mocks" label="Practice" active={pathname === '/mocks'} />
             <NavLink href="/pyqs" label="Previous Papers" active={pathname === '/pyqs'} />
@@ -104,20 +104,20 @@ export default function Navbar() {
           </div>
 
           {/* RIGHT SIDE: Action Hub */}
-          <div className="flex items-center gap-3 md:gap-4 shrink-0">
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
             <Link
               href="/search"
-              className="w-10 h-10 md:w-11 md:h-11 rounded-2xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
+              className="w-10 h-10 md:w-11 md:h-11 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
             >
               <Search className="w-5 h-5" />
             </Link>
 
             {loading ? (
-              <Skeleton className="w-10 h-10 md:w-11 md:h-11 rounded-2xl bg-slate-100" />
+              <Skeleton className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-slate-100" />
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-10 h-10 md:w-11 md:h-11 rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all">
+                  <button className="w-10 h-10 md:w-11 md:h-11 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all">
                     <StudentAvatar
                       profile={profile}
                       className="w-full h-full border-none"
@@ -134,7 +134,7 @@ export default function Navbar() {
                     max-w-[420px]
                     min-w-[280px]
                     rounded-[28px]
-                    p-4 sm:p-6 md:p-8
+                    p-4 sm:p-6
                     bg-white
                     border border-slate-200
                     shadow-[0_20px_60px_rgba(15,23,42,0.15)]
@@ -143,43 +143,43 @@ export default function Navbar() {
                 >
                   <DropdownMenuItem asChild className="rounded-2xl p-0 focus:bg-transparent cursor-default">
                     <div className="w-full">
-                       {/* PROFILE HEADER */}
-                       <Link href="/profile" className="flex items-center gap-3 sm:gap-4 mb-4 sm:mb-6 group cursor-pointer">
-                          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-all">
-                             <User className="h-5 w-5 sm:h-6 sm:w-6" />
+                       <Link href="/profile" className="flex items-center gap-4 mb-4 group cursor-pointer p-2 rounded-xl hover:bg-slate-50 transition-all">
+                          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-all">
+                             <User className="h-5 w-5" />
                           </div>
-                          <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">My Profile</h3>
+                          <div>
+                            <h3 className="text-lg font-black text-slate-900 tracking-tight leading-none">{profile?.name || "Aspirant"}</h3>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">View Profile</p>
+                          </div>
                        </Link>
 
-                       {/* ADMIN HUB (IF APPLICABLE) - POLISHED FOR MOBILE BALANCE */}
                        {isAdmin && (
-                         <div className="mb-4 sm:mb-6">
-                            <Button asChild className="w-full h-12 sm:h-16 rounded-2xl sm:rounded-3xl text-sm sm:text-xl font-black px-4 sm:px-6 bg-primary hover:bg-blue-700 text-white shadow-lg border-none transition-all active:scale-95">
+                         <div className="mb-4">
+                            <Button asChild className="w-full h-12 rounded-xl text-sm font-black bg-primary hover:bg-blue-700 text-white shadow-lg border-none transition-all active:scale-95">
                                <Link href="/admin">
-                                  <ShieldCheck className="h-4 w-4 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
-                                  Admin Hub
+                                  <ShieldCheck className="h-5 w-5 mr-2" />
+                                  Admin Control Hub
                                </Link>
                             </Button>
                          </div>
                        )}
 
-                       <DropdownMenuSeparator className="my-4 bg-slate-100" />
+                       <DropdownMenuSeparator className="my-2 bg-slate-100" />
 
-                       {/* LOGOUT NODE */}
                        <Button
                           variant="ghost"
                           onClick={handleLogout}
-                          className="w-full h-14 sm:h-16 justify-start text-red-500 text-lg sm:text-xl font-black rounded-2xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95"
+                          className="w-full h-12 justify-start text-red-500 font-bold rounded-xl hover:bg-red-50 hover:text-red-600 transition-all active:scale-95"
                        >
-                          <LogOut className="h-5 w-5 sm:h-6 sm:w-6 mr-3" />
-                          Log Out
+                          <LogOut className="h-5 w-5 mr-3" />
+                          Sign Out
                        </Button>
                     </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login" className="px-5 md:px-8 h-11 md:h-12 rounded-2xl bg-primary text-white font-bold text-sm md:text-base flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-primary/20">
+              <Link href="/login" className="px-5 md:px-8 h-10 md:h-12 rounded-xl bg-primary text-white font-bold text-sm md:text-base flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-primary/20">
                 Login
               </Link>
             )}
@@ -189,7 +189,7 @@ export default function Navbar() {
 
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="w-[320px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
-          <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Main menu.</SheetDescription></SheetHeader>
+          <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Main menu navigation hub.</SheetDescription></SheetHeader>
           <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
@@ -199,7 +199,7 @@ export default function Navbar() {
 
 function NavLink({ href, label, active }: { href: string; label: string; active?: boolean; }) {
   return (
-    <Link href={href} className={cn("text-base font-bold tracking-tight transition-all", active ? "text-primary scale-105" : "text-slate-500 hover:text-[#04102B]")}>
+    <Link href={href} className={cn("text-sm font-bold tracking-tight transition-all", active ? "text-primary" : "text-slate-500 hover:text-[#04102B]")}>
       {label}
     </Link>
   );

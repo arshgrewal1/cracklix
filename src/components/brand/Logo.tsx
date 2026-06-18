@@ -14,8 +14,8 @@ interface LogoProps {
 }
 
 /**
- * Cracklix Official Logo Hub v24.0.
- * UPDATED: Optimized for the new blue/indigo premium theme.
+ * @fileOverview Cracklix Official Logo Hub v25.0.
+ * RESTORED: Balanced sizing (h-14 on mobile, h-16 on desktop).
  */
 export default function Logo({
   className = "",
@@ -24,17 +24,16 @@ export default function Logo({
   imgClassName = "",
   onClick,
 }: LogoProps) {
-  // Using the path specified in the redesign requirements
   const logoSrc = "/logo/cracklix-logo.png";
 
   const content = (
-    <div className="relative h-14 lg:h-20 w-[140px] xs:w-[180px] md:w-[200px] lg:w-[240px] xl:w-[260px] shrink-0">
+    <div className="relative h-14 lg:h-16 w-[180px] md:w-[200px] lg:w-[220px] shrink-0">
       <Image
         src={logoSrc}
         alt="Cracklix"
         fill
         priority
-        sizes="(max-width: 768px) 180px, 260px"
+        sizes="(max-width: 768px) 180px, 220px"
         className={cn(
           "object-contain object-left shrink-0 transition-all duration-300",
           imgClassName
