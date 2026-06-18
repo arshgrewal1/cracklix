@@ -14,9 +14,10 @@ interface LogoProps {
 }
 
 /**
- * Cracklix Official Logo Hub v22.0.
- * MAXIMIZED: Logo height fixed to 78px to fill the 80px (h-20) header perfectly.
- * ALIGNMENT: Reduced container width to 200px to eliminate ghost white-space on left.
+ * Cracklix Official Logo Hub v23.0.
+ * MAXIMIZED: Logo height increased to 80px (h-20) on desktop to fill the header.
+ * RESPONSIVE: Mobile height remains 56px (h-14).
+ * ALIGNMENT: Left-aligned with optimized container width for zero-gap feel.
  */
 export default function Logo({
   className = "",
@@ -31,13 +32,13 @@ export default function Logo({
       : "/logo/cracklix-logo-light.png";
 
   const content = (
-    <div className="relative h-[78px] w-[140px] xs:w-[180px] md:w-[200px] shrink-0">
+    <div className="relative h-14 lg:h-20 w-[140px] xs:w-[180px] md:w-[200px] lg:w-[240px] xl:w-[260px] shrink-0">
       <Image
         src={logoSrc}
         alt="Cracklix"
         fill
         priority
-        sizes="(max-width: 768px) 180px, 200px"
+        sizes="(max-width: 768px) 180px, 260px"
         className={cn(
           "object-contain object-left shrink-0 transition-all duration-300",
           imgClassName

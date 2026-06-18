@@ -31,7 +31,7 @@ import { Button } from "@/components/ui/button";
 
 /**
  * @fileOverview Mobile Sidebar Hardened v34.0 (Title Case & Overlap Fix).
- * UPDATED: Reduced vertical footprint of Share card to prevent section overlap.
+ * UPDATED: Logo sizing synchronized with global responsive hub.
  */
 export default function MobileSidebar({
   onClose,
@@ -82,7 +82,6 @@ export default function MobileSidebar({
           href="/"
           onClick={onClose}
           className="shrink-0 transition-all duration-500 origin-left"
-          imgClassName="h-[78px] w-auto"
         />
 
         <button
@@ -196,7 +195,7 @@ export default function MobileSidebar({
                onClick={onClose}
                className="flex h-10 items-center gap-4 rounded-xl px-6 text-slate-600 transition-all hover:bg-slate-50 active:scale-[0.98]"
             >
-               <MessageCircle className="h-4 w-4 shrink-0 text-slate-400" />
+               <MessageMessage className="h-4 w-4 shrink-0 text-slate-400" />
                <span className="font-bold text-[13px] tracking-tight">Support Hub</span>
             </Link>
             <Link

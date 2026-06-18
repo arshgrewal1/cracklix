@@ -12,9 +12,9 @@ interface SidebarHeaderProps {
 }
 
 /**
- * Cracklix Admin Sidebar Header v18.0.
+ * Cracklix Admin Sidebar Header v19.0.
  * RESTORED: Standard 80px (h-20) height.
- * MAXIMIZED: Logo height set to 78px to fill the header without overflow.
+ * MAXIMIZED: Sidebar width adjusted to accommodate the larger logo on desktop.
  */
 export default function SidebarHeader({
   isOpen,
@@ -31,7 +31,7 @@ export default function SidebarHeader({
       <div
         className={cn(
           "flex items-center overflow-hidden transition-all duration-300",
-          isOpen ? "w-[240px]" : "w-16 justify-center"
+          isOpen ? "w-[190px]" : "w-16 justify-center"
         )}
       >
         {isOpen ? (
@@ -39,7 +39,6 @@ export default function SidebarHeader({
             href="/admin"
             variant="dark"
             className="shrink-0"
-            imgClassName="h-[78px]"
           />
         ) : (
           <div className="relative h-12 w-12 shrink-0">

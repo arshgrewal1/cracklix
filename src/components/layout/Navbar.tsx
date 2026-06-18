@@ -92,7 +92,6 @@ export default function Navbar() {
             <Logo
               variant="light"
               className="shrink-0 -ml-3 md:-ml-4 transition-all duration-500 origin-left"
-              imgClassName="h-[78px] w-auto"
             />
           </div>
 
