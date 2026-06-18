@@ -4,26 +4,36 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%; /* #FFFFFF */
-    --foreground: 221 83% 9%; /* #04102B */
+    /* Cracklix Unified Brand System - Derived from Logo */
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%; /* #0F172A */
+    
     --card: 0 0% 100%;
-    --card-foreground: 221 83% 9%;
+    --card-foreground: 222 47% 11%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 221 83% 9%;
-    --primary: 221 83% 53%; /* #2563EB */
+    --popover-foreground: 222 47% 11%;
+    
+    --primary: 215 100% 54%; /* #1677FF - Logo Bright Blue */
     --primary-foreground: 0 0% 100%;
+    
     --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary-foreground: 222 47% 11%;
+    
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --muted-foreground: 215 16% 47%;
+    
+    --accent: 215 100% 96%; /* Light Blue Wash */
+    --accent-foreground: 215 100% 54%;
+    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
+    
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 221 83% 53%;
-    --radius: 1rem;
+    --ring: 215 100% 54%;
+    
+    --radius: 1.25rem; /* 20px - Modern Squared Radius */
 
     --header-height: 80px;
   }
@@ -42,7 +52,6 @@
     -webkit-tap-highlight-color: transparent;
     -webkit-text-size-adjust: 100%;
     
-    /* PWA Safe Area Support */
     padding-top: env(safe-area-inset-top);
     padding-bottom: env(safe-area-inset-bottom);
   }
@@ -52,13 +61,11 @@
   h3 { @apply font-black tracking-tight leading-tight; }
   p { @apply font-medium; }
 
-  /* Enforce 16px minimum font size for inputs to prevent iOS zoom */
   input, textarea, select {
     font-size: 16px !important;
   }
 }
 
-/* Mobile-First App Container */
 @media (max-width: 768px) {
   .app-content-wrapper {
     max-width: 430px;
@@ -82,7 +89,7 @@
   background: transparent;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(37, 99, 235, 0.1);
+  background: rgba(22, 119, 255, 0.1);
   border-radius: 10px;
 }
 
@@ -95,18 +102,13 @@
 }
 
 .shadow-4xl {
-  box-shadow: 0 20px 40px -10px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 20px 40px -10px rgba(22, 119, 255, 0.15);
 }
 
 .shadow-5xl {
   box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.2);
 }
 
-.pointer-events-auto {
-  pointer-events: auto !important;
-}
-
-/* Fix for buttons and touch targets */
 button, [role="button"] {
   @apply touch-manipulation;
 }

@@ -25,9 +25,8 @@ import { getDeviceId, getBrowserInfo } from "@/lib/device"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Hardened Login Hub v20.0.
- * UPDATED: Optimized Single Device Handover (SDL) logic.
- * DESIGN: Enhanced Session Termination feedback UI.
+ * @fileOverview Hardened Login Hub v21.0.
+ * UPDATED: Synchronized with Logo Blue palette and 20px radius.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -67,7 +66,6 @@ function LoginContent() {
   const sessionTerminated = searchParams.get('session') === 'terminated';
 
   useEffect(() => {
-    // If user is logged in AND not restricted by device, go to dashboard
     if (!authLoading && user && !deviceError) {
        router.replace(returnUrl);
     }
@@ -80,7 +78,6 @@ function LoginContent() {
     const deviceId = await getDeviceId();
     const { browser, platform } = getBrowserInfo();
     
-    // 1. Check current device binding (Legacy Max-2-Device logic)
     const deviceRef = doc(db, 'users', userId, 'devices', deviceId);
     const deviceSnap = await getDoc(deviceRef);
     
@@ -88,7 +85,7 @@ function LoginContent() {
       const devicesSnap = await getDocs(collection(db, 'users', userId, 'devices'));
       if (devicesSnap.size >= 2) {
         await signOut(auth);
-        setDeviceError("Device limit exceeded. Maximum 2 registered devices allowed. Please remove an old device from your profile.");
+        setDeviceError("Device limit exceeded. Maximum 2 registered devices allowed.");
         setLoading(false);
         return false;
       } else {
@@ -106,8 +103,6 @@ function LoginContent() {
       await setDoc(deviceRef, { lastActive: serverTimestamp() }, { merge: true });
     }
 
-    // 2. ONE ACTIVE SESSION HANDOVER (Newest Login Wins)
-    // This updates the 'activeDeviceId' field which SessionGuard listens to.
     await setDoc(doc(db, 'users', userId), {
       activeDeviceId: deviceId,
       lastLoginAt: serverTimestamp(),
@@ -219,40 +214,41 @@ function LoginContent() {
   const isActuallyLoading = loading || isPending;
 
   return (
-    <div className="min-h-screen bg-[#020817] flex flex-col items-center justify-center p-4 md:p-10 relative overflow-hidden text-white">
-      <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-600/10 blur-[140px] rounded-full" />
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4 md:p-10 relative overflow-hidden text-[#0F172A]">
+      <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary/5 blur-[140px] rounded-full" />
       
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="z-10 w-full max-w-[440px] space-y-8">
         <div className="flex flex-col items-center h-auto w-full mb-4">
-          <Logo variant="dark" />
+          <Logo variant="light" />
         </div>
 
-        {/* SDL NOTIFICATION */}
         {sessionTerminated && (
-          <div className="bg-rose-500/10 border border-rose-500/20 p-5 md:p-6 rounded-[2rem] flex items-center gap-4 animate-in slide-in-from-top-6 duration-700">
+          <div className="bg-rose-50 border border-rose-100 p-5 md:p-6 rounded-[2rem] flex items-center gap-4 animate-in slide-in-from-top-6 duration-700 shadow-sm">
             <ShieldAlert className="h-6 w-6 text-rose-500 shrink-0" />
-            <p className="text-sm font-bold text-rose-400 tracking-tight leading-snug text-left">
-              This account was just logged in on another device. Your previous session has been terminated for security.
+            <p className="text-sm font-bold text-rose-600 tracking-tight leading-snug text-left">
+              This account was just logged in on another device.
             </p>
           </div>
         )}
 
         {deviceError && (
-          <div className="bg-rose-500/10 border border-rose-500/20 p-5 md:p-8 rounded-[2rem] flex items-start gap-5 animate-in slide-in-from-top-6 duration-700">
+          <div className="bg-rose-50 border border-rose-100 p-5 md:p-8 rounded-[2.5rem] flex items-start gap-5 animate-in slide-in-from-top-6 duration-700 shadow-sm">
             <Smartphone className="h-7 w-7 text-rose-500 shrink-0" />
             <div className="space-y-2 text-left">
-              <p className="text-sm font-bold text-rose-500 tracking-tight">Security Guard</p>
-              <p className="text-[13px] text-slate-400 leading-relaxed font-medium">{deviceError}</p>
-              <Button onClick={() => setDeviceError(null)} variant="ghost" className="h-8 px-0 text-white font-bold text-[11px] hover:bg-transparent hover:text-white tracking-tight">Switch Account</Button>
+              <p className="text-sm font-bold text-rose-600 tracking-tight uppercase">Security Guard</p>
+              <p className="text-[13px] text-slate-500 leading-relaxed font-medium">{deviceError}</p>
+              <Button onClick={() => setDeviceError(null)} variant="ghost" className="h-8 px-0 text-primary font-bold text-[11px] hover:bg-transparent hover:text-primary tracking-tight">Try Another Account</Button>
             </div>
           </div>
         )}
 
-        <Card className="border-white/5 bg-white/[0.02] backdrop-blur-3xl shadow-5xl rounded-[2.5rem] md:rounded-[4rem] overflow-hidden border-2">
-          <div className="h-1.5 w-full bg-blue-600" />
+        <Card className="border-slate-100 bg-white/80 backdrop-blur-3xl shadow-5xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border-2">
+          <div className="h-1.5 w-full bg-primary" />
           <CardHeader className="text-center pt-10 md:pt-14 pb-4 px-8 md:px-16">
-            <CardTitle className="text-2xl md:text-4xl font-extrabold tracking-tight text-white">{mode === 'login' ? "Login" : "Sign Up"}</CardTitle>
-            <CardDescription className="text-slate-500 font-bold text-[10px] md:text-[12px] tracking-tight mt-3">Registry Access v20.0</CardDescription>
+            <CardTitle className="text-2xl md:text-4xl font-black tracking-tight text-[#0F172A] uppercase">
+              {mode === 'login' ? "Login" : "Sign Up"}
+            </CardTitle>
+            <CardDescription className="text-slate-400 font-bold text-[10px] md:text-[12px] tracking-widest mt-3 uppercase">Registry Access v21.0</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 md:space-y-10 pb-12 md:pb-20 px-8 md:px-16">
             <form onSubmit={handleEmailAuth} className="space-y-4 md:space-y-6">
@@ -262,16 +258,16 @@ function LoginContent() {
                     value={name} 
                     onChange={(e) => setName(e.target.value)} 
                     required 
-                    className="h-12 md:h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-blue-600 text-sm md:text-lg font-medium px-6" 
+                    className="h-12 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] placeholder:text-slate-400 focus-visible:ring-primary text-sm md:text-lg font-bold px-6 shadow-inner" 
                     placeholder="Full Identity" 
                   />
                   <div className="relative">
-                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-600 font-bold text-sm md:text-lg">+91</span>
+                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm md:text-lg">+91</span>
                     <Input 
                       value={phone} 
                       onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0,10))} 
                       required 
-                      className="h-12 md:h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-blue-600 text-sm md:text-lg font-bold pl-16 px-6 tracking-widest" 
+                      className="h-12 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] placeholder:text-slate-400 focus-visible:ring-primary text-sm md:text-lg font-bold pl-16 px-6 tracking-widest shadow-inner" 
                       placeholder="Mobile Node" 
                     />
                   </div>
@@ -282,7 +278,7 @@ function LoginContent() {
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 required 
-                className="h-12 md:h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-blue-600 text-sm md:text-lg font-medium px-6" 
+                className="h-12 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] placeholder:text-slate-400 focus-visible:ring-primary text-sm md:text-lg font-bold px-6 shadow-inner" 
                 placeholder="Email Address" 
               />
               <div className="space-y-2">
@@ -292,16 +288,16 @@ function LoginContent() {
                     value={password} 
                     onChange={(e) => setPassword(e.target.value)} 
                     required 
-                    className="h-12 md:h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-blue-600 pr-14 px-6 text-sm md:text-lg" 
+                    className="h-12 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] placeholder:text-slate-400 focus-visible:ring-primary pr-14 px-6 text-sm md:text-lg font-bold shadow-inner" 
                     placeholder="Password" 
                   />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 hover:text-white transition-colors">
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors">
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
                 {mode === 'login' && (
                   <div className="flex justify-end pr-2">
-                    <button type="button" onClick={() => setIsResetDialogOpen(true)} className="text-[10px] md:text-[12px] font-bold text-blue-600 hover:text-blue-400 transition-colors tracking-tight">Recover Password?</button>
+                    <button type="button" onClick={() => setIsResetDialogOpen(true)} className="text-[10px] md:text-[12px] font-bold text-primary hover:text-blue-700 transition-colors tracking-tight">Recover Password?</button>
                   </div>
                 )}
               </div>
@@ -312,49 +308,49 @@ function LoginContent() {
                     value={confirmPassword} 
                     onChange={(e) => setConfirmPassword(e.target.value)} 
                     required 
-                    className="h-12 md:h-16 rounded-2xl bg-white/5 border-white/10 text-white placeholder:text-slate-600 focus-visible:ring-blue-600 pr-14 px-6 text-sm md:text-lg" 
+                    className="h-12 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] placeholder:text-slate-400 focus-visible:ring-primary pr-14 px-6 text-sm md:text-lg font-bold shadow-inner" 
                     placeholder="Verify Password" 
                   />
-                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 hover:text-white transition-colors">
+                  <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors">
                     {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
               )}
-              <Button type="submit" className="w-full h-14 md:h-20 bg-blue-600 hover:bg-blue-700 text-white font-bold text-base md:text-lg rounded-[1.5rem] md:rounded-[2.5rem] shadow-3xl shadow-blue-600/20 border-none transition-all active:scale-95" disabled={isActuallyLoading}>
+              <Button type="submit" className="w-full h-14 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-base md:text-lg rounded-[1.5rem] md:rounded-[2.5rem] shadow-4xl shadow-primary/20 border-none transition-all active:scale-95 tracking-widest" disabled={isActuallyLoading}>
                 {isActuallyLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : (mode === 'login' ? "Enter Registry" : "Create Account")}
               </Button>
             </form>
-            <div className="flex items-center gap-4 py-2"><div className="h-px flex-1 bg-white/5" /><span className="text-[10px] font-bold text-slate-700 tracking-tight">OR CONNECT</span><div className="h-px flex-1 bg-white/5" /></div>
-            <Button variant="outline" className="w-full h-12 md:h-16 border-white/5 bg-white/[0.03] text-white gap-4 rounded-2xl font-bold text-sm hover:bg-white/10 tracking-tight shadow-xl" onClick={handleGoogleSignIn} disabled={isActuallyLoading}>
+            <div className="flex items-center gap-4 py-2"><div className="h-px flex-1 bg-slate-100" /><span className="text-[10px] font-bold text-slate-300 tracking-widest uppercase">OR CONNECT</span><div className="h-px flex-1 bg-slate-100" /></div>
+            <Button variant="outline" className="w-full h-12 md:h-16 border-slate-100 bg-white text-[#0F172A] gap-4 rounded-2xl font-bold text-sm hover:bg-slate-50 tracking-tight shadow-sm" onClick={handleGoogleSignIn} disabled={isActuallyLoading}>
                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" className="h-4 w-4 md:h-5 md:w-5" alt="G" /> Google Account
             </Button>
-            <div className="text-center text-[11px] md:text-[14px] font-bold text-slate-600 tracking-tight">
-               {mode === 'login' ? (<p>New aspirant? <button onClick={() => setMode('register')} className="text-blue-600 hover:text-white transition-colors">Create account</button></p>) : (<p>Already registered? <button onClick={() => setMode('login')} className="text-blue-600 hover:text-white transition-colors">Login now</button></p>)}
+            <div className="text-center text-[11px] md:text-[14px] font-bold text-slate-400 tracking-tight">
+               {mode === 'login' ? (<p>New aspirant? <button onClick={() => setMode('register')} className="text-primary hover:text-blue-700 transition-colors">Create account</button></p>) : (<p>Already registered? <button onClick={() => setMode('login')} className="text-primary hover:text-blue-700 transition-colors">Login now</button></p>)}
             </div>
           </CardContent>
         </Card>
       </motion.div>
 
       <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-        <DialogContent className="bg-[#0F172A] text-white border-white/10 rounded-[3rem] max-w-[400px] p-10 shadow-5xl text-left">
+        <DialogContent className="bg-white rounded-[3rem] max-w-[400px] p-10 shadow-5xl text-left border-none">
           <DialogHeader className="text-center space-y-4">
-            <div className="h-16 w-16 bg-blue-600/10 rounded-2xl flex items-center justify-center mx-auto text-blue-600 shadow-xl"><RefreshCw className={cn("h-8 w-8", resetLoading && "animate-spin")} /></div>
-            <DialogTitle className="text-2xl font-extrabold tracking-tight">Recover Node</DialogTitle>
-            <DialogDescription className="text-slate-500 text-[11px] font-bold tracking-tight leading-relaxed">Enter your email to receive a reset link.</DialogDescription>
+            <div className="h-16 w-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary shadow-xl"><RefreshCw className={cn("h-8 w-8", resetLoading && "animate-spin")} /></div>
+            <DialogTitle className="text-2xl font-black uppercase tracking-tight text-[#0F172A]">Recover Node</DialogTitle>
+            <DialogDescription className="text-slate-400 text-[11px] font-bold tracking-widest uppercase leading-relaxed">Enter your email to receive a reset link.</DialogDescription>
           </DialogHeader>
           <div className="py-8 space-y-6">
             <div className="space-y-2 text-left">
-              <Label className="text-[11px] font-bold text-slate-600 ml-1">Registry Email</Label>
+              <Label className="text-[11px] font-black text-slate-400 ml-1 uppercase">Registry Email</Label>
               <Input 
                 type="email" 
                 value={resetEmail} 
                 onChange={(e) => setResetEmail(e.target.value)} 
                 placeholder="aspirant@cracklix.com" 
-                className="h-14 bg-white/5 border-white/10 rounded-xl focus-visible:ring-blue-600 text-white text-base px-6 font-medium" 
+                className="h-14 bg-slate-50 border-none rounded-xl focus-visible:ring-primary text-[#0F172A] text-base px-6 font-bold shadow-inner" 
               />
             </div>
           </div>
-          <DialogFooter><Button onClick={handleResetPassword} disabled={resetLoading} className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-2xl shadow-3xl shadow-blue-600/20 transition-all">{resetLoading ? "Transmitting..." : "Send Reset Link"}</Button></DialogFooter>
+          <DialogFooter><Button onClick={handleResetPassword} disabled={resetLoading} className="w-full h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-lg rounded-2xl shadow-4xl shadow-primary/20 transition-all border-none tracking-widest">{resetLoading ? "Transmitting..." : "Send Reset Link"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

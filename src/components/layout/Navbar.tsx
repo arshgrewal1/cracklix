@@ -35,9 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v77.0.
- * RESTORED: Height to standard 80px (h-20).
- * ALIGNMENT: Logo optimized with responsive scale in Logo.tsx.
+ * @fileOverview Institutional Header v78.0.
+ * UPDATED: Synchronized NavLink with Logo Blue.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -84,7 +83,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-12 h-12 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0"
+              className="flex items-center justify-center w-12 h-12 rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0"
             >
               <Menu className="w-6 h-6" />
             </button>
@@ -107,17 +106,17 @@ export default function Navbar() {
           <div className="flex items-center gap-4 shrink-0">
             <Link
               href="/search"
-              className="w-12 h-12 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
+              className="w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
             >
               <Search className="w-5 h-5" />
             </Link>
 
             {loading ? (
-              <Skeleton className="w-12 h-12 rounded-xl bg-slate-100" />
+              <Skeleton className="w-12 h-12 rounded-2xl bg-slate-100" />
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-12 h-12 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all">
+                  <button className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all">
                     <StudentAvatar
                       profile={profile}
                       className="w-full h-full border-none"
@@ -128,9 +127,9 @@ export default function Navbar() {
 
                 <DropdownMenuContent
                   align="end"
-                  className="w-64 mt-4 rounded-2xl border border-slate-200 bg-white p-3 shadow-2xl z-[2001]"
+                  className="w-64 mt-4 rounded-3xl border border-slate-200 bg-white p-3 shadow-2xl z-[2001]"
                 >
-                  <DropdownMenuItem asChild className="rounded-xl px-4 py-4 cursor-pointer">
+                  <DropdownMenuItem asChild className="rounded-2xl px-4 py-4 cursor-pointer">
                     <Link href="/profile" className="flex items-center gap-3">
                       <User className="w-5 h-5 text-primary" />
                       <span className="font-bold text-base">My Profile</span>
@@ -138,7 +137,7 @@ export default function Navbar() {
                   </DropdownMenuItem>
 
                   {isAdmin && (
-                    <DropdownMenuItem asChild className="rounded-xl px-4 py-4 mt-1 border border-primary/10 cursor-pointer bg-primary/5">
+                    <DropdownMenuItem asChild className="rounded-2xl px-4 py-4 mt-1 border border-primary/10 cursor-pointer bg-primary/5">
                       <Link href="/admin" className="flex items-center gap-3">
                         <ShieldCheck className="w-5 h-5 text-primary" />
                         <span className="font-bold text-base text-primary">Admin Hub</span>
@@ -148,14 +147,14 @@ export default function Navbar() {
 
                   <DropdownMenuSeparator className="my-2 bg-slate-100" />
 
-                  <DropdownMenuItem onClick={handleLogout} className="rounded-xl px-4 py-4 cursor-pointer text-rose-500 font-bold text-base flex items-center gap-3">
+                  <DropdownMenuItem onClick={handleLogout} className="rounded-2xl px-4 py-4 cursor-pointer text-rose-500 font-bold text-base flex items-center gap-3">
                     <LogOut className="w-5 h-5 shrink-0" />
                     <span>Log Out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login" className="px-8 h-12 rounded-xl bg-primary text-white font-bold text-base flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-primary/20">
+              <Link href="/login" className="px-8 h-12 rounded-2xl bg-primary text-white font-bold text-base flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-primary/20">
                 Login
               </Link>
             )}

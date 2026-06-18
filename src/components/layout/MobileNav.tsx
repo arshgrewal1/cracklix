@@ -13,21 +13,13 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Production Mobile Bottom Navigation v1.1
- *
- * Specs:
- * - Height: 80px
- * - Hidden on desktop
- * - Hidden during attempts
- * - Hidden inside admin
- * - PWA safe-area support
- * - Active pill design
+ * Production Mobile Bottom Navigation v1.2
+ * UPDATED: Synchronized with Logo Blue (#1677FF) for active states.
  */
 
 export default function MobileNav() {
   const pathname = usePathname();
 
-  // Hide on exam attempt screens
   if (
     !pathname ||
     pathname.includes("/attempt") ||
@@ -65,7 +57,7 @@ export default function MobileNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[1000] border-t border-slate-200 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.04)] md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-[1000] border-t border-slate-100 bg-white shadow-[0_-4px_30px_rgba(0,0,0,0.04)] md:hidden">
 
       <div className="flex h-[80px] items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
 
@@ -85,11 +77,11 @@ export default function MobileNav() {
             >
               <div
                 className={cn(
-                  "flex flex-col items-center justify-center rounded-3xl transition-all duration-300",
+                  "flex flex-col items-center justify-center rounded-[1.5rem] transition-all duration-300",
 
                   isActive
-                    ? "h-[56px] w-[68px] bg-[#2563EB] text-white shadow-lg shadow-[#2563EB]/20"
-                    : "h-[56px] w-[68px] text-slate-500"
+                    ? "h-[56px] w-[68px] bg-primary text-white shadow-lg shadow-primary/20"
+                    : "h-[56px] w-[68px] text-slate-400"
                 )}
               >
                 <Icon
@@ -103,7 +95,7 @@ export default function MobileNav() {
 
                     isActive
                       ? "text-white"
-                      : "text-slate-500"
+                      : "text-slate-400"
                   )}
                 >
                   {item.label}
