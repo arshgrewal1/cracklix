@@ -24,12 +24,10 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { errorEmitter } from "@/firebase/error-emitter";
-import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
- * @fileOverview Hardened CBT Engine v55.0 (Security Perimeter Hardened).
- * ENFORCEMENT: Strict subscription check before engine hydration.
+ * @fileOverview Hardened CBT Engine v56.0 (Type Integrity Sync).
+ * FIXED: Explicitly typed parameters in collection hydration to resolve implicit any errors.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -85,17 +83,17 @@ export default function MockAttemptPage() {
         }
         // ---------------------------------
 
-        const questionIds = mData.questionIds || [];
+        const questionIds: string[] = mData.questionIds || [];
         if (questionIds.length === 0) throw new Error("Question bank is empty.");
 
         const fetchedQuestions: any[] = [];
         const chunks = [];
         for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
         
-        const chunkSnaps = await Promise.all(chunks.map(chunk => getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))));
+        const chunkSnaps = await Promise.all(chunks.map((chunk: string[]) => getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))));
         chunkSnaps.forEach(snap => snap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id })));
         
-        const sortedQs = questionIds.map(id => fetchedQuestions.find(q => q.id === id)).filter(Boolean);
+        const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
         if (sortedQs.length === 0) throw new Error("Could not sync preparation nodes.");
 
         const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
@@ -128,7 +126,7 @@ export default function MockAttemptPage() {
       const posMarks = Number(mockData.positiveMarks) || 1;
       const negMarks = Number(mockData.negativeMarks) || 0.25;
 
-      questions.forEach((q, idx) => {
+      questions.forEach((q: any, idx: number) => {
         const studentAnsIdx = answers?.[idx];
         if (studentAnsIdx === undefined || studentAnsIdx === null) return;
         const correctOptIdx = ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer);
@@ -249,34 +247,30 @@ export default function MockAttemptPage() {
              <SheetTitle>Navigation Palette</SheetTitle>
              <SheetDescription>View and navigate through all questions in the current mock test.</SheetDescription>
           </SheetHeader>
-          <QuestionPalette onSelect={(idx) => { useExamStore.getState().setCurrentIdx(idx); setIsPaletteOpen(false); }} onSubmit={() => { setIsPaletteOpen(false); setShowSubmitModal(true); }} />
+          <QuestionPalette onSelect={(idx: number) => { useExamStore.getState().setCurrentIdx(idx); setIsPaletteOpen(false); }} onSubmit={() => { setIsPaletteOpen(false); setShowSubmitModal(true); }} />
         </SheetContent>
       </Sheet>
 
-      {/* EXIT MODAL */}
-      <div className="hidden">
-        <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
-          <DialogContent className="max-w-[240px] rounded-[1.2rem] p-4 md:p-6 bg-white text-center shadow-5xl border-none z-[1300]">
-            <div className="space-y-3">
-              <DialogHeader className="sr-only">
-                 <DialogTitle>Save & Exit?</DialogTitle>
-                 <DialogDescription>Your current attempt state is safely cached in the cloud.</DialogDescription>
-              </DialogHeader>
-              <div className="h-8 w-8 bg-blue-50 rounded-lg flex items-center justify-center mx-auto text-blue-500 shadow-sm">
-                <LogOut className="h-4 w-4" />
-              </div>
-              <h2 className="text-sm font-headline font-black uppercase text-[#0F172A] leading-tight">Save & Exit?</h2>
-              <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none">Progress cached in registry.</p>
-              <div className="flex gap-2 pt-1">
-                <Button variant="ghost" onClick={() => setShowExitModal(false)} className="flex-1 h-8 font-black uppercase text-[7px] tracking-widest">Stay</Button>
-                <Button onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/dashboard'); }} className="flex-1 h-8 bg-primary text-white rounded-lg font-black uppercase text-[7px] border-none shadow-lg">Exit</Button>
-              </div>
+      <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
+        <DialogContent className="max-w-[240px] rounded-[1.2rem] p-4 md:p-6 bg-white text-center shadow-5xl border-none z-[1300]">
+          <div className="space-y-3">
+            <DialogHeader className="sr-only">
+               <DialogTitle>Save & Exit?</DialogTitle>
+               <DialogDescription>Your current attempt state is safely cached in the cloud.</DialogDescription>
+            </DialogHeader>
+            <div className="h-8 w-8 bg-blue-50 rounded-lg flex items-center justify-center mx-auto text-blue-500 shadow-sm">
+              <LogOut className="h-4 w-4" />
             </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+            <h2 className="text-sm font-headline font-black uppercase text-[#0F172A] leading-tight">Save & Exit?</h2>
+            <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none">Progress cached in registry.</p>
+            <div className="flex gap-2 pt-1">
+              <Button variant="ghost" onClick={() => setShowExitModal(false)} className="flex-1 h-8 font-black uppercase text-[7px] tracking-widest">Stay</Button>
+              <Button onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/dashboard'); }} className="flex-1 h-8 bg-primary text-white rounded-lg font-black uppercase text-[7px] border-none shadow-lg">Exit</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-      {/* SUBMIT MODAL */}
       <Dialog open={showSubmitModal} onOpenChange={showSubmitModal && !isSubmittingFinal ? setShowSubmitModal : undefined}>
         <DialogContent className="max-w-[240px] rounded-[1.2rem] p-4 md:p-6 bg-[#0B1528] text-white text-center border-none shadow-5xl z-[1300]">
           <div className="space-y-3">
@@ -290,7 +284,7 @@ export default function MockAttemptPage() {
             <h2 className="text-sm font-headline font-black uppercase text-white tracking-tight leading-none">Final Submission</h2>
             <p className="text-slate-400 text-[7px] font-medium px-1 leading-relaxed uppercase">Scores will be committed to the state merit list after submission.</p>
             <div className="flex flex-col gap-1.5 pt-1">
-              <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-8 bg-[#F97316] hover:bg-orange-600 text-white font-black uppercase text-[7px] tracking-widest rounded-lg border-none shadow-xl">
+              <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-8 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[7px] tracking-widest rounded-lg border-none shadow-xl">
                 {isSubmittingFinal ? <Loader2 className="h-3 w-3 animate-spin" /> : "Finish & Score Test"}
               </Button>
               <button onClick={() => setShowSubmitModal(false)} disabled={isSubmittingFinal} className="h-4 text-slate-500 font-bold uppercase text-[6px] tracking-widest hover:text-white transition-colors cursor-pointer">Back to Questions</button>

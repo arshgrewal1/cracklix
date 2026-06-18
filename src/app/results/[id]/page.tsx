@@ -28,12 +28,10 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
-import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Test Results Hub v38.0 (Hardened).
- * FIXED: Finalized high-density scaling for 320px screens.
- * UPDATED: Replaced orange buttons with Primary Blue.
+ * @fileOverview Test Results Hub v39.0 (TypeScript Hardened).
+ * FIXED: Explicitly typed map and filter parameters to resolve implicit any errors.
  */
 
 export default function ResultPage() {
@@ -71,12 +69,12 @@ function ResultContent() {
      if (!rawGlobalResults || !sessionData) return { rank: '?', total: 0, percentile: 0, list: [] };
      
      const uniqueMap = new Map();
-     [...rawGlobalResults].sort((a, b) => (b.score || 0) - (a.score || 0)).forEach(r => {
+     [...rawGlobalResults].sort((a: any, b: any) => (b.score || 0) - (a.score || 0)).forEach((r: any) => {
         if (!uniqueMap.has(r.userId) || uniqueMap.get(r.userId).score < r.score) {
            uniqueMap.set(r.userId, r);
         }
      });
-     const meritList = Array.from(uniqueMap.values()).sort((a,b) => b.score - a.score);
+     const meritList = Array.from(uniqueMap.values()).sort((a: any, b: any) => b.score - a.score);
      
      const rank = meritList.findIndex((r: any) => r.userId === user?.uid) + 1;
      const actualRank = rank > 0 ? rank : 1;
@@ -94,14 +92,14 @@ function ResultContent() {
         if (mockSnap.exists()) {
           const mData = mockSnap.data();
           setMockData(mData);
-          const questionIds = mData.questionIds || []
+          const questionIds: string[] = mData.questionIds || []
           if (questionIds.length > 0) {
             const fetched: any[] = []
             const chunks = []
             for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)) }
-            const chunkSnaps = await Promise.all(chunks.map(chunk => getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))))
+            const chunkSnaps = await Promise.all(chunks.map((chunk: string[]) => getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))))
             chunkSnaps.forEach(snap => snap.docs.forEach(d => fetched.push({ ...d.data(), id: d.id })))
-            setQuestions(questionIds.map(id => fetched.find(q => q.id === id)).filter(Boolean))
+            setQuestions(questionIds.map((id: string) => fetched.find((q: any) => q.id === id)).filter(Boolean))
           }
         }
       } catch (e) {
@@ -115,7 +113,7 @@ function ResultContent() {
 
   const filteredQuestions = useMemo(() => {
      if (!sessionData) return [];
-     return questions.map((q, i) => ({ ...q, index: i })).filter((q) => {
+     return questions.map((q: any, i: number) => ({ ...q, index: i })).filter((q: any) => {
         const ans = sessionData.answers?.[q.index];
         const isCorrect = ans !== undefined && ['A','B','C','D'][ans] === q.correctAnswer;
         if (activeReviewFilter === 'ALL') return true;
@@ -195,7 +193,7 @@ function ResultContent() {
            </div>
 
            <TabsContent value="SOLUTIONS" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-3 duration-700">
-              {filteredQuestions.length > 0 ? filteredQuestions.map((q) => {
+              {filteredQuestions.length > 0 ? filteredQuestions.map((q: any) => {
                  const ans = sessionData.answers?.[q.index];
                  const isCorrect = ans !== undefined && ['A','B','C','D'][ans] === q.correctAnswer;
                  const isSkipped = ans === undefined || ans === null;

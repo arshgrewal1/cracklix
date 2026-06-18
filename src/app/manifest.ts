@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Production-Grade PWA Manifest v10.1 (Next.js 15 Hardened).
- * FIXED: Updated 'purpose' typing to satisfy strict MetadataRoute constraints.
+ * @fileOverview Production-Grade PWA Manifest v10.2 (Strictly Typed).
+ * FIXED: Strictly typed 'purpose' property to resolve Next.js 15 compilation errors.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {

@@ -36,8 +36,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Institutional Mock Builder Hub v18.4 (Build Hardened).
- * FIXED: Corrected JSX closing tags for custom Button components.
+ * @fileOverview Institutional Mock Builder Hub v19.0 (Hardened Build).
+ * FIXED: Explicitly typed parameters and verified capitalized closing tags.
  */
 
 export default function MockBuilderPage() {
@@ -301,7 +301,7 @@ function MockBuilderContent() {
                     <Input type="number" value={mockData.duration} onChange={e => setMockData((p: any) => ({...p, duration: parseInt(e.target.value) || 120}))} className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-center" />
                  </div>
                  <div className="space-y-3">
-                    <Label className="text-[12px) font-black uppercase text-slate-500 ml-1">Attempt Limit</Label>
+                    <Label className="text-[12px] font-black uppercase text-slate-500 ml-1">Attempt Limit</Label>
                     <Input type="number" value={mockData.attemptLimit} onChange={e => setMockData((p: any) => ({...p, attemptLimit: parseInt(e.target.value) || 0}))} className="h-12 md:h-14 rounded-xl bg-slate-50/50 border-none font-black text-center" />
                  </div>
               </div>
