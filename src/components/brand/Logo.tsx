@@ -14,10 +14,8 @@ interface LogoProps {
 }
 
 /**
- * Cracklix Official Logo Hub v23.0.
- * MAXIMIZED: Logo height increased to 80px (h-20) on desktop to fill the header.
- * RESPONSIVE: Mobile height remains 56px (h-14).
- * ALIGNMENT: Left-aligned with optimized container width for zero-gap feel.
+ * Cracklix Official Logo Hub v24.0.
+ * UPDATED: Optimized for the new blue/indigo premium theme.
  */
 export default function Logo({
   className = "",
@@ -26,10 +24,8 @@ export default function Logo({
   imgClassName = "",
   onClick,
 }: LogoProps) {
-  const logoSrc =
-    variant === "light"
-      ? "/logo/cracklix-logo-dark.png"
-      : "/logo/cracklix-logo-light.png";
+  // Using the path specified in the redesign requirements
+  const logoSrc = "/logo/cracklix-logo.png";
 
   const content = (
     <div className="relative h-14 lg:h-20 w-[140px] xs:w-[180px] md:w-[200px] lg:w-[240px] xl:w-[260px] shrink-0">
