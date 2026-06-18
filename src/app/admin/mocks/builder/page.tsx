@@ -36,7 +36,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Institutional Mock Builder Hub v17.7 (Tag Fix).
+ * @fileOverview Institutional Mock Builder Hub v17.8 (Hardened).
  * FIXED: Corrected mismatched JSX tag where Button was closed with button.
  */
 

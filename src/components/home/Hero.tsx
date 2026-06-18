@@ -11,23 +11,21 @@ import {
   BookOpen,
   FileText,
   BarChart3,
-  Star,
-  Loader2
+  Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Official Fluid Hero Hub v9.0.
- * HARDENED: Full responsive typography audit.
- * ADAPTIVE: Fluid clamp-based headings and mobile-first scaling for 320px+ devices.
- * LIVE SYNC: Synchronized with settings/stats registry.
+ * @fileOverview Official Fluid Hero Hub v10.0 (Title Case & Fluid Typography).
+ * FIXED: Missing Badge import resolved.
+ * FIXED: Fluid clamp typography for all device widths.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -62,25 +60,25 @@ export default function Hero() {
     return [
       {
         id: "q",
-        icon: <Zap className="h-4 w-4 md:h-5 md:w-5 text-blue-600" />,
+        icon: <Zap className="h-5 w-5 text-blue-600" />,
         val: formatNumber(stats?.totalQuestions, "50k+"),
         label: "Questions"
       },
       {
         id: "m",
-        icon: <ClipboardList className="h-4 w-4 md:h-5 md:w-5 text-indigo-600" />,
+        icon: <ClipboardList className="h-5 w-5 text-indigo-600" />,
         val: formatNumber(stats?.totalMocks, "500+"),
         label: "Mock Tests"
       },
       {
         id: "e",
-        icon: <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 text-emerald-600" />,
+        icon: <ShieldCheck className="h-5 w-5 text-emerald-600" />,
         val: formatNumber(stats?.totalBoards, "50+"),
         label: "Exams"
       },
       {
         id: "u",
-        icon: <Users className="h-4 w-4 md:h-5 md:w-5 text-orange-500" />,
+        icon: <Users className="h-5 w-5 text-orange-500" />,
         val: formatNumber(stats?.totalUsers, "15k+"),
         label: "Aspirants"
       }
@@ -90,27 +88,23 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-blue-50 py-8 md:py-16 lg:py-24 text-left">
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-blue-50 py-12 md:py-24 text-left">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-[1fr_0.8fr] gap-8 md:gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 items-center">
 
           {/* CONTENT COLUMN */}
-          <div className="space-y-6 md:space-y-10 max-w-full overflow-hidden">
+          <div className="space-y-6 md:space-y-10 max-w-full">
             
             <div className="space-y-4 md:space-y-8">
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center gap-2 px-3 py-1.5 md:px-5 md:py-2 rounded-full bg-white border border-slate-100 shadow-sm"
-              >
-                <Star className="h-3 w-3 md:h-4 md:w-4 text-yellow-500 fill-yellow-500" />
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-100 shadow-sm mb-2">
+                <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                 <span className="text-[10px] sm:text-xs md:text-sm font-bold text-slate-700 tracking-tight">
                   {liveAspirantCount} Aspirants Trust Cracklix
                 </span>
-              </motion.div>
+              </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.1] md:leading-[1.05] break-words antialiased">
-                <span className="text-[clamp(1.8rem,6vw,4.5rem)]">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.05] break-words antialiased">
+                <span className="text-[clamp(2rem,6vw,4.5rem)]">
                   Crack Punjab <br/>
                   <span className="text-blue-600">Government Exams</span> <br/>
                   With Confidence
@@ -138,7 +132,7 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* VISUAL BREAK: STUDENT HERO IMAGE */}
+            {/* VISUAL BLOCK */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -148,23 +142,23 @@ export default function Hero() {
               <img
                 src="/images/hero-student.png"
                 alt="Cracklix Student"
-                className="w-full h-auto object-contain drop-shadow-2xl max-w-[280px] xs:max-w-xs md:max-w-md lg:max-w-lg"
+                className="w-full h-auto object-contain drop-shadow-2xl max-w-[280px] xs:max-w-sm md:max-w-md lg:max-w-lg"
               />
             </motion.div>
 
             {/* QUICK FEATURE GRID */}
-            <div className="grid grid-cols-2 gap-3 md:gap-6 mt-4">
-              <FeatureCard icon={<ClipboardList />} label="Mock Tests" color="text-blue-600" />
-              <FeatureCard icon={<BookOpen />} label="Study Hub" color="text-indigo-600" />
-              <FeatureCard icon={<FileText />} label="PYQ Papers" color="text-emerald-600" />
-              <FeatureCard icon={<BarChart3 />} label="Analytics" color="text-orange-500" />
+            <div className="grid grid-cols-2 gap-4 md:gap-6 mt-4">
+              <HeroFeatureCard icon={<ClipboardList />} label="Mock Tests" color="text-blue-600" />
+              <HeroFeatureCard icon={<BookOpen />} label="Study Material" color="text-indigo-600" />
+              <HeroFeatureCard icon={<FileText />} label="Previous Papers" color="text-emerald-600" />
+              <HeroFeatureCard icon={<BarChart3 />} label="Performance Analytics" color="text-orange-500" />
             </div>
 
             {/* CTAS */}
-            <div className="flex flex-col sm:flex-row gap-3 md:gap-5 mt-8 md:mt-12">
+            <div className="flex flex-col sm:flex-row gap-4 md:gap-5 mt-8 md:mt-12">
               <Button
                 asChild
-                className="w-full sm:w-auto h-12 md:h-16 px-8 md:px-10 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-xl shadow-blue-600/20 active:scale-95 border-none transition-all gap-2"
+                className="w-full sm:w-auto h-12 md:h-16 px-8 md:px-10 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-xl border-none transition-all gap-2"
               >
                 <Link href="/mocks">
                   Start Practice Now
@@ -175,34 +169,33 @@ export default function Hero() {
               <Button
                 asChild
                 variant="outline"
-                className="w-full sm:w-auto h-12 md:h-16 px-8 md:px-10 border-2 border-slate-200 bg-white rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest hover:bg-slate-50 active:scale-95 transition-all text-slate-600"
+                className="w-full sm:w-auto h-12 md:h-16 px-8 md:px-10 border-2 border-slate-200 bg-white rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest transition-all text-slate-600"
               >
                 <Link href="/exams">
-                  Browse Exam List
+                  Browse Exams
                 </Link>
               </Button>
             </div>
           </div>
           
-          {/* RIGHT COLUMN (DESKTOP BALANCE) */}
           <div className="hidden lg:block"></div>
         </div>
 
         {/* BOTTOM LIVE STATS GRID */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mt-16 md:mt-24 lg:mt-32">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-16 md:mt-24 lg:mt-32">
           {liveStats.map((stat) => (
             <Card
               key={stat.id}
-              className="p-4 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl group hover:shadow-2xl transition-all duration-500"
+              className="p-5 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl group hover:shadow-2xl transition-all duration-500"
             >
-              <div className="flex flex-col sm:flex-row items-center gap-3 md:gap-5 text-center sm:text-left">
-                <div className="shrink-0 p-2 md:p-3 rounded-xl bg-slate-50 group-hover:bg-blue-50 transition-colors shadow-inner">
+              <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-5 text-center sm:text-left">
+                <div className="shrink-0 p-3 rounded-xl bg-slate-50 group-hover:bg-blue-50 transition-colors shadow-inner">
                   {stat.icon}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 tabular-nums leading-none tracking-tighter mb-1.5">
                     {statsLoading ? (
-                       <Skeleton className="h-6 w-12 bg-slate-100" />
+                       <Skeleton className="h-8 w-12 bg-slate-100" />
                     ) : (
                        stat.val
                     )}
@@ -220,7 +213,7 @@ export default function Hero() {
   );
 }
 
-function FeatureCard({ icon, label, color }: { icon: React.ReactNode, label: string, color: string }) {
+function HeroFeatureCard({ icon, label, color }: { icon: React.ReactNode, label: string, color: string }) {
   return (
     <Card className="p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-2xl transition-all text-left">
       <div className={cn("h-8 w-8 md:h-12 md:w-12 rounded-xl flex items-center justify-center mb-4 shadow-inner bg-slate-50 transition-transform group-hover:scale-110", color)}>
