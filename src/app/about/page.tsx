@@ -1,5 +1,6 @@
 "use client"
 
+import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { motion } from "framer-motion"
@@ -24,14 +25,13 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
-import React, { useMemo, useState, useEffect } from "react"
 import { useFirestore, useDoc } from "@/firebase"
 import { doc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Refined Founder's Story Hub v13.0.
- * REALITY AUDIT: Removed hardcoded stats fallbacks. Connected directly to registry stats.
+ * @fileOverview Refined Founder's Story Hub v14.0.
+ * FIXED: Consolidated React imports and resolved cloneElement context.
  */
 
 export default function AboutPage() {

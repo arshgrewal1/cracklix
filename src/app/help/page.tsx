@@ -1,7 +1,6 @@
-
 "use client"
 
-import { useState, useMemo } from "react"
+import React, { useState, useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Card, CardContent } from "@/components/ui/card"
@@ -28,8 +27,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { HelpArticle } from "@/types"
 
 /**
- * @fileOverview Official Institutional Help Hub v2.0.
- * UPDATED: Connected to Firestore 'help_articles' registry.
+ * @fileOverview Official Institutional Help Hub v2.1.
+ * FIXED: Added missing React import for cloneElement compatibility.
  */
 
 const HELP_CATEGORIES = [
