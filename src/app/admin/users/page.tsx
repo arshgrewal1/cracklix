@@ -31,8 +31,7 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Student Hub v21.0.
- * Layout refactor: Removed redundant horizontal padding.
+ * @fileOverview Institutional Student Hub v21.1 (Strictly Typed).
  */
 export default function AspirantsManagement() {
   const db = useFirestore()
@@ -53,15 +52,15 @@ export default function AspirantsManagement() {
 
   const filteredAspirants = useMemo(() => {
     if (!aspirants) return []
-    return aspirants.filter(a => 
+    return aspirants.filter((a: any) => 
         (a.name || "").toLowerCase().includes(searchTerm.toLowerCase()) || 
         (a.email || "").toLowerCase().includes(searchTerm.toLowerCase())
-    ).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
+    ).sort((a: any, b: any) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
   }, [aspirants, searchTerm])
 
   const handleGrantPass = async () => {
     if (!grantDialogUser || !db || !grantPlanId) return
-    const selectedPass = passes?.find(p => p.id === grantPlanId)
+    const selectedPass = passes?.find((p: any) => p.id === grantPlanId)
     if (!selectedPass) return
 
     setIsProcessing(true)

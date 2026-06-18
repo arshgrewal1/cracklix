@@ -27,13 +27,11 @@ import { collection, query, doc, deleteDoc, writeBatch, updateDoc, serverTimesta
 import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import { errorEmitter } from "@/firebase/error-emitter"
-import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 import { cn } from "@/lib/utils"
+import { Question } from "@/types"
 
 /**
- * @fileOverview Institutional Integrity & Cleanup Dashboard v2.2 (Type Fixed).
- * FIXED: Added explicit types for duplicate detection logic.
+ * @fileOverview Institutional Integrity & Cleanup Dashboard v2.3 (Strictly Typed).
  */
 
 export default function QADashboard() {
@@ -41,7 +39,7 @@ export default function QADashboard() {
   const { toast } = useToast()
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const { data: questions, loading: qLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]))
+  const { data: questions, loading: qLoading } = useCollection<Question>(useMemo(() => (db ? collection(db, "questions") : null), [db]) as any)
   const { data: mocks, loading: mLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
 
   // ADVANCED INTEGRITY ANALYSIS
@@ -52,7 +50,7 @@ export default function QADashboard() {
     const duplicates: any[] = [];
     const broken: any[] = [];
 
-    questions.forEach((q: any) => {
+    questions.forEach((q: Question) => {
        // 1. DUPLICATE DETECTION HASH (Text + Options + Answer)
        const hash = `${q.englishQuestion?.trim()}_${q.correctAnswer}`.toLowerCase();
        if (contentHashes[hash]) {

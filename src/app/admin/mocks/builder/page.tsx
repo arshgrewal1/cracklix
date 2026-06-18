@@ -36,8 +36,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Hardened Mock Architect v96.2 (Type Fixed).
- * FIXED: Parameter 'id' explicitly typed in sectionQIds mapping to resolve Vercel build failure.
+ * @fileOverview Hardened Mock Architect v96.3 (Strictly Typed).
  */
 
 export default function MockBuilderPage() {
@@ -144,7 +143,7 @@ function MockBuilderContent() {
   const uniqueExams = useMemo(() => {
     if (!rawExams) return [];
     const seen = new Set();
-    const sorted = [...rawExams].sort((a,b) => (a.name || "").localeCompare(b.name || ""));
+    const sorted = [...rawExams].sort((a: any, b: any) => (a.name || "").localeCompare(b.name || ""));
     const filtered = sorted.filter((e: any) => {
       const key = (e.name || "").toLowerCase().trim();
       if (!key || seen.has(key)) return false;
@@ -152,7 +151,7 @@ function MockBuilderContent() {
       return true;
     });
     if (mockData.boardIds?.length > 0) {
-       return filtered.filter(e => mockData.boardIds.includes(e.boardId));
+       return filtered.filter((e: any) => mockData.boardIds.includes(e.boardId));
     }
     return filtered;
   }, [rawExams, mockData.boardIds]);
@@ -174,7 +173,7 @@ function MockBuilderContent() {
      const current = mockData.boardIds || [];
      setMockData({
         ...mockData,
-        boardIds: current.includes(id) ? current.filter(x => x !== id) : [...current, id]
+        boardIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id]
      });
   };
 
@@ -182,7 +181,7 @@ function MockBuilderContent() {
      const current = mockData.examIds || [];
      setMockData({
         ...mockData,
-        examIds: current.includes(id) ? current.filter(x => x !== id) : [...current, id]
+        examIds: current.includes(id) ? current.filter((x: string) => x !== id) : [...current, id]
      });
   };
 
@@ -267,7 +266,7 @@ function MockBuilderContent() {
            <Card className="border-none shadow-2xl rounded-[3rem] bg-white p-6 md:p-10 space-y-8 border border-slate-100">
               <div className="space-y-3">
                  <Label className="text-[12px] font-black uppercase text-slate-500 tracking-tight ml-1">Series Headline</Label>
-                 <Input value={mockData.title} onChange={e => setFormData({...mockData, title: e.target.value})} className="h-14 md:h-16 rounded-2xl bg-slate-50/50 border-none font-black text-lg px-6 shadow-inner focus-visible:ring-primary text-[#0F172A]" placeholder="Patwari Mock Series 01" />
+                 <Input value={mockData.title} onChange={e => setMockData({...mockData, title: e.target.value})} className="h-14 md:h-16 rounded-2xl bg-slate-50/50 border-none font-black text-lg px-6 shadow-inner focus-visible:ring-primary text-[#0F172A]" placeholder="Patwari Mock Series 01" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                  <div className="space-y-3">

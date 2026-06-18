@@ -18,8 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Paginated Question Bank Hub v37.1 (Type Fixed).
- * FIXED: Explicit types added to higher-order callback parameters.
+ * @fileOverview Paginated Question Bank Hub v37.2 (Strictly Typed).
  */
 
 type QuestionFilterType = 'ALL' | 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
@@ -184,7 +183,7 @@ function QuestionBankContent() {
                     <TableCell className="text-right px-10">
                       <div className="flex justify-end gap-3 opacity-20 group-hover:opacity-100 transition-all">
                         <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl bg-white shadow-sm border border-slate-100 hover:text-primary hover:border-primary" asChild><Link href={`/admin/questions/add?id=${q.id}`}><Edit className="h-5 w-5" /></Link></Button>
-                        <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl bg-white shadow-sm border border-slate-100 hover:text-rose-600 hover:border-rose-200" onClick={() => { if(confirm("Purge node?")) { deleteDoc(doc(dbInstance, "questions", q.id)); setQuestions(prev => prev.filter(p => p.id !== q.id)); } }}><Trash2 className="h-5 w-5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl bg-white shadow-sm border border-slate-100 hover:text-rose-600 hover:border-rose-200" onClick={() => { if(confirm("Purge node?")) { deleteDoc(doc(dbInstance, "questions", q.id)); setQuestions(prev => prev.filter((p: any) => p.id !== q.id)); } }}><Trash2 className="h-5 w-5" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>

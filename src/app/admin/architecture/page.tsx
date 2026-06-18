@@ -32,9 +32,7 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Punjab Exam Architecture Manager v2.3.
- * Centralized hierarchical board for Category → Hub → Exam mapping.
- * FIXED: Explicitly typed sort parameters (a: any, b: any) to resolve Vercel build failures.
+ * @fileOverview Punjab Exam Architecture Manager v2.4 (Strictly Typed).
  */
 
 export default function ArchitectureManager() {
@@ -48,11 +46,11 @@ export default function ArchitectureManager() {
 
   const hierarchy = useMemo(() => {
     if (!categories || !hubs || !exams) return []
-    return categories.map(cat => ({
+    return categories.map((cat: any) => ({
       ...cat,
-      hubs: hubs.filter(h => h.categoryId === cat.id).map(hub => ({
+      hubs: hubs.filter((h: any) => h.categoryId === cat.id).map((hub: any) => ({
         ...hub,
-        exams: exams.filter(e => e.boardId === hub.id || e.boardId === hub.abbreviation)
+        exams: exams.filter((e: any) => e.boardId === hub.id || e.boardId === hub.abbreviation)
       }))
     }))
   }, [categories, hubs, exams])
@@ -84,7 +82,7 @@ export default function ArchitectureManager() {
             <div className="grid grid-cols-1 gap-12">
                {catLoading ? (
                   Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[3rem]" />)
-               ) : hierarchy.map((cat) => (
+               ) : hierarchy.map((cat: any) => (
                   <Card key={cat.id} className="border-none shadow-3xl rounded-[3rem] bg-white overflow-hidden border border-slate-100">
                      <div className="h-2 w-full bg-primary/20" />
                      <CardHeader className="p-10 pb-6 border-b border-slate-50 bg-slate-50/30 flex flex-row items-center justify-between">

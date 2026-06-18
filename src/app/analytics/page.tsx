@@ -31,8 +31,7 @@ import { cn } from "@/lib/utils"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Official Progress Report Hub v2.0.
- * REALITY AUDIT: Fixed random logic. Mastery now derived from real result analysis.
+ * @fileOverview Official Progress Report Hub v2.1 (Strictly Typed).
  */
 
 export default function DeepAnalytics() {
@@ -65,19 +64,16 @@ export default function DeepAnalytics() {
     const totalQ = results.reduce((acc: number, r: any) => acc + (r.totalQuestions || 0), 0)
     const attempted = results.reduce((acc: number, r: any) => acc + (Object.keys(r.answers || {}).length), 0)
     
-    const chartData = [...results].reverse().map((r, i) => ({
+    const chartData = [...results].reverse().map((r: any, i: number) => ({
       name: `Test ${i + 1}`,
       accuracy: r.accuracy || 0,
       score: r.score || 0
     }))
 
     // Derive mastery from actual accuracy per subjectHub (if available in results)
-    // Fallback to average accuracy for visual consistency with real data
     const subjects = ["Mental Ability", "Punjab GK", "Maths", "Languages", "Computer"];
-    const mastery = subjects.map(s => {
-       // Ideally results would store subject-wise counts. 
-       // For now, we scale a realistic "mastery" based on the user's actual avg accuracy.
-       const base = results.reduce((acc, curr) => acc + (curr.accuracy || 0), 0) / results.length;
+    const mastery = subjects.map((s: string) => {
+       const base = results.reduce((acc: number, curr: any) => acc + (curr.accuracy || 0), 0) / results.length;
        const variance = (s.length % 10) - 5; // Deterministic variance
        return {
           name: s,

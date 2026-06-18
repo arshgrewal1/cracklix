@@ -9,8 +9,7 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Final Administrative Control Center v4.1 (Type Fixed).
- * FIXED: Explicit types added to higher-order callback parameters to resolve Vercel build failures.
+ * @fileOverview Final Administrative Control Center v4.2 (Strictly Typed).
  */
 
 export default function AdminAnalytics() {

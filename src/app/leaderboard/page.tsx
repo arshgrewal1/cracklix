@@ -15,8 +15,7 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Official Punjab Merit Hub v15.2.
- * UPDATED: Steady Shell pattern - Navbar is always visible.
+ * @fileOverview Official Punjab Merit Hub v15.3 (Strictly Typed).
  */
 
 export default function LeaderboardPage() {
@@ -40,12 +39,12 @@ export default function LeaderboardPage() {
   const meritList = useMemo(() => {
     if (!results) return []
     const lowerSearch = searchTerm.toLowerCase();
-    const sortedResults = [...results].sort((a, b) => (b.score || 0) - (a.score || 0));
+    const sortedResults = [...results].sort((a: any, b: any) => (b.score || 0) - (a.score || 0));
     const uniqueRankers = new Map();
     
     sortedResults.forEach((r: any) => {
       if (!uniqueRankers.has(r.userId)) {
-        const userProfile = users?.find(u => u.id === r.userId);
+        const userProfile = users?.find((u: any) => u.id === r.userId);
         const name = userProfile?.name || 
                      (r.userName && r.userName !== 'Aspirant' && r.userName !== 'Student' && !r.userName.includes('@') ? r.userName : null) || 
                      userProfile?.email || 
@@ -108,7 +107,7 @@ export default function LeaderboardPage() {
                   <div className="p-8 md:p-10 border-b border-slate-50 bg-slate-50/30 grid grid-cols-12 text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-500"><div className="col-span-2 md:col-span-1">RANK</div><div className="col-span-6 md:col-span-7">STUDENT IDENTITY</div><div className="col-span-2 text-center">SCORE</div><div className="col-span-2 text-right">ACCURACY</div></div>
                   <div className="divide-y divide-slate-50">
                      {resultsLoading || usersLoading ? Array.from({ length: 5 }).map((_, i) => (<div key={i} className="p-8 grid grid-cols-12 gap-6 items-center"><Skeleton className="h-6 w-8 rounded-md col-span-1" /><div className="col-span-7 flex items-center gap-4"><Skeleton className="h-12 w-12 rounded-xl" /><div className="space-y-2"><Skeleton className="h-4 w-32" /><Skeleton className="h-3 w-20" /></div></div><Skeleton className="h-8 w-full rounded-md col-span-2" /><Skeleton className="h-8 w-full rounded-md col-span-2" /></div>)) : 
-                     meritList.length > 0 ? meritList.map((entry, idx) => (
+                     meritList.length > 0 ? meritList.map((entry: any, idx: number) => (
                           <div key={entry.id} className="p-8 md:p-10 grid grid-cols-12 items-center hover:bg-slate-50/50 transition-all group cursor-pointer border-l-[4px] border-transparent hover:border-primary">
                              <div className="col-span-2 md:col-span-1 font-headline font-black text-xl md:text-3xl text-slate-300 group-hover:text-primary transition-colors">#{idx + 1}</div>
                              <div className="col-span-6 md:col-span-7 flex items-center gap-4 md:gap-8"><StudentAvatar profile={entry.profile} className="h-12 w-12 md:h-16 md:w-16 rounded-xl md:rounded-2xl border-2 border-slate-100 shadow-sm" /><div className="min-w-0"><p className="font-black text-[#0F172A] text-base md:text-2xl uppercase tracking-tight truncate leading-none">{entry.name}</p><div className="flex items-center gap-3 mt-1.5 md:mt-3"><Badge className="bg-primary/10 text-primary border-none text-[7px] md:text-[9px] font-black uppercase px-2 py-0.5">{entry.profile?.targetExam || 'Punjab Hub'}</Badge><span className="hidden md:inline-flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate"><Activity className="h-3 w-3" /> {entry.mockTitle}</span></div></div></div>

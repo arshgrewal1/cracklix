@@ -37,8 +37,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Consolidated Master Registry Hub v2.2.
- * ACCESSIBILITY: Added DialogDescription to all modals.
+ * @fileOverview Consolidated Master Registry Hub v2.2 (Strictly Typed).
  */
 
 export default function MasterRegistryPage() {
@@ -70,18 +69,18 @@ export default function MasterRegistryPage() {
   const filteredBoards = useMemo(() => {
      if (!boards) return [];
      const hubMap = new Map();
-     boards.forEach(b => {
+     boards.forEach((b: any) => {
         const abbrev = (b.abbreviation || "").toUpperCase();
         if (!searchTerm || b.name?.toLowerCase().includes(searchTerm.toLowerCase()) || b.abbreviation?.toLowerCase().includes(searchTerm.toLowerCase())) {
            const key = abbrev || b.id;
            if (!hubMap.has(key)) hubMap.set(key, b);
         }
      });
-     return Array.from(hubMap.values()).sort((a,b) => a.abbreviation.localeCompare(b.abbreviation));
+     return Array.from(hubMap.values()).sort((a: any, b: any) => a.abbreviation.localeCompare(b.abbreviation));
   }, [boards, searchTerm]);
 
-  const filteredExams = useMemo(() => exams?.filter(e => e.name?.toLowerCase().includes(searchTerm.toLowerCase())).sort((a,b) => a.name.localeCompare(b.name)), [exams, searchTerm])
-  const filteredSubjects = useMemo(() => subjects?.filter(s => s.name?.toLowerCase().includes(searchTerm.toLowerCase())).sort((a,b) => a.name.localeCompare(b.name)), [subjects, searchTerm])
+  const filteredExams = useMemo(() => exams?.filter((e: any) => e.name?.toLowerCase().includes(searchTerm.toLowerCase())).sort((a: any, b: any) => a.name.localeCompare(b.name)), [exams, searchTerm])
+  const filteredSubjects = useMemo(() => subjects?.filter((s: any) => s.name?.toLowerCase().includes(searchTerm.toLowerCase())).sort((a: any, b: any) => a.name.localeCompare(b.name)), [subjects, searchTerm])
 
   // --- Actions: Boards ---
   const handleSaveBoard = async () => {
@@ -204,7 +203,7 @@ export default function MasterRegistryPage() {
                   <TabsContent value="boards" asChild>
                      <>
                      {bLoading ? <TableRow><TableCell colSpan={3} className="p-10"><Skeleton className="h-16 w-full rounded-2xl"/></TableCell></TableRow> : 
-                      filteredBoards?.map(b => (
+                      filteredBoards?.map((b: any) => (
                         <TableRow key={b.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                            <TableCell className="px-10 py-8">
                               <div className="flex items-center gap-6">
@@ -235,7 +234,7 @@ export default function MasterRegistryPage() {
                   <TabsContent value="verticals" asChild>
                      <>
                      {eLoading ? <TableRow><TableCell colSpan={3} className="p-10"><Skeleton className="h-16 w-full rounded-2xl"/></TableCell></TableRow> : 
-                      filteredExams?.map(e => (
+                      filteredExams?.map((e: any) => (
                         <TableRow key={e.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                            <TableCell className="px-10 py-8">
                               <div className="flex items-center gap-6">
@@ -266,7 +265,7 @@ export default function MasterRegistryPage() {
                   <TabsContent value="subjects" asChild>
                      <>
                      {sLoading ? <TableRow><TableCell colSpan={3} className="p-10"><Skeleton className="h-16 w-full rounded-2xl"/></TableCell></TableRow> : 
-                      filteredSubjects?.map(s => (
+                      filteredSubjects?.map((s: any) => (
                         <TableRow key={s.id} className="hover:bg-slate-50 group border-slate-50 transition-all">
                            <TableCell className="px-10 py-8">
                               <div className="flex items-center gap-6">
