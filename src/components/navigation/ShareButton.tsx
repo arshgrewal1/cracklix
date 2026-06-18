@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -26,8 +25,8 @@ interface ShareButtonProps {
 }
 
 /**
- * @fileOverview Hardened Social Share Hub v10.1.
- * UPDATED: Optimized for direct native sharing with high-density fallback hub.
+ * @fileOverview Hardened Social Share Hub v11.0.
+ * UPDATED: Implemented high-fidelity responsive design for modal nodes.
  */
 export default function ShareButton({ 
   className = "", 
@@ -119,45 +118,53 @@ export default function ShareButton({
       </Button>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsShareDialogOpen}>
-        <DialogContent className="bg-white rounded-[2rem] md:rounded-[3.5rem] border-none shadow-5xl max-w-[380px] w-[92vw] p-0 overflow-hidden text-left z-[2100]">
+        <DialogContent 
+          className="w-[95vw] max-w-[560px] rounded-3xl bg-white border-none shadow-5xl p-0 overflow-hidden text-left z-[2100] mx-auto"
+        >
           <div className="h-1.5 w-full bg-primary" />
-          <DialogHeader className="p-8 pb-2 text-center">
-             <div className="h-12 w-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto text-primary shadow-xl mb-4">
-                <Share2 className="h-6 w-6" />
+          <DialogHeader className="p-6 sm:p-10 pb-2 text-center">
+             <div className="h-12 w-12 sm:h-16 sm:w-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto text-primary shadow-xl mb-4 sm:mb-6">
+                <Share2 className="h-6 w-6 sm:h-8 sm:w-8" />
              </div>
-             <DialogTitle className="text-xl font-black font-headline uppercase text-[#0F172A]">Direct Share Hub</DialogTitle>
-             <DialogDescription className="text-slate-400 text-[9px] font-bold uppercase tracking-widest leading-relaxed">Invite fellow aspirants to the registry</DialogDescription>
+             <DialogTitle className="text-2xl sm:text-3xl md:text-4xl font-black text-[#0F172A] uppercase leading-tight text-center">
+                Direct Share Hub
+             </DialogTitle>
+             <DialogDescription className="text-slate-400 text-xs sm:text-sm md:text-base font-bold uppercase tracking-widest text-center mt-2">
+                Invite fellow aspirants to the registry
+             </DialogDescription>
           </DialogHeader>
 
-          <div className="px-8 pb-8 space-y-3">
+          <div className="px-6 sm:px-10 pb-8 space-y-4">
              <button 
                onClick={shareToWhatsApp}
-               className="w-full h-14 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl flex items-center px-5 gap-5 shadow-lg transition-all active:scale-95 group border-none"
+               className="w-full h-14 sm:h-16 md:h-20 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full flex items-center px-5 gap-5 shadow-lg transition-all active:scale-95 group border-none"
              >
-                <div className="h-9 w-9 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                   <MessageSquare className="h-4 w-4 fill-current" />
+                <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                   <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6 fill-current" />
                 </div>
-                <span className="font-black uppercase text-[11px] tracking-widest">Direct WhatsApp</span>
+                <span className="font-black uppercase text-sm sm:text-base md:text-lg tracking-widest">Direct WhatsApp</span>
              </button>
 
              <button 
                onClick={shareToTelegram}
-               className="w-full h-14 bg-blue-500 hover:bg-blue-600 text-white rounded-2xl flex items-center px-5 gap-5 shadow-lg transition-all active:scale-95 group border-none"
+               className="w-full h-14 sm:h-16 md:h-20 bg-blue-500 hover:bg-blue-600 text-white rounded-full flex items-center px-5 gap-5 shadow-lg transition-all active:scale-95 group border-none"
              >
-                <div className="h-9 w-9 bg-white/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                   <Send className="h-4 w-4 fill-current" />
+                <div className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 bg-white/20 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
+                   <Send className="h-5 w-5 sm:h-6 sm:w-6 fill-current" />
                 </div>
-                <span className="font-black uppercase text-[11px] tracking-widest">Direct Telegram</span>
+                <span className="font-black uppercase text-sm sm:text-base md:text-lg tracking-widest">Direct Telegram</span>
              </button>
 
              <div className="h-px w-full bg-slate-50 my-2" />
 
              <button 
                onClick={copyToClipboard}
-               className="w-full h-14 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-5 gap-5 border border-slate-100 transition-all active:scale-95 group"
+               className="w-full min-h-[56px] sm:min-h-[64px] md:min-h-[72px] bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-full flex items-center px-5 gap-5 border border-slate-100 transition-all active:scale-95 group"
              >
-                <Copy className="h-5 w-5 text-slate-400 group-hover:text-primary transition-colors" />
-                <span className="font-bold text-[10px] uppercase tracking-widest truncate">{shareUrl}</span>
+                <Copy className="h-5 w-5 sm:h-6 sm:w-6 text-slate-400 group-hover:text-primary transition-colors" />
+                <span className="font-black text-[11px] sm:text-sm md:text-base uppercase tracking-widest truncate flex-1 text-left">
+                   {shareUrl}
+                </span>
              </button>
           </div>
 
