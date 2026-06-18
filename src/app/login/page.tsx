@@ -25,8 +25,8 @@ import { getDeviceId, getBrowserInfo } from "@/lib/device"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Hardened Login Hub v21.0.
- * UPDATED: Synchronized with Logo Blue palette and 20px radius.
+ * @fileOverview Hardened Login Hub v22.0 (Responsive Fix).
+ * FIXED: Reduced card padding for extra small screens (320px).
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -242,15 +242,15 @@ function LoginContent() {
           </div>
         )}
 
-        <Card className="border-slate-100 bg-white/80 backdrop-blur-3xl shadow-5xl rounded-[2.5rem] md:rounded-[3rem] overflow-hidden border-2">
+        <Card className="border-slate-100 bg-white/80 backdrop-blur-3xl shadow-5xl rounded-[2rem] md:rounded-[3rem] overflow-hidden border-2">
           <div className="h-1.5 w-full bg-primary" />
-          <CardHeader className="text-center pt-10 md:pt-14 pb-4 px-8 md:px-16">
-            <CardTitle className="text-2xl md:text-4xl font-black tracking-tight text-[#0F172A] uppercase">
+          <CardHeader className="text-center pt-8 md:pt-14 pb-4 px-6 md:px-16">
+            <CardTitle className="text-xl md:text-4xl font-black tracking-tight text-[#0F172A] uppercase">
               {mode === 'login' ? "Login" : "Sign Up"}
             </CardTitle>
-            <CardDescription className="text-slate-400 font-bold text-[10px] md:text-[12px] tracking-widest mt-3 uppercase">Registry Access v21.0</CardDescription>
+            <CardDescription className="text-slate-400 font-bold text-[9px] md:text-[12px] tracking-widest mt-3 uppercase">Registry Access v22.0</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6 md:space-y-10 pb-12 md:pb-20 px-8 md:px-16">
+          <CardContent className="space-y-6 md:space-y-10 pb-10 md:pb-20 px-6 md:px-16">
             <form onSubmit={handleEmailAuth} className="space-y-4 md:space-y-6">
               {mode === 'register' && (
                 <div className="space-y-4">
@@ -320,11 +320,11 @@ function LoginContent() {
                 {isActuallyLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : (mode === 'login' ? "Enter Registry" : "Create Account")}
               </Button>
             </form>
-            <div className="flex items-center gap-4 py-2"><div className="h-px flex-1 bg-slate-100" /><span className="text-[10px] font-bold text-slate-300 tracking-widest uppercase">OR CONNECT</span><div className="h-px flex-1 bg-slate-100" /></div>
+            <div className="flex items-center gap-4 py-2"><div className="h-px flex-1 bg-slate-100" /><span className="text-[9px] font-bold text-slate-300 tracking-widest uppercase">OR CONNECT</span><div className="h-px flex-1 bg-slate-100" /></div>
             <Button variant="outline" className="w-full h-12 md:h-16 border-slate-100 bg-white text-[#0F172A] gap-4 rounded-2xl font-bold text-sm hover:bg-slate-50 tracking-tight shadow-sm" onClick={handleGoogleSignIn} disabled={isActuallyLoading}>
                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" className="h-4 w-4 md:h-5 md:w-5" alt="G" /> Google Account
             </Button>
-            <div className="text-center text-[11px] md:text-[14px] font-bold text-slate-400 tracking-tight">
+            <div className="text-center text-[10px] md:text-[14px] font-bold text-slate-400 tracking-tight">
                {mode === 'login' ? (<p>New aspirant? <button onClick={() => setMode('register')} className="text-primary hover:text-blue-700 transition-colors">Create account</button></p>) : (<p>Already registered? <button onClick={() => setMode('login')} className="text-primary hover:text-blue-700 transition-colors">Login now</button></p>)}
             </div>
           </CardContent>
@@ -332,25 +332,25 @@ function LoginContent() {
       </motion.div>
 
       <Dialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-        <DialogContent className="bg-white rounded-[3rem] max-w-[400px] p-10 shadow-5xl text-left border-none">
+        <DialogContent className="bg-white rounded-[2rem] md:rounded-[3rem] max-w-[400px] p-8 md:p-10 shadow-5xl text-left border-none">
           <DialogHeader className="text-center space-y-4">
-            <div className="h-16 w-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary shadow-xl"><RefreshCw className={cn("h-8 w-8", resetLoading && "animate-spin")} /></div>
-            <DialogTitle className="text-2xl font-black uppercase tracking-tight text-[#0F172A]">Recover Node</DialogTitle>
-            <DialogDescription className="text-slate-400 text-[11px] font-bold tracking-widest uppercase leading-relaxed">Enter your email to receive a reset link.</DialogDescription>
+            <div className="h-14 w-14 md:h-16 md:w-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary shadow-xl"><RefreshCw className={cn("h-7 w-7 md:h-8 md:w-8", resetLoading && "animate-spin")} /></div>
+            <DialogTitle className="text-xl md:text-2xl font-black uppercase tracking-tight text-[#0F172A]">Recover Node</DialogTitle>
+            <DialogDescription className="text-slate-400 text-[10px] font-bold tracking-widest uppercase leading-relaxed">Enter your email to receive a reset link.</DialogDescription>
           </DialogHeader>
-          <div className="py-8 space-y-6">
+          <div className="py-6 md:py-8 space-y-6">
             <div className="space-y-2 text-left">
-              <Label className="text-[11px] font-black text-slate-400 ml-1 uppercase">Registry Email</Label>
+              <Label className="text-[10px] md:text-[11px] font-black text-slate-400 ml-1 uppercase">Registry Email</Label>
               <Input 
                 type="email" 
                 value={resetEmail} 
                 onChange={(e) => setResetEmail(e.target.value)} 
                 placeholder="aspirant@cracklix.com" 
-                className="h-14 bg-slate-50 border-none rounded-xl focus-visible:ring-primary text-[#0F172A] text-base px-6 font-bold shadow-inner" 
+                className="h-12 md:h-14 bg-slate-50 border-none rounded-xl focus-visible:ring-primary text-[#0F172A] text-sm md:text-base px-6 font-bold shadow-inner" 
               />
             </div>
           </div>
-          <DialogFooter><Button onClick={handleResetPassword} disabled={resetLoading} className="w-full h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-lg rounded-2xl shadow-4xl shadow-primary/20 transition-all border-none tracking-widest">{resetLoading ? "Transmitting..." : "Send Reset Link"}</Button></DialogFooter>
+          <DialogFooter><Button onClick={handleResetPassword} disabled={resetLoading} className="w-full h-14 md:h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-base md:text-lg rounded-2xl shadow-4xl shadow-primary/20 transition-all border-none tracking-widest">{resetLoading ? "Transmitting..." : "Send Reset Link"}</Button></DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

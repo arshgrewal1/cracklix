@@ -30,9 +30,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Test Results Hub v35.0 (Ultra-Compact Mobile).
- * FIXED: Standardized metrics scaling for narrow Android/iOS devices.
- * UPDATED: Replaced all orange highlights with Primary Blue CTAs.
+ * @fileOverview Test Results Hub v36.0 (Ultra-Compact Mobile Fix).
+ * FIXED: Metrics pills now use high-density scaling to prevent wrap/clipping on small mobiles.
  */
 
 export default function ResultPage() {
@@ -146,27 +145,27 @@ function ResultContent() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 font-body pb-safe text-left overflow-x-hidden">
       <Navbar />
-      <main className="container mx-auto px-4 md:px-8 py-6 md:py-10 max-w-7xl space-y-6 md:space-y-10">
+      <main className="container mx-auto px-2 xs:px-4 md:px-8 py-6 md:py-10 max-w-7xl space-y-6 md:space-y-10">
         
         {/* SCORE BANNER - ULTRA COMPACT */}
         <div className="bg-[#0B1528] rounded-[2rem] md:rounded-[3rem] shadow-5xl overflow-hidden flex flex-col lg:flex-row items-center justify-between p-6 md:p-10 lg:px-14 lg:py-8 gap-6 md:gap-10">
-           <div className="flex items-center gap-5 md:gap-10 min-w-0 flex-1 w-full lg:w-auto">
-              <div className="h-12 w-12 md:h-18 md:w-18 rounded-2xl md:rounded-[1.5rem] bg-primary/10 flex items-center justify-center text-primary shrink-0 shadow-2xl">
-                 <Trophy className="h-6 w-6 md:h-10 md:w-10" />
+           <div className="flex items-center gap-4 md:gap-10 min-w-0 flex-1 w-full lg:w-auto">
+              <div className="h-10 w-10 md:h-18 md:w-18 rounded-xl md:rounded-[1.5rem] bg-primary/10 flex items-center justify-center text-primary shrink-0 shadow-2xl">
+                 <Trophy className="h-5 w-5 md:h-10 md:w-10" />
               </div>
               <div className="min-w-0 flex-1 space-y-1 md:space-y-2">
-                 <h1 className="text-sm md:text-3xl font-black text-white uppercase tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
-                 <p className="text-[7px] md:text-[11px] font-bold text-slate-500 uppercase tracking-[0.4em] leading-none">Official Merit Audit Index</p>
+                 <h1 className="text-xs xs:text-sm md:text-3xl font-black text-white uppercase tracking-tight truncate leading-tight">{sessionData.mockTitle}</h1>
+                 <p className="text-[6px] xs:text-[7px] md:text-[11px] font-bold text-slate-500 uppercase tracking-[0.4em] leading-none">Official Merit Audit Index</p>
               </div>
            </div>
 
-           <div className="flex items-center justify-center gap-6 md:gap-12 lg:gap-16 shrink-0 w-full lg:w-auto px-2">
+           <div className="flex items-center justify-center gap-3 xs:gap-6 md:gap-12 lg:gap-16 shrink-0 w-full lg:w-auto px-1">
               <ResultPill label="SCORE" val={(sessionData.score || 0).toFixed(1)} color={(sessionData.score || 0) < 0 ? "text-rose-400" : "text-primary"} />
-              <div className="w-px h-10 md:h-16 bg-white/5" />
+              <div className="w-px h-8 md:h-16 bg-white/5" />
               <ResultPill label="RANK" val={`#${merit.rank}`} color="text-white" />
-              <div className="w-px h-10 md:h-16 bg-white/5" />
+              <div className="w-px h-8 md:h-16 bg-white/5" />
               <ResultPill label="ACCURACY" val={`${sessionData.accuracy || 0}%`} color="text-emerald-400" />
-              <div className="w-px h-10 md:h-16 bg-white/5 hidden xs:block" />
+              <div className="w-px h-8 md:h-16 bg-white/5 hidden xs:block" />
               <ResultPill label="PERCENTILE" val={`${merit.percentile}%`} color="text-blue-400" className="hidden xs:flex" />
            </div>
 
@@ -181,9 +180,9 @@ function ResultContent() {
 
         <Tabs defaultValue="SOLUTIONS" className="space-y-6 md:space-y-10">
            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-              <TabsList className="bg-white border border-slate-100 p-1.5 h-12 md:h-14 rounded-2xl shadow-sm inline-flex">
-                 <TabsTrigger value="SOLUTIONS" className="rounded-xl px-6 md:px-10 font-black uppercase text-[9px] md:text-[11px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white transition-all whitespace-nowrap">Audit Answers</TabsTrigger>
-                 <TabsTrigger value="TOPPER" className="rounded-xl px-6 md:px-10 font-black uppercase text-[9px] md:text-[11px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white transition-all whitespace-nowrap">State Merit</TabsTrigger>
+              <TabsList className="bg-white border border-slate-100 p-1 h-12 md:h-14 rounded-2xl shadow-sm inline-flex overflow-x-auto no-scrollbar">
+                 <TabsTrigger value="SOLUTIONS" className="rounded-xl px-4 xs:px-6 md:px-10 font-black uppercase text-[8px] xs:text-[9px] md:text-[11px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white transition-all whitespace-nowrap">Audit Answers</TabsTrigger>
+                 <TabsTrigger value="TOPPER" className="rounded-xl px-4 xs:px-6 md:px-10 font-black uppercase text-[8px] xs:text-[9px] md:text-[11px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white transition-all whitespace-nowrap">State Merit</TabsTrigger>
               </TabsList>
               
               <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1 px-1">
@@ -250,16 +249,16 @@ function ResultContent() {
                           
                           return (
                            <div key={r.id} className={cn("flex items-center justify-between py-4 md:py-6 md:px-8 rounded-[1.5rem] md:rounded-[2rem] transition-all duration-500", isCurrentUser ? "bg-primary/5 ring-2 ring-primary/10 shadow-xl" : "hover:bg-slate-50/50")}>
-                              <div className="flex items-center gap-6 md:gap-10 flex-1 min-w-0">
-                                 <span className={cn("font-black w-8 md:w-12 text-sm md:text-3xl leading-none", i < 3 ? "text-primary" : "text-slate-200")}>#{i+1}</span>
+                              <div className="flex items-center gap-4 xs:gap-6 md:gap-10 flex-1 min-w-0">
+                                 <span className={cn("font-black w-6 xs:w-8 md:w-12 text-xs xs:text-sm md:text-3xl leading-none", i < 3 ? "text-primary" : "text-slate-200")}>#{i+1}</span>
                                  <StudentAvatar profile={{ name, gender: r.gender }} className="h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-2xl shadow-md" />
                                  <div className="min-w-0 flex-1 space-y-1">
-                                    <p className={cn("font-black text-sm md:text-2xl uppercase truncate tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{name} {isCurrentUser && "(You)"}</p>
-                                    <p className="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em]">Merit Score: {(r.score || 0).toFixed(1)}</p>
+                                    <p className={cn("font-black text-xs xs:text-sm md:text-2xl uppercase truncate tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{name} {isCurrentUser && "(You)"}</p>
+                                    <p className="text-[7px] xs:text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-[0.3em]">Merit Score: {(r.score || 0).toFixed(1)}</p>
                                  </div>
                               </div>
-                              <div className="flex gap-6 items-center shrink-0">
-                                 <Badge className={cn("border-none text-[9px] md:text-[14px] font-black px-4 py-1.5 md:px-6 md:py-2 rounded-xl shadow-lg tabular-nums", r.accuracy > 85 ? "bg-emerald-50 text-emerald-600" : r.accuracy > 60 ? "bg-amber-50 text-amber-600" : "bg-slate-50 text-slate-500")}>{r.accuracy}%</Badge>
+                              <div className="flex gap-3 xs:gap-6 items-center shrink-0">
+                                 <Badge className={cn("border-none text-[8px] xs:text-[9px] md:text-[14px] font-black px-2 xs:px-4 py-1 md:px-6 md:py-2 rounded-xl shadow-lg tabular-nums", r.accuracy > 85 ? "bg-emerald-50 text-emerald-600" : r.accuracy > 60 ? "bg-amber-50 text-amber-600" : "bg-slate-50 text-slate-500")}>{r.accuracy}%</Badge>
                               </div>
                            </div>
                           );
@@ -277,17 +276,17 @@ function ResultContent() {
 
 function ResultPill({ label, val, color, className }: any) {
    return (
-      <div className={cn("flex flex-col items-center md:items-start gap-1.5", className)}>
-         <span className="text-[7px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] leading-none">{label}</span>
-         <span className={cn("text-lg md:text-4xl lg:text-5xl font-headline font-black leading-none tabular-nums tracking-tighter", color)}>{val}</span>
+      <div className={cn("flex flex-col items-center md:items-start gap-0.5 xs:gap-1.5", className)}>
+         <span className="text-[5px] xs:text-[7px] md:text-[10px] font-black text-slate-500 uppercase tracking-[0.4em] leading-none">{label}</span>
+         <span className={cn("text-xs xs:text-lg md:text-4xl lg:text-5xl font-headline font-black leading-none tabular-nums tracking-tighter", color)}>{val}</span>
       </div>
    )
 }
 
 function FilterBtn({ active, onClick, label, count, icon, activeColor }: any) {
    return (
-      <button onClick={onClick} className={cn("px-5 md:px-8 py-2.5 md:py-4 rounded-xl md:rounded-2xl text-[8px] md:text-[11px] font-black uppercase tracking-widest border transition-all flex items-center gap-3 whitespace-nowrap active:scale-95 shadow-sm", active ? `${activeColor} text-white shadow-xl` : "bg-white border-slate-100 text-slate-400 hover:border-slate-200")}>
-         {icon} {label} <span className="opacity-50 text-[7px] md:text-[10px]">({count})</span>
+      <button onClick={onClick} className={cn("px-4 xs:px-5 md:px-8 py-2 md:py-4 rounded-xl md:rounded-2xl text-[7px] xs:text-[8px] md:text-[11px] font-black uppercase tracking-widest border transition-all flex items-center gap-2 xs:gap-3 whitespace-nowrap active:scale-95 shadow-sm", active ? `${activeColor} text-white shadow-xl` : "bg-white border-slate-100 text-slate-400 hover:border-slate-200")}>
+         {icon} {label} <span className="opacity-50 text-[6px] xs:text-[7px] md:text-[10px]">({count})</span>
       </button>
    )
 }

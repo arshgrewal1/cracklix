@@ -35,8 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v78.0.
- * UPDATED: Synchronized NavLink with Logo Blue.
+ * @fileOverview Institutional Header v79.0 (Responsive Fix).
+ * FIXED: Logo alignment for small screens (320px) to prevent action overflow.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -76,21 +76,21 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-50 w-full font-body">
       <nav className="w-full h-20 bg-white border-b border-slate-100 shadow-sm">
-        <div className="w-full max-w-7xl mx-auto px-4 md:px-6 h-full flex items-center justify-between">
+        <div className="w-full max-w-7xl mx-auto px-2 xs:px-4 md:px-6 h-full flex items-center justify-between">
 
           {/* LEFT SIDE: Branding Hub */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 xs:gap-4 min-w-0">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-12 h-12 rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0"
+              className="flex items-center justify-center w-10 h-10 xs:w-12 xs:h-12 rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5 xs:w-6 xs:h-6" />
             </button>
 
             <Logo
               variant="light"
-              className="shrink-0 -ml-6 lg:-ml-12"
+              className="shrink-0 -ml-8 xs:-ml-12 lg:-ml-16 scale-90 xs:scale-100 origin-left"
             />
           </div>
 
@@ -103,24 +103,24 @@ export default function Navbar() {
           </div>
 
           {/* RIGHT SIDE: Action Hub */}
-          <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-2 xs:gap-4 shrink-0">
             <Link
               href="/search"
-              className="w-12 h-12 rounded-2xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
+              className="w-10 h-10 xs:w-12 xs:h-12 rounded-2xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-4 h-4 xs:w-5 xs:h-5" />
             </Link>
 
             {loading ? (
-              <Skeleton className="w-12 h-12 rounded-2xl bg-slate-100" />
+              <Skeleton className="w-10 h-10 xs:w-12 xs:h-12 rounded-2xl bg-slate-100" />
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-12 h-12 rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all">
+                  <button className="w-10 h-10 xs:w-12 xs:h-12 rounded-2xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all">
                     <StudentAvatar
                       profile={profile}
                       className="w-full h-full border-none"
-                      iconClassName="w-6 h-6"
+                      iconClassName="w-5 h-5 xs:w-6 xs:h-6"
                     />
                   </button>
                 </DropdownMenuTrigger>
@@ -154,7 +154,7 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login" className="px-8 h-12 rounded-2xl bg-primary text-white font-bold text-base flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-primary/20">
+              <Link href="/login" className="px-4 xs:px-8 h-10 xs:h-12 rounded-2xl bg-primary text-white font-bold text-xs xs:text-base flex items-center justify-center transition-all active:scale-95 shadow-lg shadow-primary/20">
                 Login
               </Link>
             )}

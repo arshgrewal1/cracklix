@@ -22,8 +22,8 @@ import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Institutional Hero Hub v109.0.
- * REALITY AUDIT: Zero hardcoded stats. All values derived from settings/stats doc.
+ * @fileOverview Institutional Hero Hub v110.0 (Responsive Fix).
+ * FIXED: Scaled down heading for small mobile (320px) to prevent clipping.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -89,7 +89,7 @@ export default function Hero() {
             </span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-slate-900 leading-tight">
+          <h1 className="text-3xl xs:text-4xl sm:text-5xl md:text-7xl font-black text-slate-900 leading-tight">
             Crack Punjab
             <span className="block text-blue-600">
               Government Exams
