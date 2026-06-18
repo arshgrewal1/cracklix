@@ -318,7 +318,7 @@ function LoginContent() {
                 </div>
               )}
               <Button type="submit" className="w-full h-14 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase text-base md:text-lg rounded-xl md:rounded-[2.5rem] shadow-4xl shadow-primary/20 border-none transition-all active:scale-95 tracking-widest" disabled={isActuallyLoading}>
-                {isActuallyLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : (mode === 'login' ? "Enter Registry" : "Create Account")}
+                {isActuallyLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : (mode === 'login' ? "Login" : "Create Account")}
               </Button>
             </form>
             <div className="flex items-center gap-4 py-2 md:py-4"><div className="h-px flex-1 bg-slate-100" /><span className="text-[9px] font-bold text-slate-300 tracking-widest uppercase">OR</span><div className="h-px flex-1 bg-slate-100" /></div>
@@ -326,7 +326,7 @@ function LoginContent() {
                <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" className="h-4 w-4 md:h-5 md:w-5" alt="G" /> Google Account
             </Button>
             <div className="text-center text-[11px] md:text-[14px] font-bold text-slate-400 tracking-tight mt-4">
-               {mode === 'login' ? (<p>New aspirant? <button onClick={() => setMode('register')} className="text-primary hover:text-blue-700 font-black transition-colors ml-1">Create account</button></p>) : (<p>Already registered? <button onClick={() => setMode('login')} className="text-primary hover:text-blue-700 font-black transition-colors ml-1">Login now</button></p>)}
+               {mode === 'login' ? (<p>New aspirant? <button onClick={() => setMode('register')} className="text-primary hover:text-blue-700 font-black transition-colors ml-1">Create account</button></p>) : (<p>Already registered? <button onClick={() => mode === 'register' && setMode('login')} className="text-primary hover:text-blue-700 font-black transition-colors ml-1">Login now</button></p>)}
             </div>
           </CardContent>
         </Card>
