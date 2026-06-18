@@ -18,7 +18,6 @@ import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
-import { DialogDescription } from "@/components/ui/dialog"
 
 /**
  * @fileOverview Hardened Manual Question Entry v17.6.

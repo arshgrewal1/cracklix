@@ -21,11 +21,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import type { Category, Board, Exam } from "@/types"
-import { DialogDescription } from "@/components/ui/dialog"
 
 /**
  * @fileOverview Punjab Registry Architect v15.6.
- * FIXED: Properly defined ExtendedBoard and ExtendedCategory to handle nested property access.
+ * FIXED: Explicitly typed callbacks and implemented locally extended interfaces for nested property access.
  */
 
 interface ExtendedBoard extends Board {

@@ -37,7 +37,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 /**
  * @fileOverview Institutional Mock Builder Hub v15.2.
- * FIXED: Explicitly typed all callbacks and imported Exam interface.
+ * FIXED: Explicitly typed all callbacks and resolved mismatched JSX tags.
  */
 
 export default function MockBuilderPage() {
@@ -251,7 +251,7 @@ function MockBuilderContent() {
         <div className="flex items-center gap-6">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-2xl border bg-white h-12 w-12 md:h-14 md:w-14 shadow-sm active:scale-95">
              <ChevronLeft className="h-6 w-6" />
-          </button>
+          </Button>
           <div className="text-left">
             <h1 className="text-2xl md:text-5xl font-headline font-black uppercase tracking-tight text-[#0F172A] leading-none">{isEditing ? "Modify Series" : "Mock Architect"}</h1>
             <p className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-2">Institutional Component Registry</p>

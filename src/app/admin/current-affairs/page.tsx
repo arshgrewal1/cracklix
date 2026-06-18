@@ -231,7 +231,7 @@ export default function AdminCurrentAffairs() {
               <TableBody>
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                    <TableRow key={i}><TableCell colSpan={3} className="px-10 py-8"><Skeleton className="h-14 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
+                    <TableRow key={i}><TableCell colSpan={3} className="px-10 py-6 md:py-8"><Skeleton className="h-14 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
                   ))
                 ) : filteredItems.map((item) => (
                   <TableRow key={item.id} className="hover:bg-slate-50 border-slate-50 transition-all group">
