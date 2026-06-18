@@ -10,7 +10,8 @@ import {
   ChevronRight,
   Star,
   FileText,
-  BookOpen
+  BookOpen,
+  Landmark
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,9 +22,9 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Premium Redesigned Hero Hub v25.0.
- * THEME: Modern SaaS-style Blue (#2563EB) & Indigo (#4F46E5).
- * LAYOUT: Optimized for mobile ordering - Buttons below feature grid.
+ * @fileOverview Premium Redesigned Hero Hub v26.0.
+ * UPDATED: Integrated functional "Screenshot Matched" feature cards.
+ * ROUTING: Mocks, Exams, PYQs, and Practice nodes fully connected.
  */
 
 export default function Hero() {
@@ -78,42 +79,16 @@ export default function Hero() {
 
   if (!mounted) return null;
 
-  const CTAButtons = ({ className }: { className?: string }) => (
-    <div className={cn("flex flex-col sm:flex-row gap-4 w-full sm:w-auto", className)}>
-      <Button
-        asChild
-        className="h-14 md:h-16 px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-black uppercase text-[11px] md:text-xs tracking-[0.1em] rounded-full shadow-xl transition-all active:scale-95 border-none group/btn"
-      >
-        <Link href="/mocks" className="flex items-center justify-between w-full">
-          <span>Start Free Mock Test</span>
-          <ChevronRight className="ml-4 h-5 w-5 transition-transform group-hover/btn:translate-x-1" />
-        </Link>
-      </Button>
-
-      <Button
-        asChild
-        variant="outline"
-        className="h-14 md:h-16 px-10 border-2 border-slate-200 bg-white text-[#0F172A] font-black uppercase text-[11px] md:text-xs tracking-[0.1em] rounded-full shadow-sm hover:bg-slate-50 transition-all active:scale-95"
-      >
-        <Link href="/exams">
-          Browse Exams
-        </Link>
-      </Button>
-    </div>
-  );
-
   return (
     <section className="relative overflow-hidden bg-[#F8FAFC] py-12 md:py-24">
-      {/* Background Decorative Element */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start md:items-center">
 
-          {/* COLUMN 1: CONTENT HUB */}
+          {/* LEFT: CONTENT HUB */}
           <div className="flex flex-col items-start text-left space-y-8 md:space-y-10">
             
-            {/* 1. Trust Badge */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -125,7 +100,6 @@ export default function Hero() {
               </span>
             </motion.div>
 
-            {/* 2. Heading */}
             <div className="space-y-4">
               <h1 className="text-4xl md:text-6xl font-black text-[#0F172A] leading-tight tracking-tight">
                 Crack Punjab <br/>
@@ -133,32 +107,45 @@ export default function Hero() {
                 With Confidence
               </h1>
 
-              {/* 3. Description */}
               <p className="text-base md:text-lg text-[#64748B] max-w-xl font-medium leading-relaxed">
                 Practice bilingual mock tests and prepare for Punjab Government Exams with confidence. 
-                Access exam-focused practice, previous papers and performance tracking in one place.
+                Access exam-focused practice, previous papers and performance tracking.
               </p>
             </div>
 
-            {/* 4. Exam Pills */}
-            <div className="flex flex-wrap gap-2.5">
-              {["PSSSB", "Punjab Police", "PSTET", "PSPCL", "PPSC"].map((exam) => (
-                <span 
-                  key={exam}
-                  className="px-4 py-2 rounded-full bg-white border border-slate-200 text-[10px] md:text-xs font-bold text-[#0F172A] shadow-sm uppercase tracking-wide"
-                >
-                  {exam}
-                </span>
-              ))}
+            {/* INTEGRATED FUNCTIONAL CARDS (SCREENSHOT MATCHED) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+              <FeatureCard icon={<Zap className="h-5 w-5" />} label="MOCK TESTS" href="/mocks" />
+              <FeatureCard icon={<BookOpen className="h-5 w-5" />} label="PUNJAB EXAMS" href="/exams" />
+              <FeatureCard icon={<FileText className="h-5 w-5" />} label="PREVIOUS PAPERS" href="/pyqs" />
+              <FeatureCard icon={<ShieldCheck className="h-5 w-5" />} label="FREE PRACTICE" href="/mocks" />
             </div>
 
-            {/* 5. CTA Buttons (Desktop Only) */}
-            <CTAButtons className="hidden lg:flex" />
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+              <Button
+                asChild
+                className="h-14 md:h-16 px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-black uppercase text-[11px] md:text-xs tracking-[0.1em] rounded-full shadow-xl transition-all active:scale-95 border-none group/btn"
+              >
+                <Link href="/mocks" className="flex items-center justify-between w-full">
+                  <span>Start Free Mock Test</span>
+                  <ChevronRight className="ml-4 h-5 w-5 transition-transform group-hover/btn:translate-x-1" />
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                variant="outline"
+                className="h-14 md:h-16 px-10 border-2 border-slate-200 bg-white text-[#0F172A] font-black uppercase text-[11px] md:text-xs tracking-[0.1em] rounded-full shadow-sm hover:bg-slate-50 transition-all active:scale-95"
+              >
+                <Link href="/exams">
+                  Browse Exams
+                </Link>
+              </Button>
+            </div>
           </div>
 
-          {/* COLUMN 2: VISUAL HUB */}
+          {/* RIGHT: VISUAL HUB */}
           <div className="relative flex justify-center items-center">
-            {/* Main Illustration */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -172,52 +159,7 @@ export default function Hero() {
                 className="w-full h-auto object-contain drop-shadow-2xl max-w-[320px] md:max-w-[420px] lg:max-w-[520px] xl:max-w-[620px]"
               />
             </motion.div>
-
-            {/* FLOATING FEATURE CARDS (Desktop Only) */}
-            <div className="hidden lg:block">
-               <FloatingCard 
-                 icon={<Zap className="h-5 w-5 text-blue-600" />}
-                 label="Mock Tests"
-                 href="/mocks"
-                 className="top-[10%] -left-10"
-                 delay={0.2}
-               />
-               <FloatingCard 
-                 icon={<BookOpen className="h-5 w-5 text-indigo-600" />}
-                 label="Punjab Exams"
-                 href="/exams"
-                 className="top-[40%] -right-10"
-                 delay={0.4}
-               />
-               <FloatingCard 
-                 icon={<FileText className="h-5 w-5 text-blue-500" />}
-                 label="Previous Papers"
-                 href="/previous-papers"
-                 className="bottom-[20%] -left-12"
-                 delay={0.6}
-               />
-               <FloatingCard 
-                 icon={<ShieldCheck className="h-5 w-5 text-indigo-500" />}
-                 label="Free Practice"
-                 href="/practice"
-                 className="bottom-[5%] right-0"
-                 delay={0.8}
-               />
-            </div>
           </div>
-        </div>
-
-        {/* MOBILE FEATURE GRID & BUTTONS */}
-        <div className="lg:hidden mt-12 space-y-12">
-            <div className="grid grid-cols-2 gap-4">
-                <MobileFeatureCard icon={<Zap className="h-5 w-5 text-blue-600" />} label="Mock Tests" href="/mocks" />
-                <MobileFeatureCard icon={<BookOpen className="h-5 w-5 text-indigo-600" />} label="Punjab Exams" href="/exams" />
-                <MobileFeatureCard icon={<FileText className="h-5 w-5 text-blue-500" />} label="Previous Papers" href="/previous-papers" />
-                <MobileFeatureCard icon={<ShieldCheck className="h-5 w-5 text-indigo-500" />} label="Free Practice" href="/practice" />
-            </div>
-
-            {/* CTA Buttons (Mobile Only - Positioned below grid) */}
-            <CTAButtons />
         </div>
 
         {/* STATS SECTION */}
@@ -229,8 +171,8 @@ export default function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
             >
-              <Card className="p-6 md:p-8 rounded-3xl bg-white border border-slate-100 shadow-xl group hover:translate-y-[-4px] transition-all duration-300">
-                <div className="flex flex-col items-center md:items-start text-center md:text-left gap-4">
+              <Card className="p-6 md:p-8 rounded-3xl bg-white border border-slate-100 shadow-xl group hover:translate-y-[-4px] transition-all duration-300 text-left">
+                <div className="flex flex-col items-start gap-4">
                   <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:bg-blue-50 transition-colors">
                     {stat.icon}
                   </div>
@@ -257,39 +199,21 @@ export default function Hero() {
   );
 }
 
-function FloatingCard({ icon, label, href, className, delay }: any) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay, duration: 0.5 }}
-      className={cn("absolute z-20", className)}
-    >
-      <Link href={href}>
-        <motion.div
-          animate={{ y: [0, -10, 0] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: delay * 2 }}
-          className="bg-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-100 flex items-center gap-4 hover:border-blue-600/30 hover:scale-105 transition-all group cursor-pointer"
-        >
-          <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-blue-50 transition-colors">
-            {icon}
-          </div>
-          <span className="font-bold text-sm text-[#0F172A] whitespace-nowrap uppercase tracking-tight">{label}</span>
-        </motion.div>
-      </Link>
-    </motion.div>
-  );
-}
-
-function MobileFeatureCard({ icon, label, href }: any) {
+function FeatureCard({ icon, label, href }: { icon: React.ReactNode, label: string, href: string }) {
   return (
     <Link href={href}>
-      <Card className="p-4 rounded-2xl bg-white border border-slate-100 shadow-lg flex items-center gap-3 active:scale-95 transition-all">
-        <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
-          {icon}
+      <motion.div 
+        whileHover={{ scale: 1.02, translateY: -2 }}
+        whileTap={{ scale: 0.98 }}
+        className="bg-white p-4 md:p-6 rounded-full shadow-lg border border-slate-100 flex items-center gap-4 group transition-all cursor-pointer"
+      >
+        <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary transition-colors duration-300">
+           {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 text-primary group-hover:text-white transition-colors" })}
         </div>
-        <span className="font-bold text-[11px] text-[#0F172A] uppercase tracking-tight truncate">{label}</span>
-      </Card>
+        <span className="font-black text-xs md:text-sm text-[#0F172A] tracking-tight uppercase group-hover:text-primary transition-colors truncate">
+          {label}
+        </span>
+      </motion.div>
     </Link>
   );
 }
