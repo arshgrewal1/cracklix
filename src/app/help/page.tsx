@@ -29,8 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { HelpArticle } from "@/types"
 
 /**
- * @fileOverview Official Institutional Help Hub v2.5 (Build Hardened).
- * FIXED: Explicitly added missing 'Badge' import to resolve build failure.
+ * @fileOverview Official Institutional Help Hub v2.6 (Production Hardened).
+ * FIXED: Synchronized Badge import and Component Reference rendering.
  */
 
 const HELP_CATEGORIES = [

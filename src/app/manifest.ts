@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Production-Grade PWA Manifest v10.0 (Adaptive Hardened).
+ * @fileOverview Production-Grade PWA Manifest v10.1 (Next.js 15 Hardened).
+ * FIXED: Updated 'purpose' typing to satisfy strict MetadataRoute constraints.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -68,7 +69,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/icons/maskable-icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
-        purpose: 'maskable any',
+        purpose: 'maskable',
       },
     ],
     categories: ['education', 'lifestyle', 'productivity']

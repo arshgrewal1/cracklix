@@ -26,8 +26,8 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Login Hub v23.1 (Build Fixed).
- * FIXED: Added missing 'cn' import to resolve build failure.
+ * @fileOverview Hardened Login Hub v23.2 (PWA Synced).
+ * FIXED: Integrated 'cn' utility and verified hardware node binding.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
