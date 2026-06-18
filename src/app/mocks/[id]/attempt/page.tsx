@@ -28,8 +28,9 @@ import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 
 /**
- * @fileOverview Hardened CBT Engine v53.0 (Palette Refinement).
- * UPDATED: Sidebar width adjusted to 240px for better visibility of enlarged legend.
+ * @fileOverview Hardened CBT Engine v54.0 (SDL Guard Integrated).
+ * SECURITY: Real-time device monitoring is handled via the global SessionGuard.
+ * If a session is pulled, this page will automatically redirect to login.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -155,18 +156,8 @@ export default function MockAttemptPage() {
       const resultRef = doc(db, "results", `${user.uid}_${mockId}`);
       const attemptRef = doc(db, "attempts", `${user.uid}_${mockId}`);
 
-      // Initiation of non-blocking writes
-      setDoc(resultRef, resultPayload, { merge: true })
-        .catch(async (err) => {
-          errorEmitter.emit('permission-error', new FirestorePermissionError({
-            path: resultRef.path,
-            operation: 'write',
-            requestResourceData: resultPayload
-          }));
-        });
-
-      updateDoc(attemptRef, { status: 'COMPLETED', updatedAt: serverTimestamp() })
-        .catch(() => {});
+      await setDoc(resultRef, resultPayload, { merge: true });
+      await updateDoc(attemptRef, { status: 'COMPLETED', updatedAt: serverTimestamp() });
       
       router.replace(`/results/${mockId}`);
     } catch (e) {
@@ -261,25 +252,27 @@ export default function MockAttemptPage() {
       </Sheet>
 
       {/* EXIT MODAL */}
-      <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
-        <DialogContent className="max-w-[240px] rounded-[1.2rem] p-4 md:p-6 bg-white text-center shadow-5xl border-none z-[1300]">
-          <div className="space-y-3">
-            <DialogHeader className="sr-only">
-               <DialogTitle>Save & Exit?</DialogTitle>
-               <DialogDescription>Your current attempt state is safely cached in the cloud.</DialogDescription>
-            </DialogHeader>
-            <div className="h-8 w-8 bg-blue-50 rounded-lg flex items-center justify-center mx-auto text-blue-500 shadow-sm">
-              <LogOut className="h-4 w-4" />
+      <div className="hidden">
+        <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
+          <DialogContent className="max-w-[240px] rounded-[1.2rem] p-4 md:p-6 bg-white text-center shadow-5xl border-none z-[1300]">
+            <div className="space-y-3">
+              <DialogHeader className="sr-only">
+                 <DialogTitle>Save & Exit?</DialogTitle>
+                 <DialogDescription>Your current attempt state is safely cached in the cloud.</DialogDescription>
+              </DialogHeader>
+              <div className="h-8 w-8 bg-blue-50 rounded-lg flex items-center justify-center mx-auto text-blue-500 shadow-sm">
+                <LogOut className="h-4 w-4" />
+              </div>
+              <h2 className="text-sm font-headline font-black uppercase text-[#0F172A] leading-tight">Save & Exit?</h2>
+              <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none">Progress cached in registry.</p>
+              <div className="flex gap-2 pt-1">
+                <Button variant="ghost" onClick={() => setShowExitModal(false)} className="flex-1 h-8 font-black uppercase text-[7px] tracking-widest">Stay</Button>
+                <Button onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/dashboard'); }} className="flex-1 h-8 bg-primary text-white rounded-lg font-black uppercase text-[7px] border-none shadow-lg">Exit</Button>
+              </div>
             </div>
-            <h2 className="text-sm font-headline font-black uppercase text-[#0F172A] leading-tight">Save & Exit?</h2>
-            <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none">Progress cached in registry.</p>
-            <div className="flex gap-2 pt-1">
-              <Button variant="ghost" onClick={() => setShowExitModal(false)} className="flex-1 h-8 font-black uppercase text-[7px] tracking-widest">Stay</Button>
-              <Button onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/dashboard'); }} className="flex-1 h-8 bg-primary text-white rounded-lg font-black uppercase text-[7px] border-none shadow-lg">Exit</Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* SUBMIT MODAL */}
       <Dialog open={showSubmitModal} onOpenChange={showSubmitModal && !isSubmittingFinal ? setShowSubmitModal : undefined}>

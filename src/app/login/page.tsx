@@ -25,8 +25,9 @@ import { getDeviceId, getBrowserInfo } from "@/lib/device"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Hardened Login Hub v19.0.
- * UPDATED: Display Session Termination Warning in Red Pill UI.
+ * @fileOverview Hardened Login Hub v20.0.
+ * UPDATED: Optimized Single Device Handover (SDL) logic.
+ * DESIGN: Enhanced Session Termination feedback UI.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -66,6 +67,7 @@ function LoginContent() {
   const sessionTerminated = searchParams.get('session') === 'terminated';
 
   useEffect(() => {
+    // If user is logged in AND not restricted by device, go to dashboard
     if (!authLoading && user && !deviceError) {
        router.replace(returnUrl);
     }
@@ -78,6 +80,7 @@ function LoginContent() {
     const deviceId = await getDeviceId();
     const { browser, platform } = getBrowserInfo();
     
+    // 1. Check current device binding (Legacy Max-2-Device logic)
     const deviceRef = doc(db, 'users', userId, 'devices', deviceId);
     const deviceSnap = await getDoc(deviceRef);
     
@@ -85,7 +88,7 @@ function LoginContent() {
       const devicesSnap = await getDocs(collection(db, 'users', userId, 'devices'));
       if (devicesSnap.size >= 2) {
         await signOut(auth);
-        setDeviceError("Device limit exceeded. Maximum 2 registered devices allowed. Please remove a device from your profile settings on your primary device.");
+        setDeviceError("Device limit exceeded. Maximum 2 registered devices allowed. Please remove an old device from your profile.");
         setLoading(false);
         return false;
       } else {
@@ -103,7 +106,8 @@ function LoginContent() {
       await setDoc(deviceRef, { lastActive: serverTimestamp() }, { merge: true });
     }
 
-    // ONE ACTIVE SESSION HANDOVER
+    // 2. ONE ACTIVE SESSION HANDOVER (Newest Login Wins)
+    // This updates the 'activeDeviceId' field which SessionGuard listens to.
     await setDoc(doc(db, 'users', userId), {
       activeDeviceId: deviceId,
       lastLoginAt: serverTimestamp(),
@@ -223,6 +227,7 @@ function LoginContent() {
           <Logo variant="dark" />
         </div>
 
+        {/* SDL NOTIFICATION */}
         {sessionTerminated && (
           <div className="bg-rose-500/10 border border-rose-500/20 p-5 md:p-6 rounded-[2rem] flex items-center gap-4 animate-in slide-in-from-top-6 duration-700">
             <ShieldAlert className="h-6 w-6 text-rose-500 shrink-0" />
@@ -247,7 +252,7 @@ function LoginContent() {
           <div className="h-1.5 w-full bg-blue-600" />
           <CardHeader className="text-center pt-10 md:pt-14 pb-4 px-8 md:px-16">
             <CardTitle className="text-2xl md:text-4xl font-extrabold tracking-tight text-white">{mode === 'login' ? "Login" : "Sign Up"}</CardTitle>
-            <CardDescription className="text-slate-500 font-bold text-[10px] md:text-[12px] tracking-tight mt-3">Registry Access v19.0</CardDescription>
+            <CardDescription className="text-slate-500 font-bold text-[10px] md:text-[12px] tracking-tight mt-3">Registry Access v20.0</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 md:space-y-10 pb-12 md:pb-20 px-8 md:px-16">
             <form onSubmit={handleEmailAuth} className="space-y-4 md:space-y-6">
