@@ -1,7 +1,8 @@
-
 "use client"
 
 import { useState, useMemo } from "react"
+import Navbar from "@/components/layout/Navbar"
+import Footer from "@/components/layout/Footer"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

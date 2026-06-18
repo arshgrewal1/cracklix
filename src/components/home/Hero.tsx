@@ -22,9 +22,9 @@ import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Institutional Hero Hub v112.0 (Responsive Hardened).
- * CLEANED: Removed all Git merge conflict markers.
- * FIXED: Scaled down heading for 320px screens and optimized padding.
+ * @fileOverview Institutional Hero Hub v112.0 (Hardened Build).
+ * FIXED: Removed merge conflict markers.
+ * FIXED: Scaled typography for 320px screens.
  */
 export default function Hero() {
   const db = useFirestore();

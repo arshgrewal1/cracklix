@@ -11,9 +11,8 @@ import Logo from "@/components/brand/Logo";
 import Link from "next/link";
 
 /**
- * @fileOverview Maximized Admin Hub Layout v41.0.
- * AUDIT: Verified standard 80px header and maximized logo consistency.
- * SECURITY: Tightened redirection logic to prevent data leaks.
+ * @fileOverview Maximized Admin Hub Layout v41.0 (Build Hardened).
+ * FIXED: Removed merge conflict markers.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
