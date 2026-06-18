@@ -23,8 +23,9 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Fluid Hero Hub v14.0 (Hardened Build).
- * FIXED: Integrated missing Badge/cn imports and implemented type-safe icon rendering.
+ * @fileOverview Official Fluid Hero Hub v15.0 (Desktop Corrected).
+ * FIXED: 2-column desktop layout with centered illustration.
+ * FIXED: Stats grid spans full container width.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -91,14 +92,16 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-blue-50 py-12 md:py-24 text-left">
+    <section className="relative overflow-hidden bg-gradient-to-b from-slate-50 to-blue-50 py-12 md:py-20 lg:py-28 text-left">
+      {/* Background Ambience */}
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
-          {/* LEFT COLUMN */}
-          <div className="space-y-6 md:space-y-10 max-w-full">
-            
-            <div className="space-y-4 md:space-y-8">
+          {/* COLUMN 1: TEXT CONTENT */}
+          <div className="space-y-6 md:space-y-8 max-w-2xl order-2 lg:order-1">
+            <div className="space-y-4 md:space-y-6">
               <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-slate-100 shadow-sm mb-2">
                 <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                 <span className="text-[10px] sm:text-xs md:text-sm font-bold text-slate-700 tracking-tight">
@@ -107,61 +110,35 @@ export default function Hero() {
               </div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.05] break-words antialiased">
-                <span className="text-[clamp(2rem,6vw,4.5rem)]">
-                  Crack Punjab <br/>
-                  <span className="text-blue-600">Government Exams</span> <br/>
-                  With Confidence
-                </span>
+                Crack Punjab <br/>
+                <span className="text-blue-600">Government Exams</span> <br/>
+                With Confidence
               </h1>
 
-              <p className="mt-4 md:mt-6 text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 max-w-2xl font-medium leading-relaxed">
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-600 font-medium leading-relaxed">
                 Practice with bilingual mock tests, previous papers and
                 exam-focused preparation for PSSSB, Punjab Police,
                 PSTET, PSPCL and more.
               </p>
 
-              <div className="flex flex-wrap gap-2 md:gap-3 mt-4">
-                {["PSSSB", "Punjab Police", "PSTET", "PSPCL", "PPSC"].map(
-                  (item) => (
-                    <Badge
-                      key={item}
-                      variant="outline"
-                      className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white border-slate-200 text-[9px] md:text-xs font-bold text-slate-700 shadow-sm"
-                    >
-                      {item}
-                    </Badge>
-                  )
-                )}
+              <div className="flex flex-wrap gap-2 md:gap-3">
+                {["PSSSB", "Punjab Police", "PSTET", "PSPCL", "PPSC"].map((item) => (
+                  <Badge
+                    key={item}
+                    variant="outline"
+                    className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white border-slate-200 text-[9px] md:text-xs font-bold text-slate-700 shadow-sm"
+                  >
+                    {item}
+                  </Badge>
+                ))}
               </div>
             </div>
 
-            {/* VISUAL BLOCK - Student Above Features */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="relative flex justify-center md:justify-start py-4"
-            >
-              <img
-                src="/images/hero-student.png"
-                alt="Cracklix Student"
-                className="w-full h-auto object-contain drop-shadow-2xl max-w-[280px] xs:max-w-sm md:max-w-md lg:max-w-lg"
-              />
-            </motion.div>
-
-            {/* QUICK FEATURE GRID */}
-            <div className="grid grid-cols-2 gap-4 md:gap-6 mt-4">
-              <HeroFeatureCard icon={ClipboardList} label="Mock Tests" color="text-blue-600" />
-              <HeroFeatureCard icon={BookOpen} label="Study Material" color="text-indigo-600" />
-              <HeroFeatureCard icon={FileText} label="Previous Papers" color="text-emerald-600" />
-              <HeroFeatureCard icon={BarChart3} label="Performance Analytics" color="text-orange-500" />
-            </div>
-
-            {/* CTAS */}
-            <div className="flex flex-col sm:flex-row gap-4 md:gap-5 mt-8 md:mt-12">
+            {/* CTAS: Moved up with content for desktop usability */}
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <Button
                 asChild
-                className="w-full sm:w-auto h-12 md:h-16 px-8 md:px-10 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-xl border-none transition-all gap-2"
+                className="w-full sm:w-auto h-14 md:h-16 px-10 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-xl border-none transition-all gap-2"
               >
                 <Link href="/mocks">
                   Start Practice Now
@@ -172,26 +149,45 @@ export default function Hero() {
               <Button
                 asChild
                 variant="outline"
-                className="w-full sm:w-auto h-12 md:h-16 px-8 md:px-10 border-2 border-slate-200 bg-white rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest transition-all text-slate-600"
+                className="w-full sm:w-auto h-14 md:h-16 px-10 border-2 border-slate-200 bg-white rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-widest transition-all text-slate-600"
               >
                 <Link href="/exams">
                   Browse Exams
                 </Link>
               </Button>
             </div>
+
+            {/* QUICK FEATURE NODES */}
+            <div className="grid grid-cols-2 gap-4 md:gap-6 pt-6">
+              <HeroFeatureCard icon={ClipboardList} label="Mock Tests" color="text-blue-600" />
+              <HeroFeatureCard icon={FileText} label="Previous Papers" color="text-emerald-600" />
+            </div>
           </div>
           
-          <div className="hidden lg:block"></div>
+          {/* COLUMN 2: VISUAL HUB */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="order-1 lg:order-2 flex justify-center lg:justify-end relative"
+          >
+            <div className="absolute inset-0 bg-blue-600/5 blur-[100px] rounded-full lg:scale-150" />
+            <img
+              src="/images/hero-student.png"
+              alt="Cracklix Student"
+              className="relative w-full h-auto object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.15)] max-w-[280px] xs:max-w-sm md:max-w-md lg:max-w-[560px] transform hover:scale-[1.02] transition-transform duration-700"
+            />
+          </motion.div>
         </div>
 
-        {/* BOTTOM LIVE STATS GRID */}
+        {/* BOTTOM STATS HUB - FULL WIDTH */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-16 md:mt-24 lg:mt-32">
           {liveStats.map((stat) => {
             const Icon = stat.icon;
             return (
               <Card
                 key={stat.id}
-                className="p-5 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl group hover:shadow-2xl transition-all duration-500"
+                className="p-5 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl group hover:shadow-2xl hover:translate-y-[-4px] transition-all duration-500"
               >
                 <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-5 text-center sm:text-left">
                   <div className="shrink-0 p-3 rounded-xl bg-slate-50 group-hover:bg-blue-50 transition-colors shadow-inner">
@@ -221,11 +217,11 @@ export default function Hero() {
 
 function HeroFeatureCard({ icon: Icon, label, color }: { icon: LucideIcon, label: string, color: string }) {
   return (
-    <Card className="p-4 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] border border-slate-100 bg-white shadow-sm group hover:border-blue-600/30 hover:shadow-2xl transition-all text-left">
-      <div className={cn("h-8 w-8 md:h-12 md:w-12 rounded-xl flex items-center justify-center mb-4 shadow-inner bg-slate-50 transition-transform group-hover:scale-110", color)}>
-        <Icon className="h-5 w-5 md:h-6 md:w-6" />
+    <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 bg-white/50 backdrop-blur-sm shadow-sm group hover:border-blue-600/30 hover:shadow-xl transition-all text-left">
+      <div className={cn("h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center mb-3 shadow-inner bg-slate-50 transition-transform group-hover:scale-110", color)}>
+        <Icon className="h-4 w-4 md:h-5 md:w-5" />
       </div>
-      <p className="font-black text-[#0F172A] text-[10px] md:text-[13px] uppercase tracking-widest">{label}</p>
-    </Card>
+      <p className="font-black text-[#0F172A] text-[9px] md:text-[11px] uppercase tracking-widest">{label}</p>
+    </div>
   );
 }

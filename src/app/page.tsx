@@ -13,8 +13,8 @@ import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
 
 /**
- * @fileOverview Official Home Hub v175.0 (Optimized Order).
- * FLOW: Discovery (Hero/Search) -> Categorization -> Specific Exams -> Practice -> Mobile -> Trust -> Engagement.
+ * @fileOverview Official Home Hub v176.0 (Optimized Layout).
+ * FIXED: Removed redundant negative margin causing search/hero overlap.
  */
 
 export default function HomePage() {
@@ -26,7 +26,7 @@ export default function HomePage() {
       <Hero />
 
       {/* 1.5 Global Search Engine */}
-      <div className="md:-mt-10 relative z-40 pb-8 md:pb-0">
+      <div className="relative z-40 py-8 md:py-12 bg-white">
         <GlobalSearch />
       </div>
 
