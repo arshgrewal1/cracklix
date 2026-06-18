@@ -1,21 +1,16 @@
-
 import { NextResponse } from 'next/server';
 import { Cashfree } from 'cashfree-pg';
 import { initializeFirebase } from '@/firebase/app';
-import { doc, setDoc, serverTimestamp, updateDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Cashfree Webhook Node v2.0.
+ * @fileOverview Institutional Cashfree Webhook Node v2.1.
  * FIXED: Corrected initializeFirebase import path to point to the dedicated app node.
  */
 
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
-    const signature = req.headers.get('x-webhook-signature');
-    const timestamp = req.headers.get('x-webhook-timestamp');
-
-    // Webhook verification logic
     const payload = JSON.parse(rawBody);
     const { data } = payload;
     
@@ -35,13 +30,6 @@ export async function POST(req: Request) {
         webhook_synced: true,
         updatedAt: serverTimestamp()
       }, { merge: true });
-
-      // Pass activation fallback logic
-      const userRef = doc(db, 'users', userId);
-      const userSnap = await getDoc(userRef);
-      if (userSnap.exists() && !userSnap.data().pass?.active) {
-         // Background sync will typically handle this, but webhook acts as a relay
-      }
     }
 
     return NextResponse.json({ received: true });

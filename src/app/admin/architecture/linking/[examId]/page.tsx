@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, Suspense } from "react"
@@ -28,8 +27,8 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Content Linking Engine v1.0.
- * Allows administrators to link existing content to recruitment verticals.
+ * @fileOverview Content Linking Engine v1.1.
+ * FIXED: Added missing Landmark icon import.
  */
 
 export default function ContentLinkerPage() {

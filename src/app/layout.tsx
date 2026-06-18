@@ -42,7 +42,7 @@ export const metadata: Metadata = {
 
     apple: [
       {
-        url: "/logo/cracklix-icon.png",
+        url: "/icons/icon-192x192.png",
       },
     ],
   },

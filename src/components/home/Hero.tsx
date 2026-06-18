@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -22,9 +21,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Hero Hub v107.0.
- * CLEAN: Resolved all Git merge conflict markers.
- * UPDATED: Student illustration positioned directly above feature cards.
+ * @fileOverview Institutional Hero Hub v108.0.
+ * FIXED: Removed all merge conflict markers.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -117,7 +115,6 @@ export default function Hero() {
             )}
           </div>
 
-          {/* STUDENT ILLUSTRATION - POSITIONED ABOVE CARDS */}
           <motion.div 
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -134,7 +131,6 @@ export default function Hero() {
             />
           </motion.div>
 
-          {/* FEATURE CARDS GRID */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
             <Card className="p-4 md:p-6 rounded-3xl border bg-white group hover:shadow-lg transition-all border-slate-100">
               <ClipboardList className="h-6 w-6 md:h-8 md:w-8 text-blue-600 mb-3 transform group-hover:scale-110 transition-transform" />
@@ -180,7 +176,6 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* STATS HUB */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-20 md:mt-32">
           {liveStats.map((stat) => (
             <Card
