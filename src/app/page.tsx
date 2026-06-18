@@ -6,7 +6,6 @@ import FeaturedCategories from "@/components/home/FeaturedCategories";
 import PopularExams from "@/components/home/PopularExams";
 import LatestMocks from "@/components/home/LatestMocks";
 import ContinueLearning from "@/components/home/ContinueLearning";
-import Features from "@/components/home/Features";
 import CurrentAffairsPreview from "@/components/home/CurrentAffairsPreview";
 import MeritPreview from "@/components/home/MeritPreview";
 import AppPreview from "@/components/home/AppPreview";
@@ -14,7 +13,8 @@ import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
 
 /**
- * @fileOverview Official Home Hub v177.0 (Restored Features).
+ * @fileOverview Official Home Hub v178.0.
+ * UPDATED: Removed Core Features section from the home sequence as requested.
  */
 
 export default function HomePage() {
@@ -30,31 +30,28 @@ export default function HomePage() {
         <GlobalSearch />
       </div>
 
-      {/* 2. Core Feature Cards */}
-      <Features />
-
-      {/* 3. Exam Categories (Broad Discovery) */}
+      {/* 2. Exam Categories (Broad Discovery) */}
       <FeaturedCategories />
 
-      {/* 4. Popular Exams (Commission Nodes) */}
+      {/* 3. Popular Exams (Commission Nodes) */}
       <PopularExams />
 
-      {/* 5. Latest Mock Tests (Direct Practice) */}
+      {/* 4. Latest Mock Tests (Direct Practice) */}
       <LatestMocks />
 
-      {/* 6. Personal Prep (Logged-in context) */}
+      {/* 5. Personal Prep (Logged-in context) */}
       <ContinueLearning />
 
-      {/* 7. Knowledge Hub (Current Affairs) */}
+      {/* 6. Knowledge Hub (Current Affairs) */}
       <CurrentAffairsPreview />
 
-      {/* 8. Competitive Index (Merit List) */}
+      {/* 7. Competitive Index (Merit List) */}
       <MeritPreview />
 
-      {/* 9. Hardware Hub (Mobile App) */}
+      {/* 8. Hardware Hub (Mobile App) */}
       <AppPreview />
 
-      {/* 10. Leadership Node (Founder) */}
+      {/* 9. Leadership Node (Founder) */}
       <MeetFounder />
       
       <Footer />

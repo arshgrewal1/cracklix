@@ -6,12 +6,9 @@ import {
   ClipboardList,
   Zap,
   ChevronRight,
-  BookOpen,
-  FileText,
   ShieldCheck,
   Users,
-  Star,
-  ArrowRight
+  Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -22,8 +19,9 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Official Home Hero Hub v19.0 (Restored to Screenshot Specs).
- * Features: 2 large feature cards, 2x2 stats grid, responsive ordering.
+ * @fileOverview Official Home Hero Hub v20.0.
+ * UPDATED: Removed feature cards from hero content to match latest request.
+ * Features: 2x2 stats grid, responsive ordering.
  */
 
 export default function Hero() {
@@ -92,23 +90,8 @@ export default function Hero() {
               </motion.div>
             </div>
 
-            {/* FEATURE SECTION (MATCHING SCREENSHOT) */}
+            {/* FEATURE SECTION */}
             <div className="space-y-8">
-               
-               {/* LARGE TOP CARDS */}
-               <div className="grid grid-cols-2 gap-4 md:gap-6">
-                  <FeatureCard 
-                    label="MOCK TESTS" 
-                    href="/mocks" 
-                    icon={<ClipboardList className="h-5 w-5 text-primary" />} 
-                  />
-                  <FeatureCard 
-                    label="PREVIOUS PAPERS" 
-                    href="/previous-papers" 
-                    icon={<FileText className="h-5 w-5 text-emerald-500" />} 
-                  />
-               </div>
-
                {/* 2X2 STATS GRID */}
                <div className="grid grid-cols-2 gap-4 md:gap-6">
                   <StatCard 
@@ -183,21 +166,6 @@ export default function Hero() {
         </div>
       </div>
     </section>
-  );
-}
-
-function FeatureCard({ label, href, icon }: { label: string, href: string, icon: React.ReactNode }) {
-  return (
-    <Link href={href} className="block active:scale-[0.98] transition-all">
-       <Card className="p-6 md:p-10 rounded-[2.5rem] bg-white border-none shadow-xl hover:shadow-2xl transition-all duration-300 flex flex-col items-start gap-5 group">
-          <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
-             {icon}
-          </div>
-          <h3 className="text-[11px] md:text-sm font-black uppercase tracking-[0.2em] text-[#0F172A] group-hover:text-primary transition-colors">
-             {label}
-          </h3>
-       </Card>
-    </Link>
   );
 }
 
