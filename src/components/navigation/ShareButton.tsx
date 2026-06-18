@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState } from "react";
-import { Share2, Loader2, MessageCircle, Send, Copy, X, Globe, MessageSquare } from "lucide-react";
+import { Share2, Loader2, MessageSquare, Send, Copy, Globe, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
@@ -24,7 +24,7 @@ interface ShareButtonProps {
 }
 
 /**
- * @fileOverview Hardened Social Share Hub v5.0.
+ * @fileOverview Hardened Social Share Hub v6.0.
  * DIRECT SHARING: Provides instant WhatsApp/Telegram triggers if the OS share sheet is unavailable.
  */
 export default function ShareButton({ 
@@ -55,7 +55,6 @@ export default function ShareButton({
       if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
         await navigator.share(shareData);
       } else {
-        // Fallback to custom share hub if native share is blocked or unsupported
         setIsShareDialogOpen(true);
       }
     } catch (err) {
@@ -168,4 +167,3 @@ export default function ShareButton({
     </>
   );
 }
-

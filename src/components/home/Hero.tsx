@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 /**
  * @fileOverview Official Hero Section v77.0 (Overlap Hardened).
  * FIXED: Replaced horizontal flex with vertical stack for small screens to prevent stat card overlap.
+ * FIXED: Replaced standard <p> wrappers with <div> to prevent hydration violations.
  */
 
 export default function Hero() {
@@ -150,4 +151,3 @@ export default function Hero() {
     </section>
   );
 }
-

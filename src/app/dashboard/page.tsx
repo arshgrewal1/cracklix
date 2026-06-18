@@ -33,7 +33,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * @fileOverview High-Performance Student Dashboard v29.0 (Hardened).
- * FIXED: Replaced vertical-horizontal ambiguity with consistent flex-col for mobile stat nodes to prevent overlap.
+ * FIXED: Consistent flex-col for mobile stat nodes to prevent overlap.
+ * FIXED: Standardized HTML nesting to prevent hydration errors.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading, profileLoading } = useUser() as any;
