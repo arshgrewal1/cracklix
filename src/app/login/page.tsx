@@ -25,9 +25,9 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Login Hub v28.1 (Messaging Update).
- * IMPLEMENTED: Last-Login Wins policy. New login always terminates old session.
- * UPDATED: Branding-aligned welcome message.
+ * @fileOverview Hardened Login Hub v29.0 (UI Fixes).
+ * FIXED: Increased phone input padding to prevent overlap with +91.
+ * FIXED: Centered branding node.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -76,7 +76,6 @@ function LoginContent() {
     const deviceId = await getDeviceId();
     const { browser, platform } = getBrowserInfo();
     
-    // Overwrite active device in the registry - This is the "Last Login Wins" mechanism
     await setDoc(doc(db, 'users', userId), {
       activeDeviceId: deviceId,
       lastLoginAt: serverTimestamp(),
@@ -114,7 +113,7 @@ function LoginContent() {
         })
 
         await updateActiveDevice(userNode.uid);
-        toast({ title: "Account Created", description: "Welcome to Cracklix!" })
+        toast({ title: "Account Created", description: "Welcome to Cracklix" })
         startTransition(() => { router.replace(returnUrl) })
       }
     } catch (error: any) {
@@ -180,7 +179,6 @@ function LoginContent() {
       
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="z-10 w-full max-w-[440px] space-y-6 md:space-y-8">
         
-        {/* LOGO NODE */}
         <div className="flex flex-col items-center justify-center w-full">
           <Logo variant="light" align="center" />
         </div>
@@ -219,12 +217,12 @@ function LoginContent() {
                   <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Mobile Node</Label>
                     <div className="relative">
-                      <span className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm md:text-lg">+91</span>
+                      <span className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm md:text-lg">+91</span>
                       <Input 
                         value={phone} 
                         onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0,10))} 
                         required 
-                        className="h-12 md:h-16 rounded-xl md:rounded-2xl bg-slate-50 border-none text-[#0F172A] placeholder:text-slate-400 focus-visible:ring-primary text-sm md:text-lg font-bold pl-16 md:pl-20 px-4 md:px-6 tracking-widest shadow-inner" 
+                        className="h-12 md:h-16 rounded-xl md:rounded-2xl bg-slate-50 border-none text-[#0F172A] placeholder:text-slate-400 focus-visible:ring-primary text-sm md:text-lg font-bold pl-20 md:pl-24 px-4 md:px-6 tracking-widest shadow-inner" 
                         placeholder="10-digit number" 
                       />
                     </div>

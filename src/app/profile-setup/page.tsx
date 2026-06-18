@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
@@ -17,8 +16,8 @@ import { Phone, User as UserIcon, GraduationCap, Calendar, MapPin } from "lucide
 import { Gender } from "@/types"
 
 /**
- * @fileOverview Student Profile Setup v12.0.
- * UPDATED: Added a "Skip for now" option to make setup non-mandatory.
+ * @fileOverview Student Profile Setup v13.0 (UI Fixes).
+ * FIXED: Increased phone input padding to prevent overlap with +91.
  */
 export default function ProfileSetup() {
   const router = useRouter()
@@ -47,7 +46,6 @@ export default function ProfileSetup() {
   const handleSubmit = async () => {
     if (!user) return;
 
-    // Strict Validation for Submission
     const requiredFields = [
       { key: 'name', label: 'Full Name' },
       { key: 'phone', label: 'Mobile Number' },
@@ -116,7 +114,7 @@ export default function ProfileSetup() {
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/5 blur-[120px] rounded-full" />
       
       <div className="mb-10 z-10">
-        <Logo variant="dark" />
+        <Logo variant="dark" align="center" />
       </div>
 
       <Card className="w-full max-w-xl border-none shadow-2xl rounded-[2.5rem] overflow-hidden z-10">
@@ -145,11 +143,11 @@ export default function ProfileSetup() {
              <div className="space-y-2 text-left">
                 <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Mobile Number</Label>
                 <div className="relative">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">+91</span>
                   <Input 
                     type="tel"
                     placeholder="10-digit number" 
-                    className="pl-12 h-12 rounded-xl border-slate-200 bg-slate-50/50 font-bold"
+                    className="pl-20 h-12 rounded-xl border-slate-200 bg-slate-50/50 font-bold"
                     value={formData.phone}
                     onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value.replace(/\D/g, '') }))}
                     maxLength={10}
@@ -158,7 +156,7 @@ export default function ProfileSetup() {
               </div>
 
               <div className="space-y-2 text-left">
-                <Label className="text-[10px) font-black uppercase tracking-widest text-slate-400 ml-1">Date of Birth</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Date of Birth</Label>
                 <div className="relative">
                   <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                   <Input 
