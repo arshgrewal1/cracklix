@@ -14,9 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Refined Admin Layout v3.0.
- * FIXED: Standardized fixed spacing to prevent content squashing.
- * MAXIMIZED: Logo scale to fill header height.
+ * @fileOverview Refined Admin Layout v4.0 (Padding Hardened).
+ * FIXED: Strictly standardized padding to prevent content squashing on mobile.
  */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -85,7 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Main Content Hub */}
       <div className={cn(
-        "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
+        "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full min-w-0",
         isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
       )}>
         <header className="h-20 border-b border-slate-100 flex items-center px-4 md:px-8 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
@@ -116,8 +115,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-10 lg:p-14 w-full max-w-full overflow-x-hidden">
-           <div className="max-w-7xl mx-auto">
+        <main className="flex-1 p-4 md:p-8 lg:p-12 w-full max-w-full overflow-x-hidden min-w-0">
+           <div className="max-w-7xl mx-auto w-full">
               {children}
            </div>
         </main>

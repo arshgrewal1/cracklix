@@ -11,13 +11,12 @@ import {
   Zap, 
   Loader2, 
   Activity, 
-  Clock, 
-  ChevronRight, 
   RefreshCw, 
   Target, 
   DollarSign, 
   CreditCard, 
-  AlertCircle 
+  AlertCircle,
+  ChevronRight
 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
@@ -29,9 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Command Center v45.0 (UI Hardened).
- * FIXED: Text clipping and layout squashing on high-density viewports.
- * FIXED: Hydration nodes standardized from <p> to <div>.
+ * @fileOverview Institutional Command Center v46.0 (Layout Hardened).
+ * FIXED: Grid gaps and card internal spacing to prevent overlap on small screens.
  */
 
 interface MetricCardProps {
@@ -69,7 +67,6 @@ export default function AdminDashboard() {
   const recentResultsQuery = useMemo(() => (db ? query(collection(db, "results"), orderBy("timestamp", "desc"), limit(5)) : null), [db]);
   const { data: recentResults } = useCollection<any>(recentResultsQuery);
 
-  // AUTO-SYNC ON MOUNT
   useEffect(() => {
     if (db) {
        handleSyncLiveStats(true);
@@ -141,31 +138,29 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-8 md:space-y-12 text-[#0F172A] text-left">
-      {/* 1. Header Section */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-        <div className="space-y-2">
+        <div className="space-y-2 min-w-0 flex-1">
            <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-100 shrink-0">
                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                 <span className="text-[9px] font-black uppercase text-emerald-600 tracking-widest">Live Registry</span>
+                 <span className="text-[9px] font-black uppercase text-emerald-600 tracking-widest">Live</span>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Admin Control Node</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Admin Control</span>
            </div>
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none">Admin Hub</h1>
+          <h1 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none truncate">Admin Hub</h1>
           <p className="text-slate-400 text-sm md:text-lg font-medium max-w-xl">Monitoring preparation nodes and institutional financial flow.</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-           <Button onClick={() => handleSyncLiveStats()} disabled={isStatsSyncing} className="h-11 md:h-12 bg-primary hover:bg-primary/90 text-white rounded-xl font-black shadow-lg uppercase tracking-widest text-[10px] px-8 border-none">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto shrink-0">
+           <Button onClick={() => handleSyncLiveStats()} disabled={isStatsSyncing} className="h-11 bg-primary hover:bg-primary/90 text-white rounded-xl font-black shadow-lg uppercase tracking-widest text-[10px] px-6 border-none">
               {isStatsSyncing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />} Sync Stats
            </Button>
-           <Button onClick={handlePushToRegistry} disabled={isSyncing} className="h-11 md:h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black shadow-lg uppercase tracking-widest text-[10px] px-8 border-none">
+           <Button onClick={handlePushToRegistry} disabled={isSyncing} className="h-11 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black shadow-lg uppercase tracking-widest text-[10px] px-6 border-none">
               {isSyncing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Database className="h-4 w-4 mr-2" />} Seed Hub
            </Button>
         </div>
       </div>
 
-      {/* 2. Metrics Strip */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
          <MetricCard 
            label="Gross Collection" 
            value={`₹${finance.totalRevenue.toLocaleString()}`} 
@@ -190,21 +185,20 @@ export default function AdminDashboard() {
          />
       </div>
 
-      {/* 3. Main Stream */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-         <Card className="lg:col-span-8 border-none shadow-2xl bg-white rounded-[2rem] overflow-hidden border border-slate-100">
-            <CardHeader className="p-8 border-b border-slate-50 bg-slate-50/30">
+         <Card className="lg:col-span-8 border-none shadow-2xl bg-white rounded-[2rem] overflow-hidden border border-slate-100 min-w-0">
+            <CardHeader className="p-6 md:p-8 border-b border-slate-50 bg-slate-50/30">
                <CardTitle className="text-xl font-headline font-black uppercase text-[#0F172A]">Audit Stream</CardTitle>
                <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Real-time registry activities.</CardDescription>
             </CardHeader>
-            <CardContent className="p-8 space-y-10">
+            <CardContent className="p-6 md:p-8 space-y-8 md:space-y-10">
                <div className="space-y-6">
                   <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><Users className="h-4 w-4" /> Latest Aspirants</h4>
                   <div className="grid grid-cols-1 gap-3">
                      {recentUsers?.map((u: any) => (
-                        <div key={u.id} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
-                           <div className="flex items-center gap-4">
-                              <StudentAvatar profile={u} className="h-10 w-10 rounded-xl" />
+                        <div key={u.id} className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100 min-w-0 gap-4">
+                           <div className="flex items-center gap-3 md:gap-4 min-w-0">
+                              <StudentAvatar profile={u} className="h-10 w-10 rounded-xl shrink-0" />
                               <div className="min-w-0">
                                  <p className="font-bold text-sm text-[#0F172A] uppercase truncate">{u.name}</p>
                                  <p className="text-[9px] text-slate-400 font-bold uppercase truncate">{u.email}</p>
@@ -222,12 +216,12 @@ export default function AdminDashboard() {
                   <h4 className="text-[10px] font-black uppercase tracking-widest text-slate-400 flex items-center gap-2"><Activity className="h-4 w-4" /> Recent CBT Sessions</h4>
                   <div className="grid grid-cols-1 gap-3">
                      {recentResults?.map((r: any) => (
-                        <div key={r.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                           <div className="flex items-center gap-4 min-w-0">
+                        <div key={r.id} className="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-100 shadow-sm min-w-0 gap-4">
+                           <div className="flex items-center gap-3 md:gap-4 min-w-0">
                               <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary shrink-0"><Zap className="h-5 w-5" /></div>
                               <div className="min-w-0">
                                  <p className="font-bold text-sm text-[#0F172A] uppercase truncate">{r.mockTitle}</p>
-                                 <p className="text-[9px] text-slate-400 font-bold uppercase truncate">{r.userName} • Score: {r.score}</p>
+                                 <p className="text-[9px] text-slate-400 font-bold uppercase truncate">{r.userName}</p>
                               </div>
                            </div>
                            <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] shrink-0">{r.accuracy}%</Badge>
@@ -238,11 +232,10 @@ export default function AdminDashboard() {
             </CardContent>
          </Card>
 
-         {/* Quick Actions Side */}
          <div className="lg:col-span-4 space-y-8">
-            <Card className="border-none shadow-3xl bg-[#0F172A] text-white p-10 rounded-[2.5rem] relative overflow-hidden">
+            <Card className="border-none shadow-3xl bg-[#0F172A] text-white p-8 md:p-10 rounded-[2.5rem] relative overflow-hidden">
                <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><ShieldCheck className="h-64 w-64" /></div>
-               <div className="relative z-10 space-y-10">
+               <div className="relative z-10 space-y-8 md:space-y-10">
                   <div className="space-y-2 text-left">
                      <h3 className="text-2xl font-headline font-black uppercase tracking-tight">Quick Launch</h3>
                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Operations Hub</p>
@@ -269,13 +262,13 @@ function MetricCard({ label, value, subLabel, icon, href, highlight }: MetricCar
         "group-hover:translate-y-[-4px] group-hover:shadow-2xl border border-slate-100",
         highlight && "ring-2 ring-rose-500/20 bg-rose-50/5"
       )}>
-         <div className="flex items-center gap-6">
-            <div className="h-12 w-12 md:h-14 md:w-14 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 shadow-inner shrink-0 group-hover:scale-110 transition-transform">
+         <div className="flex items-center gap-4 md:gap-6">
+            <div className="h-10 w-10 md:h-14 md:w-14 rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-100 shadow-inner shrink-0 group-hover:scale-110 transition-transform">
                {icon}
             </div>
-            <div className="text-left min-w-0">
-               <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{label}</p>
-               <div className="text-xl md:text-3xl lg:text-4xl font-headline font-black text-[#0F172A] leading-none tracking-tight truncate">{value}</div>
+            <div className="text-left min-w-0 flex-1">
+               <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 truncate">{label}</p>
+               <div className="text-xl md:text-3xl font-headline font-black text-[#0F172A] leading-none tracking-tight truncate">{value}</div>
                <p className="text-[8px] font-bold text-slate-300 uppercase mt-2 truncate">{subLabel}</p>
             </div>
          </div>

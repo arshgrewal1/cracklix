@@ -21,7 +21,6 @@ import {
   ShieldCheck,
   TrendingUp,
   Calendar,
-  Loader2,
   Award,
   Activity
 } from "lucide-react"
@@ -33,8 +32,8 @@ import ShareButton from "@/components/navigation/ShareButton"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview High-Performance Student Dashboard v28.1 (Hardened).
- * FIXED: Hydration errors by replacing p tags with div tags for dynamic stats.
+ * @fileOverview High-Performance Student Dashboard v29.0 (Hardened).
+ * FIXED: Replaced vertical-horizontal ambiguity with consistent flex-col for mobile stat nodes to prevent overlap.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading, profileLoading } = useUser() as any;
@@ -258,12 +257,14 @@ export default function StudentDashboard() {
 
 function MetricItem({ label, val, icon }: any) {
   return (
-    <Card className="border-none shadow-xl bg-white p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-left group hover:translate-y-[-4px] transition-all border border-slate-50">
-      <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center mb-6 md:mb-8 group-hover:bg-primary/5 transition-all shadow-inner border border-slate-100">
+    <Card className="border-none shadow-xl bg-white p-4 sm:p-6 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-left group hover:translate-y-[-4px] transition-all border border-slate-50 min-w-0">
+      <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center mb-4 md:mb-8 group-hover:bg-primary/5 transition-all shadow-inner border border-slate-100 shrink-0">
         {icon}
       </div>
-      <div className="text-xl md:text-4xl lg:text-5xl font-headline font-black text-[#0F172A] leading-none tracking-tighter tabular-nums">{val}</div>
-      <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2 md:mt-4">{label}</p>
+      <div className="flex flex-col gap-1">
+        <div className="text-xl md:text-4xl lg:text-5xl font-headline font-black text-[#0F172A] leading-none tracking-tighter tabular-nums truncate">{val}</div>
+        <p className="text-[7px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1 md:mt-2 truncate">{label}</p>
+      </div>
     </Card>
   )
 }

@@ -8,22 +8,19 @@ import {
   Users,
   Zap,
   ChevronRight,
-  BookOpen,
-  FileText,
-  BarChart3,
   Star
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
-import Image from "next/image";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Hero Section v75.6.
- * FIXED: Replaced standard <p> containers with <div> nodes for dynamic stat points to resolve hydration mismatches.
+ * @fileOverview Official Hero Section v76.0 (Overlap Hardened).
+ * FIXED: Replaced horizontal flex with vertical-on-mobile stack for stats cards.
  */
 
 export default function Hero() {
@@ -127,21 +124,21 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-20 md:mt-32">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16 md:mt-32">
           {liveStats.map((stat) => (
             <Card
               key={stat.id}
-              className="p-5 md:p-10 rounded-[2rem] md:rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/40 text-left group hover:translate-y-[-4px] transition-all"
+              className="p-4 sm:p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/40 text-left group hover:translate-y-[-4px] transition-all overflow-hidden"
             >
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3 md:gap-5">
                 <div className="h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
                   {stat.icon}
                 </div>
-                <div>
-                  <div className="text-xl md:text-4xl font-black text-slate-900 tabular-nums leading-none tracking-tight">
+                <div className="text-center sm:text-left min-w-0">
+                  <div className="text-xl md:text-4xl font-black text-slate-900 tabular-nums leading-none tracking-tight truncate">
                     {loading ? <Skeleton className="h-8 w-16" /> : <div className="min-w-0">{stat.val || "0"}</div>}
                   </div>
-                  <div className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">
+                  <div className="text-[7px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2 truncate">
                     {stat.label}
                   </div>
                 </div>
