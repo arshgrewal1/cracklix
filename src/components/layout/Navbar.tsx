@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v91.0 (Hardened Responsiveness).
- * FIXED: Logo alignment and responsive dropdown dimensions.
+ * @fileOverview Institutional Header v92.0 (Mobile UI Polished).
+ * FIXED: Scaled Admin Hub button on mobile for better visual balance.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -151,12 +151,12 @@ export default function Navbar() {
                           <h3 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">My Profile</h3>
                        </Link>
 
-                       {/* ADMIN HUB (IF APPLICABLE) */}
+                       {/* ADMIN HUB (IF APPLICABLE) - POLISHED FOR MOBILE BALANCE */}
                        {isAdmin && (
                          <div className="mb-4 sm:mb-6">
-                            <Button asChild className="w-full h-14 sm:h-16 rounded-2xl sm:rounded-3xl text-lg sm:text-xl font-black px-4 sm:px-6 bg-primary hover:bg-blue-700 text-white shadow-lg border-none transition-all active:scale-95">
+                            <Button asChild className="w-full h-12 sm:h-16 rounded-2xl sm:rounded-3xl text-sm sm:text-xl font-black px-4 sm:px-6 bg-primary hover:bg-blue-700 text-white shadow-lg border-none transition-all active:scale-95">
                                <Link href="/admin">
-                                  <ShieldCheck className="h-5 w-5 sm:h-6 sm:w-6 mr-3" />
+                                  <ShieldCheck className="h-4 w-4 sm:h-6 sm:w-6 mr-2 sm:mr-3" />
                                   Admin Hub
                                </Link>
                             </Button>

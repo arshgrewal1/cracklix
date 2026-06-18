@@ -13,8 +13,8 @@ import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Elite Global Search Hub v2.5 (Hardened Build).
- * FIXED: Explicit React import and correct cloneElement typing.
+ * @fileOverview Elite Global Search Hub v2.6 (Production Hardened).
+ * FIXED: Explicitly imported React and hardened cloneElement generic casting.
  */
 
 export default function SearchPage() {
