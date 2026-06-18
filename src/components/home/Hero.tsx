@@ -22,8 +22,8 @@ import { doc } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Institutional Hero Hub v110.0 (Responsive Fix).
- * FIXED: Scaled down heading for small mobile (320px) to prevent clipping.
+ * @fileOverview Institutional Hero Hub v111.0 (Responsive Hardened).
+ * FIXED: Scaled down heading for 320px screens and optimized padding.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -84,7 +84,7 @@ export default function Hero() {
           
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border shadow-sm mb-6">
             <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-            <span className="text-sm font-semibold text-slate-700">
+            <span className="text-[11px] sm:text-sm font-semibold text-slate-700">
               {loading ? <Skeleton className="h-4 w-20 inline-block" /> : (stats?.totalUsers?.toLocaleString() || "0")} Aspirants Preparing
             </span>
           </div>
@@ -97,18 +97,18 @@ export default function Hero() {
             With Confidence
           </h1>
 
-          <p className="mt-6 text-base sm:text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
+          <p className="mt-6 text-sm sm:text-lg md:text-xl text-slate-600 max-w-2xl leading-relaxed">
             Practice with bilingual mock tests, previous papers and
             exam-focused preparation for PSSSB, Punjab Police,
             PSTET, PSPCL and more.
           </p>
 
-          <div className="flex flex-wrap gap-3 mt-6">
+          <div className="flex flex-wrap gap-2 md:gap-3 mt-6">
             {["PSSSB", "Punjab Police", "PSTET", "PSPCL", "PPSC"].map(
               (item) => (
                 <span
                   key={item}
-                  className="px-4 py-2 rounded-full bg-white border text-sm font-medium text-slate-700 shadow-sm"
+                  className="px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white border text-[10px] md:text-sm font-medium text-slate-700 shadow-sm"
                 >
                   {item}
                 </span>
@@ -120,7 +120,7 @@ export default function Hero() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="relative w-full max-w-2xl h-[300px] md:h-[450px] mt-10 mb-6"
+            className="relative w-full max-w-2xl h-[260px] xs:h-[300px] md:h-[450px] mt-10 mb-6"
           >
             <Image 
               src="/images/hero-student.png"
@@ -135,29 +135,29 @@ export default function Hero() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
             <Card className="p-4 md:p-6 rounded-3xl border bg-white group hover:shadow-lg transition-all border-slate-100">
               <ClipboardList className="h-6 w-6 md:h-8 md:w-8 text-blue-600 mb-3 transform group-hover:scale-110 transition-transform" />
-              <p className="font-bold text-sm md:text-base uppercase tracking-tight">Mock Tests</p>
+              <p className="font-bold text-[12px] md:text-base uppercase tracking-tight">Mock Tests</p>
             </Card>
 
             <Card className="p-4 md:p-6 rounded-3xl border bg-white group hover:shadow-lg transition-all border-slate-100">
               <BookOpen className="h-6 w-6 md:h-8 md:w-8 text-indigo-600 mb-3 transform group-hover:scale-110 transition-transform" />
-              <p className="font-bold text-sm md:text-base uppercase tracking-tight">Study Material</p>
+              <p className="font-bold text-[12px] md:text-base uppercase tracking-tight">Study Material</p>
             </Card>
 
             <Card className="p-4 md:p-6 rounded-3xl border bg-white group hover:shadow-lg transition-all border-slate-100">
               <FileText className="h-6 w-6 md:h-8 md:w-8 text-emerald-600 mb-3 transform group-hover:scale-110 transition-transform" />
-              <p className="font-bold text-sm md:text-base uppercase tracking-tight">Previous Papers</p>
+              <p className="font-bold text-[12px] md:text-base uppercase tracking-tight">Previous Papers</p>
             </Card>
 
             <Card className="p-4 md:p-6 rounded-3xl border bg-white group hover:shadow-lg transition-all border-slate-100">
               <BarChart3 className="h-6 w-6 md:h-8 md:w-8 text-orange-500 mb-3 transform group-hover:scale-110 transition-transform" />
-              <p className="font-bold text-sm md:text-base uppercase tracking-tight">Analytics</p>
+              <p className="font-bold text-[12px] md:text-base uppercase tracking-tight">Analytics</p>
             </Card>
           </div>
 
           <div className="flex flex-wrap gap-4 mt-12">
             <Button
               asChild
-              className="h-14 md:h-20 px-10 md:px-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[11px] shadow-3xl shadow-blue-600/20 transition-all active:scale-95 border-none"
+              className="h-14 md:h-20 px-8 md:px-14 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[10px] md:text-[11px] shadow-3xl shadow-blue-600/20 transition-all active:scale-95 border-none"
             >
               <Link href="/mocks">
                 Start Free Mock Test
@@ -168,7 +168,7 @@ export default function Hero() {
             <Button
               asChild
               variant="outline"
-              className="h-14 md:h-20 px-10 md:px-14 rounded-2xl border-2 border-slate-200 bg-white text-slate-700 font-black uppercase tracking-widest text-[11px] transition-all active:scale-95 hover:bg-slate-50"
+              className="h-14 md:h-20 px-8 md:px-14 rounded-2xl border-2 border-slate-200 bg-white text-slate-700 font-black uppercase tracking-widest text-[10px] md:text-[11px] transition-all active:scale-95 hover:bg-slate-50"
             >
               <Link href="/exams">
                 Browse Exams
@@ -181,17 +181,17 @@ export default function Hero() {
           {liveStats.map((stat) => (
             <Card
               key={stat.id}
-              className="p-6 md:p-10 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/40 text-left group hover:translate-y-[-4px] transition-all"
+              className="p-5 md:p-10 rounded-[2rem] md:rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/40 text-left group hover:translate-y-[-4px] transition-all"
             >
               <div className="flex items-center gap-4">
-                <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
+                <div className="h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform">
                   {stat.icon}
                 </div>
                 <div>
-                  <p className="text-2xl md:text-4xl font-black text-slate-900 tabular-nums leading-none tracking-tight">
+                  <p className="text-xl md:text-4xl font-black text-slate-900 tabular-nums leading-none tracking-tight">
                     {loading ? <Skeleton className="h-8 w-16" /> : (stat.val || "0")}
                   </p>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">
+                  <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">
                     {stat.label}
                   </p>
                 </div>

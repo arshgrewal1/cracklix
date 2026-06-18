@@ -35,8 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v79.0 (Responsive Fix).
- * FIXED: Logo alignment for small screens (320px) to prevent action overflow.
+ * @fileOverview Institutional Header v80.0 (Responsive Hardened).
+ * FIXED: Logo scaling and margin logic for 320px devices to prevent icon overflow.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
