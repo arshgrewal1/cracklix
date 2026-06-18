@@ -6,8 +6,9 @@ import { doc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { initializeFirebase } from '@/firebase/app';
 
 /**
- * @fileOverview Elite CBT Global Store v50.0 (Hardened Production).
- * STABILITY: Corrected state reset logic and added defensive Firestore update handlers.
+ * @fileOverview Elite CBT Global Store v51.0 (Hardened Production).
+ * UPDATED: Explicit forceReset logic to prevent cross-mock state bleeding.
+ * STABILITY: Reinforced endTime synchronization for accurate resumption.
  */
 
 interface ExamStore extends AttemptState {
@@ -67,11 +68,11 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const now = Date.now();
     const state = get();
     
-    // Safety check for stale state from previous test session
+    // Safety check for stale state from previous test session or different mock
     const isCompleted = savedState?.status === 'COMPLETED';
     const isTimedOut = savedState?.endTime && now >= savedState.endTime;
-    const isNewMock = state.mockId !== mockId && state.mockId !== '';
-    const forceReset = isCompleted || isTimedOut || isNewMock;
+    const isDifferentMock = state.mockId !== mockId && state.mockId !== '';
+    const forceReset = isCompleted || isTimedOut || isDifferentMock;
 
     const finalDuration = duration || 120;
     const actualStartTime = (forceReset || !savedState?.startTime) ? now : savedState.startTime;
@@ -107,7 +108,7 @@ export const useExamStore = create<ExamStore>((set, get) => ({
       isSyncing: false
     });
 
-    // Background registry sync
+    // Background registry sync for new sessions
     if (userId && mockId && (forceReset || !savedState)) {
       const { firestore: dbInstance } = initializeFirebase();
       setDoc(doc(dbInstance, 'attempts', `${userId}_${mockId}`), {

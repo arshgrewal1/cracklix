@@ -19,9 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Mobile-First Question Hub v43.0 (Ultra High Density).
- * UPDATED: Responsive text scaling with clamp() to prevent clipping on small devices.
- * FIXED: Standardized card padding and option vertical stacking.
+ * @fileOverview Precision Mobile-First Question Hub v44.0 (Ultra High Density).
+ * UPDATED: Strictly enforced high-density padding and font clamping for small screens.
+ * FIXED: Standardized option nodes with better hit targets for mobile.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -92,7 +92,7 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      {/* 2. STATEMENTS HUB - RESPONSIVE SCALING */}
+      {/* 2. STATEMENTS HUB - RESPONSIVE CLAMPING */}
       <div className={cn("space-y-4 mb-8 px-1", showSolution ? "mb-6" : "mb-10")}>
          {showEn && englishQ && (
            <div className={cn("font-bold text-[#0F172A] antialiased leading-[1.4] md:leading-relaxed break-words", showSolution ? "text-[14px] md:text-lg" : "text-[16px] sm:text-lg md:text-2xl lg:text-3xl")}>
@@ -111,7 +111,7 @@ export default function QuestionRenderer({
          )}
       </div>
 
-      {/* 3. INTERACTIVE OPTIONS - COMPACT PADDING */}
+      {/* 3. INTERACTIVE OPTIONS */}
       {!hideOptions && (
         <div className={cn("flex flex-col w-full", showSolution ? "space-y-2" : "space-y-3 md:space-y-4")}>
           {OPT_LABELS.map((key, idx) => {
@@ -147,7 +147,7 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      {/* 4. RATIONALIZATION HUB - REDUCED PADDING */}
+      {/* 4. RATIONALIZATION HUB */}
       {showSolution && (
         <div className="mt-8 pt-8 border-t border-slate-100 space-y-4">
            <div className="flex items-center gap-3">

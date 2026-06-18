@@ -30,8 +30,9 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Test Results Hub v34.0 (Ultra-Compact Mobile).
- * FIXED: Extreme responsiveness for small devices and high-density result nodes.
+ * @fileOverview Test Results Hub v35.0 (Ultra-Compact Mobile).
+ * FIXED: Standardized metrics scaling for narrow Android/iOS devices.
+ * UPDATED: Replaced all orange highlights with Primary Blue CTAs.
  */
 
 export default function ResultPage() {
@@ -170,7 +171,7 @@ function ResultContent() {
            </div>
 
            <div className="flex gap-4 shrink-0 w-full lg:w-auto">
-              <Button asChild className="w-full lg:w-auto h-12 md:h-16 px-8 md:px-12 bg-primary hover:bg-orange-600 text-white font-black uppercase text-[10px] md:text-[12px] tracking-[0.2em] rounded-2xl shadow-3xl shadow-primary/20 border-none active:scale-95 transition-all">
+              <Button asChild className="w-full lg:w-auto h-12 md:h-16 px-8 md:px-12 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[12px] tracking-[0.2em] rounded-2xl shadow-3xl shadow-primary/20 border-none active:scale-95 transition-all">
                  <Link href={`/mocks/${sessionData.mockId}/instructions`} className="flex items-center justify-center gap-3">
                     <RefreshCw className="h-4 w-4 md:h-5 md:w-5" /> RE-ATTEMPT
                  </Link>
