@@ -5,12 +5,18 @@ import { useUser, useAuth } from "@/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import { signOut } from "firebase/auth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { Menu, ShieldCheck, Loader2 } from "lucide-react";
+import { Menu, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/brand/Logo";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
+
+/**
+ * @fileOverview Refined Admin Layout v2.0.
+ * FIXED: Standardized fixed spacing to prevent content squashing.
+ */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser();
@@ -109,7 +115,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 lg:p-12 w-full max-w-full overflow-x-hidden">
+        <main className="flex-1 p-4 md:p-10 lg:p-14 w-full max-w-full overflow-x-hidden">
            <div className="max-w-7xl mx-auto">
               {children}
            </div>
@@ -118,5 +124,3 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
-
-import { cn } from "@/lib/utils";

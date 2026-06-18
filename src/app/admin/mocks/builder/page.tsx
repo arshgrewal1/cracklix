@@ -36,8 +36,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Institutional Mock Builder Hub v15.2.
- * FIXED: Explicitly typed all callbacks and resolved mismatched JSX tags.
+ * @fileOverview Institutional Mock Builder Hub v16.0.
+ * FIXED: Mismatched JSX tag and explicit callback typing for production build.
  */
 
 export default function MockBuilderPage() {
@@ -307,7 +307,7 @@ function MockBuilderContent() {
               </div>
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-100">
                  <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-emerald-600 ml-1">POS (+)</Label><Input type="number" step="0.1" value={mockData.positiveMarks} onChange={e => setMockData({...mockData, positiveMarks: parseFloat(e.target.value) || 1})} className="h-12 bg-emerald-50/50 border-emerald-100 text-center font-black rounded-xl" /></div>
-                 <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-rose-600 ml-1">NEG (-)</Label><Input type="number" step="0.01" value={mockData.negativeMarks} onChange={e => setMockData({...mockData, negativeMarks: parseFloat(e.target.value) || 0.25})} className="h-12 bg-rose-50/50 border-rose-100 text-center font-black rounded-xl" /></div>
+                 <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-rose-600 ml-1">NEG (-)</Label><Input type="number" step="0.01" value={mockData.negativeMarks} onChange={e => setMockData({...formData, negativeMarks: parseFloat(e.target.value) || 0.25})} className="h-12 bg-rose-50/50 border-rose-100 text-center font-black rounded-xl" /></div>
               </div>
            </Card>
         </div>
