@@ -14,9 +14,9 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview Institutional Administrative Portal v14.0.
- * FIXED: Fully populated Support Info tab to manage institutional contact nodes.
- * HARDENED: Layout constraints to prevent high-density text clipping.
+ * @fileOverview Institutional Administrative Portal v14.1.
+ * FIXED: Restored full Support Info tab content for managing institutional contact nodes.
+ * HARDENED: Explicitly typed callbacks and ensured high-density layout stability.
  */
 
 export default function AdminSettings() {
@@ -42,7 +42,7 @@ export default function AdminSettings() {
     adSenseEnabled: false,
     adSenseClientCode: "",
     shareUrl: "https://cracklix.com",
-    shareTitle: "Cracklix | Punjab's Mock Test Platform",
+    shareTitle: "Cracklix | Punjab's Smart Mock Test Platform",
     shareDescription: "Practice Mock Tests and Prepare for Punjab Government Exams.",
     freeTrialEnabled: true,
     freeTrialDays: 7

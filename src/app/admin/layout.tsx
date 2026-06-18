@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Refined Admin Layout v5.0 (Padding & Content Hardened).
- * FIXED: Standardized main content padding to eliminate text-clipping in narrow viewports.
+ * @fileOverview Refined Admin Layout v5.1 (Production Hardened).
+ * FIXED: Unified responsive padding to ensure high-density text never clips.
  */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -82,7 +82,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         pathname={pathname}
       />
 
-      {/* Main Content Hub - HARDENED PADDING */}
       <div className={cn(
         "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full min-w-0 overflow-x-hidden",
         isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"

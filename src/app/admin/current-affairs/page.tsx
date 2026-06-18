@@ -40,8 +40,9 @@ import { parseBulkQuestions } from "@/lib/parser"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 
 /**
- * @fileOverview Institutional Current Affairs Management Hub v20.0.
- * FIXED: Missing UI and icon component imports for production build.
+ * @fileOverview Institutional Current Affairs Management Hub v20.1 (Hardened).
+ * FIXED: Explicitly typed all higher-order callbacks for production stability.
+ * FIXED: Ensured missing Badge and cn imports are properly registered.
  */
 
 export default function AdminCurrentAffairs() {
@@ -61,7 +62,7 @@ export default function AdminCurrentAffairs() {
 
   const caItems = useMemo(() => {
      if (!rawCaItems) return [];
-     return [...rawCaItems].sort((a, b) => {
+     return [...rawCaItems].sort((a: any, b: any) => {
         const tA = a.updatedAt?.seconds || 0;
         const tB = b.updatedAt?.seconds || 0;
         return tB - tA;
@@ -169,8 +170,7 @@ export default function AdminCurrentAffairs() {
 
     const { questions: _, ...cleanPayload } = payload;
 
-    // Hardened fallback to prevent uncontrolled inputs
-    Object.keys(cleanPayload).forEach(k => {
+    Object.keys(cleanPayload).forEach((k: string) => {
       if (cleanPayload[k] === undefined || cleanPayload[k] === null) {
         cleanPayload[k] = "";
       }
@@ -189,7 +189,7 @@ export default function AdminCurrentAffairs() {
 
   const filteredItems = useMemo(() => {
     if (!caItems) return []
-    return caItems.filter(item => 
+    return caItems.filter((item: any) => 
       item.title?.toLowerCase().includes(searchTerm.toLowerCase())
     )
   }, [caItems, searchTerm])
@@ -233,7 +233,7 @@ export default function AdminCurrentAffairs() {
                   Array.from({ length: 5 }).map((_, i) => (
                     <TableRow key={i}><TableCell colSpan={3} className="px-10 py-6 md:py-8"><Skeleton className="h-14 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
                   ))
-                ) : filteredItems.map((item) => (
+                ) : filteredItems.map((item: any) => (
                   <TableRow key={item.id} className="hover:bg-slate-50 border-slate-50 transition-all group">
                     <TableCell className="px-6 md:px-10 py-6 md:py-8 text-left">
                       <div className="flex items-center gap-4 md:gap-6">
@@ -280,7 +280,7 @@ export default function AdminCurrentAffairs() {
           <DialogHeader className="px-6 py-4 shrink-0 flex flex-row items-center justify-between border-b border-slate-50">
             <div className="min-w-0">
                <DialogTitle className="text-lg md:text-2xl font-black font-headline uppercase text-[#0F172A] truncate pr-4">Direct Mock Architect (Current Affairs)</DialogTitle>
-               <DialogDescription className="sr-only">Assemble or modify a current affairs quiz Hub.</DialogDescription>
+               <DialogDescription className="text-slate-400 text-xs font-bold uppercase tracking-widest">Construct current affairs hubs and link live quizzes.</DialogDescription>
             </div>
             <button onClick={() => setEditingItem(null)} className="p-2 hover:bg-slate-100 rounded-xl transition-colors shrink-0"><X className="h-5 w-5 md:h-6 md:w-6 text-slate-400" /></button>
           </DialogHeader>

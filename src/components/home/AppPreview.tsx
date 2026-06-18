@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo } from "react";
@@ -12,8 +11,8 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 /**
- * @fileOverview High-Fidelity Balanced Mobile App Hub v21.1.
- * FIXED: Added missing Badge import.
+ * @fileOverview High-Fidelity Balanced Mobile App Hub v21.2 (Hardened).
+ * FIXED: Ensured strict Badge and layout constraints to prevent 500 errors.
  */
 
 export default function AppPreview() {

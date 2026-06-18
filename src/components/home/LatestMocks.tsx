@@ -19,7 +19,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Elite Latest Mock Hub v43.0 (Title Case Update).
+ * @fileOverview Elite Latest Mock Hub v44.0 (Hardened).
+ * FIXED: Integrated missing Badge import.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];

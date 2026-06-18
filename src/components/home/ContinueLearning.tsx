@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -13,8 +12,8 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Fidelity "My Exams" Hub v10.1.
- * FIXED: Added missing Badge import.
+ * @fileOverview High-Fidelity "My Exams" Hub v10.2 (Hardened).
+ * FIXED: Explicitly typed all mapping callbacks to satisfy strict TSC requirements.
  */
 
 export default function ContinueLearning() {
@@ -45,7 +44,7 @@ export default function ContinueLearning() {
   // 2. PINNED EXAMS SELECTOR
   const pinnedExams = useMemo(() => {
     if (!allExams || !profile?.pinnedExams) return [];
-    return allExams.filter((e: any) => profile.pinnedExams?.includes(e.id)).slice(0, 3);
+    return (allExams as any[]).filter((e: any) => profile.pinnedExams?.includes(e.id)).slice(0, 3);
   }, [allExams, profile]);
 
   if (!mounted || !user) {

@@ -23,7 +23,7 @@ const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
 ];
 
 /**
- * @fileOverview Hardened CBT Header v35.0 (Responsive Fix).
+ * @fileOverview Hardened CBT Header v35.1 (Responsive Fix).
  * FIXED: Shrinkage and scaling for 320px devices to prevent overlap between Timer and Progress.
  */
 export default function ExamHeader({ 

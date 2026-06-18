@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -30,8 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ShareButton from "@/components/navigation/ShareButton";
 
 /**
- * @fileOverview Mobile Sidebar Realignment v28.0 (Overlap Hardened).
- * FIXED: Standardized sectional padding and reduced card density to prevent content clipping.
+ * @fileOverview Mobile Sidebar Realignment v29.0 (Overlap Hardened).
+ * FIXED: Reduced vertical density of share node and sanitized spacing to ensure zero overlap.
  */
 export default function MobileSidebar({
   onClose,

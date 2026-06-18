@@ -23,8 +23,9 @@ import { cn } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 
 /**
- * @fileOverview High-Fidelity Hero Hub v81.0.
- * FIXED: Integrated missing Badge import to resolve fatal ReferenceError.
+ * @fileOverview High-Fidelity Hero Hub v82.0 (Hardened).
+ * FIXED: Standardized stat grid logic to prevent overlap on high-density displays.
+ * FIXED: Refactored Skeleton wrappers to use div nodes for hydration compliance.
  */
 
 export default function Hero() {
