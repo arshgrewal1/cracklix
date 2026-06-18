@@ -30,8 +30,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Test Results Hub v39.1 (Type Hardened).
- * FIXED: Explicitly typed merit index reduction to resolve compilation errors.
+ * @fileOverview Test Results Hub v40.0 (Production Hardened).
  */
 
 export default function ResultPage() {
@@ -217,7 +216,7 @@ function ResultContent() {
                             question={q} 
                             language={mockData?.languageMode || 'ENGLISH_PUNJABI'} 
                             showSolution={true} 
-                            selectedAnswer={ans} 
+                            selectedAnswer={ans ?? null} 
                             className="p-0 border-none shadow-none" 
                           />
                        </CardContent>

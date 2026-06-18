@@ -31,8 +31,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Individual Mock Gateway v31.0 (Hardened Access).
- * ENFORCEMENT: Synchronized visual and logical locking nodes.
+ * @fileOverview Individual Mock Gateway v32.0 (Hardened Access & Types).
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -104,7 +103,6 @@ export default function MockOverviewPage() {
   const isLimitReached = attemptsLeft === 0 && (!activeAttempt || activeAttempt.status === 'COMPLETED');
   const isResumable = activeAttempt && activeAttempt.status === 'IN_PROGRESS';
 
-  // Device Block UI Check
   const isPremiumMock = mock && (mock.accessLevel || mock.accessType || 'FREE').trim().toUpperCase() === 'PREMIUM';
   const showDeviceBlock = isPremiumMock && !isDeviceAuthorized;
 
@@ -123,12 +121,12 @@ export default function MockOverviewPage() {
           <Info className="h-12 w-12 opacity-20" />
        </div>
        <div className="text-center space-y-3">
-          <p className="font-black uppercase tracking-[0.4em] text-[10px] text-slate-400">Registry Failure</p>
+          <p className="font-black uppercase tracking-[0.3em] text-[10px] text-slate-400">Registry Failure</p>
           <h2 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Test Not Found</h2>
           <p className="text-sm md:text-lg font-medium text-slate-500 max-w-sm mx-auto leading-relaxed">This preparation item might have been archived or removed from the official registry.</p>
        </div>
        <Button asChild className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] tracking-[0.2em] rounded-2xl shadow-3xl gap-3 active:scale-95 border-none">
-          <Link href="/"><Home className="h-5 w-5" /> Return Dashboard</Link>
+          <Link href="/"><Home className="h-4 w-4" /> Return Dashboard</Link>
        </Button>
     </div>
   );
@@ -215,7 +213,7 @@ export default function MockOverviewPage() {
               </div>
 
               <div className="mt-16 md:mt-32 p-8 md:p-20 bg-slate-900 rounded-[3rem] md:rounded-[5rem] text-white relative overflow-hidden group border border-white/5">
-                 <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-[2000ms]"><Layers className="h-64 w-64 md:h-96 md:w-96" /></div>
+                 <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Layers className="h-64 w-64 md:h-96 md:w-96" /></div>
                  <div className="relative z-10 max-w-3xl space-y-8 md:space-y-12">
                     <div className="space-y-4">
                        <p className="text-primary font-black uppercase tracking-[0.4em] text-[10px] md:text-[12px]">INSTITUTIONAL INTEGRITY</p>
@@ -242,7 +240,9 @@ function FeatureNode({ icon, title, desc }: any) {
   return (
     <div className="p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] bg-slate-50 border border-slate-100 space-y-5 md:space-y-8 group hover:bg-white hover:shadow-4xl transition-all duration-500 text-left border-b-4 border-b-slate-100 hover:border-b-primary">
       <div className="h-14 w-14 md:h-20 md:w-20 bg-white rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shadow-xl group-hover:scale-110 transition-transform duration-500">
-        {React.cloneElement(icon as React.ReactElement, { className: "h-6 w-6 md:h-10 md:w-10" })}
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { 
+           className: cn(icon.props.className, "h-6 w-6 md:h-10 md:w-10") 
+        }) : icon}
       </div>
       <div className="space-y-2 md:space-y-3">
          <h3 className="text-lg md:text-2xl font-black text-[#0F172A] uppercase tracking-tight leading-none">{title}</h3>
