@@ -23,8 +23,8 @@ import { cn } from "@/lib/utils"
 import type { Category, Board, Exam } from "@/types"
 
 /**
- * @fileOverview Punjab Registry Architect v15.1.
- * FIXED: Inherited iconUrl from Category to resolve build failure.
+ * @fileOverview Punjab Registry Architect v15.2.
+ * FIXED: Local ExtendedBoard and ExtendedCategory interfaces to handle nested state.
  */
 
 interface ExtendedBoard extends Board {

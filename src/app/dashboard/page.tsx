@@ -33,9 +33,8 @@ import ShareButton from "@/components/navigation/ShareButton"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview High-Performance Student Dashboard v28.0 (Hardened).
- * UPDATED: Optimized Skeleton screens for 100% smooth hydration.
- * BRAND: Synchronized with Institutional Blue palette.
+ * @fileOverview High-Performance Student Dashboard v28.1 (Hardened).
+ * FIXED: Hydration errors by replacing p tags with div tags for dynamic stats.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading, profileLoading } = useUser() as any;

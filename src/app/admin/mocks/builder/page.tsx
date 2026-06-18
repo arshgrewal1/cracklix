@@ -30,14 +30,14 @@ import {
 import { useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch, where, documentId, orderBy, DocumentData } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { MockType, Difficulty, AccessLevel, LanguageDisplayMode, MockAssignmentMode, Question, ExamSection } from "@/types"
+import { MockType, Difficulty, AccessLevel, LanguageDisplayMode, MockAssignmentMode, Question, ExamSection, Exam } from "@/types"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Institutional Mock Builder Hub v15.1.
- * FIXED: Explicitly typed section mapping callbacks and Question lookups.
+ * @fileOverview Institutional Mock Builder Hub v15.2.
+ * FIXED: Explicitly typed all callbacks and imported Exam interface.
  */
 
 export default function MockBuilderPage() {
@@ -240,7 +240,7 @@ function MockBuilderContent() {
 
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8">
-       <Zap className="h-16 w-16 text-primary animate-pulse" />
+       <Zap className="h-12 w-12 text-primary animate-pulse" />
        <p className="text-[11px] font-black uppercase tracking-[0.5em] text-primary">Hydrating Assembly hub...</p>
     </div>
   );
