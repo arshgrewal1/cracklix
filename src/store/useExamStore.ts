@@ -6,8 +6,8 @@ import { doc, updateDoc, serverTimestamp, setDoc, Firestore } from 'firebase/fir
 import { initializeFirebase } from '@/firebase/app';
 
 /**
- * @fileOverview Elite CBT Global Store v54.3 (Hardened).
- * FIXED: Removed duplicate property in sync payload and strictly typed language initialization.
+ * @fileOverview Elite CBT Global Store v55.0 (Hardened).
+ * FIXED: Removed duplicate property in initial sync and strictly typed language nodes.
  */
 
 interface ExamStore extends AttemptState {
@@ -86,7 +86,7 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const initialTimeLeft = Math.max(0, Math.floor((finalEndTime - now) / 1000));
     const finalBaseMode: LanguageDisplayMode = languageMode || 'ENGLISH_PUNJABI';
 
-    let initialLang = (!forceReset && state.language && state.language !== "ENGLISH_PUNJABI") ? state.language : finalBaseMode;
+    let initialLang = (!forceReset && state.language && (state.language as string) !== "") ? state.language : finalBaseMode;
     
     set({
       mockId, 

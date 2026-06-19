@@ -6,8 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase';
 
 /**
- * @fileOverview Institutional Anti-Cheat Node v1.5 (Build Fixed).
- * FIXED: Explicitly passed Firestore instance to addViolation.
+ * @fileOverview Institutional Anti-Cheat Node v1.6 (Hardened).
+ * FIXED: Pass explicit Firestore instance to prevent build-gate failures.
  */
 
 export default function AntiCheat() {
@@ -18,13 +18,12 @@ export default function AntiCheat() {
   useEffect(() => {
     const handleBlur = () => {
       if (!db) return;
-      // Pass the db instance as required by the global store.
       addViolation(db);
       
       toast({
         variant: "destructive",
         title: "Security Warning",
-        description: "Switching tabs or windows is prohibited during the test. This violation has been recorded in the registry hub."
+        description: "Switching tabs or windows is prohibited. This violation has been logged."
       });
     };
 

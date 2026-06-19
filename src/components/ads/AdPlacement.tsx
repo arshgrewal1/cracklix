@@ -15,8 +15,8 @@ interface AdPlacementProps {
 }
 
 /**
- * @fileOverview Institutional Ad-Node v1.4 (Hardened).
- * FIXED: Explicit casting for Firestore query to resolve schema mismatch.
+ * @fileOverview Institutional Ad-Node v1.5 (Hardened).
+ * FIXED: Explicit casting and schema mapping for advertisement nodes.
  */
 
 export default function AdPlacement({ placement, className, examId }: AdPlacementProps) {
@@ -27,10 +27,10 @@ export default function AdPlacement({ placement, className, examId }: AdPlacemen
   const { data: globalSettings } = useDoc<any>(useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]));
   const { data: passes } = useCollection<any>(useMemo(() => (db ? collection(db, 'passes') : null), [db]));
 
-  // Safety Lock: Never show ads on checkout or during active attempt
+  // Safety Lock: Never show ads on sensitive preparation paths
   const isSafetyZone = pathname.includes('/attempt') || pathname.includes('/checkout') || pathname.startsWith('/admin');
 
-  // Ad-Free Audit: Check if user has an ad-free pass
+  // Ad-Free Audit
   const isAdFree = useMemo(() => {
     if (!profile || profile.status === 'Free') return false;
     const activePass = passes?.find(p => p.id === profile.status);
@@ -39,29 +39,22 @@ export default function AdPlacement({ placement, className, examId }: AdPlacemen
 
   const adsQuery = useMemo(() => {
     if (!db || isAdFree || isSafetyZone) return null;
-    // Explicitly cast to the expected Query type to bypass schema conversion errors
-    return query(collection(db, 'ads'), where('status', '==', 'ACTIVE')) as unknown as Query<Advertisement, DocumentData>;
+    return query(collection(db, 'ads'), where('status', '==', 'ACTIVE')) as Query<Advertisement>;
   }, [db, isAdFree, isSafetyZone]);
 
   const { data: ads, loading } = useCollection<Advertisement>(adsQuery);
 
-  // Selector Logic: Filter ads by placement and targeting
   const activeAd = useMemo(() => {
     if (!ads) return null;
     const candidates = ads.filter(ad => {
       const hasPlacement = ad.placements.includes(placement);
       if (!hasPlacement) return false;
-
-      // Targeting Logic
       if (examId && ad.targeting?.examIds && ad.targeting.examIds.length > 0) {
         return ad.targeting.examIds.includes(examId);
       }
-      
       return true;
     });
-
     if (candidates.length === 0) return null;
-    // Simple priority rotation
     return [...candidates].sort((a, b) => b.priority - a.priority)[0];
   }, [ads, placement, examId]);
 

@@ -16,8 +16,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Institutional Logo Node v29.0 (Restored from logo folder).
- * FIXED: Pointed to /logo/ directory as per user registry.
+ * @fileOverview Institutional Logo Node v35.0 (Restored from /logo/ folder).
+ * FIXED: Pointed to explicit assets provided by user.
  * SIZING: Mobile h-12 (48px) | Desktop h-16 (64px) for premium visibility.
  */
 export default function Logo({
@@ -29,9 +29,14 @@ export default function Logo({
   iconOnly = false,
   align = 'left'
 }: LogoProps) {
-  // Canonical Registry Paths - Restored from public/logo folder
-  const fullLogo = "/logo/logo.png";
-  const iconLogo = "/logo/logo-icon.png";
+  // Canonical Registry Paths - Synchronized with /public/logo folder
+  // Variant "light" is used on light backgrounds, needs the dark-text logo
+  // Variant "dark" is used on dark backgrounds, needs the light-text logo
+  const darkLogo = "/logo/cracklix-logo-dark.png"; 
+  const lightLogo = "/logo/cracklix-logo-light.png"; 
+  const iconLogo = "/logo/cracklix-icon.png";
+
+  const logoSrc = iconOnly ? iconLogo : (variant === 'light' ? darkLogo : lightLogo);
 
   const content = (
     <div className={cn(
@@ -42,7 +47,7 @@ export default function Logo({
       align === 'center' && "mx-auto"
     )}>
       <Image
-        src={iconOnly ? iconLogo : fullLogo}
+        src={logoSrc}
         alt="Cracklix"
         fill
         priority
