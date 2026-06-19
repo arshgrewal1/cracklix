@@ -7,18 +7,20 @@ import { cn } from "@/lib/utils";
 
 interface LogoProps {
   className?: string;
-  variant?: 'light' | 'dark';
+  variant?: 'light' | 'dark' | 'icon';
   href?: string;
   imgClassName?: string;
   onClick?: () => void;
-  iconOnly?: boolean;
+  priority?: boolean;
   align?: 'left' | 'center' | 'right';
 }
 
 /**
- * @fileOverview Institutional Logo Node v35.0 (Restored from /logo/ folder).
- * FIXED: Pointed to explicit assets provided by user.
- * SIZING: Mobile h-12 (48px) | Desktop h-16 (64px) for premium visibility.
+ * @fileOverview Master Cracklix Branding Node v2.0.
+ * Strictly implements the official brand guidelines:
+ * - variant="light": Uses cracklix-logo-dark.png (for light backgrounds)
+ * - variant="dark": Uses cracklix-logo-light.png (for dark backgrounds)
+ * - variant="icon": Uses cracklix-icon.png
  */
 export default function Logo({
   className = "",
@@ -26,50 +28,58 @@ export default function Logo({
   variant = "light",
   imgClassName = "",
   onClick,
-  iconOnly = false,
+  priority = true,
   align = 'left'
 }: LogoProps) {
-  // Canonical Registry Paths - Synchronized with /public/logo folder
-  // Variant "light" is used on light backgrounds, needs the dark-text logo
-  // Variant "dark" is used on dark backgrounds, needs the light-text logo
-  const darkLogo = "/logo/cracklix-logo-dark.png"; 
-  const lightLogo = "/logo/cracklix-logo-light.png"; 
-  const iconLogo = "/logo/cracklix-icon.png";
+  
+  // Official Asset Mapping
+  const assets = {
+    light: "/logo/cracklix-logo-dark.png",  // Logo with dark text for light UI
+    dark: "/logo/cracklix-logo-light.png",  // Logo with light text for dark UI
+    icon: "/logo/cracklix-icon.png"
+  };
 
-  const logoSrc = iconOnly ? iconLogo : (variant === 'light' ? darkLogo : lightLogo);
+  const src = assets[variant];
+  const isIcon = variant === 'icon';
+
+  // Responsive Height Logic based on Overhaul Specs
+  // Header: 40px desktop / 32px mobile
+  // Sidebar: 42px desktop / 36px mobile
+  // Login: 60px desktop / 50px mobile
+  // Admin: 38px desktop / 32px mobile
 
   const content = (
     <div className={cn(
-      "relative shrink-0 transition-all duration-300",
-      iconOnly 
-        ? "h-10 w-10 md:h-12 md:w-12" 
-        : "h-10 md:h-14 w-[140px] md:w-[200px]",
-      align === 'center' && "mx-auto"
+      "relative shrink-0 flex items-center transition-all duration-300",
+      align === 'center' && "mx-auto justify-center",
+      align === 'right' && "justify-end",
+      isIcon ? "h-10 w-10 md:h-12 md:w-12" : "w-auto",
+      className
     )}>
       <Image
-        src={logoSrc}
+        src={src}
         alt="Cracklix"
-        fill
-        priority
-        sizes={iconOnly ? "48px" : "(max-width: 768px) 160px, 220px"}
+        width={isIcon ? 48 : 240}
+        height={isIcon ? 48 : 80}
+        priority={priority}
         className={cn(
-          "object-contain shrink-0",
-          align === 'left' ? "object-left" : align === 'right' ? "object-right" : "object-center",
+          "object-contain w-auto",
+          // Heights are strictly controlled by parent or these specific classes
+          !isIcon && "h-[32px] md:h-[40px]",
           imgClassName
         )}
       />
     </div>
   );
 
-  if (onClick || href) {
+  if (href || onClick) {
     return (
       <Link
         href={href || "/"}
         onClick={onClick}
         className={cn(
-          "flex items-center shrink-0 select-none overflow-hidden hover:opacity-90 transition-opacity",
-          align === 'center' ? "justify-center w-full" : align === 'right' ? "justify-end" : "justify-start",
-          className
+          "flex items-center select-none hover:opacity-90 transition-opacity flex-shrink-0",
+          align === 'center' && "w-full justify-center"
         )}
       >
         {content}
@@ -77,15 +87,5 @@ export default function Logo({
     );
   }
 
-  return (
-    <div
-      className={cn(
-        "flex items-center shrink-0 select-none overflow-hidden",
-        align === 'center' ? "justify-center w-full" : align === 'right' ? "justify-end" : "justify-start",
-        className
-      )}
-    >
-      {content}
-    </div>
-  );
+  return content;
 }

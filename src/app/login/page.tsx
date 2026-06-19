@@ -25,9 +25,8 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Login Hub v29.0 (UI Fixes).
- * FIXED: Increased phone input padding to prevent overlap with +91.
- * FIXED: Centered branding node.
+ * @fileOverview Hardened Login Hub v30.0.
+ * BRAND SYSTEM: Logo centered, 60px height desktop / 50px mobile, 24px margin.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -177,11 +176,15 @@ function LoginContent() {
     <div className="min-h-screen bg-[#F8FAFC] flex flex-col items-center justify-center p-4 md:p-10 relative overflow-hidden text-[#0F172A]">
       <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[60%] bg-primary/5 blur-[140px] rounded-full" />
       
-      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="z-10 w-full max-w-[440px] space-y-6 md:space-y-8">
+      <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="z-10 w-full max-w-[440px] space-y-6">
         
-        <div className="flex flex-col items-center justify-center w-full">
-          <Logo variant="light" align="center" />
-        </div>
+        {/* BRAND OVERHAUL: Centered, specific heights, 24px bottom margin */}
+        <Logo 
+          variant="light" 
+          align="center" 
+          className="mb-6" 
+          imgClassName="h-[50px] md:h-[60px]"
+        />
 
         {sessionTerminated && (
           <div className="bg-amber-50 border border-amber-100 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] flex items-center gap-4 animate-in slide-in-from-top-6 duration-700 shadow-sm">

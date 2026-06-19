@@ -11,8 +11,8 @@ interface SidebarHeaderProps {
 }
 
 /**
- * Cracklix Admin Sidebar Header v21.0.
- * UPDATED: Uses unified Logo component for both expanded and collapsed states.
+ * Cracklix Admin Sidebar Header v22.0.
+ * BRAND SYSTEM: 38px desktop height, 32px mobile height, fixed at top.
  */
 export default function SidebarHeader({
   isOpen,
@@ -25,15 +25,15 @@ export default function SidebarHeader({
         isOpen ? "justify-between gap-4" : "justify-center"
       )}
     >
-      {/* LOGO AREA */}
+      {/* LOGO AREA: Strictly following Admin Panel specs */}
       <Logo
         href="/admin"
         variant="dark"
         iconOnly={!isOpen}
         align={isOpen ? "left" : "center"}
-        className={cn(
-          "transition-all duration-300",
-          isOpen ? "w-[190px]" : "w-12"
+        className="transition-all duration-300"
+        imgClassName={cn(
+          isOpen ? "h-[32px] md:h-[38px]" : "h-10"
         )}
       />
 

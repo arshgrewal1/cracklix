@@ -9,8 +9,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Institutional Exam Discovery Card v2.4 (Hardened).
- * FIXED: Aligned property names with strictly typed master registry.
+ * @fileOverview Institutional Exam Discovery Card v2.5 (Hardened).
+ * FIXED: Aligned property names with strictly typed Exam interface.
  */
 
 export default function ExamCard({ exam }: ExamCardProps) {

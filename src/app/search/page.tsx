@@ -13,8 +13,8 @@ import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Elite Global Search Hub v3.1 (Hardened Build).
- * FIXED: Added explicit React import and hardened icon rendering to resolve build errors.
+ * @fileOverview Elite Global Search Hub v3.2 (Hardened).
+ * FIXED: Explicit React import and hardened element rendering for production stability.
  */
 
 export default function SearchPage() {

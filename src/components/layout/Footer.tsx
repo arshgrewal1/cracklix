@@ -20,9 +20,8 @@ import {
 } from "@/lib/constants";
 
 /**
- * Production Footer v1.3
- * Cracklix Official Footer
- * UPDATED: Logo node synchronized to institucional standards.
+ * Production Footer v1.4
+ * BRAND SYSTEM: Logo height 32px, aligned with content.
  */
 
 export default function Footer() {
@@ -36,19 +35,20 @@ export default function Footer() {
         <div className="grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
 
           {/* Brand Section */}
-          <div className="space-y-8">
+          <div className="space-y-8 flex flex-col items-start">
 
             <Logo
               variant="dark"
               align="left"
+              imgClassName="h-[32px]"
             />
 
-            <p className="max-w-[300px] text-[15px] leading-relaxed text-slate-300">
+            <p className="max-w-[300px] text-[15px] leading-relaxed text-slate-300 text-left">
               Punjab's most advanced government exam platform,
               built for serious aspirants preparing for success.
             </p>
 
-            <div className="space-y-3">
+            <div className="space-y-3 text-left">
 
               <div className="flex items-center gap-3 text-[13px] text-slate-400">
                 <MapPin className="h-4 w-4 shrink-0" />
@@ -85,7 +85,7 @@ export default function Footer() {
           </div>
 
           {/* Support */}
-          <div className="space-y-8">
+          <div className="space-y-8 text-left">
 
             <h3 className="text-lg font-bold tracking-tight text-white uppercase">
               Support Hub
@@ -114,7 +114,7 @@ export default function Footer() {
           </div>
 
           {/* Resources */}
-          <div className="space-y-8">
+          <div className="space-y-8 text-left">
 
             <h3 className="text-lg font-bold tracking-tight text-white uppercase">
               Resources
@@ -143,7 +143,7 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div className="space-y-8">
+          <div className="space-y-8 text-left">
 
             <h3 className="text-lg font-bold tracking-tight text-white uppercase">
               Connect With Us
