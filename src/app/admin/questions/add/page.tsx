@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { ChevronLeft, Save, Languages, Layers, Database, Eye, BarChart3, Loader2, Info, Globe } from "lucide-react"
 import { useFirestore, useDoc, useCollection, useUser } from "@/firebase"
-import { doc, setDoc, serverTimestamp, collection } from "firebase/firestore"
+import { doc, setDoc, serverTimestamp, collection, updateDoc, increment } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
@@ -20,8 +20,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Manual Question Entry v17.7 (Build Fixed).
- * FIXED: Added missing 'cn' import and explicitly typed state updaters.
+ * @fileOverview Hardened Manual Question Entry v18.0 (Reactive).
+ * FIXED: Atomic increments for platform statistics on creation.
  */
 
 export default function QuestionEntryPage() {
@@ -118,6 +118,15 @@ function QuestionEntryContent() {
 
     try {
       await setDoc(questionRef, payload, { merge: true })
+
+      // Reactive Stat Update
+      if (!isEditing) {
+        await updateDoc(doc(db, 'settings', 'stats'), {
+           totalQuestions: increment(1),
+           updatedAt: serverTimestamp()
+        }).catch(() => {});
+      }
+
       toast({ title: "Registry Synced", description: "Question saved in global bank." })
       router.push("/admin/questions")
     } catch (err: any) {

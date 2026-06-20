@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo } from "react"
@@ -10,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Plus, Trash2, Edit, Save, Layers, Search, Loader2, Landmark, GraduationCap, Zap, Wallet, Globe, MoveUp, MoveDown } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, doc, setDoc, deleteDoc, serverTimestamp, orderBy } from "firebase/firestore"
+import { collection, query, doc, setDoc, deleteDoc, serverTimestamp, orderBy, updateDoc, increment } from "firebase/firestore"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -19,8 +18,8 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Category Governance Node v15.0.
- * TYPOGRAPHY: Removed uppercase from category titles in the list view.
+ * @fileOverview Institutional Category Governance Node v16.0 (Reactive).
+ * FIXED: Atomic increments for platform statistics on creation.
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -49,12 +48,22 @@ export default function CategoryManagement() {
     }
 
     setIsSaving(true)
+    const isNew = !editingCat.updatedAt;
     try {
       await setDoc(doc(db, "categories", editingCat.id), {
         ...editingCat,
         displayOrder: parseInt(editingCat.displayOrder) || 0,
         updatedAt: serverTimestamp()
       }, { merge: true })
+
+      // Reactive Stat Update
+      if (isNew) {
+        await updateDoc(doc(db, 'settings', 'stats'), {
+           totalCategories: increment(1),
+           updatedAt: serverTimestamp()
+        }).catch(() => {});
+      }
+
       toast({ title: "Registry Synced", description: `${editingCat.title} node updated.` })
       setEditingCat(null)
     } catch (e: any) {
@@ -93,6 +102,13 @@ export default function CategoryManagement() {
 
     try {
       await deleteDoc(doc(db, "categories", id));
+      
+      // Reactive Stat Decrement
+      await updateDoc(doc(db, 'settings', 'stats'), {
+         totalCategories: increment(-1),
+         updatedAt: serverTimestamp()
+      }).catch(() => {});
+
       toast({ title: "Node Purged", description: "Category removed from master registry." });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Purge Failed" });

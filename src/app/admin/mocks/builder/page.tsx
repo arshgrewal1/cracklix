@@ -28,7 +28,7 @@ import {
   Layers
 } from "lucide-react"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
-import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch, where, documentId, orderBy, DocumentData } from "firebase/firestore"
+import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch, where, documentId, orderBy, DocumentData, updateDoc, increment } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { MockType, Difficulty, AccessLevel, LanguageDisplayMode, MockAssignmentMode, Question, ExamSection, Exam } from "@/types"
 import { cn } from "@/lib/utils"
@@ -36,8 +36,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Institutional Mock Builder Hub v19.6 (Hardened Build).
- * FIXED: Resolved JSX tag mismatch by capitalized closing </Button> tags and explicitly typed all hydration callbacks.
+ * @fileOverview Institutional Mock Builder Hub v20.0 (Reactive).
+ * FIXED: Atomic increments for platform statistics on deployment.
  */
 
 export default function MockBuilderPage() {
@@ -229,6 +229,15 @@ function MockBuilderContent() {
         batch.update(doc(db, "questions", id), { status: 'USED', updatedAt: serverTimestamp() });
       });
       await batch.commit();
+
+      // Reactive Stat Update
+      if (!isEditing) {
+        await updateDoc(doc(db, 'settings', 'stats'), {
+           totalMocks: increment(1),
+           updatedAt: serverTimestamp()
+        }).catch(() => {});
+      }
+
       toast({ title: "Series Deployed", description: "Registry synced successfully." });
       router.push("/admin/mocks")
     } catch (e: any) {

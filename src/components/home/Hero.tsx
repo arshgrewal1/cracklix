@@ -23,12 +23,13 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Official Live Hero Hub v17.0.
- * UPDATED: Fully dynamic counters listening to the settings/stats registry node.
+ * @fileOverview Official Live Hero Hub v18.0 (Hardened Stats).
+ * UPDATED: Optimized stat mapping to resolve 0+ Categories bug.
  */
 
 const formatCompact = (num: number) => {
-  if (!num || num === 0) return "0";
+  if (num === undefined || num === null) return "...";
+  if (num === 0) return "0";
   if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
   if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
   return num.toString();

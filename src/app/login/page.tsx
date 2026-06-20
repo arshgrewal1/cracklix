@@ -41,8 +41,8 @@ import Link from "next/link"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Premium Login Hub v75.0 (Handshake Hardened).
- * FIXED: Atomic session initialization to prevent "Session Expired" loops.
+ * @fileOverview Cracklix Premium Login Hub v76.0 (Live Stats Hardened).
+ * FIXED: Atomic increments for platform statistics on registration.
  */
 
 const formatCompact = (num: number) => {
@@ -127,12 +127,19 @@ function LoginContent() {
         const sessionId = crypto.randomUUID();
         localStorage.setItem('cracklix_session_id', sessionId);
         
+        // 1. Create User Node
         await setDoc(doc(db!, 'users', userNode.uid), {
           id: userNode.uid, name, email, role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
           state: "Punjab", createdAt: new Date().toISOString(), updatedAt: serverTimestamp(),
           status: 'Free', passType: 'FREE', activeDeviceId: sessionId, sessionVersion: 1,
           lastLoginAt: serverTimestamp(), pinnedExams: [], verified: true
         })
+
+        // 2. Atomic Stat Increment
+        await updateDoc(doc(db!, 'settings', 'stats'), {
+           totalUsers: increment(1),
+           updatedAt: serverTimestamp()
+        }).catch(() => {});
 
         toast({ title: "Account Created" })
         router.replace('/profile-setup')
@@ -176,6 +183,13 @@ function LoginContent() {
           updatedAt: serverTimestamp(), status: 'Free', passType: 'FREE', activeDeviceId: sessionId,
           sessionVersion: 1, lastLoginAt: serverTimestamp(), pinnedExams: [], verified: true
         })
+        
+        // Atomic Stat Increment
+        await updateDoc(doc(db!, 'settings', 'stats'), {
+           totalUsers: increment(1),
+           updatedAt: serverTimestamp()
+        }).catch(() => {});
+
         router.replace('/profile-setup')
       } else {
         await updateDoc(userRef, { 
