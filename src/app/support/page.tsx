@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -34,11 +35,6 @@ import Link from "next/link"
 
 const TELEGRAM_GROUP = "https://t.me/cracklixapp";
 const INSTAGRAM_PROFILE = "https://www.instagram.com/arshgrewal_official/";
-
-/**
- * @fileOverview Student Support Center v3.2 (Hardened).
- * FIXED: Restored missing Link and Loader2 nodes for stable production build.
- */
 
 export default function SupportPage() {
   const { user, profile } = useUser()

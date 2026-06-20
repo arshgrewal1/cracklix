@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect } from "react"
@@ -7,14 +8,9 @@ import { sendEmailVerification, signOut } from "firebase/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import Logo from "@/components/brand/Logo"
-import { Mail, RefreshCw, LogOut, CheckCircle2, Loader2, Sparkles, ShieldCheck, ExternalLink } from "lucide-react"
+import { Mail, RefreshCw, LogOut, CheckCircle2, Loader2, ShieldCheck, ExternalLink } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { motion } from "framer-motion"
-
-/**
- * @fileOverview Professional Verification Hub v4.0.
- * SIMPLIFIED: Replaced technical terms with easy student-friendly language.
- */
 
 export default function VerifyEmailPage() {
   const { user, loading: authLoading } = useUser()
@@ -130,7 +126,7 @@ export default function VerifyEmailPage() {
                       className="h-14 border-slate-200 text-[#0F172A] font-black uppercase text-[9px] tracking-widest rounded-2xl shadow-sm"
                     >
                        {isResending ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <RefreshCw className="h-4 w-4 text-primary" />}
-                       {cooldown > 0 ? `${cooldown}s` : "Resend Email"}
+                       {cooldown > 0 ? `${cooldown}s` : "Resend Link"}
                     </Button>
                  </div>
               </div>

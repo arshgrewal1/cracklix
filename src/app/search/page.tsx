@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, cloneElement, isValidElement } from "react"
@@ -11,12 +12,6 @@ import { useCollection, useFirestore } from "@/firebase"
 import { collection } from "firebase/firestore"
 import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
-
-/**
- * @fileOverview Global Search Center v5.1 (Hardened).
- * FIXED: Explicit React import and type-safe icon cloning for stable production build.
- * SIMPLIFIED: Replaced Registry/Node terms with Center/Item.
- */
 
 export default function SearchPage() {
   return (
@@ -72,7 +67,7 @@ function SearchContent() {
            
            <div className="text-center space-y-6">
               <div className="space-y-2">
-                 <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none">Global Search</h1>
+                 <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none uppercase">Global Search</h1>
                  <p className="text-slate-400 font-bold uppercase text-[9px] md:text-[10px] tracking-[0.4em]">Find your preparation hub instantly</p>
               </div>
               

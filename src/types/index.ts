@@ -1,3 +1,4 @@
+
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET';
@@ -214,7 +215,7 @@ export interface UserProfile {
   assignedBoardId?: string;
   createdAt: string;
   updatedAt: any;
-  status: string; // 'Free' or 'Elite'
+  status: string; 
   passType: 'FREE' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY';
   passStatus: 'active' | 'expired' | 'none';
   passActivatedAt?: string;

@@ -1,3 +1,4 @@
+
 import { Exam } from "@/types"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
@@ -8,16 +9,11 @@ interface ExamCardProps {
   exam: Exam
 }
 
-/**
- * @fileOverview Institutional Exam List Item v2.7 (Hardened).
- * FIXED: Aligned property names with strictly typed Exam interface.
- */
-
 export default function ExamCard({ exam }: ExamCardProps) {
   return (
     <Link href={`/exams/${exam.id}`}>
       <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-[1.5rem] overflow-hidden h-full flex flex-col">
-        <CardContent className="p-8 flex flex-col h-full">
+        <CardContent className="p-8 flex flex-col h-full text-left">
           <div className="flex justify-between items-start mb-8">
             <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-blue-50 px-3 py-1 rounded border border-blue-100">
               {exam.boardId || 'OFFICIAL'} HUB

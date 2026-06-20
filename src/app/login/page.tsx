@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, Suspense, useEffect, useTransition } from "react"
@@ -22,7 +23,6 @@ import {
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { getDeviceId, getBrowserInfo } from "@/lib/device"
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
@@ -55,7 +55,7 @@ function LoginContent() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const returnUrl = searchParams.get("returnUrl") || "/"
+  const returnUrl = searchParams.get("returnUrl") || "/dashboard"
   const sessionTerminated = searchParams.get('session') === 'terminated';
 
   useEffect(() => {
@@ -67,20 +67,6 @@ function LoginContent() {
        }
     }
   }, [user, authLoading, router, returnUrl, sessionTerminated]);
-
-  const updateActiveDevice = async (userId: string) => {
-    if (!db) return;
-    const deviceId = await getDeviceId();
-    const { browser, platform } = getBrowserInfo();
-    
-    await setDoc(doc(db, 'users', userId), {
-      activeDeviceId: deviceId,
-      lastLoginAt: serverTimestamp(),
-      activeBrowser: browser,
-      activePlatform: platform,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
-  };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -96,14 +82,13 @@ function LoginContent() {
         await creds.user.reload();
         
         if (!creds.user.emailVerified) {
-          toast({ title: "Verification Required", description: "Please verify your email to continue." });
+          toast({ title: "Account Not Verified", description: "Check your email for the verification link." });
           router.push('/verify-email');
           setLoading(false);
           return;
         }
 
-        await updateActiveDevice(creds.user.uid);
-        toast({ title: "Welcome back!" })
+        toast({ title: "Welcome Back" })
         startTransition(() => { router.replace(returnUrl) })
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
@@ -129,11 +114,11 @@ function LoginContent() {
           verified: false
         })
 
-        toast({ title: "Account Created", description: "Check your email for the verification link." });
+        toast({ title: "Verification Required", description: "We have sent a link to your email." });
         router.push('/verify-email');
       }
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message })
+      toast({ variant: "destructive", title: "Auth Error", description: error.message })
       setLoading(false)
     }
   }
@@ -143,10 +128,9 @@ function LoginContent() {
     setLoading(true)
     try {
       const provider = new GoogleAuthProvider()
-      provider.setCustomParameters({ prompt: 'select_account' })
       const result = await signInWithPopup(auth, provider)
       const userNode = result.user
-      if (!userNode.email) throw new Error("Email mandatory.");
+      if (!userNode.email) throw new Error("Email is required.");
       
       const userRef = doc(db!, 'users', userNode.uid)
       const userSnap = await getDoc(userRef)
@@ -163,27 +147,26 @@ function LoginContent() {
         })
       }
       
-      await updateActiveDevice(userNode.uid);
-      toast({ title: "Login Successful" })
+      toast({ title: "Verification Sync Complete" })
       startTransition(() => { router.replace(returnUrl) })
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Google Sync Error", description: error.message })
+      toast({ variant: "destructive", title: "Sync Failed", description: error.message })
       setLoading(false)
     }
   }
 
   const handleResetPassword = async () => {
     if (!resetEmail) {
-      toast({ variant: "destructive", title: "Email Required", description: "Please enter your email." });
+      toast({ variant: "destructive", title: "Missing Email", description: "Enter your email address." });
       return;
     }
     setResetLoading(true);
     try {
       await sendPasswordResetEmail(auth, resetEmail);
-      toast({ title: "Reset link sent", description: "Check your email for instructions." });
+      toast({ title: "Reset Link Sent", description: "Check your email for recovery instructions." });
       setIsResetDialogOpen(false);
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Error", description: error.message });
+      toast({ variant: "destructive", title: "Reset Failed", description: error.message });
     } finally {
       setResetLoading(false);
     }
@@ -194,7 +177,6 @@ function LoginContent() {
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row text-[#0F172A] text-left overflow-hidden">
       
-      {/* BRANDING SIDE PANEL */}
       <div className="hidden lg:flex flex-1 bg-[#0B1528] text-white p-12 md:p-20 flex-col justify-between relative overflow-hidden">
         <div className="absolute inset-0 bg-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
         <div className="relative z-10 space-y-12">
@@ -210,18 +192,17 @@ function LoginContent() {
            </div>
            <div className="space-y-6 pt-10">
               <BenefitItem text="500+ Mock Tests" />
-              <BenefitItem text="Bilingual Support" />
+              <BenefitItem text="English & Punjabi Mode" />
               <BenefitItem text="Latest Pattern Mocks" />
               <BenefitItem text="Solutions with Logic" />
            </div>
         </div>
         <div className="relative z-10 flex items-center gap-4 text-slate-500">
            <ShieldCheck className="h-6 w-6 text-primary" />
-           <p className="text-[10px] font-black uppercase tracking-[0.3em]">Official Platform Secured</p>
+           <p className="text-[10px] font-black uppercase tracking-[0.3em]">Institutional Hub Secured</p>
         </div>
       </div>
 
-      {/* FORM PANEL */}
       <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 lg:p-24 relative overflow-y-auto custom-scrollbar">
         <div className="w-full max-w-[640px] space-y-10">
           
@@ -230,11 +211,11 @@ function LoginContent() {
           </div>
 
           <div className="space-y-4">
-             <h2 className="text-3xl md:text-5xl font-black tracking-tight text-[#0F172A] leading-[0.9]">
+             <h2 className="text-3xl md:text-5xl font-black tracking-tight text-[#0F172A] leading-[0.9] uppercase">
                 {mode === 'login' ? "Login Hub" : "Create Account"}
              </h2>
              <p className="text-slate-500 font-bold text-[12px] md:text-[14px] uppercase tracking-widest leading-none">
-                {mode === 'login' ? "Login to access your tests" : "Register to start practicing"}
+                {mode === 'login' ? "Access your preparation hub" : "Register to start practicing"}
              </p>
           </div>
 
@@ -249,7 +230,7 @@ function LoginContent() {
                     onChange={(e) => setName(e.target.value)} 
                     required 
                     className="h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] placeholder:text-slate-400 focus-visible:ring-primary text-lg font-bold pl-16 shadow-inner" 
-                    placeholder="Arsh Grewal" 
+                    placeholder="e.g. Arsh Grewal" 
                   />
                 </div>
               </div>
@@ -281,7 +262,7 @@ function LoginContent() {
                     onChange={(e) => setPassword(e.target.value)} 
                     required 
                     className="h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] placeholder:text-slate-400 focus-visible:ring-primary pl-16 pr-12 text-lg font-bold shadow-inner" 
-                    placeholder="Password" 
+                    placeholder="Secret Key" 
                   />
                   <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors">
                     {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}

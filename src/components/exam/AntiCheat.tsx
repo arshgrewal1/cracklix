@@ -1,14 +1,10 @@
+
 'use client';
 
 import { useEffect } from 'react';
 import { useExamStore } from '@/store/useExamStore';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase';
-
-/**
- * @fileOverview Institutional Anti-Cheat Node v3.0 (Hardened).
- * FIXED: Synchronized violation tracking to ensure db instance is passed correctly.
- */
 
 export default function AntiCheat() {
   const { addViolation } = useExamStore();
@@ -17,10 +13,8 @@ export default function AntiCheat() {
 
   useEffect(() => {
     const handleBlur = () => {
-      // 1. Audit Check: Only run if Firestore is initialized
       if (!db) return;
-
-      // 2. Logic Audit: Log the violation to the cloud bank
+      
       addViolation(db);
       
       toast({

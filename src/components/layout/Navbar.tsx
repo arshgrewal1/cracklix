@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -41,11 +42,6 @@ import { Button } from "@/components/ui/button";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
-/**
- * @fileOverview Professional Navigation Hub v55.0 (Language Simplified).
- * FIXED: Added missing AlertCircle import.
- * SIMPLIFIED: Replaced technical jargon with easy student terms.
- */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -109,6 +105,7 @@ export default function Navbar() {
             <Logo
               variant="light"
               className="ml-1 flex-shrink-0"
+              imgClassName="h-[60px] md:h-[72px]"
             />
           </div>
 
@@ -185,7 +182,7 @@ export default function Navbar() {
                        <ProfileMenuItem href="/profile" icon={Settings} label="Settings" />
                        <ProfileMenuItem href="/help" icon={HelpCircle} label="Help Center" />
                        {isAdmin && (
-                         <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Control Hub" highlight />
+                         <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Center" highlight />
                        )}
                     </div>
 
