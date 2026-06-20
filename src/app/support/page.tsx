@@ -37,8 +37,8 @@ const TELEGRAM_GROUP = "https://t.me/cracklixapp";
 const INSTAGRAM_PROFILE = "https://www.instagram.com/arshgrewal_official/";
 
 /**
- * @fileOverview Student Support Hub v2.2 (Build Hardened).
- * FIXED: Explicit imports for Link and Loader2 nodes.
+ * @fileOverview Student Support Hub v2.3 (Build Hardened).
+ * FIXED: Restored missing Link and Loader2 nodes for stable production build.
  */
 
 export default function SupportPage() {

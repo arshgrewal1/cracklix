@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import Logo from "@/components/brand/Logo"
-import { Mail, Lock, User, Phone, Eye, EyeOff, Loader2, ShieldCheck, CheckCircle2, Zap, ArrowRight, Star, AlertCircle } from "lucide-react"
+import { Mail, Lock, User, Phone, Eye, EyeOff, Loader2, ShieldCheck, CheckCircle2, Zap, ArrowRight, Star, AlertCircle, RefreshCw } from "lucide-react"
 import { useAuth, useFirestore, useUser } from "@/firebase"
 import { 
   signInWithEmailAndPassword, 
@@ -28,8 +28,8 @@ import { cn } from "@/lib/utils"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Login Hub v18.0
- * FIXED: Handled auth/unauthorized-domain error with clear instructions.
+ * @fileOverview Institutional Login Hub v18.1
+ * FIXED: Added missing RefreshCw import for the recovery dialog.
  */
 export default function LoginPage() {
   return (
