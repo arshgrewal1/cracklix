@@ -43,9 +43,8 @@ import { cn } from "@/lib/utils"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Premium Login Hub v61.0.
- * DESIGN: Dense, Premium, Modern SaaS (Linear/Stripe Inspired).
- * FIXED: Reduced excessive whitespace and calibrated heading scale.
+ * @fileOverview Cracklix Premium Login Hub v62.0.
+ * FIXED: Removed vertical centering to align content 80px from top (Top-weighted SaaS Layout).
  */
 export default function LoginPage() {
   return (
@@ -193,17 +192,16 @@ function LoginContent() {
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row text-[#0F172A] font-body selection:bg-primary/20 overflow-x-hidden">
       
-      {/* LEFT PANEL: BRANDING (55% Desktop) */}
-      <div className="hidden lg:flex flex-[1.1] bg-gradient-to-br from-[#020B2D] via-[#071B4D] to-[#0A2D7A] text-white p-12 xl:p-20 flex-col justify-center relative overflow-hidden">
+      {/* LEFT PANEL: BRANDING (Top Aligned) */}
+      <div className="hidden lg:flex flex-[1.1] bg-gradient-to-br from-[#020B2D] via-[#071B4D] to-[#0A2D7A] text-white p-12 xl:p-20 flex-col justify-start relative overflow-hidden">
         {/* Glow Effects */}
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
         <div className="absolute bottom-[-5%] left-[-5%] w-[300px] h-[300px] bg-blue-400/10 blur-[100px] rounded-full pointer-events-none" />
 
-        <div className="relative z-10 space-y-8 md:space-y-10 max-w-[550px]">
+        <div className="relative z-10 space-y-12 xl:space-y-16 max-w-[550px]">
           <motion.div 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
           >
             <Logo variant="dark" align="left" imgClassName="h-[90px] xl:h-[110px]" />
           </motion.div>
@@ -212,7 +210,7 @@ function LoginContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6 }}
-            className="space-y-4"
+            className="space-y-6"
           >
             <h1 className="text-5xl xl:text-6xl font-[900] tracking-tight text-white leading-[1.05] uppercase">
               Punjab's Smart <br/> 
@@ -250,8 +248,8 @@ function LoginContent() {
         </motion.div>
       </div>
 
-      {/* RIGHT PANEL: AUTH (45% Desktop) */}
-      <div className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 lg:p-20 relative bg-slate-50 lg:bg-white overflow-y-auto">
+      {/* RIGHT PANEL: AUTH (Top Aligned) */}
+      <div className="flex-1 flex flex-col items-center justify-start p-6 md:p-12 lg:p-20 relative bg-slate-50 lg:bg-white overflow-y-auto">
         
         {/* Mobile Logo */}
         <div className="lg:hidden mb-12">
