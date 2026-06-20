@@ -49,16 +49,26 @@ export default function SupportPage() {
     priority: "MEDIUM"
   })
 
+  // Removed orderBy to bypass composite index requirement
   const ticketsQuery = useMemo(() => {
     if (!db || !user) return null
     return query(
       collection(db, "support_tickets"), 
-      where("userId", "==", user.uid),
-      orderBy("createdAt", "desc")
+      where("userId", "==", user.uid)
     )
   }, [db, user])
 
-  const { data: tickets, loading: ticketsLoading } = useCollection<any>(ticketsQuery)
+  const { data: rawTickets, loading: ticketsLoading } = useCollection<any>(ticketsQuery)
+
+  // Implement client-side sorting
+  const tickets = useMemo(() => {
+    if (!rawTickets) return [];
+    return [...rawTickets].sort((a: any, b: any) => {
+      const tA = a.createdAt?.seconds || 0;
+      const tB = b.createdAt?.seconds || 0;
+      return tB - tA;
+    });
+  }, [rawTickets]);
 
   const handleRaiseTicket = async () => {
     if (!user || !db) return
@@ -142,7 +152,9 @@ export default function SupportPage() {
                                    </div>
                                    <h4 className="text-xl font-black text-[#0F172A] uppercase mt-2">{t.subject}</h4>
                                 </div>
-                                <span className="text-[10px] font-bold text-slate-400 uppercase">{t.createdAt?.toDate().toLocaleDateString()}</span>
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                                  {t.createdAt?.toDate().toLocaleDateString()}
+                                </span>
                              </div>
 
                              <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
