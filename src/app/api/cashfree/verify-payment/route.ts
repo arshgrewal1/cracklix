@@ -4,9 +4,9 @@ import { initializeFirebase } from '@/firebase/app';
 import { doc, updateDoc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Cashfree Verification Hub v4.0.
+ * @fileOverview Hardened Cashfree Verification Hub v5.0.
  * STABILITY: Atomic updates for subscription registry and pass activation.
- * SECURITY: Cross-referencing CF response with internal pass duration.
+ * SECURITY: Implements passActivatedAt and passExpiresAt fields for automatic expiry logic.
  */
 
 export async function POST(req: Request) {
@@ -50,19 +50,23 @@ export async function POST(req: Request) {
     }
 
     const duration = Number(planData.durationDays) || 30;
+    const now = new Date();
     const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + duration);
+    expiryDate.setDate(now.getDate() + duration);
 
-    // Step 3: Pass Activation
+    // Step 3: Pass Activation (Enhanced Structure)
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, {
       pass: {
         active: true,
         plan: planData.id?.toUpperCase() || 'ELITE',
-        purchaseDate: new Date().toISOString(),
+        purchaseDate: now.toISOString(),
         expiryDate: expiryDate.toISOString(),
         freePassClaimed: planData.id === 'free-pass'
       },
+      passStatus: 'active',
+      passActivatedAt: now.toISOString(),
+      passExpiresAt: expiryDate.toISOString(),
       status: planData.id,
       updatedAt: serverTimestamp()
     });

@@ -213,6 +213,9 @@ export interface UserProfile {
   assignedBoardId?: string;
   createdAt: string;
   status: string;
+  passStatus?: 'active' | 'expired' | 'none';
+  passActivatedAt?: string;
+  passExpiresAt?: string;
   passExpiryDate?: string;
   photoURL?: string;
   gender?: Gender;

@@ -25,15 +25,17 @@ import {
   RefreshCw,
   Smartphone,
   Layers,
-  LucideIcon
+  LucideIcon,
+  CheckCircle2,
+  Gem
 } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Individual Mock Gateway v32.2 (Hardened Types).
- * FIXED: Removed React.cloneElement in favor of direct component reference rendering for type safety.
+ * @fileOverview Individual Mock Gateway v35.0 (Elite Lock Overhaul).
+ * DESIGN: High-fidelity premium lock screen for better conversion.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -84,10 +86,9 @@ export default function MockOverviewPage() {
       let hasActivePass = false;
       if (isAdmin) {
          hasActivePass = true;
-      } else if (profile?.pass && profile.pass.active === true) {
-         const expiry = new Date(profile.pass.expiryDate);
-         const now = new Date();
-         if (expiry > now) hasActivePass = true;
+      } else if (profile?.passExpiresAt) {
+         const expiry = new Date(profile.passExpiresAt);
+         if (expiry > new Date()) hasActivePass = true;
       }
       
       const locked = isPremium && !hasActivePass;
@@ -105,9 +106,6 @@ export default function MockOverviewPage() {
   const isLimitReached = attemptsLeft === 0 && (!activeAttempt || activeAttempt.status === 'COMPLETED');
   const isResumable = activeAttempt && activeAttempt.status === 'IN_PROGRESS';
 
-  const isPremiumMock = mock && (mock.accessLevel || mock.accessType || 'FREE').trim().toUpperCase() === 'PREMIUM';
-  const showDeviceBlock = isPremiumMock && !isDeviceAuthorized;
-
   if (mockLoading || userLoading || (user && !accessChecked)) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-6">
        <Zap className="h-12 w-12 text-primary animate-pulse" />
@@ -117,45 +115,45 @@ export default function MockOverviewPage() {
 
   if (!user) return null;
 
-  if (!mock) return (
-    <div className="h-screen flex flex-col items-center justify-center text-slate-400 gap-10 bg-white p-8">
-       <div className="h-28 w-28 bg-slate-50 rounded-[3rem] flex items-center justify-center border border-slate-100 shadow-inner">
-          <Info className="h-12 w-12 opacity-20" />
-       </div>
-       <div className="text-center space-y-3">
-          <p className="font-black uppercase tracking-[0.3em] text-[10px] text-slate-400">Registry Failure</p>
-          <h2 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Test Not Found</h2>
-          <p className="text-sm md:text-lg font-medium text-slate-500 max-sm mx-auto leading-relaxed">This preparation item might have been archived or removed from the official registry.</p>
-       </div>
-       <Button asChild className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] tracking-[0.2em] rounded-2xl shadow-3xl gap-3 active:scale-95 border-none">
-          <Link href="/"><Home className="h-4 w-4" /> Return Dashboard</Link>
-       </Button>
-    </div>
-  );
+  if (isLocked) return (
+     <div className="min-h-screen bg-slate-50 flex flex-col font-body">
+        <Navbar />
+        <main className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+           <Card className="max-w-2xl w-full bg-white rounded-[3rem] p-10 md:p-20 shadow-5xl border-none space-y-12 animate-in fade-in zoom-in-95 duration-500 overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Gem className="h-48 w-48 text-primary" /></div>
+              <div className="space-y-6 relative z-10">
+                 <div className="h-20 w-20 bg-amber-50 rounded-[2rem] flex items-center justify-center mx-auto text-amber-500 shadow-xl border border-amber-100">
+                    <Lock className="h-10 w-10" />
+                 </div>
+                 <div className="space-y-3">
+                    <h2 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none">Premium Mock Locked</h2>
+                    <p className="text-slate-500 font-medium text-lg max-w-md mx-auto">Access this test with the <span className="text-primary font-bold">Cracklix Elite Pass</span>.</p>
+                 </div>
+              </div>
 
-  if (showDeviceBlock) return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-       <Navbar />
-       <div className="max-w-md w-full bg-white rounded-[3rem] p-12 shadow-5xl border border-slate-100 space-y-8 animate-in fade-in zoom-in-95 duration-500">
-          <div className="h-24 w-24 bg-rose-50 rounded-[2.5rem] flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
-             <Smartphone className="h-12 w-12" />
-          </div>
-          <div className="space-y-3 text-left">
-             <h2 className="text-2xl md:text-3xl font-headline font-black text-[#0F172A] uppercase text-center tracking-tight">Security Lock</h2>
-             <p className="text-slate-500 font-medium leading-relaxed text-center text-sm md:text-base px-2">
-                This premium test is locked to your physical registered device. You are attempting to access from an unauthorized node.
-             </p>
-          </div>
-          <Button asChild className="w-full h-16 md:h-20 bg-[#0F172A] text-white rounded-2xl md:rounded-3xl font-black uppercase text-[10px] md:text-[12px] tracking-[0.2em] shadow-4xl border-none active:scale-95">
-             <Link href="/profile">Manage Device Hub</Link>
-          </Button>
-       </div>
-       <Footer />
-    </div>
-  );
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left relative z-10">
+                 <ValueProp text="Unlimited Premium Tests" />
+                 <ValueProp text="Previous Year Papers" />
+                 <ValueProp text="Detailed Solutions" />
+                 <ValueProp text="Rank & Analytics" />
+                 <ValueProp text="Current Affairs Vault" />
+                 <ValueProp text="Ad-Free Experience" />
+              </div>
 
-  const tier = (mock.accessLevel || mock.accessType || 'FREE').trim().toUpperCase();
-  const isPremium = tier === 'PREMIUM';
+              <div className="pt-8 border-t border-slate-100 space-y-6 relative z-10">
+                 <div className="flex justify-between items-center px-4">
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Current Status</p>
+                    <Badge variant="outline" className="text-[9px] font-black uppercase tracking-widest border-slate-200">Free Pass</Badge>
+                 </div>
+                 <Button asChild className="w-full h-16 md:h-20 bg-gradient-to-r from-primary to-blue-700 hover:from-blue-700 hover:to-primary text-white rounded-2xl md:rounded-[2.5rem] font-black uppercase text-xs md:text-sm tracking-[0.2em] shadow-4xl shadow-primary/20 transition-all active:scale-95 border-none">
+                    <Link href="/pass">Unlock Elite Pass Hub <ChevronRight className="ml-2 h-5 w-5" /></Link>
+                 </Button>
+              </div>
+           </Card>
+        </main>
+        <Footer />
+     </div>
+  );
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-body overflow-x-hidden">
@@ -170,9 +168,9 @@ export default function MockOverviewPage() {
                   <div className="flex flex-wrap items-center gap-3">
                       <Badge className={cn(
                         "border-none text-[8px] md:text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest shadow-lg", 
-                        isPremium ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
+                        mock.accessLevel === 'PREMIUM' ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
                       )}>
-                        {isPremium ? '🔒 PREMIUM NODE' : 'FREE ACCESS'}
+                        {mock.accessLevel === 'PREMIUM' ? '🔒 PREMIUM NODE' : 'FREE ACCESS'}
                       </Badge>
                       <Badge variant="outline" className="border-slate-200 text-slate-400 text-[8px] md:text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-lg">ID: {mockId.slice(-8)}</Badge>
                   </div>
@@ -185,11 +183,7 @@ export default function MockOverviewPage() {
                 </div>
               </div>
               <div className="w-full md:w-auto shrink-0 pt-4 md:pt-0">
-                 {isLocked ? (
-                    <Button onClick={() => router.push('/pass')} className="w-full md:w-auto h-14 md:h-20 px-10 md:px-16 bg-orange-500 hover:bg-orange-600 text-white font-black uppercase text-[10px] md:text-[13px] tracking-[0.2em] rounded-2xl md:rounded-[2rem] shadow-4xl shadow-orange-500/20 border-none transition-all active:scale-95 flex items-center justify-center gap-4">
-                      <Lock className="h-5 w-5 fill-current" /> UNLOCK PREMIUM TEST
-                    </Button>
-                 ) : isLimitReached ? (
+                 {isLimitReached ? (
                     <Button asChild variant="outline" className="w-full md:w-auto h-14 md:h-18 px-10 md:px-14 rounded-2xl md:rounded-3xl border-2 border-slate-200 font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] gap-4 transition-all active:scale-95">
                        <Link href={`/results/${mockId}`}><Target className="h-5 w-5" /> VIEW AUDIT RESULT</Link>
                     </Button>
@@ -236,6 +230,15 @@ export default function MockOverviewPage() {
       <Footer />
     </div>
   )
+}
+
+function ValueProp({ text }: { text: string }) {
+   return (
+      <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 shadow-sm">
+         <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
+         <span className="text-[11px] md:text-sm font-bold text-[#0F172A] uppercase tracking-tight">{text}</span>
+      </div>
+   );
 }
 
 function FeatureNode({ icon: Icon, title, desc }: { icon: LucideIcon, title: string, desc: string }) {

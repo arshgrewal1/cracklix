@@ -5,7 +5,7 @@ import Footer from "@/components/layout/Footer"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { CheckCircle2, Zap, ArrowRight, ShieldCheck, Gem, Loader2, Sparkles, Star, Lock, Gift, QrCode } from "lucide-react"
+import { CheckCircle2, Zap, ArrowRight, ShieldCheck, Gem, Loader2, Sparkles, Star, Lock, Gift, QrCode, Clock, Calendar } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { useUser, useFirestore, useCollection, useDoc } from "@/firebase"
@@ -17,8 +17,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Elite PASS Hub v14.0.
- * DESIGN: Locked responsive typography and reduced section heights for mobile.
+ * @fileOverview Elite PASS Hub v15.0 (Management Overhaul).
+ * DESIGN: Integrated management card with live countdown for active subscribers.
  */
 
 export default function PassPage() {
@@ -26,8 +26,8 @@ export default function PassPage() {
   const db = useFirestore()
   const router = useRouter()
   const { toast } = useToast()
-  const [claiming, setClaiming] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [timeLeft, setTimeLeft] = useState<{ d: number, h: number, m: number, s: number } | null>(null)
 
   useEffect(() => {
     setMounted(true);
@@ -36,7 +36,31 @@ export default function PassPage() {
     }
   }, [user, userLoading, router]);
 
-  const { data: settings } = useDoc<any>(useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]));
+  // Expiry Countdown Logic
+  useEffect(() => {
+    if (!profile?.passExpiresAt) return;
+    const interval = setInterval(() => {
+       const expiry = new Date(profile.passExpiresAt).getTime();
+       const now = new Date().getTime();
+       const diff = expiry - now;
+
+       if (diff <= 0) {
+          setTimeLeft(null);
+          clearInterval(interval);
+          return;
+       }
+
+       setTimeLeft({
+          d: Math.floor(diff / (1000 * 60 * 60 * 24)),
+          h: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+          m: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+          s: Math.floor((diff % (1000 * 60)) / 1000)
+       });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [profile]);
+
   const passQuery = useMemo(() => (db ? collection(db, "passes") : null), [db])
   const { data: rawPasses, loading: passesLoading } = useCollection<any>(passQuery)
 
@@ -45,11 +69,9 @@ export default function PassPage() {
      return [...rawPasses].filter(p => p.active !== false).sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
   }, [rawPasses])
 
-  const activePassLabel = useMemo(() => {
-     if (!profile?.pass?.active) return null;
-     const expiry = new Date(profile.pass.expiryDate);
-     if (expiry < new Date()) return "PASS EXPIRED";
-     return `ACTIVE: EXPIRES ${expiry.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase()}`;
+  const passStatus = useMemo(() => {
+     if (!profile?.passExpiresAt) return 'none';
+     return new Date(profile.passExpiresAt) > new Date() ? 'active' : 'expired';
   }, [profile]);
 
   if (userLoading || !user) return (
@@ -60,12 +82,57 @@ export default function PassPage() {
     <div className="min-h-screen bg-[#04102B] font-body pb-safe overflow-x-hidden text-white" style={{ background: 'linear-gradient(180deg, #04102B 0%, #061A45 100%)' }}>
       <Navbar />
       
-      <main className="container mx-auto px-4 py-12 md:py-24 max-w-7xl relative z-10 text-center">
-        <div className="space-y-4 md:space-y-8 mb-12 md:mb-24">
+      <main className="container mx-auto px-4 py-12 md:py-24 max-w-7xl relative z-10 text-center space-y-12 md:space-y-24">
+        
+        {/* MANAGEMENT CARD - TESTBOOK STYLE */}
+        {mounted && profile?.passStatus && passStatus !== 'none' && (
+           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}>
+              <Card className="max-w-4xl mx-auto border-none bg-white rounded-[3rem] p-8 md:p-12 shadow-5xl text-left overflow-hidden relative">
+                 <div className={cn("absolute top-0 left-0 w-2 h-full", passStatus === 'active' ? 'bg-emerald-500' : 'bg-rose-500')} />
+                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
+                    <div className="space-y-6">
+                       <div className="flex items-center gap-4">
+                          <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center shadow-inner", passStatus === 'active' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+                             <ShieldCheck className="h-8 w-8" />
+                          </div>
+                          <div>
+                             <h2 className="text-2xl md:text-3xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Elite Pass</h2>
+                             <div className="flex items-center gap-3">
+                                <Badge className={cn("border-none text-[8px] font-black px-3 py-1 rounded-lg uppercase", passStatus === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600')}>
+                                   Status: {passStatus.toUpperCase()}
+                                </Badge>
+                                {passStatus === 'active' && <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Valid Till: {new Date(profile.passExpiresAt!).toLocaleDateString('en-GB')}</p>}
+                             </div>
+                          </div>
+                       </div>
+
+                       {passStatus === 'active' ? (
+                          <div className="grid grid-cols-2 xs:grid-cols-4 gap-4">
+                             <CountdownPill label="Days" val={timeLeft?.d || 0} />
+                             <CountdownPill label="Hours" val={timeLeft?.h || 0} />
+                             <CountdownPill label="Mins" val={timeLeft?.m || 0} />
+                             <CountdownPill label="Secs" val={timeLeft?.s || 0} />
+                          </div>
+                       ) : (
+                          <div className="p-6 bg-rose-50 rounded-2xl border border-rose-100 flex items-center gap-4 text-rose-600">
+                             <AlertCircle className="h-6 w-6 shrink-0" />
+                             <p className="text-sm font-bold uppercase tracking-tight">Your pass expired on {new Date(profile.passExpiresAt!).toLocaleDateString()}. Renew now to resume preparation.</p>
+                          </div>
+                       )}
+                    </div>
+
+                    <div className="shrink-0 w-full md:w-auto">
+                       <Button asChild className={cn("w-full h-16 px-10 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none transition-all", passStatus === 'active' ? "bg-slate-100 text-slate-400 cursor-default hover:bg-slate-100" : "bg-primary hover:bg-blue-700 text-white")}>
+                          {passStatus === 'active' ? <span>Premium Enabled</span> : <Link href="#plans">Renew Elite Pass <ArrowRight className="ml-2 h-4 w-4" /></Link>}
+                       </Button>
+                    </div>
+                 </div>
+              </Card>
+           </motion.div>
+        )}
+
+        <div id="plans" className="space-y-4 md:space-y-8">
            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              {mounted && activePassLabel && (
-                <Badge className={cn("px-6 py-2 rounded-full font-black uppercase mb-8 shadow-2xl transition-all", activePassLabel === 'PASS EXPIRED' ? "bg-[rgba(255,0,80,0.12)] border border-[rgba(255,0,80,0.25)] text-[#ff5d7d] text-[10px] tracking-[2px]" : "bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px] tracking-[2px]")}>{activePassLabel}</Badge>
-              )}
               <h1 className="text-3xl sm:text-5xl md:text-8xl font-black tracking-tight uppercase leading-[0.95] text-white">Elite <span className="text-[#2F6BFF]">Master Pass</span></h1>
               <p className="text-sm md:text-2xl font-medium text-[#94A3B8] max-w-3xl mx-auto mt-6 md:mt-8 leading-relaxed">Unlock all premium mock tests, verified answer keys, and performance reports to secure your selection.</p>
            </motion.div>
@@ -98,4 +165,13 @@ export default function PassPage() {
       <Footer />
     </div>
   )
+}
+
+function CountdownPill({ label, val }: { label: string, val: number }) {
+   return (
+      <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 text-center min-w-[70px] shadow-sm">
+         <p className="text-xl md:text-2xl font-black text-[#0F172A] tabular-nums leading-none">{val}</p>
+         <p className="text-[7px] md:text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1.5">{label}</p>
+      </div>
+   )
 }

@@ -37,7 +37,9 @@ import {
   Trash2,
   CheckCircle2,
   Clock,
-  LucideIcon
+  LucideIcon,
+  Timer,
+  AlertCircle
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -48,8 +50,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Profile Center v27.0 (Hardened Build).
- * FIXED: Explicitly typed React callbacks and sanitized icon injection pattern.
+ * @fileOverview Student Profile Center v28.0 (Pass System Update).
+ * DESIGN: Integrated pass status card with colored active/expired nodes.
  */
 export default function ProfilePage() {
   const { user, profile, loading, profileLoading, currentDeviceId } = useUser()
@@ -114,36 +116,35 @@ export default function ProfilePage() {
     return { total, avgAccuracy, rank: total > 5 ? "Top 12%" : "Awaiting" }
   }, [results])
 
+  const passInfo = useMemo(() => {
+     if (!profile?.passExpiresAt) return null;
+     const expiry = new Date(profile.passExpiresAt);
+     const now = new Date();
+     const active = expiry > now;
+     const diffTime = Math.abs(expiry.getTime() - now.getTime());
+     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+     return {
+        active,
+        expiryDate: expiry.toLocaleDateString('en-GB'),
+        daysLeft: diffDays,
+        label: active ? 'Elite Member' : 'Pass Expired',
+        color: active ? '#22c55e' : '#ef4444'
+     }
+  }, [profile]);
+
   const handleUpdateProfile = async () => {
     if (!db || !user || !editForm) return
-
     const mandatory = ['name', 'email', 'phone', 'dob', 'address', 'targetExam'];
     const missing = mandatory.find(key => !editForm[key]?.trim());
-    
     if (missing) {
-      toast({ 
-        variant: "destructive", 
-        title: "Setup Blocked", 
-        description: `Please enter your ${missing.toUpperCase()}.` 
-      });
+      toast({ variant: "destructive", title: "Setup Blocked", description: `Please enter your ${missing.toUpperCase()}.` });
       return;
     }
-
-    if (editForm.phone.replace(/\D/g, '').length < 10) {
-      toast({ variant: "destructive", title: "Invalid Number", description: "10-digit mobile required." });
-      return;
-    }
-
     setIsSaving(true)
     try {
        const digits = editForm.phone.replace(/\D/g, '');
        const finalPhone = `+91 ${digits}`;
-       
-       await updateDoc(doc(db, "users", user.uid), {
-          ...editForm,
-          phone: finalPhone,
-          updatedAt: serverTimestamp()
-       })
+       await updateDoc(doc(db, "users", user.uid), { ...editForm, phone: finalPhone, updatedAt: serverTimestamp() })
        toast({ title: "Registry Synced", description: "Your identity node has been updated." })
        setIsEditing(false)
     } catch (e: any) {
@@ -153,27 +154,12 @@ export default function ProfilePage() {
     }
   }
 
-  const handleRemoveDevice = async (deviceId: string) => {
-    if (!db || !user) return;
-    if (!confirm("Remove this hardware node?")) return;
-
-    try {
-      await deleteDoc(doc(db, "users", user.uid, "devices", deviceId));
-      await updateDoc(doc(db, "users", user.uid), { deviceCount: Math.max(0, (devices?.length || 1) - 1) });
-      toast({ title: "Node Removed", description: "Authorized device slot cleared." });
-    } catch (e) {
-      toast({ variant: "destructive", title: "Action Rejected" });
-    }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center space-y-4">
+  if (loading) return (
+     <div className="min-h-screen bg-white flex flex-col items-center justify-center space-y-4">
         <Loader2 className="h-10 w-10 text-primary animate-spin" />
         <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Auditing Node...</p>
-      </div>
-    )
-  }
+     </div>
+  );
 
   return (
     <div className="min-h-screen bg-slate-50/50 font-body pb-safe text-left">
@@ -216,10 +202,6 @@ export default function ProfilePage() {
                       </>
                     )}
                  </div>
-                 <div className="shrink-0 w-full md:w-auto pt-6 md:pt-0 flex flex-col sm:flex-row gap-3 md:gap-4">
-                    <Button onClick={() => setIsEditing(true)} disabled={profileLoading} className="h-12 md:h-16 px-8 md:px-10 bg-white/10 hover:bg-white/20 text-white border-2 border-white/10 rounded-2xl font-black uppercase text-[10px] md:text-[12px] tracking-[0.2em] gap-3 shadow-4xl transition-all active:scale-95"><Edit className="h-4 w-4 text-primary" /> Edit Node</Button>
-                    <Button asChild className="h-12 md:h-16 px-8 md:px-10 bg-primary hover:bg-orange-600 text-white rounded-2xl font-black uppercase text-[10px] md:text-[12px] tracking-[0.2em] gap-3 shadow-4xl border-none transition-all active:scale-95"><Link href="/pass"><Gem className="h-4 w-4" /> UPGRADE HUB</Link></Button>
-                 </div>
               </div>
            </div>
         </div>
@@ -227,99 +209,62 @@ export default function ProfilePage() {
         <div className="container mx-auto px-4 md:px-6 lg:px-12 max-w-6xl -mt-8 md:-mt-12 relative z-20">
            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-12">
               <div className="lg:col-span-8 space-y-6 md:space-y-12">
+                 
+                 {/* PASS STATUS CARD */}
+                 {passInfo && (
+                    <Card className="border-none shadow-3xl rounded-[2.5rem] bg-white p-8 md:p-12 overflow-hidden relative group border border-slate-100">
+                       <div className="absolute top-0 left-0 w-2 h-full" style={{ backgroundColor: passInfo.color }} />
+                       <div className="flex items-center justify-between">
+                          <div className="space-y-6">
+                             <div className="space-y-1">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">PASS STATUS</p>
+                                <h3 className="text-2xl md:text-4xl font-headline font-black uppercase" style={{ color: passInfo.color }}>{passInfo.label}</h3>
+                             </div>
+                             <div className="grid grid-cols-2 gap-8">
+                                <div className="space-y-0.5">
+                                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">EXPIRES ON</p>
+                                   <p className="text-sm md:text-lg font-bold text-[#0F172A]">{passInfo.expiryDate}</p>
+                                </div>
+                                <div className="space-y-0.5 text-left">
+                                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">TIME LEFT</p>
+                                   <p className="text-sm md:text-lg font-bold text-[#0F172A]">{passInfo.active ? `${passInfo.daysLeft} Days Left` : 'N/A'}</p>
+                                </div>
+                             </div>
+                          </div>
+                          <div className="shrink-0">
+                             <div className="h-16 w-16 md:h-24 md:w-24 rounded-[2rem] flex items-center justify-center shadow-xl border" style={{ backgroundColor: passInfo.color + '10', borderColor: passInfo.color + '20' }}>
+                                <Gem className="h-8 w-8 md:h-12 md:w-12" style={{ color: passInfo.color }} />
+                             </div>
+                          </div>
+                       </div>
+                    </Card>
+                 )}
+
                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 md:gap-8">
                     <StatsCard icon={ClipboardList} label="TESTS DONE" value={resultsLoading ? "..." : stats.total} color="text-blue-500" bgColor="bg-blue-50" />
                     <StatsCard icon={Target} label="ACCURACY" value={resultsLoading ? "..." : `${stats.avgAccuracy}%`} color="text-primary" bgColor="bg-primary/10" />
                     <StatsCard icon={Trophy} label="RANK" value={resultsLoading ? "..." : stats.rank} color="text-emerald-500" bgColor="bg-emerald-50" className="hidden sm:flex" />
                  </div>
 
-                 <Card className="border-none shadow-3xl rounded-[2.5rem] md:rounded-[3.5rem] bg-white p-8 md:p-14 space-y-8 md:space-y-12 border border-slate-100">
-                    <div className="flex items-center justify-between border-b border-slate-50 pb-6 md:pb-10">
-                       <div className="space-y-1.5 md:space-y-2">
-                          <h3 className="font-headline font-black text-xl md:text-3xl uppercase flex items-center gap-4 md:gap-6 text-[#0F172A]">
-                             <Smartphone className="h-6 w-6 md:h-8 md:w-8 text-primary" /> Managed Nodes
-                          </h3>
-                          <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Active hardware binding registry</p>
-                       </div>
-                       <Badge className="bg-primary/5 text-primary border-none text-[9px] md:text-[11px] font-black uppercase px-4 py-1.5 rounded-xl">SLOTS: 2</Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 gap-4 md:gap-6">
-                       {devicesLoading ? (
-                          <Skeleton className="h-28 w-full rounded-[2rem]" />
-                       ) : devices && devices.length > 0 ? (
-                          devices.map((device: any) => {
-                             const isCurrent = device.id === currentDeviceId;
-                             return (
-                                <div key={device.id} className={cn("p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border-2 flex items-center justify-between transition-all duration-500", isCurrent ? "bg-primary/5 border-primary shadow-xl" : "bg-white border-slate-100 shadow-sm hover:border-primary/20")}>
-                                   <div className="flex items-center gap-6 md:gap-10">
-                                      <div className={cn("h-14 w-14 md:h-20 md:w-20 rounded-[1.5rem] md:rounded-[2rem] flex items-center justify-center shrink-0 shadow-inner transition-transform duration-500 group-hover:scale-105", isCurrent ? "bg-primary text-white" : "bg-slate-50 text-slate-400")}>
-                                         <Smartphone className="h-6 w-6 md:h-10 md:w-10" />
-                                      </div>
-                                      <div className="min-w-0 text-left space-y-2">
-                                         <div className="flex items-center gap-3">
-                                            <p className="font-black text-sm md:text-2xl text-[#0F172A] uppercase truncate">{device.deviceName || 'Authorized Node'}</p>
-                                            {isCurrent && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] md:text-[10px] font-black px-3 py-1 rounded-lg">PRIMARY</Badge>}
-                                         </div>
-                                         <div className="flex items-center gap-4 text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                                            <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> Last Signal: {device.lastActive ? new Date(device.lastActive.seconds * 1000).toLocaleDateString() : 'N/A'}</span>
-                                         </div>
-                                      </div>
-                                   </div>
-                                   <Button 
-                                      variant="ghost" 
-                                      size="icon" 
-                                      onClick={() => handleRemoveDevice(device.id)}
-                                      className="h-12 w-12 md:h-16 md:w-16 rounded-2xl text-rose-500 hover:bg-rose-50 shrink-0 transition-all active:scale-90"
-                                   >
-                                      <Trash2 className="h-6 w-6 md:h-8 md:w-8" />
-                                   </Button>
-                                </div>
-                             )
-                          })
-                       ) : (
-                          <div className="text-center py-20 opacity-20 italic uppercase font-black text-xs tracking-[0.3em] bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200">Zero active hardware nodes.</div>
-                       )}
-                    </div>
-                 </Card>
-
                  <Card className="border-none shadow-3xl rounded-[2.5rem] md:rounded-[3.5rem] bg-white p-8 md:p-14 space-y-8 md:space-y-12 text-left border border-slate-100">
                     <div className="flex items-center justify-between border-b border-slate-50 pb-6 md:pb-10"><h3 className="font-headline font-black text-xl md:text-3xl uppercase flex items-center gap-4 md:gap-6 text-[#0F172A]"><UserIcon className="h-6 w-6 md:h-8 md:w-8 text-primary" /> Registry Metadata</h3></div>
-                    {profileLoading ? (
-                      <div className="space-y-12">
-                         <div className="grid grid-cols-2 gap-10">
-                            <Skeleton className="h-14 w-full rounded-2xl" />
-                            <Skeleton className="h-14 w-full rounded-2xl" />
-                         </div>
-                         <Skeleton className="h-32 w-full rounded-2xl" />
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8 md:gap-y-12">
-                        <ProfileDataNode icon={Calendar} label="DATE OF BIRTH" value={profile?.dob ? new Date(profile.dob).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : "Not Linked"} />
-                        <ProfileDataNode icon={Phone} label="MOBILE NODE" value={profile?.phone || "Not Linked"} />
-                        <ProfileDataNode icon={MapPin} label="HQs ADDRESS" value={profile?.address || "Not Added"} colSpan={2} />
-                        <ProfileDataNode icon={ShieldCheck} label="ACCESS LEVEL" value={`${profile?.role || 'STUDENT'}`} />
-                        <ProfileDataNode icon={Activity} label="REGISTRY SINCE" value={profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : "---"} />
-                      </div>
-                    )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-8 md:gap-y-12">
+                      <ProfileDataNode icon={Calendar} label="DATE OF BIRTH" value={profile?.dob ? new Date(profile.dob).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : "Not Linked"} />
+                      <ProfileDataNode icon={Phone} label="MOBILE NODE" value={profile?.phone || "Not Linked"} />
+                      <ProfileDataNode icon={MapPin} label="HQs ADDRESS" value={profile?.address || "Not Added"} colSpan={2} />
+                      <ProfileDataNode icon={ShieldCheck} label="ACCESS LEVEL" value={`${profile?.role || 'STUDENT'}`} />
+                      <ProfileDataNode icon={Activity} label="REGISTRY SINCE" value={profile?.createdAt ? new Date(profile.createdAt).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' }) : "---"} />
+                    </div>
                  </Card>
               </div>
               <div className="lg:col-span-4 space-y-6 md:space-y-10">
                  <Card className="border-none shadow-2xl rounded-[2.5rem] md:rounded-[3.5rem] bg-white p-8 md:p-12 space-y-8 md:space-y-10 border border-slate-100">
                     <h3 className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.4em] text-slate-400">Quick Portal</h3>
                     <div className="space-y-4 md:space-y-5">
-                       <Button asChild className="w-full h-14 md:h-18 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] md:text-[12px] tracking-widest shadow-2xl transition-all active:scale-95 border-none gap-3"><Link href="/pass"><CreditCard className="h-5 w-5 text-primary" /> Unlock Elite Hub</Link></Button>
-                       <Button asChild variant="outline" className="w-full h-14 md:h-18 border-2 border-slate-100 bg-slate-50/50 rounded-2xl font-black uppercase text-[10px] md:text-[12px] tracking-widest text-slate-600 hover:bg-white hover:border-primary/20 transition-all active:scale-95 gap-3"><Link href="/dashboard"><History className="h-5 w-5" /> Global Report</Link></Button>
+                       <Button onClick={() => setIsEditing(true)} className="w-full h-14 md:h-18 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] md:text-[12px] tracking-widest shadow-2xl transition-all active:scale-95 border-none gap-3"><Edit className="h-5 w-5 text-primary" /> Update Node</Button>
+                       <Button asChild className="w-full h-14 md:h-18 bg-primary hover:bg-blue-700 text-white rounded-2xl font-black uppercase text-[10px] md:text-[12px] tracking-widest shadow-2xl transition-all active:scale-95 border-none gap-3"><Link href="/pass"><Gem className="h-5 w-5" /> Pass Hub</Link></Button>
                     </div>
                  </Card>
-                 <div className="bg-primary rounded-[3rem] md:rounded-[4rem] p-10 md:p-14 text-white space-y-6 relative overflow-hidden group shadow-5xl">
-                    <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Award className="h-40 w-40 md:h-64 md:w-64" /></div>
-                    <div className="relative z-10 space-y-4 md:space-y-6 text-left">
-                       <h4 className="text-2xl md:text-4xl font-headline font-black uppercase leading-tight">Official <br/> Rankings</h4>
-                       <p className="text-white/70 text-[10px] md:text-[12px] font-bold uppercase tracking-widest">Compare with toppers across Punjab.</p>
-                       <Button asChild className="w-full mt-6 md:mt-12 bg-white text-primary hover:bg-slate-100 font-black h-12 md:h-16 rounded-2xl text-[10px] md:text-[12px] uppercase shadow-3xl border-none transition-all active:scale-95"><Link href="/leaderboard">See merit list</Link></Button>
-                    </div>
-                 </div>
               </div>
            </div>
         </div>
@@ -336,43 +281,31 @@ export default function ProfilePage() {
                   </DialogTitle>
                   <button onClick={() => setIsEditing(false)} className="p-3 rounded-2xl hover:bg-slate-50 transition-colors cursor-pointer"><X className="h-6 w-6 text-slate-400" /></button>
                </div>
-               <DialogDescription className="text-slate-400 text-[10px] md:text-[12px] font-bold uppercase tracking-widest mt-2">Audit your identity node information.</DialogDescription>
             </DialogHeader>
             <div className="px-8 md:px-14 pb-8 md:pb-14 space-y-5 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
-                  <div className="space-y-2 text-left">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Full Identity</Label>
-                     <Input value={editForm?.name || ""} onChange={e => setEditForm((prev: any) => ({...prev, name: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner" />
-                  </div>
-                  <div className="space-y-2 text-left">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Contact String</Label>
-                     <Input type="email" value={editForm?.email || ""} onChange={e => setEditForm((prev: any) => ({...prev, email: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner" />
-                  </div>
+                  <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Full Identity</Label><Input value={editForm?.name || ""} onChange={e => setEditForm((prev: any) => ({...prev, name: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold px-6" /></div>
+                  <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Contact String</Label><Input type="email" value={editForm?.email || ""} onChange={e => setEditForm((prev: any) => ({...prev, email: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold px-6" /></div>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8">
-                  <div className="space-y-2 text-left">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Date of Birth</Label>
-                     <Input type="date" value={editForm?.dob || ""} onChange={e => setEditForm((prev: any) => ({...prev, dob: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 shadow-inner" />
-                  </div>
-                  <div className="space-y-2 text-left">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Authority</Label>
-                     <select value={editForm?.targetExam || ""} onChange={e => setEditForm((prev: any) => ({...prev, targetExam: e.target.value}))} className="w-full h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold text-sm md:text-lg px-6 outline-none shadow-inner"><option value="" disabled>Select Board</option><option value="PSSSB">PSSSB</option><option value="PPSC">PPSC</option><option value="Punjab Police">Punjab Police</option><option value="Army">Indian Army</option><option value="High Court">High Court</option></select></div>
+                  <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Date of Birth</Label><Input type="date" value={editForm?.dob || ""} onChange={e => setEditForm((prev: any) => ({...prev, dob: e.target.value}))} className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold px-6" /></div>
+                  <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Authority</Label><select value={editForm?.targetExam || ""} onChange={e => setEditForm((prev: any) => ({...prev, targetExam: e.target.value}))} className="w-full h-14 md:h-16 rounded-2xl bg-slate-50 border-none font-bold px-6 outline-none"><option value="PSSSB">PSSSB</option><option value="PPSC">PPSC</option><option value="Punjab Police">Punjab Police</option><option value="Army">Indian Army</option><option value="High Court">High Court</option></select></div>
                </div>
                <div className="space-y-2 text-left">
-                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Verified Mobile Node</Label>
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Mobile Node</Label>
                   <div className="relative">
                      <span className="absolute left-6 top-1/2 -translate-y-1/2 text-sm md:text-lg font-black text-slate-400">+91</span>
-                     <Input value={editForm?.phone || ""} onChange={e => setEditForm((prev: any) => ({...prev, phone: e.target.value.replace(/\D/g, '').slice(0,10)}))} className="h-14 md:h-16 pl-16 md:pl-20 rounded-2xl bg-slate-50 border-none font-black text-lg md:text-2xl tracking-[0.2em]" placeholder="10-digit number" />
+                     <Input value={editForm?.phone || ""} onChange={e => setEditForm((prev: any) => ({...prev, phone: e.target.value.replace(/\D/g, '').slice(0,10)}))} className="h-14 md:h-16 pl-16 md:pl-20 rounded-2xl bg-slate-50 border-none font-black text-lg md:text-2xl" />
                   </div>
                </div>
                <div className="space-y-2 text-left">
                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Home Hub Address</Label>
-                  <Textarea value={editForm?.address || ""} onChange={e => setEditForm((prev: any) => ({...prev, address: e.target.value}))} className="min-h-[120px] md:min-h-[160px] rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-50 border-none font-medium p-5 md:p-8 text-[13px] md:text-lg leading-relaxed shadow-inner resize-none" placeholder="Enter your full HQs address..." />
+                  <Textarea value={editForm?.address || ""} onChange={e => setEditForm((prev: any) => ({...prev, address: e.target.value}))} className="min-h-[120px] rounded-[1.5rem] bg-slate-50 border-none font-medium p-5 shadow-inner resize-none" />
                </div>
             </div>
-            <DialogFooter className="p-8 md:p-14 pt-4 md:pt-6 bg-slate-50 border-t border-slate-100 shrink-0 flex flex-row gap-4 md:gap-6 items-center justify-between">
-               <Button variant="ghost" onClick={() => setIsEditing(false)} className="h-14 md:h-18 px-6 md:px-10 font-black uppercase text-[9px] md:text-[11px] text-slate-400 tracking-widest hover:text-slate-900 transition-colors">Discard</Button>
-               <Button onClick={handleUpdateProfile} disabled={isSaving} className="bg-primary hover:bg-orange-600 text-white h-14 md:h-18 px-8 md:px-14 rounded-2xl font-black uppercase text-[10px] md:text-[12px] tracking-[0.3em] flex-1 shadow-3xl transition-all active:scale-95 gap-3">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Sync Registry</Button>
+            <DialogFooter className="p-8 md:p-14 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4 items-center justify-between">
+               <Button variant="ghost" onClick={() => setIsEditing(false)} className="h-14 px-6 font-black uppercase text-[9px] text-slate-400">Discard</Button>
+               <Button onClick={handleUpdateProfile} disabled={isSaving} className="bg-primary hover:bg-orange-600 text-white h-14 px-8 rounded-2xl font-black uppercase text-[10px] flex-1 shadow-3xl transition-all active:scale-95 gap-3">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Sync Registry</Button>
             </DialogFooter>
          </DialogContent>
       </Dialog>
