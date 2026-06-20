@@ -13,16 +13,19 @@ import {
   Apple, 
   Share,
   PlusSquare,
-  AlertCircle
+  AlertCircle,
+  CheckCircle2
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
+import Link from "next/link"
 
 /**
- * @fileOverview High-Fidelity PWA Install Hub v1.2 (Handshake Fixed).
+ * @fileOverview High-Fidelity PWA Install Hub v1.3 (Build Fixed).
+ * FIXED: Added missing CheckCircle2 import.
  */
 
 export default function InstallPage() {
@@ -206,5 +209,4 @@ function BenefitRow({ icon, title, desc }: any) {
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{desc}</p>
          </div>
       </div>
-   )
 }
