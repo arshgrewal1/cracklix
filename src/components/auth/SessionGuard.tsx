@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useRef } from 'react';
@@ -8,11 +7,11 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
 /**
- * @fileOverview Hardened Takeover Session Guard v7.0.
- * LOGIC: Monitors Firestore for sessionId changes. Older devices are logged out automatically.
+ * @fileOverview Hardened Takeover Session Guard v8.0.
+ * PERFORMANCE: Non-blocking background verification to ensure fast initial dashboard paint.
  */
 export default function SessionGuard() {
-  const { user, profile, loading } = useUser();
+  const { user, profile, loading, profileLoading } = useUser();
   const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -21,26 +20,27 @@ export default function SessionGuard() {
 
   useEffect(() => {
     // 1. Guard against unauthenticated states or transition phases
+    // We don't block on 'profileLoading' to allow the UI to render first
     if (loading || !user || !profile || isSigningOut.current) return;
     
-    // 2. Ignore guard if on the login page to allow takeover to complete
-    if (pathname === '/login') return;
+    // 2. Ignore guard if on login or registration nodes
+    if (pathname === '/login' || pathname === '/profile-setup') return;
 
+    // 3. Background Verification
     const localSessionId = localStorage.getItem('cracklix_session_id');
     const cloudSessionId = profile.activeDeviceId;
 
-    // 3. Takeover Detection: If cloud ID exists and doesn't match local device
+    // 4. Takeover Detection
     if (cloudSessionId && localSessionId && cloudSessionId !== localSessionId) {
       isSigningOut.current = true;
       
-      // Notify the student that their session was taken over
       toast({
         variant: "destructive",
         title: "Session Expired",
-        description: "This account was recently logged in on another device. For security, this session has been terminated.",
+        description: "Your account was logged in on another device. This session has been closed for security.",
       });
 
-      // Perform atomic logout
+      // Atomic Sign Out
       signOut(auth).then(() => {
         localStorage.removeItem('cracklix_session_id');
         router.replace('/login');
@@ -50,7 +50,7 @@ export default function SessionGuard() {
         isSigningOut.current = false;
       });
     }
-  }, [user, profile, loading, auth, router, toast, pathname]);
+  }, [user, profile, loading, auth, router, toast, pathname, profileLoading]);
 
   return null;
 }

@@ -22,7 +22,8 @@ import {
   TrendingUp,
   Calendar,
   Award,
-  Activity
+  Activity,
+  Loader2
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -32,7 +33,8 @@ import ShareButton from "@/components/navigation/ShareButton"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Dashboard v31.0 (Simplified Language).
+ * @fileOverview Student Dashboard v32.0.
+ * PERFORMANCE: Optimized metrics calculation to prevent skeleton-lock.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading, profileLoading } = useUser() as any;
@@ -45,9 +47,10 @@ export default function StudentDashboard() {
     if (!authLoading && !user) router.push("/login")
   }, [user, authLoading, router])
 
+  // Consolidate queries to reduce mobile socket usage
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null
-    return query(collection(db, "results"), where("userId", "==", user.uid), limit(5))
+    return query(collection(db, "results"), where("userId", "==", user.uid), limit(10))
   }, [db, user, mounted])
 
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
@@ -62,7 +65,7 @@ export default function StudentDashboard() {
   }, [rawResults])
 
   const stats = useMemo(() => {
-    if (!results || results.length === 0) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0h", correct: 0 }
+    if (!results || results.length === 0) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0h" }
     
     const total = results.length
     const correct = results.reduce((acc: number, r: any) => acc + (r.correctCount || r.score || 0), 0)
@@ -80,10 +83,9 @@ export default function StudentDashboard() {
     }
     
     const uniqueDays = new Set(results.filter((r: any) => r.timestamp).map((r: any) => new Date(r.timestamp).toDateString()))
-    const streak = uniqueDays.size
     const readiness = Math.min(100, Math.round((avgAcc * 0.7) + (Math.min(total, 30) * 1)))
 
-    return { total, avgAccuracy: avgAcc, streak, readiness, hours: timeFormatted, correct }
+    return { total, avgAccuracy: avgAcc, streak: uniqueDays.size, readiness, hours: timeFormatted }
   }, [results])
 
   if (!mounted) return null;
@@ -96,12 +98,11 @@ export default function StudentDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10">
           
           <div className="lg:col-span-8 space-y-8">
-              {/* HERO SECTION */}
               <section className="bg-[#0B1528] text-white p-8 md:p-14 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl relative overflow-hidden group text-left">
                 <div className="absolute top-0 right-0 w-1/2 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
                 <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 md:gap-10">
                   <div className="relative shrink-0">
-                    {profileLoading ? (
+                    {(profileLoading && !profile) ? (
                       <Skeleton className="h-24 w-24 md:h-36 md:w-36 rounded-[2rem] md:rounded-[3rem] bg-white/5" />
                     ) : (
                       <div className="relative">
@@ -113,24 +114,19 @@ export default function StudentDashboard() {
                     )}
                   </div>
                   <div className="flex-1 space-y-4 text-center md:text-left min-w-0">
-                    {profileLoading ? (
-                      <div className="space-y-3">
-                          <Skeleton className="h-10 md:h-14 w-2/3 bg-white/5 mx-auto md:mx-0 rounded-lg" />
-                          <Skeleton className="h-5 w-1/2 bg-white/5 mx-auto md:mx-0 rounded-lg" />
-                      </div>
-                    ) : (
-                      <div className="space-y-1.5">
-                          <h2 className="text-2xl md:text-5xl lg:text-6xl font-headline font-black tracking-tight uppercase truncate">{profile?.name || user?.displayName || "Aspirant"}</h2>
-                          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
-                            <Badge className="bg-primary text-white border-none text-[8px] md:text-[10px] font-black uppercase px-4 py-1 rounded-full shadow-2xl">
-                              {(profile?.status || 'Free').toUpperCase()} PASS
-                            </Badge>
-                            <div className="text-slate-400 font-bold uppercase tracking-widest text-[9px] md:text-[11px] flex items-center gap-2">
-                              <Target className="h-4 w-4 text-primary" /> {profile?.targetExam || 'Punjab Exams'}
-                            </div>
+                    <div className="space-y-1.5">
+                        <h2 className="text-2xl md:text-5xl lg:text-6xl font-headline font-black tracking-tight uppercase truncate">
+                          {profile?.name || user?.displayName || "Aspirant"}
+                        </h2>
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-4">
+                          <Badge className="bg-primary text-white border-none text-[8px] md:text-[10px] font-black uppercase px-4 py-1 rounded-full shadow-2xl">
+                            {(profile?.status || 'Free').toUpperCase()} PASS
+                          </Badge>
+                          <div className="text-slate-400 font-bold uppercase tracking-widest text-[9px] md:text-[11px] flex items-center gap-2">
+                            <Target className="h-4 w-4 text-primary" /> {profile?.targetExam || 'Punjab Exams'}
                           </div>
-                      </div>
-                    )}
+                        </div>
+                    </div>
                     <div className="pt-2 flex flex-wrap justify-center md:justify-start gap-3">
                         <Button asChild className="h-11 md:h-12 px-6 md:px-8 bg-white/10 hover:bg-white/20 text-white rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest border border-white/10 transition-all active:scale-95">
                           <Link href="/profile">My Profile</Link>
@@ -143,15 +139,13 @@ export default function StudentDashboard() {
                 </div>
               </section>
 
-              {/* METRICS GRID */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-6">
-                <MetricItem label="PROGRESS" val={resultsLoading ? <Skeleton className="h-8 w-12" /> : <div className="min-w-0">{stats.readiness}%</div>} icon={<TrendingUp className="text-primary h-5 w-5" />} />
-                <MetricItem label="ACCURACY" val={resultsLoading ? <Skeleton className="h-8 w-12" /> : <div className="min-w-0">{stats.avgAccuracy}%</div>} icon={<Target className="text-emerald-500 h-5 w-5" />} />
-                <MetricItem label="TESTS" val={resultsLoading ? <Skeleton className="h-8 w-12" /> : <div className="min-w-0">{stats.total}</div>} icon={<ClipboardList className="text-blue-500 h-5 w-5" />} />
-                <MetricItem label="TIME SPENT" val={resultsLoading ? <Skeleton className="h-8 w-12" /> : <div className="min-w-0">{stats.hours}</div>} icon={<Clock className="text-amber-500 h-5 w-5" />} />
+                <MetricItem label="PROGRESS" val={resultsLoading ? <Loader2 className="h-6 w-6 animate-spin text-slate-300" /> : `${stats.readiness}%`} icon={<TrendingUp className="text-primary h-5 w-5" />} />
+                <MetricItem label="ACCURACY" val={resultsLoading ? <Loader2 className="h-6 w-6 animate-spin text-slate-300" /> : `${stats.avgAccuracy}%`} icon={<Target className="text-emerald-500 h-5 w-5" />} />
+                <MetricItem label="TESTS" val={resultsLoading ? <Loader2 className="h-6 w-6 animate-spin text-slate-300" /> : stats.total} icon={<ClipboardList className="text-blue-500 h-5 w-5" />} />
+                <MetricItem label="TIME SPENT" val={resultsLoading ? <Loader2 className="h-6 w-6 animate-spin text-slate-300" /> : stats.hours} icon={<Clock className="text-amber-500 h-5 w-5" />} />
               </div>
 
-              {/* RECENT ATTEMPTS */}
               <Card className="border-none shadow-3xl rounded-[2.5rem] md:rounded-[3.5rem] bg-white overflow-hidden text-left border border-slate-100">
                 <CardHeader className="p-6 md:p-10 border-b border-slate-50 bg-slate-50/30 flex flex-row items-center justify-between">
                     <div className="space-y-1">
@@ -175,7 +169,7 @@ export default function StudentDashboard() {
                             </div>
                           ))
                       ) : results && results.length > 0 ? (
-                          results.slice(0, 5).map((r: any) => (
+                          results.map((r: any) => (
                             <Link key={r.id} href={`/results/${r.mockId}`} className="p-6 md:p-10 flex items-center justify-between hover:bg-slate-50/50 transition-all group border-l-[4px] border-transparent hover:border-primary">
                                 <div className="flex items-center gap-4 md:gap-8 min-w-0 flex-1">
                                   <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
@@ -214,11 +208,6 @@ export default function StudentDashboard() {
                           <p className="text-lg md:text-2xl font-black uppercase">Days</p>
                           <p className="text-[8px] md:text-[9px] font-bold uppercase text-white/60">Active Now</p>
                       </div>
-                    </div>
-                    <div className="pt-4 flex gap-1.5">
-                      {Array.from({ length: 7 }).map((_, i) => (
-                          <div key={i} className={cn("h-1.5 flex-1 rounded-full", i < stats.streak ? 'bg-white' : 'bg-white/20')} />
-                      ))}
                     </div>
                 </div>
               </Card>
@@ -261,7 +250,7 @@ function MetricItem({ label, val, icon }: any) {
         {icon}
       </div>
       <div className="flex flex-col gap-1">
-        <div className="text-xl md:text-4xl lg:text-5xl font-headline font-black text-[#0F172A] leading-none tracking-tighter tabular-nums truncate">{val}</div>
+        <div className="text-xl md:text-4xl lg:text-5xl font-headline font-black text-[#0F172A] leading-none tracking-tighter tabular-nums truncate flex items-center h-12">{val}</div>
         <p className="text-[7px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1 md:mt-2 truncate">{label}</p>
       </div>
     </Card>
