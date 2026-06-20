@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useExamStore } from '@/store/useExamStore';
@@ -24,8 +23,8 @@ const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
 ];
 
 /**
- * @fileOverview Hardened CBT Header v36.0 (Layout Optimized).
- * FIXED: Strictly sticky header with optimized spacing for high-fidelity test engine.
+ * @fileOverview Hardened CBT Header v37.0 (Mobile Optimized).
+ * FIXED: Optimized spacing to prevent MAP button clipping on small mobile screens.
  */
 export default function ExamHeader({ 
   onPaletteToggle, 
@@ -55,18 +54,18 @@ export default function ExamHeader({
 
   return (
     <header className="bg-[#0B1528] text-white flex flex-col shrink-0 z-[100] border-b border-white/5 shadow-lg sticky top-0 h-14 md:h-16">
-      <div className="h-full flex items-center justify-between px-3 md:px-8">
+      <div className="h-full flex items-center justify-between px-3 md:px-8 gap-1 md:gap-4">
         
         {/* LEFT: BACK & PROGRESS */}
-        <div className="flex items-center gap-2 md:gap-4 shrink-0 flex-1">
+        <div className="flex items-center gap-1 md:gap-4 shrink-0 flex-1 min-w-0">
            <button 
              onClick={onExitRequest} 
-             className="p-2 text-slate-400 hover:text-white transition-all cursor-pointer active:scale-90"
+             className="p-1.5 md:p-2 text-slate-400 hover:text-white transition-all cursor-pointer active:scale-90"
            >
               <ChevronLeft className="h-5 w-5" />
            </button>
            
-           <div className="flex items-baseline gap-1 bg-white/5 px-2 py-1 rounded-lg border border-white/10">
+           <div className="flex items-baseline gap-1 bg-white/5 px-2 py-1 rounded-lg border border-white/10 shrink-0">
               <span className="text-sm md:text-lg font-black text-primary tabular-nums">
                  {currentIdx + 1}
               </span>
@@ -77,7 +76,7 @@ export default function ExamHeader({
         </div>
 
         {/* CENTER: TIMER */}
-        <div className="flex justify-center px-2 shrink-0 scale-90 md:scale-100">
+        <div className="flex justify-center px-1 shrink-0 scale-90 md:scale-100">
            <Timer 
              onTimeUp={() => {}} 
              initialSeconds={timeLeft} 
@@ -86,11 +85,11 @@ export default function ExamHeader({
         </div>
 
         {/* RIGHT: COMMANDS */}
-        <div className="flex items-center justify-end gap-2 md:gap-3 flex-1">
+        <div className="flex items-center justify-end gap-1.5 md:gap-3 flex-1 min-w-0">
            {availableModes.length > 1 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                   <button className="h-9 w-9 md:h-11 md:w-11 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded-xl flex items-center justify-center transition-all">
+                   <button className="h-8 w-8 md:h-11 md:w-11 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded-lg md:rounded-xl flex items-center justify-center transition-all shrink-0">
                       <Languages className="h-4 w-4 md:h-5 md:w-5 text-primary" />
                    </button>
                 </DropdownMenuTrigger>
@@ -113,14 +112,14 @@ export default function ExamHeader({
 
            <button 
              onClick={() => setPaused(!isPaused)}
-             className="h-9 w-9 md:h-11 md:w-11 bg-white/5 text-white border border-white/10 rounded-xl flex items-center justify-center active:scale-90 transition-all"
+             className="h-8 w-8 md:h-11 md:w-11 bg-white/5 text-white border border-white/10 rounded-lg md:rounded-xl flex items-center justify-center active:scale-90 transition-all shrink-0"
            >
              {isPaused ? <Play className="h-4 w-4 md:h-5 md:w-5 fill-current text-primary" /> : <Pause className="h-4 w-4 md:h-5 md:w-5 fill-current" />}
            </button>
            
            <button 
              onClick={onPaletteToggle}
-             className="bg-primary hover:bg-blue-600 text-white h-9 md:h-11 px-4 md:px-8 rounded-xl font-black uppercase text-[10px] md:text-[11px] tracking-widest flex items-center justify-center shadow-lg active:scale-95 border-none transition-all"
+             className="bg-primary hover:bg-blue-600 text-white h-8 md:h-11 px-3 md:px-8 rounded-lg md:rounded-xl font-black uppercase text-[10px] md:text-[11px] tracking-widest flex items-center justify-center shadow-lg active:scale-95 border-none transition-all flex-shrink"
            >
               MAP
            </button>
