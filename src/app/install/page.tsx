@@ -23,8 +23,8 @@ import { useToast } from "@/hooks/use-toast"
 import Link from "next/link"
 
 /**
- * @fileOverview High-Fidelity PWA Install Hub v1.4 (Hardened).
- * FIXED: Resolved TS2367 type overlap error for 'device' state.
+ * @fileOverview High-Fidelity PWA Install Hub v1.5 (Build Fixed).
+ * FIXED: Resolved TS2367 type overlap error using boolean flags to prevent narrowing conflicts.
  */
 
 type DeviceType = "android" | "ios" | "desktop" | "unknown";
@@ -34,6 +34,8 @@ export default function InstallPage() {
   const [isInstallable, setIsInstallable] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const { toast } = useToast();
+
+  const isIos = device === "ios";
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -65,7 +67,7 @@ export default function InstallPage() {
       prompt.prompt();
       const { outcome } = await prompt.userChoice;
       if (outcome === 'accepted') (window as any).deferredPrompt = null;
-    } else if (device === "ios") {
+    } else if (isIos) {
        toast({
          title: "iOS Instructions",
          description: "Tap Share > Add to Home Screen to install.",
@@ -108,7 +110,7 @@ export default function InstallPage() {
            <div className="lg:col-span-7">
               <Card className="border-none shadow-5xl rounded-[3rem] bg-[#0B1528] text-white overflow-hidden p-8 md:p-14 space-y-10 relative">
                  <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12">
-                    {device === "ios" ? <Apple className="h-64 w-64" /> : <Smartphone className="h-64 w-64" />}
+                    {isIos ? <Apple className="h-64 w-64" /> : <Smartphone className="h-64 w-64" />}
                  </div>
                  
                  <div className="relative z-10 space-y-8 text-left">
@@ -124,10 +126,10 @@ export default function InstallPage() {
                     </div>
 
                     <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight">
-                       {device === "ios" ? 'Steps for iPhone' : isStandalone ? 'Ready to Prepare' : 'Install Cracklix'}
+                       {isIos ? 'Steps for iPhone' : isStandalone ? 'Ready to Prepare' : 'Install Cracklix'}
                     </h2>
 
-                    {device === "ios" ? (
+                    {isIos ? (
                        <div className="space-y-6">
                           <IOSStep num={1} icon={<Share className="h-4 w-4" />} text="Tap 'Share' in your Safari toolbar" />
                           <IOSStep num={2} icon={<PlusSquare className="h-4 w-4" />} text="Scroll and tap 'Add to Home Screen'" />
@@ -153,12 +155,12 @@ export default function InstallPage() {
                           <div className="space-y-4">
                              <Button 
                                 onClick={handleInstall}
-                                disabled={!isInstallable && (device as string) !== "ios"}
-                                className="w-full h-16 md:h-20 bg-primary hover:bg-blue-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl shadow-3xl transition-all active:scale-95 border-none gap-4"
+                                disabled={!isInstallable && !isIos}
+                                className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-2xl shadow-3xl transition-all active:scale-95 border-none gap-4"
                              >
                                 <Download className="h-6 w-6" /> {isInstallable ? 'INSTALL CRACKLIX APP' : 'BROWSER NOT READY'}
                              </Button>
-                             {!isInstallable && (device as string) !== "ios" && (
+                             {!isInstallable && !isIos && (
                                 <div className="p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-center gap-3">
                                    <AlertCircle className="h-4 w-4 text-orange-500 shrink-0" />
                                    <p className="text-[10px] text-orange-200 font-bold uppercase tracking-tight">Chrome or Edge is required for direct installation.</p>
