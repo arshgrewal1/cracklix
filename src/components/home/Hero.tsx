@@ -21,8 +21,8 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Hero Section v37.0 (Language Simplified).
- * SIMPLIFIED: Replaced technical jargon with easy student terms.
+ * @fileOverview Hero Section v38.0 (Desktop Spacing Fix).
+ * OPTIMIZED: Implemented 1440px container and split grid for desktop to reduce empty margins.
  */
 
 export default function Hero() {
@@ -83,13 +83,16 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden bg-[#F8FAFC] py-10 md:py-24">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full bg-blue-600/5 blur-[140px] rounded-full pointer-events-none" />
+    <section className="relative overflow-hidden bg-[#F8FAFC] py-16 lg:py-20">
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-full bg-blue-600/5 blur-[140px] rounded-full pointer-events-none" />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="max-w-4xl mx-auto">
-          {/* CENTERED CONTENT STACK */}
-          <div className="flex flex-col items-center text-center space-y-8 md:space-y-12">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-10 xl:px-12 relative z-10">
+        
+        {/* HERO GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-8 xl:gap-16 items-center">
+          
+          {/* LEFT: CONTENT HUB */}
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-8 md:space-y-10 max-w-4xl lg:max-w-[680px] mx-auto lg:mx-0">
             
             {/* DYNAMIC TRUST BADGE */}
             <motion.div 
@@ -104,44 +107,20 @@ export default function Hero() {
             </motion.div>
 
             <div className="space-y-4 md:space-y-6">
-              <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-[#0F172A] leading-[0.9] break-words">
+              <h1 className="text-3xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold tracking-tight text-[#0F172A] leading-[0.9] break-words uppercase">
                 Crack Punjab <br/>
                 <span className="text-[#2563EB]">Government Exams</span> <br/>
                 With Confidence
               </h1>
 
-              <p className="text-sm md:text-xl text-[#64748B] max-w-2xl mx-auto font-medium leading-relaxed">
+              <p className="text-sm md:text-xl text-[#64748B] font-medium leading-relaxed max-w-2xl">
                 Practice bilingual mock tests and prepare for Punjab Government Exams. 
                 Access practice tests, previous papers and track your performance.
               </p>
             </div>
 
-            {/* HERO STUDENT IMAGE */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8 }}
-              className="relative w-full flex justify-center py-4"
-            >
-              <div className="absolute inset-0 bg-blue-600/5 blur-[80px] rounded-full scale-110 pointer-events-none" />
-              <img
-                src="/images/hero-student.png"
-                alt="Cracklix Student"
-                data-ai-hint="student studying"
-                className="w-full h-auto object-contain drop-shadow-2xl max-w-[280px] md:max-w-[480px] lg:max-w-[580px]"
-              />
-            </motion.div>
-
-            {/* FEATURES GRID */}
-            <div className="grid grid-cols-2 gap-3 md:gap-6 w-full max-w-2xl">
-               <FeatureCard icon={<Zap />} label="Mock Tests" href="/mocks" />
-               <FeatureCard icon={<Landmark />} label="Punjab Exams" href="/exams" />
-               <FeatureCard icon={<FileText />} label="Previous Papers" href="/pyqs" />
-               <FeatureCard icon={<ShieldCheck />} label="Free Practice" href="/mocks" />
-            </div>
-
             {/* CTA BUTTONS */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-4 justify-center lg:justify-start">
               <Button
                 asChild
                 className="h-14 md:h-16 px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-sm tracking-tight rounded-full shadow-xl transition-all active:scale-95 border-none group/btn"
@@ -163,7 +142,31 @@ export default function Hero() {
                 </Link>
               </Button>
             </div>
+
+            {/* FEATURES GRID */}
+            <div className="grid grid-cols-2 gap-3 md:gap-6 w-full max-w-2xl pt-2">
+               <FeatureCard icon={<Zap />} label="Mock Tests" href="/mocks" />
+               <FeatureCard icon={<Landmark />} label="Punjab Exams" href="/exams" />
+               <FeatureCard icon={<FileText />} label="Previous Papers" href="/pyqs" />
+               <FeatureCard icon={<ShieldCheck />} label="Free Practice" href="/mocks" />
+            </div>
           </div>
+
+          {/* RIGHT: STUDENT ILLUSTRATION */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            className="relative w-full flex justify-center lg:justify-end py-4"
+          >
+            <div className="absolute inset-0 bg-blue-600/5 blur-[80px] rounded-full scale-110 pointer-events-none" />
+            <img
+              src="/images/hero-student.png"
+              alt="Cracklix Student"
+              data-ai-hint="student studying"
+              className="w-full h-auto object-contain drop-shadow-2xl max-w-[280px] md:max-w-[480px] lg:max-w-[540px] xl:max-w-[620px]"
+            />
+          </motion.div>
         </div>
 
         {/* STATS SECTION */}
