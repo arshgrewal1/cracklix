@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo } from "react"
@@ -7,12 +6,16 @@ import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
-import { Bookmark, Search, Trash2, ChevronRight, BrainCircuit, ShieldCheck, Languages } from "lucide-react"
+import { Bookmark, Search, Trash2, ChevronRight, BookOpen, ShieldCheck, Languages } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+
+/**
+ * @fileOverview Official Bookmarks Hub (AI Cleaned).
+ */
 
 export default function BookmarksPage() {
   const db = useFirestore()
@@ -77,7 +80,7 @@ export default function BookmarksPage() {
                              <Languages className="h-4 w-4" /> English
                           </Button>
                           <Button variant="ghost" className="text-primary font-black uppercase text-[10px] gap-2">
-                             <BrainCircuit className="h-4 w-4" /> View AI Logic
+                             <BookOpen className="h-4 w-4" /> View Solution
                           </Button>
                        </div>
                        <Button variant="ghost" className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all">

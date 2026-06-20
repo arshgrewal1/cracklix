@@ -10,8 +10,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Pass Center v15.0 (Typography Hardened).
- * FIXED: Applied global responsive scaling text-3xl sm:text-5xl lg:text-7xl with leading-[0.9].
+ * @fileOverview Institutional Pass Center v15.1 (AI Cleaned).
  */
 
 const PLANS = [
@@ -54,7 +53,7 @@ const PLANS = [
     features: [
       "Everything in Silver",
       "All Full Length Mocks (500+)",
-      "AI Rationale Tutors",
+      "Detailed Solution Rationales",
       "Readiness Score Index",
       "Revision Vault Access",
       "Priority WhatsApp Alerts"
@@ -93,7 +92,7 @@ export default function PricingPage() {
                  Select Your <br/> <span className="text-primary">Cracklix Pass</span>
               </h1>
               <p className="text-sm md:text-2xl text-slate-500 font-medium max-w-2xl mx-auto mt-10 leading-tight tracking-tight">
-                 Invest in institutional precision. Unlock verified patterns and AI-powered audit rationalizations for Latest Pattern recruitments.
+                 Invest in institutional precision. Unlock verified patterns and expert audit rationalizations for Latest Pattern recruitments.
               </p>
            </motion.div>
         </div>

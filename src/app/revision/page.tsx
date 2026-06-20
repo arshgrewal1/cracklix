@@ -11,7 +11,6 @@ import {
   Search, 
   Trash2, 
   ChevronRight, 
-  BrainCircuit, 
   Languages, 
   AlertCircle, 
   History, 
@@ -19,7 +18,8 @@ import {
   Zap, 
   Sparkles,
   ShieldAlert,
-  GraduationCap
+  GraduationCap,
+  BookOpen
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,8 +29,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import Link from "next/link"
 
 /**
- * @fileOverview Official Revision & Study Hub.
- * SIMPLIFIED: Replaced technical jargon with easy words (Wrong Answers, Solutions).
+ * @fileOverview Official Revision & Study Hub (AI Cleaned).
  */
 
 export default function RevisionHub() {
@@ -145,7 +144,7 @@ export default function RevisionHub() {
                                  <Languages className="h-4 w-4" /> Multi-Language
                               </Button>
                               <Button variant="ghost" className="text-primary font-black uppercase text-[10px] gap-2">
-                                 <BrainCircuit className="h-4 w-4" /> View Solution
+                                 <BookOpen className="h-4 w-4" /> View Solution
                               </Button>
                            </div>
                            <Button variant="ghost" className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all shadow-sm">

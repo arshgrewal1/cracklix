@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -15,7 +14,6 @@ import {
   UploadCloud,
   FolderTree,
   Activity,
-  Sparkles,
   PenSquare,
   ClipboardList,
   Archive,
@@ -64,7 +62,6 @@ const NAV_GROUPS = [
     label: "Content CMS",
     items: [
       { label: "Content Pulse", href: "/admin/qa", icon: Activity },
-      { label: "Brand Magic", href: "/admin/brand-magic", icon: Sparkles },
       { label: "Mock Builder", href: "/admin/mocks/builder", icon: PenSquare },
       { label: "Mock Manager", href: "/admin/mocks", icon: ClipboardList },
       { label: "Current Affairs", href: "/admin/current-affairs", icon: Newspaper },

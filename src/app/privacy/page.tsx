@@ -1,9 +1,12 @@
-
 "use client"
 
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { ShieldCheck, Lock, Eye, FileText } from "lucide-react"
+
+/**
+ * @fileOverview Institutional Privacy Policy (AI Cleaned).
+ */
 
 export default function PrivacyPage() {
   return (
@@ -35,7 +38,7 @@ export default function PrivacyPage() {
                 <ul className="list-disc pl-6 space-y-2 text-slate-600 font-medium">
                    <li>Generate All Punjab Rank and performance benchmarks.</li>
                    <li>Send exam notifications and admit card alerts.</li>
-                   <li>Provide AI-powered tutors based on your weak subjects.</li>
+                   <li>Provide personalized mentors based on your performance.</li>
                 </ul>
              </section>
 

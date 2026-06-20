@@ -16,8 +16,7 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Pass Center v15.2.
- * FIXED: TypeScript Date constructor overload error.
+ * @fileOverview Institutional Pass Center v15.3 (AI Cleaned).
  */
 
 export default function PassPage() {
