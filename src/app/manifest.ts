@@ -1,8 +1,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Production-Grade PWA Manifest v13.0.
- * BRAND SYSTEM: Unified institutional branding with normalized Title and Icons.
+ * @fileOverview Production-Grade PWA Manifest v14.0.
+ * FIXED: Set purpose to 'any' for primary icons to prevent circular clipping of the "C" ring.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -21,25 +21,25 @@ export default function manifest(): MetadataRoute.Manifest {
         src: '/logo/cracklix-icon.png',
         sizes: '192x192',
         type: 'image/png',
-        purpose: 'maskable',
+        purpose: 'any',
       },
       {
         src: '/logo/cracklix-icon.png',
         sizes: '512x512',
         type: 'image/png',
-        purpose: 'maskable',
+        purpose: 'any',
       },
       {
         src: '/logo/cracklix-icon.png',
         sizes: '192x192',
         type: 'image/png',
-        purpose: 'any',
+        purpose: 'maskable',
       },
       {
         src: '/logo/cracklix-icon.png',
         sizes: '512x512',
         type: 'image/png',
-        purpose: 'any',
+        purpose: 'maskable',
       }
     ],
     categories: ['education', 'lifestyle', 'productivity']

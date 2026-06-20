@@ -11,8 +11,8 @@ interface SidebarHeaderProps {
 }
 
 /**
- * Cracklix Admin Sidebar Header v25.0.
- * BRAND SYSTEM: Maximized logo height (72px) synchronized with 88px container.
+ * Cracklix Admin Sidebar Header v26.0.
+ * FIXED: Optimized collapsed icon container to prevent ring clipping.
  */
 export default function SidebarHeader({
   isOpen,
@@ -21,8 +21,8 @@ export default function SidebarHeader({
   return (
     <div
       className={cn(
-        "h-[88px] border-b border-white/5 px-4 shrink-0 flex items-center",
-        isOpen ? "justify-between gap-2" : "justify-center"
+        "h-[88px] border-b border-white/5 px-4 shrink-0 flex items-center transition-all duration-300",
+        isOpen ? "justify-between gap-2" : "justify-center p-0"
       )}
     >
       <Logo
@@ -32,7 +32,7 @@ export default function SidebarHeader({
         align={isOpen ? "left" : "center"}
         className="transition-all duration-300"
         imgClassName={cn(
-          isOpen ? "h-[72px]" : "h-12"
+          isOpen ? "h-[72px]" : "h-14" // Larger icon when collapsed
         )}
       />
 

@@ -17,11 +17,9 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix Maximized Brand Identity v56.0.
- * SPECS:
- * Desktop Header Logo: 72px height (within 88px header)
- * Mobile Header Logo: 60px height (within 72px header)
- * FIXED: Optimized container constraints to prevent clipping.
+ * @fileOverview Cracklix Maximized Brand Identity v57.0.
+ * FIXED: Optimized icon rendering to prevent "compression" and clipping.
+ * FIXED: Removed object-contain for icons to allow edge-to-edge ring visibility.
  */
 export default function Logo({
   className = "",
@@ -40,8 +38,8 @@ export default function Logo({
     icon: "/logo/cracklix-icon.png"
   };
 
-  const src = assets[iconOnly ? 'icon' : variant];
   const isIcon = variant === 'icon' || iconOnly;
+  const src = assets[isIcon ? 'icon' : variant];
 
   const content = (
     <div className={cn(
@@ -53,12 +51,14 @@ export default function Logo({
       <Image
         src={src}
         alt="Cracklix"
-        width={isIcon ? 80 : 800}
-        height={isIcon ? 80 : 250}
+        width={isIcon ? 120 : 800}
+        height={isIcon ? 120 : 250}
         priority={priority}
         className={cn(
-          "object-contain w-auto transition-all flex-shrink-0",
-          isIcon ? "h-10 md:h-12" : "h-[56px] md:h-[72px]",
+          "transition-all flex-shrink-0 w-auto",
+          isIcon 
+            ? "h-10 md:h-12 object-center scale-110" // Maximum visibility for the ring
+            : "h-[56px] md:h-[72px] object-contain",
           imgClassName
         )}
       />
