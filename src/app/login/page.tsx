@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, Suspense, useEffect, useTransition } from "react"
@@ -28,6 +27,10 @@ import { cn } from "@/lib/utils"
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
+/**
+ * @fileOverview Login Hub v16.0
+ * BRAND SYSTEM: Maximized logo height (100px) for institutional authority.
+ */
 export default function LoginPage() {
   return (
     <Suspense fallback={null}>
@@ -207,8 +210,8 @@ function LoginContent() {
         <Logo 
           variant="light" 
           align="center" 
-          className="mb-6" 
-          imgClassName="h-[50px] md:h-[60px]"
+          className="mb-8" 
+          imgClassName="h-[80px] md:h-[100px]"
         />
 
         {sessionTerminated && (
