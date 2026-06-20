@@ -18,6 +18,7 @@ import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
+import { cn } from "@/lib/utils";
 
 /**
  * @fileOverview Official Restored Hero Hub v5.0 (Live Admin Control).
