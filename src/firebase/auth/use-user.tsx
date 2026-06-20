@@ -8,8 +8,8 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Auth & Profile Hook.
- * Automatically syncs user profile from Firestore.
+ * @fileOverview Auth & Profile Hook v5.0.
+ * Optimized: Immediate state resolution and robust profile syncing.
  */
 export function useUser() {
   const auth = useAuth();
@@ -30,8 +30,7 @@ export function useUser() {
   useEffect(() => {
     if (!auth) return;
 
-    let timeoutId: NodeJS.Timeout;
-
+    // Use onAuthStateChanged to listen to login/logout events globally
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       setAuthResolved(true);
@@ -39,29 +38,17 @@ export function useUser() {
       if (firebaseUser) {
         setProfileLoading(!profileLoaded.current);
       } else {
+        setProfile(null);
         setProfileLoading(false);
         profileLoaded.current = true;
       }
-      
-      if (timeoutId) clearTimeout(timeoutId);
     }, (err) => {
       console.error("[AUTH_SYNC_FAILURE]:", err);
       setAuthResolved(true);
       setProfileLoading(false);
-      if (timeoutId) clearTimeout(timeoutId);
     });
 
-    timeoutId = setTimeout(() => {
-       if (!authResolved) {
-          setAuthResolved(true);
-          setProfileLoading(false);
-       }
-    }, 10000);
-
-    return () => {
-       unsubscribeAuth();
-       if (timeoutId) clearTimeout(timeoutId);
-    };
+    return () => unsubscribeAuth();
   }, [auth]);
 
   useEffect(() => {
@@ -107,7 +94,6 @@ export function useUser() {
     profile, 
     loading: !authResolved, 
     profileLoading,         
-    currentDeviceId,
-    emailVerified: true // Set to true as requirement is removed
+    currentDeviceId
   };
 }

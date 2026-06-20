@@ -15,8 +15,7 @@ import {
   signInWithPopup, 
   GoogleAuthProvider,
   sendPasswordResetEmail,
-  updateProfile,
-  signOut
+  updateProfile
 } from "firebase/auth"
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
@@ -24,6 +23,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
+/**
+ * @fileOverview Professional Login Hub v41.0.
+ * FIXED: Redirection and state sync issues. Added immediate router push.
+ */
 export default function LoginPage() {
   return (
     <Suspense fallback={null}>
@@ -53,8 +56,9 @@ function LoginContent() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const returnUrl = searchParams.get("returnUrl") || "/dashboard"
+  const returnUrl = searchParams.get("returnUrl") || "/"
 
+  // Redirect if user is already logged in
   useEffect(() => {
     if (!authLoading && user) {
       router.replace(returnUrl);
@@ -71,9 +75,13 @@ function LoginContent() {
     setLoading(true)
     try {
       if (mode === 'login') {
-        await signInWithEmailAndPassword(auth, email, password)
+        const result = await signInWithEmailAndPassword(auth, email, password)
+        await result.user.reload();
         toast({ title: "Welcome Back" })
-        startTransition(() => { router.replace(returnUrl) })
+        startTransition(() => {
+          router.replace(returnUrl)
+          router.refresh()
+        })
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
         const userNode = userCredential.user
@@ -98,7 +106,10 @@ function LoginContent() {
         })
 
         toast({ title: "Account Created", description: "Welcome to Cracklix!" })
-        startTransition(() => { router.replace(returnUrl) })
+        startTransition(() => {
+          router.replace(returnUrl)
+          router.refresh()
+        })
       }
     } catch (error: any) {
       toast({ variant: "destructive", title: "Error", description: error.message })
@@ -131,7 +142,10 @@ function LoginContent() {
       }
       
       toast({ title: "Welcome" })
-      startTransition(() => { router.replace(returnUrl) })
+      startTransition(() => {
+        router.replace(returnUrl)
+        router.refresh()
+      })
     } catch (error: any) {
       toast({ variant: "destructive", title: "Error", description: error.message })
       setLoading(false)
@@ -170,7 +184,7 @@ function LoginContent() {
                 <span className="text-primary">Mock Test Hub</span>
               </h1>
               <p className="text-sm md:text-xl text-slate-400 font-medium max-w-md leading-relaxed">
-                Prepare for Punjab Government Exams with high-quality mock tests and real-time rankings.
+                Prepare for Punjab Government Exams with high-quality mock tests.
               </p>
            </div>
            <div className="space-y-6 pt-10">

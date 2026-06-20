@@ -41,6 +41,10 @@ import { Button } from "@/components/ui/button";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
+/**
+ * @fileOverview Standardized Navbar Hub v44.0.
+ * FIXED: Auth state sync issues and Navbar flickering.
+ */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
