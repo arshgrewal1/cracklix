@@ -26,10 +26,6 @@ import { getDeviceId, getBrowserInfo } from "@/lib/device"
 import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
-/**
- * @fileOverview Professional Login Hub v35.0 (Email Verification Update).
- */
-
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 export default function LoginPage() {
@@ -100,11 +96,18 @@ function LoginContent() {
     try {
       if (mode === 'login') {
         const creds = await signInWithEmailAndPassword(auth, email, password)
+        
+        // Reload user to get latest verification status
+        await creds.user.reload();
+        
         if (!creds.user.emailVerified) {
+          // If not verified, send email again and redirect
           await sendEmailVerification(creds.user);
+          toast({ title: "Verification Required", description: "Check your inbox for the link." })
           router.push('/verify-email');
           return;
         }
+
         await updateActiveDevice(creds.user.uid);
         toast({ title: "Welcome to Cracklix" })
         startTransition(() => { router.replace(returnUrl) })
@@ -113,15 +116,24 @@ function LoginContent() {
         const userNode = userCredential.user
         
         await updateProfile(userNode, { displayName: name })
+        
+        // Send initial verification email
         await sendEmailVerification(userNode);
         
         const isSuperAdmin = email && SUPER_ADMIN_WHITELIST.includes(email.toLowerCase());
         
         await setDoc(doc(db!, 'users', userNode.uid), {
-          id: userNode.uid, name, email, phone: `+91 ${phone}`,
+          id: userNode.uid, 
+          name, 
+          email, 
+          phone: `+91 ${phone}`,
           role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
-          state: "Punjab", createdAt: new Date().toISOString(),
-          updatedAt: serverTimestamp(), status: 'Free', pinnedExams: []
+          state: "Punjab", 
+          createdAt: new Date().toISOString(),
+          updatedAt: serverTimestamp(), 
+          status: 'Free', 
+          pinnedExams: [],
+          verified: false
         })
 
         await updateActiveDevice(userNode.uid);
@@ -153,7 +165,8 @@ function LoginContent() {
           id: userNode.uid, name: userNode.displayName || "Aspirant",
           email: userNode.email, role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
           state: "Punjab", createdAt: new Date().toISOString(),
-          updatedAt: serverTimestamp(), status: 'Free', pinnedExams: [], phone: ""
+          updatedAt: serverTimestamp(), status: 'Free', pinnedExams: [], phone: "",
+          verified: userNode.emailVerified
         })
       }
       

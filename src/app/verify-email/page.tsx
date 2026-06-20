@@ -8,12 +8,12 @@ import { sendEmailVerification, signOut } from "firebase/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import Logo from "@/components/brand/Logo"
-import { Mail, RefreshCw, LogOut, CheckCircle2, Loader2, Sparkles, ShieldCheck } from "lucide-react"
+import { Mail, RefreshCw, LogOut, CheckCircle2, Loader2, Sparkles, ShieldCheck, ExternalLink } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { motion } from "framer-motion"
 
 /**
- * @fileOverview Institutional Verification Hub v1.0.
+ * @fileOverview Institutional Verification Hub v2.0.
  * Enforces email validation link flow for secure aspirant registration.
  */
 
@@ -55,8 +55,19 @@ export default function VerifyEmailPage() {
     }
   }
 
-  const handleRefreshStatus = () => {
-    window.location.reload()
+  const handleRefreshStatus = async () => {
+    if (!user) return;
+    try {
+      await user.reload();
+      if (user.emailVerified) {
+        toast({ title: "Account Activated", description: "Email successfully verified." });
+        router.replace('/dashboard');
+      } else {
+        toast({ title: "Not Verified", description: "Please click the link in your email inbox." });
+      }
+    } catch (e: any) {
+       toast({ variant: "destructive", title: "Refresh Failed" });
+    }
   }
 
   const handleLogout = async () => {
@@ -95,7 +106,7 @@ export default function VerifyEmailPage() {
               <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 space-y-4">
                  <div className="flex items-center gap-3 text-emerald-600">
                     <CheckCircle2 className="h-5 w-5" />
-                    <p className="text-[10px] font-black uppercase tracking-widest">Next Registry Steps</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest">Next Steps</p>
                  </div>
                  <ul className="space-y-3">
                     <li className="flex items-center gap-3 text-sm font-bold text-slate-600">
@@ -104,25 +115,36 @@ export default function VerifyEmailPage() {
                     </li>
                     <li className="flex items-center gap-3 text-sm font-bold text-slate-600">
                        <div className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-                       Refresh this page to activate access
+                       Refresh status to activate access
                     </li>
                  </ul>
               </div>
 
               <div className="grid grid-cols-1 gap-4">
                  <Button onClick={handleRefreshStatus} className="w-full h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[11px] tracking-[0.2em] rounded-2xl shadow-3xl transition-all active:scale-95 border-none gap-3">
-                    <RefreshCw className="h-4 w-4" /> Check Verification Status
+                    <ShieldCheck className="h-4 w-4" /> I've Verified My Email
                  </Button>
-                 
-                 <Button 
-                   onClick={handleResend} 
-                   disabled={isResending || cooldown > 0} 
-                   variant="outline" 
-                   className="w-full h-14 border-slate-200 text-[#0F172A] font-bold uppercase text-[10px] tracking-widest rounded-2xl"
-                 >
-                    {isResending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-                    {cooldown > 0 ? `Resend Link in ${cooldown}s` : "Resend Link"}
-                 </Button>
+
+                 <div className="grid grid-cols-2 gap-4">
+                    <Button 
+                      asChild
+                      variant="outline" 
+                      className="h-14 border-slate-200 text-[#0F172A] font-bold uppercase text-[10px] tracking-widest rounded-2xl gap-2"
+                    >
+                       <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="h-3.5 w-3.5" /> Open Gmail
+                       </a>
+                    </Button>
+                    <Button 
+                      onClick={handleResend} 
+                      disabled={isResending || cooldown > 0} 
+                      variant="outline" 
+                      className="h-14 border-slate-200 text-[#0F172A] font-bold uppercase text-[10px] tracking-widest rounded-2xl"
+                    >
+                       {isResending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+                       {cooldown > 0 ? `${cooldown}s` : "Resend Link"}
+                    </Button>
+                 </div>
               </div>
 
               <button 

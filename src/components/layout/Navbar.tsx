@@ -12,7 +12,8 @@ import {
   ChevronRight,
   Gem,
   ArrowRight,
-  AlertCircle
+  AlertCircle,
+  CheckCircle2
 } from "lucide-react";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -41,7 +42,7 @@ import { Badge } from "@/components/ui/badge";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v108.0 (Verification Status Sync).
+ * @fileOverview Institutional Header v110.0 (Elite Verification Badge).
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -151,33 +152,34 @@ export default function Navbar() {
                     </div>
 
                     <div className="space-y-1">
-                      <h3 className="text-xl md:text-2xl font-[800] text-[#0F172A] tracking-tight leading-tight truncate w-full px-2">
-                        {profile?.name || "Aspirant"}
-                      </h3>
+                      <div className="flex flex-col items-center gap-2">
+                        <h3 className="text-xl md:text-2xl font-[800] text-[#0F172A] tracking-tight leading-tight truncate w-full px-2">
+                          {profile?.name || "Aspirant"}
+                        </h3>
+                        {emailVerified ? (
+                          <Badge className="bg-emerald-50 text-emerald-700 border-none px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1">
+                             <CheckCircle2 className="h-3 w-3" /> Verified
+                          </Badge>
+                        ) : (
+                          <Link href="/verify-email" className="bg-rose-50 text-rose-700 px-3 py-1 rounded-full text-[10px] font-black uppercase flex items-center gap-1 animate-pulse">
+                             <AlertCircle className="h-3 w-3" /> Unverified
+                          </Link>
+                        )}
+                      </div>
                       <Link 
                         href="/profile" 
-                        className="text-[13px] font-[700] text-[#94A3B8] uppercase tracking-[0.15em] hover:text-primary transition-colors flex items-center justify-center gap-1"
+                        className="text-[13px] font-[700] text-[#94A3B8] uppercase tracking-[0.15em] hover:text-primary transition-colors flex items-center justify-center gap-1 mt-4"
                       >
                         View Profile <ChevronRight className="h-3.5 w-3.5" />
                       </Link>
                     </div>
-
-                    {!emailVerified && (
-                      <Link href="/verify-email" className="w-full p-4 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100 flex flex-col gap-1 group">
-                         <div className="flex items-center justify-between">
-                            <p className="text-[10px] font-black uppercase tracking-widest">UNVERIFIED NODE</p>
-                            <AlertCircle className="h-3.5 w-3.5 animate-pulse" />
-                         </div>
-                         <p className="text-[11px] font-bold text-rose-400 mt-1 group-hover:underline">Click to verify account</p>
-                      </Link>
-                    )}
 
                     <div className="w-full p-4 bg-[#DBEAFE]/40 text-[#2563EB] rounded-2xl border border-blue-50/50 flex flex-col gap-1">
                        <div className="flex items-center justify-between">
                           <p className="text-[10px] font-black uppercase tracking-widest leading-none">
                             {profile?.status?.toUpperCase() || "FREE"} PASS
                           </p>
-                          <Gem className="h-3.5 w-3.5 animate-pulse" />
+                          <Gem className="h-3.5 w-3.5" />
                        </div>
                        <p className="text-[12px] font-bold text-slate-500 mt-1">
                          {passDaysLeft !== null ? `${passDaysLeft} Days Remaining` : "Active Subscription"}
