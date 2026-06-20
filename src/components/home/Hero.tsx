@@ -21,9 +21,9 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Premium Clean Hero Hub v30.0.
- * FIXED: Trust badge synchronized with official screenshot design.
- * RESTORED: Original data fallback values for statistics.
+ * @fileOverview Refined Centered Hero Hub v31.0.
+ * UPDATED: Moved student illustration above the features grid.
+ * DESIGN: Centered stack for maximized institutional authority.
  */
 
 export default function Hero() {
@@ -80,15 +80,14 @@ export default function Hero() {
 
   return (
     <section className="relative overflow-hidden bg-[#F8FAFC] py-12 md:py-24">
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-
-          {/* LEFT: CONTENT HUB */}
-          <div className="flex flex-col items-start text-left space-y-8 md:space-y-10">
+        <div className="max-w-4xl mx-auto">
+          {/* CENTERED CONTENT STACK */}
+          <div className="flex flex-col items-center text-center space-y-8 md:space-y-12">
             
-            {/* TRUST BADGE - SYNCHRONIZED WITH DESIGN */}
+            {/* TRUST BADGE */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -101,20 +100,20 @@ export default function Hero() {
             </motion.div>
 
             <div className="space-y-4">
-              <h1 className="text-4xl md:text-6xl font-black text-[#0F172A] leading-tight tracking-tight">
+              <h1 className="text-4xl md:text-7xl font-black text-[#0F172A] leading-tight tracking-tight uppercase">
                 Crack Punjab <br/>
                 <span className="text-[#2563EB]">Government Exams</span> <br/>
                 With Confidence
               </h1>
 
-              <p className="text-base md:text-lg text-[#64748B] max-w-xl font-medium leading-relaxed">
+              <p className="text-base md:text-xl text-[#64748B] max-w-2xl mx-auto font-medium leading-relaxed">
                 Practice bilingual mock tests and prepare for Punjab Government Exams with confidence. 
                 Access exam-focused practice, previous papers and performance tracking in one place.
               </p>
             </div>
 
             {/* EXAM CATEGORY PILLS */}
-            <div className="flex flex-wrap gap-2 md:gap-3">
+            <div className="flex flex-wrap justify-center gap-2 md:gap-3">
               {["PSSSB", "Punjab Police", "PSTET", "PSPCL", "PPSC"].map((item) => (
                 <span key={item} className="px-4 py-2 rounded-full bg-white border border-slate-100 text-[10px] md:text-xs font-bold text-slate-600 shadow-sm uppercase tracking-tight">
                    {item}
@@ -122,21 +121,37 @@ export default function Hero() {
               ))}
             </div>
 
+            {/* MOVED: HERO STUDENT IMAGE (Now above features) */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.8 }}
+              className="relative w-full flex justify-center py-4"
+            >
+              <div className="absolute inset-0 bg-blue-600/5 blur-[80px] rounded-full scale-110 pointer-events-none" />
+              <img
+                src="/images/hero-student.png"
+                alt="Cracklix Student"
+                data-ai-hint="student studying"
+                className="w-full h-auto object-contain drop-shadow-2xl max-w-[300px] md:max-w-[480px] lg:max-w-[580px]"
+              />
+            </motion.div>
+
             {/* INTEGRATED FEATURE GRID */}
-            <div className="grid grid-cols-2 gap-3 md:gap-4 w-full max-w-lg">
+            <div className="grid grid-cols-2 gap-3 md:gap-6 w-full max-w-2xl">
                <FeatureCard icon={<Zap />} label="MOCK TESTS" href="/mocks" />
                <FeatureCard icon={<Landmark />} label="PUNJAB EXAMS" href="/exams" />
                <FeatureCard icon={<FileText />} label="PREVIOUS PAPERS" href="/pyqs" />
                <FeatureCard icon={<ShieldCheck />} label="FREE PRACTICE" href="/mocks" />
             </div>
 
-            {/* CTA BUTTONS - SYNCHRONIZED ALIGNMENT */}
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-4">
+            {/* CTA BUTTONS */}
+            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-4 justify-center">
               <Button
                 asChild
-                className="h-14 md:h-16 px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-black uppercase text-[11px] md:text-xs tracking-[0.2em] rounded-full shadow-xl transition-all active:scale-95 border-none group/btn justify-center"
+                className="h-14 md:h-20 px-12 bg-[#2563EB] hover:bg-blue-700 text-white font-black uppercase text-[11px] md:text-sm tracking-[0.2em] rounded-full shadow-xl transition-all active:scale-95 border-none group/btn"
               >
-                <Link href="/mocks" className="flex items-center justify-center gap-3 w-full">
+                <Link href="/mocks" className="flex items-center justify-center gap-3">
                   <span>START FREE MOCK TEST</span>
                   <ChevronRight className="h-5 w-5 transition-transform group-hover/btn:translate-x-1" />
                 </Link>
@@ -145,31 +160,14 @@ export default function Hero() {
               <Button
                 asChild
                 variant="outline"
-                className="h-14 md:h-16 px-10 border-2 border-slate-200 bg-white text-[#0F172A] font-black uppercase text-[11px] md:text-xs tracking-[0.2em] rounded-full shadow-sm hover:bg-slate-50 transition-all active:scale-95 group/btn2 justify-center"
+                className="h-14 md:h-20 px-12 border-2 border-slate-200 bg-white text-[#0F172A] font-black uppercase text-[11px] md:text-sm tracking-[0.2em] rounded-full shadow-sm hover:bg-slate-50 transition-all active:scale-95 group/btn2"
               >
-                <Link href="/exams" className="flex items-center justify-center gap-3 w-full">
+                <Link href="/exams" className="flex items-center justify-center gap-3">
                   <span>BROWSE EXAMS</span>
                   <ChevronRight className="h-5 w-5 transition-transform group-hover/btn2:translate-x-1" />
                 </Link>
               </Button>
             </div>
-          </div>
-
-          {/* RIGHT: CLEAN VISUAL HUB */}
-          <div className="relative flex justify-center items-center">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8 }}
-              className="relative z-10 w-full flex justify-center"
-            >
-              <div className="absolute inset-0 bg-blue-600/5 blur-[100px] rounded-full scale-110 pointer-events-none" />
-              <img
-                src="/images/hero-student.png"
-                alt="Cracklix Student"
-                className="w-full h-auto object-contain drop-shadow-2xl max-w-[320px] md:max-w-[420px] lg:max-w-[520px] xl:max-w-[620px]"
-              />
-            </motion.div>
           </div>
         </div>
 
@@ -213,11 +211,11 @@ export default function Hero() {
 function FeatureCard({ icon, label, href }: { icon: React.ReactNode, label: string, href: string }) {
   return (
     <Link href={href} className="block group">
-      <div className="bg-white p-3 md:p-5 rounded-full shadow-lg border border-slate-50 flex items-center gap-3 transition-all duration-300 hover:shadow-xl hover:translate-y-[-2px] active:scale-95 cursor-pointer">
-        <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-blue-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary transition-colors duration-300">
-           {React.cloneElement(icon as React.ReactElement, { className: "h-4 w-4 md:h-5 md:w-5 text-primary group-hover:text-white transition-colors" })}
+      <div className="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-lg border border-slate-50 flex items-center gap-4 transition-all duration-300 hover:shadow-xl hover:translate-y-[-2px] active:scale-95 cursor-pointer h-full">
+        <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary transition-colors duration-300">
+           {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6 text-primary group-hover:text-white transition-colors" })}
         </div>
-        <span className="font-black text-[9px] md:text-[11px] text-[#0F172A] tracking-tight uppercase group-hover:text-primary transition-colors truncate">
+        <span className="font-black text-[10px] md:text-xs text-[#0F172A] tracking-tight uppercase group-hover:text-primary transition-colors text-left leading-tight">
           {label}
         </span>
       </div>
