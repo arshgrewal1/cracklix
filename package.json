@@ -11,7 +11,9 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "git:sync": "git add . && git commit -m 'Institutional Registry Sync'"
+    "git:sync": "git add . && git commit -m 'Registry Sync' && git push origin main",
+    "git:fix": "git pull --rebase origin main && git push origin main",
+    "git:force": "git push -f origin main"
   },
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^4.5.1",
