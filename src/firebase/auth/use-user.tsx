@@ -8,8 +8,9 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Auth & Profile Hook v5.0.
- * Optimized: Immediate state resolution and robust profile syncing.
+ * @fileOverview Hardened Auth & Profile Hub v6.0.
+ * Persistent: Uses onAuthStateChanged to maintain stable login states across refreshes.
+ * Multi-Device: Allows concurrent sessions on multiple hardware nodes.
  */
 export function useUser() {
   const auth = useAuth();
@@ -30,7 +31,7 @@ export function useUser() {
   useEffect(() => {
     if (!auth) return;
 
-    // Use onAuthStateChanged to listen to login/logout events globally
+    // Standard Firebase listener for session persistence
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
       setAuthResolved(true);

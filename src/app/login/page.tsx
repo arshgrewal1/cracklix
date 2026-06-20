@@ -24,8 +24,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Login Hub v41.0.
+ * @fileOverview Professional Login Hub v42.0.
  * FIXED: Redirection and state sync issues. Added immediate router push.
+ * UPDATED: Multi-device support enabled.
  */
 export default function LoginPage() {
   return (
