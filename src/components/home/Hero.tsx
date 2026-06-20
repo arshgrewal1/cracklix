@@ -22,8 +22,9 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Restored Hero Hub v13.0.
- * DATA: Restored original high-authority data strings (50,000+ Qs, 500+ Mocks).
+ * @fileOverview Official Restored Hero Hub v14.0.
+ * DATA: Restored original high-authority data strings.
+ * TYPOGRAPHY: Uppercase labels for institutional weight.
  */
 
 export default function Hero() {
@@ -50,25 +51,25 @@ export default function Hero() {
         id: "q",
         icon: <Zap className="h-5 w-5 text-blue-600" />,
         val: "50,000+",
-        label: "Questions"
+        label: "QUESTIONS"
       },
       {
         id: "m",
         icon: <ClipboardList className="h-5 w-5 text-indigo-600" />,
         val: "500+",
-        label: "Mock Tests"
+        label: "MOCK TESTS"
       },
       {
         id: "e",
         icon: <ShieldCheck className="h-5 w-5 text-emerald-600" />,
         val: "50+",
-        label: "Exams"
+        label: "EXAMS"
       },
       {
         id: "u",
         icon: <Users className="h-5 w-5 text-orange-500" />,
-        val: "15k+",
-        label: "Aspirants"
+        val: "15K+",
+        label: "ASPIRANTS"
       }
     ];
   }, []);
@@ -139,10 +140,10 @@ export default function Hero() {
 
             {/* Feature Matrix Cards */}
             <div className="grid grid-cols-2 gap-3 w-full">
-              <FeatureCard icon={ClipboardList} label="Mock Tests" sub="500+ Series" color="text-blue-600" href="/mocks" />
-              <FeatureCard icon={BookOpen} label="Study Material" sub="100+ Notes" color="text-indigo-600" href="/notes" />
-              <FeatureCard icon={FileText} label="Previous Papers" sub="Verified PYQs" color="text-emerald-600" href="/pyqs" />
-              <FeatureCard icon={BarChart3} label="Analytics" sub="State Merit" color="text-orange-500" href="/dashboard" />
+              <FeatureCard icon={ClipboardList} label="Mock Tests" sub="500+ SERIES" color="text-blue-600" href="/mocks" />
+              <FeatureCard icon={BookOpen} label="Study Material" sub="100+ NOTES" color="text-indigo-600" href="/notes" />
+              <FeatureCard icon={FileText} label="Previous Papers" sub="VERIFIED PYQS" color="text-emerald-600" href="/pyqs" />
+              <FeatureCard icon={BarChart3} label="Analytics" sub="STATE MERIT" color="text-orange-500" href="/dashboard" />
             </div>
 
             {/* CTA Buttons */}
