@@ -25,8 +25,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Login Hub v47.0 (Single Active Session).
- * SECURITY: Generates a unique sessionId to enforce one-device policy.
+ * @fileOverview Professional Login Hub v48.0 (Takeover Authentication).
+ * SECURITY: Implements "Latest Login Wins" policy. Automatically signs out older devices.
  */
 export default function LoginPage() {
   return (
@@ -67,12 +67,14 @@ function LoginContent() {
 
   /**
    * Generates a new session ID and syncs it to Firestore/LocalStorage.
-   * This invalidates any other active sessions for this account.
+   * This TAKEOVER flow allows login and invalidates previous sessions.
    */
-  const updateSessionNode = async (userId: string) => {
+  const registerNewSession = async (userId: string) => {
     if (!db) return;
     const sessionId = crypto.randomUUID();
     localStorage.setItem('cracklix_session_id', sessionId);
+    
+    // We update the activeDeviceId. SessionGuard on old devices will detect the change.
     await updateDoc(doc(db, 'users', userId), {
       activeDeviceId: sessionId,
       lastLoginAt: serverTimestamp(),
@@ -91,7 +93,8 @@ function LoginContent() {
     try {
       if (mode === 'login') {
         const result = await signInWithEmailAndPassword(auth, email, password)
-        await updateSessionNode(result.user.uid);
+        // TAKEOVER: Always allow login, just register new session ID
+        await registerNewSession(result.user.uid);
         toast({ title: "Welcome Back" })
         startTransition(() => {
           router.replace(returnUrl)
@@ -162,6 +165,7 @@ function LoginContent() {
           pinnedExams: [], verified: true
         })
       } else {
+        // TAKEOVER: Update the session on existing account
         await updateDoc(userRef, {
           activeDeviceId: sessionId,
           lastLoginAt: serverTimestamp(),
@@ -224,7 +228,7 @@ function LoginContent() {
         </div>
         <div className="relative z-10 flex items-center gap-4 text-slate-500">
            <ShieldCheck className="h-6 w-6 text-primary" />
-           <p className="text-[10px] font-black uppercase tracking-[0.3em]">System Verified</p>
+           <p className="text-[10px] font-black uppercase tracking-[0.3em]">Secure Login Active</p>
         </div>
       </div>
 
