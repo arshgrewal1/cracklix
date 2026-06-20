@@ -21,9 +21,9 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Refined Centered Hero Hub v33.0.
- * UPDATED: Removed 'uppercase' for a premium Title Case aesthetic.
- * HARDENED: Moved student illustration above features grid.
+ * @fileOverview Refined Dynamic Hero Hub v34.0.
+ * UPDATED: Trust Badge is now dynamic, reflecting the real-time student count.
+ * HARDENED: Maintained centered stack hierarchy with student illustration above features.
  */
 
 export default function Hero() {
@@ -46,6 +46,11 @@ export default function Hero() {
     if (num >= 1000) return Math.floor(num / 1000) + "k+";
     return num + "+";
   };
+
+  const dynamicUserCount = useMemo(() => {
+    if (!stats?.totalUsers) return "10,000";
+    return stats.totalUsers.toLocaleString();
+  }, [stats]);
 
   const liveStats = useMemo(() => {
     return [
@@ -80,22 +85,22 @@ export default function Hero() {
 
   return (
     <section className="relative overflow-hidden bg-[#F8FAFC] py-12 md:py-24">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-full bg-blue-600/5 blur-[140px] rounded-full pointer-events-none" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-4xl mx-auto">
           {/* CENTERED CONTENT STACK */}
           <div className="flex flex-col items-center text-center space-y-8 md:space-y-12">
             
-            {/* TRUST BADGE */}
+            {/* DYNAMIC TRUST BADGE */}
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-white border border-slate-100 shadow-sm"
+              className="inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-white border border-slate-100 shadow-xl"
             >
-              <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-              <span className="text-[10px] md:text-[13px] font-black text-[#0F172A] tracking-wider">
-                10,000+ Aspirants Trust Cracklix
+              <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
+              <span className="text-[10px] md:text-[13px] font-black text-[#04102B] tracking-wider">
+                {statsLoading ? "10,000+" : `${dynamicUserCount}+`} ASPIRANTS TRUST CRACKLIX
               </span>
             </motion.div>
 
@@ -112,7 +117,7 @@ export default function Hero() {
               </p>
             </div>
 
-            {/* MOVED: HERO STUDENT IMAGE (Directly above feature grid) */}
+            {/* HERO STUDENT IMAGE */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
