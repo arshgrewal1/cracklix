@@ -22,6 +22,7 @@ import { doc } from "firebase/firestore";
 /**
  * @fileOverview Official Restored Hero Hub.
  * Optimized: Hero image moved above feature cards in a unified visual column.
+ * Action: CTA buttons moved below the feature matrix on the right.
  */
 
 export default function Hero() {
@@ -81,7 +82,7 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-          {/* LEFT: Text & Action Hub */}
+          {/* LEFT: Text & Identity Hub */}
           <div className="text-left space-y-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border shadow-sm">
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
@@ -117,28 +118,6 @@ export default function Hero() {
                   )
                 )}
               </div>
-            </div>
-
-            <div className="flex flex-wrap gap-4">
-              <Button
-                asChild
-                className="h-12 md:h-14 px-8 rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 border-none text-white font-bold"
-              >
-                <Link href="/mocks">
-                  Start Free Mock Test
-                  <ChevronRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-
-              <Button
-                asChild
-                variant="outline"
-                className="h-12 md:h-14 px-8 rounded-2xl border-slate-200 bg-white font-bold text-slate-700"
-              >
-                <Link href="/exams">
-                  Browse Exams
-                </Link>
-              </Button>
             </div>
           </div>
 
@@ -183,6 +162,29 @@ export default function Hero() {
                 <p className="font-bold text-slate-900 text-sm">Analytics</p>
                 <p className="text-[10px] text-slate-400 mt-1 uppercase font-black tracking-widest">State Merit</p>
               </Card>
+            </div>
+
+            {/* CTA Buttons - Positioned below cards as requested */}
+            <div className="flex flex-wrap gap-4 mt-10 w-full justify-center">
+              <Button
+                asChild
+                className="h-12 md:h-14 px-8 rounded-2xl bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/20 border-none text-white font-bold"
+              >
+                <Link href="/mocks">
+                  Start Free Mock Test
+                  <ChevronRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+
+              <Button
+                asChild
+                variant="outline"
+                className="h-12 md:h-14 px-8 rounded-2xl border-slate-200 bg-white font-bold text-slate-700"
+              >
+                <Link href="/exams">
+                  Browse Exams
+                </Link>
+              </Button>
             </div>
           </div>
 
