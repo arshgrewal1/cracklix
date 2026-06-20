@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useMemo, useEffect, useState, isValidElement } from "react";
 import { motion } from "framer-motion";
 import {
   ClipboardList,
@@ -22,7 +22,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Hero Section v40.0 (PWA Integrated).
+ * @fileOverview Hero Section v41.0 (TypeScript Hardened).
  */
 
 export default function Hero() {
@@ -197,7 +197,7 @@ function FeatureCard({ icon, label, href }: { icon: React.ReactNode, label: stri
     <Link href={href} className="block group">
       <div className="bg-white p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] shadow-lg border border-slate-100 flex items-center gap-4 transition-all duration-300 hover:shadow-xl hover:translate-y-[-2px] active:scale-95 cursor-pointer h-full">
         <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary transition-colors duration-300">
-           {React.cloneElement(icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6 text-primary group-hover:text-white transition-colors" })}
+           {isValidElement(icon) && React.cloneElement(icon as React.ReactElement<any>, { className: "h-5 w-5 md:h-6 md:w-6 text-primary group-hover:text-white transition-colors" })}
         </div>
         <span className="font-bold text-[10px] md:text-xs text-[#0F172A] tracking-tight group-hover:text-primary transition-colors text-left leading-tight">
           {label}

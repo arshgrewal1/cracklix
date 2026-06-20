@@ -13,8 +13,7 @@ import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center.
- * FIXED: TypeScript UMD global and cloneElement errors.
+ * @fileOverview Search Center Hub v2.1 (TypeScript Hardened).
  */
 
 export default function SearchPage() {

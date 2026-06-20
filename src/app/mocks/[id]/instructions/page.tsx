@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, isValidElement } from "react";
 import { useParams, useRouter, usePathname } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -16,8 +16,7 @@ import { LanguageDisplayMode } from "@/types";
 import Link from "next/link";
 
 /**
- * @fileOverview Hardened Instructions Hub v10.1 (Color Update).
- * UPDATED: Switched all orange nodes to primary Blue.
+ * @fileOverview Hardened Instructions Hub v10.2 (TypeScript Hardened).
  */
 export default function InstructionsPage() {
   const params = useParams();
@@ -164,7 +163,7 @@ function StatPlate({ icon, label, val }: any) {
   return (
     <div className="p-1.5 md:p-5 bg-white rounded-md md:rounded-xl border border-slate-100 shadow-sm text-center space-y-0.5 group hover:border-primary/30 transition-all">
        <div className="h-5 w-5 md:h-9 md:w-9 bg-slate-50 rounded-md flex items-center justify-center mx-auto text-primary mb-0.5 shadow-inner">
-          {React.cloneElement(icon, { className: "h-2.5 w-2.5 md:h-4 md:w-4" })}
+          {isValidElement(icon) && React.cloneElement(icon as React.ReactElement<any>, { className: "h-2.5 w-2.5 md:h-4 md:w-4" })}
        </div>
        <p className="text-[5px] md:text-[8px] font-black text-slate-400 uppercase tracking-tighter">{label}</p>
        <p className="text-[11px] md:text-lg font-black text-[#0F172A] uppercase leading-none">{val}</p>
