@@ -16,8 +16,8 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v50.0 (Height Hardened).
- * FIXED: Removed fixed pb-[90px] from body to prevent layout gaps in full-screen components.
+ * @fileOverview Root Layout v51.0 (PWA Optimized).
+ * FIXED: Refined PWA icons and display properties to ensure high-fidelity launcher scaling.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -30,14 +30,14 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       {
-        url: "/logo/cracklix-icon.png",
+        url: "/icons/icon-512x512.png",
         type: "image/png",
       },
     ],
-    shortcut: "/logo/cracklix-icon.png",
+    shortcut: "/icons/icon-192x192.png",
     apple: [
       {
-        url: "/logo/cracklix-icon.png",
+        url: "/icons/icon-512x512.png",
       },
     ],
   },

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, Suspense, useEffect, useTransition } from "react"
@@ -25,8 +24,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Login Hub v52.0 (Redesigned for Desktop).
- * FIX: Vertical centering, typography scaling, and panel balance overhaul.
+ * @fileOverview Institutional Login Hub v53.0 (Desktop Redesigned).
+ * REDESIGN: Perfectly balanced split-screen, centered branding, and high-fidelity typography.
  */
 export default function LoginPage() {
   return (
@@ -203,15 +202,15 @@ function LoginContent() {
   return (
     <div className="min-h-screen bg-white flex flex-col lg:flex-row text-[#0F172A] text-left overflow-hidden">
       
-      {/* LEFT PANEL: AUTH PANEL BRANDING */}
-      <div className="hidden lg:flex flex-1 bg-[#0B1528] text-white p-12 md:p-20 flex-col justify-center relative overflow-hidden">
+      {/* LEFT PANEL: BRANDING HUB (CENTERED) */}
+      <div className="hidden lg:flex flex-1 bg-[#0B1528] text-white p-12 md:p-20 flex-col justify-center items-center relative overflow-hidden">
         {/* Ambient Glow */}
-        <div className="absolute inset-0 bg-primary/5 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2" />
+        <div className="absolute inset-0 bg-primary/5 blur-[120px] rounded-full translate-x-1/3 -translate-y-1/3" />
         
-        <div className="relative z-10 space-y-16 max-w-xl">
-           <Logo variant="dark" imgClassName="h-[100px] md:h-[130px]" />
+        <div className="relative z-10 space-y-16 max-w-xl w-full">
+           <Logo variant="dark" align="left" imgClassName="h-[100px] md:h-[130px]" />
            
-           <div className="space-y-8">
+           <div className="space-y-10">
               <h1 className="text-5xl md:text-7xl xl:text-8xl font-black tracking-tight text-white leading-[0.95] uppercase">
                 Crack <br/> 
                 <span className="text-primary">Punjab Exams</span>
@@ -228,7 +227,7 @@ function LoginContent() {
            </div>
         </div>
 
-        {/* Floating Security Badge */}
+        {/* Anchor Security Badge */}
         <div className="absolute bottom-12 left-12 md:left-20 flex items-center gap-4 text-slate-500 opacity-60">
            <ShieldCheck className="h-6 w-6 text-primary" />
            <p className="text-[10px] font-black uppercase tracking-[0.4em]">Institutional Gateway Secured</p>

@@ -1,9 +1,9 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Production-Grade PWA Manifest v15.0.
- * FIXED: Optimized icon purpose and scale for Android/iOS home screens.
- * NOTE: Ensure the source icon has minimal transparent padding for maximum visibility.
+ * @fileOverview Production-Grade PWA Manifest v16.0.
+ * FIXED: Implemented specific maskable purpose to prevent Android icon shrinking.
+ * NOTE: Requires icon-192x192.png, icon-512x512.png, and maskable-icon-512x512.png in /public/icons/
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -19,19 +19,19 @@ export default function manifest(): MetadataRoute.Manifest {
     orientation: 'portrait',
     icons: [
       {
-        src: '/logo/cracklix-icon.png',
+        src: '/icons/icon-192x192.png',
         sizes: '192x192',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/logo/cracklix-icon.png',
+        src: '/icons/icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
       },
       {
-        src: '/logo/cracklix-icon.png',
+        src: '/icons/maskable-icon-512x512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'maskable',
