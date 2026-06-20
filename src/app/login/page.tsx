@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, Suspense, useEffect, useTransition } from "react"
@@ -17,16 +18,15 @@ import {
   sendPasswordResetEmail,
   updateProfile
 } from "firebase/auth"
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore"
+import { doc, setDoc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Login Hub v42.0.
- * FIXED: Redirection and state sync issues. Added immediate router push.
- * UPDATED: Multi-device support enabled.
+ * @fileOverview Professional Login Hub v45.0.
+ * FIXED: Implemented strict 1-Account-1-Device session enforcement.
  */
 export default function LoginPage() {
   return (
@@ -59,12 +59,21 @@ function LoginContent() {
 
   const returnUrl = searchParams.get("returnUrl") || "/"
 
-  // Redirect if user is already logged in
   useEffect(() => {
     if (!authLoading && user) {
       router.replace(returnUrl);
     }
   }, [user, authLoading, router, returnUrl]);
+
+  const updateSessionNode = async (userId: string) => {
+    if (!db) return;
+    const sessionId = crypto.randomUUID();
+    localStorage.setItem('cracklix_session_id', sessionId);
+    await updateDoc(doc(db, 'users', userId), {
+      activeDeviceId: sessionId,
+      lastLoginAt: serverTimestamp()
+    });
+  };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -78,6 +87,7 @@ function LoginContent() {
       if (mode === 'login') {
         const result = await signInWithEmailAndPassword(auth, email, password)
         await result.user.reload();
+        await updateSessionNode(result.user.uid);
         toast({ title: "Welcome Back" })
         startTransition(() => {
           router.replace(returnUrl)
@@ -90,6 +100,8 @@ function LoginContent() {
         await updateProfile(userNode, { displayName: name })
         
         const isSuperAdmin = email && SUPER_ADMIN_WHITELIST.includes(email.toLowerCase());
+        const sessionId = crypto.randomUUID();
+        localStorage.setItem('cracklix_session_id', sessionId);
         
         await setDoc(doc(db!, 'users', userNode.uid), {
           id: userNode.uid, 
@@ -101,7 +113,8 @@ function LoginContent() {
           updatedAt: serverTimestamp(), 
           status: 'Free',
           passType: 'FREE',
-          passStatus: 'none',
+          activeDeviceId: sessionId,
+          lastLoginAt: serverTimestamp(),
           pinnedExams: [],
           verified: true
         })
@@ -130,6 +143,8 @@ function LoginContent() {
       const userRef = doc(db!, 'users', userNode.uid)
       const userSnap = await getDoc(userRef)
       const isSuperAdmin = SUPER_ADMIN_WHITELIST.includes(userNode.email.toLowerCase());
+      const sessionId = crypto.randomUUID();
+      localStorage.setItem('cracklix_session_id', sessionId);
       
       if (!userSnap.exists()) {
         await setDoc(userRef, {
@@ -137,9 +152,16 @@ function LoginContent() {
           email: userNode.email, role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
           state: "Punjab", createdAt: new Date().toISOString(),
           updatedAt: serverTimestamp(), status: 'Free', passType: 'FREE', 
-          passStatus: 'active',
+          activeDeviceId: sessionId,
+          lastLoginAt: serverTimestamp(),
           pinnedExams: [], verified: true
         })
+      } else {
+        await updateDoc(userRef, {
+          activeDeviceId: sessionId,
+          lastLoginAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
+        });
       }
       
       toast({ title: "Welcome" })
