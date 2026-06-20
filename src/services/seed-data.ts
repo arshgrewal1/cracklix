@@ -1,7 +1,7 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Punjab-Centric Seeding Node v71.0 (Title Case Update).
+ * @fileOverview Institutional Punjab-Centric Seeding Node v72.0 (Title Case Update).
  * TYPOGRAPHY: All titles and descriptions transitioned to Title Case for premium aesthetics.
  */
 
@@ -184,9 +184,22 @@ export async function seedInitialData(db: Firestore) {
     batch.set(doc(db, 'passes', p.id), { ...p, updatedAt: serverTimestamp() }, { merge: true });
   }
 
+  // 6. GLOBAL SETTINGS DEFAULTS
+  batch.set(doc(db, 'settings', 'global'), {
+    platformName: "Cracklix",
+    announcement: "🔥 Official Punjab Latest Pattern Recruitment Calendar Live.",
+    showAnnouncement: true,
+    trustBadgeCount: 10000,
+    trustBadgeText: "Aspirants Trust Cracklix",
+    upiId: "arshdeepgrewal1122-1@oksbi",
+    supportEmail: "cracklixhelp@gmail.com",
+    supportPhone: "+91 98881 88602",
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+
   await batch.commit();
 
-  // 6. FINAL STATS SYNC
+  // 7. FINAL STATS SYNC
   await setDoc(doc(db, 'settings', 'stats'), {
      totalQuestions: 2,
      totalMocks: 1,

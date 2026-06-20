@@ -22,8 +22,7 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Restored Hero Hub v7.0 (Typography Hardened).
- * FIXED: Removed aggressive uppercase from headings for premium Title Case look.
+ * @fileOverview Official Restored Hero Hub v8.1 (Admin Control Hardened).
  */
 
 export default function Hero() {
@@ -95,10 +94,10 @@ export default function Hero() {
             <motion.div 
                initial={{ opacity: 0, x: -20 }}
                animate={{ opacity: 1, x: 0 }}
-               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border shadow-sm group hover:border-primary/30 transition-all cursor-default"
+               className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-white border border-slate-100 shadow-sm group hover:border-primary/30 transition-all cursor-default"
             >
               <Star className="h-4 w-4 text-yellow-500 fill-yellow-500 animate-pulse" />
-              <span className="text-sm font-semibold text-slate-700">
+              <span className="text-sm font-black text-slate-700 tracking-tight">
                 {trustBadgeContent}
               </span>
             </motion.div>
@@ -244,7 +243,7 @@ function FeatureCard({ icon: Icon, label, sub, color, href }: any) {
         <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center mb-4 shadow-inner bg-slate-50 group-hover:scale-110 transition-transform")}>
           <Icon className={cn("h-5 w-5", color)} />
         </div>
-        <p className="font-bold text-slate-900 text-[13px] leading-tight">{label}</p>
+        <p className="font-bold text-slate-900 text-[13px] leading-tight uppercase">{label}</p>
         <p className="text-[9px] text-slate-400 mt-1 uppercase font-bold tracking-widest">{sub}</p>
       </Card>
     </Link>
