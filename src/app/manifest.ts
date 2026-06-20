@@ -1,8 +1,9 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Production-Grade PWA Manifest v14.0.
- * FIXED: Set purpose to 'any' for primary icons to prevent circular clipping of the "C" ring.
+ * @fileOverview Production-Grade PWA Manifest v15.0.
+ * FIXED: Optimized icon purpose and scale for Android/iOS home screens.
+ * NOTE: Ensure the source icon has minimal transparent padding for maximum visibility.
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
@@ -28,12 +29,6 @@ export default function manifest(): MetadataRoute.Manifest {
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
-      },
-      {
-        src: '/logo/cracklix-icon.png',
-        sizes: '192x192',
-        type: 'image/png',
-        purpose: 'maskable',
       },
       {
         src: '/logo/cracklix-icon.png',
