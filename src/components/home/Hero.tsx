@@ -22,7 +22,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Hero Section v41.0 (TypeScript Hardened).
+ * @fileOverview Hero Section v42.0 (Dual CTA Restored).
+ * FIXED: Restored "Choose Exam Hub" button next to "Start Free Mock Test".
  */
 
 export default function Hero() {
@@ -116,7 +117,7 @@ export default function Hero() {
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-4 justify-center lg:justify-start">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 w-full sm:w-auto pt-4 justify-center lg:justify-start">
               <Button
                 asChild
                 className="h-14 md:h-16 px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-sm tracking-tight rounded-full shadow-xl transition-all active:scale-95 border-none group/btn"
@@ -127,9 +128,17 @@ export default function Hero() {
                 </Link>
               </Button>
 
-              <PWAInstallButton 
+              <Button
+                asChild
                 variant="outline"
-                className="h-14 md:h-16 px-10 border-2 border-slate-200 bg-white text-[#0F172A] font-bold text-sm tracking-tight rounded-full shadow-sm"
+                className="h-14 md:h-16 px-10 border-2 border-slate-200 bg-white text-[#0F172A] font-bold text-sm tracking-tight rounded-full shadow-sm hover:bg-slate-50 transition-all active:scale-95"
+              >
+                <Link href="/exams">Choose Exam Hub</Link>
+              </Button>
+
+              <PWAInstallButton 
+                variant="dark"
+                className="h-14 md:h-16 px-10 rounded-full"
               />
             </div>
 
