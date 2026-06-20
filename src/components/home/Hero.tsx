@@ -10,24 +10,28 @@ import {
   ChevronRight,
   Star,
   FileText,
-  Landmark
+  Landmark,
+  Gem,
+  Play
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
-import { useDoc, useFirestore } from "@/firebase";
+import { useDoc, useFirestore, useUser } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Hero Section v42.0 (Dual CTA Restored).
- * FIXED: Restored "Choose Exam Hub" button next to "Start Free Mock Test".
+ * @fileOverview Hardened Hero Hub v45.0 (CTA Restored).
+ * FIXED: Restored all missing call-to-action buttons for Desktop and Mobile.
+ * LOGIC: Dynamic pass labeling based on user profile.
  */
 
 export default function Hero() {
   const db = useFirestore();
+  const { user, profile } = useUser();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -81,17 +85,22 @@ export default function Hero() {
     ];
   }, [stats]);
 
+  // Pass CTA Logic
+  const hasActivePass = profile?.pass?.active && new Date(profile.pass.expiryDate) > new Date();
+  const passCtaLabel = hasActivePass ? "Manage Elite Pass" : "Get Elite Pass";
+
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden bg-[#F8FAFC] py-16 lg:py-20">
+    <section className="relative overflow-hidden bg-[#F8FAFC] py-16 lg:py-24">
+      {/* Background Decorative Node */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-full bg-blue-600/5 blur-[140px] rounded-full pointer-events-none" />
       
-      <div className="max-w-[1440px] mx-auto px-6 lg:px-10 xl:px-12 relative z-10">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-12 relative z-10">
         
-        <div className="grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-12 lg:gap-8 xl:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-16 items-center">
           
-          <div className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-8 md:space-y-10 max-w-4xl lg:max-w-[680px] mx-auto lg:mx-0">
+          <div className="flex flex-col items-center lg:items-start text-center lg:text-left space-y-8 md:space-y-12">
             
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
@@ -105,48 +114,67 @@ export default function Hero() {
             </motion.div>
 
             <div className="space-y-4 md:space-y-6">
-              <h1 className="text-3xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold tracking-tight text-[#0F172A] leading-[1.05] break-words">
+              <h1 className="text-3xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold tracking-tight text-[#0F172A] leading-[1.05] break-words uppercase">
                 Crack Punjab <br/>
                 <span className="text-[#2563EB]">Government Exams</span> <br/>
                 With Confidence
               </h1>
 
               <p className="text-sm md:text-xl text-[#64748B] font-medium leading-relaxed max-w-2xl">
-                Practice bilingual mock tests and prepare for Punjab Government Exams. 
-                Access practice tests, previous papers and track your performance.
+                Prepare for PSSSB, PPSC, and Punjab Police with high-fidelity bilingual mock tests and verified patterns.
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row flex-wrap gap-4 w-full sm:w-auto pt-4 justify-center lg:justify-start">
+            {/* PRIMARY ACTION ROW - FIXED VISIBILITY */}
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 w-full sm:w-auto justify-center lg:justify-start">
               <Button
                 asChild
-                className="h-14 md:h-16 px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-sm tracking-tight rounded-full shadow-xl transition-all active:scale-95 border-none group/btn"
+                className="h-14 md:h-16 px-8 md:px-10 bg-[#2563EB] hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-xl transition-all active:scale-95 border-none group/btn"
               >
                 <Link href="/mocks" className="flex items-center justify-center gap-3">
-                  <span>Start Free Mock Test</span>
-                  <ChevronRight className="h-5 w-5 transition-transform group-hover/btn:translate-x-1" />
+                  <Play className="h-4 w-4 fill-current" />
+                  <span>Start Free Mock</span>
+                  <ChevronRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                 </Link>
               </Button>
 
               <Button
                 asChild
                 variant="outline"
-                className="h-14 md:h-16 px-10 border-2 border-slate-200 bg-white text-[#0F172A] font-bold text-sm tracking-tight rounded-full shadow-sm hover:bg-slate-50 transition-all active:scale-95"
+                className="h-14 md:h-16 px-8 md:px-10 border-2 border-slate-200 bg-white text-[#0F172A] font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-sm hover:bg-slate-50 transition-all active:scale-95"
               >
-                <Link href="/exams">Choose Exam Hub</Link>
+                <Link href="/exams" className="flex items-center gap-3">
+                  <Landmark className="h-4 w-4" />
+                  <span>Browse Exams</span>
+                </Link>
               </Button>
 
+              <Button
+                asChild
+                className="h-14 md:h-16 px-8 md:px-10 bg-[#0B1528] hover:bg-black text-white font-black uppercase text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-2xl transition-all active:scale-95 border-none group/pass"
+              >
+                <Link href="/pass" className="flex items-center gap-3">
+                  <Gem className="h-4 w-4 text-primary" />
+                  <span>{passCtaLabel}</span>
+                </Link>
+              </Button>
+            </div>
+
+            {/* SECONDARY ROW */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 w-full">
               <PWAInstallButton 
-                variant="dark"
-                className="h-14 md:h-16 px-10 rounded-full"
+                variant="outline"
+                className="h-12 px-8 rounded-xl border-slate-200"
               />
+              <div className="hidden sm:flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                 <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                 Official Pattern Verified
+              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 md:gap-6 w-full max-w-2xl pt-2">
-               <FeatureCard icon={<Zap />} label="Mock Tests" href="/mocks" />
-               <FeatureCard icon={<Landmark />} label="Punjab Exams" href="/exams" />
-               <FeatureCard icon={<FileText />} label="Previous Papers" href="/pyqs" />
-               <FeatureCard icon={<ShieldCheck />} label="Free Practice" href="/mocks" />
+               <FeatureCard icon={<Zap />} label="Latest Mocks" href="/mocks" />
+               <FeatureCard icon={<FileText />} label="PYQ Archives" href="/pyqs" />
             </div>
           </div>
 
@@ -159,7 +187,7 @@ export default function Hero() {
             <div className="absolute inset-0 bg-blue-600/5 blur-[80px] rounded-full scale-110 pointer-events-none" />
             <img
               src="/images/hero-student.png"
-              alt="Cracklix Student"
+              alt="Cracklix Aspirant"
               className="w-full h-auto object-contain drop-shadow-2xl max-w-[280px] md:max-w-[480px] lg:max-w-[540px] xl:max-w-[620px]"
             />
           </motion.div>
@@ -208,7 +236,7 @@ function FeatureCard({ icon, label, href }: { icon: React.ReactNode, label: stri
         <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-blue-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary transition-colors duration-300">
            {isValidElement(icon) && React.cloneElement(icon as React.ReactElement<any>, { className: "h-5 w-5 md:h-6 md:w-6 text-primary group-hover:text-white transition-colors" })}
         </div>
-        <span className="font-bold text-[10px] md:text-xs text-[#0F172A] tracking-tight group-hover:text-primary transition-colors text-left leading-tight">
+        <span className="font-bold text-[10px] md:text-xs text-[#0F172A] tracking-tight group-hover:text-primary transition-colors text-left leading-tight uppercase">
           {label}
         </span>
       </div>
