@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
@@ -17,8 +16,7 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Master Registry v6.0.
- * FIXED: Reduced title size and removed line-clamp to fix overflow truncation.
+ * @fileOverview Institutional Master Registry v7.0 (Typography Refined).
  */
 
 const CATEGORY_ICONS: Record<string, any> = {
@@ -79,7 +77,7 @@ export default function MocksDiscoveryPage() {
                   </h1>
 
                   <p className="text-slate-500 font-medium text-base md:text-xl lg:text-2xl max-w-2xl leading-relaxed">
-                    Select a recruitment vertical to browse official hubs and vertical exam preparation resources.
+                    Select a recruitment vertical to browse official hubs and exam preparation resources.
                   </p>
                 </div>
               </div>

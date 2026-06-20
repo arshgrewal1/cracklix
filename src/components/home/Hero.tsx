@@ -24,9 +24,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Hardened Hero Hub v45.0 (CTA Restored).
- * FIXED: Restored all missing call-to-action buttons for Desktop and Mobile.
- * LOGIC: Dynamic pass labeling based on user profile.
+ * @fileOverview Hardened Hero Hub v46.0 (Typography Refined).
+ * FIXED: Removed uppercase from h1 for a premium Title Case look.
  */
 
 export default function Hero() {
@@ -114,7 +113,7 @@ export default function Hero() {
             </motion.div>
 
             <div className="space-y-4 md:space-y-6">
-              <h1 className="text-3xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold tracking-tight text-[#0F172A] leading-[1.05] break-words uppercase">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-extrabold tracking-tight text-[#0F172A] leading-[1.05] break-words">
                 Crack Punjab <br/>
                 <span className="text-[#2563EB]">Government Exams</span> <br/>
                 With Confidence
@@ -125,7 +124,7 @@ export default function Hero() {
               </p>
             </div>
 
-            {/* PRIMARY ACTION ROW - FIXED VISIBILITY */}
+            {/* PRIMARY ACTION ROW */}
             <div className="flex flex-col sm:flex-row flex-wrap gap-4 w-full sm:w-auto justify-center lg:justify-start">
               <Button
                 asChild

@@ -19,8 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Elite Latest Mock Hub v47.0 (Premium Title Case).
- * TYPOGRAPHY: Switched to Title Case for headings and subtext.
+ * @fileOverview Elite Latest Mock Hub v48.0 (Typography Refined).
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -103,7 +102,7 @@ export default function LatestMocks() {
                      {board?.iconUrl && !failedImages[board.id] ? (
                        <Image 
                          src={board.iconUrl} 
-                         alt="Logo" 
+                         alt={board.abbreviation} 
                          fill
                          sizes="64px"
                          className="object-contain p-3.5"

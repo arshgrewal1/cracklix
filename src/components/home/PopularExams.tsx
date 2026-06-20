@@ -21,8 +21,7 @@ import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Fidelity Popular Exams v63.0 (Optimized Startup).
- * PERFORMANCE: Applied limit(8) and limit(12) to prevent heavy collection streams.
+ * @fileOverview High-Fidelity Popular Exams v64.0 (Typography Refined).
  */
 
 function getBoardFallbackIcon(id: string, abbrev: string) {
@@ -48,7 +47,6 @@ export default function PopularExams() {
   const boardsQuery = useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc"), limit(8)) : null), [db]);
   const { data: boards, loading } = useCollection<any>(boardsQuery);
   
-  // Optimize: Avoid fetching all exams/mocks. Use the preview count if available or fetch just enough.
   const examsQuery = useMemo(() => (db ? query(collection(db, "exams"), limit(12)) : null), [db]);
   const { data: allExams } = useCollection<any>(examsQuery);
 
