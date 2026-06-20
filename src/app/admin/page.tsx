@@ -28,8 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Admin Hub v47.0 (Optimized Startup).
- * PERFORMANCE: Removed heavy full-collection listeners.
+ * @fileOverview Hardened Admin Hub v47.1 (TS Build Fix).
+ * FIXED: Added null guards for pendingNodes array to resolve build errors.
  */
 
 interface MetricCardProps {
@@ -123,6 +123,8 @@ export default function AdminDashboard() {
     }
   }
 
+  const hasPending = (pendingNodes?.length || 0) > 0;
+
   return (
     <div className="space-y-8 md:space-y-12 text-[#0F172A] text-left">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
@@ -134,7 +136,7 @@ export default function AdminDashboard() {
               </div>
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Admin Control</span>
            </div>
-          <h1 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none truncate">Admin Hub</h1>
+          <h1 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none truncate max-w-[280px] sm:max-w-none">Admin Hub</h1>
           <p className="text-slate-400 text-sm md:text-lg font-medium max-w-xl">Pre-calculated counts from registry summary nodes.</p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto shrink-0">
@@ -166,9 +168,9 @@ export default function AdminDashboard() {
            label="Verification Queue" 
            value={pendingNodes?.length || 0} 
            subLabel="Pending Audits" 
-           icon={<AlertCircle className={cn("h-6 w-6", pendingNodes?.length > 0 ? "text-rose-500 animate-pulse" : "text-slate-300")} />} 
+           icon={<AlertCircle className={cn("h-6 w-6", hasPending ? "text-rose-500 animate-pulse" : "text-slate-300")} />} 
            href="/admin/payments/verify"
-           highlight={pendingNodes?.length > 0}
+           highlight={hasPending}
          />
       </div>
 
@@ -230,7 +232,7 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 gap-3">
                      <QuickLink label="Assemble Mock" href="/admin/mocks/builder" />
                      <QuickLink label="Manual MCQ Entry" href="/admin/questions/add" />
-                     <QuickLink label="Verify Payments" href="/admin/payments/verify" highlight={pendingNodes?.length > 0} />
+                     <QuickLink label="Verify Payments" href="/admin/payments/verify" highlight={hasPending} />
                      <QuickLink label="Pass Registry" href="/admin/passes" />
                   </div>
                </div>
@@ -272,7 +274,7 @@ function QuickLink({ label, href, highlight }: QuickLinkProps) {
            highlight && "border-rose-500/30 bg-rose-50/5"
          )}>
             <span className="text-[10px] font-black uppercase tracking-widest">{label}</span>
-            <ChevronRight className={cn("h-4 w-4 transition-transform group-hover:translate-x-1", highlight ? "text-rose-500" : "text-primary")} />
+            <ChevronRight className={cn("h-4 w-4 transition-transform group-hover:translate-x-1", highlight ? "text-rose-50" : "text-primary")} />
          </div>
       </Link>
    )
