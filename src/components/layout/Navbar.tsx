@@ -43,7 +43,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Standardized Navbar Hub v46.0 (PWA Fixed).
+ * @fileOverview Standardized Navbar Hub v47.0 (Logo Optimized).
+ * FIXED: Maximized logo height to fill 72px/88px header space.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -96,19 +97,19 @@ export default function Navbar() {
       <nav className="w-full h-[72px] md:h-[88px] bg-white border-b border-slate-100 shadow-sm transition-all duration-300">
         <div className="w-full max-w-7xl mx-auto px-4 h-full flex items-center justify-between gap-2">
 
-          <div className="flex items-center shrink-0">
+          <div className="flex items-center shrink-0 h-full">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30"
+              className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 mr-1"
             >
               <Menu className="w-5 h-5 md:w-6 md:h-6" />
             </button>
 
             <Logo
               variant="light"
-              className="ml-1 flex-shrink-0"
-              imgClassName="h-[60px] md:h-[72px]"
+              className="flex-shrink-0"
+              imgClassName="h-[68px] md:h-[84px]"
             />
           </div>
 

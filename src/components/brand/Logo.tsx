@@ -17,8 +17,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix Maximized Brand Identity v57.0.
- * FIXED: Optimized icon rendering to prevent "compression" and clipping.
+ * @fileOverview Cracklix Maximized Brand Identity v58.0.
+ * UPDATED: Optimized scaling to fill header heights (72px/88px) with maximum fidelity.
  * FIXED: Removed object-contain for icons to allow edge-to-edge ring visibility.
  */
 export default function Logo({
@@ -57,8 +57,8 @@ export default function Logo({
         className={cn(
           "transition-all flex-shrink-0 w-auto",
           isIcon 
-            ? "h-10 md:h-12 object-center scale-110" // Maximum visibility for the ring
-            : "h-[56px] md:h-[72px] object-contain",
+            ? "h-11 md:h-14 object-center scale-110" // Maximum visibility for the ring
+            : "h-[64px] md:h-[82px] object-contain", // Optimized for 72px/88px headers
           imgClassName
         )}
       />

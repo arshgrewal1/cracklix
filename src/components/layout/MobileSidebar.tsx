@@ -29,7 +29,8 @@ import { Button } from "@/components/ui/button";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Mobile Sidebar Overhaul v41.0 (PWA Integrated).
+ * @fileOverview Mobile Sidebar Overhaul v42.0 (Logo Optimized).
+ * FIXED: Maximized logo height to fill the sidebar header area.
  */
 export default function MobileSidebar({
   onClose,
@@ -77,7 +78,7 @@ export default function MobileSidebar({
          <Logo
            variant="light"
            align="left"
-           imgClassName="h-[60px]"
+           imgClassName="h-[68px]"
            onClick={onClose}
          />
          <button
