@@ -11,7 +11,6 @@ import {
   ChevronRight,
   Gem,
   ArrowRight,
-  AlertCircle,
   Settings,
   HelpCircle,
   CreditCard
@@ -70,12 +69,17 @@ export default function Navbar() {
     (user?.email &&
       SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
 
-  const passDaysLeft = useMemo(() => {
-    if (!profile?.passExpiresAt) return null;
+  const passStatus = useMemo(() => {
+    if (!profile?.passExpiresAt) return { label: 'FREE PASS', days: 0, active: false };
     const expiry = new Date(profile.passExpiresAt);
     const now = new Date();
     const diff = Math.ceil((expiry.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    return diff > 0 ? diff : 0;
+    const active = diff > 0;
+    return {
+      label: active ? (profile.pass?.plan || 'ELITE').toUpperCase() : 'PASS EXPIRED',
+      days: active ? diff : 0,
+      active
+    };
   }, [profile]);
 
   if (!mounted) {
@@ -85,7 +89,7 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-50 w-full font-body">
       <nav className="w-full h-[72px] md:h-[88px] bg-white border-b border-slate-100 shadow-sm transition-all duration-300">
-        <div className="w-full max-w-7xl mx-auto px-4 h-full flex items-center justify-between gap-4">
+        <div className="w-full max-w-7xl mx-auto px-4 h-full flex items-center justify-between gap-2">
 
           <div className="flex items-center shrink-0">
             <button
@@ -98,7 +102,7 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="ml-2 md:ml-4 flex-shrink-0"
+              className="ml-1 flex-shrink-0"
             />
           </div>
 
@@ -134,12 +138,11 @@ export default function Navbar() {
                 <DropdownMenuContent
                   align="end"
                   sideOffset={12}
-                  className="w-[320px] rounded-[28px] p-6 bg-white border border-[#EEF2F7] shadow-[0_12px_30px_rgba(15,23,42,0.08)] z-[2001]"
+                  className="w-[320px] max-h-[85vh] overflow-y-auto custom-scrollbar rounded-[28px] p-6 bg-white border border-[#EEF2F7] shadow-[0_12px_30px_rgba(15,23,42,0.08)] z-[2001]"
                 >
                   <div className="flex flex-col items-center text-center space-y-6">
                     
-                    {/* AVATAR & IDENTITY */}
-                    <div className="flex flex-col items-center gap-3">
+                    <div className="flex flex-col items-center gap-4">
                        <div className="h-16 w-16 rounded-2xl bg-[#EEF4FF] flex items-center justify-center text-[#2563EB] shadow-sm border border-blue-50 relative">
                           <User className="h-8 w-8" />
                           {emailVerified && (
@@ -149,43 +152,52 @@ export default function Navbar() {
                           )}
                        </div>
                        <div className="space-y-0.5">
-                         <h3 className="text-xl font-[800] text-[#0F172A] tracking-tight leading-tight truncate max-w-[240px]">
+                         <h3 className="text-xl font-[800] text-[#0F172A] tracking-tight leading-tight truncate max-w-[260px]">
                            {profile?.name || "Aspirant"}
                          </h3>
                          <Link 
                            href="/profile" 
-                           className="text-[11px] font-[700] text-[#94A3B8] uppercase tracking-[0.15em] hover:text-primary transition-colors"
+                           className="text-[13px] font-[700] text-[#94A3B8] uppercase tracking-[0.15em] hover:text-primary transition-colors"
                          >
                            View Profile
                          </Link>
                        </div>
                     </div>
 
+                    {!emailVerified && (
+                       <div className="w-full p-4 bg-rose-50 rounded-2xl border border-rose-100 flex items-center gap-3">
+                          <AlertCircle className="h-4 w-4 text-rose-500 shrink-0" />
+                          <p className="text-[10px] font-bold text-rose-600 uppercase text-left leading-tight">Account Not Verified. Check Email.</p>
+                       </div>
+                    )}
+
                     <div className="h-px w-full bg-slate-100" />
 
-                    {/* ACTIONS LIST */}
                     <div className="w-full space-y-1">
                        <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="Dashboard" />
                        <ProfileMenuItem href="/pass" icon={CreditCard} label="My Pass" />
                        <ProfileMenuItem href="/profile" icon={Settings} label="Settings" />
                        <ProfileMenuItem href="/help" icon={HelpCircle} label="Help Center" />
                        {isAdmin && (
-                         <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Center" highlight />
+                         <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Control Hub" highlight />
                        )}
                     </div>
 
-                    {/* PASS STATUS MINI BADGE */}
-                    <div className="w-full p-4 bg-[#DBEAFE]/40 text-[#2563EB] rounded-2xl border border-blue-50/50">
-                       <div className="flex items-center justify-between text-[9px] font-black uppercase tracking-widest leading-none">
-                          <span>{profile?.passType || "FREE"} PASS</span>
+                    <div className={cn(
+                      "w-full p-4 rounded-2xl border transition-all",
+                      passStatus.active ? "bg-[#DBEAFE] text-[#2563EB] border-blue-100" : "bg-slate-50 text-slate-400 border-slate-100"
+                    )}>
+                       <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-widest leading-none">
+                          <span>{passStatus.label}</span>
                           <Gem className="h-3.5 w-3.5" />
                        </div>
-                       <p className="text-[11px] font-bold text-slate-500 mt-1.5">
-                         {passDaysLeft !== null ? `${passDaysLeft} Days Remaining` : "Institutional Access"}
-                       </p>
+                       {passStatus.active && (
+                         <p className="text-[10px] font-bold opacity-70 mt-1.5 text-left">
+                           {passStatus.days} Days Remaining
+                         </p>
+                       )}
                     </div>
 
-                    {/* LOGOUT */}
                     <Button
                       onClick={handleLogout}
                       className="w-full h-12 bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] font-black text-[12px] uppercase tracking-widest rounded-xl transition-all border-none shadow-none group"

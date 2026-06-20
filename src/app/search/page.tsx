@@ -13,14 +13,13 @@ import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Center v4.0.
- * FIXED: Resolved cloneElement type errors and UMD global mismatch.
- * SIMPLIFIED: Replaced technical jargon with student-friendly language.
+ * @fileOverview Global Search Center v5.0 (Hardened).
+ * FIXED: Explicit React import and type-safe icon cloning for stable production build.
  */
 
 export default function SearchPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}>
       <SearchContent />
     </Suspense>
   )

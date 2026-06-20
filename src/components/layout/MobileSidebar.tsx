@@ -11,8 +11,6 @@ import {
   Trophy,
   Landmark,
   BookOpen,
-  HelpCircle,
-  MessageCircle,
   X,
   Award
 } from "lucide-react";
@@ -30,8 +28,8 @@ import ShareButton from "@/components/navigation/ShareButton";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Mobile Sidebar Overhaul v39.0.
- * BRAND SYSTEM: Maximized Logo (64px) within 80px minimized top area.
+ * @fileOverview Mobile Sidebar Overhaul v40.0.
+ * BRAND SYSTEM: Maximized Logo (60px) within 72px normalized header area.
  */
 export default function MobileSidebar({
   onClose,
@@ -75,12 +73,11 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
-      {/* MINIMIZED TOP BRANDING AREA (80px) */}
-      <div className="h-20 px-4 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
+      <div className="h-[72px] px-4 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
          <Logo
            variant="light"
            align="left"
-           imgClassName="h-[64px]"
+           imgClassName="h-[60px]"
            onClick={onClose}
          />
          <button
@@ -117,7 +114,7 @@ export default function MobileSidebar({
                   {profile?.name || user?.displayName || "Aspirant"}
                 </h3>
                 <p className="mt-0.5 text-[8px] text-slate-400 font-bold tracking-widest uppercase">
-                  Manage Account Node
+                  Manage Account
                 </p>
               </div>
 
@@ -128,7 +125,7 @@ export default function MobileSidebar({
 
         <div className="px-2">
           <p className="mb-2 px-6 text-[10px] font-bold text-slate-400 tracking-wide uppercase">
-            Preparation Registry
+            Library
           </p>
 
           <div className="space-y-0.5">

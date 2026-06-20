@@ -15,7 +15,6 @@ import {
   Send, 
   History, 
   CheckCircle2, 
-  Clock, 
   AlertCircle,
   HelpCircle,
   ChevronRight,
@@ -37,9 +36,8 @@ const TELEGRAM_GROUP = "https://t.me/cracklixapp";
 const INSTAGRAM_PROFILE = "https://www.instagram.com/arshgrewal_official/";
 
 /**
- * @fileOverview Student Support Center v3.1.
+ * @fileOverview Student Support Center v3.2 (Hardened).
  * FIXED: Restored missing Link and Loader2 nodes for stable production build.
- * SIMPLIFIED: Terms like "Hub" and "Node" replaced with "Center" and "Item".
  */
 
 export default function SupportPage() {
@@ -104,10 +102,10 @@ export default function SupportPage() {
            <div className="space-y-4">
               <div className="flex items-center gap-3">
                  <MessageCircle className="h-5 w-5 text-primary" />
-                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Support Center</span>
+                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Support Hub</span>
               </div>
               <h1 className="text-4xl md:text-7xl font-black text-[#0F172A] tracking-tighter uppercase leading-[0.9]">
-                 Support <br/> <span className="text-primary">Hub</span>
+                 Support <br/> <span className="text-primary">Center</span>
               </h1>
               <p className="text-slate-500 font-medium text-lg max-w-xl">
                  Raise tickets for payment issues, pass activation, or any other problems.
@@ -182,7 +180,7 @@ export default function SupportPage() {
                     <div className="h-14 w-14 bg-primary/20 rounded-2xl flex items-center justify-center text-primary shadow-2xl">
                        <HelpCircle className="h-8 w-8 fill-current" />
                     </div>
-                    <h3 className="text-3xl font-black uppercase leading-tight">Help center</h3>
+                    <h3 className="text-3xl font-black uppercase leading-tight">Help hub</h3>
                     <p className="text-slate-400 text-sm font-medium leading-relaxed">Browse help articles to solve your problems instantly.</p>
                     <Button asChild variant="outline" className="w-full h-14 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-2">
                        <Link href="/help">View help articles <ChevronRight className="h-4 w-4" /></Link>

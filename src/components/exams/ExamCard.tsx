@@ -9,7 +9,7 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Institutional Exam Discovery Card v2.6 (Hardened).
+ * @fileOverview Institutional Exam List Item v2.7 (Hardened).
  * FIXED: Aligned property names with strictly typed Exam interface.
  */
 
@@ -29,7 +29,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
           </h3>
           
           <p className="text-sm text-gray-500 font-medium leading-relaxed line-clamp-2 mb-8">
-            {exam.description || "Official preparation hub for upcoming recruitments."}
+            {exam.description || "Official preparation list for upcoming recruitments."}
           </p>
 
           <div className="mt-auto space-y-4 pt-8 border-t border-gray-50">

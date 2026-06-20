@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase';
 
 /**
- * @fileOverview Institutional Anti-Cheat Node v2.0 (Hardened).
+ * @fileOverview Institutional Anti-Cheat Node v3.0 (Hardened).
  * FIXED: Synchronized violation tracking to ensure db instance is passed correctly.
  */
 
@@ -20,7 +20,7 @@ export default function AntiCheat() {
       // 1. Audit Check: Only run if Firestore is initialized
       if (!db) return;
 
-      // 2. Logic Audit: Log the violation to the cloud registry
+      // 2. Logic Audit: Log the violation to the cloud bank
       addViolation(db);
       
       toast({
