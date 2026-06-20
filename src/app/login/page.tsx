@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, Suspense, useEffect, useTransition } from "react"
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import Logo from "@/components/brand/Logo"
-import { Mail, Lock, User, Phone, Eye, EyeOff, Loader2, ShieldAlert } from "lucide-react"
+import { Mail, Lock, User, Phone, Eye, EyeOff, Loader2, ShieldAlert, CheckCircle2 } from "lucide-react"
 import { useAuth, useFirestore, useUser } from "@/firebase"
 import { 
   signInWithEmailAndPassword, 
@@ -16,6 +17,7 @@ import {
   GoogleAuthProvider,
   sendPasswordResetEmail,
   updateProfile,
+  sendEmailVerification
 } from "firebase/auth"
 import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
@@ -25,9 +27,7 @@ import { motion } from "framer-motion"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Login Hub v33.0 (Typography Overhaul).
- * BRAND SYSTEM: Logo centered, height 60px desktop / 50px mobile.
- * TYPOGRAPHY: Title Case normalization.
+ * @fileOverview Professional Login Hub v35.0 (Email Verification Update).
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -67,7 +67,11 @@ function LoginContent() {
 
   useEffect(() => {
     if (!authLoading && user && !sessionTerminated) {
-       router.replace(returnUrl);
+       if (user.emailVerified) {
+          router.replace(returnUrl);
+       } else {
+          router.replace('/verify-email');
+       }
     }
   }, [user, authLoading, router, returnUrl, sessionTerminated]);
 
@@ -96,13 +100,21 @@ function LoginContent() {
     try {
       if (mode === 'login') {
         const creds = await signInWithEmailAndPassword(auth, email, password)
+        if (!creds.user.emailVerified) {
+          await sendEmailVerification(creds.user);
+          router.push('/verify-email');
+          return;
+        }
         await updateActiveDevice(creds.user.uid);
         toast({ title: "Welcome to Cracklix" })
         startTransition(() => { router.replace(returnUrl) })
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
         const userNode = userCredential.user
+        
         await updateProfile(userNode, { displayName: name })
+        await sendEmailVerification(userNode);
+        
         const isSuperAdmin = email && SUPER_ADMIN_WHITELIST.includes(email.toLowerCase());
         
         await setDoc(doc(db!, 'users', userNode.uid), {
@@ -113,8 +125,8 @@ function LoginContent() {
         })
 
         await updateActiveDevice(userNode.uid);
-        toast({ title: "Account Created", description: "Welcome to Cracklix" })
-        startTransition(() => { router.replace(returnUrl) })
+        toast({ title: "Verify Your Email", description: "A link has been sent to your inbox." })
+        router.push('/verify-email');
       }
     } catch (error: any) {
       toast({ variant: "destructive", title: "Sync Failed", description: error.message })
@@ -179,7 +191,6 @@ function LoginContent() {
       
       <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className="z-10 w-full max-w-[440px] space-y-6">
         
-        {/* BRAND OVERHAUL: Centered, maximized height (60px/50px) */}
         <Logo 
           variant="light" 
           align="center" 

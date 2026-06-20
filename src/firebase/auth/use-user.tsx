@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -8,8 +9,8 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth & Profile Hook v10.0.
- * UPDATED: Simplified takeover logic. New login session overrides old one automatically.
+ * @fileOverview Hardened Auth & Profile Hook v11.0.
+ * UPDATED: Optimized status tracking for email verification.
  */
 export function useUser() {
   const auth = useAuth();
@@ -100,6 +101,7 @@ export function useUser() {
     profile, 
     loading: !authResolved, 
     profileLoading,         
-    currentDeviceId
+    currentDeviceId,
+    emailVerified: user?.emailVerified || false
   };
 }

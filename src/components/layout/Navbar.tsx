@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -10,7 +11,8 @@ import {
   ShieldCheck,
   ChevronRight,
   Gem,
-  ArrowRight
+  ArrowRight,
+  AlertCircle
 } from "lucide-react";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -34,19 +36,18 @@ import { cn } from "@/lib/utils";
 import Logo from "@/components/brand/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Header v107.0.
- * BRAND SYSTEM: Maximized Logo (72px) shifted to the far left.
- * PROFILE HUB: Elite Dropdown Spec - 320px wide, 28px radius, Vertical Stack.
+ * @fileOverview Institutional Header v108.0 (Verification Status Sync).
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const { user, profile, loading } = useUser();
+  const { user, profile, loading, emailVerified } = useUser();
   const auth = useAuth();
 
   const pathname = usePathname();
@@ -139,12 +140,16 @@ export default function Navbar() {
                   className="w-[92vw] max-w-[340px] sm:w-[320px] rounded-[28px] p-6 bg-white border border-[#EEF2F7] shadow-[0_12px_30px_rgba(15,23,42,0.08)] z-[2001]"
                 >
                   <div className="flex flex-col items-center text-center space-y-6">
-                    {/* Avatar Spec: 64px, Blue Theme */}
-                    <div className="h-16 w-16 rounded-2xl bg-[#EEF4FF] flex items-center justify-center text-[#2563EB] shadow-sm border border-blue-50">
+                    
+                    <div className="h-16 w-16 rounded-2xl bg-[#EEF4FF] flex items-center justify-center text-[#2563EB] shadow-sm border border-blue-50 relative">
                        <User className="h-8 w-8" />
+                       {emailVerified && (
+                         <div className="absolute -top-1 -right-1 bg-emerald-500 h-5 w-5 rounded-full border-2 border-white flex items-center justify-center shadow-lg">
+                            <ShieldCheck className="h-3 w-3 text-white" />
+                         </div>
+                       )}
                     </div>
 
-                    {/* Identity spec: 24px/800 */}
                     <div className="space-y-1">
                       <h3 className="text-xl md:text-2xl font-[800] text-[#0F172A] tracking-tight leading-tight truncate w-full px-2">
                         {profile?.name || "Aspirant"}
@@ -157,7 +162,16 @@ export default function Navbar() {
                       </Link>
                     </div>
 
-                    {/* Elite Pass Badge Spec */}
+                    {!emailVerified && (
+                      <Link href="/verify-email" className="w-full p-4 bg-rose-50 text-rose-600 rounded-2xl border border-rose-100 flex flex-col gap-1 group">
+                         <div className="flex items-center justify-between">
+                            <p className="text-[10px] font-black uppercase tracking-widest">UNVERIFIED NODE</p>
+                            <AlertCircle className="h-3.5 w-3.5 animate-pulse" />
+                         </div>
+                         <p className="text-[11px] font-bold text-rose-400 mt-1 group-hover:underline">Click to verify account</p>
+                      </Link>
+                    )}
+
                     <div className="w-full p-4 bg-[#DBEAFE]/40 text-[#2563EB] rounded-2xl border border-blue-50/50 flex flex-col gap-1">
                        <div className="flex items-center justify-between">
                           <p className="text-[10px] font-black uppercase tracking-widest leading-none">
@@ -170,7 +184,6 @@ export default function Navbar() {
                        </p>
                     </div>
 
-                    {/* Admin Control Node */}
                     {isAdmin && (
                       <Button asChild className="w-full h-12 rounded-2xl text-sm font-black bg-[#0F172A] hover:bg-black text-white shadow-lg border-none transition-all active:scale-95">
                          <Link href="/admin">
@@ -180,7 +193,6 @@ export default function Navbar() {
                       </Button>
                     )}
 
-                    {/* Standardized Red Logout Node */}
                     <div className="w-full pt-2">
                        <Button
                           onClick={handleLogout}
