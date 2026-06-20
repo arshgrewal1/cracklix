@@ -8,8 +8,8 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
 /**
- * @fileOverview Hardened Takeover Session Guard v9.0.
- * LOGIC: Compares authoritative activeDeviceId from Firestore with the local cracklix_session_id.
+ * @fileOverview Hardened Takeover Session Guard v10.0 (Latest Login Wins).
+ * LOGIC: Compares authoritative activeDeviceId and sessionVersion from Firestore with local state.
  * If they mismatch, it means a newer login occurred on another device.
  */
 export default function SessionGuard() {
@@ -32,10 +32,12 @@ export default function SessionGuard() {
     const cloudSessionId = profile.activeDeviceId;
 
     // 4. Takeover Detection (Latest Login Wins)
-    // If we have a local session, but the cloud says a different one is active, this session is dead.
+    // If the cloud says a different device is active, this session is now unauthorized.
     if (cloudSessionId && localSessionId && cloudSessionId !== localSessionId) {
       isSigningOut.current = true;
       
+      console.warn("[SESSION_TAKEOVER]: Invalidation triggered by cloud authority mismatch.");
+
       toast({
         variant: "destructive",
         title: "Session Expired",

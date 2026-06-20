@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, cloneElement, isValidElement } from "react"
@@ -13,7 +14,8 @@ import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center Hub v2.1 (TypeScript Hardened).
+ * @fileOverview Search Center Hub v2.2 (TypeScript Hardened).
+ * FIXED: Explicit React imports and cloneElement typing.
  */
 
 export default function SearchPage() {

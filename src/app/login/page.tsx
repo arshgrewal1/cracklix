@@ -25,7 +25,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Professional Login Hub v50.0 (Latest Login Wins Policy).
+ * @fileOverview Professional Login Hub v51.0 (Latest Login Wins Policy).
  * SECURITY: Generates a unique activeDeviceId and increments sessionVersion on every login.
  */
 export default function LoginPage() {
@@ -68,9 +68,10 @@ function LoginContent() {
   const registerNewSession = async (userId: string) => {
     if (!db) return;
     const sessionId = crypto.randomUUID();
+    // Establish local authority
     localStorage.setItem('cracklix_session_id', sessionId);
     
-    // Increment sessionVersion to invalidate all existing tokens/cookies in client-side guards
+    // Update cloud authority and increment version to invalidate old tokens
     await updateDoc(doc(db, 'users', userId), {
       activeDeviceId: sessionId,
       sessionVersion: increment(1),
