@@ -29,7 +29,8 @@ import {
   Star,
   ArrowRight,
   LucideIcon,
-  Scale
+  Scale,
+  CheckCircle2
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
@@ -39,8 +40,8 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Institutional Exam Hub v40.0.
- * FIXED: Rebuilt persistent pinning engine for My Hub integration.
+ * @fileOverview Institutional Exam Hub v40.1 (Build Fixed).
+ * FIXED: Added missing 'CheckCircle2' import to resolve build failure.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
