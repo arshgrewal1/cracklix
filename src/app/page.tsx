@@ -14,8 +14,8 @@ import Footer from "@/components/layout/Footer";
 import GlobalSearch from "@/components/home/GlobalSearch";
 
 /**
- * @fileOverview Official Home Page v200.0.
- * RESTORED: Fixed section order - Hero -> Popular -> Latest Mocks -> Categories.
+ * @fileOverview Official Home Page v201.0.
+ * UPDATED: Priority Discovery Flow - Hero -> Search -> Choose Your Exam -> Popular -> Latest Mocks.
  */
 export default function HomePage() {
   return (
@@ -30,14 +30,14 @@ export default function HomePage() {
         <GlobalSearch />
       </div>
 
-      {/* 3. Popular Exams (Restored) */}
+      {/* 3. Choose Your Exam (Primary Discovery) */}
+      <FeaturedCategories />
+
+      {/* 4. Popular Exams (Restored) */}
       <PopularExams />
 
-      {/* 4. Latest Mock Tests (Restored) */}
+      {/* 5. Latest Mock Tests (Restored) */}
       <LatestMocks />
-
-      {/* 5. Exam Categories (7 Canonical Nodes) */}
-      <FeaturedCategories />
 
       {/* 6. Preparation Hub */}
       <Features />
