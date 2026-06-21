@@ -16,7 +16,8 @@ import {
   DollarSign, 
   CreditCard, 
   AlertCircle,
-  ChevronRight
+  ChevronRight,
+  Gem
 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore, useDoc } from "@/firebase"
@@ -28,8 +29,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard v22.0 (PWA Mode)
- * Matches the high-density home page look.
+ * Admin Dashboard v22.1 (PWA Mode)
+ * FIXED: Added missing Gem icon import to resolve ReferenceError.
  */
 
 interface MetricCardProps {
