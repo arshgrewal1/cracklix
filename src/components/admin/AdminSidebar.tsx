@@ -16,10 +16,9 @@ interface AdminSidebarProps {
 }
 
 /**
- * Cracklix Admin Sidebar v2.0 (PWA Optimized)
- * Matches the white/clean high-density feel of the homepage.
+ * Cracklix Admin Sidebar v3.0 (High Density PWA)
+ * Clean white theme synchronized with the homepage.
  */
-
 export default function AdminSidebar({
   isOpen,
   onToggle,
@@ -35,7 +34,7 @@ export default function AdminSidebar({
       <div
         onClick={onCloseMobile}
         className={cn(
-          "fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm transition-all duration-300 lg:hidden",
+          "fixed inset-0 z-[100] bg-slate-900/20 backdrop-blur-sm transition-all duration-300 lg:hidden",
           isOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -45,7 +44,7 @@ export default function AdminSidebar({
       {/* SIDEBAR */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-[110] flex h-screen flex-col overflow-hidden border-r border-slate-100 bg-white transition-all duration-300 ease-in-out shadow-2xl shadow-slate-200/50",
+          "fixed left-0 top-0 z-[110] flex h-screen flex-col overflow-hidden border-r border-slate-100 bg-white transition-all duration-300 ease-in-out shadow-2xl shadow-slate-200/40",
 
           // Desktop
           "lg:translate-x-0",
@@ -60,7 +59,7 @@ export default function AdminSidebar({
             : "-translate-x-full lg:translate-x-0"
         )}
       >
-        <div className="relative flex h-full flex-col bg-white">
+        <div className="relative flex h-full flex-col">
 
           {/* HEADER */}
           <SidebarHeader

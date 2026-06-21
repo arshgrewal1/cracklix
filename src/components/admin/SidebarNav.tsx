@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -30,7 +29,8 @@ import {
   Trophy,
   Calendar,
   HelpCircle,
-  Wrench
+  Wrench,
+  ChevronRight
 } from "lucide-react";
 
 import {
@@ -98,105 +98,70 @@ export default function SidebarNav({
 }: SidebarNavProps) {
   return (
     <TooltipProvider delayDuration={0}>
-      <nav className="flex-1 overflow-y-auto px-3 py-4 no-scrollbar">
+      <nav className="flex-1 overflow-y-auto px-3 py-6 no-scrollbar space-y-8">
+        {NAV_GROUPS.map((group) => (
+          <div key={group.label} className="space-y-2">
+            {/* GROUP TITLE - CLEAN TITLE CASE */}
+            {isOpen ? (
+              <p className="px-4 text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">
+                {group.label}
+              </p>
+            ) : (
+              <div className="h-px bg-slate-50 mx-2" />
+            )}
 
-        <div className="space-y-6">
+            <div className="space-y-0.5">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const isActive = pathname === item.href || (item.href !== "/admin" && pathname.startsWith(item.href));
 
-          {NAV_GROUPS.map((group) => (
-            <div key={group.label}>
+                const navItem = (
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "group flex h-10 items-center rounded-xl transition-all duration-300 active:scale-[0.98]",
+                      isOpen ? "gap-4 px-4" : "justify-center",
+                      isActive
+                        ? "bg-primary text-white shadow-lg shadow-primary/20"
+                        : "text-slate-500 hover:bg-slate-50 hover:text-primary"
+                    )}
+                  >
+                    <Icon className={cn(
+                      "h-4 w-4 shrink-0 transition-transform",
+                      isActive ? "text-white" : "group-hover:scale-110"
+                    )} />
 
-              {/* GROUP TITLE - TITLE CASE */}
-              {isOpen ? (
-                <p className="mb-2 px-4 text-[9px] font-black tracking-widest text-slate-400 uppercase">
-                  {group.label}
-                </p>
-              ) : (
-                <div className="mb-2 h-4" />
-              )}
+                    <span className={cn(
+                      "truncate text-[13px] font-bold transition-all duration-300",
+                      isOpen ? "max-w-[150px] opacity-100" : "max-w-0 opacity-0"
+                    )}>
+                      {item.label}
+                    </span>
 
-              {/* ITEMS */}
-              <div className="space-y-1">
+                    {isOpen && isActive && (
+                      <ChevronRight className="ml-auto h-3 w-3 text-white/50" />
+                    )}
+                  </Link>
+                );
 
-                {group.items.map((item) => {
-                  const Icon = item.icon;
+                if (isOpen) return <div key={item.href}>{navItem}</div>;
 
-                  const isActive =
-                    pathname === item.href ||
-                    (
-                      item.href !== "/admin" &&
-                      pathname.startsWith(item.href)
-                    );
-
-                  const navItem = (
-                    <Link
-                      href={item.href}
-                      className={cn(
-                        "group flex h-10 items-center rounded-xl transition-all duration-200 active:scale-[0.98]",
-
-                        isOpen
-                          ? "gap-4 px-4"
-                          : "justify-center",
-
-                        isActive
-                          ? "bg-primary text-white shadow-lg shadow-primary/20"
-                          : "text-slate-500 hover:bg-slate-50 hover:text-primary"
-                      )}
+                return (
+                  <Tooltip key={item.href}>
+                    <TooltipTrigger asChild>{navItem}</TooltipTrigger>
+                    <TooltipContent
+                      side="right"
+                      sideOffset={16}
+                      className="rounded-xl border border-slate-100 bg-white px-3 py-2 text-[11px] font-black text-[#0F172A] shadow-2xl uppercase tracking-widest"
                     >
-                      <Icon
-                        className={cn(
-                          "h-4 w-4 shrink-0",
-                          isActive
-                            ? "text-white"
-                            : "group-hover:text-primary transition-colors"
-                        )}
-                      />
-
-                      <span
-                        className={cn(
-                          "truncate text-[13px] font-bold transition-all duration-300",
-
-                          isOpen
-                            ? "max-w-[150px] opacity-100"
-                            : "max-w-0 opacity-0"
-                        )}
-                      >
-                        {item.label}
-                      </span>
-                    </Link>
-                  );
-
-                  if (isOpen) {
-                    return (
-                      <div key={item.href}>
-                        {navItem}
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <Tooltip key={item.href}>
-                      <TooltipTrigger asChild>
-                        {navItem}
-                      </TooltipTrigger>
-
-                      <TooltipContent
-                        side="right"
-                        sideOffset={16}
-                        className="rounded-xl border border-slate-100 bg-white px-3 py-2 text-[11px] font-black text-[#0F172A] shadow-xl uppercase tracking-widest"
-                      >
-                        {item.label}
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-
-              </div>
-
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              })}
             </div>
-          ))}
-
-        </div>
-
+          </div>
+        ))}
       </nav>
     </TooltipProvider>
   );
