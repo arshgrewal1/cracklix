@@ -41,8 +41,7 @@ import Link from "next/link"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Premium Login Hub v77.0 (PWA Optimized).
- * FIXED: Typography to Title Case and reduced mobile scale.
+ * @fileOverview Cracklix Premium Login Hub v78.0 (Setup Blocker Removed).
  */
 
 const formatCompact = (num: number) => {
@@ -93,12 +92,8 @@ function LoginContent() {
   }, [searchParams, toast]);
 
   useEffect(() => {
-    if (!authLoading && user) {
-      if (profile && (!profile.phone || !profile.targetExam)) {
-        router.replace('/profile-setup');
-      } else if (profile) {
-        router.replace(returnUrl);
-      }
+    if (!authLoading && user && profile) {
+      router.replace(returnUrl);
     }
   }, [user, profile, authLoading, router, returnUrl]);
 
@@ -135,7 +130,7 @@ function LoginContent() {
         })
 
         toast({ title: "Account Created" })
-        router.replace('/profile-setup')
+        router.replace(returnUrl)
       }
     } catch (error: any) {
       let message = error.message;
@@ -178,10 +173,8 @@ function LoginContent() {
           passType: 'FREE',
           pinnedExams: []
         })
-        router.replace('/profile-setup')
-      } else {
-        router.replace(returnUrl)
       }
+      router.replace(returnUrl)
     } catch (error: any) {
       toast({ variant: "destructive", title: "Social Auth Error", description: error.message })
       setLoading(false)

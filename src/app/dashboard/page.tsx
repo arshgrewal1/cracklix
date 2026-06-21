@@ -23,7 +23,8 @@ import {
   Calendar,
   Activity,
   Gem,
-  Layers
+  Layers,
+  AlertCircle
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -32,7 +33,7 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Dashboard v38.0 (Hardened Icons).
+ * @fileOverview Student Dashboard v39.0 (Setup Blocker Removed).
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -49,11 +50,9 @@ export default function StudentDashboard() {
     if (mounted && !authLoading) {
       if (!user) {
         router.push("/login");
-      } else if (profile && (!profile.phone || !profile.targetExam)) {
-        router.push("/profile-setup");
       }
     }
-  }, [user, profile, authLoading, router, mounted])
+  }, [user, authLoading, router, mounted])
 
   useEffect(() => {
     const expiryStr = profile?.passExpiresAt;
@@ -128,12 +127,31 @@ export default function StudentDashboard() {
   if (!user) return null;
 
   const isActive = profile?.passStatus === 'active';
+  const isProfileIncomplete = !profile?.phone || !profile?.targetExam;
 
   return (
     <div className="min-h-[100dvh] bg-slate-50/50 font-body pb-safe text-left">
       <Navbar />
       
       <main className="container mx-auto px-3 md:px-8 py-4 md:py-10 max-w-7xl space-y-4 md:space-y-8">
+        
+        {/* OPTIONAL PROFILE REMINDER */}
+        {isProfileIncomplete && (
+           <Card className="border-none bg-blue-600 text-white p-4 md:p-6 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 animate-in slide-in-from-top-2">
+              <div className="flex items-center gap-4 text-center md:text-left">
+                 <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center shrink-0">
+                    <UserIcon className="h-5 w-5" />
+                 </div>
+                 <p className="text-xs md:text-sm font-bold uppercase tracking-tight">Complete your profile for state merit rankings and better recommendations.</p>
+              </div>
+              <div className="flex gap-2 w-full md:w-auto">
+                 <Button asChild size="sm" className="bg-white text-blue-600 hover:bg-slate-100 flex-1 md:flex-none h-9 px-6 rounded-lg text-[9px]">
+                    <Link href="/profile-setup">Setup Now</Link>
+                 </Button>
+              </div>
+           </Card>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-8">
           
           <div className="lg:col-span-8 space-y-4 md:space-y-8">
