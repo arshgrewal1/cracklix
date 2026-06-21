@@ -10,10 +10,11 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { AuthorityLogo } from '@/lib/exam-icons';
 
 /**
- * @fileOverview High-Density Study Preview v1.8.
- * ALIGNMENT: Standardized side margins to match Hero section.
+ * @fileOverview High-Density Study Preview v1.9.
+ * UPDATED: Integrated branded Current Affairs logo.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -36,9 +37,7 @@ export default function CurrentAffairsPreview() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-1 px-1">
            <div className="space-y-1">
               <div className="flex items-center gap-2">
-                 <div className="h-8 w-8 bg-blue-600/10 rounded-lg flex items-center justify-center text-blue-600">
-                    <Newspaper className="h-4 w-4" />
-                 </div>
+                 <AuthorityLogo boardId="current-affairs" size="sm" className="bg-transparent shadow-none p-0" />
                  <span className="text-[9px] font-bold text-slate-400 tracking-tight uppercase">Study Material</span>
               </div>
               <h2 className="text-2xl md:text-5xl font-extrabold text-[#0F172A] tracking-tight">Current Affairs</h2>

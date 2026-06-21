@@ -33,10 +33,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Current Affairs Center v16.0.
- * UI FIX: Removed 'uppercase' from Study Center heading and item titles.
+ * @fileOverview Official Current Affairs Center v17.0.
+ * UPDATED: Integrated branded Current Affairs logo into header.
  */
 
 const HUB_TYPES = [
@@ -115,9 +116,10 @@ export default function CurrentAffairsCenter() {
             <div className="space-y-10 md:space-y-16 text-left">
                
                <div className="bg-[#0B1528] p-8 md:p-16 rounded-[2.5rem] md:rounded-[4rem] text-white relative overflow-hidden shadow-4xl group">
-                  <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Newspaper className="h-80 w-80" /></div>
+                  <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><AuthorityLogo boardId="current-affairs" size="xl" className="h-80 w-80 opacity-5" /></div>
                   <div className="space-y-10 relative z-10 max-w-4xl">
                     <div className="flex items-center gap-3">
+                        <AuthorityLogo boardId="current-affairs" size="sm" className="bg-transparent shadow-none p-0" />
                         <Badge className="bg-primary text-white border-none px-4 py-1.5 rounded-full font-black uppercase text-[10px] tracking-[0.2em] shadow-xl">
                             STUDY CENTER
                         </Badge>
@@ -167,7 +169,7 @@ export default function CurrentAffairsCenter() {
                                           item.type === 'DAILY' ? 'bg-orange-50 text-primary' : 
                                           item.type === 'WEEKLY' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'
                                        )}>
-                                          {activeType === 'QUIZ' ? <Zap className="h-8 md:h-10" /> : <BookOpen className="h-8 md:h-10" />}
+                                          <AuthorityLogo boardId="current-affairs" size="md" className="bg-transparent shadow-none p-0 opacity-80" />
                                        </div>
                                        <div className="flex-1 space-y-3 w-full">
                                           <div className="flex items-center justify-between">

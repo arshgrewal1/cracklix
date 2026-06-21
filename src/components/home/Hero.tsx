@@ -16,10 +16,11 @@ import Link from "next/link";
 import { useDoc, useFirestore, useUser } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
+import { AuthorityLogo } from "@/lib/exam-icons";
 
 /**
- * @fileOverview Official High-Density PWA Hero v37.0.
- * UPDATED: Simplified "Explore Registry" to "Explore Exams" and removed uppercase.
+ * @fileOverview Official High-Density PWA Hero v38.0.
+ * UPDATED: Integrated branded Current Affairs logo.
  */
 
 export default function Hero() {
@@ -91,7 +92,12 @@ export default function Hero() {
           <QuickAction icon={Zap} label="Mock Tests" href="/mocks" color="bg-blue-600" />
           <QuickAction icon={BookOpen} label="Study Material" href="/notes" color="bg-indigo-600" />
           <QuickAction icon={FileText} label="PYQ Papers" href="/pyqs" color="bg-emerald-600" />
-          <QuickAction icon={BarChart3} label="Current Affairs" href="/current-affairs" color="bg-orange-500" />
+          <QuickAction 
+            customIcon={<AuthorityLogo boardId="current-affairs" size="sm" className="bg-transparent shadow-none p-0" />} 
+            label="Current Affairs" 
+            href="/current-affairs" 
+            color="bg-white" 
+          />
         </div>
 
         {/* CTAs */}
@@ -108,12 +114,12 @@ export default function Hero() {
   );
 }
 
-function QuickAction({ icon: Icon, label, href, color }: any) {
+function QuickAction({ icon: Icon, customIcon, label, href, color }: any) {
   return (
     <Link href={href} className="block group h-full">
       <Card className="p-4 md:p-8 rounded-2xl border border-slate-100 bg-white hover:shadow-xl transition-all duration-300 h-full group flex flex-col md:flex-row items-center gap-3 md:gap-5 text-center md:text-left">
         <div className={cn("h-10 w-10 md:h-14 md:w-14 rounded-xl flex items-center justify-center shrink-0 shadow-lg text-white group-hover:scale-110 transition-transform", color)}>
-          <Icon className="h-5 w-5 md:h-7 md:w-7" />
+          {customIcon ? customIcon : Icon && <Icon className="h-5 w-5 md:h-7 md:w-7" />}
         </div>
         <span className="text-[11px] md:text-sm font-bold text-slate-800 leading-tight tracking-tight">{label}</span>
       </Card>

@@ -3,8 +3,8 @@ import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Act
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Branding Engine v21.0.
- * UPDATED: Added PSTET and CTET logo mappings based on local assets.
+ * @fileOverview Institutional Branding Engine v22.0.
+ * UPDATED: Added Current Affairs branded asset to canonical registry.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -22,7 +22,8 @@ const CANONICAL_BOARD_LOGOS: Record<string, string> = {
   'ibps': '/logos/boards/ibps.png',
   'defense': '/logos/boards/upsc.png',
   'pstet': '/logos/boards/pstet.png',
-  'ctet': '/logos/boards/ctet.png'
+  'ctet': '/logos/boards/ctet.png',
+  'current-affairs': '/logos/boards/current-affairs.png'
 };
 
 const CANONICAL_CAT_LOGOS: Record<string, string> = {
