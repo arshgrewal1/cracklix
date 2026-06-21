@@ -1,5 +1,10 @@
 import { Exam, MockTest, Question, CurrentAffairType, Notification } from "@/types";
 
+/**
+ * @fileOverview Institutional Mock Data v2.2.
+ * FIXED: Aligned properties with canonical Exam and Question types.
+ */
+
 export const EXAMS: Exam[] = [
   {
     id: "psssb-patwari",
@@ -110,16 +115,5 @@ export const CURRENT_AFFAIRS: any[] = [
     date: "Oct 24, 2025",
     category: "Policy",
     summary: "The Punjab Cabinet chaired by the CM has approved the new Industrial and Business Development Policy to boost startups."
-  }
-];
-
-export const NOTIFICATIONS: Notification[] = [
-  {
-    id: "n1",
-    title: "Result Declared!",
-    message: "Your score for PSSSB Mock 05 is now available.",
-    time: "2 hours ago",
-    isRead: false,
-    type: "result"
   }
 ];

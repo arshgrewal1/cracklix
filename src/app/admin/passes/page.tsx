@@ -16,7 +16,8 @@ import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Pass Architect v5.0 (Dynamic Access).
+ * @fileOverview Institutional Pass Architect v5.1 (Production Hardened).
+ * FIXED: Null guard for editingPass properties during render cycles.
  */
 export default function PassManagement() {
   const db = useFirestore()
@@ -65,6 +66,7 @@ export default function PassManagement() {
   }
 
   const toggleMock = (mockId: string) => {
+    if (!editingPass) return;
     const current = editingPass.allowedMocks || []
     setEditingPass({
       ...editingPass,
@@ -73,6 +75,7 @@ export default function PassManagement() {
   }
 
   const toggleCategory = (catId: string) => {
+    if (!editingPass) return;
     const current = editingPass.allowedCategories || []
     setEditingPass({
       ...editingPass,
@@ -161,7 +164,7 @@ export default function PassManagement() {
                       </div>
                       <div className="max-h-60 overflow-y-auto pr-2 custom-scrollbar space-y-1">
                          {mocks?.filter(m => m.title.toLowerCase().includes(mockSearch.toLowerCase())).map((m: any) => {
-                            const isAllowed = editingPass.allowedMocks?.includes(m.id)
+                            const isAllowed = editingPass?.allowedMocks?.includes(m.id)
                             return (
                                <button key={m.id} onClick={() => toggleMock(m.id)} className={cn("w-full p-2.5 rounded-lg flex items-center justify-between text-left transition-all", isAllowed ? "bg-primary text-white shadow-lg" : "bg-slate-50 hover:bg-slate-100 text-slate-600")}>
                                   <span className="text-[10px] font-bold uppercase truncate pr-4">{m.title}</span>
@@ -178,7 +181,7 @@ export default function PassManagement() {
                       <Label className="text-[9px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Landmark className="h-3 w-3" /> Grant Category Hubs</Label>
                       <div className="grid grid-cols-2 gap-2">
                          {boards?.map((b: any) => {
-                            const isAllowed = editingPass.allowedCategories?.includes(b.id)
+                            const isAllowed = editingPass?.allowedCategories?.includes(b.id)
                             return (
                                <button key={b.id} onClick={() => toggleCategory(b.id)} className={cn("p-3 rounded-xl flex items-center justify-between text-left border-2 transition-all", isAllowed ? "border-primary bg-blue-50/50 text-primary shadow-sm" : "border-slate-100 bg-white text-slate-400 hover:border-slate-200")}>
                                   <span className="text-[9px] font-black uppercase tracking-tight">{b.abbreviation} Hub</span>

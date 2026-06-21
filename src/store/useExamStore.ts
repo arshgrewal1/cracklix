@@ -6,8 +6,8 @@ import { doc, updateDoc, serverTimestamp, setDoc, Firestore } from 'firebase/fir
 import { initializeFirebase } from '@/firebase/app';
 
 /**
- * @fileOverview Global Test Store v3.9.
- * FIXED: String type mismatches and duplicate initialization logic.
+ * @fileOverview Global Test Store v4.0.
+ * FIXED: Duplicate property declarations and sanitized language mode assignments.
  */
 
 interface ExamStore extends AttemptState {
@@ -170,7 +170,6 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const newAnswers = { ...answers };
     const newStatus = { ...status };
     
-    set({ isSyncing: true });
     if (optionIdx === null) { 
        delete newAnswers[idx]; 
        newStatus[idx] = 'not-answered'; 
@@ -178,7 +177,7 @@ export const useExamStore = create<ExamStore>((set, get) => ({
        newAnswers[idx] = optionIdx; 
        newStatus[idx] = 'answered'; 
     }
-    set({ answers: newAnswers, status: newStatus });
+    set({ answers: newAnswers, status: newStatus, isSyncing: true });
     
     updateDoc(doc(dbInstance, 'attempts', `${userId}_${mockId}`), { 
       [`answers.${idx}`]: optionIdx, 
@@ -193,10 +192,9 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const newAnswers = { ...answers };
     const newStatus = { ...status };
     
-    set({ isSyncing: true });
     delete newAnswers[idx];
     newStatus[idx] = 'not-answered';
-    set({ answers: newAnswers, status: newStatus });
+    set({ answers: newAnswers, status: newStatus, isSyncing: true });
     
     updateDoc(doc(dbInstance, 'attempts', `${userId}_${mockId}`), { 
        [`answers.${idx}`]: null, 
@@ -211,10 +209,9 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const newStatus = { ...currentStatus };
     const hasAnswer = answers[idx] !== undefined && answers[idx] !== null;
     
-    set({ isSyncing: true });
     const finalStatus: QuestionStatus = hasAnswer ? 'answered-marked' : 'marked';
     newStatus[idx] = finalStatus;
-    set({ status: newStatus });
+    set({ status: newStatus, isSyncing: true });
     
     updateDoc(doc(dbInstance, 'attempts', `${userId}_${mockId}`), { 
        [`status.${idx}`]: finalStatus, 

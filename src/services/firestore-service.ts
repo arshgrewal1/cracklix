@@ -20,8 +20,8 @@ import {
 } from '@/types';
 
 /**
- * @fileOverview Production Firestore Service Hub.
- * HARDENED: Unified types and fixed AttemptResult import issues.
+ * @fileOverview Production Firestore Service Hub v1.2.
+ * HARDENED: Unified types and resolved AttemptResult import issues.
  */
 
 export const FirestoreService = {
