@@ -23,7 +23,8 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Compact Hero Hub v28.0 (Redesigned for PWA).
+ * @fileOverview Official Compact Hero Hub v29.0.
+ * UPDATED: Tagline refactored to "Crack Punjab Govt Exam with Confidence".
  */
 
 export default function Hero() {
@@ -59,9 +60,9 @@ export default function Hero() {
             </motion.div>
 
             <div className="space-y-1.5 md:space-y-4">
-              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.05]">
-                Crack Punjab <br/>
-                <span className="block text-primary">Government Exams</span>
+              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold tracking-tight text-slate-900 leading-[1.05] uppercase">
+                Crack Punjab Govt Exam <br/>
+                <span className="block text-primary">with Confidence</span>
               </h1>
 
               <p className="text-[11px] sm:text-lg text-slate-500 max-w-lg leading-relaxed font-medium">
