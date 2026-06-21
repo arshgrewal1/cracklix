@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -15,6 +16,8 @@ import {
   PlusSquare,
   CheckCircle2,
   MoreVertical,
+  ChevronRight,
+  Info
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,8 +27,9 @@ import { cn } from "@/lib/utils";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Public PWA Install Hub v10.0.
- * ACCESSIBLE: Works without login to allow shared growth.
+ * @fileOverview Public PWA Install Hub v11.0.
+ * ACCESSIBLE: Publicly accessible without login to allow shared growth.
+ * HARDENED: Direct install trigger and manual fallbacks.
  */
 export default function InstallPage() {
   const [device, setDevice] = useState<"android" | "ios" | "desktop" | "unknown">("desktop");
@@ -60,7 +64,7 @@ export default function InstallPage() {
               <Zap className="h-7 w-7 md:h-10 md:w-10 fill-current" />
            </motion.div>
            <div className="space-y-2 text-center">
-              <h1 className="text-2xl md:text-7xl font-black text-[#0F172A] tracking-tighter leading-none">
+              <h1 className="text-3xl md:text-7xl font-black text-[#0F172A] tracking-tighter leading-none">
                 Cracklix <span className="text-primary">Native</span>
               </h1>
               <p className="text-[12px] md:text-2xl text-slate-500 font-medium leading-tight">
@@ -99,7 +103,7 @@ export default function InstallPage() {
                        <div className="space-y-4">
                           <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-start gap-3">
                              <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
-                             <p className="text-emerald-50 [11px] md:text-sm font-medium">Native mode active. You are now connected to the elite prep registry.</p>
+                             <p className="text-emerald-50 text-[11px] md:text-sm font-medium leading-relaxed">Native mode active. You are now connected to the elite prep registry.</p>
                           </div>
                           <Button asChild className="w-full h-12 bg-white text-black hover:bg-slate-100 rounded-full font-black uppercase tracking-widest text-[9px] border-none shadow-xl transition-all">
                              <Link href="/dashboard">Enter Dashboard</Link>
@@ -115,6 +119,7 @@ export default function InstallPage() {
                                 variant="primary"
                                 className="w-full h-14 md:h-20 text-[10px] md:text-[11px] rounded-full"
                              />
+                             <p className="text-[9px] font-bold text-slate-500 text-center uppercase tracking-widest">One-tap installation for supported browsers</p>
                           </div>
                        </div>
                     )}
@@ -125,12 +130,12 @@ export default function InstallPage() {
                  <div className="mt-6 space-y-4">
                     <Card className="p-6 md:p-10 rounded-[2.5rem] bg-slate-50 border border-slate-200 space-y-6 text-left shadow-inner">
                        <h3 className="text-lg font-black uppercase text-[#0F172A] flex items-center gap-2">
-                          <Smartphone className="h-5 w-5 text-primary" /> Browser Setup
+                          <Smartphone className="h-5 w-5 text-primary" /> Manual Setup Fallback
                        </h3>
                        <div className="space-y-4">
                           <InstructionStep num={1} icon={<MoreVertical className="h-3.5 w-3.5" />} text="Tap browser menu (3-dots)" color="text-slate-500" />
                           <InstructionStep num={2} icon={<PlusSquare className="h-3.5 w-3.5" />} text="Select 'Install App' or 'Add to Home'" color="text-slate-500" />
-                          <InstructionStep num={3} icon={<CheckCircle2 className="h-3.5 w-3.5" />} text="Sync and Launch" color="text-slate-500" />
+                          <InstructionStep num={3} icon={<CheckCircle2 className="h-3.5 w-3.5" />} text="Sync and Launch from Home Screen" color="text-slate-500" />
                        </div>
                     </Card>
                  </div>
@@ -140,9 +145,16 @@ export default function InstallPage() {
            <div className="lg:col-span-5 space-y-4 md:space-y-8 text-left">
               <h3 className="text-[9px] font-black uppercase text-slate-400 tracking-[0.4em] ml-1">Registry Perks</h3>
               <div className="grid grid-cols-1 gap-3">
-                 <BenefitRow icon={<Smartphone />} title="Native Hub" desc="Official PWA Experience." />
-                 <BenefitRow icon={<Zap />} title="Low Latency" desc="Offline cached mocks." />
-                 <BenefitRow icon={<ShieldCheck />} title="Verified" desc="Secure preparation node." />
+                 <BenefitRow icon={<Smartphone />} title="Native Experience" desc="Zero address bar distraction." />
+                 <BenefitRow icon={<Zap />} title="Rapid Sync" desc="Offline cached preparation nodes." />
+                 <BenefitRow icon={<ShieldCheck />} title="Push Alerts" desc="Instant recruitment notifications." />
+              </div>
+
+              <div className="p-6 bg-blue-50 rounded-[2rem] border border-blue-100 flex items-start gap-4">
+                 <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                 <p className="text-[10px] md:text-[11px] font-bold text-blue-800 leading-relaxed uppercase">
+                    Cracklix is a Progressive Web App (PWA). It works just like a native app but consumes less storage and updates automatically.
+                 </p>
               </div>
            </div>
         </div>

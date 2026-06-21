@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
@@ -7,8 +8,9 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Hardened Institutional PWA Manager v25.0.
+ * @fileOverview Hardened Institutional PWA Manager v26.0.
  * FIXED: Universal capture of 'beforeinstallprompt' with global event dispatch.
+ * LOGGING: Added audit logs for install states.
  */
 export default function PWAManager() {
   const pathname = usePathname();
@@ -34,7 +36,7 @@ export default function PWAManager() {
     setMounted(true);
 
     const handlePrompt = (e: any) => {
-      console.log('[PWA_AUDIT] beforeinstallprompt captured');
+      console.log('[PWA_AUDIT] beforeinstallprompt event captured');
       e.preventDefault();
       (window as any).deferredPrompt = e;
       // Notify all install buttons to update their visibility
@@ -43,7 +45,7 @@ export default function PWAManager() {
     };
 
     const handleAppInstalled = () => {
-      console.log('[PWA_AUDIT] App installed successfully');
+      console.log('[PWA_AUDIT] App installed node successfully committed');
       setIsInstalled(true);
       setShowPrompt(false);
       (window as any).deferredPrompt = null;
@@ -66,15 +68,16 @@ export default function PWAManager() {
     if (!prompt) return;
 
     try {
-      await prompt.prompt();
+      console.log('[PWA_AUDIT] Triggering native install prompt');
+      prompt.prompt();
       const { outcome } = await prompt.userChoice;
-      console.log('[PWA_AUDIT] Installation outcome:', outcome);
+      console.log(`[PWA_AUDIT] Installation outcome: ${outcome}`);
       if (outcome === 'accepted') {
         setShowPrompt(false);
         (window as any).deferredPrompt = null;
       }
     } catch (err) {
-      console.error('[PWA_AUDIT] Trigger failed:', err);
+      console.error('[PWA_AUDIT] Native trigger failed:', err);
     }
   };
 

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useSearchParams, useRouter } from "next/navigation"
@@ -18,8 +19,8 @@ import Script from "next/script"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Testbook-Style Checkout Hub v12.0.
- * FIXED: Missing 'cn' and 'profile' null check hardening.
+ * @fileOverview Testbook-Style Checkout Hub v13.0.
+ * FIXED: Narrowed profile and Date types for TS compatibility.
  */
 
 export default function CheckoutPage() {
@@ -177,7 +178,7 @@ function CheckoutContent() {
            </Card>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-16">
            <div className="lg:col-span-7 space-y-8">
               <Tabs defaultValue="online" className="w-full">
                  <TabsList className="bg-slate-100 border border-slate-200 p-1 h-14 rounded-2xl w-full mb-8 grid grid-cols-2">

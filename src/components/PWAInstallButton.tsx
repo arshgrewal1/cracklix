@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -13,8 +14,8 @@ interface PWAInstallButtonProps {
 }
 
 /**
- * @fileOverview Hardened PWA Install Trigger v16.0.
- * Works without login and handles global prompt captures.
+ * @fileOverview Hardened PWA Install Trigger v17.0.
+ * Works WITHOUT login and handles global prompt captures.
  */
 export default function PWAInstallButton({ 
   className, 
@@ -44,7 +45,7 @@ export default function PWAInstallButton({
     setMounted(true);
 
     const handleCheck = () => {
-       console.log('[INSTALL_BTN] PWA State Synchronized');
+       console.log('[PWA_INSTALL_BUTTON] Registry update detected');
        updateState();
     };
 
@@ -65,7 +66,7 @@ export default function PWAInstallButton({
     
     if (isIOS) {
        toast({
-         title: "📱 iOS Installation",
+         title: "📱 iOS Setup",
          description: "Tap 'Share' in your Safari browser and select 'Add to Home Screen'.",
        });
        return;
@@ -73,25 +74,25 @@ export default function PWAInstallButton({
 
     const prompt = (window as any).deferredPrompt;
     if (!prompt) {
+      console.log('[PWA_INSTALL_BUTTON] No native prompt detected, showing manual instructions');
       toast({
-        variant: "destructive",
         title: "Setup Required",
-        description: "Please use the 'Install' option in your browser menu.",
+        description: "Please use the 'Install' option in your browser menu (3-dots).",
       });
       return;
     }
 
     try {
-      console.log('[PWA_INSTALL] Prompting user...');
+      console.log('[PWA_INSTALL_BUTTON] Opening native install dialog');
       prompt.prompt();
       const { outcome } = await prompt.userChoice;
-      console.log('[PWA_INSTALL] User Choice:', outcome);
+      console.log(`[PWA_INSTALL_BUTTON] User Choice: ${outcome}`);
       if (outcome === 'accepted') {
         (window as any).deferredPrompt = null;
         setCanInstall(false);
       }
     } catch (err) {
-      console.error('[PWA_INSTALL_FAILURE]:', err);
+      console.error('[PWA_INSTALL_BUTTON] Execution failed:', err);
     }
   };
 
@@ -109,7 +110,7 @@ export default function PWAInstallButton({
       )}
     >
       {isIOS ? <Smartphone className="h-4 w-4" /> : <Download className="h-4 w-4" />}
-      {showLabel && (canInstall ? "Install App" : "Setup App")}
+      {showLabel && (canInstall ? "Install App Now" : "Install App Now")}
       <Sparkles className="h-3 w-3 text-primary animate-pulse" />
     </Button>
   );

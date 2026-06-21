@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, isValidElement, cloneElement, ReactElement } from "react"
@@ -34,7 +35,7 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Dashboard v35.0.
+ * @fileOverview Student Dashboard v36.0 (PWA Refined).
  * FIXED: Missing 'Layers' and 'isValidElement' hardening.
  */
 export default function StudentDashboard() {
