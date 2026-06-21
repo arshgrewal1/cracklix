@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/home/Hero";
+import Features from "@/components/home/Features";
 import GlobalSearch from "@/components/home/GlobalSearch";
 import FeaturedCategories from "@/components/home/FeaturedCategories";
 import PopularExams from "@/components/home/PopularExams";
@@ -13,8 +14,8 @@ import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
 
 /**
- * @fileOverview Official Home Page v182.1.
- * UPDATED: Simplified section references.
+ * @fileOverview Official Home Page v183.0.
+ * RESTORED: Core Features hub (Mock Tests, Study Material, etc.) to original position.
  */
 
 export default function HomePage() {
@@ -25,33 +26,36 @@ export default function HomePage() {
       {/* 1. Hero Section */}
       <Hero />
 
-      {/* 1.5 Global Search */}
+      {/* 2. Core Features (Mock Tests, Study Material, PYQs, Analytics) */}
+      <Features />
+
+      {/* 3. Global Search */}
       <div className="relative z-40 py-8 md:py-12 bg-white">
         <GlobalSearch />
       </div>
 
-      {/* 2. Exam Categories */}
+      {/* 4. Exam Categories */}
       <FeaturedCategories />
 
-      {/* 3. Popular Exams */}
+      {/* 5. Popular Exams */}
       <PopularExams />
 
-      {/* 4. Latest Mock Tests */}
+      {/* 6. Latest Mock Tests */}
       <LatestMocks />
 
-      {/* 5. Personal Progress */}
+      {/* 7. Personal Progress */}
       <ContinueLearning />
 
-      {/* 6. Knowledge Hub */}
+      {/* 8. Knowledge Hub */}
       <CurrentAffairsPreview />
 
-      {/* 7. Merit Rankings */}
+      {/* 9. Merit Rankings */}
       <MeritPreview />
 
-      {/* 8. Mobile App */}
+      {/* 10. Mobile App */}
       <AppPreview />
 
-      {/* 9. Leadership Section */}
+      {/* 11. Leadership Section */}
       <MeetFounder />
       
       <Footer />
