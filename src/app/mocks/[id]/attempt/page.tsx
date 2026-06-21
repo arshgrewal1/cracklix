@@ -1,3 +1,4 @@
+'use server';
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
@@ -26,9 +27,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v65.0.
+ * @fileOverview Hardened CBT Engine v66.0.
  * FIXED: Sync Failure resolved by hardening the question retrieval sequence.
- * FIXED: Explicit ID verification during registry hydration.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -102,13 +102,11 @@ export default function MockAttemptPage() {
         const chunks = [];
         for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
         
-        // Hardened fetch with mapping
         for (const chunk of chunks) {
            const chunkSnap = await getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)));
            chunkSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
         }
         
-        // Ensure strictly sorted order mapping
         const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
         
         if (sortedQs.length === 0) {

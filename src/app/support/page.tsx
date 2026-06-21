@@ -30,8 +30,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import Link from "next/link"
 
 /**
- * @fileOverview Official Institutional Support Hub v5.4.
- * FIXED: Missing Link and Loader2 imports resolved.
+ * @fileOverview Official Institutional Support Hub v5.5.
+ * FIXED: Missing Link and Loader2 imports hardened.
  */
 
 export default function SupportPage() {
@@ -196,6 +196,56 @@ export default function SupportPage() {
       </main>
 
       <Footer />
+
+      <Dialog open={isRaising} onOpenChange={setIsRaising}>
+         <DialogContent className="sm:max-w-xl w-[95vw] rounded-3xl md:rounded-[3rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
+            <div className="h-2 w-full bg-primary shrink-0" />
+            <DialogHeader className="p-6 md:p-10 pb-4 shrink-0">
+               <div className="flex justify-between items-center">
+                  <DialogTitle className="text-xl md:text-3xl font-black text-[#0F172A] uppercase">Raise Support Ticket</DialogTitle>
+                  <button onClick={() => setIsRaising(false)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors"><X className="h-6 w-6 text-slate-400" /></button>
+               </div>
+               <DialogDescription className="text-slate-400 font-bold text-[9px] md:text-sm mt-1 uppercase tracking-widest">Our management node will audit your issue.</DialogDescription>
+            </DialogHeader>
+            <div className="px-6 md:px-10 pb-6 md:pb-10 space-y-6 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
+               <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                     <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Issue Type</Label>
+                     <select value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})} className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner">
+                        <option value="PAYMENT">Payment Issue</option>
+                        <option value="PASS">Pass Activation</option>
+                        <option value="MOCK_TEST">Mock Test Error</option>
+                        <option value="TECHNICAL">App/Technical</option>
+                        <option value="ACCOUNT">Account Hub</option>
+                     </select>
+                  </div>
+                  <div className="space-y-2">
+                     <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Priority</Label>
+                     <select value={formData.priority} onChange={e => setFormData({...formData, priority: e.target.value})} className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner">
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
+                        <option value="URGENT">Urgent</option>
+                     </select>
+                  </div>
+               </div>
+               <div className="space-y-2">
+                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Subject Headline</Label>
+                  <Input value={formData.subject} onChange={e => setFormData({...formData, subject: e.target.value})} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-bold" placeholder="e.g. UPI Verification Delayed" />
+               </div>
+               <div className="space-y-2">
+                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Statement of Issue</Label>
+                  <Textarea value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} className="min-h-[120px] rounded-xl border-slate-200 bg-slate-50 font-medium" placeholder="Describe your issue in detail..." />
+               </div>
+            </div>
+            <DialogFooter className="p-6 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4">
+               <Button variant="ghost" onClick={() => setIsRaising(false)} className="h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400">Discard</Button>
+               <Button onClick={handleRaiseTicket} disabled={raisingLoading} className="flex-1 bg-primary hover:bg-blue-700 text-white h-11 md:h-12 rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl gap-2 active:scale-95 border-none">
+                  {raisingLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Transmit Node
+               </Button>
+            </DialogFooter>
+         </DialogContent>
+      </Dialog>
     </div>
   )
 }

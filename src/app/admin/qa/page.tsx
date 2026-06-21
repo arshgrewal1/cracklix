@@ -25,8 +25,8 @@ import { cn } from "@/lib/utils"
 import type { Question } from "@/types"
 
 /**
- * @fileOverview Hardened CBT Integrity Hub v17.4.
- * FIXED: React.cloneElement typed correctly to resolve TS2769.
+ * @fileOverview Hardened CBT Integrity Hub v17.5.
+ * FIXED: React.cloneElement typed correctly to resolve build failures.
  */
 
 interface QAStatCardProps {
@@ -244,7 +244,7 @@ function QAStatCard({ label, value, color, desc, icon, className }: QAStatCardPr
       <Card className={cn("border-none shadow-lg bg-white rounded-2xl md:rounded-[2.5rem] p-5 md:p-10 transition-all duration-500 group border border-slate-50 text-left hover:translate-y-[-4px]", className)}>
          <div className="flex items-center justify-between mb-4 md:mb-8">
             <div className={cn("h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform")}>
-               {isValidElement(icon) && cloneElement(icon as ReactElement<any>, { className: cn("h-5 w-5 md:h-6 md:w-6", color) })}
+               {isValidElement(icon) ? cloneElement(icon as ReactElement<any>, { className: cn("h-5 w-5 md:h-6 md:w-6", color) }) : null}
             </div>
          </div>
          <div className="space-y-0.5 md:space-y-1">

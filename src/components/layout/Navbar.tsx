@@ -43,8 +43,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Standardized Navbar v53.0 (Date Narrowing Fixed).
- * FIXED: TS2769 by capturing and narrowing the passExpiresAt value.
+ * @fileOverview Standardized Navbar v54.0.
+ * FIXED: Date narrowing logic to prevent build failures.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -241,8 +241,4 @@ function ProfileMenuItem({ href, icon: Icon, label, highlight }: { href: string,
        <span className="truncate">{label}</span>
     </Link>
   )
-}
-
-function ProfileDataNode({ icon: Icon, label, value, colSpan = 1 }: { icon: any, label: string, value: string, colSpan?: number }) {
-   return (<div className={cn("flex items-start gap-4 md:gap-8", colSpan > 1 ? "md:col-span-2" : "")}><div className="h-10 w-10 md:h-16 md:w-16 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary/5 transition-colors"><Icon className="h-4 w-4 md:h-7 md:w-7 text-slate-400" /></div><div className="min-w-0 space-y-0.5 text-left"><p className="text-[8px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">{label}</p><p className="text-[11px] md:text-xl font-bold text-[#0F172A] leading-relaxed break-words tracking-tight">{value}</p></div></div>)
 }

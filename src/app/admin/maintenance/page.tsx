@@ -24,8 +24,8 @@ import { clearAppCache } from "@/app/actions/maintenance"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Master Admin Maintenance Terminal v3.4 (PWA Hardened).
- * FIXED: Missing Input import and explicit event typing.
+ * @fileOverview Master Admin Maintenance Terminal v3.5.
+ * FIXED: Explicitly typed confirming tool parameters.
  */
 
 export default function MaintenancePage() {

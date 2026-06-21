@@ -16,8 +16,8 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional PYQ Archive CMS v23.0.
- * FIXED: Resolved variable naming typos and missing properties.
+ * @fileOverview Institutional PYQ Archive CMS v23.1.
+ * FIXED: Resolved variable naming typos for state management.
  */
 
 export default function AdminPYQManagement() {

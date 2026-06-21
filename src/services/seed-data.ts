@@ -1,9 +1,7 @@
 import { Firestore, doc, serverTimestamp, writeBatch, collection, getDocs } from 'firebase/firestore';
 
 /**
- * @fileOverview Official Institutional Registry Blueprint v74.0.
- * STRICT: Implements the final deca-verified tree provided by the user.
- * SEED: Populates the global bank with sample questions for immediate verification.
+ * @fileOverview Official Institutional Registry Blueprint v75.0.
  * FIXED: Explicit ID mapping for questions to ensure CBT engine sync.
  */
 
