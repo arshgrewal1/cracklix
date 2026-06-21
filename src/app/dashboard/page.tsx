@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, isValidElement, cloneElement, ReactElement } from "react"
@@ -22,9 +21,7 @@ import {
   ShieldCheck,
   TrendingUp,
   Calendar,
-  Award,
   Activity,
-  Loader2,
   Gem,
   Layers
 } from "lucide-react"
@@ -35,8 +32,7 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Dashboard v36.0 (PWA Refined).
- * FIXED: Missing 'Layers' and 'isValidElement' hardening.
+ * @fileOverview Student Dashboard v38.0 (Hardened Icons).
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -125,7 +121,7 @@ export default function StudentDashboard() {
   if (!mounted || authLoading || (user && !profile)) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
        <Zap className="h-8 w-8 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300">Syncing Progress...</p>
+       <p className="text-[10px] font-black uppercase text-slate-300">Syncing Progress Hub...</p>
     </div>
   );
 

@@ -1,8 +1,7 @@
 import { Firestore, doc, serverTimestamp, writeBatch, collection, getDocs } from 'firebase/firestore';
 
 /**
- * @fileOverview Official Institutional Registry Blueprint v79.0.
- * UPDATED: Added planTier property for Testbook-style logic.
+ * @fileOverview Official Institutional Registry Blueprint v81.0.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -24,34 +23,21 @@ export async function seedInitialData(db: Firestore) {
     { id: "ppsc", abbreviation: "PPSC", name: "Punjab Public Service Commission", categoryId: "punjab-government-exams", displayOrder: 1 },
     { id: "psssb", abbreviation: "PSSSB", name: "Punjab Subordinate Services Selection Board", categoryId: "punjab-government-exams", displayOrder: 2 },
     { id: "punjab-police", abbreviation: "Punjab Police", name: "Punjab Police Recruitment", categoryId: "punjab-government-exams", displayOrder: 3 },
-    { id: "teaching-hub", abbreviation: "Teaching", name: "Education Recruitment Board", categoryId: "punjab-teaching-exams", displayOrder: 1 },
-    { id: "pspcl", abbreviation: "PSPCL", name: "Punjab State Power Corporation Ltd", categoryId: "punjab-technical-exams", displayOrder: 1 },
-    { id: "pstcl", abbreviation: "PSTCL", name: "Punjab State Transmission Corporation Ltd", categoryId: "punjab-technical-exams", displayOrder: 2 },
-    { id: "bfuhs", abbreviation: "BFUHS", name: "Baba Farid University of Health Sciences", categoryId: "punjab-technical-exams", displayOrder: 3 },
-    { id: "banking-hub", abbreviation: "Banking", name: "Punjab State Cooperative Banking Hub", categoryId: "banking-exams", displayOrder: 1 },
-    { id: "judiciary-hub", abbreviation: "Judiciary", name: "Punjab Judiciary Hub", categoryId: "judiciary-exams", displayOrder: 1 },
-    { id: "ssc", abbreviation: "SSC", name: "Staff Selection Commission", categoryId: "central-government-exams", displayOrder: 1 },
-    { id: "rrb", abbreviation: "RRB", name: "Railway Recruitment Board", categoryId: "central-government-exams", displayOrder: 2 },
-    { id: "ibps", abbreviation: "IBPS", name: "Institute of Banking Personnel Selection", categoryId: "central-government-exams", displayOrder: 3 },
-    { id: "sbi", abbreviation: "SBI", name: "State Bank of India Recruitment", categoryId: "central-government-exams", displayOrder: 4 },
-    { id: "defense", abbreviation: "Defense", name: "Indian Defense Hub", categoryId: "central-government-exams", displayOrder: 5 }
+    { id: "teaching-hub", abbreviation: "Teaching", name: "Education Recruitment Board", categoryId: "punjab-teaching-exams", displayOrder: 1 }
   ];
 
   // 3. CANONICAL EXAMS
   const exams = [
     { id: "pcs", name: "PCS", boardId: "ppsc", categoryId: "punjab-government-exams" },
     { id: "patwari", name: "Patwari", boardId: "psssb", categoryId: "punjab-government-exams" },
-    { id: "constable", name: "Constable", boardId: "punjab-police", categoryId: "punjab-government-exams" },
-    { id: "pstet-paper-1", name: "PSTET Paper 1", boardId: "teaching-hub", categoryId: "punjab-teaching-exams" },
-    { id: "alm", name: "ALM", boardId: "pspcl", categoryId: "punjab-technical-exams" },
-    { id: "ssc-cgl", name: "SSC CGL", boardId: "ssc", categoryId: "central-government-exams" }
+    { id: "constable", name: "Constable", boardId: "punjab-police", categoryId: "punjab-government-exams" }
   ];
 
-  // 4. CANONICAL PASSES (TIERED)
+  // 4. CANONICAL PASSES (DYNAMIC ACCESS)
   const passes = [
-    { id: "free-pass", name: "Aspirant Free", price: 0, durationDays: 365, tier: 0, active: true, displayOrder: 1, features: ["Limited Mocks", "Basic Analytics"] },
-    { id: "monthly-pass", name: "Premium Monthly", price: 299, durationDays: 30, tier: 1, active: true, displayOrder: 2, features: ["All Mock Tests", "Bilingual Support", "AIR Rankings"] },
-    { id: "elite-pass", name: "Elite Yearly", price: 999, durationDays: 365, tier: 2, active: true, displayOrder: 3, features: ["Everything in Premium", "Expert Mentorship", "Offline Downloads"] }
+    { id: "free-pass", name: "Aspirant Free", price: 0, durationDays: 365, tier: 0, active: true, displayOrder: 1, features: ["10 Free Mocks", "Basic Analytics"], allowedMocks: [], allowedCategories: [] },
+    { id: "monthly-pass", name: "Premium Monthly", price: 299, durationDays: 30, tier: 1, active: true, displayOrder: 2, features: ["All Mock Tests", "Bilingual Support", "AIR Rankings"], allowedMocks: [], allowedCategories: ["ppsc", "psssb", "punjab-police"] },
+    { id: "elite-pass", name: "Elite Yearly", price: 999, durationDays: 365, tier: 2, active: true, displayOrder: 3, features: ["Everything in Premium", "Expert Mentorship"], allowedMocks: [], allowedCategories: ["ppsc", "psssb", "punjab-police", "teaching-hub"] }
   ];
 
   // 5. SAMPLE QUESTIONS
@@ -112,5 +98,5 @@ export async function seedInitialData(db: Firestore) {
   for (const q of questions) batch.set(doc(db, 'questions', q.id), q, { merge: true });
 
   await batch.commit();
-  console.log('[SUCCESS] Institutional Registry Hardened with Tiered Nodes.');
+  console.log('[SUCCESS] Institutional Registry Hardened.');
 }

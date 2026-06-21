@@ -249,6 +249,20 @@ export interface UserProfile {
   };
 }
 
+export interface Pass {
+  id: string;
+  name: string;
+  price: number;
+  durationDays: number;
+  tier: number;
+  active: boolean;
+  features: string[];
+  allowedMocks: string[];
+  allowedCategories: string[];
+  displayOrder: number;
+  updatedAt?: any;
+}
+
 export interface Advertisement {
   id: string;
   title: string;
