@@ -33,8 +33,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Dashboard v33.0 (Queue & Expiry Aware).
- * FIXED: Pass countdown and auto-activation support.
+ * @fileOverview Student Dashboard v33.1 (Harden types).
+ * FIXED: TS18046 (icon.props) and TS2769 (Date narrowing).
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();

@@ -18,8 +18,8 @@ import Script from "next/script"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Production Checkout Hub v7.0.
- * UPDATED: Subscription Queue Awareness. Detects existing active passes.
+ * @fileOverview Hardened Production Checkout Hub v7.1.
+ * FIXED: TS18047 (profile null check) and TS2769 (Date narrowing).
  */
 
 export default function CheckoutPage() {
@@ -106,7 +106,7 @@ function CheckoutContent() {
           title: "Gateway Error", 
           description: orderData.details || orderData.error 
         });
-        setOnlineProcessing(false);
+        setOnlineProcessing(onlineProcessing);
         return;
       }
 
@@ -157,7 +157,7 @@ function CheckoutContent() {
            </div>
         </div>
 
-        {isAlreadyActive && (
+        {isAlreadyActive && profile && profile.passExpiresAt && (
            <Card className="mb-8 border-none bg-blue-600 text-white p-6 rounded-[1.5rem] shadow-xl flex items-center gap-6 animate-in slide-in-from-top-4">
               <div className="h-12 w-12 rounded-xl bg-white/10 flex items-center justify-center shrink-0 shadow-inner">
                  <Clock className="h-6 w-6 text-white" />
@@ -247,7 +247,7 @@ function CheckoutContent() {
                                    if(utr.length < 12) { toast({variant:"destructive", title:"Invalid UTR", description: "UTR must be exactly 12 digits."}); return; }
                                    setProcessing(true);
                                    try {
-                                      await submitManualPayment({ userId: user!.uid, userEmail: user!.email!, userName: profile!.name, planId, transactionId: utr });
+                                      await submitManualPayment({ userId: user!.uid, userEmail: user!.email!, userName: profile?.name || "Student", planId, transactionId: utr });
                                       toast({title:"Submitted", description:"Management will review your activation shortly."});
                                       router.push("/dashboard");
                                    } catch(e) {
