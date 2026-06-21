@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Hierarchical Board Hub v66.0.
- * BRANDING: Exams inherit parent board logo.
+ * @fileOverview Hierarchical Board Hub v68.0.
+ * BRANDING: Hardened logo rendering for authority boards.
  */
 
 export default function HubExamsPage() {
@@ -87,8 +87,13 @@ export default function HubExamsPage() {
             <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-black mb-10 transition-all"><ChevronLeft className="h-5 w-5" /></button>
             <div className="space-y-4">
                <Badge className="bg-primary/5 text-primary border-none px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest">{hub?.abbreviation} Hub</Badge>
-               <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] leading-tight tracking-tight">{hub?.abbreviation} Selection</h1>
-               <p className="text-base md:text-xl font-bold text-slate-400 leading-tight max-w-2xl">{hub?.name}</p>
+               <div className="flex items-center gap-6">
+                  <AuthorityLogo board={hub} boardId={hubId} size="xl" className="shadow-inner rounded-[2rem] bg-slate-50 p-4" />
+                  <div className="space-y-1">
+                    <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] leading-tight tracking-tight">{hub?.abbreviation} Selection</h1>
+                    <p className="text-base md:text-xl font-bold text-slate-400 leading-tight max-w-2xl">{hub?.name}</p>
+                  </div>
+               </div>
             </div>
          </div>
       </section>
@@ -104,7 +109,7 @@ export default function HubExamsPage() {
                   return (
                     <Card key={exam.id} onClick={() => router.push(`/exams/${exam.id}`)} className={cn("border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-10 text-left cursor-pointer", !hasContent && "opacity-60 grayscale-[0.5]")}>
                        <div className="flex justify-between items-start mb-8">
-                          <AuthorityLogo board={hub} size="lg" className="bg-slate-50 p-2 rounded-2xl group-hover:scale-105 transition-transform shadow-inner" />
+                          <AuthorityLogo board={hub} boardId={hubId} size="lg" className="bg-slate-50 p-2 rounded-2xl group-hover:scale-105 transition-transform shadow-inner" />
                           <button onClick={(e) => handleTogglePin(e, exam.id)} disabled={pinningId === exam.id} className={cn("h-10 w-10 rounded-xl border flex items-center justify-center transition-all", isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 shadow-sm")}>
                              {pinningId === exam.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : isPinned ? <CheckCircle2 className="h-4 w-4" /> : <Star className="h-4 w-4" />}
                           </button>

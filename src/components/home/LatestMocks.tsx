@@ -15,10 +15,11 @@ import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, limit } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Dynamic Latest Mock Tests Hub v60.0.
- * UPDATED: Enforced Title Case, simplified terminology, added attempts metadata.
+ * @fileOverview Dynamic Latest Mock Tests Hub v62.0.
+ * BRANDING: Added board-specific logo inheritance to every mock card.
  */
 
 export default function LatestMocks() {
@@ -55,12 +56,13 @@ export default function LatestMocks() {
             const tier = (mock.accessLevel || 'FREE').toUpperCase();
             const isPremium = tier === 'PREMIUM';
             const locked = isPremium && !isPassActive;
+            const boardId = mock.boardIds?.[0] || mock.boardId;
             
             return (
               <motion.div key={mock.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>
-                <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white p-8 text-center flex flex-col h-[380px] group relative overflow-hidden">
-                  <div className="h-12 w-12 mx-auto rounded-xl bg-slate-50 flex items-center justify-center p-2 mb-6 shadow-inner border border-slate-100 text-primary">
-                     <Zap className="h-6 w-6" />
+                <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white p-8 text-center flex flex-col h-[400px] group relative overflow-hidden">
+                  <div className="mb-6 flex justify-center">
+                     <AuthorityLogo boardId={boardId} size="lg" className="shadow-inner rounded-xl bg-slate-50 p-2" />
                   </div>
                   <CardHeader className="p-0 flex-1 space-y-4">
                      <CardTitle className="font-black text-xl md:text-2xl text-[#0F172A] leading-tight tracking-tight line-clamp-2">

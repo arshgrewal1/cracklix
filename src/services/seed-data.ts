@@ -1,8 +1,8 @@
 import { Firestore, doc, serverTimestamp, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Official Institutional Registry Seeder v45.0.
- * BRANDING: Updated Category and Board logos to use high-fidelity local assets.
+ * @fileOverview Official Institutional Registry Seeder v52.0.
+ * BRANDING: Updated Category and Board logos to use the verified high-fidelity assets.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -14,7 +14,7 @@ export async function seedInitialData(db: Firestore) {
     { 
       id: "punjab-government-exams", 
       title: "Punjab Government Exams", 
-      description: "Non-teaching recruitments through PPSC, PSSSB and Punjab Police.", 
+      description: "Recruitments through PPSC, PSSSB and Punjab Police.", 
       displayOrder: 1,
       iconUrl: "/logos/categories/punjab-government-exams.png"
     },
@@ -28,14 +28,14 @@ export async function seedInitialData(db: Firestore) {
     { 
       id: "punjab-technical-exams", 
       title: "Punjab Technical Exams", 
-      description: "Engineering and technical posts in PSPCL, PSTCL and PWD.", 
+      description: "Engineering posts in PSPCL, PSTCL and Technical Cadres.", 
       displayOrder: 3,
       iconUrl: "/logos/categories/punjab-technical-exams.png"
     },
     { 
       id: "banking-exams", 
       title: "Banking Exams", 
-      description: "Recruitments for PSCB, DCCB and state cooperative banks.", 
+      description: "Recruitments for PSCB, DCCB and State Cooperative Banks.", 
       displayOrder: 4,
       iconUrl: "/logos/categories/banking-exams.png"
     },
@@ -102,5 +102,5 @@ export async function seedInitialData(db: Firestore) {
   }
 
   await batch.commit();
-  console.log('[SUCCESS] Registry Synchronized with new branding assets.');
+  console.log('[SUCCESS] Registry Synchronized with high-fidelity branding assets.');
 }
