@@ -1,8 +1,8 @@
 import { Firestore, doc, serverTimestamp, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Official Institutional Registry Seeder v52.0.
- * BRANDING: Updated Category and Board logos to use the verified high-fidelity assets.
+ * @fileOverview Official Institutional Registry Seeder v52.1.
+ * BRANDING: Corrected logo paths for Technical and High Court categories.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -30,7 +30,7 @@ export async function seedInitialData(db: Firestore) {
       title: "Punjab Technical Exams", 
       description: "Engineering posts in PSPCL, PSTCL and Technical Cadres.", 
       displayOrder: 3,
-      iconUrl: "/logos/categories/punjab-technical-exams.png"
+      iconUrl: "/logos/punjab-technical-exams.png"
     },
     { 
       id: "banking-exams", 
@@ -58,7 +58,7 @@ export async function seedInitialData(db: Firestore) {
       title: "High Court Exams", 
       description: "Clerical and support staff recruitments for Punjab & Haryana High Court.", 
       displayOrder: 7,
-      iconUrl: "/logos/categories/high-court.png"
+      iconUrl: "/logos/high-court.png"
     }
   ];
 

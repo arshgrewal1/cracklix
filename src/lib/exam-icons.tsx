@@ -3,7 +3,7 @@ import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Act
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Branding Engine v12.0 (Failsafe Lookup).
+ * @fileOverview Institutional Branding Engine v12.1 (Path Corrected).
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -26,11 +26,11 @@ const CANONICAL_BOARD_LOGOS: Record<string, string> = {
 const CANONICAL_CAT_LOGOS: Record<string, string> = {
   'punjab-government-exams': '/logos/categories/punjab-government-exams.png',
   'punjab-teaching-exams': '/logos/categories/punjab-teaching-exams.png',
-  'punjab-technical-exams': '/logos/categories/punjab-technical-exams.png',
+  'punjab-technical-exams': '/logos/punjab-technical-exams.png',
   'banking-exams': '/logos/categories/banking-exams.png',
   'punjab-health-exams': '/logos/categories/punjab-health-exams.png',
   'judiciary-exams': '/logos/categories/judiciary-exams.png',
-  'high-court-exams': '/logos/categories/high-court.png'
+  'high-court-exams': '/logos/high-court.png'
 };
 
 interface AuthorityLogoProps {
