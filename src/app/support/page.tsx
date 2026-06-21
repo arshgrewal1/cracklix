@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useFirestore, useCollection } from "@/firebase"
-import { collection, addDoc, serverTimestamp, query, where, orderBy } from "firebase/firestore"
+import { collection, addDoc, serverTimestamp, query, where } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,8 +32,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import Link from "next/link"
 
 /**
- * @fileOverview Official Institutional Support Hub v4.4.
- * FIXED: Corrected Link and Loader2 module resolution.
+ * @fileOverview Official Institutional Support Hub v4.5.
+ * FIXED: Added missing Link and Loader2 imports to resolve compilation errors.
  */
 
 const TELEGRAM_GROUP = "https://t.me/cracklixapp";

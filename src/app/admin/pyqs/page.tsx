@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional PYQ Archive CMS v19.0 (PWA Hardened).
- * FIXED: Syntax error at start. Standardized to Title Case and Primary Blue.
+ * FIXED: Renamed editingNote typo to editingPYQ to resolve build error.
  */
 
 export default function AdminPYQManagement() {
@@ -84,7 +84,7 @@ export default function AdminPYQManagement() {
           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">PYQ Registry</h1>
           <p className="text-slate-500 text-[11px] md:text-lg font-medium">Manage authentic previous year papers and official keys.</p>
         </div>
-        <Button onClick={() => setEditingPYQ({ title: "", boardId: "", examId: "", year: new Date().getFullYear(), pdfUrl: "", isFree: true })} className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white font-black rounded-full shadow-xl border-none active:scale-95 gap-2">
+        <Button onClick={() => setEditingPYQ({ title: "", boardId: "", examId: "", year: new Date().getFullYear(), pdfUrl: "", isFree: true })} className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-black text-[10px] tracking-widest shadow-xl border-none active:scale-95 gap-2">
           <Plus className="h-4 w-4" /> Archive Paper
         </Button>
       </div>
@@ -111,7 +111,7 @@ export default function AdminPYQManagement() {
                   <TableRow key={i} className="border-slate-50"><TableCell colSpan={4} className="px-6 py-6 md:px-12 md:py-10"><Skeleton className="h-10 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>
                 ))
               ) : filteredPYQs.map((p: any) => (
-                <TableRow key={p.id} className="border-slate-50 hover:bg-slate-50 transition-colors group">
+                <TableRow key={p.id} className="hover:bg-slate-50 border-slate-50 transition-colors group">
                   <TableCell className="px-6 md:px-12 py-5 md:py-10">
                     <div className="flex items-center gap-4 md:gap-6">
                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-inner shrink-0"><FileText className="h-5 w-5" /></div>
@@ -167,7 +167,7 @@ export default function AdminPYQManagement() {
                      <Label className="text-[9px] font-black text-slate-500 ml-1">Assigned Exam</Label>
                      <select value={editingPYQ?.examId || ""} onChange={e => setEditingPYQ({...editingPYQ, examId: e.target.value})} className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner">
                         <option value="">Select Exam</option>
-                        {exams?.filter((e:any) => !editingNote?.boardId || e.boardId === editingNote.boardId).map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
+                        {exams?.filter((e:any) => !editingPYQ?.boardId || e.boardId === editingPYQ.boardId).map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
                      </select>
                   </div>
                </div>
