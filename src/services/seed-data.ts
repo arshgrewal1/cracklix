@@ -1,15 +1,15 @@
 import { Firestore, doc, serverTimestamp, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Canonical 7-Category Ecosystem Rebuild v2.0.
- * Wipes legacy hierarchy and establishes fresh, flattened verticals.
+ * @fileOverview Strict 7-Category Registry Seeder v3.0.
+ * Wipes legacy hierarchy and establishes ONLY the 7 authorized categories.
  */
 
 export async function seedInitialData(db: Firestore) {
-  console.log('[REBUILD] Initializing TOTAL ECOSYSTEM REBUILD (7 Categories)...');
+  console.log('[REBUILD] Initializing STRICT 7-CATEGORY ECOSYSTEM...');
   const batch = writeBatch(db);
 
-  // 1. CANONICAL TOP-LEVEL CATEGORIES (7 ONLY)
+  // 1. THE ONLY ALLOWED CATEGORIES (7 TOTAL)
   const categories = [
     { 
       id: "punjab-government-exams", 
@@ -66,7 +66,7 @@ export async function seedInitialData(db: Firestore) {
     batch.set(doc(db, 'categories', cat.id), { ...cat, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 2. EXAM VERTICALS (Specific Exams) - Flattened Logic
+  // 2. EXAM VERTICALS (Specific Exams) - Strictly Mapped to 7 Categories
   const examMappings = [
     { 
       cat: 'punjab-government-exams', 
@@ -124,5 +124,5 @@ export async function seedInitialData(db: Firestore) {
   });
 
   await batch.commit();
-  console.log('[REBUILD] Clean Architecture Deployed.');
+  console.log('[REBUILD] Clean 7-Category Architecture Deployed.');
 }

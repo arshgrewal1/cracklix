@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Landmark, ArrowRight, ShieldCheck, GraduationCap, Zap, Building2, HeartPulse, Scale, Globe } from 'lucide-react';
+import { Landmark, ArrowRight, GraduationCap, Zap, Building2, HeartPulse, Scale, Globe } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -11,9 +11,19 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview Canonical 7-Category Discovery Hub v50.0.
- * UPDATED: Enforced Title Case, removed badges, added dynamic exam counts.
+ * @fileOverview Strict 7-Category Discovery Hub v60.0.
+ * ENFORCED: Whitelist filter ensures only the 7 authorized categories are visible.
  */
+
+const ALLOWED_CATEGORY_IDS = [
+  "punjab-government-exams",
+  "punjab-teaching-exams",
+  "punjab-technical-exams",
+  "banking-exams",
+  "medical-health-exams",
+  "judiciary-exams",
+  "central-government-exams"
+];
 
 const CATEGORY_ICONS: Record<string, any> = {
   "Punjab Government Exams": <Landmark className="h-6 w-6" />,
@@ -28,8 +38,14 @@ const CATEGORY_ICONS: Record<string, any> = {
 export default function FeaturedCategories() {
   const db = useFirestore();
   const catQuery = useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]);
-  const { data: categories, loading: catLoading } = useCollection<any>(catQuery);
+  const { data: rawCategories, loading: catLoading } = useCollection<any>(catQuery);
   const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
+
+  // STRICT WHITELIST FILTER
+  const categories = useMemo(() => {
+     if (!rawCategories) return [];
+     return rawCategories.filter(c => ALLOWED_CATEGORY_IDS.includes(c.id));
+  }, [rawCategories]);
 
   return (
     <section className="py-16 bg-white border-t border-slate-50">
@@ -42,7 +58,7 @@ export default function FeaturedCategories() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {catLoading ? (
             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[2.5rem] bg-slate-50" />)
-          ) : categories?.map((cat, idx) => {
+          ) : categories.map((cat, idx) => {
             const examCount = exams?.filter(e => e.categoryId === cat.id).length || 0;
             return (
               <motion.div key={cat.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.05 }}>
