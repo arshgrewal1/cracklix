@@ -100,14 +100,14 @@ export default function SidebarNav({
     <TooltipProvider delayDuration={0}>
       <nav className="flex-1 overflow-y-auto px-4 py-5 no-scrollbar">
 
-        <div className="space-y-7">
+        <div className="space-y-6">
 
           {NAV_GROUPS.map((group) => (
             <div key={group.label}>
 
               {/* GROUP TITLE */}
               {isOpen ? (
-                <p className="mb-3 px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
+                <p className="mb-2.5 px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-500">
                   {group.label}
                 </p>
               ) : (
@@ -115,7 +115,7 @@ export default function SidebarNav({
               )}
 
               {/* ITEMS */}
-              <div className="space-y-1">
+              <div className="space-y-0.5">
 
                 {group.items.map((item) => {
                   const Icon = item.icon;
@@ -131,7 +131,7 @@ export default function SidebarNav({
                     <Link
                       href={item.href}
                       className={cn(
-                        "group flex h-12 items-center rounded-2xl transition-all duration-200 active:scale-[0.98]",
+                        "group flex h-10 items-center rounded-xl transition-all duration-200 active:scale-[0.98]",
 
                         isOpen
                           ? "gap-4 px-4"
@@ -144,7 +144,7 @@ export default function SidebarNav({
                     >
                       <Icon
                         className={cn(
-                          "h-5 w-5 shrink-0",
+                          "h-4 w-4 shrink-0",
                           isActive
                             ? "text-white"
                             : "group-hover:text-white"
@@ -153,7 +153,7 @@ export default function SidebarNav({
 
                       <span
                         className={cn(
-                          "truncate text-[14px] font-semibold transition-all duration-300",
+                          "truncate text-[13px] font-semibold transition-all duration-300",
 
                           isOpen
                             ? "max-w-[150px] opacity-100"

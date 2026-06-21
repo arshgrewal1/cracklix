@@ -13,8 +13,7 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Density Punjab Merit Preview v6.0.
- * TYPOGRAPHY: Title Case applied.
+ * @fileOverview High-Density Punjab Merit Preview v7.0 (Title Case).
  */
 export default function MeritPreview() {
   const db = useFirestore();
@@ -57,7 +56,7 @@ export default function MeritPreview() {
                     <Trophy className="h-4 w-4 text-blue-600" />
                     <span className="text-[9px] md:text-[10px] font-bold text-slate-400 tracking-tight uppercase">Punjab Merit Index</span>
                  </div>
-                 <h2 className="text-2xl md:text-6xl font-extrabold text-[#0F172A] leading-tight tracking-tight">Hall of <span className="text-blue-600">Rankers</span></h2>
+                 <h2 className="text-2xl md:text-5xl font-extrabold text-[#0F172A] leading-tight tracking-tight">Hall of Rankers</h2>
                  <p className="text-[12px] md:text-lg text-slate-500 font-medium leading-relaxed">
                     Compare performance with {liveAspirantCount} aspirants across 23 districts. Secure your spot in the official merit list.
                  </p>

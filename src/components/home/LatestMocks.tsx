@@ -18,9 +18,7 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Global High-Density Mock Grid v73.0.
- * TYPOGRAPHY: Proper Title Case.
- * DENSITY: Compact mobile card with realistic metrics.
+ * @fileOverview High-Density Mock Grid v74.0 (Title Case).
  */
 
 export default function LatestMocks() {
@@ -65,14 +63,14 @@ export default function LatestMocks() {
             
             return (
               <motion.div key={mock.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>
-                <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-xl md:rounded-[2.5rem] bg-white p-3 md:p-8 text-left md:text-center flex flex-col h-full group relative overflow-hidden">
+                <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-xl md:rounded-[2.5rem] bg-white p-3 md:p-8 text-left md:text-center flex flex-col h-full group relative overflow-hidden">
                   
                   <div className="mb-3 md:mb-8 flex justify-start md:justify-center">
                      <AuthorityLogo boardId={boardId} size="sm" className="w-10 h-10 md:w-16 md:h-16 bg-slate-50 rounded-lg md:rounded-2xl shadow-inner group-hover:scale-105 transition-transform" />
                   </div>
 
                   <CardHeader className="p-0 flex-1 space-y-1 md:space-y-4">
-                     <CardTitle className="font-bold text-[12px] md:text-2xl text-[#0F172A] leading-tight tracking-tight line-clamp-2">
+                     <CardTitle className="font-bold text-sm md:text-2xl text-[#0F172A] leading-tight tracking-tight line-clamp-2">
                         {mock.title}
                      </CardTitle>
                      

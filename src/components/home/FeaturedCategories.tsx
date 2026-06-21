@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Zap, BookOpen, Layers, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, Zap, BookOpen, Layers } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -14,8 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Institutional Category Discovery v116.0 (High Density).
- * UI UPGRADE: Card structure matched to premium PWA requirements.
+ * @fileOverview Redesigned Category Cards v120.0 (High Density PWA).
  */
 
 const STRICT_WHITELIST = [
@@ -44,20 +43,20 @@ export default function FeaturedCategories() {
 
   return (
     <section className="py-6 md:py-16 bg-white border-t border-slate-50">
-      <div className="container mx-auto px-4 max-w-7xl space-y-4 md:space-y-12 text-left">
+      <div className="container mx-auto px-4 max-w-7xl space-y-4 md:space-y-10 text-left">
         <div className="space-y-0.5 px-1">
-           <h2 className="text-xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Choose Category</h2>
+           <h2 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tight leading-none">Choose Category</h2>
            <p className="text-slate-500 font-medium text-[10px] md:text-lg">Select a recruitment vertical to begin.</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
           {catLoading ? (
-            Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 md:h-96 w-full rounded-xl md:rounded-[2.5rem] bg-slate-50" />)
+            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 md:h-64 w-full rounded-2xl bg-slate-50" />)
           ) : categories.map((cat, idx) => {
             const catExams = exams?.filter(e => e.categoryId === cat.id) || [];
             const catExamIds = catExams.map(e => e.id);
             const catBoards = boards?.filter(b => b.categoryId === cat.id) || [];
-            const boardLabel = catBoards.length > 0 ? catBoards.slice(0, 2).map(b => b.abbreviation).join(", ") : "Official";
+            const boardLabel = catBoards.length > 0 ? catBoards.slice(0, 1).map(b => b.abbreviation).join("") : "Official";
             
             const catMocksCount = mocks?.filter(m => 
               catExamIds.includes(m.examId) || 
@@ -71,36 +70,39 @@ export default function FeaturedCategories() {
                 key={cat.id} 
                 initial={{ opacity: 0, y: 15 }} 
                 whileInView={{ opacity: 1, y: 0 }} 
-                whileTap={{ scale: 0.98 }}
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.97 }}
                 viewport={{ once: true }} 
-                transition={{ delay: idx * 0.05 }}
+                transition={{ duration: 0.3 }}
               >
                  <Link href={`/exams/category/${cat.id}`}>
-                    <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-xl md:rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-3 md:p-8 h-full min-h-[220px] relative">
+                    <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] bg-white group overflow-hidden flex flex-col p-3 md:p-6 h-full min-h-[220px] relative">
                        
-                       <div className="flex flex-col gap-2 mb-3 md:mb-6">
-                          <AuthorityLogo category={cat} size="sm" className="w-10 h-10 md:w-16 md:h-16 bg-slate-50 rounded-lg md:rounded-2xl shadow-inner group-hover:scale-105 transition-transform" />
-                          <Badge variant="outline" className="w-fit bg-blue-50/50 border-blue-100 text-blue-600 text-[7px] md:text-[9px] font-black uppercase px-2 py-0.5 rounded-md">
+                       <div className="space-y-2 mb-3">
+                          <div className="h-10 w-10 md:h-14 md:w-14 bg-slate-50 rounded-xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
+                             <AuthorityLogo category={cat} size="sm" className="scale-125" />
+                          </div>
+                          <Badge className="bg-blue-50 text-blue-600 border-none font-black text-[7px] md:text-[9px] uppercase px-2 py-0.5 rounded shadow-sm w-fit">
                              {boardLabel}
                           </Badge>
                        </div>
                        
-                       <div className="space-y-1 md:space-y-4 flex-1">
-                          <h3 className="text-[12px] md:text-xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-1">{cat.title}</h3>
-                          <p className="hidden md:block text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                       <div className="space-y-1 flex-1">
+                          <h3 className="text-sm md:text-lg font-bold text-[#0F172A] leading-tight line-clamp-1">{cat.title}</h3>
+                          <p className="text-[10px] md:text-xs text-slate-400 line-clamp-2 leading-snug">
                             {cat.description || "Official government recruitment hub."}
                           </p>
-                          
-                          <div className="flex flex-wrap gap-2 pt-1 md:pt-2">
-                             <StatBadge label={`${catExams.length} Exams`} icon="📚" />
-                             <StatBadge label={`${catMocksCount} Mocks`} icon="📝" />
-                             <StatBadge label={`${catPyqsCount} Papers`} icon="📄" />
-                          </div>
                        </div>
 
-                       <div className="mt-4 md:mt-8 pt-3 border-t border-slate-50">
-                          <Button variant="ghost" className="w-full h-8 md:h-12 rounded-lg md:rounded-xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[8px] md:text-[10px] tracking-widest uppercase border-none shadow-md gap-2 active:scale-95">
-                             Open Hub <ArrowRight className="h-2.5 w-2.5 md:h-4 md:w-4" />
+                       <div className="mt-3 space-y-3">
+                          <div className="flex items-center gap-3 border-t border-slate-50 pt-2.5">
+                             <StatNode icon="📚" val={catExams.length} label="Exams" />
+                             <StatNode icon="📝" val={catMocksCount} label="Mocks" />
+                             <StatNode icon="📄" val={catPyqsCount} label="Papers" />
+                          </div>
+
+                          <Button variant="ghost" className="w-full h-8 md:h-10 rounded-lg bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[8px] md:text-[10px] tracking-widest uppercase border-none gap-2">
+                             Open <ArrowRight className="h-3 w-3" />
                           </Button>
                        </div>
                     </Card>
@@ -114,11 +116,12 @@ export default function FeaturedCategories() {
   );
 }
 
-function StatBadge({ label, icon }: { label: string, icon: string }) {
-   return (
-      <div className="flex items-center gap-1 text-[8px] md:text-[11px] font-bold text-slate-500 whitespace-nowrap">
-         <span className="text-[10px] md:text-sm">{icon}</span>
-         <span className="tracking-tight">{label}</span>
-      </div>
-   )
+function StatNode({ icon, val, label }: { icon: string, val: number, label: string }) {
+  return (
+    <div className="flex items-center gap-1 text-[8px] md:text-[10px] font-bold text-slate-500 whitespace-nowrap">
+      <span>{icon}</span>
+      <span className="text-[#0F172A] font-black">{val}</span>
+      <span className="hidden xs:inline text-slate-400">{label}</span>
+    </div>
+  )
 }

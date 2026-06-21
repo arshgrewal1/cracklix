@@ -12,8 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview High-Density Study Preview v1.6.
- * TYPOGRAPHY: Convert to proper Title Case.
+ * @fileOverview High-Density Study Preview v1.7 (Title Case).
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -51,7 +50,7 @@ export default function CurrentAffairsPreview() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8">
            {loading ? (
-              Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-2xl bg-white" />)
+              Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-2xl bg-white" />)
            ) : items?.map((item) => (
               <Link key={item.id} href="/current-affairs">
                  <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] md:rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-4 md:p-10">
