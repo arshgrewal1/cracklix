@@ -14,8 +14,8 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview Institutional Administrative Portal v15.0.
- * UPDATED: Added Trust Badge configuration for the Hero section.
+ * @fileOverview Institutional Administrative Portal v16.0.
+ * PWA SYNC: Removed uppercase, reduced font scales, and normalized Title Case.
  */
 
 export default function AdminSettings() {
@@ -62,93 +62,93 @@ export default function AdminSettings() {
   if (loading) return <div className="h-screen flex items-center justify-center bg-white"><RefreshCw className="h-10 w-10 text-primary animate-spin" /></div>
 
   return (
-    <div className="space-y-6 md:space-y-10 text-[#0F172A] text-left">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-           <div className="flex items-center gap-3 mb-2">
-              <ShieldCheck className="h-5 w-5 text-primary" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">System Configuration</span>
+    <div className="space-y-6 md:space-y-10 text-[#0F172A] text-left animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
+        <div className="space-y-1">
+           <div className="flex items-center gap-2 mb-1">
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">System Configuration</span>
            </div>
-          <h1 className="text-3xl md:text-5xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none">System Portal</h1>
+          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight">System Portal</h1>
         </div>
-        <Button onClick={handleSave} className="w-full md:w-auto bg-primary hover:bg-primary/90 h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl gap-2 transition-all active:scale-95 border-none">
-          <Save className="h-5 w-5" /> Commit Settings
+        <Button onClick={handleSave} className="w-full md:w-auto bg-primary hover:bg-blue-700 h-11 md:h-12 px-10 rounded-full font-black uppercase tracking-widest text-[10px] shadow-xl gap-2 transition-all active:scale-95 border-none">
+          <Save className="h-4 w-4" /> Commit Settings
         </Button>
       </div>
 
       <Tabs defaultValue="monetization" className="w-full">
-        <TabsList className="bg-slate-100 border border-slate-200 p-1.5 h-16 rounded-2xl mb-10 flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-2">
-          <TabsTrigger value="monetization" className="rounded-xl px-6 md:px-8 font-black uppercase text-[10px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Pass & Payments</TabsTrigger>
-          <TabsTrigger value="homepage" className="rounded-xl px-6 md:px-8 font-black uppercase text-[10px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Global Content</TabsTrigger>
-          <TabsTrigger value="website" className="rounded-xl px-6 md:px-8 font-black uppercase text-[10px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Share & Mobile</TabsTrigger>
-          <TabsTrigger value="social" className="rounded-xl px-6 md:px-8 font-black uppercase text-[10px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Support Info</TabsTrigger>
+        <TabsList className="bg-slate-100 border border-slate-200 p-1.5 h-14 md:h-16 rounded-2xl mb-8 flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-2">
+          <TabsTrigger value="monetization" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Pass & Payments</TabsTrigger>
+          <TabsTrigger value="homepage" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Global Content</TabsTrigger>
+          <TabsTrigger value="website" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Share & Mobile</TabsTrigger>
+          <TabsTrigger value="social" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Support Info</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="monetization" className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card className="border-none shadow-3xl rounded-[2.5rem] bg-white p-8 md:p-12 space-y-8">
-                 <div className="flex items-center gap-4 mb-4">
-                    <div className="h-12 w-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500 shadow-inner">
-                       <Gift className="h-6 w-6" />
+        <TabsContent value="monetization" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-8">
+              <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white p-5 md:p-12 space-y-6 md:space-y-8 border border-slate-50">
+                 <div className="flex items-center gap-4 mb-2">
+                    <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-500 shadow-inner">
+                       <Gift className="h-5 w-5 md:h-6 md:w-6" />
                     </div>
-                    <h3 className="font-headline font-black text-xl md:text-2xl uppercase text-[#0F172A]">Free Trial Hub</h3>
+                    <h3 className="text-lg md:text-2xl font-black text-[#0F172A]">Free Trial Hub</h3>
                  </div>
                  <div className="space-y-6">
-                    <div className="flex items-center justify-between p-6 bg-emerald-50 rounded-2xl border border-emerald-100">
+                    <div className="flex items-center justify-between p-5 md:p-6 bg-emerald-50 rounded-2xl border border-emerald-100">
                        <div className="space-y-0.5 text-left">
-                          <p className="font-black text-[11px] uppercase text-emerald-900">Offer Active</p>
-                          <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Allow students to claim a free pass once</p>
+                          <p className="font-black text-[10px] uppercase text-emerald-900">Offer active</p>
+                          <p className="text-[8px] font-bold text-emerald-600 uppercase tracking-widest">Allow students to claim trial</p>
                        </div>
                        <Switch checked={formData.freeTrialEnabled} onCheckedChange={v => setFormData({...formData, freeTrialEnabled: v})} />
                     </div>
                     
                     <div className="space-y-2 text-left">
-                       <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2">
-                          <Clock className="h-3 w-3" /> Trial Duration (Days)
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2">
+                          <Clock className="h-3 w-3" /> Trial duration (days)
                        </Label>
                        <Input 
                          type="number" 
                          value={formData.freeTrialDays} 
                          onChange={e => setFormData({...formData, freeTrialDays: parseInt(e.target.value) || 0})}
-                         className="h-14 rounded-xl border-slate-100 bg-slate-50 font-black text-emerald-600 text-lg"
+                         className="h-12 md:h-14 rounded-xl border-slate-50 bg-slate-50 font-black text-emerald-600 text-base md:text-lg"
                        />
                     </div>
                  </div>
               </Card>
 
-              <Card className="border-none shadow-3xl rounded-[2.5rem] bg-white p-8 md:p-12 space-y-8">
-                 <div className="flex items-center gap-4 mb-4">
-                    <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                       <QrCode className="h-6 w-6" />
+              <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white p-5 md:p-12 space-y-6 md:space-y-8 border border-slate-50">
+                 <div className="flex items-center gap-4 mb-2">
+                    <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                       <QrCode className="h-5 w-5 md:h-6 md:w-6" />
                     </div>
-                    <h3 className="font-headline font-black text-xl md:text-2xl uppercase text-[#0F172A]">M-Payment Gateway</h3>
+                    <h3 className="text-lg md:text-2xl font-black text-[#0F172A]">Manual Payments</h3>
                  </div>
                  <div className="space-y-6">
                     <div className="space-y-2 text-left">
-                       <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Institutional UPI ID</Label>
-                       <Input value={formData.upiId} onChange={e => setFormData({...formData, upiId: e.target.value})} className="h-14 rounded-xl border-slate-100 bg-slate-50 font-black text-lg text-primary" />
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Institutional UPI ID</Label>
+                       <Input value={formData.upiId} onChange={e => setFormData({...formData, upiId: e.target.value})} className="h-12 md:h-14 rounded-xl border-slate-50 bg-slate-50 font-black text-base md:text-lg text-primary" />
                     </div>
                     <div className="space-y-2 text-left">
-                       <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">QR Code Image URL</Label>
-                       <Input value={formData.qrCodeUrl} onChange={e => setFormData({...formData, qrCodeUrl: e.target.value})} className="h-12 rounded-xl border-slate-100 bg-slate-50 text-xs font-mono" placeholder="https://..." />
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">QR Code Image URL</Label>
+                       <Input value={formData.qrCodeUrl} onChange={e => setFormData({...formData, qrCodeUrl: e.target.value})} className="h-11 rounded-xl border-slate-50 bg-slate-50 text-xs font-mono" placeholder="https://..." />
                     </div>
                  </div>
               </Card>
            </div>
         </TabsContent>
 
-        <TabsContent value="homepage" className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-          <Card className="border-none shadow-3xl rounded-[3rem] bg-white p-8 md:p-14 space-y-10 text-left border border-slate-100">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <TabsContent value="homepage" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-6 md:p-14 space-y-10 text-left border border-slate-50">
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                 <div className="space-y-6">
                    <div className="space-y-2 text-left">
-                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Global Announcement</Label>
-                      <Input value={formData.announcement} onChange={e => setFormData({...formData, announcement: e.target.value})} className="h-14 rounded-xl border-slate-100 bg-slate-50 font-bold" />
+                      <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Global announcement</Label>
+                      <Input value={formData.announcement} onChange={e => setFormData({...formData, announcement: e.target.value})} className="h-12 rounded-xl border-slate-50 bg-slate-50 font-bold" />
                    </div>
-                   <div className="flex items-center justify-between p-6 bg-orange-50 rounded-2xl border border-orange-100">
+                   <div className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100">
                       <div className="flex items-center gap-4">
-                         <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm"><Megaphone className="h-5 w-5 animate-bounce" /></div>
-                         <p className="font-black text-[10px] uppercase text-[#0F172A] tracking-widest">Bar Visibility</p>
+                         <div className="h-9 w-9 bg-white rounded-xl flex items-center justify-center text-primary shadow-sm"><Megaphone className="h-4 w-4" /></div>
+                         <p className="font-black text-[9px] uppercase text-[#0F172A] tracking-widest">Show announcement bar</p>
                       </div>
                       <Switch checked={formData.showAnnouncement} onCheckedChange={val => setFormData({...formData, showAnnouncement: val})} />
                    </div>
@@ -156,82 +156,79 @@ export default function AdminSettings() {
 
                 <div className="space-y-6 text-left">
                    <div className="space-y-2 text-left">
-                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Platform Identity</Label>
-                      <Input value={formData.platformName} onChange={e => setFormData({...formData, platformName: e.target.value})} className="h-14 rounded-xl border-slate-100 bg-slate-50 font-black text-xl" />
+                      <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Platform name</Label>
+                      <Input value={formData.platformName} onChange={e => setFormData({...formData, platformName: e.target.value})} className="h-12 rounded-xl border-slate-50 bg-slate-50 font-black text-lg" />
                    </div>
                    
-                   <div className="p-6 bg-blue-50 rounded-2xl border border-blue-100 space-y-6">
-                      <p className="text-[10px] font-black text-blue-900 uppercase tracking-[0.2em] flex items-center gap-2"><Star className="h-4 w-4" /> Trust Identity (Hero)</p>
-                      <div className="grid grid-cols-1 gap-4">
-                         <div className="space-y-2">
-                            <Label className="text-[9px] font-black text-blue-500 uppercase">Trust Count</Label>
-                            <Input type="number" value={formData.trustBadgeCount} onChange={e => setFormData({...formData, trustBadgeCount: parseInt(e.target.value) || 0})} className="h-11 bg-white border-blue-200 font-black text-lg" />
+                   <div className="p-5 bg-blue-50 rounded-2xl border border-blue-100 space-y-5">
+                      <p className="text-[9px] font-black text-blue-900 uppercase tracking-[0.2em] flex items-center gap-2"><Star className="h-3.5 w-3.5" /> Trust Identity</p>
+                      <div className="grid grid-cols-2 gap-4">
+                         <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-blue-500 uppercase">Trust count</Label>
+                            <Input type="number" value={formData.trustBadgeCount} onChange={e => setFormData({...formData, trustBadgeCount: parseInt(e.target.value) || 0})} className="h-10 bg-white border-blue-100 font-black" />
                          </div>
-                         <div className="space-y-2">
-                            <Label className="text-[9px] font-black text-blue-500 uppercase">Trust Label</Label>
-                            <Input value={formData.trustBadgeText} onChange={e => setFormData({...formData, trustBadgeText: e.target.value})} className="h-11 bg-white border-blue-200 font-bold text-sm" />
+                         <div className="space-y-1.5">
+                            <Label className="text-[8px] font-black text-blue-500 uppercase">Label</Label>
+                            <Input value={formData.trustBadgeText} onChange={e => setFormData({...formData, trustBadgeText: e.target.value})} className="h-10 bg-white border-blue-100 font-bold text-xs" />
                          </div>
                       </div>
                    </div>
                 </div>
              </div>
              <div className="space-y-2 text-left">
-                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Footer Descriptor</Label>
-                <Textarea value={formData.footerText} onChange={e => setFormData({...formData, footerText: e.target.value})} className="min-h-[120px] rounded-2xl border-slate-100 bg-slate-50 font-medium leading-relaxed" />
+                <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Footer descriptor</Label>
+                <Textarea value={formData.footerText} onChange={e => setFormData({...formData, footerText: e.target.value})} className="min-h-[100px] rounded-2xl border-slate-50 bg-slate-50 font-medium leading-relaxed" />
              </div>
           </Card>
         </TabsContent>
 
-        <TabsContent value="website" className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <Card className="border-none shadow-3xl rounded-[2.5rem] bg-white p-8 md:p-12 space-y-8 text-left border border-slate-100">
-                 <div className="flex items-center gap-4 mb-4"><div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner"><Share2 className="h-6 w-6" /></div><h3 className="font-headline font-black text-xl md:text-2xl uppercase text-[#0F172A]">Share Schema</h3></div>
+        <TabsContent value="website" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+              <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white p-6 md:p-12 space-y-6 text-left border border-slate-50">
+                 <div className="flex items-center gap-4 mb-2"><div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner"><Share2 className="h-5 w-5" /></div><h3 className="text-lg md:text-2xl font-black text-[#0F172A]">Share Settings</h3></div>
                  <div className="space-y-6">
-                    <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Share URL</Label><Input value={formData.shareUrl} onChange={e => setFormData({...formData, shareUrl: e.target.value})} className="h-14 rounded-xl border-slate-100 bg-slate-50 font-bold text-primary" /></div>
-                    <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Share Title</Label><Input value={formData.shareTitle} onChange={e => setFormData({...formData, shareTitle: e.target.value})} className="h-14 rounded-xl border-slate-100 bg-slate-50 font-bold" /></div>
-                    <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Abstract</Label><Textarea value={formData.shareDescription} onChange={e => setFormData({...formData, shareDescription: e.target.value})} className="min-h-[100px] rounded-xl border-slate-100 bg-slate-50" /></div>
+                    <div className="space-y-2 text-left"><Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Share URL</Label><Input value={formData.shareUrl} onChange={e => setFormData({...formData, shareUrl: e.target.value})} className="h-12 rounded-xl border-slate-50 bg-slate-50 font-bold text-primary" /></div>
+                    <div className="space-y-2 text-left"><Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Share Title</Label><Input value={formData.shareTitle} onChange={e => setFormData({...formData, shareTitle: e.target.value})} className="h-12 rounded-xl border-slate-50 bg-slate-50 font-bold" /></div>
                  </div>
               </Card>
 
-              <Card className="border-none shadow-3xl rounded-[2.5rem] bg-white p-8 md:p-12 space-y-8 text-left border border-slate-100">
-                 <div className="flex items-center gap-4 mb-4"><div className="h-12 w-12 rounded-2xl bg-slate-900 flex items-center justify-center text-white shadow-xl"><Smartphone className="h-6 w-6" /></div><h3 className="font-headline font-black text-xl md:text-2xl uppercase text-[#0F172A]">App Stores</h3></div>
-                 <div className="space-y-8">
-                    <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Play className="h-3 w-3" /> Android Link</Label><Input value={formData.playStoreUrl} onChange={e => setFormData({...formData, playStoreUrl: e.target.value})} className="h-14 rounded-xl border-slate-100 bg-slate-50 font-bold text-primary" /></div>
-                    <div className="space-y-2 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Apple className="h-3 w-3" /> iOS Link</Label><Input value={formData.appStoreUrl} onChange={e => setFormData({...formData, appStoreUrl: e.target.value})} className="h-14 rounded-xl border-slate-100 bg-slate-50 font-bold text-primary" /></div>
+              <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white p-6 md:p-12 space-y-6 text-left border border-slate-50">
+                 <div className="flex items-center gap-4 mb-2"><div className="h-10 w-10 rounded-xl bg-[#0F172A] flex items-center justify-center text-white shadow-xl"><Smartphone className="h-5 w-5" /></div><h3 className="text-lg md:text-2xl font-black text-[#0F172A]">Native App Hub</h3></div>
+                 <div className="space-y-6">
+                    <div className="space-y-2 text-left"><Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Play Store link</Label><Input value={formData.playStoreUrl} onChange={e => setFormData({...formData, playStoreUrl: e.target.value})} className="h-12 rounded-xl border-slate-50 bg-slate-50 font-bold" /></div>
+                    <div className="space-y-2 text-left"><Label className="text-[9px] font-black uppercase text-slate-400 ml-1">App Store link</Label><Input value={formData.appStoreUrl} onChange={e => setFormData({...formData, appStoreUrl: e.target.value})} className="h-12 rounded-xl border-slate-50 bg-slate-50 font-bold" /></div>
                  </div>
               </Card>
            </div>
         </TabsContent>
 
-        <TabsContent value="social" className="space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
-           <Card className="border-none shadow-3xl rounded-[3rem] bg-white p-8 md:p-14 space-y-12 text-left border border-slate-100">
-              <div className="flex items-center gap-4 border-b border-slate-50 pb-8">
-                 <div className="h-14 w-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                    <MessageCircle className="h-8 w-8" />
+        <TabsContent value="social" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-6 md:p-14 space-y-10 text-left border border-slate-50">
+              <div className="flex items-center gap-4 border-b border-slate-50 pb-6 md:pb-8">
+                 <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                    <MessageCircle className="h-6 w-6" />
                  </div>
                  <div>
-                    <h3 className="font-headline font-black text-2xl md:text-3xl uppercase text-[#0F172A]">Support Registry</h3>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Official Institutional Contact Nodes</p>
+                    <h3 className="text-lg md:text-3xl font-black text-[#0F172A]">Support Registry</h3>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Institutional contact nodes</p>
                  </div>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                 <div className="space-y-3 text-left">
-                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Support Email Node</Label>
-                    <Input value={formData.supportEmail} onChange={e => setFormData({...formData, supportEmail: e.target.value})} className="h-14 rounded-xl border-slate-100 bg-slate-50 font-bold text-lg" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                 <div className="space-y-2 text-left">
+                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Support email</Label>
+                    <Input value={formData.supportEmail} onChange={e => setFormData({...formData, supportEmail: e.target.value})} className="h-12 rounded-xl border-slate-50 bg-slate-50 font-bold" />
                  </div>
-                 <div className="space-y-3 text-left">
-                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Support Phone Node</Label>
-                    <Input value={formData.supportPhone} onChange={e => setFormData({...formData, supportPhone: e.target.value})} className="h-14 rounded-xl border-slate-100 bg-slate-50 font-bold text-lg" />
+                 <div className="space-y-2 text-left">
+                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Support phone</Label>
+                    <Input value={formData.supportPhone} onChange={e => setFormData({...formData, supportPhone: e.target.value})} className="h-12 rounded-xl border-slate-50 bg-slate-50 font-bold" />
                  </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                 <div className="space-y-3 text-left">
-                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">Telegram Channel URL</Label>
-                    <Input value={formData.telegramUrl} onChange={e => setFormData({...formData, telegramUrl: e.target.value})} className="h-14 rounded-xl border-slate-100 bg-slate-50 font-bold text-primary text-lg" />
+                 <div className="space-y-2 text-left">
+                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Telegram URL</Label>
+                    <Input value={formData.telegramUrl} onChange={e => setFormData({...formData, telegramUrl: e.target.value})} className="h-12 rounded-xl border-slate-50 bg-slate-50 font-bold text-primary" />
                  </div>
-                 <div className="space-y-3 text-left">
-                    <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">HQ Physical Node (Address)</Label>
-                    <Input value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="h-14 rounded-xl border-slate-100 bg-slate-50 font-bold text-lg" />
+                 <div className="space-y-2 text-left">
+                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Official address</Label>
+                    <Input value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="h-12 rounded-xl border-slate-50 bg-slate-50 font-bold" />
                  </div>
               </div>
            </Card>
