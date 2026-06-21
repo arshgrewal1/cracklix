@@ -18,8 +18,9 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Global High-Density Mock Grid v72.0.
- * FIXED: Standardized 2-column mobile grid across all PWA hubs.
+ * @fileOverview Global High-Density Mock Grid v73.0.
+ * TYPOGRAPHY: Proper Title Case.
+ * DENSITY: Compact mobile card with realistic metrics.
  */
 
 export default function LatestMocks() {
@@ -67,11 +68,11 @@ export default function LatestMocks() {
                 <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-xl md:rounded-[2.5rem] bg-white p-3 md:p-8 text-left md:text-center flex flex-col h-full group relative overflow-hidden">
                   
                   <div className="mb-3 md:mb-8 flex justify-start md:justify-center">
-                     <AuthorityLogo boardId={boardId} size="sm" className="md:w-16 md:h-16 bg-slate-50 rounded-lg md:rounded-2xl shadow-inner group-hover:scale-105 transition-transform" />
+                     <AuthorityLogo boardId={boardId} size="sm" className="w-10 h-10 md:w-16 md:h-16 bg-slate-50 rounded-lg md:rounded-2xl shadow-inner group-hover:scale-105 transition-transform" />
                   </div>
 
                   <CardHeader className="p-0 flex-1 space-y-1 md:space-y-4">
-                     <CardTitle className="font-black text-[12px] md:text-2xl text-[#0F172A] leading-tight tracking-tight line-clamp-2">
+                     <CardTitle className="font-bold text-[12px] md:text-2xl text-[#0F172A] leading-tight tracking-tight line-clamp-2">
                         {mock.title}
                      </CardTitle>
                      
@@ -82,8 +83,8 @@ export default function LatestMocks() {
 
                      <div className="flex items-center gap-1.5 pt-0.5">
                         {isPremium && <Badge className="bg-orange-50 text-orange-600 border-none text-[6px] md:text-[8px] font-black px-1.5 py-0.5 rounded uppercase">PREMIUM</Badge>}
-                        <div className="flex items-center gap-1 text-[6px] md:text-[9px] font-black text-slate-300 uppercase tracking-tighter">
-                           <Users className="h-2 w-2 md:h-3 md:w-3" /> {mock.attemptsCount || 450}+
+                        <div className="flex items-center gap-1 text-[7px] md:text-[9px] font-black text-slate-300 uppercase tracking-tighter">
+                           <Users className="h-2.5 w-2.5 md:h-3.5 md:w-3.5" /> 450+ Attempts
                         </div>
                      </div>
                   </CardHeader>
@@ -95,7 +96,7 @@ export default function LatestMocks() {
                      )}>
                         <Link href={locked ? '/pass' : `/mocks/${mock.id}`}>
                            {locked ? <Lock className="h-2.5 w-2.5 md:h-4 md:w-4" /> : null}
-                           {locked ? 'UNLOCK' : 'START'}
+                           {locked ? 'Unlock' : 'Start'}
                         </Link>
                      </Button>
                   </div>

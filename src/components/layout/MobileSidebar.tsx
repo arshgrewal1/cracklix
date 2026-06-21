@@ -29,8 +29,8 @@ import { Button } from "@/components/ui/button";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Mobile Sidebar v44.0 (High Density).
- * FIXED: Reduced item height to h-10 and shrunk icons for better visibility.
+ * @fileOverview Mobile Sidebar v45.0 (High Density).
+ * TYPOGRAPHY: Convert headings to proper Title Case.
  */
 export default function MobileSidebar({
   onClose,
@@ -61,12 +61,12 @@ export default function MobileSidebar({
 
   const mainItems = [
     { label: "Home", href: "/", icon: Home },
-    { label: "My Hub", href: "/my-exams", icon: Target },
-    { label: "Exam List", href: "/exams", icon: Landmark },
-    { label: "Practice", href: "/mocks", icon: Zap },
+    { label: "My Exam Hub", href: "/my-exams", icon: Target },
+    { label: "Exam Explorer", href: "/exams", icon: Landmark },
+    { label: "Practice Tests", href: "/mocks", icon: Zap },
     { label: "Current Affairs", href: "/current-affairs", icon: Newspaper },
-    { label: "Study Notes", href: "/notes", icon: BookOpen },
-    { label: "Leaderboard", href: "/leaderboard", icon: Trophy },
+    { label: "Study Material", href: "/notes", icon: BookOpen },
+    { label: "Hall of Rankers", href: "/leaderboard", icon: Trophy },
   ];
 
   if (!mounted) return null;
@@ -132,8 +132,8 @@ export default function MobileSidebar({
         </div>
 
         <div className="px-2">
-          <p className="mb-1.5 px-4 text-[9px] font-bold text-slate-400 tracking-wide uppercase">
-            Discovery
+          <p className="mb-1.5 px-4 text-[9px] font-black text-slate-400 tracking-widest uppercase">
+            Discovery Hub
           </p>
 
           <div className="space-y-0.5">
@@ -174,7 +174,7 @@ export default function MobileSidebar({
            <div className="bg-[#0B1528] rounded-[1.25rem] p-3 space-y-2 border border-white/5 shadow-xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-3 opacity-5 rotate-12 group-hover:scale-110 transition-transform"><Award className="h-10 w-10" /></div>
               <div className="relative z-10 text-left">
-                <h4 className="text-[9px] font-black text-white tracking-widest uppercase">Share App</h4>
+                <h4 className="text-[9px] font-black text-white tracking-widest uppercase">Spread the Word</h4>
               </div>
               <ShareButton 
                 variant="dark" 
@@ -191,7 +191,7 @@ export default function MobileSidebar({
           className="w-full h-12 justify-start text-red-500 text-sm font-black rounded-xl hover:bg-red-50 transition-all active:scale-95"
         >
           <LogOut className="h-4 w-4 mr-3" />
-          Log Out
+          Sign Out
         </Button>
       </div>
     </div>

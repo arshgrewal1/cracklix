@@ -20,15 +20,15 @@ import {
 } from "@/lib/constants";
 
 /**
- * @fileOverview Hardened Compact Footer v3.0.
- * FIXED: High-density mobile grid with compressed logo and gaps.
+ * @fileOverview Hardened Compact Footer v4.0.
+ * TYPOGRAPHY: Proper Title Case applied to headings.
  */
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-white/5 bg-[#020617] font-body text-white">
+    <footer className="border-t border-slate-50 bg-[#020617] font-body text-white">
       <div className="mx-auto max-w-7xl px-4 md:px-6 py-6 md:py-12">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 items-start">
 
@@ -50,29 +50,29 @@ export default function Footer() {
 
           {/* Support Hub */}
           <div className="space-y-3">
-            <h3 className="text-[10px] md:text-sm font-black uppercase tracking-widest text-primary">Support</h3>
+            <h3 className="text-[10px] md:text-sm font-black text-primary tracking-widest uppercase">Support</h3>
             <ul className="space-y-2">
               <FooterLink href="/support">Support Center</FooterLink>
               <FooterLink href="/help">Help Articles</FooterLink>
               <FooterLink href="/privacy">Privacy Policy</FooterLink>
-              <FooterLink href="/terms">Terms</FooterLink>
+              <FooterLink href="/terms">Terms of Service</FooterLink>
             </ul>
           </div>
 
           {/* Resources */}
           <div className="space-y-3">
-            <h3 className="text-[10px] md:text-sm font-black uppercase tracking-widest text-primary">Resources</h3>
+            <h3 className="text-[10px] md:text-sm font-black text-primary tracking-widest uppercase">Resources</h3>
             <ul className="space-y-2">
               <FooterLink href="/mocks">Mock Tests</FooterLink>
-              <FooterLink href="/pyqs">Papers</FooterLink>
-              <FooterLink href="/notes">Study Notes</FooterLink>
-              <FooterLink href="/about">About Us</FooterLink>
+              <FooterLink href="/pyqs">Previous Papers</FooterLink>
+              <FooterLink href="/notes">Study Material</FooterLink>
+              <FooterLink href="/about">About Arsh Grewal</FooterLink>
             </ul>
           </div>
 
-          {/* Contact - Only visible on desktop or spans full on mobile if needed */}
+          {/* Contact */}
           <div className="col-span-2 lg:col-span-1 space-y-3 mt-4 lg:mt-0">
-            <h3 className="text-[10px] md:text-sm font-black uppercase tracking-widest text-primary">Connect</h3>
+            <h3 className="text-[10px] md:text-sm font-black text-primary tracking-widest uppercase">Connect</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-2">
               <div className="flex items-center gap-2 text-[11px] md:text-sm text-slate-400">
                 <Phone className="h-3.5 w-3.5 text-primary shrink-0" />

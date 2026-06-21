@@ -12,7 +12,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview High-Density Study Preview v1.5.
+ * @fileOverview High-Density Study Preview v1.6.
+ * TYPOGRAPHY: Convert to proper Title Case.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -40,7 +41,7 @@ export default function CurrentAffairsPreview() {
                  </div>
                  <span className="text-[9px] font-bold text-slate-400 tracking-tight uppercase">Study Material</span>
               </div>
-              <h2 className="text-2xl md:text-5xl font-extrabold text-[#0F172A] tracking-tight uppercase">Current Affairs</h2>
+              <h2 className="text-2xl md:text-5xl font-extrabold text-[#0F172A] tracking-tight">Current Affairs</h2>
               <p className="text-slate-500 font-medium text-[11px] md:text-lg">Daily bilingual updates for state exams.</p>
            </div>
            <Link href="/current-affairs" className="text-blue-600 font-black uppercase text-[9px] md:text-xs tracking-widest hover:underline flex items-center gap-2 group">
@@ -60,7 +61,7 @@ export default function CurrentAffairsPreview() {
                           <Calendar className="h-3 w-3 text-blue-600/50" /> {item.month} {item.year}
                        </span>
                     </div>
-                    <h3 className="text-sm md:text-xl font-bold text-[#0F172A] leading-tight group-hover:text-blue-600 transition-colors flex-1 mb-4 uppercase">
+                    <h3 className="text-sm md:text-xl font-bold text-[#0F172A] leading-tight group-hover:text-blue-600 transition-colors flex-1 mb-4">
                        {item.title}
                     </h3>
                     <div className="flex items-center justify-between pt-4 border-t border-slate-50">

@@ -8,11 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
 import { cn } from "@/lib/utils";
-import Image from "next/image";
+import Image from "image";
 import Link from "next/link";
 
 /**
- * @fileOverview High-Density Mobile App Hub v25.0.
+ * @fileOverview High-Density Mobile App Hub v26.0.
+ * TYPOGRAPHY: Title Case applied.
  */
 
 export default function AppPreview() {
@@ -20,8 +21,6 @@ export default function AppPreview() {
   const phoneMockup = "/images/hero-student.png"; 
 
   const { data: settings } = useDoc<any>(useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]));
-
-  const appStoreLink = settings?.appStoreUrl || "#";
 
   return (
     <section className="py-8 md:py-24 bg-white overflow-hidden border-t border-slate-50">
@@ -41,7 +40,7 @@ export default function AppPreview() {
                  </div>
                  <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">PWA HUB</span>
               </div>
-              <h2 className="text-2xl md:text-7xl font-headline font-black text-[#0F172A] leading-tight md:leading-[0.95] tracking-tight uppercase">
+              <h2 className="text-2xl md:text-7xl font-headline font-black text-[#0F172A] leading-tight md:leading-[0.95] tracking-tight">
                 Study Anywhere. <br />
                 <span className="text-primary">Anytime.</span>
               </h2>
@@ -78,12 +77,11 @@ export default function AppPreview() {
              >
                 <div className="h-full w-full bg-[#0F172A] rounded-[2.5rem] md:rounded-[3.5rem] p-2 md:p-3 shadow-5xl border-[6px] md:border-[8px] border-[#1E293B] overflow-hidden">
                    <div className="w-full h-full rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-white relative">
-                      <Image 
-                        src={phoneMockup} 
+                      {/* Using root source directly to match Hero illustration */}
+                      <img 
+                        src="/images/hero-student.png" 
                         alt="App Screenshot" 
-                        fill
-                        sizes="(max-width: 768px) 100vw, 400px"
-                        className="object-contain p-6 md:p-12"
+                        className="w-full h-full object-contain p-6 md:p-12"
                       />
                    </div>
                 </div>

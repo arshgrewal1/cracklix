@@ -9,8 +9,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Standalone Founder Leadership Node v5.0 (High Density).
- * FIXED: Reduced mobile scale, shrunk image and tightened vertical gaps.
+ * @fileOverview Standalone Founder Leadership Node v6.0.
+ * TYPOGRAPHY: Title Case applied to heading.
  */
 
 export default function MeetFounder() {
@@ -27,9 +27,9 @@ export default function MeetFounder() {
         >
            <div className="inline-flex items-center gap-3 px-3 py-1 rounded-full bg-blue-600/5 border border-blue-600/10 mb-1">
               <Sparkles className="h-3 w-3 text-blue-600 animate-pulse" />
-              <span className="text-[9px] font-bold text-blue-600 tracking-tight">Platform Leadership</span>
+              <span className="text-[9px] font-bold text-blue-600 tracking-tight uppercase">Platform Leadership</span>
            </div>
-           <h2 className="text-2xl md:text-6xl font-extrabold text-[#0F172A] tracking-tight leading-none uppercase">
+           <h2 className="text-2xl md:text-6xl font-extrabold text-[#0F172A] tracking-tight leading-none">
               Meet the <span className="text-blue-600">Founder</span>
            </h2>
            <p className="text-slate-500 font-medium text-[11px] md:text-lg max-w-xl mx-auto">
@@ -65,11 +65,11 @@ export default function MeetFounder() {
             <div className="flex-1 space-y-4 md:space-y-8 text-center md:text-left">
                <div className="space-y-2 md:space-y-4">
                   <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                     <Badge className="bg-[#0F172A] text-white border-none px-3 py-1 rounded-md font-bold text-[8px] md:text-[10px] tracking-tight shadow-lg">Founder</Badge>
-                     <Badge className="bg-blue-600 text-white border-none px-3 py-1 rounded-md font-bold text-[8px] md:text-[10px] tracking-tight shadow-lg">Lead Dev</Badge>
+                     <Badge className="bg-[#0F172A] text-white border-none px-3 py-1 rounded-md font-bold text-[8px] md:text-[10px] tracking-tight shadow-lg uppercase">Founder</Badge>
+                     <Badge className="bg-blue-600 text-white border-none px-3 py-1 rounded-md font-bold text-[8px] md:text-[10px] tracking-tight shadow-lg uppercase">Lead Dev</Badge>
                   </div>
                   <div className="space-y-0.5">
-                    <h3 className="text-2xl md:text-5xl font-extrabold text-[#0F172A] tracking-tight leading-none uppercase">
+                    <h3 className="text-2xl md:text-5xl font-extrabold text-[#0F172A] tracking-tight leading-none">
                        Arsh Grewal
                     </h3>
                     <p className="text-blue-600 font-bold text-[10px] md:text-sm flex items-center justify-center md:justify-start gap-1.5 uppercase">

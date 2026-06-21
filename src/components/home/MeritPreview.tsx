@@ -13,7 +13,8 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Density Punjab Merit Preview v5.0.
+ * @fileOverview High-Density Punjab Merit Preview v6.0.
+ * TYPOGRAPHY: Title Case applied.
  */
 export default function MeritPreview() {
   const db = useFirestore();
@@ -56,7 +57,7 @@ export default function MeritPreview() {
                     <Trophy className="h-4 w-4 text-blue-600" />
                     <span className="text-[9px] md:text-[10px] font-bold text-slate-400 tracking-tight uppercase">Punjab Merit Index</span>
                  </div>
-                 <h2 className="text-2xl md:text-6xl font-extrabold text-[#0F172A] leading-tight tracking-tight uppercase">Hall of <span className="text-blue-600">Rankers</span></h2>
+                 <h2 className="text-2xl md:text-6xl font-extrabold text-[#0F172A] leading-tight tracking-tight">Hall of <span className="text-blue-600">Rankers</span></h2>
                  <p className="text-[12px] md:text-lg text-slate-500 font-medium leading-relaxed">
                     Compare performance with {liveAspirantCount} aspirants across 23 districts. Secure your spot in the official merit list.
                  </p>
@@ -105,7 +106,7 @@ export default function MeritPreview() {
                                   <span className={cn("font-black text-xs md:text-xl w-4 md:w-6", idx === 0 ? "text-amber-400" : "text-slate-200")}>#{idx + 1}</span>
                                   <StudentAvatar profile={{ name, gender: res.gender }} className="h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-xl shadow-sm" />
                                   <div className="min-w-0">
-                                     <p className="font-bold text-[11px] md:text-lg text-[#0F172A] truncate uppercase leading-none">{name}</p>
+                                     <p className="font-bold text-[11px] md:text-lg text-[#0F172A] truncate leading-none">{name}</p>
                                      <p className="text-[7px] md:text-[9px] font-bold text-slate-300 truncate max-w-[120px] uppercase mt-1">{res.mockTitle}</p>
                                   </div>
                                </div>
