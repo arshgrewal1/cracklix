@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils"
 import { getAuthorityIcon } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Elite Latest Mock Hub v50.0 (Logo & Spacing Hardened).
+ * @fileOverview Elite Latest Mock Hub v51.0 (Hardened Expiry).
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -49,9 +49,10 @@ export default function LatestMocks() {
     const userEmail = user.email?.toLowerCase();
     const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
     if (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN' || isFounder) return true;
-    if (profile.pass?.active === true) {
-      const expiry = new Date(profile.pass.expiryDate);
-      return expiry > new Date();
+    
+    if (profile.passExpiresAt) {
+       const expiry = new Date(profile.passExpiresAt);
+       return expiry > new Date() && profile.pass?.active !== false;
     }
     return false;
   }, [user, profile]);
@@ -88,7 +89,7 @@ export default function LatestMocks() {
             
             return (
               <motion.div key={mock.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>
-                <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-300 rounded-[24px] bg-white p-6 md:p-8 text-center flex flex-col h-[380px] group relative overflow-hidden">
+                <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[24px] bg-white p-6 md:p-8 text-center flex flex-col h-[380px] group relative overflow-hidden">
                   <div className="absolute top-4 right-4 flex flex-col gap-1 items-end">
                     {(i === 0 || i === 1) && (
                       <Badge className="bg-orange-50 text-[#D97706] border-none text-[7px] font-bold px-2 py-0.5 shadow-sm">🔥 Popular</Badge>
@@ -117,7 +118,11 @@ export default function LatestMocks() {
                   </CardHeader>
                   <CardContent className="p-0 mt-6">
                      {locked ? (
-                       <Button asChild className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-all shadow-md border-none gap-2"><Link href="/pass"><Lock className="h-3.5 w-3.5" /> Unlock Hub</Link></Button>
+                       <Button asChild className="w-full h-12 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl transition-all shadow-md border-none gap-2">
+                          <Link href="/pass">
+                             <Lock className="h-3.5 w-3.5" /> {profile?.passStatus === 'expired' ? 'Renew Elite Pass' : 'Unlock Hub'}
+                          </Link>
+                       </Button>
                      ) : (
                        <Button asChild className="w-full h-12 bg-[#04102B] hover:bg-[#2F6BFF] text-white font-bold text-xs rounded-xl transition-all shadow-md border-none group/btn"><Link href={`/mocks/${mock.id}`} className="flex items-center justify-center gap-2">Attempt Now <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" /></Link></Button>
                      )}

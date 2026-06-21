@@ -14,20 +14,26 @@ import { useExamStore } from "@/store/useExamStore";
 import { cn } from "@/lib/utils";
 import { LanguageDisplayMode } from "@/types";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview Hardened Instructions Hub v11.0 (Height Fixed).
- * FIXED: Implemented flex-1 on main to push dark footer to the bottom.
+ * @fileOverview Hardened Instructions Hub v12.0.
+ * HARDENED: Strict Premium Access Guard.
  */
+
+const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
+
 export default function InstructionsPage() {
   const params = useParams();
   const router = useRouter();
   const pathname = usePathname();
   const db = useFirestore();
-  const { user, loading: userLoading } = useUser();
+  const { user, profile, loading: userLoading } = useUser();
+  const { toast } = useToast();
   const mockId = params.id as string;
   const setLanguage = useExamStore(s => s.setLanguage);
   const [prefLang, setPrefLang] = useState<LanguageDisplayMode>('ENGLISH_PUNJABI');
+  const [accessChecked, setAccessChecked] = useState(false);
 
   const { data: mock, loading } = useDoc<any>(useMemo(() => (db ? doc(db, "mocks", mockId) : null), [db, mockId]));
 
@@ -42,6 +48,36 @@ export default function InstructionsPage() {
       setPrefLang(mock.languageMode);
     }
   }, [mock]);
+
+  // CORE ACCESS AUDIT
+  useEffect(() => {
+     if (loading || userLoading || !user || !mock || !profile) return;
+
+     const tier = (mock.accessLevel || 'FREE').toUpperCase();
+     const userEmail = user.email?.toLowerCase();
+     const isAdmin = profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
+
+     let hasActivePass = false;
+     if (isAdmin) {
+        hasActivePass = true;
+     } else if (profile.passExpiresAt) {
+        const expiry = new Date(profile.passExpiresAt);
+        if (expiry > new Date() && profile.pass?.active !== false) {
+           hasActivePass = true;
+        }
+     }
+
+     if (tier === 'PREMIUM' && !hasActivePass) {
+        toast({ 
+          variant: "destructive", 
+          title: "Access Restricted", 
+          description: profile.passStatus === 'expired' ? "Renew your Elite Pass to attempt this test." : "Premium Pass required for this series." 
+        });
+        router.replace('/pass');
+     } else {
+        setAccessChecked(true);
+     }
+  }, [mock, loading, user, userLoading, profile, router, toast]);
 
   const availableLangs = useMemo(() => {
     if (!mock?.languageMode) return [];
@@ -61,7 +97,7 @@ export default function InstructionsPage() {
     router.push(`/mocks/${mockId}/attempt`);
   };
 
-  if (loading || userLoading) return (
+  if (loading || userLoading || (user && mock && !accessChecked)) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Synchronizing Hub...</p>

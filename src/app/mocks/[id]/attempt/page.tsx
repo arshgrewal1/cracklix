@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
@@ -27,8 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v60.0.
- * FIXED: Optimized layout for full viewport utilization with sticky headers and scrollable content.
+ * @fileOverview Hardened CBT Engine v61.0.
+ * HARDENED: Strict Premium Access Route Guard.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -86,7 +85,11 @@ export default function MockAttemptPage() {
         }
 
         if (tier === 'PREMIUM' && !hasActivePass) {
-           toast({ variant: "destructive", title: "Access Expired", description: "Please renew your elite pass." });
+           toast({ 
+             variant: "destructive", 
+             title: "Access Blocked", 
+             description: profile?.passStatus === 'expired' ? "Your elite pass has expired. Please renew to continue." : "This is a premium mock test. Please upgrade to a pass." 
+           });
            router.replace('/pass');
            return;
         }

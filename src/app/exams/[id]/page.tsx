@@ -30,7 +30,8 @@ import {
   ArrowRight,
   LucideIcon,
   Scale,
-  CheckCircle2
+  CheckCircle2,
+  RefreshCcw
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
@@ -42,7 +43,8 @@ import { useToast } from "@/hooks/use-toast"
 import { getAuthorityIcon } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Institutional Exam Hub v42.0 (Logo & Spacing Hardened).
+ * @fileOverview Institutional Exam Hub v43.0.
+ * HARDENED: Premium access validation logic for mock lists.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -221,13 +223,13 @@ export default function ExamHubPage() {
 
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                <TabsContent value="FULL" className="m-0">
-                  <MockList data={groupedContent.FULL} results={userResults} isPassActive={isPassActive} user={user} loading={mocksLoading} boards={boards} exam={exam} />
+                  <MockList data={groupedContent.FULL} results={userResults} isPassActive={isPassActive} profile={profile} user={user} loading={mocksLoading} boards={boards} exam={exam} />
                </TabsContent>
                <TabsContent value="SUBJECT" className="m-0">
-                  <MockList data={groupedContent.SUBJECT} results={userResults} isPassActive={isPassActive} user={user} loading={mocksLoading} boards={boards} exam={exam} />
+                  <MockList data={groupedContent.SUBJECT} results={userResults} isPassActive={isPassActive} profile={profile} user={user} loading={mocksLoading} boards={boards} exam={exam} />
                </TabsContent>
                <TabsContent value="SECTIONAL" className="m-0">
-                  <MockList data={groupedContent.SECTIONAL} results={userResults} isPassActive={isPassActive} user={user} loading={mocksLoading} boards={boards} exam={exam} />
+                  <MockList data={groupedContent.SECTIONAL} results={userResults} isPassActive={isPassActive} profile={profile} user={user} loading={mocksLoading} boards={boards} exam={exam} />
                </TabsContent>
                <TabsContent value="CA" className="m-0">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -252,7 +254,7 @@ export default function ExamHubPage() {
                   </div>
                </TabsContent>
                <TabsContent value="PYQ" className="m-0">
-                  <MockList data={groupedContent.PYQ} results={userResults} isPassActive={isPassActive} user={user} loading={mocksLoading} boards={boards} exam={exam} />
+                  <MockList data={groupedContent.PYQ} results={userResults} isPassActive={isPassActive} profile={profile} user={user} loading={mocksLoading} boards={boards} exam={exam} />
                </TabsContent>
                <TabsContent value="NOTES" className="m-0">
                   <NotesList data={groupedContent.NOTES} isPassActive={isPassActive} loading={notesLoading} />
@@ -273,7 +275,7 @@ function DashboardTab({ value, label, icon: Icon }: { value: string, label: stri
    )
 }
 
-function MockList({ data, results, isPassActive, user, loading, boards, exam }: any) {
+function MockList({ data, results, isPassActive, profile, user, loading, boards, exam }: any) {
    const router = useRouter();
    const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
    
@@ -346,7 +348,7 @@ function MockList({ data, results, isPassActive, user, loading, boards, exam }: 
                   <CardContent className="p-0 mt-10">
                      {locked ? (
                         <Button onClick={() => router.push('/pass')} className="w-full h-[56px] bg-amber-500 hover:bg-amber-600 text-white font-black text-xs uppercase tracking-widest rounded-[18px] transition-all shadow-xl shadow-amber-500/10 active:scale-95 border-none gap-2">
-                           <Lock className="h-4 w-4" /> Unlock Premium Pass
+                           <Lock className="h-4 w-4" /> {profile?.passStatus === 'expired' ? 'Renew Elite Pass' : 'Unlock Premium Pass'}
                         </Button>
                      ) : (
                         <Button onClick={() => router.push(user ? `/mocks/${mock.id}/instructions` : `/login?returnUrl=/mocks/${mock.id}`)} className="w-full h-[56px] bg-[#04102B] hover:bg-[#2F6BFF] text-white font-black text-xs uppercase tracking-widest rounded-[18px] transition-all shadow-xl shadow-slate-900/10 active:scale-95 border-none group/btn">
