@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Plus, Trash2, Edit, Save, Gem, Zap, Lock, X, ChevronRight, Loader2, CheckCircle2, Search, Landmark } from "lucide-react"
+import { Plus, Trash2, Edit, Save, Gem, Zap, Lock, X, ChevronRight, Loader2, CheckCircle2, Search, Landmark, Clock } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
@@ -16,7 +16,8 @@ import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Pass Architect v5.1 (Production Hardened).
+ * @fileOverview Institutional Pass Architect v5.5 (Validity Config Added).
+ * UPDATED: Added Validity (Days) input to dialog for dynamic duration control.
  * FIXED: Null guard for editingPass properties during render cycles.
  */
 export default function PassManagement() {
@@ -33,7 +34,6 @@ export default function PassManagement() {
   }, [rawPasses])
 
   const [editingPass, setEditingPass] = useState<any>(null)
-  const [newFeature, setNewFeature] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const [mockSearch, setMockSearch] = useState("")
 
@@ -115,7 +115,10 @@ export default function PassManagement() {
                    <CardTitle className="text-lg md:text-2xl font-black leading-none">{p.name}</CardTitle>
                    <Badge className={cn("mt-2 border-none text-[8px] font-black uppercase tracking-widest px-2", p.active ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400")}>{p.active ? 'SYSTEM ONLINE' : 'OFFLINE'}</Badge>
                 </div>
-                <p className="text-2xl md:text-4xl font-black text-[#0F172A]">₹{p.price}</p>
+                <div className="space-y-1">
+                   <p className="text-2xl md:text-4xl font-black text-[#0F172A]">₹{p.price}</p>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{p.durationDays} Days Validity</p>
+                </div>
              </CardHeader>
              <CardContent className="px-5 md:px-10 flex-1 space-y-6">
                 <div className="space-y-2">
@@ -145,14 +148,20 @@ export default function PassManagement() {
           <div className="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-10 pb-6 md:pb-10 space-y-10">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
                 <div className="space-y-6">
-                   <div className="grid grid-cols-2 gap-4">
+                   <div className="space-y-4">
                       <div className="space-y-1.5">
                          <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Plan Name</Label>
                          <Input value={editingPass?.name || ""} onChange={e => setEditingPass({...editingPass, name: e.target.value})} className="h-12 rounded-xl border-slate-200 bg-slate-50 font-bold" />
                       </div>
-                      <div className="space-y-1.5">
-                         <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Price (₹)</Label>
-                         <Input type="number" value={editingPass?.price || 0} onChange={e => setEditingPass({...editingPass, price: parseFloat(e.target.value) || 0})} className="h-12 rounded-xl border-slate-200 bg-slate-50 font-black text-primary" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                           <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Price (₹)</Label>
+                           <Input type="number" value={editingPass?.price || 0} onChange={e => setEditingPass({...editingPass, price: parseFloat(e.target.value) || 0})} className="h-12 rounded-xl border-slate-200 bg-slate-50 font-black text-primary text-center" />
+                        </div>
+                        <div className="space-y-1.5">
+                           <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Clock className="h-3 w-3" /> Validity (Days)</Label>
+                           <Input type="number" value={editingPass?.durationDays || 30} onChange={e => setEditingPass({...editingPass, durationDays: parseInt(e.target.value) || 0})} className="h-12 rounded-xl border-slate-200 bg-slate-50 font-black text-center text-blue-600" />
+                        </div>
                       </div>
                    </div>
 
@@ -206,12 +215,12 @@ export default function PassManagement() {
              </div>
           </div>
           
-          <DialogFooter className="p-6 md:p-10 pt-4 bg-slate-50 flex gap-4 border-t border-slate-100 shrink-0">
+          <div className="p-6 md:p-10 pt-4 bg-slate-50 flex gap-4 border-t border-slate-100 shrink-0">
              <Button variant="ghost" onClick={() => setEditingPass(null)} className="h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400">Discard Audit</Button>
              <Button onClick={handleSave} disabled={isSaving} className="flex-1 bg-primary hover:bg-blue-700 text-white h-11 md:h-12 rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none active:scale-95 gap-2">
                 {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit Access Rules
              </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
