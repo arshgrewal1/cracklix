@@ -15,10 +15,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Institutional Study Material Hub v1.2.
- * UI FIX: Removed 'uppercase' from Study Material heading and asset titles.
+ * @fileOverview Official Institutional Study Material Hub v1.3.
+ * UPDATED: Integrated branded Study Material logo into header.
  */
 
 export default function StudyMaterialPage() {
@@ -63,7 +64,7 @@ export default function StudyMaterialPage() {
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
             <div className="space-y-4 text-left">
               <div className="flex items-center gap-3">
-                 <Zap className="h-5 w-5 text-primary" />
+                 <AuthorityLogo boardId="study-material" size="sm" className="bg-transparent shadow-none p-0" />
                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Official Study Assets</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-headline font-black text-[#0F172A] tracking-tight leading-[0.9]">

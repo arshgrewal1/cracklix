@@ -19,8 +19,8 @@ import { cn } from "@/lib/utils";
 import { AuthorityLogo } from "@/lib/exam-icons";
 
 /**
- * @fileOverview Official High-Density PWA Hero v38.0.
- * UPDATED: Integrated branded Current Affairs logo.
+ * @fileOverview Official High-Density PWA Hero v39.0.
+ * UPDATED: Integrated branded Mock Test, Study Material, and PYQ assets.
  */
 
 export default function Hero() {
@@ -87,11 +87,26 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* QUICK ACTIONS: 2x2 GRID FOR MOBILE */}
+        {/* QUICK ACTIONS: BRANDED GRID */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mt-10 md:mt-20">
-          <QuickAction icon={Zap} label="Mock Tests" href="/mocks" color="bg-blue-600" />
-          <QuickAction icon={BookOpen} label="Study Material" href="/notes" color="bg-indigo-600" />
-          <QuickAction icon={FileText} label="PYQ Papers" href="/pyqs" color="bg-emerald-600" />
+          <QuickAction 
+            customIcon={<AuthorityLogo boardId="mock-test" size="sm" className="bg-transparent shadow-none p-0" />} 
+            label="Mock Tests" 
+            href="/mocks" 
+            color="bg-white" 
+          />
+          <QuickAction 
+            customIcon={<AuthorityLogo boardId="study-material" size="sm" className="bg-transparent shadow-none p-0" />} 
+            label="Study Material" 
+            href="/notes" 
+            color="bg-white" 
+          />
+          <QuickAction 
+            customIcon={<AuthorityLogo boardId="pyq" size="sm" className="bg-transparent shadow-none p-0" />} 
+            label="PYQ Papers" 
+            href="/pyqs" 
+            color="bg-white" 
+          />
           <QuickAction 
             customIcon={<AuthorityLogo boardId="current-affairs" size="sm" className="bg-transparent shadow-none p-0" />} 
             label="Current Affairs" 
@@ -118,7 +133,7 @@ function QuickAction({ icon: Icon, customIcon, label, href, color }: any) {
   return (
     <Link href={href} className="block group h-full">
       <Card className="p-4 md:p-8 rounded-2xl border border-slate-100 bg-white hover:shadow-xl transition-all duration-300 h-full group flex flex-col md:flex-row items-center gap-3 md:gap-5 text-center md:text-left">
-        <div className={cn("h-10 w-10 md:h-14 md:w-14 rounded-xl flex items-center justify-center shrink-0 shadow-lg text-white group-hover:scale-110 transition-transform", color)}>
+        <div className={cn("h-10 w-10 md:h-14 md:w-14 rounded-xl flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 transition-transform", color)}>
           {customIcon ? customIcon : Icon && <Icon className="h-5 w-5 md:h-7 md:w-7" />}
         </div>
         <span className="text-[11px] md:text-sm font-bold text-slate-800 leading-tight tracking-tight">{label}</span>

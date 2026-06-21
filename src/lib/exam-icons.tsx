@@ -1,10 +1,10 @@
 import React from "react"
-import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Activity, Cpu, Building2, Globe, Settings } from "lucide-react"
+import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Activity, Cpu, Building2, Globe, Settings, FileText, FileStack } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Branding Engine v22.0.
- * UPDATED: Added Current Affairs branded asset to canonical registry.
+ * @fileOverview Institutional Branding Engine v23.0.
+ * UPDATED: Integrated branded Mock Test, Study Material, and PYQ assets.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -23,7 +23,10 @@ const CANONICAL_BOARD_LOGOS: Record<string, string> = {
   'defense': '/logos/boards/upsc.png',
   'pstet': '/logos/boards/pstet.png',
   'ctet': '/logos/boards/ctet.png',
-  'current-affairs': '/logos/boards/current-affairs.png'
+  'current-affairs': '/logos/boards/current-affairs.png',
+  'mock-test': '/logos/boards/mock-test.png',
+  'study-material': '/logos/boards/study-material.png',
+  'pyq': '/logos/boards/pyq.png'
 };
 
 const CANONICAL_CAT_LOGOS: Record<string, string> = {
@@ -69,7 +72,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   if (logoUrl) {
     return (
-      <div className={cn("relative shrink-0 overflow-hidden flex items-center justify-center bg-white rounded-xl md:rounded-2xl p-1.5 shadow-inner", containerSize, className)}>
+      <div className={cn("relative shrink-0 overflow-hidden flex items-center justify-center bg-white rounded-xl md:rounded-2xl p-1 shadow-inner", containerSize, className)}>
         <img 
           src={logoUrl} 
           alt="Official Authority Logo" 
@@ -82,6 +85,9 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   }
 
   const getFallbackIcon = () => {
+    if (bId === 'mock-test') return <Zap className="h-full w-full text-primary" />;
+    if (bId === 'study-material') return <BookOpen className="h-full w-full text-indigo-600" />;
+    if (bId === 'pyq') return <FileStack className="h-full w-full text-emerald-600" />;
     if (cId.includes('govt')) return <Landmark className="h-full w-full text-amber-600" />;
     if (cId.includes('teaching')) return <BookOpen className="h-full w-full text-blue-600" />;
     if (cId.includes('technical')) return <Settings className="h-full w-full text-slate-600" />;

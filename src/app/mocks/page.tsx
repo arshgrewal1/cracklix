@@ -16,9 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Exam Hub v17.0 (Simplified Language).
- * UPDATED: Simplified "Master Registry" to "Exam Hub".
- * FIXED: Explicitly typed id in catMocksCount filter.
+ * @fileOverview High-Density Exam Hub v18.0 (Branded).
+ * UPDATED: Integrated branded Mock Test logo into header.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -63,7 +62,7 @@ export default function MocksDiscoveryPage() {
           <div className="container mx-auto px-4 max-w-7xl">
             <div className="space-y-1.5 md:space-y-4 px-1">
                <div className="flex items-center gap-2">
-                 <div className="h-7 w-7 md:h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shadow-inner"><Landmark className="h-4 w-4 md:h-5 md:w-5" /></div>
+                 <AuthorityLogo boardId="mock-test" size="sm" className="bg-transparent shadow-none p-0" />
                  <span className="text-[9px] md:text-xs font-black text-slate-400 tracking-widest uppercase">Exam Hub</span>
                </div>
                <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] leading-tight tracking-tight uppercase">Exam Hub</h1>
@@ -79,11 +78,14 @@ export default function MocksDiscoveryPage() {
              ) : categories.map((cat) => {
                 const catExams = exams?.filter(e => e.categoryId === cat.id) || [];
                 const catExamIds = catExams.map(e => e.id);
-                const catMocksCount = mocks?.filter(m => catExamIds.includes(m.examId) || (m.examIds && m.examIds.some((id: string) => catExamIds.includes(id)))).length || 0;
+                const catMocksCount = mocks?.filter(m => {
+                  const eids = m.examIds || (m.examId ? [m.examId] : []);
+                  return eids.some((id: string) => catExamIds.includes(id));
+                }).length || 0;
 
                 return (
                   <Link key={cat.id} href={`/exams/category/${cat.id}`}>
-                     <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-700 rounded-xl md:rounded-[2.5rem] bg-white flex flex-col h-full border border-slate-100 p-3 md:p-8">
+                     <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-xl md:rounded-[2.5rem] bg-white flex flex-col h-full border border-slate-100 p-3 md:p-8">
                         <div className="flex justify-between items-start mb-4 md:mb-8">
                            <AuthorityLogo category={cat} size="sm" className="md:w-16 md:h-16 bg-slate-50 rounded-lg md:rounded-2xl group-hover:scale-105 transition-transform shadow-inner" />
                            <Badge className="bg-[#0F172A] text-white border-none text-[6px] md:text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm">BOARD</Badge>

@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -22,10 +21,11 @@ import {
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Fidelity PYQ Hub v2.0.
- * Strictly matched to user screenshot: Orange headers, functional PDF nodes.
+ * @fileOverview High-Fidelity PYQ Hub v2.1.
+ * UPDATED: Integrated branded PYQ logo into header.
  */
 
 export default function PYQPage() {
@@ -39,7 +39,6 @@ export default function PYQPage() {
 
   const { data: pyqs, loading } = useCollection<any>(pyqQuery)
 
-  // Group PYQs by title/exam category for the card-based layout in the screenshot
   const groupedPyqs = useMemo(() => {
     if (!pyqs) return {}
     const filtered = pyqs.filter((p: any) => 
@@ -49,7 +48,6 @@ export default function PYQPage() {
     
     const groups: Record<string, any[]> = {}
     filtered.forEach(p => {
-      // Normalize group title: e.g. "Revenue Patwari" from "Revenue Patwari 2025"
       const groupTitle = p.title.replace(/\d{4}.*$/, '').trim() + " Papers"
       if (!groups[groupTitle]) groups[groupTitle] = []
       groups[groupTitle].push(p)
@@ -64,9 +62,12 @@ export default function PYQPage() {
       <main className="container mx-auto px-4 md:px-6 py-12 md:py-24 max-w-5xl text-center">
         <div className="space-y-16">
           
-          {/* SCREENSHOT MATCHED HEADER */}
-          <div className="space-y-4">
-            <h1 className="text-4xl md:text-7xl font-headline font-black text-primary uppercase tracking-tight leading-none">
+          <div className="space-y-6">
+            <div className="flex items-center justify-center gap-3">
+               <AuthorityLogo boardId="pyq" size="sm" className="bg-transparent shadow-none p-0" />
+               <Badge className="bg-primary/10 text-primary border-none px-4 py-1 rounded-full font-black text-[10px] tracking-widest uppercase">Archive Node</Badge>
+            </div>
+            <h1 className="text-4xl md:text-7xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none">
               PREVIOUS YEAR PAPERS
             </h1>
             <p className="text-slate-500 font-medium text-lg md:text-xl max-w-2xl mx-auto">
