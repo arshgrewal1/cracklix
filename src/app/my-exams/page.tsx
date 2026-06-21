@@ -25,7 +25,8 @@ import {
   Download,
   Sparkles,
   AlertCircle,
-  Gem
+  Gem,
+  Info
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -37,8 +38,8 @@ import { usePWAInstall } from "@/hooks/use-pwa-install"
 import { getAuthorityIcon } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Institutional My Hub Hub v10.0.
- * NORMALIZED: Reduced header and card scale for better content density.
+ * @fileOverview Institutional My Hub Hub v11.0.
+ * UPDATED: Replaced "Nodes" with detailed counts and "Coming Soon" guards.
  */
 
 export default function MyExamsPage() {
@@ -60,22 +61,22 @@ export default function MyExamsPage() {
     if (!profile?.passExpiresAt) return;
     
     const interval = setInterval(() => {
-      const expiry = new Date(profile.passExpiresAt).getTime();
-      const now = new Date().getTime();
-      const diff = expiry - now;
+       const expiry = new Date(profile.passExpiresAt).getTime();
+       const now = new Date().getTime();
+       const diff = expiry - now;
 
-      if (diff <= 0) {
-        setPassTimer("Expired");
-        clearInterval(interval);
-        return;
-      }
+       if (diff <= 0) {
+          setPassTimer("Expired");
+          clearInterval(interval);
+          return;
+       }
 
-      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      
-      if (d > 0) setPassTimer(`${d} Days Remaining`);
-      else if (h > 0) setPassTimer(`${h} Hours Remaining`);
-      else setPassTimer(`Ending Soon`);
+       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+       const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+       
+       if (d > 0) setPassTimer(`${d} Days Remaining`);
+       else if (h > 0) setPassTimer(`${h} Hours Remaining`);
+       else setPassTimer(`Ending Soon`);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -83,9 +84,44 @@ export default function MyExamsPage() {
 
   const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db])
   const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db])
+  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db])
+  const pyqsQuery = useMemo(() => (db ? collection(db, "pyqs") : null), [db])
+  const notesQuery = useMemo(() => (db ? collection(db, "notes") : null), [db])
   
   const { data: allExams, loading: examsLoading } = useCollection<any>(examsQuery)
   const { data: boards } = useCollection<any>(boardsQuery)
+  const { data: mocks } = useCollection<any>(mocksQuery)
+  const { data: pyqs } = useCollection<any>(pyqsQuery)
+  const { data: notes } = useCollection<any>(notesQuery)
+
+  const statsMap = useMemo(() => {
+    const map: Record<string, any> = {};
+    (mocks || []).forEach(m => {
+       const eids = m.examIds || (m.examId ? [m.examId] : []);
+       eids.forEach((eid: string) => {
+          if (!map[eid]) map[eid] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+          if (m.mockType === 'FULL') map[eid].full++;
+          else if (m.mockType === 'SUBJECT' || m.mockType === 'SECTIONAL') map[eid].subject++;
+          else if (m.mockType === 'PYQ') map[eid].pyq++;
+          map[eid].total++;
+       });
+    });
+    (pyqs || []).forEach(p => {
+       if (p.examId) {
+          if (!map[p.examId]) map[p.examId] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+          map[p.examId].pyq++;
+          map[p.examId].total++;
+       }
+    });
+    (notes || []).forEach(n => {
+       if (n.examId) {
+          if (!map[n.examId]) map[n.examId] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+          map[n.examId].notes++;
+          map[n.examId].total++;
+       }
+    });
+    return map;
+  }, [mocks, pyqs, notes]);
 
   const pinnedExams = useMemo(() => {
     if (!allExams || !profile?.pinnedExams) return []
@@ -127,10 +163,16 @@ export default function MyExamsPage() {
       toast({ title: "Target Locked", description: `Your focus is now set to ${examName}.` });
     } catch (e) {
       toast({ variant: "destructive", title: "Update Failed" });
-    } finally { anonymizeTargetId(null); }
+    } finally { setSettingTargetId(null); }
   };
 
-  const anonymizeTargetId = (id: string | null) => setSettingTargetId(id);
+  const handleOpenHub = (examId: string, hasContent: boolean) => {
+     if (!hasContent) {
+        toast({ title: "Coming Soon", description: "No assets yet. We're working on it!" });
+        return;
+     }
+     router.push(`/exams/${examId}`);
+  };
 
   if (userLoading) return <div className="h-screen flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>
 
@@ -164,6 +206,8 @@ export default function MyExamsPage() {
                     {examsLoading ? Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[2rem] bg-white" />) : 
                     pinnedExams.length > 0 ? pinnedExams.map((exam: any) => {
                        const board = boards?.find((b: any) => b.id === exam.boardId || b.abbreviation === exam.boardId);
+                       const stats = statsMap[exam.id] || { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+                       const hasContent = stats.total > 0;
                        const logoUrl = exam.iconUrl || board?.iconUrl;
                        const isTarget = profile?.targetExam === exam.name;
                        return (
@@ -186,12 +230,19 @@ export default function MyExamsPage() {
                                )}
                              </div>
                              <h4 className="font-black text-lg md:text-xl text-[#0F172A] uppercase leading-tight mb-1.5 line-clamp-2">{exam.name}</h4>
-                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{board?.abbreviation || 'PSSSB'} Hub</p>
+                             <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
+                                {stats.full > 0 && <span className="text-[8px] font-bold text-slate-400 uppercase">{stats.full} Mocks</span>}
+                                {stats.subject > 0 && <span className="text-[8px] font-bold text-slate-400 uppercase">{stats.subject} Tests</span>}
+                                {stats.pyq > 0 && <span className="text-[8px] font-bold text-slate-400 uppercase">{stats.pyq} PYQs</span>}
+                                {!hasContent && <span className="text-[8px] font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1"><Info className="h-2 w-2" /> Adding Content</span>}
+                             </div>
                           </div>
                           <div className="space-y-4 pt-6 mt-auto">
                              <div className="grid grid-cols-2 gap-3">
                                 <Button onClick={() => handleSetTarget(exam.name, exam.id)} disabled={settingTargetId === exam.id || isTarget} variant="outline" className={cn("h-10 rounded-xl border-2 font-black uppercase text-[8px] tracking-tight gap-2", isTarget ? "bg-emerald-50 border-emerald-100 text-emerald-700" : "bg-white border-slate-100 text-[#0F172A]")}>{settingTargetId === exam.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Target className="h-3 w-3" />}{isTarget ? 'LOCKED' : 'FOCUS'}</Button>
-                                <Button asChild className="h-10 bg-[#0F172A] hover:bg-black text-white rounded-xl font-black uppercase text-[8px] tracking-tight border-none shadow-lg"><Link href={`/exams/${exam.id}`}>OPEN HUB</Link></Button>
+                                <Button onClick={() => handleOpenHub(exam.id, hasContent)} className={cn("h-10 rounded-xl font-black uppercase text-[8px] tracking-tight border-none shadow-lg text-white", hasContent ? "bg-[#0F172A] hover:bg-black" : "bg-slate-200 text-slate-400 cursor-not-allowed")}>
+                                   {hasContent ? 'OPEN HUB' : 'COMING SOON'}
+                                </Button>
                              </div>
                              <button onClick={() => handleUnpin(exam.id)} disabled={unpinningId === exam.id} className="w-fit mx-auto flex items-center justify-center gap-2 text-[8px] font-black text-slate-300 hover:text-rose-500 uppercase tracking-widest transition-colors active:scale-90">{unpinningId === exam.id ? <RefreshCw className="h-2.5 w-2.5 animate-spin" /> : <X className="h-2.5 w-2.5" />}REMOVE</button>
                           </div>

@@ -9,7 +9,7 @@ import { collection, query, where, doc, updateDoc, arrayUnion, arrayRemove, serv
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight, GraduationCap, Zap, BookOpen, Layers, Shield, Loader2, FileText, Landmark, ShieldCheck, Scale, Star, CheckCircle2, RefreshCw } from "lucide-react"
+import { ChevronLeft, ChevronRight, GraduationCap, Zap, BookOpen, Layers, Shield, Loader2, FileText, Landmark, ShieldCheck, Scale, Star, CheckCircle2, RefreshCw, Info } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -18,8 +18,8 @@ import { useToast } from "@/hooks/use-toast"
 import { getAuthorityIcon } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Institutional Hub Explorer v17.0.
- * NORMALIZED: Reduced header scale and card padding.
+ * @fileOverview Institutional Hub Explorer v18.0.
+ * UPDATED: Detailed content breakdown instead of "Nodes" and "Coming Soon" guards.
  */
 
 export default function HubExamsPage() {
@@ -42,23 +42,47 @@ export default function HubExamsPage() {
   const { data: exams, loading: examsLoading } = useCollection<any>(examsQuery);
   const { data: categories } = useCollection<any>(useMemo(() => (db ? collection(db, "categories") : null), [db]));
   const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]));
+  const { data: pyqs } = useCollection<any>(useMemo(() => (db ? collection(db, "pyqs") : null), [db]));
+  const { data: notes } = useCollection<any>(useMemo(() => (db ? collection(db, "notes") : null), [db]));
 
   const statsMap = useMemo(() => {
-    if (!mocks) return {};
     const map: Record<string, any> = {};
-    mocks.forEach(m => {
+    
+    // 1. Audit Mocks
+    (mocks || []).forEach(m => {
       const eids = m.examIds || (m.examId ? [m.examId] : []);
       eids.forEach((eid: string) => {
-        if (!map[eid]) map[eid] = { full: 0, subject: 0, pyq: 0, sectional: 0 };
+        if (!map[eid]) map[eid] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
         const type = m.mockType;
         if (type === 'FULL') map[eid].full++;
-        else if (type === 'SUBJECT') map[eid].subject++;
+        else if (type === 'SUBJECT' || type === 'SECTIONAL') map[eid].subject++;
         else if (type === 'PYQ') map[eid].pyq++;
-        else if (type === 'SECTIONAL') map[eid].sectional++;
+        map[eid].total++;
       });
     });
+
+    // 2. Audit Official PYQs
+    (pyqs || []).forEach(p => {
+       const eid = p.examId;
+       if (eid) {
+          if (!map[eid]) map[eid] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+          map[eid].pyq++;
+          map[eid].total++;
+       }
+    });
+
+    // 3. Audit Study Materials
+    (notes || []).forEach(n => {
+       const eid = n.examId;
+       if (eid) {
+          if (!map[eid]) map[eid] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+          map[eid].notes++;
+          map[eid].total++;
+       }
+    });
+
     return map;
-  }, [mocks]);
+  }, [mocks, pyqs, notes]);
 
   const handleTogglePin = async (e: React.MouseEvent, examId: string) => {
     e.preventDefault();
@@ -84,6 +108,18 @@ export default function HubExamsPage() {
     } finally {
       setPinningId(null);
     }
+  };
+
+  const handleOpenExam = (examId: string, hasContent: boolean) => {
+     if (!hasContent) {
+        toast({
+           title: "Coming Soon",
+           description: "Preparation nodes are currently being added for this vertical.",
+           duration: 3000
+        });
+        return;
+     }
+     router.push(`/exams/${examId}`);
   };
 
   if (hubLoading) return <div className="h-screen bg-white flex flex-col items-center justify-center space-y-4"><Zap className="h-8 w-8 text-primary animate-pulse" /><p className="text-[10px] font-black uppercase text-slate-300 tracking-widest">Loading Registry...</p></div>;
@@ -145,13 +181,14 @@ export default function HubExamsPage() {
          ) : exams && exams.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                {exams.map((exam) => {
-                  const stats = statsMap[exam.id] || { full: 0, subject: 0, pyq: 0, sectional: 0 };
+                  const stats = statsMap[exam.id] || { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+                  const hasContent = stats.total > 0;
                   const category = categories?.find((c: any) => c.id === exam.categoryId);
                   const effectiveLogo = exam.iconUrl || hub?.iconUrl || category?.iconUrl;
                   const isPinned = profile?.pinnedExams?.includes(exam.id);
 
                   return (
-                    <Card key={exam.id} onClick={() => router.push(`/exams/${exam.id}`)} className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.25rem] bg-white group overflow-hidden h-full flex flex-col p-5 md:p-6 text-left cursor-pointer">
+                    <Card key={exam.id} onClick={() => handleOpenExam(exam.id, hasContent)} className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.25rem] bg-white group overflow-hidden h-full flex flex-col p-5 md:p-6 text-left cursor-pointer">
                        <div className="flex justify-between items-start mb-5">
                           <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 shadow-inner relative overflow-hidden">
                              {effectiveLogo && !failedImages[exam.id] ? (
@@ -184,12 +221,21 @@ export default function HubExamsPage() {
 
                        <div className="space-y-1.5 flex-1">
                           <h3 className="text-lg font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors line-clamp-2 uppercase">{exam.name}</h3>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stats.full + stats.subject + stats.pyq + stats.sectional} NODES</p>
+                          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                             {stats.full > 0 && <span className="text-[9px] font-bold text-slate-400 uppercase">{stats.full} Mocks</span>}
+                             {stats.subject > 0 && <span className="text-[9px] font-bold text-slate-400 uppercase">{stats.subject} Practice</span>}
+                             {stats.pyq > 0 && <span className="text-[9px] font-bold text-slate-400 uppercase">{stats.pyq} PYQs</span>}
+                             {stats.notes > 0 && <span className="text-[9px] font-bold text-slate-400 uppercase">{stats.notes} Notes</span>}
+                             {!hasContent && <span className="text-[9px] font-bold text-orange-500 uppercase tracking-[0.2em] flex items-center gap-1"><Info className="h-2 w-2" /> Content Being Added</span>}
+                          </div>
                        </div>
 
                        <div className="mt-6">
-                          <Button variant="ghost" className="w-full h-10 rounded-xl bg-slate-900 text-white font-black uppercase text-[9px] tracking-widest gap-2 group-hover:bg-primary transition-all border-none shadow-md">
-                             OPEN HUB <ChevronRight className="h-3.5 w-3.5" />
+                          <Button variant="ghost" className={cn(
+                             "w-full h-10 rounded-xl font-black uppercase text-[9px] tracking-widest gap-2 transition-all border-none shadow-md",
+                             hasContent ? "bg-slate-900 text-white group-hover:bg-primary" : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                          )}>
+                             {hasContent ? 'OPEN HUB' : 'COMING SOON'} <ChevronRight className="h-3.5 w-3.5" />
                           </Button>
                        </div>
                     </Card>
