@@ -38,8 +38,8 @@ import { usePWAInstall } from "@/hooks/use-pwa-install"
 import { getAuthorityIcon } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Institutional My Exams Page v11.1.
- * UPDATED: Simplified terminology for exams and followed exams.
+ * @fileOverview Institutional My Exams Page v12.0 (Live Counts).
+ * UPDATED: Detailed content breakdown on cards.
  */
 
 export default function MyExamsPage() {
@@ -96,30 +96,35 @@ export default function MyExamsPage() {
 
   const statsMap = useMemo(() => {
     const map: Record<string, any> = {};
+    
     (mocks || []).forEach(m => {
        const eids = m.examIds || (m.examId ? [m.examId] : []);
        eids.forEach((eid: string) => {
-          if (!map[eid]) map[eid] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+          if (!map[eid]) map[eid] = { full: 0, subject: 0, sectional: 0, pyq: 0, notes: 0, total: 0 };
           if (m.mockType === 'FULL') map[eid].full++;
-          else if (m.mockType === 'SUBJECT' || m.mockType === 'SECTIONAL') map[eid].subject++;
+          else if (m.mockType === 'SUBJECT') map[eid].subject++;
+          else if (m.mockType === 'SECTIONAL') map[eid].sectional++;
           else if (m.mockType === 'PYQ') map[eid].pyq++;
           map[eid].total++;
        });
     });
+
     (pyqs || []).forEach(p => {
        if (p.examId) {
-          if (!map[p.examId]) map[p.examId] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+          if (!map[p.examId]) map[p.examId] = { full: 0, subject: 0, sectional: 0, pyq: 0, notes: 0, total: 0 };
           map[p.examId].pyq++;
           map[p.examId].total++;
        }
     });
+
     (notes || []).forEach(n => {
        if (n.examId) {
-          if (!map[n.examId]) map[n.examId] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
-          map[n.examId].notes++;
+          if (!map[n.examId]) map[n.examId] = { full: 0, subject: 0, sectional: 0, pyq: 0, notes: 0, total: 0 };
+          if (n.category === 'NOTES') map[n.examId].notes++;
           map[n.examId].total++;
        }
     });
+
     return map;
   }, [mocks, pyqs, notes]);
 
@@ -202,16 +207,17 @@ export default function MyExamsPage() {
                     <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">My Followed Exams</h3>
                  </div>
                  
-                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-8">
                     {examsLoading ? Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[2rem] bg-white" />) : 
                     pinnedExams.length > 0 ? pinnedExams.map((exam: any) => {
                        const board = boards?.find((b: any) => b.id === exam.boardId || b.abbreviation === exam.boardId);
-                       const stats = statsMap[exam.id] || { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+                       const stats = statsMap[exam.id] || { full: 0, subject: 0, sectional: 0, pyq: 0, notes: 0, total: 0 };
                        const hasContent = stats.total > 0;
                        const logoUrl = exam.iconUrl || board?.iconUrl;
                        const isTarget = profile?.targetExam === exam.name;
+
                        return (
-                        <Card key={exam.id} className="border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[1.5rem] md:rounded-[2rem] bg-white group overflow-hidden h-[340px] flex flex-col p-6 md:p-8 text-center">
+                        <Card key={exam.id} className="border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[1.5rem] md:rounded-[2rem] bg-white group overflow-hidden h-auto flex flex-col p-6 md:p-8 text-center relative">
                           {isTarget && (
                             <div className="absolute top-4 right-4 z-20">
                               <Badge className="bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-sm px-2.5 py-0.5 font-black text-[7px] uppercase rounded-lg">
@@ -219,7 +225,7 @@ export default function MyExamsPage() {
                               </Badge>
                             </div>
                           )}
-                          <div className="flex flex-col items-center flex-1 pt-1">
+                          <div className="flex flex-col items-center flex-1">
                              <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 shadow-inner overflow-hidden mb-5 relative">
                                {logoUrl && !failedImages[exam.id] ? (
                                  <img src={logoUrl} className="w-full h-full object-contain p-2" referrerPolicy="no-referrer" alt="Logo" onError={() => setFailedImages(p => ({...p, [exam.id]: true}))} />
@@ -229,15 +235,26 @@ export default function MyExamsPage() {
                                  </div>
                                )}
                              </div>
-                             <h4 className="font-black text-lg md:text-xl text-[#0F172A] uppercase leading-tight mb-1.5 line-clamp-2">{exam.name}</h4>
-                             <div className="flex flex-wrap items-center justify-center gap-2 mt-2">
-                                {stats.full > 0 && <span className="text-[8px] font-bold text-slate-400 uppercase">{stats.full} Mocks</span>}
-                                {stats.subject > 0 && <span className="text-[8px] font-bold text-slate-400 uppercase">{stats.subject} Tests</span>}
-                                {stats.pyq > 0 && <span className="text-[8px] font-bold text-slate-400 uppercase">{stats.pyq} Papers</span>}
-                                {!hasContent && <span className="text-[8px] font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1"><Info className="h-2 w-2" /> No Content Yet</span>}
+                             <h4 className="font-black text-lg md:text-xl text-[#0F172A] uppercase leading-tight mb-4 line-clamp-2">{exam.name}</h4>
+                             
+                             <div className="w-full flex flex-col gap-1.5 mb-6">
+                                {hasContent ? (
+                                   <>
+                                      <StatLine label="Full Mocks" val={stats.full} />
+                                      <StatLine label="Subject Tests" val={stats.subject} />
+                                      <StatLine label="Sectional Tests" val={stats.sectional} />
+                                      <StatLine label="Official PYQs" val={stats.pyq} />
+                                      <StatLine label="Study Notes" val={stats.notes} />
+                                   </>
+                                ) : (
+                                   <span className="text-[9px] font-bold text-amber-500 uppercase tracking-widest flex items-center justify-center gap-1.5 mt-2 bg-amber-50 py-2 rounded-xl border border-amber-100">
+                                      <Info className="h-3.5 w-3.5" /> Content Coming Soon
+                                   </span>
+                                )}
                              </div>
                           </div>
-                          <div className="space-y-4 pt-6 mt-auto">
+
+                          <div className="space-y-4 pt-6 border-t border-slate-50 mt-auto">
                              <div className="grid grid-cols-2 gap-3">
                                 <Button onClick={() => handleSetTarget(exam.name, exam.id)} disabled={settingTargetId === exam.id || isTarget} variant="outline" className={cn("h-10 rounded-xl border-2 font-black uppercase text-[8px] tracking-tight gap-2", isTarget ? "bg-emerald-50 border-emerald-100 text-emerald-700" : "bg-white border-slate-100 text-[#0F172A]")}>{settingTargetId === exam.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Target className="h-3 w-3" />}{isTarget ? 'LOCKED' : 'FOCUS'}</Button>
                                 <Button onClick={() => handleOpenHub(exam.id, hasContent)} className={cn("h-10 rounded-xl font-black uppercase text-[8px] tracking-tight border-none shadow-lg text-white", hasContent ? "bg-[#0F172A] hover:bg-black" : "bg-slate-200 text-slate-400 cursor-not-allowed")}>
@@ -330,4 +347,16 @@ export default function MyExamsPage() {
       <Footer />
     </div>
   )
+}
+
+function StatLine({ label, val }: { label: string, val: number }) {
+   return (
+      <p className={cn(
+         "text-[10px] font-bold uppercase tracking-tight flex items-center justify-between px-1", 
+         val > 0 ? "text-slate-600" : "text-slate-300"
+      )}>
+         <span>{label}</span>
+         <span className="tabular-nums">{val}</span>
+      </p>
+   )
 }

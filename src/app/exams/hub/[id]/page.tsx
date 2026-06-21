@@ -18,8 +18,8 @@ import { useToast } from "@/hooks/use-toast"
 import { getAuthorityIcon } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Institutional Exam Explorer v20.0 (Case Refined).
- * FIXED: Removed forced uppercase from exam titles while preserving acronyms.
+ * @fileOverview Institutional Exam Explorer v21.0 (Live Counts).
+ * UPDATED: Replaced "Nodes" with detailed content breakdown.
  */
 
 const ACRONYMS = ["PSSSB", "PPSC", "CTET", "PSTET", "PSPCL", "PSTCL", "SSAPB"];
@@ -63,10 +63,11 @@ export default function HubExamsPage() {
     (mocks || []).forEach(m => {
       const eids = m.examIds || (m.examId ? [m.examId] : []);
       eids.forEach((eid: string) => {
-        if (!map[eid]) map[eid] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+        if (!map[eid]) map[eid] = { full: 0, subject: 0, sectional: 0, pyq: 0, notes: 0, total: 0 };
         const type = m.mockType;
         if (type === 'FULL') map[eid].full++;
-        else if (type === 'SUBJECT' || type === 'SECTIONAL') map[eid].subject++;
+        else if (type === 'SUBJECT') map[eid].subject++;
+        else if (type === 'SECTIONAL') map[eid].sectional++;
         else if (type === 'PYQ') map[eid].pyq++;
         map[eid].total++;
       });
@@ -76,7 +77,7 @@ export default function HubExamsPage() {
     (pyqs || []).forEach(p => {
        const eid = p.examId;
        if (eid) {
-          if (!map[eid]) map[eid] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+          if (!map[eid]) map[eid] = { full: 0, subject: 0, sectional: 0, pyq: 0, notes: 0, total: 0 };
           map[eid].pyq++;
           map[eid].total++;
        }
@@ -86,8 +87,8 @@ export default function HubExamsPage() {
     (notes || []).forEach(n => {
        const eid = n.examId;
        if (eid) {
-          if (!map[eid]) map[eid] = { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
-          map[eid].notes++;
+          if (!map[eid]) map[eid] = { full: 0, subject: 0, sectional: 0, pyq: 0, notes: 0, total: 0 };
+          if (n.category === 'NOTES') map[eid].notes++;
           map[eid].total++;
        }
     });
@@ -141,7 +142,7 @@ export default function HubExamsPage() {
       
       <section className="bg-white border-b border-slate-100 py-10 md:py-12 overflow-hidden relative">
          <div className="absolute top-0 right-0 p-12 opacity-[0.01]"><GraduationCap className="h-32 w-32 md:h-48 md:w-48" /></div>
-         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-center-7xl relative z-10">
+         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
             <button onClick={() => router.back()} className="h-9 w-9 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:text-black mb-6 transition-all active:scale-90">
                <ChevronLeft className="h-4 w-4" />
             </button>
@@ -190,17 +191,17 @@ export default function HubExamsPage() {
                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-2xl bg-white" />)}
             </div>
          ) : exams && exams.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
                {exams.map((exam) => {
-                  const stats = statsMap[exam.id] || { full: 0, subject: 0, pyq: 0, notes: 0, total: 0 };
+                  const stats = statsMap[exam.id] || { full: 0, subject: 0, sectional: 0, pyq: 0, notes: 0, total: 0 };
                   const hasContent = stats.total > 0;
                   const category = categories?.find((c: any) => c.id === exam.categoryId);
                   const effectiveLogo = exam.iconUrl || hub?.iconUrl || category?.iconUrl;
                   const isPinned = profile?.pinnedExams?.includes(exam.id);
 
                   return (
-                    <Card key={exam.id} onClick={() => handleOpenExam(exam.id, hasContent)} className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.25rem] bg-white group overflow-hidden h-full flex flex-col p-5 md:p-6 text-left cursor-pointer">
-                       <div className="flex justify-between items-start mb-5">
+                    <Card key={exam.id} onClick={() => handleOpenExam(exam.id, hasContent)} className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.25rem] bg-white group overflow-hidden h-full flex flex-col p-6 md:p-8 text-left cursor-pointer">
+                       <div className="flex justify-between items-start mb-6">
                           <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 shadow-inner relative overflow-hidden">
                              {effectiveLogo && !failedImages[exam.id] ? (
                                 <Image 
@@ -230,22 +231,30 @@ export default function HubExamsPage() {
                           </button>
                        </div>
 
-                       <div className="space-y-1.5 flex-1">
-                          <h3 className="text-lg font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors line-clamp-2">
+                       <div className="space-y-4 flex-1">
+                          <h3 className="text-xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors line-clamp-2">
                              {exam.name}
                           </h3>
-                          <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
-                             {stats.full > 0 && <span className="text-[9px] font-bold text-slate-400 uppercase">{stats.full} Mocks</span>}
-                             {stats.subject > 0 && <span className="text-[9px] font-bold text-slate-400 uppercase">{stats.subject} Tests</span>}
-                             {stats.pyq > 0 && <span className="text-[9px] font-bold text-slate-400 uppercase">{stats.pyq} Papers</span>}
-                             {stats.notes > 0 && <span className="text-[9px] font-bold text-slate-400 uppercase">{stats.notes} Notes</span>}
-                             {!hasContent && <span className="text-[9px] font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1"><Info className="h-2 w-2" /> No Materials Yet</span>}
+                          <div className="flex flex-col gap-1.5 mt-2">
+                             {hasContent ? (
+                                <>
+                                   <StatLine label="Full Mocks" val={stats.full} />
+                                   <StatLine label="Subject Tests" val={stats.subject} />
+                                   <StatLine label="Sectional Tests" val={stats.sectional} />
+                                   <StatLine label="Official PYQs" val={stats.pyq} />
+                                   <StatLine label="Study Notes" val={stats.notes} />
+                                </>
+                             ) : (
+                                <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest flex items-center gap-1.5 mt-2">
+                                   <Info className="h-3.5 w-3.5" /> Content Coming Soon
+                                </span>
+                             )}
                           </div>
                        </div>
 
-                       <div className="mt-6">
+                       <div className="mt-8">
                           <Button variant="ghost" className={cn(
-                             "w-full h-10 rounded-xl font-black uppercase text-[9px] tracking-widest gap-2 transition-all border-none shadow-md",
+                             "w-full h-11 rounded-xl font-black uppercase text-[10px] tracking-widest gap-2 transition-all border-none shadow-md",
                              hasContent ? "bg-slate-900 text-white group-hover:bg-primary" : "bg-slate-100 text-slate-400 cursor-not-allowed"
                           )}>
                              {hasContent ? 'OPEN EXAM' : 'COMING SOON'} <ChevronRight className="h-3.5 w-3.5" />
@@ -266,3 +275,16 @@ export default function HubExamsPage() {
     </div>
   )
 }
+
+function StatLine({ label, val }: { label: string, val: number }) {
+   return (
+      <p className={cn(
+         "text-[10px] font-bold uppercase tracking-tight flex items-center justify-between", 
+         val > 0 ? "text-slate-600" : "text-slate-300"
+      )}>
+         <span>{label}</span>
+         <span className="tabular-nums">{val}</span>
+      </p>
+   )
+}
+
