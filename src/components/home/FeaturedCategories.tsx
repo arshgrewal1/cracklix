@@ -14,8 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Institutional Category Discovery v114.0.
- * UI FIX: Removed 'uppercase' from category titles.
+ * @fileOverview Institutional Category Discovery v115.0 (Mobile Compressed).
  */
 
 const STRICT_WHITELIST = [
@@ -42,16 +41,16 @@ export default function FeaturedCategories() {
   }, [rawCategories]);
 
   return (
-    <section className="py-10 md:py-16 bg-white border-t border-slate-50">
-      <div className="container mx-auto px-4 max-w-7xl space-y-8 md:space-y-12 text-left">
-        <div className="space-y-1 px-1">
-           <h2 className="text-2xl md:text-5xl font-black text-[#0F172A] leading-tight tracking-tight">Choose Category</h2>
-           <p className="text-slate-500 font-medium text-[11px] md:text-lg">Select a recruitment vertical to browse verified boards.</p>
+    <section className="py-6 md:py-16 bg-white border-t border-slate-50">
+      <div className="container mx-auto px-4 max-w-7xl space-y-4 md:space-y-12 text-left">
+        <div className="space-y-0.5 px-1">
+           <h2 className="text-xl md:text-5xl font-black text-[#0F172A] leading-tight tracking-tight">Choose Category</h2>
+           <p className="text-slate-500 font-medium text-[10px] md:text-lg">Select a recruitment vertical to begin.</p>
         </div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
           {catLoading ? (
-            Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-64 md:h-96 w-full rounded-[1.5rem] md:rounded-[2.5rem] bg-slate-50" />)
+            Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 md:h-96 w-full rounded-xl md:rounded-[2.5rem] bg-slate-50" />)
           ) : categories.map((cat, idx) => {
             const catExams = exams?.filter(e => e.categoryId === cat.id) || [];
             const catExamIds = catExams.map(e => e.id);
@@ -66,25 +65,24 @@ export default function FeaturedCategories() {
             return (
               <motion.div key={cat.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.05 }}>
                  <Link href={`/exams/category/${cat.id}`}>
-                    <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] md:rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-4 md:p-10 h-full relative">
+                    <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-xl md:rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-3 md:p-10 h-full relative">
                        
-                       <div className="mb-4 md:mb-8 flex justify-start">
-                          <AuthorityLogo category={cat} size="md" className="bg-slate-50 rounded-xl md:rounded-2xl shadow-inner group-hover:scale-105 transition-transform" />
+                       <div className="mb-3 md:mb-8 flex justify-start">
+                          <AuthorityLogo category={cat} size="sm" className="md:w-16 md:h-16 bg-slate-50 rounded-lg md:rounded-2xl shadow-inner group-hover:scale-105 transition-transform" />
                        </div>
                        
-                       <div className="space-y-2 md:space-y-4 flex-1">
-                          <h3 className="text-sm md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">{cat.title}</h3>
+                       <div className="space-y-1 md:space-y-4 flex-1">
+                          <h3 className="text-[12px] md:text-[24px] font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">{cat.title}</h3>
                           
-                          <div className="flex flex-col gap-1 md:gap-3 pt-2">
+                          <div className="flex flex-col gap-1 md:gap-3 pt-1 md:pt-2">
                              <StatChip label="Exams" val={catExams.length} icon={BookOpen} />
                              {catMocksCount > 0 && <StatChip label="Tests" val={catMocksCount} icon={Zap} />}
-                             {catPyqsCount > 0 && <StatChip label="PYQs" val={catPyqsCount} icon={Layers} className="hidden md:flex" />}
                           </div>
                        </div>
 
-                       <div className="mt-6 md:mt-10 pt-4 border-t border-slate-50">
-                          <Button variant="ghost" className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[9px] md:text-xs tracking-widest uppercase border-none shadow-xl gap-2 active:scale-95">
-                             Open <ArrowRight className="h-3 w-3 md:h-4 md:w-4" />
+                       <div className="mt-4 md:mt-10 pt-3 border-t border-slate-50">
+                          <Button variant="ghost" className="w-full h-8 md:h-14 rounded-lg md:rounded-2xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[8px] md:text-xs tracking-widest uppercase border-none shadow-md gap-2 active:scale-95">
+                             Open <ArrowRight className="h-2.5 w-2.5 md:h-4 md:w-4" />
                           </Button>
                        </div>
                     </Card>
@@ -100,11 +98,11 @@ export default function FeaturedCategories() {
 
 function StatChip({ label, val, icon: Icon, className }: any) {
    return (
-      <div className={cn("flex items-center gap-1.5 text-[#0F172A] font-bold", className)}>
-         <Icon className="h-3 w-3 md:h-3.5 md:w-3.5 text-primary" />
+      <div className={cn("flex items-center gap-1 text-[#0F172A] font-bold", className)}>
+         <Icon className="h-2.5 w-2.5 md:h-3.5 md:w-3.5 text-primary" />
          <div className="flex items-baseline gap-1">
-            <span className="text-[11px] md:text-sm font-black tabular-nums">{val}</span>
-            <span className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase truncate">{label}</span>
+            <span className="text-[10px] md:text-sm font-black tabular-nums">{val}</span>
+            <span className="text-[7px] md:text-[9px] font-bold text-slate-400 uppercase truncate">{label}</span>
          </div>
       </div>
    )
