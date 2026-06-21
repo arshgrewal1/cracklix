@@ -10,8 +10,8 @@ import { useFirestore, useCollection } from "@/firebase"
 import { collection } from "firebase/firestore"
 
 /**
- * @fileOverview Hardened Operational Node Monitor v4.1.
- * Layout refactor: Removed redundant horizontal padding.
+ * @fileOverview Hardened Operational Node Monitor v4.2.
+ * PWA SYNC: Removed uppercase, reduced font scales, and normalized Title Case.
  */
 
 export default function PlatformHealth() {
@@ -61,42 +61,42 @@ export default function PlatformHealth() {
   if (!mounted) return null;
 
   return (
-    <div className="space-y-12 text-[#0F172A]">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
-        <div className="text-left">
-           <div className="flex items-center gap-3 mb-2">
-              <HeartPulse className="h-6 w-6 text-rose-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Live Telemetry Engine</span>
+    <div className="space-y-6 md:space-y-12 text-[#0F172A] animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
+        <div className="text-left space-y-1">
+           <div className="flex items-center gap-2 mb-1">
+              <HeartPulse className="h-4 w-4 text-rose-500 animate-pulse" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Live Telemetry Engine</span>
            </div>
-          <h1 className="text-5xl font-black font-headline text-[#0F172A] uppercase tracking-tight">System Health</h1>
-          <p className="text-slate-500 mt-2 text-lg font-medium">Real-time performance trail for institutional prep nodes.</p>
+          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight">System Health</h1>
+          <p className="text-slate-500 text-[11px] md:text-lg font-medium">Real-time performance trail for institutional prep nodes.</p>
         </div>
-        <div className="flex items-center gap-4">
-           <div className="text-right">
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Signal Sync</p>
-              <p className="text-sm font-bold text-emerald-600 tabular-nums">{lastSync}</p>
+        <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-slate-100 shadow-sm">
+           <div className="text-right px-2">
+              <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Signal Sync</p>
+              <p className="text-xs font-bold text-emerald-600 tabular-nums">{lastSync}</p>
            </div>
-           <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-slate-200 bg-white" onClick={handleRefresh}>
-              <RefreshCw className="h-5 w-5 text-slate-400" />
+           <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100" onClick={handleRefresh}>
+              <RefreshCw className="h-4 w-4 text-slate-400" />
            </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-         <HealthCard label="API Latency" value={`${heartbeat.latency}ms`} status="OPTIMAL" color="text-emerald-600" icon={<Zap className="text-primary" />} />
-         <HealthCard label="Registry Density" value={questions?.length || 0} status="VERIFIED" color="text-blue-600" icon={<Database className="text-blue-500" />} />
-         <HealthCard label="Traffic Node" status="ACTIVE" value={results?.length || 0} color="text-emerald-600" icon={<Activity className="text-emerald-500" />} />
-         <HealthCard label="Compute Load" status="BALANCED" value={`${heartbeat.load}%`} color="text-emerald-600" icon={<Server className="text-rose-500" />} />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-8 px-1">
+         <HealthCard label="API Latency" value={`${heartbeat.latency}ms`} status="Optimal" color="text-emerald-600" icon={<Zap className="text-primary" />} />
+         <HealthCard label="Registry Density" value={questions?.length || 0} status="Verified" color="text-blue-600" icon={<Database className="text-blue-500" />} />
+         <HealthCard label="Traffic Node" status="Active" value={results?.length || 0} color="text-emerald-600" icon={<Activity className="text-emerald-500" />} />
+         <HealthCard label="Compute Load" status="Balanced" value={`${heartbeat.load}%`} color="text-emerald-600" icon={<Server className="text-rose-500" />} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-         <Card className="border-slate-100 shadow-3xl bg-white rounded-[3rem] overflow-hidden">
-            <CardHeader className="p-10 border-b border-slate-50 bg-slate-50/50 text-left">
-               <CardTitle className="text-2xl font-headline font-black uppercase text-[#0F172A]">Live Extraction Feed</CardTitle>
-               <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Database read operations per cycle</CardDescription>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-10 px-1">
+         <Card className="border-none shadow-xl bg-white rounded-2xl md:rounded-[3rem] overflow-hidden border border-slate-50">
+            <CardHeader className="p-6 md:p-10 border-b border-slate-50 bg-slate-50/30 text-left">
+               <CardTitle className="text-lg md:text-2xl font-black text-[#0F172A]">Live Extraction Feed</CardTitle>
+               <CardDescription className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Database read operations per cycle</CardDescription>
             </CardHeader>
-            <CardContent className="p-10">
-               <div className="h-[350px] w-full">
+            <CardContent className="p-6 md:p-10">
+               <div className="h-[250px] md:h-[350px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                      <AreaChart data={healthData}>
                         <defs>
@@ -116,13 +116,13 @@ export default function PlatformHealth() {
             </CardContent>
          </Card>
 
-         <Card className="border-slate-100 shadow-3xl bg-white rounded-[3rem] overflow-hidden">
-            <CardHeader className="p-10 border-b border-slate-50 bg-slate-50/50 text-left">
-               <CardTitle className="text-2xl font-headline font-black uppercase text-[#0F172A]">CBT Latency (ms)</CardTitle>
-               <CardDescription className="text-[10px] font-bold uppercase tracking-widest text-slate-400">High-fidelity response trail for test engine</CardDescription>
+         <Card className="border-none shadow-xl bg-white rounded-2xl md:rounded-[3rem] overflow-hidden border border-slate-50">
+            <CardHeader className="p-6 md:p-10 border-b border-slate-50 bg-slate-50/30 text-left">
+               <CardTitle className="text-lg md:text-2xl font-black text-[#0F172A]">CBT Latency (ms)</CardTitle>
+               <CardDescription className="text-[9px] font-bold uppercase tracking-widest text-slate-400">High-fidelity response trail for test engine</CardDescription>
             </CardHeader>
-            <CardContent className="p-10">
-               <div className="h-[350px] w-full">
+            <CardContent className="p-6 md:p-10">
+               <div className="h-[250px] md:h-[350px] w-full">
                   <ResponsiveContainer width="100%" height="100%">
                      <AreaChart data={healthData}>
                         <defs>
@@ -142,14 +142,14 @@ export default function PlatformHealth() {
          </Card>
       </div>
 
-      <div className="bg-slate-900 rounded-[3.5rem] p-12 overflow-hidden relative">
-         <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><ShieldCheck className="h-64 w-64 text-white" /></div>
-         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-10">
-            <div className="text-left space-y-4">
-               <h4 className="text-3xl font-headline font-black uppercase text-white tracking-tight">Security Node: Active</h4>
-               <p className="text-slate-400 max-w-xl font-medium">All platform operations are audited against official Punjab Government recruitment norms. SSL/TLS encryption active on all extraction hubs.</p>
+      <div className="mx-1 bg-[#0F172A] rounded-2xl md:rounded-[3.5rem] p-6 md:p-12 overflow-hidden relative">
+         <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><ShieldCheck className="h-44 md:h-64 w-44 md:w-64 text-white" /></div>
+         <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10">
+            <div className="text-center md:text-left space-y-2 md:space-y-4">
+               <h4 className="text-xl md:text-3xl font-black text-white tracking-tight">Security Node Active</h4>
+               <p className="text-slate-400 max-w-xl text-[11px] md:text-base font-medium leading-relaxed">All platform operations are audited against official government recruitment norms. SSL/TLS encryption active on all extraction hubs.</p>
             </div>
-            <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-8 py-3 rounded-2xl font-black text-xs tracking-widest uppercase">Registry Protected</Badge>
+            <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-6 py-2 rounded-full font-black text-[9px] md:text-xs tracking-widest uppercase">Registry Protected</Badge>
          </div>
       </div>
     </div>
@@ -158,12 +158,12 @@ export default function PlatformHealth() {
 
 function HealthCard({ label, value, status, icon, color }: any) {
    return (
-      <Card className="border-slate-100 shadow-xl bg-white p-10 rounded-[2.5rem] relative overflow-hidden group">
-         <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform">{icon}</div>
-         <div className="space-y-4 relative z-10 text-left">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{label}</p>
-            <p className="text-4xl font-headline font-black text-[#0F172A] tabular-nums">{value}</p>
-            <Badge className={`border-none text-[8px] font-black px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-600 uppercase tracking-widest`}>
+      <Card className="border-none shadow-lg bg-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] relative overflow-hidden group border border-slate-50">
+         <div className="absolute top-0 right-0 p-4 md:p-6 opacity-5 group-hover:scale-110 transition-transform">{icon}</div>
+         <div className="space-y-3 md:space-y-4 relative z-10 text-left">
+            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</p>
+            <p className="text-2xl md:text-4xl font-black text-[#0F172A] tabular-nums leading-none">{value}</p>
+            <Badge className={cn("border-none text-[8px] font-black px-2 py-0.5 rounded-lg shadow-sm bg-emerald-50 text-emerald-600 uppercase tracking-widest")}>
                {status}
             </Badge>
          </div>
