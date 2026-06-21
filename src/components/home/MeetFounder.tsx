@@ -9,7 +9,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Compact Founder Node v8.0 (High Density).
+ * @fileOverview Compact Founder Node v8.1.
+ * ALIGNMENT: Standardized side margins to match Hero section.
  */
 
 export default function MeetFounder() {
@@ -17,8 +18,8 @@ export default function MeetFounder() {
 
   return (
     <section className="py-8 md:py-24 bg-white overflow-hidden border-t border-slate-100">
-      <div className="container mx-auto px-4 max-w-4xl">
-        <div className="bg-slate-50/50 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-4xl border border-slate-100 flex flex-col md:flex-row items-center p-6 md:p-14 gap-6 md:gap-14 group hover:border-primary/20 transition-all duration-700">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-slate-50/50 rounded-[2.5rem] md:rounded-[3rem] overflow-hidden shadow-4xl border border-slate-100 flex flex-col md:flex-row items-center p-6 md:p-14 gap-6 md:gap-14 group hover:border-primary/20 transition-all duration-700 max-w-4xl mx-auto">
           <div className="relative shrink-0">
              <div className="relative h-20 w-20 md:h-44 md:w-44 rounded-full overflow-hidden border-[4px] border-white shadow-2xl bg-[#0B1528] ring-1 ring-slate-200">
                 <Image 

@@ -12,7 +12,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview High-Density Study Preview v1.7 (Title Case).
+ * @fileOverview High-Density Study Preview v1.8.
+ * ALIGNMENT: Standardized side margins to match Hero section.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -30,7 +31,7 @@ export default function CurrentAffairsPreview() {
 
   return (
     <section className="py-8 md:py-24 bg-slate-50/50">
-      <div className="container mx-auto px-4 max-w-7xl space-y-6 md:space-y-12 text-left">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 text-left">
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-1 px-1">
            <div className="space-y-1">

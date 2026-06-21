@@ -12,7 +12,8 @@ import { AuthorityLogo } from "@/lib/exam-icons";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview High-Density Popular Exams Grid v78.0.
+ * @fileOverview High-Density Popular Exams Grid v78.1.
+ * ALIGNMENT: Standardized side margins to match Hero section.
  */
 
 const POPULAR_LIST = [
@@ -29,7 +30,7 @@ const POPULAR_LIST = [
 export default function PopularExams() {
   return (
     <section className="py-6 md:py-24 bg-slate-50/50 border-t border-slate-100">
-      <div className="container mx-auto px-4 max-w-7xl text-left">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 md:mb-16 gap-1 px-1">
             <div className="space-y-0.5">
                <h2 className="text-xl md:text-5xl font-black text-[#04102B] tracking-tight leading-none">Popular Exams</h2>

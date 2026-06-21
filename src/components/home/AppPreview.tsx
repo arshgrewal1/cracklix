@@ -17,14 +17,14 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Density Study Anywhere Hub v28.1 (Fixed).
- * FIXED: Imported missing ChevronRight and cn utility.
+ * @fileOverview High-Density Study Anywhere Hub v28.2.
+ * ALIGNMENT: Standardized side margins to match Hero section.
  */
 
 export default function AppPreview() {
   return (
     <section className="py-8 md:py-24 bg-white overflow-hidden border-t border-slate-100">
-      <div className="container mx-auto px-4 md:px-6 max-w-7xl text-left">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
         <div className="space-y-6 md:space-y-12">
            <div className="space-y-1 px-1">
               <div className="flex items-center gap-3">

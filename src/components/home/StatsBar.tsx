@@ -9,9 +9,8 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Fidelity Single-Line Stats Bar v6.0.
- * OPTIMIZED: Background synced to Hero (bg-blue-50) for seamless flow.
- * OPTIMIZED: Forced single horizontal line (grid-cols-4) with micro-scaling for PWA mobile.
+ * @fileOverview High-Fidelity Single-Line Stats Bar v6.1.
+ * ALIGNMENT: Standardized side margins to match Hero section.
  */
 
 const formatCompact = (num: number) => {
@@ -59,7 +58,7 @@ export default function StatsBar() {
 
   return (
     <section className="bg-blue-50 pt-0 pb-6 md:pb-16">
-      <div className="container mx-auto px-2 md:px-4 max-w-7xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-4 gap-1.5 md:gap-8">
           {items.map((item, i) => (
             <Card key={i} className="border border-slate-100 shadow-sm rounded-xl md:rounded-[2.5rem] p-2 md:p-10 bg-white flex flex-col md:flex-row items-center justify-center md:justify-start gap-1.5 md:gap-8 transition-all duration-500 hover:shadow-xl group">

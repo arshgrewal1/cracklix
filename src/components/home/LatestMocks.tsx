@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Mock Grid v75.0 (Data Cleaned).
- * REMOVED: Static attempt counts to preserve data integrity for pre-launch.
+ * @fileOverview High-Density Mock Grid v75.1.
+ * ALIGNMENT: Standardized side margins to match Hero section.
  */
 
 export default function LatestMocks() {
@@ -42,7 +42,7 @@ export default function LatestMocks() {
 
   return (
     <section className="py-6 md:py-16 bg-white border-t border-slate-50">
-      <div className="container mx-auto px-4 max-w-7xl">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 md:mb-12 gap-1 text-left px-1">
            <div className="space-y-0.5">
               <h2 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tight leading-none">Latest Mock Tests</h2>

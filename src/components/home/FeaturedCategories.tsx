@@ -14,8 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview High-Density Category Explorer v124.0 (Performance Optimized).
- * OPTIMIZATION: Removed heavy collection fetches for mocks/exams/pyqs to resolve memory pressure.
+ * @fileOverview High-Density Category Explorer v124.1.
+ * ALIGNMENT: Standardized side margins to match Hero section.
  */
 
 const STRICT_WHITELIST = [
@@ -40,7 +40,7 @@ export default function FeaturedCategories() {
 
   return (
     <section className="py-8 md:py-24 bg-white border-t border-slate-50">
-      <div className="container mx-auto px-4 max-get-7xl space-y-6 md:space-y-12 text-left">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 text-left">
         <div className="space-y-1 px-1">
            <h2 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tight leading-none">Choose Category</h2>
            <p className="text-slate-500 font-medium text-[11px] md:text-lg">Select your recruitment category to see exams</p>

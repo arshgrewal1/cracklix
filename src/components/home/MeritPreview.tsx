@@ -13,7 +13,8 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Density Merit Hub v8.0 (Horizontal Mobile Scroll).
+ * @fileOverview High-Density Merit Hub v8.1.
+ * ALIGNMENT: Standardized side margins to match Hero section.
  */
 export default function MeritPreview() {
   const db = useFirestore();
@@ -41,7 +42,7 @@ export default function MeritPreview() {
 
   return (
     <section className="py-8 md:py-24 bg-slate-50/50 border-t border-slate-100 overflow-hidden">
-      <div className="container mx-auto px-4 max-w-7xl text-left">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-left">
         <div className="flex items-center justify-between mb-6 md:mb-14 px-1">
            <div className="space-y-1">
               <div className="flex items-center gap-3">

@@ -12,8 +12,8 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Fidelity "My Exams" Hub v12.0.
- * UPDATED: Implemented Title Case and live session node tracking.
+ * @fileOverview High-Fidelity "My Exams" Hub v12.1.
+ * ALIGNMENT: Standardized side margins to match Hero section.
  */
 
 export default function ContinueLearning() {
@@ -61,7 +61,7 @@ export default function ContinueLearning() {
 
   return (
     <section className="py-8 md:py-16 bg-white animate-in fade-in slide-in-from-bottom-4 duration-1000">
-      <div className="container mx-auto px-4 max-w-7xl space-y-8 md:space-y-12 text-left">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 md:space-y-12 text-left">
         <div className="flex items-center justify-between px-1">
            <div className="flex items-center gap-3">
               <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-blue-50 flex items-center justify-center text-primary shadow-sm shrink-0">
