@@ -16,8 +16,7 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Institutional Pass Center v18.0.
- * NORMALIZED: Reduced header scale and pricing card padding.
+ * @fileOverview High-Density Pass Center v20.0.
  */
 
 export default function PassPage() {
@@ -72,110 +71,86 @@ export default function PassPage() {
      return new Date(profile.passExpiresAt) > new Date() ? 'active' : 'expired';
   }, [profile]);
 
-  if (userLoading || !user) return (
-    <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
-       <Zap className="h-8 w-8 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300">Synchronizing Session...</p>
-    </div>
-  );
+  if (userLoading || !user) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-8 w-8 text-primary animate-pulse" /></div>;
 
   return (
     <div className="min-h-screen bg-slate-50 font-body pb-safe text-left overflow-x-hidden">
       <Navbar />
       
-      <main className="container mx-auto px-4 py-10 md:py-16 max-w-7xl space-y-12 md:space-y-20">
+      <main className="container mx-auto px-3 md:px-8 py-6 md:py-16 max-w-7xl space-y-8 md:space-y-20">
         
-        {/* MANAGEMENT CARD */}
+        {/* COMPACT MANAGEMENT CARD */}
         {mounted && profile?.passStatus && passStatus !== 'none' && (
-           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <Card className="max-w-4xl mx-auto border-none bg-white rounded-[2rem] p-6 md:p-10 shadow-5xl text-left overflow-hidden relative">
-                 <div className={cn("absolute top-0 left-0 w-1.5 h-full transition-colors duration-500", passStatus === 'active' ? 'bg-emerald-500' : 'bg-rose-500')} />
-                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 relative z-10">
-                    <div className="space-y-5 flex-1 w-full">
+           <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }}>
+              <Card className="max-w-4xl mx-auto border border-slate-100 bg-white rounded-2xl md:rounded-[2rem] p-4 md:p-10 shadow-xl text-left overflow-hidden relative">
+                 <div className={cn("absolute top-0 left-0 w-1.5 h-full", passStatus === 'active' ? 'bg-emerald-500' : 'bg-rose-500')} />
+                 <div className="flex flex-col md:flex-row justify-between items-center gap-4 relative z-10">
+                    <div className="space-y-4 flex-1 w-full">
                        <div className="flex items-center gap-4">
-                          <div className={cn("h-12 w-12 md:h-14 md:w-14 rounded-xl flex items-center justify-center shadow-inner shrink-0", passStatus === 'active' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                             <Gem className="h-7 w-7" />
+                          <div className={cn("h-10 w-10 md:h-14 rounded-xl flex items-center justify-center shadow-inner shrink-0", passStatus === 'active' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+                             <Gem className="h-6 w-6" />
                           </div>
                           <div>
-                             <h2 className="text-xl md:text-2xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-none">
+                             <h2 className="text-lg md:text-2xl font-headline font-black text-[#0F172A] uppercase leading-none">
                                {passStatus === 'active' ? 'Active Pass' : 'Pass Expired'}
                              </h2>
-                             <div className="flex items-center gap-3 mt-1.5">
-                                <Badge className={cn("border-none text-[8px] font-black px-2.5 py-0.5 rounded-lg uppercase", passStatus === 'active' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                                   Tier: {profile.pass?.plan || 'PREMIUM'}
-                                </Badge>
-                             </div>
+                             <Badge className={cn("mt-1.5 border-none text-[8px] font-black uppercase px-2 py-0.5", passStatus === 'active' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
+                                Tier: {profile.pass?.plan || 'PREMIUM'}
+                             </Badge>
                           </div>
                        </div>
 
                        {passStatus === 'active' && timeLeft ? (
-                          <div className="grid grid-cols-4 gap-2 md:gap-3 max-w-sm">
+                          <div className="grid grid-cols-4 gap-1.5 md:gap-3 max-w-xs md:max-w-sm">
                              <CountdownPill label="Days" val={timeLeft.d} />
-                             <CountdownPill label="Hours" val={timeLeft.h} />
+                             <CountdownPill label="Hrs" val={timeLeft.h} />
                              <CountdownPill label="Mins" val={timeLeft.m} />
                              <CountdownPill label="Secs" val={timeLeft.s} />
                           </div>
                        ) : passStatus === 'expired' ? (
-                          <div className="p-4 bg-rose-50 rounded-xl border border-rose-100 flex items-center gap-3 text-rose-600">
-                             <AlertCircle className="h-5 w-5 shrink-0" />
-                             <p className="text-[11px] font-bold uppercase tracking-tight">Your elite access has expired. Renew to continue.</p>
+                          <div className="p-3 bg-rose-50 rounded-xl border border-rose-100 flex items-center gap-3 text-rose-600">
+                             <AlertCircle className="h-4 w-4 shrink-0" />
+                             <p className="text-[10px] font-bold uppercase">Pass expired. Renew to continue.</p>
                           </div>
                        ) : null}
                     </div>
 
-                    <div className="shrink-0 w-full md:w-auto">
-                       <Button asChild className="w-full h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95">
-                          <Link href="#plans">Explore Plans <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
-                       </Button>
-                    </div>
+                    <Button asChild className="w-full md:w-auto h-12 px-8 bg-primary hover:bg-blue-700 text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none">
+                       <Link href="#plans">Get Pass <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
+                    </Button>
                  </div>
               </Card>
            </motion.div>
         )}
 
-        <div id="plans" className="text-center space-y-6 md:space-y-8">
-           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <h1 className="text-2xl sm:text-4xl md:text-5xl font-black tracking-tight leading-[1.1] text-[#0F172A] break-words antialiased">
-                 Elite <span className="text-primary">Pass Plans</span>
-              </h1>
-              <p className="text-sm md:text-lg text-slate-600 font-medium max-w-2xl mx-auto mt-4 leading-relaxed">
-                 Access verified mock tests, solved papers, and institutional analytics to secure your government job.
-              </p>
-           </motion.div>
+        <div id="plans" className="text-center space-y-2 md:space-y-8 px-1">
+           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] uppercase leading-tight">Elite Plans</h1>
+           <p className="text-[12px] md:text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">Verified patterns and official audit rationalizations.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
-           {passesLoading ? Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-96 w-full rounded-3xl bg-white" />) : passes.map((plan, idx) => (
-             <motion.div key={plan.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}>
-                <Card className="h-full border-none shadow-3xl bg-white rounded-[2rem] overflow-hidden flex flex-col transition-all duration-500 hover:translate-y-[-6px]">
-                   <CardHeader className="p-8 md:p-10 pb-4 text-center space-y-5">
-                      <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-slate-50 text-primary flex items-center justify-center mx-auto shadow-inner"><Gem className="h-7 w-7 fill-current" /></div>
-                      <CardTitle className="font-black text-lg md:text-2xl uppercase tracking-tight text-[#0F172A]">{plan.name}</CardTitle>
-                      <div className="flex items-baseline justify-center gap-1.5">
-                        {plan.price > 0 ? (
-                           <>
-                              <span className="text-xl font-black text-primary">₹</span>
-                              <span className="text-4xl md:text-6xl font-black text-[#0F172A] tracking-tighter tabular-nums">{plan.price}</span>
-                           </>
-                        ) : (
-                           <span className="text-4xl md:text-6xl font-black text-emerald-500 tracking-tighter uppercase">FREE</span>
-                        )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+           {passesLoading ? Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-2xl bg-white" />) : passes.map((plan, idx) => (
+             <motion.div key={plan.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}>
+                <Card className="h-full border border-slate-100 shadow-xl rounded-[1.5rem] md:rounded-[2rem] bg-white overflow-hidden flex flex-col hover:translate-y-[-4px] transition-all">
+                   <CardHeader className="p-4 md:p-10 pb-2 md:pb-4 text-center space-y-3">
+                      <div className="h-10 w-10 md:h-16 rounded-xl bg-slate-50 text-primary flex items-center justify-center mx-auto shadow-inner"><Gem className="h-6 w-6 md:h-8" /></div>
+                      <CardTitle className="font-black text-sm md:text-2xl uppercase tracking-tight text-[#0F172A]">{plan.name}</CardTitle>
+                      <div className="flex items-baseline justify-center gap-1">
+                        <span className="text-xl md:text-6xl font-black text-[#0F172A] tabular-nums">₹{plan.price}</span>
+                        <span className="text-[8px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">/ {plan.durationDays}d</span>
                       </div>
-                      <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">VALIDITY: {plan.durationDays} DAYS</p>
                    </CardHeader>
-                   <CardContent className="px-8 md:px-10 pb-8 flex-1">
-                      <div className="h-px w-full bg-slate-50 mb-6" />
-                      <ul className="space-y-3.5">
+                   <CardContent className="px-4 md:px-10 pb-6 flex-1">
+                      <div className="h-px w-full bg-slate-50 mb-4 md:mb-6" />
+                      <ul className="space-y-2 md:space-y-3.5">
                          {plan.features?.map((feat: string, i: number) => (
-                            <li key={i} className="flex items-start gap-3.5 text-left"><CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5 text-emerald-500" /><span className="text-xs md:text-sm font-bold text-slate-600 leading-snug">{feat}</span></li>
+                            <li key={i} className="flex items-start gap-2.5 text-left"><CheckCircle2 className="h-3.5 w-3.5 md:h-4 md:w-4 shrink-0 mt-0.5 text-emerald-500" /><span className="text-[11px] md:text-sm font-bold text-slate-600 leading-snug">{feat}</span></li>
                          ))}
                       </ul>
                    </CardContent>
-                   <CardFooter className="p-8 md:p-10 pt-0">
-                      <Button asChild className="w-full h-14 md:h-16 rounded-xl md:rounded-2xl bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest shadow-4xl transition-all active:scale-95 border-none">
-                         <Link href={`/checkout?plan=${plan.id}`}>
-                            {plan.price > 0 ? 'UPGRADE NOW' : 'ACTIVATE FREE'} <ArrowRight className="ml-2 h-4 w-4" />
-                         </Link>
+                   <CardFooter className="p-4 md:p-10 pt-0">
+                      <Button asChild className="w-full h-12 md:h-16 rounded-xl md:rounded-2xl bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest shadow-lg border-none active:scale-95">
+                         <Link href={`/checkout?plan=${plan.id}`}>ACTIVATE <ArrowRight className="ml-2 h-3.5 w-3.5" /></Link>
                       </Button>
                    </CardFooter>
                 </Card>
@@ -190,9 +165,9 @@ export default function PassPage() {
 
 function CountdownPill({ label, val }: { label: string, val: number }) {
    return (
-      <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-center flex-1 shadow-inner">
-         <p className="text-base md:text-xl font-black text-[#0F172A] tabular-nums leading-none">{val}</p>
-         <p className="text-[7px] font-black text-slate-400 uppercase tracking-tight mt-1">{label}</p>
+      <div className="p-2 bg-slate-50 rounded-lg border border-slate-100 text-center flex-1">
+         <p className="text-sm md:text-xl font-black text-[#0F172A] tabular-nums leading-none">{val}</p>
+         <p className="text-[6px] md:text-[7px] font-black text-slate-400 uppercase mt-1">{label}</p>
       </div>
    )
 }

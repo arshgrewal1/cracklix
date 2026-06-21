@@ -22,7 +22,7 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Live Hero Hub v22.0 (Mobile Compressed).
+ * @fileOverview Official High-Density Hero Hub v25.0.
  */
 
 const formatCompact = (num: number) => {
@@ -58,32 +58,32 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-4 md:gap-8 items-center">
 
-          <div className="text-left space-y-3 md:space-y-6">
+          <div className="text-left space-y-2 md:space-y-6">
             <motion.div 
                initial={{ opacity: 0, x: -20 }}
                animate={{ opacity: 1, x: 0 }}
-               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-100 shadow-sm group hover:border-primary/30 transition-all cursor-default"
+               className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white border border-slate-100 shadow-sm group hover:border-primary/30 transition-all cursor-default"
             >
               <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 animate-pulse" />
-              <span className="text-[9px] md:text-[12px] font-black text-slate-700 tracking-tight uppercase">
+              <span className="text-[8px] md:text-[12px] font-black text-slate-700 tracking-tight uppercase">
                 {statsLoading ? "..." : (stats?.totalUsers || 0).toLocaleString()} Students Preparing
               </span>
             </motion.div>
 
-            <div className="space-y-2 md:space-y-4">
-              <h1 className="text-xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05]">
+            <div className="space-y-1.5 md:space-y-4">
+              <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.05]">
                 Crack Punjab <br/>
                 <span className="block text-blue-600">Government Exams</span>
                 With Confidence
               </h1>
 
-              <p className="text-[11px] sm:text-base text-slate-600 max-w-lg leading-relaxed font-medium">
+              <p className="text-[10px] sm:text-base text-slate-600 max-w-lg leading-relaxed font-medium">
                 Practice with bilingual mock tests, previous papers and exam-focused preparation.
               </p>
 
-              <div className="flex flex-wrap gap-1 md:gap-1.5">
-                {["PSSSB", "Punjab Police", "PSTET", "PSPCL"].map((item) => (
-                  <span key={item} className="px-2 py-0.5 rounded-full bg-white border text-[8px] md:text-[11px] font-bold text-slate-500 hover:bg-slate-50 transition-colors tracking-tight">
+              <div className="flex flex-wrap gap-1 md:gap-1.5 pt-1">
+                {["PSSSB", "Punjab Police", "PSTET"].map((item) => (
+                  <span key={item} className="px-2 py-0.5 rounded-full bg-white border text-[8px] md:text-[10px] font-bold text-slate-400 tracking-tight">
                     {item}
                   </span>
                 ))}
@@ -93,10 +93,10 @@ export default function Hero() {
 
           <div className="flex flex-col items-center">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="relative flex justify-center mb-2 md:mb-6">
-              <img src="/images/hero-student.png" alt="Cracklix Student" className="w-full max-w-[180px] md:max-w-md drop-shadow-2xl" />
+              <img src="/images/hero-student.png" alt="Cracklix Student" className="w-full max-w-[140px] md:max-w-md drop-shadow-2xl" />
             </motion.div>
 
-            <div className="grid grid-cols-2 gap-2 md:gap-3 w-full">
+            <div className="grid grid-cols-2 gap-1.5 md:gap-3 w-full max-w-sm md:max-w-none">
               <FeatureCard icon={ClipboardList} label="Mock Tests" sub="Premium" color="text-blue-600" href="/mocks" />
               <FeatureCard icon={BookOpen} label="Study Material" sub="Verified" color="text-indigo-600" href="/notes" />
               <FeatureCard icon={FileText} label="PYQ Papers" sub="Solved" color="text-emerald-600" href="/pyqs" />
