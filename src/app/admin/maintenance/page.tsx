@@ -24,8 +24,7 @@ import { clearAppCache } from "@/app/actions/maintenance"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Master Admin Maintenance Terminal v3.0.
- * FIXED: Explicit typing for onChange event to satisfy strict mode.
+ * @fileOverview Master Admin Maintenance Terminal v3.1.
  */
 
 export default function MaintenancePage() {

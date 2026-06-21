@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useMemo, useEffect, Suspense } from "react"
+import React, { useState, useMemo, useEffect, Suspense, cloneElement, isValidElement } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Search as SearchIcon, Zap, ChevronRight, Sparkles, ShieldCheck, FileText, LayoutGrid, Loader2 } from "lucide-react"
@@ -14,8 +14,7 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Search Center Hub v3.6.
- * FIXED: Explicit typing and React import for production stability.
+ * @fileOverview Search Center Hub v3.7 (Production Hardened).
  */
 
 export default function SearchPage() {
@@ -187,7 +186,7 @@ function SearchResultItem({ boardId, title, category, href, icon }: { boardId: s
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between group border border-slate-100 transition-all duration-500">
             <div className="flex items-center gap-4 min-w-0 flex-1">
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
-                  {React.isValidElement(icon) && React.cloneElement(icon as React.ReactElement<any>, { className: "h-5 w-5" })}
+                  {isValidElement(icon) ? cloneElement(icon as React.ReactElement<any>, { className: "h-5 w-5" }) : null}
                </div>
                <div className="text-left min-w-0 flex-1 space-y-1">
                   <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>

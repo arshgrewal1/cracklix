@@ -27,9 +27,8 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview High-Fidelity PWA Install Hub v4.0.
+ * @fileOverview High-Fidelity PWA Install Hub v4.1.
  * FIXED: Reliable standalone detection to prevent false positives for "Already Installed".
- * FIXED: Manual instructions fallback enabled for Android browsers.
  */
 
 type DeviceType = "android" | "ios" | "desktop" | "unknown";
@@ -54,9 +53,10 @@ export default function InstallPage() {
     setIsStandalone(isStandaloneMode);
     
     // Check if the install prompt event is cached globally
-    setIsInstallable(!!(window as any).deferredPrompt);
+    const hasPrompt = !!(window as any).deferredPrompt;
+    setIsInstallable(hasPrompt);
     
-    console.log('[PWA_INSTALL_AUDIT] Status:', { isStandaloneMode, isInstallable: !!(window as any).deferredPrompt });
+    console.log('[PWA_INSTALL_AUDIT] Status:', { isStandaloneMode, isInstallable: hasPrompt });
   }, []);
 
   useEffect(() => {
@@ -75,12 +75,13 @@ export default function InstallPage() {
 
     updateState();
 
-    window.addEventListener('pwa-installable', updateState);
-    window.addEventListener('appinstalled', updateState);
+    const handleCheck = () => updateState();
+    window.addEventListener('pwa-installable', handleCheck);
+    window.addEventListener('appinstalled', handleCheck);
     
     return () => {
-      window.removeEventListener('pwa-installable', updateState);
-      window.removeEventListener('appinstalled', updateState);
+      window.removeEventListener('pwa-installable', handleCheck);
+      window.removeEventListener('appinstalled', handleCheck);
     };
   }, [updateState]);
 
@@ -89,7 +90,10 @@ export default function InstallPage() {
     if (prompt) {
       prompt.prompt();
       const { outcome } = await prompt.userChoice;
-      if (outcome === 'accepted') (window as any).deferredPrompt = null;
+      if (outcome === 'accepted') {
+        (window as any).deferredPrompt = null;
+        setIsInstallable(false);
+      }
     } else if (isIos) {
        toast({
          title: "iOS Instructions",
@@ -169,7 +173,7 @@ export default function InstallPage() {
                        <div className="space-y-4">
                           <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-start gap-3">
                              <CheckCircle2 className="h-5 w-5 text-emerald-500 shrink-0" />
-                             <p className="text-emerald-50 [11px] md:text-sm font-medium">You are already using the native app. Go to your home screen to launch it anytime.</p>
+                             <p className="text-emerald-50 text-[11px] md:text-sm font-medium">You are already using the native app. Go to your home screen to launch it anytime.</p>
                           </div>
                           <Button asChild className="w-full h-12 bg-white text-black hover:bg-slate-100 rounded-full font-black uppercase tracking-widest text-[9px] border-none shadow-xl transition-all">
                              <Link href="/dashboard">Back to Hub</Link>
@@ -187,12 +191,12 @@ export default function InstallPage() {
                                 onClick={handleInstall}
                                 className="w-full h-14 md:h-20 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-[11px] rounded-full shadow-3xl transition-all active:scale-95 border-none gap-3"
                              >
-                                <Download className="h-4 w-4 md:h-6 md:w-6" /> {isInstallable ? 'Install App Now' : 'Show Instructions'}
+                                <Download className="h-4 w-4 md:h-6 md:w-6" /> {isInstallable ? 'Install App Now' : 'Manual Install'}
                              </Button>
                              {!isInstallable && !isIos && (
                                 <div className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center gap-2">
                                    <Info className="h-3 w-3 text-primary shrink-0" />
-                                   <p className="text-[9px] text-slate-300 font-bold uppercase tracking-tight">Manual install node active for Chrome & Browser.</p>
+                                   <p className="text-[9px] text-slate-300 font-bold uppercase tracking-tight">Direct prompt not available. Follow manual steps below.</p>
                                 </div>
                              )}
                           </div>

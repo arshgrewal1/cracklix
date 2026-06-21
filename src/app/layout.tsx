@@ -17,7 +17,7 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v52.2 (PWA & Offline Overhaul).
+ * @fileOverview Root Layout v52.3 (Production Hardened).
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
