@@ -3,12 +3,7 @@ import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Act
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Branding Engine v11.0 (Visibility Optimized).
- * 
- * OPTIMIZATION: 
- * 1. Increased base container sizes.
- * 2. Applied scale-[1.5] to trim excessive transparent padding in source assets.
- * 3. Removed restrictive internal padding.
+ * @fileOverview Institutional Branding Engine v12.0 (Failsafe Lookup).
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -48,8 +43,10 @@ interface AuthorityLogoProps {
 }
 
 export const AuthorityLogo = ({ board, category, boardId, categoryId, className, size = 'md' }: AuthorityLogoProps) => {
-  const bId = (boardId || board?.id || "").toLowerCase();
-  const cId = (categoryId || category?.id || board?.categoryId || "").toLowerCase();
+  const normalize = (id: string) => (id || "").toLowerCase().trim().replace(/\s+/g, '-').replace(/\./g, '');
+  
+  const bId = normalize(boardId || board?.id || "");
+  const cId = normalize(categoryId || category?.id || board?.categoryId || "");
   
   const logoUrl = 
     CANONICAL_BOARD_LOGOS[bId] || 
@@ -73,7 +70,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
       <div className={cn("relative shrink-0 overflow-hidden flex items-center justify-center bg-white rounded-2xl", containerSize, className)}>
         <img 
           src={logoUrl} 
-          alt="Institutional Branding" 
+          alt="Branding" 
           className="h-full w-full object-contain animate-in fade-in duration-500 scale-[1.5]"
           referrerPolicy="no-referrer"
           onError={(e) => {

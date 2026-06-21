@@ -4,26 +4,26 @@ import React from "react"
 import { motion } from "framer-motion"
 import { 
   ChevronRight, 
-  Zap, 
   ArrowRight
 } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
+import { AuthorityLogo } from "@/lib/exam-icons";
 
 /**
- * @fileOverview Popular Punjab Exams Hub v71.0.
- * FIXED: Normalized Title Case and strictly showing targeted popular exams.
+ * @fileOverview Popular Punjab Exams Hub v72.0 (Branding Integrated).
+ * UPDATED: Replaced generic Zap icons with Authority logos for PCS, Police, and PSSSB.
  */
 
 const POPULAR_LIST = [
-  { name: "PCS", id: "pcs" },
-  { name: "Punjab Police Constable", id: "constable" },
-  { name: "Patwari", id: "patwari" },
-  { name: "Clerk", id: "clerk" },
-  { name: "PSTET", id: "pstet-paper-1" },
-  { name: "ALM", id: "alm" },
-  { name: "Staff Nurse", id: "staff-nurse" },
-  { name: "SSC CGL", id: "ssc-cgl" }
+  { name: "PCS", id: "pcs", boardId: "ppsc" },
+  { name: "Punjab Police Constable", id: "constable", boardId: "punjab-police" },
+  { name: "Patwari", id: "patwari", boardId: "psssb" },
+  { name: "Clerk", id: "clerk", boardId: "psssb" },
+  { name: "PSTET", id: "pstet-paper-1", boardId: "pstet" },
+  { name: "ALM", id: "alm", boardId: "pspcl" },
+  { name: "Staff Nurse", id: "staff-nurse", boardId: "bfuhs" },
+  { name: "SSC CGL", id: "ssc-cgl", boardId: "ssc" }
 ];
 
 export default function PopularExams() {
@@ -45,8 +45,8 @@ export default function PopularExams() {
                <motion.div key={p.id} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }} viewport={{ once: true }}>
                   <Link href={`/exams/${p.id}`}>
                      <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-8 text-left h-full group">
-                        <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center mb-6 shadow-inner group-hover:scale-105 transition-transform text-primary">
-                           <Zap className="h-5 w-5" />
+                        <div className="mb-6 flex justify-start">
+                           <AuthorityLogo boardId={p.boardId} size="md" className="bg-slate-50 rounded-xl group-hover:scale-105 transition-transform" />
                         </div>
                         <h3 className="text-lg font-black text-[#04102B] leading-tight group-hover:text-primary transition-colors mb-6">
                            {p.name}

@@ -18,8 +18,7 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Dynamic Latest Mock Tests Hub v63.0.
- * UI FIX: Enlarged logos by removing padding and using optimized sizes.
+ * @fileOverview Dynamic Latest Mock Tests Hub v64.0 (Logic Hardened).
  */
 
 export default function LatestMocks() {
@@ -56,13 +55,13 @@ export default function LatestMocks() {
             const tier = (mock.accessLevel || 'FREE').toUpperCase();
             const isPremium = tier === 'PREMIUM';
             const locked = isPremium && !isPassActive;
-            const boardId = mock.boardIds?.[0] || mock.boardId;
+            const boardId = mock.boardIds?.[0] || mock.boardId || "GENERAL";
             
             return (
               <motion.div key={mock.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} viewport={{ once: true }}>
                 <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white p-8 text-center flex flex-col h-[400px] group relative overflow-hidden">
                   <div className="mb-6 flex justify-center">
-                     <AuthorityLogo boardId={boardId} size="lg" className="bg-slate-50 rounded-2xl" />
+                     <AuthorityLogo boardId={boardId} size="lg" className="bg-slate-50 rounded-2xl group-hover:scale-105 transition-transform" />
                   </div>
                   <CardHeader className="p-0 flex-1 space-y-4">
                      <CardTitle className="font-black text-xl md:text-2xl text-[#0F172A] leading-tight tracking-tight line-clamp-2">
