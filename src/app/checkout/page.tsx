@@ -18,7 +18,7 @@ import Script from "next/script"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Production Checkout Hub v8.1.
+ * @fileOverview Hardened Production Checkout Hub v8.2.
  * FIXED: TS18047 (profile null check) and TS2769 (Date narrowing).
  */
 
