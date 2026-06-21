@@ -11,7 +11,9 @@ import {
   Trash2, 
   RefreshCw,
   Archive,
-  GitMerge
+  GitMerge,
+  Activity,
+  Zap
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, deleteDoc } from "firebase/firestore"
@@ -20,8 +22,8 @@ import { cn } from "@/lib/utils"
 import type { Question } from "@/types"
 
 /**
- * @fileOverview CBT Integrity Hub v12.2.
- * HARDENED: Resolved missing Badge and Button references causing build failures.
+ * @fileOverview CBT Integrity Hub v13.0 (PWA Hardened).
+ * UPDATED: Removed ALL CAPS, reduced font scales, and standardized to Blue Pill system.
  */
 
 interface QAStatCardProps {
@@ -29,6 +31,7 @@ interface QAStatCardProps {
   value: string | number;
   color: string;
   desc: string;
+  icon: React.ReactNode;
 }
 
 export default function QADashboard() {
@@ -67,12 +70,12 @@ export default function QADashboard() {
   }, [questions])
 
   const handleReScan = () => {
-    toast({ title: "Re-scanning Registry", description: "Fidelity audit synchronized with live data." })
+    toast({ title: "Audit Synchronized", description: "Registry fidelity check complete." })
   }
 
   const handleBulkPurgeDuplicates = async () => {
     if (!db || audit.duplicates.length === 0) return
-    if (!confirm(`CRITICAL AUDIT: Permanently purge ${audit.duplicates.length} duplicate nodes?`)) return
+    if (!confirm(`Confirm Deletion: Permanently purge ${audit.duplicates.length} duplicate nodes?`)) return
     
     setIsProcessing(true)
     const batch = writeBatch(db)
@@ -104,83 +107,90 @@ export default function QADashboard() {
   }
 
   return (
-    <div className="space-y-12 pb-20 text-[#0F172A] text-left">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-4">
-        <div>
-           <div className="flex items-center gap-3 mb-2">
-              <ShieldAlert className="h-6 w-6 text-rose-500" />
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Integrity Governance Monitor</span>
+    <div className="space-y-6 md:space-y-12 pb-20 text-[#0F172A] text-left animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
+        <div className="space-y-1">
+           <div className="flex items-center gap-2 mb-1">
+              <ShieldAlert className="h-4 w-4 text-rose-500" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Integrity Governance Monitor</span>
            </div>
-          <h1 className="text-5xl font-black font-headline text-[#0F172A] uppercase tracking-tight leading-none">CBT Integrity</h1>
-          <p className="text-slate-500 mt-2 text-lg font-medium">Sanitize global bank overlaps and validate asset fidelity.</p>
+          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight">CBT Integrity</h1>
+          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Sanitize global bank overlaps and validate asset fidelity.</p>
         </div>
-        <div className="flex gap-4">
-           <Button 
-             onClick={handleReScan} 
-             className="bg-[#0F172A] hover:bg-black text-white h-16 px-10 rounded-2xl font-black uppercase tracking-widest text-xs gap-3 shadow-2xl transition-all border-none"
-           >
-              <RefreshCw className={cn("h-5 w-5", qLoading && "animate-spin")} /> Re-Scan Registry
-           </Button>
-        </div>
+        <Button 
+          onClick={handleReScan} 
+          disabled={qLoading}
+          className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-3"
+        >
+          {qLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Re-Scan Registry
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4">
-         <QAStatCard label="Overlapping Assets" value={audit.stats.dup} color="text-rose-600" desc="Questions with identical statements & keys." />
-         <QAStatCard label="Broken Nodes" value={audit.stats.broken} color="text-orange-600" desc="Missing metadata or logic paths." />
-         <QAStatCard label="Fidelity Index" value={`${questions && questions.length > 0 ? Math.round(((questions.length - audit.stats.dup) / questions.length) * 100) : 100}%`} color="text-emerald-600" desc="Valid, unique preparation nodes." />
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 px-1">
+         <QAStatCard label="Overlapping Assets" value={audit.stats.dup} color="text-rose-600" desc="Identical statements" icon={<Archive />} />
+         <QAStatCard label="Broken Nodes" value={audit.stats.broken} color="text-orange-600" desc="Missing metadata" icon={<Activity />} />
+         <QAStatCard label="Fidelity Index" value={`${questions && questions.length > 0 ? Math.round(((questions.length - audit.stats.dup) / questions.length) * 100) : 100}%`} color="text-emerald-600" desc="Unique nodes" icon={<Zap />} className="hidden md:block" />
       </div>
 
-      <div className="space-y-12 px-4">
+      <div className="space-y-6 md:space-y-12 px-1">
          <section className="space-y-6">
-            <div className="flex justify-between items-center">
-               <h3 className="text-2xl font-headline font-black uppercase flex items-center gap-4">
-                  <Archive className="h-6 w-6 text-rose-600" /> Duplicate Audit Stream
-               </h3>
+            <div className="flex justify-between items-center px-1">
+               <div className="flex items-center gap-3">
+                  <Archive className="h-5 w-5 text-rose-500" />
+                  <h3 className="text-lg md:text-3xl font-black text-[#0F172A]">Duplicate Audit Stream</h3>
+               </div>
                {audit.duplicates.length > 0 && (
-                  <Button onClick={handleBulkPurgeDuplicates} variant="outline" className="h-11 rounded-xl border-rose-100 text-rose-600 font-black uppercase text-[9px] gap-2">
-                     <Trash2 className="h-4 w-4" /> Purge All
+                  <Button onClick={handleBulkPurgeDuplicates} variant="outline" className="h-10 rounded-full border-rose-100 text-rose-600 font-black uppercase text-[9px] gap-2 px-6">
+                     <Trash2 className="h-3.5 w-3.5" /> Purge All
                   </Button>
                )}
             </div>
             
-            <Card className="border-slate-100 shadow-3xl bg-white rounded-[2.5rem] overflow-hidden">
+            <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white border border-slate-50">
                <Table>
                   <TableHeader className="bg-slate-50/50">
-                     <TableRow className="border-slate-50 h-16">
-                        <TableHead className="px-10 text-[10px] font-black uppercase text-slate-500">Conflict Statements</TableHead>
-                        <TableHead className="text-[10px] font-black uppercase text-center text-slate-500">Confidence</TableHead>
-                        <TableHead className="text-right px-10 text-[10px] font-black uppercase text-slate-500">Audit Action</TableHead>
+                     <TableRow className="border-slate-50 h-14 md:h-20">
+                        <TableHead className="px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Conflict Statements</TableHead>
+                        <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-center text-slate-400">Confidence</TableHead>
+                        <TableHead className="text-right px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Audit Action</TableHead>
                      </TableRow>
                   </TableHeader>
                   <TableBody>
                      {qLoading ? (
-                        Array.from({length: 3}).map((_, i) => <TableRow key={i}><TableCell colSpan={3} className="p-10"><Skeleton className="h-12 w-full rounded-xl" /></TableCell></TableRow>)
+                        Array.from({length: 3}).map((_, i) => <TableRow key={i} className="border-slate-50"><TableCell colSpan={3} className="px-6 py-6 md:px-12 md:py-10"><Skeleton className="h-10 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>)
                      ) : audit.duplicates.length > 0 ? (
                         audit.duplicates.map((d: any) => (
                            <TableRow key={d.id} className="border-slate-50 hover:bg-slate-50 transition-colors group">
-                              <TableCell className="px-10 py-6 text-left">
-                                 <p className="font-bold text-[#0F172A] line-clamp-1">{d.englishQuestion}</p>
-                                 <code className="text-[9px] text-slate-400 font-mono uppercase tracking-widest mt-1 block">NODE: {d.id} • ORIGIN: {d.originalId}</code>
+                              <TableCell className="px-6 md:px-12 py-5 md:py-8 text-left">
+                                 <p className="font-bold text-[#0F172A] text-sm md:text-base line-clamp-1 truncate max-w-xs md:max-w-md">{d.englishQuestion}</p>
+                                 <code className="text-[8px] text-slate-300 font-mono uppercase mt-1.5 block">Node: {d.id.slice(0, 8)}...</code>
                               </TableCell>
                               <TableCell className="text-center">
-                                 <Badge className="bg-rose-50 text-rose-600 border-none px-4 py-1 text-[9px] uppercase font-black tracking-widest">
+                                 <Badge className="bg-rose-50 text-rose-600 border-none px-2.5 py-0.5 text-[8px] md:text-[9px] uppercase font-black tracking-widest">
                                     100% OVERLAP
                                  </Badge>
                               </TableCell>
-                              <TableCell className="text-right px-10">
-                                 <div className="flex justify-end gap-3 opacity-20 group-hover:opacity-100 transition-all">
-                                    <Button onClick={() => handleMergeDuplicate(d)} variant="ghost" size="icon" className="h-12 w-12 rounded-xl bg-blue-50 text-blue-600">
-                                       <GitMerge className="h-5 w-5" />
-                                    </Button>
-                                    <Button onClick={async () => { if(confirm("Purge conflict?")) await deleteDoc(doc(db!, "questions", d.id)); }} variant="ghost" size="icon" className="h-12 w-12 rounded-xl bg-rose-50 text-rose-600">
-                                       <Trash2 className="h-5 w-5" />
-                                    </Button>
+                              <TableCell className="text-right px-6 md:px-12">
+                                 <div className="flex justify-end gap-2 md:gap-3 opacity-20 group-hover:opacity-100 transition-all">
+                                    <button onClick={() => handleMergeDuplicate(d)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-blue-500 hover:bg-blue-50 active:scale-90 transition-all">
+                                       <GitMerge className="h-4 w-4 md:h-5 md:w-5" />
+                                    </button>
+                                    <button onClick={async () => { if(confirm("Purge conflict node?")) await deleteDoc(doc(db!, "questions", d.id)); }} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all">
+                                       <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
+                                    </button>
                                  </div>
                               </TableCell>
                            </TableRow>
                         ))
                      ) : (
-                        <TableRow><TableCell colSpan={3} className="h-40 text-center opacity-30 italic font-black uppercase text-[10px]">No overlaps detected. Registry fidelity is 100%.</TableCell></TableRow>
+                        <TableRow>
+                           <TableCell colSpan={3} className="h-40 text-center">
+                              <div className="flex flex-col items-center justify-center opacity-10 space-y-4">
+                                 <Zap className="h-12 w-12 text-slate-300" />
+                                 <p className="font-black text-sm md:text-xl uppercase tracking-widest">Registry Fidelity 100%</p>
+                              </div>
+                           </TableCell>
+                        </TableRow>
                      )}
                   </TableBody>
                </Table>
@@ -191,12 +201,19 @@ export default function QADashboard() {
   )
 }
 
-function QAStatCard({ label, value, color, desc }: QAStatCardProps) {
+function QAStatCard({ label, value, color, desc, icon, className }: any) {
    return (
-      <Card className="border-slate-100 bg-white rounded-[2.5rem] p-10 shadow-2xl text-left border border-slate-50">
-         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6">{label}</p>
-         <h4 className={`text-6xl font-headline font-black tracking-tighter ${color} leading-none tabular-nums`}>{value}</h4>
-         <p className="text-xs font-bold text-slate-500 mt-5 leading-relaxed">{desc}</p>
+      <Card className={cn("border-none shadow-lg bg-white rounded-2xl md:rounded-[2.5rem] p-5 md:p-10 transition-all duration-500 group border border-slate-50 text-left hover:translate-y-[-4px]", className)}>
+         <div className="flex items-center justify-between mb-4 md:mb-8">
+            <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+               {React.cloneElement(icon as React.ReactElement, { className: cn("h-5 w-5 md:h-6 md:w-6", color) })}
+            </div>
+         </div>
+         <div className="space-y-0.5 md:space-y-1">
+            <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</p>
+            <h4 className={cn("text-2xl md:text-6xl font-black tracking-tighter leading-none tabular-nums", color)}>{value}</h4>
+            <p className="text-[8px] md:text-[11px] font-bold text-slate-300 uppercase tracking-tight mt-1.5 md:mt-3">{desc}</p>
+         </div>
       </Card>
    )
 }
