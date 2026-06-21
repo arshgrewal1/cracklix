@@ -11,7 +11,7 @@ import { collection } from "firebase/firestore"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Operational Node Monitor v4.7.
+ * @fileOverview Hardened Operational Node Monitor v4.8.
  * FIXED: React.cloneElement correctly typed for production deployment.
  */
 
@@ -21,7 +21,6 @@ export default function PlatformHealth() {
   const [lastSync, setLastSync] = useState("");
   const [heartbeat, setHeartbeat] = useState({ latency: 142, load: 18 });
 
-  // Real-time Registry Listeners
   const { data: users } = useCollection<any>(useMemo(() => (db ? collection(db, "users") : null), [db]));
   const { data: questions } = useCollection<any>(useMemo(() => (db ? collection(db, "questions") : null), [db]));
   const { data: results } = useCollection<any>(useMemo(() => (db ? collection(db, "results") : null), [db]));
@@ -30,7 +29,6 @@ export default function PlatformHealth() {
     setMounted(true);
     setLastSync(new Date().toLocaleTimeString());
 
-    // Live Heartbeat Simulation
     const interval = setInterval(() => {
       setHeartbeat({
         latency: Math.floor(Math.random() * (160 - 120 + 1)) + 120,

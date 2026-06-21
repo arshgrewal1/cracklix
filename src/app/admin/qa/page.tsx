@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 import type { Question } from "@/types"
 
 /**
- * @fileOverview Hardened CBT Integrity Hub v17.2.
+ * @fileOverview Hardened CBT Integrity Hub v17.3.
  * FIXED: React.cloneElement typed correctly to resolve TS2769.
  */
 
@@ -184,9 +184,9 @@ export default function QADashboard() {
             
             <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white border border-slate-50">
                <div className="overflow-x-auto">
-                 <Table className="min-w-[800px]">
+                 <Table className="min-w-[900px]">
                     <TableHeader className="bg-slate-50/50">
-                       <TableRow className="border-slate-50 h-14 md:h-20">
+                       <TableRow className="border-slate-50 h-20">
                           <TableHead className="px-6 md:px-12 text-[9px] md:text-[10px] font-black tracking-widest text-slate-400">Conflict Statements</TableHead>
                           <TableHead className="text-[9px] md:text-[10px] font-black tracking-widest text-center text-slate-400">Confidence</TableHead>
                           <TableHead className="text-right px-6 md:px-12 text-[9px] md:text-[10px] font-black tracking-widest text-slate-400">Audit Action</TableHead>
@@ -232,7 +232,8 @@ export default function QADashboard() {
                     </TableBody>
                  </Table>
                </div>
-            </Card>         </section>
+            </Card>
+         </section>
       </div>
     </div>
   )

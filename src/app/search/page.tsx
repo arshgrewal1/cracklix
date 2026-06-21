@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Search Center Hub v3.6 (Build Corrected).
- * FIXED: Resolved React.cloneElement type error and implicit global React error.
+ * @fileOverview Search Center Hub v3.6.
+ * FIXED: Explicit typing and React import for production stability.
  */
 
 export default function SearchPage() {
@@ -62,7 +62,8 @@ function SearchContent() {
        title: e.name, 
        type: "Exam Center", 
        href: `/exams/${e.id}`, 
-       boardId: e.boardId 
+       boardId: e.boardId,
+       icon: <GraduationCap className="h-5 w-5" />
     }))
 
     const mockMatches = (mocks || []).filter((m: any) => 
@@ -72,7 +73,8 @@ function SearchContent() {
        title: m.title, 
        type: "Practice Test", 
        href: `/mocks/${m.id}`, 
-       boardId: m.boardId 
+       boardId: m.boardId,
+       icon: <Zap className="h-5 w-5" />
     }))
 
     const notesMatches = (notes || []).filter((n: any) => 
@@ -82,7 +84,8 @@ function SearchContent() {
        title: n.title, 
        type: "Study Material", 
        href: `/notes`, 
-       boardId: n.boardId 
+       boardId: n.boardId,
+       icon: <FileText className="h-5 w-5" />
     }))
 
     return [...examMatches, ...mockMatches, ...notesMatches]
@@ -108,7 +111,7 @@ function SearchContent() {
               </div>
               
               <div className="relative max-w-2xl mx-auto group">
-                 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-600 rounded-2xl blur opacity-5 group-focus-within:opacity-15 transition duration-1000"></div>
+                 <div className="absolute -inset-1 bg-gradient-to-r from-primary to-blue-600 rounded-2xl blur lg opacity-0 group-focus-within:opacity-15 transition duration-1000"></div>
                  <div className="relative">
                     <SearchIcon className={cn("absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 transition-colors", isLoading ? "text-primary animate-pulse" : "text-slate-300")} />
                     <input 
@@ -131,7 +134,7 @@ function SearchContent() {
                  </div>
                  <div className="grid grid-cols-1 gap-3">
                     {results.length > 0 ? results.map((res, i) => (
-                      <SearchResultItem key={i} boardId={res.boardId} title={res.title} category={res.type} href={res.href} />
+                      <SearchResultItem key={i} boardId={res.boardId} title={res.title} category={res.type} href={res.href} icon={res.icon} />
                     )) : !isLoading && (
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">
@@ -178,14 +181,16 @@ function SearchContent() {
   )
 }
 
-function SearchResultItem({ boardId, title, category, href }: { boardId: string, title: string, category: string, href: string }) {
+function SearchResultItem({ boardId, title, category, href, icon }: { boardId: string, title: string, category: string, href: string, icon: React.ReactNode }) {
    return (
       <Link href={href} className="block active:scale-[0.99] transition-all">
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between group border border-slate-100 transition-all duration-500">
-            <div className="flex items-center gap-6 min-w-0 flex-1">
-               <AuthorityLogo boardId={boardId} size="md" className="bg-slate-50 rounded-2xl shadow-inner group-hover:scale-105 transition-transform" />
-               <div className="text-left min-w-0 flex-1 space-y-1.5">
-                  <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-base md:text-2xl leading-tight line-clamp-1 truncate">{title}</p>
+            <div className="flex items-center gap-4 min-w-0 flex-1">
+               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
+                  {React.isValidElement(icon) && React.cloneElement(icon as React.ReactElement<any>, { className: "h-5 w-5" })}
+               </div>
+               <div className="text-left min-w-0 flex-1 space-y-1">
+                  <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
                   <div className="flex items-center gap-3">
                      <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] md:text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm">{category}</Badge>
                      <div className="h-1 w-1 rounded-full bg-slate-200" />
@@ -193,20 +198,12 @@ function SearchResultItem({ boardId, title, category, href }: { boardId: string,
                   </div>
                </div>
             </div>
-            <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0 ml-4 shadow-inner">
-               <ChevronRightIcon className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
+            <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0 ml-4 shadow-inner">
+               <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </div>
          </div>
       </Link>
    )
-}
-
-function ChevronRightIcon({ className }: { className?: string }) {
-  return (
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="m9 18 6-6-6-6"/>
-    </svg>
-  )
 }
 
 function TrendingItem({ text, onSelect }: { text: string, onSelect: (v: string) => void }) {
@@ -227,4 +224,12 @@ function SearchBadge({ label }: { label: string }) {
          {label}
       </Badge>
    )
+}
+
+function GraduationCap(props: any) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/>
+    </svg>
+  )
 }

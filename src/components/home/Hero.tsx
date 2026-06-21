@@ -8,7 +8,8 @@ import {
   FileText,
   BarChart3,
   Star,
-  ArrowRight
+  ArrowRight,
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -19,8 +20,8 @@ import { cn } from "@/lib/utils";
 import { AuthorityLogo } from "@/lib/exam-icons";
 
 /**
- * @fileOverview Official High-Density PWA Hero v42.0.
- * UPDATED: Quick Actions converted to fully clickable high-fidelity cards.
+ * @fileOverview Official High-Density PWA Hero v43.0.
+ * UPDATED: Quick Actions converted to fully clickable high-fidelity cards with branded logos.
  */
 
 export default function Hero() {
@@ -97,7 +98,7 @@ export default function Hero() {
           <QuickActionCard 
             boardId="study-material"
             label="Study Material" 
-            href="/notes" 
+            href="/study-material" 
           />
           <QuickActionCard 
             boardId="pyq"
@@ -127,7 +128,7 @@ export default function Hero() {
 
 function QuickActionCard({ boardId, label, href }: { boardId: string, label: string, href: string }) {
   return (
-    <Link href={href} className="block group">
+    <Link href={href} className="block group h-full">
       <div className="
         bg-white
         rounded-[2rem]
@@ -164,16 +165,14 @@ function QuickActionCard({ boardId, label, href }: { boardId: string, label: str
         </div>
 
         <div className="text-left flex-1 min-w-0">
-          <h3 className="text-sm md:text-xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors">
+          <h3 className="text-sm md:text-xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors uppercase">
             {label}
           </h3>
           <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Institutional Hub</p>
         </div>
         
         <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-200 group-hover:bg-primary/5 group-hover:text-primary transition-all">
-           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 transition-transform group-hover:translate-x-0.5">
-             <path d="m9 18 6-6-6-6"/>
-           </svg>
+           <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
         </div>
       </div>
     </Link>

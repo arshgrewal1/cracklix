@@ -1,19 +1,16 @@
-import { Exam } from "@/types"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
-import { ArrowRight, BookOpen, Clock, ChevronRight } from "lucide-react"
+import { ChevronRight, BookOpen, Layers } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { Badge } from "@/components/ui/badge"
 
 interface ExamCardProps {
-  exam: any // Using any for flexible hydration variants
+  exam: any 
 }
 
 /**
- * @fileOverview Refined Exam Card v4.0 (Premium Upgrade).
- * UI UPGRADE: Large board logos and dynamic resource availability chips.
- * UI FIX: Removed uppercase from titles.
+ * @fileOverview Refined Exam Card v4.0.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   return (
@@ -23,7 +20,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
           <div className="flex justify-between items-start mb-8 md:mb-10">
             <AuthorityLogo boardId={exam.boardId} size="xl" className="bg-slate-50 rounded-[2rem] group-hover:scale-105 transition-transform" />
             <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded shadow-sm">
-              {(exam.boardId || 'OFFICIAL').toUpperCase()}
+              {(exam.boardId || 'OFFICIAL').toUpperCase()} HUB
             </Badge>
           </div>
           

@@ -67,7 +67,7 @@ export default function AdminPYQManagement() {
 
   const filteredPYQs = useMemo(() => {
     if (!pyqs) return []
-    return pyqs.filter(p => 
+    return pyqs.filter((p: any) => 
       p.title?.toLowerCase().includes(searchTerm.toLowerCase()) || 
       p.examId?.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -124,7 +124,7 @@ export default function AdminPYQManagement() {
                   <TableCell>
                      <div className="space-y-1">
                         <p className="font-bold text-slate-600 text-xs md:text-sm line-clamp-1">{exams?.find((e:any) => e.id === p.examId)?.name || p.examId}</p>
-                        <Badge variant="outline" className="border-slate-100 text-slate-400 text-[7px] font-black uppercase px-2 rounded">{p.boardId || 'OFFICIAL'} HUB</Badge>
+                        <Badge variant="outline" className="border-slate-100 text-slate-400 text-[7px] md:text-[8px] font-black uppercase px-2 rounded">{p.boardId || 'OFFICIAL'} HUB</Badge>
                      </div>
                   </TableCell>
                   <TableCell className="text-center">

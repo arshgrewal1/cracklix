@@ -3,7 +3,7 @@ import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Act
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Branding Engine v23.0.
+ * @fileOverview Institutional Branding Engine v24.0.
  * UPDATED: Integrated branded Mock Test, Study Material, and PYQ assets.
  */
 

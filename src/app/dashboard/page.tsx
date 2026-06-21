@@ -34,8 +34,8 @@ import ShareButton from "@/components/navigation/ShareButton"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Dashboard v28.0.
- * FIXED: Corrected icon.props casting to resolve unknown property error.
+ * @fileOverview Student Dashboard v29.0.
+ * FIXED: Explicit typing for icon.props to resolve build-time unknown property errors.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading, profileLoading } = useUser() as any;
