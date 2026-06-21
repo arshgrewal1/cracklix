@@ -35,8 +35,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Bulk Ingestion Hub v9.2.
- * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
+ * @fileOverview Institutional Bulk Ingestion Hub v10.0 (PWA Hardened).
+ * PWA SYNC: Removed all uppercase headers/labels, implemented high-density Title Case.
  */
 
 export default function BulkImportPage() {
@@ -65,7 +65,7 @@ export default function BulkImportPage() {
   const handleImport = () => {
     if (!rawText.trim()) return
     if (!metadata.boardId || !metadata.subjectId) {
-      toast({ variant: "destructive", title: "Audit Blocked", description: "Select Board and Subject Hub." })
+      toast({ variant: "destructive", title: "Wait", description: "Please select a Board and Subject hub." })
       return
     }
 
@@ -79,9 +79,9 @@ export default function BulkImportPage() {
     setParsedQuestions(questionsWithStatus);
 
     if (result.questions.length > 0) {
-      toast({ title: "Extraction Success", description: `${result.questions.length} blocks mapped to explicit fields.` });
+      toast({ title: "Extraction Success", description: `${result.questions.length} blocks mapped correctly.` });
     } else {
-      toast({ variant: "destructive", title: "Audit Rejected", description: "Check multi-line pattern." });
+      toast({ variant: "destructive", title: "Extraction Failed", description: "Could not find valid question patterns." });
     }
   }
 
@@ -96,7 +96,7 @@ export default function BulkImportPage() {
     updated[editingIndex] = editForm
     setParsedQuestions(updated)
     setEditingIndex(null)
-    toast({ title: "Entry Node Tweaked" })
+    toast({ title: "Node Updated" })
   }
 
   const handleDelete = (idx: number) => {
@@ -124,10 +124,10 @@ export default function BulkImportPage() {
 
     try {
       await batch.commit()
-      toast({ title: "Master Registry Synced", description: `${parsedQuestions.length} assets committed.` })
+      toast({ title: "Registry Synced", description: `${parsedQuestions.length} assets committed.` })
       router.push("/admin/questions")
     } catch (e) {
-      toast({ variant: "destructive", title: "Cloud Rejection" })
+      toast({ variant: "destructive", title: "Sync failed" })
     } finally {
       setIsSyncing(false)
     }
@@ -136,42 +136,46 @@ export default function BulkImportPage() {
   const isHindiMode = metadata.secondaryLanguage === 'hindi';
 
   return (
-    <div className="space-y-10 pb-32 text-left max-w-7xl mx-auto pt-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-4">
+    <div className="space-y-6 md:space-y-10 pb-32 text-left max-w-7xl mx-auto pt-4 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-xl border border-slate-200 h-12 w-12 bg-white shadow-sm"><ChevronLeft className="h-6 w-6" /></Button>
+          <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-xl border border-slate-200 h-10 w-10 md:h-12 md:w-12 bg-white shadow-sm shrink-0">
+             <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+          </Button>
           <div>
-            <h1 className="text-4xl font-black font-headline text-[#0F172A] uppercase tracking-tight leading-none">Bulk Ingestion</h1>
-            <p className="text-slate-500 font-medium">Stacked Multi-Language Mapping Hub.</p>
+            <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Bulk Ingestion</h1>
+            <p className="text-slate-500 font-medium text-[11px] md:text-lg mt-1">Stacked Multi-Language Mapping Hub.</p>
           </div>
         </div>
-        <Button onClick={handleSaveToRegistry} disabled={isSyncing || parsedQuestions.length === 0} className="bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] tracking-widest rounded-xl h-14 px-12 gap-3 shadow-2xl">
+        <Button onClick={handleSaveToRegistry} disabled={isSyncing || parsedQuestions.length === 0} className="w-full md:w-auto bg-[#0F172A] hover:bg-black text-white font-black text-[9px] md:text-[11px] tracking-widest rounded-full h-11 md:h-14 px-8 md:px-12 gap-3 shadow-xl">
           {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4 text-primary" />} Commit Staged Assets
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 px-4">
-        <div className="lg:col-span-5 space-y-8">
-          <Card className="border-none bg-white shadow-3xl rounded-[2.5rem] overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 px-1">
+        <div className="lg:col-span-5 space-y-6 md:space-y-8">
+          <Card className="border-none bg-white shadow-xl rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-slate-50">
             <div className="h-1.5 w-full bg-[#0F172A]" />
-            <CardHeader className="p-10 pb-4 text-left">
-              <CardTitle className="font-headline font-black text-xl uppercase flex items-center gap-3"><ClipboardList className="h-5 w-5 text-primary" /> Ingestion Config</CardTitle>
+            <CardHeader className="p-6 md:p-10 pb-2 text-left">
+              <CardTitle className="text-lg md:text-2xl font-black text-[#0F172A] flex items-center gap-3">
+                 <ClipboardList className="h-5 w-5 text-primary" /> Ingestion Config
+              </CardTitle>
             </CardHeader>
-            <CardContent className="p-10 pt-4 space-y-8">
+            <CardContent className="p-6 md:p-10 pt-4 space-y-6 md:space-y-8">
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Target Board</Label>
+                <div className="space-y-1.5 text-left">
+                  <Label className="text-[9px] font-black text-slate-400 ml-1 uppercase tracking-widest">Target Board</Label>
                   <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v})}>
-                    <SelectTrigger className="rounded-xl h-12 bg-slate-50/50 border-none font-bold text-sm">
+                    <SelectTrigger className="rounded-xl h-11 md:h-12 bg-slate-50 border-none font-bold text-xs">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
                     <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
-                <div className="space-y-1.5">
-                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Subject</Label>
+                <div className="space-y-1.5 text-left">
+                   <Label className="text-[9px] font-black text-slate-400 ml-1 uppercase tracking-widest">Target Subject</Label>
                    <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
-                      <SelectTrigger className="rounded-xl h-12 bg-slate-50/50 border-none font-bold text-sm">
+                      <SelectTrigger className="rounded-xl h-11 md:h-12 bg-slate-50 border-none font-bold text-xs">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>{subjects?.map((s:any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
@@ -179,10 +183,12 @@ export default function BulkImportPage() {
                 </div>
               </div>
 
-              <div className="space-y-1.5 pt-2">
-                 <Label className="text-[10px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Languages className="h-3 w-3" /> Secondary Assessment Language</Label>
+              <div className="space-y-1.5 pt-2 text-left">
+                 <Label className="text-[9px] font-black text-slate-400 ml-1 flex items-center gap-2 uppercase tracking-widest">
+                    <Languages className="h-3 w-3" /> Secondary Assessment Language
+                 </Label>
                  <Select value={metadata.secondaryLanguage} onValueChange={(v: any) => setMetadata({...metadata, secondaryLanguage: v})}>
-                    <SelectTrigger className="rounded-xl h-14 bg-slate-900 text-white border-none font-black uppercase text-[10px] tracking-widest">
+                    <SelectTrigger className="rounded-xl h-12 md:h-14 bg-slate-900 text-white border-none font-black text-[9px] tracking-widest">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -199,33 +205,33 @@ export default function BulkImportPage() {
                 value={rawText}
                 onChange={e => setRawText(e.target.value)}
                 placeholder={`Q15. English Statement...\n${isHindiMode ? 'Hindi Statement...' : 'Punjabi Statement...'}\n(A) Option EN\n${isHindiMode ? 'Hindi Text' : 'Punjabi Text'}\nAnswer: C\nExplanation: Text...`}
-                className="min-h-[550px] rounded-[2.5rem] bg-white border-none p-12 text-sm font-bold shadow-4xl leading-relaxed resize-none focus-visible:ring-primary text-[#0F172A]"
+                className="min-h-[400px] md:min-h-[500px] rounded-2xl md:rounded-[2.5rem] bg-white border-none p-6 md:p-12 text-sm font-bold shadow-xl leading-relaxed resize-none focus-visible:ring-primary text-[#0F172A] shadow-inner"
             />
-            <Button onClick={handleImport} className="w-full h-20 bg-primary hover:bg-orange-600 text-white font-black uppercase tracking-[0.3em] text-[11px] rounded-[2rem] shadow-4xl gap-4 group transition-all active:scale-95 border-none">
-               Initialize Ingestion <ArrowRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
+            <Button onClick={handleImport} className="w-full h-14 md:h-20 bg-primary hover:bg-orange-600 text-white font-black text-[10px] md:text-[11px] tracking-widest rounded-2xl md:rounded-[2.5rem] shadow-2xl gap-3 transition-all active:scale-95 border-none">
+               Initialize Ingestion <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
             </Button>
           </div>
         </div>
 
-        <div className="lg:col-span-7 space-y-10">
+        <div className="lg:col-span-7 space-y-6 md:space-y-10">
            {parsedQuestions.length > 0 ? (
-             <div className="space-y-12">
+             <div className="space-y-8 md:space-y-12">
                 <div className="flex items-center justify-between px-2">
-                   <h3 className="font-headline font-black text-2xl uppercase flex items-center gap-4 text-[#0F172A]">
+                   <h3 className="text-xl md:text-3xl font-black text-[#0F172A] flex items-center gap-3">
                       <Database className="h-6 w-6 text-primary" /> Staged Hub
                    </h3>
-                   <Badge className="bg-emerald-50 text-emerald-600 border-none font-black px-6 py-2 rounded-xl text-[10px] tracking-widest uppercase">
+                   <Badge className="bg-emerald-50 text-emerald-600 border-none font-black px-4 py-1.5 rounded-xl text-[8px] md:text-[10px] tracking-widest uppercase shadow-sm">
                       {parsedQuestions.length} Blocks Verified
                    </Badge>
                 </div>
                 {parsedQuestions.map((q, idx) => (
                   <div key={idx} className="relative group">
-                    <Card className="border-none shadow-3xl rounded-[3rem] bg-white p-12 text-left group overflow-visible border border-slate-100 transition-all hover:border-primary/20">
-                       <div className="flex justify-between items-start mb-10 border-b border-slate-100 pb-8">
-                          <Badge className="bg-[#0F172A] text-white border-none text-[10px] font-black px-6 py-2 rounded-xl uppercase tracking-widest">Asset {idx + 1}</Badge>
-                          <div className="flex gap-3">
-                             <Button variant="ghost" size="icon" className="h-14 w-14 rounded-2xl text-blue-500 bg-blue-50 shadow-sm hover:scale-110 transition-transform" onClick={() => handleOpenEdit(idx)}><Edit className="h-6 w-6" /></Button>
-                             <Button variant="ghost" size="icon" className="h-14 w-14 rounded-2xl text-rose-500 bg-rose-50 shadow-sm hover:scale-110 transition-transform" onClick={() => handleDelete(idx)}><Trash2 className="h-6 w-6" /></Button>
+                    <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-6 md:p-12 text-left group border border-slate-50 transition-all hover:border-primary/20">
+                       <div className="flex justify-between items-start mb-6 md:mb-10 border-b border-slate-50 pb-4 md:pb-8">
+                          <Badge className="bg-[#0F172A] text-white border-none text-[8px] md:text-[9px] font-black px-4 py-1.5 rounded-lg uppercase tracking-widest">Asset {idx + 1}</Badge>
+                          <div className="flex gap-2 md:gap-3">
+                             <button className="h-10 w-10 md:h-12 md:w-12 rounded-xl text-blue-500 bg-blue-50 shadow-sm flex items-center justify-center active:scale-90 transition-all" onClick={() => handleOpenEdit(idx)}><Edit className="h-5 w-5" /></button>
+                             <button className="h-10 w-10 md:h-12 md:w-12 rounded-xl text-rose-500 bg-rose-50 shadow-sm flex items-center justify-center active:scale-90 transition-all" onClick={() => handleDelete(idx)}><Trash2 className="h-5 w-5" /></button>
                           </div>
                        </div>
                        <div className="space-y-8">
@@ -237,62 +243,65 @@ export default function BulkImportPage() {
              </div>
            ) : (
              <div className="h-full flex flex-col items-center justify-center text-slate-300 opacity-20 pt-40">
-                <FileText className="h-40 w-40 mb-10" />
-                <p className="font-headline font-black uppercase text-2xl tracking-[0.2em]">Awaiting Content Hub</p>
+                <FileText className="h-32 w-32 md:h-48 md:w-48 mb-8" />
+                <p className="font-headline font-black uppercase text-xl md:text-3xl tracking-[0.3em]">Awaiting Hub</p>
              </div>
            )}
         </div>
       </div>
 
       <Dialog open={editingIndex !== null} onOpenChange={open => !open && setEditingIndex(null)}>
-         <DialogContent className="sm:max-w-5xl max-h-[95vh] overflow-y-auto rounded-[3rem] bg-white border-none shadow-5xl p-0 text-left flex flex-col">
+         <DialogContent className="sm:max-w-5xl max-h-[95vh] overflow-y-auto rounded-3xl md:rounded-[3rem] bg-white border-none shadow-5xl p-0 text-left flex flex-col">
             <div className="h-2 w-full bg-[#0F172A] shrink-0" />
-            <DialogHeader className="p-10 pb-6 flex flex-row items-center justify-between shrink-0">
-               <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600"><SearchCode className="h-7 w-7" /></div>
-                  <DialogTitle className="text-3xl font-black font-headline uppercase text-[#0F172A]">Modify Explicit Fields</DialogTitle>
-                  <DialogDescription className="sr-only">Edit the details of the staged question block.</DialogDescription>
-               </div>
-               <Button variant="ghost" size="icon" onClick={() => setEditingIndex(null)} className="rounded-xl h-12 w-12"><X className="h-6 w-6 text-slate-400" /></Button>
-            </DialogHeader>
-            <div className="px-10 pb-10 space-y-10 overflow-y-auto custom-scrollbar flex-1">
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                  <div className="space-y-3">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">English Statement</Label>
-                     <Textarea value={editForm?.englishQuestion ?? ""} onChange={e => setEditForm({...editForm, englishQuestion: e.target.value})} className="h-32 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner text-[#0F172A]" />
+            <DialogHeader className="p-6 md:p-10 pb-4 shrink-0">
+               <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                     <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600"><SearchCode className="h-6 w-6 md:h-7 md:w-7" /></div>
+                     <DialogTitle className="text-xl md:text-3xl font-black text-[#0F172A]">Modify Explicit Fields</DialogTitle>
                   </div>
-                  <div className="space-y-3">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">{isHindiMode ? 'Hindi Statement' : 'Punjabi Statement'}</Label>
+                  <button onClick={() => setEditingIndex(null)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors"><X className="h-6 w-6 text-slate-400" /></button>
+               </div>
+               <DialogDescription className="sr-only">Edit the details of the staged question block.</DialogDescription>
+            </DialogHeader>
+            
+            <div className="px-6 md:px-10 pb-6 md:pb-10 space-y-8 md:space-y-12 overflow-y-auto custom-scrollbar flex-1">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
+                  <div className="space-y-2 text-left">
+                     <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">English Statement</Label>
+                     <Textarea value={editForm?.englishQuestion ?? ""} onChange={e => setEditForm({...editForm, englishQuestion: e.target.value})} className="h-32 rounded-xl bg-slate-50 border-none font-bold text-sm md:text-lg p-5 shadow-inner" />
+                  </div>
+                  <div className="space-y-2 text-left">
+                     <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">{isHindiMode ? 'Hindi Statement' : 'Punjabi Statement'}</Label>
                      <Textarea 
                         value={isHindiMode ? (editForm?.hindiQuestion ?? "") : (editForm?.punjabiQuestion ?? "")} 
                         onChange={e => setEditForm({...editForm, [isHindiMode ? 'hindiQuestion' : 'punjabiQuestion']: e.target.value})} 
-                        className="h-32 rounded-2xl bg-slate-50 border-none font-bold text-lg p-6 shadow-inner text-[#0F172A]" 
+                        className="h-32 rounded-xl bg-slate-50 border-none font-bold text-sm md:text-lg p-5 shadow-inner" 
                      />
                   </div>
                </div>
 
-               <div className="space-y-6 pt-6 border-t border-slate-100">
+               <div className="space-y-6 pt-6 border-t border-slate-50">
                   <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em] ml-1">Options Matrix</p>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                      {['A','B','C','D'].map(opt => (
-                        <div key={opt} className="bg-slate-50/50 p-6 rounded-[2rem] border border-slate-100 space-y-4">
+                        <div key={opt} className="bg-slate-50/50 p-4 md:p-6 rounded-2xl md:rounded-[2.5rem] border border-slate-100 space-y-4">
                            <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
-                                 <div className="h-7 w-7 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-black text-xs">{opt}</div>
-                                 <Label className="text-[10px] font-black uppercase text-slate-500">English Text</Label>
+                                 <div className="h-6 w-6 md:h-7 md:w-7 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-black text-xs">{opt}</div>
+                                 <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">English Text</Label>
                               </div>
-                              <button onClick={() => setEditForm({...editForm, correctAnswer: opt})} className={cn("h-6 w-6 rounded-full border-2 transition-all flex items-center justify-center", (editForm?.correctAnswer ?? "A") === opt ? "bg-emerald-50 border-emerald-500 text-white" : "border-slate-200 hover:border-primary")}>
+                              <button onClick={() => setEditForm({...editForm, correctAnswer: opt})} className={cn("h-6 w-6 rounded-full border-2 transition-all flex items-center justify-center", (editForm?.correctAnswer ?? "A") === opt ? "bg-emerald-50 border-emerald-500 text-emerald-600" : "border-slate-200 hover:border-primary bg-white")}>
                                  {(editForm?.correctAnswer ?? "A") === opt && <CheckCircle2 className="h-4 w-4" />}
                               </button>
                            </div>
-                           <Input value={editForm?.[`option${opt}English`] ?? ""} onChange={e => setEditForm({...editForm, [`option${opt}English`]: e.target.value})} className="bg-white border-none font-bold h-12 rounded-xl" />
+                           <Input value={editForm?.[`option${opt}English`] ?? ""} onChange={e => setEditForm({...editForm, [`option${opt}English`]: e.target.value})} className="bg-white border-none font-bold h-10 md:h-12 rounded-xl" />
                            
-                           <div className="pt-2 space-y-2">
-                              <Label className="text-[9px] font-black uppercase text-slate-400 flex items-center gap-2"><Globe className="h-3 w-3" /> {isHindiMode ? 'Hindi Text' : 'Punjabi Text'}</Label>
+                           <div className="pt-2 space-y-1.5">
+                              <Label className="text-[8px] font-black text-slate-400 flex items-center gap-2 uppercase tracking-widest"><Globe className="h-2.5 w-2.5" /> {isHindiMode ? 'Hindi Text' : 'Punjabi Text'}</Label>
                               <Input 
                                  value={isHindiMode ? (editForm?.[`option${opt}Hindi`] ?? "") : (editForm?.[`option${opt}Punjabi`] ?? "")} 
                                  onChange={e => setEditForm({...editForm, [isHindiMode ? `option${opt}Hindi` : `option${opt}Punjabi`]: e.target.value})} 
-                                 className="bg-white border-none font-bold h-12 rounded-xl" 
+                                 className="bg-white border-none font-bold h-10 md:h-12 rounded-xl" 
                               />
                            </div>
                         </div>
@@ -300,25 +309,25 @@ export default function BulkImportPage() {
                   </div>
                </div>
 
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-10 pt-6 border-t border-slate-100">
-                  <div className="space-y-3">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">English Rationalization</Label>
-                     <Textarea value={editForm?.englishExplanation ?? ""} onChange={e => setEditForm({...editForm, englishExplanation: e.target.value})} className="h-32 rounded-2xl bg-slate-900 text-emerald-400 font-medium p-6 shadow-2xl" />
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 pt-6 border-t border-slate-50">
+                  <div className="space-y-2 text-left">
+                     <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">English Rationalization</Label>
+                     <Textarea value={editForm?.englishExplanation ?? ""} onChange={e => setEditForm({...editForm, englishExplanation: e.target.value})} className="h-32 rounded-2xl bg-slate-900 text-emerald-400 font-medium p-5 shadow-inner" />
                   </div>
-                  <div className="space-y-3">
-                     <Label className="text-[10px] font-black uppercase text-slate-500 tracking-widest ml-1">{isHindiMode ? 'Hindi Rationalization' : 'Punjabi Rationalization'}</Label>
+                  <div className="space-y-2 text-left">
+                     <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">{isHindiMode ? 'Hindi Rationalization' : 'Punjabi Rationalization'}</Label>
                      <Textarea 
                         value={isHindiMode ? (editForm?.hindiExplanation ?? "") : (editForm?.punjabiExplanation ?? "")} 
                         onChange={e => setEditForm({...editForm, [isHindiMode ? 'hindiExplanation' : 'punjabiExplanation']: e.target.value})} 
-                        className="h-32 rounded-2xl bg-slate-900 text-blue-400 font-medium p-6 shadow-2xl" 
+                        className="h-32 rounded-2xl bg-slate-900 text-blue-400 font-medium p-5 shadow-inner" 
                      />
                   </div>
                </div>
             </div>
-            <DialogFooter className="p-10 pt-6 bg-slate-50 flex gap-6 shrink-0">
-               <Button variant="ghost" onClick={() => setEditingIndex(null)} className="h-16 px-10 font-black uppercase text-[11px] text-slate-400 tracking-widest">Discard Changes</Button>
-               <Button onClick={handleSaveEdit} className="bg-[#0F172A] hover:bg-black text-white h-16 px-16 rounded-2xl font-black uppercase text-[11px] tracking-[0.2em] flex-1 shadow-2xl transition-all active:scale-95 border-none">
-                  <CheckCircle2 className="h-5 w-5 mr-3" /> Apply Modifications
+            <DialogFooter className="p-6 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4 shrink-0">
+               <Button variant="ghost" onClick={() => setEditingIndex(null)} className="h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400 tracking-widest">Discard</Button>
+               <Button onClick={handleSaveEdit} className="bg-[#0F172A] hover:bg-black text-white h-11 md:h-14 px-10 rounded-full font-black text-[10px] tracking-[0.2em] flex-1 shadow-xl transition-all active:scale-95 border-none gap-3">
+                  <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" /> Apply Modifications
                </Button>
             </DialogFooter>
          </DialogContent>
