@@ -1,8 +1,8 @@
 import { Firestore, doc, serverTimestamp, writeBatch, collection, getDocs } from 'firebase/firestore';
 
 /**
- * @fileOverview Official Institutional Registry Blueprint v76.0.
- * FIXED: Robust ID mapping for questions to ensure CBT engine synchronization.
+ * @fileOverview Official Institutional Registry Blueprint v77.0.
+ * FIXED: Reliable ID mapping for questions to ensure CBT engine synchronization.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -97,32 +97,34 @@ export async function seedInitialData(db: Firestore) {
     }
   ];
 
-  // 5. SAMPLE MOCK
-  const sampleMock = {
-    id: "sample-mock-1",
-    title: "Punjab General Knowledge - Mock 01",
-    boardId: "psssb",
-    boardIds: ["psssb"],
-    examIds: ["patwari"],
-    mockType: "FULL",
-    accessLevel: "FREE",
-    duration: 15,
-    totalQuestions: 2,
-    totalMarks: 2,
-    negativeMarks: 0.25,
-    positiveMarks: 1,
-    questionIds: ["q1", "q2"],
-    published: true,
-    languageMode: "ENGLISH_PUNJABI",
-    updatedAt: serverTimestamp()
-  };
+  // 5. SAMPLE MOCKS
+  const sampleMocks = [
+    {
+      id: "sample-mock-1",
+      title: "Punjab General Knowledge - Mock 01",
+      boardId: "psssb",
+      boardIds: ["psssb"],
+      examIds: ["patwari"],
+      mockType: "FULL",
+      accessLevel: "FREE",
+      duration: 15,
+      totalQuestions: 2,
+      totalMarks: 2,
+      negativeMarks: 0.25,
+      positiveMarks: 1,
+      questionIds: ["q1", "q2"],
+      published: true,
+      languageMode: "ENGLISH_PUNJABI",
+      updatedAt: serverTimestamp()
+    }
+  ];
 
   // COMMIT
   for (const cat of categories) batch.set(doc(db, 'categories', cat.id), { ...cat, updatedAt: serverTimestamp() }, { merge: true });
   for (const b of boards) batch.set(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() }, { merge: true });
   for (const e of exams) batch.set(doc(db, 'exams', e.id), { ...e, displayOrder: 1, updatedAt: serverTimestamp() }, { merge: true });
   for (const q of questions) batch.set(doc(db, 'questions', q.id), q, { merge: true });
-  batch.set(doc(db, 'mocks', sampleMock.id), sampleMock, { merge: true });
+  for (const m of sampleMocks) batch.set(doc(db, 'mocks', m.id), m, { merge: true });
 
   await batch.commit();
   console.log('[SUCCESS] Institutional Registry Hardened with Sample Nodes.');

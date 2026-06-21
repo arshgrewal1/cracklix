@@ -33,8 +33,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Dashboard v31.4.
- * FIXED: TS18046 unknown property access on icon node by adding validation and casting.
+ * @fileOverview Student Dashboard v31.5.
+ * FIXED: TS18046 unknown property access on icon node.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser() as any;
@@ -249,7 +249,7 @@ export default function StudentDashboard() {
   )
 }
 
-function MetricItem({ label, val, icon }: any) {
+function MetricItem({ label, val, icon }: { label: string, val: string | number, icon: React.ReactNode }) {
   return (
     <Card className="border-none shadow-lg bg-white p-4 md:p-6 rounded-2xl text-left group hover:translate-y-[-2px] transition-all border border-slate-100 min-w-0">
       <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-slate-50 flex items-center justify-center mb-3 md:mb-4 group-hover:bg-primary/5 transition-all shadow-inner shrink-0">

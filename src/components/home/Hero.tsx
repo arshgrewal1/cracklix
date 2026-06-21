@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { AuthorityLogo } from "@/lib/exam-icons";
 
 /**
- * @fileOverview Official High-Density PWA Hero v48.0.
+ * @fileOverview Official High-Density PWA Hero v49.0.
  * UPDATED: Fully clickable Quick Action cards with branded hub logos.
  */
 

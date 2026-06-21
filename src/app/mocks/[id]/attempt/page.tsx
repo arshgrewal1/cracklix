@@ -26,8 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v68.0.
- * FIXED: Graceful registry mismatch handling to prevent blank screens.
+ * @fileOverview Hardened CBT Engine v69.0.
+ * FIXED: Registry mismatch detection and graceful redirection.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -88,7 +88,7 @@ export default function MockAttemptPage() {
            toast({ 
              variant: "destructive", 
              title: "Access Blocked", 
-             description: profile?.passStatus === 'expired' ? "Your elite pass has expired. Please renew to continue." : "This is a premium mock test. Please upgrade to a pass." 
+             description: "Premium Mock requires an active Elite Pass." 
            });
            router.replace('/pass');
            return;
@@ -110,11 +110,11 @@ export default function MockAttemptPage() {
         
         // GRACEFUL REGISTRY MISMATCH HANDLER
         if (sortedQs.length === 0) {
-           console.error("[CBT_SYNC_FAILURE]: Mock exists but question nodes are missing in registry.", { mockId, questionIds });
+           console.error("[CBT_SYNC_FAILURE]: Missing question nodes in registry.", { mockId, questionIds });
            toast({ 
              variant: "destructive", 
              title: "Registry Mismatch", 
-             description: "Questions are currently unavailable for this mock test. Please try another series." 
+             description: "Questions are currently unavailable for this mock test." 
            });
            router.replace("/mocks");
            return;
@@ -239,7 +239,7 @@ export default function MockAttemptPage() {
           
           <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center px-4 pt-4 pb-32">
             <div className="w-full max-w-4xl">
-              {questions[currentIdx] ? (
+              {questions.length > 0 && questions[currentIdx] ? (
                 <motion.div 
                   key={currentIdx} 
                   initial={{ opacity: 0, y: 5 }} 
@@ -258,7 +258,7 @@ export default function MockAttemptPage() {
               ) : (
                 <div className="py-20 text-center opacity-20">
                    <Zap className="h-10 w-10 mx-auto mb-4" />
-                   <p className="font-black uppercase tracking-widest text-xs">Awaiting question node...</p>
+                   <p className="font-black uppercase tracking-widest text-xs">Registry Node Syncing...</p>
                 </div>
               )}
             </div>
@@ -276,7 +276,7 @@ export default function MockAttemptPage() {
         <SheetContent side="right" className="p-0 border-none w-[240px] md:w-[320px] h-full shadow-5xl z-[1200]">
           <SheetHeader className="sr-only">
              <SheetTitle>Navigation Palette</SheetTitle>
-             <SheetDescription>View and navigate through all questions in the current mock test.</SheetDescription>
+             <SheetDescription>Navigate through questions.</SheetDescription>
           </SheetHeader>
           <QuestionPalette onSelect={(idx: number) => { useExamStore.getState().setCurrentIdx(idx); setIsPaletteOpen(false); }} onSubmit={() => { setIsPaletteOpen(false); setShowSubmitModal(true); }} />
         </SheetContent>
@@ -287,13 +287,12 @@ export default function MockAttemptPage() {
           <div className="space-y-3">
             <DialogHeader className="sr-only">
                <DialogTitle>Save & Exit?</DialogTitle>
-               <DialogDescription>Your current attempt state is safely cached in the cloud.</DialogDescription>
+               <DialogDescription>Your attempt state is cached.</DialogDescription>
             </DialogHeader>
             <div className="h-8 w-8 bg-blue-50 rounded-lg flex items-center justify-center mx-auto text-blue-500 shadow-sm">
               <LogOut className="h-4 w-4" />
             </div>
             <h2 className="text-sm font-black uppercase text-[#0F172A] leading-tight">Save & Exit?</h2>
-            <p className="text-[7px] font-bold text-slate-400 uppercase tracking-widest leading-none">Progress cached in registry.</p>
             <div className="flex gap-2 pt-1">
               <Button variant="ghost" onClick={() => setShowExitModal(false)} className="flex-1 h-8 font-black uppercase text-[7px] tracking-widest">Stay</Button>
               <Button onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/dashboard'); }} className="flex-1 h-8 bg-primary text-white rounded-lg font-black uppercase text-[7px] border-none shadow-lg">Exit</Button>
@@ -307,13 +306,12 @@ export default function MockAttemptPage() {
           <div className="space-y-3">
             <DialogHeader className="sr-only">
                <DialogTitle>Final Submission</DialogTitle>
-               <DialogDescription>Finish and score your test to commit it to the state merit list.</DialogDescription>
+               <DialogDescription>Submit and score your test.</DialogDescription>
             </DialogHeader>
             <div className="h-8 w-8 bg-primary/20 rounded-lg flex items-center justify-center mx-auto text-primary shadow-lg shadow-primary/10">
               <ShieldCheck className="h-4 w-4" />
             </div>
             <h2 className="text-sm font-black uppercase text-white tracking-tight leading-none">Final Submission</h2>
-            <p className="text-slate-400 text-[7px] font-medium px-1 leading-relaxed uppercase">Scores will be committed to the state merit list after submission.</p>
             <div className="flex flex-col gap-1.5 pt-1">
               <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-8 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[7px] tracking-widest rounded-lg border-none shadow-xl">
                 {isSubmittingFinal ? <Loader2 className="h-3 w-3 animate-spin" /> : "Finish & Score Test"}
