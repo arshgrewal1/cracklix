@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Refined Admin Layout v7.0 (PWA Optimized).
- * PWA SYNC: Reduced header height to 64px, tightened density, professional Title Case.
+ * @fileOverview Refined Admin Layout v8.0.
+ * UPDATED: Increased Logo height for consistent premium branding.
  */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -52,6 +52,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const toggleSidebar = () => {
     const newState = !isSidebarOpen;
+    newState ? setIsSidebarOpen(true) : setIsSidebarOpen(false); // Direct toggle
     setIsSidebarOpen(newState);
     localStorage.setItem('admin-sidebar-state', newState ? 'expanded' : 'collapsed');
   };
@@ -86,7 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full min-w-0 overflow-x-hidden",
         isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
       )}>
-        <header className="h-[64px] border-b border-slate-50 flex items-center px-3 md:px-10 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
+        <header className="h-[64px] md:h-[88px] border-b border-slate-50 flex items-center px-3 md:px-10 justify-between bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
           <div className="flex items-center gap-2 md:gap-4 h-full">
             <button 
               onClick={() => setIsSidebarOpen(true)}
@@ -98,7 +99,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Logo
               variant="light"
               className="shrink-0 -ml-2"
-              imgClassName="h-[54px] md:h-[72px]"
+              imgClassName="h-[60px] md:h-[78px]"
             />
           </div>
           

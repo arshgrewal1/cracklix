@@ -43,7 +43,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Standardized Navbar v55.0 (High Resolution Logo).
+ * @fileOverview Standardized Navbar v56.0.
+ * UPDATED: Increased Logo Size for better brand visibility.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -130,7 +131,7 @@ export default function Navbar() {
             <Logo
               variant="light"
               className="flex-shrink-0"
-              imgClassName="h-[40px] md:h-[52px]"
+              imgClassName="h-[44px] md:h-[60px]"
             />
           </div>
 
