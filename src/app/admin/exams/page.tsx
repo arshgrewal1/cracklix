@@ -16,8 +16,8 @@ import { Badge } from "@/components/ui/badge"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Authority Hub CMS v12.0 (PWA Sync).
- * FIXED: Removed uppercase from headers and refactored to high-density Title Case.
+ * @fileOverview Authority Hub CMS v13.0 (PWA Hardened).
+ * UPDATED: Removed all uppercase headers and refactored to high-density Title Case.
  */
 
 export default function ExamManagement() {
@@ -70,12 +70,12 @@ export default function ExamManagement() {
         <div className="space-y-1">
            <div className="flex items-center gap-2 mb-1">
               <Building2 className="h-4 w-4 text-primary" />
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Institutional Board Registry</span>
+              <span className="text-[9px] md:text-[10px] font-bold text-slate-400 tracking-tight">Institutional Board Registry</span>
            </div>
           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Authority Hub</h1>
           <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Manage official board nodes and their primary logos.</p>
         </div>
-        <Button onClick={() => setEditingBoard({ abbreviation: "", name: "", iconUrl: "", categoryId: "", displayOrder: (boards?.length || 0) + 1 })} className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-3">
+        <Button onClick={() => setEditingBoard({ abbreviation: "", name: "", iconUrl: "", categoryId: "", displayOrder: (boards?.length || 0) + 1 })} className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-black text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-3">
           <Plus className="h-4 w-4" /> Deploy Hub
         </Button>
       </div>
@@ -83,7 +83,7 @@ export default function ExamManagement() {
       <div className="relative group px-1">
          <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
          <Input 
-           className="h-14 md:h-16 pl-14 rounded-2xl md:rounded-full bg-white border-slate-50 shadow-inner text-base md:text-lg font-bold" 
+           className="h-14 md:h-16 pl-14 rounded-2xl md:rounded-full bg-white border-slate-50 shadow-inner font-bold text-[#0F172A]" 
            placeholder="Search authorities..." 
            value={searchTerm} 
            onChange={e => setSearchTerm(e.target.value)} 
@@ -95,9 +95,9 @@ export default function ExamManagement() {
           <Table className="min-w-[800px]">
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-slate-100 h-14 md:h-20">
-                <TableHead className="px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Hub Identity</TableHead>
-                <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Category</TableHead>
-                <TableHead className="text-right px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
+                <TableHead className="px-6 md:px-12 text-[9px] md:text-[10px] font-bold text-slate-400 tracking-tight">Hub Identity</TableHead>
+                <TableHead className="text-[9px] md:text-[10px] font-bold text-slate-400 tracking-tight">Category</TableHead>
+                <TableHead className="text-right px-6 md:px-12 text-[9px] md:text-[10px] font-bold text-slate-400 tracking-tight">Audit</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -110,21 +110,21 @@ export default function ExamManagement() {
                   <TableCell className="px-6 md:px-12 py-5 md:py-8">
                     <div className="flex items-center gap-4 md:gap-6">
                       <AuthorityLogo board={board} size="md" className="h-10 w-10 md:h-14 md:w-14 bg-slate-50 p-2 rounded-xl shadow-inner group-hover:scale-105 transition-transform" />
-                      <div className="min-w-0">
+                      <div className="min-w-0 text-left">
                          <p className="font-black text-primary text-sm md:text-xl leading-none uppercase">{board.abbreviation}</p>
                          <p className="text-[9px] md:text-xs font-bold text-slate-500 mt-1 truncate max-w-[200px] md:max-w-md">{board.name}</p>
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>
-                     <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-500 text-[8px] md:text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm">
-                        {categories?.find((c: any) => c.id === board.categoryId)?.title || "GENERAL"} HUB
+                  <TableCell className="text-left">
+                     <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-500 text-[8px] md:text-[9px] font-bold px-2 py-0.5 rounded shadow-sm">
+                        {categories?.find((c: any) => c.id === board.categoryId)?.title || "General"} Hub
                      </Badge>
                   </TableCell>
                   <TableCell className="text-right px-6 md:px-12">
                     <div className="flex justify-end gap-2 md:gap-3 opacity-20 group-hover:opacity-100 transition-all">
-                       <button onClick={() => setEditingBoard(board)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90"><Edit className="h-5 w-5" /></button>
-                       <button onClick={async () => { if(confirm("Purge hub?")) await deleteDoc(doc(db!, "boards", board.id)) }} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90"><Trash2 className="h-4 w-4" /></button>
+                       <button onClick={() => setEditingBoard(board)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-5 w-5" /></button>
+                       <button onClick={async () => { if(confirm("Purge hub?")) await deleteDoc(doc(db!, "boards", board.id)) }} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -147,20 +147,20 @@ export default function ExamManagement() {
           <div className="px-6 md:px-10 pb-6 md:pb-10 space-y-6 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
              <div className="grid grid-cols-2 gap-4 md:gap-6">
                 <div className="space-y-1.5 text-left">
-                   <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Short Code</Label>
+                   <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">Short Code</Label>
                    <Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value.toUpperCase()})} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-black uppercase px-5" placeholder="e.g. PSSSB" />
                 </div>
                 <div className="space-y-1.5 text-left">
-                   <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Full Hub Name</Label>
+                   <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">Full Hub Name</Label>
                    <Input value={editingBoard?.name || ""} onChange={e => setEditingBoard({...editingBoard, name: e.target.value})} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-bold px-5" placeholder="e.g. Subordinate Selection" />
                 </div>
              </div>
              <div className="space-y-1.5 text-left">
-                <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Logo URL (PNG/SVG Node)</Label>
+                <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">Logo URL (PNG/SVG Node)</Label>
                 <Input value={editingBoard?.iconUrl || ""} onChange={e => setEditingBoard({...editingBoard, iconUrl: e.target.value})} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-mono text-xs text-primary px-5" placeholder="https://..." />
              </div>
              <div className="space-y-1.5 text-left">
-                <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Vertical Category</Label>
+                <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">Vertical Category</Label>
                 <select value={editingBoard?.categoryId || ""} onChange={e => setEditingBoard({...editingBoard, categoryId: e.target.value})} className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-5 font-bold text-sm outline-none shadow-inner">
                    <option value="" disabled>Select Category</option>
                    {categories?.map((c: any) => <option key={c.id} value={c.id}>{c.title}</option>)}
