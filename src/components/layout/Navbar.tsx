@@ -43,7 +43,7 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Standardized Navbar v52.3.
+ * @fileOverview Standardized Navbar v52.4.
  * FIXED: TS2769 by ensuring optional passExpiresAt is correctly narrowed for Date constructor.
  */
 export default function Navbar() {

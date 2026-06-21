@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Search Center Hub v3.5 (Fixed).
- * FIXED: Resolved React.cloneElement type error by using AuthorityLogo engine directly and ensuring React import.
+ * @fileOverview Search Center Hub v3.6 (Build Corrected).
+ * FIXED: Resolved React.cloneElement type error and implicit global React error.
  */
 
 export default function SearchPage() {
@@ -194,11 +194,19 @@ function SearchResultItem({ boardId, title, category, href }: { boardId: string,
                </div>
             </div>
             <div className="h-12 w-12 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0 ml-4 shadow-inner">
-               <ChevronRight className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
+               <ChevronRightIcon className="h-6 w-6 group-hover:translate-x-1 transition-transform" />
             </div>
          </div>
       </Link>
    )
+}
+
+function ChevronRightIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="m9 18 6-6-6-6"/>
+    </svg>
+  )
 }
 
 function TrendingItem({ text, onSelect }: { text: string, onSelect: (v: string) => void }) {

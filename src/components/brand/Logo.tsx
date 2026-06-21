@@ -17,7 +17,7 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix Maximized Brand Identity v62.1.
+ * @fileOverview Cracklix Maximized Brand Identity v62.2.
  * FIXED: Explicitly typed onClick to resolve functional assignment errors.
  */
 export default function Logo({

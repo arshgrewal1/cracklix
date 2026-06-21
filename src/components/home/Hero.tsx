@@ -19,8 +19,8 @@ import { cn } from "@/lib/utils";
 import { AuthorityLogo } from "@/lib/exam-icons";
 
 /**
- * @fileOverview Official High-Density PWA Hero v39.0.
- * UPDATED: Integrated branded Mock Test, Study Material, and PYQ assets.
+ * @fileOverview Official High-Density PWA Hero v40.0.
+ * UPDATED: Quick Actions are now fully clickable high-fidelity buttons with hover animations.
  */
 
 export default function Hero() {
@@ -87,31 +87,27 @@ export default function Hero() {
           </motion.div>
         </div>
 
-        {/* QUICK ACTIONS: BRANDED GRID */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mt-10 md:mt-20">
+        {/* QUICK ACTIONS: BRANDED FULL-CLICK BUTTONS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mt-10 md:mt-20">
           <QuickAction 
-            customIcon={<AuthorityLogo boardId="mock-test" size="sm" className="bg-transparent shadow-none p-0" />} 
+            boardId="mock-test"
             label="Mock Tests" 
             href="/mocks" 
-            color="bg-white" 
           />
           <QuickAction 
-            customIcon={<AuthorityLogo boardId="study-material" size="sm" className="bg-transparent shadow-none p-0" />} 
+            boardId="study-material"
             label="Study Material" 
             href="/notes" 
-            color="bg-white" 
           />
           <QuickAction 
-            customIcon={<AuthorityLogo boardId="pyq" size="sm" className="bg-transparent shadow-none p-0" />} 
+            boardId="pyq"
             label="PYQ Papers" 
             href="/pyqs" 
-            color="bg-white" 
           />
           <QuickAction 
-            customIcon={<AuthorityLogo boardId="current-affairs" size="sm" className="bg-transparent shadow-none p-0" />} 
+            boardId="current-affairs"
             label="Current Affairs" 
             href="/current-affairs" 
-            color="bg-white" 
           />
         </div>
 
@@ -129,15 +125,61 @@ export default function Hero() {
   );
 }
 
-function QuickAction({ icon: Icon, customIcon, label, href, color }: any) {
+function QuickAction({ boardId, label, href }: { boardId: string, label: string, href: string }) {
   return (
-    <Link href={href} className="block group h-full">
-      <Card className="p-4 md:p-8 rounded-2xl border border-slate-100 bg-white hover:shadow-xl transition-all duration-300 h-full group flex flex-col md:flex-row items-center gap-3 md:gap-5 text-center md:text-left">
-        <div className={cn("h-10 w-10 md:h-14 md:w-14 rounded-xl flex items-center justify-center shrink-0 shadow-lg group-hover:scale-110 transition-transform", color)}>
-          {customIcon ? customIcon : Icon && <Icon className="h-5 w-5 md:h-7 md:w-7" />}
+    <Link href={href} className="block group">
+      <div className="
+        bg-white
+        rounded-3xl
+        p-4 md:p-6
+        flex
+        items-center
+        gap-4 md:gap-6
+        shadow-md
+        hover:shadow-2xl
+        hover:-translate-y-1
+        transition-all
+        duration-500
+        cursor-pointer
+        border
+        border-slate-100
+        active:scale-[0.98]
+        h-full
+      ">
+        <div className="
+          h-12 w-12 md:h-20 md:w-20
+          rounded-2xl md:rounded-[2rem]
+          bg-slate-50
+          shadow-inner
+          flex
+          items-center
+          justify-center
+          shrink-0
+          group-hover:scale-110
+          transition-transform
+          duration-500
+          overflow-hidden
+        ">
+          <AuthorityLogo boardId={boardId} size="md" className="bg-transparent shadow-none p-0" />
         </div>
-        <span className="text-[11px] md:text-sm font-bold text-slate-800 leading-tight tracking-tight">{label}</span>
-      </Card>
+
+        <div className="text-left flex-1 min-w-0">
+          <h3 className="text-sm md:text-xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors">
+            {label}
+          </h3>
+          <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Institutional Hub</p>
+        </div>
+        
+        <ChevronRight className="h-4 w-4 md:h-5 md:w-5 text-slate-200 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+      </div>
     </Link>
+  )
+}
+
+function ChevronRight({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="m9 18 6-6-6-6"/>
+    </svg>
   )
 }

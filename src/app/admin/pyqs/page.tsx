@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional PYQ Archive CMS v21.1.
+ * @fileOverview Institutional PYQ Archive CMS v21.2.
  * FIXED: Captured correct 'editingPYQ' variable for filtering and registry sync.
  */
 

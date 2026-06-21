@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 import type { Question } from "@/types"
 
 /**
- * @fileOverview Hardened CBT Integrity Hub v17.1.
+ * @fileOverview Hardened CBT Integrity Hub v17.2.
  * FIXED: React.cloneElement typed correctly to resolve TS2769.
  */
 
@@ -232,8 +232,7 @@ export default function QADashboard() {
                     </TableBody>
                  </Table>
                </div>
-            </Card>
-         </section>
+            </Card>         </section>
       </div>
     </div>
   )
