@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Landmark, ArrowRight, GraduationCap, Zap, Building2, HeartPulse, Scale, Globe } from 'lucide-react';
+import { Landmark, ArrowRight, GraduationCap, Zap, Building2, HeartPulse, Scale, Globe, ShieldCheck } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -11,25 +11,27 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview Authorized 6-Category Discovery Hub v70.0.
- * ENFORCED: Whitelist filter ensures only the 6 canonical categories are displayed.
+ * @fileOverview Strictly Filtered 7-Category Hub v80.0.
+ * ENFORCED: Whitelist filter ensures only the 7 authorized categories are displayed.
  */
 
-const ALLOWED_CATEGORY_IDS = [
-  "ppsc",
+const AUTHORIZED_CATEGORY_IDS = [
   "punjab-government-exams",
   "punjab-teaching-exams",
-  "banking-exams",
   "punjab-technical-exams",
+  "banking-exams",
+  "medical-health-exams",
+  "judiciary-exams",
   "central-government-exams"
 ];
 
 const CATEGORY_ICONS: Record<string, any> = {
-  "PPSC": <Landmark className="h-6 w-6" />,
-  "Punjab Government Exams": <Shield className="h-6 w-6" />,
+  "Punjab Government Exams": <Landmark className="h-6 w-6" />,
   "Punjab Teaching Exams": <GraduationCap className="h-6 w-6" />,
-  "Banking Exams": <Building2 className="h-6 w-6" />,
   "Punjab Technical Exams": <Zap className="h-6 w-6" />,
+  "Banking Exams": <Building2 className="h-6 w-6" />,
+  "Medical & Health Exams": <HeartPulse className="h-6 w-6" />,
+  "Judiciary Exams": <Scale className="h-6 w-6" />,
   "Central Government Exams": <Globe className="h-6 w-6" />
 };
 
@@ -41,7 +43,8 @@ export default function FeaturedCategories() {
 
   const categories = useMemo(() => {
      if (!rawCategories) return [];
-     return rawCategories.filter(c => ALLOWED_CATEGORY_IDS.includes(c.id));
+     // Hard-coded whitelist filter to prevent ghost/legacy categories from appearing
+     return rawCategories.filter(c => AUTHORIZED_CATEGORY_IDS.includes(c.id));
   }, [rawCategories]);
 
   return (
@@ -49,35 +52,35 @@ export default function FeaturedCategories() {
       <div className="container mx-auto px-4 max-w-7xl space-y-12 text-left">
         <div className="space-y-2">
            <h2 className="text-3xl md:text-5xl font-black text-[#0F172A] leading-tight tracking-tight">Choose Your Exam</h2>
-           <p className="text-slate-500 font-medium text-sm md:text-lg">Select a category to start your preparation journey.</p>
+           <p className="text-slate-500 font-medium text-sm md:text-lg">Select an official category to begin your preparation journey.</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {catLoading ? (
             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[2.5rem] bg-slate-50" />)
           ) : categories.map((cat, idx) => {
-            const categoryExams = exams?.filter(e => e.categoryId === cat.id) || [];
+            const categoryExamsCount = exams?.filter(e => e.categoryId === cat.id).length || 0;
             return (
               <motion.div key={cat.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.05 }}>
                  <Link href={`/exams/category/${cat.id}`}>
-                    <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-8 h-full">
-                       <div className="mb-8">
+                    <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2rem] bg-white group overflow-hidden flex flex-col p-6 h-full">
+                       <div className="mb-6">
                           <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center shadow-inner text-primary shrink-0 transition-transform group-hover:scale-110">
-                             {CATEGORY_ICONS[cat.title] || <Landmark className="h-6 w-6" />}
+                             {CATEGORY_ICONS[cat.title] || <ShieldCheck className="h-6 w-6" />}
                           </div>
                        </div>
                        
                        <div className="space-y-2 flex-1">
-                          <h3 className="text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight">{cat.title}</h3>
-                          <p className="text-[14px] text-slate-500 font-medium leading-relaxed line-clamp-3">{cat.description}</p>
+                          <h3 className="text-xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight">{cat.title}</h3>
+                          <p className="text-[13px] text-slate-500 font-medium leading-relaxed line-clamp-2">{cat.description}</p>
                        </div>
 
-                       <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
+                       <div className="mt-8 pt-4 border-t border-slate-50 flex items-center justify-between">
                           <div className="flex flex-col">
-                             <span className="text-[10px] font-black text-[#0F172A] uppercase leading-none">{categoryExams.length}</span>
+                             <span className="text-[10px] font-black text-[#0F172A] uppercase leading-none">{categoryExamsCount}</span>
                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Exams Live</span>
                           </div>
-                          <Button variant="ghost" className="h-11 px-6 rounded-xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[11px] tracking-widest uppercase border-none shadow-md">
+                          <Button variant="ghost" className="h-10 px-4 rounded-xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[10px] tracking-widest uppercase border-none shadow-md">
                              View Exams <ArrowRight className="ml-2 h-3.5 w-3.5" />
                           </Button>
                        </div>
@@ -91,5 +94,3 @@ export default function FeaturedCategories() {
     </section>
   );
 }
-
-import { Shield } from 'lucide-react';
