@@ -49,7 +49,7 @@ export default function CalendarManagement() {
         updatedAt: serverTimestamp(),
         createdAt: editingEvent.createdAt || serverTimestamp()
       }, { merge: true })
-      toast({ title: "Registry Synced", description: "Calendar node updated." })
+      toast({ title: "Registry Synced" })
       setEditingEvent(null)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Sync Failed" })

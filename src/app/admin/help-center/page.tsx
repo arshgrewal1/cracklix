@@ -18,9 +18,8 @@ import { HelpArticle } from "@/types"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Knowledge Base Hub Management v7.0 (PWA Optimized).
- * FIXED: Removed Huge ALL CAPS headers and reduced font scales.
- * FIXED: Implemented High-Density padding and Title Case.
+ * @fileOverview Knowledge Base Hub Management v8.0 (PWA Optimized).
+ * FIXED: Removed huge ALL CAPS headers and standardized to Title Case.
  */
 
 export default function HelpCenterManagement() {
@@ -80,7 +79,7 @@ export default function HelpCenterManagement() {
   }, [articles, searchTerm])
 
   return (
-    <div className="space-y-6 md:space-y-12 text-[#0F172A] text-left animate-in fade-in duration-500">
+    <div className="space-y-6 md:space-y-12 text-[#0F172A] text-left animate-in fade-in duration-500 pb-20">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
         <div className="space-y-1">
            <div className="flex items-center gap-2 mb-1">
@@ -136,8 +135,8 @@ export default function HelpCenterManagement() {
                   </TableCell>
                   <TableCell className="text-right px-6 md:px-12">
                      <div className="flex justify-end gap-2 md:gap-3 opacity-20 group-hover:opacity-100 transition-all">
-                        <button onClick={() => setEditingArticle(a)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90"><Edit className="h-5 w-5" /></button>
-                        <button onClick={() => handleDelete(a.id)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90"><Trash2 className="h-5 w-5" /></button>
+                        <button onClick={() => setEditingArticle(a)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-5 w-5" /></button>
+                        <button onClick={() => handleDelete(a.id)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                      </div>
                   </TableCell>
                 </TableRow>
