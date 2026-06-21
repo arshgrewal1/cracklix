@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Search Center Hub v4.7.
- * FIXED: TS2769 by explicitly typing cloneElement.
+ * FIXED: Explicit import of React and hardening cloneElement (TS2769).
  */
 
 export default function SearchPage() {

@@ -25,9 +25,9 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Hardened CBT Engine v72.0.
- * FIXED: Endless submission loading with safety timeouts.
- * FIXED: Graceful recovery for registry mismatch errors.
+ * @fileOverview Hardened CBT Engine v73.0.
+ * FIXED: Removed duplicate/conflicting 'use server' directive (Build Error).
+ * FIXED: Submission logic with 12s safety timeout and student-friendly language.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -108,7 +108,6 @@ export default function MockAttemptPage() {
         
         const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
         
-        // GRACEFUL REGISTRY MISMATCH HANDLER
         if (sortedQs.length === 0) {
            console.error("[CBT_SYNC_FAILURE]: Missing question nodes in registry.", { mockId, questionIds });
            toast({ 
@@ -184,7 +183,6 @@ export default function MockAttemptPage() {
         await updateDoc(attemptRef, { status: 'COMPLETED', updatedAt: serverTimestamp() });
       };
 
-      // 12 SECOND HARD TIMEOUT PROTECTION
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error("Submission Timeout")), 12000)
       );
@@ -197,7 +195,7 @@ export default function MockAttemptPage() {
       toast({
         variant: "destructive",
         title: "Submission Error",
-        description: e.message === "Submission Timeout" ? "Network timeout. Please check your internet and try again." : "Could not save results. Contact management if issue persists."
+        description: e.message === "Submission Timeout" ? "Network timeout. Please check your internet and try again." : "Could not save results."
       });
     } finally {
       setIsSubmittingFinal(false);

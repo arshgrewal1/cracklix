@@ -15,10 +15,11 @@ import { useToast } from "@/hooks/use-toast"
 import { submitManualPayment, activateFreePass } from "@/app/actions/payment"
 import { doc } from "firebase/firestore"
 import Script from "next/script"
+import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Production Checkout Hub v6.1.
- * FIXED: Instant activation for plans with price 0.
+ * @fileOverview Hardened Production Checkout Hub v6.5.
+ * FIXED: Added missing 'cn' utility import (TS2304).
  */
 
 export default function CheckoutPage() {
@@ -59,7 +60,6 @@ function CheckoutContent() {
   const handlePaymentInitiation = async () => {
     if (!user || !profile || !planData || onlineProcessing) return;
     
-    // 1. Instant Activation for Free Plans
     if (planData.price === 0) {
       setOnlineProcessing(true);
       try {
@@ -73,7 +73,6 @@ function CheckoutContent() {
       return;
     }
 
-    // 2. Online Gateway Flow
     if (!(window as any).Cashfree) {
        toast({ variant: "destructive", title: "SDK Error", description: "Payment engine is still loading. Please wait." });
        return;

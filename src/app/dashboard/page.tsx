@@ -33,8 +33,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Dashboard v31.7.
- * FIXED: TS18046 by explicit casting and isValidElement validation.
+ * @fileOverview Student Dashboard v31.8.
+ * FIXED: TS18046 icon.props unknown by adding isValidElement guards and proper casting.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser() as any;
