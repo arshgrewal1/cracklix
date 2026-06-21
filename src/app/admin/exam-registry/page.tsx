@@ -17,8 +17,8 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Exam Vertical Registry v12.0 (PWA Sync).
- * FIXED: Removed uppercase from headers and refactored to high-density Title Case.
+ * @fileOverview Exam Vertical Registry v13.0 (PWA Optimized).
+ * FIXED: Systematically removed all forced uppercase to match student home page aesthetic.
  */
 
 export default function ExamRegistryPage() {
@@ -80,12 +80,12 @@ export default function ExamRegistryPage() {
         <div className="space-y-1">
            <div className="flex items-center gap-2 mb-1">
               <GraduationCap className="h-4 w-4 text-primary" />
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Recruitment Vertical Registry</span>
+              <span className="text-[9px] font-black text-slate-400 tracking-tight">Recruitment Vertical Registry</span>
            </div>
           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Exam Registry</h1>
           <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Manage specific exam verticals and Home Page trending items.</p>
         </div>
-        <Button onClick={() => setEditingExam({ name: "", boardId: "", categoryId: "", displayOrder: 1, isTrending: false })} className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-3">
+        <Button onClick={() => setEditingExam({ name: "", boardId: "", categoryId: "", displayOrder: 1, isTrending: false })} className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-black text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-3">
           <Plus className="h-4 w-4" /> Register Vertical
         </Button>
       </div>
@@ -105,10 +105,10 @@ export default function ExamRegistryPage() {
           <Table className="min-w-[800px]">
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-slate-100 h-14 md:h-20">
-                <TableHead className="px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Vertical Identity</TableHead>
-                <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Authority Board</TableHead>
-                <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Trending</TableHead>
-                <TableHead className="text-right px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
+                <TableHead className="px-6 md:px-12 text-[9px] md:text-[10px] font-black tracking-tight text-slate-400">Vertical Identity</TableHead>
+                <TableHead className="text-[9px] md:text-[10px] font-black tracking-tight text-slate-400">Authority Board</TableHead>
+                <TableHead className="text-[9px] md:text-[10px] font-black tracking-tight text-center text-slate-400">Trending</TableHead>
+                <TableHead className="text-right px-6 md:px-12 text-[9px] md:text-[10px] font-black tracking-tight text-slate-400">Audit</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -127,13 +127,13 @@ export default function ExamRegistryPage() {
                         </div>
                         <div className="min-w-0">
                            <p className="font-bold text-[#0F172A] text-sm md:text-lg leading-tight truncate">{e.name}</p>
-                           <code className="text-[8px] font-mono text-slate-300 uppercase mt-1 block tracking-tighter truncate">ID: {e.id}</code>
+                           <code className="text-[8px] font-mono text-slate-300 mt-1 block tracking-tighter truncate">Id: {e.id}</code>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="bg-primary/5 border-none text-primary text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm">
-                        {board?.abbreviation || e.boardId || 'NONE'} HUB
+                        {board?.abbreviation || e.boardId || 'NONE'} Hub
                       </Badge>
                     </TableCell>
                     <TableCell className="text-center">
@@ -164,35 +164,35 @@ export default function ExamRegistryPage() {
             </DialogHeader>
             <div className="px-6 md:px-10 pb-6 md:pb-10 space-y-6 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
                <div className="space-y-2 text-left">
-                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Assigned Board Hub</Label>
+                  <Label className="text-[9px] font-black text-slate-500 ml-1">Assigned Board Hub</Label>
                   <select value={editingExam?.boardId || ""} onChange={e => setEditingExam({...editingExam, boardId: e.target.value})} className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner">
                      <option value="" disabled>Select Hub</option>
                      {boards?.map((b:any) => <option key={b.id} value={b.id}>{b.abbreviation} Hub</option>)}
                   </select>
                </div>
                <div className="space-y-2 text-left">
-                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Relational Category</Label>
+                  <Label className="text-[9px] font-black text-slate-500 ml-1">Relational Category</Label>
                   <select value={editingExam?.categoryId || ""} onChange={e => setEditingExam({...editingExam, categoryId: e.target.value})} className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none shadow-inner">
                      <option value="" disabled>Select Category</option>
                      {categories?.map((c:any) => <option key={c.id} value={c.id}>{c.title}</option>)}
                   </select>
                </div>
                <div className="space-y-2 text-left">
-                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Vertical Name</Label>
+                  <Label className="text-[9px] font-black text-slate-500 ml-1">Vertical Name</Label>
                   <Input value={editingExam?.name ?? ""} onChange={e => setEditingExam({...editingExam, name: e.target.value})} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-bold" placeholder="e.g. Constable District Cadre" />
                </div>
 
                <div className="flex items-center justify-between p-5 md:p-6 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
                   <div className="space-y-0.5">
-                     <p className="text-[10px] font-black uppercase text-[#0F172A]">Show in Trending</p>
+                     <p className="text-[10px] font-black text-[#0F172A]">Show in Trending</p>
                      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Displays vertical on Home Page</p>
                   </div>
                   <Switch checked={editingExam?.isTrending} onCheckedChange={v => setEditingExam({...editingExam, isTrending: v})} />
                </div>
             </div>
             <DialogFooter className="p-6 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4">
-               <Button variant="ghost" onClick={() => setEditingExam(null)} className="h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400">Discard</Button>
-               <Button onClick={handleSaveExam} disabled={isSaving} className="flex-1 h-11 md:h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-full shadow-xl border-none active:scale-95 gap-2">
+               <Button variant="ghost" onClick={() => setEditingExam(null)} className="h-11 md:h-12 px-6 font-black text-[10px] text-slate-400">Discard</Button>
+               <Button onClick={handleSaveExam} disabled={isSaving} className="flex-1 h-11 md:h-14 bg-primary hover:bg-blue-700 text-white font-black text-[10px] tracking-widest rounded-full shadow-xl border-none active:scale-95 gap-2">
                   {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit Node
                </Button>
             </DialogFooter>
