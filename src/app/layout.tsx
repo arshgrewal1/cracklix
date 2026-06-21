@@ -7,6 +7,7 @@ import { FirebaseClientProvider } from "@/firebase/client-provider";
 
 import MobileNav from "@/components/layout/MobileNav";
 import PWAManager from "@/components/pwa/PWAManager";
+import NetworkStatus from "@/components/pwa/NetworkStatus";
 
 import { Toaster } from "@/components/ui/toaster";
 
@@ -16,7 +17,7 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v52.1 (PWA & Light Mode Optimized).
+ * @fileOverview Root Layout v52.2 (PWA & Offline Overhaul).
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -95,8 +96,9 @@ export default function RootLayout({
           {/* Mobile Bottom Navigation */}
           <MobileNav />
 
-          {/* PWA Manager */}
+          {/* PWA & Network Management */}
           <PWAManager />
+          <NetworkStatus />
 
           {/* Toasts */}
           <Toaster />

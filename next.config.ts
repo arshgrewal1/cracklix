@@ -6,6 +6,9 @@ const withPWA = require("next-pwa")({
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
   buildExcludes: [/middleware-manifest\.json$/],
+  fallbacks: {
+    document: '/offline.html',
+  }
 });
 
 const nextConfig: NextConfig = {
@@ -22,10 +25,6 @@ const nextConfig: NextConfig = {
 
   poweredByHeader: false,
   compress: true,
-
-  experimental: {
-    // Removed allowedDevOrigins to satisfy ExperimentalConfig type schema
-  }
 };
 
 export default withPWA(nextConfig);

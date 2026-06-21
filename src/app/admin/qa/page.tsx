@@ -25,7 +25,7 @@ import { cn } from "@/lib/utils"
 import type { Question } from "@/types"
 
 /**
- * @fileOverview Hardened CBT Integrity Hub v16.2.
+ * @fileOverview Hardened CBT Integrity Hub v16.3.
  * FIXED: Explicitly typed cloneElement and verified React imports.
  */
 

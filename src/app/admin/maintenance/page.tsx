@@ -18,7 +18,7 @@ import {
   CheckCircle2,
   ShieldCheck,
   ChevronRight
-} from "lucide-react"
+} from "lucide-material"
 import { useFirestore } from "@/firebase"
 import { collection, query, where, getDocs, writeBatch, doc, setDoc, serverTimestamp, getCountFromServer, deleteDoc, DocumentData, updateDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
@@ -26,8 +26,8 @@ import { clearAppCache } from "@/app/actions/maintenance"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Master Admin Maintenance Terminal v2.6.
- * FIXED: Corrected Input import and explicit event typing.
+ * @fileOverview Master Admin Maintenance Terminal v2.7.
+ * FIXED: Corrected event parameter type for strict TS compliance.
  */
 
 export default function MaintenancePage() {

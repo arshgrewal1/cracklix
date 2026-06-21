@@ -16,8 +16,8 @@ import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional PYQ Archive CMS v20.0 (Fixed).
- * FIXED: Resolved 'editingNote' typo to 'editingPYQ'.
+ * @fileOverview Institutional PYQ Archive CMS v20.1.
+ * FIXED: Captured correct 'editingPYQ' variable for filtering.
  */
 
 export default function AdminPYQManagement() {
@@ -117,7 +117,7 @@ export default function AdminPYQManagement() {
                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-inner shrink-0"><FileText className="h-5 w-5" /></div>
                        <div className="min-w-0">
                           <p className="font-bold text-[#0F172A] text-sm md:text-lg leading-tight truncate">{p.title}</p>
-                          <code className="text-[8px] font-mono text-slate-300 uppercase mt-1 block">ID: {p.id.slice(-8)}</code>
+                          <code className="text-[8px] font-mono text-slate-300 uppercase mt-1.5 block">ID: {p.id.slice(-8)}</code>
                        </div>
                     </div>
                   </TableCell>

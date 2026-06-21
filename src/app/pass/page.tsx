@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview High-Density Pass Center v22.1 (Hardened).
+ * @fileOverview High-Density Pass Center v22.2 (Hardened).
  * FIXED: Captured passExpiresAt into local constant to resolve TS2769.
  */
 
@@ -39,6 +39,7 @@ export default function PassPage() {
     if (!expiryStr) return;
     
     const expiryDate = new Date(expiryStr);
+    if (isNaN(expiryDate.getTime())) return;
     
     const interval = setInterval(() => {
        const now = new Date().getTime();
@@ -59,7 +60,7 @@ export default function PassPage() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [profile]);
+  }, [profile?.passExpiresAt]);
 
   const passQuery = useMemo(() => (db ? collection(db, "passes") : null), [db])
   const { data: rawPasses, loading: passesLoading } = useCollection<any>(passQuery)
