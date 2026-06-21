@@ -1,8 +1,9 @@
 import { Firestore, doc, setDoc, serverTimestamp, collection, writeBatch } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional Punjab-Centric Seeding Node v80.0 (Free Pass Hardened).
- * UPDATED: Explicitly seeded a FOUNDATIONAL FREE PASS node for trial visibility.
+ * @fileOverview Institutional Punjab-Centric Seeding Node v82.0 (Strict Authority Mapping).
+ * FIXED: Corrected PPSC/Teaching exam mapping to prevent hub contamination.
+ * ADDED: Education Recruitment Board (Teaching) authority node.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -57,7 +58,7 @@ export async function seedInitialData(db: Firestore) {
     batch.set(doc(db, 'categories', cat.id), { ...cat, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 2. BOARDS SILO
+  // 2. BOARDS SILO (Institutional Authority Nodes)
   const boards = [
     { 
       id: 'psssb', 
@@ -84,12 +85,28 @@ export async function seedInitialData(db: Firestore) {
       iconUrl: 'https://www.punjabpolice.gov.in/media/images/Logo_of_Punjab_Police_India.original.png' 
     },
     { 
+      id: 'punjab-teaching', 
+      abbreviation: 'TEACHING', 
+      name: 'Education Recruitment Board Punjab', 
+      categoryId: 'punjab-teaching', 
+      displayOrder: 4, 
+      iconUrl: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQbNnoge6pNWx1HZYrUJKM58qWk1dDw85xvKPBoG-O4ew&s=10" 
+    },
+    { 
       id: 'pspcl', 
       abbreviation: 'PSPCL', 
       name: 'Punjab State Power Corporation Limited', 
       categoryId: 'punjab-technical', 
-      displayOrder: 4, 
+      displayOrder: 5, 
       iconUrl: 'https://www.pspcl.in/images/logo.png' 
+    },
+    { 
+      id: 'banking', 
+      abbreviation: 'BANKING', 
+      name: 'Punjab State Cooperative Bank', 
+      categoryId: 'banking', 
+      displayOrder: 6, 
+      iconUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ7McWqZqOgKy-BakccvR02WQdEQFrwuvmHBG5rYJzuEg&s=10' 
     }
   ];
 
@@ -97,26 +114,38 @@ export async function seedInitialData(db: Firestore) {
     batch.set(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() }, { merge: true });
   }
 
-  // 3. SEEDING INITIAL VERTICALS
-  const examNames = [
-    "PSSSB Clerk", "PSSSB Clerk IT", "PSSSB Clerk Accounts", "Revenue Patwari", "Excise Inspector", "Senior Assistant", "Junior Draftsman",
-    "Police Constable", "Police Sub-Inspector", "Police Head Constable", "Police Intelligence", "PSTET Paper 1", "PSTET Paper 2", "Master Cadre Punjabi",
-    "Master Cadre SST", "Master Cadre Maths", "ETT Recruitment", "PSPCL ALM", "PSPCL JE", "PSPCL LDC", "Cooperative Bank Clerk", "Cooperative Bank Manager"
+  // 3. SEEDING INITIAL VERTICALS (Strictly Categorized)
+  const psssbExams = ["PSSSB Clerk", "PSSSB Clerk IT", "Revenue Patwari", "Excise Inspector", "Junior Draftsman"];
+  const policeExams = ["Police Constable", "Police Sub-Inspector", "Intelligence Assistant"];
+  const ppscExams = ["Naib Tehsildar", "ADO (Agriculture)", "PPSC Assistant Professor", "Senior Assistant (PPSC)"];
+  const teachingExams = ["PSTET Paper 1", "PSTET Paper 2", "Master Cadre Punjabi", "Master Cadre Maths", "ETT Recruitment"];
+  const techExams = ["PSPCL ALM", "PSPCL JE", "PSPCL LDC"];
+  const bankExams = ["Cooperative Bank Clerk", "Bank Manager"];
+
+  const allExamGroups = [
+    { list: psssbExams, board: 'psssb', cat: 'punjab-govt' },
+    { list: policeExams, board: 'punjab-police', cat: 'punjab-govt' },
+    { list: ppscExams, board: 'ppsc', cat: 'punjab-govt' },
+    { list: teachingExams, board: 'punjab-teaching', cat: 'punjab-teaching' },
+    { list: techExams, board: 'pspcl', cat: 'punjab-technical' },
+    { list: bankExams, board: 'banking', cat: 'banking' }
   ];
 
-  examNames.forEach((name, i) => {
-    const id = name.toLowerCase().replace(/\s+/g, '-');
-    batch.set(doc(db, 'exams', id), {
-      id, name,
-      boardId: i < 7 ? 'psssb' : i < 11 ? 'punjab-police' : i < 17 ? 'ppsc' : i < 20 ? 'pspcl' : 'banking',
-      categoryId: i < 11 ? 'punjab-govt' : i < 17 ? 'punjab-teaching' : i < 20 ? 'punjab-technical' : 'banking',
-      displayOrder: i + 1,
-      isTrending: i < 5,
-      updatedAt: serverTimestamp()
-    }, { merge: true });
+  allExamGroups.forEach((group, gIdx) => {
+    group.list.forEach((name, i) => {
+      const id = name.toLowerCase().replace(/\s+/g, '-');
+      batch.set(doc(db, 'exams', id), {
+        id, name,
+        boardId: group.board,
+        categoryId: group.cat,
+        displayOrder: (gIdx * 10) + i,
+        isTrending: i < 2,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    });
   });
 
-  // 4. PASS PLANS (Restored Free Pass Visibility)
+  // 4. PASS PLANS
   const passes = [
     { id: 'free-pass', name: 'Free Elite Trial', price: 0, durationDays: 7, features: ['Unlimited Trial Mocks', 'Bilingual Support', 'Performance Audit', 'Basic Notes'], active: true, displayOrder: 0, type: 'FREE' },
     { id: 'monthly-pass', name: 'Monthly Elite', price: 299, durationDays: 30, features: ['Unlimited Full Mocks', 'AI Logic Solutions', 'PDF Study Notes', 'Ad-Free Hub'], active: true, displayOrder: 1, type: 'PREMIUM' },
@@ -141,5 +170,5 @@ export async function seedInitialData(db: Firestore) {
 
   await batch.commit();
 
-  console.log('[AUDIT] Initial Registry Synchronized. Please use Admin Hub to sync live counts.');
+  console.log('[AUDIT] Initial Registry Synchronized. PPSC and Teaching sections now strictly filtered.');
 }
