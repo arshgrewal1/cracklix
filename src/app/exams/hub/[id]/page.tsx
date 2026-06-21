@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Hierarchical Board vertical v60.0.
- * FIXED: Standardized Title Case and simplified "Open Exam" actions.
+ * @fileOverview Hierarchical Board vertical v61.0.
+ * FLOW: Board -> Exam Selection. Terminology: "Open Exam".
  */
 
 export default function HubExamsPage() {
@@ -61,7 +61,7 @@ export default function HubExamsPage() {
     return map;
   }, [mocks, pyqs]);
 
-  // CONTENT-ONLY VISIBILITY: Hide exams with 0 content
+  // CONTENT GUARD: Hide exams with 0 content
   const exams = useMemo(() => {
     if (!rawExams) return [];
     return rawExams.filter((e: any) => (statsMap[e.id]?.total || 0) > 0);
@@ -85,53 +85,55 @@ export default function HubExamsPage() {
   return (
     <div className="min-h-screen bg-slate-50/50 font-body text-left">
       <Navbar />
-      <section className="bg-white border-b border-slate-100 py-10 md:py-14">
+      <section className="bg-white border-b border-slate-100 py-12 md:py-20">
          <div className="container mx-auto px-4 max-w-7xl">
-            <button onClick={() => router.back()} className="h-9 w-9 rounded-full border border-slate-100 flex items-center justify-center text-slate-400 hover:text-black mb-6 transition-all"><ChevronLeft className="h-4 w-4" /></button>
-            <div className="space-y-2">
-               <Badge className="bg-primary/5 text-primary border-none px-2.5 py-0.5 rounded-lg text-[8px] font-black uppercase">{hub?.abbreviation} Hub</Badge>
-               <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] leading-tight tracking-tight">{hub?.abbreviation} Selection</h1>
-               <p className="text-sm md:text-lg font-bold text-slate-400 leading-tight">{hub?.name}</p>
+            <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-100 flex items-center justify-center text-slate-400 hover:text-black mb-10 transition-all"><ChevronLeft className="h-5 w-5" /></button>
+            <div className="space-y-4">
+               <Badge className="bg-primary/5 text-primary border-none px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest">{hub?.abbreviation} Hub</Badge>
+               <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] leading-tight tracking-tight">{hub?.abbreviation} Selection</h1>
+               <p className="text-base md:text-xl font-bold text-slate-400 leading-tight max-w-2xl">{hub?.name}</p>
             </div>
          </div>
       </section>
 
-      <main className="container mx-auto px-4 py-12 max-w-7xl">
+      <main className="container mx-auto px-4 py-16 max-w-7xl">
          {examsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-72 w-full rounded-[2.5rem] bg-white" />)}</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[2.5rem] bg-white" />)}</div>
          ) : exams.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                {exams.map((exam) => {
                   const s = statsMap[exam.id] || { full: 0, subject: 0, sectional: 0, pyq: 0, total: 0 };
                   const isPinned = profile?.pinnedExams?.includes(exam.id);
                   return (
-                    <Card key={exam.id} onClick={() => router.push(`/exams/${exam.id}`)} className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-8 text-left cursor-pointer">
-                       <div className="flex justify-between items-start mb-6">
-                          <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
-                             <GraduationCap className="h-6 w-6 text-primary" />
+                    <Card key={exam.id} onClick={() => router.push(`/exams/${exam.id}`)} className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-10 text-left cursor-pointer">
+                       <div className="flex justify-between items-start mb-8">
+                          <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                             <GraduationCap className="h-7 w-7 text-primary" />
                           </div>
-                          <button onClick={(e) => handleTogglePin(e, exam.id)} disabled={pinningId === exam.id} className={cn("h-8 w-8 rounded-lg border flex items-center justify-center transition-all", isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300")}>
-                             {pinningId === exam.id ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : isPinned ? <CheckCircle2 className="h-3.5 w-3.5" /> : <Star className="h-3.5 w-3.5" />}
+                          <button onClick={(e) => handleTogglePin(e, exam.id)} disabled={pinningId === exam.id} className={cn("h-10 w-10 rounded-xl border flex items-center justify-center transition-all", isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 shadow-sm")}>
+                             {pinningId === exam.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : isPinned ? <CheckCircle2 className="h-4 w-4" /> : <Star className="h-4 w-4" />}
                           </button>
                        </div>
-                       <h3 className="text-xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors mb-6">{exam.name}</h3>
+                       <h3 className="text-xl md:text-2xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors mb-6">{exam.name}</h3>
                        
-                       <div className="mt-auto space-y-5">
-                          <div className="flex flex-wrap gap-x-2 gap-y-1 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
-                             {s.full > 0 && <span>{s.full} Full Mocks</span>}
-                             {s.subject > 0 && <span>{s.subject} Subject Tests</span>}
-                             {s.pyq > 0 && <span>{s.pyq} PYQs</span>}
+                       <div className="mt-auto space-y-8">
+                          <div className="flex flex-wrap gap-x-4 gap-y-2 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                             {s.full > 0 && <span className="flex items-center gap-1.5"><Zap className="h-3 w-3" /> {s.full} Mocks</span>}
+                             {s.subject > 0 && <span className="flex items-center gap-1.5"><BookOpen className="h-3 w-3" /> {s.subject} Subject</span>}
+                             {s.pyq > 0 && <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> {s.pyq} PYQs</span>}
                           </div>
-                          <Button className="w-full h-11 rounded-xl bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[10px] tracking-widest gap-2 shadow-md border-none">Open Exam <ChevronRight className="h-3.5 w-3.5" /></Button>
+                          <Button className="w-full h-12 rounded-xl bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[11px] tracking-[0.2em] gap-3 shadow-md border-none transition-all active:scale-95">
+                             Open Exam <ChevronRight className="h-4 w-4" />
+                          </Button>
                        </div>
                     </Card>
                   )
                })}
             </div>
          ) : (
-            <div className="py-32 text-center opacity-20 flex flex-col items-center gap-4">
+            <div className="py-40 text-center opacity-20 flex flex-col items-center gap-6">
                <Info className="h-16 w-16" />
-               <p className="font-headline font-black text-2xl uppercase tracking-widest">Awaiting Verification</p>
+               <p className="font-headline font-black text-3xl uppercase tracking-widest">Awaiting Verification</p>
             </div>
          )}
       </main>
