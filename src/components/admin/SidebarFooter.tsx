@@ -12,7 +12,8 @@ interface SidebarFooterProps {
 }
 
 /**
- * Admin Sidebar Footer v2.0 (High Density PWA)
+ * Admin Sidebar Footer v2.1 (PWA Refined)
+ * Standardized to Title Case.
  */
 export default function SidebarFooter({
   isOpen,
@@ -41,14 +42,14 @@ export default function SidebarFooter({
           </p>
           <div className="flex items-center gap-1.5 mt-0.5">
              <ShieldCheck className="h-2.5 w-2.5 text-primary" />
-             <p className="truncate text-[9px] font-black uppercase tracking-widest text-slate-400">
-               {profile?.role?.replace('_', ' ') || "SUPER ADMIN"}
+             <p className="truncate text-[9px] font-black tracking-widest text-slate-400">
+               {profile?.role === 'SUPER_ADMIN' ? 'Super Admin' : profile?.role === 'ADMIN' ? 'Admin' : 'Staff'}
              </p>
           </div>
         </div>
       </div>
 
-      {/* LOGOUT PILL - TITLE CASE */}
+      {/* LOGOUT PILL - TITLE CASE SYNC */}
       <button
         onClick={handleLogout}
         className={cn(
@@ -60,7 +61,7 @@ export default function SidebarFooter({
       >
         <LogOut className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" />
         <span className={cn(
-          "overflow-hidden whitespace-nowrap text-[10px] font-black uppercase tracking-widest transition-all duration-300",
+          "overflow-hidden whitespace-nowrap text-[10px] font-black tracking-widest transition-all duration-300",
           isOpen ? "max-w-[120px] opacity-100" : "max-w-0 opacity-0"
         )}>
           Sign Out

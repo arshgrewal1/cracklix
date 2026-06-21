@@ -101,9 +101,9 @@ export default function SidebarNav({
       <nav className="flex-1 overflow-y-auto px-3 py-6 no-scrollbar space-y-8">
         {NAV_GROUPS.map((group) => (
           <div key={group.label} className="space-y-2">
-            {/* GROUP TITLE - CLEAN TITLE CASE */}
+            {/* GROUP TITLE - TITLE CASE SYNC */}
             {isOpen ? (
-              <p className="px-4 text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">
+              <p className="px-4 text-[10px] font-black tracking-tight text-slate-400">
                 {group.label}
               </p>
             ) : (
@@ -152,7 +152,7 @@ export default function SidebarNav({
                     <TooltipContent
                       side="right"
                       sideOffset={16}
-                      className="rounded-xl border border-slate-100 bg-white px-3 py-2 text-[11px] font-black text-[#0F172A] shadow-2xl uppercase tracking-widest"
+                      className="rounded-xl border border-slate-100 bg-white px-3 py-2 text-[11px] font-black text-[#0F172A] shadow-2xl tracking-widest"
                     >
                       {item.label}
                     </TooltipContent>

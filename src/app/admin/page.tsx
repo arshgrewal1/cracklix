@@ -26,8 +26,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard v25.0 (High Density PWA)
- * PWA SYNC: Removed uppercase, reduced font scales, standardized buttons to pills.
+ * Admin Dashboard v26.0 (PWA Refined)
+ * PWA SYNC: Removed uppercase from all primary elements per user feedback.
  */
 
 export default function AdminDashboard() {
@@ -99,19 +99,19 @@ export default function AdminDashboard() {
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 px-1">
         <div className="space-y-1">
            <div className="flex items-center gap-2">
-              <div className="px-2 py-0.5 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center gap-1.5 shadow-sm">
+              <div className="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center gap-1.5 shadow-sm">
                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                 <span className="text-[8px] font-black uppercase text-emerald-600">Governance Active</span>
+                 <span className="text-[9px] font-black text-emerald-600 tracking-tight">Governance Active</span>
               </div>
            </div>
           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight">Admin Hub</h1>
           <p className="text-slate-500 text-[11px] md:text-lg font-medium">Coordinate preparation nodes and session integrity.</p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto shrink-0">
-           <Button onClick={handleSyncLiveStats} disabled={isStatsSyncing} variant="outline" className="flex-1 sm:flex-none h-11 rounded-full border-slate-200 font-black uppercase text-[10px]">
+           <Button onClick={handleSyncLiveStats} disabled={isStatsSyncing} variant="outline" className="flex-1 sm:flex-none h-11 rounded-full border-slate-200 font-black text-[10px] tracking-widest">
               {isStatsSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Sync
            </Button>
-           <Button onClick={handlePushToRegistry} disabled={isSyncing} className="flex-1 sm:flex-none h-11 px-8 bg-primary hover:bg-blue-700 text-white shadow-xl rounded-full border-none font-black uppercase text-[10px]">
+           <Button onClick={handlePushToRegistry} disabled={isSyncing} className="flex-1 sm:flex-none h-11 px-8 bg-primary hover:bg-blue-700 text-white shadow-xl rounded-full border-none font-black text-[10px] tracking-widest">
               {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />} Seed
            </Button>
         </div>
@@ -135,11 +135,11 @@ export default function AdminDashboard() {
                         <StudentAvatar profile={u} className="h-10 w-10 md:h-12 md:w-12 rounded-lg md:rounded-xl bg-slate-100" />
                         <div className="min-w-0 text-left">
                            <p className="font-bold text-sm md:text-lg text-[#0F172A] truncate leading-tight">{u.name}</p>
-                           <p className="text-[9px] text-slate-400 font-bold uppercase truncate mt-1">{u.email}</p>
+                           <p className="text-[9px] text-slate-400 font-bold mt-1 truncate lowercase">{u.email}</p>
                         </div>
                      </div>
                      <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase border-slate-200 px-2 py-0.5 rounded shadow-sm">
-                        {u.pass?.active ? (u.pass.plan || 'ELITE') : 'FREE HUB'}
+                        {u.pass?.active ? (u.pass.plan || 'Elite') : 'Free Hub'}
                      </Badge>
                   </div>
                ))}
@@ -155,7 +155,7 @@ export default function AdminDashboard() {
                <div className="relative z-10 space-y-6 md:space-y-8 text-left">
                   <div className="space-y-1">
                      <h3 className="text-xl md:text-2xl font-black tracking-tight">Quick Tools</h3>
-                     <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-500">Operational Shortcuts</p>
+                     <p className="text-[8px] md:text-[9px] font-black text-slate-500 tracking-widest">Operational Shortcuts</p>
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:gap-3">
                      <AdminQuickLink label="Mock Builder" href="/admin/mocks/builder" />
@@ -184,7 +184,7 @@ function AdminMetricCard({ label, value, sub, icon, href, highlight }: any) {
                {icon}
             </div>
             <div className="min-w-0 flex-1">
-               <p className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-slate-400 mb-1 truncate">{label}</p>
+               <p className="text-[8px] md:text-[9px] font-black text-slate-400 mb-1 truncate tracking-tight">{label}</p>
                <div className="text-lg md:text-3xl font-black text-[#0F172A] leading-none tabular-nums truncate">{value}</div>
                <p className="text-[7px] md:text-[8px] font-bold text-slate-300 uppercase mt-2 truncate">{sub}</p>
             </div>
@@ -201,7 +201,7 @@ function AdminQuickLink({ label, href, highlight }: any) {
            "flex items-center justify-between p-3 md:p-4 bg-white/5 border border-white/5 rounded-xl md:rounded-2xl hover:bg-white/10 transition-all active:scale-95",
            highlight && "border-rose-500/30 bg-rose-50/5"
          )}>
-            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest ml-1 md:ml-2">{label}</span>
+            <span className="text-[9px] md:text-[10px] font-black tracking-widest ml-1 md:ml-2">{label}</span>
             <ChevronRight className={cn("h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-1", highlight ? "text-rose-50" : "text-primary")} />
          </div>
       </Link>
