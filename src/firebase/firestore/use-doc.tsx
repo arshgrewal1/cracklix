@@ -14,17 +14,21 @@ import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
  * @fileOverview Hardened Document Listener Hook.
- * Prevents system-wide crashes by handling null references and non-permission errors gracefully.
+ * Prevents system-wide crashes and infinite loops by using stable path dependencies.
  */
 export function useDoc<T = DocumentData>(docRef: DocumentReference<T> | null) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<FirestoreError | null>(null);
 
+  // We use the path as a stable key to prevent infinite loops if the docRef 
+  // object is recreated on every render by the caller.
+  const path = docRef?.path;
+
   useEffect(() => {
-    if (!docRef || typeof docRef !== 'object') {
-      setLoading(false);
+    if (!docRef || !path) {
       setData(null);
+      setLoading(false);
       return;
     }
 
@@ -33,11 +37,14 @@ export function useDoc<T = DocumentData>(docRef: DocumentReference<T> | null) {
     const unsubscribe = onSnapshot(
       docRef,
       (snapshot: DocumentSnapshot<T>) => {
-        setData(snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } : null);
+        // Build the final data object once per snapshot
+        const docData = snapshot.exists() ? { ...snapshot.data(), id: snapshot.id } : null;
+        
+        setData(docData as T);
         setLoading(false);
         setError(null);
       },
-      async (err) => {
+      (err) => {
         // Only emit to global error listener if it's a permission failure
         if (err.code === 'permission-denied') {
           const permissionError = new FirestorePermissionError({
@@ -54,7 +61,7 @@ export function useDoc<T = DocumentData>(docRef: DocumentReference<T> | null) {
     );
 
     return () => unsubscribe();
-  }, [docRef]);
+  }, [path]); // Crucial: Depend on the stable path string, not the unstable object reference
 
   return { data, loading, error };
 }

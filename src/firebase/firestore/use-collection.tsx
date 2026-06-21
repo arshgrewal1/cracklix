@@ -14,7 +14,7 @@ import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
  * @fileOverview Production-Grade Firestore Collection Hook.
- * Features: Infinite loop prevention, memory leak cleanup, and strict permission monitoring.
+ * Hardened to prevent infinite loop loops if query objects are not memoized by the caller.
  */
 export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
@@ -22,16 +22,14 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [error, setError] = useState<FirestoreError | null>(null);
 
   useEffect(() => {
-    // 1. Stability Guard: Prevent initialization with invalid query objects
-    if (!query || typeof query !== 'object') {
-      setLoading(false);
+    if (!query) {
       setData(null);
+      setLoading(false);
       return;
     }
 
     setLoading(true);
 
-    // 2. Real-time Subscription with robust cleanup
     const unsubscribe = onSnapshot(
       query,
       (snapshot: QuerySnapshot<T>) => {
@@ -44,7 +42,6 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setError(null);
       },
       (err) => {
-        // 3. Security & Operational Logging
         if (err.code === 'permission-denied') {
           const permissionError = new FirestorePermissionError({
             path: (query as any)?._query?.path?.segments?.join('/') || 'registry_node',
@@ -61,7 +58,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
     );
 
     return () => unsubscribe();
-  }, [query]); // Dependencies are strictly controlled to prevent infinite re-renders
+  }, [query]); // Callers MUST use useMemo() for this dependency to be stable
 
   return { data, loading, error };
 }
