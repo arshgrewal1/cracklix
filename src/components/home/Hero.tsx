@@ -23,8 +23,8 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * @fileOverview Official Live Hero Hub v18.0 (Hardened Stats).
- * UPDATED: Optimized stat mapping to resolve 0+ Categories bug.
+ * @fileOverview Official Live Hero Hub v19.0.
+ * UPDATED: Stats grid UI matched to high-fidelity screenshot (Pill-shaped nodes).
  */
 
 const formatCompact = (num: number) => {
@@ -50,27 +50,31 @@ export default function Hero() {
   const liveStats = useMemo(() => [
     {
       id: "q",
-      icon: <Zap className="h-5 w-5 text-blue-600" />,
+      icon: <Zap className="h-4 w-4 md:h-5 md:w-5 text-blue-600 fill-current" />,
       val: statsLoading ? "..." : `${formatCompact(stats?.totalQuestions)}+`,
-      label: "QUESTIONS"
+      label: "QUESTIONS",
+      bgColor: "bg-blue-50"
     },
     {
       id: "m",
-      icon: <ClipboardList className="h-5 w-5 text-indigo-600" />,
+      icon: <ClipboardList className="h-4 w-4 md:h-5 md:w-5 text-indigo-600" />,
       val: statsLoading ? "..." : `${formatCompact(stats?.totalMocks)}+`,
-      label: "MOCK TESTS"
+      label: "MOCK TESTS",
+      bgColor: "bg-indigo-50"
     },
     {
       id: "e",
-      icon: <ShieldCheck className="h-5 w-5 text-emerald-600" />,
+      icon: <ShieldCheck className="h-4 w-4 md:h-5 md:w-5 text-emerald-600" />,
       val: statsLoading ? "..." : `${formatCompact(stats?.totalCategories)}+`,
-      label: "CATEGORIES"
+      label: "CATEGORIES",
+      bgColor: "bg-emerald-50"
     },
     {
       id: "u",
-      icon: <Users className="h-5 w-5 text-orange-500" />,
+      icon: <Users className="h-4 w-4 md:h-5 md:w-5 text-orange-500" />,
       val: statsLoading ? "..." : `${formatCompact(stats?.totalUsers)}+`,
-      label: "ASPIRANTS"
+      label: "ASPIRANTS",
+      bgColor: "bg-orange-50"
     }
   ], [stats, statsLoading]);
 
@@ -182,18 +186,26 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* STATS: Bottom Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-10">
+        {/* STATS GRID: Matched to User Screenshot */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-12 md:mt-16">
           {liveStats.map((stat) => (
-            <Card key={stat.id} className="p-4 rounded-2xl bg-white border border-slate-100 shadow-md group hover:shadow-xl transition-all">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                  {stat.icon}
-                </div>
-                <div>
-                  <p className="text-xl font-black text-slate-900 leading-none tabular-nums">{stat.val}</p>
-                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">{stat.label}</p>
-                </div>
+            <Card 
+              key={stat.id} 
+              className="p-4 md:p-6 rounded-[2rem] md:rounded-[3rem] bg-white border border-slate-100 shadow-sm flex items-center gap-4 group hover:shadow-xl transition-all duration-500 cursor-default"
+            >
+              <div className={cn(
+                "h-10 w-10 md:h-12 md:w-12 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 shadow-inner",
+                stat.bgColor
+              )}>
+                {stat.icon}
+              </div>
+              <div className="text-left">
+                <p className="text-xl md:text-2xl font-black text-[#0F172A] leading-none tabular-nums tracking-tight">
+                  {stat.val}
+                </p>
+                <p className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mt-1.5 leading-none">
+                  {stat.label}
+                </p>
               </div>
             </Card>
           ))}
