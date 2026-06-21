@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Strict Category Explorer v17.0.
+ * @fileOverview Strict Category Explorer v18.0.
  * ENFORCED: Whitelist filter ensures only the 7 authorized categories are listed.
  */
 
@@ -44,6 +44,7 @@ export default function ExamsEntryPage() {
 
   const categories = useMemo(() => {
     if (!rawCategories) return [];
+    // Only allow the 7 specific categories
     return rawCategories.filter(c => AUTHORIZED_CATEGORY_IDS.includes(c.id));
   }, [rawCategories]);
 

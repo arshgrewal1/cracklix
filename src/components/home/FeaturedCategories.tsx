@@ -11,8 +11,9 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview Strictly Filtered 7-Category Hub v80.0.
+ * @fileOverview Strictly Filtered 7-Category Hub v81.0.
  * ENFORCED: Whitelist filter ensures only the 7 authorized categories are displayed.
+ * FIXED: Standardized button text to "View Exams" (Title Case).
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -43,7 +44,7 @@ export default function FeaturedCategories() {
 
   const categories = useMemo(() => {
      if (!rawCategories) return [];
-     // Hard-coded whitelist filter to prevent ghost/legacy categories from appearing
+     // Hard-coded whitelist filter to prevent ghost/legacy categories (like PPSC/PSSSB) from appearing on home
      return rawCategories.filter(c => AUTHORIZED_CATEGORY_IDS.includes(c.id));
   }, [rawCategories]);
 
@@ -52,12 +53,12 @@ export default function FeaturedCategories() {
       <div className="container mx-auto px-4 max-w-7xl space-y-12 text-left">
         <div className="space-y-2">
            <h2 className="text-3xl md:text-5xl font-black text-[#0F172A] leading-tight tracking-tight">Choose Your Exam</h2>
-           <p className="text-slate-500 font-medium text-sm md:text-lg">Select an official category to begin your preparation journey.</p>
+           <p className="text-slate-500 font-medium text-sm md:text-lg">Select an official category to start your preparation journey.</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {catLoading ? (
-            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[2.5rem] bg-slate-50" />)
+            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[2rem] bg-slate-50" />)
           ) : categories.map((cat, idx) => {
             const categoryExamsCount = exams?.filter(e => e.categoryId === cat.id).length || 0;
             return (
@@ -80,7 +81,7 @@ export default function FeaturedCategories() {
                              <span className="text-[10px] font-black text-[#0F172A] uppercase leading-none">{categoryExamsCount}</span>
                              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Exams Live</span>
                           </div>
-                          <Button variant="ghost" className="h-10 px-4 rounded-xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[10px] tracking-widest uppercase border-none shadow-md">
+                          <Button variant="ghost" className="h-10 px-6 rounded-xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[10px] tracking-widest uppercase border-none shadow-md">
                              View Exams <ArrowRight className="ml-2 h-3.5 w-3.5" />
                           </Button>
                        </div>
