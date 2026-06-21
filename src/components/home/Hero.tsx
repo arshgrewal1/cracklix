@@ -18,8 +18,9 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Compact Hero Hub v31.0.
+ * @fileOverview Official Compact Hero Hub v32.0.
  * RE-ORDERED: CTA buttons moved below quick action cards.
+ * ENHANCED: Increased illustration size for mobile and desktop.
  */
 
 export default function Hero() {
@@ -66,22 +67,22 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* 2. ILLUSTRATION */}
+          {/* 2. ILLUSTRATION - INCREASED SIZE */}
           <div className="hidden lg:flex flex-col items-center">
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }} className="relative">
               <img 
                 src="/images/hero-student.png" 
                 alt="Cracklix Student" 
-                className="w-full max-w-md drop-shadow-2xl h-auto object-contain" 
+                className="w-full max-w-xl drop-shadow-2xl h-auto object-contain" 
               />
             </motion.div>
           </div>
 
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="lg:hidden flex justify-center mt-2">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="lg:hidden flex justify-center mt-4">
             <img 
               src="/images/hero-student.png" 
               alt="Cracklix Student" 
-              className="h-[90px] w-auto drop-shadow-xl" 
+              className="h-[140px] w-auto drop-shadow-xl" 
             />
           </motion.div>
         </div>
