@@ -10,7 +10,7 @@ import { Plus, Search, Edit, Trash2, Database, Loader2, RefreshCw, Landmark, Loc
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, deleteDoc, doc, where, limit, getDocs, startAfter, writeBatch, serverTimestamp, orderBy, DocumentData } from "firebase/firestore"
+import { collection, query, doc, where, limit, getDocs, startAfter, writeBatch, serverTimestamp, orderBy, DocumentData } from "firebase/firestore"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
@@ -18,8 +18,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional MCQ Bank v19.0 (High Density PWA).
- * PWA SYNC: Exact mirror of screenshot with compact Title Case nodes and Blue Pills.
+ * @fileOverview Institutional MCQ Bank v20.0 (PWA Sync).
+ * FIXED: Removed uppercase from headers and refactored to high-density Title Case.
  */
 
 type QuestionFilterType = 'ALL' | 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
@@ -41,7 +41,6 @@ function QuestionBankContent() {
   const boardParam = searchParams.get('board') || 'all'
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState<QuestionFilterType>('ALL')
-  const [subjectFilter, setSubjectFilter] = useState("all")
   
   const [loading, setLoading] = useState(true)
   const [questions, setQuestions] = useState<any[]>([])
@@ -51,7 +50,6 @@ function QuestionBankContent() {
   const [isBulkProcessing, setIsBulkProcessing] = useState(false)
 
   const { data: boards } = useCollection<any>(useMemo(() => (dbInstance ? query(collection(dbInstance, "boards"), orderBy("displayOrder", "asc")) : null), [dbInstance]));
-  const { data: subjects } = useCollection<any>(useMemo(() => (dbInstance ? query(collection(dbInstance, "subjects"), orderBy("name", "asc")) : null), [dbInstance]));
 
   const fetchQuestions = useCallback(async (nextCursor: DocumentData | null = null) => {
     if (!dbInstance) return
@@ -101,46 +99,48 @@ function QuestionBankContent() {
   }
 
   return (
-    <div className="space-y-4 md:space-y-8 text-left relative pb-32">
-      <div className="flex flex-col items-start gap-4 px-1">
+    <div className="space-y-6 md:space-y-12 text-left pb-32 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-1">
              <Database className="h-4 w-4 text-primary" />
-             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Registry Audit</span>
+             <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Registry Bank Hub</span>
           </div>
-          <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">MCQ Bank</h1>
+          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">MCQ Bank</h1>
+          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Master collection of preparation nodes across Punjab.</p>
         </div>
         
-        <Button asChild className="w-full md:w-auto h-12 md:h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-full shadow-xl border-none transition-all active:scale-95 gap-3">
-           <Link href="/admin/questions/add"><Plus className="h-5 w-5" /> Add Question</Link>
+        <Button asChild className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-full shadow-xl border-none transition-all active:scale-95 gap-3">
+           <Link href="/admin/questions/add"><Plus className="h-4 w-4" /> Add Question</Link>
         </Button>
-
-        <Select value={boardParam} onValueChange={(v) => router.push(`/admin/questions?board=${v}`)}>
-           <SelectTrigger className="w-full h-12 md:h-14 rounded-full bg-white border-slate-100 shadow-sm font-bold text-xs">
-              <div className="flex items-center gap-3"><Landmark className="h-4 w-4 text-slate-300" /> <SelectValue placeholder="All Boards" /></div>
-           </SelectTrigger>
-           <SelectContent><SelectItem value="all">All Boards</SelectItem>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Hub</SelectItem>)}</SelectContent>
-        </Select>
       </div>
 
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2 px-1">
-         <FilterChip active={activeTab === 'ALL'} label="ALL NODES" onClick={() => setActiveTab('ALL')} />
-         <FilterChip active={activeTab === 'UNUSED'} label="UNUSED" onClick={() => setActiveTab('UNUSED')} color="text-blue-500" />
-         <FilterChip active={activeTab === 'USED'} label="USED" onClick={() => setActiveTab('USED')} color="text-emerald-500" />
-         <FilterChip active={activeTab === 'LOCKED'} label="LOCKED" onClick={() => setActiveTab('LOCKED')} color="text-amber-500" />
+         <FilterChip active={activeTab === 'ALL'} label="All Nodes" onClick={() => setActiveTab('ALL')} />
+         <FilterChip active={activeTab === 'UNUSED'} label="Unused" onClick={() => setActiveTab('UNUSED')} color="text-blue-500" />
+         <FilterChip active={activeTab === 'USED'} label="Used" onClick={() => setActiveTab('USED')} color="text-emerald-500" />
+         <FilterChip active={activeTab === 'LOCKED'} label="Locked" onClick={() => setActiveTab('LOCKED')} color="text-amber-500" />
       </div>
 
-      <div className="relative px-1">
-         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
-         <Input 
-           className="h-14 md:h-16 pl-14 rounded-2xl md:rounded-full bg-white border-slate-50 shadow-inner font-bold text-[#0F172A]" 
-           placeholder="Search statements..." 
-           value={searchTerm} 
-           onChange={e => setSearchTerm(e.target.value)} 
-         />
+      <div className="flex flex-col md:flex-row gap-4 px-1">
+         <div className="relative flex-1 group">
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+            <Input 
+              className="h-14 md:h-16 pl-14 rounded-2xl md:rounded-full bg-white border-slate-50 shadow-inner font-bold text-[#0F172A]" 
+              placeholder="Search statements..." 
+              value={searchTerm} 
+              onChange={e => setSearchTerm(e.target.value)} 
+            />
+         </div>
+         <Select value={boardParam} onValueChange={(v) => router.push(`/admin/questions?board=${v}`)}>
+            <SelectTrigger className="w-full md:w-64 h-14 md:h-16 rounded-2xl md:rounded-full bg-white border-slate-50 shadow-inner font-bold text-xs">
+               <div className="flex items-center gap-3"><Landmark className="h-4 w-4 text-slate-300" /> <SelectValue placeholder="All Boards" /></div>
+            </SelectTrigger>
+            <SelectContent><SelectItem value="all">All Boards Hub</SelectItem>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Hub</SelectItem>)}</SelectContent>
+         </Select>
       </div>
 
-      <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] overflow-hidden bg-white mx-1">
+      <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[900px]">
             <TableHeader className="bg-slate-50/50">
@@ -152,12 +152,13 @@ function QuestionBankContent() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading && questions.length === 0 ? Array.from({ length: 5 }).map((_, i) => (<TableRow key={i}><TableCell colSpan={4} className="p-8"><Skeleton className="h-12 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>)) : 
-              filteredQuestions.map((q: any) => (
-                <TableRow key={q.id} className={cn("hover:bg-slate-50 transition-all group", selectedIds.includes(q.id) && "bg-primary/5")}>
+              {loading && questions.length === 0 ? (
+                Array.from({ length: 5 }).map((_, i) => (<TableRow key={i}><TableCell colSpan={4} className="p-8"><Skeleton className="h-12 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>))
+              ) : filteredQuestions.map((q: any) => (
+                <TableRow key={q.id} className={cn("hover:bg-slate-50 transition-all group border-slate-50", selectedIds.includes(q.id) && "bg-primary/5")}>
                   <TableCell className="px-6 text-center"><Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={(checked) => setSelectedIds(prev => checked ? [...prev, q.id] : prev.filter(id => id !== q.id))} /></TableCell>
                   <TableCell className="px-6 py-6 text-left max-w-md">
-                     <p className="text-[9px] font-black text-primary uppercase tracking-tight mb-1">{q.subjectId || "GENERAL"}</p>
+                     <p className="text-[9px] font-black text-primary uppercase tracking-tight mb-1.5">{q.subjectId || "GENERAL"}</p>
                      <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-2">{q.englishQuestion}</p>
                   </TableCell>
                   <TableCell className="text-center">
@@ -165,8 +166,8 @@ function QuestionBankContent() {
                   </TableCell>
                   <TableCell className="text-right px-10">
                      <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
-                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg bg-slate-50 shadow-sm" asChild><Link href={`/admin/questions/add?id=${q.id}`}><Edit className="h-4 w-4" /></Link></Button>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg bg-slate-50 shadow-sm hover:text-rose-600" onClick={() => { if(confirm("Purge node?")) deleteDoc(doc(dbInstance!, "questions", q.id)) }}><Trash2 className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90" asChild><Link href={`/admin/questions/add?id=${q.id}`}><Edit className="h-4 w-4" /></Link></Button>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90" onClick={() => { if(confirm("Purge node?")) deleteDoc(doc(dbInstance!, "questions", q.id)) }}><Trash2 className="h-4 w-4" /></Button>
                      </div>
                   </TableCell>
                 </TableRow>
@@ -192,9 +193,9 @@ function QuestionBankContent() {
                   <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Selected</p>
                </div>
                <div className="flex items-center gap-2">
-                  <button onClick={() => handleBulkStatusChange('LOCKED')} disabled={isBulkProcessing} className="p-2.5 rounded-xl bg-white/5 hover:bg-blue-600 transition-all"><Lock className="h-4 w-4" /></button>
-                  <button onClick={() => handleBulkStatusChange('UNUSED')} disabled={isBulkProcessing} className="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-600 transition-all"><Unlock className="h-4 w-4" /></button>
-                  <button onClick={() => setSelectedIds([])} className="p-2.5 rounded-xl bg-white/5 hover:bg-rose-600 transition-all"><Trash2 className="h-4 w-4" /></button>
+                  <button onClick={() => handleBulkStatusChange('LOCKED')} disabled={isBulkProcessing} className="p-2.5 rounded-xl bg-white/5 hover:bg-blue-600 transition-all active:scale-90"><Lock className="h-4 w-4" /></button>
+                  <button onClick={() => handleBulkStatusChange('UNUSED')} disabled={isBulkProcessing} className="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-600 transition-all active:scale-90"><Unlock className="h-4 w-4" /></button>
+                  <button onClick={() => setSelectedIds([])} className="p-2.5 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90"><Trash2 className="h-4 w-4" /></button>
                </div>
             </div>
          </div>
@@ -209,7 +210,7 @@ function FilterChip({ active, label, onClick, color = "" }: any) {
         onClick={onClick} 
         className={cn(
           "px-6 py-2 rounded-full font-black uppercase text-[9px] tracking-widest transition-all border-2 whitespace-nowrap active:scale-95", 
-          active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : `bg-white border-slate-50 hover:bg-slate-50 ${color}`
+          active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : `bg-white border-slate-100 hover:bg-slate-50 ${color}`
         )}
       >
         {label}

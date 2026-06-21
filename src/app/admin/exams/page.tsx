@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Trash2, Save, Loader2, Landmark, Search } from "lucide-react"
+import { Plus, Edit, Trash2, Save, Loader2, Landmark, Search, Building2, X } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, doc, deleteDoc, setDoc, serverTimestamp, orderBy } from "firebase/firestore"
@@ -14,6 +14,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
 import { AuthorityLogo } from "@/lib/exam-icons"
+
+/**
+ * @fileOverview Authority Hub CMS v12.0 (PWA Sync).
+ * FIXED: Removed uppercase from headers and refactored to high-density Title Case.
+ */
 
 export default function ExamManagement() {
   const db = useFirestore()
@@ -60,55 +65,66 @@ export default function ExamManagement() {
   }
 
   return (
-    <div className="space-y-10 pb-32 text-left pt-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 px-4">
-        <div>
-          <h1 className="text-4xl md:text-6xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Authority Hub</h1>
-          <p className="text-slate-500 font-medium text-lg">Manage official board nodes and their primary logos.</p>
+    <div className="space-y-6 md:space-y-12 pb-32 text-left animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
+        <div className="space-y-1">
+           <div className="flex items-center gap-2 mb-1">
+              <Building2 className="h-4 w-4 text-primary" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Institutional Board Registry</span>
+           </div>
+          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Authority Hub</h1>
+          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Manage official board nodes and their primary logos.</p>
         </div>
-        <Button onClick={() => setEditingBoard({ abbreviation: "", name: "", iconUrl: "", categoryId: "", displayOrder: (boards?.length || 0) + 1 })} className="bg-[#0F172A] hover:bg-black text-white h-16 px-12 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-3xl transition-all active:scale-95 border-none">
-          <Plus className="h-5 w-5 text-primary" /> Deploy New Hub
+        <Button onClick={() => setEditingBoard({ abbreviation: "", name: "", iconUrl: "", categoryId: "", displayOrder: (boards?.length || 0) + 1 })} className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-3">
+          <Plus className="h-4 w-4" /> Deploy Hub
         </Button>
       </div>
 
-      <div className="px-4 relative group max-w-2xl">
-        <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
-        <Input className="h-16 pl-16 rounded-[1.5rem] bg-white border-none shadow-2xl text-lg font-medium" placeholder="Search authorities..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+      <div className="relative group px-1">
+         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+         <Input 
+           className="h-14 md:h-16 pl-14 rounded-2xl md:rounded-full bg-white border-slate-50 shadow-inner text-base md:text-lg font-bold" 
+           placeholder="Search authorities..." 
+           value={searchTerm} 
+           onChange={e => setSearchTerm(e.target.value)} 
+         />
       </div>
 
-      <Card className="border-none shadow-3xl bg-white rounded-[3rem] overflow-hidden mx-4">
-        <CardContent className="p-0">
-          <Table>
+      <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
+        <CardContent className="p-0 overflow-x-auto">
+          <Table className="min-w-[800px]">
             <TableHeader className="bg-slate-50/50">
-              <TableRow className="border-white/5 h-20">
-                <TableHead className="px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Hub Identity</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Category</TableHead>
-                <TableHead className="text-right px-10 text-[10px] font-black uppercase tracking-widest text-slate-400">Actions</TableHead>
+              <TableRow className="border-slate-100 h-14 md:h-20">
+                <TableHead className="px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Hub Identity</TableHead>
+                <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Category</TableHead>
+                <TableHead className="text-right px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow><TableCell colSpan={3} className="p-10"><Skeleton className="h-14 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
+                Array.from({ length: 5 }).map((_, i) => (
+                  <TableRow key={i} className="border-slate-50"><TableCell colSpan={3} className="px-6 py-6 md:px-12 md:py-8"><Skeleton className="h-10 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>
+                ))
               ) : filteredBoards.map((board: any) => (
-                <TableRow key={board.id} className="hover:bg-slate-50 border-slate-50 transition-all group">
-                  <TableCell className="px-10 py-6">
-                    <div className="flex items-center gap-6">
-                      <AuthorityLogo board={board} size="lg" className="bg-slate-50 p-2 rounded-2xl shadow-inner" />
-                      <div>
-                         <p className="font-headline font-black text-primary text-xl uppercase leading-none">{board.abbreviation}</p>
-                         <p className="text-sm font-bold text-slate-600 mt-1">{board.name}</p>
+                <TableRow key={board.id} className="hover:bg-slate-50 border-slate-50 transition-colors group">
+                  <TableCell className="px-6 md:px-12 py-5 md:py-8">
+                    <div className="flex items-center gap-4 md:gap-6">
+                      <AuthorityLogo board={board} size="md" className="h-10 w-10 md:h-14 md:w-14 bg-slate-50 p-2 rounded-xl shadow-inner group-hover:scale-105 transition-transform" />
+                      <div className="min-w-0">
+                         <p className="font-black text-primary text-sm md:text-xl leading-none uppercase">{board.abbreviation}</p>
+                         <p className="text-[9px] md:text-xs font-bold text-slate-500 mt-1 truncate max-w-[200px] md:max-w-md">{board.name}</p>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
-                     <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-500 text-[9px] font-black uppercase px-3 py-1">
-                        {categories?.find((c: any) => c.id === board.categoryId)?.title || "GENERAL"}
+                     <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-500 text-[8px] md:text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm">
+                        {categories?.find((c: any) => c.id === board.categoryId)?.title || "GENERAL"} HUB
                      </Badge>
                   </TableCell>
-                  <TableCell className="text-right px-10">
-                    <div className="flex justify-end gap-3 opacity-20 group-hover:opacity-100 transition-all">
-                       <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl" onClick={() => setEditingBoard(board)}><Edit className="h-5 w-5" /></Button>
-                       <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl hover:bg-rose-50 hover:text-rose-600" onClick={async () => { if(confirm("Purge hub?")) await deleteDoc(doc(db!, "boards", board.id)) }}><Trash2 className="h-5 w-5" /></Button>
+                  <TableCell className="text-right px-6 md:px-12">
+                    <div className="flex justify-end gap-2 md:gap-3 opacity-20 group-hover:opacity-100 transition-all">
+                       <button onClick={() => setEditingBoard(board)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90"><Edit className="h-5 w-5" /></button>
+                       <button onClick={async () => { if(confirm("Purge hub?")) await deleteDoc(doc(db!, "boards", board.id)) }} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -119,30 +135,42 @@ export default function ExamManagement() {
       </Card>
 
       <Dialog open={!!editingBoard} onOpenChange={(open) => !open && !isSaving && setEditingBoard(null)}>
-        <DialogContent className="sm:max-w-xl rounded-[3rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
+        <DialogContent className="sm:max-w-xl w-[95vw] max-h-[95vh] rounded-3xl md:rounded-[3rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
           <div className="h-2 w-full bg-[#0F172A] shrink-0" />
-          <DialogHeader className="p-10 pb-0">
-             <DialogTitle className="text-2xl font-black font-headline uppercase text-[#0F172A] flex items-center gap-4">
-                <AuthorityLogo board={editingBoard} size="md" className="bg-primary/10 p-2 rounded-xl" />
-                Authority Architect
-             </DialogTitle>
-             <DialogDescription>Modify official board identity and logo node.</DialogDescription>
+          <DialogHeader className="p-6 md:p-10 pb-2 md:pb-4 shrink-0">
+             <div className="flex justify-between items-center">
+                <DialogTitle className="text-xl md:text-3xl font-black text-[#0F172A]">Authority Architect</DialogTitle>
+                <button onClick={() => setEditingBoard(null)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors"><X className="h-5 w-5 text-slate-400" /></button>
+             </div>
+             <DialogDescription className="text-slate-400 font-bold text-[9px] md:text-sm mt-1">Configure official board identity node.</DialogDescription>
           </DialogHeader>
-          <div className="p-10 space-y-6">
-             <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Short Code</Label><Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value.toUpperCase()})} className="h-12 rounded-xl font-black uppercase" /></div>
-                <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Full Name</Label><Input value={editingBoard?.name || ""} onChange={e => setEditingBoard({...editingBoard, name: e.target.value})} className="h-12 rounded-xl font-bold" /></div>
+          <div className="px-6 md:px-10 pb-6 md:pb-10 space-y-6 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
+             <div className="grid grid-cols-2 gap-4 md:gap-6">
+                <div className="space-y-1.5 text-left">
+                   <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Short Code</Label>
+                   <Input value={editingBoard?.abbreviation || ""} onChange={e => setEditingBoard({...editingBoard, abbreviation: e.target.value.toUpperCase()})} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-black uppercase px-5" placeholder="e.g. PSSSB" />
+                </div>
+                <div className="space-y-1.5 text-left">
+                   <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Full Hub Name</Label>
+                   <Input value={editingBoard?.name || ""} onChange={e => setEditingBoard({...editingBoard, name: e.target.value})} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-bold px-5" placeholder="e.g. Subordinate Selection" />
+                </div>
              </div>
-             <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Logo URL (Official PNG/SVG)</Label>
-                <Input value={editingBoard?.iconUrl || ""} onChange={e => setEditingBoard({...editingBoard, iconUrl: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-mono text-xs text-primary" placeholder="https://..." />
+             <div className="space-y-1.5 text-left">
+                <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Logo URL (PNG/SVG Node)</Label>
+                <Input value={editingBoard?.iconUrl || ""} onChange={e => setEditingBoard({...editingBoard, iconUrl: e.target.value})} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-mono text-xs text-primary px-5" placeholder="https://..." />
              </div>
-             <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Vertical Category</Label><select value={editingBoard?.categoryId || ""} onChange={e => setEditingBoard({...editingBoard, categoryId: e.target.value})} className="w-full h-12 bg-slate-50 border-none rounded-xl px-4 font-black uppercase text-[10px] outline-none shadow-inner"><option value="">Select Category</option>{categories?.map((c: any) => <option key={c.id} value={c.id}>{c.title}</option>)}</select></div>
+             <div className="space-y-1.5 text-left">
+                <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Vertical Category</Label>
+                <select value={editingBoard?.categoryId || ""} onChange={e => setEditingBoard({...editingBoard, categoryId: e.target.value})} className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-5 font-bold text-sm outline-none shadow-inner">
+                   <option value="" disabled>Select Category</option>
+                   {categories?.map((c: any) => <option key={c.id} value={c.id}>{c.title}</option>)}
+                </select>
+             </div>
           </div>
-          <DialogFooter className="p-10 pt-4 bg-slate-50 border-t border-slate-100 flex gap-4">
-            <Button variant="ghost" onClick={() => setEditingBoard(null)} className="rounded-xl h-12 px-6 font-bold text-slate-400">Cancel</Button>
-            <Button className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-12 px-10 font-black uppercase tracking-widest text-[10px] flex-1 shadow-xl" onClick={handleSave} disabled={isSaving}>
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit Hub Node
+          <DialogFooter className="p-6 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4 shrink-0">
+            <Button variant="ghost" onClick={() => setEditingBoard(null)} className="h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400">Discard</Button>
+            <Button onClick={handleSave} disabled={isSaving} className="flex-1 h-11 md:h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-full shadow-xl border-none active:scale-95 gap-2">
+              {isSaving ? <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin" /> : <Save className="h-3 w-3 md:h-4 md:w-4" />} Commit Hub
             </Button>
           </DialogFooter>
         </DialogContent>
