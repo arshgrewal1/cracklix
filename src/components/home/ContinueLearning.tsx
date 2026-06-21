@@ -12,8 +12,8 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Fidelity "My Progress" Hub v11.1.
- * UPDATED: Simplified student-facing language.
+ * @fileOverview High-Fidelity "My Exams" Hub v12.0.
+ * UPDATED: Implemented Title Case and live session node tracking.
  */
 
 export default function ContinueLearning() {
@@ -60,31 +60,32 @@ export default function ContinueLearning() {
   if (!hasData && !resultsLoading && !examsLoading) return null;
 
   return (
-    <section className="py-12 md:py-16 bg-white animate-in fade-in slide-in-from-bottom-4 duration-1000">
-      <div className="container mx-auto px-4 max-w-7xl space-y-10 text-left">
+    <section className="py-8 md:py-16 bg-white animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      <div className="container mx-auto px-4 max-w-7xl space-y-8 md:space-y-12 text-left">
         <div className="flex items-center justify-between px-1">
            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-orange-50 flex items-center justify-center text-primary shadow-sm shrink-0">
+              <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-blue-50 flex items-center justify-center text-primary shadow-sm shrink-0">
                  <Target className="h-4 w-4 md:h-5 md:w-5" />
               </div>
-              <h2 className="text-xl md:text-3xl font-headline font-black text-[#0F172A] uppercase tracking-tight">MY EXAMS</h2>
+              <h2 className="text-xl md:text-4xl font-headline font-black text-[#0F172A] tracking-tight leading-none">My Exams</h2>
            </div>
-           <Button asChild variant="ghost" className="text-primary font-black uppercase text-[10px] tracking-widest gap-2">
-              <Link href="/my-exams">View All <ChevronRight className="h-4 w-4" /></Link>
+           <Button asChild variant="ghost" className="text-primary font-black uppercase text-[9px] md:text-xs tracking-widest gap-2">
+              <Link href="/my-exams">View All <ChevronRight className="h-3 w-3" /></Link>
            </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
            <div className="lg:col-span-7 space-y-6">
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 flex items-center gap-2">
-                 <Zap className="h-3 w-3 text-primary" /> CONTINUE PRACTICE
-              </p>
+              <div className="flex items-center gap-2 px-1">
+                 <Zap className="h-3.5 w-3.5 text-primary" />
+                 <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400">Continue Practice</p>
+              </div>
               <div className="grid grid-cols-1 gap-4 md:gap-6">
                  {resultsLoading ? (
                     Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-[2.5rem] bg-slate-50" />)
                  ) : recentAttempts.length > 0 ? (
                     recentAttempts.map((res: any) => (
-                      <Card key={res.id} className="border-none shadow-xl rounded-[2.5rem] bg-[#0B1528] text-white p-6 md:p-8 overflow-hidden relative group text-left border border-white/5">
+                      <Card key={res.id} className="border-none shadow-xl rounded-[2.5rem] bg-[#0B1528] text-white p-6 md:p-10 overflow-hidden relative group text-left border border-white/5">
                         <div className="absolute bottom-0 right-0 p-8 opacity-[0.03] rotate-12 group-hover:scale-110 transition-transform duration-1000">
                             <Trophy className="h-32 w-32" />
                         </div>
@@ -93,10 +94,10 @@ export default function ContinueLearning() {
                                 <Zap className="h-6 w-6 md:h-8 md:w-8 text-primary fill-current" />
                             </div>
                             <div className="flex-1 min-w-0">
-                                <p className="text-primary font-black text-[9px] uppercase tracking-[0.4em] mb-1">SCORE: {res.score}</p>
-                                <h3 className="text-base md:text-xl font-black uppercase text-white truncate">{res.mockTitle}</h3>
-                                <Button asChild className="h-9 mt-4 px-6 bg-primary hover:bg-orange-600 text-white font-black uppercase text-[9px] tracking-widest rounded-xl transition-all active:scale-95 border-none">
-                                  <Link href={`/results/${res.mockId}`}>REVIEW TEST</Link>
+                                <p className="text-primary font-black text-[9px] uppercase tracking-[0.4em] mb-1">Score: {res.score}</p>
+                                <h3 className="text-base md:text-xl font-black text-white truncate uppercase">{res.mockTitle}</h3>
+                                <Button asChild className="h-11 md:h-12 mt-6 px-8 bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-full transition-all active:scale-95 border-none shadow-lg">
+                                  <Link href={`/results/${res.mockId}`}>Review Test</Link>
                                 </Button>
                             </div>
                         </div>
@@ -104,16 +105,17 @@ export default function ContinueLearning() {
                     ))
                  ) : (
                     <div className="p-12 text-center bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200">
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No tests found</p>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No recent attempts found</p>
                     </div>
                  )}
               </div>
            </div>
 
            <div className="lg:col-span-5 space-y-6">
-              <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1 flex items-center gap-2">
-                 <Star className="h-3 w-3 text-amber-500 fill-current" /> SAVED EXAMS
-              </p>
+              <div className="flex items-center gap-2 px-1">
+                 <Star className="h-3.5 w-3.5 text-amber-500 fill-current" />
+                 <p className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-400">Pinned Verticals</p>
+              </div>
               <div className="grid grid-cols-1 gap-4">
                  {examsLoading ? (
                     Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl bg-slate-50" />)
@@ -134,8 +136,8 @@ export default function ContinueLearning() {
                                       )}
                                    </div>
                                    <div className="min-w-0">
-                                      <h4 className="text-sm font-black text-[#0F172A] uppercase truncate">{exam.name}</h4>
-                                      <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">{board?.abbreviation || 'PSSSB'} Hub</p>
+                                      <h4 className="text-sm font-bold text-[#0F172A] truncate">{exam.name}</h4>
+                                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-0.5">{board?.abbreviation || 'Official'} Hub</p>
                                    </div>
                                 </div>
                                 <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-primary transition-all" />
@@ -145,7 +147,7 @@ export default function ContinueLearning() {
                     })
                  ) : (
                     <div className="p-8 text-center bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200">
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Follow an exam to see it here</p>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Follow an exam vertical to pin it</p>
                     </div>
                  )}
               </div>
