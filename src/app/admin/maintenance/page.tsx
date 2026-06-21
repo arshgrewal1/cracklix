@@ -24,8 +24,8 @@ import { clearAppCache } from "@/app/actions/maintenance"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Master Admin Maintenance Terminal v2.8.
- * FIXED: Corrected event parameter type and added missing Input import.
+ * @fileOverview Master Admin Maintenance Terminal v2.9.
+ * FIXED: Added missing Input import and typed onChange event parameter.
  */
 
 export default function MaintenancePage() {

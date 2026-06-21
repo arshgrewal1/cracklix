@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview High-Density Pass Center v22.3.
- * FIXED: TS2769 by ensuring optional passExpiresAt is correctly narrowed.
+ * @fileOverview High-Density Pass Center v22.4.
+ * FIXED: TS2769 by capturing passExpiresAt locally before Date initialization.
  */
 
 export default function PassPage() {
@@ -71,8 +71,9 @@ export default function PassPage() {
   }, [rawPasses])
 
   const passStatus = useMemo(() => {
-     if (!profile?.passExpiresAt) return 'none';
-     return new Date(profile.passExpiresAt) > new Date() ? 'active' : 'expired';
+     const expiryStr = profile?.passExpiresAt;
+     if (!expiryStr) return 'none';
+     return new Date(expiryStr) > new Date() ? 'active' : 'expired';
   }, [profile]);
 
   if (userLoading || !user) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-8 w-8 text-primary animate-pulse" /></div>;
@@ -99,7 +100,7 @@ export default function PassPage() {
                                {passStatus === 'active' ? 'Active Pass' : 'Pass Expired'}
                              </h2>
                              <Badge className={cn("mt-1 border-none text-[7px] md:text-[9px] font-black uppercase px-2 py-0.5", passStatus === 'active' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                                Tier: {profile.pass?.plan || 'PREMIUM'}
+                                Tier: {profile?.pass?.plan || 'PREMIUM'}
                              </Badge>
                           </div>
                        </div>

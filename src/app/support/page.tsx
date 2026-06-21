@@ -30,7 +30,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import Link from "next/link"
 
 /**
- * @fileOverview Official Institutional Support Hub v5.0.
+ * @file Overview Official Institutional Support Hub v5.0.
  * FIXED: Missing Link and Loader2 imports.
  */
 

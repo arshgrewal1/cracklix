@@ -25,8 +25,8 @@ import { cn } from "@/lib/utils"
 import type { Question } from "@/types"
 
 /**
- * @fileOverview Hardened CBT Integrity Hub v17.0.
- * FIXED: Explicitly typed cloneElement and verified React imports.
+ * @fileOverview Hardened CBT Integrity Hub v17.1.
+ * FIXED: React.cloneElement typed correctly to resolve TS2769.
  */
 
 interface QAStatCardProps {

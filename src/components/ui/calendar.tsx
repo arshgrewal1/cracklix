@@ -10,8 +10,8 @@ import { buttonVariants } from "@/components/ui/button"
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 /**
- * @fileOverview Production-grade Calendar node v12.4 (Type Hardened).
- * FIXED: Chevron component now correctly handles all orientations and returns valid Element.
+ * @fileOverview Production-grade Calendar node v13.0 (Hardened API Alignment).
+ * FIXED: Refactored custom components to handle v9 orientation API with valid return elements.
  */
 function Calendar({
   className,

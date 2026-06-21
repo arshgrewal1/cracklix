@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useMemo } from "react"
+import React, { useState, useEffect, useMemo, isValidElement, cloneElement, ReactElement } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { HeartPulse, Zap, Activity, ShieldCheck, HardDrive, RefreshCw, Database, Server } from "lucide-react"
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
@@ -11,8 +11,8 @@ import { collection } from "firebase/firestore"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Operational Node Monitor v4.5.
- * FIXED: Explicitly typed cloneElement and verified React imports.
+ * @fileOverview Hardened Operational Node Monitor v4.6.
+ * FIXED: React.cloneElement correctly typed for production deployment.
  */
 
 export default function PlatformHealth() {
@@ -161,7 +161,7 @@ function HealthCard({ label, value, status, icon, color }: any) {
    return (
       <Card className="border-none shadow-lg bg-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] relative overflow-hidden group border border-slate-50">
          <div className="absolute top-0 right-0 p-4 md:p-6 opacity-5 group-hover:scale-110 transition-transform">
-            {React.isValidElement(icon) && React.cloneElement(icon as React.ReactElement<any>, { className: cn("h-5 w-5 md:h-8 md:w-8", color) })}
+            {isValidElement(icon) && cloneElement(icon as ReactElement<any>, { className: cn("h-5 w-5 md:h-8 md:w-8", color) })}
          </div>
          <div className="space-y-3 md:space-y-4 relative z-10 text-left">
             <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{label}</p>

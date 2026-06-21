@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Hardened Institutional PWA Manager v14.0.
- * FIXED: Reliable standalone detection and logging for Android/Samsung Internet.
+ * @fileOverview Hardened Institutional PWA Manager v15.0.
+ * FIXED: Removed /install from exclusion list to allow prompt triggering on the setup page.
+ * FIXED: Added production logging for installation handshake.
  */
 export default function PWAManager() {
   const pathname = usePathname();
@@ -23,21 +24,22 @@ export default function PWAManager() {
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (navigator as any).standalone === true;
     setIsInstalled(isStandalone);
 
-    const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin') || pathname === '/install';
+    // Only exclude active test sessions and admin panels
+    const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin');
     const isDismissed = localStorage.getItem('cracklix_pwa_dismissed') === 'true';
     const hasPrompt = !!(window as any).deferredPrompt;
     
     const shouldShow = !isStandalone && !isExcluded && !isDismissed && hasPrompt;
     setShowPrompt(shouldShow);
     
-    console.log('[PWA_AUDIT] Status:', { isStandalone, isExcluded, isDismissed, hasPrompt, shouldShow });
+    console.log('[PWA_AUDIT] Status Check:', { isStandalone, isExcluded, isDismissed, hasPrompt, shouldShow });
   }, [pathname]);
 
   useEffect(() => {
     setMounted(true);
 
     const handlePrompt = (e: any) => {
-      console.log('[PWA_AUDIT] beforeinstallprompt fired');
+      console.log('[PWA_AUDIT] beforeinstallprompt event captured');
       e.preventDefault();
       (window as any).deferredPrompt = e;
       window.dispatchEvent(new CustomEvent('pwa-installable'));
@@ -45,7 +47,7 @@ export default function PWAManager() {
     };
 
     const handleAppInstalled = () => {
-      console.log('[PWA_AUDIT] App successfully installed');
+      console.log('[PWA_AUDIT] Application successfully installed into registry');
       setIsInstalled(true);
       setShowPrompt(false);
       (window as any).deferredPrompt = null;
@@ -67,21 +69,21 @@ export default function PWAManager() {
   const handleInstallClick = async () => {
     const prompt = (window as any).deferredPrompt;
     if (!prompt) {
-      console.warn('[PWA_AUDIT] Prompt called but not available');
+      console.warn('[PWA_AUDIT] Manual trigger attempted but prompt is null');
       return;
     }
 
     try {
       await prompt.prompt();
       const { outcome } = await prompt.userChoice;
-      console.log('[PWA_AUDIT] Install result:', outcome);
+      console.log('[PWA_AUDIT] Installation outcome:', outcome);
       
       if (outcome === 'accepted') {
         setShowPrompt(false);
         (window as any).deferredPrompt = null;
       }
     } catch (err) {
-      console.error('[PWA_AUDIT] Install interaction failed:', err);
+      console.error('[PWA_AUDIT] Installation logic failure:', err);
     }
   };
 

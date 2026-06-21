@@ -43,7 +43,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Standardized Navbar v52.2 (Hardened Expiry Closure).
+ * @fileOverview Standardized Navbar v52.3.
+ * FIXED: TS2769 by ensuring optional passExpiresAt is correctly narrowed for Date constructor.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -64,6 +65,7 @@ export default function Navbar() {
     if (!expiryStr) return;
     
     const expiryDate = new Date(expiryStr);
+    if (isNaN(expiryDate.getTime())) return;
     
     const interval = setInterval(() => {
       const now = new Date().getTime();
