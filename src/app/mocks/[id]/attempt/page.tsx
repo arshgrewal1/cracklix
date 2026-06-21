@@ -26,8 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v67.0.
- * FIXED: Removed 'use server' directive conflict.
+ * @fileOverview Hardened CBT Engine v68.0.
+ * FIXED: Graceful registry mismatch handling to prevent blank screens.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -108,8 +108,16 @@ export default function MockAttemptPage() {
         
         const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
         
+        // GRACEFUL REGISTRY MISMATCH HANDLER
         if (sortedQs.length === 0) {
-           throw new Error("Could not sync preparation nodes. Registry mismatch detected.");
+           console.error("[CBT_SYNC_FAILURE]: Mock exists but question nodes are missing in registry.", { mockId, questionIds });
+           toast({ 
+             variant: "destructive", 
+             title: "Registry Mismatch", 
+             description: "Questions are currently unavailable for this mock test. Please try another series." 
+           });
+           router.replace("/mocks");
+           return;
         }
 
         const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));

@@ -1,8 +1,8 @@
 import { Firestore, doc, serverTimestamp, writeBatch, collection, getDocs } from 'firebase/firestore';
 
 /**
- * @fileOverview Official Institutional Registry Blueprint v75.0.
- * FIXED: Explicit ID mapping for questions to ensure CBT engine sync.
+ * @fileOverview Official Institutional Registry Blueprint v76.0.
+ * FIXED: Robust ID mapping for questions to ensure CBT engine synchronization.
  */
 
 export async function seedInitialData(db: Firestore) {

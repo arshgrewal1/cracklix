@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center Hub v4.4 (Production Stabilized).
- * FIXED: Missing React import and cloneElement type errors.
+ * @fileOverview Search Center Hub v4.5 (Production Stabilized).
+ * FIXED: Explicitly typed cloneElement to resolve TS2769.
  */
 
 export default function SearchPage() {

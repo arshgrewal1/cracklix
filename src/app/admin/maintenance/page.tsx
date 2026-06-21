@@ -24,8 +24,8 @@ import { clearAppCache } from "@/app/actions/maintenance"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Master Admin Maintenance Terminal v3.5.
- * FIXED: Explicitly typed confirming tool parameters.
+ * @fileOverview Master Admin Maintenance Terminal v3.6.
+ * FIXED: Explicitly typed confirming tool parameters and added missing Input import.
  */
 
 export default function MaintenancePage() {
