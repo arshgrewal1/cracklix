@@ -1,4 +1,3 @@
-'use server';
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
@@ -27,8 +26,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Hardened CBT Engine v66.0.
- * FIXED: Sync Failure resolved by hardening the question retrieval sequence.
+ * @fileOverview Hardened CBT Engine v67.0.
+ * FIXED: Removed 'use server' directive conflict.
  */
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
@@ -110,7 +109,7 @@ export default function MockAttemptPage() {
         const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
         
         if (sortedQs.length === 0) {
-           throw new Error("Could not sync preparation nodes. Please ensure you have seeded the initial data in the Admin Dashboard.");
+           throw new Error("Could not sync preparation nodes. Registry mismatch detected.");
         }
 
         const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));

@@ -6,8 +6,8 @@ import { doc, updateDoc, serverTimestamp, setDoc, Firestore } from 'firebase/fir
 import { initializeFirebase } from '@/firebase/app';
 
 /**
- * @fileOverview Global Test Store v3.4.
- * FIXED: Removed duplicate endTime property and aligned language types.
+ * @fileOverview Global Test Store v3.5.
+ * FIXED: Removed duplicate property in object literal.
  */
 
 interface ExamStore extends AttemptState {
@@ -86,7 +86,7 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const initialTimeLeft = Math.max(0, Math.floor((finalEndTime - now) / 1000));
     const finalBaseMode: LanguageDisplayMode = languageMode || 'ENGLISH_PUNJABI';
 
-    let initialLang: LanguageDisplayMode = (!forceReset && state.language !== 'ENGLISH_PUNJABI' && state.language !== ('' as any)) 
+    let initialLang: LanguageDisplayMode = (!forceReset && state.language && state.language !== ('' as any)) 
       ? state.language 
       : finalBaseMode;
     

@@ -2,7 +2,7 @@
 
 import { useMemo, useEffect } from 'react';
 import { useCollection, useFirestore, useUser, useDoc } from '@/firebase';
-import { collection, query, where, doc, Query } from 'firebase/firestore';
+import { collection, query, where, doc, Query, DocumentData } from 'firebase/firestore';
 import { Advertisement, AdPlacementType } from '@/types';
 import { trackAdImpression, trackAdClick } from '@/app/actions/ads';
 import { cn } from '@/lib/utils';
@@ -15,8 +15,8 @@ interface AdPlacementProps {
 }
 
 /**
- * @fileOverview Institutional Ad-Node v1.10 (Hardened).
- * FIXED: Explicit type casting for Advertisement query to resolve Firestore error.
+ * @fileOverview Institutional Ad-Node v1.11.
+ * FIXED: Firestore query type casting resolved.
  */
 
 export default function AdPlacement({ placement, className, examId }: AdPlacementProps) {
@@ -37,10 +37,10 @@ export default function AdPlacement({ placement, className, examId }: AdPlacemen
 
   const adsQuery = useMemo(() => {
     if (!db || isAdFree || isSafetyZone) return null;
-    return query(collection(db, 'ads'), where('status', '==', 'ACTIVE')) as Query<Advertisement>;
+    return query(collection(db, 'ads'), where('status', '==', 'ACTIVE')) as Query<Advertisement, DocumentData>;
   }, [db, isAdFree, isSafetyZone]);
 
-  const { data: ads, loading } = useCollection<Advertisement>(adsQuery);
+  const { data: ads, loading } = useCollection<Advertisement>(adsQuery as any);
 
   const activeAd = useMemo(() => {
     if (!ads) return null;
