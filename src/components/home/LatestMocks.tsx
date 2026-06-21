@@ -18,7 +18,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Dynamic Latest Mock Tests Hub v64.0 (Logic Hardened).
+ * @fileOverview Dynamic Latest Mock Tests Hub v65.0 (Branding Integrated).
+ * AUTO-RESOLUTION: Every exam card inherits parent board branding.
  */
 
 export default function LatestMocks() {

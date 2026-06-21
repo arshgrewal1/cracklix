@@ -1,26 +1,27 @@
-
 import { Exam } from "@/types"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { ArrowRight, BookOpen, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 interface ExamCardProps {
-  exam: any // Using any here to bypass strict registry type conflicts temporarily
+  exam: any // Using any for flexible hydration variants
 }
 
 /**
- * @fileOverview Refined Exam Card v2.0.
- * FIXED: Resolved property conflicts and missing type attributes.
+ * @fileOverview Refined Exam Card v3.0 (Auto-Inheritance).
+ * FIXED: Inherits and displays parent Board Logo automatically using the Authority Resolver.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   return (
     <Link href={`/exams/${exam.id}`}>
-      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-[1.5rem] overflow-hidden h-full flex flex-col">
+      <Card className="bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group rounded-[2.5rem] overflow-hidden h-full flex flex-col">
         <CardContent className="p-8 flex flex-col h-full text-left">
           <div className="flex justify-between items-start mb-8">
+            <AuthorityLogo boardId={exam.boardId} size="md" className="bg-slate-50 rounded-xl" />
             <span className="text-[10px] font-black uppercase tracking-widest text-primary bg-blue-50 px-3 py-1 rounded border border-blue-100">
-              {(exam.boardId || 'OFFICIAL').toUpperCase()} HUB
+              {(exam.boardId || 'OFFICIAL').toUpperCase()}
             </span>
           </div>
           
@@ -29,7 +30,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
           </h3>
           
           <p className="text-sm text-gray-500 font-medium leading-relaxed line-clamp-2 mb-8">
-            {exam.description || "Official preparation list for upcoming recruitments."}
+            {exam.description || "Official preparation vertical verified by institutional patterns."}
           </p>
 
           <div className="mt-auto space-y-4 pt-8 border-t border-gray-50">
@@ -43,7 +44,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
             </div>
             <div className="pt-4">
               <Button variant="ghost" className="w-full justify-between p-0 font-black uppercase tracking-widest text-[10px] text-primary hover:bg-transparent group-hover:translate-x-1 transition-transform">
-                Start Preparation <ArrowRight className="h-4 w-4" />
+                Open Exam <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
           </div>

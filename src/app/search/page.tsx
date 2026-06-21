@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useMemo, useEffect, Suspense, cloneElement, isValidElement } from "react"
+import React, { useState, useMemo, useEffect, Suspense } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Search as SearchIcon, Zap, ChevronRight, Sparkles, ShieldCheck, FileText, LayoutGrid, Loader2 } from "lucide-react"
@@ -11,10 +11,11 @@ import { useCollection, useFirestore } from "@/firebase"
 import { collection } from "firebase/firestore"
 import { useSearchParams } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Search Center Hub v2.9.
- * UI FIX: Enlarged result icons by removing padding and using contain logic.
+ * @fileOverview Search Center Hub v3.0 (Branding Integrated).
+ * FIXED: Replaced generic icons with AuthorityLogo resolver for exam results.
  */
 
 export default function SearchPage() {
@@ -48,17 +49,32 @@ function SearchContent() {
     const examMatches = (exams || []).filter((e: any) => 
       e.name?.toLowerCase().includes(term) || 
       e.boardId?.toLowerCase().includes(term)
-    ).map((e: any) => ({ title: e.name, type: "Exam Center", href: `/exams/${e.id}`, icon: <ShieldCheck className="text-primary" /> }))
+    ).map((e: any) => ({ 
+       title: e.name, 
+       type: "Exam Center", 
+       href: `/exams/${e.id}`, 
+       boardId: e.boardId 
+    }))
 
     const mockMatches = (mocks || []).filter((m: any) => 
       m.title?.toLowerCase().includes(term) || 
       m.boardId?.toLowerCase().includes(term)
-    ).map((m: any) => ({ title: m.title, type: "Practice Test", href: `/mocks/${m.id}`, icon: <Zap className="text-orange-500" /> }))
+    ).map((m: any) => ({ 
+       title: m.title, 
+       type: "Practice Test", 
+       href: `/mocks/${m.id}`, 
+       boardId: m.boardId 
+    }))
 
     const notesMatches = (notes || []).filter((n: any) => 
        n.title?.toLowerCase().includes(term) || 
        n.subjectId?.toLowerCase().includes(term)
-    ).map((n: any) => ({ title: n.title, type: "Study Material", href: `/notes`, icon: <FileText className="text-blue-500" /> }))
+    ).map((n: any) => ({ 
+       title: n.title, 
+       type: "Study Material", 
+       href: `/notes`, 
+       boardId: n.boardId 
+    }))
 
     return [...examMatches, ...mockMatches, ...notesMatches]
   }, [query, exams, mocks, notes])
@@ -99,7 +115,7 @@ function SearchContent() {
                  </div>
                  <div className="grid grid-cols-1 gap-3">
                     {results.length > 0 ? results.map((res, i) => (
-                      <SearchResultItem key={i} icon={res.icon} title={res.title} category={res.type} href={res.href} />
+                      <SearchResultItem key={i} boardId={res.boardId} title={res.title} category={res.type} href={res.href} />
                     )) : !isLoading && (
                       <div className="text-center py-20 bg-white rounded-3xl border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-3 opacity-20 flex flex-col items-center">
@@ -145,22 +161,18 @@ function SearchContent() {
   )
 }
 
-function SearchResultItem({ icon, title, category, href }: { icon: React.ReactNode, title: string, category: string, href: string }) {
+function SearchResultItem({ boardId, title, category, href }: { boardId: string, title: string, category: string, href: string }) {
    return (
       <Link href={href} className="block active:scale-[0.99] transition-all">
          <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm hover:shadow-xl flex items-center justify-between group border border-slate-100 transition-all duration-300">
             <div className="flex items-center gap-4 min-w-0 flex-1">
-               <div className="h-10 w-10 md:h-16 md:w-16 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden shrink-0 shadow-sm border border-slate-100">
-                  {isValidElement(icon) 
-                    ? cloneElement(icon as any, { className: "h-full w-full object-contain p-2" }) 
-                    : icon}
-               </div>
+               <AuthorityLogo boardId={boardId} size="md" className="bg-slate-50 rounded-xl" />
                <div className="text-left min-w-0 flex-1 space-y-1">
                   <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl leading-tight line-clamp-1 truncate">{title}</p>
                   <div className="flex items-center gap-2">
                      <span className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">{category}</span>
                      <div className="h-0.5 w-0.5 rounded-full bg-slate-200" />
-                     <span className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.2em] text-primary">Live</span>
+                     <span className="text-[7px] md:text-[9px] font-black uppercase tracking-[0.2em] text-primary">Official</span>
                   </div>
                </div>
             </div>

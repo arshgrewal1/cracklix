@@ -11,8 +11,8 @@ import { Card } from "@/components/ui/card";
 import { AuthorityLogo } from "@/lib/exam-icons";
 
 /**
- * @fileOverview Popular Punjab Exams Hub v72.0 (Branding Integrated).
- * UPDATED: Replaced generic Zap icons with Authority logos for PCS, Police, and PSSSB.
+ * @fileOverview Popular Punjab Exams Hub v73.0 (Auto-Inheritance).
+ * AUTO-RESOLUTION: Board logos are resolved automatically from the Board Registry.
  */
 
 const POPULAR_LIST = [

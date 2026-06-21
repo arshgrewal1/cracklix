@@ -3,9 +3,11 @@ import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Act
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Branding Engine v12.1 (Path Corrected).
+ * @fileOverview Institutional Branding Engine v15.0 (Single Source of Truth).
+ * RESOLVER: Maps board/category IDs to official high-fidelity local assets.
  */
 
+// 1. CANONICAL BOARD REGISTRY (Single Source of Truth)
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
   'ppsc': '/logos/boards/ppsc.png',
   'psssb': '/logos/boards/psssb.png',
@@ -23,6 +25,7 @@ const CANONICAL_BOARD_LOGOS: Record<string, string> = {
   'upsc': '/logos/boards/upsc.png'
 };
 
+// 2. CANONICAL CATEGORY REGISTRY
 const CANONICAL_CAT_LOGOS: Record<string, string> = {
   'punjab-government-exams': '/logos/categories/punjab-government-exams.png',
   'punjab-teaching-exams': '/logos/categories/punjab-teaching-exams.png',
@@ -43,11 +46,13 @@ interface AuthorityLogoProps {
 }
 
 export const AuthorityLogo = ({ board, category, boardId, categoryId, className, size = 'md' }: AuthorityLogoProps) => {
+  // NORMALIZATION ENGINE
   const normalize = (id: string) => (id || "").toLowerCase().trim().replace(/\s+/g, '-').replace(/\./g, '');
   
-  const bId = normalize(boardId || board?.id || "");
+  const bId = normalize(boardId || board?.id || board?.abbreviation || "");
   const cId = normalize(categoryId || category?.id || board?.categoryId || "");
   
+  // LOGO RESOLUTION LOGIC: Board Registry (High Priority) -> Category Registry (Fallback)
   const logoUrl = 
     CANONICAL_BOARD_LOGOS[bId] || 
     board?.iconUrl || 
@@ -70,7 +75,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
       <div className={cn("relative shrink-0 overflow-hidden flex items-center justify-center bg-white rounded-2xl", containerSize, className)}>
         <img 
           src={logoUrl} 
-          alt="Branding" 
+          alt="Official Authority Logo" 
           className="h-full w-full object-contain animate-in fade-in duration-500 scale-[1.5]"
           referrerPolicy="no-referrer"
           onError={(e) => {
@@ -81,6 +86,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     );
   }
 
+  // INSTITUTIONAL FALLBACK ICON (Strict Whitelist)
   const getFallbackIcon = () => {
     if (cId.includes('govt')) return <Landmark className="h-full w-full text-amber-600" />;
     if (cId.includes('teaching') || bId.includes('pstet')) return <BookOpen className="h-full w-full text-blue-600" />;
