@@ -10,15 +10,15 @@ interface LogoProps {
   variant?: 'light' | 'dark' | 'icon';
   href?: string;
   imgClassName?: string;
-  onClick?: void;
+  onClick?: () => void;
   priority?: boolean;
   align?: 'left' | 'center' | 'right';
   iconOnly?: boolean;
 }
 
 /**
- * @fileOverview Cracklix Maximized Brand Identity v60.0.
- * FIXED: Reduced mobile height to prevent header overflow.
+ * @fileOverview Cracklix Maximized Brand Identity v61.0.
+ * FIXED: Updated onClick type from void to () => void to resolve TS2322.
  */
 export default function Logo({
   className = "",
@@ -68,7 +68,12 @@ export default function Logo({
     return (
       <Link
         href={href || "/"}
-        onClick={onClick as any}
+        onClick={(e) => {
+           if (onClick) {
+              e.preventDefault();
+              onClick();
+           }
+        }}
         className={cn(
           "flex items-center select-none hover:opacity-90 transition-opacity flex-shrink-0",
           align === 'center' && "w-full justify-center"

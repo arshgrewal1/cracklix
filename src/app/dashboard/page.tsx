@@ -33,6 +33,9 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import ShareButton from "@/components/navigation/ShareButton"
 import { Skeleton } from "@/components/ui/skeleton"
 
+/**
+ * @fileOverview Student Dashboard v27.0 (Fixed Date Narrowing).
+ */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading, profileLoading } = useUser() as any;
   const db = useFirestore()
@@ -55,12 +58,14 @@ export default function StudentDashboard() {
   }, [user, profile, authLoading, router, mounted])
 
   useEffect(() => {
-    if (!profile?.passExpiresAt) return;
+    const expiryStr = profile?.passExpiresAt;
+    if (!expiryStr) return;
     
+    const expiryDate = new Date(expiryStr);
+
     const interval = setInterval(() => {
-      const expiry = new Date(profile.passExpiresAt).getTime();
       const now = new Date().getTime();
-      const diff = expiry - now;
+      const diff = expiryDate.getTime() - now;
 
       if (diff <= 0) {
         setPassCountdown("Expired");

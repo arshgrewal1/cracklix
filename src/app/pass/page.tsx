@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview High-Density Pass Center v21.0 (PWA Optimized).
- * FIXED: Hardened passExpiresAt narrowing for setInterval to resolve TS2769.
+ * @fileOverview High-Density Pass Center v22.0 (PWA Optimized).
+ * FIXED: Hardened passExpiresAt narrowing to resolve TS2769.
  */
 
 export default function PassPage() {
@@ -38,10 +38,11 @@ export default function PassPage() {
     const expiryStr = profile?.passExpiresAt;
     if (!expiryStr) return;
     
+    const expiryDate = new Date(expiryStr);
+    
     const interval = setInterval(() => {
-       const expiry = new Date(expiryStr).getTime();
        const now = new Date().getTime();
-       const diff = expiry - now;
+       const diff = expiryDate.getTime() - now;
 
        if (diff <= 0) {
           setTimeLeft(null);

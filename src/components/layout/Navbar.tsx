@@ -43,7 +43,7 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Standardized Navbar v51.0 (Compact Mobile).
+ * @fileOverview Standardized Navbar v52.0 (Fixed Date Narrowing).
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -60,12 +60,14 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    if (!profile?.passExpiresAt) return;
+    const expiryStr = profile?.passExpiresAt;
+    if (!expiryStr) return;
+    
+    const expiryDate = new Date(expiryStr);
     
     const interval = setInterval(() => {
-      const expiry = new Date(profile.passExpiresAt).getTime();
       const now = new Date().getTime();
-      const diff = expiry - now;
+      const diff = expiryDate.getTime() - now;
 
       if (diff <= 0) {
         setTimeLeft("Expired");
