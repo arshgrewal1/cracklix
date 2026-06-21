@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react"
 import { motion } from "framer-motion"
-import { BookOpen, Clock, Zap, Lock, ChevronRight, Users } from "lucide-react"
+import { BookOpen, Clock, Zap, Lock, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { 
@@ -18,7 +18,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Mock Grid v74.0 (Title Case).
+ * @fileOverview High-Density Mock Grid v75.0 (Data Cleaned).
+ * REMOVED: Static attempt counts to preserve data integrity for pre-launch.
  */
 
 export default function LatestMocks() {
@@ -81,15 +82,12 @@ export default function LatestMocks() {
 
                      <div className="flex items-center gap-1.5 pt-0.5">
                         {isPremium && <Badge className="bg-orange-50 text-orange-600 border-none text-[6px] md:text-[8px] font-black px-1.5 py-0.5 rounded uppercase">PREMIUM</Badge>}
-                        <div className="flex items-center gap-1 text-[7px] md:text-[9px] font-black text-slate-300 uppercase tracking-tighter">
-                           <Users className="h-2.5 w-2.5 md:h-3.5 md:w-3.5" /> 450+ Attempts
-                        </div>
                      </div>
                   </CardHeader>
 
                   <div className="mt-4 md:mt-10 pt-3 border-t border-slate-50">
                      <Button asChild className={cn(
-                       "w-full h-8 md:h-14 rounded-lg md:rounded-2xl font-black text-[8px] md:text-[11px] tracking-[0.2em] uppercase shadow-md border-none transition-all active:scale-95 gap-2", 
+                       "w-full h-8 md:h-14 rounded-full font-black text-[8px] md:text-[11px] tracking-[0.2em] uppercase shadow-md border-none transition-all active:scale-95 gap-2", 
                        locked ? "bg-orange-500 hover:bg-orange-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                      )}>
                         <Link href={locked ? '/pass' : `/mocks/${mock.id}`}>
