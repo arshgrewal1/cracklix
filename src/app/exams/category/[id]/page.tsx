@@ -1,26 +1,31 @@
+
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, where } from "firebase/firestore"
+import { useCollection, useFirestore, useUser } from "@/firebase"
+import { collection, query, where, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { ChevronLeft, ChevronRight } from "lucide-react"
+import { ChevronLeft, ChevronRight, Star, CheckCircle2, RefreshCw } from "lucide-react"
 import { AuthorityLogo } from "@/lib/exam-icons"
+import { cn } from "@/lib/utils"
+import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Hierarchical Category Hub v54.0.
- * OPTIMIZATION: Reduced header padding and logo size for PWA density.
+ * @fileOverview Hierarchical Category Hub v55.0 (Pinning Enabled).
  */
 
 export default function CategoryHubsPage() {
   const params = useParams();
   const router = useRouter();
   const db = useFirestore();
+  const { user, profile } = useUser();
+  const { toast } = useToast();
   const catId = params.id as string;
+  const [pinningId, setPinningId] = useState<string | null>(null);
 
   const { data: categories } = useCollection<any>(useMemo(() => (db ? collection(db, "categories") : null), [db]));
   const category = categories?.find(c => c.id === catId);
@@ -56,6 +61,19 @@ export default function CategoryHubsPage() {
      if (!rawExams) return [];
      return rawExams.filter(e => (statsMap[e.id]?.total || 0) > 0);
   }, [rawExams, statsMap]);
+
+  const handleTogglePin = async (e: React.MouseEvent, examId: string) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!db || !user || pinningId) return;
+    setPinningId(examId);
+    const isPinned = profile?.pinnedExams?.includes(examId);
+    const userRef = doc(db, "users", user.uid);
+    try {
+      if (isPinned) await updateDoc(userRef, { pinnedExams: arrayRemove(examId), updatedAt: serverTimestamp() });
+      else await updateDoc(userRef, { pinnedExams: arrayUnion(examId), updatedAt: serverTimestamp() });
+      toast({ title: isPinned ? "Removed from hub" : "Added to your hub" });
+    } finally { setPinningId(null); }
+  };
 
   const hasBoards = boards && boards.length > 0;
 
@@ -101,17 +119,25 @@ export default function CategoryHubsPage() {
             </div>
          ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-               {activeExams.map((exam) => (
-                  <Card key={exam.id} onClick={() => router.push(`/exams/${exam.id}`)} className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-6 md:p-10 text-left cursor-pointer">
-                     <AuthorityLogo category={category} size="md" className="md:w-20 md:h-20 bg-slate-50 rounded-xl mb-4 md:mb-8" />
-                     <h3 className="text-lg md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight mb-4 md:mb-6">{exam.name}</h3>
-                     <div className="mt-auto">
-                        <Button className="w-full h-11 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[10px] md:text-[11px] tracking-widest uppercase border-none shadow-md gap-2">
-                           Open Exam <ChevronRight className="h-3 w-3" />
-                        </Button>
-                     </div>
-                  </Card>
-               ))}
+               {activeExams.map((exam) => {
+                  const isPinned = profile?.pinnedExams?.includes(exam.id);
+                  return (
+                    <Card key={exam.id} onClick={() => router.push(`/exams/${exam.id}`)} className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[2.5rem] bg-white group overflow-hidden h-full flex flex-col p-6 md:p-10 text-left cursor-pointer">
+                       <div className="flex justify-between items-start mb-4 md:mb-8">
+                          <AuthorityLogo category={category} size="md" className="md:w-20 md:h-20 bg-slate-50 rounded-xl" />
+                          <button onClick={(e) => handleTogglePin(e, exam.id)} disabled={pinningId === exam.id} className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl border flex items-center justify-center transition-all shadow-sm", isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}>
+                             {pinningId === exam.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : isPinned ? <CheckCircle2 className="h-4 w-4" /> : <Star className="h-4 w-4" />}
+                          </button>
+                       </div>
+                       <h3 className="text-lg md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight mb-4 md:mb-6">{exam.name}</h3>
+                       <div className="mt-auto">
+                          <Button className="w-full h-11 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[10px] md:text-[11px] tracking-widest uppercase border-none shadow-md gap-2">
+                             Open Exam <ChevronRight className="h-3 w-3" />
+                          </Button>
+                       </div>
+                    </Card>
+                  )
+               })}
             </div>
          )}
       </main>

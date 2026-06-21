@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
@@ -5,18 +6,20 @@ import { useRouter, usePathname } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, orderBy } from "firebase/firestore"
-import { Landmark, ChevronRight, Zap, BookOpen, Layers } from "lucide-react"
+import { collection, query, orderBy, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
+import { Landmark, ChevronRight, Zap, BookOpen, Search, Star, CheckCircle2, RefreshCw, Layers } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AuthorityLogo } from "@/lib/exam-icons"
+import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview High-Density Category Explorer v27.0 (Hierarchy Aligned).
+ * @fileOverview High-Density Category Explorer v28.0 (Instant Pinning Enabled).
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -32,23 +35,49 @@ export default function ExamsEntryPage() {
   const db = useFirestore();
   const router = useRouter();
   const pathname = usePathname();
-  const { user, loading: authLoading } = useUser();
+  const { user, profile, loading: authLoading } = useUser();
+  const { toast } = useToast();
   
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
-    }
-  }, [user, authLoading, router, pathname]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pinningId, setPinningId] = useState<string | null>(null);
 
   const { data: rawCategories, loading: catLoading } = useCollection<any>(useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]));
-  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
+  const { data: exams, loading: examsLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
   const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]));
-  const { data: pyqs } = useCollection<any>(useMemo(() => (db ? collection(db, "pyqs") : null), [db]));
+  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
 
   const categories = useMemo(() => {
     if (!rawCategories) return [];
     return rawCategories.filter(c => AUTHORIZED_CATEGORY_IDS.includes(c.id));
   }, [rawCategories]);
+
+  const filteredExams = useMemo(() => {
+    if (!searchTerm || !exams) return [];
+    const term = searchTerm.toLowerCase().trim();
+    return exams.filter(e => 
+      e.name?.toLowerCase().includes(term) || 
+      e.boardId?.toLowerCase().includes(term)
+    ).slice(0, 8);
+  }, [exams, searchTerm]);
+
+  const handleTogglePin = async (e: React.MouseEvent, examId: string) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!db || !user || pinningId) return;
+    setPinningId(examId);
+    const isPinned = profile?.pinnedExams?.includes(examId);
+    const userRef = doc(db, "users", user.uid);
+    try {
+      if (isPinned) {
+        await updateDoc(userRef, { pinnedExams: arrayRemove(examId), updatedAt: serverTimestamp() });
+        toast({ title: "Removed from hub" });
+      } else {
+        await updateDoc(userRef, { pinnedExams: arrayUnion(examId), updatedAt: serverTimestamp() });
+        toast({ title: "Added to your hub" });
+      }
+    } catch (err) {
+      toast({ variant: "destructive", title: "Sync failed" });
+    } finally { setPinningId(null); }
+  };
 
   if (authLoading || !user) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
@@ -56,15 +85,70 @@ export default function ExamsEntryPage() {
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body text-left">
       <Navbar />
       <main className="container mx-auto px-3 md:px-6 py-6 md:py-12 max-w-7xl">
-        <div className="text-left mb-6 md:mb-12 space-y-1 md:space-y-3 px-1">
-          <div className="flex items-center gap-2">
-             <div className="h-7 w-7 bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-inner"><Landmark className="h-4 w-4" /></div>
-             <span className="text-[9px] font-black text-slate-400 tracking-[0.2em] uppercase">Recruitment Boards</span>
+        
+        {/* 1. Header & Quick Search */}
+        <div className="text-left mb-8 md:mb-16 space-y-6 px-1">
+          <div className="space-y-1 md:space-y-3">
+             <div className="flex items-center gap-2">
+                <div className="h-7 w-7 bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-inner"><Landmark className="h-4 w-4" /></div>
+                <span className="text-[9px] font-black text-slate-400 tracking-[0.2em] uppercase">Selection Hub</span>
+             </div>
+             <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] leading-tight tracking-tight uppercase">Choose Category</h1>
+             <p className="text-slate-500 font-medium text-[11px] md:text-lg max-w-2xl">Find your exam or browse by recruitment category below.</p>
           </div>
-          <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] leading-tight tracking-tight uppercase">Choose Category</h1>
-          <p className="text-slate-500 font-medium text-[11px] md:text-lg max-w-2xl">Select a vertical to browse verified exams and tests.</p>
+
+          <div className="relative max-w-2xl group">
+             <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+             <Input 
+                className="h-14 md:h-16 pl-14 rounded-2xl md:rounded-[2rem] bg-white border-slate-200 shadow-xl text-sm md:text-lg font-bold" 
+                placeholder="Search specific exam (e.g. Patwari)..." 
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+             />
+             
+             {searchTerm.length >= 2 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-[2rem] shadow-5xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                   <div className="p-4 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
+                      <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Search Results</span>
+                      <button onClick={() => setSearchTerm("")} className="text-slate-400 hover:text-rose-500"><RefreshCw className="h-3 w-3" /></button>
+                   </div>
+                   <div className="divide-y divide-slate-50 max-h-[400px] overflow-y-auto">
+                      {filteredExams.length > 0 ? filteredExams.map((e) => {
+                         const isPinned = profile?.pinnedExams?.includes(e.id);
+                         const board = boards?.find((b: any) => b.id === e.boardId);
+                         return (
+                            <div key={e.id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-all">
+                               <Link href={`/exams/${e.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                                  <div className="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center shrink-0">
+                                     <GraduationCap className="h-5 w-5 text-slate-400" />
+                                  </div>
+                                  <div className="min-w-0">
+                                     <p className="font-bold text-[#0F172A] truncate text-sm">{e.name}</p>
+                                     <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">{board?.abbreviation || 'PSSSB'} HUB</p>
+                                  </div>
+                               </Link>
+                               <button 
+                                  onClick={(ev) => handleTogglePin(ev, e.id)} 
+                                  disabled={pinningId === e.id}
+                                  className={cn(
+                                     "h-10 w-10 rounded-xl border flex items-center justify-center transition-all shadow-sm shrink-0 ml-4",
+                                     isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-200 text-slate-300 hover:text-primary hover:border-primary/30"
+                                  )}
+                               >
+                                  {pinningId === e.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : isPinned ? <CheckCircle2 className="h-4 w-4" /> : <Star className="h-4 w-4" />}
+                               </button>
+                            </div>
+                         )
+                      }) : (
+                         <div className="p-10 text-center text-slate-400 italic text-sm">No exam nodes matching your query.</div>
+                      )}
+                   </div>
+                </div>
+             )}
+          </div>
         </div>
 
+        {/* 2. Categories Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
            {catLoading ? (
              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-40 md:h-80 w-full rounded-2xl bg-white" />)
