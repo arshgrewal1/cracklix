@@ -12,8 +12,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
 
 /**
- * @fileOverview Strictly Whitelisted 7-Category Hub v106.0.
- * BRANDING: Uses the official logo engine.
+ * @fileOverview Strictly Whitelisted 7-Category Hub v110.0.
+ * BRANDING: Updated to the new canonical 7-category list.
  */
 
 const STRICT_WHITELIST = [
@@ -21,9 +21,9 @@ const STRICT_WHITELIST = [
   "punjab-teaching-exams",
   "punjab-technical-exams",
   "banking-exams",
-  "medical-health-exams",
+  "punjab-health-exams",
   "judiciary-exams",
-  "central-government-exams"
+  "high-court-exams"
 ];
 
 export default function FeaturedCategories() {

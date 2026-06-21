@@ -15,17 +15,18 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Strict Category Explorer v19.0.
- * ENFORCED: Whitelist filter ensures only the 6 authorized categories are listed.
+ * @fileOverview Strict Category Explorer v22.0.
+ * ENFORCED: Whitelist filter ensures only the 7 authorized categories are listed.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
-  "punjab-govt",
-  "punjab-teaching",
-  "punjab-technical",
+  "punjab-government-exams",
+  "punjab-teaching-exams",
+  "punjab-technical-exams",
   "banking-exams",
+  "punjab-health-exams",
   "judiciary-exams",
-  "central-govt"
+  "high-court-exams"
 ];
 
 export default function ExamsEntryPage() {
@@ -68,7 +69,9 @@ export default function ExamsEntryPage() {
              <Link key={cat.id} href={`/exams/category/${cat.id}`}>
                 <Card className="border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2rem] bg-white group overflow-hidden h-full flex flex-col p-6">
                    <div className="flex justify-between items-start mb-6">
-                      <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center text-primary shadow-inner"><ShieldCheck className="h-6 w-6" /></div>
+                      <div className="h-12 w-12 rounded-xl bg-slate-50 flex items-center justify-center text-primary shadow-inner">
+                         <ShieldCheck className="h-6 w-6" />
+                      </div>
                       <Badge className="bg-[#0F172A] text-white border-none text-[8px] font-black uppercase px-3 py-1 rounded-lg">AUTHORIZED</Badge>
                    </div>
                    <h3 className="text-xl font-black text-[#0F172A] group-hover:text-primary transition-colors uppercase leading-tight mb-3">{cat.title}</h3>
@@ -76,7 +79,7 @@ export default function ExamsEntryPage() {
                    <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
                       <div className="flex flex-col">
                         <span className="text-xs font-black text-[#0F172A]">{exams?.filter(e => e.categoryId === cat.id).length || 0}</span>
-                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Exams</span>
+                        <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1">Exams</span>
                       </div>
                       <Button variant="ghost" className="h-10 px-6 rounded-xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[10px] tracking-widest uppercase border-none shadow-md">View Exams <ChevronRight className="ml-2 h-3.5 w-3.5" /></Button>
                    </div>
