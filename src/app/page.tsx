@@ -11,10 +11,11 @@ import AppPreview from "@/components/home/AppPreview";
 import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
 import GlobalSearch from "@/components/home/GlobalSearch";
+import StatsBar from "@/components/home/StatsBar";
 
 /**
- * @fileOverview Official Home Page v203.0.
- * UPDATED: Hierarchy Restoration (Hero -> FeaturedCategories -> LatestMocks).
+ * @fileOverview Official Home Page v204.0.
+ * RESTORED: Added StatsBar back to the discovery flow.
  */
 export default function HomePage() {
   return (
@@ -29,28 +30,31 @@ export default function HomePage() {
         <GlobalSearch />
       </div>
 
-      {/* 3. Choose Your Exam (Primary Discovery) */}
+      {/* 3. Live Metrics Hub (Restored) */}
+      <StatsBar />
+
+      {/* 4. Choose Your Exam (Primary Discovery) */}
       <FeaturedCategories />
 
-      {/* 4. Popular Exams */}
+      {/* 5. Popular Exams */}
       <PopularExams />
 
-      {/* 5. Latest Mock Tests */}
+      {/* 6. Latest Mock Tests */}
       <LatestMocks />
 
-      {/* 6. Personal Progress */}
+      {/* 7. Personal Progress */}
       <ContinueLearning />
 
-      {/* 7. Study Material */}
+      {/* 8. Study Material */}
       <CurrentAffairsPreview />
 
-      {/* 8. Merit Rankings */}
+      {/* 9. Merit Rankings */}
       <MeritPreview />
 
-      {/* 9. Mobile App */}
+      {/* 10. Mobile App */}
       <AppPreview />
 
-      {/* 10. Founder Section */}
+      {/* 11. Founder Section */}
       <MeetFounder />
       
       <Footer />
