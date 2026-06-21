@@ -16,18 +16,16 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Master Registry v15.0 (Central Govt Added).
+ * @fileOverview High-Density Master Registry v16.0 (Hierarchy Aligned).
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
   "punjab-government-exams",
-  "central-government-exams",
   "punjab-teaching-exams",
   "punjab-technical-exams",
   "banking-exams",
-  "punjab-health-exams",
   "judiciary-exams",
-  "high-court-exams"
+  "central-government-exams"
 ];
 
 export default function MocksDiscoveryPage() {

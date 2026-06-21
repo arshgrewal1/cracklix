@@ -14,18 +14,16 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview High-Density Category Explorer v122.0 (Central Govt Added).
+ * @fileOverview High-Density Category Explorer v123.0 (Strictly Aligned).
  */
 
 const STRICT_WHITELIST = [
   "punjab-government-exams",
-  "central-government-exams",
   "punjab-teaching-exams",
   "punjab-technical-exams",
   "banking-exams",
-  "punjab-health-exams",
   "judiciary-exams",
-  "high-court-exams"
+  "central-government-exams"
 ];
 
 export default function FeaturedCategories() {

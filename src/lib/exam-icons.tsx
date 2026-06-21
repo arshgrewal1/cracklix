@@ -3,38 +3,33 @@ import { Shield, GraduationCap, Scale, Zap, Stethoscope, Landmark, BookOpen, Act
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Branding Engine v17.0 (Central Govt Added).
+ * @fileOverview Institutional Branding Engine v18.0 (Hierarchy Aligned).
  * RESOLVER: Maps board/category IDs to official high-fidelity local assets.
  */
 
-// 1. CANONICAL BOARD REGISTRY (Single Source of Truth)
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
   'ppsc': '/logos/boards/ppsc.png',
   'psssb': '/logos/boards/psssb.png',
   'punjab-police': '/logos/boards/punjab-police.png',
-  'pstet': '/logos/boards/pstet.png',
-  'erb': '/logos/boards/education-board.png',
+  'teaching-hub': '/logos/boards/education-board.png',
   'pspcl': '/logos/boards/pspcl.png',
   'pstcl': '/logos/boards/pstcl.png',
-  'pscb': '/logos/boards/pscb.png',
   'bfuhs': '/logos/boards/bfuhs.png',
-  'phhc': '/logos/boards/high-court.png',
+  'banking-hub': '/logos/boards/pscb.png',
+  'judiciary-hub': '/logos/boards/high-court.png',
   'ssc': '/logos/boards/ssc.png',
-  'ibps': '/logos/boards/ibps.png',
   'rrb': '/logos/boards/rrb.png',
-  'upsc': '/logos/boards/upsc.png'
+  'ibps': '/logos/boards/ibps.png',
+  'defense': '/logos/boards/upsc.png'
 };
 
-// 2. CANONICAL CATEGORY REGISTRY
 const CANONICAL_CAT_LOGOS: Record<string, string> = {
   'punjab-government-exams': '/logos/categories/punjab-government-exams.png',
-  'central-government-exams': '/logos/categories/punjab-government-exams.png', // Placeholder
   'punjab-teaching-exams': '/logos/categories/punjab-teaching-exams.png',
   'punjab-technical-exams': '/logos/punjab-technical-exams.png',
   'banking-exams': '/logos/categories/banking-exams.png',
-  'punjab-health-exams': '/logos/categories/punjab-health-exams.png',
   'judiciary-exams': '/logos/categories/judiciary-exams.png',
-  'high-court-exams': '/logos/high-court.png'
+  'central-government-exams': '/logos/categories/punjab-government-exams.png'
 };
 
 interface AuthorityLogoProps {
@@ -47,13 +42,11 @@ interface AuthorityLogoProps {
 }
 
 export const AuthorityLogo = ({ board, category, boardId, categoryId, className, size = 'md' }: AuthorityLogoProps) => {
-  // NORMALIZATION ENGINE
   const normalize = (id: string) => (id || "").toLowerCase().trim().replace(/\s+/g, '-').replace(/\./g, '');
   
   const bId = normalize(boardId || board?.id || board?.abbreviation || "");
   const cId = normalize(categoryId || category?.id || board?.categoryId || "");
   
-  // LOGO RESOLUTION LOGIC: Board Registry (High Priority) -> Category Registry (Fallback)
   const logoUrl = 
     CANONICAL_BOARD_LOGOS[bId] || 
     board?.iconUrl || 
@@ -79,22 +72,18 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           alt="Official Authority Logo" 
           className="h-full w-full object-contain animate-in fade-in duration-500 scale-[1.8]"
           referrerPolicy="no-referrer"
-          onError={(e) => {
-            (e.target as any).style.display = 'none';
-          }}
+          onError={(e) => { (e.target as any).style.display = 'none'; }}
         />
       </div>
     );
   }
 
-  // INSTITUTIONAL FALLBACK ICON (Strict Whitelist)
   const getFallbackIcon = () => {
     if (cId.includes('govt')) return <Landmark className="h-full w-full text-amber-600" />;
-    if (cId.includes('teaching') || bId.includes('pstet')) return <BookOpen className="h-full w-full text-blue-600" />;
-    if (cId.includes('technical') || bId.includes('power') || bId.includes('pspcl')) return <Settings className="h-full w-full text-slate-600" />;
+    if (cId.includes('teaching')) return <BookOpen className="h-full w-full text-blue-600" />;
+    if (cId.includes('technical')) return <Settings className="h-full w-full text-slate-600" />;
     if (cId.includes('bank')) return <Building2 className="h-full w-full text-emerald-700" />;
-    if (cId.includes('health')) return <Stethoscope className="h-full w-full text-rose-600" />;
-    if (cId.includes('judiciary') || cId.includes('court')) return <Scale className="h-full w-full text-slate-700" />;
+    if (cId.includes('judiciary')) return <Scale className="h-full w-full text-slate-700" />;
     if (cId.includes('central')) return <Globe className="h-full w-full text-blue-800" />;
     return <Shield className="h-full w-full text-slate-300" />;
   };
