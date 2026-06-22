@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Production Search Hub v2.8.
- * FIXED: Resolved React module errors and variable scope issues.
+ * @fileOverview Production Search Hub v2.9.
+ * FIXED: Resolved React UMD module errors and variable scope issues.
  */
 
 export default function SearchPage() {
