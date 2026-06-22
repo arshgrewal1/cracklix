@@ -5,7 +5,6 @@ const config: CapacitorConfig = {
   appId: 'com.cracklix.app',
   appName: 'Cracklix',
   webDir: 'out',
-  bundledWebRuntime: false,
   server: {
     // For production builds with Server Actions, use the live URL
     // url: 'https://cracklix.vercel.app',
