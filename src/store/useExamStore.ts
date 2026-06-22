@@ -84,7 +84,8 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const initialTimeLeft = Math.max(0, Math.floor((finalEndTime - now) / 1000));
     const finalBaseMode: LanguageDisplayMode = languageMode || 'ENGLISH_PUNJABI';
 
-    const initialLang: LanguageDisplayMode = (!forceReset && state.language) 
+    // Fix for the language comparison/assignment issue
+    const initialLang: LanguageDisplayMode = (!forceReset && state.language && state.language !== 'ENGLISH_PUNJABI') 
       ? state.language 
       : finalBaseMode;
     
@@ -107,7 +108,7 @@ export const useExamStore = create<ExamStore>((set, get) => ({
       currentSectionId: questions[forceReset ? 0 : (savedState?.currentIdx || 0)]?.sectionId || 'General Hub',
       isPaused: false, 
       isSyncing: false,
-      isSubmitting: false
+      isSubmitting: false // Removed duplicate entry here
     });
 
     if (userId && mockId && (forceReset || !savedState)) {
