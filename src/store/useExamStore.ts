@@ -240,4 +240,4 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     set({ violations: newVal });
     updateDoc(doc(dbInstance, 'attempts', `${userId}_${mockId}`), { violations: newVal, updatedAt: serverTimestamp() }).catch(() => {});
   }
-}));
+}))

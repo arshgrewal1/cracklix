@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Production Search Hub v2.9.
+ * @fileOverview Production Search Hub v3.0.
  * FIXED: Resolved React UMD module errors and variable scope issues.
  */
 

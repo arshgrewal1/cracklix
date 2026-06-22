@@ -30,7 +30,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Support Ticket Management Console v5.5.
+ * @fileOverview Institutional Support Ticket Management Console v5.6.
  * FIXED: Restored Link and Loader2 components to the import registry.
  */
 
@@ -178,7 +178,7 @@ export default function SupportPage() {
            </div>
 
            <div className="lg:col-span-4 space-y-6">
-              <Card className="border-none shadow-3xl rounded-[3rem] bg-[#0B1528] text-white p-10 md:p-12 space-y-8 relative overflow-hidden group">
+              <Card className="border-none shadow-3xl rounded-[3rem] bg-[#0B1528] text-white p-10 md:p-12 space-y-6 md:space-y-8 relative overflow-hidden group">
                  <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Zap className="h-48 w-48" /></div>
                  <div className="relative z-10 space-y-6">
                     <div className="h-14 w-14 bg-primary/20 rounded-2xl flex items-center justify-center text-primary shadow-2xl">
