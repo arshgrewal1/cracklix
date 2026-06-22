@@ -1,14 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Capacitor } from '@capacitor/core';
+import { Capacitor, PluginListenerHandle } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 /**
- * @fileOverview Global Native App Bridge v1.9.
- * FIXED: Wrapped all native plugins in isNativePlatform checks to prevent web crashes.
+ * @fileOverview Global Native App Bridge v2.0.
  */
 export default function CapacitorManager() {
   useEffect(() => {
@@ -16,14 +15,27 @@ export default function CapacitorManager() {
       return;
     }
 
-    // Hardware Back Button Handling
-    const backListener = App.addListener('backButton', ({ canGoBack }) => {
-      if (!canGoBack) {
-        App.exitApp();
-      } else {
-        window.history.back();
-      }
-    });
+    let backListener: PluginListenerHandle | null = null;
+    let urlListener: PluginListenerHandle | null = null;
+
+    const setupListeners = async () => {
+      // Hardware Back Button Handling
+      backListener = await App.addListener('backButton', ({ canGoBack }) => {
+        if (!canGoBack) {
+          App.exitApp();
+        } else {
+          window.history.back();
+        }
+      });
+
+      // Deep Link Listener
+      urlListener = await App.addListener('appUrlOpen', (data) => {
+        const slug = data.url.split('.app').pop();
+        if (slug) window.location.href = slug;
+      });
+    };
+
+    setupListeners();
 
     // Status Bar Configuration
     try {
@@ -32,12 +44,6 @@ export default function CapacitorManager() {
     } catch (e) {
       console.warn('[NATIVE_BRIDGE] StatusBar plugin error');
     }
-
-    // Deep Link Listener
-    const urlListener = App.addListener('appUrlOpen', (data) => {
-      const slug = data.url.split('.app').pop();
-      if (slug) window.location.href = slug;
-    });
 
     // External Browser Interceptor
     const handleLinkClick = (e: MouseEvent) => {
@@ -62,8 +68,8 @@ export default function CapacitorManager() {
     
     return () => {
       document.removeEventListener('click', handleLinkClick);
-      backListener.remove();
-      urlListener.remove();
+      if (backListener) backListener.remove();
+      if (urlListener) urlListener.remove();
     };
   }, []);
 

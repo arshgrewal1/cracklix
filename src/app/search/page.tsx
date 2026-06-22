@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, cloneElement, isValidElement, ReactElement } from "react"
@@ -189,7 +188,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
                   <div className="flex items-center gap-3">
                      <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] md:text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm">{category}</Badge>
                      <div className="h-1 w-1 rounded-full bg-slate-200" />
-                     <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary">Verified Node</span>
+                     <span className="text-[8px] font-black uppercase tracking-widest text-primary">Verified Node</span>
                   </div>
                </div>
             </div>

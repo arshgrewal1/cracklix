@@ -7,7 +7,6 @@ import { useFirestore } from '@/firebase';
 
 /**
  * @fileOverview Anti-Cheat Security Node v1.4.
- * FIXED: Argument mismatch in addViolation call resolved.
  */
 export default function AntiCheat() {
   const { addViolation } = useExamStore();
@@ -18,7 +17,6 @@ export default function AntiCheat() {
     const handleBlur = () => {
       if (!db) return;
       
-      // Fixed: Passing db instance to store action to sync with cloud
       addViolation(db);
       
       toast({

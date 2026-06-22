@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -130,7 +129,7 @@ export default function SupportPage() {
                     {tickets.map((t: any) => (
                        <Card key={t.id} className="border-none shadow-xl rounded-[2.5rem] bg-white overflow-hidden group hover:shadow-2xl transition-all border border-slate-100">
                           <CardContent className="p-8 space-y-6">
-                             <div className="flex justify-between items-start">
+                             <div className="justify-between items-start flex">
                                 <div className="space-y-1">
                                    <div className="flex items-center gap-3">
                                       <Badge className={cn(
