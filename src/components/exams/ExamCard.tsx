@@ -4,9 +4,10 @@ import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { Badge } from "@/components/ui/badge"
+import { Exam } from "@/types"
 
 interface ExamCardProps {
-  exam: any 
+  exam: Exam 
 }
 
 /**
