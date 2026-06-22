@@ -5,8 +5,6 @@ const config: CapacitorConfig = {
   appName: 'Cracklix',
   webDir: 'out',
   server: {
-    // For production builds with Server Actions, use the live URL
-    // url: 'https://cracklix.vercel.app',
     androidScheme: 'https'
   },
   plugins: {

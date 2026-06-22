@@ -32,7 +32,7 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow write: if isAdmin() || (isOwner(userId) && (
         // Protect sensitive fields from self-modification
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'pass', 'passStatus', 'planTier', 'passExpiresAt'])
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'pass', 'passStatus', 'planTier', 'passExpiresAt', 'status'])
       ));
     }
 

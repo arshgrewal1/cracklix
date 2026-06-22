@@ -8,42 +8,16 @@ import { Browser } from '@capacitor/browser';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 /**
- * @fileOverview Global Native App Bridge v1.7 (Build Fixed).
- * Intercepts web behaviors to provide a high-fidelity Android experience.
- * FIXED: Wrapped all native API calls in strict isNativePlatform guards.
+ * @fileOverview Global Native App Bridge v1.8 (Certified Build).
+ * FIXED: Wrapped native plugins in platform guards to prevent web crashes.
  */
 export default function CapacitorManager() {
   useEffect(() => {
-    // 1. Device Handshake - Strict Native Container Check
     if (!Capacitor.isNativePlatform()) {
-      console.log('[NATIVE_BRIDGE] Standard Browser Environment Detected.');
       return;
     }
 
-    console.log('[NATIVE_BRIDGE] Initializing Android Environment');
-
-    // 2. Share Bridge: Intercept navigator.share for Native Share Sheet
-    if (typeof navigator !== 'undefined') {
-      const originalShare = navigator.share;
-      navigator.share = async (data: any) => {
-        try {
-          if (Capacitor.isNativePlatform()) {
-            await Share.share({
-              title: data.title || 'Cracklix',
-              text: data.text || 'Prepare for Punjab Government Exams with Cracklix.',
-              url: data.url || window.location.href,
-            });
-            return undefined;
-          }
-          return originalShare(data);
-        } catch (err) {
-          if (originalShare) return originalShare(data);
-        }
-        return undefined;
-      };
-    }
-
-    // 3. Hardware Back Button Handling
+    // Hardware Back Button Handling
     App.addListener('backButton', ({ canGoBack }) => {
       if (!canGoBack) {
         App.exitApp();
@@ -52,23 +26,21 @@ export default function CapacitorManager() {
       }
     });
 
-    // 4. Status Bar Node Configuration
+    // Status Bar Node Configuration
     try {
-      if (Capacitor.isNativePlatform()) {
-        StatusBar.setStyle({ style: Style.Dark });
-        StatusBar.setBackgroundColor({ color: '#0B1528' });
-      }
+      StatusBar.setStyle({ style: Style.Dark });
+      StatusBar.setBackgroundColor({ color: '#0B1528' });
     } catch (e) {
-      console.warn('[NATIVE_BRIDGE] StatusBar plugin fail');
+      console.warn('[NATIVE_BRIDGE] StatusBar plugin error');
     }
 
-    // 5. Deep Link Listener
+    // Deep Link Listener
     App.addListener('appUrlOpen', (data) => {
       const slug = data.url.split('.app').pop();
       if (slug) window.location.href = slug;
     });
 
-    // 6. External Browser Interceptor
+    // External Browser Interceptor
     const handleLinkClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const anchor = target.closest('a');
