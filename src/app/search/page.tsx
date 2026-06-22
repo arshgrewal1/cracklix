@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Production Search Hub v3.8.
- * FIXED: Resolved UMD global and cloneElement typing for strict production build.
+ * @fileOverview Production Search Hub v4.0.
+ * FIXED: Resolved UMD global error and hardened cloneElement typing.
  */
 
 export default function SearchPage() {

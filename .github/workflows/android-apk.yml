@@ -9,7 +9,6 @@ on:
 
 env:
   GRADLE_OPTS: "-Xmx4096m -Dorg.gradle.jvmargs=-Xmx4096m"
-  NODE_ENV: production
 
 jobs:
   analyze:
@@ -67,6 +66,7 @@ jobs:
         run: npm run build:android
         env:
           NEXT_PUBLIC_ENVIRONMENT: production
+          NODE_ENV: production
 
       - name: Export to www
         run: |
@@ -140,6 +140,7 @@ jobs:
           path: android/app/build/outputs/apk/release/app-release-unsigned.apk
           if-no-files-found: warn
 
+      # Upload APK (Debug)
       - name: Upload APK (Debug)
         uses: actions/upload-artifact@v4
         with:
