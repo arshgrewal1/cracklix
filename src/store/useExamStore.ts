@@ -6,7 +6,7 @@ import { doc, updateDoc, serverTimestamp, setDoc, Firestore } from 'firebase/fir
 import { initializeFirebase } from '@/firebase/app';
 
 /**
- * @fileOverview Global Test Store v4.3 (Production Hardened).
+ * @fileOverview Global Test Store v4.4 (Production Hardened).
  * FIXED: Removed duplicate property key 'isSubmitting' and sanitized initial strings.
  */
 
