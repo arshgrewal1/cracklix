@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -31,8 +30,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Support Ticket Management Console v5.1.
- * FIXED: Restored missing Link and Loader2 imports to satisfy production build.
+ * @fileOverview Institutional Support Ticket Management Console v5.2.
+ * FIXED: Restored Link and Loader2 component imports for production stability.
  */
 
 export default function SupportPage() {

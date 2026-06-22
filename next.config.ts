@@ -1,4 +1,3 @@
-
 import type { NextConfig } from "next";
 
 const withPWA = require("next-pwa")({
@@ -23,10 +22,6 @@ const nextConfig: NextConfig = {
 
   poweredByHeader: false,
   compress: true,
-
-  experimental: {
-    // Note: allowedDevOrigins is removed as it currently causes TS2353 in ExperimentalConfig types
-  },
 
   webpack: (config, { isServer }) => {
     if (!isServer) {
