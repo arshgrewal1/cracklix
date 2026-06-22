@@ -32,3 +32,20 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Keystore and signing files (SECURITY: Never commit keystores)
+*.keystore
+*.jks
+keystore-secrets.txt
+*.p12
+*.pfx
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+.DS_Store
