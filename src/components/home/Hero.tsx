@@ -20,8 +20,8 @@ import { cn } from "@/lib/utils";
 import { AuthorityLogo } from "@/lib/exam-icons";
 
 /**
- * @fileOverview Official High-Density PWA Hero v50.0.
- * UPDATED: Fully clickable Quick Action cards with branded hub logos.
+ * @fileOverview Official High-Density PWA Hero v51.0.
+ * FIXED: Optimized QuickActionCard spacing to prevent text clipping on long labels.
  */
 
 export default function Hero() {
@@ -132,10 +132,10 @@ function QuickActionCard({ boardId, label, href }: { boardId: string, label: str
       <div className="
         bg-white
         rounded-[2rem]
-        p-5 md:p-8
+        p-4 md:p-6
         flex
         items-center
-        gap-4 md:gap-6
+        gap-3 md:gap-4
         shadow-md
         hover:shadow-xl
         hover:-translate-y-1
@@ -148,7 +148,7 @@ function QuickActionCard({ boardId, label, href }: { boardId: string, label: str
         h-full
       ">
         <div className="
-          h-12 w-12 md:h-20 md:w-20
+          h-10 w-10 md:h-16 md:w-16
           rounded-2xl md:rounded-[2.5rem]
           bg-slate-50
           shadow-inner
@@ -165,14 +165,14 @@ function QuickActionCard({ boardId, label, href }: { boardId: string, label: str
         </div>
 
         <div className="text-left flex-1 min-w-0">
-          <h3 className="text-sm md:text-xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors uppercase">
+          <h3 className="text-xs md:text-lg font-[900] text-[#0F172A] leading-tight group-hover:text-primary transition-colors uppercase tracking-tight">
             {label}
           </h3>
-          <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Institutional Hub</p>
+          <p className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Institutional Hub</p>
         </div>
         
-        <div className="h-8 w-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-200 group-hover:bg-primary/5 group-hover:text-primary transition-all">
-           <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+        <div className="h-6 w-6 md:h-8 md:w-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-200 group-hover:bg-primary/5 group-hover:text-primary transition-all shrink-0">
+           <ChevronRight className="h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-0.5" />
         </div>
       </div>
     </Link>
