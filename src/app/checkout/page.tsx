@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils"
 import { Capacitor } from "@capacitor/core"
 
 /**
- * @fileOverview Testbook-Style Checkout Hub v16.6 (Certified).
+ * @fileOverview Testbook-Style Checkout Hub v16.7 (Certified).
  * FIXED: Target deployed Vercel API for APK environments to bypass static export constraints.
  */
 

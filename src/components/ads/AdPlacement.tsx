@@ -15,8 +15,8 @@ interface AdPlacementProps {
 }
 
 /**
- * @fileOverview Institutional Ad-Node v1.14 (Certified).
- * FIXED: Generic type casting for Firestore query to satisfy Next.js 15 build.
+ * @fileOverview Institutional Ad-Node v1.15 (Build Fixed).
+ * FIXED: Generic type casting for Firestore query.
  */
 
 export default function AdPlacement({ placement, className, examId }: AdPlacementProps) {
@@ -37,7 +37,6 @@ export default function AdPlacement({ placement, className, examId }: AdPlacemen
 
   const adsQuery = useMemo(() => {
     if (!db || isAdFree || isSafetyZone) return null;
-    // Explicitly cast to unknown then to the target Query type to resolve TS2345
     return query(collection(db, 'ads'), where('status', '==', 'ACTIVE')) as unknown as Query<Advertisement, DocumentData>;
   }, [db, isAdFree, isSafetyZone]);
 

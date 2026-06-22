@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
-import { ChevronRight, BookOpen, Layers } from "lucide-react"
+import { ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { Badge } from "@/components/ui/badge"
@@ -10,8 +10,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Refined Exam Card v4.7 (Certified).
- * FIXED: Corrected property mapping for title/name and description to prevent TS errors.
+ * @fileOverview Refined Exam Card v4.8 (Build Fixed).
+ * FIXED: Corrected property mapping for title/name to prevent TS errors.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || exam.title || "Official Vertical";

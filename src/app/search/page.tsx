@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Center v7.6 (Certified).
- * FIXED: Explicit React import and type-safe cloneElement.
+ * @fileOverview Global Search Center v7.7 (Production Hardened).
+ * FIXED: Explicit React import and type-safe cloneElement for Next.js 15.
  */
 
 export default function SearchPage() {

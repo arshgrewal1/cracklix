@@ -8,9 +8,9 @@ import { Browser } from '@capacitor/browser';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 /**
- * @fileOverview Global Native App Bridge v1.6 (Certified).
+ * @fileOverview Global Native App Bridge v1.7 (Build Fixed).
  * Intercepts web behaviors to provide a high-fidelity Android experience.
- * FIXED: Wrapped native APIs in isNativePlatform guard to prevent web crashes.
+ * FIXED: Wrapped all native API calls in strict isNativePlatform guards.
  */
 export default function CapacitorManager() {
   useEffect(() => {
@@ -27,11 +27,15 @@ export default function CapacitorManager() {
       const originalShare = navigator.share;
       navigator.share = async (data: any) => {
         try {
-          await Share.share({
-            title: data.title || 'Cracklix',
-            text: data.text || 'Prepare for Punjab Government Exams with Cracklix.',
-            url: data.url || window.location.href,
-          });
+          if (Capacitor.isNativePlatform()) {
+            await Share.share({
+              title: data.title || 'Cracklix',
+              text: data.text || 'Prepare for Punjab Government Exams with Cracklix.',
+              url: data.url || window.location.href,
+            });
+            return undefined;
+          }
+          return originalShare(data);
         } catch (err) {
           if (originalShare) return originalShare(data);
         }
@@ -50,8 +54,10 @@ export default function CapacitorManager() {
 
     // 4. Status Bar Node Configuration
     try {
-      StatusBar.setStyle({ style: Style.Dark });
-      StatusBar.setBackgroundColor({ color: '#0B1528' });
+      if (Capacitor.isNativePlatform()) {
+        StatusBar.setStyle({ style: Style.Dark });
+        StatusBar.setBackgroundColor({ color: '#0B1528' });
+      }
     } catch (e) {
       console.warn('[NATIVE_BRIDGE] StatusBar plugin fail');
     }
@@ -62,12 +68,12 @@ export default function CapacitorManager() {
       if (slug) window.location.href = slug;
     });
 
-    // 6. External Browser Interceptor for non-local links
+    // 6. External Browser Interceptor
     const handleLinkClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const anchor = target.closest('a');
       
-      if (anchor && anchor.href) {
+      if (anchor && anchor.href && Capacitor.isNativePlatform()) {
         try {
           const url = new URL(anchor.href);
           const isExternal = url.hostname !== window.location.hostname;

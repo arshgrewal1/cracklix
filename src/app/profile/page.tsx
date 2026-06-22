@@ -52,7 +52,7 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Profile Center v34.1 (Certified).
+ * @fileOverview Student Profile Center v34.2 (Certified).
  * FIXED: Full Account Purge (Auth + Firestore) for Play Store compliance.
  */
 export default function ProfilePage() {
