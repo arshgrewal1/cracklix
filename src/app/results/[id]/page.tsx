@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useMemo, useEffect, Suspense } from "react"
+import React, { useState, useMemo, useEffect, Suspense, isValidElement, cloneElement, ReactElement } from "react"
 import { useParams, useRouter } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -30,8 +30,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Hardened Test Results Hub v43.0.
- * NORMALIZED: Reduced visual scale for high-density information review.
+ * @fileOverview Hardened Test Results Hub v44.0.
+ * FIXED: Added mounting guard to prevent hydration errors from complex data sorting.
  */
 
 export default function ResultPage() {
@@ -129,7 +129,7 @@ function ResultContent() {
      });
   }, [questions, sessionData, activeReviewFilter]);
 
-  if (resultLoading || (loadingQuestions && questions.length === 0)) return (
+  if (!mounted || resultLoading || (loadingQuestions && questions.length === 0)) return (
      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
         <Loader2 className="h-8 w-8 text-primary animate-spin" />
         <p className="text-[10px] font-black uppercase text-slate-300">Auditing Session...</p>

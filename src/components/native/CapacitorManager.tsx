@@ -8,7 +8,7 @@ import { Browser } from '@capacitor/browser';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 /**
- * @fileOverview Global Native App Bridge v1.3 (Hardened).
+ * @fileOverview Global Native App Bridge v1.4 (Hardened).
  * Intercepts web behaviors to provide a high-fidelity Android experience.
  * FIXED: Wrapped native APIs in isNativePlatform guard to prevent web crashes.
  */

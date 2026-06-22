@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Public PWA Install Hub v12.3 (Build Fixed).
+ * @fileOverview Public PWA Install Hub v12.4 (Hardened).
  * FIXED: Satisfied isValidElement from React core.
  */
 export default function InstallPage() {
@@ -177,7 +177,7 @@ export default function InstallPage() {
 
               <div className="p-6 bg-blue-50 rounded-[2rem] border border-blue-100 flex items-start gap-4">
                  <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                 <p className="text-[10px] md:text-[11px] font-bold text-blue-800 leading-relaxed uppercase">
+                 <p className="text-[10px] font-bold text-blue-800 leading-relaxed uppercase">
                     Cracklix is a Progressive Web App (PWA). It works just like a native app but consumes less storage and updates automatically.
                  </p>
               </div>
@@ -192,7 +192,7 @@ export default function InstallPage() {
 function InstructionStep({ num, icon, text, color = "text-primary" }: any) {
    return (
       <div className="flex items-center gap-4 group">
-         <div className={cn("h-8 w-8 md:h-12 md:w-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-black text-[10px] md:text-sm shadow-inner", color)}>
+         <div className={cn("h-8 w-8 md:h-12 md:w-12 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center font-black text-[10px] md:sm shadow-inner", color)}>
             {num}
          </div>
          <div className="flex items-center gap-2 text-slate-200">

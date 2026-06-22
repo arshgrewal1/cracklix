@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Center v7.3 (Hardened).
+ * @fileOverview Global Search Center v7.4 (Hardened).
  * FIXED: Resolved TS2769 and UMD global errors for production build.
  */
 

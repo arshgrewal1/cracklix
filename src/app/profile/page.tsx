@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -22,7 +21,7 @@ import {
   Target, 
   ClipboardList, 
   ShieldCheck,
-  Zap,
+  Zap, 
   Activity,
   Edit,
   Save,
@@ -40,7 +39,8 @@ import {
   Clock,
   LucideIcon,
   Timer,
-  AlertCircle
+  AlertCircle,
+  ShieldAlert
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
@@ -51,8 +51,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Profile Center v31.0 (PWA Optimized).
- * FIXED: Reduced scaling and Title Case typography.
+ * @fileOverview Student Profile Center v32.0 (APK Compliant).
+ * FIXED: Added Account Deletion node for Play Store Data Safety compliance.
  */
 export default function ProfilePage() {
   const { user, profile, loading, profileLoading, currentDeviceId } = useUser()
@@ -61,6 +61,8 @@ export default function ProfilePage() {
   const { toast } = useToast()
 
   const [isEditing, setIsEditing] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState("")
   const [editForm, setEditForm] = useState<any>({
     name: "",
     email: "",
@@ -154,6 +156,20 @@ export default function ProfilePage() {
        setIsSaving(false)
     }
   }
+
+  const handleDeleteAccount = async () => {
+     if (deleteConfirm !== 'DELETE' || !user || !db) return;
+     setIsSaving(true);
+     try {
+        await deleteDoc(doc(db, 'users', user.uid));
+        toast({ title: "Account Purged", description: "All data nodes have been deleted." });
+        router.push('/login');
+     } catch (e) {
+        toast({ variant: "destructive", title: "Deletion Failed" });
+     } finally {
+        setIsSaving(false);
+     }
+  };
 
   if (loading) return (
      <div className="min-h-[100dvh] bg-white flex flex-col items-center justify-center space-y-4">
@@ -267,6 +283,17 @@ export default function ProfilePage() {
                        <Button onClick={() => setIsEditing(true)} className="w-full h-12 md:h-18 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-black uppercase text-[9px] md:text-[12px] tracking-widest shadow-xl transition-all active:scale-95 border-none gap-2"><Edit className="h-4 w-4 text-white" /> Edit Profile</Button>
                        <Button asChild variant="outline" className="w-full h-12 md:h-18 rounded-full font-black uppercase text-[9px] md:text-[12px] tracking-widest shadow-sm transition-all active:scale-95 border-2 gap-2"><Link href="/pass"><Gem className="h-4 w-4 text-primary" /> Elite Pass Hub</Link></Button>
                     </div>
+
+                    <div className="pt-8 md:pt-12 border-t border-slate-50 space-y-4">
+                       <p className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Account Persistence</p>
+                       <Button 
+                          onClick={() => setIsDeleting(true)}
+                          variant="ghost" 
+                          className="w-full h-10 text-rose-500 hover:bg-rose-50 hover:text-rose-600 rounded-xl font-black uppercase text-[8px] tracking-widest transition-all gap-2"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" /> Delete My Account
+                       </Button>
+                    </div>
                  </Card>
               </div>
            </div>
@@ -275,7 +302,7 @@ export default function ProfilePage() {
       <Footer />
 
       <Dialog open={isEditing} onOpenChange={setIsEditing}>
-         <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[90vh] bg-white rounded-3xl md:rounded-[3.5rem] border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
+         <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[90vh] bg-white rounded-3xl md:rounded-[3rem] border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
             <div className="h-2 w-full bg-[#0B1528] shrink-0" />
             <DialogHeader className="p-6 md:p-14 pb-3 md:pb-6 shrink-0">
                <div className="flex justify-between items-center">
@@ -287,22 +314,22 @@ export default function ProfilePage() {
             </DialogHeader>
             <div className="px-6 md:px-14 pb-6 md:pb-14 space-y-4 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-                  <div className="space-y-1.5 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Full Name</Label><Input value={editForm?.name || ""} onChange={e => setEditForm((prev: any) => ({...prev, name: e.target.value}))} className="h-12 md:h-16 rounded-xl bg-slate-50 border-none font-bold px-5" /></div>
-                  <div className="space-y-1.5 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Email Address</Label><Input type="email" value={editForm?.email || ""} onChange={e => setEditForm((prev: any) => ({...prev, email: e.target.value}))} className="h-12 md:h-16 rounded-xl bg-slate-50 border-none font-bold px-5" /></div>
+                  <div className="space-y-1.5 text-left"><Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Full Name</Label><Input value={editForm?.name || ""} onChange={e => setEditForm((prev: any) => ({...prev, name: e.target.value}))} className="h-12 md:h-16 rounded-xl bg-slate-50 border-none font-bold px-5" /></div>
+                  <div className="space-y-1.5 text-left"><Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Email Address</Label><Input type="email" value={editForm?.email || ""} onChange={e => setEditForm((prev: any) => ({...prev, email: e.target.value}))} className="h-12 md:h-16 rounded-xl bg-slate-50 border-none font-bold px-5" /></div>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-8">
-                  <div className="space-y-1.5 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Date of Birth</Label><Input type="date" value={editForm?.dob || ""} onChange={e => setEditForm((prev: any) => ({...prev, dob: e.target.value}))} className="h-12 md:h-16 rounded-xl bg-slate-50 border-none font-bold px-5" /></div>
-                  <div className="space-y-1.5 text-left"><Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Exam Hub</Label><select value={editForm?.targetExam || ""} onChange={e => setEditForm((prev: any) => ({...prev, targetExam: e.target.value}))} className="w-full h-12 md:h-16 rounded-xl bg-slate-50 border-none font-bold px-5 outline-none"><option value="PSSSB">PSSSB</option><option value="PPSC">PPSC</option><option value="Punjab Police">Punjab Police</option><option value="Army">Indian Army</option><option value="High Court">High Court</option></select></div>
+                  <div className="space-y-1.5 text-left"><Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Date of Birth</Label><Input type="date" value={editForm?.dob || ""} onChange={e => setEditForm((prev: any) => ({...prev, dob: e.target.value}))} className="h-12 md:h-16 rounded-xl bg-slate-50 border-none font-bold px-5" /></div>
+                  <div className="space-y-1.5 text-left"><Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Target Exam Hub</Label><select value={editForm?.targetExam || ""} onChange={e => setEditForm((prev: any) => ({...prev, targetExam: e.target.value}))} className="w-full h-12 md:h-16 rounded-xl bg-slate-50 border-none font-bold px-5 outline-none"><option value="PSSSB">PSSSB</option><option value="PPSC">PPSC</option><option value="Punjab Police">Punjab Police</option><option value="Army">Indian Army</option><option value="High Court">High Court</option></select></div>
                </div>
                <div className="space-y-1.5 text-left">
-                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Mobile Number</Label>
+                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Mobile Number</Label>
                   <div className="relative">
                      <span className="absolute left-5 top-1/2 -translate-y-1/2 text-sm md:text-lg font-black text-slate-400">+91</span>
                      <Input value={editForm?.phone || ""} onChange={e => setEditForm((prev: any) => ({...prev, phone: e.target.value.replace(/\D/g, '').slice(0,10)}))} className="h-12 md:h-16 pl-14 md:pl-20 rounded-xl bg-slate-50 border-none font-black text-base md:text-2xl" />
                   </div>
                </div>
                <div className="space-y-1.5 text-left">
-                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Home Address</Label>
+                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Home Address</Label>
                   <Textarea value={editForm?.address || ""} onChange={e => setEditForm((prev: any) => ({...prev, address: e.target.value}))} className="min-h-[100px] rounded-xl bg-slate-50 border-none font-medium p-4 shadow-inner resize-none" />
                </div>
             </div>
@@ -310,6 +337,38 @@ export default function ProfilePage() {
                <Button variant="ghost" onClick={() => setIsEditing(false)} className="h-12 px-6 font-black uppercase text-[9px] text-slate-400">Cancel</Button>
                <Button onClick={handleUpdateProfile} disabled={isSaving} className="bg-blue-600 hover:bg-blue-700 text-white h-12 px-8 rounded-full font-black uppercase text-[10px] flex-1 shadow-3xl transition-all active:scale-95 gap-2">{isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Save Details</Button>
             </DialogFooter>
+         </DialogContent>
+      </Dialog>
+
+      <Dialog open={isDeleting} onOpenChange={setIsDeleting}>
+         <DialogContent className="max-w-md w-[95vw] bg-white rounded-3xl p-8 shadow-5xl border-none text-center">
+            <div className="space-y-6">
+               <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
+                  <ShieldAlert className="h-8 w-8" />
+               </div>
+               <div className="space-y-2">
+                  <DialogTitle className="text-2xl font-black uppercase text-rose-600">Delete Account</DialogTitle>
+                  <DialogDescription className="text-slate-500 text-sm leading-relaxed">
+                     This action is permanent. All your mock attempts, results, and elite pass access will be purged. Type <strong>DELETE</strong> to authorize.
+                  </DialogDescription>
+               </div>
+               <Input 
+                  value={deleteConfirm}
+                  onChange={(e) => setDeleteConfirm(e.target.value)}
+                  className="h-12 rounded-xl bg-slate-50 border-slate-100 text-center font-black tracking-widest text-rose-500"
+                  placeholder="---"
+               />
+               <div className="flex gap-4 pt-2">
+                  <Button variant="ghost" onClick={() => setIsDeleting(false)} className="flex-1 rounded-xl h-12 font-black uppercase text-[9px] text-slate-400">Cancel</Button>
+                  <Button 
+                    onClick={handleDeleteAccount}
+                    disabled={deleteConfirm !== 'DELETE' || isSaving}
+                    className="flex-1 bg-rose-600 hover:bg-rose-700 text-white rounded-xl h-12 font-black uppercase text-[9px] shadow-lg border-none active:scale-95 transition-all"
+                  >
+                     Authorize Purge
+                  </Button>
+               </div>
+            </div>
          </DialogContent>
       </Dialog>
     </div>
