@@ -1,12 +1,38 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Capacitor, PluginListenerHandle } from '@capacitor/core';
+import { Capacitor, PluginListenerHandle, registerPlugin } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { Browser } from '@capacitor/browser';
 import { StatusBar, Style } from '@capacitor/status-bar';
+import { useUser } from '@/firebase';
 
+// Bridge to our internal native Security plugin
+const Security = registerPlugin<any>('Security');
+
+/**
+ * @fileOverview Hardened Capacitor Bridge v2.0.
+ * Handles hardware back button, external links, and role-based screenshot protection.
+ */
 export default function CapacitorManager() {
+  const { profile } = useUser();
+
+  // Role-based Screenshot Protection Toggle
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) {
+      return;
+    }
+
+    if (profile) {
+      const isAdmin = profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN';
+      // If user is Admin, disable protection (enabled: false)
+      // If user is Student, enable protection (enabled: true)
+      Security.setPrivacyScreen({ enabled: !isAdmin }).catch((err: any) => {
+        console.warn('[SECURITY_BRIDGE] Failed to toggle privacy screen:', err);
+      });
+    }
+  }, [profile]);
+
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) {
       return;
