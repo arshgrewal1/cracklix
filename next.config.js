@@ -10,6 +10,7 @@ const nextConfig = {
         'fs': false,
         'path': false,
         'crypto': false,
+        '@opentelemetry/context-async-hooks': false,
       };
     }
 
@@ -20,6 +21,12 @@ const nextConfig = {
         '@opentelemetry/context-async-hooks': 'commonjs @opentelemetry/context-async-hooks',
       },
     ];
+
+    // Add loaders for better module handling
+    config.module.rules.push({
+      test: /node_modules\/@opentelemetry.*\.js$/,
+      use: 'null-loader',
+    });
 
     return config;
   },
