@@ -76,12 +76,20 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android --deployment
 
-      # Decode and setup keystore for signing
+      # Decode and setup keystore for signing with hardening
       - name: Setup Keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "Error: KEYSTORE_BASE64 secret is missing or empty."
+            exit 1
+          fi
           mkdir -p ~/.android
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > ~/.android/release.keystore
-        continue-on-error: true
+          echo "$KEYSTORE_BASE64" | tr -d '\n ' | base64 -d > ~/.android/release.keystore
+          
+          # Validate keystore integrity
+          keytool -list -v -keystore ~/.android/release.keystore -storepass "${{ secrets.KEYSTORE_PASSWORD }}" || (echo "Keystore validation failed" && exit 1)
 
       # Build Release APK (Signed)
       - name: Build Signed Release APK
@@ -96,32 +104,6 @@ jobs:
             -Pandroid.injected.signing.store.password="${{ secrets.KEYSTORE_PASSWORD }}" \
             -Pandroid.injected.signing.key.alias="${{ secrets.KEY_ALIAS }}" \
             -Pandroid.injected.signing.key.password="${{ secrets.KEY_PASSWORD }}"
-        continue-on-error: true
-
-      # Build Release APK (Unsigned) - Fallback
-      - name: Build Release APK (Unsigned)
-        working-directory: android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleRelease \
-            -x bundleRelease \
-            --no-daemon \
-            --build-cache
-        if: failure()
-
-      - name: Build Debug APK
-        working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
-
-      - name: Sign Debug APK
-        run: |
-          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-            -keystore ~/.android/debug.keystore \
-            -storepass android \
-            -keypass android \
-            android/app/build/outputs/apk/debug/app-debug.apk \
-            androiddebugkey
-        continue-on-error: true
 
       # Upload Signed Release APK
       - name: Upload Signed Release APK
@@ -129,22 +111,6 @@ jobs:
         with:
           name: cracklix-release-signed-apk
           path: android/app/build/outputs/apk/release/app-release.apk
-          if-no-files-found: warn
-
-      # Upload Unsigned Release APK (Fallback)
-      - name: Upload Release APK (Unsigned)
-        uses: actions/upload-artifact@v4
-        with:
-          name: cracklix-release-unsigned-apk
-          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
-          if-no-files-found: warn
-
-      # Upload APK (Debug)
-      - name: Upload APK (Debug)
-        uses: actions/upload-artifact@v4
-        with:
-          name: cracklix-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: warn
 
       - name: Create Release Notes
