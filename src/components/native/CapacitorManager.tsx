@@ -7,7 +7,8 @@ import { Browser } from '@capacitor/browser';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 /**
- * @fileOverview Global Native App Bridge v2.2 (Hardened Cleanup).
+ * @fileOverview Global Native App Bridge v2.3.
+ * FIXED: Async listener handles are now properly resolved before removal to prevent type errors.
  */
 export default function CapacitorManager() {
   useEffect(() => {
@@ -15,7 +16,7 @@ export default function CapacitorManager() {
       return;
     }
 
-    let listeners: PluginListenerHandle[] = [];
+    const listeners: PluginListenerHandle[] = [];
 
     const setupListeners = async () => {
       // Hardware Back Button Handling
