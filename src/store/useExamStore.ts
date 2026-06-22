@@ -6,8 +6,8 @@ import { doc, updateDoc, serverTimestamp, setDoc, Firestore } from 'firebase/fir
 import { initializeFirebase } from '@/firebase/app';
 
 /**
- * @fileOverview Global Test Store v4.2 (Production Hardened).
- * FIXED: Removed duplicate property key 'isSubmitting' and sanitized type assignments.
+ * @fileOverview Global Test Store v4.3 (Production Hardened).
+ * FIXED: Removed duplicate property key 'isSubmitting' and sanitized initial strings.
  */
 
 interface ExamStore extends AttemptState {

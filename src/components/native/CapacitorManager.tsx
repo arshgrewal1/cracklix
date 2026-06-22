@@ -8,14 +8,17 @@ import { Browser } from '@capacitor/browser';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 /**
- * @fileOverview Global Native App Bridge.
+ * @fileOverview Global Native App Bridge v1.1.
  * Intercepts web behaviors to provide a high-fidelity Android experience.
- * FIXED: Replaced window check with Capacitor.isNativePlatform() to prevent "StatusBar not implemented on web" errors.
+ * FIXED: Wrapped native APIs in isNativePlatform guard to prevent web crashes.
  */
 export default function CapacitorManager() {
   useEffect(() => {
     // 1. Device Handshake - Strict Native Container Check
-    if (!Capacitor.isNativePlatform()) return;
+    if (!Capacitor.isNativePlatform()) {
+      console.log('[NATIVE_BRIDGE] Standard Browser Environment Detected.');
+      return;
+    }
 
     console.log('[NATIVE_BRIDGE] Initializing Android Environment');
 
@@ -31,7 +34,6 @@ export default function CapacitorManager() {
       } catch (err) {
         if (originalShare) return originalShare(data);
       }
-      // Added return to satisfy TypeScript async expectations
       return undefined;
     };
 

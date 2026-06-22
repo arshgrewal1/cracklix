@@ -10,8 +10,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Refined Exam Card v4.3 (Production Hardened).
- * FIXED: Aligned property access with canonical Exam types and resolved property name mismatches.
+ * @fileOverview Refined Exam Card v4.4 (Production Hardened).
+ * FIXED: Aligned property names with canonical Exam schema to prevent TS reference errors.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   return (
@@ -27,7 +27,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
           
           <div className="flex-1 space-y-6">
             <h3 className="font-headline text-2xl md:text-3xl font-black text-[#0B1F3A] group-hover:text-primary transition-colors leading-tight">
-              {exam.name}
+              {exam.name || exam.title}
             </h3>
             
             <p className="text-sm text-gray-500 font-medium leading-relaxed line-clamp-2">
