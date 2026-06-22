@@ -184,7 +184,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
    return (
       <Link href={href} className="block active:scale-[0.99] transition-all">
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between group border border-slate-100 transition-all duration-500">
-            <div className="flex items-center gap-4 min-w-0 flex-1 space-x-2">
+            <div className="flex items-center gap-4 min-w-0 flex-1">
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
                   {isValidElement(icon) ? cloneElement(icon as ReactElement<any>, { className: "h-5 w-5" }) : null}
                </div>

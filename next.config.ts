@@ -27,6 +27,22 @@ const nextConfig: NextConfig = {
 
   poweredByHeader: false,
   compress: true,
+
+  // Resolve Node.js module errors in client-side bundling for static export
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        http2: false,
+        dns: false,
+        child_process: false,
+      };
+    }
+    return config;
+  },
 };
 
 export default withPWA(nextConfig);
