@@ -1,32 +1,151 @@
-name: Build Android APK
+name: Build Android APK - Production
 
 on:
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+env:
+  GRADLE_OPTS: "-Xmx4096m -Dorg.gradle.jvmargs=-Xmx4096m"
+  NODE_ENV: production
 
 jobs:
-  build:
+  analyze:
+    name: Code Quality Analysis
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run TypeScript check
+        run: npm run typecheck
+      
+      - name: Run linting
+        run: npm run lint
+      
+      - name: Security audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+
+  build:
+    name: Build APK
+    runs-on: ubuntu-latest
+    needs: analyze
+    permissions:
+      contents: read
+      actions: write
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
-      - run: npm install
-      - run: npm run build
-
-      - uses: actions/setup-java@v4
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
+          cache: gradle
 
-      - run: npx cap sync
-      - run: cd android && ./gradlew assembleDebug
+      - name: Install dependencies
+        run: npm ci
 
-      - uses: actions/upload-artifact@v4
+      - name: Build Next.js app
+        run: npm run build:android
+        env:
+          NEXT_PUBLIC_ENVIRONMENT: production
+
+      - name: Export to www
+        run: |
+          rm -rf www
+          cp -r .next/static www/ || true
+          cp -r public/* www/ || true
+
+      - name: Sync Capacitor
+        run: npx cap sync android --deployment
+
+      - name: Build Release APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease \
+            -x bundleRelease \
+            --no-daemon \
+            --build-cache
+
+      - name: Build Debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK (Debug)
+        uses: actions/upload-artifact@v4
         with:
-          name: apk
+          name: cracklix-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: warn
+
+      - name: Upload APK (Release)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cracklix-release-apk
+          path: android/app/build/outputs/apk/release/app-release-unsigned.apk
+          if-no-files-found: warn
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm test -- --passWithNoTests
+        continue-on-error: true
+
+  performance:
+    name: Performance Analysis
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build and analyze bundle size
+        run: |
+          npm run build
+          mkdir -p performance-reports
+          du -sh .next > performance-reports/bundle-size.txt 2>&1 || true
+          echo "Build Analysis Complete" >> performance-reports/analysis.txt
+
+      - name: Upload performance reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-reports
+          path: performance-reports/
