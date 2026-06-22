@@ -23,13 +23,6 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   compress: true,
 
-  experimental: {
-    // Suppress CORS warnings in Firebase Studio environment
-    allowedDevOrigins: [
-      "6000-firebase-studio-1780356784378.cluster-cd3bsnf6r5bemwki2bxljme5as.cloudworkstations.dev"
-    ]
-  },
-
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
