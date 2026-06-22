@@ -1,4 +1,3 @@
-
 import type { NextConfig } from "next";
 
 const withPWA = require("next-pwa")({
@@ -7,9 +6,6 @@ const withPWA = require("next-pwa")({
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
   buildExcludes: [/middleware-manifest\.json$/],
-  fallbacks: {
-    document: '/offline.html',
-  }
 });
 
 /** @type {import('next').NextConfig} */
