@@ -7,7 +7,7 @@ import { Browser } from '@capacitor/browser';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 /**
- * @fileOverview Global Native App Bridge v2.7.
+ * @fileOverview Global Native App Bridge v2.8.
  * FIXED: Properly handled async listener removal logic.
  */
 export default function CapacitorManager() {
@@ -16,25 +16,24 @@ export default function CapacitorManager() {
       return;
     }
 
-    const listeners: (PluginListenerHandle | null)[] = [];
+    let backListener: PluginListenerHandle | null = null;
+    let urlListener: PluginListenerHandle | null = null;
 
     const setupListeners = async () => {
       // Hardware Back Button Handling
-      const backListener = await App.addListener('backButton', ({ canGoBack }) => {
+      backListener = await App.addListener('backButton', ({ canGoBack }) => {
         if (!canGoBack) {
           App.exitApp();
         } else {
           window.history.back();
         }
       });
-      listeners.push(backListener);
 
       // Deep Link Listener
-      const urlListener = await App.addListener('appUrlOpen', (data) => {
+      urlListener = await App.addListener('appUrlOpen', (data) => {
         const slug = data.url.split('.app').pop();
         if (slug) window.location.href = slug;
       });
-      listeners.push(urlListener);
     };
 
     setupListeners();
@@ -70,7 +69,8 @@ export default function CapacitorManager() {
     
     return () => {
       document.removeEventListener('click', handleLinkClick);
-      listeners.forEach(l => l?.remove());
+      if (backListener) backListener.remove();
+      if (urlListener) urlListener.remove();
     };
   }, []);
 

@@ -198,7 +198,7 @@ export default function SupportPage() {
             <DialogHeader className="p-6 md:p-10 pb-4 shrink-0">
                <div className="flex justify-between items-center">
                   <DialogTitle className="text-xl md:text-3xl font-black text-[#0F172A] uppercase">Raise Support Ticket</DialogTitle>
-                  <button onClick={() => setIsRaising(false)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"><X className="h-6 w-6 text-slate-400" /></button>
+                  <button onClick={() => setIsRaising(false)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"><X className="h-5 w-5 text-slate-400" /></button>
                </div>
                <DialogDescription className="text-slate-400 font-bold text-[9px] md:text-sm mt-1 uppercase tracking-widest">Our management node will audit your issue.</DialogDescription>
             </DialogHeader>
