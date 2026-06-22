@@ -7,7 +7,7 @@ import { Browser } from '@capacitor/browser';
 import { StatusBar, Style } from '@capacitor/status-bar';
 
 /**
- * @fileOverview Global Native App Bridge v2.0.
+ * @fileOverview Global Native App Bridge v2.2 (Hardened Cleanup).
  */
 export default function CapacitorManager() {
   useEffect(() => {
@@ -15,24 +15,25 @@ export default function CapacitorManager() {
       return;
     }
 
-    let backListener: PluginListenerHandle | null = null;
-    let urlListener: PluginListenerHandle | null = null;
+    let listeners: PluginListenerHandle[] = [];
 
     const setupListeners = async () => {
       // Hardware Back Button Handling
-      backListener = await App.addListener('backButton', ({ canGoBack }) => {
+      const backListener = await App.addListener('backButton', ({ canGoBack }) => {
         if (!canGoBack) {
           App.exitApp();
         } else {
           window.history.back();
         }
       });
+      listeners.push(backListener);
 
       // Deep Link Listener
-      urlListener = await App.addListener('appUrlOpen', (data) => {
+      const urlListener = await App.addListener('appUrlOpen', (data) => {
         const slug = data.url.split('.app').pop();
         if (slug) window.location.href = slug;
       });
+      listeners.push(urlListener);
     };
 
     setupListeners();
@@ -68,8 +69,7 @@ export default function CapacitorManager() {
     
     return () => {
       document.removeEventListener('click', handleLinkClick);
-      if (backListener) backListener.remove();
-      if (urlListener) urlListener.remove();
+      listeners.forEach(l => l.remove());
     };
   }, []);
 

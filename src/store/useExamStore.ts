@@ -63,7 +63,10 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     mockTitle: '', 
     userId: '', 
     language: 'ENGLISH_PUNJABI',
-    baseLanguageMode: 'ENGLISH_PUNJABI'
+    baseLanguageMode: 'ENGLISH_PUNJABI',
+    isSubmitting: false,
+    isPaused: false,
+    isSyncing: false
   }),
 
   initExam: (mockId, mockTitle, userId, questions, duration, savedState, languageMode) => {
