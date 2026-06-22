@@ -8,7 +8,7 @@ import { StatusBar, Style } from '@capacitor/status-bar';
 
 /**
  * @fileOverview Global Native App Bridge v2.8.
- * FIXED: Properly handled async listener removal logic.
+ * FIXED: Properly handled async listener removal logic to resolve TypeScript errors.
  */
 export default function CapacitorManager() {
   useEffect(() => {

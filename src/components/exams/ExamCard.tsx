@@ -10,7 +10,7 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Refined Exam Card v4.8 (Build Fixed).
+ * @fileOverview Refined Exam Card v4.9 (Build Fixed).
  * FIXED: Corrected property mapping for title/name to prevent TS errors.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
