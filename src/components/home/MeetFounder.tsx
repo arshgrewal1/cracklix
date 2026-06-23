@@ -8,8 +8,8 @@ import Link from "next/link";
 import Image from "next/image";
 
 /**
- * @fileOverview Meet Founder section v2.0.
- * UPDATED: Optimized with next/image for production performance and fixed ESLint warnings.
+ * @fileOverview Meet Founder section v2.1.
+ * UPDATED: Optimized with next/image for production performance.
  */
 
 export default function MeetFounder() {

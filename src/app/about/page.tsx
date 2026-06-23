@@ -21,8 +21,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional About Center v21.4.
- * UPDATED: Optimized with next/image for production-grade performance and fixed LCP warnings.
+ * @fileOverview Institutional About Center v21.5.
+ * UPDATED: Optimized with next/image for production performance and resolved build warnings.
  */
 
 export default function AboutPage() {

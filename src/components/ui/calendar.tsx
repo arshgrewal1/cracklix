@@ -8,9 +8,8 @@ import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
 /**
- * @fileOverview Custom Calendar UI.
- * UPDATED: Refactored for react-day-picker v9 compatibility.
- * FIXED: Resolved TS return type error by returning valid elements for all orientations.
+ * @fileOverview Custom Calendar UI v2.0.
+ * UPDATED: Fixed TypeScript return element error for Next.js 15 production build.
  */
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>

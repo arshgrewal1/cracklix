@@ -6,9 +6,8 @@ import { doc, updateDoc, serverTimestamp, setDoc, Firestore } from 'firebase/fir
 import { initializeFirebase } from '@/firebase/app';
 
 /**
- * @fileOverview Hardened Exam State Hub v1.7.
- * FIXED: TS2322 empty string language assignment issue.
- * FIXED: TS1117 duplicate property key 'isSubmitting' removed.
+ * @fileOverview Hardened Exam State Hub v1.8.
+ * FIXED: Removed duplicate property keys causing TS1117 build failures.
  */
 
 interface ExamStore extends AttemptState {
@@ -91,7 +90,7 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const initialTimeLeft = Math.max(0, Math.floor((finalEndTime - now) / 1000));
     const finalBaseMode: LanguageDisplayMode = languageMode || 'ENGLISH_PUNJABI';
 
-    const initialLang: LanguageDisplayMode = (!forceReset && state.language && state.language !== 'ENGLISH_PUNJABI') 
+    const initialLang: LanguageDisplayMode = (!forceReset && state.language && state.language !== ('ENGLISH_PUNJABI' as any)) 
       ? state.language
       : finalBaseMode;
     

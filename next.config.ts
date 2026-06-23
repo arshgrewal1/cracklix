@@ -10,9 +10,11 @@ const withPWA = require("next-pwa")({
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+
   eslint: {
     ignoreDuringBuilds: true,
   },
+
   typescript: {
     ignoreBuildErrors: false,
   },
@@ -56,17 +58,17 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "joinindianarmy.nic.in",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
         hostname: "punjabpolice.gov.in",
         pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "**",
+        hostname: "joinindianarmy.nic.in",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.mapsofindia.com",
         pathname: "/**",
       },
     ],
@@ -74,40 +76,6 @@ const nextConfig: NextConfig = {
 
   poweredByHeader: false,
   compress: true,
-
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        http2: false,
-        dns: false,
-        child_process: false,
-        crypto: false,
-        os: false,
-        path: false,
-        stream: false,
-        zlib: false,
-        'node:async_hooks': false,
-        async_hooks: false,
-        perf_hooks: false,
-      };
-
-      config.externals = [
-        ...(Array.isArray(config.externals) ? config.externals : [config.externals].filter(Boolean)),
-        {
-          '@opentelemetry/context-async-hooks': 'commonjs @opentelemetry/context-async-hooks',
-          'genkit': 'commonjs genkit',
-          '@genkit-ai/google-genai': 'commonjs @genkit-ai/google-genai',
-          '@genkit-ai/core': 'commonjs @genkit-ai/core',
-          '@genkit-ai/ai': 'commonjs @genkit-ai/ai'
-        },
-      ];
-    }
-    return config;
-  },
 };
 
 export default withPWA(nextConfig);

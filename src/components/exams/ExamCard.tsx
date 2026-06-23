@@ -11,8 +11,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Vertical Card v1.6.
- * FIXED: Resolved TypeScript property errors by correctly mapping categoryId and descriptive fields.
+ * @fileOverview Exam Vertical Card v1.7.
+ * FIXED: Resolved property access errors by correctly mapping canonical Exam interface fields.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || exam.title || "Official Vertical";
