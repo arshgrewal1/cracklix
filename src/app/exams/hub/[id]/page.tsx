@@ -2,7 +2,7 @@ import BoardHubClient from "@/components/exams/BoardHubClient";
 
 /**
  * @fileOverview Official Board Hub Entry.
- * Satisfies static export requirements with generateStaticParams.
+ * FIXED: Expanded board registry to prevent 404s for auxiliary hubs.
  */
 
 export const dynamicParams = false;
@@ -12,7 +12,11 @@ export async function generateStaticParams() {
     { id: "ppsc" },
     { id: "psssb" },
     { id: "punjab-police" },
-    { id: "teaching-hub" }
+    { id: "teaching-hub" },
+    { id: "pspcl" },
+    { id: "ssc" },
+    { id: "banking-hub" },
+    { id: "judiciary-hub" }
   ];
 }
 

@@ -2,7 +2,7 @@ import ResultClient from "@/components/results/ResultClient";
 
 /**
  * @fileOverview Official Result Node Entry.
- * Satisfies static export requirements with generateStaticParams.
+ * FIXED: Added generic IDs for static rendering.
  */
 
 export const dynamicParams = false;
@@ -10,7 +10,10 @@ export const dynamicParams = false;
 export async function generateStaticParams() {
   return [
     { id: 'mock-punjab-1' },
-    { id: 'dummy-result' }
+    { id: 'dummy-result' },
+    { id: 'patwari-mock-1' },
+    { id: 'constable-mock-1' },
+    { id: 'psssb-sa-mock-1' }
   ];
 }
 
