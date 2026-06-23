@@ -9,7 +9,7 @@ import Image from "next/image";
 
 /**
  * @fileOverview Meet Founder section.
- * UPDATED: Replaced <img> with optimized <Image /> component.
+ * UPDATED: Optimized with next/image for production performance.
  */
 
 export default function MeetFounder() {

@@ -13,9 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Hub v2.2.
- * FIXED: Resolved TS2769 and UMD global errors by explicitly importing React 
- * and using strict type guards for cloneElement to ensure a clean build.
+ * @fileOverview Global Search Hub v2.3.
+ * FIXED: Explicitly imported React and hardened dynamic icon logic for Next.js 15 production build.
  */
 
 export default function SearchPage() {
@@ -45,9 +44,13 @@ function SearchContent() {
     if (q) setQuery(q)
   }, [searchParams])
 
-  const { data: mocks, loading: mLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]))
-  const { data: exams, loading: eLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
-  const { data: notes, loading: nLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "notes") : null), [db]))
+  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db]);
+  const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db]);
+  const notesQuery = useMemo(() => (db ? collection(db, "notes") : null), [db]);
+
+  const { data: mocks, loading: mLoading } = useCollection<any>(mocksQuery)
+  const { data: exams, loading: eLoading } = useCollection<any>(examsQuery)
+  const { data: notes, loading: nLoading } = useCollection<any>(notesQuery)
 
   const isLoading = mLoading || eLoading || nLoading;
 
@@ -111,7 +114,7 @@ function SearchContent() {
               </div>
               
               <div className="relative max-w-[700px] mx-auto group">
-                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-blue-600/20 rounded-2xl blur lg opacity-0 group-focus-within:opacity-15 transition duration-1000"></div>
+                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-blue-600/20 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-15 transition duration-1000"></div>
                  <div className="relative">
                     <SearchIcon className={cn("absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 transition-colors", isLoading ? "text-primary animate-pulse" : "text-slate-300")} />
                     <input 

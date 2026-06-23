@@ -30,8 +30,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Support Hub v2.2.
- * FIXED: Resolved TS2304 errors by adding missing Link and Loader2 imports.
+ * @fileOverview Institutional Support Hub v2.3.
+ * FIXED: Resolved TS errors by ensuring all UI components (Link, Loader2) are correctly imported.
  */
 
 export default function SupportPage() {

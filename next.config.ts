@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false, // Set to false to enforce quality
   },
 
   images: {

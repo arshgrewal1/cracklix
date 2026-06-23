@@ -55,8 +55,6 @@ jobs:
           if [[ -n "${{ secrets.KEYSTORE_BASE64 }}" ]]; then
             echo "Decoding Keystore from Secrets..."
             echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\n ' | base64 -d > ~/.android/release.keystore
-            echo "Validating Release Keystore..."
-            keytool -list -keystore ~/.android/release.keystore -storepass "${{ secrets.STORE_PASSWORD }}" || echo "Warning: Could not list release keystore content"
           else
             echo "No Release Keystore secret found. Generating temporary debug keystore..."
             keytool -genkeypair -v \
@@ -68,10 +66,9 @@ jobs:
               -keysize 2048 \
               -validity 10000 \
               -dname "CN=Android Debug,O=Android,C=US"
-            echo "Verifying debug keystore..."
-            ls -la ~/.android/debug.keystore
-            keytool -list -keystore ~/.android/debug.keystore -storepass android
           fi
+          echo "Verifying keystore presence..."
+          ls -la ~/.android
 
       - name: Build Android App
         working-directory: android

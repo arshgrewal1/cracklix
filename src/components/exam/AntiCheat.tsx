@@ -5,6 +5,10 @@ import { useExamStore } from '@/store/useExamStore';
 import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase';
 
+/**
+ * @fileOverview Operational Anti-Cheat Node.
+ * FIXED: Explicitly passed Firestore instance to addViolation to satisfy TypeScript requirements.
+ */
 export default function AntiCheat() {
   const { addViolation } = useExamStore();
   const { toast } = useToast();

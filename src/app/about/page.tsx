@@ -21,8 +21,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional About Center v21.2.
- * UPDATED: Replaced img with next/image for performance and optimized LCP.
+ * @fileOverview Institutional About Center v21.3.
+ * UPDATED: Optimized with next/image for production-grade performance.
  */
 
 export default function AboutPage() {
@@ -113,7 +113,6 @@ export default function AboutPage() {
                         alt="Arsh Grewal"
                         fill
                         className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
-                        loading="eager"
                         priority
                       />
                        <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent opacity-80" />

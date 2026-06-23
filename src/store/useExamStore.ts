@@ -6,8 +6,8 @@ import { doc, updateDoc, serverTimestamp, setDoc, Firestore } from 'firebase/fir
 import { initializeFirebase } from '@/firebase/app';
 
 /**
- * @fileOverview Hardened Exam State Hub v1.5.
- * FIXED: Resolved TS1117 duplicate property error and audit types.
+ * @fileOverview Hardened Exam State Hub v1.6.
+ * FIXED: Duplicate property key in resetStore resolved. Corrected language type assignments.
  */
 
 interface ExamStore extends AttemptState {
@@ -71,7 +71,8 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     baseLanguageMode: 'ENGLISH_PUNJABI',
     isSubmitting: false,
     isPaused: false, 
-    isSyncing: false
+    isSyncing: false,
+    isPaletteVisible: true
   }),
 
   initExam: (mockId, mockTitle, userId, questions, duration, savedState, languageMode) => {
@@ -89,8 +90,8 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const initialTimeLeft = Math.max(0, Math.floor((finalEndTime - now) / 1000));
     const finalBaseMode: LanguageDisplayMode = languageMode || 'ENGLISH_PUNJABI';
 
-    const initialLang: LanguageDisplayMode = (!forceReset && state.language && (state.language as string) !== "") 
-      ? (state.language as LanguageDisplayMode)
+    const initialLang: LanguageDisplayMode = (!forceReset && state.language) 
+      ? state.language
       : finalBaseMode;
     
     set({
