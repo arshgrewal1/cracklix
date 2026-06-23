@@ -42,6 +42,7 @@ jobs:
       - name: Export to www
         run: |
           rm -rf www
+          mkdir -p www
           cp -r .next/static www/ || true
           cp -r public/* www/ || true
 
@@ -50,13 +51,13 @@ jobs:
 
       - name: Setup Keystore
         run: |
-          mkdir -p ~/.android
-          # Check if secret exists and is valid base64
           if [[ -n "${{ secrets.KEYSTORE_BASE64 }}" ]]; then
-            echo "Decoding Keystore from Secrets..."
-            echo "${{ secrets.KEYSTORE_BASE64 }}" | tr -d '\n ' | base64 -d > ~/.android/release.keystore
+            echo "Decoding Release Keystore..."
+            printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > release.keystore
+            echo "KEYSTORE_TYPE=RELEASE" >> $GITHUB_ENV
           else
             echo "No Release Keystore secret found. Generating temporary debug keystore..."
+            mkdir -p ~/.android
             keytool -genkeypair -v \
               -keystore ~/.android/debug.keystore \
               -storepass android \
@@ -66,9 +67,18 @@ jobs:
               -keysize 2048 \
               -validity 10000 \
               -dname "CN=Android Debug,O=Android,C=US"
+            echo "KEYSTORE_TYPE=DEBUG" >> $GITHUB_ENV
           fi
-          echo "Verifying keystore presence..."
-          ls -la ~/.android
+
+      - name: Verify Keystore Integrity
+        run: |
+          if [[ "$KEYSTORE_TYPE" == "RELEASE" ]]; then
+            ls -la release.keystore
+            keytool -list -v -keystore release.keystore -storepass "${{ secrets.KEYSTORE_PASSWORD }}" | grep Alias
+          else
+            ls -la ~/.android/debug.keystore
+            keytool -list -v -keystore ~/.android/debug.keystore -storepass android | grep Alias
+          fi
 
       - name: Build Android App
         working-directory: android
@@ -76,7 +86,7 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon
 
-      - name: Sign APK (Jarsigner fallback)
+      - name: Sign APK (Jarsigner)
         run: |
           APK_PATH=$(find android/app/build/outputs/apk -name "*.apk" | head -n 1)
           if [[ -z "$APK_PATH" ]]; then
@@ -85,11 +95,11 @@ jobs:
           fi
           echo "Discovered APK: $APK_PATH"
           
-          if [[ -f ~/.android/release.keystore ]]; then
+          if [[ "$KEYSTORE_TYPE" == "RELEASE" ]]; then
             echo "Signing with Release Keystore..."
             jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
-              -keystore ~/.android/release.keystore \
-              -storepass "${{ secrets.STORE_PASSWORD }}" \
+              -keystore release.keystore \
+              -storepass "${{ secrets.KEYSTORE_PASSWORD }}" \
               -keypass "${{ secrets.KEY_PASSWORD }}" \
               "$APK_PATH" "${{ secrets.KEY_ALIAS }}"
           else

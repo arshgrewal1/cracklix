@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Hub v2.5.
- * FIXED: Explicitly imported React and hardened dynamic icon logic for Next.js 15 production build.
+ * @fileOverview Global Search Hub v2.6.
+ * FIXED: React cloneElement type safety for production build.
  */
 
 export default function SearchPage() {

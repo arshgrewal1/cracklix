@@ -7,7 +7,7 @@ set -e
 
 KEYSTORE_FILE="my-release-key.keystore"
 KEYSTORE_PASSWORD="CrackLix@2026Release!"
-KEY_ALIAS="cracklix-release-key"
+KEY_ALIAS="cracklix"
 KEY_PASSWORD="CrackLix@2026Release!"
 
 echo "🔐 Generating Android Release Keystore..."
@@ -82,10 +82,9 @@ KEY_PASSWORD=$KEY_PASSWORD
 EOF
 
 echo "💾 Secrets saved to: keystore-secrets.txt"
-echo "   ⚠️  Add this file to .gitignore (already done if using default)"
 echo ""
 echo "✨ Next steps:"
 echo "   1. Go to GitHub Settings > Secrets and variables > Actions"
 echo "   2. Add each secret from the list above"
-echo "   3. Delete keystore-secrets.txt after adding secrets"
-echo "   4. Commit the keystore file to a secure location (not git)"
+echo "   3. Delete keystore-secrets.txt and $KEYSTORE_FILE after adding secrets"
+echo "   4. Never commit the keystore file to git"
