@@ -81,7 +81,7 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
-      # ✅ Sign APK with apksigner (Mandatory for Android 11+ / V2 Signature)
+      # ✅ Sign APK with apksigner (Mandatory for Android 11+ / V2/V3 Signature)
       - name: Sign & Align APK
         run: |
           UNSIGNED_APK=$(find android/app/build/outputs/apk/release -name "*-unsigned.apk" | head -n 1)
@@ -91,7 +91,6 @@ jobs:
 
           echo "📦 Unsigned APK found: $UNSIGNED_APK"
           
-          # Discovery for build-tools (path varies by runner)
           BUILD_TOOLS_PATH=$(find $ANDROID_HOME/build-tools -name "apksigner" | head -n 1 | xargs dirname)
           echo "🛠️ Build Tools Path: $BUILD_TOOLS_PATH"
 

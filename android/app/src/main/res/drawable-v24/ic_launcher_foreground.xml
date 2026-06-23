@@ -3,11 +3,12 @@
     android:height="108dp"
     android:viewportHeight="108"
     android:viewportWidth="108">
-    <!-- Simplified high-zoom representation of the Cracklix logo -->
+    <!-- Blue 'C' Outer Ring -->
     <path
         android:fillColor="#1677FF"
-        android:pathData="M54,20 C35.2,20 20,35.2 20,54 C20,72.8 35.2,88 54,88 C62.8,88 70.8,84.8 77,79.5 L70,72.5 C65.5,76 60,78 54,78 C40.7,78 30,67.3 30,54 C30,40.7 40.7,30 54,30 C60,30 65.5,32 70,35.5 L77,28.5 C70.8,23.2 62.8,20 54,20 Z" />
+        android:pathData="M54,15 C32.5,15 15,32.5 15,54 C15,75.5 32.5,93 54,93 C64.5,93 73.1,88.9 79.8,82.1 L71.5,73.8 C66.8,77.8 60.8,80.5 54,80.5 C39.4,80.5 27.5,68.6 27.5,54 C27.5,39.4 39.4,27.5 54,27.5 C60.8,27.5 66.8,30.2 71.5,34.2 L79.8,25.9 C73.1,19.1 64.5,15 54,15 Z" />
+    <!-- Checkmark Symbol -->
     <path
         android:fillColor="#1677FF"
-        android:pathData="M84,35 L48,71 L34,57 L28,63 L48,83 L90,41 Z" />
+        android:pathData="M88,32 L54,66 L40,52 L32,60 L54,82 L96,40 Z" />
 </vector>

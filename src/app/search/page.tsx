@@ -13,8 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Hub v2.9.2 (Hardened).
- * FIXED: Explicitly import React and use typed ReactElement for dynamic component rendering.
+ * @fileOverview Global Search Hub v2.9.3 (Hardened).
  */
 
 export default function SearchPage() {

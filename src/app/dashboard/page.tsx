@@ -34,8 +34,7 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Dashboard v42.0 (Hardened Logic).
- * FIXED: Study Hours logic correctly handles durations and filters out corruption.
+ * @fileOverview Student Dashboard v42.1 (Study Hours Fixed).
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -109,11 +108,9 @@ export default function StudentDashboard() {
     const attempted = sorted.reduce((acc: number, r: any) => acc + (Object.keys(r.answers || {}).length), 0)
     const avgAcc = attempted > 0 ? Math.round((correct / attempted) * 100) : 0
     
-    // HARDENED: Study Hours - Correctly sum actual test durations, ignoring corrupt Unix timestamps
+    // Study Hours Fix: Sum test durations, ignore large values (corruption)
     const totalSeconds = sorted.reduce((acc: number, r: any) => {
        const val = Number(r.timeTaken) || 0;
-       // Heuristic: If timeTaken looks like a timestamp (extremely large), it's corrupted.
-       // Average test is < 3 hours (10800s). We filter anything > 6 hours.
        return acc + (val > 21600 ? 0 : val);
     }, 0)
 
@@ -258,17 +255,6 @@ export default function StudentDashboard() {
                     </div>
                 </div>
               </Card>
-
-              {profile?.queuedPasses && profile.queuedPasses.length > 0 && (
-                <Card className="border-none shadow-xl bg-white p-6 rounded-2xl border border-slate-100 overflow-hidden relative">
-                   <div className="absolute top-0 right-0 p-4 opacity-10"><Layers className="h-12 w-12" /></div>
-                   <div className="relative z-10 space-y-3">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-primary">Scheduled Extensions</p>
-                      <h4 className="text-sm font-bold text-slate-900">{profile.queuedPasses.length} Pass nodes waiting</h4>
-                      <Link href="/pass" className="text-[10px] font-black text-slate-400 uppercase tracking-widest hover:text-primary transition-colors flex items-center gap-1">Manage Queue <ChevronRight className="h-3 w-3" /></Link>
-                   </div>
-                </Card>
-              )}
 
               <div className="bg-white p-4 md:p-6 rounded-2xl border border-slate-100 shadow-xl space-y-4 md:space-y-6">
                  <h4 className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Quick Tools</h4>
