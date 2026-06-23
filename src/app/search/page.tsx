@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Hub v2.6.
- * FIXED: React cloneElement type safety for production build.
+ * @fileOverview Global Search Hub v2.7.
+ * FIXED: React cloneElement type safety and import requirements for production build.
  */
 
 export default function SearchPage() {
@@ -116,12 +116,12 @@ function SearchContent() {
               <div className="relative max-w-[700px] mx-auto group">
                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-blue-600/20 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-15 transition duration-1000"></div>
                  <div className="relative">
-                    <SearchIcon className={cn("absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 transition-colors", isLoading ? "text-primary animate-pulse" : "text-slate-300")} />
+                    <SearchIcon className={cn("absolute left-4 md:left-6 top-1/2 -translate-y-1/2 h-5 w-5 md:h-6 md:w-6 transition-colors", isLoading ? "text-primary animate-pulse" : "text-slate-300")} />
                     <input 
                       value={query}
                       onChange={e => setQuery(e.target.value)}
                       autoFocus
-                      className="w-full h-14 md:h-18 pl-16 pr-14 text-sm md:text-2xl rounded-2xl md:rounded-[2.5rem] border-none shadow-2xl bg-white focus:ring-4 focus:ring-primary/5 text-[#0F172A] font-bold outline-none placeholder:text-slate-200" 
+                      className="w-full h-14 md:h-18 pl-12 md:pl-16 pr-14 text-sm md:text-2xl rounded-2xl md:rounded-[2.5rem] border-none shadow-2xl bg-white focus:ring-4 focus:ring-primary/5 text-[#0F172A] font-bold outline-none placeholder:text-slate-200" 
                       placeholder="Search exams, tests, or notes..." 
                     />
                     {isLoading && <Loader2 className="absolute right-6 top-1/2 -translate-y-1/2 h-6 w-6 text-primary animate-spin" />}

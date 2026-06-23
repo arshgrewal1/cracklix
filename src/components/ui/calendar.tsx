@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
 /**
- * @fileOverview Custom Calendar UI v2.1.
- * FIXED: Returns valid spans for non-left/right orientations to satisfy strict React element typing.
+ * @fileOverview Custom Calendar UI v2.2.
+ * FIXED: Replaced deprecated react-day-picker v8 components with v9 standard return elements to satisfy strict React typing.
  */
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
