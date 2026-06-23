@@ -22,30 +22,37 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "i.ibb.co",
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "picsum.photos",
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "**.googleusercontent.com",
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "sssb.punjab.gov.in",
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "joinindianarmy.nic.in",
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "punjabpolice.gov.in",
+        pathname: "/**",
       },
       {
         protocol: "https",
         hostname: "**",
+        pathname: "/**",
       },
     ],
   },

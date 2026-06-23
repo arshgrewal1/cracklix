@@ -142,7 +142,7 @@ function SearchContent() {
               </div>
            ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                 <Card className="border-none shadow-xl rounded-[2.5rem] p-10 bg-[#0B1528] text-white overflow-hidden relative group">
+                 <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] p-10 bg-[#0B1528] text-white overflow-hidden relative group">
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform"><LayoutGrid className="h-44 w-44" /></div>
                     <div className="relative z-10 space-y-8">
                        <h4 className="font-black text-[10px] text-primary uppercase tracking-[0.4em]">Quick Search</h4>
