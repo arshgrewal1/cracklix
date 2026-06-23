@@ -34,7 +34,7 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Dashboard v42.1 (Study Hours Fixed).
+ * @fileOverview Student Dashboard v42.2 (Study Hours & Icon Sync).
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -115,7 +115,8 @@ export default function StudentDashboard() {
     }, 0)
 
     const timeFormattedValue = totalSeconds >= 3600 ? `${(totalSeconds / 3600).toFixed(1)}h` : 
-                       totalSeconds >= 60 ? `${Math.floor(totalSeconds / 60)}m` : `${totalSeconds}s`;
+                       totalSeconds >= 60 ? `${Math.floor(totalSeconds / 60)}m` : 
+                       totalSeconds > 0 ? `${totalSeconds}s` : "0h";
     
     const uniqueDays = new Set(sorted.filter((r: any) => r.timestamp).map((r: any) => new Date(r.timestamp).toDateString()))
     const readiness = Math.min(100, Math.round((avgAcc * 0.7) + (Math.min(total, 30) * 1)))

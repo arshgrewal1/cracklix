@@ -103,20 +103,20 @@ jobs:
               --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
               --ks-pass "pass:${{ secrets.KEYSTORE_PASSWORD }}" \
               --key-pass "pass:${{ secrets.KEY_PASSWORD }}" \
-              --out cracklix-production.apk cracklix-aligned.apk
+              --out cracklix.apk cracklix-aligned.apk
           else
             $BUILD_TOOLS_PATH/apksigner sign --ks release.keystore \
               --ks-key-alias "$KEY_ALIAS" \
               --ks-pass "pass:$KEYSTORE_PASSWORD" \
               --key-pass "pass:$KEY_PASSWORD" \
-              --out cracklix-production.apk cracklix-aligned.apk
+              --out cracklix.apk cracklix-aligned.apk
           fi
           
           # 3. Verify
-          $BUILD_TOOLS_PATH/apksigner verify --verbose cracklix-production.apk
+          $BUILD_TOOLS_PATH/apksigner verify --verbose cracklix.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: cracklix-production-build
-          path: cracklix-production.apk
+          name: cracklix-build
+          path: cracklix.apk
