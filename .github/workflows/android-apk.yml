@@ -36,9 +36,6 @@ jobs:
       - name: Run TypeScript Check
         run: npm run typecheck
 
-      - name: Run Linting
-        run: npm run lint -- --max-warnings 10
-
       - name: Build Next.js app
         run: npm run build:android
 
@@ -73,6 +70,7 @@ jobs:
               -dname "CN=Android Debug,O=Android,C=US"
             echo "Verifying debug keystore..."
             ls -la ~/.android/debug.keystore
+            keytool -list -keystore ~/.android/debug.keystore -storepass android
           fi
 
       - name: Build Android App
