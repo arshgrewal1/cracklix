@@ -84,7 +84,7 @@ export const useExamStore = create<ExamStore>((set, get) => ({
     const initialTimeLeft = Math.max(0, Math.floor((finalEndTime - now) / 1000));
     const finalBaseMode: LanguageDisplayMode = languageMode || 'ENGLISH_PUNJABI';
 
-    const initialLang: LanguageDisplayMode = (!forceReset && state.language && (state.language as string) !== "") 
+    const initialLang: LanguageDisplayMode = (!forceReset && state.language) 
       ? state.language 
       : finalBaseMode;
     
