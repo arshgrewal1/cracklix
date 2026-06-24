@@ -7,12 +7,11 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Exam Store v3.0
- * FIXED: Full implementation of ExamStoreState interface properties to resolve CBT build errors.
+ * @fileOverview Hardened Exam Store v3.1
+ * FIXED: Standardized state initialization and resolved property collision in sync logic.
  */
 
 export interface ExamStoreState {
-  // State
   mockId: string | null;
   mockTitle: string;
   userId: string | null;
@@ -29,7 +28,6 @@ export interface ExamStoreState {
   baseLanguageMode: LanguageDisplayMode;
   violations: number;
 
-  // Actions
   initExam: (
     mockId: string, 
     title: string, 
@@ -68,6 +66,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   violations: 0,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
+    const finalLang = languageMode || "ENGLISH_PUNJABI";
     if (resumeData && resumeData.status !== 'COMPLETED') {
       set({
         mockId,
@@ -83,8 +82,8 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         isPaused: false,
         startTime: resumeData.startTime || Date.now(),
         violations: resumeData.violations || 0,
-        language: languageMode || "ENGLISH_PUNJABI",
-        baseLanguageMode: languageMode || "ENGLISH_PUNJABI",
+        language: finalLang,
+        baseLanguageMode: finalLang,
       });
     } else {
       set({
@@ -101,8 +100,8 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         isPaused: false,
         startTime: Date.now(),
         violations: 0,
-        language: languageMode || "ENGLISH_PUNJABI",
-        baseLanguageMode: languageMode || "ENGLISH_PUNJABI",
+        language: finalLang,
+        baseLanguageMode: finalLang,
       });
     }
   },
@@ -177,9 +176,9 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   },
 
   saveAndNext: (db) => {
-    const { currentIdx, questions, setCurrentIdx } = get();
+    const { currentIdx, questions } = get();
     if (currentIdx < (questions?.length || 0) - 1) {
-      setCurrentIdx(currentIdx + 1);
+      get().setCurrentIdx(currentIdx + 1);
     }
   },
 

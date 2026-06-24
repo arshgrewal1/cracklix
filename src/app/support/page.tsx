@@ -37,8 +37,8 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Hub v2.9 - Production Ready
- * FIXED: Resolved Link and Loader2 imports
+ * @fileOverview Support Hub v3.0 - Production Fixed
+ * FIXED: Resolved Link and Loader2 imports to satisfy production build criteria.
  */
 
 export default function SupportPage() {
@@ -353,7 +353,7 @@ export default function SupportPage() {
             >
               Discard
             </button>
-            <button
+            <Button
               onClick={handleRaiseTicket}
               disabled={raisingLoading}
               className="flex-1 bg-primary hover:bg-blue-700 text-white h-11 md:h-12 rounded-full font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
@@ -364,7 +364,7 @@ export default function SupportPage() {
                 <Send className="h-4 w-4" />
               )}
               Transmit Node
-            </button>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

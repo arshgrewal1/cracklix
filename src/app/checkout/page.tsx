@@ -19,7 +19,7 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Hardened Checkout Hub v5.2.
+ * @fileOverview Hardened Checkout Hub v5.3.
  * FIXED: Restored missing Badge and CheckCircle2 icons and imports.
  */
 

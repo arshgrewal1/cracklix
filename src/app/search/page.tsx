@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Hub v3.15 - Build Hardened
+ * @fileOverview Global Search Hub v3.16 - Build Stabilized.
  * FIXED: Explicit React usage and type casting for cloneElement to satisfy strict overload checks.
  */
 
@@ -136,7 +136,7 @@ function SearchContent() {
                  </div>
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.length > 0 ? searchResults.map((res, i) => (
-                      <SearchResultItem key={i} title={res.title} category={res.type} href={res.href} icon={res.icon} />
+                      <SearchResultItem key={i} title={res.title} category={res.type} href={res.href} icon={res.icon as ReactElement} />
                     )) : !isLoading && (
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">

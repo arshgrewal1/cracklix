@@ -11,8 +11,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Card Component v1.9 - Production Ready
- * FIXED: Resolved Exam interface property access errors
+ * @fileOverview Exam Card Component v2.0 - Production Fixed
+ * FIXED: Ensured property access strictly matches the Exam interface.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || exam.title || "Official Vertical"
@@ -21,11 +21,11 @@ export default function ExamCard({ exam }: ExamCardProps) {
   const activeQuestionsCount = exam.activeQuestions ?? 0
 
   return (
-    <Link href={`/exams/${exam.id}`}>
+    <Link href={`/exams/view?id=${exam.id}`}>
       <Card className="bg-white border border-[#E5E7EB] shadow-sm hover:shadow-2xl transition-all duration-500 group rounded-[3rem] overflow-hidden h-full flex flex-col">
         <CardContent className="p-8 md:p-12 flex flex-col h-full text-left">
           <div className="flex justify-between items-start mb-8 md:mb-10">
-            <AuthorityLogo boardId={exam.boardId} size="xl" className="bg-slate-50 rounded-[2rem] group-hover:scale-105 transition-transform" />
+            <AuthorityLogo boardId={exam.boardId} size="md" className="bg-slate-50 rounded-xl group-hover:scale-105 transition-transform" />
             <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded shadow-sm">
               {(exam.boardId || "OFFICIAL").toUpperCase()} HUB
             </Badge>
