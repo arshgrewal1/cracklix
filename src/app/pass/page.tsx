@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Zap, ArrowRight, Gem, AlertCircle, Clock, Layers, Calendar } from "lucide-react"
-import Link from "link"
+import Link from "next/link"
 import { motion } from "framer-motion"
 import { useUser, useFirestore, useCollection } from "@/firebase"
 import { collection } from "firebase/firestore"
@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 /**
  * @fileOverview High-Density Pass Center v26.0 (Typography Fixed).
  * UPDATED: Removed forced uppercase and refined button logic for modern "Buy Now" style.
+ * FIXED: Corrected Link import from "link" to "next/link".
  */
 
 export default function PassPage() {
