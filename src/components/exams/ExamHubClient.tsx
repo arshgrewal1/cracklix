@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState, useEffect, Suspense } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useCollection, useFirestore, useUser } from "@/firebase"
@@ -47,7 +47,7 @@ export default function ExamHubClient() {
     if (queryId) return queryId;
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSegment = pathSegments[pathSegments.length - 1];
-    return lastSegment !== 'view' ? lastSegment : null;
+    return lastSegment !== 'view' ? lastSegment : "";
   }, [pathname, searchParams]);
 
   const { data: exam, loading: examLoading } = useDoc<any>(useMemo(() => (db && examId ? doc(db, "exams", examId) : null), [db, examId]))
@@ -216,10 +216,11 @@ function MockList({ data, results, isPassActive, loading, boards }: any) {
                         onClick={() => router.push(locked ? '/pass' : `/mocks/view?id=${mock.id}`)} 
                         className={cn(
                           "w-full h-9 md:h-14 rounded-full font-black text-[8px] md:text-[11px] tracking-widest uppercase shadow-md border-none transition-all active:scale-95 flex items-center justify-center gap-2 md:gap-3", 
-                          locked ? "bg-orange-50 text-white" : "bg-[#0F172A] text-white"
+                          locked ? "bg-orange-500 text-white" : "bg-[#0F172A] text-white"
                         )}
                       >
-                        {locked ? <><Lock className="h-2.5 w-2.5 md:h-4 md:w-4" /> UNLOCK</> : 'Start'}
+                        {locked ? <Lock className="h-2.5 w-2.5 md:h-4 md:w-4" /> : null}
+                        {locked ? 'Unlock' : 'Start'}
                      </button>
                   </CardContent>
                </Card>
@@ -250,7 +251,7 @@ function NotesList({ data, isPassActive, loading, type }: any) {
                   </div>
                   <button onClick={() => window.open(isLocked ? '/pass' : (item.pdfUrl || '#'), isLocked ? '_self' : '_blank')} className={cn(
                     "h-9 md:h-11 px-5 md:px-8 rounded-full font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-md shrink-0 border-none transition-all active:scale-95",
-                    isLocked ? "bg-orange-50 text-white" : "bg-[#0F172A] text-white"
+                    isLocked ? "bg-orange-500 text-white" : "bg-[#0F172A] text-white"
                   )}>
                      {isLocked ? 'UNLOCK' : 'GET'}
                   </button>

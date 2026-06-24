@@ -3,6 +3,7 @@
 import { useExamStore } from '@/store/useExamStore';
 import { cn } from '@/lib/utils';
 import { useMemo } from 'react';
+import { Question } from '@/types';
 
 /**
  * @fileOverview Refined Subject Switching Hub v2.1 (Absolute Minimum).
@@ -17,7 +18,7 @@ export default function SubjectTabs() {
   const sections = useMemo(() => {
     const map = new Map<string, { id: string, name: string, startIdx: number, total: number, answered: number }>();
     
-    (questions || []).forEach((q, idx) => {
+    (questions || []).forEach((q: Question, idx: number) => {
       const sid = q.sectionId || 'General';
       const st = status[idx];
       const isAnswered = st === 'answered' || st === 'answered-marked';
@@ -66,4 +67,3 @@ export default function SubjectTabs() {
     </nav>
   );
 }
-

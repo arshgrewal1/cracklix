@@ -2,8 +2,7 @@ import { create } from "zustand";
 import { 
   Question, 
   QuestionStatus, 
-  LanguageDisplayMode,
-  AttemptState 
+  LanguageDisplayMode 
 } from "@/types";
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -39,11 +38,11 @@ interface ExamStoreState {
   setPaused: (paused: boolean) => void;
   setCurrentIdx: (idx: number) => void;
   setLanguage: (lang: LanguageDisplayMode) => void;
-  setAnswer: (idx: number, optIdx: number, db: Firestore) => void;
-  clearAnswer: (idx: number, db: Firestore) => void;
-  markForReview: (idx: number, db: Firestore) => void;
-  saveAndNext: (db: Firestore) => void;
-  addViolation: (db: Firestore) => void;
+  setAnswer: (idx: number, optIdx: number, db: Firestore | null) => void;
+  clearAnswer: (idx: number, db: Firestore | null) => void;
+  markForReview: (idx: number, db: Firestore | null) => void;
+  saveAndNext: (db: Firestore | null) => void;
+  addViolation: (db: Firestore | null) => void;
 }
 
 export const useExamStore = create<ExamStoreState>((set, get) => ({
@@ -123,7 +122,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   setLanguage: (language) => set({ language }),
 
   setAnswer: (idx, optIdx, db) => {
-    const { answers, status, mockId, userId, questions, visited, bookmarks, timeLeft, currentIdx, violations, startTime } = get();
+    const { answers, status, mockId, userId, visited, bookmarks, timeLeft, currentIdx, violations, startTime } = get();
     const newAnswers = { ...answers, [idx]: optIdx };
     const newStatus = { ...status, [idx]: 'answered' as QuestionStatus };
     

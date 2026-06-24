@@ -3,9 +3,9 @@
 import { useExamStore } from '@/store/useExamStore';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useMemo } from 'react';
+import { Question } from '@/types';
 
 /**
  * @fileOverview Refined CBT Palette Drawer v1.1.
@@ -16,7 +16,7 @@ export default function PaletteDrawer({ open, onOpenChange }: { open: boolean, o
 
   const stats = useMemo(() => {
     const s = { answered: 0, marked: 0, notAnswered: 0, notVisited: 0, ansMarked: 0 };
-    questions.forEach((_, i) => {
+    questions.forEach((_: Question, i: number) => {
       const st = status[i];
       if (st === 'answered') s.answered++;
       else if (st === 'marked') s.marked++;
@@ -47,7 +47,7 @@ export default function PaletteDrawer({ open, onOpenChange }: { open: boolean, o
 
             <div className="space-y-8">
                <div className="grid grid-cols-5 gap-3">
-                 {questions.map((_, i) => {
+                 {questions.map((_: Question, i: number) => {
                    const st = status[i];
                    const isVisited = visited.includes(i);
                    const isCurrent = currentIdx === i;

@@ -3,13 +3,14 @@
 import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { 
-  CheckCircle2, 
-  ShieldCheck,
-  LayoutGrid
+  Zap,
+  CheckCircle2,
+  ShieldCheck
 } from "lucide-react";
 import { useExamStore } from '@/store/useExamStore';
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Question } from "@/types";
 
 interface QuestionPaletteProps {
   onSelect: (index: number) => void;
@@ -30,7 +31,7 @@ export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteP
   // Status Aggregation
   const stats = useMemo(() => {
     const s = { answered: 0, marked: 0, notAnswered: 0, notVisited: 0, ansMarked: 0 };
-    (questions || []).forEach((_, i) => {
+    (questions || []).forEach((_: Question, i: number) => {
       const st = status[i];
       if (st === 'answered') s.answered++;
       else if (st === 'marked') s.marked++;
@@ -45,7 +46,7 @@ export default function QuestionPalette({ onSelect, onSubmit }: QuestionPaletteP
   const sections = useMemo(() => {
     const groups: Record<string, { name: string, questions: any[] }> = {};
     
-    questions.forEach((q, idx) => {
+    questions.forEach((q: Question, idx: number) => {
       const sid = q.sectionId || 'General';
       if (!groups[sid]) {
         groups[sid] = { name: sid.toUpperCase(), questions: [] };
