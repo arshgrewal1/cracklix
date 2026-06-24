@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { doc, onSnapshot, updateDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth, useFirestore } from '../provider';
 import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth & Profile Hub v11.1 (Rapid Queue Sync).
+ * @fileOverview Hardened Auth & Profile Hub v12.0 (Auto-Activation Aware).
  * SECURITY: Real-time pass status derivation with rapid auto-activation from queue.
  */
 export function useUser() {
@@ -49,7 +49,6 @@ export function useUser() {
         profileLoaded.current = true;
       }
     }, (err) => {
-      console.error("[AUTH_SYNC_FAILURE]:", err);
       setAuthResolved(true);
       setProfileLoading(false);
     });
@@ -80,7 +79,7 @@ export function useUser() {
                 passStatus = 'expired';
                 passActive = false;
                 
-                // 2. RAPID QUEUE ACTIVATION (Eliminates flicker)
+                // 2. RAPID QUEUE ACTIVATION (Eliminates service gaps)
                 if (data.queuedPasses && data.queuedPasses.length > 0) {
                    const nextPass = data.queuedPasses[0];
                    const remainingQueue = data.queuedPasses.slice(1);
@@ -102,7 +101,7 @@ export function useUser() {
                       queuedPasses: remainingQueue,
                       updatedAt: serverTimestamp()
                    });
-                   return; // Re-fire on next snapshot immediately
+                   return; // Snapshot will re-trigger immediately
                 }
              } else {
                 passStatus = 'active';
@@ -132,7 +131,6 @@ export function useUser() {
         setProfileLoading(false);
       }
     }, (err) => {
-      console.error("[PROFILE_SYNC_FAILURE]:", err);
       profileLoaded.current = true;
       setProfileLoading(false);
     });

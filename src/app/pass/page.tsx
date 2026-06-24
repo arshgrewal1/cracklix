@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview High-Density Pass Center v24.0.
- * UPDATED: Added Subscription Queue visibility. Aspirants can now see their extension schedule.
+ * @fileOverview High-Density Pass Center v25.0.
+ * UPDATED: Premium UI inspired by Testbook with countdown and scheduled extensions.
  */
 
 export default function PassPage() {
@@ -155,8 +155,8 @@ export default function PassPage() {
         )}
 
         <div id="plans" className="text-center space-y-1.5 md:space-y-6 px-1">
-           <h1 className="text-xl md:text-5xl font-black text-[#0F172A] leading-tight">Elite Plans</h1>
-           <p className="text-[11px] md:text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">Verified patterns and official audit rationalizations.</p>
+           <h1 className="text-xl md:text-5xl font-black text-[#0F172A] leading-tight">Elite Preparation Pass</h1>
+           <p className="text-[11px] md:text-lg text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">Verified patterns and official audit rationalizations for Punjab government exams.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
@@ -168,7 +168,7 @@ export default function PassPage() {
                       <CardTitle className="font-black text-xs md:text-2xl tracking-tight text-[#0F172A]">{plan.name}</CardTitle>
                       <div className="flex items-baseline justify-center gap-1">
                         <span className="text-lg md:text-5xl font-black text-[#0F172A] tabular-nums">₹{plan.price}</span>
-                        <span className="text-[7px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">/ {plan.durationDays}d</span>
+                        <span className="text-[7px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">/ {plan.durationDays} Days</span>
                       </div>
                    </CardHeader>
                    <CardContent className="px-4 md:px-10 pb-4 md:pb-8 flex-1">

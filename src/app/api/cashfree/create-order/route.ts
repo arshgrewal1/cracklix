@@ -4,9 +4,8 @@ import { initializeFirebase } from '@/firebase/app';
 import { doc, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Cashfree Order Node v9.0.
- * FIXED: Aggressive phone number sanitization to prevent Cashfree API rejections.
- * FIXED: Robust Return URL mapping for Capacitor/Web hybrid environments.
+ * @fileOverview Hardened Cashfree Order Node v10.0.
+ * FIXED: Advanced phone number normalization and site URL resolution.
  */
 
 export async function POST(req: Request) {
@@ -26,7 +25,6 @@ export async function POST(req: Request) {
 
     Cashfree.XClientId = clientId;
     Cashfree.XClientSecret = clientSecret;
-    // Auto-detect environment from secret key prefix
     const isProd = clientSecret.startsWith('cf_prod_');
     Cashfree.XEnvironment = isProd ? Cashfree.Environment.PRODUCTION : Cashfree.Environment.SANDBOX;
 
@@ -45,11 +43,15 @@ export async function POST(req: Request) {
     const userSnap = await getDoc(doc(db, "users", userId));
     const userData = userSnap.data();
 
-    // CRITICAL: Cashfree requires EXACTLY 10 digits for phone
-    const cleanPhone = (userData?.phone || "9999999999").replace(/\D/g, '').slice(-10);
+    // CRITICAL: Cashfree requires EXACTLY 10 digits for phone, no prefixes.
+    const rawPhone = userData?.phone || "9999999999";
+    const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
 
-    const secureOrigin = (clientOrigin || process.env.NEXT_PUBLIC_SITE_URL || "https://cracklix.vercel.app").replace('http://', 'https://');
-    const orderId = `order_${Date.now()}_${userId.slice(-6)}`;
+    // Capacitor Compatibility: Use client origin or fallback to environment URL
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cracklix.vercel.app";
+    const secureOrigin = (clientOrigin || siteUrl).replace('http://', 'https://');
+    
+    const orderId = `CRK_${Date.now()}_${userId.slice(-4)}`;
 
     const orderRequest = {
       order_amount: Number(planData.price),
@@ -62,11 +64,10 @@ export async function POST(req: Request) {
         customer_phone: cleanPhone,
       },
       order_meta: {
-        // We pass the plan ID in the URL so the success page knows what was bought
         return_url: `${secureOrigin}/payment/success?order_id={order_id}&plan=${encodeURIComponent(planId)}`,
         notify_url: `${secureOrigin}/api/cashfree/webhook`
       },
-      order_note: `Cracklix Pass: ${planData.name}`,
+      order_note: `Elite Pass: ${planData.name}`,
     };
 
     const response = await Cashfree.PGCreateOrder("2023-08-01", orderRequest);

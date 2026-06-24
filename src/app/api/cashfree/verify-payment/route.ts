@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { Cashfree } from 'cashfree-pg';
 import { initializeFirebase } from '@/firebase/app';
-import { doc, updateDoc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, serverTimestamp, getDoc, arrayUnion } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Verification Hub v7.0.
- * FIXED: Optimized plan ID normalization to handle both display names and canonical IDs.
+ * @fileOverview Hardened Verification Node v8.0.
+ * UPDATED: Support for multi-pass queuing (Scheduled Extensions).
  */
 
 export async function POST(req: Request) {
@@ -23,29 +23,24 @@ export async function POST(req: Request) {
     Cashfree.XEnvironment = clientSecret.startsWith('cf_prod_') ? Cashfree.Environment.PRODUCTION : Cashfree.Environment.SANDBOX;
 
     if (!order_id || !userId || !planId) {
-      return NextResponse.json({ error: 'Audit parameters missing' }, { status: 400 });
+      return NextResponse.json({ error: 'Parameters missing' }, { status: 400 });
     }
 
-    // 1. Pull payment status from gateway
     const response = await Cashfree.PGOrderFetchPayments("2023-08-01", order_id);
     const payments = response.data;
     const successNode = payments?.find(p => p.payment_status === 'SUCCESS');
 
     if (!successNode) {
-      return NextResponse.json({ error: 'Payment not verified by gateway' }, { status: 400 });
+      return NextResponse.json({ error: 'Payment not verified' }, { status: 400 });
     }
 
-    // 2. Normalize and locate plan
-    const normalizedPlanId = planId.toLowerCase().replace(/[\s_]+/g, '-');
     const { firestore: db } = initializeFirebase();
+    const normalizedPlanId = planId.toLowerCase().replace(/[\s_]+/g, '-');
     
     const planSnap = await getDoc(doc(db, 'passes', normalizedPlanId));
-    if (!planSnap.exists()) {
-       return NextResponse.json({ error: `Plan node ${normalizedPlanId} not found` }, { status: 404 });
-    }
+    if (!planSnap.exists()) return NextResponse.json({ error: 'Plan invalid' }, { status: 404 });
     const planData = planSnap.data();
 
-    // 3. Calculate Expiry Logic (Extension Support)
     const userRef = doc(db, 'users', userId);
     const userSnap = await getDoc(userRef);
     const userData = userSnap.data() || {};
@@ -55,32 +50,46 @@ export async function POST(req: Request) {
     const currentExpiry = userData.passExpiresAt ? new Date(userData.passExpiresAt) : null;
     const isPassActive = currentExpiry && currentExpiry > now;
     
-    let finalExpiry: Date;
-    if (isPassActive && userData.status === normalizedPlanId) {
-      finalExpiry = new Date(currentExpiry.getTime());
-      finalExpiry.setDate(finalExpiry.getDate() + duration);
+    if (isPassActive && userData.status !== normalizedPlanId) {
+       // Logic: SCHEDULED EXTENSION (Queue different plan types)
+       await updateDoc(userRef, {
+          queuedPasses: arrayUnion({
+             id: `q_${Date.now()}`,
+             planId: normalizedPlanId,
+             name: planData.name,
+             durationDays: duration,
+             purchasedAt: now.toISOString()
+          }),
+          updatedAt: serverTimestamp()
+       });
     } else {
-      finalExpiry = new Date();
-      finalExpiry.setDate(now.getDate() + duration);
+       // Logic: IMMEDIATE ACTIVATION / EXTENSION
+       let finalExpiry: Date;
+       if (isPassActive && userData.status === normalizedPlanId) {
+          finalExpiry = new Date(currentExpiry.getTime());
+          finalExpiry.setDate(finalExpiry.getDate() + duration);
+       } else {
+          finalExpiry = new Date();
+          finalExpiry.setDate(now.getDate() + duration);
+       }
+
+       await updateDoc(userRef, {
+          pass: {
+             active: true,
+             plan: planData.id?.toUpperCase() || 'PREMIUM',
+             purchaseDate: now.toISOString(),
+             expiryDate: finalExpiry.toISOString(),
+             freePassClaimed: false
+          },
+          passStatus: 'active',
+          passExpiresAt: finalExpiry.toISOString(),
+          status: normalizedPlanId,
+          planTier: planData.tier || 1,
+          updatedAt: serverTimestamp()
+       });
     }
 
-    // 4. Sync Registry
-    await updateDoc(userRef, {
-      pass: {
-        active: true,
-        plan: planData.id?.toUpperCase() || 'ELITE',
-        purchaseDate: now.toISOString(),
-        expiryDate: finalExpiry.toISOString(),
-        freePassClaimed: false
-      },
-      passStatus: 'active',
-      passExpiresAt: finalExpiry.toISOString(),
-      status: normalizedPlanId,
-      planTier: planData.tier || 1,
-      updatedAt: serverTimestamp()
-    });
-
-    // 5. Save audit request
+    // Record verified transaction node
     await setDoc(doc(db, 'payment_requests', successNode.cf_payment_id!.toString()), {
       id: successNode.cf_payment_id!.toString(),
       orderId: order_id,
@@ -97,7 +106,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true });
 
   } catch (error: any) {
-    console.error("[VERIFICATION_CRITICAL_FAIL]:", error);
-    return NextResponse.json({ error: 'Registry sync failed' }, { status: 500 });
+    console.error("[CASHFREE_VERIFICATION_CRITICAL]:", error);
+    return NextResponse.json({ error: 'Internal sync failed' }, { status: 500 });
   }
 }
