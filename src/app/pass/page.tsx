@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, Zap, ArrowRight, Gem, AlertCircle, Clock, Layers, Calendar } from "lucide-react"
-import Link from "next/link"
+import Link from "link"
 import { motion } from "framer-motion"
 import { useUser, useFirestore, useCollection } from "@/firebase"
 import { collection } from "firebase/firestore"
@@ -16,8 +16,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview High-Density Pass Center v25.0.
- * UPDATED: Premium UI inspired by Testbook with countdown and scheduled extensions.
+ * @fileOverview High-Density Pass Center v26.0 (Typography Fixed).
+ * UPDATED: Removed forced uppercase and refined button logic for modern "Buy Now" style.
  */
 
 export default function PassPage() {
@@ -120,8 +120,8 @@ export default function PassPage() {
                        ) : null}
                     </div>
 
-                    <Button asChild className="w-full md:w-auto h-11 px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-xl border-none">
-                       <Link href="#plans">Extend <ArrowRight className="ml-2 h-3 w-3" /></Link>
+                    <Button asChild className="w-full md:w-auto h-11 px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-black text-[10px] tracking-widest shadow-xl border-none">
+                       <Link href="#plans">Extend Validity <ArrowRight className="ml-2 h-3 w-3" /></Link>
                     </Button>
                  </div>
               </Card>
@@ -160,35 +160,42 @@ export default function PassPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-           {passesLoading ? Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-2xl bg-white" />) : passes.map((plan, idx) => (
-             <motion.div key={plan.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}>
-                <Card className="h-full border border-slate-100 shadow-xl rounded-[1.5rem] md:rounded-[2rem] bg-white overflow-hidden flex flex-col hover:translate-y-[-4px] transition-all">
-                   <CardHeader className="p-4 md:p-10 pb-2 md:pb-4 text-center space-y-2 md:space-y-4">
-                      <div className="h-9 w-9 md:h-14 rounded-xl bg-slate-50 text-primary flex items-center justify-center mx-auto shadow-inner"><Gem className="h-5 w-5 md:h-7" /></div>
-                      <CardTitle className="font-black text-xs md:text-2xl tracking-tight text-[#0F172A]">{plan.name}</CardTitle>
-                      <div className="flex items-baseline justify-center gap-1">
-                        <span className="text-lg md:text-5xl font-black text-[#0F172A] tabular-nums">₹{plan.price}</span>
-                        <span className="text-[7px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">/ {plan.durationDays} Days</span>
-                      </div>
-                   </CardHeader>
-                   <CardContent className="px-4 md:px-10 pb-4 md:pb-8 flex-1">
-                      <div className="h-px w-full bg-slate-50 mb-3 md:mb-6" />
-                      <ul className="space-y-1.5 md:space-y-3.5">
-                         {plan.features?.map((feat: string, i: number) => (
-                            <li key={i} className="flex items-start gap-2 text-left"><CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 shrink-0 mt-0.5 text-emerald-500" /><span className="text-[10px] md:text-sm font-bold text-slate-600 leading-snug">{feat}</span></li>
-                         ))}
-                      </ul>
-                   </CardContent>
-                   <CardFooter className="p-3 md:p-10 pt-0">
-                      <Button asChild className="w-full h-11 md:h-16 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-lg border-none active:scale-95">
-                         <Link href={`/checkout?plan=${plan.id}`}>
-                           {passStatus === 'active' ? 'Extend Preparation' : 'Activate Plan'} <ArrowRight className="ml-2 h-3 w-3" />
-                         </Link>
-                      </Button>
-                   </CardFooter>
-                </Card>
-             </motion.div>
-           ))}
+           {passesLoading ? Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-2xl bg-white" />) : passes.map((plan, idx) => {
+             const isCurrentPlan = profile?.status === plan.id;
+             const btnText = passStatus === 'active' 
+               ? (isCurrentPlan ? "Extend Plan" : "Upgrade Hub") 
+               : (plan.price === 0 ? "Activate Free" : "Buy Now");
+
+             return (
+               <motion.div key={plan.id} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}>
+                  <Card className="h-full border border-slate-100 shadow-xl rounded-[1.5rem] md:rounded-[2.5rem] bg-white overflow-hidden flex flex-col hover:translate-y-[-4px] transition-all">
+                     <CardHeader className="p-4 md:p-10 pb-2 md:pb-4 text-center space-y-2 md:space-y-4">
+                        <div className="h-9 w-9 md:h-14 rounded-xl bg-slate-50 text-primary flex items-center justify-center mx-auto shadow-inner"><Gem className="h-5 w-5 md:h-7" /></div>
+                        <CardTitle className="font-black text-sm md:text-2xl tracking-tight text-[#0F172A]">{plan.name}</CardTitle>
+                        <div className="flex items-baseline justify-center gap-1">
+                          <span className="text-xl md:text-5xl font-black text-[#0F172A] tabular-nums">₹{plan.price}</span>
+                          <span className="text-[7px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">/ {plan.durationDays} Days</span>
+                        </div>
+                     </CardHeader>
+                     <CardContent className="px-4 md:px-10 pb-4 md:pb-8 flex-1">
+                        <div className="h-px w-full bg-slate-50 mb-3 md:mb-6" />
+                        <ul className="space-y-1.5 md:space-y-3.5">
+                           {plan.features?.map((feat: string, i: number) => (
+                              <li key={i} className="flex items-start gap-2 text-left"><CheckCircle2 className="h-3 w-3 md:h-4 md:w-4 shrink-0 mt-0.5 text-emerald-500" /><span className="text-[10px] md:text-sm font-bold text-slate-600 leading-snug">{feat}</span></li>
+                           ))}
+                        </ul>
+                     </CardContent>
+                     <CardFooter className="p-3 md:p-10 pt-0">
+                        <Button asChild className="w-full h-11 md:h-16 rounded-full bg-primary hover:bg-blue-700 text-white font-black text-[10px] md:text-xs tracking-widest shadow-lg border-none active:scale-95">
+                           <Link href={`/checkout?plan=${plan.id}`} className="flex items-center justify-center gap-2">
+                             {btnText} <ArrowRight className="h-4 w-4" />
+                           </Link>
+                        </Button>
+                     </CardFooter>
+                  </Card>
+               </motion.div>
+             )
+           })}
         </div>
       </main>
       <Footer />
