@@ -1,18 +1,13 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
-    ext.kotlin_version = '1.9.24'
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.2.1'
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath 'com.google.gms:google-services:4.4.0'
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
 }
 
@@ -23,18 +18,14 @@ allprojects {
     }
 }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-
-// FORCE COMPATIBILITY ACROSS ALL PLUGINS
 subprojects {
     afterEvaluate { project ->
         if (project.hasProperty('android')) {
             project.android {
                 if (namespace == null) {
-                    namespace project.group
+                    namespace = project.group
                 }
+                // Force all plugins and subprojects to use SDK 34 for build stability
                 compileSdk 34
                 defaultConfig {
                     minSdk 24
@@ -43,4 +34,8 @@ subprojects {
             }
         }
     }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
 }

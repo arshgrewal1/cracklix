@@ -1,24 +1,24 @@
 apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
 
 android {
-    namespace "com.cracklix.app"
+    namespace 'com.cracklix.app'
     compileSdk 34
     defaultConfig {
         applicationId "com.cracklix.app"
         minSdk 24
         targetSdk 34
         versionCode 1
-        versionName "1.0.0"
+        versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Fragments allowed to find the correct icon files
-             cruncherEnabled = false
+             // Fragments allowed to prove metadata
+             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -26,41 +26,25 @@ android {
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
     }
-    kotlinOptions {
-        jvmTarget = '21'
-    }
 }
 
 repositories {
-    flatDir {
-        dirs 'libs'
-    }
+    google()
+    mavenCentral()
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.appcompat:appcompat:1.6.1"
-    implementation "androidx.core:core-splashscreen:1.0.1"
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.core:core-splashscreen:1.0.1'
     implementation project(':capacitor-android')
-    implementation project(':capacitor-app')
-    implementation project(':capacitor-browser')
-    implementation project(':capacitor-filesystem')
-    implementation project(':capacitor-keyboard')
-    implementation project(':capacitor-share')
-    implementation project(':capacitor-status-bar')
     implementation project(':capacitor-cordova-android-plugins')
-    testImplementation "junit:junit:4.13.2"
-    androidTestImplementation "androidx.test.ext:junit:1.1.5"
-    androidTestImplementation "androidx.test.espresso:core:3.5.1"
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:core:3.5.1'
 }
 
-// Avoid library conflicts
-configurations.all {
-    resolutionStrategy {
-        force 'androidx.core:core:1.12.0'
-        force 'androidx.core:core-ktx:1.12.0'
-    }
-}
+apply from: 'capacitor.build.gradle'
 
 try {
     def servicesJSON = file('google-services.json')
