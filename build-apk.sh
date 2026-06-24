@@ -7,6 +7,7 @@ echo "🔨 Preparing Web Assets..."
 npm run build:android
 
 echo "📦 Syncing with Capacitor..."
+# Synchronize using the 'out' directory as configured in capacitor.config.ts
 npx cap sync android
 
 echo "🏗️ Building Debug APK..."

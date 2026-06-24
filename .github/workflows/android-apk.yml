@@ -36,12 +36,6 @@ jobs:
       - name: Build Next.js app
         run: npm run build:android
 
-      - name: Export to www
-        run: |
-          rm -rf www
-          mkdir -p www
-          cp -r out/* www/ || true
-
       - name: Sync Capacitor
         run: npx cap sync android
 

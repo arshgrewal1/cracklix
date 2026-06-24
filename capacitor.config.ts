@@ -3,7 +3,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
   appId: 'com.cracklix.app',
   appName: 'Cracklix',
-  webDir: 'www',
+  webDir: 'out',
 
   // server.url removed to enable true offline functionality using local assets
   server: {
