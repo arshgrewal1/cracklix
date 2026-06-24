@@ -5,8 +5,8 @@ const config: CapacitorConfig = {
   appName: 'Cracklix',
   webDir: 'www',
 
+  // server.url removed to enable true offline functionality using local assets
   server: {
-    url: 'https://cracklix.vercel.app',
     androidScheme: 'https'
   },
 
