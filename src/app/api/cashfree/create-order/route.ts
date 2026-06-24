@@ -4,9 +4,9 @@ import { initializeFirebase } from '@/firebase/app';
 import { doc, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Cashfree Order Node v8.0.
- * DEFENSIVE: Comprehensive environment variable audit and payload validation.
- * STABILITY: Isolated logic to prevent build-time dynamic import failures.
+ * @fileOverview Hardened Cashfree Order Node v9.0.
+ * FIXED: Aggressive phone number sanitization to prevent Cashfree API rejections.
+ * FIXED: Robust Return URL mapping for Capacitor/Web hybrid environments.
  */
 
 export async function POST(req: Request) {
@@ -18,63 +18,55 @@ export async function POST(req: Request) {
 
     const clientId = process.env.CASHFREE_CLIENT_ID;
     const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
-    const env = process.env.CASHFREE_ENV || 'production';
 
-    // Phase 1: Authentication Guard
     if (!clientId || !clientSecret) {
-      console.error("[CASHFREE_CRITICAL]: Missing API credentials in environment.");
-      return NextResponse.json({ 
-        error: 'Payment Hub Configuration Error',
-        details: 'API Keys not detected on server node.'
-      }, { status: 500 });
+      console.error("[CASHFREE_CRITICAL]: Missing API credentials.");
+      return NextResponse.json({ error: 'Gateway Configuration Error' }, { status: 500 });
     }
 
-    // Phase 2: Gateway Configuration
     Cashfree.XClientId = clientId;
     Cashfree.XClientSecret = clientSecret;
-    const isProd = env === 'production' || clientSecret.startsWith('cf_prod_');
+    // Auto-detect environment from secret key prefix
+    const isProd = clientSecret.startsWith('cf_prod_');
     Cashfree.XEnvironment = isProd ? Cashfree.Environment.PRODUCTION : Cashfree.Environment.SANDBOX;
 
-    // Phase 3: Payload Validation
     if (!userId || !planId) {
-      return NextResponse.json({ error: 'Identity or Plan context missing.' }, { status: 400 });
+      return NextResponse.json({ error: 'Context missing (UserId/PlanId)' }, { status: 400 });
     }
 
-    // Phase 4: Registry Audit (Verify plan existence and price)
+    // 1. Validate Plan in Registry
     const planSnap = await getDoc(doc(db, "passes", planId));
     if (!planSnap.exists()) {
-      return NextResponse.json({ error: `Pass node '${planId}' not found in registry.` }, { status: 404 });
+      return NextResponse.json({ error: 'Invalid plan node' }, { status: 404 });
     }
     const planData = planSnap.data();
-    const amount = Number(planData.price);
 
-    if (amount <= 0) {
-      return NextResponse.json({ error: 'Manual activation required for free pass nodes.' }, { status: 400 });
-    }
-
-    // Phase 5: Student Profile Audit
+    // 2. Fetch Student Profile for details
     const userSnap = await getDoc(doc(db, "users", userId));
     const userData = userSnap.data();
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || clientOrigin || new URL(req.url).origin;
-    const secureOrigin = siteUrl.replace('http://', 'https://');
+    // CRITICAL: Cashfree requires EXACTLY 10 digits for phone
+    const cleanPhone = (userData?.phone || "9999999999").replace(/\D/g, '').slice(-10);
+
+    const secureOrigin = (clientOrigin || process.env.NEXT_PUBLIC_SITE_URL || "https://cracklix.vercel.app").replace('http://', 'https://');
     const orderId = `order_${Date.now()}_${userId.slice(-6)}`;
 
     const orderRequest = {
-      order_amount: amount,
+      order_amount: Number(planData.price),
       order_currency: "INR",
       order_id: orderId,
       customer_details: {
         customer_id: userId,
         customer_name: userData?.name || "Aspirant",
         customer_email: userData?.email || "student@cracklix.com",
-        customer_phone: userData?.phone?.replace(/\D/g, '').slice(-10) || "9999999999",
+        customer_phone: cleanPhone,
       },
       order_meta: {
-        return_url: `${secureOrigin}/payment/success?order_id={order_id}&plan=${encodeURIComponent(planData.id)}`,
+        // We pass the plan ID in the URL so the success page knows what was bought
+        return_url: `${secureOrigin}/payment/success?order_id={order_id}&plan=${encodeURIComponent(planId)}`,
         notify_url: `${secureOrigin}/api/cashfree/webhook`
       },
-      order_note: `Elite Prep Pass: ${planData.name}`,
+      order_note: `Cracklix Pass: ${planData.name}`,
     };
 
     const response = await Cashfree.PGCreateOrder("2023-08-01", orderRequest);
@@ -82,16 +74,13 @@ export async function POST(req: Request) {
     return NextResponse.json({
       payment_session_id: response.data.payment_session_id,
       order_id: response.data.order_id,
-      cf_order_id: response.data.cf_order_id,
       environment: isProd ? 'production' : 'sandbox'
     });
 
   } catch (error: any) {
-    const errorBody = error?.response?.data || error;
-    console.error("[GATEWAY_ORDER_FAILURE]:", errorBody);
+    console.error("[CASHFREE_ORDER_FAILURE]:", error?.response?.data || error);
     return NextResponse.json({ 
-      error: errorBody.message || 'Payment Hub connection timed out.',
-      details: errorBody
+      error: error?.response?.data?.message || 'Gateway connection failed' 
     }, { status: 500 });
   }
 }
