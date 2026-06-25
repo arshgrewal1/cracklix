@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { SuccessStory } from "@/types"
 
 /**
- * @fileOverview Official Hall of Rankers v8.0 - Standardized Case & Stabilized.
+ * @fileOverview Official Hall of Rankers v9.0 - Replaced external picsum assets.
  */
 
 export default function SuccessStoriesPage() {
@@ -64,7 +64,7 @@ export default function SuccessStoriesPage() {
                    <div className="w-full md:w-2/5">
                       <div className="relative aspect-[4/5] rounded-[2rem] md:rounded-[4rem] overflow-hidden shadow-2xl group border border-slate-100 bg-[#0F172A] max-w-[240px] md:max-w-none mx-auto">
                          <Image 
-                            src={story.imageUrl || "https://picsum.photos/seed/topper/400/500"} 
+                            src={story.imageUrl || "/images/topper-placeholder.png"} 
                             fill 
                             alt={story.name} 
                             className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" 

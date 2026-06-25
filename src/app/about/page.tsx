@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -22,8 +21,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional About Center v23.0.
- * UPDATED: Replaced missing local image with picsum placeholder for stability.
+ * @fileOverview Institutional About Center v24.0.
+ * UPDATED: Replaced picsum with local founder asset for build stability.
  */
 
 export default function AboutPage() {
@@ -33,8 +32,6 @@ export default function AboutPage() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const founderImg = "https://picsum.photos/seed/founder/800/1000";
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
@@ -110,7 +107,7 @@ export default function AboutPage() {
                  >
                     <div className="relative aspect-[4/5] rounded-[2rem] md:rounded-[3.5rem] overflow-hidden border border-white/10 shadow-5xl group bg-[#0B1528] max-w-[280px] md:max-w-none mx-auto">
                       <Image
-                        src={founderImg}
+                        src="/founder.png"
                         alt="Arsh Grewal"
                         fill
                         className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"

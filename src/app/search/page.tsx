@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, cloneElement, ReactElement, isValidElement } from "react"
@@ -14,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v6.9.
- * FIXED: Explicitly typed ReactElement for cloneElement and added robust validation.
+ * @fileOverview Search Center v7.0.
+ * FIXED: Standardized React import and implemented type-safe cloneElement to resolve build blockers.
  */
 
 export default function SearchPage() {

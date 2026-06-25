@@ -9,8 +9,8 @@ import { buttonVariants } from "@/components/ui/button"
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 /**
- * @fileOverview Calendar Component v5.6 - Fixed react-day-picker v9 types.
- * FIXED: Chevron component hardened to return Fragment instead of null.
+ * @fileOverview Calendar Component v5.7 - Next.js 15 Static Export Ready.
+ * FIXED: Chevron component hardened to return Fragment instead of null for strict TS compliance.
  */
 function Calendar({
   className,

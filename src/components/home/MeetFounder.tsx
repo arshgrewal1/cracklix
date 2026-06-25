@@ -1,6 +1,6 @@
-
 'use client';
 
+import React from "react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,11 @@ import Link from "next/link";
 import Image from "next/image";
 
 /**
- * @fileOverview Meet Founder section v3.2.
- * UPDATED: Replaced missing local image with picsum placeholder.
+ * @fileOverview Meet Founder section v4.0.
+ * UPDATED: Optimized with local founder asset and priority Next.js Image component.
  */
 
 export default function MeetFounder() {
-  const founderImg = "https://picsum.photos/seed/founder/600/600";
-
   return (
     <section className="py-8 md:py-24 bg-white overflow-hidden border-t border-slate-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,12 +22,12 @@ export default function MeetFounder() {
           <div className="relative shrink-0">
             <div className="relative h-20 w-20 md:h-44 md:w-44 rounded-full overflow-hidden border-[4px] border-white shadow-2xl bg-[#0B1528] ring-1 ring-slate-200">
               <Image
-                src={founderImg}
+                src="/founder.png"
                 alt="Arsh Grewal"
-                fill
+                width={600}
+                height={600}
                 className="object-cover grayscale group-hover:grayscale-0 transition-all scale-105 group-hover:scale-100 duration-1000"
                 priority
-                data-ai-hint="professional man"
               />
             </div>
 
