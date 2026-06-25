@@ -37,7 +37,7 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Hub v4.0 - Standardized Case.
+ * @fileOverview Support Center v6.0 - Standardized Case & Build Stabilized.
  */
 
 export default function SupportPage() {

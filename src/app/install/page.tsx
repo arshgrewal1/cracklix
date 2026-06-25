@@ -23,8 +23,8 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Direct APK Download Hub v2.0.
- * UPDATED: Implemented direct download logic from the site's own hosting.
+ * @fileOverview Official Direct APK Download Hub v3.0.
+ * UPDATED: Optimized typography and direct download logic.
  */
 export default function InstallPage() {
   const [mounted, setMounted] = useState(false);

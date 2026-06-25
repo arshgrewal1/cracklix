@@ -13,7 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Hub v5.0 - Standardized Case & Production Hardened.
+ * @fileOverview Search Center v6.0 - Standardized Case & Production Hardened.
+ * FIXED: TypeScript cloneElement type mismatch for strict production build.
  */
 
 export default function SearchPage() {
@@ -29,7 +30,7 @@ function SearchContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
-  const { user, loading: authLoading } = useUser()
+  const { user, profile, loading: authLoading } = useUser()
   const [queryStr, setQuery] = useState("")
 
   useEffect(() => {

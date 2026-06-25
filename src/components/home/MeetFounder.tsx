@@ -8,8 +8,9 @@ import Link from "next/link";
 import Image from "next/image";
 
 /**
- * @fileOverview Meet Founder section v2.3.
+ * @fileOverview Meet Founder section v3.0.
  * UPDATED: Replaced external i.ibb.co URL with local public asset.
+ * UPDATED: Standardized typography to Title Case.
  */
 
 export default function MeetFounder() {

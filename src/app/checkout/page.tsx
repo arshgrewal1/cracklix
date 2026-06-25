@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
 /**
- * @fileOverview Hardened Checkout Hub v7.0 - Standardized Case.
+ * @fileOverview Checkout Hub v8.0 - Standardized Case & Build Stabilized.
  */
 
 export default function CheckoutPage() {

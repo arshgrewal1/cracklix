@@ -15,7 +15,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { SuccessStory } from "@/types"
 
 /**
- * @fileOverview Official Hall of Rankers v7.0 (High Density).
+ * @fileOverview Official Hall of Rankers v8.0 - Standardized Case & Stabilized.
  */
 
 export default function SuccessStoriesPage() {

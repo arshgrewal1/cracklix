@@ -11,7 +11,7 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Card Component v3.0 - Standardized Case.
+ * @fileOverview Exam Card Component v4.0 - Standardized Case.
  * FIXED: Property access synchronized with the core Exam interface.
  */
 export default function ExamCard({ exam }: ExamCardProps) {

@@ -21,8 +21,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional About Center v21.6.
+ * @fileOverview Institutional About Center v22.0.
  * UPDATED: Replaced external i.ibb.co URL with local public asset.
+ * UPDATED: Standardized typography to Title Case.
  */
 
 export default function AboutPage() {
@@ -142,9 +143,9 @@ export default function AboutPage() {
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4">
-                       <ImpactNode label="ASPIRANTS" val={mounted ? liveStats.students : "---"} icon={Users} loading={false} />
-                       <ImpactNode label="MCQ BANK" val={mounted ? liveStats.mcqs : "---"} icon={ShieldCheck} loading={false} />
-                       <ImpactNode label="OFFICIAL HUBS" val={mounted ? liveStats.hubs : "---"} icon={Landmark} loading={false} />
+                       <ImpactNode label="Aspirants" val={mounted ? liveStats.students : "---"} icon={Users} loading={false} />
+                       <ImpactNode label="MCQ Bank" val={mounted ? liveStats.mcqs : "---"} icon={ShieldCheck} loading={false} />
+                       <ImpactNode label="Official Hubs" val={mounted ? liveStats.hubs : "---"} icon={Landmark} loading={false} />
                     </div>
                  </motion.div>
               </div>
