@@ -42,12 +42,12 @@ jobs:
           ls -la
           echo "🔍 Checking for 'out' directory..."
           if [ ! -d "out" ]; then
-            echo "❌ ERROR: Static export directory 'out' missing."
+            echo "❌ ERROR: Static export directory 'out' missing. Build failed."
             exit 1
           fi
           echo "🔍 Checking for 'out/index.html'..."
           if [ ! -f "out/index.html" ]; then
-            echo "❌ ERROR: 'out/index.html' not found. Build failed to export correctly."
+            echo "❌ ERROR: 'out/index.html' not found. Static export is incomplete."
             exit 1
           fi
           echo "✅ Static Export Verified."

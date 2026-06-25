@@ -37,7 +37,7 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Hub v3.5 - Production Hardened
+ * @fileOverview Support Hub v3.6 - Production Hardened
  * FIXED: Restored missing Link and Loader2 imports.
  */
 
