@@ -1,3 +1,4 @@
+
 import { create } from "zustand";
 import { 
   Question, 
@@ -7,8 +8,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Exam Store v7.7.
- * FIXED: Optimized state initialization and resolved type strictness blockers.
+ * @fileOverview Hardened Exam Store v7.8.
+ * FIXED: Removed duplicate property assignment and standardized initial state.
  */
 
 export interface ExamStoreState {

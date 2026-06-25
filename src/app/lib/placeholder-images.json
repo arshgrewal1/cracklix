@@ -1,51 +1,52 @@
+
 {
   "placeholderImages": [
     {
       "id": "hero-student",
       "description": "Professional Student Preparation Hero",
-      "imageUrl": "/images/hero-student.png",
+      "imageUrl": "https://picsum.photos/seed/1/1200/800",
       "imageHint": "student studying"
     },
     {
       "id": "promo-psssb",
       "description": "PSSSB Official Institutional Promotion",
-      "imageUrl": "/images/promo-psssb.jpg",
+      "imageUrl": "https://picsum.photos/seed/2/1200/800",
       "imageHint": "psssb official"
     },
     {
       "id": "hero-army",
       "description": "Indian Army Preparation Node",
-      "imageUrl": "/images/hero-army.jpg",
+      "imageUrl": "https://picsum.photos/seed/3/1200/800",
       "imageHint": "indian army"
     },
     {
       "id": "hero-punjab",
       "description": "Punjab Heritage Hero",
-      "imageUrl": "/images/hero-punjab.jpg",
+      "imageUrl": "https://picsum.photos/seed/4/1200/800",
       "imageHint": "punjab heritage"
     },
     {
       "id": "map-punjab",
       "description": "Punjab Geographic Node",
-      "imageUrl": "/images/map-punjab.jpg",
+      "imageUrl": "https://picsum.photos/seed/5/800/1000",
       "imageHint": "punjab map"
     },
     {
       "id": "map-india",
       "description": "India National Registry Map",
-      "imageUrl": "/images/map-india.jpg",
+      "imageUrl": "https://picsum.photos/seed/6/800/1000",
       "imageHint": "india map"
     },
     {
       "id": "mock-police",
       "description": "Punjab Police Operational Readiness",
-      "imageUrl": "/images/mock-police.jpg",
+      "imageUrl": "https://picsum.photos/seed/7/1200/800",
       "imageHint": "punjab police"
     },
     {
       "id": "founder-arsh",
       "description": "Arsh Grewal - Founder & Lead Developer",
-      "imageUrl": "/logo/founder-arsh.jpg",
+      "imageUrl": "https://picsum.photos/seed/founder/600/800",
       "imageHint": "professional man"
     }
   ]

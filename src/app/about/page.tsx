@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -21,9 +22,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional About Center v22.0.
- * UPDATED: Replaced external i.ibb.co URL with local public asset.
- * UPDATED: Standardized typography to Title Case.
+ * @fileOverview Institutional About Center v23.0.
+ * UPDATED: Replaced missing local image with picsum placeholder for stability.
  */
 
 export default function AboutPage() {
@@ -34,7 +34,7 @@ export default function AboutPage() {
     setMounted(true);
   }, []);
 
-  const founderImg = "/logo/founder-arsh.jpg";
+  const founderImg = "https://picsum.photos/seed/founder/800/1000";
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
@@ -115,6 +115,7 @@ export default function AboutPage() {
                         fill
                         className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
                         priority
+                        data-ai-hint="professional man"
                       />
                        <div className="absolute inset-0 bg-gradient-to-t from-[#020817] via-transparent to-transparent opacity-80" />
                        <div className="absolute bottom-6 left-6 right-6">

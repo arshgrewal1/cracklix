@@ -1,3 +1,4 @@
+
 'use client';
 
 import { motion } from "framer-motion";
@@ -8,12 +9,12 @@ import Link from "next/link";
 import Image from "next/image";
 
 /**
- * @fileOverview Meet Founder section v3.1.
- * UPDATED: Replaced external i.ibb.co URL with local public asset.
+ * @fileOverview Meet Founder section v3.2.
+ * UPDATED: Replaced missing local image with picsum placeholder.
  */
 
 export default function MeetFounder() {
-  const founderImg = "/logo/founder-arsh.jpg";
+  const founderImg = "https://picsum.photos/seed/founder/600/600";
 
   return (
     <section className="py-8 md:py-24 bg-white overflow-hidden border-t border-slate-100">
@@ -28,6 +29,7 @@ export default function MeetFounder() {
                 fill
                 className="object-cover grayscale group-hover:grayscale-0 transition-all scale-105 group-hover:scale-100 duration-1000"
                 priority
+                data-ai-hint="professional man"
               />
             </div>
 
