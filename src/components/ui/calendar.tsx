@@ -9,7 +9,7 @@ import { buttonVariants } from "@/components/ui/button"
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 /**
- * @fileOverview Hardened Calendar Component v2.1.
+ * @fileOverview Hardened Calendar Component v2.2.
  * FIXED: Chevron return type must be ReactElement, null is prohibited in DayPicker v9.
  */
 function Calendar({

@@ -35,6 +35,8 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "joinindianarmy.nic.in", pathname: "/**" },
       { protocol: "https", hostname: "www.mapsofindia.com", pathname: "/**" },
       { protocol: "https", hostname: "highcourtchd.gov.in", pathname: "/**" },
+      { protocol: "https", hostname: "i.ibb.co", pathname: "/**" },
+      { protocol: "https", hostname: "ibb.co", pathname: "/**" },
     ],
   },
 

@@ -11,7 +11,7 @@ import {
 } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Testbook-Style Subscription Actions v5.0.
+ * @fileOverview Hardened Testbook-Style Subscription Actions v5.1.
  * CONVERTED: From Server Actions to Client Functions for 'output: export' compatibility.
  */
 

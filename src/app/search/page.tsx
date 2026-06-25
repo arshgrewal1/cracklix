@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Hub v3.32 - Production Hardened.
+ * @fileOverview Global Search Hub v3.33 - Production Hardened.
  * FIXED: Resolved UMD global error and ReactElement type mismatch.
  */
 
