@@ -20,8 +20,8 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
 /**
- * @fileOverview Checkout Hub v8.1.
- * FIXED: Restored missing Badge and CheckCircle2 imports for build stabilization.
+ * @fileOverview Checkout Hub v8.2.
+ * FIXED: Restored missing Badge and CheckCircle2 imports to resolve build blockers.
  */
 
 export default function CheckoutPage() {
@@ -58,10 +58,10 @@ function CheckoutContent() {
       setOnlineProcessing(true);
       try {
         await activateFreePass(user.uid, planId);
-        toast({ title: "Pass activated", description: "Your free tier is now live." });
+        toast({ title: "Pass Activated", description: "Your free tier is now live." });
         router.push("/dashboard");
       } catch (e) {
-        toast({ variant: "destructive", title: "Activation failed" });
+        toast({ variant: "destructive", title: "Activation Failed" });
         setOnlineProcessing(false);
       }
       return;
@@ -72,7 +72,7 @@ function CheckoutContent() {
     const cf = getCashfree();
     
     if (!cf) {
-       toast({ variant: "destructive", title: "Gateway error", description: "Payment engine failed to initialize." });
+       toast({ variant: "destructive", title: "Gateway Error", description: "Payment engine failed to initialize." });
        setOnlineProcessing(false);
        return;
     }
@@ -98,7 +98,7 @@ function CheckoutContent() {
       });
 
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Order blocked", description: e.message || "Transaction could not be established." });
+      toast({ variant: "destructive", title: "Order Blocked", description: e.message || "Transaction could not be established." });
       setOnlineProcessing(false);
     }
   };
@@ -142,11 +142,11 @@ function CheckoutContent() {
                           <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto text-blue-600 shadow-inner mb-6">
                              <ShieldCheck className="h-8 w-8" />
                           </div>
-                          <h2 className="text-2xl font-black text-[#0F172A]">Direct activation hub</h2>
+                          <h2 className="text-2xl font-black text-[#0F172A]">Direct Activation Hub</h2>
                           <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">Access instant preparation mocks via our encrypted payment gateway.</p>
                        </div>
                        <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black text-sm rounded-full shadow-3xl border-none transition-all active:scale-95">
-                          {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Zap className="h-5 w-5 mr-2" /> Pay ₹{planData.price} now</>}
+                          {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Zap className="h-5 w-5 mr-2" /> Pay ₹{planData.price} Now</>}
                        </Button>
                     </Card>
                  </TabsContent>
@@ -182,15 +182,15 @@ function CheckoutContent() {
                                     planId, 
                                     transactionId: utr 
                                   }); 
-                                  toast({ title: "Audit staged", description: "Our team will verify your UTR shortly." }); 
+                                  toast({ title: "Audit Staged", description: "Our team will verify your UTR shortly." }); 
                                   router.push("/dashboard"); 
                                 } catch(e) { 
-                                  toast({variant: "destructive", title:"Sync error"}); 
+                                  toast({variant: "destructive", title:"Sync Error"}); 
                                 } finally { setProcessing(false); }
                              }}
                              disabled={processing}
                              className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase rounded-full shadow-2xl border-none active:scale-95 transition-all"
-                          >{processing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify & activate pass"}</Button>
+                          >{processing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify & Activate Pass"}</Button>
                        </div>
                     </Card>
                  </TabsContent>
@@ -216,7 +216,7 @@ function CheckoutContent() {
 
                  <div className="mt-16 pt-10 border-t border-white/5 flex justify-between items-end">
                     <div className="text-left">
-                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Total amount</p>
+                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Total Amount</p>
                        <span className="text-5xl md:text-7xl font-black text-white tabular-nums tracking-tighter">₹{planData.price}</span>
                     </div>
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">INR</span>

@@ -13,9 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v7.1.
+ * @fileOverview Search Center v7.2.
  * FIXED: Standardized React import and implemented type-safe cloneElement to resolve build blockers.
- * NORMALIZED: Removed forced uppercase from UI labels.
  */
 
 export default function SearchPage() {
@@ -109,7 +108,7 @@ function SearchContent() {
         <div className="space-y-8 md:space-y-12">
            <div className="text-center space-y-6">
               <div className="space-y-2">
-                 <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">Find your test</h1>
+                 <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">Find Your Test</h1>
                  <p className="text-slate-400 font-bold text-[9px] md:text-11px uppercase tracking-[0.4em]">Instant access to the test bank</p>
               </div>
               
@@ -132,7 +131,7 @@ function SearchContent() {
            {queryStr.length >= 2 ? (
               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <h3 className="text-[10px] font-bold text-slate-400">Results: {searchResults.length} items</h3>
+                    <h3 className="text-[10px] font-bold text-slate-400">Results: {searchResults.length} Items</h3>
                     <Badge className="bg-primary/5 text-primary border-none text-[8px] font-black px-3 py-0.5 rounded-lg uppercase">Verified List</Badge>
                  </div>
                  <div className="grid grid-cols-1 gap-3">
@@ -142,7 +141,7 @@ function SearchContent() {
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">
                            <SearchIcon className="h-16 w-16" />
-                           <p className="text-xl font-bold tracking-tight">No results found</p>
+                           <p className="text-xl font-bold tracking-tight">No Results Found</p>
                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Try keywords like "Patwari" or "Police"</p>
                         </div>
                       </div>

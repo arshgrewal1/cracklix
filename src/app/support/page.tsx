@@ -37,9 +37,8 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Center v6.3.
- * FIXED: Restored missing Link and Loader2 imports.
- * NORMALIZED: Removed forced uppercase from UI labels.
+ * @fileOverview Support Center v6.4.
+ * FIXED: Restored missing Link and Loader2 imports to resolve build blockers.
  */
 
 export default function SupportPage() {
@@ -97,7 +96,7 @@ export default function SupportPage() {
         updatedAt: serverTimestamp(),
       })
       toast({
-        title: "Ticket raised",
+        title: "Ticket Raised",
         description: "Our team will review your issue shortly.",
       })
       setIsRaising(false)
@@ -128,7 +127,7 @@ export default function SupportPage() {
             <div className="flex items-center gap-3">
               <MessageCircle className="h-5 w-5 text-primary" />
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                Support center
+                Support Center
               </span>
             </div>
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-[#0F172A] tracking-tight leading-[0.9] break-words antialiased">
@@ -142,7 +141,7 @@ export default function SupportPage() {
             onClick={() => setIsRaising(true)}
             className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-3xl flex items-center gap-2 transition-all active:scale-95"
           >
-            <Plus className="h-5 w-5" /> Raise new ticket
+            <Plus className="h-5 w-5" /> Raise New Ticket
           </button>
         </div>
 
@@ -151,7 +150,7 @@ export default function SupportPage() {
             <div className="flex items-center gap-3 px-2">
               <History className="h-4 w-4 text-slate-400" />
               <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-                My support tickets
+                My Support Tickets
               </h3>
             </div>
 
@@ -209,7 +208,7 @@ export default function SupportPage() {
                             <ShieldCheck className="h-10 w-10 text-primary" />
                           </div>
                           <p className="text-[9px] font-black text-primary uppercase tracking-widest">
-                            Team response
+                            Team Response
                           </p>
                           <p className="text-sm text-blue-900 font-semibold leading-relaxed italic">
                             "{t.adminReply}"
@@ -224,7 +223,7 @@ export default function SupportPage() {
               <div className="py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-30">
                 <MessageCircle className="h-16 w-16 mb-4 text-slate-300" />
                 <p className="text-xl font-bold uppercase tracking-widest">
-                  No active tickets
+                  No Active Tickets
                 </p>
               </div>
             )}
@@ -240,7 +239,7 @@ export default function SupportPage() {
                   <HelpCircle className="h-8 w-8 fill-current" />
                 </div>
                 <h3 className="text-3xl font-black uppercase leading-tight">
-                  Help center
+                  Help Center
                 </h3>
                 <p className="text-slate-400 text-sm font-medium leading-relaxed">
                   Browse help articles to solve your problems instantly.
@@ -251,7 +250,7 @@ export default function SupportPage() {
                   className="w-full h-14 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-black uppercase text-[10px] tracking-widest group"
                 >
                   <Link href="/help">
-                    View help articles{" "}
+                    View Help Articles{" "}
                     <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
                 </Button>
@@ -286,7 +285,7 @@ export default function SupportPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">
-                  Issue type
+                  Issue Type
                 </Label>
                 <select
                   value={formData.type}
@@ -322,7 +321,7 @@ export default function SupportPage() {
             </div>
             <div className="space-y-2">
               <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">
-                Subject headline
+                Subject Headline
               </Label>
               <Input
                 value={formData.subject}
@@ -335,7 +334,7 @@ export default function SupportPage() {
             </div>
             <div className="space-y-2">
               <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">
-                Statement of issue
+                Statement of Issue
               </Label>
               <Textarea
                 value={formData.message}
@@ -364,7 +363,7 @@ export default function SupportPage() {
               ) : (
                 <Send className="h-4 w-4" />
               )}
-              Submit ticket
+              Submit Ticket
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -7,8 +7,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Exam Store v8.1.
- * FIXED: Resolved duplicate property assignment and standardized initial state types.
+ * @fileOverview Hardened Exam Store v8.2.
+ * FIXED: Resolved duplicate property assignment and invalid type initialization.
  */
 
 export interface ExamStoreState {
@@ -68,8 +68,10 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
     const finalLang: LanguageDisplayMode = languageMode || "ENGLISH_PUNJABI";
     
-    // Core base state shared between fresh start and resume
-    const baseState = {
+    // Initial state derived from props or resume
+    const isResuming = resumeData && resumeData.status !== 'COMPLETED';
+    
+    set({
       mockId,
       mockTitle: title,
       userId,
@@ -77,33 +79,15 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       isPaused: false,
       language: finalLang,
       baseLanguageMode: finalLang,
-    };
-
-    if (resumeData && resumeData.status !== 'COMPLETED') {
-      set({
-        ...baseState,
-        answers: resumeData.answers || {},
-        status: resumeData.statusMap || {},
-        visited: resumeData.visited || [0],
-        bookmarks: resumeData.bookmarks || [],
-        timeLeft: resumeData.timeLeft || duration * 60,
-        currentIdx: resumeData.currentIdx || 0,
-        startTime: resumeData.startTime || Date.now(),
-        violations: resumeData.violations || 0,
-      });
-    } else {
-      set({
-        ...baseState,
-        answers: {},
-        status: {},
-        visited: [0],
-        bookmarks: [],
-        timeLeft: duration * 60,
-        currentIdx: 0,
-        startTime: Date.now(),
-        violations: 0,
-      });
-    }
+      answers: isResuming ? (resumeData.answers || {}) : {},
+      status: isResuming ? (resumeData.statusMap || {}) : {},
+      visited: isResuming ? (resumeData.visited || [0]) : [0],
+      bookmarks: isResuming ? (resumeData.bookmarks || []) : [],
+      timeLeft: isResuming ? (resumeData.timeLeft || duration * 60) : (duration * 60),
+      currentIdx: isResuming ? (resumeData.currentIdx || 0) : 0,
+      startTime: isResuming ? (resumeData.startTime || Date.now()) : Date.now(),
+      violations: isResuming ? (resumeData.violations || 0) : 0,
+    });
   },
 
   tick: () => {
