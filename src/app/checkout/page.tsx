@@ -20,8 +20,7 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
 /**
- * @fileOverview Hardened Checkout Hub v6.2.
- * FIXED: Restored missing imports and ensured local asset compliance.
+ * @fileOverview Hardened Checkout Hub v7.0 - Standardized Case.
  */
 
 export default function CheckoutPage() {
@@ -58,10 +57,10 @@ function CheckoutContent() {
       setOnlineProcessing(true);
       try {
         await activateFreePass(user.uid, planId);
-        toast({ title: "Pass Activated", description: "Your free tier is now live." });
+        toast({ title: "Pass activated", description: "Your free tier is now live." });
         router.push("/dashboard");
       } catch (e) {
-        toast({ variant: "destructive", title: "Activation Failed" });
+        toast({ variant: "destructive", title: "Activation failed" });
         setOnlineProcessing(false);
       }
       return;
@@ -72,7 +71,7 @@ function CheckoutContent() {
     const cf = getCashfree();
     
     if (!cf) {
-       toast({ variant: "destructive", title: "Gateway Error", description: "Payment engine failed to initialize." });
+       toast({ variant: "destructive", title: "Gateway error", description: "Payment engine failed to initialize." });
        setOnlineProcessing(false);
        return;
     }
@@ -98,7 +97,7 @@ function CheckoutContent() {
       });
 
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Order Blocked", description: e.message || "Transaction could not be established." });
+      toast({ variant: "destructive", title: "Order blocked", description: e.message || "Transaction could not be established." });
       setOnlineProcessing(false);
     }
   };
@@ -119,18 +118,18 @@ function CheckoutContent() {
            <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-all">
               <ArrowLeft className="h-5 w-5" />
            </button>
-           <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] uppercase tracking-tight">Checkout</h1>
+           <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Checkout</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16">
            <div className="lg:col-span-7 space-y-10">
               <Tabs defaultValue="online" className="w-full">
                  <TabsList className="bg-slate-100 p-1.5 h-14 rounded-2xl w-full mb-10 grid grid-cols-2 shadow-inner border border-slate-200">
-                    <TabsTrigger value="online" className="rounded-xl font-black uppercase text-[10px] h-full flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all">
+                    <TabsTrigger value="online" className="rounded-xl font-bold text-sm h-full flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all">
                        <ShieldCheck className="h-3.5 w-3.5" /> Secure Online
                     </TabsTrigger>
                     {planData.price > 0 && (
-                       <TabsTrigger value="manual" className="rounded-xl font-black uppercase text-[10px] h-full flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all">
+                       <TabsTrigger value="manual" className="rounded-xl font-bold text-sm h-full flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all">
                           <Gem className="h-3.5 w-3.5" /> Manual UPI
                        </TabsTrigger>
                     )}
@@ -142,11 +141,11 @@ function CheckoutContent() {
                           <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto text-blue-600 shadow-inner mb-6">
                              <ShieldCheck className="h-8 w-8" />
                           </div>
-                          <h2 className="text-2xl font-black text-[#0F172A]">Direct Activation Hub</h2>
+                          <h2 className="text-2xl font-black text-[#0F172A]">Direct activation hub</h2>
                           <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">Access instant preparation mocks via our encrypted payment gateway.</p>
                        </div>
-                       <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-full shadow-3xl border-none transition-all active:scale-95">
-                          {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Zap className="h-5 w-5 mr-2" /> Pay ₹{planData.price} Now</>}
+                       <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black text-sm rounded-full shadow-3xl border-none transition-all active:scale-95">
+                          {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Zap className="h-5 w-5 mr-2" /> Pay ₹{planData.price} now</>}
                        </Button>
                     </Card>
                  </TabsContent>
@@ -166,7 +165,7 @@ function CheckoutContent() {
                           </div>
                        </div>
                        <div className="space-y-6 pt-8 border-t border-slate-50">
-                          <div className="space-y-2">
+                          <div className="space-y-2 text-left">
                              <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">12-Digit UTR Number</Label>
                              <Input value={utr} onChange={e => setUtr(e.target.value.replace(/\D/g, '').slice(0,12))} className="h-14 rounded-2xl border-slate-200 bg-slate-50 text-center font-black text-xl tracking-[0.3em] shadow-inner" placeholder="---" />
                           </div>
@@ -182,15 +181,15 @@ function CheckoutContent() {
                                     planId, 
                                     transactionId: utr 
                                   }); 
-                                  toast({ title: "Audit Staged", description: "Our team will verify your UTR shortly." }); 
+                                  toast({ title: "Audit staged", description: "Our team will verify your UTR shortly." }); 
                                   router.push("/dashboard"); 
                                 } catch(e) { 
-                                  toast({variant: "destructive", title:"Sync Error"}); 
+                                  toast({variant: "destructive", title:"Sync error"}); 
                                 } finally { setProcessing(false); }
                              }}
                              disabled={processing}
                              className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase rounded-full shadow-2xl border-none active:scale-95 transition-all"
-                          >{processing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify & Activate Pass"}</Button>
+                          >{processing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify & activate pass"}</Button>
                        </div>
                     </Card>
                  </TabsContent>
@@ -201,7 +200,7 @@ function CheckoutContent() {
               <Card className="border-none shadow-5xl rounded-[3.5rem] bg-[#0B1528] text-white p-10 md:p-14 sticky top-32 border border-white/5">
                  <div className="h-1.5 w-16 bg-primary rounded-full mb-10" />
                  <div className="space-y-4">
-                    <h3 className="text-3xl md:text-5xl font-black uppercase leading-[0.9] tracking-tighter">{planData.name}</h3>
+                    <h3 className="text-3xl md:text-5xl font-black leading-[0.9] tracking-tighter">{planData.name}</h3>
                     <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3">Elite Access Pass</Badge>
                  </div>
                  
@@ -209,7 +208,7 @@ function CheckoutContent() {
                     {planData.features?.slice(0, 4).map((f: string, i: number) => (
                        <div key={i} className="flex items-center gap-4 text-slate-400">
                           <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                          <span className="text-xs font-bold uppercase tracking-tight">{f}</span>
+                          <span className="text-xs font-bold tracking-tight">{f}</span>
                        </div>
                     ))}
                  </div>

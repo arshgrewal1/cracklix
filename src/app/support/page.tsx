@@ -37,8 +37,7 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Hub v3.7 - Production Hardened.
- * FIXED: Restored missing components and synchronized types.
+ * @fileOverview Support Hub v4.0 - Standardized Case.
  */
 
 export default function SupportPage() {
@@ -157,7 +156,7 @@ export default function SupportPage() {
             {ticketsLoading ? (
               <div className="space-y-4">
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <Skeleton key={i} className="h-32 w-full rounded-[2rem]" />
+                  <Skeleton className="h-32 w-full rounded-[2rem]" key={i} />
                 ))}
               </div>
             ) : tickets && tickets.length > 0 ? (
@@ -187,7 +186,7 @@ export default function SupportPage() {
                               #{t.id.slice(-6)}
                             </span>
                           </div>
-                          <h4 className="text-xl font-black text-[#0F172A] uppercase mt-2">
+                          <h4 className="text-xl font-black text-[#0F172A] mt-2">
                             {t.subject}
                           </h4>
                         </div>
@@ -267,7 +266,7 @@ export default function SupportPage() {
           <div className="h-2 w-full bg-primary shrink-0" />
           <DialogHeader className="p-6 md:p-10 pb-4 shrink-0">
             <div className="flex justify-between items-center">
-              <DialogTitle className="text-xl md:text-3xl font-black text-[#0F172A] uppercase">
+              <DialogTitle className="text-xl md:text-3xl font-black text-[#0F172A]">
                 Raise Support Ticket
               </DialogTitle>
               <button
@@ -278,7 +277,7 @@ export default function SupportPage() {
               </button>
             </div>
             <DialogDescription className="text-slate-400 font-bold text-[9px] md:text-sm mt-1 uppercase tracking-widest">
-              Our management node will audit your issue.
+              Our team will audit your issue.
             </DialogDescription>
           </DialogHeader>
           <div className="px-6 md:px-10 pb-6 md:pb-10 space-y-6 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
@@ -363,7 +362,7 @@ export default function SupportPage() {
               ) : (
                 <Send className="h-4 w-4" />
               )}
-              Transmit Node
+              Submit ticket
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -7,7 +7,7 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Exam Store v5.0 - Simplified Sync.
+ * @fileOverview Hardened Exam Store v6.0 - Normalized Case & Simplified Sync.
  */
 
 export interface ExamStoreState {

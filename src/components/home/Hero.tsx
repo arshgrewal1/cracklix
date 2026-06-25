@@ -15,6 +15,9 @@ import { doc } from "firebase/firestore";
 import { AuthorityLogo } from "@/lib/exam-icons";
 import Image from "next/image"
 
+/**
+ * @fileOverview Hero Hub v4.0 - Standardized Case.
+ */
 export default function Hero() {
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
@@ -40,7 +43,7 @@ export default function Hero() {
                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-100 shadow-sm group hover:border-primary/30 transition-all cursor-default"
             >
               <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 animate-pulse" />
-              <span className="text-[10px] md:text-[12px] font-black text-slate-700 tracking-tight">
+              <span className="text-[10px] md:text-[12px] font-bold text-slate-700 tracking-tight">
                 Punjab's Smart Exam Platform
               </span>
             </motion.div>
@@ -94,22 +97,22 @@ export default function Hero() {
           />
           <QuickActionCard 
             boardId="pyq"
-            label="PYQ Papers" 
+            label="Old Papers" 
             href="/pyqs" 
           />
           <QuickActionCard 
             boardId="current-affairs"
-            label="Current Affairs" 
+            label="Daily News" 
             href="/current-affairs" 
           />
         </div>
 
         <div className="flex flex-row gap-3 md:gap-5 mt-8 md:mt-12 justify-center lg:justify-start">
           <Button asChild className="flex-1 md:flex-none h-14 md:h-18 rounded-full font-black text-xs md:text-sm tracking-widest px-6 md:px-14 shadow-xl active:scale-95 transition-all border-none">
-            <Link href="/mocks" className="flex items-center gap-2">Start Free Mock <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/mocks" className="flex items-center gap-2">Start free mock <ArrowRight className="h-4 w-4" /></Link>
           </Button>
           <Button asChild variant="outline" className="flex-1 md:flex-none h-14 md:h-18 rounded-full font-black text-xs md:text-sm tracking-widest px-6 md:px-14 shadow-sm border-2 active:scale-95 transition-all">
-            <Link href="/exams">Explore Exams</Link>
+            <Link href="/exams">View exams</Link>
           </Button>
         </div>
       </div>
@@ -130,7 +133,7 @@ function QuickActionCard({ boardId, label, href }: { boardId: string, label: str
           </h3>
           <p className="text-[7px] md:text-[9px] font-bold text-slate-400 uppercase tracking-tight mt-1">Official Hub</p>
         </div>
-        <div className="h-6 w-6 md:h-8 md:w-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-200 group-hover:bg-primary/5 group-hover:text-primary transition-all shrink-0">
+        <div className="h-6 w-6 h-6 w-6 md:h-8 md:w-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-200 group-hover:bg-primary/5 group-hover:text-primary transition-all shrink-0">
            <ChevronRight className="h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-0.5" />
         </div>
       </div>

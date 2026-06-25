@@ -11,7 +11,7 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Card Component v2.5 - Hardened Interface.
+ * @fileOverview Exam Card Component v3.0 - Standardized Case.
  * FIXED: Property access synchronized with the core Exam interface.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
@@ -27,7 +27,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
           <div className="flex justify-between items-start mb-8 md:mb-10">
             <AuthorityLogo boardId={exam.boardId} size="md" className="bg-slate-50 rounded-xl group-hover:scale-105 transition-transform" />
             <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded shadow-sm">
-              {(exam.boardId || "OFFICIAL").toUpperCase()} HUB
+              {(exam.boardId || "Official").toUpperCase()} HUB
             </Badge>
           </div>
 
@@ -48,8 +48,8 @@ export default function ExamCard({ exam }: ExamCardProps) {
           </div>
 
           <div className="mt-12 pt-8 border-t border-gray-50">
-            <Button className="w-full h-14 md:h-16 rounded-2xl bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[11px] tracking-[0.2em] shadow-xl border-none transition-all active:scale-95">
-              Open Exam <ChevronRight className="h-4 w-4" />
+            <Button className="w-full h-14 md:h-16 rounded-2xl bg-[#0F172A] hover:bg-primary text-white font-bold text-sm shadow-xl border-none transition-all active:scale-95">
+              Open exam <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </CardContent>
@@ -60,7 +60,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
 
 function AvailabilityBadge({ label, emoji }: { label: string; emoji: string }) {
   return (
-    <Badge variant="outline" className="bg-slate-50 border-slate-100 text-[#0F172A] text-[8px] font-black uppercase px-3 py-1.5 rounded-xl flex items-center gap-2">
+    <Badge variant="outline" className="bg-slate-50 border-slate-100 text-[#0F172A] text-[8px] font-black px-3 py-1.5 rounded-xl flex items-center gap-2 uppercase tracking-widest">
       <span className="text-xs">{emoji}</span>
       {label}
     </Badge>

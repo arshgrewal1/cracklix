@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Hub v4.0 - Simplified Language & Production Hardened.
+ * @fileOverview Search Hub v5.0 - Standardized Case & Production Hardened.
  */
 
 export default function SearchPage() {
@@ -107,8 +107,8 @@ function SearchContent() {
         <div className="space-y-8 md:space-y-12">
            <div className="text-center space-y-6">
               <div className="space-y-2">
-                 <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">Find Your Test</h1>
-                 <p className="text-slate-400 font-bold uppercase text-[9px] md:text-[11px] tracking-[0.4em]">Instant Access to the Test Bank</p>
+                 <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">Find your test</h1>
+                 <p className="text-slate-400 font-bold text-[9px] md:text-[11px] uppercase tracking-[0.4em]">Instant access to the test bank</p>
               </div>
               
               <div className="relative max-w-[700px] mx-auto group">
@@ -130,8 +130,8 @@ function SearchContent() {
            {queryStr.length >= 2 ? (
               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <h3 className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">RESULTS: {searchResults.length} ITEMS</h3>
-                    <Badge className="bg-primary/5 text-primary border-none text-[8px] font-black px-3 py-0.5 rounded-lg uppercase">Verified List</Badge>
+                    <h3 className="text-[8px] font-black uppercase tracking-[0.2em] text-slate-400">Results: {searchResults.length} items</h3>
+                    <Badge className="bg-primary/5 text-primary border-none text-[8px] font-black px-3 py-0.5 rounded-lg uppercase">Verified list</Badge>
                  </div>
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.length > 0 ? searchResults.map((res, i) => (
@@ -140,7 +140,7 @@ function SearchContent() {
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">
                            <SearchIcon className="h-16 w-16" />
-                           <p className="text-xl font-bold uppercase tracking-tight">No Results Found</p>
+                           <p className="text-xl font-bold tracking-tight">No results found</p>
                            <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Try keywords like "Patwari" or "Police"</p>
                         </div>
                       </div>
@@ -152,7 +152,7 @@ function SearchContent() {
                  <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] p-10 bg-[#0B1528] text-white overflow-hidden relative group">
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform"><LayoutGrid className="h-44 w-44" /></div>
                     <div className="relative z-10 space-y-8">
-                       <h4 className="font-black text-[10px] text-primary uppercase tracking-[0.4em]">Quick Search</h4>
+                       <h4 className="font-black text-[10px] text-primary uppercase tracking-[0.4em]">Quick search</h4>
                        <ul className="space-y-5">
                           <TrendingItem text="PSSSB Patwari Hub" onSelect={setQuery} />
                           <TrendingItem text="Punjab Police SI" onSelect={setQuery} />
@@ -163,7 +163,7 @@ function SearchContent() {
                  </Card>
                  <Card className="border-none shadow-xl rounded-[2.5rem] p-10 bg-white group overflow-hidden border border-slate-100">
                     <div className="relative z-10 space-y-8">
-                       <h4 className="font-black text-[10px] text-slate-400 uppercase tracking-[0.4em]">Study Items</h4>
+                       <h4 className="font-black text-[10px] text-slate-400 uppercase tracking-[0.4em]">Study items</h4>
                        <div className="flex flex-wrap gap-3">
                           <SearchBadge label="Army Hub" onSelect={setQuery} />
                           <SearchBadge label="PPSC Hub" onSelect={setQuery} />
@@ -197,7 +197,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
                <div className="text-left min-w-0 flex-1 space-y-1">
                   <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
                   <div className="flex items-center gap-3">
-                     <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] md:text-[9px] font-black uppercase px-2 py-0.5 rounded shadow-sm">{category}</Badge>
+                     <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] md:text-[9px] font-black rounded shadow-sm">{category}</Badge>
                      <div className="h-1 w-1 rounded-full bg-slate-200" />
                      <span className="text-[8px] font-black uppercase tracking-widest text-primary">Verified</span>
                   </div>
@@ -218,7 +218,7 @@ function TrendingItem({ text, onSelect }: { text: string, onSelect: (v: string) 
          className="flex items-center gap-4 text-slate-400 text-sm font-bold hover:text-white cursor-pointer transition-colors group active:scale-95"
       >
          <Zap className="h-4 w-4 text-primary group-hover:animate-pulse" /> 
-         <span className="uppercase tracking-tight truncate">{text}</span>
+         <span className="tracking-tight truncate">{text}</span>
       </li>
    )
 }
