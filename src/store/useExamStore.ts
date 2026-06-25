@@ -7,8 +7,9 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Exam Store v7.1 - Production Stabilized.
- * FIXED: Removed duplicate properties in state initialization to satisfy strict build requirements.
+ * @fileOverview Hardened Exam Store v7.2.
+ * FIXED: Removed duplicate property assignments in initExam.
+ * FIXED: Corrected type initialization for LanguageDisplayMode.
  */
 
 export interface ExamStoreState {
@@ -61,47 +62,46 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   currentIdx: 0,
   isPaused: false,
   startTime: 0,
-  language: "ENGLISH_PUNJABI",
-  baseLanguageMode: "ENGLISH_PUNJABI",
+  language: "ENGLISH_PUNJABI" as LanguageDisplayMode,
+  baseLanguageMode: "ENGLISH_PUNJABI" as LanguageDisplayMode,
   violations: 0,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
     const finalLang: LanguageDisplayMode = languageMode || "ENGLISH_PUNJABI";
+    
+    const baseState = {
+      mockId,
+      mockTitle: title,
+      userId,
+      questions,
+      isPaused: false,
+      language: finalLang,
+      baseLanguageMode: finalLang,
+    };
+
     if (resumeData && resumeData.status !== 'COMPLETED') {
       set({
-        mockId,
-        mockTitle: title,
-        userId,
-        questions,
+        ...baseState,
         answers: resumeData.answers || {},
         status: resumeData.statusMap || {},
         visited: resumeData.visited || [0],
         bookmarks: resumeData.bookmarks || [],
         timeLeft: resumeData.timeLeft || duration * 60,
         currentIdx: resumeData.currentIdx || 0,
-        isPaused: false,
         startTime: resumeData.startTime || Date.now(),
         violations: resumeData.violations || 0,
-        language: finalLang,
-        baseLanguageMode: finalLang,
       });
     } else {
       set({
-        mockId,
-        mockTitle: title,
-        userId,
-        questions,
+        ...baseState,
         answers: {},
         status: {},
         visited: [0],
         bookmarks: [],
         timeLeft: duration * 60,
         currentIdx: 0,
-        isPaused: false,
         startTime: Date.now(),
         violations: 0,
-        language: finalLang,
-        baseLanguageMode: finalLang,
       });
     }
   },

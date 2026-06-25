@@ -7,21 +7,24 @@ import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import SessionGuard from '@/components/auth/SessionGuard';
 
 /**
- * @fileOverview Master Client Boundary Node v2.4 (Chunk Hardened).
- * SECURE: Integrates the real-time Session Guard for one-device policy.
- * STABILITY: Improved hydration guard to resolve ChunkLoadError in layout.
+ * @fileOverview Master Client Boundary Node v2.5.
+ * FIXED: Enhanced hydration guard to prevent ChunkLoadError and hydration mismatches.
+ * This component acts as the primary switch between SSR and Client-side hydration.
  */
 export function FirebaseClientProvider({ children }: { children: ReactNode }) {
   const [mounted, setMounted] = useState(false);
   
   useEffect(() => {
+    // This effect runs immediately after hydration completes.
     setMounted(true);
   }, []);
 
+  // Memoize firebase initialization to prevent re-runs during re-renders.
   const { app, firestore, auth, storage } = useMemo(() => initializeFirebase(), []);
 
-  // Hydration Guard: Prevents ChunkLoadError by ensuring no hydration mismatch occurs
-  // during the asynchronous Firebase initialization phase.
+  // Hydration Guard: Return a stable loading skeleton until the client is ready.
+  // This prevents the "Loading chunk failed" error by ensuring dynamic chunks 
+  // (like SessionGuard) only load after the base layout is stable.
   if (!mounted) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">

@@ -13,8 +13,9 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v6.1 - Standardized Case & Production Hardened.
+ * @fileOverview Search Center v6.2.
  * FIXED: TypeScript cloneElement type mismatch for strict production build.
+ * FIXED: Corrected Icon rendering logic for Lucide components.
  */
 
 export default function SearchPage() {
@@ -30,7 +31,7 @@ function SearchContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()
-  const { user, profile, loading: authLoading } = useUser()
+  const { user, loading: authLoading } = useUser()
   const [queryStr, setQuery] = useState("")
 
   useEffect(() => {
@@ -66,7 +67,7 @@ function SearchContent() {
        type: "Exam Center", 
        href: `/exams/view?id=${e.id}`, 
        boardId: e.boardId,
-       icon: <GraduationCap className="h-5 w-5" />
+       icon: <GraduationCap />
     }))
 
     const mockMatches = (mocks || []).filter((m: any) => 
@@ -77,7 +78,7 @@ function SearchContent() {
        type: "Practice Test", 
        href: `/mocks/view?id=${m.id}`, 
        boardId: m.boardId,
-       icon: <Zap className="h-5 w-5" />
+       icon: <Zap />
     }))
 
     const notesMatches = (notes || []).filter((n: any) => 
@@ -88,7 +89,7 @@ function SearchContent() {
        type: "Notes & PDFs", 
        href: `/notes`, 
        boardId: n.boardId,
-       icon: <FileText className="h-5 w-5" />
+       icon: <FileText />
     }))
 
     return [...examMatches, ...mockMatches, ...notesMatches]
