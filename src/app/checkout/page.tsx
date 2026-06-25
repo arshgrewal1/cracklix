@@ -20,8 +20,8 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
 /**
- * @fileOverview Hardened Checkout Hub v5.8.
- * FIXED: Restored missing Badge, Link and Loader2 imports.
+ * @fileOverview Hardened Checkout Hub v5.9.
+ * FIXED: Restored all missing imports and stabilized types.
  */
 
 export default function CheckoutPage() {

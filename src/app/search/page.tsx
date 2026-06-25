@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Hub v3.29 - Fully Hardened Types.
- * FIXED: Resolved cloneElement overload errors by using explicit casting.
+ * @fileOverview Global Search Hub v3.30 - Production Hardened.
+ * FIXED: Resolved React type overload by explicitly casting icon nodes.
  */
 
 export default function SearchPage() {
@@ -190,7 +190,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
             <div className="flex items-center gap-4 min-w-0 flex-1">
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
                   {isValidElement(icon)
-                    ? cloneElement(icon as ReactElement<any>, {
+                    ? cloneElement(icon as ReactElement<{ className?: string }>, {
                         className: "h-5 w-5",
                       })
                     : icon}

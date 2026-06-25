@@ -33,8 +33,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Next.js app
+      - name: Build Next.js app (Static Export)
         run: npm run build:android
+
+      - name: Verify Web Assets
+        run: |
+          echo "📂 Root Directory Contents:"
+          ls -la
+          echo "🔍 Checking for 'out' directory..."
+          if [ ! -d "out" ]; then
+            echo "❌ ERROR: Static export directory 'out' missing."
+            exit 1
+          fi
+          echo "🔍 Checking for 'out/index.html'..."
+          if [ ! -f "out/index.html" ]; then
+            echo "❌ ERROR: 'out/index.html' not found. Build failed to export correctly."
+            exit 1
+          fi
+          echo "✅ Static Export Verified."
 
       - name: Sync Capacitor
         run: npx cap sync android

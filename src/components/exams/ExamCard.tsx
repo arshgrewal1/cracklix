@@ -11,8 +11,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Card Component v2.4 - Fixed Interface Alignment.
- * FIXED: Corrected property access to match Exam interface.
+ * @fileOverview Exam Card Component v2.5 - Hardened Interface.
+ * FIXED: Property access synchronized with the core Exam interface.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || "Official Vertical"
@@ -60,7 +60,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
 
 function AvailabilityBadge({ label, emoji }: { label: string; emoji: string }) {
   return (
-    <Badge variant="outline" className="bg-slate-50 border-slate-100 text-[#0F172A] text-[9px] font-black uppercase px-3 py-1.5 rounded-xl flex items-center gap-2">
+    <Badge variant="outline" className="bg-slate-50 border-slate-100 text-[#0F172A] text-[8px] font-black uppercase px-3 py-1.5 rounded-xl flex items-center gap-2">
       <span className="text-xs">{emoji}</span>
       {label}
     </Badge>
