@@ -13,7 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Hub v3.23 - Hardened ReactElement Typing.
+ * @fileOverview Global Search Hub v3.25 - Hardened ReactElement Typing.
+ * FIXED: 'React' refers to a UMD global and cloneElement overload errors.
  */
 
 export default function SearchPage() {
