@@ -34,7 +34,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Student Home - Simplified Language v43.0.
+ * @fileOverview Student Home - Simplified Language v43.1.
+ * UPDATED: Normalized text case to Title Case.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -204,7 +205,7 @@ export default function StudentDashboard() {
                 <CardHeader className="p-4 md:p-8 border-b border-slate-50 bg-slate-50/30">
                     <div className="space-y-0.5">
                       <h3 className="font-black text-sm md:text-xl text-[#0F172A]">Recent Tests</h3>
-                      <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">My History</p>
+                      <p className="text-[8px] md:text-[10px] font-bold text-slate-400 tracking-widest">My History</p>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -245,12 +246,12 @@ export default function StudentDashboard() {
               <Card className="border-none shadow-4xl bg-gradient-to-br from-blue-600 to-primary text-white p-6 md:p-10 rounded-2xl md:rounded-[2rem] relative overflow-hidden group">
                 <div className="absolute bottom-0 right-0 p-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Flame className="h-24 w-24 md:h-32 w-32" /></div>
                 <div className="relative z-10 space-y-2 md:space-y-4 text-left">
-                    <p className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-white/70">DAILY STREAK</p>
+                    <p className="text-[8px] md:text-[10px] font-black text-white/70 tracking-[0.2em]">Daily Streak</p>
                     <div className="flex items-baseline gap-2">
                       <div className="text-4xl md:text-7xl font-black leading-none">{resultsLoading ? "..." : stats.streak}</div>
                       <div className="space-y-0.5">
-                          <p className="text-sm md:text-lg font-black uppercase">Days</p>
-                          <p className="text-[7px] font-bold uppercase text-white/60">Study Streak</p>
+                          <p className="text-sm md:text-lg font-black">Days</p>
+                          <p className="text-[7px] font-bold text-white/60">Study Streak</p>
                       </div>
                     </div>
                 </div>
@@ -283,7 +284,7 @@ function MetricItem({ label, val, icon }: { label: string, val: string | number,
       </div>
       <div className="flex flex-col">
         <div className="text-lg md:text-2xl font-black text-[#0F172A] leading-none tabular-nums truncate">{val}</div>
-        <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mt-2">{label}</p>
+        <p className="text-[8px] md:text-[10px] font-black tracking-widest text-slate-400 mt-2">{label}</p>
       </div>
     </Card>
   )

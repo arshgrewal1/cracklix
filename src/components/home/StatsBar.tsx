@@ -9,8 +9,8 @@ import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview High-Fidelity Single-Line Stats Bar v6.5.
- * FIXED: Removed uppercase from labels and increased font scales for modern look.
+ * @fileOverview High-Fidelity Single-Line Stats Bar v6.6.
+ * FIXED: Normalized text case to Title Case.
  */
 
 const formatCompact = (num: number) => {
