@@ -21,8 +21,8 @@ const FirebaseContext = createContext<FirebaseContextValue>({
 });
 
 /**
- * @fileOverview Hardened Context Node.
- * DECOUPLED: Removed FirebaseErrorListener to prevent circular dependency with the index registry.
+ * @fileOverview Hardened Context Node v2.6.
+ * FIXED: Removed circular self-import that was causing runtime initialization failures.
  */
 export function FirebaseProvider({
   children,

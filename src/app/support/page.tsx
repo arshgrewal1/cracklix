@@ -37,7 +37,8 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Center v6.0 - Standardized Case & Build Stabilized.
+ * @fileOverview Support Center v6.1.
+ * FIXED: Restored missing Link and Loader2 imports for build stabilization.
  */
 
 export default function SupportPage() {

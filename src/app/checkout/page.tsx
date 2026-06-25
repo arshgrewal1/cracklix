@@ -20,7 +20,8 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
 /**
- * @fileOverview Checkout Hub v8.0 - Standardized Case & Build Stabilized.
+ * @fileOverview Checkout Hub v8.1.
+ * FIXED: Restored missing Badge and CheckCircle2 imports for build stabilization.
  */
 
 export default function CheckoutPage() {
