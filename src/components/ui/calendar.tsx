@@ -7,8 +7,7 @@ import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 
 /**
- * @fileOverview Calendar Component v2.7 - Production Ready
- * FIXED: Corrected Chevron component return type to ReactElement
+ * @fileOverview Calendar Component v2.8 - DayPicker v9 Hardened.
  */
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
@@ -56,10 +55,10 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        Chevron: ({ orientation }: { orientation?: "left" | "right" | "up" | "down" }): React.ReactElement => {
-          if (orientation === "left") return <ChevronLeft className="h-4 w-4" />
-          if (orientation === "right") return <ChevronRight className="h-4 w-4" />
-          return <div />
+        Chevron: (props) => {
+          if (props.orientation === "left") return <ChevronLeft className="h-4 w-4" />
+          if (props.orientation === "right") return <ChevronRight className="h-4 w-4" />
+          return null
         },
       }}
       {...props}

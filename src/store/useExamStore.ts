@@ -7,9 +7,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Exam Store v3.3
- * FIXED: Standardized state initialization and resolved duplicate property collision.
- * FIXED: Synchronized language type handling for production build.
+ * @fileOverview Hardened Exam Store v3.6
+ * FIXED: Corrected initial language state and ensured unique properties in state map.
  */
 
 export interface ExamStoreState {
@@ -67,7 +66,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   violations: 0,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
-    const finalLang = languageMode || "ENGLISH_PUNJABI";
+    const finalLang: LanguageDisplayMode = languageMode || "ENGLISH_PUNJABI";
     if (resumeData && resumeData.status !== 'COMPLETED') {
       set({
         mockId,
@@ -108,9 +107,9 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   },
 
   tick: () => {
-    const { timeLeft, isPaused, questions } = get();
-    if (questions.length > 0 && timeLeft > 0 && !isPaused) {
-      set({ timeLeft: timeLeft - 1 });
+    const state = get();
+    if (state.questions.length > 0 && state.timeLeft > 0 && !state.isPaused) {
+      set({ timeLeft: state.timeLeft - 1 });
     }
   },
 
@@ -127,69 +126,69 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   setLanguage: (language) => set({ language }),
 
   setAnswer: (idx, optIdx, db) => {
-    const { answers, status, mockId, userId, visited, bookmarks, timeLeft, currentIdx, violations, startTime } = get();
-    const newAnswers = { ...answers, [idx]: optIdx };
-    const newStatus = { ...status, [idx]: 'answered' as QuestionStatus };
+    const state = get();
+    const newAnswers = { ...state.answers, [idx]: optIdx };
+    const newStatus = { ...state.status, [idx]: 'answered' as QuestionStatus };
     
     set({ answers: newAnswers, status: newStatus });
 
-    if (db && userId && mockId) {
-      const attemptRef = doc(db, "attempts", `${userId}_${mockId}`);
+    if (db && state.userId && state.mockId) {
+      const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
       setDoc(attemptRef, {
         answers: newAnswers,
         statusMap: newStatus,
-        visited,
-        bookmarks,
-        timeLeft,
-        currentIdx,
-        violations,
-        startTime,
+        visited: state.visited,
+        bookmarks: state.bookmarks,
+        timeLeft: state.timeLeft,
+        currentIdx: state.currentIdx,
+        violations: state.violations,
+        startTime: state.startTime,
         updatedAt: serverTimestamp()
       }, { merge: true });
     }
   },
 
   clearAnswer: (idx, db) => {
-    const { answers, status, userId, mockId } = get();
-    const newAnswers = { ...answers };
+    const state = get();
+    const newAnswers = { ...state.answers };
     delete newAnswers[idx];
-    const newStatus = { ...status, [idx]: 'not-answered' as QuestionStatus };
+    const newStatus = { ...state.status, [idx]: 'not-answered' as QuestionStatus };
     
     set({ answers: newAnswers, status: newStatus });
 
-    if (db && userId && mockId) {
-      const attemptRef = doc(db, "attempts", `${userId}_${mockId}`);
+    if (db && state.userId && state.mockId) {
+      const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
       setDoc(attemptRef, { answers: newAnswers, statusMap: newStatus, updatedAt: serverTimestamp() }, { merge: true });
     }
   },
 
   markForReview: (idx, db) => {
-    const { status, answers, userId, mockId } = get();
-    const hasAnswer = answers[idx] !== undefined && answers[idx] !== null;
-    const newStatus = { ...status, [idx]: (hasAnswer ? 'answered-marked' : 'marked') as QuestionStatus };
+    const state = get();
+    const hasAnswer = state.answers[idx] !== undefined && state.answers[idx] !== null;
+    const newStatus = { ...state.status, [idx]: (hasAnswer ? 'answered-marked' : 'marked') as QuestionStatus };
     
     set({ status: newStatus });
 
-    if (db && userId && mockId) {
-      const attemptRef = doc(db, "attempts", `${userId}_${mockId}`);
+    if (db && state.userId && state.mockId) {
+      const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
       setDoc(attemptRef, { statusMap: newStatus, updatedAt: serverTimestamp() }, { merge: true });
     }
   },
 
   saveAndNext: (db) => {
-    const { currentIdx, questions } = get();
-    if (currentIdx < (questions?.length || 0) - 1) {
-      get().setCurrentIdx(currentIdx + 1);
+    const state = get();
+    if (state.currentIdx < (state.questions?.length || 0) - 1) {
+      state.setCurrentIdx(state.currentIdx + 1);
     }
   },
 
   addViolation: (db) => {
-    const { violations, userId, mockId } = get();
-    const newVal = violations + 1;
+    const state = get();
+    const newVal = state.violations + 1;
     set({ violations: newVal });
 
-    if (db && userId && mockId) {
-      const attemptRef = doc(db, "attempts", `${userId}_${mockId}`);
+    if (db && state.userId && state.mockId) {
+      const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
       setDoc(attemptRef, { violations: newVal, updatedAt: serverTimestamp() }, { merge: true });
     }
   }

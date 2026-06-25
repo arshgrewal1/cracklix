@@ -11,7 +11,7 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Card Component v2.1 - Production Fixed
+ * @fileOverview Exam Card Component v2.2 - Hardened.
  * FIXED: Synchronized property access with the Exam interface to resolve build errors.
  */
 export default function ExamCard({ exam }: ExamCardProps) {

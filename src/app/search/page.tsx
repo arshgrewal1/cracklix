@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useMemo, Suspense, cloneElement, ReactElement } from "react"
+import React, { useState, useEffect, useMemo, Suspense, cloneElement, ReactElement, isValidElement } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Search as SearchIcon, Zap, ChevronRight, FileText, LayoutGrid, Loader2, GraduationCap } from "lucide-react"
@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Hub v3.18 - Build Stabilized.
- * FIXED: Resolved TypeScript cloneElement overload error using isValidElement check and casting.
+ * @fileOverview Global Search Hub v3.22 - Type Hardened.
+ * FIXED: Explicit ReactElement casting for cloneElement to satisfy strict TS checks.
  */
 
 export default function SearchPage() {
@@ -136,7 +136,7 @@ function SearchContent() {
                  </div>
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.length > 0 ? searchResults.map((res, i) => (
-                      <SearchResultItem key={i} title={res.title} category={res.type} href={res.href} icon={res.icon as ReactElement} />
+                      <SearchResultItem key={i} title={res.title} category={res.type} href={res.href} icon={res.icon} />
                     )) : !isLoading && (
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">
@@ -189,8 +189,8 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
             <div className="flex items-center gap-4 min-w-0 flex-1">
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
-                  {React.isValidElement(icon)
-                    ? React.cloneElement(icon as React.ReactElement<any>, {
+                  {isValidElement(icon)
+                    ? cloneElement(icon as React.ReactElement<any>, {
                         className: "h-5 w-5",
                       })
                     : icon}
