@@ -7,8 +7,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Exam Store v3.9
- * FIXED: Initialization of LanguageDisplayMode and duplicate set keys.
+ * @fileOverview Hardened Exam Store v4.0
+ * FIXED: Initialization logic and duplicate property assignments.
  */
 
 export interface ExamStoreState {
@@ -178,7 +178,8 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   saveAndNext: (db) => {
     const state = get();
     if (state.currentIdx < (state.questions?.length || 0) - 1) {
-      state.setCurrentIdx(state.currentIdx + 1);
+      const nextIdx = state.currentIdx + 1;
+      state.setCurrentIdx(nextIdx);
     }
   },
 

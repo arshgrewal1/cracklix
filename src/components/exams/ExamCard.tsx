@@ -11,11 +11,10 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Card Component v2.2 - Hardened.
- * FIXED: Synchronized property access with the Exam interface to resolve build errors.
+ * @fileOverview Exam Card Component v2.3 - Fixed Interface Alignment.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
-  const examName = exam.name || exam.title || "Official Vertical"
+  const examName = exam.name || "Official Vertical"
   const examDescription = exam.description || "Official preparation vertical verified by institutional patterns."
   const totalMocksCount = exam.totalMocks ?? 0
   const activeQuestionsCount = exam.activeQuestions ?? 0
@@ -49,7 +48,7 @@ export default function ExamCard({ exam }: ExamCardProps) {
 
           <div className="mt-12 pt-8 border-t border-gray-50">
             <Button className="w-full h-14 md:h-16 rounded-2xl bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[11px] tracking-[0.2em] shadow-xl border-none transition-all active:scale-95">
-              Open Exam <ChevronRight className="h-5 w-5" />
+              Open Exam <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </CardContent>
