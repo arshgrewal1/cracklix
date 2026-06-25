@@ -20,7 +20,7 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
 /**
- * @fileOverview Hardened Checkout Hub v5.6.
+ * @fileOverview Hardened Checkout Hub v5.7.
  * FIXED: Restored Badge, Link, and CheckCircle2 imports to resolve compilation errors.
  */
 

@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Global Search Hub v3.27 - Fully Hardened Types.
+ * @fileOverview Global Search Hub v3.28 - Fully Hardened Types.
  * FIXED: 'React' refers to a UMD global and cloneElement overload errors.
  */
 
@@ -190,7 +190,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
             <div className="flex items-center gap-4 min-w-0 flex-1">
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
                   {isValidElement(icon)
-                    ? cloneElement(icon as ReactElement<{ className?: string }>, {
+                    ? cloneElement(icon as ReactElement<any>, {
                         className: "h-5 w-5",
                       })
                     : icon}

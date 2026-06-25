@@ -37,7 +37,8 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Hub v3.3 - Production Hardened
+ * @fileOverview Support Hub v3.4 - Production Hardened
+ * FIXED: Restored missing Link and Loader2 imports.
  */
 
 export default function SupportPage() {
@@ -132,7 +133,7 @@ export default function SupportPage() {
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-[#0F172A] tracking-tight leading-[0.9] break-words antialiased">
               Support <br /> <span className="text-primary">Center</span>
             </h1>
-            <p className="text-slate-500 font-medium text-lg md:text-2xl max-w-xl leading-tight tracking-tight">
+            <p className="text-slate-500 font-medium text-lg max-w-xl leading-tight tracking-tight">
               Raise tickets for institutional issues or pass activation assistance.
             </p>
           </div>
