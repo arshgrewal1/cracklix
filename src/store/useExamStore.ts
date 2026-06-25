@@ -7,8 +7,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Exam Store v3.8
- * FIXED: assignment of "" to LanguageDisplayMode and duplicate set keys.
+ * @fileOverview Hardened Exam Store v3.9
+ * FIXED: Initialization of LanguageDisplayMode and duplicate set keys.
  */
 
 export interface ExamStoreState {

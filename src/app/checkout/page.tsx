@@ -17,10 +17,11 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
+import Link from "next/link"
 
 /**
- * @fileOverview Hardened Checkout Hub v5.5.
- * FIXED: Added missing Badge and CheckCircle2 imports to resolve build errors.
+ * @fileOverview Hardened Checkout Hub v5.6.
+ * FIXED: Restored Badge, Link, and CheckCircle2 imports to resolve compilation errors.
  */
 
 export default function CheckoutPage() {
