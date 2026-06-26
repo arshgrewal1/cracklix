@@ -6,10 +6,11 @@ import { X, Zap, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import { Capacitor } from '@capacitor/core';
 
 /**
- * @fileOverview Institutional Mobile App Prompt v1.0.
- * Updated to suggest APK download instead of browser PWA installation.
+ * @fileOverview Institutional Mobile App Prompt v1.2.
+ * UPDATED: Added environment checks to hide prompt if app is already installed or running natively.
  */
 export default function PWAManager() {
   const pathname = usePathname();
@@ -19,17 +20,25 @@ export default function PWAManager() {
   useEffect(() => {
     setMounted(true);
     
-    // Show prompt after 5 seconds if on mobile-like resolution
     const checkStatus = () => {
-      const isMobile = window.innerWidth < 768;
+      // 1. Check if running inside the Native Android APK
+      const isNative = Capacitor.isNativePlatform();
+      
+      // 2. Check if running as an installed PWA (Standalone mode)
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+
+      // 3. Other existing checks
+      const isMobile = window.innerWidth < 1024; // Prompt browser users on mobile/tablet resolutions
       const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin');
       const isDismissed = localStorage.getItem('cracklix_app_prompt_dismissed') === 'true';
       
-      if (isMobile && !isExcluded && !isDismissed) {
+      // LOGIC: Only show if NOT native, NOT standalone, is on mobile resolution, NOT in exam, and NOT dismissed
+      if (!isNative && !isStandalone && isMobile && !isExcluded && !isDismissed) {
         setShowPrompt(true);
       }
     };
 
+    // Show prompt after 5 seconds to let the main content load
     const timer = setTimeout(checkStatus, 5000);
     return () => clearTimeout(timer);
   }, [pathname]);
