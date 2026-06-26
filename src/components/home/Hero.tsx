@@ -22,8 +22,8 @@ import { AuthorityLogo } from "@/lib/exam-icons";
 import Image from "next/image";
 
 /**
- * @fileOverview Refined Hero Hub v91.0.
- * OPTIMIZED: Side-by-side desktop layout while preserving PWA specific stacking.
+ * @fileOverview Refined Hero Hub v92.0.
+ * UPDATED: Synchronized Quick Action cards and buttons with PWA UI standards.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -56,10 +56,9 @@ export default function Hero() {
     <section className="relative overflow-hidden bg-white pt-6 pb-12 md:pt-16 md:pb-28 border-b border-slate-50">
       <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Responsive Flex/Grid Container */}
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 md:gap-20 lg:gap-24 items-center">
 
-          {/* 1. Text Content Hub - Primary Left on Desktop */}
+          {/* 1. Text Content Hub */}
           <div className="text-center lg:text-left space-y-6 md:space-y-8 flex flex-col order-1">
             
             <motion.div 
@@ -74,17 +73,16 @@ export default function Hero() {
             </motion.div>
 
             <div className="space-y-4 md:space-y-6">
-              <h1 className="text-[clamp(26px,6vw,44px)] lg:text-[clamp(32px,4vw,64px)] xl:text-[72px] font-[900] tracking-tighter text-[#0F172A] leading-[1.1] md:leading-[0.95] antialiased">
+              <h1 className="text-[26px] md:text-[clamp(32px,4vw,64px)] xl:text-[72px] font-[900] tracking-tighter text-[#0F172A] leading-[1.1] md:leading-[0.95] antialiased">
                 Crack Punjab Govt Exams <br className="hidden md:block"/>
                 <span className="text-primary italic">With Confidence</span>
               </h1>
 
               <div className="space-y-4 md:space-y-6">
-                <p className="text-[clamp(14px,3vw,18px)] lg:text-xl text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-bold tracking-tight">
+                <p className="text-[14px] md:text-xl text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-bold tracking-tight">
                   Mock tests and notes checked by official patterns.
                 </p>
                 
-                {/* Board Hub - Wraps under Description on both Mobile & Desktop */}
                 <div className="flex flex-wrap justify-center lg:justify-start gap-1.5 md:gap-2 max-w-xl mx-auto lg:mx-0">
                   {boardHubs.map((board, i) => (
                     <Link 
@@ -99,23 +97,22 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* CTA Buttons - Positioned for accessibility on Desktop */}
             <div className="hidden lg:flex flex-col sm:flex-row gap-4 pt-4 w-full max-w-xl">
-               <Button asChild className="sm:flex-1 h-16 px-10 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-lg shadow-xl shadow-blue-500/20 rounded-full active:scale-95 transition-all border-none">
+               <Button asChild className="sm:flex-1 h-12 px-10 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-base shadow-xl shadow-blue-500/20 rounded-full active:scale-95 transition-all border-none">
                   <Link href="/mocks" className="flex items-center justify-center gap-2">
-                    <Play className="h-5 w-5 fill-current" /> Start Study
+                    <Play className="h-4 w-4 fill-current" /> Start Study
                   </Link>
                </Button>
-               <Button asChild variant="outline" className="sm:flex-1 h-16 px-10 rounded-full font-bold text-lg border-2 border-slate-200 hover:border-primary/30 hover:bg-slate-50 transition-all active:scale-95">
+               <Button asChild variant="outline" className="sm:flex-1 h-12 px-10 rounded-full font-bold text-base border-2 border-slate-200 hover:border-primary/30 hover:bg-slate-50 transition-all active:scale-95">
                   <Link href="/exams" className="flex items-center justify-center gap-2">
-                    <LayoutGrid className="h-5 w-5" /> View Exams
+                    <LayoutGrid className="h-4 w-4" /> View Exams
                   </Link>
                </Button>
             </div>
           </div>
 
-          {/* 2. Hero Image - Dynamic Positioning */}
-          <div className="flex flex-col items-center w-full max-w-[280px] lg:max-w-none mx-auto lg:mx-0 order-2 lg:order-2">
+          {/* 2. Hero Image */}
+          <div className="flex flex-col items-center w-full max-w-[280px] lg:max-w-none mx-auto lg:mx-0 order-2">
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }} 
               animate={{ opacity: 1, scale: 1 }} 
@@ -132,17 +129,15 @@ export default function Hero() {
             </motion.div>
           </div>
 
-          {/* 3. Action Grid & Mobile CTAs - Lower priority group on Desktop */}
+          {/* 3. Action Grid & Mobile CTAs */}
           <div className="col-span-1 lg:col-span-2 space-y-6 md:space-y-12 order-3">
-             {/* Action Grid - Spans wide on Desktop */}
-             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                 <QuickActionCard boardId="mock-test" label="Mock Tests" href="/mocks" />
                 <QuickActionCard boardId="study-material" label="Notes" href="/notes" />
                 <QuickActionCard boardId="pyq" label="PYQ Papers" href="/pyqs" />
                 <QuickActionCard boardId="current-affairs" label="Current Affairs" href="/current-affairs" />
              </div>
 
-             {/* MOBILE ONLY CTA BUTTONS - Preserving PWA order */}
              <div className="flex flex-col sm:flex-row gap-4 pt-2 w-full max-w-xl mx-auto lg:hidden">
                 <Button asChild className="w-full sm:flex-1 h-12 px-10 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-[15px] shadow-xl shadow-blue-500/20 rounded-full active:scale-95 transition-all border-none">
                     <Link href="/mocks" className="flex items-center justify-center gap-2">
@@ -166,14 +161,16 @@ export default function Hero() {
 function QuickActionCard({ boardId, label, href }: { boardId: string, label: string, href: string }) {
   return (
     <Link href={href} className="block group h-full">
-      <Card className="bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-500 rounded-2xl md:rounded-[2.5rem] p-3.5 md:p-12 flex flex-col md:flex-row items-center gap-2 md:gap-8 cursor-pointer active:scale-[0.98] h-full text-center md:text-left">
-        <div className="h-10 w-10 md:h-20 md:w-20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500">
-          <AuthorityLogo boardId={boardId} size="lg" className="bg-transparent shadow-none border-none p-0 w-full h-full" />
+      <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[24px] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-4 md:p-10 lg:p-12 h-full min-h-[280px] md:min-h-[420px] text-center">
+        <div className="flex justify-center mb-4 md:mb-12 shrink-0">
+          <div className="h-11 w-11 md:h-24 md:w-24 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
+             <AuthorityLogo boardId={boardId} size="lg" className="bg-transparent shadow-none border-none p-0 h-full w-full" />
+          </div>
         </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-[13px] md:text-xl font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight">
-            {label}
-          </h3>
+        <div className="flex-1 flex flex-col justify-start min-w-0">
+           <h3 className="text-[16px] md:text-[clamp(15px,1.8vw,26px)] font-bold tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
+              {label}
+           </h3>
         </div>
       </Card>
     </Link>
