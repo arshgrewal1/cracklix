@@ -1,3 +1,6 @@
 include ':app'
 
+rootProject.name = 'Cracklix'
+
+// Standard Capacitor Plugin Resolution Node
 apply from: 'capacitor.settings.gradle'

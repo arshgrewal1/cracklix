@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useMemo, Suspense, cloneElement, ReactElement, isValidElement } from "react"
+import React, { useState, useEffect, useMemo, Suspense, cloneElement, isValidElement, ReactElement } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Search as SearchIcon, Zap, ChevronRight, FileText, LayoutGrid, Loader2, GraduationCap } from "lucide-react"
@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v8.12.
- * FIXED: Explicitly imported cloneElement and React to resolve UMD and typing build blockers.
+ * @fileOverview Search Center v8.13.
+ * FIXED: Explicit imports for cloneElement and React module to satisfy Next.js 15 isolation.
  */
 
 export default function SearchPage() {

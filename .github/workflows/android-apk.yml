@@ -38,7 +38,6 @@ jobs:
         run: |
           mkdir -p out
           mkdir -p android/app/src/main/assets
-          mkdir -p android/app/src/main/res/xml
           touch android/app/src/main/assets/.gitkeep
 
       - name: Sync Capacitor
@@ -48,6 +47,7 @@ jobs:
         working-directory: android
         run: |
           chmod +x gradlew
+          ./gradlew clean
           ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK Artifact
