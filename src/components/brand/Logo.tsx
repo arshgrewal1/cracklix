@@ -17,7 +17,7 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix High-Fidelity Brand Identity v70.3.
+ * @fileOverview Cracklix High-Fidelity Brand Identity v71.0.
  * FIXED: Explicitly defined container dimensions to resolve Next.js Image height 0 warning.
  */
 export default function Logo({
@@ -40,8 +40,6 @@ export default function Logo({
   const isIcon = variant === 'icon' || iconOnly;
   const src = assets[isIcon ? 'icon' : variant];
 
-  // The wrapper MUST have a relative position for Next.js Image "fill" to work.
-  // The dimensions are provided by the baseClasses below.
   const content = (
     <div className="relative w-full h-full flex items-center justify-center">
       <Image
@@ -60,7 +58,7 @@ export default function Logo({
 
   const baseClasses = cn(
     "flex items-center select-none hover:opacity-90 transition-opacity flex-shrink-0 relative overflow-hidden",
-    // These specific height/width anchors provide the necessary context for the fill prop
+    // FIXED: Explicit height/width anchors to resolve Image fill warning
     isIcon 
       ? "h-10 w-10 md:h-14 md:w-14" 
       : "h-12 w-32 md:h-16 md:w-56",

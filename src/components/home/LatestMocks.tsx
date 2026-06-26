@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Mock Grid v79.0.
- * UPDATED: Title Case normalization and standardizing responsive containers.
+ * @fileOverview High-Density Mock Grid v80.0.
+ * UPDATED: Removed forced uppercase.
  */
 
 export default function LatestMocks() {
@@ -87,10 +87,10 @@ export default function LatestMocks() {
 
                   <div className="mt-4 md:mt-10 pt-3 border-t border-slate-50">
                      <Button asChild className={cn(
-                       "w-full h-8 md:h-14 rounded-full font-black text-[8px] md:text-[11px] tracking-widest uppercase shadow-md border-none transition-all active:scale-95 gap-2", 
+                       "w-full h-8 md:h-14 rounded-full font-black text-[8px] md:text-[11px] tracking-widest uppercase shadow-md border-none transition-all active:scale-95 gap-2 md:gap-3", 
                        locked ? "bg-orange-500 hover:bg-orange-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                      )}>
-                        <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`}>
+                        <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`} className="flex items-center justify-center gap-1 md:gap-2">
                            {locked ? <Lock className="h-2.5 w-2.5 md:h-4 md:w-4" /> : null}
                            {locked ? 'Unlock' : 'Start'}
                         </Link>

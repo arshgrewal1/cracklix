@@ -26,8 +26,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard v26.0 (PWA Refined)
- * PWA SYNC: Removed uppercase from all primary elements per user feedback.
+ * Admin Dashboard v27.0 (Typography Hardened)
+ * UPDATED: Title Case normalization for all headers and strings.
  */
 
 export default function AdminDashboard() {
@@ -104,13 +104,13 @@ export default function AdminDashboard() {
                  <span className="text-[9px] font-black text-emerald-600 tracking-tight">Governance Active</span>
               </div>
            </div>
-          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight">Admin Hub</h1>
+          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Admin Hub</h1>
           <p className="text-slate-500 text-[11px] md:text-lg font-medium">Coordinate preparation nodes and session integrity.</p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto shrink-0">
-           <Button onClick={handleSyncLiveStats} disabled={isStatsSyncing} variant="outline" className="flex-1 sm:flex-none h-11 rounded-full border-slate-200 font-black text-[10px] tracking-widest">
+           <button onClick={handleSyncLiveStats} disabled={isStatsSyncing} className="flex-1 sm:flex-none h-11 px-6 rounded-full border border-slate-200 font-black text-[10px] tracking-widest text-[#0F172A] hover:bg-slate-50 transition-all">
               {isStatsSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Sync
-           </Button>
+           </button>
            <Button onClick={handlePushToRegistry} disabled={isSyncing} className="flex-1 sm:flex-none h-11 px-8 bg-primary hover:bg-blue-700 text-white shadow-xl rounded-full border-none font-black text-[10px] tracking-widest">
               {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />} Seed
            </Button>

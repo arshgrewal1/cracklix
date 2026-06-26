@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Notes Center v2.1.
- * RESPONSIVE: Increased container width for PC and optimized card layout.
+ * @fileOverview Notes Center v2.2 (Typography Hardened).
+ * UPDATED: Converted headers and strings to Title Case.
  */
 
 export default function StudyMaterialPage() {
@@ -116,7 +116,7 @@ export default function StudyMaterialPage() {
            <div className="absolute top-0 right-0 p-16 opacity-5 rotate-12 group-hover:scale-125 transition-transform"><AuthorityLogo boardId="study-material" size="xl" className="h-96 w-96 opacity-5" /></div>
            <div className="relative z-10 max-w-3xl space-y-8 md:space-y-12">
               <div className="space-y-4">
-                 <Badge className="bg-primary/20 text-primary border-none px-5 py-2 rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl">PRO ACCESS</Badge>
+                 <Badge className="bg-primary/20 text-primary border-none px-5 py-2 rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl">PRO Access</Badge>
                  <h2 className="text-3xl sm:text-5xl md:text-7xl font-black uppercase leading-[0.9] tracking-tight">Registry <br/> Test Center</h2>
               </div>
               <p className="text-slate-400 text-sm md:text-2xl font-medium leading-snug">Unlock all premium institutional PDFs, solved papers, and expert notes for all Punjab government exams.</p>
@@ -177,15 +177,15 @@ function DownloadCard({ asset, profile }: { asset: any, profile: any }) {
                      "border-none font-black text-[9px] md:text-[11px] uppercase tracking-widest px-4 py-1.5 rounded-xl shadow-sm",
                      asset.isFree ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-600"
                   )}>
-                     {asset.subjectId || 'GENERAL'}
+                     {asset.subjectId || 'General'}
                   </Badge>
                   {asset.isFree ? (
-                     <span className="text-[10px] md:text-[12px] font-black text-emerald-600 uppercase tracking-widest">FREE ACCESS NODE</span>
+                     <span className="text-[10px] md:text-[12px] font-black text-emerald-600 uppercase tracking-widest">Free Access Node</span>
                   ) : (
-                     <span className="text-[10px] md:text-[12px] font-black text-orange-600 uppercase tracking-widest">ELITE REGISTRY</span>
+                     <span className="text-[10px] md:text-[12px] font-black text-orange-600 uppercase tracking-widest">Elite Registry</span>
                   )}
                </div>
-               <h3 className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors flex-1 uppercase tracking-tight truncate max-w-full">
+               <h3 className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors flex-1 tracking-tight truncate max-w-full">
                   {asset.title}
                </h3>
                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pt-6 border-t border-slate-50 mt-auto">

@@ -12,8 +12,8 @@ import { AuthorityLogo } from "@/lib/exam-icons";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview High-Density Popular Exams Grid v81.3.
- * UPDATED: Converted typography to Title Case and standardizing section layout.
+ * @fileOverview High-Density Popular Exams Grid v82.0.
+ * UPDATED: Title Case strings. Acronyms preserved.
  */
 
 const POPULAR_LIST = [
@@ -56,18 +56,18 @@ export default function PopularExams() {
                         </div>
                         
                         <div className="flex-1 space-y-2 md:space-y-6">
-                           <h3 className="text-[15px] md:text-3xl font-black text-[#04102B] leading-tight group-hover:text-primary transition-colors uppercase tracking-tight truncate">
+                           <h3 className="text-[15px] md:text-3xl font-black text-[#04102B] leading-tight group-hover:text-primary transition-colors tracking-tight truncate">
                               {p.name}
                            </h3>
                            
                            <div className="flex flex-wrap gap-2">
-                              <MiniChip emoji="📚" label="MOCKS" />
-                              <MiniChip emoji="⚡" label="LIVE" />
+                              <MiniChip emoji="📚" label="Mocks" />
+                              <MiniChip emoji="⚡" label="Live" />
                            </div>
                         </div>
 
                         <div className="mt-10 md:mt-16 pt-6 border-t border-slate-50">
-                           <Button variant="ghost" className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[9px] md:text-[11px] tracking-[0.2em] border-none shadow-md uppercase">
+                           <Button variant="ghost" className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[9px] md:text-[11px] tracking-[0.2em] border-none shadow-md">
                               Launch <ChevronRight className="h-4 w-4 ml-1" />
                            </Button>
                         </div>
@@ -83,7 +83,7 @@ export default function PopularExams() {
 
 function MiniChip({ emoji, label }: { emoji: string, label: string }) {
    return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-50 border border-slate-100 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-50 border border-slate-100 text-[8px] md:text-[10px] font-black text-slate-400 tracking-widest">
          <span className="text-xs">{emoji}</span> {label}
       </span>
    )

@@ -13,8 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview High-Density Category Explorer v125.3.
- * UPDATED: Normalized typography to Title Case and unified container constraints.
+ * @fileOverview High-Density Category Explorer v126.0.
+ * UPDATED: Converted headers to Title Case. Acronyms preserved.
  */
 
 const STRICT_WHITELIST = [
@@ -74,19 +74,19 @@ export default function FeaturedCategories() {
                              <AuthorityLogo category={cat} size="lg" className="h-full w-full p-2" />
                           </div>
                           <Badge className="bg-primary/5 text-primary border-none font-black text-[8px] md:text-[11px] px-4 py-1.5 rounded-full shadow-sm w-fit uppercase tracking-widest">
-                             {boardLabel} HUB
+                             {boardLabel} Hub
                           </Badge>
                        </div>
                        
                        <div className="space-y-2 md:space-y-4 flex-1">
-                          <h3 className="text-lg md:text-3xl font-black text-[#0F172A] leading-tight line-clamp-2 uppercase tracking-tight">{cat.title}</h3>
+                          <h3 className="text-lg md:text-3xl font-black text-[#0F172A] leading-tight line-clamp-2 tracking-tight">{cat.title}</h3>
                           <p className="text-xs md:text-lg text-slate-400 line-clamp-2 leading-relaxed font-medium">
                             {cat.description || "Browse official government recruitment and preparation series."}
                           </p>
                        </div>
 
                        <div className="mt-10 md:mt-20 pt-6 border-t border-slate-50">
-                          <Button variant="ghost" className="w-full h-11 md:h-16 rounded-xl md:rounded-2xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[9px] md:text-[12px] tracking-[0.2em] gap-3 shadow-xl uppercase border-none">
+                          <Button variant="ghost" className="w-full h-11 md:h-16 rounded-xl md:rounded-2xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[9px] md:text-[12px] tracking-[0.2em] gap-3 shadow-xl border-none">
                              Enter Hub <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                           </Button>
                        </div>

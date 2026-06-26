@@ -16,7 +16,8 @@ import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Pass Center - Simplified Language v27.0.
+ * @fileOverview Pass Center - Typography Hardened v28.0.
+ * UPDATED: Standardized headers to Title Case.
  */
 
 export default function PassPage() {
@@ -24,7 +25,7 @@ export default function PassPage() {
   const db = useFirestore()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
-  const [timeLeft, setTimeLeft] = useState<{ d: number, h: number, m: number, s: number } | null>(null)
+  const [passCountdown, setPassCountdown] = useState("");
 
   useEffect(() => {
     setMounted(true);
@@ -45,17 +46,18 @@ export default function PassPage() {
        const diff = expiryDate.getTime() - now;
 
        if (diff <= 0) {
-          setTimeLeft(null);
+          setPassCountdown("Expired");
           clearInterval(interval);
           return;
        }
 
-       setTimeLeft({
-          d: Math.floor(diff / (1000 * 60 * 60 * 24)),
-          h: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          m: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-          s: Math.floor((diff % (1000 * 60)) / 1000)
-       });
+       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+       const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+       const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+       
+       if (d > 0) setPassCountdown(`${d}d remaining`);
+       else if (h > 0) setPassCountdown(`${h}h remaining`);
+       else setPassCountdown(`${m}m remaining`);
     }, 1000);
 
     return () => clearInterval(interval);
@@ -83,7 +85,7 @@ export default function PassPage() {
       
       <main className="container mx-auto px-3 md:px-8 py-4 md:py-12 max-w-7xl space-y-6 md:space-y-16">
         
-        {/* PASS MANAGEMENT */}
+        {/* Pass Management Hub */}
         {mounted && profile?.passStatus && passStatus !== 'none' && (
            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
               <Card className="max-w-4xl mx-auto border border-slate-100 bg-white rounded-2xl md:rounded-[2rem] p-3 md:p-10 shadow-xl text-left overflow-hidden relative">
@@ -96,27 +98,20 @@ export default function PassPage() {
                           </div>
                           <div>
                              <h2 className="text-base md:text-2xl font-headline font-black text-[#0F172A] leading-none">
-                               {passStatus === 'active' ? 'Active Pro Pass' : 'Pass Expired'}
+                               {passStatus === 'active' ? 'Active Elite Pass' : 'Pass Expired'}
                              </h2>
                              <Badge className={cn("mt-1 border-none text-[7px] md:text-[9px] font-black uppercase px-2 py-0.5", passStatus === 'active' ? "bg-emerald-50 text-emerald-600" : "bg-rose-50 text-rose-600")}>
-                                Plan: {profile?.pass?.plan || 'PRO'}
+                                Plan: {profile?.pass?.plan || 'Pro'}
                              </Badge>
                           </div>
                        </div>
 
-                       {passStatus === 'active' && timeLeft ? (
-                          <div className="grid grid-cols-4 gap-1 md:gap-3 max-w-xs md:max-w-sm">
-                             <CountdownPill label="Days" val={timeLeft.d} />
-                             <CountdownPill label="Hrs" val={timeLeft.h} />
-                             <CountdownPill label="Mins" val={timeLeft.m} />
-                             <CountdownPill label="Secs" val={timeLeft.s} />
+                       {passStatus === 'active' && passCountdown && (
+                          <div className="flex items-center gap-2 p-2 bg-emerald-50 rounded-lg border border-emerald-100 text-emerald-600">
+                             <Clock className="h-3 w-3 shrink-0" />
+                             <p className="text-[10px] font-bold uppercase tracking-tight">{passCountdown}</p>
                           </div>
-                       ) : passStatus === 'expired' ? (
-                          <div className="p-2 bg-rose-50 rounded-lg border border-rose-100 flex items-center gap-2 text-rose-600">
-                             <AlertCircle className="h-3 w-3 shrink-0" />
-                             <p className="text-[9px] font-bold uppercase">Pass expired. Renew to continue practicing.</p>
-                          </div>
-                       ) : null}
+                       )}
                     </div>
 
                     <Button asChild className="w-full md:w-auto h-11 px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-full font-black text-[10px] tracking-widest shadow-xl border-none">
@@ -124,31 +119,6 @@ export default function PassPage() {
                     </Button>
                  </div>
               </Card>
-
-              {profile.queuedPasses && profile.queuedPasses.length > 0 && (
-                 <div className="max-w-4xl mx-auto space-y-4">
-                    <div className="flex items-center gap-3 px-2">
-                       <Layers className="h-4 w-4 text-primary" />
-                       <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Upcoming Plans</h3>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                       {profile.queuedPasses.map((q, i) => (
-                          <div key={q.id} className="bg-white border border-slate-100 p-4 rounded-2xl shadow-lg flex items-center justify-between group">
-                             <div className="flex items-center gap-4">
-                                <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-inner">
-                                   <Zap className="h-5 w-5" />
-                                </div>
-                                <div>
-                                   <p className="text-xs font-black text-[#0F172A] uppercase">{q.name}</p>
-                                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">{q.durationDays} Days Extra</p>
-                                </div>
-                             </div>
-                             <Badge variant="outline" className="border-slate-100 text-slate-300 text-[7px] font-black uppercase px-2 py-1">In Line #{i+1}</Badge>
-                          </div>
-                       ))}
-                    </div>
-                 </div>
-              )}
            </motion.div>
         )}
 
@@ -199,13 +169,4 @@ export default function PassPage() {
       <Footer />
     </div>
   )
-}
-
-function CountdownPill({ label, val }: { label: string, val: number }) {
-   return (
-      <div className="p-1.5 bg-slate-50 rounded-lg border border-slate-100 text-center flex-1">
-         <p className="text-xs md:text-xl font-black text-[#0F172A] tabular-nums leading-none">{val}</p>
-         <p className="text-[6px] md:text-[7px] font-black text-slate-400 mt-1 uppercase">{label}</p>
-      </div>
-   )
 }
