@@ -34,6 +34,9 @@ jobs:
       - name: Build Next.js Static Export
         run: npm run build
 
+      - name: Ensure Assets Directory Exists
+        run: mkdir -p android/app/src/main/assets
+
       - name: Sync Capacitor
         run: npx cap sync android
 
