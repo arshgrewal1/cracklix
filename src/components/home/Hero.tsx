@@ -24,8 +24,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Fidelity Hero Hub v102.1.
- * UPDATED: Reduced Quick Action card sizing for a more compact layout.
+ * @fileOverview High-Fidelity Hero Hub v102.2.
+ * UPDATED: Reduced Quick Action card sizing for a more compact layout on mobile.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -163,14 +163,14 @@ export default function Hero() {
 function QuickActionCard({ boardId, label, href }: { boardId: string, label: string, href: string }) {
   return (
     <Link href={href} className="block group h-full">
-      <Card className="w-full md:max-w-[280px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.25rem] md:rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-3 pt-4 pb-3 md:p-6 text-center">
-        <div className="flex justify-center mb-3 md:mb-6 shrink-0">
-          <div className="h-12 w-12 md:h-16 md:w-16 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-             <AuthorityLogo boardId={boardId} size="md" className="border-none shadow-none" />
+      <Card className="w-full md:max-w-[240px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1rem] md:rounded-[2rem] bg-white group overflow-hidden flex flex-col p-2 pt-4 pb-2 md:p-6 text-center">
+        <div className="flex justify-center mb-2 md:mb-6 shrink-0">
+          <div className="h-10 w-10 md:h-16 md:w-16 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+             <AuthorityLogo boardId={boardId} size="md" className="border-none shadow-none h-10 w-10 md:h-16 md:w-16" />
           </div>
         </div>
         <div className="min-w-0">
-           <h3 className="text-[12px] md:text-lg font-bold tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
+           <h3 className="text-[11px] md:text-lg font-bold tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-1">
               {label}
            </h3>
         </div>

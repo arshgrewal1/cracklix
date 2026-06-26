@@ -37,8 +37,8 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Center v7.8.
- * FIXED: Restored missing Link and Loader2 references.
+ * @fileOverview Support Center v7.9.
+ * FIXED: Restored missing Link and Loader2 references for build stability.
  */
 
 export default function SupportPage() {
