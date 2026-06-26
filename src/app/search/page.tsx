@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v8.6.
+ * @fileOverview Search Center v8.7.
  * FIXED: Explicitly imported cloneElement and resolved UMD global conflict.
  */
 
@@ -87,7 +87,7 @@ function SearchContent() {
        title: n.title, 
        type: "Notes & PDFs", 
        href: `/notes`, 
-       boardId: n.boardId,
+       boardId: n.boardId, 
        icon: <FileText className="h-5 w-5" />
     }))
 
@@ -120,7 +120,7 @@ function SearchContent() {
                       value={queryStr}
                       onChange={e => setQuery(e.target.value)}
                       autoFocus
-                      className="w-full h-14 md:h-18 pl-12 md:pl-16 pr-14 text-sm md:text-2xl rounded-2xl md:rounded-[2.5rem] border-none shadow-2xl bg-white focus:ring-4 focus:ring-primary/5 text-slate-900 placeholder-slate-400"
+                      className="w-full h-12 md:h-18 pl-12 md:pl-16 pr-14 text-sm md:text-2xl rounded-2xl md:rounded-[2.5rem] border-none shadow-2xl bg-white focus:ring-4 focus:ring-primary/5 text-slate-900 placeholder-slate-400"
                       placeholder="Search exams, tests, or notes..." 
                     />
                     {isLoading && <Loader2 className="absolute right-6 top-1/2 -translate-y-1/2 h-6 w-6 text-primary animate-spin" />}
@@ -189,7 +189,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
             <div className="flex items-center gap-4 min-w-0 flex-1">
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
-                  {cloneElement(icon, { className: "h-5 w-5" })}
+                  {isValidElement(icon) && cloneElement(icon, { className: "h-5 w-5" } as any)}
                </div>
                <div className="text-left min-w-0 flex-1 space-y-1">
                   <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
