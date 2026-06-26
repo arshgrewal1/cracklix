@@ -27,6 +27,7 @@ export interface CalendarEvent {
   published: boolean;
   createdAt?: any;
   updatedAt?: any;
+  displayOrder?: number;
 }
 
 export interface HelpArticle {

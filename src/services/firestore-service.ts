@@ -16,8 +16,8 @@ import {
 import { Board, Exam, Question, MockTest, AttemptResult } from "@/types"
 
 /**
- * @fileOverview Firestore Service v1.3 - Production Ready
- * FIXED: Added proper type handling and resolved AttemptResult import issues
+ * @fileOverview Firestore Service v1.4 - Production Ready
+ * FIXED: Synchronized imports and type definitions.
  */
 
 export const FirestoreService = {

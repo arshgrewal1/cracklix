@@ -15,7 +15,7 @@ interface AdPlacementProps {
 }
 
 /**
- * @fileOverview Institutional Ad-Node v1.22.
+ * @fileOverview Institutional Ad-Node v1.24.
  * FIXED: Explicit type casting for Firestore queries to resolve parameter assignability errors.
  */
 
@@ -38,7 +38,8 @@ export default function AdPlacement({ placement, className, examId }: AdPlacemen
   const adsQuery = useMemo(() => {
     if (!db || isAdFree || isSafetyZone) return null;
     const colRef = collection(db, 'ads');
-    return query(colRef, where('status', '==', 'ACTIVE')) as Query<Advertisement, DocumentData>;
+    // Using explicit cast to avoid TypeScript assignability errors between Query<DocumentData> and Query<Advertisement>
+    return query(colRef, where('status', '==', 'ACTIVE')) as unknown as Query<Advertisement, DocumentData>;
   }, [db, isAdFree, isSafetyZone]);
 
   const { data: ads, loading } = useCollection<Advertisement>(adsQuery);

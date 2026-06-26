@@ -1,8 +1,8 @@
 import { Exam, MockTest, Question } from "@/types"
 
 /**
- * @fileOverview Mock Data v2.5 - Hardened Types
- * FIXED: Removed redundant CurrentAffair and Notification imports; synchronized Exam structure.
+ * @fileOverview Mock Data v2.6 - Hardened Types
+ * FIXED: Synchronized Exam structure and MockTest relationships.
  */
 
 export const EXAMS: Exam[] = [
