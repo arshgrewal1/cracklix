@@ -27,14 +27,14 @@ export default function Footer() {
   return (
     <footer className="border-t border-slate-50 bg-[#020617] font-body text-white">
       <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 py-12 md:py-24">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-10 md:gap-20 items-start text-left">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 md:gap-20 items-start text-left">
 
           {/* Brand Section */}
           <div className="col-span-2 lg:col-span-1 space-y-8">
             <Logo
               variant="dark"
               align="left"
-              imgClassName="h-[120px] md:h-[200px]" // Maximized footer logo size
+              imgClassName="h-[180px] md:h-[260px]"
             />
             <p className="max-w-[320px] text-[15px] leading-relaxed text-slate-400 font-medium tracking-tight">
               Punjab's smart exam preparation platform for every aspirant.
@@ -47,8 +47,8 @@ export default function Footer() {
           </div>
 
           {/* Links Group */}
-          <div className="space-y-6">
-            <h3 className="text-sm font-bold text-primary tracking-tight">Quick Links</h3>
+          <div className="col-span-1 lg:col-span-1 space-y-6">
+            <h3 className="text-sm font-bold text-primary tracking-tight uppercase">Quick Links</h3>
             <ul className="space-y-3">
               <FooterLink href="/">Home</FooterLink>
               <FooterLink href="/exams">Exams</FooterLink>
@@ -59,8 +59,8 @@ export default function Footer() {
           </div>
 
           {/* Resources Group */}
-          <div className="hidden lg:block space-y-6">
-            <h3 className="text-sm font-bold text-primary tracking-tight">Resources</h3>
+          <div className="hidden lg:block lg:col-span-1 space-y-6">
+            <h3 className="text-sm font-bold text-primary tracking-tight uppercase">Resources</h3>
             <ul className="space-y-3">
               <FooterLink href="/mocks">Mock Tests</FooterLink>
               <FooterLink href="/pyqs">Previous Papers</FooterLink>
@@ -69,17 +69,21 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Support Group */}
-          <div className="col-span-1 lg:col-span-1 space-y-6">
-            <h3 className="text-sm font-bold text-primary tracking-tight">Support</h3>
+          {/* Support Group - Full Width on Mobile for Email Visibility */}
+          <div className="col-span-2 lg:col-span-1 space-y-6">
+            <h3 className="text-sm font-bold text-primary tracking-tight uppercase">Support</h3>
             <div className="space-y-4">
-              <div className="flex items-center gap-3 text-[15px] text-slate-400">
+              <div className="flex items-center gap-3 text-[14px] md:text-[15px] text-slate-400">
                 <Phone className="h-4 w-4 text-primary shrink-0" />
-                <a href={`tel:${SUPPORT_PHONE}`} className="hover:text-white transition-colors truncate font-bold">{SUPPORT_PHONE}</a>
+                <a href={`tel:${SUPPORT_PHONE}`} className="hover:text-white transition-colors font-bold whitespace-nowrap">
+                  {SUPPORT_PHONE}
+                </a>
               </div>
-              <div className="flex items-center gap-3 text-[15px] text-slate-400">
+              <div className="flex items-center gap-3 text-[14px] md:text-[15px] text-slate-400">
                 <Mail className="h-4 w-4 text-primary shrink-0" />
-                <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-white transition-colors truncate font-bold">{SUPPORT_EMAIL}</a>
+                <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-white transition-colors font-bold break-all md:break-normal">
+                  {SUPPORT_EMAIL}
+                </a>
               </div>
             </div>
           </div>
