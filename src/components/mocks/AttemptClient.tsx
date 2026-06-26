@@ -16,6 +16,8 @@ import { Loader2, Play, ShieldCheck, Zap, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
+import { errorEmitter } from "@/firebase/error-emitter";
+import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors";
 import {
   Dialog,
   DialogContent,
@@ -27,8 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Client Hub.
- * FIXED: Standardized ID retrieval and lookup resilience for high-fidelity CBT.
+ * @fileOverview Official Mock Attempt Client Hub v3.0.
+ * FIXED: Non-blocking submission to resolve 10s delay.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -44,7 +46,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const queryId = searchParams.get('id');
     if (queryId) return queryId;
     const pathSegments = pathname.split('/').filter(Boolean);
-    const lastSegment = pathSegments[pathSegments.length - 2]; // Handles /mocks/[id]/attempt
+    const lastSegment = pathSegments[pathSegments.length - 2]; 
     return lastSegment !== 'attempt' ? lastSegment : null;
   }, [pathname, searchParams, propMockId]);
 
@@ -143,57 +145,72 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     return () => clearInterval(interval);
   }, [isInitializing, initError, tick]);
 
-  const handleSubmitFinal = useCallback(async () => {
+  const handleSubmitFinal = useCallback(() => {
     if (!db || isSubmittingFinal || !user || !mockData || !mockId) return;
     setIsSubmittingFinal(true);
     
-    try {
-      let correctCount = 0;
-      let wrongCount = 0;
-      const attemptedCount = Object.keys(answers || {}).length;
+    let correctCount = 0;
+    let wrongCount = 0;
+    const attemptedCount = Object.keys(answers || {}).length;
 
-      const posMarks = Number(mockData.positiveMarks) || 1;
-      const negMarks = Number(mockData.negativeMarks) || 0.25;
+    const posMarks = Number(mockData.positiveMarks) || 1;
+    const negMarks = Number(mockData.negativeMarks) || 0.25;
 
-      questions.forEach((q: any, idx: number) => {
-        const studentAnsIdx = answers?.[idx];
-        if (studentAnsIdx === undefined || studentAnsIdx === null) return;
-        const correctOptIdx = ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer);
-        if (correctOptIdx === studentAnsIdx) correctCount++;
-        else wrongCount++;
+    questions.forEach((q: any, idx: number) => {
+      const studentAnsIdx = answers?.[idx];
+      if (studentAnsIdx === undefined || studentAnsIdx === null) return;
+      const correctOptIdx = ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer);
+      if (correctOptIdx === studentAnsIdx) correctCount++;
+      else wrongCount++;
+    });
+
+    const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
+    const timeTaken = Math.round((Date.now() - startTime) / 1000);
+    const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
+
+    const resultPayload = {
+      userId: user.uid, 
+      userName: profile?.name || 'Aspirant', 
+      userEmail: user.email || "",
+      mockId, 
+      mockTitle: mockData.title || mockTitle,
+      score: parseFloat(rawScore.toFixed(2)),
+      correctCount, wrongCount, attemptedCount,
+      totalQuestions: questions.length, 
+      accuracy, timeTaken, answers: answers || {}, 
+      timestamp: new Date().toISOString(), 
+      createdAt: serverTimestamp(),
+      accessLevel: (mockData.accessLevel || 'FREE').toUpperCase() 
+    };
+
+    const resultRef = doc(db, "results", `${user.uid}_${mockId}`);
+    const attemptRef = doc(db, "attempts", `${user.uid}_${mockId}`);
+
+    // NON-BLOCKING MUTATIONS (Background Sync)
+    setDoc(resultRef, resultPayload, { merge: true })
+      .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: resultRef.path,
+          operation: 'write',
+          requestResourceData: resultPayload,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
       });
 
-      const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
-      const timeTaken = Math.round((Date.now() - startTime) / 1000);
-      const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
-
-      const resultPayload = {
-        userId: user.uid, 
-        userName: profile?.name || 'Aspirant', 
-        userEmail: user.email || "",
-        mockId, 
-        mockTitle: mockData.title || mockTitle,
-        score: parseFloat(rawScore.toFixed(2)),
-        correctCount, wrongCount, attemptedCount,
-        totalQuestions: questions.length, 
-        accuracy, timeTaken, answers: answers || {}, 
-        timestamp: new Date().toISOString(), 
-        createdAt: serverTimestamp(),
-        accessLevel: (mockData.accessLevel || 'FREE').toUpperCase() 
-      };
-
-      const resultRef = doc(db, "results", `${user.uid}_${mockId}`);
-      const attemptRef = doc(db, "attempts", `${user.uid}_${mockId}`);
-      await setDoc(resultRef, resultPayload, { merge: true });
-      await updateDoc(attemptRef, { status: 'COMPLETED', updatedAt: serverTimestamp() });
-      
-      router.replace(`/results/view?id=${mockId}`);
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Submission Error", description: "Could not save results." });
-    } finally {
-      setIsSubmittingFinal(false);
-    }
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime, toast]);
+    updateDoc(attemptRef, { status: 'COMPLETED', updatedAt: serverTimestamp() })
+      .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: attemptRef.path,
+          operation: 'update',
+          requestResourceData: { status: 'COMPLETED' }
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
+    
+    // OPTIMISTIC NAVIGATION
+    router.replace(`/results/view?id=${mockId}`);
+    
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime]);
 
   useEffect(() => {
      if (!isInitializing && !initError && timeLeft === 0 && !isSubmittingFinal) {
