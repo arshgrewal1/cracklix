@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v7.6.
- * FIXED: Type-safe cloneElement and React UMD error resolution.
+ * @fileOverview Search Center v7.7.
+ * FIXED: Explicit React import to resolve UMD global reference error.
  */
 
 export default function SearchPage() {
@@ -183,13 +183,13 @@ function SearchContent() {
   )
 }
 
-function SearchResultItem({ title, category, href, icon }: { title: string, category: string, href: string, icon: React.ReactNode }) {
+function SearchResultItem({ title, category, href, icon }: { title: string, category: string, href: string, icon: ReactElement }) {
    return (
       <Link href={href} className="block active:scale-[0.99] transition-all group">
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
-            <div className="flex items-center gap-4 min-w-0 flex-1 space-y-1">
+            <div className="flex items-center gap-4 min-w-0 flex-1">
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
-                  {icon}
+                  {React.cloneElement(icon, { className: "h-5 w-5" })}
                </div>
                <div className="text-left min-w-0 flex-1 space-y-1">
                   <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>

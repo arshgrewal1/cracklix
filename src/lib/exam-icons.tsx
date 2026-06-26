@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v26.2 (Optimized).
+ * @fileOverview Institutional Branding Engine v26.3 (Optimized).
+ * FIXED: Added missing sizes prop to all fill images.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -77,7 +78,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           src={logoUrl} 
           alt="Official Authority Logo" 
           fill
-          sizes="(max-width: 768px) 100vw, 128px"
+          sizes="(max-width: 768px) 64px, 128px"
           className="object-contain animate-in fade-in duration-500"
           referrerPolicy="no-referrer"
         />

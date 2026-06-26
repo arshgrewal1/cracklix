@@ -17,9 +17,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Hardened Social Share Hub v13.0 (Size Optimized).
- * REDESIGNED: URL points to /install. Dialog scaled for high-fidelity mobile display.
- * FIXED: Overlap and sizing issues in mobile mode as per user feedback.
+ * @fileOverview Hardened Social Share Hub v13.1.
+ * FIXED: Secure clipboard access with try/catch and permission detection.
  */
 export default function ShareButton({ 
   className = "", 
@@ -58,11 +57,15 @@ export default function ShareButton({
 
   const copyToClipboard = async () => {
     try {
+      if (!navigator.clipboard) {
+        throw new Error('Clipboard API not available');
+      }
       await navigator.clipboard.writeText(shareUrl);
       toast({ title: "Link Copied!", description: "Install link saved to clipboard." });
       setIsShareDialogOpen(false);
     } catch (e) {
-      toast({ variant: "destructive", title: "Copy Failed" });
+      console.warn('[CLIPBOARD_ERROR]:', e);
+      toast({ variant: "destructive", title: "Copy Failed", description: "Please copy the URL manually." });
     }
   };
 

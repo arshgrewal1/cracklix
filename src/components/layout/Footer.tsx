@@ -22,8 +22,8 @@ import PLATFORM_VERSION from "@/lib/version";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Compact High-Density Footer v10.2.
- * UPDATED: Integrated direct APK download link and versioning.
+ * @fileOverview Compact High-Density Footer v10.3.
+ * FIXED: Added missing Badge import. Optimized logo image sizes.
  */
 
 export default function Footer() {

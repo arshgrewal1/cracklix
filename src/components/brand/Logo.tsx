@@ -17,8 +17,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix High-Fidelity Brand Identity v70.0.
- * UPDATED: Significantly increased default heights for maximum presence.
+ * @fileOverview Cracklix High-Fidelity Brand Identity v70.1.
+ * FIXED: Added sizes prop for optimized responsive delivery.
  */
 export default function Logo({
   className = "",
@@ -50,14 +50,11 @@ export default function Logo({
       <Image
         src={src}
         alt="Cracklix"
-        width={isIcon ? 200 : 1600}
-        height={isIcon ? 200 : 500}
+        fill
         priority={priority}
+        sizes="(max-width: 768px) 150px, 250px"
         className={cn(
-          "transition-all flex-shrink-0 w-auto object-contain",
-          isIcon 
-            ? "h-14 md:h-20" 
-            : "h-[64px] md:h-[92px]",
+          "transition-all flex-shrink-0 object-contain",
           imgClassName
         )}
       />
@@ -75,8 +72,9 @@ export default function Logo({
            }
         }}
         className={cn(
-          "flex items-center select-none hover:opacity-90 transition-opacity flex-shrink-0",
-          align === 'center' && "w-full justify-center"
+          "flex items-center select-none hover:opacity-90 transition-opacity flex-shrink-0 relative",
+          isIcon ? "h-14 w-14 md:h-20 md:w-20" : "h-[64px] w-[180px] md:h-[92px] md:w-[260px]",
+          align === 'center' && "mx-auto"
         )}
       >
         {content}
@@ -84,5 +82,12 @@ export default function Logo({
     );
   }
 
-  return content;
+  return (
+    <div className={cn(
+      "relative",
+      isIcon ? "h-14 w-14 md:h-20 md:w-20" : "h-[64px] w-[180px] md:h-[92px] md:w-[260px]",
+    )}>
+      {content}
+    </div>
+  );
 }
