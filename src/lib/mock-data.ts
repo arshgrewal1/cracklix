@@ -1,15 +1,15 @@
 import { Exam, MockTest, Question } from "@/types"
 
 /**
- * @fileOverview Mock Data v2.6 - Hardened Types
- * FIXED: Synchronized Exam structure and MockTest relationships.
+ * @fileOverview Mock Data v2.7 - Hardened Types
+ * FIXED: Synchronized Exam structure and MockTest relationships to resolve build blockers.
  */
 
 export const EXAMS: Exam[] = [
   {
     id: "psssb-patwari",
     name: "Revenue Patwari",
-    boardId: "PSSSB",
+    boardId: "psssb",
     categoryId: "punjab-government-exams",
     displayOrder: 1,
     description: "Prepare for Revenue Patwari, Canal Patwari and Ziladar recruitment for Punjab Government departments.",
@@ -19,7 +19,7 @@ export const EXAMS: Exam[] = [
   {
     id: "psssb-clerk",
     name: "Clerk (General/IT/Accounts)",
-    boardId: "PSSSB",
+    boardId: "psssb",
     categoryId: "punjab-government-exams",
     displayOrder: 2,
     description: "Multi-departmental clerk recruitment exams with Punjabi qualifying sections.",
@@ -29,7 +29,7 @@ export const EXAMS: Exam[] = [
   {
     id: "ppsc-pcs",
     name: "Punjab Civil Services (PCS)",
-    boardId: "PPSC",
+    boardId: "ppsc",
     categoryId: "punjab-government-exams",
     displayOrder: 3,
     description: "Higher Class A & B services including Executive, DSP, and Tehsildar posts.",
@@ -55,7 +55,7 @@ export const MOCK_QUESTIONS: Question[] = [
     difficulty: "Easy",
     englishExplanation: "Gurmukhi script is used for writing the Punjabi language.",
     subjectId: "punjabi",
-    boardId: "PSSSB",
+    boardId: "psssb",
     status: "UNUSED",
     usedCount: 0,
     createdAt: null,
@@ -72,7 +72,7 @@ export const MOCK_QUESTIONS: Question[] = [
     difficulty: "Medium",
     englishExplanation: "Mandi Gobindgarh is famous for its steel industry.",
     subjectId: "punjab-gk",
-    boardId: "PSSSB",
+    boardId: "psssb",
     status: "UNUSED",
     usedCount: 0,
     createdAt: null,
@@ -82,8 +82,8 @@ export const MOCK_QUESTIONS: Question[] = [
 
 export const SAMPLE_MOCK: MockTest = {
   id: "mock-punjab-1",
-  boardId: "PSSSB",
-  boardIds: ["PSSSB"],
+  boardId: "psssb",
+  boardIds: ["psssb"],
   examIds: ["psssb-patwari"],
   title: "PSSSB Patwari Full Length Mock 01",
   duration: 120,

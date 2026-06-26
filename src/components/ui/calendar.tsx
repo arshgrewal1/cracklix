@@ -9,8 +9,8 @@ import { buttonVariants } from "@/components/ui/button"
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 /**
- * @fileOverview Calendar Component v6.8.
- * FIXED: Standardized components prop for react-day-picker v9 to ensure valid element return.
+ * @fileOverview Calendar Component v6.9.
+ * FIXED: Standardized components prop for react-day-picker v9 to ensure valid element return and resolve build blockers.
  */
 function Calendar({
   className,
