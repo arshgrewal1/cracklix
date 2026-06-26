@@ -14,8 +14,8 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview High-Density Category Explorer v125.1.
- * UPDATED: Standardized typography to Title Case for better professionalism.
+ * @fileOverview High-Density Category Explorer v125.2.
+ * RESPONSIVE: Increased container width to max-w-[1440px] and gap density.
  */
 
 const STRICT_WHITELIST = [
@@ -39,16 +39,19 @@ export default function FeaturedCategories() {
   }, [rawCategories]);
 
   return (
-    <section className="py-8 md:py-24 bg-white border-t border-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 text-left">
-        <div className="space-y-1 px-1">
-           <h2 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tight leading-none">Choose Category</h2>
-           <p className="text-slate-500 font-medium text-[11px] md:text-lg">Select your recruitment category to see exams</p>
+    <section className="py-10 md:py-24 bg-white border-t border-slate-50 overflow-x-hidden">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8 md:space-y-16 text-left">
+        <div className="space-y-2 px-1">
+           <div className="flex items-center gap-3">
+              <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-inner"><Layers className="h-5 w-5" /></div>
+              <h2 className="text-xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none uppercase">Choose Category</h2>
+           </div>
+           <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl">Select your recruitment category to explore verified exams and preparation hubs.</p>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-10">
           {catLoading ? (
-            Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 md:h-64 w-full rounded-2xl bg-slate-50" />)
+            Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-64 md:h-96 w-full rounded-[2rem] bg-slate-50" />)
           ) : categories.map((cat, idx) => {
             const catBoards = boards?.filter(b => b.categoryId === cat.id) || [];
             const boardLabel = catBoards.length > 0 ? catBoards[0].abbreviation : "Official";
@@ -56,35 +59,36 @@ export default function FeaturedCategories() {
             return (
               <motion.div 
                 key={cat.id} 
-                initial={{ opacity: 0, y: 15 }} 
+                initial={{ opacity: 0, y: 20 }} 
                 whileInView={{ opacity: 1, y: 0 }} 
-                whileHover={{ y: -4 }}
-                whileTap={{ scale: 0.97 }}
+                whileHover={{ y: -6 }}
+                whileTap={{ scale: 0.98 }}
                 viewport={{ once: true }} 
-                transition={{ duration: 0.3 }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
+                className="h-full"
               >
-                 <Link href={`/exams/category/${cat.id}`}>
-                    <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] bg-white group overflow-hidden flex flex-col p-3 md:p-8 h-full min-h-[220px] relative">
+                 <Link href={`/exams/category/${cat.id}`} className="h-full block">
+                    <Card className="border border-slate-100 shadow-sm hover:shadow-3xl transition-all duration-700 rounded-[2rem] md:rounded-[3.5rem] bg-white group overflow-hidden flex flex-col p-5 md:p-14 h-full relative">
                        
-                       <div className="space-y-2 mb-3">
-                          <div className="h-10 w-10 md:h-16 md:w-16 bg-slate-50 rounded-xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform overflow-hidden">
-                             <AuthorityLogo category={cat} size="md" />
+                       <div className="space-y-4 mb-6 md:mb-10">
+                          <div className="h-14 w-14 md:h-24 md:w-24 bg-slate-50 rounded-2xl md:rounded-[2.5rem] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform duration-700 overflow-hidden">
+                             <AuthorityLogo category={cat} size="lg" className="h-full w-full p-2" />
                           </div>
-                          <Badge className="bg-primary/5 text-primary border-none font-bold text-[7px] md:text-[9px] px-2 py-0.5 rounded shadow-sm w-fit">
-                             {boardLabel} Hub
+                          <Badge className="bg-primary/5 text-primary border-none font-black text-[8px] md:text-[11px] px-4 py-1.5 rounded-full shadow-sm w-fit uppercase tracking-widest">
+                             {boardLabel} HUB
                           </Badge>
                        </div>
                        
-                       <div className="space-y-1 flex-1">
-                          <h3 className="text-sm md:text-2xl font-black text-[#0F172A] leading-tight line-clamp-2">{cat.title}</h3>
-                          <p className="text-[10px] md:text-sm text-slate-400 line-clamp-2 leading-snug font-medium mt-1">
-                            {cat.description || "Official government recruitment hub."}
+                       <div className="space-y-2 md:space-y-4 flex-1">
+                          <h3 className="text-lg md:text-3xl font-black text-[#0F172A] leading-tight line-clamp-2 uppercase tracking-tight">{cat.title}</h3>
+                          <p className="text-xs md:text-lg text-slate-400 line-clamp-2 leading-relaxed font-medium">
+                            {cat.description || "Browse official government recruitment and preparation series."}
                           </p>
                        </div>
 
-                       <div className="mt-6 md:mt-10 pt-4 border-t border-slate-50">
-                          <Button variant="ghost" className="w-full h-8 md:h-12 rounded-lg md:rounded-xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[8px] md:text-[10px] tracking-tight gap-2 shadow-md">
-                             Open Hub <ArrowRight className="h-3 w-3" />
+                       <div className="mt-10 md:mt-20 pt-6 border-t border-slate-50">
+                          <Button variant="ghost" className="w-full h-11 md:h-16 rounded-xl md:rounded-2xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[9px] md:text-[12px] tracking-[0.2em] gap-3 shadow-xl uppercase border-none">
+                             Enter Hub <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                           </Button>
                        </div>
                     </Card>

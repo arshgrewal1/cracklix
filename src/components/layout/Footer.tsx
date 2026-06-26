@@ -22,8 +22,8 @@ import PLATFORM_VERSION from "@/lib/version";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Compact High-Density Footer v10.3.
- * FIXED: Added missing Badge import. Optimized logo image sizes.
+ * @fileOverview Compact High-Density Footer v10.4.
+ * OPTIMIZED: Increased container width for desktop widescreen.
  */
 
 export default function Footer() {
@@ -31,7 +31,7 @@ export default function Footer() {
 
   return (
     <footer className="border-t border-slate-50 bg-[#020617] font-body text-white">
-      <div className="mx-auto max-w-7xl px-4 md:px-6 py-10 md:py-24">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 py-12 md:py-24">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-10 md:gap-20 items-start text-left">
 
           {/* Brand Section */}
@@ -39,9 +39,9 @@ export default function Footer() {
             <Logo
               variant="dark"
               align="left"
-              imgClassName="h-[100px] md:h-[140px]"
+              imgClassName="h-[80px] md:h-[120px]"
             />
-            <p className="max-w-[320px] text-[11px] md:text-base leading-relaxed text-slate-400 font-bold uppercase tracking-tight">
+            <p className="max-w-[320px] text-[11px] md:text-[15px] leading-relaxed text-slate-400 font-bold uppercase tracking-tight">
               Punjab's most advanced exam platform for serious aspirants.
             </p>
             <div className="flex items-center gap-4">
@@ -78,11 +78,11 @@ export default function Footer() {
           <div className="col-span-1 lg:col-span-1 space-y-6">
             <h3 className="text-xs md:text-sm font-bold text-primary tracking-tight uppercase">Support</h3>
             <div className="space-y-4">
-              <div className="flex items-center gap-3 text-[11px] md:text-base text-slate-400">
+              <div className="flex items-center gap-3 text-[11px] md:text-[15px] text-slate-400">
                 <Phone className="h-4 w-4 text-primary shrink-0" />
                 <a href={`tel:${SUPPORT_PHONE}`} className="hover:text-white transition-colors truncate font-bold">{SUPPORT_PHONE}</a>
               </div>
-              <div className="flex items-center gap-3 text-[11px] md:text-base text-slate-400">
+              <div className="flex items-center gap-3 text-[11px] md:text-[15px] text-slate-400">
                 <Mail className="h-4 w-4 text-primary shrink-0" />
                 <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-white transition-colors truncate font-bold">{SUPPORT_EMAIL}</a>
               </div>
@@ -93,7 +93,7 @@ export default function Footer() {
       </div>
 
       <div className="border-t border-white/5 bg-black/20 py-6">
-        <div className="mx-auto max-w-7xl px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
              <p className="text-[10px] md:text-[12px] text-slate-500 font-bold uppercase tracking-widest">© {currentYear} Cracklix</p>
              <Badge variant="outline" className="border-white/10 text-slate-500 text-[8px] font-black tracking-widest">V{PLATFORM_VERSION.version}</Badge>
@@ -111,7 +111,7 @@ export default function Footer() {
 function FooterLink({ href, children }: { href: string; children: React.ReactNode; }) {
   return (
     <li>
-      <Link href={href} className="text-[11px] md:text-[15px] text-slate-400 hover:text-white transition-colors font-bold tracking-tight uppercase">
+      <Link href={href} className="text-[11px] md:text-[14px] text-slate-400 hover:text-white transition-colors font-bold tracking-tight uppercase">
         {children}
       </Link>
     </li>

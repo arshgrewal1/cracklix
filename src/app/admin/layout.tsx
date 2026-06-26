@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Refined Admin Layout v13.0.
- * UPDATED: Persistent Sidebar toggle in header for all viewports.
+ * @fileOverview Refined Admin Layout v13.1.
+ * RESPONSIVE: Content area expanded to max-w-full to reduce sidebar-content gap on widescreen.
  */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -87,11 +87,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
       )}>
         <header className="pt-safe border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
-          <div className="h-[80px] md:h-[112px] flex items-center px-3 md:px-10 justify-between">
+          <div className="h-[80px] md:h-[100px] flex items-center px-4 md:px-10 justify-between">
             <div className="flex items-center gap-2 md:gap-4 h-full">
               <button 
                 onClick={toggleSidebar}
-                className="bg-white border border-slate-200 text-slate-700 h-10 w-10 md:h-12 md:w-12 rounded-xl shadow-sm flex items-center justify-center active:scale-95 transition-all hover:border-primary/30"
+                className="bg-white border border-slate-200 text-slate-700 h-10 w-10 md:h-11 md:h-11 rounded-xl shadow-sm flex items-center justify-center active:scale-95 transition-all hover:border-primary/30"
               >
                 <Menu className="w-5 h-5 md:w-6 md:h-6" />
               </button>
@@ -99,7 +99,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Logo
                 variant="light"
                 className="shrink-0"
-                imgClassName="h-[64px] md:h-[92px]"
+                imgClassName="h-[60px] md:h-[80px]"
               />
             </div>
             
@@ -108,7 +108,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <Link href="/">View Site</Link>
                </Button>
                <div className="flex items-center gap-4 md:gap-6 pl-4 md:pl-6 border-l border-slate-100 h-10 md:h-14">
-                  <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-lg md:text-2xl shadow-lg">
+                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-lg md:text-xl shadow-lg">
                     {profile?.name?.[0] || 'A'}
                   </div>
                </div>
@@ -116,8 +116,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-12 w-full max-w-full overflow-x-hidden">
-           <div className="max-w-7xl mx-auto w-full">
+        <main className="flex-1 p-4 md:p-8 lg:p-12 w-full max-w-full overflow-x-hidden">
+           <div className="max-w-full mx-auto w-full">
               {children}
            </div>
         </main>

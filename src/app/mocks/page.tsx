@@ -16,8 +16,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Exam Hub v18.0 (Branded).
- * UPDATED: Integrated branded Mock Test logo into header.
+ * @fileOverview High-Density Exam Hub v18.1.
+ * RESPONSIVE: Increased container width and improved grid density for PC.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -58,23 +58,23 @@ export default function MocksDiscoveryPage() {
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body text-left">
       <Navbar />
       <main className="flex-1">
-        <section className="bg-white border-b border-slate-100 py-6 md:py-16">
-          <div className="container mx-auto px-4 max-w-7xl">
-            <div className="space-y-1.5 md:space-y-4 px-1">
+        <section className="bg-white border-b border-slate-100 py-10 md:py-24">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-[1440px]">
+            <div className="space-y-4">
                <div className="flex items-center gap-2">
                  <AuthorityLogo boardId="mock-test" size="sm" className="bg-transparent shadow-none p-0" />
-                 <span className="text-[9px] md:text-xs font-black text-slate-400 tracking-widest uppercase">Exam Hub</span>
+                 <span className="text-[10px] md:text-sm font-black text-slate-400 tracking-widest uppercase">Verified Hub</span>
                </div>
-               <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] leading-tight tracking-tight uppercase">Exam Hub</h1>
-               <p className="text-slate-500 font-medium text-[11px] md:text-xl max-w-2xl leading-tight">Verified authority boards and mock tests.</p>
+               <h1 className="text-3xl md:text-5xl lg:text-7xl font-black text-[#0F172A] leading-tight tracking-tight uppercase">Exam Hub</h1>
+               <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-3xl leading-tight">Access verified authority boards and premium mock tests for all state exams.</p>
             </div>
           </div>
         </section>
 
-        <section className="container mx-auto px-3 md:px-6 py-6 md:py-16 max-w-7xl">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
+        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-24 max-w-[1440px]">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-10">
              {catLoading ? (
-               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-40 md:h-80 w-full rounded-xl bg-white" />)
+               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 md:h-96 w-full rounded-[2rem] bg-white" />)
              ) : categories.map((cat) => {
                 const catExams = exams?.filter(e => e.categoryId === cat.id) || [];
                 const catExamIds = catExams.map(e => e.id);
@@ -85,21 +85,21 @@ export default function MocksDiscoveryPage() {
 
                 return (
                   <Link key={cat.id} href={`/exams/category/${cat.id}`}>
-                     <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-xl md:rounded-[2.5rem] bg-white flex flex-col h-full border border-slate-100 p-3 md:p-8">
-                        <div className="flex justify-between items-start mb-4 md:mb-8">
-                           <AuthorityLogo category={cat} size="sm" className="md:w-16 md:h-16 bg-slate-50 rounded-lg md:rounded-2xl group-hover:scale-105 transition-transform shadow-inner" />
-                           <Badge className="bg-[#0F172A] text-white border-none text-[6px] md:text-[8px] font-black uppercase px-2 py-0.5 rounded shadow-sm">BOARD</Badge>
+                     <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] md:rounded-[3rem] bg-white flex flex-col h-full border border-slate-100 p-5 md:p-10 group">
+                        <div className="flex justify-between items-start mb-6 md:mb-12">
+                           <AuthorityLogo category={cat} size="sm" className="w-12 h-12 md:w-20 md:h-20 bg-slate-50 rounded-xl md:rounded-[2rem] group-hover:scale-105 transition-transform shadow-inner" />
+                           <Badge className="bg-[#0F172A] text-white border-none text-[7px] md:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-sm">VERIFIED</Badge>
                         </div>
-                        <h3 className="text-[12px] md:text-[24px] font-black leading-tight tracking-tight text-[#0F172A] group-hover:text-primary transition-colors flex-1 mb-2 md:mb-4">{cat.title}</h3>
+                        <h3 className="text-sm md:text-2xl xl:text-3xl font-black leading-tight tracking-tight text-[#0F172A] group-hover:text-primary transition-colors flex-1 mb-4 md:mb-8 uppercase">{cat.title}</h3>
                         
-                        <div className="space-y-1 md:space-y-2 mt-auto">
-                           <MetricBlock label="Exams" val={catExams.length} icon={BookOpen} />
-                           {catMocksCount > 0 && <MetricBlock label="Tests" val={catMocksCount} icon={Zap} />}
+                        <div className="space-y-2 md:space-y-4 mt-auto">
+                           <MetricBlock label="Active Verticals" val={catExams.length} icon={BookOpen} />
+                           {catMocksCount > 0 && <MetricBlock label="Practice Series" val={catMocksCount} icon={Zap} />}
                         </div>
 
-                        <div className="mt-4 md:mt-10 pt-3 border-t border-slate-50">
-                           <Button variant="ghost" className="w-full h-8 md:h-12 rounded-lg md:rounded-xl bg-[#0F172A] text-white group-hover:bg-primary transition-all shadow-md font-black text-[8px] md:text-xs tracking-widest uppercase border-none gap-2">
-                              Explore <ChevronRight className="h-3 w-3" />
+                        <div className="mt-8 md:mt-16 pt-4 border-t border-slate-50">
+                           <Button variant="ghost" className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl bg-[#0F172A] text-white group-hover:bg-primary transition-all shadow-md font-black text-[9px] md:text-[11px] tracking-widest uppercase border-none gap-3">
+                              Explore Hub <ChevronRight className="h-4 w-4" />
                            </Button>
                         </div>
                      </Card>
@@ -116,10 +116,10 @@ export default function MocksDiscoveryPage() {
 
 function MetricBlock({ label, val, icon: Icon }: any) {
    return (
-      <div className="flex items-center gap-1.5 text-slate-500 font-bold text-[8px] md:text-xs uppercase">
-         <Icon className="h-3 w-3 text-primary/50" />
+      <div className="flex items-center gap-2.5 text-slate-500 font-bold text-[9px] md:text-[13px] uppercase">
+         <Icon className="h-4 w-4 md:h-5 md:w-5 text-primary/50" />
          <span className="text-[#0F172A] font-black tabular-nums">{val}</span>
-         <span className="text-[7px] tracking-tight">{label}</span>
+         <span className="text-[8px] md:text-[11px] tracking-tight">{label}</span>
       </div>
    )
 }
