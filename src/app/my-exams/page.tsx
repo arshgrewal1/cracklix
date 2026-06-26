@@ -17,9 +17,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Institutional My Exams Hub v19.0.
- * UPDATED: Synchronized card layout with Latest Mocks (Centered).
- * FIXED: Removed black button background and optimized icon container.
+ * @fileOverview Institutional My Exams Hub v20.0.
+ * FIXED: Automatic cleanup of orphan pinned exams.
  */
 
 export default function MyExamsPage() {
@@ -28,19 +27,40 @@ export default function MyExamsPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [unpinningId, setUnpinningId] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (!userLoading && !user) router.push("/login?returnUrl=/my-exams")
-  }, [user, userLoading, router])
+    setMounted(true)
+  }, [])
 
-  const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db])
-  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db])
-  const pyqsQuery = useMemo(() => (db ? collection(db, "pyqs") : null), [db])
+  useEffect(() => {
+    if (!userLoading && !user && mounted) router.push("/login?returnUrl=/my-exams")
+  }, [user, userLoading, router, mounted])
+
+  const examsQuery = useMemo(() => (db && mounted ? collection(db, "exams") : null), [db, mounted])
+  const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted])
+  const pyqsQuery = useMemo(() => (db && mounted ? collection(db, "pyqs") : null), [db, mounted])
   
   const { data: allExams, loading: examsLoading } = useCollection<any>(examsQuery)
   const { data: mocks } = useCollection<any>(mocksQuery)
   const { data: pyqs } = useCollection<any>(pyqsQuery)
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
+
+  // ORPHAN PIN CLEANUP
+  useEffect(() => {
+     if (!examsLoading && allExams && profile?.pinnedExams && db && user) {
+        const validExamIds = new Set(allExams.map(e => e.id));
+        const orphans = profile.pinnedExams.filter(id => !validExamIds.has(id));
+        
+        if (orphans.length > 0) {
+           console.log(`[AUDIT] Found ${orphans.length} stale pinned exams. Cleaning node...`);
+           updateDoc(doc(db, "users", user.uid), {
+              pinnedExams: profile.pinnedExams.filter(id => validExamIds.has(id)),
+              updatedAt: serverTimestamp()
+           }).catch(e => console.error("[AUDIT_FAILURE]:", e));
+        }
+     }
+  }, [allExams, profile, examsLoading, db, user]);
 
   const statsMap = useMemo(() => {
     const map: Record<string, any> = {};
@@ -78,7 +98,7 @@ export default function MyExamsPage() {
     } finally { setUnpinningId(null); }
   };
 
-  if (userLoading) return <div className="h-screen flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>
+  if (userLoading || !mounted) return <div className="h-screen flex items-center justify-center bg-white"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body pb-safe text-left">
@@ -101,9 +121,8 @@ export default function MyExamsPage() {
               const board = boards?.find((b: any) => b.id === exam.boardId || b.abbreviation === exam.boardId);
               
               return (
-               <Card key={exam.id} onClick={() => router.push(`/exams/view?id=${exam.id}`)} className="border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] bg-white p-6 md:p-10 flex flex-col items-center text-center relative group cursor-pointer">
+               <Card key={exam.id} onClick={() => router.push(`/exams/view?id=${exam.id}`)} className="border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-2rem md:rounded-[2.5rem] bg-white p-6 md:p-10 flex flex-col items-center text-center relative group cursor-pointer">
                   
-                  {/* UNPIN BUTTON */}
                   <button 
                     onClick={(e) => { e.stopPropagation(); handleUnpin(exam.id); }} 
                     disabled={unpinningId === exam.id} 

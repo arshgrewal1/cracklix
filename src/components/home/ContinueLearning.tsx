@@ -2,23 +2,28 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useUser, useCollection, useFirestore } from '@/firebase';
-import { collection, query, where, limit, orderBy } from 'firebase/firestore';
+import { collection, query, where, limit, orderBy, doc, deleteDoc } from 'firebase/firestore';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Zap, Trophy, Target, Star, GraduationCap, ChevronRight } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
+import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview "My Exams" Hub v12.5.
+ * @fileOverview "My Exams" Hub v12.6.
+ * FIXED: Silent orphan cleanup for stale records.
  */
 
 export default function ContinueLearning() {
   const { user, profile } = useUser();
   const db = useFirestore();
+  const router = useRouter();
+  const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -35,23 +40,39 @@ export default function ContinueLearning() {
     return collection(db, "exams");
   }, [db, mounted]);
 
+  const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]);
+
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery);
   const { data: allExams, loading: examsLoading } = useCollection<any>(examsQuery);
+  const { data: validMocks, loading: mocksLoading } = useCollection<any>(mocksQuery);
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
 
   const recentAttempts = useMemo(() => {
-    if (!rawResults || rawResults.length === 0) return []
-    return [...rawResults].sort((a, b) => {
-       const timeA = new Date(a.timestamp || 0).getTime();
-       const timeB = new Date(b.timestamp || 0).getTime();
-       return timeB - timeA;
-    }).slice(0, 2);
-  }, [rawResults]);
+    if (!rawResults || rawResults.length === 0 || !validMocks) return []
+    const validMockIds = new Set(validMocks.map(m => m.id));
+    
+    return [...rawResults]
+      .filter(r => validMockIds.has(r.mockId))
+      .sort((a, b) => {
+        const timeA = new Date(a.timestamp || 0).getTime();
+        const timeB = new Date(b.timestamp || 0).getTime();
+        return timeB - timeA;
+      }).slice(0, 2);
+  }, [rawResults, validMocks]);
 
   const pinnedExams = useMemo(() => {
     if (!allExams || !profile?.pinnedExams) return [];
     return (allExams as any[]).filter((e: any) => profile.pinnedExams?.includes(e.id)).slice(0, 3);
   }, [allExams, profile]);
+
+  const handleReviewAction = (mockId: string) => {
+     const isValid = validMocks?.some(m => m.id === mockId);
+     if (!isValid) {
+        toast({ variant: "destructive", title: "Record Audit", description: "Node archived silently." });
+        return;
+     }
+     router.push(`/results/view?id=${mockId}`);
+  };
 
   if (!mounted || !user) return null;
 
@@ -69,7 +90,7 @@ export default function ContinueLearning() {
               <h2 className="text-xl md:text-4xl font-headline font-black text-[#0F172A] tracking-tight leading-none">My Progress</h2>
            </div>
            <Button asChild variant="ghost" className="text-primary font-black text-[9px] md:text-xs tracking-widest gap-2">
-              <Link href="/my-exams">View All <ChevronRight className="h-3 w-3" /></Link>
+              <Link href="/my-exams">View All <ChevronRight className="h-4 w-4" /></Link>
            </Button>
         </div>
 
@@ -80,7 +101,7 @@ export default function ContinueLearning() {
                  <p className="text-[10px] md:text-xs font-black tracking-widest text-slate-400">Continue Learning</p>
               </div>
               <div className="grid grid-cols-1 gap-4 md:gap-6">
-                 {resultsLoading ? (
+                 {resultsLoading || mocksLoading ? (
                     Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-[2.5rem] bg-slate-50" />)
                  ) : recentAttempts.length > 0 ? (
                     recentAttempts.map((res: any) => (
@@ -95,8 +116,8 @@ export default function ContinueLearning() {
                             <div className="flex-1 min-w-0">
                                 <p className="text-primary font-black text-[9px] tracking-[0.4em] mb-1">Score: {res.score}</p>
                                 <h3 className="text-base md:text-xl font-black text-white truncate">{res.mockTitle}</h3>
-                                <Button asChild className="h-11 md:h-12 mt-6 px-8 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] tracking-widest rounded-full transition-all active:scale-95 border-none shadow-lg">
-                                  <Link href={`/results/${res.mockId}`}>Review Test</Link>
+                                <Button onClick={() => handleReviewAction(res.mockId)} className="h-11 md:h-12 mt-6 px-8 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] tracking-widest rounded-full transition-all active:scale-95 border-none shadow-lg">
+                                  Review Test
                                 </Button>
                             </div>
                         </div>
@@ -123,7 +144,7 @@ export default function ContinueLearning() {
                        const board = boards?.find((b: any) => b.id === exam.boardId || b.abbreviation === exam.boardId);
                        
                        return (
-                          <Link key={exam.id} href={`/exams/${exam.id}`}>
+                          <Link key={exam.id} href={`/exams/view?id=${exam.id}`}>
                              <div className="flex items-center justify-between p-4 bg-white rounded-[2rem] border border-slate-100 shadow-sm hover:shadow-xl hover:translate-x-1 transition-all group">
                                 <div className="flex items-center gap-4 min-w-0">
                                    <div className="shrink-0 group-hover:scale-105 transition-transform">

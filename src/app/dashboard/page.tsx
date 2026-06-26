@@ -4,7 +4,7 @@ import React, { useMemo, useState, useEffect, isValidElement, cloneElement, Reac
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore } from "@/firebase"
-import { collection, query, where, limit } from "firebase/firestore"
+import { collection, query, where, limit, doc, deleteDoc, serverTimestamp } from "firebase/firestore"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -35,8 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Student Home - Standardized PWA v44.0.
- * UPDATED: Added greeting toast on first entry.
+ * @fileOverview Student Home - Standardized PWA v45.0.
+ * FIXED: Implemented automatic orphan cleanup for stale test results.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -102,17 +102,43 @@ export default function StudentDashboard() {
     return () => clearInterval(interval);
   }, [profile?.passExpiresAt]);
 
+  // Registry & Progress Hooks
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null
-    return query(collection(db, "results"), where("userId", "==", user.uid), limit(50))
+    return query(collection(db, "results"), where("userId", "==", user.uid))
   }, [db, user, mounted])
 
+  const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]);
+
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
+  const { data: validMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
+
+  // ORPHAN CLEANUP LOGIC
+  useEffect(() => {
+    if (!resultsLoading && !mocksLoading && rawResults && validMocks && db) {
+      const validMockIds = new Set(validMocks.map(m => m.id));
+      const orphans = rawResults.filter(r => !validMockIds.has(r.mockId));
+      
+      if (orphans.length > 0) {
+        console.log(`[AUDIT] Found ${orphans.length} orphan result nodes. Liquidating...`);
+        orphans.forEach(async (orphan) => {
+          try {
+            await deleteDoc(doc(db, "results", orphan.id));
+          } catch (e) {
+            console.error("[AUDIT_FAILURE]:", e);
+          }
+        });
+      }
+    }
+  }, [rawResults, validMocks, resultsLoading, mocksLoading, db]);
 
   const stats = useMemo(() => {
-    if (!rawResults || rawResults.length === 0) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0h", list: [] }
+    if (!rawResults || rawResults.length === 0 || !validMocks) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0h", list: [] }
     
-    const sorted = [...rawResults].sort((a, b) => {
+    const validMockIds = new Set(validMocks.map(m => m.id));
+    const filtered = rawResults.filter(r => validMockIds.has(r.mockId));
+
+    const sorted = [...filtered].sort((a, b) => {
        const timeA = new Date(a.timestamp || 0).getTime();
        const timeB = new Date(b.timestamp || 0).getTime();
        return timeB - timeA;
@@ -136,7 +162,20 @@ export default function StudentDashboard() {
     const readiness = Math.min(100, Math.round((avgAcc * 0.7) + (Math.min(total, 30) * 1)))
 
     return { total, avgAccuracy: avgAcc, streak: uniqueDays.size, readiness, hours: timeFormattedValue, list: sorted.slice(0, 8) }
-  }, [rawResults])
+  }, [rawResults, validMocks])
+
+  const handleReviewClick = (mockId: string) => {
+    const isValid = validMocks?.some(m => m.id === mockId);
+    if (!isValid) {
+      toast({ 
+        variant: "destructive", 
+        title: "Test Unavailable", 
+        description: "This test has been removed from the registry. Refreshing your list." 
+      });
+      return;
+    }
+    router.push(`/results/view?id=${mockId}`);
+  };
 
   if (!mounted || authLoading || (user && !profile)) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
@@ -224,13 +263,13 @@ export default function StudentDashboard() {
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="divide-y divide-slate-50">
-                      {resultsLoading ? (
+                      {resultsLoading || mocksLoading ? (
                           Array.from({ length: 3 }).map((_, i) => (
                             <div key={i} className="p-6 md:p-8 flex gap-4 items-center"><Skeleton className="h-10 w-10 rounded-lg bg-slate-50" /><div className="flex-1 space-y-1.5"><Skeleton className="h-3 w-1/3 bg-slate-50" /><Skeleton className="h-2 w-1/4 bg-slate-50" /></div></div>
                           ))
                       ) : stats.list.length > 0 ? (
                           stats.list.map((r: any) => (
-                            <Link key={r.id} href={`/results/view?id=${r.mockId}`} className="p-6 md:p-8 flex items-center justify-between hover:bg-slate-50/50 transition-all group">
+                            <div key={r.id} onClick={() => handleReviewClick(r.mockId)} className="p-6 md:p-8 flex items-center justify-between hover:bg-slate-50/50 transition-all group cursor-pointer">
                                 <div className="flex items-center gap-4 md:gap-6 min-w-0 flex-1">
                                   <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
                                       <Zap className="h-5 w-5 text-primary" />
@@ -246,7 +285,7 @@ export default function StudentDashboard() {
                                   </div>
                                 </div>
                                 <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-primary transition-all group-hover:translate-x-1" />
-                            </Link>
+                            </div>
                           ))
                       ) : (
                           <div className="p-12 text-center opacity-30 italic text-[14px] font-bold text-slate-400">No tests taken yet.</div>
