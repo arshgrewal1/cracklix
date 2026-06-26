@@ -13,8 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview Featured Categories Hub v28.0.
- * FIXED: Card width constrained to narrow portrait pills to match Hero.
+ * @fileOverview Featured Categories Hub v29.0.
+ * FIXED: Reduced vertical white space while maintaining narrow portrait width.
  */
 
 const STRICT_WHITELIST = [
@@ -56,7 +56,7 @@ export default function FeaturedCategories() {
             Array.from({ length: 4 }).map((_, i) => (
               <Skeleton 
                 key={i} 
-                className="h-[300px] md:h-[500px] w-full max-w-[180px] md:max-w-[340px] mx-auto rounded-[2.5rem] md:rounded-[4rem] bg-slate-50" 
+                className="h-[220px] md:h-[350px] w-full max-w-[180px] md:max-w-[340px] mx-auto rounded-[2rem] md:rounded-[3rem] bg-slate-50" 
               />
             ))
           ) : categories.map((cat, idx) => {
@@ -73,29 +73,29 @@ export default function FeaturedCategories() {
                 className="flex flex-col h-full"
               >
                  <Link href={`/exams/category/${cat.id}`} className="h-full block">
-                    <Card className="w-full max-w-[180px] md:max-w-[340px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] md:rounded-[4rem] bg-white group overflow-hidden flex flex-col p-4 md:p-14 h-full min-h-[300px] md:min-h-[500px]">
+                    <Card className="w-full max-w-[180px] md:max-w-[340px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2rem] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-4 md:p-8 h-full min-h-[220px] md:min-h-[350px] text-center">
                        
-                       <div className="flex justify-center mb-6 md:mb-16 shrink-0">
-                          <div className="h-11 w-11 md:h-28 md:w-28 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
+                       <div className="flex justify-center mb-4 md:mb-10 shrink-0">
+                          <div className="h-10 w-10 md:h-24 md:w-24 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
                              <AuthorityLogo category={cat} size="lg" className="bg-transparent shadow-none border-none p-0 h-full w-full" />
                           </div>
                        </div>
 
-                       <div className="flex-1 flex flex-col justify-start text-center min-w-0">
-                          <div className="space-y-3 md:space-y-6">
-                             <div className="flex justify-center h-4 md:h-7">
-                                <Badge className="bg-primary/5 text-primary border-none font-bold text-[11px] px-3 py-1 rounded-full shadow-sm w-fit tracking-tight">
+                       <div className="flex-1 flex flex-col justify-start min-w-0">
+                          <div className="space-y-2 md:space-y-4">
+                             <div className="flex justify-center h-4 md:h-6">
+                                <Badge className="bg-primary/5 text-primary border-none font-bold text-[10px] px-2 py-0.5 rounded-full shadow-sm w-fit tracking-tight">
                                    {boardLabel} Hub
                                 </Badge>
                              </div>
-                             <h3 className="text-[16px] md:text-[clamp(18px,2vw,28px)] font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
+                             <h3 className="text-[14px] md:text-[clamp(16px,2vw,24px)] font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
                                 {cat.title}
                              </h3>
                           </div>
                        </div>
 
-                       <div className="mt-auto shrink-0 pt-6 md:pt-12">
-                          <Button variant="ghost" className="w-full h-11 md:h-16 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[10px] md:text-[13px] tracking-widest uppercase shadow-md border-none active:scale-95 gap-2">
+                       <div className="mt-auto shrink-0 pt-4 md:pt-8">
+                          <Button variant="ghost" className="w-full h-10 md:h-14 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[10px] md:text-[13px] tracking-widest uppercase shadow-md border-none active:scale-95 gap-2">
                              Open
                              <ChevronRight className="h-4 w-4" />
                           </Button>

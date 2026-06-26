@@ -23,9 +23,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Fidelity Hero Hub v95.0.
- * FIXED: Card width constrained to narrow portrait pills.
- * UPDATED: Premium CTA button design.
+ * @fileOverview High-Fidelity Hero Hub v96.0.
+ * FIXED: Reduced vertical space in action cards while keeping fixed narrow width.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -163,14 +162,14 @@ export default function Hero() {
 function QuickActionCard({ boardId, label, href }: { boardId: string, label: string, href: string }) {
   return (
     <Link href={href} className="block group h-full">
-      <Card className="w-full max-w-[180px] md:max-w-[340px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] md:rounded-[4rem] bg-white group overflow-hidden flex flex-col p-4 md:p-14 lg:p-16 h-full min-h-[280px] md:min-h-[480px] text-center">
-        <div className="flex justify-center mb-6 md:mb-16 shrink-0">
-          <div className="h-12 w-12 md:h-28 md:w-28 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform overflow-hidden">
+      <Card className="w-full max-w-[180px] md:max-w-[340px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2rem] md:rounded-[3.5rem] bg-white group overflow-hidden flex flex-col p-4 md:p-8 h-full min-h-[160px] md:min-h-[280px] text-center">
+        <div className="flex justify-center mb-4 md:mb-10 shrink-0">
+          <div className="h-10 w-10 md:h-20 md:w-20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform overflow-hidden">
              <AuthorityLogo boardId={boardId} size="lg" className="bg-transparent shadow-none border-none p-0 h-full w-full" />
           </div>
         </div>
-        <div className="flex-1 flex flex-col justify-start min-w-0">
-           <h3 className="text-[16px] md:text-[clamp(18px,2vw,32px)] font-bold tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
+        <div className="flex-1 flex flex-col justify-center min-w-0">
+           <h3 className="text-[14px] md:text-[clamp(16px,1.8vw,26px)] font-bold tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
               {label}
            </h3>
         </div>

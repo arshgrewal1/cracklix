@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Latest Mock Tests Hub v22.0.
- * FIXED: Card width constrained to narrow portrait pills.
+ * @fileOverview Latest Mock Tests Hub v23.0.
+ * FIXED: Reduced vertical white space in cards.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -55,7 +55,7 @@ export default function LatestMocks() {
         
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-12">
           {loading ? (
-             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[300px] md:h-[500px] w-full max-w-[180px] md:max-w-[340px] mx-auto rounded-[2.5rem] md:rounded-[4rem] bg-slate-50" />)
+             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[220px] md:h-[350px] w-full max-w-[180px] md:max-w-[340px] mx-auto rounded-[2rem] md:rounded-[3rem] bg-slate-50" />)
           ) : mocks.length > 0 ? mocks.map((mock, i) => {
             const tier = (mock.accessLevel || 'FREE').toUpperCase();
             const isPremium = tier === 'PREMIUM';
@@ -71,43 +71,43 @@ export default function LatestMocks() {
                 transition={{ duration: 0.4, delay: i * 0.05 }} 
                 className="flex flex-col h-full"
               >
-                <Card className="w-full max-w-[180px] md:max-w-[340px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2.5rem] md:rounded-[4rem] bg-white p-4 md:p-14 h-full min-h-[300px] md:min-h-[500px] relative overflow-hidden group">
+                <Card className="w-full max-w-[180px] md:max-w-[340px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[2rem] md:rounded-[3rem] bg-white p-4 md:p-8 h-full min-h-[220px] md:min-h-[350px] relative overflow-hidden group text-center flex flex-col">
                   
-                  <div className="flex justify-center mb-6 md:mb-16 shrink-0">
-                    <div className="h-10 w-10 md:h-28 md:w-28 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 overflow-hidden">
+                  <div className="flex justify-center mb-4 md:mb-10 shrink-0">
+                    <div className="h-10 w-10 md:h-24 md:w-24 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform duration-500 overflow-hidden">
                         <AuthorityLogo boardId={boardId} size="lg" className="bg-transparent shadow-none border-none p-0 h-full w-full" />
                     </div>
                   </div>
 
-                  <div className="flex-1 flex flex-col justify-start text-center min-w-0">
-                    <h3 className="text-[15px] md:text-[clamp(18px,2vw,28px)] font-bold leading-tight tracking-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors mb-4 md:mb-10">
+                  <div className="flex-1 flex flex-col justify-center min-w-0">
+                    <h3 className="text-[14px] md:text-[clamp(16px,2vw,24px)] font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors mb-2 md:mb-6 line-clamp-2">
                         {mock.title}
                     </h3>
                     
-                    <div className="mt-auto md:mt-0 space-y-4 md:space-y-8">
-                       <div className="flex flex-wrap items-center justify-center gap-3 md:gap-10 text-[11px] md:text-[clamp(10px,1.2vw,14px)] font-bold text-slate-400 tracking-tight">
-                          <span className="flex items-center gap-1.5"><BookOpen className="h-4 w-4 md:h-5 md:w-5 text-primary" /> {mock.totalQuestions} Qs</span>
-                          <span className="flex items-center gap-1.5"><Clock className="h-4 w-4 md:h-5 md:w-5 text-primary" /> {mock.duration}m</span>
+                    <div className="mt-auto md:mt-0 space-y-2 md:space-y-4">
+                       <div className="flex flex-wrap items-center justify-center gap-2 md:gap-6 text-[9px] md:text-[12px] font-bold text-slate-400 tracking-tight">
+                          <span className="flex items-center gap-1"><BookOpen className="h-3 w-3 md:h-4 md:w-4 text-primary" /> {mock.totalQuestions} Qs</span>
+                          <span className="flex items-center gap-1"><Clock className="h-3 w-3 md:h-4 md:w-4 text-primary" /> {mock.duration}m</span>
                        </div>
 
                        {isPremium && (
-                         <div className="flex justify-center h-4 md:h-7">
-                            <Badge className="bg-amber-50 text-amber-600 border-none text-[11px] font-bold px-4 py-1 rounded-full shadow-sm flex items-center gap-2 tracking-tight">
-                               <Lock className="h-3 w-3" /> Premium
+                         <div className="flex justify-center h-4 md:h-6">
+                            <Badge className="bg-amber-50 text-amber-600 border-none text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1 tracking-tight">
+                               <Lock className="h-2.5 w-2.5" /> Premium
                             </Badge>
                          </div>
                        )}
                     </div>
                   </div>
 
-                  <div className="mt-auto pt-6 md:pt-14 shrink-0">
+                  <div className="mt-auto pt-4 md:pt-10 shrink-0">
                     <Button asChild className={cn(
-                      "w-full h-11 md:h-18 rounded-full font-black text-[13px] md:text-[15px] shadow-lg border-none transition-all active:scale-95 gap-2 md:gap-4 uppercase tracking-widest", 
+                      "w-full h-10 md:h-14 rounded-full font-black text-[11px] md:text-[13px] shadow-lg border-none transition-all active:scale-95 gap-2 uppercase tracking-widest", 
                       locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] text-white"
                     )}>
                         <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`} className="flex items-center justify-center">
                           {locked ? 'Unlock' : 'Start'}
-                          <ChevronRight className="h-4 w-4 md:h-6 md:w-6" />
+                          <ChevronRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
                         </Link>
                     </Button>
                   </div>
