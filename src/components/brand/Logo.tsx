@@ -17,8 +17,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix High-Fidelity Brand Identity v70.1.
- * FIXED: Added sizes prop for optimized responsive delivery.
+ * @fileOverview Cracklix High-Fidelity Brand Identity v70.2.
+ * FIXED: Explicitly set parent container height for images with "fill" to avoid Next.js warnings.
  */
 export default function Logo({
   className = "",
@@ -42,7 +42,7 @@ export default function Logo({
 
   const content = (
     <div className={cn(
-      "relative shrink-0 flex items-center transition-all duration-300",
+      "relative h-full w-full flex items-center transition-all duration-300",
       align === 'center' && "mx-auto justify-center",
       align === 'right' && "justify-end",
       className
@@ -52,7 +52,7 @@ export default function Logo({
         alt="Cracklix"
         fill
         priority={priority}
-        sizes="(max-width: 768px) 150px, 250px"
+        sizes={isIcon ? "(max-width: 768px) 56px, 80px" : "(max-width: 768px) 180px, 260px"}
         className={cn(
           "transition-all flex-shrink-0 object-contain",
           imgClassName

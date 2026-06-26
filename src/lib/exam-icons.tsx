@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v26.3 (Optimized).
- * FIXED: Added missing sizes prop to all fill images.
+ * @fileOverview Institutional Branding Engine v26.4 (Performance Hardened).
+ * FIXED: Optimized sizes prop for all Authority Icons.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -13,6 +13,7 @@ const CANONICAL_BOARD_LOGOS: Record<string, string> = {
   'psssb': '/logos/boards/psssb.png',
   'punjab-police': '/logos/boards/punjab-police.png',
   'teaching-hub': '/logos/boards/education-board.png',
+  'pscl': '/logos/boards/pscb.png',
   'pspcl': '/logos/boards/pspcl.png',
   'pstcl': '/logos/boards/pstcl.png',
   'bfuhs': '/logos/boards/bfuhs.png',
@@ -78,7 +79,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           src={logoUrl} 
           alt="Official Authority Logo" 
           fill
-          sizes="(max-width: 768px) 64px, 128px"
+          sizes={size === 'sm' ? '40px' : size === 'md' ? '56px' : size === 'lg' ? '96px' : '128px'}
           className="object-contain animate-in fade-in duration-500"
           referrerPolicy="no-referrer"
         />
