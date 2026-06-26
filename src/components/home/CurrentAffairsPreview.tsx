@@ -3,20 +3,15 @@
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, where, limit } from 'firebase/firestore';
-import { Calendar, ChevronRight, Zap } from 'lucide-react';
+import { Calendar, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-/**
- * @fileOverview Universal Responsive Current Affairs Preview v11.0.
- * UPDATED: Matches Latest Mocks high-density grid and functional alignment.
- */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
   
@@ -72,20 +67,20 @@ export default function CurrentAffairsPreview() {
                        </div>
 
                        <div className="flex-1 flex flex-col justify-start text-center min-w-0">
-                          <h3 className="text-[clamp(14px,1.7vw,24px)] font-black leading-tight tracking-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors mb-3 md:mb-8 uppercase">
+                          <h3 className="text-[clamp(14px,1.7vw,24px)] font-black leading-tight tracking-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors mb-3 md:mb-8">
                              {item.title}
                           </h3>
                           
                           <div className="mt-auto md:mt-0 space-y-3 md:space-y-5">
-                             <div className="flex flex-wrap items-center justify-center gap-3 md:gap-8 text-[clamp(8px,1vw,12px)] font-black text-slate-400 uppercase tracking-widest">
+                             <div className="flex flex-wrap items-center justify-center gap-3 md:gap-8 text-[clamp(8px,1vw,12px)] font-bold text-slate-400 tracking-tight">
                                 <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 md:h-5 md:w-5 text-primary" /> {item.month}</span>
-                                <span className="flex items-center gap-1.5 uppercase">Bilingual</span>
+                                <span className="flex items-center gap-1.5">Bilingual</span>
                              </div>
                           </div>
                        </div>
 
                        <div className="mt-auto pt-5 md:pt-10 shrink-0">
-                          <Button variant="ghost" className="w-full h-11 md:h-16 lg:h-18 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[clamp(10px,1.1vw,14px)] tracking-widest shadow-lg border-none active:scale-95 gap-2 md:gap-3 uppercase">
+                          <Button variant="ghost" className="w-full h-11 md:h-16 lg:h-18 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[clamp(10px,1.1vw,14px)] tracking-tight shadow-lg border-none active:scale-95 gap-2 md:gap-3">
                              Start Test
                              <ChevronRight className="h-4 w-4 md:h-5 md:w-5" />
                           </Button>

@@ -8,11 +8,6 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 
-/**
- * @fileOverview Universal Responsive Metrics Hub v15.0.
- * SCALING: Mobile (2x2 Grid) -> Desktop (4 items in a row).
- */
-
 const formatCompact = (num: number) => {
   if (num === undefined || num === null) return null;
   if (num === 0) return "0";
@@ -78,11 +73,11 @@ export default function StatsBar() {
                 {loading && !stats ? (
                   <Skeleton className="h-6 md:h-20 w-16 md:w-48 bg-slate-50 rounded-xl mx-auto" />
                 ) : (
-                  <span className="text-[22px] md:text-5xl lg:text-7xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none antialiased uppercase">
+                  <span className="text-[22px] md:text-5xl lg:text-7xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none antialiased">
                     {item.val}
                   </span>
                 )}
-                <span className="text-[10px] md:text-sm font-black text-slate-400 uppercase tracking-[0.3em] leading-none truncate w-full">
+                <span className="text-[10px] md:text-sm font-bold text-slate-400 tracking-tight leading-none truncate w-full">
                   {item.label}
                 </span>
               </div>

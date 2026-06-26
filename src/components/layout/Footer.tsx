@@ -21,10 +21,6 @@ import {
 import PLATFORM_VERSION from "@/lib/version";
 import { Badge } from "@/components/ui/badge";
 
-/**
- * @fileOverview Compact High-Density Footer v10.5 - Normal Case Sync.
- */
-
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -95,7 +91,7 @@ export default function Footer() {
         <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-4">
              <p className="text-[12px] text-slate-500 font-bold">© {currentYear} Cracklix</p>
-             <Badge variant="outline" className="border-white/10 text-slate-500 text-[10px] font-black tracking-widest">V{PLATFORM_VERSION.version}</Badge>
+             <Badge variant="outline" className="border-white/10 text-slate-500 text-[10px] font-bold">V{PLATFORM_VERSION.version}</Badge>
           </div>
           <div className="flex items-center gap-3 text-[12px] font-bold text-slate-600 tracking-tight">
             <ShieldCheck className="h-4 w-4 text-emerald-500" />

@@ -8,19 +8,13 @@ import {
   LayoutGrid, 
   Activity, 
   Gem, 
-  ChevronRight,
-  Download
+  ChevronRight
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-
-/**
- * @fileOverview Universal Responsive App Hub v35.0.
- * SCALING: Mobile (2) -> Tablet (3) -> Desktop (4).
- */
 
 export default function AppPreview() {
   const features = [
@@ -65,16 +59,16 @@ export default function AppPreview() {
                  </div>
 
                  <div className="flex-1 flex flex-col justify-start text-center space-y-2 md:space-y-6">
-                    <h3 className="text-[clamp(14px,1.8vw,26px)] font-black tracking-tight leading-tight text-[#0F172A] uppercase">
+                    <h3 className="text-[clamp(14px,1.8vw,26px)] font-black tracking-tight leading-tight text-[#0F172A]">
                        {f.label}
                     </h3>
-                    <p className="text-[clamp(11px,1.2vw,16px)] font-medium text-slate-400 leading-snug line-clamp-3 uppercase tracking-tight">
+                    <p className="text-[clamp(11px,1.2vw,16px)] font-medium text-slate-400 leading-snug line-clamp-3 tracking-tight">
                        {f.desc}
                     </p>
                  </div>
 
                  <div className="mt-auto shrink-0 pt-6 md:pt-10">
-                    <Button asChild variant="ghost" className="w-full h-11 md:h-14 lg:h-16 rounded-full bg-slate-50 text-[#0F172A] hover:bg-primary hover:text-white transition-all font-black text-[clamp(9px,1vw,12px)] tracking-widest border-none shadow-sm active:scale-95 uppercase">
+                    <Button asChild variant="ghost" className="w-full h-11 md:h-14 lg:h-16 rounded-full bg-slate-50 text-[#0F172A] hover:bg-primary hover:text-white transition-all font-bold text-[clamp(9px,1vw,12px)] tracking-tight border-none shadow-sm active:scale-95">
                        <Link href="/install">Get App Node</Link>
                     </Button>
                  </div>
@@ -96,16 +90,16 @@ export default function AppPreview() {
                  </div>
                  <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-10 md:gap-16">
                     <div className="text-center lg:text-left space-y-6 md:space-y-12 flex-1">
-                       <h3 className="text-[clamp(28px,6vw,72px)] font-black tracking-tighter leading-[0.9] text-white uppercase">Elite <br/> Membership</h3>
-                       <div className="flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-4 text-[clamp(10px,1.5vw,20px)] font-bold text-slate-400 uppercase tracking-tight">
+                       <h3 className="text-[clamp(28px,6vw,72px)] font-black tracking-tighter leading-[0.9] text-white">Elite <br/> Membership</h3>
+                       <div className="flex flex-wrap justify-center lg:justify-start gap-x-6 gap-y-4 text-[clamp(10px,1.5vw,20px)] font-bold text-slate-400 tracking-tight">
                           <span className="flex items-center gap-2 md:gap-4"><CheckCircle2 className="h-4 w-4 md:h-7 md:w-7 text-primary" /> Full Series</span>
                           <span className="flex items-center gap-2 md:gap-4"><CheckCircle2 className="h-4 w-4 md:h-7 md:w-7 text-primary" /> Premium Hub</span>
                           <span className="flex items-center gap-2 md:gap-4"><CheckCircle2 className="h-4 w-4 md:h-7 md:w-7 text-primary" /> State Ranks</span>
                        </div>
                     </div>
-                    <Button asChild className="w-full lg:w-auto h-16 md:h-24 px-12 md:px-24 bg-primary hover:bg-blue-700 text-white font-black text-[clamp(11px,1.2vw,16px)] uppercase tracking-[0.2em] shadow-4xl transition-all border-none active:scale-95 shrink-0 rounded-full">
+                    <Button asChild className="w-full lg:w-auto h-16 md:h-24 px-12 md:px-24 bg-primary hover:bg-blue-700 text-white font-bold text-[clamp(11px,1.2vw,16px)] shadow-4xl transition-all border-none active:scale-95 shrink-0 rounded-full">
                        <Link href="/pass" className="flex items-center justify-center gap-3">
-                         Join Elite Now <ChevronRight className="h-5 w-5 md:h-8 md:w-8" />
+                         Join Elite Now <ChevronRight className="h-4 w-4 md:h-8 md:w-8" />
                        </Link>
                     </Button>
                  </div>

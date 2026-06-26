@@ -4,18 +4,12 @@ import React from "react"
 import { motion } from "framer-motion"
 import { 
   ChevronRight, 
-  Target,
-  Zap
+  Target
 } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { AuthorityLogo } from "@/lib/exam-icons";
 import { Button } from "@/components/ui/button";
-
-/**
- * @fileOverview Universal Responsive Popular Exams Hub v15.0.
- * SCALING: Mobile (2) -> Tablet (4) -> Desktop (6).
- */
 
 const POPULAR_LIST = [
   { name: "PCS Hub", id: "pcs", boardId: "PPSC", hasMocks: true },
@@ -66,7 +60,7 @@ export default function PopularExams() {
                                  <AuthorityLogo boardId={p.boardId} size="sm" className="h-full w-full" />
                               </div>
                               <div className="space-y-1.5">
-                                <h3 className="text-[clamp(13px,1.6vw,22px)] font-black tracking-tight text-[#0F172A] group-hover:text-primary transition-colors uppercase leading-tight line-clamp-2">
+                                <h3 className="text-[clamp(13px,1.6vw,22px)] font-black tracking-tight text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
                                    {p.name}
                                 </h3>
                                 <div className="flex flex-wrap gap-1.5">
@@ -77,7 +71,7 @@ export default function PopularExams() {
                         </div>
 
                         <div className="mt-auto shrink-0 pt-4 md:pt-8">
-                           <Button variant="ghost" className="w-full h-11 md:h-14 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[clamp(10px,1vw,13px)] tracking-widest uppercase border-none shadow-md active:scale-95 gap-2">
+                           <Button variant="ghost" className="w-full h-11 md:h-14 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[clamp(10px,1vw,13px)] tracking-tight border-none shadow-md active:scale-95 gap-2">
                               Explore <ChevronRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
                            </Button>
                         </div>
@@ -93,7 +87,7 @@ export default function PopularExams() {
 
 function MiniChip({ emoji, label }: { emoji: string, label: string }) {
    return (
-      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-100 text-[clamp(7px,0.8vw,10px)] font-black text-slate-400 uppercase tracking-tight">
+      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-100 text-[clamp(7px,0.8vw,10px)] font-bold text-slate-400 tracking-tight">
          <span>{emoji}</span> {label}
       </span>
    )

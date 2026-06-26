@@ -17,10 +17,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
-/**
- * @fileOverview Universal Responsive Mock Hub v25.0.
- * SCALING: Mobile (2) -> Tablet (3) -> Desktop (4) -> Ultra (5).
- */
 export default function LatestMocks() {
   const db = useFirestore()
   const { profile } = useUser()
@@ -90,14 +86,14 @@ export default function LatestMocks() {
                     </h3>
                     
                     <div className="mt-auto md:mt-0 space-y-3 md:space-y-5">
-                       <div className="flex flex-wrap items-center justify-center gap-3 md:gap-8 text-[clamp(8px,1vw,12px)] font-black text-slate-400 uppercase tracking-widest">
+                       <div className="flex flex-wrap items-center justify-center gap-3 md:gap-8 text-[clamp(8px,1vw,12px)] font-bold text-slate-400 tracking-tight">
                           <span className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 md:h-5 md:w-5 text-primary" /> {mock.totalQuestions} Qs</span>
                           <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 md:h-5 md:w-5 text-primary" /> {mock.duration}m</span>
                        </div>
 
                        {isPremium && (
                          <div className="flex justify-center h-4 md:h-7">
-                            <Badge className="bg-amber-50 text-amber-600 border-none text-[clamp(8px,0.9vw,11px)] font-black px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 uppercase tracking-widest">
+                            <Badge className="bg-amber-50 text-amber-600 border-none text-[clamp(8px,0.9vw,11px)] font-bold px-3 py-1 rounded-full shadow-sm flex items-center gap-1.5 tracking-tight">
                                <Lock className="h-3 w-3" /> Elite Pass
                             </Badge>
                          </div>
@@ -107,7 +103,7 @@ export default function LatestMocks() {
 
                   <div className="mt-auto pt-5 md:pt-10 shrink-0">
                     <Button asChild className={cn(
-                      "w-full h-11 md:h-16 lg:h-18 rounded-full font-black text-[clamp(10px,1.1vw,14px)] tracking-widest shadow-lg border-none transition-all active:scale-95 gap-2 md:gap-3 uppercase", 
+                      "w-full h-11 md:h-16 lg:h-18 rounded-full font-bold text-[clamp(10px,1.1vw,14px)] shadow-lg border-none transition-all active:scale-95 gap-2 md:gap-3", 
                       locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                     )}>
                         <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`} className="flex items-center justify-center">

@@ -7,16 +7,11 @@ import { Trophy, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
 import StudentAvatar from '@/components/brand/StudentAvatar';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
-/**
- * @fileOverview Universal Responsive Merit Hub v22.0.
- * SCALING: Mobile (Horizontal Scroll - 4 Visible) -> Tablet/Desktop (Grid - 4 to 6 Cols).
- */
 export default function MeritPreview() {
   const db = useFirestore();
   
@@ -72,16 +67,16 @@ export default function MeritPreview() {
                           <div className="relative shrink-0">
                              <StudentAvatar profile={{ name: cleanName, gender: res.gender }} className="h-10 w-10 md:h-24 md:w-24 rounded-xl md:rounded-[2rem] border border-slate-50 shadow-inner group-hover:scale-110 transition-transform" />
                              <div className={cn(
-                                "absolute -bottom-1.5 -right-1.5 h-5 w-5 md:h-10 md:w-10 rounded-lg md:rounded-xl flex items-center justify-center text-white text-[8px] md:text-sm font-black shadow-xl border-2 border-white transition-all",
+                                "absolute -bottom-1.5 -right-1.5 h-5 w-5 md:h-10 md:w-10 rounded-lg md:rounded-xl flex items-center justify-center text-white text-[8px] md:text-sm font-bold shadow-xl border-2 border-white transition-all",
                                 i === 0 ? "bg-amber-400" : i === 1 ? "bg-slate-300" : "bg-orange-400"
                              )}>
                                 {i + 1}
                              </div>
                           </div>
                           <div className="min-w-0 w-full space-y-1">
-                             <p className="font-black text-[11px] md:text-xl text-[#0F172A] truncate leading-none uppercase tracking-tight">{cleanName}</p>
+                             <p className="font-bold text-[11px] md:text-xl text-[#0F172A] truncate leading-none tracking-tight">{cleanName}</p>
                              <div className="flex flex-col items-center">
-                                <p className="text-[9px] md:text-sm font-bold text-slate-400 uppercase tracking-widest tabular-nums">Score: {Math.round(res.score)}</p>
+                                <p className="text-[9px] md:text-sm font-bold text-slate-400 tracking-tight tabular-nums">Score: {Math.round(res.score)}</p>
                              </div>
                           </div>
                        </div>

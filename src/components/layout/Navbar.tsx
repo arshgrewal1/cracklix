@@ -7,7 +7,6 @@ import {
   User,
   Menu,
   ShieldCheck,
-  ChevronRight,
   Gem,
   Settings,
   CreditCard,
@@ -34,13 +33,9 @@ import { cn } from "@/lib/utils";
 import Logo from "@/components/brand/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import PWAInstallButton from "@/components/PWAInstallButton";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
-/**
- * @fileOverview Standardized Navbar v70.0 - Icon Scale & Mobile Alignment Refined.
- */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -135,7 +130,7 @@ export default function Navbar() {
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
             {profile?.passStatus === 'active' && timeLeft && (
                <div className="hidden sm:flex flex-col items-end mr-1">
-                  <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none uppercase">Premium</span>
+                  <span className="text-[8px] font-bold text-emerald-600 tracking-tight leading-none">Premium</span>
                   <span className="text-[10px] font-bold text-slate-400 mt-1 leading-none">{timeLeft}</span>
                </div>
             )}
