@@ -24,8 +24,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Fidelity Hero Hub v99.0.
- * UPDATED: Reduced desktop padding and typography scales.
+ * @fileOverview High-Fidelity Hero Hub v100.0.
+ * UPDATED: Optimized typography scale for professional desktop presence.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -55,13 +55,13 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden bg-white pt-6 pb-12 md:pt-8 md:pb-12 border-b border-slate-50">
+    <section className="relative overflow-hidden bg-white pt-6 pb-12 md:pt-10 md:pb-16 border-b border-slate-50">
       <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto">
         
-        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 md:gap-12 lg:gap-16 items-center px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-center px-4 sm:px-6 lg:px-8">
 
           {/* 1. Text Content Hub */}
-          <div className="text-center lg:text-left space-y-4 md:space-y-6 flex flex-col order-1">
+          <div className="text-center lg:text-left space-y-4 md:space-y-8 flex flex-col order-1">
             
             <motion.div 
                initial={{ opacity: 0, y: -10 }}
@@ -74,14 +74,14 @@ export default function Hero() {
               </span>
             </motion.div>
 
-            <div className="space-y-3 md:space-y-4">
-              <h1 className="text-[26px] md:text-[clamp(32px,3.5vw,48px)] xl:text-[56px] font-[900] tracking-tighter text-[#0F172A] leading-[1.1] md:leading-[0.95] antialiased">
+            <div className="space-y-3 md:space-y-6">
+              <h1 className="text-[26px] md:text-5xl lg:text-6xl xl:text-7xl font-[900] tracking-tighter text-[#0F172A] leading-[1.05] md:leading-[0.95] antialiased">
                 Crack Punjab Govt Exams <br className="hidden md:block"/>
                 <span className="text-primary italic">With Confidence</span>
               </h1>
 
-              <div className="space-y-4 md:space-y-4">
-                <p className="text-[14px] md:text-lg text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-bold tracking-tight">
+              <div className="space-y-4 md:space-y-6">
+                <p className="text-[14px] md:text-xl text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-bold tracking-tight">
                   Mock tests and notes checked by official patterns.
                 </p>
                 
@@ -133,7 +133,7 @@ export default function Hero() {
         </div>
 
         {/* 3. Action Grid & Mobile CTAs - Edge to Edge on mobile */}
-        <div className="mt-8 md:mt-12 space-y-8 md:space-y-12 px-0 sm:px-6 lg:px-8">
+        <div className="mt-8 md:mt-16 space-y-8 md:space-y-12 px-0 sm:px-6 lg:px-8">
            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6">
               <QuickActionCard boardId="mock-test" label="Mock Tests" href="/mocks" />
               <QuickActionCard boardId="study-material" label="Notes" href="/notes" />
@@ -165,8 +165,8 @@ function QuickActionCard({ boardId, label, href }: { boardId: string, label: str
     <Link href={href} className="block group h-full">
       <Card className="w-full md:max-w-[340px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-4 pt-6 pb-4 md:p-8 text-center">
         <div className="flex justify-center mb-4 md:mb-8 shrink-0">
-          <div className="h-14 w-14 md:h-16 md:w-16 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform overflow-hidden">
-             <AuthorityLogo boardId={boardId} size="lg" className="bg-transparent shadow-none border-none p-0 h-full w-full" />
+          <div className="h-14 w-14 md:h-20 md:w-20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+             <AuthorityLogo boardId={boardId} size="lg" className="border-none shadow-none" />
           </div>
         </div>
         <div className="min-w-0">

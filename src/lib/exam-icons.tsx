@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v26.4 (Performance Hardened).
- * FIXED: Optimized sizes prop for all Authority Icons.
+ * @fileOverview Institutional Branding Engine v27.0 (Circular Protection).
+ * FIXED: Icons now utilize rounded-full containers to prevent clipping and ensure brand consistency.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -64,23 +64,23 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     category?.logoUrl;
   
   const sizeClasses = {
-    sm: "h-8 w-8 md:h-10 md:w-10",
-    md: "h-10 w-10 md:h-14 md:w-14",
-    lg: "h-16 w-16 md:h-24 md:w-24",
-    xl: "h-20 w-20 md:h-32 md:w-32"
+    sm: "h-10 w-10 md:h-12 md:w-12",
+    md: "h-14 w-14 md:h-20 md:w-20",
+    lg: "h-20 w-20 md:h-28 md:w-28",
+    xl: "h-24 w-24 md:h-36 md:w-32"
   };
 
   const containerSize = sizeClasses[size];
 
   if (logoUrl) {
     return (
-      <div className={cn("relative shrink-0 overflow-hidden flex items-center justify-center bg-white rounded-xl md:rounded-2xl p-1 shadow-inner", containerSize, className)}>
+      <div className={cn("relative shrink-0 overflow-hidden flex items-center justify-center bg-white rounded-full border border-slate-100 p-2 shadow-inner", containerSize, className)}>
         <Image 
           src={logoUrl} 
-          alt="Official Authority Logo" 
+          alt="Authority" 
           fill
-          sizes={size === 'sm' ? '40px' : size === 'md' ? '56px' : size === 'lg' ? '96px' : '128px'}
-          className="object-contain animate-in fade-in duration-500"
+          sizes={size === 'sm' ? '48px' : size === 'md' ? '80px' : size === 'lg' ? '112px' : '144px'}
+          className="object-contain p-2"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -101,7 +101,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   };
 
   return (
-    <div className={cn("flex items-center justify-center p-1", containerSize, className)}>
+    <div className={cn("flex items-center justify-center bg-white rounded-full border border-slate-100 p-3 shadow-inner", containerSize, className)}>
       {getFallbackIcon()}
     </div>
   );

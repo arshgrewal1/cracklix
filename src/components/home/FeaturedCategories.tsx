@@ -13,8 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview Featured Categories Hub v32.0.
- * UPDATED: Reduced desktop section padding and text scales.
+ * @fileOverview Featured Categories Hub v33.0.
+ * UPDATED: Icons standardized to high-fidelity circular nodes.
  */
 
 const STRICT_WHITELIST = [
@@ -38,7 +38,7 @@ export default function FeaturedCategories() {
   }, [rawCategories]);
 
   return (
-    <section className="py-8 md:py-12 bg-white border-t border-slate-50">
+    <section className="py-8 md:py-16 bg-white border-t border-slate-50">
       <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto space-y-8 md:space-y-12">
         
         <div className="space-y-2 text-left px-4 sm:px-6 lg:px-8">
@@ -56,7 +56,7 @@ export default function FeaturedCategories() {
             Array.from({ length: 4 }).map((_, i) => (
               <Skeleton 
                 key={i} 
-                className="h-[200px] md:h-[300px] w-full mx-auto rounded-[1.5rem] md:rounded-[3rem] bg-slate-50" 
+                className="h-[200px] md:h-[320px] w-full mx-auto rounded-[1.5rem] md:rounded-[3rem] bg-slate-50" 
               />
             ))
           ) : categories.map((cat, idx) => {
@@ -73,28 +73,26 @@ export default function FeaturedCategories() {
                 className="flex flex-col h-full"
               >
                  <Link href={`/exams/category/${cat.id}`} className="h-full block">
-                    <Card className="w-full mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-4 pt-6 pb-4 md:p-8 h-full text-center">
+                    <Card className="w-full mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-4 pt-6 pb-4 md:p-10 h-full text-center">
                        
-                       <div className="flex justify-center mb-4 md:mb-8 shrink-0">
-                          <div className="h-14 w-14 md:h-16 md:w-16 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
-                             <AuthorityLogo category={cat} size="lg" className="bg-transparent shadow-none border-none p-0 h-full w-full" />
-                          </div>
+                       <div className="flex justify-center mb-4 md:mb-10 shrink-0">
+                          <AuthorityLogo category={cat} size="md" className="shadow-lg" />
                        </div>
 
                        <div className="flex-1 flex flex-col justify-start min-w-0">
-                          <div className="space-y-2 md:space-y-3">
+                          <div className="space-y-2 md:space-y-4">
                              <div className="flex justify-center h-4 md:h-6">
                                 <Badge className="bg-primary/5 text-primary border-none font-bold text-[10px] px-2 py-0.5 rounded-full shadow-sm w-fit tracking-tight">
                                    {boardLabel} Hub
                                 </Badge>
                              </div>
-                             <h3 className="text-[14px] md:text-lg font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
+                             <h3 className="text-[15px] md:text-lg lg:text-xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
                                 {cat.title}
                              </h3>
                           </div>
                        </div>
 
-                       <div className="mt-auto shrink-0 pt-4 md:pt-8">
+                       <div className="mt-auto shrink-0 pt-4 md:pt-10">
                           <Button variant="ghost" className="w-full h-10 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[10px] md:text-xs tracking-widest uppercase border-none active:scale-95 gap-2">
                              Open
                              <ChevronRight className="h-4 w-4" />
