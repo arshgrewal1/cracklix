@@ -32,15 +32,19 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useToast } from "@/hooks/use-toast"
 
 /**
  * @fileOverview Student Home - Standardized PWA v44.0.
+ * UPDATED: Added greeting toast on first entry.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
   const db = useFirestore()
   const router = useRouter()
+  const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
+  const [hasGreeted, setHasGreeted] = useState(false)
   const [passCountdown, setPassCountdown] = useState("");
 
   useEffect(() => {
@@ -54,6 +58,17 @@ export default function StudentDashboard() {
       }
     }
   }, [user, authLoading, router, mounted])
+
+  // GREETING LOGIC
+  useEffect(() => {
+    if (profile && !hasGreeted) {
+      toast({
+        title: `Welcome Back, ${profile.name?.split(' ')[0]}!`,
+        description: "Your preparation hub is synchronized.",
+      });
+      setHasGreeted(true);
+    }
+  }, [profile, hasGreeted, toast]);
 
   useEffect(() => {
     const expiryStr = profile?.passExpiresAt;

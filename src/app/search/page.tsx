@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v9.2.
+ * @fileOverview Search Center v9.3.
  * FIXED: Explicit imports and type casting for cloneElement to satisfy strict TS and build rules.
  */
 
