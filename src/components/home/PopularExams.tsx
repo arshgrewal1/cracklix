@@ -4,7 +4,6 @@ import React from "react"
 import { motion } from "framer-motion"
 import { 
   ChevronRight, 
-  ArrowRight,
   Target
 } from "lucide-react";
 import Link from "next/link";
@@ -13,8 +12,8 @@ import { AuthorityLogo } from "@/lib/exam-icons";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview High-Density Popular Exams Grid v81.2.
- * RESPONSIVE: Increased container width and optimized grid for PC.
+ * @fileOverview High-Density Popular Exams Grid v81.3.
+ * UPDATED: Converted typography to Title Case and standardizing section layout.
  */
 
 const POPULAR_LIST = [
@@ -36,7 +35,7 @@ export default function PopularExams() {
             <div className="space-y-2">
                <div className="flex items-center gap-3">
                   <div className="h-8 w-8 bg-blue-50 rounded-lg flex items-center justify-center text-primary shadow-inner"><Target className="h-5 w-5" /></div>
-                  <h2 className="text-xl md:text-5xl font-black text-[#04102B] tracking-tight leading-none uppercase">Popular Exams</h2>
+                  <h2 className="text-xl md:text-5xl font-black text-[#04102B] tracking-tight leading-none">Popular Exams</h2>
                </div>
                <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl">Direct links to the most attempted recruitment preparation hubs.</p>
             </div>

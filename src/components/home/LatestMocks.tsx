@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Mock Grid v78.0 (Stable Path).
- * FIXED: Removed uppercase from primary elements for clean Title Case look.
+ * @fileOverview High-Density Mock Grid v79.0.
+ * UPDATED: Title Case normalization and standardizing responsive containers.
  */
 
 export default function LatestMocks() {
@@ -41,12 +41,12 @@ export default function LatestMocks() {
   }, [profile]);
 
   return (
-    <section className="py-6 md:py-16 bg-white border-t border-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-4 md:mb-12 gap-1 text-left px-1">
-           <div className="space-y-0.5">
-              <h2 className="text-xl md:text-4xl font-black text-[#0F172A] tracking-tight leading-none">Latest Mock Tests</h2>
-              <p className="text-slate-500 font-medium text-[10px] md:text-lg">Freshly updated series for all exams.</p>
+    <section className="py-10 md:py-24 bg-white border-t border-slate-50">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 md:mb-16 gap-4 text-left px-1">
+           <div className="space-y-1">
+              <h2 className="text-xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Latest Mock Tests</h2>
+              <p className="text-slate-500 font-medium text-sm md:text-lg">Freshly updated series for all major Punjab recruitments.</p>
            </div>
            <Link href="/mocks" className="text-primary font-black uppercase text-[9px] md:text-xs tracking-widest hover:underline flex items-center gap-2 group">
               View All <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />

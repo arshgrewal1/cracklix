@@ -2,19 +2,17 @@
 
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
-import { collection, query, where, limit, orderBy } from 'firebase/firestore';
-import { Newspaper, Calendar, ChevronRight, Zap } from 'lucide-react';
+import { collection, query, where, limit } from 'firebase/firestore';
+import { Calendar, ChevronRight, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
 import { AuthorityLogo } from '@/lib/exam-icons';
 
 /**
- * @fileOverview High-Density Study Preview v1.9.
- * UPDATED: Integrated branded Current Affairs logo.
+ * @fileOverview High-Density Study Preview v2.0.
+ * UPDATED: Standardized to Title Case and widescreen container alignment.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -31,17 +29,17 @@ export default function CurrentAffairsPreview() {
   const { data: items, loading } = useCollection<any>(hubQuery);
 
   return (
-    <section className="py-8 md:py-24 bg-slate-50/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 md:space-y-12 text-left">
+    <section className="py-10 md:py-24 bg-slate-50/50">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8 md:space-y-16 text-left">
         
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-1 px-1">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 px-1">
            <div className="space-y-1">
               <div className="flex items-center gap-2">
                  <AuthorityLogo boardId="current-affairs" size="sm" className="bg-transparent shadow-none p-0" />
                  <span className="text-[9px] font-bold text-slate-400 tracking-tight uppercase">Study Material</span>
               </div>
               <h2 className="text-2xl md:text-5xl font-extrabold text-[#0F172A] tracking-tight">Current Affairs</h2>
-              <p className="text-slate-500 font-medium text-[11px] md:text-lg">Daily bilingual updates for state exams.</p>
+              <p className="text-slate-500 font-medium text-sm md:text-lg">Daily bilingual updates verified for Punjab recruitments.</p>
            </div>
            <Link href="/current-affairs" className="text-blue-600 font-black uppercase text-[9px] md:text-xs tracking-widest hover:underline flex items-center gap-2 group">
               View All <ChevronRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />

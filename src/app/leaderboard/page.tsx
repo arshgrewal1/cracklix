@@ -5,7 +5,7 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, limit, orderBy } from "firebase/firestore"
-import { Trophy, ShieldCheck, Search, Activity, Zap, Loader2 } from "lucide-react"
+import { Trophy, ShieldCheck, Search, Activity, Zap } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Merit Hub v16.2.
- * RESPONSIVE: Increased container width and improved table density for desktop.
+ * @fileOverview Institutional Merit Hub v16.3.
+ * UPDATED: Title Case normalization and container standardization for high-resolution desktop.
  */
 
 export default function LeaderboardPage() {
@@ -90,7 +90,7 @@ export default function LeaderboardPage() {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
                <div className="space-y-6 text-left">
                   <div className="flex items-center gap-4"><div className="h-10 w-10 md:h-12 md:w-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-inner"><ShieldCheck className="h-6 w-6 md:h-7 md:w-7" /></div><span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-slate-500">Official Merit Registry</span></div>
-                  <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-[#0F172A] tracking-tight leading-[0.9] break-words antialiased uppercase">Hall of <br/> <span className="text-primary">Rankers</span></h1>
+                  <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-[#0F172A] tracking-tight leading-[0.9] break-words antialiased uppercase">Hall of Rankers</h1>
                   <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl leading-tight tracking-tight">Real-time Punjab merit rankings derived from authenticated mock results.</p>
                </div>
                <div className="relative w-full md:w-[480px] group">
@@ -150,9 +150,9 @@ function PodiumCard({ rank, data, color, isMain }: any) {
          <div className="text-center space-y-4">
             <h3 className={cn("font-headline font-black text-[#0F172A] uppercase tracking-tight truncate max-w-[280px]", isMain ? "text-2xl md:text-5xl" : "text-lg md:text-3xl")}>{data?.name || '---'}</h3>
             <div className="flex items-center justify-center gap-6 md:gap-12">
-               <div className="text-center"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1 md:mb-2">SCORE</p><p className="text-xl md:text-4xl font-bold text-primary leading-none">{(data?.score || 0).toFixed(1)}</p></div>
+               <div className="text-center"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1 md:mb-2">Score</p><p className="text-xl md:text-4xl font-bold text-primary leading-none">{(data?.score || 0).toFixed(1)}</p></div>
                <div className="h-8 w-px bg-slate-200" />
-               <div className="text-center"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1 md:mb-2">ACCURACY</p><p className="text-xl md:text-4xl font-bold text-emerald-600 leading-none">{data?.accuracy || '0'}%</p></div>
+               <div className="text-center"><p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1 md:mb-2">Accuracy</p><p className="text-xl md:text-4xl font-bold text-emerald-600 leading-none">{data?.accuracy || '0'}%</p></div>
             </div>
          </div>
       </div>

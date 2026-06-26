@@ -6,18 +6,17 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
-import { Landmark, ChevronRight, Zap, BookOpen, Layers } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { ChevronRight, Zap, BookOpen, Layers } from "lucide-react"
+import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview High-Density Exam Hub v18.1.
- * RESPONSIVE: Increased container width and improved grid density for PC.
+ * @fileOverview High-Density Exam Hub v18.2.
+ * UPDATED: Typography Title Case normalization and container standardized.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -45,7 +44,6 @@ export default function MocksDiscoveryPage() {
   const { data: rawCategories, loading: catLoading } = useCollection<any>(useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]));
   const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
   const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]));
-  const { data: pyqs } = useCollection<any>(useMemo(() => (db ? collection(db, "pyqs") : null), [db]));
 
   const categories = useMemo(() => {
     if (!rawCategories) return [];
@@ -65,7 +63,7 @@ export default function MocksDiscoveryPage() {
                  <AuthorityLogo boardId="mock-test" size="sm" className="bg-transparent shadow-none p-0" />
                  <span className="text-[10px] md:text-sm font-black text-slate-400 tracking-widest uppercase">Verified Hub</span>
                </div>
-               <h1 className="text-3xl md:text-5xl lg:text-7xl font-black text-[#0F172A] leading-tight tracking-tight uppercase">Exam Hub</h1>
+               <h1 className="text-3xl md:text-5xl lg:text-7xl font-black text-[#0F172A] leading-tight tracking-tight">Exam Hub</h1>
                <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-3xl leading-tight">Access verified authority boards and premium mock tests for all state exams.</p>
             </div>
           </div>
@@ -88,9 +86,9 @@ export default function MocksDiscoveryPage() {
                      <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] md:rounded-[3rem] bg-white flex flex-col h-full border border-slate-100 p-5 md:p-10 group">
                         <div className="flex justify-between items-start mb-6 md:mb-12">
                            <AuthorityLogo category={cat} size="sm" className="w-12 h-12 md:w-20 md:h-20 bg-slate-50 rounded-xl md:rounded-[2rem] group-hover:scale-105 transition-transform shadow-inner" />
-                           <Badge className="bg-[#0F172A] text-white border-none text-[7px] md:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-sm">VERIFIED</Badge>
+                           <Badge className="bg-[#0F172A] text-white border-none text-[7px] md:text-[10px] font-black uppercase px-2 py-0.5 rounded shadow-sm">Verified</Badge>
                         </div>
-                        <h3 className="text-sm md:text-2xl xl:text-3xl font-black leading-tight tracking-tight text-[#0F172A] group-hover:text-primary transition-colors flex-1 mb-4 md:mb-8 uppercase">{cat.title}</h3>
+                        <h3 className="text-sm md:text-2xl xl:text-3xl font-black leading-tight tracking-tight text-[#0F172A] group-hover:text-primary transition-colors flex-1 mb-4 md:mb-8">{cat.title}</h3>
                         
                         <div className="space-y-2 md:space-y-4 mt-auto">
                            <MetricBlock label="Active Verticals" val={catExams.length} icon={BookOpen} />

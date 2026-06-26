@@ -2,7 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Zap, BookOpen, Layers, ChevronRight } from 'lucide-react';
+import { Zap, BookOpen, Layers, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -11,11 +11,10 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview High-Density Category Explorer v125.2.
- * RESPONSIVE: Increased container width to max-w-[1440px] and gap density.
+ * @fileOverview High-Density Category Explorer v125.3.
+ * UPDATED: Normalized typography to Title Case and unified container constraints.
  */
 
 const STRICT_WHITELIST = [
@@ -44,7 +43,7 @@ export default function FeaturedCategories() {
         <div className="space-y-2 px-1">
            <div className="flex items-center gap-3">
               <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-inner"><Layers className="h-5 w-5" /></div>
-              <h2 className="text-xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none uppercase">Choose Category</h2>
+              <h2 className="text-xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Choose Category</h2>
            </div>
            <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl">Select your recruitment category to explore verified exams and preparation hubs.</p>
         </div>
@@ -88,7 +87,7 @@ export default function FeaturedCategories() {
 
                        <div className="mt-10 md:mt-20 pt-6 border-t border-slate-50">
                           <Button variant="ghost" className="w-full h-11 md:h-16 rounded-xl md:rounded-2xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[9px] md:text-[12px] tracking-[0.2em] gap-3 shadow-xl uppercase border-none">
-                             Enter Hub <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                             Enter Hub <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                           </Button>
                        </div>
                     </Card>
