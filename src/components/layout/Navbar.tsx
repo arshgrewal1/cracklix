@@ -37,8 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v18.0.
- * FIXED: Restored logo visibility and reinforced extreme left alignment.
+ * @fileOverview Institutional Navbar v19.0.
+ * FIXED: Maximized logo height to fill more of the navigation bar while maintaining alignment.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -118,7 +118,7 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 ml-0 md:ml-1 h-12 md:h-16" 
+              className="flex-shrink-0 ml-0 md:ml-1 h-14 md:h-18" 
               align="left"
             />
           </div>
