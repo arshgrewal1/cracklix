@@ -12,8 +12,8 @@ import { AuthorityLogo } from "@/lib/exam-icons";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Popular Exams Hub v20.0.
- * UPDATED: Standardized to match Latest Mocks center-aligned aesthetic.
+ * @fileOverview Popular Exams Hub v21.0.
+ * UPDATED: Set to strict 4-column grid on desktop for visual consistency.
  */
 
 const POPULAR_LIST = [
@@ -45,7 +45,7 @@ export default function PopularExams() {
             </Link>
          </div>
 
-         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 md:gap-8 lg:gap-10">
+         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-10">
             {POPULAR_LIST.map((p, idx) => (
                <motion.div 
                  key={p.id} 

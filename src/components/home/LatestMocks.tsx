@@ -17,6 +17,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
+/**
+ * @fileOverview Latest Mock Tests Hub v20.0.
+ * UPDATED: Restricted to strict 4-column grid on desktop for visual consistency.
+ */
 export default function LatestMocks() {
   const db = useFirestore()
   const { profile } = useUser()
@@ -49,7 +53,7 @@ export default function LatestMocks() {
            </Link>
         </div>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-8 lg:gap-10">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-10">
           {loading ? (
              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[210px] md:h-[420px] w-full rounded-2xl md:rounded-[3rem] bg-slate-50" />)
           ) : mocks.length > 0 ? mocks.map((mock, i) => {
