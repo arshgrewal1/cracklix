@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v8.7.
+ * @fileOverview Search Center v8.8.
  * FIXED: Explicitly imported cloneElement and resolved UMD global conflict.
  */
 
