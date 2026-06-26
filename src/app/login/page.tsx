@@ -44,8 +44,8 @@ import Image from "next/image"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Premium Login Hub v83.0.
- * UPDATED: Maximized logo scales for professional institutional branding.
+ * @fileOverview Cracklix Premium Login Hub v84.0.
+ * UPDATED: Maximized logo scales for a dominant institutional entry.
  */
 
 const formatCompact = (num: number) => {
@@ -252,7 +252,7 @@ function LoginContent() {
            <Link href="/" className="flex items-center gap-2 text-slate-400 font-black uppercase text-[10px] tracking-widest hover:text-primary transition-colors">
               <ChevronLeft className="h-4 w-4" /> Home
            </Link>
-           <Logo variant="light" align="left" className="h-24 md:h-28" />
+           <Logo variant="light" align="left" className="h-28" />
            <div className="w-10" />
         </div>
 

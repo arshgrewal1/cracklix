@@ -22,8 +22,8 @@ import PLATFORM_VERSION from "@/lib/version";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Institutional Footer Hub v18.0.
- * UPDATED: Removed top/bottom padding and space-y gaps around the logo for zero-space integration.
+ * @fileOverview Institutional Footer Hub v19.0.
+ * UPDATED: Zero top space for the branding node and synchronized high-fidelity scales.
  */
 export default function Footer() {
   const currentYear = new Date().getFullYear();

@@ -37,8 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v17.0.
- * FIXED: Removed all left padding to push logo to the extreme left edge.
+ * @fileOverview Institutional Navbar v18.0.
+ * FIXED: Restored logo visibility and reinforced extreme left alignment.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -118,8 +118,7 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 ml-0 md:ml-1" 
-              imgClassName="h-12 md:h-16"
+              className="flex-shrink-0 ml-0 md:ml-1 h-12 md:h-16" 
               align="left"
             />
           </div>

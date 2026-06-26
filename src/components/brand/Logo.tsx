@@ -17,8 +17,9 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix High-Fidelity Brand Identity v87.0.
- * FIXED: Removed all minimum width constraints to ensure tight left alignment in headers.
+ * @fileOverview Cracklix High-Fidelity Brand Identity v88.0.
+ * FIXED: Re-implemented stable width constraints to ensure visibility in flex containers.
+ * ALIGNMENT: Strictly left-aligned via object-position.
  */
 export default function Logo({
   className = "",
@@ -54,6 +55,7 @@ export default function Logo({
         sizes={isIcon ? "120px" : "1200px"}
         className={cn(
           "transition-all flex-shrink-0 object-contain",
+          align === 'left' && "object-left",
           imgClassName
         )}
       />
@@ -64,7 +66,7 @@ export default function Logo({
     "flex items-center select-none hover:opacity-90 transition-opacity flex-shrink-0 relative",
     isIcon 
       ? "h-12 w-12 md:h-14 md:w-14" 
-      : "h-24 w-auto md:h-32", 
+      : "h-24 w-40 md:h-32 md:w-56", // Defined width ensures visibility
     align === 'center' && "mx-auto",
     className
   );
