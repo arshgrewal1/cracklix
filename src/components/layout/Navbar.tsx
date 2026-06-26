@@ -39,7 +39,7 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Standardized Navbar v68.0 - Logo Scaled & Offset.
+ * @fileOverview Standardized Navbar v69.0 - Logo Scaled & Navigation Shifted.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -124,7 +124,8 @@ export default function Navbar() {
             />
           </div>
 
-          <div className="hidden lg:flex items-center justify-center gap-10 xl:gap-14 flex-1">
+          {/* Desktop Navigation Links - Shifted 40px left */}
+          <div className="hidden lg:flex items-center justify-center gap-10 xl:gap-14 flex-1 lg:-ml-10">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Practice Tests" active={pathname === '/exams'} />
             <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
