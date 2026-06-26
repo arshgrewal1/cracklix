@@ -4,7 +4,7 @@ import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useCollection, useFirestore, useUser } from "@/firebase"
-import { doc, collection, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp, getDoc } from "firebase/firestore"
+import { doc, collection, query, where, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -20,7 +20,8 @@ import {
   RefreshCw,
   Star,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  ClipboardList
 } from "lucide-react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -30,10 +31,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Universal Exam Hub Client v3.0 (Static Hardened).
- * FIXED: Standardized ID resolution using ?id= query param as primary.
- * FIXED: Removed env(safe-area-inset-top) collisions by adding pt-safe to shell.
- * FIXED: Title Case normalization for preparation verticals.
+ * @fileOverview Universal Exam Hub Client v3.2.
+ * FIXED: Replaced 404 screen with professional "No Mock Tests" empty state for valid exams.
  */
 
 export default function ExamHubClient() {
@@ -44,12 +43,9 @@ export default function ExamHubClient() {
   const { toast } = useToast()
   const { user, profile, loading: userLoading } = useUser()
 
-  // 1. Resolve ID from Query Param (Priority) or Path
   const examId = useMemo(() => {
     const queryId = searchParams.get('id');
     if (queryId) return queryId;
-    
-    // Path fallback for direct links
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSegment = pathSegments[pathSegments.length - 1];
     return lastSegment !== 'view' && lastSegment !== 'exams' ? lastSegment : "";
@@ -69,12 +65,6 @@ export default function ExamHubClient() {
   const { data: categories } = useCollection<any>(useMemo(() => (db ? collection(db, "categories") : null), [db]))
 
   const [isPinning, setIsPinning] = useState(false);
-
-  useEffect(() => {
-    if (!examLoading && examId && !exam) {
-       console.warn("[REGISTRY_WARN] Exam ID not found in cloud nodes:", examId);
-    }
-  }, [examId, exam, examLoading]);
 
   const isPinned = useMemo(() => (examId && profile?.pinnedExams?.includes(examId)) || false, [profile, examId]);
 
@@ -100,13 +90,15 @@ export default function ExamHubClient() {
   }, [user, profile]);
 
   const groupedContent = useMemo(() => {
-    if (!examId) return { FULL: [], SUBJECT: [], SECTIONAL: [], PYQ: [] };
+    if (!examId) return { FULL: [], SUBJECT: [], SECTIONAL: [], PYQ: [], total: 0 };
     const mocks = (rawMocks || []).filter(m => m.examId === examId || (m.examIds && m.examIds.includes(examId)));
+    const pyqs = rawPyqs || [];
     return {
       FULL: mocks.filter(m => m.mockType === 'FULL'),
       SUBJECT: mocks.filter(m => m.mockType === 'SUBJECT'),
       SECTIONAL: mocks.filter(m => m.mockType === 'SECTIONAL'),
-      PYQ: (rawPyqs || [])
+      PYQ: pyqs,
+      total: mocks.length + pyqs.length
     }
   }, [rawMocks, rawPyqs, examId])
 
@@ -165,23 +157,38 @@ export default function ExamHubClient() {
       </section>
 
       <main className="container mx-auto px-2 md:px-4 py-4 md:py-12 max-w-7xl pb-40">
-         <Tabs defaultValue="FULL" className="space-y-4 md:space-y-12">
-            <div className="bg-white border border-slate-100 rounded-xl md:rounded-[2rem] p-1 shadow-md overflow-x-auto no-scrollbar">
-               <TabsList className="bg-transparent border-none p-0 flex h-10 md:h-14 w-full justify-start gap-1">
-                  <DashboardTab value="FULL" label="Mock Tests" icon={Zap} />
-                  <DashboardTab value="SUBJECT" label="Subjects" icon={BookOpen} />
-                  <DashboardTab value="SECTIONAL" label="Sectional" icon={List} />
-                  <DashboardTab value="PYQ" label="Papers" icon={Layers} />
-               </TabsList>
+         {groupedContent.total === 0 && !mocksLoading && !pyqsLoading ? (
+            <div className="py-20 md:py-32 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in-95 duration-500">
+               <div className="h-24 w-24 md:h-32 md:w-32 bg-slate-100 rounded-[2.5rem] flex items-center justify-center text-slate-300 shadow-inner">
+                  <ClipboardList className="h-10 w-10 md:h-14 md:w-14" />
+               </div>
+               <div className="space-y-3 max-w-md mx-auto">
+                  <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] uppercase tracking-tight">No Mock Tests Available</h2>
+                  <p className="text-slate-500 font-medium text-sm md:text-lg leading-relaxed">
+                     Mock tests for this exam haven't been published yet. Please check back soon. New tests will be added regularly.
+                  </p>
+               </div>
+               <Button onClick={() => router.back()} variant="outline" className="rounded-xl h-14 px-10 border-2 font-bold uppercase tracking-widest text-[10px]">Return Back</Button>
             </div>
+         ) : (
+            <Tabs defaultValue="FULL" className="space-y-4 md:space-y-12">
+               <div className="bg-white border border-slate-100 rounded-xl md:rounded-[2rem] p-1 shadow-md overflow-x-auto no-scrollbar">
+                  <TabsList className="bg-transparent border-none p-0 flex h-10 md:h-14 w-full justify-start gap-1">
+                     <DashboardTab value="FULL" label="Mock Tests" icon={Zap} />
+                     <DashboardTab value="SUBJECT" label="Subjects" icon={BookOpen} />
+                     <DashboardTab value="SECTIONAL" label="Sectional" icon={List} />
+                     <DashboardTab value="PYQ" label="Papers" icon={Layers} />
+                  </TabsList>
+               </div>
 
-            <div className="animate-in fade-in slide-in-from-bottom-3 duration-700">
-               <TabsContent value="FULL"><MockList data={groupedContent.FULL} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-               <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-               <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-               <TabsContent value="PYQ"><NotesList data={groupedContent.PYQ} isPassActive={isPassActive} loading={pyqsLoading} type="PYQ" /></TabsContent>
-            </div>
-         </Tabs>
+               <div className="animate-in fade-in slide-in-from-bottom-3 duration-700">
+                  <TabsContent value="FULL"><MockList data={groupedContent.FULL} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
+                  <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
+                  <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
+                  <TabsContent value="PYQ"><NotesList data={groupedContent.PYQ} isPassActive={isPassActive} loading={pyqsLoading} type="PYQ" /></TabsContent>
+               </div>
+            </Tabs>
+         )}
       </main>
       <Footer />
     </div>
@@ -190,7 +197,7 @@ export default function ExamHubClient() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-3 md:px-12 h-full font-black text-[8px] md:text-[10px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white rounded-lg md:rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-3">
+      <TabsTrigger value={value} className="px-3 md:px-12 h-full font-black text-[8px] md:text-[10px] data-[state=active]:bg-[#0B1528] data-[state=active]:text-white rounded-lg md:rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-3">
          <Icon className="h-3 w-3 md:h-4 md:w-4" /> {label}
       </TabsTrigger>
    )

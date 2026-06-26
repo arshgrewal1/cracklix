@@ -13,9 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v9.1.
- * FIXED: Explicit imports for cloneElement and React to satisfy Next.js 15 isolated builds.
- * FIXED: Explicit type casting for icon components to resolve TS2769.
+ * @fileOverview Search Center v9.2.
+ * FIXED: Explicit imports and type casting for cloneElement to satisfy strict TS and build rules.
  */
 
 export default function SearchPage() {
