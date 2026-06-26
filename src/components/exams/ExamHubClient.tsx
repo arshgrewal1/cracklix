@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState, useEffect } from "react"
+import React, { useMemo, useState, useEffect, Suspense } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useCollection, useFirestore, useUser } from "@/firebase"
@@ -31,8 +31,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Universal Exam Hub Client v3.2.
- * FIXED: Replaced 404 screen with professional "No Mock Tests" empty state for valid exams.
+ * @fileOverview Universal Exam Hub Client v3.3.
+ * FIXED: Professional empty state when exam exists but has no associated content.
  */
 
 export default function ExamHubClient() {
@@ -56,11 +56,9 @@ export default function ExamHubClient() {
   
   const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]);
   const pyqsQuery = useMemo(() => (db && examId ? query(collection(db, "pyqs"), where("examId", "==", examId)) : null), [db, examId]);
-  const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid)) : null), [db, user]);
 
   const { data: rawMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
   const { data: rawPyqs, loading: pyqsLoading } = useCollection<any>(pyqsQuery)
-  const { data: userResults } = useCollection<any>(resultsQuery)
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
   const { data: categories } = useCollection<any>(useMemo(() => (db ? collection(db, "categories") : null), [db]))
 
@@ -182,9 +180,9 @@ export default function ExamHubClient() {
                </div>
 
                <div className="animate-in fade-in slide-in-from-bottom-3 duration-700">
-                  <TabsContent value="FULL"><MockList data={groupedContent.FULL} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-                  <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-                  <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
+                  <TabsContent value="FULL"><MockList data={groupedContent.FULL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
+                  <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
+                  <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
                   <TabsContent value="PYQ"><NotesList data={groupedContent.PYQ} isPassActive={isPassActive} loading={pyqsLoading} type="PYQ" /></TabsContent>
                </div>
             </Tabs>
@@ -203,7 +201,7 @@ function DashboardTab({ value, label, icon: Icon }: { value: string, label: stri
    )
 }
 
-function MockList({ data, results, isPassActive, loading, boards }: any) {
+function MockList({ data, isPassActive, loading, boards }: any) {
    const router = useRouter();
    if (loading) return <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-40 md:h-64 w-full rounded-xl md:rounded-[2.5rem] bg-white" />)}</div>;
    if (data.length === 0) return <div className="py-24 text-center opacity-20 flex flex-col items-center justify-center space-y-4 text-slate-300"><Zap className="h-10 w-10" /><p className="font-headline font-black text-lg md:text-xl uppercase tracking-widest">Section Empty</p></div>;
