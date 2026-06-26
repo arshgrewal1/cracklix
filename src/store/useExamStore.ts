@@ -7,8 +7,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Exam Store v8.6 (ESLint Optimized).
- * FIXED: Removed duplicate property assignment in initExam and standardized LanguageDisplayMode initialization.
+ * @fileOverview Hardened Exam Store v8.7.
+ * FIXED: Standardized LanguageDisplayMode initialization and fixed duplicate property errors.
  */
 
 export interface ExamStoreState {
@@ -61,14 +61,12 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   currentIdx: 0,
   isPaused: false,
   startTime: 0,
-  language: "ENGLISH_PUNJABI" as LanguageDisplayMode,
-  baseLanguageMode: "ENGLISH_PUNJABI" as LanguageDisplayMode,
+  language: "ENGLISH_PUNJABI",
+  baseLanguageMode: "ENGLISH_PUNJABI",
   violations: 0,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
     const finalLang: LanguageDisplayMode = languageMode || "ENGLISH_PUNJABI";
-    
-    // Initial state derived from props or resume
     const isResuming = resumeData && resumeData.status !== 'COMPLETED';
     
     set({

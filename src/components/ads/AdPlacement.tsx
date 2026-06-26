@@ -15,8 +15,8 @@ interface AdPlacementProps {
 }
 
 /**
- * @fileOverview Institutional Ad-Node v1.19.
- * FIXED: Resolved TypeScript query assignment error by explicitly typing the collection query.
+ * @fileOverview Institutional Ad-Node v1.20.
+ * FIXED: Explicit type casting for Firestore queries to resolve build mismatches.
  */
 
 export default function AdPlacement({ placement, className, examId }: AdPlacementProps) {

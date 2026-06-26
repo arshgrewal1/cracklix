@@ -2,7 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 /**
  * @fileOverview Capacitor 7 Configuration for Cracklix Android.
- * FIXED: Strictly pointing to 'out' directory for Next.js 15 static export.
+ * Optimized for production Next.js 15 static exports.
  */
 
 const config: CapacitorConfig = {

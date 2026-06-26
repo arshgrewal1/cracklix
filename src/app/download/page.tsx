@@ -14,8 +14,7 @@ import {
   AlertCircle,
   Zap,
   Info,
-  Layers,
-  ArrowDown
+  Layers
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -26,6 +25,7 @@ import {
   AccordionItem, 
   AccordionTrigger 
 } from "@/components/ui/accordion"
+import { PLATFORM_VERSION } from "@/lib/version"
 
 /**
  * @fileOverview Production-Grade APK Distribution Hub v1.0.
@@ -34,10 +34,10 @@ import {
 
 export default function DownloadPage() {
   const [apkExists, setApkExists] = useState(false);
-  const version = "1.0.4"; // Standardized versioning
+  const { version, releaseDate } = PLATFORM_VERSION;
 
   useEffect(() => {
-    // Audit check for APK presence
+    // Audit check for APK presence via HEAD request
     fetch('/downloads/app-release.apk', { method: 'HEAD' })
       .then(res => setApkExists(res.ok))
       .catch(() => setApkExists(false));
@@ -48,7 +48,7 @@ export default function DownloadPage() {
       <Navbar />
       
       <main>
-        {/* DOWNLOAD HERO (Distinct from Homepage Hero) */}
+        {/* DOWNLOAD HERO */}
         <section className="relative pt-12 pb-20 md:pt-24 md:pb-32 overflow-hidden bg-slate-50/50 border-b border-slate-100">
            <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full" />
            
@@ -60,15 +60,15 @@ export default function DownloadPage() {
                     className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20"
                  >
                     <Smartphone className="h-4 w-4 text-primary" />
-                    <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary">Native Android Distribution</span>
+                    <span className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-primary">Official Android Hub</span>
                  </motion.div>
 
                  <div className="space-y-4">
                     <h1 className="text-4xl md:text-7xl font-black text-[#0F172A] tracking-tighter uppercase leading-[0.95]">
-                       Cracklix <br/> <span className="text-primary">Pro Mobile</span>
+                       Get the <br/> <span className="text-primary">Cracklix App</span>
                     </h1>
                     <p className="text-[12px] md:text-xl text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed">
-                       Experience Punjab's smartest preparation platform with native performance, zero-latency tests, and instant job alerts.
+                       Experience native performance, high-fidelity mock tests, and real-time rank updates directly on your mobile device.
                     </p>
                  </div>
 
@@ -83,20 +83,20 @@ export default function DownloadPage() {
                     ) : (
                        <Button disabled className="h-16 md:h-20 px-10 md:px-16 bg-slate-200 text-slate-400 rounded-2xl md:rounded-[2.5rem] border-none gap-4">
                           <Zap className="h-6 w-6" />
-                          <span className="font-black uppercase tracking-widest text-xs md:text-lg">APK COMING SOON</span>
+                          <span className="font-black uppercase tracking-widest text-xs md:text-lg">APK Coming Soon</span>
                        </Button>
                     )}
                     
                     <div className="flex items-center gap-8 text-slate-400 font-bold text-[9px] md:text-[11px] uppercase tracking-[0.2em]">
                        <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" /> Play Protect Verified</span>
-                       <span className="flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /> Size: ~14MB</span>
+                       <span className="flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /> Size: ~15MB</span>
                     </div>
                  </div>
               </div>
            </div>
         </section>
 
-        {/* DETAILS GRID */}
+        {/* INSTALLATION GUIDE */}
         <section className="py-20 bg-white">
            <div className="container mx-auto px-4 max-w-6xl">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-start">
@@ -108,10 +108,10 @@ export default function DownloadPage() {
                     </div>
 
                     <div className="space-y-6">
-                       <GuideStep num="01" title="Download" desc="Click the download button above to retrieve the Cracklix Pro APK file." />
-                       <GuideStep num="02" title="Authorize" desc="Enable 'Install from Unknown Sources' in your Android security settings if prompted." />
-                       <GuideStep num="03" title="Install" desc="Open the downloaded file and click Install. The app will appear on your home screen." />
-                       <GuideStep num="04" title="Initialize" desc="Launch Cracklix and login with your existing registry credentials." />
+                       <GuideStep num="01" title="Download APK" desc="Retrieve the official installer by clicking the button above." />
+                       <GuideStep num="02" title="Authorize Source" desc="Enable 'Install from Unknown Sources' in your Android security settings." />
+                       <GuideStep num="03" title="Install App" desc="Launch the downloaded file and follow the system prompts." />
+                       <GuideStep num="04" title="Initialize Hub" desc="Login with your registry credentials to sync your progress." />
                     </div>
                  </div>
 
@@ -123,13 +123,13 @@ export default function DownloadPage() {
                        <CardContent className="p-0 space-y-8 relative z-10">
                           <div className="space-y-2">
                              <h3 className="text-2xl font-black uppercase tracking-tight">What's New</h3>
-                             <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Version {version} Release</p>
+                             <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Released: {releaseDate}</p>
                           </div>
                           <ul className="space-y-4">
-                             <UpdateFeature text="Optimized CBT engine for Punjab Police Mocks." />
-                             <UpdateFeature text="New High-Speed PDF downloader for Notes." />
-                             <UpdateFeature text="Biometric authentication support for Profile Hub." />
-                             <UpdateFeature text="Reduced data consumption by 40%." />
+                             <UpdateFeature text="New high-speed CBT engine for Punjab Police tests." />
+                             <UpdateFeature text="Enhanced bilingual support for Gurmukhi fonts." />
+                             <UpdateFeature text="Optimized offline storage for study notes." />
+                             <UpdateFeature text="Automated admit card notification node." />
                           </ul>
                        </CardContent>
                     </Card>
@@ -137,7 +137,7 @@ export default function DownloadPage() {
                     <div className="p-8 bg-blue-50 border border-blue-100 rounded-[2rem] flex items-start gap-4">
                        <Info className="h-6 w-6 text-blue-600 shrink-0" />
                        <p className="text-xs md:text-sm text-blue-700 font-medium leading-relaxed uppercase">
-                          Minimum Requirement: Android 8.0 (Oreo) or higher. Recommended 2GB RAM for high-fidelity test simulations.
+                          System Requirement: Android 8.0 or higher recommended for stable mock test simulations.
                        </p>
                     </div>
                  </div>
@@ -146,7 +146,7 @@ export default function DownloadPage() {
            </div>
         </section>
 
-        {/* FAQ SECTION */}
+        {/* FAQ */}
         <section className="py-20 bg-slate-50/30 border-t border-slate-100">
            <div className="container mx-auto px-4 max-w-4xl">
               <div className="text-center space-y-4 mb-16">
@@ -155,9 +155,9 @@ export default function DownloadPage() {
               </div>
 
               <Accordion type="single" collapsible className="space-y-4">
-                 <FAQItem value="item-1" q="Is it safe to install APK directly?" a="Yes. Cracklix Pro is digitally signed and verified. Android shows a warning for all direct APK installs, but you can safely proceed by authorizing the source." />
-                 <FAQItem value="item-2" q="Will I get automatic updates?" a="The app will notify you when a new version node is deployed. You can then download the update directly from this hub." />
-                 <FAQItem value="item-3" q="Can I use the same account?" a="Absolutely. All your mocks, progress, and Elite Pass status are synchronized across Web and Mobile in real-time." />
+                 <FAQItem value="item-1" q="Is this APK safe for my device?" a="Yes. Every build of Cracklix is digitally signed and audited by Arsh Grewal Management for data integrity." />
+                 <FAQItem value="item-2" q="Will I get future updates automatically?" a="The app will notify you when a new version node is available for download on this hub." />
+                 <FAQItem value="item-3" q="Can I use my existing account?" a="Absolutely. All your mocks, rank, and Elite Pass status are synchronized across web and mobile." />
               </Accordion>
            </div>
         </section>

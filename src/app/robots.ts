@@ -2,7 +2,6 @@ import { MetadataRoute } from 'next';
 
 /**
  * @fileOverview Official Robots.txt Node.
- * Ensures only public routes are indexed by search engine nodes.
  */
 
 export default function robots(): MetadataRoute.Robots {

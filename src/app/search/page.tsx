@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v7.5.
- * FIXED: Standardized React import and type-safe cloneElement.
+ * @fileOverview Search Center v7.6.
+ * FIXED: Type-safe cloneElement and React UMD error resolution.
  */
 
 export default function SearchPage() {
@@ -66,7 +66,7 @@ function SearchContent() {
        type: "Exam Center", 
        href: `/exams/view?id=${e.id}`, 
        boardId: e.boardId,
-       icon: <GraduationCap />
+       icon: <GraduationCap className="h-5 w-5" />
     }))
 
     const mockMatches = (mocks || []).filter((m: any) => 
@@ -77,7 +77,7 @@ function SearchContent() {
        type: "Practice Test", 
        href: `/mocks/view?id=${m.id}`, 
        boardId: m.boardId,
-       icon: <Zap />
+       icon: <Zap className="h-5 w-5" />
     }))
 
     const notesMatches = (notes || []).filter((n: any) => 
@@ -88,7 +88,7 @@ function SearchContent() {
        type: "Notes & PDFs", 
        href: `/notes`, 
        boardId: n.boardId,
-       icon: <FileText />
+       icon: <FileText className="h-5 w-5" />
     }))
 
     return [...examMatches, ...mockMatches, ...notesMatches]
@@ -189,11 +189,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
             <div className="flex items-center gap-4 min-w-0 flex-1 space-y-1">
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
-                  {isValidElement(icon)
-                    ? cloneElement(icon as ReactElement<{ className?: string }>, {
-                        className: "h-5 w-5",
-                      })
-                    : icon}
+                  {icon}
                </div>
                <div className="text-left min-w-0 flex-1 space-y-1">
                   <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
