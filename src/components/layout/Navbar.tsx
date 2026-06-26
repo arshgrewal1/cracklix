@@ -39,7 +39,7 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Standardized Navbar v69.0 - Logo Scaled & Navigation Shifted.
+ * @fileOverview Standardized Navbar v69.1 - Mobile Icon Scale Optimized.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -100,12 +100,12 @@ export default function Navbar() {
       SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-[80px] md:h-[100px]" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-[64px] md:h-[100px]" />;
   }
 
   return (
     <div className="sticky top-0 z-50 w-full font-body pt-safe bg-white border-b border-slate-100">
-      <nav className="w-full h-[80px] md:h-[112px] transition-all duration-300">
+      <nav className="w-full h-[64px] md:h-[112px] transition-all duration-300">
         <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-2 md:gap-4">
 
           <div className="flex items-center shrink-0 h-full gap-0">
@@ -114,17 +114,17 @@ export default function Navbar() {
               aria-label="Open menu"
               className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-lg md:rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
             >
-              <Menu className="w-5 h-5 md:w-6 md:h-6" />
+              <Menu className="w-[22px] h-[22px] md:w-6 md:h-6" />
             </button>
 
             <Logo
               variant="light"
               className="flex-shrink-0 -ml-12"
-              imgClassName="h-[64px] md:h-[160px]"
+              imgClassName="h-[52px] md:h-[160px]"
             />
           </div>
 
-          {/* Desktop Navigation Links - Shifted 40px left */}
+          {/* Desktop Navigation Links */}
           <div className="hidden lg:flex items-center justify-center gap-10 xl:gap-14 flex-1 lg:-ml-10">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Practice Tests" active={pathname === '/exams'} />
@@ -140,16 +140,11 @@ export default function Navbar() {
                </div>
             )}
 
-            <PWAInstallButton 
-              variant="outline"
-              className="hidden md:flex h-9 px-4 text-[10px] rounded-lg border-slate-200"
-            />
-
             <Link
               href="/search"
               className="w-10 h-10 md:w-11 md:h-11 rounded-lg md:rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
             >
-              <Search className="w-5 h-5" />
+              <Search className="w-[20px] h-[20px] md:w-5 md:h-5" />
             </Link>
 
             {loading ? (
@@ -161,7 +156,7 @@ export default function Navbar() {
                     <StudentAvatar
                       profile={profile}
                       className="w-full h-full border-none"
-                      iconClassName="w-5 h-5 md:w-6 md:h-6"
+                      iconClassName="w-[20px] h-[20px] md:w-6 md:h-6"
                     />
                   </button>
                 </DropdownMenuTrigger>
@@ -195,7 +190,7 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login" className="px-5 h-10 rounded-lg md:rounded-xl bg-primary text-white font-bold text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
+              <Link href="/login" className="px-4 md:px-5 h-9 md:h-11 rounded-lg md:rounded-xl bg-primary text-white font-bold text-[11px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
                 Login
               </Link>
             )}

@@ -34,24 +34,24 @@ export default function FeaturedCategories() {
 
   return (
     <section className="section-py bg-white border-t border-slate-50">
-      <div className="max-w-[1440px] mx-auto container-px space-y-8 md:space-y-16">
+      <div className="max-w-[1440px] mx-auto container-px space-y-6 md:space-y-16">
         
-        <div className="space-y-2">
+        <div className="space-y-1 md:space-y-2">
           <div className="flex items-center gap-3">
-             <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
-               <Layers className="h-5 w-5 md:h-6 md:w-6" />
+             <div className="h-7 w-7 md:h-10 md:w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
+               <Layers className="h-4 w-4 md:h-6 md:w-6" />
              </div>
-             <h2 className="tracking-tight">Choose Category</h2>
+             <h2 className="text-[24px] md:text-5xl font-black tracking-tight leading-none">Choose Category</h2>
           </div>
-          <p className="max-w-2xl">Select your recruitment category to explore verified preparation hubs.</p>
+          <p className="max-w-2xl text-sm md:text-xl">Select your recruitment category to explore verified preparation hubs.</p>
         </div>
 
-        <div className="grid gap-4 md:gap-8 lg:gap-10 grid-cols-[repeat(auto-fit,minmax(min(100%,320px),1fr))]">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-8 lg:gap-10">
           {catLoading ? (
-            Array.from({ length: 3 }).map((_, i) => (
+            Array.from({ length: 4 }).map((_, i) => (
               <Skeleton 
                 key={i} 
-                className="aspect-[4/5] md:aspect-square w-full rounded-[var(--radius)] bg-slate-50" 
+                className="h-[280px] md:h-[400px] w-full rounded-2xl md:rounded-[3rem] bg-slate-50" 
               />
             ))
           ) : categories.map((cat, idx) => {
@@ -61,35 +61,31 @@ export default function FeaturedCategories() {
             return (
               <motion.div 
                 key={cat.id} 
-                initial={{ opacity: 0, y: 20 }} 
+                initial={{ opacity: 0, y: 15 }} 
                 whileInView={{ opacity: 1, y: 0 }} 
                 viewport={{ once: true }} 
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
+                transition={{ duration: 0.4, delay: idx * 0.05 }}
                 className="flex flex-col"
               >
                  <Link href={`/exams/category/${cat.id}`} className="h-full block">
-                    <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[var(--radius)] bg-white group overflow-hidden flex flex-col p-6 md:p-10 lg:p-12 h-full min-h-[380px] md:min-h-[440px]">
-                       <div className="flex flex-col h-full">
-                          <div className="space-y-4 mb-6">
-                             <div className="h-16 w-16 md:h-24 md:w-24 bg-slate-50 rounded-2xl md:rounded-3xl flex items-center justify-center shadow-inner overflow-hidden">
-                                <AuthorityLogo category={cat} size="md" className="h-full w-full p-2" />
+                    <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[24px] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-4 md:p-10 h-[280px] md:h-[400px]">
+                       <div className="flex flex-col h-full justify-between">
+                          <div className="space-y-3">
+                             <div className="h-11 w-11 md:h-24 md:w-24 bg-slate-50 rounded-xl md:rounded-3xl flex items-center justify-center shadow-inner overflow-hidden shrink-0">
+                                <AuthorityLogo category={cat} size="sm" className="h-full w-full p-1.5 md:p-4" />
                              </div>
-                             <Badge className="bg-primary/5 text-primary border-none font-bold text-[13px] px-3 py-1 rounded-full shadow-sm w-fit tracking-tight">
+                             <Badge className="bg-primary/5 text-primary border-none font-bold text-[11px] md:text-[13px] px-2.5 py-0.5 rounded-full shadow-sm w-fit tracking-tight">
                                 {boardLabel} Hub
                              </Badge>
-                          </div>
-                          
-                          <div className="space-y-2 flex-1">
-                             <h3 className="leading-tight line-clamp-2">{cat.title}</h3>
-                             <p className="line-clamp-3 leading-relaxed font-medium">
-                               {cat.description || "Browse official preparation series."}
-                             </p>
+                             <h3 className="text-[17px] md:text-2xl font-black leading-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors">
+                                {cat.title}
+                             </h3>
                           </div>
 
-                          <div className="mt-8 pt-6 border-t border-slate-50">
-                             <Button variant="ghost" className="w-full h-12 md:h-14 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-semibold text-base gap-3 shadow-md border-none active:scale-95">
+                          <div className="mt-4">
+                             <Button variant="ghost" className="w-full h-11 md:h-14 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-semibold text-xs md:text-base gap-2 shadow-md border-none active:scale-95">
                                 Start Learning
-                                <ChevronRight className="h-4 w-4" />
+                                <ChevronRight className="h-3.5 w-3.5" />
                              </Button>
                           </div>
                        </div>

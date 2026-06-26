@@ -13,8 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Production Mobile Bottom Navigation v1.5.
- * UPDATED: Simplified labels for mobile navigation.
+ * Production Mobile Bottom Navigation v1.6 - Icon Scale Optimized.
  */
 
 export default function MobileNav() {
@@ -59,7 +58,7 @@ export default function MobileNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[1000] border-t border-slate-100 bg-white shadow-[0_-4px_30px_rgba(0,0,0,0.04)] md:hidden">
 
-      <div className="flex h-[80px] items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
+      <div className="flex h-[72px] items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
 
         {navItems.map((item) => {
           const isActive =
@@ -77,21 +76,21 @@ export default function MobileNav() {
             >
               <div
                 className={cn(
-                  "flex flex-col items-center justify-center rounded-[1.5rem] transition-all duration-300",
+                  "flex flex-col items-center justify-center rounded-[1.25rem] transition-all duration-300",
 
                   isActive
-                    ? "h-[56px] w-[68px] bg-primary text-white shadow-lg shadow-primary/20"
-                    : "h-[56px] w-[68px] text-slate-400"
+                    ? "h-[50px] w-[62px] bg-primary text-white shadow-lg shadow-primary/20"
+                    : "h-[50px] w-[62px] text-slate-400"
                 )}
               >
                 <Icon
-                  className="h-5 w-5"
+                  className="h-[20px] w-[20px]"
                   fill={isActive ? "currentColor" : "none"}
                 />
 
                 <span
                   className={cn(
-                    "mt-1 text-[11px] font-bold tracking-tight",
+                    "mt-0.5 text-[10px] font-bold tracking-tight",
 
                     isActive
                       ? "text-white"

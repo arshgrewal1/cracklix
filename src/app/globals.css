@@ -61,7 +61,7 @@
     overflow-x: hidden;
   }
   
-  /* Fluid Typography Scale */
+  /* Optimized Fluid Typography Scale */
   h1 { 
     @apply font-black tracking-tighter leading-[1.05] text-[#0F172A]; 
     font-size: clamp(2rem, 5vw, 4.5rem);
@@ -79,8 +79,8 @@
   
   p { 
     @apply font-medium text-slate-500; 
-    font-size: clamp(0.875rem, 1.2vw, 1.125rem);
-    line-height: 1.6;
+    font-size: clamp(0.8125rem, 1.2vw, 1.125rem);
+    line-height: 1.5;
   }
 
   input, textarea, select {
@@ -125,8 +125,8 @@
 
 /* Fluid Spacing Utilities */
 .section-py {
-  padding-top: clamp(2.5rem, 8vw, 6rem);
-  padding-bottom: clamp(2.5rem, 8vw, 6rem);
+  padding-top: clamp(2rem, 6vw, 6rem);
+  padding-bottom: clamp(2rem, 6vw, 6rem);
 }
 
 .container-px {
