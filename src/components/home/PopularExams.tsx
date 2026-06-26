@@ -13,8 +13,8 @@ import { AuthorityLogo } from "@/lib/exam-icons";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Popular Exam Verticals v10.0 - Precision PWA Refinement.
- * REDUCED: Font sizes for mobile.
+ * @fileOverview Popular Exam Verticals v11.0 - Alignment Hardened.
+ * FIXED: Used mt-auto to ensure all action buttons sit on the same horizontal line.
  */
 
 const POPULAR_LIST = [
@@ -59,7 +59,7 @@ export default function PopularExams() {
                >
                   <Link href={`/exams/view?id=${p.id}`} className="h-full block">
                      <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[3rem] bg-white p-4 md:p-10 flex flex-col h-[200px] md:h-[340px] relative overflow-hidden group">
-                        <div className="flex flex-col h-full justify-between">
+                        <div className="flex-1 flex flex-col justify-start">
                            <div className="space-y-2 md:space-y-4">
                               <div className="h-9 w-9 md:h-20 md:w-20 bg-slate-50 rounded-lg md:rounded-[2rem] shadow-inner flex items-center justify-center overflow-hidden p-1.5 group-hover:scale-110 transition-transform">
                                  <AuthorityLogo boardId={p.boardId} size="sm" className="h-full w-full" />
@@ -71,12 +71,12 @@ export default function PopularExams() {
                                 </div>
                               </div>
                            </div>
+                        </div>
 
-                           <div className="mt-2 shrink-0">
-                              <Button variant="ghost" className="w-full h-10 md:h-14 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[11px] md:text-xs tracking-widest uppercase border-none shadow-md active:scale-95 gap-2">
-                                 Open <ChevronRight className="h-3 w-3" />
-                              </Button>
-                           </div>
+                        <div className="mt-auto shrink-0 pt-2">
+                           <Button variant="ghost" className="w-full h-10 md:h-14 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[11px] md:text-xs tracking-widest uppercase border-none shadow-md active:scale-95 gap-2">
+                              Open <ChevronRight className="h-3 w-3" />
+                           </Button>
                         </div>
                      </Card>
                   </Link>

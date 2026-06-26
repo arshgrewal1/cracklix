@@ -13,9 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview Institutional Category Hub v30.0.
- * UPDATED: Reduced mobile font sizes for high-density PWA.
- * FULL TEXT: Removed truncation from titles.
+ * @fileOverview Institutional Category Hub v31.0 - Alignment Hardened.
+ * FIXED: Standardized mt-auto on action buttons for perfect horizontal rhythm.
  */
 
 const STRICT_WHITELIST = [
@@ -57,7 +56,7 @@ export default function FeaturedCategories() {
             Array.from({ length: 4 }).map((_, i) => (
               <Skeleton 
                 key={i} 
-                className="h-[220px] md:h-[400px] w-full rounded-xl md:rounded-[3rem] bg-slate-50" 
+                className="h-[260px] md:h-[400px] w-full rounded-xl md:rounded-[3rem] bg-slate-50" 
               />
             ))
           ) : categories.map((cat, idx) => {
@@ -75,7 +74,7 @@ export default function FeaturedCategories() {
               >
                  <Link href={`/exams/category/${cat.id}`} className="h-full block">
                     <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-4 md:p-10 h-[260px] md:h-[400px]">
-                       <div className="flex flex-col h-full justify-between">
+                       <div className="flex-1 flex flex-col justify-start">
                           <div className="space-y-2 md:space-y-3">
                              <div className="h-10 w-10 md:h-24 md:w-24 bg-slate-50 rounded-xl md:rounded-3xl flex items-center justify-center shadow-inner overflow-hidden shrink-0">
                                 <AuthorityLogo category={cat} size="sm" className="h-full w-full p-1 md:p-4" />
@@ -87,13 +86,13 @@ export default function FeaturedCategories() {
                                 {cat.title}
                              </h3>
                           </div>
+                       </div>
 
-                          <div className="mt-2 md:mt-4">
-                             <Button variant="ghost" className="w-full h-10 md:h-14 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-semibold text-[12px] md:text-base gap-2 shadow-md border-none active:scale-95">
-                                Open Hub
-                                <ChevronRight className="h-3 w-3" />
-                             </Button>
-                          </div>
+                       <div className="mt-auto shrink-0 pt-2 md:pt-4">
+                          <Button variant="ghost" className="w-full h-10 md:h-14 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-semibold text-[12px] md:text-base gap-2 shadow-md border-none active:scale-95">
+                             Open Hub
+                             <ChevronRight className="h-3 w-3" />
+                          </Button>
                        </div>
                     </Card>
                  </Link>

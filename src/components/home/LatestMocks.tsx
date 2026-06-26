@@ -18,7 +18,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Institutional Mock Hub v20.0 - Precision Alignment Hardened.
+ * @fileOverview Institutional Mock Hub v21.0 - Alignment Hardened.
+ * FIXED: Replaced mt-6 with mt-auto to ensure Start/Unlock buttons align perfectly.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -39,7 +40,7 @@ export default function LatestMocks() {
   }, [profile]);
 
   return (
-    <section className="section-py bg-white border-t border-slate-50">
+    <section className="section-py bg-white border-t border-slate-100">
       <div className="max-w-[1440px] mx-auto container-px space-y-8 md:space-y-16">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 text-left">
            <div className="space-y-1">
@@ -60,7 +61,6 @@ export default function LatestMocks() {
             const locked = isPremium && !isPassActive;
             const boardId = mock.boardId || mock.boardIds?.[0] || "GENERAL";
             
-            // Normalize Title Case
             const title = (mock.title || "Practice Mock")
               .split(' ')
               .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
@@ -75,30 +75,28 @@ export default function LatestMocks() {
                 transition={{ duration: 0.4, delay: i * 0.05 }} 
                 className="flex flex-col"
               >
-                <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[24px] md:rounded-[3rem] bg-white p-6 md:p-10 flex flex-col group h-[280px] md:h-[400px] relative overflow-hidden">
+                <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[24px] md:rounded-[3rem] bg-white p-5 md:p-10 flex flex-col group h-[280px] md:h-[400px] relative overflow-hidden">
                   
-                  {/* LOGO AREA */}
                   <div className="flex justify-center mb-4 md:mb-10 shrink-0">
                     <div className="h-12 w-12 md:h-20 md:w-20 bg-slate-50 rounded-xl md:rounded-3xl shadow-inner group-hover:scale-110 transition-transform overflow-hidden flex items-center justify-center p-1.5">
                         <AuthorityLogo boardId={boardId} size="sm" className="h-full w-full" />
                     </div>
                   </div>
 
-                  {/* CONTENT HUB - FLEX-1 ENSURES BUTTONS ARE AT BOTTOM */}
                   <div className="flex-1 flex flex-col justify-start text-center space-y-3 md:space-y-6 min-w-0">
-                    <h3 className="text-[17px] md:text-2xl font-black leading-tight tracking-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors">
+                    <h3 className="text-[15px] md:text-2xl font-black leading-tight tracking-tight line-clamp-2 text-[#0F172A] group-hover:text-primary transition-colors">
                         {title}
                     </h3>
                     
                     <div className="space-y-3">
-                       <div className="flex flex-wrap items-center justify-center gap-3 md:gap-5 text-[11px] md:text-sm font-bold text-slate-400 uppercase tracking-tight">
+                       <div className="flex flex-wrap items-center justify-center gap-3 md:gap-5 text-[9px] md:text-sm font-bold text-slate-400 uppercase tracking-tight">
                           <span className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" /> {mock.totalQuestions} Qs</span>
                           <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 md:h-4 md:w-4 text-primary" /> {mock.duration}m</span>
                        </div>
 
                        {isPremium && (
-                         <div className="flex justify-center">
-                            <Badge className="bg-amber-50 text-amber-600 border-none text-[10px] md:text-[12px] font-black px-3 py-1 rounded-lg shadow-sm flex items-center gap-1.5">
+                         <div className="flex justify-center h-6">
+                            <Badge className="bg-amber-50 text-amber-600 border-none text-[9px] md:text-[12px] font-black px-3 py-1 rounded-lg shadow-sm flex items-center gap-1.5">
                                <Lock className="h-3 w-3" /> Elite
                             </Badge>
                          </div>
@@ -106,10 +104,9 @@ export default function LatestMocks() {
                     </div>
                   </div>
 
-                  {/* ACTION NODE - FIXED AT BOTTOM */}
-                  <div className="mt-6 md:mt-10 shrink-0">
+                  <div className="mt-auto pt-4 shrink-0">
                     <Button asChild className={cn(
-                      "w-full h-12 md:h-16 rounded-full font-black text-xs md:text-base tracking-widest shadow-md border-none transition-all active:scale-95 gap-2 uppercase", 
+                      "w-full h-11 md:h-16 rounded-full font-black text-xs md:text-base tracking-widest shadow-md border-none transition-all active:scale-95 gap-2 uppercase", 
                       locked ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-[#0F172A] hover:bg-black text-white"
                     )}>
                         <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`} className="flex items-center justify-center gap-2">

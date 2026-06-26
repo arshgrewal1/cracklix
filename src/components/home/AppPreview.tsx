@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview Study Anywhere Hub v30.0 - Refactored to match Latest Mocks functional layout.
- * FIXED: Balanced card heights, bottom-aligned buttons, and Title Case typography.
+ * @fileOverview Study Anywhere Hub v31.0 - Alignment Hardened.
+ * FIXED: Standardized mt-auto on action buttons to sit on the same horizontal line as Mock Hub.
  */
 
 export default function AppPreview() {
@@ -34,7 +34,7 @@ export default function AppPreview() {
     <section className="section-py bg-white overflow-hidden border-t border-slate-100">
       <div className="max-w-[1440px] mx-auto container-px space-y-6 md:space-y-16">
         
-        {/* SECTION HEADER: SYNCED WITH MOCK HUB */}
+        {/* SECTION HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 text-left">
            <div className="space-y-1">
               <div className="flex items-center gap-3">
@@ -45,7 +45,7 @@ export default function AppPreview() {
            </div>
         </div>
 
-        {/* FEATURE GRID: SYNCED WITH MOCK HUB STYLE */}
+        {/* FEATURE GRID */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-8 lg:gap-10">
            {features.map((f, i) => (
             <motion.div 
@@ -56,27 +56,24 @@ export default function AppPreview() {
               transition={{ duration: 0.4, delay: i * 0.05 }}
               className="flex flex-col"
             >
-              <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[3rem] bg-white p-4 md:p-10 flex flex-col h-[240px] md:h-[380px] relative overflow-hidden group">
+              <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[3rem] bg-white p-4 md:p-10 flex flex-col h-[230px] md:h-[380px] relative overflow-hidden group">
                  
-                 {/* ICON HUB */}
                  <div className="flex justify-center mb-3 md:mb-8 shrink-0">
                     <div className={cn("h-10 w-10 md:h-20 md:w-20 rounded-xl md:rounded-3xl flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform", f.bgColor, f.color)}>
                        <f.icon className="h-5 w-5 md:h-10 md:w-10" />
                     </div>
                  </div>
 
-                 {/* CONTENT HUB: FLEX-1 FOR BOTTOM ALIGNMENT */}
                  <div className="flex-1 flex flex-col justify-start text-center space-y-2 md:space-y-4">
                     <h3 className="text-[14px] md:text-2xl font-black tracking-tight leading-tight text-[#0F172A]">
                        {f.label}
                     </h3>
-                    <p className="text-[11px] md:text-base font-medium text-slate-400 leading-snug">
+                    <p className="text-[11px] md:text-base font-medium text-slate-400 leading-snug line-clamp-2">
                        {f.desc}
                     </p>
                  </div>
 
-                 {/* ACTION NODE: FIXED AT BOTTOM */}
-                 <div className="mt-4 shrink-0">
+                 <div className="mt-auto shrink-0 pt-2">
                     <Button asChild variant="ghost" className="w-full h-10 md:h-14 rounded-full bg-slate-50 text-[#0F172A] hover:bg-primary hover:text-white transition-all font-bold text-[11px] md:text-sm tracking-tight border-none shadow-sm active:scale-95">
                        <Link href="/install">Learn More</Link>
                     </Button>
