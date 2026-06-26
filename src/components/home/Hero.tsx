@@ -22,8 +22,8 @@ import { AuthorityLogo } from "@/lib/exam-icons";
 import Image from "next/image";
 
 /**
- * @fileOverview Refined Hero Hub v86.0.
- * Layout: Text -> Image -> Action Cards -> Buttons -> Board Hub.
+ * @fileOverview Refined Hero Hub v87.0.
+ * Layout: Text -> Image -> Action Cards -> Buttons -> Punjab Specific Boards.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -38,6 +38,13 @@ export default function Hero() {
 
   const boardsQuery = useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc")) : null), [db]);
   const { data: boards } = useCollection<any>(boardsQuery);
+
+  const punjabBoards = useMemo(() => {
+    if (!boards) return [];
+    return boards.filter((b: any) => 
+      ['PPSC', 'PSSSB', 'Punjab Police'].includes(b.abbreviation)
+    );
+  }, [boards]);
 
   if (!mounted) return null;
 
@@ -60,9 +67,9 @@ export default function Hero() {
             </motion.div>
 
             <div className="space-y-3 md:space-y-6">
-              <h1 className="text-[clamp(26px,6vw,34px)] lg:text-[clamp(26px,6vw,84px)] font-black tracking-tighter text-[#0F172A] leading-[1.1] md:leading-[0.95] antialiased uppercase">
+              <h1 className="text-[clamp(26px,6vw,34px)] lg:text-[clamp(26px,6vw,84px)] font-black tracking-tighter text-[#0F172A] leading-[1.1] md:leading-[0.95] antialiased">
                 Crack Punjab Govt Exams <br className="hidden md:block"/>
-                <span className="text-primary italic">With Confidence</span>
+                <span className="text-primary italic">with Confidence</span>
               </h1>
 
               <p className="text-[clamp(13px,3vw,16px)] lg:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium tracking-tight">
@@ -90,7 +97,7 @@ export default function Hero() {
             {/* QUICK ACTION CLUSTER */}
             <div className="grid grid-cols-2 gap-3 mt-4 md:mt-12">
               <QuickActionCard boardId="mock-test" label="Mock Tests" href="/mocks" />
-              <QuickActionCard boardId="study-material" label="Notes" href="/notes" />
+              <QuickActionCard boardId="study-material" label="Study Notes" href="/notes" />
               <QuickActionCard boardId="pyq" label="PYQ Papers" href="/pyqs" />
               <QuickActionCard boardId="current-affairs" label="Current Affairs" href="/current-affairs" />
             </div>
@@ -99,7 +106,7 @@ export default function Hero() {
             <div className="flex flex-col sm:flex-row gap-4 pt-4 md:pt-8 w-full max-w-xl mx-auto lg:mx-0">
                <Button asChild className="w-full sm:flex-1 h-12 md:h-20 px-10 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-[15px] md:text-lg shadow-xl shadow-blue-500/20 rounded-full active:scale-95 transition-all border-none">
                   <Link href="/mocks" className="flex items-center justify-center gap-2">
-                    <Play className="h-4 w-4 md:h-5 md:w-5 fill-current" /> Start Study
+                    <Play className="h-4 w-4 md:h-5 md:w-5 fill-current" /> Start Prep
                   </Link>
                </Button>
                <Button asChild variant="outline" className="w-full sm:flex-1 h-12 md:h-20 px-10 rounded-full font-bold text-[15px] md:text-lg border-2 border-slate-200 hover:border-primary/30 hover:bg-slate-50 transition-all active:scale-95">
@@ -109,17 +116,17 @@ export default function Hero() {
                </Button>
             </div>
 
-            {/* OFFICIAL BOARDS HUB */}
+            {/* PUNJAB SPECIFIC BOARDS */}
             <div className="pt-8 md:pt-12 space-y-4">
-              <p className="text-[10px] md:text-[11px] font-black uppercase text-slate-400 tracking-widest text-center lg:text-left">Browse Official Boards</p>
+              <p className="text-[10px] md:text-[11px] font-black uppercase text-slate-400 tracking-widest text-center lg:text-left">Official Punjab Boards</p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-2 md:gap-3">
-                {boards?.map((board: any) => (
+                {punjabBoards.map((board: any) => (
                   <Link 
                     key={board.id} 
                     href={`/exams/hub/${board.id}`}
-                    className="px-4 py-2 md:px-6 md:py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[11px] md:text-[13px] font-black text-slate-500 hover:text-primary hover:border-primary hover:bg-white hover:shadow-lg transition-all active:scale-95 whitespace-nowrap"
+                    className="px-4 py-2 md:px-6 md:py-2.5 bg-slate-50 border border-slate-100 rounded-xl text-[11px] md:text-[13px] font-bold text-slate-600 hover:text-primary hover:border-primary hover:bg-white hover:shadow-lg transition-all active:scale-95 whitespace-nowrap"
                   >
-                    {board.abbreviation} Hub
+                    {board.abbreviation}
                   </Link>
                 ))}
               </div>
@@ -157,7 +164,7 @@ function QuickActionCard({ boardId, label, href }: { boardId: string, label: str
           <AuthorityLogo boardId={boardId} size="lg" className="bg-transparent shadow-none border-none p-0 w-full h-full" />
         </div>
         <div className="min-w-0 flex-1">
-          <h3 className="text-[13px] md:text-lg font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight truncate">
+          <h3 className="text-[13px] md:text-lg font-bold text-[#0F172A] group-hover:text-primary transition-colors leading-tight">
             {label}
           </h3>
         </div>
