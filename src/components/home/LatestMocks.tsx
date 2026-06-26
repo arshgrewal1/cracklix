@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Latest Mock Tests Hub v26.2.
- * UPDATED: Removed forced uppercase from titles and buttons.
+ * @fileOverview Latest Mock Tests Hub v26.3.
+ * UPDATED: Removed forced uppercase from buttons and standardized Title Case.
  */
 export default function LatestMocks() {
   const db = useFirestore()

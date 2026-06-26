@@ -13,8 +13,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview Featured Categories Hub v33.0.
- * UPDATED: Icons standardized to high-fidelity circular nodes.
+ * @fileOverview Featured Categories Hub v33.1.
+ * UPDATED: Removed uppercase from action buttons.
  */
 
 const STRICT_WHITELIST = [
@@ -93,7 +93,7 @@ export default function FeaturedCategories() {
                        </div>
 
                        <div className="mt-auto shrink-0 pt-4 md:pt-10">
-                          <Button variant="ghost" className="w-full h-10 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[10px] md:text-xs tracking-widest uppercase border-none active:scale-95 gap-2">
+                          <Button variant="ghost" className="w-full h-10 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[10px] md:text-xs tracking-widest border-none active:scale-95 gap-2">
                              Open
                              <ChevronRight className="h-4 w-4" />
                           </Button>

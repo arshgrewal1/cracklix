@@ -12,7 +12,8 @@ import { AuthorityLogo } from "@/lib/exam-icons";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Popular Exams Hub v27.1 (Circular Branding).
+ * @fileOverview Popular Exams Hub v27.2 (Typography Refined).
+ * UPDATED: Removed uppercase from titles and buttons.
  */
 
 const POPULAR_LIST = [
@@ -63,7 +64,7 @@ export default function PopularExams() {
 
                         <div className="flex-1 flex flex-col justify-center min-w-0">
                            <div className="space-y-2 md:space-y-4">
-                              <h3 className="text-[14px] md:text-lg lg:text-xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2 uppercase">
+                              <h3 className="text-[14px] md:text-lg lg:text-xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
                                  {p.name}
                               </h3>
                               <div className="flex justify-center">
@@ -73,7 +74,7 @@ export default function PopularExams() {
                         </div>
 
                         <div className="mt-auto shrink-0 pt-4 md:pt-10">
-                           <Button variant="ghost" className="w-full h-10 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[10px] md:text-xs tracking-widest uppercase border-none active:scale-95 gap-2">
+                           <Button variant="ghost" className="w-full h-10 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[10px] md:text-xs tracking-widest border-none active:scale-95 gap-2">
                               Open <ChevronRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
                            </Button>
                         </div>
