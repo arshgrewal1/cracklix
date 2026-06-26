@@ -9,7 +9,8 @@ const withPWA = require("next-pwa")({
 });
 
 const nextConfig: NextConfig = {
-  output: "export",
+  // REMOVED: output: "export" to allow Vercel API routes and dynamic payment gateway.
+  // Static exports are incompatible with server-side payment verification.
 
   reactStrictMode: true,
 

@@ -4,8 +4,8 @@ import { initializeFirebase } from '@/firebase/app';
 import { doc, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Cashfree Order Node v10.0.
- * FIXED: Advanced phone number normalization and site URL resolution.
+ * @fileOverview Hardened Cashfree Order Node v11.0.
+ * FIXED: Advanced phone number normalization and dynamic environment resolution.
  */
 
 export async function POST(req: Request) {
@@ -19,10 +19,11 @@ export async function POST(req: Request) {
     const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
-      console.error("[CASHFREE_CRITICAL]: Missing API credentials.");
-      return NextResponse.json({ error: 'Gateway Configuration Error' }, { status: 500 });
+      console.error("[CASHFREE_CRITICAL]: Missing API credentials in environment.");
+      return NextResponse.json({ error: 'Gateway Configuration Error: Credentials Missing' }, { status: 500 });
     }
 
+    // Configure SDK
     Cashfree.XClientId = clientId;
     Cashfree.XClientSecret = clientSecret;
     const isProd = clientSecret.startsWith('cf_prod_');
@@ -35,19 +36,19 @@ export async function POST(req: Request) {
     // 1. Validate Plan in Registry
     const planSnap = await getDoc(doc(db, "passes", planId));
     if (!planSnap.exists()) {
-      return NextResponse.json({ error: 'Invalid plan node' }, { status: 404 });
+      return NextResponse.json({ error: 'Invalid plan node in registry' }, { status: 404 });
     }
     const planData = planSnap.data();
 
-    // 2. Fetch Student Profile for details
+    // 2. Fetch Student Profile
     const userSnap = await getDoc(doc(db, "users", userId));
     const userData = userSnap.data();
 
-    // CRITICAL: Cashfree requires EXACTLY 10 digits for phone, no prefixes.
+    // CRITICAL: Cashfree requires EXACTLY 10 digits for phone, no prefixes like +91.
     const rawPhone = userData?.phone || "9999999999";
     const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
 
-    // Capacitor Compatibility: Use client origin or fallback to environment URL
+    // Site URL resolution for callbacks
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cracklix.vercel.app";
     const secureOrigin = (clientOrigin || siteUrl).replace('http://', 'https://');
     
