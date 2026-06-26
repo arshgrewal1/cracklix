@@ -29,8 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Client Hub v3.0.
- * FIXED: Non-blocking submission to resolve 10s delay.
+ * @fileOverview Official Mock Attempt Client Hub v3.1.
+ * FIXED: Optimized layout for safe-area insets.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -262,7 +262,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         <div className="flex-1 flex flex-col min-h-0 relative">
           <SubjectTabs />
           
-          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center px-4 pt-4 pb-32">
+          <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center px-4 pt-4 pb-40 md:pb-32">
             <div className="w-full max-w-4xl">
               {questions.length > 0 && questions[currentIdx] ? (
                 <motion.div 

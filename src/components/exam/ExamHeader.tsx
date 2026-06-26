@@ -23,8 +23,8 @@ const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
 ];
 
 /**
- * @fileOverview Hardened CBT Header v37.1 (Typography Refined).
- * FIXED: Removed uppercase from dropdown labels and command button.
+ * @fileOverview Hardened CBT Header v38.0.
+ * FIXED: Status bar overlap and horizontal component collision on small Android devices.
  */
 export default function ExamHeader({ 
   onPaletteToggle, 
@@ -53,30 +53,30 @@ export default function ExamHeader({
   }, [baseLanguageMode]);
 
   return (
-    <header className="bg-[#0B1528] text-white flex flex-col shrink-0 striped z-[100] border-b border-white/5 shadow-lg sticky top-0 h-14 md:h-16">
-      <div className="h-full flex items-center justify-between px-3 md:px-8 gap-1 md:gap-4">
+    <header className="bg-[#0B1528] text-white flex flex-col shrink-0 z-[100] border-b border-white/5 shadow-xl sticky top-0 pt-[env(safe-area-inset-top)]">
+      <div className="h-14 md:h-18 flex items-center justify-between px-2 md:px-8 gap-1">
         
-        {/* LEFT: BACK & PROGRESS */}
-        <div className="flex items-center gap-1 md:gap-4 shrink-0 flex-1 min-w-0">
+        {/* LEFT SLOT: Progress - Flex-1 ensures equal weighting with right side */}
+        <div className="flex items-center gap-1 md:gap-4 flex-1 min-w-0">
            <button 
              onClick={onExitRequest} 
-             className="p-1.5 md:p-2 text-slate-400 hover:text-white transition-all cursor-pointer active:scale-90"
+             className="p-2 text-slate-400 hover:text-white transition-all active:scale-90 shrink-0"
            >
-              <ChevronLeft className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
            </button>
            
-           <div className="flex items-baseline gap-1 bg-white/5 px-2 py-1 rounded-lg border border-white/10 shrink-0">
-              <span className="text-sm md:text-lg font-black text-primary tabular-nums">
+           <div className="flex items-center gap-1 bg-white/10 px-2 md:px-3 py-1 md:py-1.5 rounded-lg border border-white/10 shrink-0 shadow-inner">
+              <span className="text-sm md:text-xl font-black text-primary tabular-nums">
                  {currentIdx + 1}
               </span>
-              <span className="text-[9px] md:text-xs font-bold uppercase text-slate-500">
+              <span className="text-[10px] md:text-xs font-bold text-slate-500">
                  /{questionsCount}
               </span>
            </div>
         </div>
 
-        {/* CENTER: TIMER */}
-        <div className="flex justify-center px-1 shrink-0 scale-90 md:scale-100">
+        {/* CENTER SLOT: Timer - Shrink-0 prevents sides from squishing the clock */}
+        <div className="flex justify-center shrink-0 px-1">
            <Timer 
              onTimeUp={() => {}} 
              initialSeconds={timeLeft} 
@@ -84,22 +84,22 @@ export default function ExamHeader({
            />
         </div>
 
-        {/* RIGHT: COMMANDS */}
-        <div className="flex items-center justify-end gap-1.5 md:gap-3 flex-1 min-w-0">
+        {/* RIGHT SLOT: Actions - Flex-1 ensures equal weighting with left side for true centering */}
+        <div className="flex items-center justify-end gap-1 md:gap-3 flex-1 min-w-0">
            {availableModes.length > 1 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                   <button className="h-8 w-8 md:h-11 md:w-11 bg-white/5 text-white hover:bg-white/10 border border-white/10 rounded-lg md:rounded-xl flex items-center justify-center transition-all shrink-0">
+                   <button className="h-9 w-9 md:h-12 md:w-12 bg-white/10 text-white hover:bg-white/20 border border-white/10 rounded-xl flex items-center justify-center transition-all shrink-0">
                       <Languages className="h-4 w-4 md:h-5 md:w-5 text-primary" />
                    </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52 bg-[#0F172A] border-white/10 text-white rounded-2xl shadow-2xl p-1.5 z-[2000]">
+                <DropdownMenuContent align="end" className="w-56 bg-[#0F172A] border-white/10 text-white rounded-2xl shadow-5xl p-2 z-[2000]">
                    {availableModes.map((mode) => (
                       <DropdownMenuItem 
                         key={mode.value} 
                         onSelect={() => setLanguage(mode.value)}
                         className={cn(
-                          "text-[10px] font-bold px-4 py-3 rounded-xl cursor-pointer tracking-tight mb-1 last:mb-0",
+                          "text-[11px] font-bold px-4 py-3 rounded-xl cursor-pointer mb-1 last:mb-0 transition-all",
                           language === mode.value ? "bg-primary text-white" : "hover:bg-white/5 text-slate-400"
                         )}
                       >
@@ -112,14 +112,14 @@ export default function ExamHeader({
 
            <button 
              onClick={() => setPaused(!isPaused)}
-             className="h-8 w-8 md:h-11 md:w-11 bg-white/5 text-white border border-white/10 rounded-lg md:rounded-xl flex items-center justify-center active:scale-90 transition-all shrink-0"
+             className="h-9 w-9 md:h-12 md:w-12 bg-white/10 text-white border border-white/10 rounded-xl flex items-center justify-center active:scale-90 transition-all shrink-0"
            >
              {isPaused ? <Play className="h-4 w-4 md:h-5 md:w-5 fill-current text-primary" /> : <Pause className="h-4 w-4 md:h-5 md:w-5 fill-current" />}
            </button>
            
            <button 
              onClick={onPaletteToggle}
-             className="bg-primary hover:bg-blue-600 text-white h-8 md:h-11 px-3 md:px-8 rounded-lg md:rounded-xl font-black uppercase text-[10px] md:text-[11px] tracking-widest flex items-center justify-center shadow-lg active:scale-95 border-none transition-all flex-shrink"
+             className="bg-primary hover:bg-blue-600 text-white h-9 md:h-12 px-3 md:px-8 rounded-xl font-black uppercase text-[10px] md:text-[11px] tracking-widest flex items-center justify-center shadow-lg active:scale-95 border-none transition-all"
            >
               Map
            </button>
