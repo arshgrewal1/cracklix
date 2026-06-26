@@ -22,8 +22,8 @@ import { AuthorityLogo } from "@/lib/exam-icons";
 import Image from "next/image";
 
 /**
- * @fileOverview Refined Hero Hub v89.0.
- * UPDATED: Replaced "node" with "Hub" and reduced text scales for full visibility.
+ * @fileOverview Refined Hero Hub v90.0.
+ * FIXED: Made board list clickable and optimized mobile visibility.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -36,10 +36,19 @@ export default function Hero() {
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
 
-  const boardList = [
-    "PSSSB", "PPSC", "PSPCL", "PSTET", "CTET", 
-    "ETT Cader", "Lecturer Cader", "Master Cader", 
-    "BFUHS Exam", "And Others"
+  // Functional Board Mapping
+  const boardHubs = [
+    { label: "PSSSB", href: "/exams/hub/psssb" },
+    { label: "PPSC", href: "/exams/hub/ppsc" },
+    { label: "Punjab Police", href: "/exams/hub/punjab-police" },
+    { label: "PSPCL", href: "/exams/hub/pspcl" },
+    { label: "PSTET", href: "/exams/hub/pstet" },
+    { label: "CTET", href: "/exams/hub/ctet" },
+    { label: "ETT Cader", href: "/exams/hub/teaching-hub" },
+    { label: "Lecturer Cader", href: "/exams/hub/teaching-hub" },
+    { label: "Master Cader", href: "/exams/hub/teaching-hub" },
+    { label: "BFUHS Exam", href: "/exams/hub/bfuhs" },
+    { label: "And Others", href: "/exams" }
   ];
 
   if (!mounted) return null;
@@ -65,7 +74,7 @@ export default function Hero() {
             <div className="space-y-4 md:space-y-6">
               <h1 className="text-[clamp(26px,6vw,44px)] lg:text-[clamp(26px,6vw,84px)] font-black tracking-tighter text-[#0F172A] leading-[1.1] md:leading-[0.95] antialiased">
                 Crack Punjab Govt Exams <br className="hidden md:block"/>
-                <span className="text-primary italic">with Confidence</span>
+                <span className="text-primary italic">With Confidence</span>
               </h1>
 
               <div className="space-y-4 md:space-y-6">
@@ -73,21 +82,22 @@ export default function Hero() {
                   Mock tests and notes checked by official patterns.
                 </p>
                 
-                {/* Styled Board Hub - Reduced text size for full visibility */}
+                {/* Clickable Board Hub - Optimized for full visibility */}
                 <div className="flex flex-wrap justify-center lg:justify-start gap-1.5 md:gap-2 max-w-xl mx-auto lg:mx-0">
-                  {boardList.map((board, i) => (
-                    <span 
+                  {boardHubs.map((board, i) => (
+                    <Link 
                       key={i} 
-                      className="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-100 text-[10px] md:text-[11px] font-bold text-slate-400 whitespace-nowrap shadow-sm"
+                      href={board.href}
+                      className="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-100 text-[10px] md:text-[11px] font-black text-slate-400 whitespace-nowrap shadow-sm hover:border-primary/30 hover:text-primary transition-all active:scale-95"
                     >
-                      {board}
-                    </span>
+                      {board.label}
+                    </Link>
                   ))}
                 </div>
               </div>
             </div>
 
-            {/* MOBILE ONLY: HERO IMAGE PLACEMENT (Center fold) */}
+            {/* MOBILE ONLY: HERO IMAGE PLACEMENT (Correct stacking) */}
             <div className="flex lg:hidden flex-col items-center w-full max-w-[280px] mx-auto py-4">
                <motion.div 
                  initial={{ opacity: 0, scale: 0.95 }} 
