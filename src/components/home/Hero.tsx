@@ -24,9 +24,9 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Fidelity Hero Hub v103.0.
+ * @fileOverview Institutional Hero Hub v103.1.
  * UPDATED: Optimized card sizing for a more compact and professional grid.
- * UPDATED: Normalized typography to Title Case.
+ * UPDATED: Standardized typography to Title Case.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -130,8 +130,8 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* 3. Action Grid - Edge to Edge on mobile */}
-        <div className="mt-8 md:mt-12 space-y-8 md:space-y-12 px-0 sm:px-6 lg:px-8">
+        {/* 3. Action Grid */}
+        <div className="mt-8 md:mt-12 space-y-8 md:space-y-12 px-4 sm:px-6 lg:px-8">
            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 max-w-5xl mx-auto">
               <QuickActionCard boardId="mock-test" label="Mock Tests" href="/mocks" />
               <QuickActionCard boardId="study-material" label="Study Notes" href="/notes" />
@@ -161,7 +161,7 @@ export default function Hero() {
 function QuickActionCard({ boardId, label, href }: { boardId: string, label: string, href: string }) {
   return (
     <Link href={href} className="block group h-full">
-      <Card className="w-full md:max-w-[220px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1rem] md:rounded-[2rem] bg-white group overflow-hidden flex flex-col p-2 pt-4 pb-2 md:p-6 text-center">
+      <Card className="w-full md:max-w-[200px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1rem] md:rounded-[2rem] bg-white group overflow-hidden flex flex-col p-2 pt-4 pb-2 md:p-6 text-center">
         <div className="flex justify-center mb-2 md:mb-6 shrink-0">
           <div className="h-9 w-9 md:h-14 md:w-14 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
              <AuthorityLogo boardId={boardId} size="sm" className="border-none shadow-none h-8 w-8 md:h-12 md:w-12" />

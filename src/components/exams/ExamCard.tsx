@@ -11,8 +11,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Card Component v4.7.
- * FIXED: Synchronized property access with updated Exam interface and corrected field names for production audit.
+ * @fileOverview Exam Card Component v4.8.
+ * FIXED: Synchronized property access with updated Exam interface.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || "Official Vertical"
@@ -26,9 +26,11 @@ export default function ExamCard({ exam }: ExamCardProps) {
         <CardContent className="p-8 md:p-12 flex flex-col h-full text-left">
           <div className="flex justify-between items-start mb-8 md:mb-10">
             <AuthorityLogo boardId={exam.boardId} size="md" className="bg-slate-50 rounded-xl group-hover:scale-105 transition-transform" />
-            <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded shadow-sm">
-              {(exam.boardId || "Official").toUpperCase()} HUB
-            </Badge>
+            <div className="flex flex-col items-end gap-2">
+              <Badge className="bg-primary/10 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded shadow-sm">
+                {(exam.boardId || "Official").toUpperCase()} HUB
+              </Badge>
+            </div>
           </div>
 
           <div className="flex-1 space-y-6">

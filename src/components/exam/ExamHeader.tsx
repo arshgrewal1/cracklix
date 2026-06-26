@@ -23,10 +23,8 @@ const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
 ];
 
 /**
- * @fileOverview Hardened CBT Header v39.0.
- * FIXED: Integrated env(safe-area-inset-top) to prevent Android status bar overlap.
- * FIXED: Balanced flex-basis slots to ensure the timer remains centered without drift.
- * FIXED: Scaled down mobile action buttons to prevent collision on 320px-360px devices.
+ * @fileOverview Staff CBT Header v39.1.
+ * FIXED: Comprehensive layout refinement to prevent overlapping elements on mobile Android.
  */
 export default function ExamHeader({ 
   onPaletteToggle, 
@@ -58,7 +56,7 @@ export default function ExamHeader({
     <header className="bg-[#0B1528] text-white flex flex-col shrink-0 z-[100] border-b border-white/5 shadow-xl sticky top-0 pt-safe">
       <div className="h-14 md:h-18 flex items-center justify-between px-2 md:px-8 gap-0.5 md:gap-4 pt-[env(safe-area-inset-top)]">
         
-        {/* LEFT SLOT: Progress - Flex Basis 33% for centering */}
+        {/* LEFT: Progress */}
         <div className="flex items-center gap-0.5 md:gap-4 flex-1 min-w-0">
            <button 
              onClick={onExitRequest} 
@@ -77,7 +75,7 @@ export default function ExamHeader({
            </div>
         </div>
 
-        {/* CENTER SLOT: Timer */}
+        {/* CENTER: Timer */}
         <div className="flex justify-center shrink-0">
            <Timer 
              onTimeUp={() => {}} 
@@ -86,7 +84,7 @@ export default function ExamHeader({
            />
         </div>
 
-        {/* RIGHT SLOT: Actions - Flex Basis 33% for centering */}
+        {/* RIGHT: Actions */}
         <div className="flex items-center justify-end gap-1 md:gap-3 flex-1 min-w-0">
            {availableModes.length > 1 && (
               <DropdownMenu>
