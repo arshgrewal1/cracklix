@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Refined Admin Layout v13.3 - Spacing Tightened.
+ * @fileOverview Refined Admin Layout v13.4 - Logo Scaled & Realigned.
  */
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -90,15 +90,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center h-full gap-0">
               <button 
                 onClick={toggleSidebar}
-                className="bg-white border border-slate-200 text-slate-700 h-10 w-10 md:h-11 md:w-11 rounded-xl shadow-sm flex items-center justify-center active:scale-95 transition-all hover:border-primary/30"
+                className="bg-white border border-slate-200 text-slate-700 h-10 w-10 md:h-11 md:w-11 rounded-xl shadow-sm flex items-center justify-center active:scale-95 transition-all hover:border-primary/30 z-10"
               >
                 <Menu className="w-5 h-5 md:w-6 md:h-6" />
               </button>
 
               <Logo
                 variant="light"
-                className="shrink-0"
-                imgClassName="h-[60px] md:h-[110px]"
+                className="shrink-0 -ml-5"
+                imgClassName="h-[70px] md:h-[130px]"
               />
             </div>
             

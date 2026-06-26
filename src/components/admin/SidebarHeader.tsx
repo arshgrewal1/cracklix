@@ -11,8 +11,7 @@ interface SidebarHeaderProps {
 }
 
 /**
- * Cracklix Admin Sidebar Header v36.0 (High Density).
- * UPDATED: Persistent SidebarToggle visibility for collapsed state.
+ * Cracklix Admin Sidebar Header v37.0 (Logo Scaled).
  */
 export default function SidebarHeader({
   isOpen,
@@ -32,7 +31,7 @@ export default function SidebarHeader({
         align={isOpen ? "left" : "center"}
         className="transition-all duration-300"
         imgClassName={cn(
-          isOpen ? "h-[100px] md:h-[118px]" : "h-12 md:h-16"
+          isOpen ? "h-[110px] md:h-[140px]" : "h-12 md:h-16"
         )}
       />
 

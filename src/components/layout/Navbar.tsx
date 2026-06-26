@@ -39,7 +39,7 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Standardized Navbar v65.0 - Spacing Tightened.
+ * @fileOverview Standardized Navbar v66.0 - Logo Scaled & Realigned.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -108,19 +108,19 @@ export default function Navbar() {
       <nav className="w-full h-[80px] md:h-[112px] transition-all duration-300">
         <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between gap-2 md:gap-4">
 
-          <div className="flex items-center shrink-0 h-full gap-0 md:gap-1">
+          <div className="flex items-center shrink-0 h-full gap-0">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-lg md:rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30"
+              className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-lg md:rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
             >
               <Menu className="w-5 h-5 md:w-6 md:h-6" />
             </button>
 
             <Logo
               variant="light"
-              className="flex-shrink-0"
-              imgClassName="h-[56px] md:h-[100px]"
+              className="flex-shrink-0 -ml-5"
+              imgClassName="h-[64px] md:h-[120px]"
             />
           </div>
 

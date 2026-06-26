@@ -17,8 +17,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix High-Fidelity Brand Identity v73.0.
- * UPDATED: Fixed internal alignment to eliminate whitespace when left-aligned.
+ * @fileOverview Cracklix High-Fidelity Brand Identity v75.0.
+ * UPDATED: Increased dimensions and refined alignment logic.
  */
 export default function Logo({
   className = "",
@@ -64,7 +64,7 @@ export default function Logo({
     "flex items-center select-none hover:opacity-90 transition-opacity flex-shrink-0 relative overflow-hidden",
     isIcon 
       ? "h-10 w-10 md:h-14 md:w-14" 
-      : "h-12 w-32 md:h-24 md:w-80",
+      : "h-14 w-40 md:h-32 md:w-[400px]",
     align === 'center' && "mx-auto",
     className
   );
