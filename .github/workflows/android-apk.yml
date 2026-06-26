@@ -44,26 +44,15 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Build Android Production APK
+      - name: Build Android Debug APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease -x lint -x test --no-daemon
+          ./gradlew assembleDebug --no-daemon
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cracklix-production-apk
-          path: android/app/build/outputs/apk/release/*.apk
-          retention-days: 7
-
-      - name: Build Android App Bundle (AAB)
-        working-directory: android
-        run: ./gradlew bundleRelease -x lint -x test --no-daemon
-
-      - name: Upload AAB Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: cracklix-production-aab
-          path: android/app/build/outputs/bundle/release/*.aab
+          name: cracklix-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
           retention-days: 7
