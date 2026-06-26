@@ -1,4 +1,4 @@
-name: Build & Host Android APK
+name: Build Android APK
 
 on:
   push:
@@ -6,10 +6,10 @@ on:
 
 jobs:
   build:
-    name: Build, Sign & Deploy
+    name: Build & Sign Android APK
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       actions: write
 
     steps:
@@ -37,37 +37,26 @@ jobs:
       - name: Sync Capacitor
         run: npx cap sync android
 
-      - name: Build Android Production Assets
+      - name: Build Android Production APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew bundleRelease assembleRelease -x lint -x test --no-daemon
+          ./gradlew assembleRelease -x lint -x test --no-daemon
 
-      - name: Sign & Prepare Assets
-        run: |
-          mkdir -p out/apk
-          
-          # Move APK to distribution node
-          APK_PATH=$(find android/app/build/outputs/apk/release -name "*.apk" | head -n 1)
-          if [ -f "$APK_PATH" ]; then
-            cp "$APK_PATH" out/apk/cracklix-production.apk
-            echo "✅ APK staged at /apk/cracklix-production.apk"
-          fi
-
-          # Move AAB to distribution node
-          AAB_PATH=$(find android/app/build/outputs/bundle/release -name "*.aab" | head -n 1)
-          if [ -f "$AAB_PATH" ]; then
-            cp "$AAB_PATH" out/apk/cracklix-production.aab
-            echo "✅ AAB staged for Play Store"
-          fi
-          
-          # Version Metadata for Auto-Update Node
-          echo "{\"version\": \"1.0.0\", \"build\": ${{ github.run_number }}, \"updatedAt\": \"$(date -u +'%Y-%m-%dT%H:%M:%SZ')\"}" > out/apk/metadata.json
-
-      - name: Deploy to Firebase Hosting
-        uses: FirebaseExtended/action-hosting-deploy@v0
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
         with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          channelId: live
-          projectId: cracklix0
+          name: cracklix-production-apk
+          path: android/app/build/outputs/apk/release/*.apk
+          retention-days: 7
+
+      - name: Build Android App Bundle (AAB)
+        working-directory: android
+        run: ./gradlew bundleRelease -x lint -x test --no-daemon
+
+      - name: Upload AAB Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cracklix-production-aab
+          path: android/app/build/outputs/bundle/release/*.aab
+          retention-days: 7

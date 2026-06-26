@@ -9,7 +9,6 @@ const config: CapacitorConfig = {
   appId: 'com.cracklix.app',
   appName: 'Cracklix',
   webDir: 'out',
-  bundledWebRuntime: false,
   server: {
     // CRITICAL: Load production URL directly for authenticated sessions
     url: 'https://cracklix.vercel.app',
