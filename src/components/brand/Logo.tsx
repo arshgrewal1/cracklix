@@ -17,8 +17,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix High-Fidelity Brand Identity v83.0.
- * UPDATED: Increased default scales and removed rigid width constraints.
+ * @fileOverview Cracklix High-Fidelity Brand Identity v84.0.
+ * UPDATED: Removed rigid width constraints to allow for maximized scaling in Header and Footer.
  */
 export default function Logo({
   className = "",
@@ -51,7 +51,7 @@ export default function Logo({
         alt="Cracklix"
         fill
         priority={priority}
-        sizes={isIcon ? "120px" : "600px"}
+        sizes={isIcon ? "120px" : "800px"}
         className={cn(
           "transition-all flex-shrink-0 object-contain",
           imgClassName
@@ -64,7 +64,7 @@ export default function Logo({
     "flex items-center select-none hover:opacity-90 transition-opacity flex-shrink-0 relative",
     isIcon 
       ? "h-12 w-12 md:h-14 md:w-14" 
-      : "h-14 w-44 md:h-18 md:w-56",
+      : "h-20 w-64 md:h-28 md:w-96", // Increased default container to prevent clipping
     align === 'center' && "mx-auto",
     className
   );
