@@ -109,7 +109,7 @@ export default function Navbar() {
               aria-label="Open menu"
               className="flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
             >
-              <Menu className="w-[20px] h-[20px] md:w-6 md:h-6" />
+              <Menu className="w-[22px] h-[22px] md:w-6 md:h-6" />
             </button>
 
             <Logo
@@ -124,7 +124,7 @@ export default function Navbar() {
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
             <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
-            <NavLink href="/current-affairs" label="Notes & PDFs" active={pathname === '/current-affairs'} />
+            <NavLink href="/current-affairs" label="Daily News" active={pathname === '/current-affairs'} />
           </div>
 
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
@@ -137,9 +137,9 @@ export default function Navbar() {
 
             <Link
               href="/search"
-              className="w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
+              className="w-9 h-9 md:h-11 md:w-11 rounded-lg md:rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
             >
-              <Search className="w-[18px] h-[18px] md:w-5 md:h-5" />
+              <Search className="w-[22px] h-[22px] md:w-5 md:h-5" />
             </Link>
 
             {loading ? (
@@ -151,7 +151,7 @@ export default function Navbar() {
                     <StudentAvatar
                       profile={profile}
                       className="w-full h-full border-none"
-                      iconClassName="w-[18px] h-[18px] md:w-6 md:h-6"
+                      iconClassName="w-[22px] h-[22px] md:w-6 md:h-6"
                     />
                   </button>
                 </DropdownMenuTrigger>

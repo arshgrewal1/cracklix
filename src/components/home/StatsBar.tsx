@@ -56,7 +56,7 @@ export default function StatsBar() {
   ], [stats]);
 
   return (
-    <section className="bg-blue-50/30 py-8 md:py-24 border-y border-slate-100">
+    <section className="bg-blue-50/30 py-6 md:py-24 border-y border-slate-100">
       <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid gap-4 md:gap-12 grid-cols-2 md:grid-cols-4">
           {items.map((item, i) => (
@@ -73,11 +73,11 @@ export default function StatsBar() {
                 {loading && !stats ? (
                   <Skeleton className="h-6 md:h-20 w-16 md:w-48 bg-slate-50 rounded-xl mx-auto" />
                 ) : (
-                  <span className="text-[20px] md:text-5xl lg:text-7xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none antialiased">
+                  <span className="text-[22px] md:text-5xl lg:text-7xl font-black text-[#0F172A] tabular-nums tracking-tighter leading-none antialiased">
                     {item.val}
                   </span>
                 )}
-                <span className="text-[11px] md:text-sm font-bold text-slate-400 tracking-tight leading-none truncate w-full">
+                <span className="text-[13px] md:text-sm font-bold text-slate-400 tracking-tight leading-none truncate w-full">
                   {item.label}
                 </span>
               </div>
