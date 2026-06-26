@@ -37,8 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v16.3.
- * FIXED: Shifted logo 40px to the left using negative margin.
+ * @fileOverview Institutional Navbar v16.5.
+ * FIXED: Shifted logo to be exactly right of the menu button with minimal margin.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -118,7 +118,7 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 -ml-8 md:-ml-10" // Shifted 40px left on desktop
+              className="flex-shrink-0 ml-1 md:ml-2" // Positioned directly next to the button
               imgClassName="h-12 md:h-16"
             />
           </div>

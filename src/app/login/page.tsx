@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import React, { useState, Suspense, useEffect, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -44,8 +44,8 @@ import Image from "next/image"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Premium Login Hub v81.1 (ESLint Hardened).
- * FIXED: Replaced legacy img tags with next/image.
+ * @fileOverview Cracklix Premium Login Hub v82.0.
+ * UPDATED: Increased logo sizes for mobile and desktop views.
  */
 
 const formatCompact = (num: number) => {
@@ -154,7 +154,6 @@ function LoginContent() {
   const handleGoogleSignIn = async () => {
     if (loading) return;
 
-    // NATIVE GUARD: signInWithPopup is unsupported in many Android WebViews.
     if (Capacitor.isNativePlatform()) {
        toast({
          title: "📱 Mobile Login",
@@ -222,7 +221,7 @@ function LoginContent() {
 
         <div className="relative z-10 space-y-12 xl:space-y-20 max-w-[650px] pt-12 xl:pt-20">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            <Logo variant="dark" align="left" imgClassName="h-[110px] xl:h-[150px]" />
+            <Logo variant="dark" align="left" imgClassName="h-[140px] xl:h-[200px]" />
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-8">
@@ -253,7 +252,7 @@ function LoginContent() {
            <Link href="/" className="flex items-center gap-2 text-slate-400 font-black uppercase text-[10px] tracking-widest hover:text-primary transition-colors">
               <ChevronLeft className="h-4 w-4" /> Home
            </Link>
-           <Logo variant="light" align="center" imgClassName="h-20" />
+           <Logo variant="light" align="center" imgClassName="h-24 md:h-28" />
            <div className="w-10" />
         </div>
 

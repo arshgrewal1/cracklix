@@ -21,6 +21,10 @@ import {
 import PLATFORM_VERSION from "@/lib/version";
 import { Badge } from "@/components/ui/badge";
 
+/**
+ * @fileOverview Institutional Footer Hub v17.5.
+ * UPDATED: Significantly increased logo scale for high-fidelity brand finish.
+ */
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
@@ -34,7 +38,7 @@ export default function Footer() {
             <Logo
               variant="dark"
               align="left"
-              imgClassName="h-[180px] md:h-[260px]"
+              imgClassName="h-[220px] md:h-[320px]"
             />
             <p className="max-w-[320px] text-[15px] leading-relaxed text-slate-400 font-medium tracking-tight">
               Punjab's smart exam preparation platform for every aspirant.
@@ -69,7 +73,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Support Group - Full Width on Mobile for Email Visibility */}
+          {/* Support Group */}
           <div className="col-span-2 lg:col-span-1 space-y-6">
             <h3 className="text-sm font-bold text-primary tracking-tight uppercase">Support</h3>
             <div className="space-y-4">
