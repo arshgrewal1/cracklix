@@ -13,6 +13,7 @@ import {
   Newspaper
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
@@ -55,12 +56,12 @@ export default function Hero() {
             </motion.div>
 
             <div className="space-y-4 md:space-y-8">
-              <h1 className="text-[clamp(28px,6vw,84px)] font-[900] tracking-tighter text-[#0F172A] leading-[1] md:leading-[0.95] uppercase antialiased">
+              <h1 className="text-[clamp(26px,6vw,32px)] lg:text-[clamp(28px,6vw,84px)] font-[900] tracking-tighter text-[#0F172A] leading-[1] md:leading-[0.95] uppercase antialiased">
                 Crack Punjab <br className="hidden md:block"/>
                 <span className="text-primary italic">Recruitments</span>
               </h1>
 
-              <p className="text-[clamp(13px,1.8vw,24px)] md:text-2xl text-slate-500 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium tracking-tight">
+              <p className="text-[clamp(13px,1.8vw,16px)] lg:text-2xl text-slate-500 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium tracking-tight">
                 Practice tests and study nodes verified by official commission patterns.
               </p>
             </div>
@@ -99,21 +100,21 @@ export default function Hero() {
 
         {/* 3. QUICK ACTION CLUSTER */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8 mt-12 md:mt-32">
-          <QuickActionCard boardId="mock-test" label="Mock Tests" href="/mocks" />
-          <QuickActionCard boardId="study-material" label="Study Notes" href="/study-material" />
-          <QuickActionCard boardId="pyq" label="Old Papers" href="/pyqs" />
+          <QuickActionCard boardId="mock-test" label="Practice Tests" href="/mocks" />
+          <QuickActionCard boardId="study-material" label="Study Material" href="/study-material" />
+          <QuickActionCard boardId="pyq" label="Previous Papers" href="/pyqs" />
           <QuickActionCard boardId="current-affairs" label="Current Affairs" href="/current-affairs" />
         </div>
 
-        {/* 4. MOBILE CTAs */}
+        {/* 4. MOBILE CTAs - MOVED BELOW QUICK ACTIONS */}
         <div className="flex flex-col gap-3 pt-10 lg:hidden px-1">
-           <Button asChild className="w-full h-12 md:h-14 rounded-full font-black uppercase text-[10px] tracking-[0.2em] shadow-xl active:scale-95 transition-all border-none">
+           <Button asChild className="w-full h-12 md:h-14 rounded-full font-black uppercase text-[15px] tracking-[0.2em] shadow-xl active:scale-95 transition-all border-none">
               <Link href="/mocks" className="flex items-center justify-center gap-2">
                 Start Learning <ArrowRight className="h-4 w-4" />
               </Link>
            </Button>
-           <Button asChild variant="outline" className="w-full h-12 md:h-14 rounded-full font-black uppercase text-[10px] tracking-[0.2em] shadow-sm border-2 active:scale-95 transition-all">
-              <Link href="/exams">Explore Hub</Link>
+           <Button asChild variant="outline" className="w-full h-12 md:h-14 rounded-full font-black uppercase text-[15px] tracking-[0.2em] shadow-sm border-2 active:scale-95 transition-all">
+              <Link href="/exams">Explore Exams</Link>
            </Button>
         </div>
       </div>
