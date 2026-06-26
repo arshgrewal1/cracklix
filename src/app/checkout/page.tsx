@@ -20,8 +20,8 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
 /**
- * @fileOverview Checkout Hub v8.3.
- * FIXED: Restored missing Badge and CheckCircle2 imports to resolve build blockers.
+ * @fileOverview Checkout Hub v8.4.
+ * FIXED: Handled text overflow on manual verification button for mobile.
  */
 
 export default function CheckoutPage() {
@@ -189,7 +189,7 @@ function CheckoutContent() {
                                 } finally { setProcessing(false); }
                              }}
                              disabled={processing}
-                             className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase rounded-full shadow-2xl border-none active:scale-95 transition-all"
+                             className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] md:text-xs rounded-full shadow-2xl border-none active:scale-95 transition-all px-4"
                           >{processing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify & Activate Pass"}</Button>
                        </div>
                     </Card>
