@@ -12,6 +12,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
 import { Badge } from '@/components/ui/badge';
 
+/**
+ * @fileOverview Featured Categories Hub v25.0.
+ * UPDATED: Center-aligned and standardized with the Latest Mocks style.
+ */
+
 const STRICT_WHITELIST = [
   "punjab-government-exams",
   "punjab-teaching-exams",
@@ -43,7 +48,7 @@ export default function FeaturedCategories() {
              </div>
              <h2 className="text-[22px] md:text-[clamp(24px,4vw,36px)] font-bold tracking-tight text-[#0F172A]">Choose Exam</h2>
           </div>
-          <p className="max-w-2xl text-[14px] md:text-[clamp(13px,1.5vw,16px)] font-medium text-slate-500">Choose an exam to start your study.</p>
+          <p className="max-w-2xl text-[14px] md:text-[clamp(13px,1.5vw,18px)] font-medium text-slate-500">Choose an exam to start your study.</p>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4 md:gap-8 lg:gap-10">
@@ -51,7 +56,7 @@ export default function FeaturedCategories() {
             Array.from({ length: 6 }).map((_, i) => (
               <Skeleton 
                 key={i} 
-                className="h-[270px] md:h-[420px] w-full rounded-2xl md:rounded-[3rem] bg-slate-50" 
+                className="h-[280px] md:h-[420px] w-full rounded-2xl md:rounded-[3rem] bg-slate-50" 
               />
             ))
           ) : categories.map((cat, idx) => {
@@ -69,19 +74,23 @@ export default function FeaturedCategories() {
               >
                  <Link href={`/exams/category/${cat.id}`} className="h-full block">
                     <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[24px] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-4 md:p-10 lg:p-12 h-full min-h-[280px] md:min-h-[420px]">
-                       <div className="flex-1 flex flex-col justify-start">
-                          <div className="space-y-3 md:space-y-6">
-                             <div className="h-11 w-11 md:h-24 md:w-24 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
-                                <AuthorityLogo category={cat} size="lg" className="bg-transparent shadow-none border-none p-0 h-full w-full" />
-                             </div>
-                             <div className="space-y-1.5 md:space-y-3">
+                       
+                       <div className="flex justify-center mb-4 md:mb-12 shrink-0">
+                          <div className="h-11 w-11 md:h-24 md:w-24 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform overflow-hidden">
+                             <AuthorityLogo category={cat} size="lg" className="bg-transparent shadow-none border-none p-0 h-full w-full" />
+                          </div>
+                       </div>
+
+                       <div className="flex-1 flex flex-col justify-start text-center min-w-0">
+                          <div className="space-y-2 md:space-y-4">
+                             <div className="flex justify-center h-4 md:h-7">
                                 <Badge className="bg-primary/5 text-primary border-none font-bold text-[11px] px-2.5 py-0.5 rounded-full shadow-sm w-fit tracking-tight">
                                    {boardLabel} Hub
                                 </Badge>
-                                <h3 className="text-[16px] md:text-[clamp(15px,1.8vw,20px)] font-semibold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
-                                   {cat.title}
-                                </h3>
                              </div>
+                             <h3 className="text-[16px] md:text-[clamp(15px,1.8vw,20px)] font-semibold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
+                                {cat.title}
+                             </h3>
                           </div>
                        </div>
 

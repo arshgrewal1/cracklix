@@ -11,15 +11,18 @@ import { Card } from "@/components/ui/card";
 import { AuthorityLogo } from "@/lib/exam-icons";
 import { Button } from "@/components/ui/button";
 
+/**
+ * @fileOverview Popular Exams Hub v20.0.
+ * UPDATED: Standardized to match Latest Mocks center-aligned aesthetic.
+ */
+
 const POPULAR_LIST = [
   { name: "PCS Hub", id: "pcs", boardId: "PPSC", hasMocks: true },
   { name: "Constable", id: "constable", boardId: "Punjab Police", hasMocks: true },
   { name: "Patwari Hub", id: "patwari", boardId: "PSSSB", hasMocks: true },
   { name: "Clerk Hub", id: "clerk", boardId: "PSSSB", hasMocks: true },
   { name: "PSTET Paper 1", id: "pstet-paper-1", boardId: "PSTET", hasMocks: true },
-  { name: "ALM Tech", id: "alm", boardId: "PSPCL", hasMocks: true },
-  { name: "Staff Nurse", id: "staff-nurse", boardId: "BFUHS", hasMocks: true },
-  { name: "SSC CGL", id: "ssc-cgl", boardId: "SSC", hasMocks: true }
+  { name: "ALM Tech", id: "alm", boardId: "PSPCL", hasMocks: true }
 ];
 
 export default function PopularExams() {
@@ -33,7 +36,7 @@ export default function PopularExams() {
                   <div className="h-8 w-8 md:h-12 md:w-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary shadow-inner shrink-0">
                     <Target className="h-4 w-4 md:h-6 md:w-6" />
                   </div>
-                  <h2 className="text-[clamp(24px,4vw,36px)] font-black tracking-tight text-[#0F172A]">Popular Exams</h2>
+                  <h2 className="text-[clamp(24px,4vw,36px)] font-bold tracking-tight text-[#0F172A]">Popular Exams</h2>
                </div>
                <p className="max-w-2xl text-[clamp(13px,1.5vw,16px)] font-medium text-slate-500">Start your study with our most popular exam groups.</p>
             </div>
@@ -53,25 +56,27 @@ export default function PopularExams() {
                  className="flex flex-col h-full"
                >
                   <Link href={`/exams/view?id=${p.id}`} className="h-full block">
-                     <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[24px] md:rounded-[3rem] bg-white p-[16px] md:p-8 lg:p-10 flex flex-col h-full min-h-[190px] md:min-h-[340px] relative overflow-hidden group">
-                        <div className="flex-1 flex flex-col justify-start">
+                     <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[24px] md:rounded-[3rem] bg-white p-4 md:p-10 lg:p-12 flex flex-col h-full min-h-[220px] md:min-h-[420px] relative overflow-hidden group">
+                        
+                        <div className="flex justify-center mb-4 md:mb-12 shrink-0">
+                          <div className="h-10 w-10 md:h-24 md:w-24 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-500 overflow-hidden">
+                              <AuthorityLogo boardId={p.boardId} size="lg" className="bg-transparent shadow-none border-none p-0 h-full w-full" />
+                          </div>
+                        </div>
+
+                        <div className="flex-1 flex flex-col justify-start text-center min-w-0">
                            <div className="space-y-3 md:space-y-6">
-                              <div className="h-10 w-10 md:h-20 md:w-20 flex items-center justify-center overflow-hidden shrink-0 group-hover:scale-110 transition-transform">
-                                 <AuthorityLogo boardId={p.boardId} size="lg" className="bg-transparent shadow-none border-none p-0 h-full w-full" />
-                              </div>
-                              <div className="space-y-1.5">
-                                <h3 className="text-[clamp(15px,1.7vw,20px)] font-black tracking-tight text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
-                                   {p.name}
-                                </h3>
-                                <div className="flex flex-wrap gap-1.5">
-                                   <MiniChip emoji="📚" label="Tests" />
-                                </div>
+                              <h3 className="text-[15px] md:text-[clamp(15px,1.7vw,20px)] font-semibold leading-tight tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
+                                 {p.name}
+                              </h3>
+                              <div className="flex flex-wrap justify-center gap-1.5">
+                                 <MiniChip emoji="📚" label="Tests" />
                               </div>
                            </div>
                         </div>
 
                         <div className="mt-auto shrink-0 pt-4 md:pt-8">
-                           <Button variant="ghost" className="w-full h-[48px] md:h-14 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[clamp(13px,1vw,14px)] tracking-tight border-none shadow-md active:scale-95 gap-2">
+                           <Button variant="ghost" className="w-full h-11 md:h-14 lg:h-16 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[14px] md:text-[15px] tracking-tight border-none shadow-md active:scale-95 gap-2">
                               Open <ChevronRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
                            </Button>
                         </div>
