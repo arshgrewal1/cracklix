@@ -34,7 +34,7 @@ export default function Footer() {
             <Logo
               variant="dark"
               align="left"
-              imgClassName="h-[80px] md:h-[120px]"
+              imgClassName="h-[100px] md:h-[140px]"
             />
             <p className="max-w-[320px] text-[15px] leading-relaxed text-slate-400 font-medium tracking-tight">
               Punjab's smart exam preparation platform for every aspirant.

@@ -37,8 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v16.1.
- * FIXED: Removed logo overlap and negative margins for proper alignment.
+ * @fileOverview Institutional Navbar v16.2.
+ * FIXED: Increased logo size and shifted left as requested.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -118,8 +118,8 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 ml-3 md:ml-5"
-              imgClassName="h-10 md:h-12"
+              className="flex-shrink-0 ml-1 md:ml-2"
+              imgClassName="h-12 md:h-16"
             />
           </div>
 
