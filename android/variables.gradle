@@ -1,23 +1,16 @@
 ext {
-    minSdkVersion = 22
+    minSdkVersion = 24
     compileSdkVersion = 35
     targetSdkVersion = 35
-    androidxActivityVersion = '1.9.2'
+    androidxActivityVersion = '1.9.3'
     androidxAppCompatVersion = '1.7.0'
-    androidxBrowserVersion = '1.8.0'
-    androidxCheckpointVersion = '1.0.0'
-    androidxAnnotationVersion = '1.9.1'
-    androidxCoreVersion = '1.13.1'
     androidxCoordinatorLayoutVersion = '1.2.0'
-    androidxExifinterfaceVersion = '1.3.7'
-    androidxFragmentVersion = '1.8.3'
-    androidxSplashScreenVersion = '1.0.1'
-    androidxTransitionVersion = '1.5.1'
-    androidxLocalBroadcastManagerVersion = '1.1.0'
-    androidxMultiDexVersion = '2.0.1'
-    androidxSafeArgsVersion = '2.8.1'
-    firebaseMessagingVersion = '24.0.1'
-    playServicesLocationVersion = '21.3.0'
-    androidxWindowVersion = '1.3.0'
+    androidxCoreVersion = '1.15.0'
+    androidxFragmentVersion = '1.8.5'
     coreSplashScreenVersion = '1.0.1'
+    androidxWebkitVersion = '1.12.1'
+    junitVersion = '4.13.2'
+    androidxJunitVersion = '1.2.1'
+    androidxEspressoCoreVersion = '3.6.1'
+    cordovaAndroidVersion = '10.1.1'
 }
