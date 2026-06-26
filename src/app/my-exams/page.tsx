@@ -17,8 +17,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Institutional My Exams Hub v17.2 (Authority Icons Restored).
- * FIXED: Replaced manual icon logic with official AuthorityLogo component.
+ * @fileOverview Institutional My Exams Hub v18.0.
+ * FIXED: Standardized routing to /exams/view?id= to prevent 404 errors on dynamic exams.
  */
 
 export default function MyExamsPage() {
@@ -100,12 +100,12 @@ export default function MyExamsPage() {
               const board = boards?.find((b: any) => b.id === exam.boardId || b.abbreviation === exam.boardId);
               
               return (
-               <Card key={exam.id} className="border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] bg-white p-6 md:p-10 flex flex-col relative group">
+               <Card key={exam.id} onClick={() => router.push(`/exams/view?id=${exam.id}`)} className="border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] bg-white p-6 md:p-10 flex flex-col relative group cursor-pointer">
                   <div className="flex justify-between items-start mb-6 md:mb-10">
                      <div className="shrink-0 group-hover:scale-105 transition-transform">
                         <AuthorityLogo board={board} boardId={exam.boardId} size="md" className="h-12 w-12 md:h-16 rounded-2xl bg-slate-50 shadow-inner" />
                      </div>
-                     <button onClick={() => handleUnpin(exam.id)} disabled={unpinningId === exam.id} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90">
+                     <button onClick={(e) => { e.stopPropagation(); handleUnpin(exam.id); }} disabled={unpinningId === exam.id} className="text-slate-300 hover:text-rose-500 transition-colors p-2 active:scale-90">
                         {unpinningId === exam.id ? <RefreshCw className="h-5 w-5 animate-spin" /> : <X className="h-5 w-5" />}
                      </button>
                   </div>
@@ -115,7 +115,7 @@ export default function MyExamsPage() {
                       <StatRow label="Subject-wise Tests" val={s.subject} />
                       <StatRow label="Official Papers" val={s.pyq} />
                   </div>
-                  <Button onClick={() => router.push(`/exams/${exam.id}`)} className="w-full h-11 md:h-14 bg-[#0F172A] hover:bg-black text-white rounded-full shadow-lg border-none font-black uppercase text-[10px] tracking-widest gap-2">
+                  <Button className="w-full h-11 md:h-14 bg-[#0F172A] hover:bg-black text-white rounded-full shadow-lg border-none font-black uppercase text-[10px] tracking-widest gap-2">
                      Open Exam Hub <ChevronRight className="h-4 w-4" />
                   </Button>
                </Card>

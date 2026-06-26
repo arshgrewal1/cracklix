@@ -18,6 +18,11 @@ interface BoardHubClientProps {
   hubId: string;
 }
 
+/**
+ * @fileOverview Official Board Hub Client v2.0.
+ * FIXED: Standardized routing to prevent 404s on dynamic exams.
+ */
+
 export default function BoardHubClient({ hubId }: BoardHubClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -112,10 +117,10 @@ export default function BoardHubClient({ hubId }: BoardHubClientProps) {
                   const hasContent = s.total > 0;
 
                   return (
-                    <Card key={exam.id} onClick={() => router.push(`/exams/${exam.id}`)} className={cn("border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[3rem] bg-white group overflow-hidden h-full flex flex-col p-6 md:p-12 text-left cursor-pointer", !hasContent && "opacity-80 grayscale-[0.3]")}>
+                    <Card key={exam.id} onClick={() => router.push(`/exams/view?id=${exam.id}`)} className={cn("border border-[#E5E7EB] shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[3rem] bg-white group overflow-hidden h-full flex flex-col p-6 md:p-12 text-left cursor-pointer", !hasContent && "opacity-80 grayscale-[0.3]")}>
                        <div className="flex justify-between items-start mb-6 md:mb-10">
                           <AuthorityLogo board={hub} boardId={hubId} size="md" className="md:w-20 md:h-20 bg-slate-50 rounded-xl group-hover:scale-105 transition-transform" />
-                          <button onClick={(e) => handleTogglePin(e, exam.id)} disabled={pinningId === exam.id} className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl border flex items-center justify-center transition-all shadow-sm", isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}>
+                          <button onClick={(e) => { e.stopPropagation(); handleTogglePin(e, exam.id); }} disabled={pinningId === exam.id} className={cn("h-10 w-10 md:h-12 md:w-12 rounded-xl border flex items-center justify-center transition-all shadow-sm", isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-100 text-slate-300 hover:text-primary")}>
                              {pinningId === exam.id ? <RefreshCw className="h-4 w-4 animate-spin" /> : isPinned ? <CheckCircle2 className="h-4 w-4" /> : <Star className="h-4 w-4" />}
                           </button>
                        </div>

@@ -30,8 +30,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Universal Exam Hub Client with Detailed Debugging.
- * FIXED: Standardized ID retrieval and enhanced lookup resilience.
+ * @fileOverview Universal Exam Hub Client v2.1 (Resilient Routing).
+ * FIXED: Hardened ID resolution to prevent 404s on dynamic Firestore data.
  */
 
 export default function ExamHubClient() {
@@ -42,15 +42,19 @@ export default function ExamHubClient() {
   const { toast } = useToast()
   const { user, profile, loading: userLoading } = useUser()
 
+  // 1. Resolve ID from Query Param (Priority) or Path
   const examId = useMemo(() => {
     const queryId = searchParams.get('id');
     if (queryId) return queryId;
+    
+    // Path fallback (e.g., /exams/[id])
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSegment = pathSegments[pathSegments.length - 1];
-    return lastSegment !== 'view' ? lastSegment : "";
+    return lastSegment !== 'view' && lastSegment !== 'exams' ? lastSegment : "";
   }, [pathname, searchParams]);
 
-  const { data: exam, loading: examLoading } = useDoc<any>(useMemo(() => (db && examId ? doc(db, "exams", examId) : null), [db, examId]))
+  const examRef = useMemo(() => (db && examId ? doc(db, "exams", examId) : null), [db, examId]);
+  const { data: exam, loading: examLoading } = useDoc<any>(examRef);
   
   const mocksQuery = useMemo(() => (db ? query(collection(db, "mocks"), where("published", "==", true)) : null), [db]);
   const pyqsQuery = useMemo(() => (db && examId ? query(collection(db, "pyqs"), where("examId", "==", examId)) : null), [db, examId]);
@@ -66,7 +70,7 @@ export default function ExamHubClient() {
 
   useEffect(() => {
     if (!examLoading && examId && !exam) {
-       console.error("[DEBUG_EXAM] Document not found in 'exams' collection for ID:", examId);
+       console.warn("[REGISTRY_WARN] Exam ID not found in cloud nodes:", examId);
     }
   }, [examId, exam, examLoading]);
 
@@ -95,7 +99,7 @@ export default function ExamHubClient() {
 
   const groupedContent = useMemo(() => {
     if (!examId) return { FULL: [], SUBJECT: [], SECTIONAL: [], PYQ: [] };
-    const mocks = (rawMocks || []).filter(m => m.examId === examId || m.examIds?.includes(examId));
+    const mocks = (rawMocks || []).filter(m => m.examId === examId || (m.examIds && m.examIds.includes(examId)));
     return {
       FULL: mocks.filter(m => m.mockType === 'FULL'),
       SUBJECT: mocks.filter(m => m.mockType === 'SUBJECT'),
@@ -104,7 +108,12 @@ export default function ExamHubClient() {
     }
   }, [rawMocks, rawPyqs, examId])
 
-  if (examLoading || userLoading) return <div className="h-screen flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-8 w-8 text-primary animate-pulse" /><p className="text-[10px] font-black uppercase text-slate-300">Synchronizing Hub...</p></div>;
+  if (examLoading || userLoading) return (
+    <div className="h-screen flex flex-col items-center justify-center bg-white space-y-4">
+      <Zap className="h-8 w-8 text-primary animate-pulse" />
+      <p className="text-[10px] font-black uppercase text-slate-300">Synchronizing Hub...</p>
+    </div>
+  );
   
   if (!examId || (!exam && !examLoading)) return (
     <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6 bg-white">
@@ -114,7 +123,7 @@ export default function ExamHubClient() {
        <div className="space-y-2">
           <h2 className="text-2xl font-black text-[#0F172A] uppercase">Vertical Not Found</h2>
           <p className="text-slate-500 font-medium max-w-xs mx-auto">
-             The vertical vertical could not be verified in the registry.
+             The preparation node <code className="text-rose-600 bg-rose-50 px-1 py-0.5 rounded">{examId}</code> could not be verified.
           </p>
        </div>
        <Button onClick={() => router.back()} variant="outline" className="rounded-xl h-12 px-8">Return Back</Button>
@@ -179,7 +188,7 @@ export default function ExamHubClient() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-3 md:px-12 h-full font-black text-[8px] md:text-[11px] uppercase tracking-widest text-slate-400 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-lg md:rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-3">
+      <TabsTrigger value={value} className="px-3 md:px-12 h-full font-black text-[8px] md:text-[10px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white rounded-lg md:rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-3">
          <Icon className="h-3 w-3 md:h-4 md:w-4" /> {label}
       </TabsTrigger>
    )

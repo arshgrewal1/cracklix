@@ -9,13 +9,14 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview Institutional Sticky Search Hub v13.0 (Title Case Refined).
+ * @fileOverview Institutional Sticky Search Hub v14.0.
+ * FIXED: Standardized routing to prevent 404 errors on dynamic exams.
  */
 
 const TRENDING = [
-  { label: "PPSC", href: "/exams/category/punjab-government-exams" },
-  { label: "PSSSB", href: "/exams/category/punjab-government-exams" },
-  { label: "Punjab Police", href: "/exams/category/punjab-government-exams" },
+  { label: "PPSC", href: "/exams/hub/ppsc" },
+  { label: "PSSSB", href: "/exams/hub/psssb" },
+  { label: "Punjab Police", href: "/exams/hub/punjab-police" },
   { label: "Mock Tests", href: "/mocks" }
 ];
 
@@ -122,7 +123,7 @@ export default function GlobalSearch() {
                 {results.exams.length > 0 && (
                   <SearchGroup label="📚 Exams">
                     {results.exams.map(e => (
-                      <SearchResult key={e.id} href={`/exams/${e.id}`} title={e.name} sub="Official Hub" icon={<GraduationCap className="h-4 w-4" />} onClick={() => setIsOpen(false)} />
+                      <SearchResult key={e.id} href={`/exams/view?id=${e.id}`} title={e.name} sub="Official Hub" icon={<GraduationCap className="h-4 w-4" />} onClick={() => setIsOpen(false)} />
                     ))}
                   </SearchGroup>
                 )}
@@ -130,7 +131,7 @@ export default function GlobalSearch() {
                 {results.mocks.length > 0 && (
                   <SearchGroup label="📝 Mock Tests">
                     {results.mocks.map(m => (
-                      <SearchResult key={m.id} href={`/mocks/${m.id}`} title={m.title} sub={`${m.totalQuestions} Questions`} icon={<Zap className="h-4 w-4 text-primary" />} onClick={() => setIsOpen(false)} />
+                      <SearchResult key={m.id} href={`/mocks/view?id=${m.id}`} title={m.title} sub={`${m.totalQuestions} Questions`} icon={<Zap className="h-4 w-4 text-primary" />} onClick={() => setIsOpen(false)} />
                     ))}
                   </SearchGroup>
                 )}

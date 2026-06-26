@@ -18,8 +18,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview High-Density Category Explorer v29.1.
- * RESPONSIVE: Expanded container to max-w-[1440px] for desktop widescreen.
+ * @fileOverview High-Density Category Explorer v30.0.
+ * FIXED: Standardized exam routing to /exams/view?id= to prevent 404s.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -86,7 +86,6 @@ export default function ExamsEntryPage() {
       <Navbar />
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 max-w-[1440px]">
         
-        {/* 1. Header & Quick Search */}
         <div className="text-left mb-8 md:mb-20 space-y-8">
           <div className="space-y-3">
              <div className="flex items-center gap-2">
@@ -118,7 +117,7 @@ export default function ExamsEntryPage() {
                          const board = boards?.find((b: any) => b.id === e.boardId);
                          return (
                             <div key={e.id} className="flex items-center justify-between p-5 hover:bg-slate-50 transition-all">
-                               <Link href={`/exams/${e.id}`} className="flex items-center gap-6 flex-1 min-w-0">
+                               <Link href={`/exams/view?id=${e.id}`} className="flex items-center gap-6 flex-1 min-w-0">
                                   <div className="h-12 w-12 bg-slate-100 rounded-xl flex items-center justify-center shrink-0">
                                      <GraduationCap className="h-6 w-6 text-slate-400" />
                                   </div>
@@ -148,14 +147,16 @@ export default function ExamsEntryPage() {
           </div>
         </div>
 
-        {/* 2. Categories Grid */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8 lg:gap-10">
            {catLoading ? (
              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 md:h-96 w-full rounded-[2.5rem] bg-slate-50" />)
            ) : categories.map((cat) => {
               const catExams = exams?.filter(e => e.categoryId === cat.id) || [];
               const catExamIds = catExams.map(e => e.id);
-              const catMocksCount = mocks?.filter(m => catExamIds.includes(m.examId) || (m.examIds && m.examIds.some((id: string) => catExamIds.includes(id)))).length || 0;
+              const catMocksCount = mocks?.filter(m => {
+                const eids = m.examIds || (m.examId ? [m.examId] : []);
+                return eids.some((id: string) => catExamIds.includes(id));
+              }).length || 0;
               
               return (
                 <Link key={cat.id} href={`/exams/category/${cat.id}`}>
