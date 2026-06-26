@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v8.5.
- * FIXED: Explicitly imported cloneElement and isValidElement to resolve UMD global conflict and build blockers.
+ * @fileOverview Search Center v8.6.
+ * FIXED: Explicitly imported cloneElement and resolved UMD global conflict.
  */
 
 export default function SearchPage() {
