@@ -7,8 +7,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Exam Store v8.5.
- * FIXED: Removed duplicate property assignment in initExam.
+ * @fileOverview Hardened Exam Store v8.6 (ESLint Optimized).
+ * FIXED: Removed duplicate property assignment in initExam and standardized LanguageDisplayMode initialization.
  */
 
 export interface ExamStoreState {
@@ -142,7 +142,11 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
     if (db && state.userId && state.mockId) {
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
-      setDoc(attemptRef, { answers: newAnswers, statusMap: newStatus, updatedAt: serverTimestamp() }, { merge: true });
+      setDoc(attemptRef, { 
+         answers: newAnswers, 
+         statusMap: newStatus, 
+         updatedAt: serverTimestamp() 
+      }, { merge: true });
     }
   },
 

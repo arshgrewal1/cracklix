@@ -115,7 +115,7 @@ function SearchContent() {
               <div className="relative max-w-[700px] mx-auto group">
                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-blue-600/20 rounded-2xl blur-lg opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
                  <div className="relative">
-                    <SearchIcon className={cn("absolute left-4 md:left-6 top-1/2 -translate-y-1/2 h-5 w-5 md:h-6 md:w-6 transition-colors", isLoading ? "text-primary animate-pulse" : "text-slate-400")} />
+                    <SearchIcon className={cn("absolute left-4 md:left-6 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors", isLoading ? "text-primary animate-pulse" : "text-slate-400")} />
                     <input 
                       value={queryStr}
                       onChange={e => setQuery(e.target.value)}
@@ -187,7 +187,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
    return (
       <Link href={href} className="block active:scale-[0.99] transition-all group">
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
-            <div className="flex items-center gap-4 min-w-0 flex-1">
+            <div className="flex items-center gap-4 min-w-0 flex-1 space-y-1">
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
                   {isValidElement(icon)
                     ? cloneElement(icon as ReactElement<{ className?: string }>, {
@@ -196,7 +196,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
                     : icon}
                </div>
                <div className="text-left min-w-0 flex-1 space-y-1">
-                  <p className="font-bold text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl leading-tight line-clamp-1 truncate">{title}</p>
+                  <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
                   <div className="flex items-center gap-3">
                      <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] md:text-[9px] font-black rounded shadow-sm">{category}</Badge>
                      <div className="h-1 w-1 rounded-full bg-slate-200" />
@@ -219,7 +219,7 @@ function TrendingItem({ text, onSelect }: { text: string, onSelect: (v: string) 
          className="flex items-center gap-4 text-slate-400 text-sm font-bold hover:text-white cursor-pointer transition-colors group active:scale-95"
       >
          <Zap className="h-4 w-4 text-primary group-hover:animate-pulse" /> 
-         <span className="tracking-tight truncate">{text}</span>
+         <span className="tracking-tight truncate uppercase">{text}</span>
       </li>
    )
 }
