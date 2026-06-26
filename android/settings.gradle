@@ -1,6 +1,8 @@
 include ':app'
+include ':capacitor-android'
+include ':capacitor-cordova-android-plugins'
 
-rootProject.name = 'Cracklix'
+project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/android/capacitor')
+project(':capacitor-cordova-android-plugins').projectDir = new File('capacitor-cordova-android-plugins')
 
-// Standard Capacitor Plugin Resolution Node
 apply from: 'capacitor.settings.gradle'

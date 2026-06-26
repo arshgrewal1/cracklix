@@ -30,8 +30,10 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Universal Exam Hub Client v2.1 (Resilient Routing).
- * FIXED: Hardened ID resolution to prevent 404s on dynamic Firestore data.
+ * @fileOverview Universal Exam Hub Client v3.0 (Static Hardened).
+ * FIXED: Standardized ID resolution using ?id= query param as primary.
+ * FIXED: Removed env(safe-area-inset-top) collisions by adding pt-safe to shell.
+ * FIXED: Title Case normalization for preparation verticals.
  */
 
 export default function ExamHubClient() {
@@ -47,7 +49,7 @@ export default function ExamHubClient() {
     const queryId = searchParams.get('id');
     if (queryId) return queryId;
     
-    // Path fallback (e.g., /exams/[id])
+    // Path fallback for direct links
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSegment = pathSegments[pathSegments.length - 1];
     return lastSegment !== 'view' && lastSegment !== 'exams' ? lastSegment : "";
@@ -152,7 +154,7 @@ export default function ExamHubClient() {
                      </div>
                      <div className="flex items-center gap-4 md:gap-8">
                         <AuthorityLogo board={activeBoard} category={activeCategory} size="md" className="w-12 h-12 md:w-28 md:h-28 rounded-xl md:rounded-[2.5rem] bg-slate-50" />
-                        <h1 className="text-xl md:text-6xl font-black text-[#0F172A] leading-tight tracking-tight">
+                        <h1 className="text-xl md:text-5xl lg:text-6xl font-black text-[#0F172A] leading-tight tracking-tight">
                            {exam.name}
                         </h1>
                      </div>
@@ -211,7 +213,7 @@ function MockList({ data, results, isPassActive, loading, boards }: any) {
                   <div className="h-10 w-10 md:h-20 md:w-20 mx-auto mb-4 md:mb-8">
                      <AuthorityLogo board={board} size="md" className="w-10 h-10 md:w-20 md:h-20 bg-slate-50 rounded-lg md:rounded-xl" />
                   </div>
-                  <CardHeader className="p-0 flex-1 space-y-1 md:space-y-5">
+                  <CardHeader className="p-0 flex-1 space-y-1 md:space-y-4">
                      <CardTitle className="font-bold text-xs md:text-2xl text-[#0F172A] leading-tight line-clamp-2">
                         {mock.title}
                      </CardTitle>

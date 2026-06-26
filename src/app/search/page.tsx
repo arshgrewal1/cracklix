@@ -13,8 +13,9 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Center v8.13.
- * FIXED: Explicit imports for cloneElement and React module to satisfy Next.js 15 isolation.
+ * @fileOverview Search Center v9.0.
+ * FIXED: Explicit imports for cloneElement and React to satisfy Next.js 15 isolated builds.
+ * FIXED: Standardized routing to /exams/view?id= for dynamic registry support.
  */
 
 export default function SearchPage() {

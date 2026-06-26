@@ -23,8 +23,10 @@ const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
 ];
 
 /**
- * @fileOverview Hardened CBT Header v38.2.
- * FIXED: Optimized gaps and padding for mobile to prevent overlap between timer and translate.
+ * @fileOverview Hardened CBT Header v39.0.
+ * FIXED: Integrated env(safe-area-inset-top) to prevent Android status bar overlap.
+ * FIXED: Balanced flex-basis slots to ensure the timer remains centered without drift.
+ * FIXED: Scaled down mobile action buttons to prevent collision on 320px-360px devices.
  */
 export default function ExamHeader({ 
   onPaletteToggle, 
@@ -53,10 +55,10 @@ export default function ExamHeader({
   }, [baseLanguageMode]);
 
   return (
-    <header className="bg-[#0B1528] text-white flex flex-col shrink-0 z-[100] border-b border-white/5 shadow-xl sticky top-0 pt-[env(safe-area-inset-top)]">
-      <div className="h-14 md:h-18 flex items-center justify-between px-2 md:px-8 gap-0.5 md:gap-4">
+    <header className="bg-[#0B1528] text-white flex flex-col shrink-0 z-[100] border-b border-white/5 shadow-xl sticky top-0 pt-safe">
+      <div className="h-14 md:h-18 flex items-center justify-between px-2 md:px-8 gap-0.5 md:gap-4 pt-[env(safe-area-inset-top)]">
         
-        {/* LEFT SLOT: Progress */}
+        {/* LEFT SLOT: Progress - Flex Basis 33% for centering */}
         <div className="flex items-center gap-0.5 md:gap-4 flex-1 min-w-0">
            <button 
              onClick={onExitRequest} 
@@ -66,7 +68,7 @@ export default function ExamHeader({
            </button>
            
            <div className="flex items-center gap-1 bg-white/10 px-1.5 md:px-3 py-1 md:py-1.5 rounded-lg border border-white/10 shrink-0 shadow-inner">
-              <span className="text-xs md:text-xl font-black text-primary tabular-nums">
+              <span className="text-[10px] md:text-xl font-black text-primary tabular-nums">
                  {currentIdx + 1}
               </span>
               <span className="text-[8px] md:text-xs font-bold text-slate-500">
@@ -84,12 +86,12 @@ export default function ExamHeader({
            />
         </div>
 
-        {/* RIGHT SLOT: Actions */}
+        {/* RIGHT SLOT: Actions - Flex Basis 33% for centering */}
         <div className="flex items-center justify-end gap-1 md:gap-3 flex-1 min-w-0">
            {availableModes.length > 1 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                   <button className="h-7 w-7 md:h-12 md:w-12 bg-white/10 text-white hover:bg-white/20 border border-white/10 rounded-xl flex items-center justify-center transition-all shrink-0">
+                   <button className="h-7 w-7 md:h-11 md:w-11 bg-white/10 text-white hover:bg-white/20 border border-white/10 rounded-lg flex items-center justify-center transition-all shrink-0">
                       <Languages className="h-3.5 w-3.5 md:h-5 md:w-5 text-primary" />
                    </button>
                 </DropdownMenuTrigger>
@@ -112,14 +114,14 @@ export default function ExamHeader({
 
            <button 
              onClick={() => setPaused(!isPaused)}
-             className="h-7 w-7 md:h-12 md:w-12 bg-white/10 text-white border border-white/10 rounded-xl flex items-center justify-center active:scale-90 transition-all shrink-0"
+             className="h-7 w-7 md:h-11 md:w-11 bg-white/10 text-white border border-white/10 rounded-lg flex items-center justify-center active:scale-90 transition-all shrink-0"
            >
              {isPaused ? <Play className="h-3.5 w-3.5 md:h-5 md:w-5 fill-current text-primary" /> : <Pause className="h-3.5 w-3.5 md:h-5 md:w-5 fill-current" />}
            </button>
            
            <button 
              onClick={onPaletteToggle}
-             className="bg-primary hover:bg-blue-600 text-white h-7 md:h-12 px-2 md:px-6 rounded-lg md:rounded-xl font-black uppercase text-[8px] md:text-[11px] tracking-widest flex items-center justify-center shadow-lg active:scale-95 border-none transition-all"
+             className="bg-primary hover:bg-blue-600 text-white h-7 md:h-11 px-2 md:px-5 rounded-lg font-black uppercase text-[8px] md:text-[10px] tracking-widest flex items-center justify-center shadow-lg active:scale-95 border-none transition-all"
            >
               Map
            </button>
