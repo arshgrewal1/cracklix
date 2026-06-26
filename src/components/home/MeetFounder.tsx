@@ -39,12 +39,12 @@ export default function MeetFounder() {
           <div className="flex-1 space-y-4 md:space-y-8 text-center md:text-left">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                <Badge className="bg-[#0F172A] text-white border-none px-3 py-1 rounded-lg font-black text-[8px] md:text-[10px] uppercase tracking-widest">
+                <Badge className="bg-[#0F172A] text-white border-none px-3 py-1 rounded-lg font-black text-[8px] md:text-[10px] tracking-widest">
                   Founder
                 </Badge>
               </div>
 
-              <h3 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tight leading-none uppercase">
+              <h3 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tight leading-none">
                 Meet the Founder
               </h3>
             </div>
@@ -56,7 +56,7 @@ export default function MeetFounder() {
             <div className="pt-2 md:pt-6">
               <Button
                 asChild
-                className="h-12 md:h-18 px-10 md:px-14 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] md:text-xs tracking-[0.2em] rounded-2xl shadow-xl transition-all active:scale-95 border-none"
+                className="h-12 md:h-18 px-10 md:px-14 bg-[#0F172A] hover:bg-black text-white font-black text-[10px] md:text-xs tracking-[0.2em] rounded-2xl shadow-xl transition-all active:scale-95 border-none"
               >
                 <Link href="/about" className="flex items-center gap-3">
                   Read Story <ArrowRight className="h-4 w-4 md:h-5 md:w-5" />
