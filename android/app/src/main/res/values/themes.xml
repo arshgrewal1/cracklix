@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- 
-       Theme.Cracklix definition removed from here to resolve duplicate resource error.
-       Standardized theme definitions are now consolidated in styles.xml.
+       Institutional Theme Registry.
+       Conflicting Theme.Cracklix definition has been consolidated into styles.xml 
+       to resolve duplicate resource build failures.
     -->
 </resources>
