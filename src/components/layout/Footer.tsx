@@ -22,29 +22,29 @@ import PLATFORM_VERSION from "@/lib/version";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Institutional Footer Hub v17.6.
- * UPDATED: Maximized logo scale and strictly left-aligned for high-fidelity branding.
+ * @fileOverview Institutional Footer Hub v18.0.
+ * UPDATED: Removed top/bottom padding and space-y gaps around the logo for zero-space integration.
  */
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="border-t border-slate-50 bg-[#020617] font-body text-white">
-      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 py-12 md:py-24">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 pt-0 pb-12 md:pb-24">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-12 md:gap-20 items-start text-left">
 
-          {/* Brand Section */}
-          <div className="col-span-2 lg:col-span-1 space-y-8">
+          {/* Brand Section - ZERO TOP SPACE */}
+          <div className="col-span-2 lg:col-span-1 space-y-4">
             <Logo
               variant="dark"
               align="left"
-              className="h-[240px] md:h-[360px]"
+              className="h-28 md:h-40 -ml-2"
               imgClassName="h-full w-auto"
             />
             <p className="max-w-[320px] text-[15px] leading-relaxed text-slate-400 font-medium tracking-tight">
               Punjab's smart exam preparation platform for every aspirant.
             </p>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 pt-2">
               <SocialIcon href={TELEGRAM_GROUP} icon={<MessageCircle className="h-5 w-5" />} />
               <SocialIcon href={INSTAGRAM_PROFILE} icon={<Instagram className="h-5 w-5" />} />
               <SocialIcon href="/download" icon={<Download className="h-5 w-5" />} />
@@ -52,7 +52,7 @@ export default function Footer() {
           </div>
 
           {/* Links Group */}
-          <div className="col-span-1 lg:col-span-1 space-y-6">
+          <div className="col-span-1 lg:col-span-1 space-y-6 pt-10 md:pt-14">
             <h3 className="text-sm font-bold text-primary tracking-tight uppercase">Quick Links</h3>
             <ul className="space-y-3">
               <FooterLink href="/">Home</FooterLink>
@@ -64,7 +64,7 @@ export default function Footer() {
           </div>
 
           {/* Resources Group */}
-          <div className="hidden lg:block lg:col-span-1 space-y-6">
+          <div className="hidden lg:block lg:col-span-1 space-y-6 pt-10 md:pt-14">
             <h3 className="text-sm font-bold text-primary tracking-tight uppercase">Resources</h3>
             <ul className="space-y-3">
               <FooterLink href="/mocks">Mock Tests</FooterLink>
@@ -75,7 +75,7 @@ export default function Footer() {
           </div>
 
           {/* Support Group */}
-          <div className="col-span-2 lg:col-span-1 space-y-6">
+          <div className="col-span-2 lg:col-span-1 space-y-6 pt-10 md:pt-14">
             <h3 className="text-sm font-bold text-primary tracking-tight uppercase">Support</h3>
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-[14px] md:text-[15px] text-slate-400">
