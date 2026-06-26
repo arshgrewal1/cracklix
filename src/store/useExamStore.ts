@@ -7,7 +7,7 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Exam Store v10.8.
+ * @fileOverview Hardened Exam Store v10.9.
  * FIXED: Purged duplicate object property declarations and standardized state initialization.
  */
 
