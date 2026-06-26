@@ -16,7 +16,7 @@ import { AuthorityLogo } from "@/lib/exam-icons";
 import Image from "next/image"
 
 /**
- * @fileOverview Hero Hub v4.3 - Restored Mobile Image & Optimized Stacking.
+ * @fileOverview Hero Hub v4.4 - Strategic CTA placement below resource cards.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -36,7 +36,7 @@ export default function Hero() {
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-8 md:gap-12 items-center">
 
-          {/* LEFT: TEXT CONTENT & PRIMARY ACTIONS */}
+          {/* LEFT: TEXT CONTENT */}
           <div className="text-left space-y-6 md:space-y-10 order-1">
             <motion.div 
                initial={{ opacity: 0, x: -20 }}
@@ -58,16 +58,6 @@ export default function Hero() {
               <p className="text-[13px] sm:text-lg text-slate-500 max-w-xl leading-relaxed font-medium">
                 Practice Tests, Old Papers, and Notes verified by official board patterns. Join thousands of successful aspirants today.
               </p>
-            </div>
-
-            {/* PRIMARY BUTTONS - MOVED UP FOR BETTER MOBILE CONVERSION */}
-            <div className="flex flex-row gap-3 md:gap-5 pt-2">
-              <Button asChild className="flex-1 md:flex-none h-12 md:h-16 rounded-full font-black text-[10px] md:text-xs tracking-widest px-6 md:px-12 shadow-xl active:scale-95 transition-all border-none">
-                <Link href="/mocks" className="flex items-center gap-2">Start Test <ArrowRight className="h-4 w-4" /></Link>
-              </Button>
-              <Button asChild variant="outline" className="flex-1 md:flex-none h-12 md:h-16 rounded-full font-black text-[10px] md:text-xs tracking-widest px-6 md:px-12 shadow-sm border-2 active:scale-95 transition-all">
-                <Link href="/exams">Browse All</Link>
-              </Button>
             </div>
           </div>
 
@@ -114,6 +104,21 @@ export default function Hero() {
             href="/current-affairs" 
           />
         </div>
+
+        {/* PRIMARY CALL TO ACTION - NOW BELOW ALL RESOURCE CARDS */}
+        <motion.div 
+           initial={{ opacity: 0, y: 20 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ delay: 0.4 }}
+           className="mt-10 md:mt-16 flex flex-col sm:flex-row justify-center items-center gap-3 md:gap-5"
+        >
+           <Button asChild className="w-full sm:w-auto h-12 md:h-16 rounded-full font-black text-[10px] md:text-xs tracking-widest px-12 md:px-16 shadow-xl active:scale-95 transition-all border-none">
+              <Link href="/mocks" className="flex items-center gap-2">Start Free Test <ArrowRight className="h-4 w-4" /></Link>
+           </Button>
+           <Button asChild variant="outline" className="w-full sm:w-auto h-12 md:h-16 rounded-full font-black text-[10px] md:text-xs tracking-widest px-12 md:px-16 shadow-sm border-2 active:scale-95 transition-all">
+              <Link href="/exams">Browse All Exams</Link>
+           </Button>
+        </motion.div>
       </div>
     </section>
   );
