@@ -17,8 +17,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix High-Fidelity Brand Identity v97.0.
- * UPDATED: Increased dimensions by 50% for maximum brand presence across platforms.
+ * @fileOverview Cracklix High-Fidelity Brand Identity v98.0.
+ * FIXED: Removed fixed pixel widths that caused header overflow.
  */
 export default function Logo({
   className = "",
@@ -51,7 +51,7 @@ export default function Logo({
         alt="Cracklix"
         fill
         priority={priority}
-        sizes={isIcon ? "512px" : "2500px"}
+        sizes={isIcon ? "128px" : "400px"}
         className={cn(
           "transition-all flex-shrink-0 object-contain",
           align === 'left' && "object-left",
@@ -64,8 +64,8 @@ export default function Logo({
   const baseClasses = cn(
     "flex items-center select-none hover:opacity-90 transition-opacity flex-shrink-0 relative",
     isIcon 
-      ? "h-48 w-48 md:h-80 md:w-80" 
-      : "h-80 w-[400px] md:h-96 md:w-[1000px]", 
+      ? "h-10 w-10 md:h-12 md:w-12" 
+      : "h-12 w-32 md:h-16 md:w-48", 
     align === 'center' && "mx-auto",
     className
   );

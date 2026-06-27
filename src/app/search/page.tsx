@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v2.1.
+ * @fileOverview Institutional Search Hub v2.2.
  * FIXED: Explicit React import and Suspense boundary for Next.js 15 stability.
  */
 
@@ -188,7 +188,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
       <Link href={href} className="block active:scale-[0.99] transition-all group">
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
             <div className="flex items-center gap-4 min-w-0 flex-1">
-               <div className="h-14 w-14 md:h-20 md:w-20 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
+               <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
                   {isValidElement(icon) ? cloneElement(icon as ReactElement<any>, { className: "h-8 w-8" }) : icon}
                </div>
                <div className="text-left min-w-0 flex-1 space-y-1">

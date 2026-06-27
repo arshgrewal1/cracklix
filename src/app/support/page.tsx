@@ -38,7 +38,7 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Support Ticket Hub v6.1.
+ * @fileOverview Institutional Support Ticket Hub v6.2.
  * FIXED: Restored missing Link and Loader2 imports.
  */
 

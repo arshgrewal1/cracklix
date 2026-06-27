@@ -37,8 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v21.1.
- * UPDATED: Replaced "Daily News" with "Current Affairs" for hub consistency.
+ * @fileOverview Institutional Navbar v22.0.
+ * FIXED: Responsive gaps to ensure all nav items are visible on desktop.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -105,8 +105,9 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-50 w-full font-body pt-safe bg-white border-b border-slate-100 shadow-sm">
       <nav className="w-full h-[64px] md:h-[80px] transition-all duration-300">
-        <div className="w-full max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-2 md:gap-4">
+        <div className="w-full max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
 
+          {/* LEFT: Menu + Logo */}
           <div className="flex items-center shrink-0 h-full">
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -118,12 +119,13 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 ml-2 md:ml-4 h-14 md:h-20" 
+              className="flex-shrink-0 ml-2 md:ml-4 h-12 md:h-16 w-auto" 
               align="left"
             />
           </div>
 
-          <div className="hidden lg:flex items-center justify-center gap-8 xl:gap-12 flex-1 lg:-ml-10">
+          {/* CENTER: Navigation Links */}
+          <div className="hidden lg:flex items-center justify-center gap-4 xl:gap-8 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
             <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
@@ -131,10 +133,11 @@ export default function Navbar() {
             <NavLink href="/leaderboard" label="Top Rankers" active={pathname === '/leaderboard'} />
           </div>
 
+          {/* RIGHT: User Actions */}
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
             {profile?.passStatus === 'active' && timeLeft && (
                <div className="hidden sm:flex flex-col items-end mr-1">
-                  <span className="text-[8px] font-bold text-emerald-600 tracking-tight leading-none">Elite Hub</span>
+                  <span className="text-[8px] font-bold text-emerald-600 tracking-tight leading-none uppercase">Elite Hub</span>
                   <span className="text-[10px] font-bold text-slate-400 mt-1 leading-none">{timeLeft}</span>
                </div>
             )}
@@ -209,7 +212,10 @@ export default function Navbar() {
 
 function NavLink({ href, label, active }: { href: string; label: string; active?: boolean; }) {
   return (
-    <Link href={href} className={cn("text-[13px] xl:text-[14px] font-bold tracking-tight transition-all", active ? "text-primary border-b-2 border-primary" : "text-slate-500 hover:text-primary")}>
+    <Link href={href} className={cn(
+      "text-[13px] xl:text-[14px] font-bold tracking-tight transition-all whitespace-nowrap", 
+      active ? "text-primary border-b-2 border-primary" : "text-slate-500 hover:text-primary"
+    )}>
       {label}
     </Link>
   );
