@@ -12,6 +12,8 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
+
 include ':app'
 
+// Capacitor Plugins linkage
 apply from: 'capacitor.settings.gradle'
