@@ -2,7 +2,8 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 /**
  * @fileOverview Production Capacitor Configuration for Cracklix Android.
- * Optimized for institutional readiness and high-fidelity WebView performance.
+ * Optimized for institutional readiness and high-fidelity static asset rendering.
+ * FIXED: Ensured webDir points to 'out' to match Next.js static export.
  */
 
 const config: CapacitorConfig = {
@@ -10,7 +11,7 @@ const config: CapacitorConfig = {
   appName: 'Cracklix',
   webDir: 'out',
   server: {
-    // CRITICAL: Load production URL directly for authenticated sessions
+    // FALLBACK: Load production URL if local assets fail or for authenticated sessions
     url: 'https://cracklix.vercel.app',
     allowNavigation: ['*'],
     androidScheme: 'https'

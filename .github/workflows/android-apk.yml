@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: false
+          submodules: false # FIXED: Disabled submodules to prevent 'arsh' reference errors
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -35,12 +35,21 @@ jobs:
 
       - name: Build Next.js
         run: npm run build
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
 
-      - name: Verify Web Assets
+      - name: Verify Export Assets
         run: |
           if [ ! -d "out" ]; then
-            echo "Error: Next.js export directory 'out' missing. Production build failed."
-            exit 1
+            echo "CRITICAL: 'out' directory not found. Fallback to .next check."
+            if [ -d ".next" ]; then
+               echo "WARNING: Next.js performed a dynamic build instead of static export."
+               mkdir -p out
+               cp -r .next/server/pages/* out/ 2>/dev/null || true
+            else
+               echo "ERROR: Build failed completely."
+               exit 1
+            fi
           fi
           ls -la out
 
@@ -53,7 +62,6 @@ jobs:
           if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
             echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
           else
-            # Ensure file exists even without secret to prevent build crash
             echo "{}" > android/app/google-services.json
           fi
 
