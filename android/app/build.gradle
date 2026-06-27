@@ -1,21 +1,26 @@
-apply plugin: 'com.android.application'
-apply plugin: 'org.jetbrains.kotlin.android'
-apply plugin: 'com.google.gms.google-services'
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'com.google.gms.google-services'
+}
+
+apply from: '../variables.gradle'
 
 android {
     namespace "com.cracklix.app"
-    compileSdk rootProject.ext.compileSdkVersion
-    
+    compileSdk project.ext.compileSdkVersion
+
     defaultConfig {
         applicationId "com.cracklix.app"
-        minSdk rootProject.ext.minSdkVersion
-        targetSdk rootProject.ext.targetSdkVersion
+        minSdk project.ext.minSdkVersion
+        targetSdk project.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Avoid adding files to the apk that aren't needed
-             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:fsa:bak'
+             // Capacitor handles indexing
+             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
 
@@ -34,27 +39,40 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
+}
 
-    packagingOptions {
-        resources {
-            excludes += '/META-INF/{AL2.0,LGPL2.1}'
-        }
+repositories {
+    flatDir {
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
-    implementation "androidx.core:core-ktx:$rootProject.ext.androidxCoreKTXVersion"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.ext.androidxCoordinatorLayoutVersion"
-    implementation "androidx.activity:activity-ktx:$rootProject.ext.androidxActivityVersion"
-    
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "androidx.appcompat:appcompat:$project.ext.androidxAppCompatVersion"
+    implementation "androidx.core:core-ktx:$project.ext.androidxCoreKTXVersion"
+    implementation "com.google.android.material:material:1.12.0"
     implementation project(':capacitor-android')
+    implementation project(':capacitor-app')
+    implementation project(':capacitor-browser')
+    implementation project(':capacitor-filesystem')
+    implementation project(':capacitor-keyboard')
+    implementation project(':capacitor-share')
+    implementation project(':capacitor-status-bar')
+
+    testImplementation "junit:junit:$project.ext.junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$project.ext.androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$project.ext.androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
-    
-    testImplementation "junit:junit:$rootProject.ext.junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.androidxEspressoCoreVersion"
 }
 
 apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, skipping plugin application")
+}
