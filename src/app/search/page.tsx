@@ -131,7 +131,7 @@ function SearchContent() {
                  </div>
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.length > 0 ? searchResults.map((res, i) => (
-                      <SearchResultItem key={i} title={res.title} category={res.type} href={res.href} icon={res.icon as ReactElement} />
+                      <SearchResultItem key={i} title={res.title} category={res.type} href={res.href} icon={res.icon as React.ReactElement<any>} />
                     )) : !isLoading && (
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">
@@ -178,7 +178,7 @@ function SearchContent() {
   )
 }
 
-function SearchResultItem({ title, category, href, icon }: { title: string, category: string, href: string, icon: ReactElement }) {
+function SearchResultItem({ title, category, href, icon }: { title: string, category: string, href: string, icon: React.ReactElement<any> }) {
    return (
       <Link href={href} className="block active:scale-[0.99] transition-all group">
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">

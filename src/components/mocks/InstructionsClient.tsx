@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, isValidElement, cloneElement } from "react";
+import React, { useEffect, useState, useMemo, isValidElement, cloneElement, ReactElement } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
