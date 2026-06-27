@@ -5,7 +5,6 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
@@ -16,6 +15,6 @@ dependencyResolutionManagement {
 
 rootProject.name = 'android'
 include ':app'
+project(':app').projectDir = new File('app')
 
-// CRITICAL: Link Capacitor generated settings for native plugins
 apply from: 'capacitor.settings.gradle'
