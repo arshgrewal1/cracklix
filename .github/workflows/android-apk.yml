@@ -2,39 +2,42 @@ name: Build Android APK
 
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
   build:
     name: Build & Sign Android APK
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       actions: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
-          submodules: false
           fetch-depth: 0
+          submodules: false
 
-      - name: Cleanup Submodules
+      - name: Cleanup Broken Submodules
         run: |
           git config --local --unset-all core.sshCommand || true
           rm -f .gitmodules
           git rm --cached arsh 2>/dev/null || true
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          cache: npm
 
-      - name: Setup Java 21
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
+          distribution: temurin
+          java-version: 21
 
       - name: Install Dependencies
         run: npm ci
@@ -44,12 +47,24 @@ jobs:
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
 
-      - name: Setup Capacitor Placeholder Assets
+      - name: Create Placeholder Web Assets
         run: |
           # Capacitor requires a webDir folder to exist for sync
           # Even if loading from server.url, we create a placeholder index
           mkdir -p out
-          echo '<script>window.location.href="https://cracklix.vercel.app"</script>' > out/index.html
+          cat > out/index.html <<EOF
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Cracklix</title>
+            <meta http-equiv="refresh" content="0; url=https://cracklix.vercel.app">
+          </head>
+          <body>
+            Redirecting to Cracklix Hub...
+          </body>
+          </html>
+          EOF
           mkdir -p android/app/src/main/assets/public
 
       - name: Setup Google Services
@@ -60,20 +75,19 @@ jobs:
             echo "{}" > android/app/google-services.json
           fi
 
-      - name: Sync Capacitor
-        run: |
-          npx cap sync android
+      - name: Capacitor Sync
+        run: npx cap sync android
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Build Android Release APK
+      - name: Build Release APK
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon --stacktrace
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: cracklix-release-apk
