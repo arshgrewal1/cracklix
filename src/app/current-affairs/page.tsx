@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -26,8 +27,8 @@ import { useRouter } from "next/navigation"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Current Affairs Center v19.0.
- * UPDATED: Removed forced uppercase and refined logo styling.
+ * @fileOverview Official Current Affairs Center v20.0.
+ * UPDATED: Optimized hero logo and removed all forced uppercase.
  */
 
 const HUB_TYPES = [
@@ -108,7 +109,7 @@ export default function CurrentAffairsCenter() {
                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><AuthorityLogo boardId="current-affairs" size="xl" className="h-96 w-96 opacity-5" /></div>
                   <div className="space-y-10 relative z-10 max-w-5xl">
                     <div className="flex items-center gap-4">
-                        <AuthorityLogo boardId="current-affairs" size="md" className="bg-white/10 border-white/20 shadow-none" />
+                        <AuthorityLogo boardId="current-affairs" size="md" className="bg-white/10 border-white/20 shadow-none p-0" />
                         <Badge className="bg-primary text-white border-none px-4 py-1.5 rounded-full font-bold text-[10px] tracking-widest shadow-xl">
                             Registry Updates
                         </Badge>
