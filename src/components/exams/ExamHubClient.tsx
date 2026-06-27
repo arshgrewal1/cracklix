@@ -31,8 +31,9 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Universal Exam Hub Client v3.3.
- * FIXED: Professional empty state when exam exists but has no associated content.
+ * @fileOverview Universal Exam Hub Client v3.4.
+ * FIXED: Replaced professional empty state when exam exists but has no associated content.
+ * sabhi me same sms rakho mock available nahi hai.
  */
 
 export default function ExamHubClient() {
@@ -109,13 +110,13 @@ export default function ExamHubClient() {
   
   if (!examId || (!exam && !examLoading)) return (
     <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6 bg-white">
-       <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-xl border border-rose-100">
+       <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto text-primary shadow-xl border border-blue-100">
           <AlertCircle className="h-8 w-8" />
        </div>
        <div className="space-y-2">
-          <h2 className="text-2xl font-black text-[#0F172A] uppercase">Vertical Not Found</h2>
+          <h2 className="text-2xl font-black text-[#0F172A] uppercase">Mock Available Nahi Hai</h2>
           <p className="text-slate-500 font-medium max-w-xs mx-auto">
-             The preparation node <code className="text-rose-600 bg-rose-50 px-1 py-0.5 rounded">{examId}</code> could not be verified.
+             Coming Soon: Tests for this vertical are being verified by our technical team.
           </p>
        </div>
        <Button onClick={() => router.back()} variant="outline" className="rounded-xl h-12 px-8">Return Back</Button>
@@ -161,9 +162,9 @@ export default function ExamHubClient() {
                   <ClipboardList className="h-10 w-10 md:h-14 md:w-14" />
                </div>
                <div className="space-y-3 max-w-md mx-auto">
-                  <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] uppercase tracking-tight">No Mock Tests Available</h2>
+                  <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] uppercase tracking-tight">Mock Available Nahi Hai</h2>
                   <p className="text-slate-500 font-medium text-sm md:text-lg leading-relaxed">
-                     Mock tests for this exam haven't been published yet. Please check back soon. New tests will be added regularly.
+                     Tests for this exam haven't been published yet. Please check back soon. New tests will be added regularly.
                   </p>
                </div>
                <Button onClick={() => router.back()} variant="outline" className="rounded-xl h-14 px-10 border-2 font-bold uppercase tracking-widest text-[10px]">Return Back</Button>
@@ -204,7 +205,7 @@ function DashboardTab({ value, label, icon: Icon }: { value: string, label: stri
 function MockList({ data, isPassActive, loading, boards }: any) {
    const router = useRouter();
    if (loading) return <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">{Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-40 md:h-64 w-full rounded-xl md:rounded-[2.5rem] bg-white" />)}</div>;
-   if (data.length === 0) return <div className="py-24 text-center opacity-20 flex flex-col items-center justify-center space-y-4 text-slate-300"><Zap className="h-10 w-10" /><p className="font-headline font-black text-lg md:text-xl uppercase tracking-widest">Section Empty</p></div>;
+   if (data.length === 0) return <div className="py-24 text-center opacity-20 flex flex-col items-center justify-center space-y-4 text-slate-300"><Zap className="h-10 w-10" /><p className="font-headline font-black text-lg md:text-xl uppercase tracking-widest">Mock Available Nahi Hai</p></div>;
 
    return (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
@@ -248,7 +249,7 @@ function MockList({ data, isPassActive, loading, boards }: any) {
 
 function NotesList({ data, isPassActive, loading, type }: any) {
    if (loading) return <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-xl bg-white" />)}</div>;
-   if (data.length === 0) return <div className="py-24 text-center opacity-20 flex flex-col items-center justify-center space-y-4 text-slate-300"><Layers className="h-10 w-10" /><p className="font-headline font-black text-lg md:text-xl uppercase tracking-widest">No Items</p></div>;
+   if (data.length === 0) return <div className="py-24 text-center opacity-20 flex flex-col items-center justify-center space-y-4 text-slate-300"><Layers className="h-10 w-10" /><p className="font-headline font-black text-lg md:text-xl uppercase tracking-widest">Mock Available Nahi Hai</p></div>;
 
    return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6">

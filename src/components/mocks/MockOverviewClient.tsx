@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -33,8 +32,9 @@ import { cn } from "@/lib/utils"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub Client with Detailed Debugging.
- * FIXED: Standardized ID retrieval and enhanced lookup resilience for static builds.
+ * @fileOverview Universal Mock Overview Hub Client.
+ * FIXED: Standardized ID retrieval and enhanced resilience.
+ * sabhi me same sms rakho mock available nahi hai.
  */
 
 export default function MockOverviewClient() {
@@ -57,13 +57,6 @@ export default function MockOverviewClient() {
   }, [pathname, searchParams]);
 
   const { data: mock, loading: mockLoading } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
-
-  useEffect(() => {
-    console.log("[DEBUG_MOCK] Requested ID:", mockId);
-    if (!mockLoading && mockId && !mock) {
-       console.error("[DEBUG_MOCK] Firestore Lookup FAILED for ID:", mockId);
-    }
-  }, [mockId, mock, mockLoading]);
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -114,13 +107,13 @@ export default function MockOverviewClient() {
 
   if (!mockId || (!mock && !mockLoading)) return (
     <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
-       <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shadow-xl border border-rose-100">
+       <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center text-primary shadow-xl border border-blue-100">
           <AlertCircle className="h-8 w-8" />
        </div>
        <div className="space-y-2">
-          <h2 className="text-2xl font-black text-[#0F172A] uppercase">Node Not Found</h2>
+          <h2 className="text-2xl font-black text-[#0F172A] uppercase">Mock Available Nahi Hai</h2>
           <p className="text-slate-500 font-medium max-w-xs mx-auto">
-             The mock ID <code className="text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">{mockId}</code> could not be located in the registry.
+             Coming Soon: This preparation node is being synchronized with the master registry.
           </p>
        </div>
        <div className="flex flex-col gap-3">
