@@ -14,7 +14,7 @@ dependencyResolutionManagement {
     }
 }
 
+rootProject.name = 'android'
 include ':app'
 
-// Standard Capacitor Plugin Linkage
 apply from: 'capacitor.settings.gradle'
