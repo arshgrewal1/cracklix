@@ -39,7 +39,7 @@ jobs:
       - name: Verify Web Assets
         run: |
           if [ ! -d "out" ]; then
-            echo "Error: Next.js export directory 'out' missing. Production build failed or architecture mismatch."
+            echo "Error: Next.js export directory 'out' missing. Production build failed."
             exit 1
           fi
 

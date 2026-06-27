@@ -245,7 +245,7 @@ export default function SupportPage() {
                   variant="outline"
                   className="w-full h-14 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-black uppercase text-[10px] tracking-widest group"
                 >
-                  <Link href="/help">
+                  <Link href="/help/">
                     View Help Articles{" "}
                     <ChevronRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
                   </Link>
