@@ -1,4 +1,4 @@
 include ':app'
 
-// Capacitor standard plugin inclusion logic
+// Use relative path for local generated settings
 apply from: 'capacitor.settings.gradle'

@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   Gem,
   Settings,
-  CreditCard,
 } from "lucide-react";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -37,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v24.0.
- * UPDATED: Optimized for maximum desktop link visibility and larger logo presence.
+ * @fileOverview Institutional Navbar v25.0.
+ * FIXED: Optimized desktop spacing and gaps to prevent link crowding.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -105,10 +104,10 @@ export default function Navbar() {
   return (
     <div className="sticky top-0 z-50 w-full font-body pt-safe bg-white border-b border-slate-100 shadow-sm">
       <nav className="w-full h-[72px] md:h-[120px] transition-all duration-300">
-        <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4 md:gap-10">
+        <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
 
           {/* LEFT: Menu + Logo */}
-          <div className="flex items-center shrink-0 h-full">
+          <div className="flex items-center shrink-0 gap-3 md:gap-6">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -119,13 +118,13 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 ml-2 md:ml-8" 
+              className="flex-shrink-0" 
               imgClassName="h-16 md:h-28 w-auto"
               align="left"
             />
           </div>
 
-          {/* CENTER: Navigation Links - ALL FUNCTIONS VISIBLE */}
+          {/* CENTER: Navigation Links - SPACING OPTIMIZED */}
           <div className="hidden lg:flex items-center justify-center gap-4 xl:gap-10 flex-1 px-4">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
@@ -214,8 +213,8 @@ export default function Navbar() {
 function NavLink({ href, label, active }: { href: string; label: string; active?: boolean; }) {
   return (
     <Link href={href} className={cn(
-      "text-[13px] xl:text-[15px] font-black uppercase tracking-widest transition-all whitespace-nowrap", 
-      active ? "text-primary border-b-2 border-primary pb-1" : "text-slate-500 hover:text-primary"
+      "text-[13px] xl:text-[15px] font-black uppercase tracking-widest transition-all whitespace-nowrap border-b-2 py-1", 
+      active ? "text-primary border-primary" : "text-slate-500 border-transparent hover:text-primary hover:border-primary/20"
     )}>
       {label}
     </Link>
