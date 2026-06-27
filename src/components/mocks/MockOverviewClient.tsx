@@ -32,9 +32,8 @@ import { cn } from "@/lib/utils"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub Client.
- * FIXED: Standardized ID retrieval and enhanced resilience.
- * sabhi me same sms rakho mock available nahi hai.
+ * @fileOverview Universal Mock Overview Hub Client v4.0.
+ * REFINED: Stripe/Linear style hero with optimized spacing and typography.
  */
 
 export default function MockOverviewClient() {
@@ -57,12 +56,6 @@ export default function MockOverviewClient() {
   }, [pathname, searchParams]);
 
   const { data: mock, loading: mockLoading } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]))
-
-  useEffect(() => {
-    if (!userLoading && !user) {
-       router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
-    }
-  }, [user, userLoading, router, pathname]);
 
   useEffect(() => {
     async function checkAccess() {
@@ -126,36 +119,42 @@ export default function MockOverviewClient() {
     <div className="min-h-screen bg-white flex flex-col font-body">
       <Navbar />
       <main className="flex-1 text-left pb-20">
-        <section className="bg-slate-50 border-b border-slate-100 py-10 md:py-20">
+        {/* COMPACT HERO SECTION */}
+        <section className="bg-slate-50 border-b border-slate-100 pt-6 pb-10 min-h-[420px] md:min-h-[480px] flex items-center">
           <div className="container mx-auto px-4 md:px-8 max-w-7xl">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
-              <div className="flex items-start gap-6 md:gap-10 flex-1 min-w-0">
-                <Button variant="ghost" onClick={() => router.back()} className="rounded-full h-12 w-12 border-2 border-slate-100 bg-white p-0 shadow-sm shrink-0 hover:bg-slate-50 transition-all"><ChevronLeft className="h-6 w-6" /></Button>
-                <div className="space-y-4 min-w-0">
-                  <div className="flex flex-wrap items-center gap-3">
-                      <Badge className={cn(
-                        "border-none text-[8px] md:text-[10px] font-black px-3 py-1 rounded-lg uppercase tracking-widest shadow-sm", 
-                        mock.accessLevel === 'PREMIUM' ? "bg-amber-50 text-amber-600" : "bg-emerald-50 text-emerald-600"
-                      )}>
-                        {mock.accessLevel === 'PREMIUM' ? '🔒 PREMIUM' : 'FREE'}
-                      </Badge>
-                  </div>
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-headline font-black text-[#0F172A] uppercase leading-[0.9] tracking-tight max-w-4xl break-words antialiased">{mock.title}</h1>
-                  <div className="flex flex-wrap items-center gap-6 pt-2 text-slate-500 font-black text-[9px] md:text-[11px] uppercase tracking-widest">
-                      <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /> {mock.duration}m Time</span>
-                      <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> {mock.totalQuestions} Items</span>
-                      <span className="flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> {mock.totalQuestions * (mock.positiveMarks || 1)} Pts</span>
-                  </div>
+            <div className="flex flex-col items-start gap-4 md:gap-6">
+              
+              {/* PREMIUM BADGE - GOLD STYLING */}
+              <Badge className={cn(
+                "border-none text-[10px] font-bold px-2.5 py-0.5 rounded-lg uppercase tracking-widest shadow-sm h-7 flex items-center", 
+                mock.accessLevel === 'PREMIUM' ? "bg-[#FBBF24] text-[#78350F]" : "bg-emerald-50 text-emerald-600"
+              )}>
+                {mock.accessLevel === 'PREMIUM' ? '🔒 PREMIUM' : 'FREE HUB'}
+              </Badge>
+
+              <div className="space-y-4 md:space-y-6 w-full">
+                <h1 className="text-[32px] md:text-[44px] lg:text-[56px] font-[800] text-[#0F172A] uppercase leading-[1.05] tracking-tight lg:max-w-[60%] break-words antialiased">
+                  {mock.title}
+                </h1>
+
+                {/* METADATA - 16PX SLATE COLOR */}
+                <div className="flex flex-wrap items-center gap-6 text-[#64748B] text-base font-bold uppercase tracking-widest">
+                    <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /> {mock.duration}m Time</span>
+                    <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> {mock.totalQuestions} Items</span>
+                    <span className="flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> {mock.totalQuestions * (mock.positiveMarks || 1)} Pts</span>
+                </div>
+
+                {/* ACTION BUTTON - SPECIFIC DIMENSIONS */}
+                <div className="pt-2 md:pt-4">
+                  <Button asChild className="h-14 w-60 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-[16px] shadow-3xl transition-all active:scale-95 border-none">
+                    <Link href={`/mocks/instructions?id=${mock.id}`} className="flex items-center justify-center gap-3">
+                      {activeAttempt?.status === 'IN_PROGRESS' ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4 fill-current text-primary" />} 
+                      {activeAttempt?.status === 'IN_PROGRESS' ? 'RESUME PREP' : 'START TEST'}
+                    </Link>
+                  </Button>
                 </div>
               </div>
-              <div className="w-full md:w-auto shrink-0 pt-4">
-                 <Button asChild className="w-full md:w-auto h-16 md:h-20 px-10 md:px-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[10px] md:text-[12px] rounded-2xl md:rounded-[2rem] shadow-4xl transition-all active:scale-95 border-none">
-                   <Link href={`/mocks/instructions?id=${mock.id}`} className="flex items-center justify-center gap-4">
-                     {activeAttempt?.status === 'IN_PROGRESS' ? <RefreshCw className="h-5 w-5" /> : <Play className="h-5 w-5 fill-current text-primary" />} 
-                     {activeAttempt?.status === 'IN_PROGRESS' ? 'RESUME PREP' : 'START TEST'}
-                   </Link>
-                 </Button>
-              </div>
+
             </div>
           </div>
         </section>
