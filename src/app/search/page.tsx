@@ -12,12 +12,6 @@ import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-/**
- * @fileOverview Search Center v11.0.
- * FIXED: Explicitly imported React and cloneElement to resolve UMD global conflict.
- * FIXED: Applied strict type casting for cloned elements.
- */
-
 export default function SearchPage() {
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>

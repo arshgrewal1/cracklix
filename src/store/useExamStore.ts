@@ -6,12 +6,6 @@ import {
 } from "@/types";
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
-/**
- * @fileOverview Hardened Exam Store v14.0.
- * FIXED: Purged duplicate 'startTime' property declaration.
- * FIXED: Sanitized state initialization to satisfy Next.js 15 bundler.
- */
-
 export interface ExamStoreState {
   mockId: string | null;
   mockTitle: string;
