@@ -10,11 +10,8 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        flatDir {
-            dirs 'libs'
-        }
     }
 }
-rootProject.name = 'cracklix'
+rootProject.name = 'android'
 include ':app'
 apply from: 'capacitor.settings.gradle'
