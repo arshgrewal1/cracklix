@@ -36,8 +36,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v28.0.
- * UPDATED: Logo moved 40px left (gap reduced to gap-1) and size maximized.
+ * @fileOverview Institutional Navbar v29.0.
+ * UPDATED: Moved logo 40px left (gap-2) and increased footprint for branding.
+ * REFINED: Navigation links are now clean Title Case.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -107,24 +108,24 @@ export default function Navbar() {
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
           {/* LEFT: Menu + Logo - REDUCED GAP TO MOVE LOGO LEFT */}
-          <div className="flex items-center shrink-0 gap-1 md:gap-2">
+          <div className="flex items-center shrink-0 gap-2">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
+              className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
             >
-              <Menu className="w-[20px] h-[20px] md:w-5 md:h-5" />
+              <Menu className="w-5 h-5 md:w-6 md:h-6" />
             </button>
 
             <Logo
               variant="light"
-              className="flex-shrink-0 -ml-1 md:-ml-2" 
+              className="flex-shrink-0 -ml-1" 
               imgClassName="h-16 md:h-28 w-auto"
               align="left"
             />
           </div>
 
-          {/* CENTER: Navigation Links */}
+          {/* CENTER: Navigation Links - TITLE CASE & SPACING */}
           <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-10 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
@@ -144,21 +145,21 @@ export default function Navbar() {
 
             <Link
               href="/search"
-              className="w-9 h-9 md:h-11 md:h-11 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm"
+              className="w-10 h-10 md:h-12 md:h-12 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm"
             >
-              <Search className="w-[18px] h-[18px] md:w-5 md:h-5" />
+              <Search className="w-5 h-5" />
             </Link>
 
             {loading ? (
-              <Skeleton className="w-9 h-9 md:h-11 rounded-xl bg-slate-100" />
+              <Skeleton className="w-10 h-10 md:h-12 rounded-xl bg-slate-100" />
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-9 h-9 md:h-11 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all shadow-sm">
+                  <button className="w-10 h-10 md:h-12 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all shadow-sm">
                     <StudentAvatar
                       profile={profile}
                       className="w-full h-full border-none"
-                      iconClassName="w-[20px] h-[20px] md:w-6 md:h-6"
+                      iconClassName="w-6 h-6"
                     />
                   </button>
                 </DropdownMenuTrigger>
@@ -171,7 +172,7 @@ export default function Navbar() {
                   <div className="flex flex-col items-center text-center space-y-6">
                     <div className="flex flex-col items-center gap-4">
                        <div className="h-14 w-14 rounded-2xl bg-[#EEF4FF] flex items-center justify-center text-[#2563EB] shadow-sm relative">
-                          <User className="h-7 v-7" />
+                          <User className="h-7 w-7" />
                        </div>
                        <div className="space-y-0.5">
                          <h3 className="text-base font-bold text-[#0F172A] tracking-tight truncate max-w-[240px]">
@@ -192,7 +193,7 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login" className="px-4 md:px-6 h-9 md:h-11 rounded-xl bg-primary text-white font-bold text-[11px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
+              <Link href="/login" className="px-4 md:px-6 h-10 md:h-12 rounded-xl bg-primary text-white font-bold text-[11px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
                 Login
               </Link>
             )}
@@ -213,7 +214,7 @@ export default function Navbar() {
 function NavLink({ href, label, active }: { href: string; label: string; active?: boolean; }) {
   return (
     <Link href={href} className={cn(
-      "text-[14px] xl:text-[16px] font-bold transition-all whitespace-nowrap border-b-2 py-1", 
+      "text-[15px] xl:text-[17px] font-bold transition-all whitespace-nowrap border-b-2 py-1", 
       active ? "text-primary border-primary" : "text-slate-500 border-transparent hover:text-primary hover:border-primary/20"
     )}>
       {label}

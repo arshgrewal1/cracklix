@@ -28,8 +28,8 @@ import { cn } from "@/lib/utils"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Deep Analytics Hub v4.2.
- * FIXED: Restored missing imports and implemented high-fidelity dynamic calculation.
+ * @fileOverview Deep Analytics Hub v4.3.
+ * FIXED: Restored missing BarChart3, Button, and Link imports.
  */
 
 export default function DeepAnalytics() {
@@ -104,12 +104,12 @@ export default function DeepAnalytics() {
                <div className="h-8 w-px bg-slate-200 hidden md:block" />
                <div className="min-w-0 flex-1">
                   <h1 className="text-xl md:text-4xl font-headline font-black text-[#0F172A] uppercase tracking-tight leading-tight truncate">My Progress</h1>
-                  <p className="text-slate-500 font-medium text-[9px] md:text-sm hidden sm:block">Real-time fidelity analysis of your preparation nodes.</p>
+                  <p className="text-slate-500 font-medium text-[9px] md:text-sm hidden sm:block">Real-time performance trail of your preparation.</p>
                </div>
             </div>
             <div className="flex gap-4 shrink-0">
                <Badge className="bg-emerald-50 text-emerald-600 border-none px-2 md:px-4 py-1.5 rounded-xl font-black uppercase text-[8px] md:text-[10px] tracking-widest flex items-center gap-2 shadow-sm">
-                  {dataLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Activity className="h-3 w-3" />} <span className="hidden xs:inline">{dataLoading ? 'Syncing...' : 'Dynamic Feed'}</span>
+                  {dataLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Activity className="h-3 w-3" />} <span className="hidden xs:inline">{dataLoading ? 'Syncing...' : 'Live Feed'}</span>
                </Badge>
             </div>
          </div>
@@ -120,7 +120,7 @@ export default function DeepAnalytics() {
                   <BarChart3 className="h-12 w-12" />
                </div>
                <h2 className="text-2xl font-black text-[#0F172A] uppercase tracking-tight">Awaiting Benchmarks</h2>
-               <p className="text-slate-500 font-medium max-w-xs mx-auto mt-2">Complete your first mock test to generate a deep-fidelity analysis report.</p>
+               <p className="text-slate-500 font-medium max-w-xs mx-auto mt-2">Complete your first mock test to generate a deep analysis report.</p>
                <Button asChild className="mt-8 h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl">
                   <Link href="/mocks">Explore Mock Bank</Link>
                </Button>
@@ -197,7 +197,7 @@ export default function DeepAnalytics() {
                         <div className="space-y-3">
                            <h4 className="text-2xl font-headline font-black uppercase text-emerald-900 leading-none">Readiness Index</h4>
                            <p className="text-sm font-medium text-emerald-700 leading-relaxed italic">
-                              "Based on {rawResults.length} data nodes, your readiness score is <strong>{analytics.avgAcc}%</strong>. Consistency in Mental Ability is key for the next phase."
+                              "Based on {rawResults.length} sessions, your readiness score is <strong>{analytics.avgAcc}%</strong>. Focus on consistency in Mental Ability."
                            </p>
                         </div>
                      </div>

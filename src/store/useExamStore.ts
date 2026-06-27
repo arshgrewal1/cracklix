@@ -7,8 +7,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened CBT Store v58.0.
- * FIXED: Purged duplicate startTime property.
+ * @fileOverview Hardened CBT Store v59.0.
+ * FIXED: Purged duplicate startTime property that was causing TS1117.
  */
 
 export interface ExamStoreState {
