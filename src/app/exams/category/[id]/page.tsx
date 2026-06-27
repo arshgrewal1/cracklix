@@ -2,7 +2,7 @@ import CategoryHubClient from "@/components/exams/CategoryHubClient";
 
 /**
  * @fileOverview Official Category Hub Entry.
- * Satisfies static export requirements with generateStaticParams.
+ * SSG handle for Static Export.
  */
 
 export const dynamicParams = false;

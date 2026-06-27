@@ -2,7 +2,7 @@ import MockOverviewClient from "@/components/mocks/MockOverviewClient";
 
 /**
  * @fileOverview Official Mock Overview Entry.
- * FIXED: dynamicParams: false required for static export.
+ * SSG enabled for static export.
  */
 
 export const dynamicParams = false;

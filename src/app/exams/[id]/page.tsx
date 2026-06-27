@@ -2,15 +2,12 @@ import ExamHubClient from "@/components/exams/ExamHubClient";
 
 /**
  * @fileOverview Official Exam Hub Entry.
- * FIXED: dynamicParams: false is mandatory for static export.
- * Added core registry nodes for pre-rendering.
+ * Pre-rendering vertical routes for static export.
  */
 
 export const dynamicParams = false;
 
 export async function generateStaticParams() {
-  // Pre-rendering core exam nodes for the static registry
-  // In a production environment, this could be fetched from a CSV or local JSON
   return [
     { id: 'pcs' },
     { id: 'patwari' },

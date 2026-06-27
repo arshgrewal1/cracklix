@@ -2,7 +2,7 @@ import BoardHubClient from "@/components/exams/BoardHubClient";
 
 /**
  * @fileOverview Official Board Hub Entry.
- * FIXED: dynamicParams: false for static export compatibility.
+ * Pre-rendered authority nodes for static export.
  */
 
 export const dynamicParams = false;
