@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection, query, where, limit } from 'firebase/firestore';
-import { Calendar, ChevronRight } from 'lucide-react';
+import { Calendar, ChevronRight, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,8 +13,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Current Affairs Preview Hub v19.0.
- * UPDATED: Replaced "node" with "Hub" and refined typography.
+ * @fileOverview Current Affairs Preview Hub v20.0.
+ * UPDATED: Increased logo sizes for better visibility.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -36,9 +36,9 @@ export default function CurrentAffairsPreview() {
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 text-left px-1">
            <div className="space-y-1">
-              <div className="flex items-center gap-3 md:gap-4">
-                 <div className="h-8 w-8 md:h-12 md:w-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary shadow-inner shrink-0">
-                    <AuthorityLogo boardId="current-affairs" size="sm" className="bg-transparent shadow-none p-0" />
+              <div className="flex items-center gap-3 md:gap-5">
+                 <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-blue-50 flex items-center justify-center text-primary shadow-inner shrink-0">
+                    <AuthorityLogo boardId="current-affairs" size="md" className="bg-transparent shadow-none p-0" />
                  </div>
                  <h2 className="text-[22px] md:text-[clamp(24px,4vw,36px)] font-bold tracking-tight text-[#0F172A]">Current Affairs</h2>
               </div>
@@ -65,7 +65,7 @@ export default function CurrentAffairsPreview() {
                     <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[24px] md:rounded-[3rem] bg-white p-4 md:p-10 flex flex-col group h-full min-h-[230px] md:min-h-[400px] relative overflow-hidden">
                        
                        <div className="flex justify-center mb-4 md:mb-10 shrink-0">
-                          <div className="h-10 w-10 md:h-20 md:w-20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                          <div className="h-16 w-16 md:h-28 md:w-28 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                               <AuthorityLogo boardId="current-affairs" size="lg" className="bg-transparent shadow-none p-0 w-full h-full opacity-80" />
                           </div>
                        </div>

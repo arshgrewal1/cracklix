@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState, useEffect } from "react"
+import { useState, useMemo, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -10,21 +10,11 @@ import { Badge } from "@/components/ui/badge"
 import { 
   Search, 
   Zap, 
-  FileText, 
-  Globe, 
-  Newspaper, 
   ChevronRight,
-  MessageCircle,
-  Trophy,
-  Sparkles,
-  Bell,
-  Medal,
-  Users,
-  Loader2,
+  Loader2, 
   Calendar,
   Download,
-  BookOpen,
-  Layers
+  Medal
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -36,16 +26,16 @@ import { useRouter } from "next/navigation"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Current Affairs Center v17.1.
- * RESPONSIVE: Increased container width for PC and optimized card padding.
+ * @fileOverview Official Current Affairs Center v18.0.
+ * UPDATED: Increased logo sizes for better brand presence.
  */
 
 const HUB_TYPES = [
   { id: "DAILY", label: "Daily", icon: <Calendar className="h-4 w-4" /> },
-  { id: "WEEKLY", label: "Weekly", icon: <Layers className="h-4 w-4" /> },
-  { id: "MONTHLY", label: "Monthly", icon: <Newspaper className="h-4 w-4" /> },
+  { id: "WEEKLY", label: "Weekly", icon: <Zap className="h-4 w-4" /> },
+  { id: "MONTHLY", label: "Monthly", icon: <Calendar className="h-4 w-4" /> },
   { id: "QUIZ", label: "Quizzes", icon: <Zap className="h-4 w-4" /> },
-  { id: "PDF", label: "PDFs", icon: <FileText className="h-4 w-4" /> }
+  { id: "PDF", label: "PDFs", icon: <Badge className="h-4 w-4" /> }
 ]
 
 export default function CurrentAffairsCenter() {
@@ -117,8 +107,8 @@ export default function CurrentAffairsCenter() {
                <div className="bg-[#0B1528] p-8 md:p-20 rounded-[2.5rem] md:rounded-[4rem] text-white relative overflow-hidden shadow-4xl group border border-white/5">
                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><AuthorityLogo boardId="current-affairs" size="xl" className="h-96 w-96 opacity-5" /></div>
                   <div className="space-y-10 relative z-10 max-w-5xl">
-                    <div className="flex items-center gap-3">
-                        <AuthorityLogo boardId="current-affairs" size="sm" className="bg-transparent shadow-none p-0" />
+                    <div className="flex items-center gap-4">
+                        <AuthorityLogo boardId="current-affairs" size="md" className="bg-white/10 shadow-none" />
                         <Badge className="bg-primary text-white border-none px-4 py-1.5 rounded-full font-black uppercase text-[10px] tracking-[0.2em] shadow-xl">
                             REGISTRY UPDATES
                         </Badge>
@@ -166,11 +156,11 @@ export default function CurrentAffairsCenter() {
                                  <Card key={item.id} className="bg-white border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] overflow-hidden group text-left border border-slate-100 p-6 md:p-12">
                                     <CardContent className="p-0 flex flex-col md:flex-row items-center gap-8 md:gap-12">
                                        <div className={cn(
-                                          "h-20 w-20 md:h-28 md:w-28 rounded-[2rem] md:rounded-[2.5rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
+                                          "h-24 w-24 md:h-32 md:w-32 rounded-[2.5rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
                                           item.type === 'DAILY' ? 'bg-orange-50 text-primary' : 
                                           item.type === 'WEEKLY' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'
                                        )}>
-                                          <AuthorityLogo boardId="current-affairs" size="md" className="bg-transparent shadow-none p-0 opacity-80 h-12 w-12 md:h-16 md:w-16" />
+                                          <AuthorityLogo boardId="current-affairs" size="lg" className="bg-transparent shadow-none p-0 opacity-80" />
                                        </div>
                                        <div className="flex-1 space-y-3 w-full">
                                           <div className="flex items-center justify-between">
@@ -183,7 +173,7 @@ export default function CurrentAffairsCenter() {
                                           </div>
                                           <h2 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase tracking-tight">{item.title}</h2>
                                           <div className="flex items-center gap-4 text-[10px] md:text-[12px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-                                             <Globe className="h-3.5 w-3.5" /> Language: {item.language || "Bilingual"}
+                                             <Zap className="h-3.5 w-3.5" /> Language: {item.language || "Bilingual"}
                                           </div>
                                        </div>
                                        <div className="shrink-0 w-full md:w-auto flex flex-col gap-3">
@@ -206,7 +196,7 @@ export default function CurrentAffairsCenter() {
                            </div>
                         ) : (
                            <div className="py-32 text-center border-2 border-dashed border-slate-200 rounded-[4rem] opacity-20 flex flex-col items-center gap-6">
-                              <Sparkles className="h-16 w-16 text-slate-300" />
+                              <Zap className="h-16 w-16 text-slate-300" />
                               <p className="font-headline font-black text-2xl uppercase tracking-widest">Repository Empty</p>
                            </div>
                         )}

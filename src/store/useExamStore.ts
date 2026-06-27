@@ -6,6 +6,11 @@ import {
 } from "@/types";
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
+/**
+ * @fileOverview Hardened CBT Store v47.1.
+ * FIXED: Purged duplicate object property error for startTime.
+ */
+
 export interface ExamStoreState {
   mockId: string | null;
   mockTitle: string;
