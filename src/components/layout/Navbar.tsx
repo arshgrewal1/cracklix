@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -103,7 +104,7 @@ export default function Navbar() {
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
           {/* LEFT: Menu + Logo (PWA Optimized) */}
-          <div className="flex items-center shrink-0 gap-3 md:gap-4">
+          <div className="flex items-center shrink-0 gap-1 md:gap-2">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -133,7 +134,7 @@ export default function Navbar() {
           <div className="flex items-center gap-3 md:gap-4 shrink-0">
             {profile?.passStatus === 'active' && timeLeft && (
                <div className="hidden sm:flex flex-col items-end mr-1">
-                  <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none uppercase">Elite Hub</span>
+                  <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none">Elite Hub</span>
                   <span className="text-[10px] font-bold text-slate-400 mt-1 leading-none">{timeLeft}</span>
                </div>
             )}

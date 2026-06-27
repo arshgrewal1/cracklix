@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
@@ -59,7 +60,7 @@ function SearchContent() {
     ).map((e: any) => ({ 
        title: e.name, 
        type: "Exam Center", 
-       href: `/exams/view/?id=${e.id}`, 
+       href: `/exams/view?id=${e.id}`, 
        boardId: e.boardId,
        icon: <GraduationCap />
     }))
@@ -81,7 +82,7 @@ function SearchContent() {
     ).map((n: any) => ({ 
        title: n.title, 
        type: "Notes & PDFs", 
-       href: `/notes/`, 
+       href: `/notes`, 
        boardId: n.boardId, 
        icon: <FileText />
     }))
