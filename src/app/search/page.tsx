@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Hub v3.1.
- * FIXED: Resolved React.cloneElement type conflicts.
+ * @fileOverview Search Hub v3.2.
+ * FIXED: Resolved React.cloneElement type conflicts and added Suspense boundary.
  */
 
 export default function SearchPage() {
@@ -188,11 +188,11 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
       <Link href={href} className="block active:scale-[0.99] transition-all group">
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
             <div className="flex items-center gap-4 min-w-0 flex-1">
-               <div className="h-12 w-12 md:h-14 md:w-14 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
-                  {isValidElement(icon) ? cloneElement(icon as ReactElement<any>, { className: "h-6 w-6" }) : icon}
+               <div className="h-14 w-14 md:h-20 md:w-20 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
+                  {isValidElement(icon) ? cloneElement(icon as ReactElement<any>, { className: "h-8 w-8" }) : icon}
                </div>
                <div className="text-left min-w-0 flex-1 space-y-1">
-                  <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
+                  <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-2xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
                   <div className="flex items-center gap-3">
                      <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black rounded shadow-sm">{category}</Badge>
                      <div className="h-1 w-1 rounded-full bg-slate-200" />
