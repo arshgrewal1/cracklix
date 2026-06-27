@@ -21,6 +21,7 @@ import {
   Plus,
   X,
   Loader2,
+  AlertCircle
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"

@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase';
 
 /**
- * @fileOverview Operational Anti-Cheat Node v4.14.
+ * @fileOverview Operational Anti-Cheat Node v4.15.
  * FIXED: Passed firestore instance to addViolation call to satisfy TS.
  */
 export default function AntiCheat() {
