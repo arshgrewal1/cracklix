@@ -2,7 +2,7 @@
 
 import React, { Suspense, useMemo, useEffect } from "react"
 import ResultClient from "@/components/results/ResultClient"
-import { Loader2 } from "lucide-react"
+import { Loader2, Zap } from "lucide-react"
 import { useDoc, useFirestore, useUser } from "@/firebase"
 import { doc, deleteDoc } from "firebase/firestore"
 import { useRouter, useSearchParams } from "next/navigation"

@@ -11,7 +11,7 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Card Component v4.9.
+ * @fileOverview Exam Card Component v5.0.
  * FIXED: Synchronized property access and enforced search parameter routing.
  */
 export default function ExamCard({ exam }: ExamCardProps) {

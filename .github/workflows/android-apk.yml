@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: false # Bypass broken 'arsh' submodule metadata
+          submodules: false
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -36,9 +36,13 @@ jobs:
       - name: Build Next.js Static Export
         run: npm run build
 
+      - name: Setup Android Assets
+        run: |
+          mkdir -p android/app/src/main/assets/public
+          mkdir -p android/app/google-services.json
+
       - name: Setup Google Services
         run: |
-          mkdir -p android/app
           if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
             echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
           else
