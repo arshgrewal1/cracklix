@@ -37,8 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v23.0.
- * UPDATED: Increased header height and logo size for maximum brand impact.
+ * @fileOverview Institutional Navbar v24.0.
+ * UPDATED: Optimized for maximum desktop link visibility and larger logo presence.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -99,34 +99,34 @@ export default function Navbar() {
       SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-[64px] md:h-[80px]" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-[64px] md:h-[120px]" />;
   }
 
   return (
     <div className="sticky top-0 z-50 w-full font-body pt-safe bg-white border-b border-slate-100 shadow-sm">
-      <nav className="w-full h-[72px] md:h-[112px] transition-all duration-300">
-        <div className="w-full max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
+      <nav className="w-full h-[72px] md:h-[120px] transition-all duration-300">
+        <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4 md:gap-10">
 
           {/* LEFT: Menu + Logo */}
           <div className="flex items-center shrink-0 h-full">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
-              className="flex items-center justify-center w-9 h-9 md:w-11 md:h-11 rounded-lg md:rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
+              className="flex items-center justify-center w-9 h-9 md:w-12 md:h-12 rounded-lg md:rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
             >
               <Menu className="w-[22px] h-[22px] md:w-6 md:h-6" />
             </button>
 
             <Logo
               variant="light"
-              className="flex-shrink-0 ml-2 md:ml-6" 
-              imgClassName="h-14 md:h-24 w-auto"
+              className="flex-shrink-0 ml-2 md:ml-8" 
+              imgClassName="h-16 md:h-28 w-auto"
               align="left"
             />
           </div>
 
-          {/* CENTER: Navigation Links */}
-          <div className="hidden lg:flex items-center justify-center gap-4 xl:gap-8 flex-1">
+          {/* CENTER: Navigation Links - ALL FUNCTIONS VISIBLE */}
+          <div className="hidden lg:flex items-center justify-center gap-4 xl:gap-10 flex-1 px-4">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
             <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
@@ -145,21 +145,21 @@ export default function Navbar() {
 
             <Link
               href="/search"
-              className="w-9 h-9 md:h-11 md:w-11 rounded-lg md:rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95"
+              className="w-9 h-9 md:h-12 md:w-12 rounded-lg md:rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm"
             >
-              <Search className="w-[22px] h-[22px] md:w-5 md:h-5" />
+              <Search className="w-[22px] h-[22px] md:w-6 md:h-6" />
             </Link>
 
             {loading ? (
-              <Skeleton className="w-9 h-9 md:h-11 rounded-lg md:rounded-xl bg-slate-100" />
+              <Skeleton className="w-9 h-9 md:h-12 rounded-lg md:rounded-xl bg-slate-100" />
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="w-9 h-9 md:h-11 rounded-lg md:rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all">
+                  <button className="w-9 h-9 md:h-12 rounded-lg md:rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all shadow-sm">
                     <StudentAvatar
                       profile={profile}
                       className="w-full h-full border-none"
-                      iconClassName="w-[22px] h-[22px] md:w-6 md:h-6"
+                      iconClassName="w-[22px] h-[22px] md:w-7 md:h-7"
                     />
                   </button>
                 </DropdownMenuTrigger>
@@ -184,7 +184,7 @@ export default function Navbar() {
                     <div className="h-px w-full bg-slate-100" />
                     <div className="w-full space-y-1 text-left">
                        <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My Progress" />
-                       <ProfileMenuItem href="/pass" icon={CreditCard} label="Pro Pass" />
+                       <ProfileMenuItem href="/pass" icon={Gem} label="Pro Pass" />
                        <ProfileMenuItem href="/profile" icon={Settings} label="Settings" />
                        {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Panel" highlight />}
                     </div>
@@ -193,7 +193,7 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <Link href="/login" className="px-4 md:px-5 h-9 md:h-11 rounded-lg md:rounded-xl bg-primary text-white font-bold text-[11px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
+              <Link href="/login" className="px-4 md:px-6 h-9 md:h-12 rounded-lg md:rounded-xl bg-primary text-white font-bold text-[11px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
                 Login
               </Link>
             )}
@@ -214,8 +214,8 @@ export default function Navbar() {
 function NavLink({ href, label, active }: { href: string; label: string; active?: boolean; }) {
   return (
     <Link href={href} className={cn(
-      "text-[13px] xl:text-[14px] font-bold tracking-tight transition-all whitespace-nowrap", 
-      active ? "text-primary border-b-2 border-primary" : "text-slate-500 hover:text-primary"
+      "text-[13px] xl:text-[15px] font-black uppercase tracking-widest transition-all whitespace-nowrap", 
+      active ? "text-primary border-b-2 border-primary pb-1" : "text-slate-500 hover:text-primary"
     )}>
       {label}
     </Link>

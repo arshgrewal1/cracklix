@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v2.3.
+ * @fileOverview Institutional Search Hub v2.4.
  * FIXED: React UMD global error and element cloning types.
  */
 

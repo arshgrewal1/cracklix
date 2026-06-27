@@ -11,8 +11,7 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Standard options for Capacitor
-             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:f~:bak:cvs:thumbs.db:tps:*.pyc:*.pyo'
+             // Optimized for modern AGP
         }
     }
     buildTypes {
@@ -33,22 +32,15 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     implementation "androidx.core:core-ktx:$rootProject.ext.androidxCoreVersion"
-    implementation "androidx.core:core-splashscreen:$rootProject.ext.androidxSplashScreenVersion"
+    implementation "androidx.core:core-splashscreen:$rootProject.ext.coreSplashScreenVersion"
     implementation project(':capacitor-android')
-    implementation project(':capacitor-app')
-    implementation project(':capacitor-browser')
-    implementation project(':capacitor-filesystem')
-    implementation project(':capacitor-keyboard')
-    implementation project(':capacitor-share')
-    implementation project(':capacitor-status-bar')
-
-    testImplementation "junit:junit:$rootProject.ext.junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
+    testImplementation "junit:junit:4.13.2"
+    androidTestImplementation "androidx.test.ext:junit:1.2.1"
+    androidTestImplementation "androidx.test.espresso:core:3.6.1"
 }
 
-apply plugin: 'com.google.gms.google-services'
+apply from: 'capacitor.build.gradle'
 
 try {
     def servicesJSON = file('google-services.json')
