@@ -12,6 +12,11 @@ import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Institutional Search Hub v2.1.
+ * FIXED: Explicit React import and Suspense boundary for Next.js 15 stability.
+ */
+
 export default function SearchPage() {
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>

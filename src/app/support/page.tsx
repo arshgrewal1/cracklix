@@ -37,6 +37,11 @@ import {
 } from "@/components/ui/dialog"
 import Link from "next/link"
 
+/**
+ * @fileOverview Institutional Support Ticket Hub v6.1.
+ * FIXED: Restored missing Link and Loader2 imports.
+ */
+
 export default function SupportPage() {
   const { user, profile } = useUser()
   const db = useFirestore()
