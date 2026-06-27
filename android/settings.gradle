@@ -5,6 +5,7 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
@@ -12,6 +13,8 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = 'cracklix'
+
 include ':app'
+
+// Standard Capacitor Plugin Linkage
 apply from: 'capacitor.settings.gradle'
