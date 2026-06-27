@@ -132,7 +132,7 @@ function SearchContent() {
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.length > 0 ? searchResults.map((res, i) => (
                       <SearchResultItem key={i} title={res.title} category={res.type} href={res.href} icon={res.icon as ReactElement} />
-                    )) : !isLoading && (
+                    ) as any) : !isLoading && (
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">
                            <SearchIcon className="h-16 w-16" />
