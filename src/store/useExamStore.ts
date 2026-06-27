@@ -164,7 +164,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     }
   },
 
-  addViolation: (db) => {
+  addViolation: (db: Firestore | null) => {
     const state = get();
     const newVal = state.violations + 1;
     set({ violations: newVal });

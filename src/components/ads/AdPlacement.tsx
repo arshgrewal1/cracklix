@@ -15,7 +15,7 @@ interface AdPlacementProps {
 }
 
 /**
- * @fileOverview Institutional Ad-Node v1.25.
+ * @fileOverview Institutional Ad-Node v1.26.
  * FIXED: Explicit type casting for Firestore queries to resolve parameter assignability errors.
  */
 
