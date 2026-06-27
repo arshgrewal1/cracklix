@@ -12,6 +12,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = 'android'
+rootProject.name = "cracklix"
 include ':app'
+
 apply from: 'capacitor.settings.gradle'
