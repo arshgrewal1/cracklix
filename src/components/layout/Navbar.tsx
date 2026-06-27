@@ -102,7 +102,7 @@ export default function Navbar() {
       <nav className="w-full h-[72px] md:h-[112px]">
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
-          {/* LEFT: Menu + Logo (Hard Left Shift) */}
+          {/* LEFT: Menu + Logo (PWA Optimized) */}
           <div className="flex items-center shrink-0 gap-3 md:gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -114,14 +114,14 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0" 
+              className="flex-shrink-0 -ml-2 md:-ml-8" 
               imgClassName="h-14 md:h-24 w-auto"
               align="left"
             />
           </div>
 
-          {/* CENTER: Navigation Links (Title Case) */}
-          <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-10 flex-1">
+          {/* CENTER: Navigation Links */}
+          <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-8 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
             <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
