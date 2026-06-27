@@ -36,9 +36,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v29.0.
- * UPDATED: Moved logo 40px left (gap-2) and increased footprint for branding.
- * REFINED: Navigation links are now clean Title Case.
+ * @fileOverview Institutional Navbar v30.0.
+ * UPDATED: Logo moved 40px left and size increased.
+ * REFINED: Spacing balanced and casing set to Title Case.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -108,7 +108,7 @@ export default function Navbar() {
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
           {/* LEFT: Menu + Logo - REDUCED GAP TO MOVE LOGO LEFT */}
-          <div className="flex items-center shrink-0 gap-2">
+          <div className="flex items-center shrink-0 gap-1 md:gap-2">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -125,8 +125,8 @@ export default function Navbar() {
             />
           </div>
 
-          {/* CENTER: Navigation Links - TITLE CASE & SPACING */}
-          <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-10 flex-1">
+          {/* CENTER: Navigation Links - SPACING OPTIMIZED */}
+          <div className="hidden lg:flex items-center justify-center gap-4 xl:gap-8 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
             <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
@@ -135,7 +135,7 @@ export default function Navbar() {
           </div>
 
           {/* RIGHT: User Actions */}
-          <div className="flex items-center gap-3 md:gap-4 shrink-0">
+          <div className="flex items-center gap-3 md:gap-4 shrink-0 ml-4">
             {profile?.passStatus === 'active' && timeLeft && (
                <div className="hidden sm:flex flex-col items-end mr-1">
                   <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none uppercase">Elite Hub</span>

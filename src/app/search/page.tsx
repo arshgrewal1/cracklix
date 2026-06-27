@@ -13,8 +13,9 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v2.8.
+ * @fileOverview Institutional Search Hub v2.9.
  * FIXED: React UMD global error and element cloning types.
+ * FIXED: Implemented Suspense boundary for build-time static generation safety.
  */
 
 export default function SearchPage() {

@@ -28,7 +28,7 @@ import { cn } from "@/lib/utils"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Deep Analytics Hub v4.3.
+ * @fileOverview Deep Analytics Hub v4.4.
  * FIXED: Restored missing BarChart3, Button, and Link imports.
  */
 
@@ -121,7 +121,7 @@ export default function DeepAnalytics() {
                </div>
                <h2 className="text-2xl font-black text-[#0F172A] uppercase tracking-tight">Awaiting Benchmarks</h2>
                <p className="text-slate-500 font-medium max-w-xs mx-auto mt-2">Complete your first mock test to generate a deep analysis report.</p>
-               <Button asChild className="mt-8 h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-2xl">
+               <Button asChild className="mt-8 h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl">
                   <Link href="/mocks">Explore Mock Bank</Link>
                </Button>
             </div>

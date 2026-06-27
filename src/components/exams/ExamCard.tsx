@@ -11,7 +11,7 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Card Component v5.4.
+ * @fileOverview Exam Card Component v5.5.
  * FIXED: Corrected property access to align with the canonical Exam interface.
  */
 export default function ExamCard({ exam }: ExamCardProps) {

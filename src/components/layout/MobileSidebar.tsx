@@ -28,7 +28,7 @@ import ShareButton from "@/components/navigation/ShareButton";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Mobile Sidebar v55.0.
+ * @fileOverview Mobile Sidebar v56.0.
  * FIXED: Close button visibility and logo alignment.
  */
 export default function MobileSidebar({
@@ -74,17 +74,17 @@ export default function MobileSidebar({
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
       {/* HEADER: FIXED CLOSE BUTTON VISIBILITY */}
-      <div className="h-[80px] md:h-[112px] px-4 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
+      <div className="h-[80px] md:h-[112px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
          <Logo
            variant="light"
            align="left"
-           className="h-16 md:h-24 w-auto flex-1"
+           className="h-12 md:h-16 w-auto flex-1"
            imgClassName="h-full w-auto"
            onClick={onClose}
          />
          <button
             onClick={onClose}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all border border-slate-100 ml-2"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 active:scale-95 transition-all border border-slate-100 ml-4"
           >
             <X className="h-6 w-6" />
           </button>
