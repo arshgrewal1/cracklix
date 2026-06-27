@@ -1,4 +1,16 @@
 include ':app'
+include ':capacitor-android'
+include ':capacitor-app'
+include ':capacitor-browser'
+include ':capacitor-filesystem'
+include ':capacitor-keyboard'
+include ':capacitor-share'
+include ':capacitor-status-bar'
 
-// Capacitor standard plugin bridge
-apply from: 'capacitor.settings.gradle'
+project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/android/capacitor')
+project(':capacitor-app').projectDir = new File('../node_modules/@capacitor/app/android')
+project(':capacitor-browser').projectDir = new File('../node_modules/@capacitor/browser/android')
+project(':capacitor-filesystem').projectDir = new File('../node_modules/@capacitor/filesystem/android')
+project(':capacitor-keyboard').projectDir = new File('../node_modules/@capacitor/keyboard/android')
+project(':capacitor-share').projectDir = new File('../node_modules/@capacitor/share/android')
+project(':capacitor-status-bar').projectDir = new File('../node_modules/@capacitor/status-bar/android')

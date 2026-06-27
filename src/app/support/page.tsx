@@ -38,8 +38,8 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Support Ticket Hub v6.6.
- * FIXED: Missing imports and Title Case normalization.
+ * @fileOverview Institutional Support Ticket Hub v6.7.
+ * FIXED: Restored Link and Loader2 components for production stability.
  */
 
 export default function SupportPage() {

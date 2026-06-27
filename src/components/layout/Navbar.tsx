@@ -36,9 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v32.0.
- * UPDATED: Logo moved 40px left and size increased.
- * REFINED: Spacing balanced and casing set to Title Case.
+ * @fileOverview Institutional Navbar v33.0.
+ * UPDATED: Logo shifted 40px left and size increased. Spacing normalized.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -51,12 +50,8 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
-    mountedSet(true);
+    setMounted(true);
   }, []);
-
-  const mountedSet = (val: boolean) => {
-    setMounted(val);
-  }
 
   useEffect(() => {
     const expiryStr = profile?.passExpiresAt;
