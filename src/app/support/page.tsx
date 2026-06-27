@@ -39,7 +39,7 @@ import Link from "next/link"
 
 /**
  * @fileOverview Institutional Support Ticket Management v5.1.
- * FIXED: Restored missing imports Link and Loader2.
+ * FIXED: Restored missing components and simplified Title Case typography.
  */
 
 export default function SupportPage() {

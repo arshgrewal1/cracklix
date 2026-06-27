@@ -18,7 +18,7 @@ jobs:
           submodules: false
           fetch-depth: 0
 
-      - name: Cleanup Submodules
+      - name: Cleanup Submodules & Arsh
         run: |
           git config --local --unset-all core.sshCommand || true
           rm -f .gitmodules
@@ -44,7 +44,7 @@ jobs:
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
 
-      - name: Setup Capacitor Assets
+      - name: Setup Capacitor Placeholder Assets
         run: |
           # Capacitor requires a webDir folder to exist for sync
           # Even if loading from server.url, we create a placeholder index

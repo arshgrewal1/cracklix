@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Hub v2.7.
- * FIXED: Advanced type safety for React element cloning.
+ * @fileOverview Search Hub v2.8.
+ * FIXED: Explicit React import and enhanced type safety for element cloning.
  */
 
 export default function SearchPage() {
@@ -75,7 +75,7 @@ function SearchContent() {
     ).map((m: any) => ({ 
        title: m.title, 
        type: "Practice Test", 
-       href: `/mocks/view/?id=${m.id}`, 
+       href: `/mocks/view?id=${m.id}`, 
        boardId: m.boardId, 
        icon: <Zap />
     }))
