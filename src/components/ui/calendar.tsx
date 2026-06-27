@@ -8,11 +8,6 @@ import { buttonVariants } from "@/components/ui/button"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
-/**
- * @fileOverview Calendar Component v9.4.
- * FIXED: Strictly aligned with react-day-picker v9 Chevron API.
- */
-
 function Calendar({
   className,
   classNames,

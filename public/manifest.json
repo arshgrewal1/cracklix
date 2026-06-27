@@ -2,20 +2,58 @@
   "id": "com.cracklix.app",
   "name": "Cracklix | Punjab's Mock Test Platform",
   "short_name": "Cracklix",
-  "description": "Punjab's most advanced government exam preparation platform. Verified patterns for PSSSB, PPSC, and Police recruitments.",
+  "description": "Punjab's most advanced government exam preparation platform.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "display_override": ["window-controls-overlay", "standalone"],
+  "display_override": ["window-controls-overlay", "minimal-ui"],
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#1677FF",
-  "categories": ["education", "government", "books"],
-  "lang": "en",
-  "dir": "ltr",
+  "categories": ["education", "books"],
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "icons": [
+    {
+      "src": "/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/icons/icon-192x192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-384x384.png",
+      "sizes": "384x384",
       "type": "image/png",
       "purpose": "any"
     },
@@ -38,42 +76,34 @@
       "purpose": "maskable"
     }
   ],
-  "screenshots": [
-    {
-      "src": "https://picsum.photos/seed/screenshot1/1080/1920",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Mock Test Interface"
-    },
-    {
-      "src": "https://picsum.photos/seed/screenshot2/1920/1080",
-      "sizes": "1920x1080",
-      "type": "image/png",
-      "form_factor": "wide",
-      "label": "Student Analytics Dashboard"
-    }
-  ],
   "shortcuts": [
     {
       "name": "My Exams",
       "url": "/my-exams",
-      "description": "Quick access to your pinned exam verticals",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+      "description": "View your saved exam verticals",
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     },
     {
       "name": "Practice Hub",
       "url": "/mocks",
       "description": "Start a new mock test",
-      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icons/icon-96x96.png", "sizes": "96x96" }]
     }
   ],
-  "prefer_related_applications": true,
-  "related_applications": [
+  "screenshots": [
     {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.cracklix.app",
-      "id": "com.cracklix.app"
+      "src": "https://picsum.photos/seed/screenshot1/1080/1920",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "label": "Cracklix Dashboard Mobile",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "https://picsum.photos/seed/screenshot2/1920/1080",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "label": "Cracklix Dashboard Desktop",
+      "form_factor": "wide"
     }
   ]
 }

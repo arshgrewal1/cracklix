@@ -1,10 +1,6 @@
-pluginManagement {
-    repositories {
-        google()
-        mavenCentral()
-        gradlePluginPortal()
-    }
-}
+include ':app'
+
+// Resolve repository conflicts by centralizing declarations
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
@@ -13,7 +9,4 @@ dependencyResolutionManagement {
     }
 }
 
-include ':app'
-
-// Capacitor Plugins linkage
 apply from: 'capacitor.settings.gradle'

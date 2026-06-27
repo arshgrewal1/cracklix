@@ -37,11 +37,6 @@ import {
 } from "@/components/ui/dialog"
 import Link from "next/link"
 
-/**
- * @fileOverview Institutional Support Ticket Management Console v6.3.
- * FIXED: Restored missing Link and AlertCircle imports for build stability.
- */
-
 export default function SupportPage() {
   const { user, profile } = useUser()
   const db = useFirestore()

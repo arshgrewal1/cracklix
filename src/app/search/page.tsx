@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
+import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Search as SearchIcon, Zap, ChevronRight, FileText, LayoutGrid, Loader2, GraduationCap } from "lucide-react"
@@ -11,11 +11,6 @@ import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-
-/**
- * @fileOverview Search Results Center v2.5.
- * FIXED: Explicit React import and strict type casting for icon cloning.
- */
 
 export default function SearchPage() {
   return (
@@ -189,7 +184,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
             <div className="flex items-center gap-4 min-w-0 flex-1">
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
-                  {isValidElement(icon) ? cloneElement(icon as React.ReactElement<any>, { className: "h-5 w-5" }) : icon}
+                  {isValidElement(icon) ? cloneElement(icon as React.ReactElement<{ className?: string }>, { className: "h-5 w-5" }) : icon}
                </div>
                <div className="text-left min-w-0 flex-1 space-y-1">
                   <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
