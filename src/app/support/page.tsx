@@ -38,8 +38,7 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Support Ticket Management Console v6.0.
- * FIXED: Missing imports Link, Loader2, and AlertCircle added.
+ * @fileOverview Institutional Support Ticket Management Console v6.1 (Static Compatible).
  */
 
 export default function SupportPage() {

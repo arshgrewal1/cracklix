@@ -2,7 +2,7 @@ import ResultClient from "@/components/results/ResultClient";
 
 /**
  * @fileOverview Official Result Node Entry.
- * FIXED: Added generic IDs for static rendering.
+ * FIXED: dynamicParams: false for static export.
  */
 
 export const dynamicParams = false;

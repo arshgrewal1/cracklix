@@ -11,8 +11,8 @@ import {
 } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Testbook-Style Subscription Actions v5.1.
- * CONVERTED: From Server Actions to Client Functions for 'output: export' compatibility.
+ * @fileOverview Hardened Testbook-Style Subscription Actions v5.2.
+ * CONVERTED: From Server Actions to Client Functions for static export compatibility.
  */
 
 export async function activateFreePass(userId: string, planId: string) {

@@ -2,7 +2,8 @@ import ExamHubClient from "@/components/exams/ExamHubClient";
 
 /**
  * @fileOverview Official Exam Hub Entry.
- * FIXED: Expanded registry nodes to resolve 404 errors for PSSSB Patwari and others.
+ * FIXED: dynamicParams: false is mandatory for static export.
+ * Added core registry nodes for pre-rendering.
  */
 
 export const dynamicParams = false;

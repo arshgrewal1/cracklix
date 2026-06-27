@@ -9,8 +9,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Universal Result Hub Viewer v2.1.
- * FIXED: Restored missing Loader2 import and optimized for Static Export.
+ * @fileOverview Universal Result Hub Viewer v2.2 (Static Ready).
+ * FIXED: Added Suspense boundary for static export compatibility.
  */
 
 export default function ResultViewPage() {

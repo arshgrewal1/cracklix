@@ -20,8 +20,8 @@ import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
 
 /**
- * @fileOverview Checkout Hub v8.4.
- * FIXED: Handled text overflow on manual verification button for mobile.
+ * @fileOverview Checkout Hub v8.5 (Static Ready).
+ * FIXED: Wrapped in Suspense for static export.
  */
 
 export default function CheckoutPage() {

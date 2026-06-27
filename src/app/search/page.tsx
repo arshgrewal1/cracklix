@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Results Center v2.0.
- * FIXED: React import added for UMD global compatibility.
+ * @fileOverview Search Results Center v2.1 (Static Export Compatible).
+ * FIXED: Wrapped in Suspense for Next.js 15 static export.
  */
 
 export default function SearchPage() {

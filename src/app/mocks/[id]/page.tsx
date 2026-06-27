@@ -2,7 +2,7 @@ import MockOverviewClient from "@/components/mocks/MockOverviewClient";
 
 /**
  * @fileOverview Official Mock Overview Entry.
- * FIXED: Expanded registry nodes to resolve potential 404 errors during static generation.
+ * FIXED: dynamicParams: false required for static export.
  */
 
 export const dynamicParams = false;

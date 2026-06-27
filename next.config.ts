@@ -9,7 +9,7 @@ const withPWA = require("next-pwa")({
 });
 
 const nextConfig: NextConfig = {
-  // Static export is required for standard Capacitor builds to bundle assets
+  // CRITICAL: Force static export for Capacitor compatibility
   output: "export",
   trailingSlash: true,
   reactStrictMode: true,

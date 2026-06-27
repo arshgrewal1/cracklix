@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { Suspense } from "react"
@@ -7,7 +6,7 @@ import { Loader2 } from "lucide-react"
 
 /**
  * @fileOverview Universal Mock Overview Hub.
- * Optimized for Static Export: Uses query params (?id=...) to bypass path pre-rendering limitations.
+ * FIXED: Added Suspense boundary for static export compatibility.
  */
 
 export default function MockViewPage() {

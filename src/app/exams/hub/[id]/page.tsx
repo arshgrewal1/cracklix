@@ -2,7 +2,7 @@ import BoardHubClient from "@/components/exams/BoardHubClient";
 
 /**
  * @fileOverview Official Board Hub Entry.
- * FIXED: Expanded board registry to prevent 404s for auxiliary hubs.
+ * FIXED: dynamicParams: false for static export compatibility.
  */
 
 export const dynamicParams = false;
