@@ -148,7 +148,7 @@ export default function QADashboard() {
         <div className="space-y-1">
            <div className="flex items-center gap-2 mb-1">
               <ShieldAlert className="h-4 w-4 text-rose-500" />
-              <span className="text-[9px] font-black tracking-[0.1em] text-slate-400">Integrity Governance Monitor</span>
+              <span className="text-[9px] font-black uppercase tracking-[0.1em] text-slate-400">Integrity Governance Monitor</span>
            </div>
           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight">CBT Integrity</h1>
           <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Sanitize global bank overlaps and validate asset fidelity.</p>

@@ -183,7 +183,7 @@ function StatPlate({ icon, label, val }: any) {
   return (
     <div className="p-4 md:p-8 bg-white rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-xl text-center space-y-2 md:space-y-4 group hover:border-primary/30 transition-all">
        <div className="h-10 w-10 md:h-14 bg-slate-50 rounded-xl flex items-center justify-center mx-auto text-primary mb-2 shadow-inner group-hover:scale-110 transition-transform">
-          {isValidElement(icon) && cloneElement(icon as React.ReactElement<any>, { className: "h-5 w-5 md:h-7 md:w-7" })}
+          {isValidElement(icon) && cloneElement(icon as ReactElement<any>, { className: "h-5 w-5 md:h-7 md:w-7" })}
        </div>
        <p className="text-[7px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">{label}</p>
        <p className="text-lg md:text-3xl font-black text-[#0F172A] uppercase leading-none">{val}</p>
