@@ -32,8 +32,8 @@ import { cn } from "@/lib/utils"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub Client v4.1.
- * FIXED: Removed forced uppercase from hero section and buttons.
+ * @fileOverview Universal Mock Overview Hub Client v4.2.
+ * UPDATED: Normalized casing for headers and action nodes.
  */
 
 export default function MockOverviewClient() {
@@ -140,13 +140,15 @@ export default function MockOverviewClient() {
                 {/* METADATA - 16PX SLATE COLOR */}
                 <div className="flex flex-wrap items-center gap-6 text-[#64748B] text-base font-bold tracking-widest">
                     <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /> {mock.duration}m Time</span>
+                    <span className="text-slate-300">|</span>
                     <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> {mock.totalQuestions} Items</span>
+                    <span className="text-slate-300">|</span>
                     <span className="flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> {mock.totalQuestions * (mock.positiveMarks || 1)} Pts</span>
                 </div>
 
                 {/* ACTION BUTTON - SPECIFIC DIMENSIONS */}
                 <div className="pt-2 md:pt-4">
-                  <Button asChild className="h-14 w-60 bg-[#0F172A] hover:bg-black text-white font-black tracking-[0.2em] text-[11px] rounded-[16px] shadow-3xl transition-all active:scale-95 border-none">
+                  <Button asChild className="h-14 w-60 bg-[#0F172A] hover:bg-black text-white font-bold tracking-tight text-sm rounded-[16px] shadow-3xl transition-all active:scale-95 border-none">
                     <Link href={`/mocks/instructions?id=${mock.id}`} className="flex items-center justify-center gap-3">
                       {activeAttempt?.status === 'IN_PROGRESS' ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4 fill-current text-primary" />} 
                       {activeAttempt?.status === 'IN_PROGRESS' ? 'Resume Prep' : 'Start Test'}
@@ -182,7 +184,7 @@ function FeatureNode({ icon: Icon, title, desc }: any) {
       </div>
       <div className="space-y-2">
          <h3 className="text-xl font-black text-[#0F172A] leading-tight">{title}</h3>
-         <p className="text-slate-400 font-bold text-[10px] tracking-widest leading-relaxed">{desc}</p>
+         <p className="text-slate-400 font-bold text-[10px] tracking-widest leading-relaxed uppercase">{desc}</p>
       </div>
     </div>
   );

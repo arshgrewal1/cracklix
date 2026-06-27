@@ -24,8 +24,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Hero Hub v106.0.
- * UPDATED: Removed forced uppercase from headlines and action cards.
+ * @fileOverview Institutional Hero Hub v107.0.
+ * UPDATED: Removed forced uppercase from headlines and normalized casing.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -74,7 +74,7 @@ export default function Hero() {
             <div className="space-y-3 md:space-y-5">
               <h1 className="text-[26px] md:text-5xl lg:text-6xl xl:text-7xl font-[900] tracking-tighter text-[#0F172A] leading-[1.05] md:leading-[0.95] antialiased">
                 Crack Punjab Govt Exams <br className="hidden md:block"/>
-                <span className="text-primary italic">With Confidence</span>
+                <span className="text-primary italic">with Confidence</span>
               </h1>
 
               <div className="space-y-4 md:space-y-5">

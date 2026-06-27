@@ -93,7 +93,7 @@ export default function FeaturedCategories() {
                        </div>
 
                        <div className="mt-auto shrink-0 pt-4 md:pt-10">
-                          <Button variant="ghost" className="w-full h-10 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[10px] md:text-xs tracking-widest border-none active:scale-95 gap-2">
+                          <Button variant="ghost" className="w-full h-10 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[10px] md:text-xs tracking-widest border-none active:scale-95 gap-2">
                              Open
                              <ChevronRight className="h-4 w-4" />
                           </Button>

@@ -26,8 +26,8 @@ import { useRouter } from "next/navigation"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Current Affairs Center v18.0.
- * UPDATED: Increased logo sizes for better brand presence.
+ * @fileOverview Official Current Affairs Center v19.0.
+ * UPDATED: Removed forced uppercase and refined logo styling.
  */
 
 const HUB_TYPES = [
@@ -108,13 +108,13 @@ export default function CurrentAffairsCenter() {
                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><AuthorityLogo boardId="current-affairs" size="xl" className="h-96 w-96 opacity-5" /></div>
                   <div className="space-y-10 relative z-10 max-w-5xl">
                     <div className="flex items-center gap-4">
-                        <AuthorityLogo boardId="current-affairs" size="md" className="bg-white/10 shadow-none" />
-                        <Badge className="bg-primary text-white border-none px-4 py-1.5 rounded-full font-black uppercase text-[10px] tracking-[0.2em] shadow-xl">
-                            REGISTRY UPDATES
+                        <AuthorityLogo boardId="current-affairs" size="md" className="bg-white/10 border-white/20 shadow-none" />
+                        <Badge className="bg-primary text-white border-none px-4 py-1.5 rounded-full font-bold text-[10px] tracking-widest shadow-xl">
+                            Registry Updates
                         </Badge>
                     </div>
                     <div className="space-y-6 md:space-y-12">
-                        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-9xl font-black tracking-tight leading-[0.9] break-words antialiased uppercase">
+                        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-9xl font-black tracking-tight leading-[0.9] break-words antialiased">
                             Current <br/>
                             <span className="text-primary italic">Affairs Center</span>
                         </h1>
@@ -139,7 +139,7 @@ export default function CurrentAffairsCenter() {
                   <div className="bg-white border border-slate-100 p-1.5 rounded-2xl md:rounded-3xl shadow-sm flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-2">
                      <TabsList className="bg-transparent border-none p-0 h-12 md:h-16 flex gap-2">
                         {HUB_TYPES.map(hub => (
-                           <TabsTrigger key={hub.id} value={hub.id} className="rounded-xl px-5 md:px-10 font-black uppercase text-[10px] md:text-[11px] gap-3 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">
+                           <TabsTrigger key={hub.id} value={hub.id} className="rounded-xl px-5 md:px-10 font-bold text-[10px] md:text-[11px] gap-3 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">
                               {hub.icon} {hub.label}
                            </TabsTrigger>
                         ))}
@@ -164,26 +164,26 @@ export default function CurrentAffairsCenter() {
                                        </div>
                                        <div className="flex-1 space-y-3 w-full">
                                           <div className="flex items-center justify-between">
-                                             <Badge className="bg-slate-100 text-slate-400 border-none px-3 py-1 font-black uppercase text-[8px] md:text-[10px] tracking-widest">
-                                                {item.type} HUB
+                                             <Badge className="bg-slate-100 text-slate-400 border-none px-3 py-1 font-bold text-[8px] md:text-[10px] tracking-widest uppercase">
+                                                {item.type} Hub
                                              </Badge>
-                                             <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex items-center gap-2">
+                                             <span className="text-[10px] font-bold text-slate-300 tracking-widest flex items-center gap-2">
                                                 <Calendar className="h-4 w-4 text-primary" /> {item.month} {item.year}
                                              </span>
                                           </div>
-                                          <h2 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase tracking-tight">{item.title}</h2>
-                                          <div className="flex items-center gap-4 text-[10px] md:text-[12px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+                                          <h2 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight tracking-tight">{item.title}</h2>
+                                          <div className="flex items-center gap-4 text-[10px] md:text-[12px] font-bold text-slate-400 tracking-widest uppercase">
                                              <Zap className="h-3.5 w-3.5" /> Language: {item.language || "Bilingual"}
                                           </div>
                                        </div>
                                        <div className="shrink-0 w-full md:w-auto flex flex-col gap-3">
                                           {item.quizId && (
-                                             <Button onClick={() => handleQuizAttempt(item.quizId)} className="w-full md:w-auto h-14 px-10 bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] rounded-2xl shadow-xl transition-all active:scale-95 border-none">
+                                             <Button onClick={() => handleQuizAttempt(item.quizId)} className="w-full md:w-auto h-14 px-10 bg-[#0F172A] hover:bg-primary text-white font-bold text-[10px] md:text-[11px] tracking-widest rounded-2xl shadow-xl transition-all active:scale-95 border-none">
                                                 Start Quiz <Zap className="ml-2 h-4 w-4 fill-current" />
                                              </Button>
                                           )}
                                           {item.pdfUrl && (
-                                             <Button asChild variant="outline" className="w-full md:w-auto h-14 px-10 border-2 border-slate-100 text-[#0F172A] font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] rounded-2xl hover:bg-slate-50 shadow-sm transition-all">
+                                             <Button asChild variant="outline" className="w-full md:w-auto h-14 px-10 border-2 border-slate-100 text-[#0F172A] font-bold text-[10px] md:text-[11px] tracking-widest rounded-2xl hover:bg-slate-50 shadow-sm transition-all">
                                                 <a href={item.pdfUrl} target="_blank" rel="noopener noreferrer">
                                                    View PDF <Download className="ml-2 h-4 w-4" />
                                                 </a>
@@ -197,7 +197,7 @@ export default function CurrentAffairsCenter() {
                         ) : (
                            <div className="py-32 text-center border-2 border-dashed border-slate-200 rounded-[4rem] opacity-20 flex flex-col items-center gap-6">
                               <Zap className="h-16 w-16 text-slate-300" />
-                              <p className="font-headline font-black text-2xl uppercase tracking-widest">Repository Empty</p>
+                              <p className="font-bold text-2xl tracking-widest">Repository Empty</p>
                            </div>
                         )}
                      </div>
@@ -207,9 +207,9 @@ export default function CurrentAffairsCenter() {
                            <div className="bg-[#0F172A] p-8 md:p-12 text-white">
                               <div className="flex items-center gap-4 mb-3">
                                  <Medal className="h-7 w-7 text-primary" />
-                                 <h3 className="font-headline font-black text-2xl uppercase tracking-tight">Top Merit</h3>
+                                 <h3 className="font-headline font-black text-2xl tracking-tight">Top Merit</h3>
                               </div>
-                              <p className="text-slate-400 text-[11px] font-bold uppercase tracking-[0.3em]">Institutional Merit</p>
+                              <p className="text-slate-400 text-[11px] font-bold tracking-widest uppercase">Institutional Merit</p>
                            </div>
                            <CardContent className="p-8 md:p-12 space-y-8">
                               {topRankers?.map((res: any, idx: number) => {
@@ -221,16 +221,16 @@ export default function CurrentAffairsCenter() {
                                           #{idx + 1}
                                        </div>
                                        <div className="min-w-0">
-                                          <p className="font-black text-[#0F172A] text-sm md:text-lg uppercase truncate max-w-[150px]">{name}</p>
-                                          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Score: {res.score}</p>
+                                          <p className="font-black text-[#0F172A] text-sm md:text-lg truncate max-w-[150px]">{name}</p>
+                                          <p className="text-[9px] font-bold text-slate-400 tracking-widest mt-1 uppercase">Score: {res.score}</p>
                                        </div>
                                     </div>
-                                    <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[10px] px-3 py-1 rounded-lg">{res.accuracy}%</Badge>
+                                    <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[10px] px-3 py-1 rounded-lg">{res.accuracy}%</Badge>
                                  </div>
                                  );
                               })}
                               <div className="pt-8 border-t border-slate-50">
-                                 <Button asChild variant="ghost" className="w-full h-12 font-black uppercase text-[10px] tracking-widest text-primary gap-3 hover:bg-primary/5 transition-all rounded-xl">
+                                 <Button asChild variant="ghost" className="w-full h-12 font-bold text-[10px] tracking-widest text-primary gap-3 hover:bg-primary/5 transition-all rounded-xl">
                                     <Link href="/leaderboard">Full Merit List <ChevronRight className="h-4 w-4" /></Link>
                                  </Button>
                               </div>
