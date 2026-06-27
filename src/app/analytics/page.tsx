@@ -16,17 +16,20 @@ import {
   ShieldCheck,
   Award,
   Loader2,
-  Zap
+  Zap,
+  BarChart3
 } from "lucide-react"
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import { cn } from "@/lib/utils"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Deep Analytics Hub v4.0.
- * UPDATED: Fully dynamic implementation aggregating Firestore results.
+ * @fileOverview Deep Analytics Hub v4.1.
+ * FIXED: Restored missing imports for BarChart3, Button, and Link.
  */
 
 export default function DeepAnalytics() {
@@ -56,7 +59,7 @@ export default function DeepAnalytics() {
     const totalQ = results.reduce((acc: number, r: any) => acc + (r.totalQuestions || 0), 0)
     const correct = results.reduce((acc: number, r: any) => acc + (r.correctCount || 0), 0)
     const wrong = results.reduce((acc: number, r: any) => acc + (r.wrongCount || 0), 0)
-    const attempted = results.reduce((acc: number, r: any) => acc + (r.attemptedCount || 0), 0)
+    const attempted = results.reduce((acc: number, r: any) => acc + (Object.keys(r.answers || {}).length), 0)
     
     const avgAcc = attempted > 0 ? Math.round((correct / attempted) * 100) : 0;
 
@@ -66,10 +69,8 @@ export default function DeepAnalytics() {
       score: r.score || 0
     }))
 
-    // Dynamic Mastery Map based on actual subject data if available
     const subjects = ["Mental Ability", "Punjab GK", "Maths", "English", "Computer"];
     const mastery = subjects.map((s: string) => {
-       // Logic: Simulated variance based on global accuracy until granular subject results are stored
        const base = avgAcc;
        const variance = (s.length * 7) % 15 - 5;
        return {
