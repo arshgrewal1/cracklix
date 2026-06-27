@@ -33,8 +33,7 @@ const withPWA = require("next-pwa")({
 });
 
 const nextConfig: NextConfig = {
-  output: "export",
-  trailingSlash: true,
+  // Standard Build for SSR support (Required for API Routes & Cashfree)
   reactStrictMode: true,
   images: {
     unoptimized: true,

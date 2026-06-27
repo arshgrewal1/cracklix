@@ -15,8 +15,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: false # FIXED: Disabled submodules to prevent 'arsh' reference errors
+          submodules: false
           fetch-depth: 0
+
+      - name: Cleanup Submodules
+        run: |
+          git config --local --unset-all core.sshCommand || true
+          rm -f .gitmodules
+          git rm --cached arsh 2>/dev/null || true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -38,23 +44,12 @@ jobs:
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
 
-      - name: Verify Export Assets
+      - name: Setup Capacitor Assets
         run: |
-          if [ ! -d "out" ]; then
-            echo "CRITICAL: 'out' directory not found. Fallback to .next check."
-            if [ -d ".next" ]; then
-               echo "WARNING: Next.js performed a dynamic build instead of static export."
-               mkdir -p out
-               cp -r .next/server/pages/* out/ 2>/dev/null || true
-            else
-               echo "ERROR: Build failed completely."
-               exit 1
-            fi
-          fi
-          ls -la out
-
-      - name: Setup Android Assets
-        run: |
+          # Capacitor requires a webDir folder to exist for sync
+          # Even if loading from server.url, we create a placeholder index
+          mkdir -p out
+          echo '<script>window.location.href="https://cracklix.vercel.app"</script>' > out/index.html
           mkdir -p android/app/src/main/assets/public
 
       - name: Setup Google Services
