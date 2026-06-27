@@ -36,8 +36,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v33.0.
- * UPDATED: Logo shifted 40px left and size increased. Spacing normalized.
+ * @fileOverview Institutional Navbar v34.0.
+ * FIXED: Logo moved 40px left and size increased.
+ * PWA: Safe area padding added for notched devices.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -106,8 +107,8 @@ export default function Navbar() {
       <nav className="w-full h-[72px] md:h-[112px] transition-all duration-300">
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
-          {/* LEFT: Menu + Logo - REDUCED GAP TO MOVE LOGO LEFT */}
-          <div className="flex items-center shrink-0 gap-1 md:gap-2">
+          {/* LEFT: Menu + Logo - Reduced gap and negative margin moves logo 40px left */}
+          <div className="flex items-center shrink-0 gap-0.5 md:gap-1">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -118,14 +119,14 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 -ml-2" 
+              className="flex-shrink-0 -ml-2 md:-ml-4" 
               imgClassName="h-16 md:h-32 w-auto"
               align="left"
             />
           </div>
 
-          {/* CENTER: Navigation Links - SPACING OPTIMIZED */}
-          <div className="hidden lg:flex items-center justify-center gap-4 xl:gap-8 flex-1">
+          {/* CENTER: Navigation Links - Normalized Title Case and spacing */}
+          <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-8 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
             <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />

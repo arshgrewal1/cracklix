@@ -7,7 +7,7 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened CBT Store v60.3.
+ * @fileOverview Hardened CBT Store v60.4.
  * FIXED: Purged duplicate startTime key to resolve syntax errors.
  */
 

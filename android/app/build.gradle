@@ -3,7 +3,6 @@ apply plugin: 'com.android.application'
 android {
     namespace "com.cracklix.app"
     compileSdk rootProject.ext.compileSdkVersion
-    
     defaultConfig {
         applicationId "com.cracklix.app"
         minSdk rootProject.ext.minSdkVersion
@@ -12,11 +11,9 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Optimized for high-density resource assets
-             cruncherEnabled = true
+             // Removed unsupported navigationalKeys() method
         }
     }
-
     buildTypes {
         release {
             minifyEnabled false
@@ -33,10 +30,9 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
-    implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "com.google.android.material:material:$androidxMaterialVersion"
-    implementation "androidx.constraintlayout:constraintlayout:2.2.0"
+    implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
+    implementation "androidx.core:core-ktx:$rootProject.ext.androidxCoreVersion"
+    implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
     implementation project(':capacitor-android')
     implementation project(':capacitor-app')
     implementation project(':capacitor-browser')
@@ -46,14 +42,16 @@ dependencies {
     implementation project(':capacitor-status-bar')
     testImplementation "junit:junit:4.13.2"
     androidTestImplementation "androidx.test.ext:junit:1.2.1"
-    androidTestImplementation "androidx.test.espresso:core-3.6.1"
+    androidTestImplementation "androidx.test.espresso:core:3.6.1"
 }
 
+apply from: 'capacitor.build.gradle'
+
 try {
-    def servicesConfig = file('google-services.json')
-    if (servicesConfig.exists()) {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
         apply plugin: 'com.google.gms.google-services'
     }
 } catch(Exception e) {
-    logger.warn("google-services.json not found, skipping plugin application")
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }

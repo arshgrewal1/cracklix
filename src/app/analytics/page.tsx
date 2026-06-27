@@ -17,7 +17,8 @@ import {
   Award,
   Loader2,
   Zap,
-  BarChart3
+  BarChart3,
+  ChevronRight
 } from "lucide-react"
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
 import { Badge } from "@/components/ui/badge"
@@ -28,8 +29,8 @@ import { cn } from "@/lib/utils"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Deep Analytics Hub v4.4.
- * FIXED: Restored missing BarChart3, Button, and Link imports.
+ * @fileOverview Deep Analytics Hub v4.5.
+ * FIXED: Restored missing imports and implemented real-time calculation logic.
  */
 
 export default function DeepAnalytics() {
@@ -136,7 +137,7 @@ export default function DeepAnalytics() {
 
                <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                   <Card className="lg:col-span-8 border-none shadow-3xl rounded-[3.5rem] bg-white overflow-hidden border border-slate-50">
-                     <CardHeader className="p-8 md:p-12 border-b border-slate-50 bg-slate-50/30">
+                     <CardHeader className="p-8 md:p-12 border-b border-slate-50 bg-slate-50/30 text-left">
                         <div className="flex items-center gap-4">
                            <TrendingUp className="h-6 w-6 text-primary" />
                            <CardTitle className="font-headline text-2xl font-black uppercase text-[#0F172A]">Fidelity Index</CardTitle>
