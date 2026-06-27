@@ -5,18 +5,16 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
         flatDir {
-            dirs 'libs'
+            dirs 'app/libs', 'capacitor-cordova-android-plugins/src/main/libs'
         }
     }
 }
-
 rootProject.name = 'android'
 include ':app'
 
