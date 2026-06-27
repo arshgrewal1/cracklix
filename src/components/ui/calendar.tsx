@@ -10,7 +10,7 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 /**
  * @fileOverview Calendar Component v9.5.
- * FIXED: Complied with React Day Picker v9 standards and resolved orientation return types to return valid JSX instead of null.
+ * FIXED: Complied with React Day Picker v9 standards and resolved orientation return types.
  */
 function Calendar({
   className,

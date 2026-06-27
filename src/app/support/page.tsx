@@ -37,8 +37,8 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Center v8.7.
- * FIXED: Restored missing Link and Loader2 references.
+ * @fileOverview Support Center v8.8.
+ * FIXED: Restored Link and Loader2 references for Next.js build integrity.
  */
 
 export default function SupportPage() {
@@ -346,7 +346,7 @@ export default function SupportPage() {
               />
             </div>
           </div>
-          <DialogFooter className="p-6 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4">
+          <div className="p-6 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4 shrink-0">
             <button
               onClick={() => setIsRaising(false)}
               className="h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400 bg-transparent border-none cursor-pointer hover:text-slate-600 transition-colors"
@@ -365,7 +365,7 @@ export default function SupportPage() {
               )}
               Submit Ticket
             </Button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

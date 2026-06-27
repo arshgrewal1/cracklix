@@ -2,7 +2,7 @@
 <resources>
     <!-- 
        Institutional Theme Registry.
-       Conflicting Theme.Cracklix definition has been consolidated into styles.xml 
-       to resolve duplicate resource build failures.
+       Duplicate Theme.Cracklix definition has been consolidated into styles.xml 
+       to resolve resource build collisions.
     -->
 </resources>

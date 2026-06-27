@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Search Center v10.6.
- * FIXED: Explicitly imported cloneElement to resolve UMD global conflict and TS2769.
+ * FIXED: Explicitly imported React and cloneElement to resolve UMD global conflict.
  */
 
 export default function SearchPage() {
