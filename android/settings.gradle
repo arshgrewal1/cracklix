@@ -15,6 +15,6 @@ dependencyResolutionManagement {
 
 rootProject.name = 'android'
 include ':app'
-project(':app').projectDir = new File('app')
 
+// Mandatory linkage for Capacitor dynamic plugins
 apply from: 'capacitor.settings.gradle'
