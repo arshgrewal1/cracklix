@@ -11,10 +11,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        flatDir {
+            dirs 'libs'
+        }
     }
 }
 
-rootProject.name = 'android'
 include ':app'
-
 apply from: 'capacitor.settings.gradle'

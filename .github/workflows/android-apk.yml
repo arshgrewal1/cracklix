@@ -36,24 +36,13 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
-      - name: Verify Build Output
-        run: |
-          if [ -d "out" ]; then
-            echo "STATIC_BUILD=true" >> $GITHUB_ENV
-          elif [ -d ".next" ]; then
-            echo "STATIC_BUILD=false" >> $GITHUB_ENV
-          else
-            echo "Error: No valid Next.js build output found."
-            exit 1
-          fi
-
       - name: Setup Android Directories
         run: |
           mkdir -p android/app/src/main/assets/public
 
       - name: Setup Google Services
         run: |
-          # Force remove if it exists as a directory to prevent collision
+          # Force remove any existing directory to prevent collision
           rm -rf android/app/google-services.json
           if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
             echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
