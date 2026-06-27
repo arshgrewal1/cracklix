@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Hub v2.9.
- * FIXED: Resolved UMD global React conflict and improved type casting for element cloning.
+ * @fileOverview Search Hub v3.0.
+ * FIXED: Resolved UMD global React conflict by using named imports and explicit React scope.
  */
 
 export default function SearchPage() {
@@ -188,13 +188,13 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
       <Link href={href} className="block active:scale-[0.99] transition-all group">
          <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
             <div className="flex items-center gap-4 min-w-0 flex-1">
-               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
-                  {isValidElement(icon) ? cloneElement(icon as ReactElement<any>, { className: "h-5 w-5" }) : icon}
+               <div className="h-12 w-12 md:h-14 md:w-14 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
+                  {isValidElement(icon) ? cloneElement(icon as ReactElement<any>, { className: "h-6 w-6" }) : icon}
                </div>
                <div className="text-left min-w-0 flex-1 space-y-1">
                   <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
                   <div className="flex items-center gap-3">
-                     <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] md:text-[9px] font-black rounded shadow-sm">{category}</Badge>
+                     <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black rounded shadow-sm">{category}</Badge>
                      <div className="h-1 w-1 rounded-full bg-slate-200" />
                      <span className="text-[8px] font-black uppercase tracking-widest text-primary">Verified</span>
                   </div>
