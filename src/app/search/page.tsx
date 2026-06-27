@@ -13,9 +13,9 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Hub v2.5.
- * FIXED: Wrapped in Suspense to satisfy Next.js 15 static export requirements.
+ * @fileOverview Search Hub v2.6.
  * FIXED: Explicit React import to resolve UMD global error.
+ * FIXED: Wrapped in Suspense for static export compatibility.
  */
 
 export default function SearchPage() {
@@ -67,7 +67,7 @@ function SearchContent() {
        type: "Exam Center", 
        href: `/exams/view/?id=${e.id}`, 
        boardId: e.boardId,
-       icon: <GraduationCap className="h-5 w-5" />
+       icon: <GraduationCap />
     }))
 
     const mockMatches = (mocks || []).filter((m: any) => 
@@ -78,7 +78,7 @@ function SearchContent() {
        type: "Practice Test", 
        href: `/mocks/view/?id=${m.id}`, 
        boardId: m.boardId, 
-       icon: <Zap className="h-5 w-5" />
+       icon: <Zap />
     }))
 
     const notesMatches = (notes || []).filter((n: any) => 
@@ -89,7 +89,7 @@ function SearchContent() {
        type: "Notes & PDFs", 
        href: `/notes/`, 
        boardId: n.boardId, 
-       icon: <FileText className="h-5 w-5" />
+       icon: <FileText />
     }))
 
     return [...examMatches, ...mockMatches, ...notesMatches]

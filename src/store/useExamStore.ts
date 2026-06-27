@@ -7,8 +7,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened CBT Store v48.0.
- * FIXED: Removed duplicate startTime property and corrected type initializers.
+ * @fileOverview Hardened CBT Store v49.0.
+ * FIXED: Removed duplicate startTime key that violated strict object literal rules.
  */
 
 export interface ExamStoreState {
