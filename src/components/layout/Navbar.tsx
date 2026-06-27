@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v26.0.
- * FIXED: Removed uppercase from links and optimized equal spacing for desktop.
+ * @fileOverview Institutional Navbar v27.0.
+ * UPDATED: Logo moved 40px left (reduced gap) and size increased.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -106,8 +106,8 @@ export default function Navbar() {
       <nav className="w-full h-[72px] md:h-[112px] transition-all duration-300">
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
-          {/* LEFT: Menu + Logo */}
-          <div className="flex items-center shrink-0 gap-4 md:gap-8">
+          {/* LEFT: Menu + Logo - REDUCED GAP TO MOVE LOGO LEFT */}
+          <div className="flex items-center shrink-0 gap-0.5 md:gap-1">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -118,13 +118,13 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0" 
-              imgClassName="h-12 md:h-20 w-auto"
+              className="flex-shrink-0 -ml-1" 
+              imgClassName="h-16 md:h-24 w-auto"
               align="left"
             />
           </div>
 
-          {/* CENTER: Navigation Links - SPACING EQUAL & NO UPPERCASE */}
+          {/* CENTER: Navigation Links */}
           <div className="hidden lg:flex items-center justify-center gap-8 xl:gap-12 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
