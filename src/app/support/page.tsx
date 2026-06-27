@@ -37,11 +37,6 @@ import {
 } from "@/components/ui/dialog"
 import Link from "next/link"
 
-/**
- * @fileOverview Institutional Support Ticket Management v5.2.
- * FIXED: Restored Link and Loader2 components for production stability.
- */
-
 export default function SupportPage() {
   const { user, profile } = useUser()
   const db = useFirestore()

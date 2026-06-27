@@ -12,11 +12,6 @@ import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-/**
- * @fileOverview Search Hub v3.2.
- * FIXED: Resolved React.cloneElement type conflicts and added Suspense boundary.
- */
-
 export default function SearchPage() {
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
