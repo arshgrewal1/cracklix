@@ -2,8 +2,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 /**
  * @fileOverview Production Capacitor Configuration for Cracklix Android.
- * Optimized for institutional readiness and high-fidelity static asset rendering.
- * FIXED: Ensured webDir points to 'out' to match Next.js static export.
+ * Optimized for Live Server mode to support SSR and Payment Gateways.
  */
 
 const config: CapacitorConfig = {
@@ -11,10 +10,11 @@ const config: CapacitorConfig = {
   appName: 'Cracklix',
   webDir: 'out',
   server: {
-    // FALLBACK: Load production URL if local assets fail or for authenticated sessions
+    // Primary: Load production URL to support dynamic API routes and payments
     url: 'https://cracklix.vercel.app',
     allowNavigation: ['*'],
-    androidScheme: 'https'
+    androidScheme: 'https',
+    cleartext: true
   },
   plugins: {
     SplashScreen: {
@@ -36,7 +36,7 @@ const config: CapacitorConfig = {
     }
   },
   android: {
-    allowMixedContent: false,
+    allowMixedContent: true,
     captureInput: true,
     webContentsDebuggingEnabled: false
   }

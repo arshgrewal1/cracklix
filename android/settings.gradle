@@ -13,8 +13,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = 'android'
 include ':app'
 
-// Capacitor auto-generated settings
+// Capacitor plugins settings inclusion
 apply from: 'capacitor.settings.gradle'

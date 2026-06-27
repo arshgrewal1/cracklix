@@ -9,7 +9,7 @@ const withPWA = require("next-pwa")({
 });
 
 const nextConfig: NextConfig = {
-  // Standard Build for SSR support (Required for API Routes & Cashfree)
+  // standard SSR build to support API routes (Cashfree/Genkit)
   reactStrictMode: true,
   images: {
     unoptimized: true,

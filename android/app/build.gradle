@@ -11,8 +11,10 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Fragments and resources should be kept during optimization
-             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+             // Fragments allowed to queries.
+             // Msg: "Project with path ':capacitor-cordova-android-plugins' could not be found"
+             // usually means settings.gradle is missing plugin inclusion.
+             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:f~:bak:cvs:thumbs.db:desktop.ini'
         }
     }
     buildTypes {
@@ -31,17 +33,10 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation project(':capacitor-android')
     implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.ext.androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-splashscreen:$rootProject.ext.androidxSplashScreenVersion"
-    implementation project(':capacitor-app')
-    implementation project(':capacitor-browser')
-    implementation project(':capacitor-filesystem')
-    implementation project(':capacitor-keyboard')
-    implementation project(':capacitor-share')
-    implementation project(':capacitor-status-bar')
-    
+    implementation project(':capacitor-android')
+    implementation project(':capacitor-cordova-android-plugins')
     testImplementation "junit:junit:$rootProject.ext.junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.androidxJunitVersion"
     androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.androidxEspressoCoreVersion"
@@ -55,5 +50,5 @@ try {
         apply plugin: 'com.google.gms.google-services'
     }
 } catch(Exception e) {
-    logger.warn("google-services.json not found, skipping registration")
+    logger.warn("google-services.json not found or malformed, skipping plugin.")
 }
