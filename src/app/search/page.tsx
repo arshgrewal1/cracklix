@@ -13,9 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Hub v2.6.
- * FIXED: Explicit React import to resolve UMD global error.
- * FIXED: Wrapped in Suspense for static export compatibility.
+ * @fileOverview Search Hub v2.7.
+ * FIXED: Advanced type safety for React element cloning.
  */
 
 export default function SearchPage() {
