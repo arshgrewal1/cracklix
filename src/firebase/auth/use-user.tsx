@@ -8,8 +8,8 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth & Profile Hub v12.0 (Auto-Activation Aware).
- * SECURITY: Real-time pass status derivation with rapid auto-activation from queue.
+ * @fileOverview Hardened Auth Hub v15.0.
+ * SECURITY: Real-time pass audit on every handshake.
  */
 export function useUser() {
   const auth = useAuth();
@@ -48,9 +48,6 @@ export function useUser() {
         setProfileLoading(false);
         profileLoaded.current = true;
       }
-    }, (err) => {
-      setAuthResolved(true);
-      setProfileLoading(false);
     });
 
     return () => unsubscribeAuth();
@@ -70,69 +67,36 @@ export function useUser() {
           const now = new Date();
           
           let passStatus: 'active' | 'expired' | 'none' = data.passStatus || 'none';
-          let passActive = false;
-
-          // 1. PRIMARY PASS AUDIT
+          
+          // 1. INSTITUTIONAL PASS AUDIT
           if (data.passExpiresAt) {
              const expiryDate = new Date(data.passExpiresAt);
-             if (now > expiryDate) {
+             if (now > expiryDate && data.passStatus === 'active') {
+                // Auto-expire session node
+                await updateDoc(doc(db, 'users', user.uid), {
+                   passStatus: 'expired',
+                   updatedAt: serverTimestamp()
+                });
                 passStatus = 'expired';
-                passActive = false;
-                
-                // 2. RAPID QUEUE ACTIVATION (Eliminates service gaps)
-                if (data.queuedPasses && data.queuedPasses.length > 0) {
-                   const nextPass = data.queuedPasses[0];
-                   const remainingQueue = data.queuedPasses.slice(1);
-                   
-                   const newExpiry = new Date();
-                   newExpiry.setDate(newExpiry.getDate() + nextPass.durationDays);
-
-                   await updateDoc(doc(db, 'users', user.uid), {
-                      pass: {
-                         active: true,
-                         plan: nextPass.planId.toUpperCase(),
-                         purchaseDate: now.toISOString(),
-                         expiryDate: newExpiry.toISOString(),
-                         freePassClaimed: nextPass.planId === 'free-pass'
-                      },
-                      passStatus: 'active',
-                      passExpiresAt: newExpiry.toISOString(),
-                      status: nextPass.planId,
-                      queuedPasses: remainingQueue,
-                      updatedAt: serverTimestamp()
-                   });
-                   return; // Snapshot will re-trigger immediately
-                }
-             } else {
+             } else if (now <= expiryDate) {
                 passStatus = 'active';
-                passActive = true;
              }
-          } else if (data.pass?.active === true) {
-             passStatus = 'active';
-             passActive = true;
           }
 
           setProfile({ 
             ...data, 
             id: docSnap.id, 
-            passStatus,
-            pass: {
-              ...(data.pass || {}),
-              active: passActive
-            }
+            passStatus 
           } as UserProfile);
         } else {
           setProfile(null);
         }
       } catch (e) {
-        console.error("[PROFILE_PARSE_ERROR]:", e);
+        console.error("[PROFILE_AUDIT_ERROR]:", e);
       } finally {
         profileLoaded.current = true;
         setProfileLoading(false);
       }
-    }, (err) => {
-      profileLoaded.current = true;
-      setProfileLoading(false);
     });
 
     return () => unsubscribeProfile();

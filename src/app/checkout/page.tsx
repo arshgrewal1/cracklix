@@ -17,11 +17,10 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
-import Link from "next/link"
 
 /**
- * @fileOverview Checkout Hub v8.5 (Static Ready).
- * FIXED: Wrapped in Suspense for static export.
+ * @fileOverview Institutional Checkout Hub v10.0.
+ * Optimized for secure gateway bridging and real-time pass activation.
  */
 
 export default function CheckoutPage() {
@@ -35,14 +34,13 @@ export default function CheckoutPage() {
 function CheckoutContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
-  const planId = searchParams.get("plan") || ""
+  const planId = searchParams.get("plan") || "monthly-pass"
   const { user, profile, loading } = useUser()
   const dbInstance = useFirestore()
   const { toast } = useToast()
   
-  const [processing, setProcessing] = useState(false)
-  const [onlineProcessing, setOnlineProcessing] = useState(false)
-  const [utr, setUtr] = useState("")
+  const [onlineProcessing, setOnlineProcessing] = useState(false);
+  const [utr, setUtr] = useState("");
 
   const { data: settings } = useDoc<any>(useMemo(() => (dbInstance ? doc(dbInstance, 'settings', 'global') : null), [dbInstance]));
   const { data: planData, loading: planLoading } = useDoc<any>(useMemo(() => (dbInstance && planId ? doc(dbInstance, 'passes', planId) : null), [dbInstance, planId]));
@@ -68,8 +66,7 @@ function CheckoutContent() {
     }
 
     setOnlineProcessing(true);
-    const getCashfree = () => (window as any).Cashfree;
-    const cf = getCashfree();
+    const cf = (window as any).Cashfree;
     
     if (!cf) {
        toast({ variant: "destructive", title: "Gateway Error", description: "Payment engine failed to initialize." });
@@ -98,16 +95,15 @@ function CheckoutContent() {
       });
 
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Order Blocked", description: e.message || "Transaction could not be established." });
+      toast({ variant: "destructive", title: "Order Blocked", description: e.message });
       setOnlineProcessing(false);
     }
   };
 
   if (planLoading) return <div className="h-screen flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>
-  if (!planData) return <div className="h-screen flex flex-col items-center justify-center text-slate-300 font-black uppercase text-xs gap-4"><Zap className="h-10 w-10" /> Registry Node Missing</div>
+  if (!planData) return <div className="h-screen flex flex-col items-center justify-center text-slate-300 font-black uppercase text-xs gap-4"><Zap className="h-10 w-10" /> Plan Not Registered</div>
 
   const upiId = settings?.upiId || "arshdeepgrewal1122-1@oksbi";
-  const qrUrl = settings?.qrCodeUrl || `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent('upi://pay?pa='+upiId+'&pn=Cracklix&am='+planData.price+'&cu=INR')}`;
 
   return (
     <div className="min-h-screen bg-slate-50/50 font-body text-left">
@@ -119,7 +115,7 @@ function CheckoutContent() {
            <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-all">
               <ArrowLeft className="h-5 w-5" />
            </button>
-           <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Checkout</h1>
+           <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight leading-none">Checkout Hub</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16">
@@ -127,11 +123,11 @@ function CheckoutContent() {
               <Tabs defaultValue="online" className="w-full">
                  <TabsList className="bg-slate-100 p-1.5 h-14 rounded-2xl w-full mb-10 grid grid-cols-2 shadow-inner border border-slate-200">
                     <TabsTrigger value="online" className="rounded-xl font-bold text-sm h-full flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all">
-                       <ShieldCheck className="h-3.5 w-3.5" /> Secure Online
+                       <ShieldCheck className="h-3.5 w-3.5" /> Secure Gateway
                     </TabsTrigger>
                     {planData.price > 0 && (
                        <TabsTrigger value="manual" className="rounded-xl font-bold text-sm h-full flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all">
-                          <Gem className="h-3.5 w-3.5" /> Manual UPI
+                          <Gem className="h-3.5 w-3.5" /> Manual Verify
                        </TabsTrigger>
                     )}
                  </TabsList>
@@ -142,8 +138,8 @@ function CheckoutContent() {
                           <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto text-blue-600 shadow-inner mb-6">
                              <ShieldCheck className="h-8 w-8" />
                           </div>
-                          <h2 className="text-2xl font-black text-[#0F172A]">Direct Activation Hub</h2>
-                          <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed">Access instant preparation mocks via our encrypted payment gateway.</p>
+                          <h2 className="text-2xl font-black text-[#0F172A]">Direct Activation</h2>
+                          <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed text-sm">Instant prep-node activation via encrypted Cashfree gateway.</p>
                        </div>
                        <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black text-sm rounded-full shadow-3xl border-none transition-all active:scale-95">
                           {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Zap className="h-5 w-5 mr-2" /> Pay ₹{planData.price} Now</>}
@@ -152,28 +148,28 @@ function CheckoutContent() {
                  </TabsContent>
 
                  <TabsContent value="manual" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    <Card className="border-none shadow-5xl rounded-[3rem] bg-white p-8 md:p-14 space-y-12 border border-slate-100">
+                    <Card className="border-none shadow-5xl rounded-[3rem] bg-white p-8 md:p-14 space-y-10 border border-slate-100">
                        <div className="flex flex-col items-center gap-8">
-                          <div className="relative h-52 w-52 md:h-64 md:w-64 p-4 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
-                            <Image src={qrUrl} alt="UPI QR Code" fill sizes="256px" className="object-contain p-4" unoptimized />
+                          <div className="relative h-52 w-52 p-4 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
+                            <Image src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent('upi://pay?pa='+upiId+'&pn=Cracklix&am='+planData.price+'&cu=INR')}`} alt="UPI QR" fill sizes="200px" className="object-contain p-4" unoptimized />
                           </div>
-                          <div className="w-full p-5 bg-slate-900 rounded-2xl flex items-center justify-between shadow-2xl">
-                             <div className="text-left">
+                          <div className="w-full p-4 bg-slate-900 rounded-xl flex items-center justify-between shadow-2xl">
+                             <div className="text-left min-w-0">
                                 <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Registry VPA</p>
-                                <p className="text-sm md:text-lg font-black text-white truncate">{upiId}</p>
+                                <p className="text-sm font-black text-white truncate">{upiId}</p>
                              </div>
                              <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(upiId); toast({title:"Copied"}); }} className="text-primary hover:bg-white/5"><Copy className="h-5 w-5" /></Button>
                           </div>
                        </div>
-                       <div className="space-y-6 pt-8 border-t border-slate-50">
+                       <div className="space-y-6 pt-6 border-t border-slate-50">
                           <div className="space-y-2 text-left">
                              <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">12-Digit UTR Number</Label>
-                             <Input value={utr} onChange={e => setUtr(e.target.value.replace(/\D/g, '').slice(0,12))} className="h-14 rounded-2xl border-slate-200 bg-slate-50 text-center font-black text-xl tracking-[0.3em] shadow-inner" placeholder="---" />
+                             <Input value={utr} onChange={e => setUtr(e.target.value.replace(/\D/g, '').slice(0,12))} className="h-14 rounded-2xl border-slate-200 bg-slate-50 text-center font-black text-xl tracking-[0.2em]" placeholder="---" />
                           </div>
                           <Button 
                              onClick={async () => {
-                                if(utr.length < 12) { toast({ variant: "destructive", title: "Invalid UTR", description: "Please enter the full 12-digit number." }); return; }
-                                setProcessing(true);
+                                if(utr.length < 12) { toast({ variant: "destructive", title: "Invalid UTR" }); return; }
+                                setOnlineProcessing(true);
                                 try { 
                                   await submitManualPayment({ 
                                     userId: user!.uid, 
@@ -182,15 +178,15 @@ function CheckoutContent() {
                                     planId, 
                                     transactionId: utr 
                                   }); 
-                                  toast({ title: "Audit Staged", description: "Our team will verify your UTR shortly." }); 
+                                  toast({ title: "Verification Staged", description: "Team node will audit shortly." }); 
                                   router.push("/dashboard"); 
                                 } catch(e) { 
-                                  toast({variant: "destructive", title:"Sync Error"}); 
-                                } finally { setProcessing(false); }
+                                  toast({variant: "destructive", title:"Sync Failed"}); 
+                                } finally { setOnlineProcessing(false); }
                              }}
-                             disabled={processing}
-                             className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] md:text-xs rounded-full shadow-2xl border-none active:scale-95 transition-all px-4"
-                          >{processing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify & Activate Pass"}</Button>
+                             disabled={onlineProcessing}
+                             className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-xs rounded-full shadow-2xl border-none transition-all"
+                          >{onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Transaction"}</Button>
                        </div>
                     </Card>
                  </TabsContent>
@@ -199,27 +195,27 @@ function CheckoutContent() {
 
            <div className="lg:col-span-5">
               <Card className="border-none shadow-5xl rounded-[3.5rem] bg-[#0B1528] text-white p-10 md:p-14 sticky top-32 border border-white/5">
-                 <div className="h-1.5 w-16 bg-primary rounded-full mb-10" />
+                 <div className="h-1 w-12 bg-primary rounded-full mb-8" />
                  <div className="space-y-4">
                     <h3 className="text-3xl md:text-5xl font-black leading-[0.9] tracking-tighter">{planData.name}</h3>
-                    <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3">Elite Access Pass</Badge>
+                    <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1">Premium Prep Node</Badge>
                  </div>
                  
-                 <div className="mt-12 pt-12 border-t border-white/5 space-y-6">
-                    {planData.features?.slice(0, 4).map((f: string, i: number) => (
-                       <div key={i} className="flex items-center gap-4 text-slate-400">
+                 <div className="mt-10 pt-10 border-t border-white/5 space-y-5">
+                    {planData.features?.slice(0, 5).map((f: string, i: number) => (
+                       <div key={i} className="flex items-center gap-3 text-slate-400">
                           <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                          <span className="text-xs font-bold tracking-tight">{f}</span>
+                          <span className="text-[13px] font-bold tracking-tight leading-snug">{f}</span>
                        </div>
                     ))}
                  </div>
 
-                 <div className="mt-16 pt-10 border-t border-white/5 flex justify-between items-end">
+                 <div className="mt-14 pt-8 border-t border-white/5 flex justify-between items-end">
                     <div className="text-left">
-                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-2">Total Amount</p>
-                       <span className="text-5xl md:text-7xl font-black text-white tabular-nums tracking-tighter">₹{planData.price}</span>
+                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Pass Amount</p>
+                       <span className="text-5xl font-black text-white tabular-nums tracking-tighter">₹{planData.price}</span>
                     </div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">INR</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">INR</span>
                  </div>
               </Card>
            </div>

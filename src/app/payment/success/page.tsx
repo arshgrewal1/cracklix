@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useSearchParams, useRouter } from "next/navigation"
@@ -12,8 +11,8 @@ import { Suspense, useEffect, useState } from "react"
 import { useUser } from "@/firebase"
 
 /**
- * @fileOverview Success Node v2.1.
- * UPDATED: Hardened plan normalization for registry sync.
+ * @fileOverview Verified Success Node v2.5.
+ * Triggers server-side verification before allowing hub access.
  */
 
 export default function SuccessPage() {
@@ -37,7 +36,6 @@ function SuccessContent() {
     async function verify() {
       if (!orderId || !user) return;
       try {
-        // Robust ID normalization: handles underscores and hyphens
         const planId = planName.toLowerCase().replace(/[\s_]+/g, '-');
         
         const res = await fetch('/api/cashfree/verify-payment', {
@@ -52,7 +50,7 @@ function SuccessContent() {
         const data = await res.json();
         if (data.success) setVerified(true);
       } catch (e) {
-        console.error("Verification failed:", e);
+        console.error("[VERIFICATION_HANDSHAKE_FAILED]:", e);
       } finally {
         setVerifying(false);
       }
@@ -67,7 +65,7 @@ function SuccessContent() {
         {verifying ? (
            <div className="space-y-6">
               <Loader2 className="h-12 w-12 text-primary animate-spin mx-auto" />
-              <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Verifying Registry Hub...</p>
+              <p className="text-slate-500 font-bold uppercase text-[10px] tracking-widest">Auditing Registry...</p>
            </div>
         ) : (
           <motion.div 
@@ -76,7 +74,7 @@ function SuccessContent() {
              className="space-y-10 max-w-xl"
           >
              <div className="relative">
-                <div className="h-32 w-32 bg-emerald-100 rounded-[3rem] flex items-center justify-center mx-auto text-emerald-600 shadow-2xl">
+                <div className="h-32 w-32 bg-emerald-100 rounded-[3rem] flex items-center justify-center mx-auto text-emerald-600 shadow-2xl border border-emerald-200">
                    <CheckCircle2 className="h-16 w-16" />
                 </div>
                 <motion.div 
@@ -88,36 +86,36 @@ function SuccessContent() {
                 </motion.div>
              </div>
 
-             <div className="space-y-4">
-                <h1 className="text-5xl font-headline font-black text-[#0F172A] uppercase">Payment Successful</h1>
-                <p className="text-lg text-slate-500 font-medium leading-relaxed">
-                   Your preparation pass has been successfully activated. {verified ? "Your elite prepared node is now live." : "Registry sync in progress via background node."}
+             <div className="space-y-4 px-4">
+                <h1 className="text-4xl md:text-5xl font-black text-[#0F172A] leading-tight">Payment Verified</h1>
+                <p className="text-base md:text-lg text-slate-500 font-medium leading-relaxed antialiased">
+                   Your preparation pass is now active. Your elite preparation node has been synchronized with the master registry.
                 </p>
              </div>
 
-             <div className="bg-slate-50 p-10 rounded-[3rem] border border-slate-100 space-y-6 text-left shadow-inner">
-                <div className="flex justify-between items-center pb-4 border-b border-slate-200">
-                   <span className="text-[10px] font-black uppercase text-slate-400">Transaction ID</span>
-                   <span className="text-sm font-mono font-black text-primary truncate max-w-[200px]">{orderId || "ONLINE_NODE"}</span>
+             <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 space-y-4 text-left shadow-inner mx-4">
+                <div className="flex justify-between items-center pb-3 border-b border-slate-200">
+                   <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Node ID</span>
+                   <span className="text-xs font-mono font-black text-primary truncate max-w-[180px]">{orderId || "MANUAL_NODE"}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                   <span className="text-[10px] font-black uppercase text-slate-400">Hub Status</span>
-                   <span className="text-base font-bold text-[#0F172A] uppercase">{planName} Activated</span>
+                   <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Pass Tier</span>
+                   <span className="text-sm font-bold text-[#0F172A] uppercase">{planName}</span>
                 </div>
              </div>
 
-             <div className="flex flex-col sm:flex-row gap-4">
-                <Button asChild className="flex-1 bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl gap-3">
-                   <Link href="/dashboard">Enter Dashboard <ArrowRight className="h-4 w-4" /></Link>
+             <div className="flex flex-col sm:flex-row gap-4 px-4">
+                <Button asChild className="flex-1 bg-[#0F172A] hover:bg-black text-white h-16 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-3xl gap-3">
+                   <Link href="/dashboard">Enter Hub <ArrowRight className="h-4 w-4" /></Link>
                 </Button>
-                <Button asChild variant="outline" className="flex-1 h-16 rounded-2xl border-slate-200 font-black uppercase tracking-widest text-xs gap-3">
-                   <Link href="/mocks">Browse Mocks</Link>
+                <Button asChild variant="outline" className="flex-1 h-16 rounded-2xl border-slate-200 font-black uppercase tracking-widest text-[11px] gap-3">
+                   <Link href="/mocks">Practice Tests</Link>
                 </Button>
              </div>
 
-             <div className="flex items-center justify-center gap-4 text-slate-400 pt-10">
-                <ShieldCheck className="h-5 w-5 text-primary" />
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Institutional Verification Complete</span>
+             <div className="flex items-center justify-center gap-3 text-slate-400 pt-6">
+                <ShieldCheck className="h-4 w-4 text-primary" />
+                <span className="text-[9px] font-black uppercase tracking-[0.3em]">Institutional Node Secured</span>
              </div>
           </motion.div>
         )}

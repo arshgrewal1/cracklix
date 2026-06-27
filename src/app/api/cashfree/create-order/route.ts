@@ -4,8 +4,8 @@ import { initializeFirebase } from '@/firebase/app';
 import { doc, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Cashfree Order Node v11.0.
- * FIXED: Advanced phone number normalization and dynamic environment resolution.
+ * @fileOverview Production Cashfree Order Engine v15.0.
+ * SECURITY: Validates pricing against Firestore registry before gateway handshake.
  */
 
 export async function POST(req: Request) {
@@ -19,8 +19,7 @@ export async function POST(req: Request) {
     const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
-      console.error("[CASHFREE_CRITICAL]: Missing API credentials in environment.");
-      return NextResponse.json({ error: 'Gateway Configuration Error: Credentials Missing' }, { status: 500 });
+      return NextResponse.json({ error: 'Gateway Credentials Missing' }, { status: 500 });
     }
 
     // Configure SDK
@@ -30,25 +29,24 @@ export async function POST(req: Request) {
     Cashfree.XEnvironment = isProd ? Cashfree.Environment.PRODUCTION : Cashfree.Environment.SANDBOX;
 
     if (!userId || !planId) {
-      return NextResponse.json({ error: 'Context missing (UserId/PlanId)' }, { status: 400 });
+      return NextResponse.json({ error: 'Context Missing' }, { status: 400 });
     }
 
-    // 1. Validate Plan in Registry
+    // 1. Audit Price from Registry
     const planSnap = await getDoc(doc(db, "passes", planId));
     if (!planSnap.exists()) {
-      return NextResponse.json({ error: 'Invalid plan node in registry' }, { status: 404 });
+      return NextResponse.json({ error: 'Invalid Plan' }, { status: 404 });
     }
     const planData = planSnap.data();
 
-    // 2. Fetch Student Profile
+    // 2. Fetch Aspirant Profile
     const userSnap = await getDoc(doc(db, "users", userId));
     const userData = userSnap.data();
 
-    // CRITICAL: Cashfree requires EXACTLY 10 digits for phone, no prefixes like +91.
+    // 3. Clean Phone (Required for Cashfree)
     const rawPhone = userData?.phone || "9999999999";
     const cleanPhone = rawPhone.replace(/\D/g, '').slice(-10);
 
-    // Site URL resolution for callbacks
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://cracklix.vercel.app";
     const secureOrigin = (clientOrigin || siteUrl).replace('http://', 'https://');
     
@@ -68,7 +66,7 @@ export async function POST(req: Request) {
         return_url: `${secureOrigin}/payment/success?order_id={order_id}&plan=${encodeURIComponent(planId)}`,
         notify_url: `${secureOrigin}/api/cashfree/webhook`
       },
-      order_note: `Elite Pass: ${planData.name}`,
+      order_note: `Cracklix Pass: ${planData.name}`,
     };
 
     const response = await Cashfree.PGCreateOrder("2023-08-01", orderRequest);
@@ -80,9 +78,7 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error("[CASHFREE_ORDER_FAILURE]:", error?.response?.data || error);
-    return NextResponse.json({ 
-      error: error?.response?.data?.message || 'Gateway connection failed' 
-    }, { status: 500 });
+    console.error("[CASHFREE_CRITICAL]:", error?.response?.data || error);
+    return NextResponse.json({ error: 'Order Creation Failed' }, { status: 500 });
   }
 }
