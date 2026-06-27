@@ -37,8 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v22.0.
- * FIXED: Responsive gaps to ensure all nav items are visible on desktop.
+ * @fileOverview Institutional Navbar v23.0.
+ * UPDATED: Increased header height and logo size for maximum brand impact.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -104,7 +104,7 @@ export default function Navbar() {
 
   return (
     <div className="sticky top-0 z-50 w-full font-body pt-safe bg-white border-b border-slate-100 shadow-sm">
-      <nav className="w-full h-[64px] md:h-[80px] transition-all duration-300">
+      <nav className="w-full h-[72px] md:h-[112px] transition-all duration-300">
         <div className="w-full max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
 
           {/* LEFT: Menu + Logo */}
@@ -119,7 +119,8 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 ml-2 md:ml-4 h-12 md:h-16 w-auto" 
+              className="flex-shrink-0 ml-2 md:ml-6" 
+              imgClassName="h-14 md:h-24 w-auto"
               align="left"
             />
           </div>
