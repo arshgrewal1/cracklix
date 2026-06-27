@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -36,9 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v37.0.
- * FIXED: Logo moved 40px left (flush with menu) and size maximized.
- * PWA: Standalone safe-area padding enforced via pt-safe.
+ * @fileOverview Institutional Navbar v38.0.
+ * FIXED: Alignment for PWA safe area and logo placement.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -145,7 +145,7 @@ export default function Navbar() {
 
             <Link
               href="/search"
-              className="w-10 h-10 md:h-12 md:h-12 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm"
+              className="w-10 h-10 md:h-12 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm"
             >
               <Search className="w-5 h-5" />
             </Link>

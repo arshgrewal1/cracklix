@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
@@ -13,8 +14,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v3.3.
- * FIXED: Resolved React UMD conflict and implemented Next.js 15 Suspense safety.
+ * @fileOverview Institutional Search Hub v3.4.
+ * FIXED: Resolved React UMD conflict and element cloning type safety.
  */
 
 export default function SearchPage() {
