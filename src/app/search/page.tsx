@@ -132,7 +132,7 @@ function SearchContent() {
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.length > 0 ? searchResults.map((res, i) => (
                       <SearchResultItem key={i} title={res.title} category={res.type} href={res.href} icon={res.icon as ReactElement} />
-                    ) as any) : !isLoading && (
+                    )) : !isLoading && (
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">
                            <SearchIcon className="h-16 w-16" />
@@ -186,7 +186,7 @@ function SearchResultItem({ title, category, href, icon }: { title: string, cate
                <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
                   {isValidElement(icon) ? cloneElement(icon as React.ReactElement<any>, { className: "h-5 w-5" }) : icon}
                </div>
-               <div className="text-left min-w-0 flex-1 space-y-1">
+               <div className="text-left min-w-0 flex-1 space-y-1" >
                   <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
                   <div className="flex items-center gap-3">
                      <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] md:text-[9px] font-black rounded shadow-sm">{category}</Badge>
