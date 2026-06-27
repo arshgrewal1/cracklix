@@ -24,8 +24,9 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Hero Hub v104.0.
+ * @fileOverview Institutional Hero Hub v105.0.
  * UPDATED: Maximized quick-action icon sizes and renamed news to Current Affairs.
+ * REFINED: Removed uppercase and extra space as per branding guidelines.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -129,16 +130,16 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* 3. Action Grid - MAXIMIZED ICONS */}
-        <div className="mt-10 md:mt-20 space-y-8 md:space-y-12 px-4 sm:px-6 lg:px-8">
-           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10 max-w-6xl mx-auto">
+        {/* 3. Action Grid - MAXIMIZED ICONS & TITLE CASE */}
+        <div className="mt-8 md:mt-16 space-y-6 md:space-y-10 px-4 sm:px-6 lg:px-8">
+           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8 max-w-6xl mx-auto">
               <QuickActionCard boardId="mock-test" label="Mock Tests" href="/mocks" />
               <QuickActionCard boardId="study-material" label="Study Notes" href="/notes" />
               <QuickActionCard boardId="pyq" label="PYQ Papers" href="/pyqs" />
               <QuickActionCard boardId="current-affairs" label="Current Affairs" href="/current-affairs" />
            </div>
 
-           <div className="flex flex-col sm:flex-row gap-3 pt-4 w-full max-w-xl mx-auto px-4 lg:hidden">
+           <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full max-w-xl mx-auto px-4 lg:hidden">
               <Button asChild className="w-full sm:flex-1 h-12 px-10 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-[13px] tracking-tight shadow-xl shadow-blue-500/20 rounded-full active:scale-[0.98] transition-all border-none">
                   <Link href="/mocks" className="flex items-center justify-center gap-2.5">
                     <Play className="h-4 w-4 fill-current" /> Start Prep
@@ -160,14 +161,14 @@ export default function Hero() {
 function QuickActionCard({ boardId, label, href }: { boardId: string, label: string, href: string }) {
   return (
     <Link href={href} className="block group h-full">
-      <Card className="w-full mx-auto border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[2rem] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-4 pt-6 pb-4 md:p-10 text-center">
-        <div className="flex justify-center mb-4 md:mb-10 shrink-0">
-          <div className="h-16 w-16 md:h-32 md:w-32 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+      <Card className="w-full mx-auto border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[1.5rem] md:rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-4 pt-5 pb-3 md:p-8 text-center items-center justify-center">
+        <div className="flex justify-center mb-3 md:mb-6 shrink-0">
+          <div className="h-14 w-14 md:h-24 md:w-24 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
              <AuthorityLogo boardId={boardId} size="md" className="border-none shadow-none w-full h-full" />
           </div>
         </div>
         <div className="min-w-0">
-           <h3 className="text-[11px] md:text-xl font-black tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-1 uppercase">
+           <h3 className="text-[12px] md:text-lg font-black tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-1">
               {label}
            </h3>
         </div>
