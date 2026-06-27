@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v3.2.
+ * @fileOverview Institutional Search Hub v3.3.
  * FIXED: Resolved React UMD conflict and implemented Next.js 15 Suspense safety.
  */
 

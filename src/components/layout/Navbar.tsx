@@ -36,10 +36,9 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v36.0.
+ * @fileOverview Institutional Navbar v37.0.
  * FIXED: Logo moved 40px left (flush with menu) and size maximized.
- * PWA: Standalone safe-area padding enforced.
- * CASE: Normal Title Case for all links.
+ * PWA: Standalone safe-area padding enforced via pt-safe.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -104,8 +103,8 @@ export default function Navbar() {
   }
 
   return (
-    <div className="sticky top-0 z-50 w-full font-body bg-white border-b border-slate-100 shadow-sm transition-all">
-      <nav className="w-full h-[72px] md:h-[112px] pt-safe">
+    <div className="sticky top-0 z-50 w-full font-body bg-white border-b border-slate-100 shadow-sm transition-all pt-safe">
+      <nav className="w-full h-[72px] md:h-[112px]">
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
           {/* LEFT: Menu + Logo */}
@@ -126,7 +125,7 @@ export default function Navbar() {
             />
           </div>
 
-          {/* CENTER: Navigation Links - Title Case and equal spacing */}
+          {/* CENTER: Navigation Links */}
           <div className="hidden lg:flex items-center justify-center gap-4 xl:gap-8 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />

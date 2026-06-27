@@ -29,7 +29,7 @@ import { cn } from "@/lib/utils"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Deep Analytics Hub v4.5.
+ * @fileOverview Deep Analytics Hub v4.6.
  * FIXED: Restored missing imports and implemented real-time calculation logic.
  */
 
