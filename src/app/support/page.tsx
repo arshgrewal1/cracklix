@@ -36,11 +36,6 @@ import {
 } from "@/components/ui/dialog"
 import Link from "next/link"
 
-/**
- * @fileOverview Support Center v8.8.
- * FIXED: Restored Link and Loader2 references for Next.js build integrity.
- */
-
 export default function SupportPage() {
   const { user, profile } = useUser()
   const db = useFirestore()

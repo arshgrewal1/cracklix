@@ -4,14 +4,11 @@ ext {
     targetSdkVersion = 35
     androidxActivityVersion = '1.9.3'
     androidxAppCompatVersion = '1.7.0'
-    androidxCoreKTXVersion = '1.15.0'
-    androidxFragmentVersion = '1.8.5'
     androidxCoordinatorLayoutVersion = '1.2.0'
-    androidxWebkitVersion = '1.12.1'
-    kotlin_version = '1.9.22'
+    androidxCoreKTXVersion = '1.13.1'
+    androidxFragmentVersion = '1.8.5'
     junitVersion = '4.13.2'
     androidxJunitVersion = '1.2.1'
     androidxEspressoCoreVersion = '3.6.1'
     cordovaAndroidVersion = '10.1.1'
-    googleServicesVersion = '4.4.2'
 }
