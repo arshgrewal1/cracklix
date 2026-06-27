@@ -15,7 +15,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # Bypasses fatal: No url found for submodule path 'arsh' in .gitmodules
           submodules: false
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -39,6 +41,16 @@ jobs:
         run: |
           mkdir -p android/app/src/main/assets
           npx cap sync android
+
+      - name: Setup Google Services
+        # If the user has added this secret to GitHub, it will create the required file.
+        # Otherwise, the build will still attempt to run but might fail if the plugin is active.
+        run: |
+          if [ -n "${{ secrets.GOOGLE_SERVICES_JSON }}" ]; then
+            echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
+          else
+            echo "Warning: GOOGLE_SERVICES_JSON secret not found. Build may fail if Firebase plugin is enabled."
+          fi
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
