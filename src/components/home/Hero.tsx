@@ -24,9 +24,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Hero Hub v103.1.
- * UPDATED: Optimized card sizing for a more compact and professional grid.
- * UPDATED: Standardized typography to Title Case.
+ * @fileOverview Institutional Hero Hub v104.0.
+ * UPDATED: Maximized quick-action icon sizes and renamed news to Current Affairs.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -130,13 +129,13 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* 3. Action Grid */}
-        <div className="mt-8 md:mt-12 space-y-8 md:space-y-12 px-4 sm:px-6 lg:px-8">
-           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-4 max-w-5xl mx-auto">
+        {/* 3. Action Grid - MAXIMIZED ICONS */}
+        <div className="mt-10 md:mt-20 space-y-8 md:space-y-12 px-4 sm:px-6 lg:px-8">
+           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10 max-w-6xl mx-auto">
               <QuickActionCard boardId="mock-test" label="Mock Tests" href="/mocks" />
               <QuickActionCard boardId="study-material" label="Study Notes" href="/notes" />
               <QuickActionCard boardId="pyq" label="PYQ Papers" href="/pyqs" />
-              <QuickActionCard boardId="current-affairs" label="Latest News" href="/current-affairs" />
+              <QuickActionCard boardId="current-affairs" label="Current Affairs" href="/current-affairs" />
            </div>
 
            <div className="flex flex-col sm:flex-row gap-3 pt-4 w-full max-w-xl mx-auto px-4 lg:hidden">
@@ -161,14 +160,14 @@ export default function Hero() {
 function QuickActionCard({ boardId, label, href }: { boardId: string, label: string, href: string }) {
   return (
     <Link href={href} className="block group h-full">
-      <Card className="w-full md:max-w-[200px] mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1rem] md:rounded-[2rem] bg-white group overflow-hidden flex flex-col p-2 pt-4 pb-2 md:p-6 text-center">
-        <div className="flex justify-center mb-2 md:mb-6 shrink-0">
-          <div className="h-9 w-9 md:h-14 md:w-14 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-             <AuthorityLogo boardId={boardId} size="sm" className="border-none shadow-none h-8 w-8 md:h-12 md:w-12" />
+      <Card className="w-full mx-auto border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[2rem] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-4 pt-6 pb-4 md:p-10 text-center">
+        <div className="flex justify-center mb-4 md:mb-10 shrink-0">
+          <div className="h-16 w-16 md:h-32 md:w-32 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+             <AuthorityLogo boardId={boardId} size="md" className="border-none shadow-none w-full h-full" />
           </div>
         </div>
         <div className="min-w-0">
-           <h3 className="text-[10px] md:text-base font-bold tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-1">
+           <h3 className="text-[11px] md:text-xl font-black tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-1 uppercase">
               {label}
            </h3>
         </div>
