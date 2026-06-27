@@ -36,9 +36,10 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v35.0.
+ * @fileOverview Institutional Navbar v36.0.
  * FIXED: Logo moved 40px left (flush with menu) and size maximized.
  * PWA: Standalone safe-area padding enforced.
+ * CASE: Normal Title Case for all links.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -107,7 +108,7 @@ export default function Navbar() {
       <nav className="w-full h-[72px] md:h-[112px] pt-safe">
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
-          {/* LEFT: Menu + Logo - Logo shifted 40px left via negative margin */}
+          {/* LEFT: Menu + Logo */}
           <div className="flex items-center shrink-0 gap-0.5 md:gap-1">
             <button
               onClick={() => setIsSidebarOpen(true)}
