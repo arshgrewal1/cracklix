@@ -4,39 +4,26 @@
 
 @layer base {
   :root {
-    /* Cracklix Unified Brand System - Derived from Logo */
     --background: 0 0% 100%;
-    --foreground: 222 47% 11%; /* #0F172A */
-    
+    --foreground: 222 47% 11%;
     --card: 0 0% 100%;
     --card-foreground: 222 47% 11%;
-    
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    
-    --primary: 215 100% 54%; /* #1677FF - Logo Bright Blue */
+    --primary: 215 100% 54%;
     --primary-foreground: 0 0% 100%;
-    
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222 47% 11%;
-    
     --muted: 210 40% 96.1%;
     --muted-foreground: 215 16% 47%;
-    
-    --accent: 215 100% 96%; /* Light Blue Wash */
+    --accent: 215 100% 96%;
     --accent-foreground: 215 100% 54%;
-    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 215 100% 54%;
-    
-    --radius: 1.5rem; /* 24px - Modern Standard */
-
-    --header-height-mobile: 64px;
-    --header-height-desktop: 80px;
+    --radius: 1.5rem;
   }
 }
 
@@ -61,25 +48,24 @@
     overflow-x: hidden;
   }
   
-  /* PWA STANDARDIZED TYPOGRAPHY SCALE */
   h1 { 
     @apply font-black tracking-tight leading-[1.1] text-[#0F172A]; 
-    font-size: clamp(1.625rem, 4vw, 2.5rem); /* 26px mobile, 40px max desktop */
+    font-size: clamp(1.625rem, 4vw, 2.5rem);
   }
 
   h2 { 
     @apply font-bold tracking-tight leading-[1.2] text-[#0F172A]; 
-    font-size: clamp(1.375rem, 3vw, 1.875rem); /* 22px mobile, 30px max desktop */
+    font-size: clamp(1.375rem, 3vw, 1.875rem);
   }
 
   h3 { 
     @apply font-semibold tracking-tight leading-tight text-[#0F172A]; 
-    font-size: clamp(1.125rem, 2vw, 1.5rem); /* 18px mobile, 24px max desktop */
+    font-size: clamp(1.125rem, 2vw, 1.5rem);
   }
   
   p { 
     @apply font-normal text-slate-500; 
-    font-size: 0.875rem; /* 14px mobile */
+    font-size: 0.875rem;
     line-height: 1.5;
   }
 
@@ -88,21 +74,12 @@
   }
 }
 
-/* PWA STANDARDIZED SPACING */
 .pb-safe {
   padding-bottom: calc(env(safe-area-inset-bottom) + 80px);
 }
 
 .pt-safe {
   padding-top: env(safe-area-inset-top);
-}
-
-.section-spacing {
-  @apply py-6 md:py-12;
-}
-
-.container-padding {
-  @apply px-4 sm:px-6 lg:px-8;
 }
 
 .custom-scrollbar::-webkit-scrollbar {

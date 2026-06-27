@@ -35,10 +35,6 @@ import { Button } from "@/components/ui/button";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
-/**
- * @fileOverview Institutional Navbar v39.0.
- * FIXED: Alignment and spacing between sidebar toggle and logo.
- */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -106,8 +102,8 @@ export default function Navbar() {
       <nav className="w-full h-[72px] md:h-[112px]">
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
-          {/* LEFT: Menu + Logo */}
-          <div className="flex items-center shrink-0 gap-3 md:gap-4">
+          {/* LEFT: Menu + Logo (Shifted Left) */}
+          <div className="flex items-center shrink-0 gap-1 md:gap-2 -ml-2 md:-ml-6">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -118,14 +114,14 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0" 
+              className="flex-shrink-0 -ml-4 md:-ml-8" 
               imgClassName="h-14 md:h-24 w-auto"
               align="left"
             />
           </div>
 
-          {/* CENTER: Navigation Links */}
-          <div className="hidden lg:flex items-center justify-center gap-4 xl:gap-8 flex-1">
+          {/* CENTER: Navigation Links (Title Case) */}
+          <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-10 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
             <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
@@ -134,7 +130,7 @@ export default function Navbar() {
           </div>
 
           {/* RIGHT: User Actions */}
-          <div className="flex items-center gap-3 md:gap-4 shrink-0 ml-4">
+          <div className="flex items-center gap-3 md:gap-4 shrink-0">
             {profile?.passStatus === 'active' && timeLeft && (
                <div className="hidden sm:flex flex-col items-end mr-1">
                   <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none uppercase">Elite Hub</span>
@@ -202,7 +198,7 @@ export default function Navbar() {
 
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="w-[280px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
-          <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation</SheetDescription></SheetHeader>
+          <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Hub</SheetDescription></SheetHeader>
           <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
