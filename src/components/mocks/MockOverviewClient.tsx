@@ -32,8 +32,8 @@ import { cn } from "@/lib/utils"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Universal Mock Overview Hub Client v4.0.
- * REFINED: Stripe/Linear style hero with optimized spacing and typography.
+ * @fileOverview Universal Mock Overview Hub Client v4.1.
+ * FIXED: Removed forced uppercase from hero section and buttons.
  */
 
 export default function MockOverviewClient() {
@@ -104,7 +104,7 @@ export default function MockOverviewClient() {
           <AlertCircle className="h-8 w-8" />
        </div>
        <div className="space-y-2">
-          <h2 className="text-2xl font-black text-[#0F172A] uppercase">Mock Available Nahi Hai</h2>
+          <h2 className="text-2xl font-black text-[#0F172A]">Mock available nahi hai</h2>
           <p className="text-slate-500 font-medium max-w-xs mx-auto">
              Coming Soon: This preparation node is being synchronized with the master registry.
           </p>
@@ -126,19 +126,19 @@ export default function MockOverviewClient() {
               
               {/* PREMIUM BADGE - GOLD STYLING */}
               <Badge className={cn(
-                "border-none text-[10px] font-bold px-2.5 py-0.5 rounded-lg uppercase tracking-widest shadow-sm h-7 flex items-center", 
+                "border-none text-[10px] font-bold px-2.5 py-0.5 rounded-lg tracking-widest shadow-sm h-7 flex items-center", 
                 mock.accessLevel === 'PREMIUM' ? "bg-[#FBBF24] text-[#78350F]" : "bg-emerald-50 text-emerald-600"
               )}>
-                {mock.accessLevel === 'PREMIUM' ? '🔒 PREMIUM' : 'FREE HUB'}
+                {mock.accessLevel === 'PREMIUM' ? '🔒 Premium' : 'Free Hub'}
               </Badge>
 
               <div className="space-y-4 md:space-y-6 w-full">
-                <h1 className="text-[32px] md:text-[44px] lg:text-[56px] font-[800] text-[#0F172A] uppercase leading-[1.05] tracking-tight lg:max-w-[60%] break-words antialiased">
+                <h1 className="text-[32px] md:text-[44px] lg:text-[56px] font-[800] text-[#0F172A] leading-[1.05] tracking-tight lg:max-w-[60%] break-words antialiased">
                   {mock.title}
                 </h1>
 
                 {/* METADATA - 16PX SLATE COLOR */}
-                <div className="flex flex-wrap items-center gap-6 text-[#64748B] text-base font-bold uppercase tracking-widest">
+                <div className="flex flex-wrap items-center gap-6 text-[#64748B] text-base font-bold tracking-widest">
                     <span className="flex items-center gap-2"><Clock className="h-4 w-4 text-primary" /> {mock.duration}m Time</span>
                     <span className="flex items-center gap-2"><BookOpen className="h-4 w-4 text-primary" /> {mock.totalQuestions} Items</span>
                     <span className="flex items-center gap-2"><Target className="h-4 w-4 text-primary" /> {mock.totalQuestions * (mock.positiveMarks || 1)} Pts</span>
@@ -146,10 +146,10 @@ export default function MockOverviewClient() {
 
                 {/* ACTION BUTTON - SPECIFIC DIMENSIONS */}
                 <div className="pt-2 md:pt-4">
-                  <Button asChild className="h-14 w-60 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[11px] rounded-[16px] shadow-3xl transition-all active:scale-95 border-none">
+                  <Button asChild className="h-14 w-60 bg-[#0F172A] hover:bg-black text-white font-black tracking-[0.2em] text-[11px] rounded-[16px] shadow-3xl transition-all active:scale-95 border-none">
                     <Link href={`/mocks/instructions?id=${mock.id}`} className="flex items-center justify-center gap-3">
                       {activeAttempt?.status === 'IN_PROGRESS' ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4 fill-current text-primary" />} 
-                      {activeAttempt?.status === 'IN_PROGRESS' ? 'RESUME PREP' : 'START TEST'}
+                      {activeAttempt?.status === 'IN_PROGRESS' ? 'Resume Prep' : 'Start Test'}
                     </Link>
                   </Button>
                 </div>
@@ -162,9 +162,9 @@ export default function MockOverviewClient() {
         <section className="py-12 md:py-24 bg-white">
            <div className="container mx-auto px-4 md:px-8 max-w-7xl">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                 <FeatureNode icon={ShieldCheck} title="OFFICIAL PATTERN" desc="Curated according to latest board notifications." />
-                 <FeatureNode icon={Zap} title="EXPERT SOLUTIONS" desc="Detailed rationalizations for every MCQ node." />
-                 <FeatureNode icon={Target} title="STATE RANKINGS" desc="Compare performance with toppers across Punjab." />
+                 <FeatureNode icon={ShieldCheck} title="Official Pattern" desc="Curated according to latest board notifications." />
+                 <FeatureNode icon={Zap} title="Expert Solutions" desc="Detailed rationalizations for every MCQ node." />
+                 <FeatureNode icon={Target} title="State Rankings" desc="Compare performance with toppers across Punjab." />
               </div>
            </div>
         </section>
@@ -181,8 +181,8 @@ function FeatureNode({ icon: Icon, title, desc }: any) {
         <Icon className="h-6 w-6 text-primary" />
       </div>
       <div className="space-y-2">
-         <h3 className="text-xl font-black text-[#0F172A] uppercase leading-tight">{title}</h3>
-         <p className="text-slate-400 font-bold uppercase text-[10px] tracking-widest leading-relaxed">{desc}</p>
+         <h3 className="text-xl font-black text-[#0F172A] leading-tight">{title}</h3>
+         <p className="text-slate-400 font-bold text-[10px] tracking-widest leading-relaxed">{desc}</p>
       </div>
     </div>
   );

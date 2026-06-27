@@ -24,9 +24,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Hero Hub v105.0.
- * UPDATED: Maximized quick-action icon sizes and renamed news to Current Affairs.
- * REFINED: Removed uppercase and extra space as per branding guidelines.
+ * @fileOverview Institutional Hero Hub v106.0.
+ * UPDATED: Removed forced uppercase from headlines and action cards.
  */
 export default function Hero() {
   const db = useFirestore();

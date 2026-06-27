@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -37,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v38.0.
- * FIXED: Alignment for PWA safe area and logo placement.
+ * @fileOverview Institutional Navbar v39.0.
+ * FIXED: Alignment and spacing between sidebar toggle and logo.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -108,7 +107,7 @@ export default function Navbar() {
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
           {/* LEFT: Menu + Logo */}
-          <div className="flex items-center shrink-0 gap-0.5 md:gap-1">
+          <div className="flex items-center shrink-0 gap-3 md:gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -119,8 +118,8 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 -ml-4 md:-ml-10" 
-              imgClassName="h-16 md:h-32 w-auto"
+              className="flex-shrink-0" 
+              imgClassName="h-14 md:h-24 w-auto"
               align="left"
             />
           </div>
