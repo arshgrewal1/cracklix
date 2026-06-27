@@ -37,11 +37,6 @@ import {
 } from "@/components/ui/dialog"
 import Link from "next/link"
 
-/**
- * @fileOverview Institutional Support Ticket Hub v6.8.
- * FIXED: Restored Link and Loader2 components for production stability.
- */
-
 export default function SupportPage() {
   const { user, profile } = useUser()
   const db = useFirestore()
@@ -132,7 +127,7 @@ export default function SupportPage() {
               </span>
             </div>
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-[#0F172A] tracking-tight leading-[0.9] break-words antialiased">
-              Support <br /> <span className="text-primary">Center</span>
+              Support Hub
             </h1>
             <p className="text-slate-500 font-medium text-lg max-w-xl leading-tight tracking-tight">
               Raise tickets for institutional issues or pass activation assistance.

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
@@ -12,11 +11,6 @@ import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-
-/**
- * @fileOverview Institutional Search Hub v3.4.
- * FIXED: Resolved React UMD conflict and element cloning type safety.
- */
 
 export default function SearchPage() {
   return (
