@@ -1,10 +1,14 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-apply from: "variables.gradle"
 
 buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.2.1'
-        classpath 'com.google.gms:google-services:4.4.1'
+        classpath 'com.google.gms:google-services:4.4.0'
+        // Kotlin dependency is handled via the plugins block in modern Gradle
     }
 }
 
@@ -14,7 +18,16 @@ plugins {
     id 'org.jetbrains.kotlin.android' version '1.9.22' apply false
 }
 
-// Cleanup task for build artifacts
-tasks.register('clean', Delete) {
+// Variables must be applied AFTER the plugins block or INSIDE buildscript
+apply from: 'variables.gradle'
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
     delete rootProject.buildDir
 }
