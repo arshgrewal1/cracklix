@@ -6,13 +6,16 @@ pluginManagement {
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
         mavenCentral()
+        // Move flatDir here to satisfy Capacitor plugin requirements centrally
+        flatDir {
+            dirs 'libs'
+        }
     }
 }
-rootProject.name = "cracklix"
+rootProject.name = 'android'
 include ':app'
-
 apply from: 'capacitor.settings.gradle'
