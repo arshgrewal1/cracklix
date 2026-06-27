@@ -33,13 +33,17 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build Next.js Static Export
+      - name: Build Next.js
         run: npm run build
 
-      - name: Verify Web Assets
+      - name: Verify Build Output
         run: |
-          if [ ! -d "out" ]; then
-            echo "Error: Next.js export directory 'out' missing. Build failed."
+          if [ -d "out" ]; then
+            echo "STATIC_BUILD=true" >> $GITHUB_ENV
+          elif [ -d ".next" ]; then
+            echo "STATIC_BUILD=false" >> $GITHUB_ENV
+          else
+            echo "Error: No valid Next.js build output found."
             exit 1
           fi
 

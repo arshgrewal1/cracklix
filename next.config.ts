@@ -9,26 +9,20 @@ const withPWA = require("next-pwa")({
 });
 
 const nextConfig: NextConfig = {
-  // Static export is required for standard Capacitor builds
+  // Static export is required for standard Capacitor builds to bundle assets
   output: "export",
-
   reactStrictMode: true,
-
   eslint: {
     ignoreDuringBuilds: true,
   },
-
   typescript: {
     ignoreBuildErrors: false,
   },
-
   images: {
     unoptimized: true,
   },
-
   poweredByHeader: false,
   compress: true,
-
   generateBuildId: async () => {
     return `cracklix-prod-${Date.now()}`;
   },
