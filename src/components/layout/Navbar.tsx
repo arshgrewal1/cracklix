@@ -36,7 +36,7 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v30.0.
+ * @fileOverview Institutional Navbar v32.0.
  * UPDATED: Logo moved 40px left and size increased.
  * REFINED: Spacing balanced and casing set to Title Case.
  */
@@ -51,8 +51,12 @@ export default function Navbar() {
   const router = useRouter();
 
   useEffect(() => {
-    setMounted(true);
+    mountedSet(true);
   }, []);
+
+  const mountedSet = (val: boolean) => {
+    setMounted(val);
+  }
 
   useEffect(() => {
     const expiryStr = profile?.passExpiresAt;
@@ -119,8 +123,8 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 -ml-1" 
-              imgClassName="h-16 md:h-28 w-auto"
+              className="flex-shrink-0 -ml-2" 
+              imgClassName="h-16 md:h-32 w-auto"
               align="left"
             />
           </div>

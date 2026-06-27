@@ -3,7 +3,6 @@ apply plugin: 'com.android.application'
 android {
     namespace "com.cracklix.app"
     compileSdk rootProject.ext.compileSdkVersion
-
     defaultConfig {
         applicationId "com.cracklix.app"
         minSdk rootProject.ext.minSdkVersion
@@ -12,15 +11,19 @@ android {
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             cruncherEnabled = false
+             // Removed unsupported navigationalKeys method
+             // Add valid options if needed
         }
     }
-
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
 }
 
@@ -32,10 +35,9 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
-    implementation "androidx.core:core-ktx:$rootProject.ext.androidxCoreVersion"
-    implementation "com.google.android.material:material:$rootProject.ext.materialVersion"
-    implementation "androidx.constraintlayout:constraintlayout:2.1.4"
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.core:core-ktx:$androidxCoreVersion"
+    implementation "com.google.android.material:material:$materialVersion"
     implementation project(':capacitor-android')
     implementation project(':capacitor-app')
     implementation project(':capacitor-browser')
@@ -43,10 +45,9 @@ dependencies {
     implementation project(':capacitor-keyboard')
     implementation project(':capacitor-share')
     implementation project(':capacitor-status-bar')
-
-    testImplementation "junit:junit:$rootProject.ext.junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.androidxEspressoCoreVersion"
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
 }
 
 apply from: 'capacitor.build.gradle'
