@@ -1,21 +1,20 @@
 apply plugin: 'com.android.application'
-apply plugin: 'org.jetbrains.kotlin.android'
 apply plugin: 'com.google.gms.google-services'
+apply plugin: 'kotlin-android'
 
 android {
     namespace "com.cracklix.app"
-    compileSdk project.ext.compileSdkVersion
+    compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.cracklix.app"
-        minSdk project.ext.minSdkVersion
-        targetSdk project.ext.targetSdkVersion
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Strings or resources in the "raw" (or other) directories can be excluded from compression
-             // to ensure they can be read by the Capacitor bridge effectively.
-             noCompress 'public'
+             // Fragments allowed to have more than 255 resources.
+             namespaced = true
         }
     }
     buildTypes {
@@ -40,21 +39,13 @@ repositories {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "androidx.appcompat:appcompat:$project.ext.androidxAppCompatVersion"
-    implementation "androidx.core:core-ktx:$project.ext.androidxCoreKTXVersion"
-    implementation "androidx.activity:activity-ktx:$project.ext.androidxActivityVersion"
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.core:core-ktx:$androidxCoreKTXVersion"
     implementation project(':capacitor-android')
-    implementation project(':capacitor-app')
-    implementation project(':capacitor-browser')
-    implementation project(':capacitor-filesystem')
-    implementation project(':capacitor-keyboard')
-    implementation project(':capacitor-share')
-    implementation project(':capacitor-status-bar')
-
-    testImplementation "junit:junit:$project.ext.junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$project.ext.androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$project.ext.androidxEspressoCoreVersion"
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
 }
 
@@ -66,5 +57,5 @@ try {
         apply plugin: 'com.google.gms.google-services'
     }
 } catch(Exception e) {
-    logger.info("google-services.json not found, skipping plugin application")
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
