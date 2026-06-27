@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v2.7.
+ * @fileOverview Institutional Search Hub v2.8.
  * FIXED: React UMD global error and element cloning types.
  */
 
@@ -136,13 +136,27 @@ function SearchContent() {
                  </div>
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.length > 0 ? searchResults.map((res, i) => (
-                      <SearchResultItem key={i} title={res.title} category={res.type} href={res.href} icon={res.icon} />
+                      <div key={i} className="block active:scale-[0.99] transition-all group">
+                         <Link href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
+                            <div className="flex items-center gap-4 min-w-0 flex-1">
+                               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
+                                  {isValidElement(res.icon) ? cloneElement(res.icon as ReactElement<any>, { className: "h-5 w-5" }) : res.icon}
+                               </div>
+                               <div className="text-left min-w-0 flex-1 space-y-1">
+                                  <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>
+                                  <div className="flex items-center gap-3">
+                                     <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black rounded shadow-sm">{res.type}</Badge>
+                                  </div>
+                               </div>
+                            </div>
+                            <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                         </Link>
+                      </div>
                     )) : !isLoading && (
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">
                            <SearchIcon className="h-16 w-16" />
                            <p className="text-xl font-bold tracking-tight">No Results Found</p>
-                           <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Try keywords like "Patwari" or "Police"</p>
                         </div>
                       </div>
                     )}
@@ -155,23 +169,13 @@ function SearchContent() {
                     <div className="relative z-10 space-y-8">
                        <h4 className="font-black text-[10px] text-primary uppercase tracking-[0.4em]">Quick Search</h4>
                        <ul className="space-y-5">
-                          <TrendingItem text="PSSSB Patwari Hub" onSelect={setQuery} />
-                          <TrendingItem text="Punjab Police SI" onSelect={setQuery} />
-                          <TrendingItem text="Mental Ability Tests" onSelect={setQuery} />
-                          <TrendingItem text="Solved Old Papers" onSelect={setQuery} />
+                          <li onClick={() => setQuery("PSSSB Patwari")} className="flex items-center gap-4 text-slate-400 text-sm font-bold hover:text-white cursor-pointer transition-colors group active:scale-95">
+                             <Zap className="h-4 w-4 text-primary" /> PSSSB Patwari
+                          </li>
+                          <li onClick={() => setQuery("Punjab Police")} className="flex items-center gap-4 text-slate-400 text-sm font-bold hover:text-white cursor-pointer transition-colors group active:scale-95">
+                             <Zap className="h-4 w-4 text-primary" /> Punjab Police
+                          </li>
                        </ul>
-                    </div>
-                 </Card>
-                 <Card className="border-none shadow-xl rounded-[2.5rem] p-10 bg-white group overflow-hidden border border-slate-100">
-                    <div className="relative z-10 space-y-8">
-                       <h4 className="font-black text-[10px] text-slate-400 uppercase tracking-[0.4em]">Study Items</h4>
-                       <div className="flex flex-wrap gap-3">
-                          <SearchBadge label="Army Hub" onSelect={setQuery} />
-                          <SearchBadge label="PPSC Hub" onSelect={setQuery} />
-                          <SearchBadge label="Clerk Series" onSelect={setQuery} />
-                          <SearchBadge label="Pro Pass" onSelect={setQuery} />
-                          <SearchBadge label="Top Rankers" onSelect={setQuery} />
-                       </div>
                     </div>
                  </Card>
               </div>
@@ -181,53 +185,4 @@ function SearchContent() {
       <Footer />
     </div>
   )
-}
-
-function SearchResultItem({ title, category, href, icon }: { title: string, category: string, href: string, icon: React.ReactNode }) {
-   return (
-      <Link href={href} className="block active:scale-[0.99] transition-all group">
-         <div className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
-            <div className="flex items-center gap-4 min-w-0 flex-1">
-               <div className="h-14 w-14 md:h-16 md:w-16 rounded-xl bg-slate-50 flex items-center justify-center group-hover:bg-primary/5 transition-all shrink-0 shadow-inner">
-                  {isValidElement(icon) ? cloneElement(icon as ReactElement<any>, { className: "h-8 w-8" }) : icon}
-               </div>
-               <div className="text-left min-w-0 flex-1 space-y-1">
-                  <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-2xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
-                  <div className="flex items-center gap-3">
-                     <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black rounded shadow-sm">{category}</Badge>
-                     <div className="h-1 w-1 rounded-full bg-slate-200" />
-                     <span className="text-[8px] font-black uppercase tracking-widest text-primary">Verified</span>
-                  </div>
-               </div>
-            </div>
-            <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all shrink-0 ml-4 shadow-inner">
-               <ChevronRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-            </div>
-         </div>
-      </Link>
-   )
-}
-
-function TrendingItem({ text, onSelect }: { text: string, onSelect: (v: string) => void }) {
-   return (
-      <li 
-         onClick={() => onSelect(text)}
-         className="flex items-center gap-4 text-slate-400 text-sm font-bold hover:text-white cursor-pointer transition-colors group active:scale-95"
-      >
-         <Zap className="h-4 w-4 text-primary group-hover:animate-pulse" /> 
-         <span className="tracking-tight truncate uppercase">{text}</span>
-      </li>
-   )
-}
-
-function SearchBadge({ label, onSelect }: { label: string, onSelect: (v: string) => void }) {
-   return (
-      <Badge 
-         onClick={() => onSelect(label)}
-         variant="outline" 
-         className="rounded-xl px-4 py-2 border-slate-200 bg-slate-50/50 text-[9px] font-black uppercase tracking-widest text-slate-500 hover:bg-primary/10 hover:text-primary hover:border-primary transition-all cursor-pointer"
-      >
-         {label}
-      </Badge>
-   )
 }

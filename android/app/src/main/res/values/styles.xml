@@ -3,7 +3,6 @@
     <!-- Base application theme -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/primary</item>
-        <item name="colorSecondary">@color/secondary</item>
         <item name="colorAccent">@color/primary</item>
     </style>
 
@@ -13,7 +12,6 @@
         <item name="windowNoTitle">true</item>
         <item name="colorPrimary">@color/primary</item>
         <item name="colorSecondary">@color/secondary</item>
-        <item name="colorTertiary">@color/tertiary</item>
         <item name="android:statusBarColor">@color/primary</item>
         <item name="android:navigationBarColor">@color/background</item>
     </style>

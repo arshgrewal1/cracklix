@@ -9,10 +9,10 @@ android {
         targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnit4"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // navigationalKeys(true) removed as it is unsupported in modern AGP
-             cruncherEnabled = false
+             // Capacitor handles resource processing
+             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:fmod:fmod_event*:fmod_studio*'
         }
     }
     buildTypes {
@@ -37,12 +37,18 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
     implementation "androidx.core:core-ktx:$rootProject.ext.androidxCoreVersion"
-    implementation "androidx.core:core-splashscreen:$rootProject.ext.androidxSplashScreenVersion"
+    implementation "com.google.android.material:material:$rootProject.ext.androidxMaterialVersion"
+    implementation "androidx.core:core-splashscreen:$rootProject.ext.coreSplashScreenVersion"
     implementation project(':capacitor-android')
-
-    testImplementation "junit:junit:$rootProject.ext.junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.androidxEspressoCoreVersion"
+    implementation project(':capacitor-app')
+    implementation project(':capacitor-browser')
+    implementation project(':capacitor-filesystem')
+    implementation project(':capacitor-keyboard')
+    implementation project(':capacitor-share')
+    implementation project(':capacitor-status-bar')
+    testImplementation "junit:junit:4.13.2"
+    androidTestImplementation "androidx.test.ext:junit:1.2.1"
+    androidTestImplementation "androidx.test.espresso:core:3.6.1"
 }
 
 apply from: 'capacitor.build.gradle'
