@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: false # Skip broken submodules
+          submodules: false # Bypass broken 'arsh' submodule metadata
           fetch-depth: 0
 
       - name: Setup Node.js
@@ -43,12 +43,10 @@ jobs:
             echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > android/app/google-services.json
           else
             echo "{}" > android/app/google-services.json
-            echo "Warning: GOOGLE_SERVICES_JSON secret not found. Using dummy file for structural build."
           fi
 
       - name: Sync Capacitor
         run: |
-          mkdir -p android/app/src/main/assets/public
           npx cap sync android
 
       - name: Setup Gradle

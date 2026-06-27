@@ -5,17 +5,17 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
+
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
-        // Move flatDir here to satisfy Capacitor plugin requirements centrally
-        flatDir {
-            dirs 'libs'
-        }
     }
 }
+
 rootProject.name = 'android'
+
 include ':app'
+
 apply from: 'capacitor.settings.gradle'
