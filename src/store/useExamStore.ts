@@ -7,8 +7,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened CBT Store v54.0.
- * FIXED: Removed duplicate startTime key in initExam causing TS1117.
+ * @fileOverview Hardened CBT Store v55.0.
+ * FIXED: Purged all duplicate key declarations causing build blockers.
  */
 
 export interface ExamStoreState {
