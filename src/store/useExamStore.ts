@@ -7,8 +7,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened CBT Store v47.2.
- * FIXED: Purged duplicate object property error and aligned types.
+ * @fileOverview Hardened CBT Store v47.3.
+ * FIXED: Purged duplicate object property error and aligned types for static export compatibility.
  */
 
 export interface ExamStoreState {

@@ -1,13 +1,15 @@
 {
-  "name": "Cracklix",
+  "id": "com.cracklix.app",
+  "name": "Cracklix | Punjab's Smart Mock Test Hub",
   "short_name": "Cracklix",
-  "description": "Prepare for Punjab Government Exams with Cracklix",
+  "description": "Punjab's most trusted government exam preparation platform.",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
+  "display_override": ["standalone", "window-controls-overlay"],
+  "orientation": "portrait",
   "background_color": "#ffffff",
-  "theme_color": "#2563EB",
-  "orientation": "portrait-primary",
+  "theme_color": "#1677FF",
+  "categories": ["education", "books", "productivity"],
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -36,24 +38,39 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshots/screenshot-1.png",
-      "sizes": "540x720",
+      "src": "https://picsum.photos/seed/screenshot1/540/1080",
+      "sizes": "540x1080",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "narrow",
+      "label": "Cracklix Home - Punjab's Preparation Node"
     },
     {
-      "src": "/screenshots/screenshot-2.png",
-      "sizes": "540x720",
+      "src": "https://picsum.photos/seed/screenshot2/1280/800",
+      "sizes": "1280x800",
       "type": "image/png",
-      "form_factor": "narrow"
+      "form_factor": "wide",
+      "label": "Mock Test Simulation Center"
     }
   ],
-  "categories": ["education", "productivity"],
-  "prefer_related_applications": true,
+  "shortcuts": [
+    {
+      "name": "My Exams",
+      "url": "/my-exams/",
+      "description": "View your saved preparation verticals",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Practice Hub",
+      "url": "/mocks/",
+      "description": "Start a new high-fidelity mock test",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
   "related_applications": [
     {
-      "platform": "play",
-      "url": "https://play.google.com/store/apps/details?id=com.cracklix.app"
+      "platform": "webapp",
+      "url": "https://cracklix.vercel.app/manifest.json"
     }
-  ]
+  ],
+  "prefer_related_applications": false
 }

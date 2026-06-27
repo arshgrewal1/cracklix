@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Search Results Center v2.1 (Static Export Compatible).
- * FIXED: Wrapped in Suspense for Next.js 15 static export.
+ * FIXED: Wrapped in Suspense and applied strict React 19 typing for cloneElement.
  */
 
 export default function SearchPage() {
