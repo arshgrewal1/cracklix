@@ -1,15 +1,17 @@
 {
   "id": "com.cracklix.app",
-  "name": "Cracklix | Punjab's Smart Mock Test Hub",
+  "name": "Cracklix | Punjab's Mock Test Platform",
   "short_name": "Cracklix",
-  "description": "Punjab's most trusted government exam preparation platform.",
+  "description": "Punjab's most advanced government exam preparation platform. Verified patterns for PSSSB, PPSC, and Police recruitments.",
   "start_url": "/",
   "display": "standalone",
-  "display_override": ["standalone", "window-controls-overlay"],
+  "display_override": ["window-controls-overlay", "standalone"],
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#1677FF",
-  "categories": ["education", "books", "productivity"],
+  "categories": ["education", "government", "books"],
+  "lang": "en",
+  "dir": "ltr",
   "icons": [
     {
       "src": "/icons/icon-192x192.png",
@@ -38,39 +40,40 @@
   ],
   "screenshots": [
     {
-      "src": "https://picsum.photos/seed/screenshot1/540/1080",
-      "sizes": "540x1080",
+      "src": "https://picsum.photos/seed/screenshot1/1080/1920",
+      "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Cracklix Home - Punjab's Preparation Node"
+      "label": "Mock Test Interface"
     },
     {
-      "src": "https://picsum.photos/seed/screenshot2/1280/800",
-      "sizes": "1280x800",
+      "src": "https://picsum.photos/seed/screenshot2/1920/1080",
+      "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Mock Test Simulation Center"
+      "label": "Student Analytics Dashboard"
     }
   ],
   "shortcuts": [
     {
       "name": "My Exams",
-      "url": "/my-exams/",
-      "description": "View your saved preparation verticals",
+      "url": "/my-exams",
+      "description": "Quick access to your pinned exam verticals",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Practice Hub",
-      "url": "/mocks/",
-      "description": "Start a new high-fidelity mock test",
+      "url": "/mocks",
+      "description": "Start a new mock test",
       "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ],
+  "prefer_related_applications": true,
   "related_applications": [
     {
-      "platform": "webapp",
-      "url": "https://cracklix.vercel.app/manifest.json"
+      "platform": "play",
+      "url": "https://play.google.com/store/apps/details?id=com.cracklix.app",
+      "id": "com.cracklix.app"
     }
-  ],
-  "prefer_related_applications": false
+  ]
 }

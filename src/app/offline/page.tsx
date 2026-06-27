@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 
 /**
- * @fileOverview Institutional Offline Fallback Hub.
- * This page is served by the Service Worker when the user is offline.
+ * @fileOverview Institutional Offline Fallback Hub v2.0.
+ * Standardized to match Cracklix high-fidelity design.
  */
 export default function OfflinePage() {
   return (
@@ -24,16 +24,20 @@ export default function OfflinePage() {
         </div>
 
         <div className="space-y-3 max-w-sm">
-           <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] uppercase tracking-tight">Offline Hub</h1>
+           <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] uppercase tracking-tight leading-none">Connection Lost</h1>
            <p className="text-slate-500 font-medium leading-relaxed">
-              Connectivity lost. Please check your network to sync with the official Cracklix registry.
+              Your device is currently offline. Please check your network to sync with the official Cracklix preparation registry.
            </p>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xs">
-           <Button asChild className="h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-2xl border-none">
+           <Button asChild className="h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 shadow-2xl border-none active:scale-95 transition-all">
               <Link href="/"><Home className="h-4 w-4 text-primary" /> Return Home</Link>
            </Button>
+        </div>
+        
+        <div className="pt-10 border-t border-slate-50 w-full max-w-xs">
+           <p className="text-[10px] font-black uppercase text-slate-300 tracking-[0.4em]">Offline Node v1.05</p>
         </div>
       </main>
       <Footer />

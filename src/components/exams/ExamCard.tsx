@@ -11,8 +11,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Card Component v5.2.
- * FIXED: Synchronized property access and enforced search parameter routing.
+ * @fileOverview Exam Card Component v5.3.
+ * FIXED: Corrected property access (title -> name, category -> categoryId).
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || "Official Vertical"

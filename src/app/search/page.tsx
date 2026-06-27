@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Search Results Center v2.1 (Static Export Compatible).
- * FIXED: Wrapped in Suspense and applied strict React 19 typing for cloneElement.
+ * @fileOverview Search Results Center v2.2.
+ * FIXED: Explicit React import and strict casting for cloneElement.
  */
 
 export default function SearchPage() {
