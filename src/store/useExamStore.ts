@@ -7,7 +7,7 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened CBT Store v47.4.
+ * @fileOverview Hardened CBT Store v47.5.
  * FIXED: Purged duplicate startTime property and aligned types.
  */
 

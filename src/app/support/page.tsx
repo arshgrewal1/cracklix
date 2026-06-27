@@ -38,8 +38,8 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Institutional Support Ticket Management Console v6.2.
- * FIXED: Restored Link and Loader2 imports for build stability.
+ * @fileOverview Institutional Support Ticket Management Console v6.3.
+ * FIXED: Restored missing Link and AlertCircle imports for build stability.
  */
 
 export default function SupportPage() {
