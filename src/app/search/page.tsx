@@ -71,7 +71,7 @@ function SearchContent() {
        title: m.title, 
        type: "Practice Test", 
        href: `/mocks/view?id=${m.id}`, 
-       boardId: m.boardId,
+       boardId: m.boardId, 
        icon: <Zap className="h-5 w-5" />
     }))
 
