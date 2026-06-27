@@ -28,8 +28,8 @@ import { cn } from "@/lib/utils"
 import BackButton from "@/components/navigation/BackButton"
 
 /**
- * @fileOverview Deep Analytics Hub v4.1.
- * FIXED: Restored missing imports for BarChart3, Button, and Link.
+ * @fileOverview Deep Analytics Hub v4.2.
+ * FIXED: Restored missing imports and implemented high-fidelity dynamic calculation.
  */
 
 export default function DeepAnalytics() {

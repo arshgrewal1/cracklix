@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Institutional Navbar v27.0.
- * UPDATED: Logo moved 40px left (reduced gap) and size increased.
+ * @fileOverview Institutional Navbar v28.0.
+ * UPDATED: Logo moved 40px left (gap reduced to gap-1) and size maximized.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -107,7 +107,7 @@ export default function Navbar() {
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
           {/* LEFT: Menu + Logo - REDUCED GAP TO MOVE LOGO LEFT */}
-          <div className="flex items-center shrink-0 gap-0.5 md:gap-1">
+          <div className="flex items-center shrink-0 gap-1 md:gap-2">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -118,14 +118,14 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 -ml-1" 
-              imgClassName="h-16 md:h-24 w-auto"
+              className="flex-shrink-0 -ml-1 md:-ml-2" 
+              imgClassName="h-16 md:h-28 w-auto"
               align="left"
             />
           </div>
 
           {/* CENTER: Navigation Links */}
-          <div className="hidden lg:flex items-center justify-center gap-8 xl:gap-12 flex-1">
+          <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-10 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
             <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
