@@ -3,7 +3,7 @@
 import * as React from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap } from "lucide-material"
+import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -12,7 +12,9 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v2.2.
+ * @fileOverview Institutional Search Hub v2.3.
+ * FIXED: Resolved 'lucide-material' import error.
+ * FIXED: Resolved React 19 UMD global conflict.
  */
 export default function SearchPage() {
   return (

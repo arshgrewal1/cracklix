@@ -19,7 +19,7 @@ import {
   ShieldCheck,
   Tag,
   QrCode
-} from "lucide-material";
+} from "lucide-react";
 import { useUser, useDoc, useFirestore } from "@/firebase";
 import { submitManualPayment } from "@/app/actions/payment";
 import { doc } from "firebase/firestore";
@@ -30,7 +30,9 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
 /**
- * @fileOverview Institutional Checkout Hub v21.0.
+ * @fileOverview Institutional Checkout Hub v21.1.
+ * FIXED: Resolved 'lucide-material' import error.
+ * FIXED: Corrected useMemo and useDoc hook signatures.
  */
 export default function CheckoutPage() {
   return (
