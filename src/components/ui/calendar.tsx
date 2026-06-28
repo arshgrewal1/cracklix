@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -9,8 +10,7 @@ import { buttonVariants } from "@/components/ui/button"
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 /**
- * @fileOverview Hardened Calendar Hub v16.1 (react-day-picker v9 Compatible).
- * FIXED: Support for all valid Chevron orientations.
+ * @fileOverview Hardened Calendar Hub v16.2 (react-day-picker v9 API).
  */
 
 function Calendar({

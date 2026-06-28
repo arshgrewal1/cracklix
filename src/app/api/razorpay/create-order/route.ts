@@ -1,11 +1,12 @@
+
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { initializeFirebase } from "@/firebase/app";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Production Pro v7.0)
- * Logic: Strictly audit plan prices from Firestore and apply valid coupons.
+ * Razorpay Order API (Startup Hardened v8.0)
+ * Logic: Audit plan prices, block duplicate subscriptions, and log attempt.
  */
 
 export async function POST(req: Request) {
@@ -13,11 +14,11 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { planId, userId, couponCode } = body;
 
-    console.log("[RAZORPAY_ORDER_REQUEST]", { planId, userId, couponCode });
+    console.log("[RAZORPAY_ORDER_AUDIT]", { planId, userId });
 
     if (!planId || !userId) {
       return NextResponse.json(
-        { success: false, reason: "Missing planId or userId." },
+        { success: false, reason: "Missing identification tokens." },
         { status: 400 }
       );
     }
@@ -27,20 +28,34 @@ export async function POST(req: Request) {
 
     if (!keyId || !keySecret) {
       return NextResponse.json(
-        { success: false, reason: "Payment configuration missing in server environment." },
+        { success: false, reason: "Payment config node missing in environment." },
         { status: 503 }
       );
     }
 
     const { firestore: db } = initializeFirebase();
 
-    // 1. Plan Integrity Audit
+    // 1. ACTIVE PLAN LOCK (Anti-Abuse)
+    const userRef = doc(db, "users", userId);
+    const userSnap = await getDoc(userRef);
+    if (userSnap.exists()) {
+       const userData = userSnap.data();
+       const now = new Date();
+       if (userData.passStatus === 'active' && userData.passExpiresAt && new Date(userData.passExpiresAt) > now) {
+          return NextResponse.json(
+            { success: false, reason: "You already have an active elite hub pass." },
+            { status: 400 }
+          );
+       }
+    }
+
+    // 2. PLAN AUDIT
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 
     if (!planSnap.exists()) {
       return NextResponse.json(
-        { success: false, reason: `Plan node [${planId}] not found in registry.` },
+        { success: false, reason: "Plan node not found in canonical registry." },
         { status: 404 }
       );
     }
@@ -50,12 +65,12 @@ export async function POST(req: Request) {
 
     if (isNaN(price) || price < 0) {
       return NextResponse.json(
-        { success: false, reason: "Invalid price configuration in registry." },
+        { success: false, reason: "Invalid price registry for this vertical." },
         { status: 400 }
       );
     }
 
-    // 2. Apply Coupon Logic (Server-side)
+    // 3. COUPON VERIFICATION
     let appliedDiscount = 0;
     if (couponCode) {
       const couponRef = doc(db, "coupons", couponCode.toUpperCase());
@@ -67,11 +82,11 @@ export async function POST(req: Request) {
         } else {
           appliedDiscount = cData.discount;
         }
-        price = Math.max(1, price - appliedDiscount); // Minimum 1 rupee
+        price = Math.max(1, price - appliedDiscount);
       }
     }
 
-    // 3. Razorpay Order Node Creation
+    // 4. RAZORPAY INITIALIZATION
     const razorpay = new Razorpay({
       key_id: keyId,
       key_secret: keySecret,
@@ -81,7 +96,18 @@ export async function POST(req: Request) {
       amount: Math.round(price * 100),
       currency: "INR",
       receipt: `ORD_${Date.now()}_${userId.slice(-6)}`,
-      notes: { userId, planId, couponCode: couponCode || "", planName: planData.name || "Elite Pass" },
+      notes: { userId, planId, planName: planData.name || "Elite Pass" },
+    });
+
+    // 5. AUDIT LOGGING
+    await setDoc(doc(db, "payment_logs", order.id), {
+       orderId: order.id,
+       userId,
+       planId,
+       amount: price,
+       status: "created",
+       ip: req.headers.get("x-forwarded-for") || "direct",
+       createdAt: serverTimestamp()
     });
 
     return NextResponse.json({
@@ -93,9 +119,9 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error("[RAZORPAY_ORDER_CRITICAL]", error);
+    console.error("[RAZORPAY_CREATE_CRITICAL]", error);
     return NextResponse.json(
-      { success: false, error: error?.message || "Order creation failed" },
+      { success: false, error: error?.message || "Order creation node failure" },
       { status: 500 }
     );
   }

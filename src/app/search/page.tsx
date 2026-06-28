@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
@@ -12,8 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v12.9.
- * FIXED: Malformed React import to resolve JSX IntrinsicElements resolution.
+ * @fileOverview Institutional Search Hub v13.0 (Startup Hardened).
  */
 
 export default function SearchPage() {

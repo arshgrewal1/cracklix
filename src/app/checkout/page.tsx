@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { Suspense, useMemo, useState, useEffect } from "react";
@@ -29,7 +30,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview High-Fidelity Checkout Hub v7.0 (Referral & Coupon Integrated).
+ * @fileOverview High-Fidelity Checkout Hub v8.1 (Startup Hardened).
  */
 
 export default function CheckoutPage() {
@@ -134,7 +135,7 @@ function CheckoutContent() {
     }
 
     setOnlineProcessing(true);
-    console.log("[CHECKOUT_INITIATED]", { planId, userId: user.uid, coupon: coupon.trim().toUpperCase() });
+    console.log("[CHECKOUT_INITIATED]", { planId, userId: user.uid });
 
     try {
       const res = await fetch("/api/razorpay/create-order", {
@@ -147,16 +148,11 @@ function CheckoutContent() {
         }),
       });
 
-      const responseText = await res.text();
-      let orderData;
-      try {
-        orderData = JSON.parse(responseText);
-      } catch (e) {
-        throw new Error("Server response malformed.");
-      }
+      const orderData = await res.json();
 
       if (!res.ok) {
-        throw new Error(orderData.reason || orderData.error || `Error ${res.status}`);
+        console.error("[ORDER_API_REJECTION]", orderData);
+        throw new Error(orderData.reason || orderData.error || "Order hub handshake failed.");
       }
 
       if (!(window as any).Razorpay) {
@@ -168,7 +164,7 @@ function CheckoutContent() {
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Cracklix",
-        description: `Elite Pass: ${planData.name}`,
+        description: `Elite Hub: ${planData.name}`,
         order_id: orderData.orderId,
         handler: async function (response: any) {
           setOnlineProcessing(true);
@@ -221,7 +217,6 @@ function CheckoutContent() {
   };
 
   if (planLoading) return <div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>;
-  if (!planData) return <div className="h-screen flex flex-col items-center justify-center gap-4 bg-white"><AlertCircle className="text-slate-300" /><span>Plan node missing</span><Button onClick={() => router.push('/pass')}>Back</Button></div>;
 
   return (
     <div className="min-h-screen bg-slate-50 font-body">
@@ -240,10 +235,10 @@ function CheckoutContent() {
                 <div className="p-6 bg-rose-50 border border-rose-100 rounded-[1.5rem] flex items-start gap-4 animate-in slide-in-from-top-4">
                   <AlertCircle className="h-6 w-6 text-rose-500 shrink-0" />
                   <div className="flex-1 space-y-3">
-                     <p className="font-bold text-rose-700 leading-tight">Payment Hub Rejection</p>
+                     <p className="font-bold text-rose-700 leading-tight">Payment Node Failure</p>
                      <p className="text-sm text-rose-600 font-medium">{errorMessage}</p>
                      <Button variant="outline" size="sm" className="h-9 rounded-lg bg-white border-rose-200 text-rose-600 font-bold" onClick={handlePaymentInitiation}>
-                        <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Handshake
+                        <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Hub Sync
                      </Button>
                   </div>
                 </div>
