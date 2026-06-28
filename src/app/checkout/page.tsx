@@ -29,9 +29,9 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v19.0.
- * FIXED: Restored missing RefreshCw import.
- * FIXED: Hardened contact prefill to ensure 10-digit numeric string for Razorpay Test Mode success.
+ * @fileOverview Institutional Checkout Hub v19.2.
+ * FIXED: Restored RefreshCw import.
+ * FIXED: Hardened contact prefill to ensures 10-digit numeric string for Razorpay Test Mode success.
  */
 
 export default function CheckoutPage() {
