@@ -1,3 +1,5 @@
 include ':app'
 
+rootProject.name = "cracklix"
+
 apply from: '../node_modules/@capacitor/android/capacitor.settings.gradle'
