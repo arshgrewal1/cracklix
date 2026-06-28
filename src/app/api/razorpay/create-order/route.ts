@@ -1,112 +1,96 @@
-
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { logEvent } from "@/lib/logger";
 
 /**
- * Razorpay Order API (Startup Hardened v8.0)
- * Logic: Audit plan prices, block duplicate subscriptions, and log attempt.
+ * Razorpay Order API (Enterprise Hardened v9.0)
+ * Security: Origin validation, active plan lock, and real-time logging.
  */
-
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { planId, userId, couponCode } = body;
+    // 1. ORIGIN SECURITY
+    const origin = req.headers.get("origin");
+    if (process.env.ALLOWED_ORIGIN && origin !== process.env.ALLOWED_ORIGIN) {
+       return NextResponse.json({ error: "Unauthorized endpoint access." }, { status: 403 });
+    }
 
-    console.log("[RAZORPAY_ORDER_AUDIT]", { planId, userId });
+    const { planId, userId, couponCode } = await req.json();
 
     if (!planId || !userId) {
-      return NextResponse.json(
-        { success: false, reason: "Missing identification tokens." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Missing identity tokens." }, { status: 400 });
     }
 
     const keyId = process.env.RAZORPAY_KEY_ID?.trim();
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
     if (!keyId || !keySecret) {
-      return NextResponse.json(
-        { success: false, reason: "Payment config node missing in environment." },
-        { status: 503 }
-      );
+      await logEvent({ type: "critical", message: "Razorpay environment variables missing." });
+      return NextResponse.json({ error: "Server configuration anomaly." }, { status: 503 });
     }
 
     const { firestore: db } = initializeFirebase();
 
-    // 1. ACTIVE PLAN LOCK (Anti-Abuse)
+    // 2. ACTIVE PLAN AUDIT
     const userRef = doc(db, "users", userId);
     const userSnap = await getDoc(userRef);
     if (userSnap.exists()) {
        const userData = userSnap.data();
        const now = new Date();
        if (userData.passStatus === 'active' && userData.passExpiresAt && new Date(userData.passExpiresAt) > now) {
-          return NextResponse.json(
-            { success: false, reason: "You already have an active elite hub pass." },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: "Active pass already registered." }, { status: 400 });
        }
     }
 
-    // 2. PLAN AUDIT
+    // 3. REGISTRY PRICE AUDIT
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 
     if (!planSnap.exists()) {
-      return NextResponse.json(
-        { success: false, reason: "Plan node not found in canonical registry." },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "Pass tier not found in registry." }, { status: 404 });
     }
 
-    const planData = planSnap.data();
-    let price = Number(planData?.price);
+    const plan = planSnap.data();
+    let price = Number(plan?.price);
 
     if (isNaN(price) || price < 0) {
-      return NextResponse.json(
-        { success: false, reason: "Invalid price registry for this vertical." },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid price registry." }, { status: 400 });
     }
 
-    // 3. COUPON VERIFICATION
-    let appliedDiscount = 0;
+    // 4. COUPON VALIDATION
     if (couponCode) {
       const couponRef = doc(db, "coupons", couponCode.toUpperCase());
       const couponSnap = await getDoc(couponRef);
       if (couponSnap.exists() && couponSnap.data().active) {
         const cData = couponSnap.data();
-        if (cData.type === 'percent') {
-          appliedDiscount = (price * cData.discount) / 100;
-        } else {
-          appliedDiscount = cData.discount;
-        }
-        price = Math.max(1, price - appliedDiscount);
+        const discount = cData.type === 'percent' ? (price * cData.discount) / 100 : cData.discount;
+        price = Math.max(1, price - discount);
       }
     }
 
-    // 4. RAZORPAY INITIALIZATION
-    const razorpay = new Razorpay({
-      key_id: keyId,
-      key_secret: keySecret,
-    });
+    // 5. RAZORPAY HANDSHAKE
+    const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
 
     const order = await razorpay.orders.create({
       amount: Math.round(price * 100),
       currency: "INR",
-      receipt: `ORD_${Date.now()}_${userId.slice(-6)}`,
-      notes: { userId, planId, planName: planData.name || "Elite Pass" },
+      receipt: `ORD_${Date.now()}_${userId.slice(-5)}`,
+      notes: { userId, planId, planName: plan.name },
     });
 
-    // 5. AUDIT LOGGING
-    await setDoc(doc(db, "payment_logs", order.id), {
-       orderId: order.id,
+    // 6. LOGGING & TRACING
+    await logEvent({
+       type: "payment",
+       message: "Order created successfully",
        userId,
        planId,
-       amount: price,
-       status: "created",
-       ip: req.headers.get("x-forwarded-for") || "direct",
+       metadata: { orderId: order.id, amount: price }
+    });
+
+    await setDoc(doc(db, "payment_logs", order.id), {
+       userId, planId, amount: price, status: "created",
+       ip: req.headers.get("x-forwarded-for") || "unknown",
        createdAt: serverTimestamp()
     });
 
@@ -117,12 +101,9 @@ export async function POST(req: Request) {
       currency: order.currency,
       key: keyId,
     });
-
   } catch (error: any) {
-    console.error("[RAZORPAY_CREATE_CRITICAL]", error);
-    return NextResponse.json(
-      { success: false, error: error?.message || "Order creation node failure" },
-      { status: 500 }
-    );
+    console.error("[RAZORPAY_CREATE_ERROR]", error);
+    await logEvent({ type: "error", message: error.message, stack: error.stack });
+    return NextResponse.json({ error: error.message || "Order creation failure" }, { status: 500 });
   }
 }

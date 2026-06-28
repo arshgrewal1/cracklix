@@ -1,14 +1,13 @@
-
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { initializeFirebase } from "@/firebase/app";
 import { doc, setDoc, serverTimestamp, getDoc, updateDoc, increment } from "firebase/firestore";
+import { logEvent } from "@/lib/logger";
 
 /**
- * Razorpay Enterprise Webhook Node (v4.0)
+ * Razorpay Enterprise Webhook Hub (v10.0)
  * Logic: Signature verification, Fraud detection, Referral rewards, and Activation.
  */
-
 export async function POST(req: Request) {
   try {
     const body = await req.text();
@@ -16,7 +15,7 @@ export async function POST(req: Request) {
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
     if (!secret) {
-       console.error("[WEBHOOK_CRITICAL] RAZORPAY_WEBHOOK_SECRET is undefined.");
+       await logEvent({ type: "critical", message: "RAZORPAY_WEBHOOK_SECRET is undefined" });
        return NextResponse.json({ error: "Configuration anomaly" }, { status: 500 });
     }
 
@@ -26,7 +25,7 @@ export async function POST(req: Request) {
       .digest("hex");
 
     if (expectedSignature !== signature) {
-      console.warn("[WEBHOOK_FRAUD] Unauthorized handshake signature mismatch.");
+      await logEvent({ type: "critical", message: "Unauthorized webhook signature detected." });
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
@@ -38,32 +37,32 @@ export async function POST(req: Request) {
       const userId = payment.notes?.userId;
       const planId = payment.notes?.planId;
 
-      if (!userId || !planId) return NextResponse.json({ success: true, warning: "Ghost transaction detected" });
+      if (!userId || !planId) {
+         await logEvent({ type: "info", message: "Payment captured without metadata notes." });
+         return NextResponse.json({ success: true });
+      }
 
       // 1. FRAUD DETECTION (Amount Audit)
       const planSnap = await getDoc(doc(db, "passes", planId));
       if (planSnap.exists()) {
          const expectedPrice = Number(planSnap.data().price);
          const paidPrice = Number(payment.amount) / 100;
-         // Allow for 10% margin due to potential discounts/rounding
          if (paidPrice < expectedPrice * 0.4) {
-            console.error("[WEBHOOK_ALERT] High-severity price mismatch detected.", { paidPrice, expectedPrice });
+            await logEvent({ type: "critical", message: "High-severity price mismatch detected.", userId, metadata: { paid: paidPrice, expected: expectedPrice } });
             await setDoc(doc(db, "fraud_alerts", payment.id), { payment, userId, planId, createdAt: serverTimestamp() });
             return NextResponse.json({ success: true, flagged: true });
          }
       }
 
       // 2. ACTIVATION LOGIC
-      const now = new Date();
       const durationDays = planSnap.exists() ? (planSnap.data().durationDays || 30) : 30;
-      const expiry = new Date(now.getTime() + durationDays * 24 * 60 * 60 * 1000);
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + durationDays);
 
       // A. SUBSCRIPTION REGISTRY
       await setDoc(doc(db, "user_passes", userId), {
-        planId,
-        active: true,
-        activatedAt: serverTimestamp(),
-        expiry: expiry.toISOString(),
+        planId, active: true, activatedAt: serverTimestamp(),
+        expiry: expiryDate.getTime(),
         paymentId: payment.id,
         orderId: payment.order_id,
         updatedAt: serverTimestamp()
@@ -76,7 +75,7 @@ export async function POST(req: Request) {
 
       await updateDoc(userRef, {
         passStatus: 'active',
-        passExpiresAt: expiry.toISOString(),
+        passExpiresAt: expiryDate.toISOString(),
         status: planId,
         planTier: planSnap.exists() ? (planSnap.data().tier || 1) : 1,
         updatedAt: serverTimestamp()
@@ -86,11 +85,8 @@ export async function POST(req: Request) {
       if (userData?.referredBy) {
         const referrerId = userData.referredBy;
         await setDoc(doc(db, "referrals", `${referrerId}_${userId}`), {
-          referrerId,
-          referredId: userId,
-          amount: payment.amount / 100,
-          rewardGiven: true,
-          createdAt: serverTimestamp()
+          referrerId, referredId: userId, amount: payment.amount / 100,
+          rewardGiven: true, createdAt: serverTimestamp()
         });
 
         await updateDoc(doc(db, "users", referrerId), {
@@ -100,16 +96,16 @@ export async function POST(req: Request) {
       }
 
       // D. AUDIT LOG CLOSURE
+      await logEvent({ type: "payment", message: "Pass activated via Webhook", userId, planId });
       await updateDoc(doc(db, "payment_logs", payment.order_id), {
-         status: "captured",
-         paymentId: payment.id,
-         capturedAt: serverTimestamp()
+         status: "captured", paymentId: payment.id, capturedAt: serverTimestamp()
       }).catch(() => {});
     }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("[WEBHOOK_EXCEPTION]", error);
-    return NextResponse.json({ error: error?.message }, { status: 500 });
+    await logEvent({ type: "error", message: error.message, stack: error.stack });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

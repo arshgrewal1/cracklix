@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { Suspense, useMemo, useState, useEffect } from "react";
@@ -28,11 +27,11 @@ import Script from "next/script";
 import { Badge } from "@/components/ui/badge";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { logEvent } from "@/lib/logger";
 
 /**
- * @fileOverview High-Fidelity Checkout Hub v8.1 (Startup Hardened).
+ * @fileOverview High-Fidelity Checkout Hub v10.0 (Production Hardened).
  */
-
 export default function CheckoutPage() {
   return (
     <Suspense
@@ -65,21 +64,11 @@ function CheckoutContent() {
   const [verifyingCoupon, setVerifyingCoupon] = useState(false);
 
   const { data: settings } = useDoc<any>(
-    useMemo(
-      () =>
-        dbInstance ? doc(dbInstance, "settings", "global") : null,
-      [dbInstance]
-    )
+    useMemo(() => dbInstance ? doc(dbInstance, "settings", "global") : null, [dbInstance])
   );
 
   const { data: planData, loading: planLoading } = useDoc<any>(
-    useMemo(
-      () =>
-        dbInstance && planId
-          ? doc(dbInstance, "passes", planId)
-          : null,
-      [dbInstance, planId]
-    )
+    useMemo(() => dbInstance && planId ? doc(dbInstance, "passes", planId) : null, [dbInstance, planId])
   );
 
   useEffect(() => {
@@ -93,12 +82,12 @@ function CheckoutContent() {
        const res = await fetch('/api/coupon/apply', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: coupon.trim().toUpperCase() })
+          body: JSON.stringify({ code: coupon.trim().toUpperCase(), userId: user?.uid })
        });
        const data = await res.json();
        if (res.ok) {
           setAppliedCoupon(data);
-          toast({ title: "Coupon Applied", description: `You saved ₹${data.discount}${data.type === 'percent' ? '%' : ''}` });
+          toast({ title: "Coupon Applied", description: `Discount verified.` });
        } else {
           toast({ variant: "destructive", title: "Invalid Code", description: data.error });
        }
@@ -119,25 +108,11 @@ function CheckoutContent() {
     if (!user || !profile || !planData || onlineProcessing) return;
 
     setErrorMessage(null);
-    const price = discountedPrice;
-
-    if (price === 0) {
-      setOnlineProcessing(true);
-      try {
-        await activateFreePass(user.uid, planId);
-        router.push("/dashboard");
-      } catch (e) {
-        setErrorMessage("Failed to activate free pass.");
-      } finally {
-        setOnlineProcessing(false);
-      }
-      return;
-    }
-
     setOnlineProcessing(true);
-    console.log("[CHECKOUT_INITIATED]", { planId, userId: user.uid });
 
     try {
+      await logEvent({ type: "payment", message: "Checkout started", userId: user.uid, planId });
+
       const res = await fetch("/api/razorpay/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -151,12 +126,7 @@ function CheckoutContent() {
       const orderData = await res.json();
 
       if (!res.ok) {
-        console.error("[ORDER_API_REJECTION]", orderData);
-        throw new Error(orderData.reason || orderData.error || "Order hub handshake failed.");
-      }
-
-      if (!(window as any).Razorpay) {
-        throw new Error("Razorpay SDK not loaded.");
+        throw new Error(orderData.error || orderData.reason || "Gateway node failure.");
       }
 
       const options = {
@@ -172,22 +142,18 @@ function CheckoutContent() {
             const verifyRes = await fetch("/api/razorpay/verify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                ...response,
-                userId: user.uid,
-                planId,
-              }),
+              body: JSON.stringify({ ...response, userId: user.uid, planId }),
             });
 
-            const verifyData = await verifyRes.json();
-
-            if (verifyRes.ok && verifyData.success) {
+            const vData = await verifyRes.json();
+            if (verifyRes.ok && vData.success) {
               router.push(`/payment/success?order_id=${response.razorpay_order_id}&plan=${encodeURIComponent(planData.name)}`);
             } else {
-              throw new Error(verifyData.reason || verifyData.error || "Verification failed.");
+              throw new Error(vData.error || "Verification mismatch.");
             }
           } catch (err: any) {
-            setErrorMessage(err.message);
+             await logEvent({ type: "error", message: "Verification failed on client", userId: user.uid, metadata: { err: err.message } });
+             setErrorMessage(err.message);
           } finally {
             setOnlineProcessing(false);
           }
@@ -198,19 +164,12 @@ function CheckoutContent() {
           contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "",
         },
         theme: { color: "#2563EB" },
-        modal: {
-          ondismiss: () => setOnlineProcessing(false),
-        },
+        modal: { ondismiss: () => setOnlineProcessing(false) }
       };
 
       const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", (resp: any) => {
-        setErrorMessage(resp?.error?.description || "Payment node rejected.");
-        setOnlineProcessing(false);
-      });
       rzp.open();
     } catch (err: any) {
-      console.error("[CHECKOUT_EXCEPTION]", err);
       setErrorMessage(err.message);
       setOnlineProcessing(false);
     }
@@ -223,7 +182,7 @@ function CheckoutContent() {
       <Navbar />
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
-      <main className="container mx-auto p-4 md:p-12 max-w-5xl text-left">
+      <main className="container mx-auto p-4 md:p-12 max-w-5xl text-left pb-40">
         <div className="flex items-center gap-4 mb-8">
            <button onClick={() => router.back()} className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm active:scale-95 transition-all"><ArrowLeft className="h-5 w-5" /></button>
            <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Checkout Hub</h1>
@@ -254,7 +213,7 @@ function CheckoutContent() {
                   <Card className="p-8 border-none shadow-xl rounded-[2rem] space-y-8 bg-white">
                     <div className="space-y-2">
                        <h2 className="text-xl font-black text-[#0F172A]">Pro Activation</h2>
-                       <p className="text-sm text-slate-500 font-medium leading-relaxed">Automatic verified activation via encrypted gateway.</p>
+                       <p className="text-sm text-slate-500 font-medium leading-relaxed">Verified activation via encrypted gateway.</p>
                     </div>
 
                     <div className="space-y-4 border-y border-slate-50 py-6">
@@ -269,11 +228,7 @@ function CheckoutContent() {
                                 placeholder="ENTER CODE" 
                              />
                           </div>
-                          <Button 
-                             onClick={handleApplyCoupon} 
-                             disabled={!coupon.trim() || verifyingCoupon}
-                             className="h-12 px-6 rounded-xl bg-[#0F172A] hover:bg-black font-black uppercase text-[10px]"
-                          >
+                          <Button onClick={handleApplyCoupon} disabled={!coupon.trim() || verifyingCoupon} className="h-12 px-6 rounded-xl bg-[#0F172A] hover:bg-black font-black uppercase text-[10px]">
                              {verifyingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
                           </Button>
                        </div>
@@ -290,7 +245,7 @@ function CheckoutContent() {
                   <Card className="p-8 border-none shadow-xl rounded-[2rem] space-y-8 bg-white">
                     <div className="space-y-2">
                        <h2 className="text-xl font-black text-[#0F172A]">Manual Audit</h2>
-                       <p className="text-sm text-slate-500 font-medium leading-relaxed">Pay via UPI and enter the 12-digit UTR for registry verification.</p>
+                       <p className="text-sm text-slate-500 font-medium leading-relaxed">Pay via UPI and enter the 12-digit UTR.</p>
                     </div>
                     <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
                        <div className="space-y-0.5">
@@ -308,7 +263,7 @@ function CheckoutContent() {
                         setOnlineProcessing(true);
                         try {
                           await submitManualPayment({ userId: user.uid, userEmail: user.email || "", userName: profile?.name || "Aspirant", planId, transactionId: utr });
-                          toast({ title: "Request Staged", description: "Audit will be completed within 12 hours." });
+                          toast({ title: "Request Staged", description: "Audit in progress." });
                           router.push("/dashboard");
                         } catch (e: any) {
                           setErrorMessage(e.message);
@@ -328,8 +283,8 @@ function CheckoutContent() {
                        <Gem className="h-6 w-6" />
                     </div>
                     <div className="space-y-0.5 text-left">
-                       <h3 className="text-lg font-black uppercase tracking-tight text-[#0F172A]">{planData.name}</h3>
-                       <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] uppercase px-2">{planData.durationDays} Days Hub</Badge>
+                       <h3 className="text-lg font-black uppercase tracking-tight text-[#0F172A]">{planData?.name}</h3>
+                       <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] uppercase px-2">{planData?.durationDays} Days Hub</Badge>
                     </div>
                  </div>
                  
@@ -338,16 +293,16 @@ function CheckoutContent() {
                     <div className="space-y-3">
                        <div className="flex justify-between items-center text-sm font-medium text-slate-500">
                           <span>Base Price</span>
-                          <span>₹{planData.price}</span>
+                          <span>₹{planData?.price}</span>
                        </div>
                        {appliedCoupon && (
                           <div className="flex justify-between items-center text-sm font-bold text-emerald-600">
-                             <span className="flex items-center gap-2"><Tag className="h-3 w-3" /> Coupon Discount</span>
+                             <span className="flex items-center gap-2"><Tag className="h-3 w-3" /> Discount</span>
                              <span>-₹{planData.price - discountedPrice}</span>
                           </div>
                        )}
                        <div className="pt-4 border-t border-slate-50 flex justify-between items-center">
-                          <span className="font-bold text-[#0F172A]">Total Payable</span>
+                          <span className="font-bold text-[#0F172A]">Total</span>
                           <span className="text-3xl font-black text-primary">₹{discountedPrice}</span>
                        </div>
                     </div>
@@ -357,7 +312,7 @@ function CheckoutContent() {
                    <div className="p-5 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center gap-4">
                       <Gift className="h-6 w-6 text-primary" />
                       <div className="text-left">
-                         <p className="text-[10px] font-black uppercase text-blue-800">Your referral code</p>
+                         <p className="text-[10px] font-black uppercase text-blue-800">Referral Code</p>
                          <p className="text-sm font-black text-primary tracking-widest">{profile.referralCode}</p>
                       </div>
                    </div>

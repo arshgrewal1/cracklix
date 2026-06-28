@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
@@ -13,9 +12,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v13.0 (Startup Hardened).
+ * @fileOverview Institutional Search Hub v15.0 (Startup Hardened).
  */
-
 export default function SearchPage() {
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
@@ -125,8 +123,8 @@ function SearchContent() {
                     {searchResults.map((res, i) => (
                       <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
                          <div className="flex items-center gap-4 min-w-0 flex-1">
-                            <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
-                               {isValidElement(res.icon) ? cloneElement(res.icon as ReactElement<any>, { className: "h-5 w-5" }) : null}
+                            <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary/5 transition-all">
+                               {React.cloneElement(res.icon as React.ReactElement, { className: "h-5 w-5 text-primary" })}
                             </div>
                             <div className="text-left min-w-0 flex-1">
                                <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>
