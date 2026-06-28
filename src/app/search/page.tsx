@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
@@ -13,8 +14,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v3.2.
- * FIXED: Explicitly imported React and used typed cloneElement to resolve build errors.
+ * @fileOverview Official Search Hub v3.3.
+ * FIXED: Explicit React imports and Suspense boundary.
  */
 
 export default function SearchPage() {

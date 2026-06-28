@@ -1,6 +1,7 @@
+
 "use client"
 
-import { useSearchParams, useRouter } from "next/navigation"
+import React, { useSearchParams, useRouter } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Card, CardContent } from "@/components/ui/card"
@@ -29,8 +30,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v12.2.
- * FIXED: Restored RefreshCw import.
+ * @fileOverview Institutional Checkout Hub v13.0.
+ * UPDATED: Replaced Cashfree with Razorpay integration.
  */
 
 export default function CheckoutPage() {
@@ -78,19 +79,13 @@ function CheckoutContent() {
     }
 
     setOnlineProcessing(true);
-    const cf = (window as any).Cashfree;
     
-    if (!cf) {
-       setErrorMessage("Payment gateway failed to initialize. Please refresh the page.");
-       setOnlineProcessing(false);
-       return;
-    }
-
     try {
-      const orderRes = await fetch(`/api/cashfree/create-order`, {
+      // 1. Create Razorpay Order
+      const orderRes = await fetch(`/api/razorpay/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId, userId: user.uid, origin: window.location.origin })
+        body: JSON.stringify({ planId, userId: user.uid })
       });
 
       const orderData = await orderRes.json();
@@ -99,25 +94,64 @@ function CheckoutContent() {
          throw new Error(orderData.error || "Order creation failed.");
       }
 
-      if (!orderData.payment_session_id) {
-         throw new Error("Missing payment session node from gateway.");
-      }
-      
-      const cashfreeInstance = cf({ mode: orderData.environment || 'sandbox' });
-      await cashfreeInstance.checkout({
-         paymentSessionId: orderData.payment_session_id,
-         redirectTarget: "_self" 
-      });
+      // 2. Open Razorpay Modal
+      const options = {
+        key: orderData.key,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Cracklix",
+        description: `Purchase ${planData.name}`,
+        image: "/logo/cracklix-icon.png",
+        order_id: orderData.id,
+        handler: async (response: any) => {
+          setOnlineProcessing(true);
+          try {
+            const verifyRes = await fetch('/api/razorpay/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                ...response,
+                userId: user.uid,
+                planId: planId
+              })
+            });
+            const verifyData = await verifyRes.json();
+            if (verifyData.success) {
+               toast({ title: "Payment Successful", description: "Your elite pass is now active." });
+               router.push("/payment/success?order_id=" + response.razorpay_order_id);
+            } else {
+               throw new Error(verifyData.error || "Verification failed");
+            }
+          } catch (err: any) {
+            toast({ variant: "destructive", title: "Verification Failed", description: err.message });
+          } finally {
+            setOnlineProcessing(false);
+          }
+        },
+        prefill: {
+          name: profile?.name || "",
+          email: user.email || "",
+          contact: profile?.phone || ""
+        },
+        theme: {
+          color: "#2563EB"
+        },
+        modal: {
+           ondismiss: () => setOnlineProcessing(false)
+        }
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
 
     } catch (e: any) {
-      console.error("[CHECKOUT_ERROR]:", e);
+      console.error("[RAZORPAY_ERROR]:", e);
       setErrorMessage(e.message);
       toast({ 
         variant: "destructive", 
         title: "Order Blocked", 
         description: e.message 
       });
-    } finally {
       setOnlineProcessing(false);
     }
   };
@@ -130,7 +164,7 @@ function CheckoutContent() {
   return (
     <div className="min-h-screen bg-slate-50/50 font-body text-left">
       <Navbar />
-      <Script src="https://sdk.cashfree.com/js/v3/cashfree.js" strategy="lazyOnload" />
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       
       <main className="container mx-auto px-4 md:px-6 py-8 md:py-16 max-w-6xl pb-40">
         <div className="flex items-center gap-4 mb-10">
@@ -175,7 +209,7 @@ function CheckoutContent() {
                              <ShieldCheck className="h-8 w-8" />
                           </div>
                           <h2 className="text-2xl font-black text-[#0F172A]">Direct Activation</h2>
-                          <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed text-sm">Instant prep-node activation via encrypted Cashfree gateway.</p>
+                          <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed text-sm">Instant prep-node activation via encrypted Razorpay gateway.</p>
                        </div>
                        <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black text-sm rounded-full shadow-3xl border-none transition-all active:scale-95">
                           {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Zap className="h-5 w-5 mr-2" /> Pay ₹{planData.price} Now</>}
