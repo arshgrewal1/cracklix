@@ -13,6 +13,8 @@ export async function POST(req: Request) {
   try {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId, planId } = await req.json();
 
+    console.log("[RAZORPAY_VERIFY] Starting audit for payment:", razorpay_payment_id);
+
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !userId || !planId) {
       return NextResponse.json({ success: false, reason: "Incomplete payment tokens received." }, { status: 400 });
     }
@@ -21,6 +23,7 @@ export async function POST(req: Request) {
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
     if (!keyId || !keySecret) {
+      console.error("[RAZORPAY_VERIFY] Missing environment secrets.");
       return NextResponse.json({ success: false, reason: "Server configuration error." }, { status: 500 });
     }
 
@@ -31,7 +34,7 @@ export async function POST(req: Request) {
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      console.error("[RAZORPAY_VERIFY] Security signature mismatch.");
+      console.error("[RAZORPAY_VERIFY] Security signature mismatch. Transaction blocked.");
       return NextResponse.json({ success: false, reason: "Security signature mismatch." }, { status: 400 });
     }
 
@@ -52,13 +55,17 @@ export async function POST(req: Request) {
     const paymentStatus = String((payment as any).status).toLowerCase();
 
     if (!["captured", "authorized"].includes(paymentStatus)) {
+       console.error("[RAZORPAY_VERIFY] Invalid payment status:", paymentStatus);
        return NextResponse.json({ success: false, reason: `Invalid payment status: ${paymentStatus}` }, { status: 400 });
     }
 
     // 4. PLAN AUDIT & ACTIVATION
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
-    if (!planSnap.exists()) return NextResponse.json({ success: false, reason: "Plan node lost in registry." }, { status: 404 });
+    if (!planSnap.exists()) {
+       console.error("[RAZORPAY_VERIFY] Plan lost in registry:", planId);
+       return NextResponse.json({ success: false, reason: "Plan node lost in registry." }, { status: 404 });
+    }
 
     const planData = planSnap.data();
     const duration = Number(planData.durationDays || 30);
@@ -100,6 +107,7 @@ export async function POST(req: Request) {
       updatedAt: serverTimestamp()
     });
 
+    console.log("[RAZORPAY_VERIFY] Audit Complete. Subscription synchronized.");
     return NextResponse.json({ success: true, orderId: razorpay_order_id });
 
   } catch (error: any) {
