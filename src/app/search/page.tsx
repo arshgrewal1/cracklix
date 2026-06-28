@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense } from "react"
@@ -7,8 +6,7 @@ import Footer from "@/components/layout/Footer"
 import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
-import { useCollection, useFirestore, useUser } from "@/firebase"
+import { useCollection, useFirestore } from "@/firebase"
 import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -121,9 +119,9 @@ function SearchContent() {
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.map((res, i) => (
                       <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
-                         <div className="flex items-center gap-4 min-w-0 flex-1">
+                         <div className="flex items-center gap-4 min-w-0 flex-1" key={`item-${i}`}>
                             <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
-                               {res.icon}
+                               {React.cloneElement(res.icon as React.ReactElement, { className: "h-5 w-5" })}
                             </div>
                             <div className="text-left min-w-0 flex-1">
                                <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>
@@ -142,3 +140,5 @@ function SearchContent() {
     </div>
   )
 }
+
+import { useUser } from "@/firebase"

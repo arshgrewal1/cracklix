@@ -1,98 +1,109 @@
-
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * @fileOverview Hardened Razorpay Order Node v4.0.
- * Includes explicit diagnostic logging and verified plan auditing.
+ * Razorpay Order API (Production Safe v4.2)
+ * Hardened diagnostic logging and Firestore price audit.
  */
 
 export async function POST(req: Request) {
-  console.log("[RAZORPAY_ORDER] Incoming request received.");
-
   try {
+    const body = await req.json();
+    const { planId, userId } = body;
+
+    console.log("[RAZORPAY_ORDER_REQUEST]", { planId, userId });
+
+    if (!planId || !userId) {
+      return NextResponse.json(
+        { success: false, reason: "Missing planId or userId" },
+        { status: 400 }
+      );
+    }
+
     const keyId = process.env.RAZORPAY_KEY_ID?.trim();
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
     if (!keyId || !keySecret) {
-      console.error("[RAZORPAY_ORDER] Configuration missing in environment.");
-      return NextResponse.json({ 
-        error: "Gateway configuration error", 
-        reason: "Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET in environment variables." 
-      }, { status: 503 });
-    }
-
-    const body = await req.json();
-    const { planId, userId } = body;
-    console.log("[RAZORPAY_ORDER] Context:", { planId, userId });
-
-    if (!planId || !userId) {
-      return NextResponse.json({ error: "Missing required fields.", reason: "userId and planId are mandatory." }, { status: 400 });
+      console.error("[RAZORPAY_CONFIG_ERROR] Environment variables missing");
+      return NextResponse.json(
+        {
+          success: false,
+          reason: "Razorpay environment variables missing in production node.",
+        },
+        { status: 500 }
+      );
     }
 
     const { firestore: db } = initializeFirebase();
 
-    // 1. Audit Plan from Firestore Registry
+    // Fetch canonical plan from Firestore to prevent client-side price manipulation
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 
     if (!planSnap.exists()) {
-      console.error("[RAZORPAY_ORDER] Plan document not found in registry:", planId);
-      return NextResponse.json({ error: "Plan not found", reason: `Document 'passes/${planId}' does not exist in Firestore.` }, { status: 404 });
+      return NextResponse.json(
+        { success: false, reason: `Plan document [${planId}] not found in registry.` },
+        { status: 404 }
+      );
     }
 
     const plan = planSnap.data();
-    const price = Number(plan?.price ?? 0);
+    const price = Number(plan?.price);
 
-    if (price < 1) {
-      console.error("[RAZORPAY_ORDER] Invalid plan price detected:", price);
-      return NextResponse.json({ error: "Invalid pricing", reason: "The plan price must be at least ₹1." }, { status: 400 });
+    if (!price || isNaN(price) || price < 1) {
+      return NextResponse.json(
+        {
+          success: false,
+          reason: "Invalid plan price detected in registry audit.",
+        },
+        { status: 400 }
+      );
     }
 
-    // 2. Initialize Razorpay with strict credentials
+    const amountInPaise = Math.round(price * 100);
+
     const razorpay = new Razorpay({
       key_id: keyId,
       key_secret: keySecret,
     });
 
-    const amountInPaise = Math.round(price * 100);
-    console.log("[RAZORPAY_ORDER] Attempting order creation for amount:", amountInPaise);
+    const orderOptions = {
+      amount: amountInPaise,
+      currency: "INR",
+      receipt: `ORD_${Date.now()}_${userId?.slice?.(-6) ?? "user"}`,
+      notes: {
+        userId,
+        planId,
+        planName: String(plan?.name ?? "Unknown Plan"),
+      },
+    };
 
-    // 3. Create Order via Razorpay SDK
-    try {
-      const order = await razorpay.orders.create({
-        amount: amountInPaise,
-        currency: "INR",
-        receipt: `ORD_${Date.now()}_${userId.slice(-6)}`,
-        notes: {
-          userId,
-          planId,
-          planName: String(plan?.name ?? "Elite Pass"),
-        },
-      });
+    const order = await razorpay.orders.create(orderOptions);
 
-      console.log("[RAZORPAY_ORDER] Success:", order.id);
+    console.log("[RAZORPAY_ORDER_CREATED]", order.id);
 
-      return NextResponse.json({
-        success: true,
-        id: order.id,
-        amount: order.amount,
-        currency: order.currency,
-        key: keyId,
-      });
-    } catch (rzpError: any) {
-      console.error("[RAZORPAY_SDK_ERROR]", rzpError);
-      return NextResponse.json({ 
-        error: "Razorpay SDK Failure", 
-        reason: rzpError.description || rzpError.message,
-        metadata: rzpError.metadata || null,
-        statusCode: rzpError.statusCode || 500
-      }, { status: 500 });
-    }
+    return NextResponse.json({
+      success: true,
+      orderId: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      key: keyId,
+    });
   } catch (error: any) {
-    console.error("[RAZORPAY_ORDER_CRITICAL]", error);
-    return NextResponse.json({ error: "Internal Server Error", reason: error.message }, { status: 500 });
+    console.error("[RAZORPAY_ORDER_ERROR FULL]", {
+      message: error?.message,
+      stack: error?.stack,
+      raw: error,
+    });
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: error?.message || "Razorpay order failed",
+      },
+      { status: 500 }
+    );
   }
 }
