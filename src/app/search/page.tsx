@@ -11,6 +11,11 @@ import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Universal Search Hub.
+ * FIXED: Added explicit React import and fixed cloneElement for React 19.
+ */
+
 export default function SearchPage() {
   return (
     <React.Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
