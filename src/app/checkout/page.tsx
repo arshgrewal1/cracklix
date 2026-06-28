@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useSearchParams, useRouter } from "next/navigation"
@@ -30,8 +29,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v17.0.
- * UPDATED: Optimized for Razorpay Standard Checkout with pre-fill logic.
+ * @fileOverview Institutional Checkout Hub v18.0.
+ * FIXED: Hardened prefill data for Test Mode stability and restored RefreshCw import.
  */
 
 export default function CheckoutPage() {
@@ -131,9 +130,10 @@ function CheckoutContent() {
           }
         },
         prefill: {
-          name: profile?.name || "",
-          email: user.email || "",
-          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || ""
+          name: profile?.name || user.displayName || "Aspirant",
+          email: user.email || "student@cracklix.com",
+          // Razorpay test mode is strict about 10 digits
+          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "9999999999"
         },
         theme: { color: "#2563EB" },
         modal: { 

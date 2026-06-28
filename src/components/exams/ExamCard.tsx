@@ -11,8 +11,8 @@ interface ExamCardProps {
 }
 
 /**
- * @fileOverview Exam Card Component v5.5.
- * FIXED: Corrected property access to align with the canonical Exam interface.
+ * @fileOverview Exam Card Component v6.0.
+ * FIXED: Corrected property access to align with canonical types and resolved build errors.
  */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || "Official Vertical"

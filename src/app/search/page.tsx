@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
@@ -14,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v4.0.
+ * @fileOverview Official Search Hub v5.0.
  * FIXED: Explicit React imports and typed cloneElement API to resolve UMD and build blockers.
  */
 
