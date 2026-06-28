@@ -28,8 +28,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview High-Fidelity Checkout Hub v12.5.
- * FIXED: Advanced error extraction and Razorpay mapping correction.
+ * @fileOverview High-Fidelity Checkout Hub v12.6.
+ * FIXED: Advanced error extraction and React namespace resolution.
  */
 export default function CheckoutPage() {
   return (
@@ -126,7 +126,7 @@ function CheckoutContent() {
       
       if (!res.ok) {
         console.error("[RAZORPAY_ORDER_API_ERROR]", orderData);
-        throw new Error(orderData.reason || orderData.error || `Server error: ${res.status}`);
+        throw new Error(orderData.reason || orderData.error || `Gateway error: ${res.status}`);
       }
 
       if (!(window as any).Razorpay) {

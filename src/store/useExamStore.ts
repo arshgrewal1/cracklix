@@ -175,6 +175,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
       setDoc(attemptRef, { 
         violations: newVal, 
+        startTime: state.startTime,
         updatedAt: serverTimestamp() 
       }, { merge: true }).catch(() => {});
     }

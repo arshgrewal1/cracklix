@@ -4,7 +4,7 @@ import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Production Hardened v17.0)
+ * Razorpay Order API (Production Hardened v18.0)
  * Security: Strict price validation, environment auditing, and detailed diagnostic logging.
  */
 export async function POST(req: Request) {
@@ -21,9 +21,14 @@ export async function POST(req: Request) {
     const keyId = process.env.RAZORPAY_KEY_ID?.trim();
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
-    if (!keyId || !keySecret || keyId === "" || keySecret === "") {
-      console.error("[RAZORPAY_ORDER] Environment anomaly: Missing or empty keys.");
-      return NextResponse.json({ success: false, reason: "Invalid Razorpay API Keys" }, { status: 503 });
+    // VITAL: Check for existence and valid format
+    if (!keyId || !keySecret || !keyId.startsWith('rzp_')) {
+      console.error("[RAZORPAY_ORDER] Environment anomaly: Missing or malformed keys.");
+      return NextResponse.json({ 
+        success: false, 
+        reason: "Invalid Razorpay API Keys. Please check environment variables.",
+        detail: "Keys must start with rzp_"
+      }, { status: 503 });
     }
 
     const { firestore: db } = initializeFirebase();
@@ -31,14 +36,16 @@ export async function POST(req: Request) {
     const planSnap = await getDoc(planRef);
 
     if (!planSnap.exists()) {
+      console.error("[RAZORPAY_ORDER] Plan node not found:", planId);
       return NextResponse.json({ success: false, reason: "Plan not found in registry." }, { status: 404 });
     }
 
     const plan = planSnap.data();
     const price = Number(plan?.price);
 
-    if (isNaN(price) || price < 0) {
-      return NextResponse.json({ success: false, reason: "Invalid price node detected." }, { status: 400 });
+    if (isNaN(price) || price <= 0) {
+      console.error("[RAZORPAY_ORDER] Invalid price node detected:", price);
+      return NextResponse.json({ success: false, reason: "Invalid price node detected in registry." }, { status: 400 });
     }
 
     // Initialize Razorpay SDK
@@ -72,15 +79,13 @@ export async function POST(req: Request) {
   } catch (err: any) {
     console.error("[RAZORPAY_CRITICAL_FAILURE]", err);
     
-    // Check for specific Razorpay auth errors
-    const errorMessage = err?.message || "";
-    if (errorMessage.toLowerCase().includes("api key") || errorMessage.toLowerCase().includes("secret")) {
-       return NextResponse.json({ success: false, reason: "Invalid Razorpay API Keys" }, { status: 401 });
-    }
-
+    // Explicitly serialize the error for the frontend
+    const errorDetail = err?.error?.description || err?.message || "Unknown error";
+    
     return NextResponse.json({ 
       success: false, 
-      reason: err?.description || err?.message || "Internal payment node failure."
+      reason: "Internal payment node failure.",
+      error: errorDetail
     }, { status: 500 });
   }
 }

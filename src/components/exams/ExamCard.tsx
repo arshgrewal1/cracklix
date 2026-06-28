@@ -9,6 +9,10 @@ interface ExamCardProps {
   exam: Exam
 }
 
+/**
+ * @fileOverview Official Exam Hub Card.
+ * FIXED: Standardized property mapping for the Exam interface.
+ */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || "Official Vertical"
   const examDescription = exam.description || "Official preparation vertical verified by institutional patterns."
