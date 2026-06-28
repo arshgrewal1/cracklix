@@ -17,6 +17,8 @@ import {
   AlertCircle,
   RefreshCw,
   ShieldCheck,
+  Tag,
+  Gift
 } from "lucide-react";
 import { useUser, useDoc, useFirestore } from "@/firebase";
 import { activateFreePass, submitManualPayment } from "@/app/actions/payment";
@@ -27,8 +29,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview High-Fidelity Checkout Hub v6.5 (Pro Integrated).
- * Logic: Webhook-backed security with explicit server-side price auditing.
+ * @fileOverview High-Fidelity Checkout Hub v7.0 (Referral & Coupon Integrated).
  */
 
 export default function CheckoutPage() {
@@ -58,6 +59,9 @@ function CheckoutContent() {
   const [onlineProcessing, setOnlineProcessing] = useState(false);
   const [utr, setUtr] = useState("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [coupon, setCoupon] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
+  const [verifyingCoupon, setVerifyingCoupon] = useState(false);
 
   const { data: settings } = useDoc<any>(
     useMemo(
@@ -81,11 +85,40 @@ function CheckoutContent() {
     if (!loading && !user) router.push("/login");
   }, [user, loading, router]);
 
+  const handleApplyCoupon = async () => {
+    if (!coupon.trim()) return;
+    setVerifyingCoupon(true);
+    try {
+       const res = await fetch('/api/coupon/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: coupon.trim().toUpperCase() })
+       });
+       const data = await res.json();
+       if (res.ok) {
+          setAppliedCoupon(data);
+          toast({ title: "Coupon Applied", description: `You saved ₹${data.discount}${data.type === 'percent' ? '%' : ''}` });
+       } else {
+          toast({ variant: "destructive", title: "Invalid Code", description: data.error });
+       }
+    } finally {
+       setVerifyingCoupon(false);
+    }
+  };
+
+  const discountedPrice = useMemo(() => {
+    if (!planData) return 0;
+    const base = Number(planData.price);
+    if (!appliedCoupon) return base;
+    if (appliedCoupon.type === 'percent') return Math.max(1, base - (base * appliedCoupon.discount / 100));
+    return Math.max(1, base - appliedCoupon.discount);
+  }, [planData, appliedCoupon]);
+
   const handlePaymentInitiation = async () => {
     if (!user || !profile || !planData || onlineProcessing) return;
 
     setErrorMessage(null);
-    const price = Number(planData?.price || 0);
+    const price = discountedPrice;
 
     if (price === 0) {
       setOnlineProcessing(true);
@@ -101,13 +134,17 @@ function CheckoutContent() {
     }
 
     setOnlineProcessing(true);
-    console.log("[CHECKOUT_INITIATED]", { planId, userId: user.uid });
+    console.log("[CHECKOUT_INITIATED]", { planId, userId: user.uid, coupon: coupon.trim().toUpperCase() });
 
     try {
       const res = await fetch("/api/razorpay/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId, userId: user.uid }),
+        body: JSON.stringify({ 
+          planId, 
+          userId: user.uid,
+          couponCode: appliedCoupon ? coupon.trim().toUpperCase() : null
+        }),
       });
 
       const responseText = await res.text();
@@ -115,12 +152,10 @@ function CheckoutContent() {
       try {
         orderData = JSON.parse(responseText);
       } catch (e) {
-        console.error("[JSON_PARSE_ERROR]", responseText);
         throw new Error("Server response malformed.");
       }
 
       if (!res.ok) {
-        console.error("[ORDER_API_ERROR]", { status: res.status, data: orderData });
         throw new Error(orderData.reason || orderData.error || `Error ${res.status}`);
       }
 
@@ -193,27 +228,27 @@ function CheckoutContent() {
       <Navbar />
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
-      <main className="container mx-auto p-4 md:p-12 max-w-4xl text-left">
+      <main className="container mx-auto p-4 md:p-12 max-w-5xl text-left">
         <div className="flex items-center gap-4 mb-8">
            <button onClick={() => router.back()} className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm active:scale-95 transition-all"><ArrowLeft className="h-5 w-5" /></button>
            <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Checkout Hub</h1>
         </div>
 
-        {errorMessage && (
-          <div className="p-6 mb-8 bg-rose-50 border border-rose-100 rounded-[1.5rem] flex items-start gap-4 animate-in slide-in-from-top-4">
-            <AlertCircle className="h-6 w-6 text-rose-500 shrink-0" />
-            <div className="flex-1 space-y-3">
-               <p className="font-bold text-rose-700 leading-tight">Payment Hub Rejection</p>
-               <p className="text-sm text-rose-600 font-medium">{errorMessage}</p>
-               <Button variant="outline" size="sm" className="h-9 rounded-lg bg-white border-rose-200 text-rose-600 font-bold" onClick={handlePaymentInitiation}>
-                  <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Handshake
-               </Button>
-            </div>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
            <div className="lg:col-span-7 space-y-6">
+              {errorMessage && (
+                <div className="p-6 bg-rose-50 border border-rose-100 rounded-[1.5rem] flex items-start gap-4 animate-in slide-in-from-top-4">
+                  <AlertCircle className="h-6 w-6 text-rose-500 shrink-0" />
+                  <div className="flex-1 space-y-3">
+                     <p className="font-bold text-rose-700 leading-tight">Payment Hub Rejection</p>
+                     <p className="text-sm text-rose-600 font-medium">{errorMessage}</p>
+                     <Button variant="outline" size="sm" className="h-9 rounded-lg bg-white border-rose-200 text-rose-600 font-bold" onClick={handlePaymentInitiation}>
+                        <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Handshake
+                     </Button>
+                  </div>
+                </div>
+              )}
+
               <Tabs defaultValue="online" className="w-full">
                 <TabsList className="grid grid-cols-2 h-14 bg-slate-100 rounded-2xl p-1 mb-6">
                   <TabsTrigger value="online" className="rounded-xl font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white">Secure Gateway</TabsTrigger>
@@ -226,9 +261,32 @@ function CheckoutContent() {
                        <h2 className="text-xl font-black text-[#0F172A]">Pro Activation</h2>
                        <p className="text-sm text-slate-500 font-medium leading-relaxed">Automatic verified activation via encrypted gateway.</p>
                     </div>
+
+                    <div className="space-y-4 border-y border-slate-50 py-6">
+                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Have a promo code?</Label>
+                       <div className="flex gap-2">
+                          <div className="relative flex-1">
+                             <Tag className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                             <Input 
+                                value={coupon} 
+                                onChange={e => setCoupon(e.target.value.toUpperCase())} 
+                                className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold placeholder:text-slate-300" 
+                                placeholder="ENTER CODE" 
+                             />
+                          </div>
+                          <Button 
+                             onClick={handleApplyCoupon} 
+                             disabled={!coupon.trim() || verifyingCoupon}
+                             className="h-12 px-6 rounded-xl bg-[#0F172A] hover:bg-black font-black uppercase text-[10px]"
+                          >
+                             {verifyingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                          </Button>
+                       </div>
+                    </div>
+
                     <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl gap-3 text-[10px]">
                       {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}
-                      Pay ₹{planData.price} Now
+                      Pay ₹{discountedPrice} Now
                     </Button>
                   </Card>
                 </TabsContent>
@@ -268,7 +326,7 @@ function CheckoutContent() {
               </Tabs>
            </div>
 
-           <div className="lg:col-span-5">
+           <div className="lg:col-span-5 space-y-6">
               <Card className="p-8 border-none shadow-xl rounded-[2rem] bg-white space-y-8 sticky top-24">
                  <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
@@ -279,21 +337,36 @@ function CheckoutContent() {
                        <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] uppercase px-2">{planData.durationDays} Days Hub</Badge>
                     </div>
                  </div>
+                 
                  <div className="space-y-4">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Included Assets</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Summary</p>
                     <div className="space-y-3">
-                       {planData.features?.map((f: string, i: number) => (
-                          <div key={i} className="flex items-start gap-3 text-left">
-                             <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                             <span className="text-sm font-medium text-slate-600 leading-snug">{f}</span>
+                       <div className="flex justify-between items-center text-sm font-medium text-slate-500">
+                          <span>Base Price</span>
+                          <span>₹{planData.price}</span>
+                       </div>
+                       {appliedCoupon && (
+                          <div className="flex justify-between items-center text-sm font-bold text-emerald-600">
+                             <span className="flex items-center gap-2"><Tag className="h-3 w-3" /> Coupon Discount</span>
+                             <span>-₹{planData.price - discountedPrice}</span>
                           </div>
-                       ))}
+                       )}
+                       <div className="pt-4 border-t border-slate-50 flex justify-between items-center">
+                          <span className="font-bold text-[#0F172A]">Total Payable</span>
+                          <span className="text-3xl font-black text-primary">₹{discountedPrice}</span>
+                       </div>
                     </div>
                  </div>
-                 <div className="pt-6 border-t border-slate-50 flex justify-between items-center">
-                    <span className="font-bold text-slate-400">Total Payable</span>
-                    <span className="text-3xl font-black text-primary">₹{planData.price}</span>
-                 </div>
+
+                 {profile?.referralCode && (
+                   <div className="p-5 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center gap-4">
+                      <Gift className="h-6 w-6 text-primary" />
+                      <div className="text-left">
+                         <p className="text-[10px] font-black uppercase text-blue-800">Your referral code</p>
+                         <p className="text-sm font-black text-primary tracking-widest">{profile.referralCode}</p>
+                      </div>
+                   </div>
+                 )}
               </Card>
            </div>
         </div>

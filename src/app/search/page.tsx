@@ -12,8 +12,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v12.8.
- * FIXED: Explicit React import to resolve IntrinsicElements conflict.
+ * @fileOverview Institutional Search Hub v12.9.
+ * FIXED: Malformed React import to resolve JSX IntrinsicElements resolution.
  */
 
 export default function SearchPage() {

@@ -4,16 +4,16 @@ import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Production Pro v6.0)
- * Logic: Strictly audit plan prices from Firestore to prevent client-side tampering.
+ * Razorpay Order API (Production Pro v7.0)
+ * Logic: Strictly audit plan prices from Firestore and apply valid coupons.
  */
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { planId, userId } = body;
+    const { planId, userId, couponCode } = body;
 
-    console.log("[RAZORPAY_ORDER_REQUEST]", { planId, userId });
+    console.log("[RAZORPAY_ORDER_REQUEST]", { planId, userId, couponCode });
 
     if (!planId || !userId) {
       return NextResponse.json(
@@ -46,16 +46,32 @@ export async function POST(req: Request) {
     }
 
     const planData = planSnap.data();
-    const price = Number(planData?.price);
+    let price = Number(planData?.price);
 
-    if (isNaN(price) || price <= 0) {
+    if (isNaN(price) || price < 0) {
       return NextResponse.json(
         { success: false, reason: "Invalid price configuration in registry." },
         { status: 400 }
       );
     }
 
-    // 2. Razorpay Order Node Creation
+    // 2. Apply Coupon Logic (Server-side)
+    let appliedDiscount = 0;
+    if (couponCode) {
+      const couponRef = doc(db, "coupons", couponCode.toUpperCase());
+      const couponSnap = await getDoc(couponRef);
+      if (couponSnap.exists() && couponSnap.data().active) {
+        const cData = couponSnap.data();
+        if (cData.type === 'percent') {
+          appliedDiscount = (price * cData.discount) / 100;
+        } else {
+          appliedDiscount = cData.discount;
+        }
+        price = Math.max(1, price - appliedDiscount); // Minimum 1 rupee
+      }
+    }
+
+    // 3. Razorpay Order Node Creation
     const razorpay = new Razorpay({
       key_id: keyId,
       key_secret: keySecret,
@@ -65,7 +81,7 @@ export async function POST(req: Request) {
       amount: Math.round(price * 100),
       currency: "INR",
       receipt: `ORD_${Date.now()}_${userId.slice(-6)}`,
-      notes: { userId, planId, planName: planData.name || "Elite Pass" },
+      notes: { userId, planId, couponCode: couponCode || "", planName: planData.name || "Elite Pass" },
     });
 
     return NextResponse.json({

@@ -40,12 +40,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import Link from "next/link"
 import { Capacitor } from "@capacitor/core"
 import Image from "next/image"
-
-const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
+import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Hub v86.4.
- * FIXED: Removed all spacing around logos as requested. Zero padding/margin.
+ * @fileOverview Cracklix Premium Login Hub v87.0.
  */
 
 const formatCompact = (num: number) => {
@@ -80,6 +78,8 @@ function LoginContent() {
   const auth = useAuth()
   const db = useFirestore()
   const { toast } = useToast()
+
+  const referralFromUrl = searchParams.get("ref");
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
@@ -128,19 +128,20 @@ function LoginContent() {
         const userNode = userCredential.user
         await updateProfile(userNode, { displayName: name })
         
-        const isSuperAdmin = email && SUPER_ADMIN_WHITELIST.includes(email.toLowerCase());
-        
         await setDoc(doc(db!, 'users', userNode.uid), {
           id: userNode.uid,
           name,
           email,
-          role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
+          role: 'STUDENT',
           state: "Punjab",
           createdAt: new Date().toISOString(),
           updatedAt: serverTimestamp(),
           status: 'Free',
           passType: 'FREE',
-          pinnedExams: []
+          pinnedExams: [],
+          referralCode: generateReferralCode(userNode.uid),
+          referredBy: referralFromUrl || null,
+          coins: 0
         })
 
         toast({ 
@@ -150,29 +151,15 @@ function LoginContent() {
         router.replace(returnUrl)
       }
     } catch (error: any) {
-      let message = error.message;
-      if (error.code === 'auth/invalid-credential') {
-        message = "Incorrect email or password. Please try again.";
-      } else if (error.code === 'auth/user-not-found') {
-        message = "No account found with this email.";
-      } else if (error.code === 'auth/wrong-password') {
-        message = "Incorrect password.";
-      }
-      
-      toast({ variant: "destructive", title: "Auth Failed", description: message })
+      toast({ variant: "destructive", title: "Auth Failed", description: error.message })
       setLoading(false)
     }
   }
 
   const handleGoogleSignIn = async () => {
     if (loading) return;
-
     if (Capacitor.isNativePlatform()) {
-       toast({
-         title: "📱 Mobile Login",
-         description: "Please use your email and password to login on the Android app.",
-         variant: "destructive"
-       });
+       toast({ title: "Mobile Login", description: "Use email/password on the Android app.", variant: "destructive" });
        return;
     }
 
@@ -185,31 +172,24 @@ function LoginContent() {
       
       const userRef = doc(db!, 'users', userNode.uid)
       const userSnap = await getDoc(userRef)
-      const isSuperAdmin = SUPER_ADMIN_WHITELIST.includes(userNode.email.toLowerCase());
-      
-      let finalName = userNode.displayName || "Aspirant";
 
       if (!userSnap.exists()) {
         await setDoc(userRef, {
           id: userNode.uid,
           name: userNode.displayName || "Aspirant",
           email: userNode.email,
-          role: isSuperAdmin ? 'SUPER_ADMIN' : 'STUDENT',
+          role: 'STUDENT',
           state: "Punjab",
           createdAt: new Date().toISOString(),
           updatedAt: serverTimestamp(),
           status: 'Free',
           passType: 'FREE',
-          pinnedExams: []
+          pinnedExams: [],
+          referralCode: generateReferralCode(userNode.uid),
+          referredBy: referralFromUrl || null,
+          coins: 0
         })
-      } else {
-        finalName = userSnap.data()?.name || userNode.displayName || "Aspirant";
       }
-
-      toast({
-        title: `Welcome Back, ${finalName.split(' ')[0]}!`,
-        description: "Your preparation hub is synchronized.",
-      });
 
       router.replace(returnUrl)
     } catch (error: any) {
@@ -223,7 +203,6 @@ function LoginContent() {
       toast({ variant: "destructive", title: "Email Required" })
       return
     }
-    setResetEmail(resetEmail.trim());
     setResetLoading(true)
     try {
       await sendPasswordResetEmail(auth, resetEmail)
@@ -239,58 +218,45 @@ function LoginContent() {
   return (
     <div className="min-h-[100dvh] bg-white flex flex-col lg:flex-row text-[#0F172A] font-body selection:bg-primary/20 overflow-x-hidden">
       
-      {/* LEFT PANEL: BRANDING (ZERO SPACING) */}
-      <div className="hidden lg:flex flex-[1.1] bg-gradient-to-br from-[#020B2D] via-[#071B4D] to-[#0A2D7A] text-white px-12 xl:px-20 py-0 flex-col justify-start relative overflow-hidden">
+      <div className="hidden lg:flex flex-[1.1] bg-[#020B2D] text-white px-12 xl:px-20 py-0 flex-col justify-center relative overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
 
-        <div className="relative z-10 space-y-12 xl:space-y-20 max-w-[650px] pt-0">
-          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            <Logo variant="dark" align="left" className="h-[180px] xl:h-[240px] pt-0 mt-0" />
-          </motion.div>
+        <div className="relative z-10 space-y-12 xl:space-y-20 max-w-[650px]">
+          <Logo variant="dark" align="left" className="h-[180px] xl:h-[240px]" />
 
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-8">
-            <h1 className="text-5xl xl:text-6xl font-[900] tracking-tight text-white leading-[1.05] max-w-[550px]">
+          <div className="space-y-8">
+            <h1 className="text-5xl xl:text-6xl font-[900] tracking-tight text-white leading-[1.05]">
               Punjab's Smart <br/> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-300">
                 Exam Platform
               </span>
             </h1>
-            <p className="text-base xl:text-xl text-slate-300 font-medium leading-relaxed tracking-wide">
+            <p className="text-base xl:text-xl text-slate-300 font-medium leading-relaxed">
               Real-time mock tests and performance analytics verified by the Punjab recruitment registry.
             </p>
-          </motion.div>
+          </div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="grid grid-cols-2 gap-8 pt-6 pb-12">
+          <div className="grid grid-cols-2 gap-8">
             <HeroStat icon={ClipboardList} label={`${statsLoading ? '...' : formatCompact(stats?.totalMocks)}+ Mock Tests`} />
             <HeroStat icon={Zap} label={`${statsLoading ? '...' : formatCompact(stats?.totalQuestions)}+ Questions`} />
             <HeroStat icon={Users} label={`${statsLoading ? '...' : formatCompact(stats?.totalUsers)}+ Active Aspirants`} />
             <HeroStat icon={ShieldCheck} label="Real Exam Pattern" />
-          </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* RIGHT PANEL: AUTH (ZERO SPACING) */}
-      <div className="flex-1 flex flex-col items-center justify-start px-4 md:px-12 lg:px-20 py-0 relative bg-slate-50 lg:bg-white overflow-y-auto">
-        
-        <div className="w-full flex items-center justify-between mt-0 mb-0 lg:hidden">
-           <Link href="/" className="flex items-center gap-2 text-slate-400 font-bold uppercase text-[10px] tracking-widest hover:text-primary transition-colors">
-              <ChevronLeft className="h-4 w-4" /> Home
-           </Link>
-           <Logo variant="light" align="left" className="h-28 pt-0 mt-0" />
-           <div className="w-10" />
-        </div>
-
+      <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-12 lg:px-20 py-0 relative bg-slate-50 lg:bg-white overflow-y-auto">
         <motion.div 
            initial={{ opacity: 0, scale: 0.95 }} 
            animate={{ opacity: 1, scale: 1 }} 
-           className="w-full max-w-[480px] pt-0 lg:pt-10 pb-24" 
+           className="w-full max-w-[480px] py-12" 
         >
-          <Card className="border-none shadow-5xl lg:shadow-none bg-white/92 backdrop-blur-[20px] rounded-[32px] p-6 md:p-12 space-y-6 md:space-y-10">
+          <Card className="border-none shadow-5xl lg:shadow-none bg-white rounded-[32px] p-6 md:p-12 space-y-6 md:space-y-10">
             <div className="space-y-2 text-center lg:text-left">
-               <h2 className="text-2xl md:text-4xl font-[900] tracking-tight text-[#0F172A] leading-none">
+               <h2 className="text-2xl md:text-4xl font-[900] tracking-tight text-[#0F172A]">
                  {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                </h2>
-               <p className="text-slate-400 font-bold text-[10px] md:text-[11px] uppercase tracking-widest mt-2">
+               <p className="text-slate-400 font-bold text-[10px] md:text-[11px] uppercase tracking-widest">
                  {mode === 'login' ? 'Access your hub' : 'Join the preparation network'}
                </p>
             </div>
@@ -299,8 +265,8 @@ function LoginContent() {
               {mode === 'register' && (
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-bold text-slate-400 ml-1">Full Name</Label>
-                  <div className="relative group">
-                    <User className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                  <div className="relative">
+                    <User className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
                     <Input value={name} onChange={(e) => setName(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="e.g. Arsh Grewal" />
                   </div>
                 </div>
@@ -308,8 +274,8 @@ function LoginContent() {
               
               <div className="space-y-1.5">
                 <Label className="text-[10px] font-bold text-slate-400 ml-1">Email Address</Label>
-                <div className="relative group">
-                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                <div className="relative">
+                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
                   <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="name@domain.com" />
                 </div>
               </div>
@@ -317,22 +283,12 @@ function LoginContent() {
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-bold text-slate-400 ml-1">Password</Label>
-                  <div className="relative group">
-                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                  <div className="relative">
+                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
                     <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] pl-12 md:pl-14 pr-12 font-bold shadow-inner" placeholder="Secret key" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
                   </div>
                 </div>
-
-                {mode === 'register' && (
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-400 ml-1">Confirm Password</Label>
-                    <div className="relative group">
-                      <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-                      <Input type={showPassword ? "text" : "password"} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] pl-12 md:pl-14 shadow-inner" placeholder="Repeat key" />
-                    </div>
-                  </div>
-                )}
 
                 {mode === 'login' && (
                   <div className="flex items-center justify-between px-1">
@@ -365,10 +321,7 @@ function LoginContent() {
                 {mode === 'login' ? "Don't have an account?" : "Already registered?"}
                 <button 
                   type="button"
-                  onClick={() => {
-                    setMode(mode === 'login' ? 'register' : 'login');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }} 
+                  onClick={() => setMode(mode === 'login' ? 'register' : 'login')} 
                   className="text-primary font-black ml-2 hover:underline"
                 >
                   {mode === 'login' ? 'Create Account' : 'Login Hub'}

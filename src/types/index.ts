@@ -112,6 +112,9 @@ export interface UserProfile {
   activePlatform?: string;
   lastLoginAt?: any;
   sessionVersion?: number;
+  referralCode?: string;
+  referredBy?: string | null;
+  coins?: number;
   pass?: {
     active: boolean;
     plan: 'FREE_PASS' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY' | string;
