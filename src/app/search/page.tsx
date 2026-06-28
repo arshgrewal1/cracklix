@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
+import * as React from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap } from "lucide-react"
@@ -12,14 +13,14 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v15.1.
- * FIXED: Malformed import shadowing global React namespace.
+ * @fileOverview Institutional Search Hub v15.2.
+ * FIXED: Resolved UMD global conflict for React 19 standards.
  */
 export default function SearchPage() {
   return (
-    <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
+    <React.Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
       <SearchContent />
-    </Suspense>
+    </React.Suspense>
   )
 }
 
@@ -29,22 +30,22 @@ function SearchContent() {
   const router = useRouter()
   const pathname = usePathname()
   const { user, loading: authLoading } = useUser()
-  const [queryStr, setQuery] = useState("")
+  const [queryStr, setQuery] = React.useState("")
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!authLoading && !user) {
       router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`)
     }
   }, [user, authLoading, router, pathname])
 
-  useEffect(() => {
+  React.useEffect(() => {
     const q = searchParams.get("q")
     if (q) setQuery(q)
   }, [searchParams])
 
-  const mocksQuery = useMemo(() => (db ? collection(db, "mocks") : null), [db])
-  const examsQuery = useMemo(() => (db ? collection(db, "exams") : null), [db])
-  const notesQuery = useMemo(() => (db ? collection(db, "notes") : null), [db])
+  const mocksQuery = React.useMemo(() => (db ? collection(db, "mocks") : null), [db])
+  const examsQuery = React.useMemo(() => (db ? collection(db, "exams") : null), [db])
+  const notesQuery = React.useMemo(() => (db ? collection(db, "notes") : null), [db])
 
   const { data: mocks, loading: mLoading } = useCollection<any>(mocksQuery)
   const { data: exams, loading: eLoading } = useCollection<any>(examsQuery)
@@ -52,7 +53,7 @@ function SearchContent() {
 
   const isLoading = mLoading || eLoading || nLoading
 
-  const searchResults = useMemo(() => {
+  const searchResults = React.useMemo(() => {
     if (queryStr.trim().length < 2) return []
     const term = queryStr.toLowerCase().trim()
     
@@ -125,7 +126,7 @@ function SearchContent() {
                       <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
                          <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary/5 transition-all">
-                               {React.cloneElement(res.icon as ReactElement, { className: "h-5 w-5 text-primary" })}
+                               {React.cloneElement(res.icon as React.ReactElement<any>, { className: "h-5 w-5 text-primary" })}
                             </div>
                             <div className="text-left min-w-0 flex-1">
                                <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>

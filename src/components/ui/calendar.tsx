@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -9,8 +10,8 @@ import { buttonVariants } from "@/components/ui/button"
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 /**
- * @fileOverview Hardened Calendar Hub v16.2 (react-day-picker v9 API).
- * FIXED: Chevron orientation type safety for React 19.
+ * @fileOverview Hardened Calendar Hub v16.3 (react-day-picker v9 API).
+ * FIXED: Chevron component mapping for full React 19 / Next 15 compatibility.
  */
 
 function Calendar({
@@ -61,8 +62,6 @@ function Calendar({
         }: {
           orientation?: "left" | "right" | "up" | "down";
           className?: string;
-          size?: number;
-          disabled?: boolean;
         }) => {
           switch (orientation) {
             case "left":

@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { Suspense, useMemo, useState, useEffect } from "react";
+import * as React from "react";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { Card } from "@/components/ui/card";
@@ -30,12 +31,12 @@ import { useToast } from "@/hooks/use-toast";
 import { logEvent } from "@/lib/logger";
 
 /**
- * @fileOverview High-Fidelity Checkout Hub v10.1 (Hardened).
- * FIXED: Shadowed React import and explicit error extraction.
+ * @fileOverview High-Fidelity Checkout Hub v10.2.
+ * FIXED: Malformed imports and UMD global resolution.
  */
 export default function CheckoutPage() {
   return (
-    <Suspense
+    <React.Suspense
       fallback={
         <div className="h-screen flex items-center justify-center">
           <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -43,7 +44,7 @@ export default function CheckoutPage() {
       }
     >
       <CheckoutContent />
-    </Suspense>
+    </React.Suspense>
   );
 }
 
@@ -57,22 +58,22 @@ function CheckoutContent() {
   const { user, profile, loading } = useUser();
   const dbInstance = useFirestore();
 
-  const [onlineProcessing, setOnlineProcessing] = useState(false);
-  const [utr, setUtr] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [coupon, setCoupon] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
-  const [verifyingCoupon, setVerifyingCoupon] = useState(false);
+  const [onlineProcessing, setOnlineProcessing] = React.useState(false);
+  const [utr, setUtr] = React.useState("");
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [coupon, setCoupon] = React.useState("");
+  const [appliedCoupon, setAppliedCoupon] = React.useState<any>(null);
+  const [verifyingCoupon, setVerifyingCoupon] = React.useState(false);
 
   const { data: settings } = useDoc<any>(
-    useMemo(() => dbInstance ? doc(dbInstance, "settings", "global") : null, [dbInstance])
+    React.useMemo(() => dbInstance ? doc(dbInstance, "settings", "global") : null, [dbInstance])
   );
 
   const { data: planData, loading: planLoading } = useDoc<any>(
-    useMemo(() => dbInstance && planId ? doc(dbInstance, "passes", planId) : null, [dbInstance, planId])
+    React.useMemo(() => dbInstance && planId ? doc(dbInstance, "passes", planId) : null, [dbInstance, planId])
   );
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (!loading && !user) router.push("/login");
   }, [user, loading, router]);
 
@@ -97,7 +98,7 @@ function CheckoutContent() {
     }
   };
 
-  const discountedPrice = useMemo(() => {
+  const discountedPrice = React.useMemo(() => {
     if (!planData) return 0;
     const base = Number(planData.price);
     if (!appliedCoupon) return base;
