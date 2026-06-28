@@ -2,97 +2,95 @@ import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
-import { logEvent } from "@/lib/logger";
 
 /**
- * Razorpay Order API (SaaS Lifecycle Hardened v11.0)
- * Security: Origin validation, Smart Plan Lock (Allows Upgrades/Renewals), and real-time logging.
+ * Razorpay Order API (Enterprise-Grade v12.0)
+ * Security: Strict price validation, environment auditing, and detailed diagnostic logging.
  */
 export async function POST(req: Request) {
   try {
-    const { planId, userId, couponCode } = await req.json();
+    const body = await req.json();
+    const { planId, userId } = body;
+
+    console.log("[RAZORPAY_ORDER] Incoming request:", { planId, userId });
 
     if (!planId || !userId) {
-      return NextResponse.json({ error: "Missing identity tokens." }, { status: 400 });
+      console.error("[RAZORPAY_ORDER] Validation failed: Missing planId or userId");
+      return NextResponse.json({ success: false, reason: "Incomplete identity tokens." }, { status: 400 });
     }
 
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!keyId || !keySecret) {
-      await logEvent({ type: "critical", message: "Razorpay environment variables missing." });
-      return NextResponse.json({ error: "Server configuration anomaly." }, { status: 503 });
+      console.error("[RAZORPAY_ORDER] Environment anomaly: Keys not found in process.env");
+      return NextResponse.json({ success: false, reason: "Server configuration anomaly: Missing API keys." }, { status: 503 });
     }
 
     const { firestore: db } = initializeFirebase();
 
-    // 1. SMART SUBSCRIPTION GUARD (Allow Upgrades/Renewals)
-    const userPassRef = doc(db, "user_passes", userId);
-    const userPassSnap = await getDoc(userPassRef);
-    
-    if (userPassSnap.exists()) {
-      const currentPass = userPassSnap.data();
-      const isActive = currentPass.active && currentPass.expiry > Date.now();
-      
-      // Only block if trying to buy the SAME plan that is already active
-      if (isActive && currentPass.planId === planId) {
-        return NextResponse.json({ 
-          error: "You already have this Elite Pass active. You can renew once it expires." 
-        }, { status: 400 });
-      }
-    }
-
-    // 2. PLAN REGISTRY AUDIT
+    // 1. REGISTRY AUDIT: Verify plan and fetch official price
+    console.log("[RAZORPAY_ORDER] Fetching plan from registry:", planId);
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 
     if (!planSnap.exists()) {
-      return NextResponse.json({ error: "Pass tier not found in registry." }, { status: 404 });
+      console.error("[RAZORPAY_ORDER] Plan node not found:", planId);
+      return NextResponse.json({ success: false, reason: "Plan not found in registry." }, { status: 404 });
     }
 
     const plan = planSnap.data();
-    let price = Number(plan?.price);
+    const price = Number(plan?.price);
 
-    // 3. COUPON VALIDATION
-    if (couponCode) {
-      const couponRef = doc(db, "coupons", couponCode.toUpperCase());
-      const couponSnap = await getDoc(couponRef);
-      if (couponSnap.exists() && couponSnap.data().active) {
-        const cData = couponSnap.data();
-        const discount = cData.type === 'percent' ? (price * cData.discount) / 100 : cData.discount;
-        price = Math.max(1, price - discount);
-      }
+    if (isNaN(price) || price <= 0) {
+      console.error("[RAZORPAY_ORDER] Integrity violation: Invalid price node", { price });
+      return NextResponse.json({ success: false, reason: "Invalid price node detected." }, { status: 400 });
     }
 
-    // 4. RAZORPAY HANDSHAKE
-    const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
+    // 2. INITIALIZE RAZORPAY
+    let razorpay;
+    try {
+      razorpay = new Razorpay({
+        key_id: keyId,
+        key_secret: keySecret,
+      });
+    } catch (initErr: any) {
+      console.error("[RAZORPAY_ORDER] Initialization failed:", initErr);
+      return NextResponse.json({ success: false, reason: "Invalid Razorpay API Keys" }, { status: 500 });
+    }
 
-    const order = await razorpay.orders.create({
-      amount: Math.round(price * 100),
-      currency: "INR",
-      receipt: `ORD_${Date.now()}_${userId.slice(-5)}`,
-      notes: { userId, planId, planName: plan.name },
-    });
+    // 3. CREATE ORDER (Amount in Paise)
+    const amountInPaise = Math.round(price * 100);
+    console.log("[RAZORPAY_ORDER] Creating order for amount:", amountInPaise);
 
-    // 5. LOGGING & TRACING
-    await logEvent({
-       type: "payment",
-       message: "Order created successfully",
-       userId,
-       planId,
-       metadata: { orderId: order.id, amount: price }
-    });
+    try {
+      const order = await razorpay.orders.create({
+        amount: amountInPaise,
+        currency: "INR",
+        receipt: `ORD_${Date.now()}_${userId.slice(-5)}`,
+        notes: { userId, planId, planName: plan.name },
+      });
 
-    return NextResponse.json({
-      success: true,
-      orderId: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      key: keyId,
-    });
-  } catch (error: any) {
-    console.error("[RAZORPAY_CREATE_ERROR]", error);
-    await logEvent({ type: "error", message: error.message, stack: error.stack });
-    return NextResponse.json({ error: error.message || "Order creation failure" }, { status: 500 });
+      console.log("[RAZORPAY_ORDER] Order Created Successfully:", order.id);
+
+      return NextResponse.json({
+        success: true,
+        orderId: order.id,
+        amount: order.amount,
+        currency: order.currency,
+        key: keyId,
+      });
+    } catch (sdkErr: any) {
+      console.error("[RAZORPAY_ORDER] SDK creation error:", sdkErr);
+      const isAuthError = sdkErr.statusCode === 401;
+      return NextResponse.json({ 
+        success: false, 
+        reason: isAuthError ? "Invalid Razorpay API Keys" : (sdkErr.description || sdkErr.message || "Gateway rejection.")
+      }, { status: 500 });
+    }
+
+  } catch (globalErr: any) {
+    console.error("[RAZORPAY_ORDER] Critical failure:", globalErr);
+    return NextResponse.json({ success: false, reason: globalErr.message || "Internal payment node failure." }, { status: 500 });
   }
 }

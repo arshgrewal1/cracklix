@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -31,8 +30,8 @@ import { useToast } from "@/hooks/use-toast";
 import { logEvent } from "@/lib/logger";
 
 /**
- * @fileOverview High-Fidelity Checkout Hub v10.2.
- * FIXED: Malformed imports and UMD global resolution.
+ * @fileOverview High-Fidelity Checkout Hub v11.0.
+ * FIXED: Advanced error extraction and Razorpay mapping correction.
  */
 export default function CheckoutPage() {
   return (
@@ -113,8 +112,8 @@ function CheckoutContent() {
     setOnlineProcessing(true);
 
     try {
-      await logEvent({ type: "payment", message: "Checkout started", userId: user.uid, planId });
-
+      console.log("[CHECKOUT] Initiating order creation for plan:", planId);
+      
       const res = await fetch("/api/razorpay/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -125,10 +124,24 @@ function CheckoutContent() {
         }),
       });
 
-      const orderData = await res.json();
+      const responseText = await res.text();
+      let orderData;
+      
+      try {
+        orderData = JSON.parse(responseText);
+        console.log("[CHECKOUT RESPONSE]", orderData);
+      } catch (parseErr) {
+        console.error("[CHECKOUT] Malformed JSON response:", responseText);
+        throw new Error("The server returned an unreadable response. Payment node out of sync.");
+      }
 
       if (!res.ok) {
-        throw new Error(orderData.error || orderData.reason || "Gateway node failure.");
+        console.error("[CHECKOUT] API Rejection:", orderData);
+        throw new Error(orderData.reason || orderData.error || `Gateway error code ${res.status}`);
+      }
+
+      if (!(window as any).Razorpay) {
+        throw new Error("Razorpay SDK not loaded. Check your internet connection.");
       }
 
       const options = {
@@ -136,11 +149,12 @@ function CheckoutContent() {
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Cracklix",
-        description: `Elite Hub: ${planData.name}`,
-        order_id: orderData.orderId,
+        description: `Elite Pass: ${planData.name}`,
+        order_id: orderData.orderId, // CORRECT MAPPING
         handler: async function (response: any) {
           setOnlineProcessing(true);
           try {
+            console.log("[CHECKOUT] Verifying signature:", response.razorpay_payment_id);
             const verifyRes = await fetch("/api/razorpay/verify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -151,10 +165,9 @@ function CheckoutContent() {
             if (verifyRes.ok && vData.success) {
               router.push(`/payment/success?order_id=${response.razorpay_order_id}&plan=${encodeURIComponent(planData.name)}`);
             } else {
-              throw new Error(vData.error || "Verification mismatch.");
+              throw new Error(vData.reason || "Payment signature mismatch. Audit required.");
             }
           } catch (err: any) {
-             await logEvent({ type: "error", message: "Verification failed on client", userId: user.uid, metadata: { err: err.message } });
              setErrorMessage(err.message);
           } finally {
             setOnlineProcessing(false);
@@ -163,15 +176,21 @@ function CheckoutContent() {
         prefill: {
           name: profile?.name || "Aspirant",
           email: user.email || "",
-          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "",
+          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "", // Ensure 10 digits
         },
         theme: { color: "#2563EB" },
-        modal: { ondismiss: () => setOnlineProcessing(false) }
+        modal: { 
+          ondismiss: () => {
+            setOnlineProcessing(false);
+            console.log("[CHECKOUT] Payment modal dismissed.");
+          }
+        }
       };
 
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (err: any) {
+      console.error("[CHECKOUT] Initiation Failed:", err);
       setErrorMessage(err.message);
       setOnlineProcessing(false);
     }
