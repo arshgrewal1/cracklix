@@ -35,6 +35,10 @@ import { Button } from "@/components/ui/button";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
+/**
+ * @fileOverview Refined Navbar v57.0 (PWA Optimized).
+ * FIXED: Restored mobile header for authenticated users with high-fidelity brand alignment.
+ */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -97,48 +101,28 @@ export default function Navbar() {
     return <nav className="w-full border-b border-slate-100 bg-white h-[72px] md:h-[112px]" />;
   }
 
-  // IF LOGGED IN: Hide top navbar on mobile to avoid duplicate navigation (App Mode)
-  if (user) {
-    return (
-      <>
-        {/* Desktop Header */}
-        <div className="hidden md:block sticky top-0 z-50 w-full font-body bg-white border-b border-slate-100 shadow-sm transition-all pt-safe">
-           {renderNavbarContent()}
-        </div>
-        
-        {/* Mobile Safe Area Spacer */}
-        <div className="md:hidden pt-safe w-full bg-white border-b border-slate-50 sticky top-0 z-50 shadow-sm" />
-
-        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-          <SheetContent side="left" className="w-[280px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
-            <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Hub</SheetDescription></SheetHeader>
-            <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
-          </SheetContent>
-        </Sheet>
-      </>
-    );
-  }
-
-  // GUEST MODE: Show full header (Landing Page)
   return (
-    <div className="sticky top-0 z-50 w-full font-body bg-white border-b border-slate-100 shadow-sm transition-all pt-safe">
-      {renderNavbarContent()}
+    <>
+      <div className="sticky top-0 z-50 w-full font-body bg-white border-b border-slate-100 shadow-sm transition-all pt-safe">
+        {renderNavbarContent()}
+      </div>
+
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="w-[280px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
           <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Hub</SheetDescription></SheetHeader>
           <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
-    </div>
+    </>
   );
 
   function renderNavbarContent() {
     return (
-      <nav className="w-full h-[72px] md:h-[112px]">
-        <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
+      <nav className="w-full h-14 md:h-[112px]">
+        <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-2">
 
           {/* LEFT: Menu + Logo */}
-          <div className="flex items-center shrink-0 gap-3 md:gap-4">
+          <div className="flex items-center shrink-0 gap-2 md:gap-4 flex-1 lg:flex-none">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -149,13 +133,13 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 -ml-4 md:-ml-8" 
-              imgClassName="h-14 md:h-24 w-auto"
+              className="flex-shrink-0 -ml-2 md:-ml-8" 
+              imgClassName="h-12 md:h-24 w-auto"
               align="left"
             />
           </div>
 
-          {/* CENTER: Navigation Links */}
+          {/* CENTER: Navigation Links (Desktop Only) */}
           <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-8 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
@@ -165,10 +149,10 @@ export default function Navbar() {
           </div>
 
           {/* RIGHT: User Actions */}
-          <div className="flex items-center gap-3 md:gap-4 shrink-0">
+          <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0 flex-1 lg:flex-none">
             {profile?.passStatus === 'active' && timeLeft && (
                <div className="hidden sm:flex flex-col items-end mr-1">
-                  <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none">Elite Hub</span>
+                  <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none">Elite hub</span>
                   <span className="text-[10px] font-bold text-slate-400 mt-1 leading-none">{timeLeft}</span>
                </div>
             )}
@@ -208,17 +192,17 @@ export default function Navbar() {
                          <h3 className="text-base font-bold text-[#0F172A] tracking-tight truncate max-w-[240px]">
                            {profile?.name || "Student"}
                          </h3>
-                         <Link href="/profile" className="text-[11px] font-bold text-[#94A3B8] hover:text-primary">My Profile</Link>
+                         <Link href="/profile" className="text-[11px] font-bold text-[#94A3B8] hover:text-primary">My profile</Link>
                        </div>
                     </div>
                     <div className="h-px w-full bg-slate-100" />
                     <div className="w-full space-y-1 text-left">
-                       <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My Progress" />
-                       <ProfileMenuItem href="/pass" icon={Gem} label="Pro Pass" />
+                       <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My progress" />
+                       <ProfileMenuItem href="/pass" icon={Gem} label="Pro pass" />
                        <ProfileMenuItem href="/profile" icon={Settings} label="Settings" />
-                       {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Panel" highlight />}
+                       {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin panel" highlight />}
                     </div>
-                    <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] font-bold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
+                    <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] font-bold text-[11px] rounded-xl transition-all border-none">Log out</Button>
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v2.5.
+ * @fileOverview Official Search Hub v2.6.
  * FIXED: Resolved React UMD global conflict and implemented Title Case.
  */
 
@@ -63,7 +63,7 @@ function SearchContent() {
       e.boardId?.toLowerCase().includes(term)
     ).map((e: any) => ({ 
        title: e.name, 
-       type: "Exam Center", 
+       type: "Exam center", 
        href: `/exams/view?id=${e.id}`, 
        boardId: e.boardId,
        icon: <GraduationCap />
@@ -74,7 +74,7 @@ function SearchContent() {
       m.boardId?.toLowerCase().includes(term)
     ).map((m: any) => ({ 
        title: m.title, 
-       type: "Practice Test", 
+       type: "Practice test", 
        href: `/mocks/view?id=${m.id}`, 
        boardId: m.boardId, 
        icon: <Zap />
@@ -97,7 +97,7 @@ function SearchContent() {
   if (authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300">Authorizing Search...</p>
+       <p className="text-[10px] font-black uppercase text-slate-300">Authorizing search...</p>
     </div>
   )
 
@@ -108,7 +108,7 @@ function SearchContent() {
         <div className="space-y-8 md:space-y-12">
            <div className="text-center space-y-6">
               <div className="space-y-2">
-                 <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">Find Your Test</h1>
+                 <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">Find your test</h1>
                  <p className="text-slate-400 font-bold text-[9px] md:text-11px uppercase tracking-[0.4em]">Instant access to the test bank</p>
               </div>
               
@@ -132,7 +132,7 @@ function SearchContent() {
               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300">
                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <h3 className="text-[10px] font-bold text-slate-400">Results: {searchResults.length} Items</h3>
-                    <Badge className="bg-primary/5 text-primary border-none text-[8px] font-black px-3 py-0.5 rounded-lg uppercase">Verified List</Badge>
+                    <Badge className="bg-primary/5 text-primary border-none text-[8px] font-black px-3 py-0.5 rounded-lg uppercase">Verified list</Badge>
                  </div>
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.length > 0 ? searchResults.map((res, i) => (
@@ -156,7 +156,7 @@ function SearchContent() {
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">
                            <SearchIcon className="h-16 w-16" />
-                           <p className="text-xl font-bold tracking-tight">No Results Found</p>
+                           <p className="text-xl font-bold tracking-tight">No results found</p>
                         </div>
                       </div>
                     )}
@@ -167,7 +167,7 @@ function SearchContent() {
                  <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] p-10 bg-[#0B1528] text-white overflow-hidden relative group">
                     <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform"><LayoutGrid className="h-44 w-44" /></div>
                     <div className="relative z-10 space-y-8">
-                       <h4 className="font-black text-[10px] text-primary uppercase tracking-[0.4em]">Quick Search</h4>
+                       <h4 className="font-black text-[10px] text-primary uppercase tracking-[0.4em]">Quick search</h4>
                        <ul className="space-y-5">
                           <li onClick={() => setQuery("PSSSB Patwari")} className="flex items-center gap-4 text-slate-400 text-sm font-bold hover:text-white cursor-pointer transition-colors group active:scale-95">
                              <Zap className="h-4 w-4 text-primary" /> PSSSB Patwari
