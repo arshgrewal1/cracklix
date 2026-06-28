@@ -12,7 +12,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v19.0.
+ * @fileOverview Institutional Search Hub v20.0.
  * FIXED: Explicit React import to resolve JSX namespace conflict for React 19.
  */
 export default function SearchPage() {

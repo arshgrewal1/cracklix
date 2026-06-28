@@ -30,7 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
 /**
- * @fileOverview High-Fidelity Checkout Hub v14.0.
+ * @fileOverview High-Fidelity Checkout Hub v15.0.
  * FIXED: useMemo dependency array placement and React namespace resolution.
  */
 export default function CheckoutPage() {
