@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -17,7 +18,8 @@ import {
   AlertCircle,
   RefreshCw,
   ShieldCheck,
-  Tag
+  Tag,
+  QrCode
 } from "lucide-react";
 import { useUser, useDoc, useFirestore } from "@/firebase";
 import { submitManualPayment } from "@/app/actions/payment";
@@ -26,10 +28,11 @@ import Script from "next/script";
 import { Badge } from "@/components/ui/badge";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import Image from "next/image";
 
 /**
- * @fileOverview High-Fidelity Checkout Hub v12.6.
- * FIXED: Advanced error extraction and React namespace resolution.
+ * @fileOverview High-Fidelity Checkout Hub v13.0.
+ * UPDATED: Integrated QR Code for manual payments and fixed React namespace.
  */
 export default function CheckoutPage() {
   return (
@@ -110,8 +113,6 @@ function CheckoutContent() {
     setOnlineProcessing(true);
 
     try {
-      console.log("[CHECKOUT] Initiating order creation for plan:", planId);
-      
       const res = await fetch("/api/razorpay/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -125,12 +126,11 @@ function CheckoutContent() {
       const orderData = await res.json();
       
       if (!res.ok) {
-        console.error("[RAZORPAY_ORDER_API_ERROR]", orderData);
         throw new Error(orderData.reason || orderData.error || `Gateway error: ${res.status}`);
       }
 
       if (!(window as any).Razorpay) {
-        throw new Error("Razorpay SDK not loaded. Check your internet connection.");
+        throw new Error("Razorpay SDK not loaded. Check connection.");
       }
 
       const options = {
@@ -153,7 +153,7 @@ function CheckoutContent() {
             if (verifyRes.ok && vData.success) {
               router.push(`/payment/success?order_id=${response.razorpay_order_id}&plan=${encodeURIComponent(planData.name)}`);
             } else {
-              throw new Error(vData.reason || "Payment signature mismatch. Audit required.");
+              throw new Error(vData.reason || "Verification signature mismatch.");
             }
           } catch (err: any) {
              setErrorMessage(err.message);
@@ -167,18 +167,27 @@ function CheckoutContent() {
           contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "",
         },
         theme: { color: "#2563EB" },
-        modal: { 
-          ondismiss: () => {
-            setOnlineProcessing(false);
-          }
-        }
+        modal: { ondismiss: () => setOnlineProcessing(false) }
       };
 
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (err: any) {
-      console.error("[CHECKOUT_INIT_FAILED]", err);
       setErrorMessage(err.message);
+      setOnlineProcessing(false);
+    }
+  };
+
+  const handleManualSubmit = async () => {
+    if (!user) return;
+    setOnlineProcessing(true);
+    try {
+      await submitManualPayment({ userId: user.uid, userEmail: user.email || "", userName: profile?.name || "Aspirant", planId, transactionId: utr });
+      toast({ title: "Request Staged", description: "Manual verification in progress." });
+      router.push("/dashboard");
+    } catch (e: any) {
+      setErrorMessage(e.message);
+    } finally {
       setOnlineProcessing(false);
     }
   };
@@ -190,14 +199,14 @@ function CheckoutContent() {
       <Navbar />
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
 
-      <main className="container mx-auto p-4 md:p-12 max-w-5xl text-left pb-40">
+      <main className="container mx-auto p-4 md:p-12 max-w-6xl text-left pb-40">
         <div className="flex items-center gap-4 mb-8">
            <button onClick={() => router.back()} className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm active:scale-95 transition-all"><ArrowLeft className="h-5 w-5" /></button>
            <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Checkout Hub</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-           <div className="lg:col-span-7 space-y-6">
+           <div className="lg:col-span-8 space-y-6">
               {errorMessage && (
                 <div className="p-6 bg-rose-50 border border-rose-100 rounded-[1.5rem] flex items-start gap-4 animate-in slide-in-from-top-4">
                   <AlertCircle className="h-6 w-6 text-rose-500 shrink-0" />
@@ -212,7 +221,7 @@ function CheckoutContent() {
               )}
 
               <Tabs defaultValue="online" className="w-full">
-                <TabsList className="grid grid-cols-2 h-14 bg-slate-100 rounded-2xl p-1 mb-6">
+                <TabsList className="grid grid-cols-2 h-14 bg-slate-100 rounded-2xl p-1 mb-6 shadow-inner">
                   <TabsTrigger value="online" className="rounded-xl font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white">Secure Gateway</TabsTrigger>
                   <TabsTrigger value="manual" className="rounded-xl font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white">Manual UPI</TabsTrigger>
                 </TabsList>
@@ -232,7 +241,7 @@ function CheckoutContent() {
                              <Input 
                                 value={coupon} 
                                 onChange={e => setCoupon(e.target.value.toUpperCase())} 
-                                className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold placeholder:text-slate-300" 
+                                className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold placeholder:text-slate-300 shadow-inner" 
                                 placeholder="ENTER CODE" 
                              />
                           </div>
@@ -255,37 +264,64 @@ function CheckoutContent() {
                        <h2 className="text-xl font-black text-[#0F172A]">Manual Audit</h2>
                        <p className="text-sm text-slate-500 font-medium leading-relaxed">Pay via UPI and enter the 12-digit UTR.</p>
                     </div>
-                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
-                       <div className="space-y-0.5">
-                          <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Business UPI Node</p>
-                          <p className="text-sm font-bold text-primary">{settings?.upiId || "arshdeepgrewal1122-1@oksbi"}</p>
+
+                    <div className="flex flex-col md:flex-row gap-10 items-center">
+                       {/* QR CODE NODE */}
+                       <div className="w-full md:w-1/2 flex flex-col items-center gap-4">
+                          <div className="relative h-48 w-48 md:h-64 md:w-64 bg-slate-50 rounded-[2.5rem] border-2 border-dashed border-slate-200 flex items-center justify-center overflow-hidden shadow-inner group transition-all hover:border-primary/30">
+                             {settings?.qrCodeUrl ? (
+                                <div className="relative w-full h-full p-6">
+                                   <Image src={settings.qrCodeUrl} alt="UPI QR" fill className="object-contain" />
+                                </div>
+                             ) : (
+                                <div className="text-center space-y-3 opacity-30 group-hover:opacity-50 transition-opacity">
+                                   <QrCode className="h-14 w-14 text-slate-400 mx-auto" />
+                                   <p className="text-[10px] font-black uppercase text-slate-500 tracking-[0.2em]">Awaiting QR Node</p>
+                                </div>
+                             )}
+                          </div>
+                          <div className="flex items-center gap-2 text-slate-400">
+                             <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                             <p className="text-[10px] font-bold uppercase tracking-widest">Scan in any UPI App</p>
+                          </div>
                        </div>
-                       <Button variant="ghost" size="icon" onClick={() => { navigator.clipboard.writeText(settings?.upiId || ""); toast({ title: "Copied" }); }}><Copy className="h-4 w-4" /></Button>
+
+                       {/* DETAILS NODE */}
+                       <div className="w-full md:w-1/2 space-y-6">
+                          <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
+                             <div className="space-y-0.5">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Business UPI ID</p>
+                                <p className="text-sm font-bold text-primary">{settings?.upiId || "arshdeepgrewal1122-1@oksbi"}</p>
+                             </div>
+                             <Button variant="ghost" size="icon" onClick={() => { navigator.clipboard.writeText(settings?.upiId || ""); toast({ title: "Copied" }); }}><Copy className="h-4 w-4" /></Button>
+                          </div>
+                          
+                          <div className="space-y-2">
+                             <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">UTR / Transaction ID</Label>
+                             <Input 
+                                value={utr} 
+                                onChange={(e) => setUtr(e.target.value.replace(/\D/g, "").slice(0, 12))} 
+                                placeholder="Enter 12 digit UTR" 
+                                className="h-14 rounded-xl border-slate-100 bg-slate-50 font-bold shadow-inner" 
+                             />
+                          </div>
+
+                          <Button 
+                             disabled={utr.length < 12 || onlineProcessing} 
+                             className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest rounded-2xl shadow-xl text-[10px] border-none" 
+                             onClick={handleManualSubmit}
+                          >
+                             Submit Verification
+                          </Button>
+                       </div>
                     </div>
-                    <div className="space-y-2">
-                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">UTR / Transaction ID</Label>
-                       <Input value={utr} onChange={(e) => setUtr(e.target.value.replace(/\D/g, "").slice(0, 12))} placeholder="12 digit UTR" className="h-14 rounded-xl border-slate-200 bg-slate-50 font-bold" />
-                    </div>
-                    <Button disabled={utr.length < 12 || onlineProcessing} className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest rounded-2xl shadow-xl text-[10px]" onClick={async () => {
-                        if (!user) return;
-                        setOnlineProcessing(true);
-                        try {
-                          await submitManualPayment({ userId: user.uid, userEmail: user.email || "", userName: profile?.name || "Aspirant", planId, transactionId: utr });
-                          toast({ title: "Request Staged", description: "Audit in progress." });
-                          router.push("/dashboard");
-                        } catch (e: any) {
-                          setErrorMessage(e.message);
-                        } finally {
-                          setOnlineProcessing(false);
-                        }
-                    }}>Submit Verification</Button>
                   </Card>
                 </TabsContent>
               </Tabs>
            </div>
 
-           <div className="lg:col-span-5 space-y-6">
-              <Card className="p-8 border-none shadow-xl rounded-[2rem] bg-white space-y-8 sticky top-24">
+           <div className="lg:col-span-4 space-y-6">
+              <Card className="p-8 border-none shadow-xl rounded-[2rem] bg-white space-y-8 sticky top-24 border border-slate-50">
                  <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                        <Gem className="h-6 w-6" />

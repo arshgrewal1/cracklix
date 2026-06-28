@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -12,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v17.9.
- * FIXED: Explicit React namespace for JSX intrinsic elements resolution and UMD global error.
+ * @fileOverview Institutional Search Hub v18.0.
+ * FIXED: Explicit React namespace and Intrinsic Elements resolution for React 19.
  */
 export default function SearchPage() {
   return (
