@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
+import React, { useState, useEffect, useMemo, Suspense } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap } from "lucide-react"

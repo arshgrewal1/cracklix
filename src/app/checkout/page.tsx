@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { Suspense, useMemo, useState, useEffect } from "react"
@@ -72,16 +73,21 @@ function CheckoutContent() {
     setOnlineProcessing(true);
     
     try {
+      const payload = { planId, userId: user.uid };
+      console.log("[CHECKOUT] Requesting Order:", payload);
+
       const orderRes = await fetch(`/api/razorpay/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId, userId: user.uid })
+        body: JSON.stringify(payload)
       });
 
       const orderData = await orderRes.json();
+      console.log("[CHECKOUT] Response Status:", orderRes.status);
+      console.log("[CHECKOUT] Response Data:", orderData);
 
       if (!orderRes.ok) {
-         throw new Error(orderData.error || "Order creation failed on backend.");
+         throw new Error(orderData.reason || orderData.error || "Order initialization failed.");
       }
 
       const cleanPhone = (profile?.phone || "").replace(/\D/g, '').slice(-10) || "9999999999";
@@ -114,7 +120,7 @@ function CheckoutContent() {
             if (verifyRes.ok && verifyData.success) {
                router.push("/payment/success?order_id=" + response.razorpay_order_id + "&plan=" + encodeURIComponent(planData.name));
             } else {
-               throw new Error(verifyData.reason || "Backend signature verification failed.");
+               throw new Error(verifyData.reason || "Verification handshake failed.");
             }
           } catch (err: any) {
             setErrorMessage(err.message);
@@ -136,7 +142,7 @@ function CheckoutContent() {
       };
 
       if (!(window as any).Razorpay) {
-         throw new Error("Razorpay SDK script not found. Check your internet.");
+         throw new Error("Razorpay SDK not loaded. Please check your connection.");
       }
 
       const rzp = new (window as any).Razorpay(options);
@@ -147,6 +153,7 @@ function CheckoutContent() {
       rzp.open();
 
     } catch (e: any) {
+      console.error("[CHECKOUT ERROR]", e);
       setErrorMessage(e.message);
       setOnlineProcessing(false);
     }
