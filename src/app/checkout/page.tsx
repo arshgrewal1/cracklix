@@ -32,7 +32,7 @@ import Image from "next/image";
 
 /**
  * @fileOverview High-Fidelity Checkout Hub v13.0.
- * UPDATED: Integrated QR Code for manual payments and fixed React namespace.
+ * UPDATED: Corrected hook usage and JSX Intrinsic Elements resolution for React 19.
  */
 export default function CheckoutPage() {
   return (
@@ -65,13 +65,17 @@ function CheckoutContent() {
   const [appliedCoupon, setAppliedCoupon] = React.useState<any>(null);
   const [verifyingCoupon, setVerifyingCoupon] = React.useState(false);
 
-  const { data: settings } = useDoc<any>(
-    React.useMemo(() => dbInstance ? doc(dbInstance, "settings", "global") : null), [dbInstance]
+  const settingsRef = React.useMemo(
+    () => (dbInstance ? doc(dbInstance, "settings", "global") : null), 
+    [dbInstance]
   );
+  const { data: settings } = useDoc<any>(settingsRef);
 
-  const { data: planData, loading: planLoading } = useDoc<any>(
-    React.useMemo(() => dbInstance && planId ? doc(dbInstance, "passes", planId) : null), [dbInstance, planId]
+  const planRef = React.useMemo(
+    () => (dbInstance && planId ? doc(dbInstance, "passes", planId) : null), 
+    [dbInstance, planId]
   );
+  const { data: planData, loading: planLoading } = useDoc<any>(planRef);
 
   React.useEffect(() => {
     if (!loading && !user) router.push("/login");
