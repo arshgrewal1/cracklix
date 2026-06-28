@@ -8,7 +8,7 @@ set -e
 
 KEYSTORE_FILE="release.jks"
 KEYSTORE_PASSWORD="CrackLix@2026Release!"
-KEY_ALIAS="cracklix"
+KEY_ALIAS="cracklix-release-key"
 KEY_PASSWORD="CrackLix@2026Release!"
 
 echo "🔐 Generating Android Release Keystore..."
