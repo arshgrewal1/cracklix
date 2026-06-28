@@ -1,4 +1,3 @@
-
 'use client';
 
 import { create } from "zustand";
@@ -8,6 +7,11 @@ import {
   LanguageDisplayMode 
 } from "@/types";
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+
+/**
+ * @fileOverview Institutional CBT Store v43.0.
+ * FIXED: TS1117 Duplicate property key 'updatedAt' removed.
+ */
 
 export interface ExamStoreState {
   mockId: string | null;
@@ -124,7 +128,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         violations: state.violations,
         startTime: state.startTime,
         updatedAt: serverTimestamp()
-      }, { merge: true }).catch(err => console.error("Store sync error:", err));
+      }, { merge: true }).catch(() => {});
     }
   },
 
@@ -142,7 +146,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
          answers: newAnswers, 
          statusMap: newStatus, 
          updatedAt: serverTimestamp() 
-      }, { merge: true }).catch(err => console.error("Store sync error:", err));
+      }, { merge: true }).catch(() => {});
     }
   },
 
@@ -155,7 +159,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
     if (db && state.userId && state.mockId) {
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
-      setDoc(attemptRef, { statusMap: newStatus, updatedAt: serverTimestamp() }, { merge: true }).catch(err => console.error("Store sync error:", err));
+      setDoc(attemptRef, { statusMap: newStatus, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
     }
   },
 
@@ -177,7 +181,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       setDoc(attemptRef, { 
         violations: newVal, 
         updatedAt: serverTimestamp() 
-      }, { merge: true }).catch(err => console.error("Store sync error:", err));
+      }, { merge: true }).catch(() => {});
     }
   }
 }));

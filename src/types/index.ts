@@ -1,4 +1,3 @@
-
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET';
@@ -118,7 +117,7 @@ export interface UserProfile {
   coins?: number;
   pass?: {
     active: boolean;
-    plan: 'FREE_PASS' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY' | string;
+    plan: string;
     purchaseDate: string;
     expiryDate: string;
     freePassClaimed: boolean;
@@ -267,7 +266,6 @@ export interface AttemptResult {
   gender?: Gender;
 }
 
-// Aliases for project-wide compatibility
 export type Mock = MockTest;
 export type CurrentAffair = CurrentAffairHubItem;
 export type Notification = any;

@@ -1,4 +1,3 @@
-
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { initializeFirebase } from "@/firebase/app";
@@ -8,8 +7,8 @@ import { sendEmail } from "@/lib/email";
 import { sendWhatsApp } from "@/lib/whatsapp";
 
 /**
- * Razorpay Enterprise Webhook Hub (v12.0)
- * Logic: Signature verification, Fraud detection, Referral rewards, and Multi-channel Automation.
+ * Razorpay Enterprise Webhook Hub (v13.0)
+ * Logic: Signature verification, Renewal Stacking, Fraud detection, and Multi-channel Automation.
  */
 export async function POST(req: Request) {
   try {
@@ -55,12 +54,34 @@ export async function POST(req: Request) {
          }
       }
 
-      // 2. ACTIVATION LOGIC
+      // 2. ACTIVATION LOGIC (Renewal Stacking)
       const durationDays = planSnap.exists() ? (planSnap.data().durationDays || 30) : 30;
-      const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + durationDays);
+      const msPerDay = 24 * 60 * 60 * 1000;
+      
+      const userPassRef = doc(db, "user_passes", userId);
+      const userPassSnap = await getDoc(userPassRef);
+      
+      let baseTime = Date.now();
+      if (userPassSnap.exists()) {
+         const current = userPassSnap.data();
+         // If same plan is active, stack the time. If different, start from now.
+         if (current.active && current.expiry > Date.now() && current.planId === planId) {
+            baseTime = current.expiry;
+         }
+      }
 
-      // A. PROFILE SYNC
+      const expiryDate = new Date(baseTime + (durationDays * msPerDay));
+
+      // A. SUBSCRIPTION REGISTRY SYNC
+      await setDoc(userPassRef, {
+        planId,
+        active: true,
+        activatedAt: serverTimestamp(),
+        expiry: expiryDate.getTime(),
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      // B. PROFILE SYNC (Legacy Compatibility)
       const userRef = doc(db, "users", userId);
       const userSnap = await getDoc(userRef);
       const userData = userSnap.data();
@@ -79,30 +100,25 @@ export async function POST(req: Request) {
         updatedAt: serverTimestamp()
       });
 
-      // B. REFERRAL REWARD
+      // C. REFERRAL REWARD
       if (userData?.referredBy) {
-        const referrerId = userData.referredBy;
-        await updateDoc(doc(db, "users", referrerId), {
+        await updateDoc(doc(db, "users", userData.referredBy), {
           coins: increment(50),
           updatedAt: serverTimestamp()
-        }).catch(e => console.error("[REFERRAL_ERR]", e));
+        }).catch(() => {});
       }
 
-      // C. MULTI-CHANNEL AUTOMATION
+      // D. AUTOMATION
       const userEmail = userSnap.data()?.email || payment.email;
       if (userEmail) {
          await sendEmail(
             userEmail, 
-            "Payment Successful 🎉", 
-            `<h2>Welcome to Cracklix Pro!</h2><p>Your subscription for ${planSnap.data()?.name || planId} is now active.</p><p>Expires on: ${expiryDate.toLocaleDateString()}</p>`
+            "Elite Pass Activated 🎉", 
+            `<h2>Success!</h2><p>Your subscription for ${planSnap.data()?.name || planId} is now live.</p><p>Valid until: ${expiryDate.toLocaleDateString()}</p>`
          );
       }
 
-      await sendWhatsApp(
-         `💰 New Payment Received\nUser: ${userData?.name || userId}\nPlan: ${planId}\nAmount: ₹${Number(payment.amount)/100}`
-      );
-
-      // D. AUDIT LOG
+      await sendWhatsApp(`💰 Revenue Hub: ₹${Number(payment.amount)/100} captured from ${userData?.name || userId}`);
       await logEvent({ type: "payment", message: "Pass activated via Webhook", userId, planId });
     }
 

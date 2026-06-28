@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { initializeFirebase } from "@/firebase/app";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import { logEvent } from "@/lib/logger";
 
 /**
- * Razorpay Order API (Enterprise Hardened v10.0)
- * Security: Origin validation, active plan lock, and real-time logging.
+ * Razorpay Order API (SaaS Lifecycle Hardened v11.0)
+ * Security: Origin validation, Smart Plan Lock (Allows Upgrades/Renewals), and real-time logging.
  */
 export async function POST(req: Request) {
   try {
@@ -26,7 +26,23 @@ export async function POST(req: Request) {
 
     const { firestore: db } = initializeFirebase();
 
-    // 1. PLAN REGISTRY AUDIT
+    // 1. SMART SUBSCRIPTION GUARD (Allow Upgrades/Renewals)
+    const userPassRef = doc(db, "user_passes", userId);
+    const userPassSnap = await getDoc(userPassRef);
+    
+    if (userPassSnap.exists()) {
+      const currentPass = userPassSnap.data();
+      const isActive = currentPass.active && currentPass.expiry > Date.now();
+      
+      // Only block if trying to buy the SAME plan that is already active
+      if (isActive && currentPass.planId === planId) {
+        return NextResponse.json({ 
+          error: "You already have this Elite Pass active. You can renew once it expires." 
+        }, { status: 400 });
+      }
+    }
+
+    // 2. PLAN REGISTRY AUDIT
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 
@@ -37,7 +53,7 @@ export async function POST(req: Request) {
     const plan = planSnap.data();
     let price = Number(plan?.price);
 
-    // 2. COUPON VALIDATION
+    // 3. COUPON VALIDATION
     if (couponCode) {
       const couponRef = doc(db, "coupons", couponCode.toUpperCase());
       const couponSnap = await getDoc(couponRef);
@@ -48,7 +64,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 3. RAZORPAY HANDSHAKE
+    // 4. RAZORPAY HANDSHAKE
     const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
 
     const order = await razorpay.orders.create({
@@ -58,18 +74,13 @@ export async function POST(req: Request) {
       notes: { userId, planId, planName: plan.name },
     });
 
-    // 4. LOGGING & TRACING
+    // 5. LOGGING & TRACING
     await logEvent({
        type: "payment",
        message: "Order created successfully",
        userId,
        planId,
        metadata: { orderId: order.id, amount: price }
-    });
-
-    await setDoc(doc(db, "payment_logs", order.id), {
-       userId, planId, amount: price, status: "created",
-       createdAt: serverTimestamp()
     });
 
     return NextResponse.json({

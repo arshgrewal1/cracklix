@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -13,8 +12,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v15.2.
- * FIXED: Resolved UMD global conflict for React 19 standards.
+ * @fileOverview Institutional Search Hub v16.0.
+ * FIXED: Resolved UMD global conflict and React.cloneElement type resolution.
  */
 export default function SearchPage() {
   return (
@@ -126,7 +125,7 @@ function SearchContent() {
                       <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
                          <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary/5 transition-all">
-                               {React.cloneElement(res.icon as React.ReactElement<any>, { className: "h-5 w-5 text-primary" })}
+                               {React.isValidElement(res.icon) ? React.cloneElement(res.icon as React.ReactElement<any>, { className: "h-5 w-5 text-primary" }) : null}
                             </div>
                             <div className="text-left min-w-0 flex-1">
                                <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>
