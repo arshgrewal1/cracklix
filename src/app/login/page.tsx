@@ -44,8 +44,8 @@ import Image from "next/image"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Premium Login Hub v86.0.
- * FIXED: Removed top/bottom spacing for the logo as requested.
+ * @fileOverview Cracklix Premium Login Hub v86.1.
+ * FIXED: Removed all container padding for zero logo spacing as requested.
  */
 
 const formatCompact = (num: number) => {
@@ -238,8 +238,8 @@ function LoginContent() {
   return (
     <div className="min-h-[100dvh] bg-white flex flex-col lg:flex-row text-[#0F172A] font-body selection:bg-primary/20 overflow-x-hidden">
       
-      {/* LEFT PANEL: BRANDING (REMOVED TOP PADDING) */}
-      <div className="hidden lg:flex flex-[1.1] bg-gradient-to-br from-[#020B2D] via-[#071B4D] to-[#0A2D7A] text-white p-12 xl:p-20 flex-col justify-start relative overflow-hidden">
+      {/* LEFT PANEL: BRANDING (ZERO SPACING) */}
+      <div className="hidden lg:flex flex-[1.1] bg-gradient-to-br from-[#020B2D] via-[#071B4D] to-[#0A2D7A] text-white p-12 xl:px-20 xl:py-0 flex-col justify-start relative overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
 
         <div className="relative z-10 space-y-12 xl:space-y-20 max-w-[650px] pt-0">
@@ -268,7 +268,7 @@ function LoginContent() {
         </div>
       </div>
 
-      {/* RIGHT PANEL: AUTH (REMOVED LOGO BOTTOM SPACING) */}
+      {/* RIGHT PANEL: AUTH (ZERO SPACING) */}
       <div className="flex-1 flex flex-col items-center justify-start p-4 md:p-12 lg:p-20 relative bg-slate-50 lg:bg-white overflow-y-auto">
         
         <div className="w-full flex items-center justify-between mb-0 lg:hidden">

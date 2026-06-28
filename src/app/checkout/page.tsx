@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useSearchParams, useRouter } from "next/navigation"
@@ -30,8 +29,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v22.0.
- * FIXED: Restored missing RefreshCw import and standardized Razorpay flow.
+ * @fileOverview Institutional Checkout Hub v22.1.
+ * FIXED: Restored RefreshCw import to resolve build failure.
  */
 
 export default function CheckoutPage() {

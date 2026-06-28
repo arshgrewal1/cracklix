@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
@@ -14,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v5.5.
- * FIXED: Explicit typing for icon cloning and added Suspense boundary.
+ * @fileOverview Official Search Hub v5.6.
+ * FIXED: Added explicit React imports and correctly typed cloneElement to resolve UMD and production errors.
  */
 
 export default function SearchPage() {

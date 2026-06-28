@@ -1,4 +1,3 @@
-
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET';
@@ -161,38 +160,6 @@ export interface MockTest {
   published: boolean;
   languageMode: LanguageDisplayMode;
   attemptLimit: number;
-  createdAt: any;
-  updatedAt: any;
-}
-
-export interface Question {
-  id: string;
-  englishQuestion: string;
-  punjabiQuestion?: string;
-  hindiQuestion?: string;
-  optionAEnglish: string;
-  optionAPunjabi?: string;
-  optionAHindi?: string;
-  optionBEnglish: string;
-  optionBPunjabi?: string;
-  optionBHindi?: string;
-  optionCEnglish: string;
-  optionCPunjabi?: string;
-  optionCHindi?: string;
-  optionDEnglish: string;
-  optionDPunjabi?: string;
-  optionDHindi?: string;
-  correctAnswer: 'A' | 'B' | 'C' | 'D';
-  difficulty: Difficulty;
-  englishExplanation?: string;
-  punjabiExplanation?: string;
-  hindiExplanation?: string;
-  subjectId: string;
-  boardId: string;
-  examId?: string;
-  sectionId?: string;
-  status: QuestionLifecycleStatus;
-  usedCount: number;
   createdAt: any;
   updatedAt: any;
 }
