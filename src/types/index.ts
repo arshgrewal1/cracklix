@@ -266,7 +266,7 @@ export interface AttemptResult {
   gender?: Gender;
 }
 
-// Aliases
+// Aliases for project-wide compatibility
 export type Mock = MockTest;
 export type CurrentAffair = CurrentAffairHubItem;
 export type Notification = any;

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 /**
  * @fileOverview System Health Monitoring Node.
+ * Provides a heartbeat for deployment uptime tracking.
  */
 export async function GET() {
   try {

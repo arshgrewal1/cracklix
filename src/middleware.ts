@@ -1,4 +1,3 @@
-
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
@@ -12,11 +11,11 @@ const rateMap = new Map();
 export function middleware(req: NextRequest) {
   const url = req.nextUrl.pathname;
   
-  // 1. Rate Limiting for API Nodes
+  // 1. Rate Limiting for API Nodes (Anti-Abuse)
   if (url.startsWith("/api/")) {
     const ip = req.headers.get("x-forwarded-for") || "unknown";
     const now = Date.now();
-    const limit = 30; // requests
+    const limit = 40; // requests
     const windowMs = 60 * 1000; // 1 min window
 
     const record = rateMap.get(ip) || [];
@@ -33,8 +32,6 @@ export function middleware(req: NextRequest) {
     }
   }
 
-  // 2. Auth Guards are primarily handled in page layouts (Client-side)
-  // Standard Next.js 15 Middleware passthrough
   return NextResponse.next();
 }
 

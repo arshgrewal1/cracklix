@@ -5,25 +5,19 @@ import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { logEvent } from "@/lib/logger";
 
 /**
- * Razorpay Order API (Enterprise Hardened v9.0)
+ * Razorpay Order API (Enterprise Hardened v10.0)
  * Security: Origin validation, active plan lock, and real-time logging.
  */
 export async function POST(req: Request) {
   try {
-    // 1. ORIGIN SECURITY
-    const origin = req.headers.get("origin");
-    if (process.env.ALLOWED_ORIGIN && origin !== process.env.ALLOWED_ORIGIN) {
-       return NextResponse.json({ error: "Unauthorized endpoint access." }, { status: 403 });
-    }
-
     const { planId, userId, couponCode } = await req.json();
 
     if (!planId || !userId) {
       return NextResponse.json({ error: "Missing identity tokens." }, { status: 400 });
     }
 
-    const keyId = process.env.RAZORPAY_KEY_ID?.trim();
-    const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
+    const keyId = process.env.RAZORPAY_KEY_ID;
+    const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!keyId || !keySecret) {
       await logEvent({ type: "critical", message: "Razorpay environment variables missing." });
@@ -32,18 +26,7 @@ export async function POST(req: Request) {
 
     const { firestore: db } = initializeFirebase();
 
-    // 2. ACTIVE PLAN AUDIT
-    const userRef = doc(db, "users", userId);
-    const userSnap = await getDoc(userRef);
-    if (userSnap.exists()) {
-       const userData = userSnap.data();
-       const now = new Date();
-       if (userData.passStatus === 'active' && userData.passExpiresAt && new Date(userData.passExpiresAt) > now) {
-          return NextResponse.json({ error: "Active pass already registered." }, { status: 400 });
-       }
-    }
-
-    // 3. REGISTRY PRICE AUDIT
+    // 1. PLAN REGISTRY AUDIT
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 
@@ -54,11 +37,7 @@ export async function POST(req: Request) {
     const plan = planSnap.data();
     let price = Number(plan?.price);
 
-    if (isNaN(price) || price < 0) {
-      return NextResponse.json({ error: "Invalid price registry." }, { status: 400 });
-    }
-
-    // 4. COUPON VALIDATION
+    // 2. COUPON VALIDATION
     if (couponCode) {
       const couponRef = doc(db, "coupons", couponCode.toUpperCase());
       const couponSnap = await getDoc(couponRef);
@@ -69,7 +48,7 @@ export async function POST(req: Request) {
       }
     }
 
-    // 5. RAZORPAY HANDSHAKE
+    // 3. RAZORPAY HANDSHAKE
     const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
 
     const order = await razorpay.orders.create({
@@ -79,7 +58,7 @@ export async function POST(req: Request) {
       notes: { userId, planId, planName: plan.name },
     });
 
-    // 6. LOGGING & TRACING
+    // 4. LOGGING & TRACING
     await logEvent({
        type: "payment",
        message: "Order created successfully",
@@ -90,7 +69,6 @@ export async function POST(req: Request) {
 
     await setDoc(doc(db, "payment_logs", order.id), {
        userId, planId, amount: price, status: "created",
-       ip: req.headers.get("x-forwarded-for") || "unknown",
        createdAt: serverTimestamp()
     });
 

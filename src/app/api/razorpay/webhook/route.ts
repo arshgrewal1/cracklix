@@ -5,7 +5,7 @@ import { doc, setDoc, serverTimestamp, getDoc, updateDoc, increment } from "fire
 import { logEvent } from "@/lib/logger";
 
 /**
- * Razorpay Enterprise Webhook Hub (v10.0)
+ * Razorpay Enterprise Webhook Hub (v11.0)
  * Logic: Signature verification, Fraud detection, Referral rewards, and Activation.
  */
 export async function POST(req: Request) {
@@ -38,7 +38,6 @@ export async function POST(req: Request) {
       const planId = payment.notes?.planId;
 
       if (!userId || !planId) {
-         await logEvent({ type: "info", message: "Payment captured without metadata notes." });
          return NextResponse.json({ success: true });
       }
 
@@ -48,8 +47,7 @@ export async function POST(req: Request) {
          const expectedPrice = Number(planSnap.data().price);
          const paidPrice = Number(payment.amount) / 100;
          if (paidPrice < expectedPrice * 0.4) {
-            await logEvent({ type: "critical", message: "High-severity price mismatch detected.", userId, metadata: { paid: paidPrice, expected: expectedPrice } });
-            await setDoc(doc(db, "fraud_alerts", payment.id), { payment, userId, planId, createdAt: serverTimestamp() });
+            await logEvent({ type: "critical", message: "Price mismatch detected.", userId, metadata: { paid: paidPrice, expected: expectedPrice } });
             return NextResponse.json({ success: true, flagged: true });
          }
       }
@@ -59,12 +57,11 @@ export async function POST(req: Request) {
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + durationDays);
 
-      // A. SUBSCRIPTION REGISTRY
+      // A. USER PASS REGISTRY
       await setDoc(doc(db, "user_passes", userId), {
         planId, active: true, activatedAt: serverTimestamp(),
         expiry: expiryDate.getTime(),
         paymentId: payment.id,
-        orderId: payment.order_id,
         updatedAt: serverTimestamp()
       });
 
@@ -77,29 +74,20 @@ export async function POST(req: Request) {
         passStatus: 'active',
         passExpiresAt: expiryDate.toISOString(),
         status: planId,
-        planTier: planSnap.exists() ? (planSnap.data().tier || 1) : 1,
         updatedAt: serverTimestamp()
       });
 
       // C. REFERRAL REWARD
       if (userData?.referredBy) {
         const referrerId = userData.referredBy;
-        await setDoc(doc(db, "referrals", `${referrerId}_${userId}`), {
-          referrerId, referredId: userId, amount: payment.amount / 100,
-          rewardGiven: true, createdAt: serverTimestamp()
-        });
-
         await updateDoc(doc(db, "users", referrerId), {
           coins: increment(50),
           updatedAt: serverTimestamp()
         }).catch(e => console.error("[REFERRAL_ERR]", e));
       }
 
-      // D. AUDIT LOG CLOSURE
+      // D. AUDIT LOG
       await logEvent({ type: "payment", message: "Pass activated via Webhook", userId, planId });
-      await updateDoc(doc(db, "payment_logs", payment.order_id), {
-         status: "captured", paymentId: payment.id, capturedAt: serverTimestamp()
-      }).catch(() => {});
     }
 
     return NextResponse.json({ success: true });

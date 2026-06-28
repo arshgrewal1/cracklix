@@ -2,7 +2,7 @@ import { initializeFirebase } from "@/firebase/app";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Event Logger v1.0.
+ * @fileOverview Institutional Event Logger v1.1.
  * Records system-wide telemetry for administrative audits.
  */
 export async function logEvent(data: {
