@@ -121,7 +121,7 @@ function SearchContent() {
                       <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
                          <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
-                               {React.cloneElement(res.icon as React.ReactElement, { className: "h-5 w-5" })}
+                               {React.cloneElement(res.icon as React.ReactElement<any>, { className: "h-5 w-5" })}
                             </div>
                             <div className="text-left min-w-0 flex-1">
                                <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>

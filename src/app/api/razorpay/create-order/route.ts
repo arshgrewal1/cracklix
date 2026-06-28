@@ -4,8 +4,8 @@ import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Production Hardened v5.0)
- * strictly uses environment variables and validates price against Firestore.
+ * Razorpay Order API (Production Hardened v5.1)
+ * Optimized for diagnostic visibility and secure price auditing.
  */
 
 export async function POST(req: Request) {
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     if (!planId || !userId) {
       return NextResponse.json(
-        { success: false, reason: "Missing planId or userId in request." },
+        { success: false, reason: "Missing planId or userId in request payload." },
         { status: 400 }
       );
     }
@@ -26,20 +26,24 @@ export async function POST(req: Request) {
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
     if (!keyId || !keySecret) {
-      console.error("[RAZORPAY_CONFIG_ERROR] Environment variables missing in runtime.");
+      console.error("[RAZORPAY_CONFIG_ERROR] Environment variables missing.");
       return NextResponse.json(
-        { success: false, reason: "Payment gateway configuration is missing on server." },
+        { 
+          success: false, 
+          reason: "Payment gateway configuration is missing on server. Verify RAZORPAY_KEY_ID and SECRET." 
+        },
         { status: 503 }
       );
     }
 
     const { firestore: db } = initializeFirebase();
 
-    // AUDIT: Fetch canonical plan from Firestore to prevent client-side price manipulation
+    // Securely fetch plan from Firestore to prevent tampering
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 
     if (!planSnap.exists()) {
+      console.error(`[PLAN_NOT_FOUND] ${planId}`);
       return NextResponse.json(
         { success: false, reason: `Plan node [${planId}] not found in registry.` },
         { status: 404 }
@@ -51,7 +55,7 @@ export async function POST(req: Request) {
 
     if (isNaN(price) || price <= 0) {
       return NextResponse.json(
-        { success: false, reason: "The selected plan has an invalid price node." },
+        { success: false, reason: "Selected plan has an invalid price configuration." },
         { status: 400 }
       );
     }
@@ -89,11 +93,14 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("[RAZORPAY_ORDER_CRITICAL_FAILURE]", error);
 
+    // Return detailed error structure to avoid empty {} in frontend
     return NextResponse.json(
       {
         success: false,
         error: error?.message || "Internal payment processing error.",
-        code: error?.code || "INTERNAL_ERROR"
+        reason: "The server encountered a failure while contacting Razorpay.",
+        code: error?.code || "INTERNAL_ERROR",
+        details: process.env.NODE_ENV === 'development' ? error : undefined
       },
       { status: 500 }
     );

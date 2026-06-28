@@ -97,7 +97,7 @@ function CheckoutContent() {
 
     setOnlineProcessing(true);
 
-    console.log("[CHECKOUT REQUEST]", { planId, userId: user?.uid });
+    console.log("[CHECKOUT REQUEST]", { planId, userId: user.uid });
 
     try {
       const res = await fetch("/api/razorpay/create-order", {
@@ -109,23 +109,27 @@ function CheckoutContent() {
         }),
       });
 
-      const responseText = await res.text();
+      const errorText = await res.text();
       let orderData;
       
       try {
-        orderData = JSON.parse(responseText);
+        orderData = JSON.parse(errorText);
       } catch (e) {
-        console.error("[JSON_PARSE_ERROR]", responseText);
-        throw new Error("Server returned a malformed response. Please try again.");
+        console.error("[JSON_PARSE_ERROR]", errorText);
+        throw new Error("Server returned a malformed response. Please check your network.");
       }
 
       if (!res.ok) {
-        console.error("[ORDER_API_ERROR]", orderData);
-        throw new Error(orderData.reason || orderData.error || `Server error: ${res.status}`);
+        console.error("[ORDER_API_ERROR]", { status: res.status, data: orderData });
+        throw new Error(
+          orderData.reason || 
+          orderData.error || 
+          `Order initialization failed (${res.status})`
+        );
       }
 
       if (!(window as any).Razorpay) {
-        throw new Error("Razorpay SDK not loaded. Check your connection.");
+        throw new Error("Razorpay SDK not loaded. Please refresh the page.");
       }
 
       const options = {
@@ -155,7 +159,7 @@ function CheckoutContent() {
             if (verifyRes.ok && verifyData.success) {
               router.push(`/payment/success?order_id=${response.razorpay_order_id}&plan=${encodeURIComponent(planData.name)}`);
             } else {
-              throw new Error(verifyData.reason || "Payment verification failed.");
+              throw new Error(verifyData.reason || verifyData.error || "Payment verification failed.");
             }
           } catch (err: any) {
             setErrorMessage(err.message);
@@ -178,7 +182,7 @@ function CheckoutContent() {
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on("payment.failed", function (resp: any) {
-        setErrorMessage(resp?.error?.description || "Payment failed");
+        setErrorMessage(resp?.error?.description || "Transaction failed");
         setOnlineProcessing(false);
       });
       rzp.open();
