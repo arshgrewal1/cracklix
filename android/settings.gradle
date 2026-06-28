@@ -1,4 +1,3 @@
 include ':app'
 
-// This script stitches the Capacitor plugins into the Android project
 apply from: '../node_modules/@capacitor/android/capacitor.settings.gradle'
