@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useEffect } from 'react';
@@ -15,7 +16,7 @@ interface AdPlacementProps {
 }
 
 /**
- * @fileOverview Institutional Ad-Node v1.27.
+ * @fileOverview Institutional Ad-Node v1.28.
  * FIXED: Explicit type casting for Firestore queries to resolve parameter assignability errors.
  */
 
@@ -27,13 +28,13 @@ export default function AdPlacement({ placement, className, examId }: AdPlacemen
   const { data: globalSettings } = useDoc<any>(useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]));
   const { data: passes } = useCollection<any>(useMemo(() => (db ? collection(db, 'passes') : null), [db]));
 
-  const isSafetyZone = pathname.includes('/attempt') || pathname.includes('/checkout') || pathname.startsWith('/admin');
-
   const isAdFree = useMemo(() => {
     if (!profile || profile.status === 'Free') return false;
     const activePass = (passes as any[])?.find((p: any) => p.id === profile.status);
     return activePass?.adFree === true;
   }, [profile, passes]);
+
+  const isSafetyZone = pathname.includes('/attempt') || pathname.includes('/checkout') || pathname.startsWith('/admin');
 
   const adsQuery = useMemo(() => {
     if (!db || isAdFree || isSafetyZone) return null;

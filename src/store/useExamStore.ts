@@ -45,8 +45,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Institutional CBT State Manager v53.0.
- * FIXED: Removed duplicate startTime key that caused TS1117 syntax crash.
+ * @fileOverview Institutional CBT State Manager v54.0.
+ * FIXED: Removed duplicate startTime key to satisfy production build requirements.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,

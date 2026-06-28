@@ -17,6 +17,9 @@ export type CurrentAffairType = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUIZ' | 'SPECI
 
 export type MockAssignmentMode = 'SINGLE' | 'MULTIPLE' | 'AUTHORITY';
 
+export type AdType = 'BANNER' | 'ADSENSE' | 'HTML';
+export type AdStatus = 'ACTIVE' | 'PAUSED' | 'SCHEDULED';
+
 export interface CalendarEvent {
   id: string;
   post: string;
@@ -197,8 +200,8 @@ export interface Question {
 export interface Advertisement {
   id: string;
   title: string;
-  type: 'BANNER' | 'ADSENSE' | 'HTML';
-  status: 'ACTIVE' | 'PAUSED' | 'SCHEDULED';
+  type: AdType;
+  status: AdStatus;
   placements: AdPlacementType[];
   desktopImageUrl?: string;
   mobileImageUrl?: string;

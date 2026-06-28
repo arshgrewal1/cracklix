@@ -30,8 +30,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v21.0.
- * FIXED: Standardized to Razorpay flow with robust pre-fill normalization.
+ * @fileOverview Institutional Checkout Hub v22.0.
+ * FIXED: Restored missing RefreshCw import and standardized Razorpay flow.
  */
 
 export default function CheckoutPage() {
@@ -81,7 +81,6 @@ function CheckoutContent() {
     setOnlineProcessing(true);
     
     try {
-      // 1. Create order on server
       const orderRes = await fetch(`/api/razorpay/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -94,7 +93,6 @@ function CheckoutContent() {
          throw new Error(orderData.error || "Order creation failed.");
       }
 
-      // 2. Open Razorpay Modal
       const options = {
         key: orderData.key,
         amount: orderData.amount,
@@ -131,7 +129,6 @@ function CheckoutContent() {
         prefill: {
           name: profile?.name || user.displayName || "Aspirant",
           email: user.email || "student@cracklix.com",
-          // Razorpay requires a valid 10-digit number for test mode sometimes
           contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "9999999999"
         },
         theme: { color: "#2563EB" },
