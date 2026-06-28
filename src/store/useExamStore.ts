@@ -44,8 +44,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Institutional CBT State Manager v54.7.
- * FIXED: Liquidated duplicate key in Firestore setDoc operation.
+ * @fileOverview Institutional CBT State Manager v54.8.
+ * FIXED: Removed duplicate startTime key in setDoc operation.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,

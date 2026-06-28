@@ -28,8 +28,9 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v22.7.
- * FIXED: Separated React and Next.js imports to resolve JSX namespace resolution.
+ * @fileOverview Institutional Checkout Hub v22.8.
+ * FIXED: Malformed React import from next/navigation corrected to react.
+ * FIXED: Restored missing RefreshCw icon.
  */
 
 export default function CheckoutPage() {

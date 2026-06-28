@@ -87,6 +87,7 @@ export interface UserProfile {
   activeBrowser?: string;
   activePlatform?: string;
   lastLoginAt?: any;
+  sessionVersion?: number;
   pass?: {
     active: boolean;
     plan: 'FREE_PASS' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY' | string;
