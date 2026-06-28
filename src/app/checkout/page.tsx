@@ -21,13 +21,18 @@ import {
   QrCode
 } from "lucide-react";
 import { useUser, useDoc, useFirestore } from "@/firebase";
-import { activateFreePass, submitManualPayment } from "@/app/actions/payment";
+import { submitManualPayment } from "@/app/actions/payment";
 import { doc } from "firebase/firestore";
 import Script from "next/script";
 import { Badge } from "@/components/ui/badge";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
+
+/**
+ * @fileOverview Official Checkout Hub.
+ * FIXED: Malformed useMemo and useDoc signatures.
+ */
 
 export default function CheckoutPage() {
   return (

@@ -3,7 +3,7 @@
 import * as React from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap } from "lucide-react"
+import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap, LucideIcon } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -13,9 +13,15 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Universal Search Hub.
- * FIXED: Added explicit React import for module resolution in React 19.
- * FIXED: Standardized cloneElement usage.
+ * FIXED: Refactored Icon logic from cloneElement to Component references for React 19 / TS 5 compatibility.
  */
+
+interface SearchResultNode {
+  title: string;
+  type: string;
+  href: string;
+  icon: LucideIcon;
+}
 
 export default function SearchPage() {
   return (
@@ -54,7 +60,7 @@ function SearchContent() {
 
   const isLoading = mLoading || eLoading || nLoading
 
-  const searchResults = React.useMemo(() => {
+  const searchResults = React.useMemo<SearchResultNode[]>(() => {
     if (queryStr.trim().length < 2) return []
     const term = queryStr.toLowerCase().trim()
     
@@ -65,7 +71,7 @@ function SearchContent() {
        title: e.name, 
        type: "Exam Hub", 
        href: `/exams/view?id=${e.id}`, 
-       icon: <GraduationCap />
+       icon: GraduationCap
     }))
 
     const mockMatches = (mocks || []).filter((m: any) => 
@@ -75,7 +81,7 @@ function SearchContent() {
        title: m.title, 
        type: "Practice Test", 
        href: `/mocks/view?id=${m.id}`, 
-       icon: <Zap />
+       icon: Zap
     }))
 
     const notesMatches = (notes || []).filter((n: any) => 
@@ -85,7 +91,7 @@ function SearchContent() {
        title: n.title, 
        type: "Library", 
        href: `/notes`, 
-       icon: <FileText />
+       icon: FileText
     }))
 
     return [...examMatches, ...mockMatches, ...notesMatches]
@@ -123,20 +129,23 @@ function SearchContent() {
            {queryStr.length >= 2 && (
               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
                  <div className="grid grid-cols-1 gap-3">
-                    {searchResults.map((res, i) => (
-                      <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-center border border-slate-100 transition-all duration-500">
-                         <div className="flex items-center gap-4 min-w-0 flex-1">
-                            <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary/5 transition-all">
-                               {React.cloneElement(res.icon as React.ReactElement, { className: "h-5 w-5" })}
-                            </div>
-                            <div className="text-left min-w-0 flex-1">
-                               <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>
-                               <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black rounded mt-1 uppercase">{res.type}</Badge>
-                            </div>
-                         </div>
-                         <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
-                      </Link>
-                    ))}
+                    {searchResults.map((res, i) => {
+                      const Icon = res.icon;
+                      return (
+                        <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-center border border-slate-100 transition-all duration-500">
+                          <div className="flex items-center gap-4 min-w-0 flex-1">
+                              <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary/5 transition-all">
+                                <Icon className="h-5 w-5" />
+                              </div>
+                              <div className="text-left min-w-0 flex-1">
+                                <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>
+                                <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black rounded mt-1 uppercase">{res.type}</Badge>
+                              </div>
+                          </div>
+                          <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
+                        </Link>
+                      )
+                    })}
                  </div>
               </div>
            )}

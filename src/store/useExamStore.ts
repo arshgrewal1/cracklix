@@ -9,9 +9,9 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional CBT Store v50.2.
- * FIXED: Removed "use server" - synchronous Zustand hooks are strictly client-side.
- * FIXED: Removed duplicate property declaration in addViolation.
+ * @fileOverview Institutional CBT Store v51.0.
+ * FIXED: Directive set to "use client" as synchronous state hooks are strictly client-side.
+ * FIXED: Purged duplicate key declaration in addViolation node.
  */
 
 export interface ExamStoreState {
