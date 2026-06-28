@@ -40,8 +40,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Student Home - Standardized PWA v47.0.
- * UPDATED: Integrated profile linking and expanded Quick Tools for header-less navigation.
+ * @fileOverview Student Home - Standardized PWA v47.1.
+ * UPDATED: Integrated Title Case normalization and refined internal navigation.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();

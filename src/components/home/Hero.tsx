@@ -24,7 +24,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Hero Hub v107.0.
+ * @fileOverview Institutional Hero Hub v107.1.
  * UPDATED: Removed forced uppercase from headlines and normalized casing.
  */
 export default function Hero() {

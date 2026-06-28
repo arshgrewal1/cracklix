@@ -97,38 +97,29 @@ export default function Navbar() {
     return <nav className="w-full border-b border-slate-100 bg-white h-[72px] md:h-[112px]" />;
   }
 
-  // APP MODE LOGIC: Hide top navbar on mobile if authenticated and on internal app screens
-  const isAppScreen = user && (
-    pathname === '/' || 
-    pathname.startsWith('/dashboard') || 
-    pathname.startsWith('/my-exams') || 
-    pathname.startsWith('/mocks') || 
-    pathname.startsWith('/pass') || 
-    pathname.startsWith('/profile') || 
-    pathname.startsWith('/exams') || 
-    pathname.startsWith('/notes') || 
-    pathname.startsWith('/pyqs') || 
-    pathname.startsWith('/current-affairs') || 
-    pathname.startsWith('/leaderboard') ||
-    pathname.startsWith('/support') ||
-    pathname.startsWith('/analytics') ||
-    pathname.startsWith('/bookmarks') ||
-    pathname.startsWith('/revision')
-  );
-
-  if (isAppScreen) {
+  // IF LOGGED IN: Hide top navbar on mobile to avoid duplicate navigation (App Mode)
+  if (user) {
     return (
       <>
-        {/* Desktop Header: Visible only on larger screens */}
+        {/* Desktop Header */}
         <div className="hidden md:block sticky top-0 z-50 w-full font-body bg-white border-b border-slate-100 shadow-sm transition-all pt-safe">
            {renderNavbarContent()}
         </div>
-        {/* Mobile Spacer: Removes header height but keeps safe area padding for notch/status bar */}
-        <div className="md:hidden pt-safe w-full" />
+        
+        {/* Mobile Safe Area Spacer: Content starts below status bar with clean border */}
+        <div className="md:hidden pt-safe w-full bg-white border-b border-slate-50 sticky top-0 z-50 shadow-sm" />
+
+        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+          <SheetContent side="left" className="w-[280px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
+            <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Hub</SheetDescription></SheetHeader>
+            <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
+          </SheetContent>
+        </Sheet>
       </>
     );
   }
 
+  // GUEST MODE: Show full header (Landing Page)
   return (
     <div className="sticky top-0 z-50 w-full font-body bg-white border-b border-slate-100 shadow-sm transition-all pt-safe">
       {renderNavbarContent()}
