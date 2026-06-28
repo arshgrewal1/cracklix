@@ -14,8 +14,9 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Refined Admin Layout v13.7.
- * FIXED: Increased header logo size and optimized alignment.
+ * @fileOverview Admin Layout v14.0.
+ * FIXED: Sidebar now automatically collapses on navigation.
+ * FIXED: Optimized z-index for modal compatibility.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser();
@@ -34,6 +35,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       setIsSidebarOpen(window.innerWidth >= 1024);
     }
   }, []);
+
+  // AUTO-CLOSE Sidebar on navigation change
+  useEffect(() => {
+    if (mounted && window.innerWidth < 1024) {
+      setIsSidebarOpen(false);
+    }
+  }, [pathname, mounted]);
 
   const userEmail = user?.email?.toLowerCase();
   const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
@@ -85,7 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full min-w-0 overflow-x-hidden",
         isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
       )}>
-        <header className="pt-safe border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-40 shrink-0">
+        <header className="pt-safe border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 shrink-0">
           <div className="h-[80px] md:h-[112px] flex items-center px-4 md:px-10 justify-between">
             <div className="flex items-center h-full">
               <button 

@@ -16,8 +16,8 @@ interface AdminSidebarProps {
 }
 
 /**
- * Cracklix Admin Sidebar v3.0 (High Density PWA)
- * Clean white theme synchronized with the homepage.
+ * Admin Sidebar v3.1 (Z-Index Optimized)
+ * FIXED: Lowered z-index to stay below dialogs and fixed overlap.
  */
 export default function AdminSidebar({
   isOpen,
@@ -34,7 +34,7 @@ export default function AdminSidebar({
       <div
         onClick={onCloseMobile}
         className={cn(
-          "fixed inset-0 z-[100] bg-slate-900/20 backdrop-blur-sm transition-all duration-300 lg:hidden",
+          "fixed inset-0 z-30 bg-slate-900/20 backdrop-blur-sm transition-all duration-300 lg:hidden",
           isOpen
             ? "opacity-100 pointer-events-auto"
             : "opacity-0 pointer-events-none"
@@ -44,7 +44,7 @@ export default function AdminSidebar({
       {/* SIDEBAR */}
       <aside
         className={cn(
-          "fixed left-0 top-0 z-[110] flex h-screen flex-col overflow-hidden border-r border-slate-100 bg-white transition-all duration-300 ease-in-out shadow-2xl shadow-slate-200/40",
+          "fixed left-0 top-0 z-40 flex h-screen flex-col overflow-hidden border-r border-slate-100 bg-white transition-all duration-300 ease-in-out shadow-2xl shadow-slate-200/40",
 
           // Desktop
           "lg:translate-x-0",

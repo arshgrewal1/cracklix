@@ -9,8 +9,8 @@ import { buttonVariants } from "@/components/ui/button"
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 /**
- * @fileOverview Hardened Calendar Hub v17.7 (react-day-picker v9 API).
- * FIXED: Chevron orientation type compliance and prop names for production build.
+ * @fileOverview Hardened Calendar Hub v17.8 (react-day-picker v9 API).
+ * FIXED: Chevron orientation mapping for production build stability.
  */
 function Calendar({
   className,
@@ -55,7 +55,7 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        Chevron: ({ orientation }: { orientation?: "left" | "right" | "up" | "down" }) => {
+        Chevron: ({ orientation }) => {
           if (orientation === "left") return <ChevronLeft className="h-4 w-4" />;
           if (orientation === "right") return <ChevronRight className="h-4 w-4" />;
           return <ChevronRight className="h-4 w-4" />;
