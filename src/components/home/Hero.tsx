@@ -24,8 +24,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Hero Hub v109.0.
- * UPDATED: Title Case normalization and refined logo scaling.
+ * @fileOverview Institutional Hero Hub v110.0.
+ * UPDATED: Title Case normalization and refined typography scale.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -167,7 +167,7 @@ function QuickActionCard({ boardId, label, href }: { boardId: string, label: str
           </div>
         </div>
         <div className="min-w-0">
-           <h3 className="text-[12px] md:text-lg font-black tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-1">
+           <h3 className="text-[12px] md:text-lg font-bold tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-1">
               {label}
            </h3>
         </div>

@@ -13,8 +13,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Top Rankers Preview Hub v19.0.
- * UPDATED: Replaced institutional jargon and optimized mobile layout.
+ * @fileOverview Top Rankers Preview Hub v20.0.
+ * UPDATED: Title Case normalization and ensured full name visibility.
  */
 export default function MeritPreview() {
   const db = useFirestore();
@@ -57,30 +57,30 @@ export default function MeritPreview() {
            </Button>
         </div>
 
-        <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 gap-3 md:grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 md:gap-8 lg:gap-10">
+        <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 gap-3 md:grid md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 md:gap-8 lg:gap-10">
            {resultsLoading ? (
-              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="flex-shrink-0 w-[23%] h-24 md:h-64 md:w-full rounded-2xl md:rounded-[3rem] bg-white" />)
+              Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="flex-shrink-0 w-[45%] h-48 md:h-72 md:w-full rounded-2xl md:rounded-[3rem] bg-white" />)
            ) : topRankers.map((res, i) => {
               const name = (res.userName && res.userName !== 'Aspirant' && !res.userName.includes('@')) ? res.userName : (res.userEmail?.split('@')[0] || "Student");
               const cleanName = name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
               return (
-                 <div key={res.id} className="flex-shrink-0 w-[23%] md:w-full snap-start h-full">
-                    <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 group overflow-hidden bg-white p-3 md:p-10 flex flex-col justify-center rounded-2xl md:rounded-[4rem] h-full min-h-[110px] md:min-h-[300px]">
-                       <div className="flex flex-col items-center text-center space-y-2 md:space-y-6">
+                 <div key={res.id} className="flex-shrink-0 w-[45%] md:w-full snap-start h-full">
+                    <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 group overflow-hidden bg-white p-4 md:p-10 flex flex-col justify-center rounded-2xl md:rounded-[4rem] h-full min-h-[160px] md:min-h-[340px]">
+                       <div className="flex flex-col items-center text-center space-y-3 md:space-y-6">
                           <div className="relative shrink-0">
-                             <StudentAvatar profile={{ name: cleanName, gender: res.gender }} className="h-10 w-10 md:h-24 md:w-24 rounded-xl md:rounded-[2rem] border border-slate-50 shadow-inner group-hover:scale-110 transition-transform" />
+                             <StudentAvatar profile={{ name: cleanName, gender: res.gender }} className="h-12 w-12 md:h-24 md:w-24 rounded-xl md:rounded-[2rem] border border-slate-50 shadow-inner group-hover:scale-105 transition-transform" />
                              <div className={cn(
-                                "absolute -bottom-1.5 -right-1.5 h-4 w-4 md:h-10 md:w-10 rounded-lg md:rounded-xl flex items-center justify-center text-white text-[8px] md:text-sm font-bold shadow-xl border-2 border-white transition-all",
+                                "absolute -bottom-1.5 -right-1.5 h-5 w-5 md:h-10 md:w-10 rounded-lg md:rounded-xl flex items-center justify-center text-white text-[9px] md:text-sm font-bold shadow-xl border-2 border-white transition-all",
                                 i === 0 ? "bg-amber-400" : i === 1 ? "bg-slate-300" : "bg-orange-400"
                              )}>
                                 {i + 1}
                              </div>
                           </div>
-                          <div className="min-w-0 w-full space-y-0.5 md:space-y-1">
-                             <p className="font-bold text-[11px] md:text-xl text-[#0F172A] truncate leading-none tracking-tight">{cleanName}</p>
+                          <div className="min-w-0 w-full space-y-1 md:space-y-2">
+                             <p className="font-bold text-[13px] md:text-xl text-[#0F172A] leading-tight tracking-tight break-words">{cleanName}</p>
                              <div className="flex flex-col items-center">
-                                <p className="text-[9px] md:text-sm font-bold text-slate-400 tracking-tight tabular-nums">Score: {Math.round(res.score)}</p>
+                                <p className="text-[10px] md:text-sm font-bold text-slate-400 tracking-tight tabular-nums">Score: {Math.round(res.score)}</p>
                              </div>
                           </div>
                        </div>
