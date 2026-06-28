@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useSearchParams, useRouter } from "next/navigation"
@@ -29,8 +30,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v15.0.
- * FIXED: Restored missing RefreshCw import and hardened Razorpay handshake.
+ * @fileOverview Institutional Checkout Hub v16.0.
+ * UPDATED: Standardized to Razorpay Gateway.
  */
 
 export default function CheckoutPage() {
@@ -68,7 +69,7 @@ function CheckoutContent() {
       setOnlineProcessing(true);
       try {
         await activateFreePass(user.uid, planId);
-        toast({ title: "Pass Activated", description: "Your free preparation tier is now live." });
+        toast({ title: "Pass Activated", description: "Your free tier is now live." });
         router.push("/dashboard");
       } catch (e) {
         toast({ variant: "destructive", title: "Activation Failed" });
@@ -97,7 +98,7 @@ function CheckoutContent() {
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Cracklix",
-        description: `Premium Pass: ${planData.name}`,
+        description: `Pass: ${planData.name}`,
         image: "/logo/cracklix-icon.png",
         order_id: orderData.id,
         handler: async (response: any) => {
@@ -114,51 +115,38 @@ function CheckoutContent() {
             });
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-               toast({ title: "Payment Successful", description: "Your elite pass is now active across all devices." });
+               toast({ title: "Payment Successful", description: "Your Elite Pass is now active." });
                router.push("/payment/success?order_id=" + response.razorpay_order_id);
             } else {
-               throw new Error(verifyData.error || "Registry sync failed.");
+               throw new Error(verifyData.error || "Verification failed.");
             }
           } catch (err: any) {
-            toast({ variant: "destructive", title: "Verification Failed", description: err.message });
+            toast({ variant: "destructive", title: "Sync Error", description: err.message });
           } finally {
             setOnlineProcessing(false);
           }
         },
         prefill: {
-          name: profile?.name || user?.displayName || "",
+          name: profile?.name || "",
           email: user.email || "",
           contact: profile?.phone?.replace(/\s+/g, '') || ""
         },
-        theme: {
-          color: "#2563EB"
-        },
-        modal: {
-           ondismiss: () => setOnlineProcessing(false)
-        }
+        theme: { color: "#2563EB" },
+        modal: { ondismiss: () => setOnlineProcessing(false) }
       };
 
-      if ((window as any).Razorpay) {
-        const rzp = new (window as any).Razorpay(options);
-        rzp.open();
-      } else {
-        throw new Error("Payment gateway SDK failed to load. Please refresh.");
-      }
+      const rzp = new (window as any).Razorpay(options);
+      rzp.open();
 
     } catch (e: any) {
-      console.error("[RAZORPAY_HANDSHAKE_ERROR]:", e);
       setErrorMessage(e.message);
-      toast({ 
-        variant: "destructive", 
-        title: "Order Blocked", 
-        description: e.message 
-      });
+      toast({ variant: "destructive", title: "Gateway Error", description: e.message });
       setOnlineProcessing(false);
     }
   };
 
   if (planLoading) return <div className="h-screen flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>
-  if (!planData) return <div className="h-screen flex flex-col items-center justify-center text-slate-300 font-black uppercase text-xs gap-4"><Zap className="h-10 w-10" /> Plan Not Registered</div>
+  if (!planData) return <div className="h-screen flex flex-col items-center justify-center text-slate-300 font-bold uppercase text-xs gap-4"><Zap className="h-10 w-10" /> Node Missing</div>
 
   const upiId = settings?.upiId || "arshdeepgrewal1122-1@oksbi";
 
@@ -172,64 +160,64 @@ function CheckoutContent() {
            <button onClick={() => router.back()} className="h-10 w-10 md:h-12 md:w-12 rounded-xl border border-slate-200 bg-white flex items-center justify-center hover:bg-slate-50 transition-all">
               <ArrowLeft className="h-5 w-5" />
            </button>
-           <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight leading-none">Checkout Hub</h1>
+           <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Checkout Hub</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16">
            <div className="lg:col-span-7 space-y-10">
               
               {errorMessage && (
-                 <div className="p-5 bg-rose-50 border border-rose-100 rounded-[2rem] flex items-start gap-4 animate-in fade-in duration-500">
+                 <div className="p-5 bg-rose-50 border border-rose-100 rounded-[2rem] flex items-start gap-4">
                     <AlertCircle className="h-6 w-6 text-rose-500 shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                       <p className="text-xs font-black text-rose-900 uppercase tracking-widest">Gateway Error</p>
+                       <p className="text-xs font-black text-rose-900 uppercase">Gateway Error</p>
                        <p className="text-sm font-medium text-rose-600 leading-relaxed">{errorMessage}</p>
-                       <Button variant="ghost" onClick={handlePaymentInitiation} className="text-rose-700 h-8 p-0 hover:bg-transparent font-black uppercase text-[10px] gap-2 mt-2">
-                          <RefreshCw className="h-3 w-3" /> Retry Handshake
+                       <Button variant="ghost" onClick={handlePaymentInitiation} className="text-rose-700 h-8 p-0 font-bold uppercase text-[10px] gap-2 mt-2">
+                          <RefreshCw className="h-3 w-3" /> Retry Sync
                        </Button>
                     </div>
                  </div>
               )}
 
               <Tabs defaultValue="online" className="w-full">
-                 <TabsList className="bg-slate-100 p-1.5 h-14 rounded-2xl w-full mb-10 grid grid-cols-2 shadow-inner border border-slate-200">
-                    <TabsTrigger value="online" className="rounded-xl font-bold text-sm h-full flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all">
+                 <TabsList className="bg-slate-100 p-1.5 h-14 rounded-2xl w-full mb-10 grid grid-cols-2">
+                    <TabsTrigger value="online" className="rounded-xl font-bold text-sm h-full flex items-center justify-center gap-2 data-[state=active]:bg-white shadow-sm transition-all">
                        <ShieldCheck className="h-3.5 w-3.5" /> Secure Gateway
                     </TabsTrigger>
                     {planData.price > 0 && (
-                       <TabsTrigger value="manual" className="rounded-xl font-bold text-sm h-full flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all">
+                       <TabsTrigger value="manual" className="rounded-xl font-bold text-sm h-full flex items-center justify-center gap-2 data-[state=active]:bg-white shadow-sm transition-all">
                           <Gem className="h-3.5 w-3.5" /> Manual Verify
                        </TabsTrigger>
                     )}
                  </TabsList>
 
-                 <TabsContent value="online" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                 <TabsContent value="online" className="animate-in fade-in slide-in-from-bottom-2">
                     <Card className="border-none shadow-5xl rounded-[3rem] bg-white p-8 md:p-14 text-center border border-slate-100">
                        <div className="mb-12 space-y-3">
-                          <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto text-blue-600 shadow-inner mb-6">
+                          <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto text-blue-600 mb-6 shadow-inner">
                              <ShieldCheck className="h-8 w-8" />
                           </div>
                           <h2 className="text-2xl font-black text-[#0F172A]">Direct Activation</h2>
-                          <p className="text-slate-500 font-medium max-w-sm mx-auto leading-relaxed text-sm">Instant prep-node activation via encrypted Razorpay gateway.</p>
+                          <p className="text-slate-500 font-medium max-w-sm mx-auto text-sm">Instant access via encrypted Razorpay gateway.</p>
                        </div>
-                       <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black text-sm rounded-full shadow-3xl border-none transition-all active:scale-95">
+                       <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black text-sm rounded-full shadow-3xl border-none transition-all">
                           {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Zap className="h-5 w-5 mr-2" /> Pay ₹{planData.price} Now</>}
                        </Button>
                     </Card>
                  </TabsContent>
 
-                 <TabsContent value="manual" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+                 <TabsContent value="manual" className="animate-in fade-in slide-in-from-bottom-2">
                     <Card className="border-none shadow-5xl rounded-[3rem] bg-white p-8 md:p-14 space-y-10 border border-slate-100">
                        <div className="flex flex-col items-center gap-8">
                           <div className="relative h-52 w-52 p-4 bg-slate-50 rounded-[2rem] border-2 border-dashed border-slate-200">
                             <Image src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent('upi://pay?pa='+upiId+'&pn=Cracklix&am='+planData.price+'&cu=INR')}`} alt="UPI QR" fill sizes="200px" className="object-contain p-4" unoptimized />
                           </div>
                           <div className="w-full p-4 bg-slate-900 rounded-xl flex items-center justify-between shadow-2xl">
-                             <div className="text-left min-w-0">
-                                <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Registry VPA</p>
+                             <div className="text-left min-w-0 px-2">
+                                <p className="text-[8px] font-black text-slate-500 uppercase">Registry VPA</p>
                                 <p className="text-sm font-black text-white truncate">{upiId}</p>
                              </div>
-                             <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(upiId); toast({title:"Copied"}); }} className="text-primary hover:bg-white/5"><Copy className="h-5 w-5" /></Button>
+                             <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(upiId); toast({title:"Copied"}); }} className="text-primary"><Copy className="h-5 w-5" /></Button>
                           </div>
                        </div>
                        <div className="space-y-6 pt-6 border-t border-slate-50">
@@ -249,11 +237,9 @@ function CheckoutContent() {
                                     planId, 
                                     transactionId: utr 
                                   }); 
-                                  toast({ title: "Verification Staged", description: "Team node will audit shortly." }); 
+                                  toast({ title: "Audit Staged", description: "Team node will verify shortly." }); 
                                   router.push("/dashboard"); 
-                                } catch(e) { 
-                                  toast({variant: "destructive", title:"Sync Failed"}); 
-                                } finally { setOnlineProcessing(false); }
+                                } catch(e) { toast({variant: "destructive", title:"Sync Failed"}); } finally { setOnlineProcessing(false); }
                              }}
                              disabled={onlineProcessing}
                              className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-xs rounded-full shadow-2xl border-none transition-all"
@@ -267,26 +253,26 @@ function CheckoutContent() {
            <div className="lg:col-span-5">
               <Card className="border-none shadow-5xl rounded-[3.5rem] bg-[#0B1528] text-white p-10 md:p-14 sticky top-32 border border-white/5">
                  <div className="h-1 w-12 bg-primary rounded-full mb-8" />
-                 <div className="space-y-4">
+                 <div className="space-y-4 text-left">
                     <h3 className="text-3xl md:text-5xl font-black leading-[0.9] tracking-tighter">{planData.name}</h3>
-                    <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1">Premium Prep Pass</Badge>
+                    <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1">Premium Pass</Badge>
                  </div>
                  
                  <div className="mt-10 pt-10 border-t border-white/5 space-y-5">
                     {planData.features?.slice(0, 5).map((f: string, i: number) => (
                        <div key={i} className="flex items-center gap-3 text-slate-400">
                           <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
-                          <span className="text-[13px] font-bold tracking-tight leading-snug">{f}</span>
+                          <span className="text-[13px] font-bold tracking-tight">{f}</span>
                        </div>
                     ))}
                  </div>
 
                  <div className="mt-14 pt-8 border-t border-white/5 flex justify-between items-end">
                     <div className="text-left">
-                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Amount</p>
+                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total</p>
                        <span className="text-5xl font-black text-white tabular-nums tracking-tighter">₹{planData.price}</span>
                     </div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">INR</span>
+                    <span className="text-[10px] font-black text-slate-500 uppercase mb-3">INR</span>
                  </div>
               </Card>
            </div>

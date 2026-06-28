@@ -1,11 +1,12 @@
+
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { initializeFirebase } from '@/firebase/app';
 import { doc, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Production Razorpay Order Engine v2.1.
- * FIXED: Enhanced error logging and price auditing.
+ * @fileOverview Production Razorpay Order Engine v3.0.
+ * HARDENED: Secure price audit from Firestore and robust error propagation.
  */
 
 export async function POST(req: Request) {
@@ -19,9 +20,9 @@ export async function POST(req: Request) {
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!keyId || !keySecret) {
-      console.error("[RAZORPAY_CONFIG_ERROR]: Credentials not found in environment variables.");
+      console.error("[RAZORPAY_CONFIG_ERROR]: Credentials missing.");
       return NextResponse.json({ 
-        error: 'Payment service is temporarily unavailable. Please try again later.' 
+        error: 'Payment service is temporarily unavailable.' 
       }, { status: 503 });
     }
 
@@ -31,34 +32,30 @@ export async function POST(req: Request) {
     });
 
     if (!userId || !planId) {
-      return NextResponse.json({ error: 'Context Missing: userId and planId are required' }, { status: 400 });
+      return NextResponse.json({ error: 'User/Plan context missing' }, { status: 400 });
     }
 
     // 1. Audit Price from Registry
     const planSnap = await getDoc(doc(db, "passes", planId));
     if (!planSnap.exists()) {
-      return NextResponse.json({ error: 'Invalid plan node selected.' }, { status: 404 });
+      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
     }
     const planData = planSnap.data();
     const amount = Math.round(Number(planData.price) * 100);
 
     if (isNaN(amount) || amount < 100) {
-      return NextResponse.json({ error: 'Invalid plan price. Minimum amount is ₹1.' }, { status: 400 });
+      return NextResponse.json({ error: 'Invalid plan price (Min ₹1 required)' }, { status: 400 });
     }
 
-    // 2. Prepare Order Options
+    // 2. Create Order
     const options = {
       amount,
       currency: "INR",
-      receipt: `RCPT_${Date.now()}_${userId.slice(-4)}`,
-      notes: {
-        userId,
-        planId,
-        planName: planData.name
-      }
+      receipt: `CRK_${Date.now()}`,
+      notes: { userId, planId, planName: planData.name }
     };
 
-    console.log("[RAZORPAY_REQUEST]: Creating order for", planId, "Amount:", amount);
+    console.log("[RAZORPAY_INIT]: Creating order for", planId);
     const order = await instance.orders.create(options);
 
     return NextResponse.json({
@@ -69,11 +66,9 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error("[RAZORPAY_ORDER_FAILURE]:", error);
-    // Propagate actual Razorpay error if available
-    const msg = error?.error?.description || error.message || 'Payment processing failed. Please try again.';
+    console.error("[RAZORPAY_CRITICAL_FAILURE]:", error);
     return NextResponse.json({ 
-      error: msg 
+      error: error.message || 'Gateway handshake failed.' 
     }, { status: 500 });
   }
 }

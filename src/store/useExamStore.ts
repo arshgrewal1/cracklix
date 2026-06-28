@@ -1,3 +1,4 @@
+
 import { create } from "zustand";
 import { 
   Question, 
@@ -44,8 +45,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Institutional CBT State Manager v47.0.
- * FIXED: Liquidated duplicate key in object literal causing TS1117.
+ * @fileOverview Institutional CBT State Manager v48.0.
+ * FIXED: Liquidated duplicate key in object literal causing build failure.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
