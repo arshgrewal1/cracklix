@@ -13,7 +13,8 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Universal Search Hub.
- * FIXED: Added explicit React import and fixed cloneElement for React 19.
+ * FIXED: Added explicit React import for module resolution in React 19.
+ * FIXED: Standardized cloneElement usage.
  */
 
 export default function SearchPage() {
@@ -64,7 +65,7 @@ function SearchContent() {
        title: e.name, 
        type: "Exam Hub", 
        href: `/exams/view?id=${e.id}`, 
-       icon: <GraduationCap className="h-5 w-5" />
+       icon: <GraduationCap />
     }))
 
     const mockMatches = (mocks || []).filter((m: any) => 
@@ -74,7 +75,7 @@ function SearchContent() {
        title: m.title, 
        type: "Practice Test", 
        href: `/mocks/view?id=${m.id}`, 
-       icon: <Zap className="h-5 w-5" />
+       icon: <Zap />
     }))
 
     const notesMatches = (notes || []).filter((n: any) => 
@@ -84,7 +85,7 @@ function SearchContent() {
        title: n.title, 
        type: "Library", 
        href: `/notes`, 
-       icon: <FileText className="h-5 w-5" />
+       icon: <FileText />
     }))
 
     return [...examMatches, ...mockMatches, ...notesMatches]
@@ -126,14 +127,14 @@ function SearchContent() {
                       <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-center border border-slate-100 transition-all duration-500">
                          <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary/5 transition-all">
-                               {React.isValidElement(res.icon) ? React.cloneElement(res.icon as React.ReactElement<any>, { className: "h-5 w-5" }) : null}
+                               {React.cloneElement(res.icon as React.ReactElement, { className: "h-5 w-5" })}
                             </div>
                             <div className="text-left min-w-0 flex-1">
                                <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>
                                <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black rounded mt-1 uppercase">{res.type}</Badge>
                             </div>
                          </div>
-                         <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all" />
+                         <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
                       </Link>
                     ))}
                  </div>

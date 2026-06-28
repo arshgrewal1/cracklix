@@ -2,7 +2,6 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 /**
  * @fileOverview Production Capacitor Configuration for Cracklix Android.
- * Optimized for Live Server mode to support SSR and Payment Gateways.
  */
 
 const config: CapacitorConfig = {
@@ -10,7 +9,6 @@ const config: CapacitorConfig = {
   appName: 'Cracklix',
   webDir: 'out',
   server: {
-    // Primary: Load production URL to support dynamic API routes and payments
     url: 'https://cracklix.vercel.app',
     allowNavigation: ['*'],
     androidScheme: 'https',

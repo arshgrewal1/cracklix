@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -51,9 +50,9 @@ export default function SupportPage() {
   const [raisingLoading, setRaisingLoading] = useState(false)
   const [formData, setFormData] = useState({
     subject: "",
-    type: "PAYMENT",
+    type: "PAYMENT" as const,
     message: "",
-    priority: "MEDIUM",
+    priority: "MEDIUM" as const,
   })
 
   const ticketsQuery = useMemo(() => {

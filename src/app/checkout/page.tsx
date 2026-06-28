@@ -21,7 +21,7 @@ import {
   QrCode
 } from "lucide-react";
 import { useUser, useDoc, useFirestore } from "@/firebase";
-import { submitManualPayment } from "@/app/actions/payment";
+import { activateFreePass, submitManualPayment } from "@/app/actions/payment";
 import { doc } from "firebase/firestore";
 import Script from "next/script";
 import { Badge } from "@/components/ui/badge";
