@@ -123,7 +123,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         violations: state.violations,
         startTime: state.startTime,
         updatedAt: serverTimestamp()
-      }, { merge: true });
+      }, { merge: true }).catch(err => console.error("Store sync error:", err));
     }
   },
 
@@ -141,7 +141,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
          answers: newAnswers, 
          statusMap: newStatus, 
          updatedAt: serverTimestamp() 
-      }, { merge: true });
+      }, { merge: true }).catch(err => console.error("Store sync error:", err));
     }
   },
 
@@ -154,7 +154,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
     if (db && state.userId && state.mockId) {
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
-      setDoc(attemptRef, { statusMap: newStatus, updatedAt: serverTimestamp() }, { merge: true });
+      setDoc(attemptRef, { statusMap: newStatus, updatedAt: serverTimestamp() }, { merge: true }).catch(err => console.error("Store sync error:", err));
     }
   },
 
@@ -176,7 +176,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       setDoc(attemptRef, { 
         violations: newVal, 
         updatedAt: serverTimestamp() 
-      }, { merge: true });
+      }, { merge: true }).catch(err => console.error("Store sync error:", err));
     }
   }
 }));

@@ -4,7 +4,7 @@ import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Production Hardened v5.1)
+ * Razorpay Order API (Production Hardened v5.2)
  * Optimized for diagnostic visibility and secure price auditing.
  */
 
@@ -93,14 +93,12 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("[RAZORPAY_ORDER_CRITICAL_FAILURE]", error);
 
-    // Return detailed error structure to avoid empty {} in frontend
     return NextResponse.json(
       {
         success: false,
         error: error?.message || "Internal payment processing error.",
-        reason: "The server encountered a failure while contacting Razorpay.",
-        code: error?.code || "INTERNAL_ERROR",
-        details: process.env.NODE_ENV === 'development' ? error : undefined
+        reason: error?.description || error?.message || "The server encountered a failure while contacting Razorpay.",
+        code: error?.code || "INTERNAL_ERROR"
       },
       { status: 500 }
     );

@@ -109,22 +109,14 @@ function CheckoutContent() {
         }),
       });
 
-      const errorText = await res.text();
-      let orderData;
-      
-      try {
-        orderData = JSON.parse(errorText);
-      } catch (e) {
-        console.error("[JSON_PARSE_ERROR]", errorText);
-        throw new Error("Server returned a malformed response. Please check your network.");
-      }
+      const responseData = await res.json();
 
       if (!res.ok) {
-        console.error("[ORDER_API_ERROR]", { status: res.status, data: orderData });
+        console.error("[ORDER_API_ERROR]", responseData);
         throw new Error(
-          orderData.reason || 
-          orderData.error || 
-          `Order initialization failed (${res.status})`
+          responseData.reason || 
+          responseData.error || 
+          `Order initialization failed with status ${res.status}`
         );
       }
 
@@ -133,12 +125,12 @@ function CheckoutContent() {
       }
 
       const options = {
-        key: orderData.key,
-        amount: orderData.amount,
-        currency: orderData.currency,
+        key: responseData.key,
+        amount: responseData.amount,
+        currency: responseData.currency,
         name: "Cracklix",
         description: `Elite Pass: ${planData.name}`,
-        order_id: orderData.orderId,
+        order_id: responseData.orderId,
         handler: async function (response: any) {
           setOnlineProcessing(true);
           try {
