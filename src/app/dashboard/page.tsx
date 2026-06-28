@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, isValidElement, cloneElement, ReactElement } from "react"
@@ -240,7 +239,7 @@ function MetricItem({ label, val, icon }: { label: string, val: string | number,
   return (
     <Card className="border-none shadow-lg bg-white p-4 md:p-6 rounded-2xl text-left group border border-slate-100 min-w-0">
       <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-primary/5 shadow-inner shrink-0">
-        {isValidElement(icon) && cloneElement(icon as ReactElement<any>, { className: "h-5 w-5" })}
+        {isValidElement(icon) ? cloneElement(icon as ReactElement<{ className?: string }>, { className: "h-5 w-5" }) : icon}
       </div>
       <div className="text-[18px] md:text-2xl font-black text-[#0F172A] leading-none truncate tabular-nums">{val}</div>
       <p className="text-[11px] font-bold tracking-tight text-slate-400 mt-2">{label}</p>
