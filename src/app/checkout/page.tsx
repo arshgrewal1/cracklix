@@ -19,8 +19,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v10.0.
- * Optimized for secure gateway bridging and real-time pass activation.
+ * @fileOverview Institutional Checkout Hub v11.0.
+ * FIXED: Enhanced error handling and loading states for Cashfree order creation.
  */
 
 export default function CheckoutPage() {
@@ -69,7 +69,11 @@ function CheckoutContent() {
     const cf = (window as any).Cashfree;
     
     if (!cf) {
-       toast({ variant: "destructive", title: "Gateway Error", description: "Payment engine failed to initialize." });
+       toast({ 
+         variant: "destructive", 
+         title: "Gateway Error", 
+         description: "Payment engine failed to initialize. Please refresh the page." 
+       });
        setOnlineProcessing(false);
        return;
     }
@@ -81,12 +85,15 @@ function CheckoutContent() {
         body: JSON.stringify({ planId, userId: user.uid, origin: window.location.origin })
       });
 
+      const orderData = await orderRes.json();
+
       if (!orderRes.ok) {
-         const errData = await orderRes.json();
-         throw new Error(errData.error || "Order creation failed.");
+         throw new Error(orderData.error || "Order creation failed.");
       }
 
-      const orderData = await orderRes.json();
+      if (!orderData.payment_session_id) {
+         throw new Error("Missing payment session node from gateway.");
+      }
       
       const cashfreeInstance = cf({ mode: orderData.environment || 'sandbox' });
       await cashfreeInstance.checkout({
@@ -95,7 +102,12 @@ function CheckoutContent() {
       });
 
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Order Blocked", description: e.message });
+      toast({ 
+        variant: "destructive", 
+        title: "Order Blocked", 
+        description: e.message 
+      });
+    } finally {
       setOnlineProcessing(false);
     }
   };
@@ -108,7 +120,7 @@ function CheckoutContent() {
   return (
     <div className="min-h-screen bg-slate-50/50 font-body text-left">
       <Navbar />
-      <Script src="https://sdk.cashfree.com/js/v3/cashfree.js" />
+      <Script src="https://sdk.cashfree.com/js/v3/cashfree.js" strategy="lazyOnload" />
       
       <main className="container mx-auto px-4 md:px-6 py-8 md:py-16 max-w-6xl pb-40">
         <div className="flex items-center gap-4 mb-10">

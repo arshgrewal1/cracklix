@@ -4,8 +4,9 @@ import { initializeFirebase } from '@/firebase/app';
 import { doc, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Production Cashfree Order Engine v15.0.
+ * @fileOverview Production Cashfree Order Engine v16.0.
  * SECURITY: Validates pricing against Firestore registry before gateway handshake.
+ * FIXED: Improved error messaging and credential validation.
  */
 
 export async function POST(req: Request) {
@@ -15,17 +16,23 @@ export async function POST(req: Request) {
     
     const { firestore: db } = initializeFirebase();
 
+    // Use specific names for Cashfree credentials
     const clientId = process.env.CASHFREE_CLIENT_ID;
     const clientSecret = process.env.CASHFREE_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
-      return NextResponse.json({ error: 'Gateway Credentials Missing' }, { status: 500 });
+      console.error("[CASHFREE_CONFIG_ERROR]: Missing CASHFREE_CLIENT_ID or CASHFREE_CLIENT_SECRET environment variables.");
+      return NextResponse.json({ 
+        error: 'Payment service is temporarily unavailable. Please try again later.' 
+      }, { status: 503 });
     }
 
     // Configure SDK
     Cashfree.XClientId = clientId;
     Cashfree.XClientSecret = clientSecret;
-    const isProd = clientSecret.startsWith('cf_prod_');
+    
+    // Automatically detect environment based on key prefix or use explicit ENV
+    const isProd = !clientId.startsWith('TEST');
     Cashfree.XEnvironment = isProd ? Cashfree.Environment.PRODUCTION : Cashfree.Environment.SANDBOX;
 
     if (!userId || !planId) {
@@ -63,7 +70,7 @@ export async function POST(req: Request) {
         customer_phone: cleanPhone,
       },
       order_meta: {
-        return_url: `${secureOrigin}/payment/success?order_id={order_id}&plan=${encodeURIComponent(planId)}`,
+        return_url: `${secureOrigin}/payment/success?order_id={order_id}&plan=${encodeURIComponent(planData.name || planId)}`,
         notify_url: `${secureOrigin}/api/cashfree/webhook`
       },
       order_note: `Cracklix Pass: ${planData.name}`,
@@ -79,6 +86,7 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("[CASHFREE_CRITICAL]:", error?.response?.data || error);
-    return NextResponse.json({ error: 'Order Creation Failed' }, { status: 500 });
+    const errorMessage = error?.response?.data?.message || 'Payment processing failed. Please try again.';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
