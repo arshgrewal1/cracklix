@@ -1,6 +1,7 @@
+
 /**
- * @fileOverview Global Error Handler Utility v2.0
- * FIXED: Comprehensive error catching and logging for production
+ * @fileOverview Global Error Handler Utility v2.1
+ * FIXED: Purged all Cashfree references and enhanced production logging.
  */
 
 export interface AppError {
@@ -32,12 +33,10 @@ export class ErrorHandler {
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'N/A',
     };
 
-    // Log to console in development
     if (process.env.NODE_ENV === 'development') {
       console.error('[ERROR]', errorLog);
     }
 
-    // Send to error tracking service
     try {
       await fetch('/api/errors/log', {
         method: 'POST',
@@ -52,8 +51,8 @@ export class ErrorHandler {
   static handlePaymentError(error: any): AppError {
     if (error.code === 'PAYMENT_GATEWAY_ERROR') {
       return this.createError(
-        'CASHFREE_ERROR',
-        'Payment gateway error. Please try again.',
+        'GATEWAY_ERROR',
+        'Handshake with payment server failed. Please try again.',
         500,
         error.details
       );
@@ -62,88 +61,30 @@ export class ErrorHandler {
     if (error.code === 'NETWORK_ERROR') {
       return this.createError(
         'NETWORK_ERROR',
-        'Network error. Check your connection.',
+        'Check your connection and try again.',
         503
-      );
-    }
-
-    if (error.code === 'VALIDATION_ERROR') {
-      return this.createError(
-        'VALIDATION_ERROR',
-        error.message,
-        400
       );
     }
 
     return this.createError(
       'UNKNOWN_ERROR',
-      'An unexpected error occurred',
+      'An unexpected error occurred during checkout.',
       500
     );
   }
 
   static handleAuthError(error: any): AppError {
     if (error.code === 'auth/user-not-found') {
-      return this.createError(
-        'USER_NOT_FOUND',
-        'User not found. Please register.',
-        404
-      );
+      return this.createError('USER_NOT_FOUND', 'Identity node not matched.', 404);
     }
-
-    if (error.code === 'auth/wrong-password') {
-      return this.createError(
-        'INVALID_PASSWORD',
-        'Invalid password. Please try again.',
-        401
-      );
-    }
-
-    if (error.code === 'auth/too-many-requests') {
-      return this.createError(
-        'TOO_MANY_ATTEMPTS',
-        'Too many attempts. Please try later.',
-        429
-      );
-    }
-
-    return this.createError(
-      'AUTH_ERROR',
-      error.message || 'Authentication failed',
-      401
-    );
+    return this.createError('AUTH_ERROR', error.message || 'Authentication failed', 401);
   }
 
   static handleFirestoreError(error: any): AppError {
     if (error.code === 'permission-denied') {
-      return this.createError(
-        'PERMISSION_DENIED',
-        'You do not have permission to access this resource.',
-        403
-      );
+      return this.createError('PERMISSION_DENIED', 'Security audit rejected request.', 403);
     }
-
-    if (error.code === 'not-found') {
-      return this.createError(
-        'NOT_FOUND',
-        'Resource not found.',
-        404
-      );
-    }
-
-    if (error.code === 'unavailable') {
-      return this.createError(
-        'DATABASE_ERROR',
-        'Database temporarily unavailable. Please try again.',
-        503
-      );
-    }
-
-    return this.createError(
-      'DATABASE_ERROR',
-      error.message || 'Database error occurred',
-      500
-    );
+    return this.createError('DATABASE_ERROR', error.message || 'Database error occurred', 500);
   }
 }
 

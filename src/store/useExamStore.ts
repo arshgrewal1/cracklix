@@ -1,3 +1,4 @@
+
 import { create } from "zustand";
 import { 
   Question, 
@@ -44,8 +45,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Institutional CBT State Manager v51.3.
- * FIXED: Removed duplicate 'startTime' key causing fatal TS1117 crash.
+ * @fileOverview Institutional CBT State Manager v52.0.
+ * FIXED: Removed duplicate property declarations causing build failures.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,

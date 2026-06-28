@@ -5,8 +5,8 @@ import { initializeFirebase } from '@/firebase/app';
 import { doc, updateDoc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Razorpay Security Node v4.0.
- * SECURITY: Cryptographic HMAC SHA256 validation to prevent pass spoofing.
+ * @fileOverview Razorpay Security Node v5.0.
+ * SECURITY: Cryptographic HMAC SHA256 validation to prevent spoofing.
  */
 
 export async function POST(req: Request) {
@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     const finalExpiry = new Date();
     finalExpiry.setDate(now.getDate() + duration);
 
-    // 4. Update Aspirant Node (Grant Elite Tokens)
+    // 4. Update User Node (Grant Elite Tokens)
     const userRef = doc(db, 'users', userId);
     await updateDoc(userRef, {
       pass: {

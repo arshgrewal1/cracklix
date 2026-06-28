@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useSearchParams, useRouter } from "next/navigation"
@@ -29,8 +30,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v19.3.
- * FIXED: Restored RefreshCw import and hardened prefill logic for Razorpay Test Mode.
+ * @fileOverview Institutional Checkout Hub v20.0.
+ * REPLACED: Cashfree logic completely removed for Razorpay.
  */
 
 export default function CheckoutPage() {
@@ -80,6 +81,7 @@ function CheckoutContent() {
     setOnlineProcessing(true);
     
     try {
+      // 1. Create order on server
       const orderRes = await fetch(`/api/razorpay/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -92,9 +94,7 @@ function CheckoutContent() {
          throw new Error(orderData.error || "Order creation failed.");
       }
 
-      // Hardened phone prefill for Test Mode (must be valid numeric string)
-      const cleanPhone = profile?.phone?.replace(/\D/g, '').slice(-10) || "9999999999";
-
+      // 2. Open Razorpay Modal
       const options = {
         key: orderData.key,
         amount: orderData.amount,
@@ -131,7 +131,7 @@ function CheckoutContent() {
         prefill: {
           name: profile?.name || user.displayName || "Aspirant",
           email: user.email || "student@cracklix.com",
-          contact: cleanPhone
+          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "9999999999"
         },
         theme: { color: "#2563EB" },
         modal: { 
@@ -140,14 +140,10 @@ function CheckoutContent() {
       };
 
       if (!(window as any).Razorpay) {
-         throw new Error("Razorpay SDK not loaded. Check connection.");
+         throw new Error("Payment gateway SDK not loaded.");
       }
 
       const rzp = new (window as any).Razorpay(options);
-      rzp.on('payment.failed', function (response: any) {
-         setErrorMessage(`Payment Failed: ${response.error.description}`);
-         setOnlineProcessing(false);
-      });
       rzp.open();
 
     } catch (e: any) {
@@ -210,7 +206,7 @@ function CheckoutContent() {
                              <ShieldCheck className="h-8 w-8" />
                           </div>
                           <h2 className="text-2xl font-black text-[#0F172A]">Direct Activation</h2>
-                          <p className="text-slate-500 font-medium max-w-sm mx-auto text-sm">Instant access via official encrypted Razorpay node.</p>
+                          <p className="text-slate-500 font-medium max-w-sm mx-auto text-sm">Instant access via official encrypted payment node.</p>
                        </div>
                        <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black text-sm rounded-full shadow-3xl border-none transition-all">
                           {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Zap className="h-5 w-5 mr-2" /> Pay ₹{planData.price} Now</>}
