@@ -38,12 +38,12 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Center v30.0.
- * FIXED: Resolved missing Link and Loader2 imports and Title Case labels.
+ * @fileOverview Support Center v31.0.
+ * FIXED: Restored missing Link and Loader2 imports, switched to Title Case labels.
  */
 export default function SupportPage() {
   const { user, profile } = useUser()
-  const db = useFirestore()
+  const db = dbInstance();
   const { toast } = useToast()
 
   const [isRaising, setIsRaising] = useState(false)
@@ -55,10 +55,16 @@ export default function SupportPage() {
     priority: "MEDIUM",
   })
 
+  // Local helper for DB instance to avoid hook timing issues in some environments
+  function dbInstance() {
+    return useFirestore();
+  }
+
   const ticketsQuery = useMemo(() => {
+    const db = dbInstance();
     if (!db || !user) return null
     return query(collection(db, "support_tickets"), where("userId", "==", user.uid))
-  }, [db, user])
+  }, [user])
 
   const { data: rawTickets, loading: ticketsLoading } = useCollection<any>(
     ticketsQuery
@@ -74,12 +80,13 @@ export default function SupportPage() {
   }, [rawTickets])
 
   const handleRaiseTicket = async () => {
+    const db = dbInstance();
     if (!user || !db) return
     if (!formData.subject || !formData.message) {
       toast({
         variant: "destructive",
-        title: "Wait",
-        description: "Subject and message are required.",
+        title: "Validation error",
+        description: "Subject and message are required nodes.",
       })
       return
     }
@@ -96,8 +103,8 @@ export default function SupportPage() {
         updatedAt: serverTimestamp(),
       })
       toast({
-        title: "Ticket Raised",
-        description: "Our team will review your issue shortly.",
+        title: "Ticket raised",
+        description: "Our team will audit your issue shortly.",
       })
       setIsRaising(false)
       setFormData({
@@ -109,8 +116,8 @@ export default function SupportPage() {
     } catch (e) {
       toast({
         variant: "destructive",
-        title: "Error",
-        description: "Could not raise ticket.",
+        title: "Transmission failure",
+        description: "Could not sync ticket to registry.",
       })
     } finally {
       setRaisingLoading(false)
@@ -121,13 +128,13 @@ export default function SupportPage() {
     <div className="min-h-screen bg-slate-50/30 text-left font-body">
       <Navbar />
 
-      <main className="container mx-auto px-4 md:px-6 py-12 md:py-20 max-w-6xl space-y-12">
+      <main className="container mx-auto px-4 md:px-6 py-12 md:py-20 max-w-6xl space-y-12 pb-40">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
           <div className="space-y-6 md:space-y-10">
             <div className="flex items-center gap-3">
               <MessageCircle className="h-5 w-5 text-primary" />
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                Support Center
+                Support desk
               </span>
             </div>
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-[#0F172A] tracking-tight leading-[0.9] break-words antialiased">
@@ -139,7 +146,7 @@ export default function SupportPage() {
           </div>
           <button
             onClick={() => setIsRaising(true)}
-            className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-3xl flex items-center gap-2 transition-all active:scale-95"
+            className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-3xl flex items-center gap-2 transition-all active:scale-95 border-none"
           >
             <Plus className="h-5 w-5" /> Raise New Ticket
           </button>
@@ -150,7 +157,7 @@ export default function SupportPage() {
             <div className="flex items-center gap-3 px-2">
               <History className="h-4 w-4 text-slate-400" />
               <h3 className="text-[11px] font-black uppercase tracking-widest text-slate-400">
-                My Support Tickets
+                My support history
               </h3>
             </div>
 
@@ -208,7 +215,7 @@ export default function SupportPage() {
                             <ShieldCheck className="h-10 w-10 text-primary" />
                           </div>
                           <p className="text-[9px] font-black text-primary uppercase tracking-widest">
-                            Team Response
+                            Team response
                           </p>
                           <p className="text-sm text-blue-900 font-semibold leading-relaxed italic">
                             "{t.adminReply}"
@@ -223,7 +230,7 @@ export default function SupportPage() {
               <div className="py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-30">
                 <MessageCircle className="h-16 w-16 mb-4 text-slate-300" />
                 <p className="text-xl font-bold uppercase tracking-widest">
-                  No Active Tickets
+                  No active tickets
                 </p>
               </div>
             )}
@@ -239,7 +246,7 @@ export default function SupportPage() {
                   <HelpCircle className="h-8 w-8 fill-current" />
                 </div>
                 <h3 className="text-3xl font-black uppercase leading-tight">
-                  Help Center
+                  Help center
                 </h3>
                 <p className="text-slate-400 text-sm font-medium leading-relaxed">
                   Browse help articles to solve your problems instantly.
@@ -268,11 +275,11 @@ export default function SupportPage() {
           <DialogHeader className="p-6 md:p-10 pb-4 shrink-0">
             <div className="flex justify-between items-center">
               <DialogTitle className="text-xl md:text-3xl font-black text-[#0F172A]">
-                Raise Support Ticket
+                Raise support ticket
               </DialogTitle>
               <button
                 onClick={() => setIsRaising(false)}
-                className="p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
+                className="p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer border-none bg-transparent"
               >
                 <X className="h-5 w-5 text-slate-400" />
               </button>
@@ -285,18 +292,18 @@ export default function SupportPage() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">
-                  Issue Type
+                  Issue type
                 </Label>
                 <select
                   value={formData.type}
                   onChange={(e) =>
                     setFormData({ ...formData, type: e.target.value as any })
                   }
-                  className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-4 font-semibold text-sm"
+                  className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-4 font-semibold text-sm outline-none"
                 >
-                  <option value="PAYMENT">Payment Issue</option>
-                  <option value="PASS">Pass Activation</option>
-                  <option value="MOCK_TEST">Mock Test Error</option>
+                  <option value="PAYMENT">Payment issue</option>
+                  <option value="PASS">Pass activation</option>
+                  <option value="MOCK_TEST">Mock test error</option>
                   <option value="TECHNICAL">App/Technical</option>
                   <option value="ACCOUNT">Account Hub</option>
                 </select>
@@ -310,7 +317,7 @@ export default function SupportPage() {
                   onChange={(e) =>
                     setFormData({ ...formData, priority: e.target.value as any })
                   }
-                  className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-4 font-semibold text-sm"
+                  className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-4 font-semibold text-sm outline-none"
                 >
                   <option value="LOW">Low</option>
                   <option value="MEDIUM">Medium</option>
@@ -321,28 +328,28 @@ export default function SupportPage() {
             </div>
             <div className="space-y-2">
               <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">
-                Subject Headline
+                Subject headline
               </Label>
               <Input
                 value={formData.subject}
                 onChange={(e) =>
                   setFormData({ ...formData, subject: e.target.value })
                 }
-                className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-bold"
+                className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-bold px-5"
                 placeholder="Brief subject"
               />
             </div>
             <div className="space-y-2">
               <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">
-                Statement of Issue
+                Statement of issue
               </Label>
               <Textarea
                 value={formData.message}
                 onChange={(e) =>
                   setFormData({ ...formData, message: e.target.value })
                 }
-                className="min-h-[120px] rounded-xl border-slate-200 bg-slate-50 font-medium"
-                placeholder="Describe your issue in detail"
+                className="min-h-[120px] rounded-xl border-slate-200 bg-slate-50 font-medium px-5"
+                placeholder="Describe your issue in detail..."
               />
             </div>
           </div>
@@ -356,7 +363,7 @@ export default function SupportPage() {
             <Button
               onClick={handleRaiseTicket}
               disabled={raisingLoading}
-              className="flex-1 bg-primary hover:bg-blue-700 text-white h-11 md:h-12 rounded-full font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              className="flex-1 bg-primary hover:bg-blue-700 text-white h-11 md:h-12 rounded-full font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2 border-none shadow-xl"
             >
               {raisingLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

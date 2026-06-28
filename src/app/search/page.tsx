@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
@@ -14,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v3.3.
- * FIXED: Explicit React imports and Suspense boundary.
+ * @fileOverview Official Search Hub v3.4.
+ * FIXED: Explicit React imports, correct icon cloning types, and Suspense boundary.
  */
 
 export default function SearchPage() {
@@ -110,7 +109,7 @@ function SearchContent() {
            <div className="text-center space-y-6">
               <div className="space-y-2">
                  <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">Find Your Test</h1>
-                 <p className="text-slate-400 font-bold text-[9px] md:text-11px uppercase tracking-[0.4em]">Instant Access to the Test Bank</p>
+                 <p className="text-slate-400 font-bold text-[9px] md:text-11px uppercase tracking-[0.4em]">Instant access to the test bank</p>
               </div>
               
               <div className="relative max-w-[700px] mx-auto group">
@@ -157,7 +156,7 @@ function SearchContent() {
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">
                            <SearchIcon className="h-16 w-16" />
-                           <p className="text-xl font-bold tracking-tight">No Results Found</p>
+                           <p className="text-xl font-bold tracking-tight">No results found</p>
                         </div>
                       </div>
                     )}

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useSearchParams, useRouter } from "next/navigation"
@@ -30,8 +29,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v13.0.
- * UPDATED: Replaced Cashfree with Razorpay integration.
+ * @fileOverview Institutional Checkout Hub v14.0.
+ * UPDATED: Full migration to Razorpay for production reliability.
  */
 
 export default function CheckoutPage() {
@@ -65,11 +64,12 @@ function CheckoutContent() {
     if (!user || !profile || !planData || onlineProcessing) return;
     setErrorMessage(null);
 
+    // 1. Free Plan Instant Activation
     if (planData.price === 0) {
       setOnlineProcessing(true);
       try {
         await activateFreePass(user.uid, planId);
-        toast({ title: "Pass Activated", description: "Your free tier is now live." });
+        toast({ title: "Pass Activated", description: "Your free preparation tier is now live." });
         router.push("/dashboard");
       } catch (e) {
         toast({ variant: "destructive", title: "Activation Failed" });
@@ -81,7 +81,7 @@ function CheckoutContent() {
     setOnlineProcessing(true);
     
     try {
-      // 1. Create Razorpay Order
+      // 2. Create Razorpay Order on Server
       const orderRes = await fetch(`/api/razorpay/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -91,22 +91,23 @@ function CheckoutContent() {
       const orderData = await orderRes.json();
 
       if (!orderRes.ok) {
-         throw new Error(orderData.error || "Order creation failed.");
+         throw new Error(orderData.error || "Order initialization failed.");
       }
 
-      // 2. Open Razorpay Modal
+      // 3. Configure Razorpay Options
       const options = {
         key: orderData.key,
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Cracklix",
-        description: `Purchase ${planData.name}`,
+        description: `Premium Pass: ${planData.name}`,
         image: "/logo/cracklix-icon.png",
         order_id: orderData.id,
         handler: async (response: any) => {
           setOnlineProcessing(true);
           try {
-            const verifyRes = await fetch('/api/razorpay/verify-payment', {
+            // 4. Secure Signature Verification
+            const verifyRes = await fetch('/api/razorpay/verify', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
@@ -117,10 +118,10 @@ function CheckoutContent() {
             });
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-               toast({ title: "Payment Successful", description: "Your elite pass is now active." });
+               toast({ title: "Payment Successful", description: "Your elite pass is now active across all devices." });
                router.push("/payment/success?order_id=" + response.razorpay_order_id);
             } else {
-               throw new Error(verifyData.error || "Verification failed");
+               throw new Error(verifyData.error || "Registry sync failed.");
             }
           } catch (err: any) {
             toast({ variant: "destructive", title: "Verification Failed", description: err.message });
@@ -129,9 +130,9 @@ function CheckoutContent() {
           }
         },
         prefill: {
-          name: profile?.name || "",
+          name: profile?.name || user?.displayName || "",
           email: user.email || "",
-          contact: profile?.phone || ""
+          contact: profile?.phone?.replace(/\s/g, '') || ""
         },
         theme: {
           color: "#2563EB"
@@ -141,11 +142,12 @@ function CheckoutContent() {
         }
       };
 
+      // 5. Open Razorpay Modal
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
 
     } catch (e: any) {
-      console.error("[RAZORPAY_ERROR]:", e);
+      console.error("[RAZORPAY_HANDSHAKE_ERROR]:", e);
       setErrorMessage(e.message);
       toast({ 
         variant: "destructive", 
@@ -268,7 +270,7 @@ function CheckoutContent() {
                  <div className="h-1 w-12 bg-primary rounded-full mb-8" />
                  <div className="space-y-4">
                     <h3 className="text-3xl md:text-5xl font-black leading-[0.9] tracking-tighter">{planData.name}</h3>
-                    <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1">Premium Prep Node</Badge>
+                    <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1">Premium Prep Pass</Badge>
                  </div>
                  
                  <div className="mt-10 pt-10 border-t border-white/5 space-y-5">
@@ -282,7 +284,7 @@ function CheckoutContent() {
 
                  <div className="mt-14 pt-8 border-t border-white/5 flex justify-between items-end">
                     <div className="text-left">
-                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Pass Amount</p>
+                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total Amount</p>
                        <span className="text-5xl font-black text-white tabular-nums tracking-tighter">₹{planData.price}</span>
                     </div>
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">INR</span>
