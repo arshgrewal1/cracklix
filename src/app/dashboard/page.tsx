@@ -25,7 +25,12 @@ import {
   Gem,
   Layers,
   AlertCircle,
-  User as UserIcon
+  User as UserIcon,
+  Search,
+  BookOpen,
+  Newspaper,
+  FileStack,
+  ShieldAlert
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -35,9 +40,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Student Home - Standardized PWA v46.0.
- * FIXED: Test title scaling and two-line clamping.
- * FIXED: Removed forced uppercase from labels.
+ * @fileOverview Student Home - Standardized PWA v47.0.
+ * UPDATED: Integrated profile linking and expanded Quick Tools for header-less navigation.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -91,7 +95,6 @@ export default function StudentDashboard() {
     return () => clearInterval(interval);
   }, [profile?.passExpiresAt]);
 
-  // Registry & Progress Hooks
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null
     return query(collection(db, "results"), where("userId", "==", user.uid))
@@ -109,7 +112,6 @@ export default function StudentDashboard() {
       const orphans = rawResults.filter(r => !validMockIds.has(r.mockId));
       
       if (orphans.length > 0) {
-        console.log(`[AUDIT] Found ${orphans.length} orphan result nodes. Liquidating...`);
         orphans.forEach(async (orphan) => {
           try {
             await deleteDoc(doc(db, "results", orphan.id));
@@ -159,7 +161,7 @@ export default function StudentDashboard() {
       toast({ 
         variant: "destructive", 
         title: "Test Unavailable", 
-        description: "This test has been removed from the registry. Refreshing your list." 
+        description: "This test has been removed from the registry." 
       });
       return;
     }
@@ -177,6 +179,7 @@ export default function StudentDashboard() {
 
   const isActive = profile?.passStatus === 'active';
   const isProfileIncomplete = !profile?.phone || !profile?.targetExam;
+  const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
 
   return (
     <div className="min-h-[100dvh] bg-slate-50/50 font-body pb-safe text-left">
@@ -207,16 +210,16 @@ export default function StudentDashboard() {
                 <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[80px] rounded-full pointer-events-none" />
                 <div className="relative z-10 flex flex-row items-center gap-4 md:gap-10">
                   <div className="relative shrink-0">
-                    <div className="relative">
+                    <Link href="/profile" className="relative block active:scale-95 transition-all">
                       <StudentAvatar profile={profile} className="h-14 w-14 md:h-28 md:w-28 border-[2px] md:border-[3px] border-white/10 rounded-xl md:rounded-3xl shadow-5xl bg-[#0F172A]" />
                       <div className="absolute -bottom-1 -right-1 bg-emerald-500 h-4 w-4 md:h-8 md:w-8 rounded-lg border border-[#0B1528] flex items-center justify-center text-white shadow-xl">
                           <ShieldCheck className="h-2 w-2 md:h-4 md:w-4" />
                       </div>
-                    </div>
+                    </Link>
                   </div>
                   <div className="flex-1 space-y-1.5 min-w-0 text-left">
-                    <div className="space-y-0.5">
-                        <h1 className="text-[26px] md:text-3xl font-black tracking-tight truncate">
+                    <Link href="/profile" className="space-y-0.5 block group/name">
+                        <h1 className="text-[26px] md:text-3xl font-black tracking-tight truncate group-hover/name:text-primary transition-colors">
                           {profile?.name || user?.displayName || "Student"}
                         </h1>
                         <div className="flex flex-wrap items-center justify-start gap-2">
@@ -231,7 +234,7 @@ export default function StudentDashboard() {
                             <Target className="h-3 w-3 text-primary" /> {profile?.targetExam || 'Punjab Exams'}
                           </div>
                         </div>
-                    </div>
+                    </Link>
                   </div>
                 </div>
               </section>
@@ -299,13 +302,34 @@ export default function StudentDashboard() {
                 </div>
               </Card>
 
+              {/* AUTHENTICATED APP NAVIGATION HUB */}
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl space-y-6">
-                 <h4 className="text-[12px] font-black text-slate-400 tracking-widest">Quick Tools</h4>
-                 <div className="grid grid-cols-1 gap-3">
-                    <QuickToolLink href="/my-exams" label="My Exams" icon={Target} />
+                 <h4 className="text-[12px] font-black text-slate-400 tracking-widest uppercase">Quick Tools</h4>
+                 <div className="grid grid-cols-1 gap-2 md:gap-3">
+                    <QuickToolLink href="/search" label="Search Bank" icon={Search} />
+                    <QuickToolLink href="/my-exams" label="My Exam Hub" icon={Target} />
                     <QuickToolLink href="/analytics" label="My Progress" icon={TrendingUp} />
                     <QuickToolLink href="/bookmarks" label="Saved MCQs" icon={Bookmark} />
+                    <QuickToolLink href="/profile" label="Profile Hub" icon={UserIcon} />
                  </div>
+
+                 <div className="h-px w-full bg-slate-50 my-2" />
+                 
+                 <h4 className="text-[12px] font-black text-slate-400 tracking-widest uppercase">Library</h4>
+                 <div className="grid grid-cols-1 gap-2 md:gap-3">
+                    <QuickToolLink href="/current-affairs" label="Current Affairs" icon={Newspaper} />
+                    <QuickToolLink href="/notes" label="Study Material" icon={BookOpen} />
+                    <QuickToolLink href="/pyqs" label="Old Papers" icon={FileStack} />
+                    <QuickToolLink href="/leaderboard" label="Hall of Rankers" icon={Trophy} />
+                 </div>
+
+                 {isAdmin && (
+                    <>
+                       <div className="h-px w-full bg-slate-50 my-2" />
+                       <h4 className="text-[12px] font-black text-primary uppercase tracking-widest">Management</h4>
+                       <QuickToolLink href="/admin" label="Admin Panel" icon={ShieldAlert} highlight />
+                    </>
+                 )}
               </div>
           </div>
         </div>
@@ -332,14 +356,17 @@ function MetricItem({ label, val, icon }: { label: string, val: string | number,
   )
 }
 
-function QuickToolLink({ href, label, icon: Icon }: any) {
+function QuickToolLink({ href, label, icon: Icon, highlight }: any) {
    return (
-      <Link href={href} className="flex items-center justify-between p-4 rounded-xl border border-slate-50 bg-slate-50/50 hover:bg-slate-100 transition-all active:scale-[0.98] group">
+      <Link href={href} className={cn(
+        "flex items-center justify-between p-3.5 rounded-xl border transition-all active:scale-[0.98] group",
+        highlight ? "border-primary/20 bg-primary/5 hover:bg-primary/10" : "border-slate-50 bg-slate-50/50 hover:bg-slate-100"
+      )}>
          <div className="flex items-center gap-3">
-            <Icon className="h-5 w-5 text-primary" />
-            <span className="text-[14px] font-semibold text-[#0F172A]">{label}</span>
+            <Icon className={cn("h-4.5 w-4.5", highlight ? "text-primary" : "text-slate-500 group-hover:text-primary")} />
+            <span className={cn("text-[13px] font-bold", highlight ? "text-primary" : "text-[#0F172A]")}>{label}</span>
          </div>
-         <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-all" />
+         <ChevronRight className={cn("h-3.5 w-3.5 transition-all group-hover:translate-x-0.5", highlight ? "text-primary/50" : "text-slate-300 group-hover:text-primary")} />
       </Link>
    )
 }

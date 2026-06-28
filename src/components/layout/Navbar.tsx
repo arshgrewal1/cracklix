@@ -97,12 +97,56 @@ export default function Navbar() {
     return <nav className="w-full border-b border-slate-100 bg-white h-[72px] md:h-[112px]" />;
   }
 
+  // APP MODE LOGIC: Hide top navbar on mobile if authenticated and on internal app screens
+  const isAppScreen = user && (
+    pathname === '/' || 
+    pathname.startsWith('/dashboard') || 
+    pathname.startsWith('/my-exams') || 
+    pathname.startsWith('/mocks') || 
+    pathname.startsWith('/pass') || 
+    pathname.startsWith('/profile') || 
+    pathname.startsWith('/exams') || 
+    pathname.startsWith('/notes') || 
+    pathname.startsWith('/pyqs') || 
+    pathname.startsWith('/current-affairs') || 
+    pathname.startsWith('/leaderboard') ||
+    pathname.startsWith('/support') ||
+    pathname.startsWith('/analytics') ||
+    pathname.startsWith('/bookmarks') ||
+    pathname.startsWith('/revision')
+  );
+
+  if (isAppScreen) {
+    return (
+      <>
+        {/* Desktop Header: Visible only on larger screens */}
+        <div className="hidden md:block sticky top-0 z-50 w-full font-body bg-white border-b border-slate-100 shadow-sm transition-all pt-safe">
+           {renderNavbarContent()}
+        </div>
+        {/* Mobile Spacer: Removes header height but keeps safe area padding for notch/status bar */}
+        <div className="md:hidden pt-safe w-full" />
+      </>
+    );
+  }
+
   return (
     <div className="sticky top-0 z-50 w-full font-body bg-white border-b border-slate-100 shadow-sm transition-all pt-safe">
+      {renderNavbarContent()}
+      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+        <SheetContent side="left" className="w-[280px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
+          <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Hub</SheetDescription></SheetHeader>
+          <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
+        </SheetContent>
+      </Sheet>
+    </div>
+  );
+
+  function renderNavbarContent() {
+    return (
       <nav className="w-full h-[72px] md:h-[112px]">
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
-          {/* LEFT: Menu + Logo (PWA Optimized) */}
+          {/* LEFT: Menu + Logo */}
           <div className="flex items-center shrink-0 gap-3 md:gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -195,15 +239,8 @@ export default function Navbar() {
           </div>
         </div>
       </nav>
-
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent side="left" className="w-[280px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
-          <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Hub</SheetDescription></SheetHeader>
-          <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
-        </SheetContent>
-      </Sheet>
-    </div>
-  );
+    );
+  }
 }
 
 function NavLink({ href, label, active }: { href: string; label: string; active?: boolean; }) {
