@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect, useMemo, Suspense } from "react"
+import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap } from "lucide-react"
@@ -121,7 +121,7 @@ function SearchContent() {
                       <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
                          <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
-                               {React.cloneElement(res.icon as React.ReactElement<any>, { className: "h-5 w-5" })}
+                               {isValidElement(res.icon) ? cloneElement(res.icon as ReactElement<any>, { className: "h-5 w-5" }) : null}
                             </div>
                             <div className="text-left min-w-0 flex-1">
                                <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>

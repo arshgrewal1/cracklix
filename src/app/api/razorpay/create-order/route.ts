@@ -4,7 +4,7 @@ import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Production Hardened v5.2)
+ * Razorpay Order API (Production Hardened v5.3)
  * Optimized for diagnostic visibility and secure price auditing.
  */
 
@@ -91,7 +91,11 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error("[RAZORPAY_ORDER_CRITICAL_FAILURE]", error);
+    console.error("[RAZORPAY_ORDER_CRITICAL_FAILURE]", {
+      message: error?.message,
+      stack: error?.stack,
+      raw: error
+    });
 
     return NextResponse.json(
       {

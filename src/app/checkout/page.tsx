@@ -13,10 +13,10 @@ import {
   Loader2,
   Copy,
   Gem,
-  ShieldCheck,
   CheckCircle2,
   AlertCircle,
   RefreshCw,
+  ShieldCheck,
 } from "lucide-react";
 import { useUser, useDoc, useFirestore } from "@/firebase";
 import { activateFreePass, submitManualPayment } from "@/app/actions/payment";
@@ -96,7 +96,6 @@ function CheckoutContent() {
     }
 
     setOnlineProcessing(true);
-
     console.log("[CHECKOUT REQUEST]", { planId, userId: user.uid });
 
     try {
@@ -109,28 +108,34 @@ function CheckoutContent() {
         }),
       });
 
-      const responseData = await res.json();
+      const responseText = await res.text();
+      let orderData;
+      try {
+        orderData = JSON.parse(responseText);
+      } catch (e) {
+        console.error("[JSON_PARSE_ERROR]", responseText);
+        throw new Error("Server returned non-JSON response. Check backend logs.");
+      }
 
       if (!res.ok) {
-        console.error("[ORDER_API_ERROR]", responseData);
-        throw new Error(
-          responseData.reason || 
-          responseData.error || 
-          `Order initialization failed with status ${res.status}`
-        );
+        console.error("[ORDER_API_ERROR]", orderData);
+        throw new Error(orderData.reason || orderData.error || `Server error: ${res.status}`);
       }
 
       if (!(window as any).Razorpay) {
         throw new Error("Razorpay SDK not loaded. Please refresh the page.");
       }
 
+      // Sanitize phone for Razorpay (must be 10 digits)
+      const contactNumber = profile?.phone?.replace(/\D/g, '').slice(-10) || "";
+
       const options = {
-        key: responseData.key,
-        amount: responseData.amount,
-        currency: responseData.currency,
+        key: orderData.key,
+        amount: orderData.amount,
+        currency: orderData.currency,
         name: "Cracklix",
         description: `Elite Pass: ${planData.name}`,
-        order_id: responseData.orderId,
+        order_id: orderData.orderId,
         handler: async function (response: any) {
           setOnlineProcessing(true);
           try {
@@ -162,7 +167,7 @@ function CheckoutContent() {
         prefill: {
           name: profile?.name || "Aspirant",
           email: user.email || "",
-          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "",
+          contact: contactNumber,
         },
         theme: { color: "#2563EB" },
         modal: {
@@ -174,6 +179,7 @@ function CheckoutContent() {
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on("payment.failed", function (resp: any) {
+        console.error("[RAZORPAY_FAILURE_EVENT]", resp.error);
         setErrorMessage(resp?.error?.description || "Transaction failed");
         setOnlineProcessing(false);
       });
@@ -223,7 +229,7 @@ function CheckoutContent() {
           <div className="p-6 mb-8 bg-rose-50 border border-rose-100 rounded-[1.5rem] flex items-start gap-4 animate-in slide-in-from-top-4">
             <AlertCircle className="h-6 w-6 text-rose-500 shrink-0" />
             <div className="flex-1 space-y-3">
-               <p className="font-bold text-rose-700 leading-tight">Order Audit Failure</p>
+               <p className="font-bold text-rose-700 leading-tight">Handshake Audit Failure</p>
                <p className="text-sm text-rose-600 font-medium">{errorMessage}</p>
                <Button variant="outline" size="sm" className="h-9 px-4 rounded-lg bg-white border-rose-200 text-rose-600 font-bold" onClick={handlePaymentInitiation}>
                   <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Handshake
