@@ -198,11 +198,6 @@ export interface Question {
   displayId?: string;
 }
 
-// Legacy Aliases
-export type Mock = MockTest;
-export type CurrentAffair = CurrentAffairHubItem;
-export type Notification = any; 
-
 export interface CurrentAffairHubItem {
   id: string;
   title: string;
@@ -267,3 +262,8 @@ export interface AttemptResult {
   accessLevel: AccessLevel;
   gender?: Gender;
 }
+
+// Aliases
+export type Mock = MockTest;
+export type CurrentAffair = CurrentAffairHubItem;
+export type Notification = any;

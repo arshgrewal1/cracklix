@@ -63,7 +63,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   violations: 0,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
-    const finalLang: LanguageDisplayMode = languageMode || "ENGLISH_PUNJABI";
+    const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
     const isResuming = resumeData && resumeData.status !== 'COMPLETED';
     
     set({
