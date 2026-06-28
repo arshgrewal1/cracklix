@@ -13,9 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v5.1.
+ * @fileOverview Official Search Hub v5.2.
  * FIXED: Explicit React imports and typed cloneElement API to resolve UMD and build blockers.
- * FIXED: Implemented Suspense boundary for Next.js 15 compatibility.
  */
 
 export default function SearchPage() {

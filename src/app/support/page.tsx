@@ -38,8 +38,8 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Official Support Center v34.2.
- * FIXED: Restored Link and Loader2 component references.
+ * @fileOverview Official Support Center v34.3.
+ * FIXED: Restored missing Link and Loader2 component references.
  */
 export default function SupportPage() {
   const { user, profile } = useUser()

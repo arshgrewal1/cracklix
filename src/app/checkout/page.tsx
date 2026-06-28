@@ -29,9 +29,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v19.2.
- * FIXED: Restored RefreshCw import.
- * FIXED: Hardened contact prefill to ensures 10-digit numeric string for Razorpay Test Mode success.
+ * @fileOverview Institutional Checkout Hub v19.3.
+ * FIXED: Restored RefreshCw import and hardened prefill logic for Razorpay Test Mode.
  */
 
 export default function CheckoutPage() {
@@ -65,7 +64,6 @@ function CheckoutContent() {
     if (!user || !profile || !planData || onlineProcessing) return;
     setErrorMessage(null);
 
-    // 0. Handle Free Plans
     if (planData.price === 0) {
       setOnlineProcessing(true);
       try {
@@ -82,7 +80,6 @@ function CheckoutContent() {
     setOnlineProcessing(true);
     
     try {
-      // 1. Create Server-Side Order
       const orderRes = await fetch(`/api/razorpay/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -95,7 +92,9 @@ function CheckoutContent() {
          throw new Error(orderData.error || "Order creation failed.");
       }
 
-      // 2. Open Razorpay Modal
+      // Hardened phone prefill for Test Mode (must be valid numeric string)
+      const cleanPhone = profile?.phone?.replace(/\D/g, '').slice(-10) || "9999999999";
+
       const options = {
         key: orderData.key,
         amount: orderData.amount,
@@ -107,7 +106,6 @@ function CheckoutContent() {
         handler: async (response: any) => {
           setOnlineProcessing(true);
           try {
-            // 3. Verify Payment
             const verifyRes = await fetch('/api/razorpay/verify', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -133,14 +131,17 @@ function CheckoutContent() {
         prefill: {
           name: profile?.name || user.displayName || "Aspirant",
           email: user.email || "student@cracklix.com",
-          // Razorpay test mode is strict about 10 digits numeric contact
-          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "9999999999"
+          contact: cleanPhone
         },
         theme: { color: "#2563EB" },
         modal: { 
           ondismiss: () => setOnlineProcessing(false) 
         }
       };
+
+      if (!(window as any).Razorpay) {
+         throw new Error("Razorpay SDK not loaded. Check connection.");
+      }
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on('payment.failed', function (response: any) {
