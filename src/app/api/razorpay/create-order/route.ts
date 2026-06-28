@@ -4,7 +4,7 @@ import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Enterprise-Grade v16.0)
+ * Razorpay Order API (Production Hardened v17.0)
  * Security: Strict price validation, environment auditing, and detailed diagnostic logging.
  */
 export async function POST(req: Request) {
@@ -18,11 +18,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, reason: "Incomplete identity tokens." }, { status: 400 });
     }
 
-    const keyId = process.env.RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
+    const keyId = process.env.RAZORPAY_KEY_ID?.trim();
+    const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
-    if (!keyId || !keySecret) {
-      console.error("[RAZORPAY_ORDER] Environment anomaly: Missing keys.");
+    if (!keyId || !keySecret || keyId === "" || keySecret === "") {
+      console.error("[RAZORPAY_ORDER] Environment anomaly: Missing or empty keys.");
       return NextResponse.json({ success: false, reason: "Invalid Razorpay API Keys" }, { status: 503 });
     }
 
@@ -41,12 +41,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, reason: "Invalid price node detected." }, { status: 400 });
     }
 
+    // Initialize Razorpay SDK
     const razorpay = new Razorpay({
       key_id: keyId,
       key_secret: keySecret,
     });
 
+    // Amount must be in Paise (Sub-units)
     const amountInPaise = Math.round(price * 100);
+
+    console.log("[RAZORPAY_ORDER] Creating order for amount:", amountInPaise);
 
     const order = await razorpay.orders.create({
       amount: amountInPaise,
@@ -55,7 +59,7 @@ export async function POST(req: Request) {
       notes: { userId, planId, planName: plan.name },
     });
 
-    console.log("Order Created Successfully:", order.id);
+    console.log("[RAZORPAY_ORDER] Order Created Successfully:", order.id);
 
     return NextResponse.json({
       success: true,
@@ -67,6 +71,13 @@ export async function POST(req: Request) {
 
   } catch (err: any) {
     console.error("[RAZORPAY_CRITICAL_FAILURE]", err);
+    
+    // Check for specific Razorpay auth errors
+    const errorMessage = err?.message || "";
+    if (errorMessage.toLowerCase().includes("api key") || errorMessage.toLowerCase().includes("secret")) {
+       return NextResponse.json({ success: false, reason: "Invalid Razorpay API Keys" }, { status: 401 });
+    }
+
     return NextResponse.json({ 
       success: false, 
       reason: err?.description || err?.message || "Internal payment node failure."

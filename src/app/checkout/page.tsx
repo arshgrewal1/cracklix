@@ -28,9 +28,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview High-Fidelity Checkout Hub v12.0.
+ * @fileOverview High-Fidelity Checkout Hub v12.5.
  * FIXED: Advanced error extraction and Razorpay mapping correction.
- * FIXED: Explicit React import to resolve JSX Intrinsic Elements resolution.
  */
 export default function CheckoutPage() {
   return (
@@ -64,11 +63,11 @@ function CheckoutContent() {
   const [verifyingCoupon, setVerifyingCoupon] = React.useState(false);
 
   const { data: settings } = useDoc<any>(
-    React.useMemo(() => dbInstance ? doc(dbInstance, "settings", "global") : null, [dbInstance])
+    React.useMemo(() => dbInstance ? doc(dbInstance, "settings", "global") : null), [dbInstance]
   );
 
   const { data: planData, loading: planLoading } = useDoc<any>(
-    React.useMemo(() => dbInstance && planId ? doc(dbInstance, "passes", planId) : null, [dbInstance, planId])
+    React.useMemo(() => dbInstance && planId ? doc(dbInstance, "passes", planId) : null), [dbInstance, planId]
   );
 
   React.useEffect(() => {
@@ -123,16 +122,8 @@ function CheckoutContent() {
         }),
       });
 
-      const responseText = await res.text();
-      let orderData;
+      const orderData = await res.json();
       
-      try {
-        orderData = JSON.parse(responseText);
-      } catch (parseErr) {
-        console.error("[CHECKOUT] Malformed JSON response:", responseText);
-        throw new Error("The server returned an invalid response. Payment node out of sync.");
-      }
-
       if (!res.ok) {
         console.error("[RAZORPAY_ORDER_API_ERROR]", orderData);
         throw new Error(orderData.reason || orderData.error || `Server error: ${res.status}`);
