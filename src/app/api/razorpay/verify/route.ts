@@ -5,7 +5,7 @@ import { initializeFirebase } from '@/firebase/app';
 import { doc, updateDoc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Razorpay Security Node v5.0.
+ * @fileOverview Razorpay Security Node v6.0.
  * SECURITY: Cryptographic HMAC SHA256 validation to prevent spoofing.
  */
 

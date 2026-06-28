@@ -14,8 +14,9 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v5.3.
+ * @fileOverview Official Search Hub v5.4.
  * FIXED: Explicit React imports and Suspense boundaries for Next.js 15.
+ * FIXED: Explicit typing for icon cloning to resolve UMD conflict.
  */
 
 export default function SearchPage() {
@@ -105,7 +106,7 @@ function SearchContent() {
       <main className="container mx-auto px-4 md:px-6 py-6 md:py-16 max-w-5xl text-left pb-safe">
         <div className="space-y-8 md:space-y-12">
            <div className="text-center space-y-6">
-              <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter">Find Your Test</h1>
+              <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter uppercase">Find Your Test</h1>
               <div className="relative max-w-[700px] mx-auto group">
                  <div className="relative">
                     <SearchIcon className={cn("absolute left-4 md:left-6 top-1/2 -translate-y-1/2 h-5 w-5 transition-colors", isLoading ? "text-primary animate-pulse" : "text-slate-400")} />
@@ -127,12 +128,12 @@ function SearchContent() {
                     {searchResults.map((res, i) => (
                       <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
                          <div className="flex items-center gap-4 min-w-0 flex-1">
-                            <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
+                            <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
                                {isValidElement(res.icon) ? cloneElement(res.icon as ReactElement<any>, { className: "h-5 w-5" }) : res.icon}
                             </div>
                             <div className="text-left min-w-0 flex-1">
-                               <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl truncate">{res.title}</p>
-                               <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black rounded mt-1">{res.type}</Badge>
+                               <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>
+                               <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black rounded mt-1 uppercase">{res.type}</Badge>
                             </div>
                          </div>
                          <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all" />

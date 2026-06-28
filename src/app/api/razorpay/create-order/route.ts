@@ -5,7 +5,7 @@ import { initializeFirebase } from '@/firebase/app';
 import { doc, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Production Razorpay Order Engine v4.0.
+ * @fileOverview Production Razorpay Order Engine v5.0.
  * HARDENED: Secure price audit from Firestore and robust error propagation.
  */
 
@@ -35,13 +35,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Context missing: userId and planId required' }, { status: 400 });
     }
 
-    // 1. Audit Price from Registry
+    // 1. Audit Price from Registry to prevent manipulation
     const planSnap = await getDoc(doc(db, "passes", planId));
     if (!planSnap.exists()) {
       return NextResponse.json({ error: 'Plan not found in registry' }, { status: 404 });
     }
     
     const planData = planSnap.data();
+    // Razorpay amount is in paise (₹1 = 100 paise)
     const amount = Math.round(Number(planData.price) * 100);
 
     if (isNaN(amount) || (planData.price > 0 && amount < 100)) {
@@ -57,6 +58,8 @@ export async function POST(req: Request) {
     };
 
     const order = await instance.orders.create(options);
+
+    console.log("[RAZORPAY_ORDER_CREATED]:", order.id);
 
     return NextResponse.json({
       id: order.id,

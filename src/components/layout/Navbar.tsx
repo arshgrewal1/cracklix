@@ -37,7 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Refined Navbar v61.0.
+ * @fileOverview Refined Navbar v62.0.
+ * FIXED: Logo offset (-ml-5) for symmetrical alignment.
  * FIXED: Header logic optimized for App Mode + Title Case typography.
  */
 export default function Navbar() {

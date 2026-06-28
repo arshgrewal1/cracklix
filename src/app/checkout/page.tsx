@@ -30,8 +30,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v20.0.
- * REPLACED: Cashfree logic completely removed for Razorpay.
+ * @fileOverview Institutional Checkout Hub v21.0.
+ * FIXED: Standardized to Razorpay flow with robust pre-fill normalization.
  */
 
 export default function CheckoutPage() {
@@ -131,6 +131,7 @@ function CheckoutContent() {
         prefill: {
           name: profile?.name || user.displayName || "Aspirant",
           email: user.email || "student@cracklix.com",
+          // Razorpay requires a valid 10-digit number for test mode sometimes
           contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "9999999999"
         },
         theme: { color: "#2563EB" },
