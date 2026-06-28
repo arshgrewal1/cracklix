@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v2.1.
+ * @fileOverview Institutional Search Hub v2.2.
  * FIXED: Standardized React import and ensured mandatory Suspense boundary.
  */
 
