@@ -3,12 +3,20 @@ import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * @fileOverview Coupon Verification API v1.0.
+ * @fileOverview Coupon Verification API v1.1.
+ * FIXED: Safe JSON body parsing to prevent "Unexpected end of JSON input".
  */
 
 export async function POST(req: Request) {
   try {
-    const { code } = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return NextResponse.json({ error: "Invalid or missing request body" }, { status: 400 });
+    }
+
+    const { code } = body;
 
     if (!code) {
       return NextResponse.json({ error: "Coupon code is required" }, { status: 400 });
@@ -27,8 +35,6 @@ export async function POST(req: Request) {
     if (!data.active) {
       return NextResponse.json({ error: "This coupon is no longer active" }, { status: 400 });
     }
-
-    // Optional: Check if user has already used this coupon (requires user context in req)
     
     return NextResponse.json({
       success: true,
@@ -39,7 +45,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("[COUPON_VERIFY_ERROR]", error);
     return NextResponse.json(
-      { error: error?.message || "Verification failed" },
+      { error: error?.message || "Internal verification failure" },
       { status: 500 }
     );
   }

@@ -5,65 +5,60 @@ import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 /**
- * Razorpay Verification Node (Pro Anti-Fraud v6.2)
- * Logic: Mandatory HMAC-SHA256 signature verification + Idempotency Check.
+ * Razorpay Verification Node (Pro Anti-Fraud v6.3)
+ * FIXED: Safe body parsing.
  */
 
 export async function POST(req: Request) {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId, planId } = await req.json();
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return NextResponse.json({ success: false, reason: "Invalid payload." }, { status: 400 });
+    }
 
-    console.log("[RAZORPAY_VERIFY] Starting audit for payment:", razorpay_payment_id);
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId, planId } = body;
 
     if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !userId || !planId) {
-      return NextResponse.json({ success: false, reason: "Incomplete payment tokens received." }, { status: 400 });
+      return NextResponse.json({ success: false, reason: "Incomplete payment tokens." }, { status: 400 });
     }
 
     const keyId = process.env.RAZORPAY_KEY_ID?.trim();
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
     if (!keyId || !keySecret) {
-      console.error("[RAZORPAY_VERIFY] Missing environment secrets.");
       return NextResponse.json({ success: false, reason: "Server configuration error." }, { status: 500 });
     }
 
-    // 1. SIGNATURE VERIFICATION (Anti-Tampering)
     const expectedSignature = crypto
       .createHmac("sha256", keySecret)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
     if (expectedSignature !== razorpay_signature) {
-      console.error("[RAZORPAY_VERIFY] Security signature mismatch. Transaction blocked.");
       return NextResponse.json({ success: false, reason: "Security signature mismatch." }, { status: 400 });
     }
 
     const { firestore: db } = initializeFirebase();
-
-    // 2. IDEMPOTENCY CHECK (Anti-Duplicate)
     const paymentRef = doc(db, "payment_requests", razorpay_payment_id);
     const paymentSnap = await getDoc(paymentRef);
 
     if (paymentSnap.exists() && paymentSnap.data().verified) {
-       console.log(`[RAZORPAY_VERIFY] Payment ${razorpay_payment_id} already processed. Skipping.`);
        return NextResponse.json({ success: true, message: "Payment already verified." });
     }
 
-    // 3. SERVER-TO-SERVER AUDIT
     const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
     const payment = await razorpay.payments.fetch(razorpay_payment_id);
     const paymentStatus = String((payment as any).status).toLowerCase();
 
     if (!["captured", "authorized"].includes(paymentStatus)) {
-       console.error("[RAZORPAY_VERIFY] Invalid payment status:", paymentStatus);
        return NextResponse.json({ success: false, reason: `Invalid payment status: ${paymentStatus}` }, { status: 400 });
     }
 
-    // 4. PLAN AUDIT & ACTIVATION
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
     if (!planSnap.exists()) {
-       console.error("[RAZORPAY_VERIFY] Plan lost in registry:", planId);
        return NextResponse.json({ success: false, reason: "Plan node lost in registry." }, { status: 404 });
     }
 
@@ -90,7 +85,6 @@ export async function POST(req: Request) {
       updatedAt: serverTimestamp()
     }, { merge: true });
 
-    // 5. TRANSACTION LOGGING
     await setDoc(paymentRef, {
       paymentId: razorpay_payment_id,
       orderId: razorpay_order_id,
@@ -107,11 +101,10 @@ export async function POST(req: Request) {
       updatedAt: serverTimestamp()
     });
 
-    console.log("[RAZORPAY_VERIFY] Audit Complete. Subscription synchronized.");
     return NextResponse.json({ success: true, orderId: razorpay_order_id });
 
   } catch (error: any) {
     console.error("[RAZORPAY_VERIFY_EXCEPTION]", error);
-    return NextResponse.json({ success: false, error: error?.message || "Verification failed." }, { status: 500 });
+    return NextResponse.json({ success: false, error: "Internal verification failure." }, { status: 500 });
   }
 }

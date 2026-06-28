@@ -125,16 +125,16 @@ function SearchContent() {
               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.map((res, i) => {
-                      const { icon: Icon, title, href, type } = res;
+                      const Icon = res.icon;
                       return (
-                        <Link key={i} href={href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
+                        <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
                           <div className="flex items-center gap-4 min-w-0 flex-1">
                               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary/5 transition-all">
                                  <Icon className="h-5 w-5" />
                               </div>
                               <div className="text-left min-w-0 flex-1">
-                                <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{title}</p>
-                                <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black rounded mt-1 uppercase">{type}</Badge>
+                                <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>
+                                <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black rounded mt-1 uppercase">{res.type}</Badge>
                               </div>
                           </div>
                           <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all group-hover:translate-x-1" />

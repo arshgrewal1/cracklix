@@ -30,9 +30,22 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
 /**
- * @fileOverview Official Checkout Hub.
- * FIXED: Malformed useMemo and useDoc signatures.
+ * @fileOverview Official Checkout Hub v3.1.
+ * FIXED: Hardened JSON parsing and response validation for network requests.
  */
+
+async function safeJsonParse(response: Response) {
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    try {
+      return await response.json();
+    } catch (e) {
+      console.error("[JSON_PARSE_ERROR]", e);
+      return { error: "Failed to parse server response." };
+    }
+  }
+  return { error: `Server returned non-JSON response (${response.status})` };
+}
 
 export default function CheckoutPage() {
   return (
@@ -88,19 +101,23 @@ function CheckoutContent() {
   const handleApplyCoupon = async () => {
     if (!coupon.trim()) return;
     setVerifyingCoupon(true);
+    setErrorMessage(null);
     try {
        const res = await fetch('/api/coupon/apply', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code: coupon.trim().toUpperCase(), userId: user?.uid })
        });
-       const data = await res.json();
-       if (res.ok) {
+       
+       const data = await safeJsonParse(res);
+       if (res.ok && !data.error) {
           setAppliedCoupon(data);
           toast({ title: "Coupon Applied", description: `Discount verified.` });
        } else {
-          toast({ variant: "destructive", title: "Invalid Code", description: data.error });
+          toast({ variant: "destructive", title: "Invalid Code", description: data.error || "Could not verify code." });
        }
+    } catch (e) {
+       toast({ variant: "destructive", title: "Network Error", description: "Coupon verification node timed out." });
     } finally {
        setVerifyingCoupon(false);
     }
@@ -131,9 +148,9 @@ function CheckoutContent() {
         }),
       });
 
-      const orderData = await res.json();
+      const orderData = await safeJsonParse(res);
       
-      if (!res.ok) {
+      if (!res.ok || orderData.error) {
         throw new Error(orderData.reason || orderData.error || `Gateway error code ${res.status}`);
       }
 
@@ -157,11 +174,11 @@ function CheckoutContent() {
               body: JSON.stringify({ ...response, userId: user.uid, planId }),
             });
 
-            const vData = await verifyRes.json();
+            const vData = await safeJsonParse(verifyRes);
             if (verifyRes.ok && vData.success) {
               router.push(`/payment/success?order_id=${response.razorpay_order_id}&plan=${encodeURIComponent(planData.name)}`);
             } else {
-              throw new Error(vData.reason || "Verification signature mismatch.");
+              throw new Error(vData.reason || vData.error || "Verification signature mismatch.");
             }
           } catch (err: any) {
              setErrorMessage(err.message);

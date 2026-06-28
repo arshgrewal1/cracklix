@@ -4,15 +4,19 @@ import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Production Hardened v18.0)
- * Security: Strict price validation, environment auditing, and detailed diagnostic logging.
+ * Razorpay Order API (Production Hardened v18.1)
+ * FIXED: Safe JSON parsing for request bodies.
  */
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
-    const { planId, userId } = body;
+    let body;
+    try {
+      body = await req.json();
+    } catch (e) {
+      return NextResponse.json({ success: false, reason: "Malformed request body." }, { status: 400 });
+    }
 
-    console.log("[RAZORPAY_ORDER] Incoming request:", { planId, userId });
+    const { planId, userId } = body;
 
     if (!planId || !userId) {
       return NextResponse.json({ success: false, reason: "Incomplete identity tokens." }, { status: 400 });
@@ -21,12 +25,11 @@ export async function POST(req: Request) {
     const keyId = process.env.RAZORPAY_KEY_ID?.trim();
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
-    // VITAL: Check for existence and valid format
     if (!keyId || !keySecret || !keyId.startsWith('rzp_')) {
-      console.error("[RAZORPAY_ORDER] Environment anomaly: Missing or malformed keys.");
+      console.error("[RAZORPAY_ORDER] Environment anomaly: Missing keys.");
       return NextResponse.json({ 
         success: false, 
-        reason: "Invalid Razorpay API Keys. Please check environment variables.",
+        reason: "Invalid Razorpay API Keys.",
         detail: "Keys must start with rzp_"
       }, { status: 503 });
     }
@@ -36,7 +39,6 @@ export async function POST(req: Request) {
     const planSnap = await getDoc(planRef);
 
     if (!planSnap.exists()) {
-      console.error("[RAZORPAY_ORDER] Plan node not found:", planId);
       return NextResponse.json({ success: false, reason: "Plan not found in registry." }, { status: 404 });
     }
 
@@ -44,20 +46,15 @@ export async function POST(req: Request) {
     const price = Number(plan?.price);
 
     if (isNaN(price) || price < 0) {
-      console.error("[RAZORPAY_ORDER] Invalid price node detected:", price);
-      return NextResponse.json({ success: false, reason: "Invalid price node detected in registry." }, { status: 400 });
+      return NextResponse.json({ success: false, reason: "Invalid price node detected." }, { status: 400 });
     }
 
-    // Initialize Razorpay SDK
     const razorpay = new Razorpay({
       key_id: keyId,
       key_secret: keySecret,
     });
 
-    // Amount must be in Paise (Sub-units)
     const amountInPaise = Math.round(price * 100);
-
-    console.log("[RAZORPAY_ORDER] Creating order for amount:", amountInPaise);
 
     const order = await razorpay.orders.create({
       amount: amountInPaise,
@@ -65,8 +62,6 @@ export async function POST(req: Request) {
       receipt: `ORD_${Date.now()}_${userId.slice(-5)}`,
       notes: { userId, planId, planName: plan.name },
     });
-
-    console.log("[RAZORPAY_ORDER] Order Created Successfully:", order.id);
 
     return NextResponse.json({
       success: true,
@@ -78,10 +73,7 @@ export async function POST(req: Request) {
 
   } catch (err: any) {
     console.error("[RAZORPAY_CRITICAL_FAILURE]", err);
-    
-    // Explicitly serialize the error for the frontend
     const errorDetail = err?.error?.description || err?.message || "Unknown error";
-    
     return NextResponse.json({ 
       success: false, 
       reason: "Internal payment node failure.",

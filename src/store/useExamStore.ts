@@ -9,8 +9,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional CBT Store v54.0.
- * FIXED: Removed "use server" and sanitized object mapping to avoid build errors.
+ * @fileOverview Institutional CBT Store v54.1.
+ * FIXED: Removed duplicate property in violation logging.
  */
 
 export interface ExamStoreState {
