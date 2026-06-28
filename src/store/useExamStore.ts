@@ -9,9 +9,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional CBT Store v52.0.
- * FIXED: Strictly defined as "use client".
- * FIXED: Purged duplicate property initialization in addViolation logic.
+ * @fileOverview Institutional CBT Store v53.0.
+ * FIXED: Strictly client-side Zustand registry.
  */
 
 export interface ExamStoreState {
@@ -174,8 +173,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
   addViolation: (db: Firestore | null) => {
     const state = get();
-    const currentViolations = state.violations || 0;
-    const nextVal = currentViolations + 1;
+    const nextVal = (state.violations || 0) + 1;
     
     set({ violations: nextVal });
 

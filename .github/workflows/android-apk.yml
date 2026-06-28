@@ -21,23 +21,23 @@ jobs:
           node-version: 20
           cache: 'npm'
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
       - name: Install Dependencies
         run: npm ci
 
-      - name: Build Web Assets (Next.js Static Export)
+      - name: Build Web Assets (Static Export)
         run: npm run build
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           GOOGLE_GENAI_API_KEY: ${{ secrets.GOOGLE_GENAI_API_KEY }}
           RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
 
-      - name: Prepare Capacitor Android
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Prepare Android Assets
         run: |
           mkdir -p android/app/src/main/assets/public
           npx cap sync android

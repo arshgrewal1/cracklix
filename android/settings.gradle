@@ -1,4 +1,3 @@
 include ':app'
 
-// Mandatory Capacitor bridge for Android
 apply from: '../node_modules/@capacitor/android/capacitor.settings.gradle'

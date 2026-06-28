@@ -1,4 +1,3 @@
-// Root build file where dependencies for all modules are defined
 buildscript {
     repositories {
         google()
@@ -6,7 +5,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.2.1'
-        classpath 'com.google.gms:google-services:4.4.1'
+        classpath 'com.google.gms:google-services:4.4.0'
     }
 }
 
