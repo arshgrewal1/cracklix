@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -36,10 +37,6 @@ import {
 } from "@/components/ui/dialog"
 import Link from "next/link"
 
-/**
- * @fileOverview Official Support Center v36.2.
- * FIXED: Restored missing Link and Loader2 component imports.
- */
 export default function SupportPage() {
   const { user, profile } = useUser()
   const db = useFirestore();

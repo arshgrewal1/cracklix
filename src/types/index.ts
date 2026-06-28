@@ -19,6 +19,30 @@ export type MockAssignmentMode = 'SINGLE' | 'MULTIPLE' | 'AUTHORITY';
 
 export type AdType = 'BANNER' | 'ADSENSE' | 'HTML';
 export type AdStatus = 'ACTIVE' | 'PAUSED' | 'SCHEDULED';
+export type AdPlacementType = 'HOMEPAGE_TOP' | 'HOMEPAGE_MIDDLE' | 'HOMEPAGE_BOTTOM' | 'EXAM_LISTING' | 'MOCK_LISTING' | 'NOTES_PAGE' | 'CA_PAGE' | 'RESULT_PAGE' | 'SIDEBAR' | 'FOOTER';
+
+export interface Advertisement {
+  id: string;
+  title: string;
+  type: AdType;
+  status: AdStatus;
+  placements: AdPlacementType[];
+  desktopImageUrl?: string;
+  mobileImageUrl?: string;
+  externalUrl?: string;
+  htmlCode?: string;
+  adSenseCode?: string;
+  priority: number;
+  targeting?: {
+    examIds?: string[];
+  };
+  stats?: {
+    impressions: number;
+    clicks: number;
+  };
+  createdAt: any;
+  updatedAt: any;
+}
 
 export interface CalendarEvent {
   id: string;
@@ -172,6 +196,7 @@ export interface Question {
   updatedAt: any;
   isStandalone?: boolean;
   author?: string;
+  displayId?: string;
 }
 
 export interface ExamSection {
@@ -218,4 +243,5 @@ export interface AttemptResult {
   timestamp: string;
   createdAt: any;
   accessLevel: AccessLevel;
+  gender?: Gender;
 }

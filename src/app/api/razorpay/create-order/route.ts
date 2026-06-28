@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { initializeFirebase } from '@/firebase/app';
@@ -15,7 +16,6 @@ export async function POST(req: Request) {
     
     const { firestore: db } = initializeFirebase();
 
-    // Next.js 15 requires process.env access
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
