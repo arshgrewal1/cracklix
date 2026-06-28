@@ -31,8 +31,9 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
 /**
- * @fileOverview Institutional Checkout Hub v19.0.
- * FIXED: Standardized useDoc and useMemo signatures.
+ * @fileOverview Institutional Checkout Hub v20.0.
+ * FIXED: Misplaced dependency array in React.useMemo.
+ * UPDATED: Integrated official UPI QR for arshdeepgrewal1122-1@oksbi.
  */
 export default function CheckoutPage() {
   return (

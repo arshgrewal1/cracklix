@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from "react";
@@ -14,9 +15,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v14.0.
- * FIXED: Sidebar now automatically collapses on navigation.
- * FIXED: Optimized z-index for modal compatibility.
+ * @fileOverview Admin Layout v15.0.
+ * FIXED: Sidebar now automatically collapses on navigation to ensure unblocked functional focus.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser();
@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  // AUTO-CLOSE Sidebar on navigation change
+  // SIDEBAR AUTO-COLLAPSE ON NAVIGATION
   useEffect(() => {
     if (mounted && window.innerWidth < 1024) {
       setIsSidebarOpen(false);

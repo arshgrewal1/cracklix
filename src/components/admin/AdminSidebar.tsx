@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -16,8 +17,8 @@ interface AdminSidebarProps {
 }
 
 /**
- * Admin Sidebar v3.1 (Z-Index Optimized)
- * FIXED: Lowered z-index to stay below dialogs and fixed overlap.
+ * Admin Sidebar v3.2 (Z-Index Corrected)
+ * FIXED: Lowered z-index from 110 to 40 to ensure sidebars stay behind shadcn dialogs (z-50).
  */
 export default function AdminSidebar({
   isOpen,
