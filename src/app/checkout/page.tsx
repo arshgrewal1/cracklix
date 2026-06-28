@@ -29,8 +29,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v22.3.
- * FIXED: Restored RefreshCw and improved Razorpay Test Mode prefill logic.
+ * @fileOverview Institutional Checkout Hub v22.4.
+ * FIXED: Explicit React imports and restored RefreshCw to resolve build blockers.
  */
 
 export default function CheckoutPage() {

@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v5.8.
+ * @fileOverview Official Search Hub v5.9.
  * FIXED: Added explicit React imports and correctly typed cloneElement to resolve UMD and production errors.
  */
 

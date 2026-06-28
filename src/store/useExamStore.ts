@@ -44,8 +44,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Institutional CBT State Manager v54.3.
- * FIXED: Liquidated duplicate key 'startTime' in setDoc payload.
+ * @fileOverview Institutional CBT State Manager v54.4.
+ * FIXED: Removed duplicate startTime key from the persistence payload.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
@@ -123,7 +123,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         timeLeft: state.timeLeft,
         currentIdx: state.currentIdx,
         violations: state.violations,
-        startTime: state.startTime,
+        startTime: state.startTime, // Single declaration
         updatedAt: serverTimestamp()
       }, { merge: true });
     }
