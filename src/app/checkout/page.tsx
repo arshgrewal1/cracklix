@@ -29,8 +29,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v7.1.
- * FIXED: Malformed React imports and production Razorpay integration.
+ * @fileOverview Institutional Checkout Hub v7.2 (Debug Ready).
+ * FIXED: Malformed imports and enhanced backend verification handshake.
  */
 
 export default function CheckoutPage() {
@@ -78,6 +78,7 @@ function CheckoutContent() {
     setOnlineProcessing(true);
     
     try {
+      console.log("[CHECKOUT] Creating Razorpay Order for plan:", planId);
       const orderRes = await fetch(`/api/razorpay/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -87,10 +88,9 @@ function CheckoutContent() {
       const orderData = await orderRes.json();
 
       if (!orderRes.ok) {
-         throw new Error(orderData.error || "Order creation failed.");
+         throw new Error(orderData.error || "Order creation failed on backend.");
       }
 
-      // PHONE SANITIZATION: Strict 10-digit format for Razorpay reliability
       const cleanPhone = (profile?.phone || "").replace(/\D/g, '').slice(-10) || "9999999999";
 
       const options = {
@@ -103,6 +103,7 @@ function CheckoutContent() {
         order_id: orderData.id,
         handler: async (response: any) => {
           setOnlineProcessing(true);
+          console.log("[CHECKOUT] Payment success from modal. Verifying signature...");
           try {
             const verifyRes = await fetch('/api/razorpay/verify', {
               method: 'POST',
@@ -115,11 +116,15 @@ function CheckoutContent() {
                 planId: planId
               })
             });
+            
             const verifyData = await verifyRes.json();
-            if (verifyData.success) {
+            
+            if (verifyRes.ok && verifyData.success) {
+               console.log("[CHECKOUT] Verification success. Redirecting...");
                router.push("/payment/success?order_id=" + response.razorpay_order_id + "&plan=" + encodeURIComponent(planData.name));
             } else {
-               throw new Error(verifyData.error || "Verification failed.");
+               console.error("[CHECKOUT] Verification failure reason:", verifyData.reason);
+               throw new Error(verifyData.reason || "Backend signature verification failed.");
             }
           } catch (err: any) {
             setErrorMessage(err.message);
@@ -134,22 +139,27 @@ function CheckoutContent() {
         },
         theme: { color: "#2563EB" },
         modal: { 
-          ondismiss: () => setOnlineProcessing(false) 
+          ondismiss: () => {
+             console.log("[CHECKOUT] Modal dismissed by user.");
+             setOnlineProcessing(false);
+          }
         }
       };
 
       if (!(window as any).Razorpay) {
-         throw new Error("Razorpay SDK not loaded.");
+         throw new Error("Razorpay SDK script not found. Check your internet.");
       }
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on('payment.failed', function (resp: any) {
-        setErrorMessage(resp.error.description || "Payment failed.");
+        console.error("[CHECKOUT] Razorpay Payment failed event:", resp.error);
+        setErrorMessage(resp.error.description || "Gateway payment rejection.");
         setOnlineProcessing(false);
       });
       rzp.open();
 
     } catch (e: any) {
+      console.error("[CHECKOUT] Catch block error:", e.message);
       setErrorMessage(e.message);
       setOnlineProcessing(false);
     }
@@ -180,10 +190,10 @@ function CheckoutContent() {
                  <div className="p-5 bg-rose-50 border border-rose-100 rounded-[2rem] flex items-start gap-4">
                     <AlertCircle className="h-6 w-6 text-rose-500 shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                       <p className="text-xs font-black text-rose-900 uppercase">Gateway Alert</p>
+                       <p className="text-xs font-black text-rose-900 uppercase">Audit Alert</p>
                        <p className="text-sm font-medium text-rose-600 leading-relaxed">{errorMessage}</p>
                        <Button variant="ghost" onClick={handlePaymentInitiation} className="text-rose-700 h-8 p-0 font-bold uppercase text-[10px] gap-2 mt-2">
-                          <RefreshCw className="h-3 w-3" /> Retry Handshake
+                          <RefreshCw className="h-3 w-3" /> Retry Protocol
                        </Button>
                     </div>
                  </div>
