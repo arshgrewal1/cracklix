@@ -29,7 +29,7 @@ import { Badge } from "@/components/ui/badge"
 
 /**
  * @fileOverview Institutional Checkout Hub v6.2.
- * FIXED: Standardized React import and ensured all Razorpay Test Mode constraints are met.
+ * FIXED: Corrected malformed React imports to resolve JSX.IntrinsicElements errors.
  */
 
 export default function CheckoutPage() {

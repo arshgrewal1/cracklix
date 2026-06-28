@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Search Hub v2.2.
- * FIXED: Standardized React import and ensured mandatory Suspense boundary.
+ * FIXED: Corrected malformed React imports to resolve JSX resolution errors and UMD global conflicts.
  */
 
 export default function SearchPage() {

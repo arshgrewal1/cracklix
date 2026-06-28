@@ -38,7 +38,7 @@ import Link from "next/link"
 
 /**
  * @fileOverview Institutional Support Hub v5.1.
- * FIXED: Restored missing Link and Loader2 imports.
+ * FIXED: Restored missing Link and Loader2 imports to resolve build errors.
  */
 
 export default function SupportPage() {

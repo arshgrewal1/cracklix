@@ -198,6 +198,24 @@ export interface Question {
   displayId?: string;
 }
 
+export interface CurrentAffairHubItem {
+  id: string;
+  title: string;
+  type: CurrentAffairType;
+  month: string;
+  year: string;
+  status: ContentStatus;
+  questions: Question[];
+  language: string;
+  duration: number;
+  positiveMarks: number;
+  negativeMarks: number;
+  pdfUrl?: string;
+  quizId?: string;
+  updatedAt?: any;
+  createdAt?: any;
+}
+
 export interface ExamSection {
   name: string;
   count: number;

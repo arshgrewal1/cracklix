@@ -10,7 +10,7 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 /**
  * @fileOverview Refined Calendar Component v3.0.
- * FIXED: Replaced deprecated IconLeft/Right with components.Chevron for react-day-picker v9/Next.js 15.
+ * FIXED: Replaced deprecated IconLeft/Right with components.Chevron for react-day-picker v9/Next.js 15 compatibility.
  */
 function Calendar({
   className,
