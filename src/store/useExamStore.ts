@@ -9,8 +9,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional CBT Store v43.0.
- * FIXED: TS1117 Duplicate property key 'updatedAt' removed.
+ * @fileOverview Institutional CBT Store v44.0.
+ * FIXED: TS1117 Removed duplicate property keys in object literals.
  */
 
 export interface ExamStoreState {

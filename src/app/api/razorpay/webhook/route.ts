@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { initializeFirebase } from "@/firebase/app";
-import { doc, setDoc, serverTimestamp, getDoc, updateDoc, increment } from "firebase/firestore";
+import { doc, setDoc, serverTimestamp, getDoc, updateDoc } from "firebase/firestore";
 import { logEvent } from "@/lib/logger";
-import { sendEmail } from "@/lib/email";
-import { sendWhatsApp } from "@/lib/whatsapp";
 
 /**
- * Razorpay Enterprise Webhook Hub (v13.0)
- * Logic: Signature verification, Renewal Stacking, Fraud detection, and Multi-channel Automation.
+ * Razorpay Enterprise Webhook Hub (v15.0)
+ * Security: HMAC-SHA256 Signature Verification + Renewal Stacking Logic.
  */
 export async function POST(req: Request) {
   try {
@@ -17,10 +15,11 @@ export async function POST(req: Request) {
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
     if (!secret) {
-       await logEvent({ type: "critical", message: "RAZORPAY_WEBHOOK_SECRET is undefined" });
-       return NextResponse.json({ error: "Configuration anomaly" }, { status: 500 });
+      await logEvent({ type: "critical", message: "RAZORPAY_WEBHOOK_SECRET missing in environment." });
+      return NextResponse.json({ error: "Configuration anomaly" }, { status: 500 });
     }
 
+    // 1. SIGNATURE VERIFICATION (Anti-Tampering)
     const expectedSignature = crypto
       .createHmac("sha256", secret)
       .update(body)
@@ -34,62 +33,45 @@ export async function POST(req: Request) {
     const event = JSON.parse(body);
     const { firestore: db } = initializeFirebase();
 
-    if (event.event === "payment.captured") {
-      const payment = event.payload.payment.entity;
+    if (event.event === "payment.captured" || event.event === "order.paid") {
+      const payment = event.payload.payment?.entity || event.payload.order?.entity;
       const userId = payment.notes?.userId;
       const planId = payment.notes?.planId;
 
       if (!userId || !planId) {
-         return NextResponse.json({ success: true });
+        return NextResponse.json({ success: true, warning: "Metadata missing" });
       }
 
-      // 1. FRAUD DETECTION (Amount Audit)
+      // 2. SUBSCRIPTION ACTIVATION WITH RENEWAL STACKING
       const planSnap = await getDoc(doc(db, "passes", planId));
-      if (planSnap.exists()) {
-         const expectedPrice = Number(planSnap.data().price);
-         const paidPrice = Number(payment.amount) / 100;
-         if (paidPrice < expectedPrice * 0.4) {
-            await logEvent({ type: "critical", message: "Price mismatch detected.", userId, metadata: { paid: paidPrice, expected: expectedPrice } });
-            return NextResponse.json({ success: true, flagged: true });
-         }
+      if (!planSnap.exists()) {
+        await logEvent({ type: "error", message: "Plan not found in registry during webhook.", userId });
+        return NextResponse.json({ success: true });
       }
 
-      // 2. ACTIVATION LOGIC (Renewal Stacking)
-      const durationDays = planSnap.exists() ? (planSnap.data().durationDays || 30) : 30;
+      const planData = planSnap.data();
+      const durationDays = Number(planData.durationDays || 30);
       const msPerDay = 24 * 60 * 60 * 1000;
       
-      const userPassRef = doc(db, "user_passes", userId);
-      const userPassSnap = await getDoc(userPassRef);
-      
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.data();
+
       let baseTime = Date.now();
-      if (userPassSnap.exists()) {
-         const current = userPassSnap.data();
-         // If same plan is active, stack the time. If different, start from now.
-         if (current.active && current.expiry > Date.now() && current.planId === planId) {
-            baseTime = current.expiry;
+      // If same plan is active, stack the time. If different, start fresh.
+      if (userData?.passStatus === 'active' && userData?.passExpiresAt) {
+         const currentExpiry = new Date(userData.passExpiresAt).getTime();
+         if (currentExpiry > Date.now() && userData.status === planId) {
+            baseTime = currentExpiry;
          }
       }
 
       const expiryDate = new Date(baseTime + (durationDays * msPerDay));
 
-      // A. SUBSCRIPTION REGISTRY SYNC
-      await setDoc(userPassRef, {
-        planId,
-        active: true,
-        activatedAt: serverTimestamp(),
-        expiry: expiryDate.getTime(),
-        updatedAt: serverTimestamp()
-      }, { merge: true });
-
-      // B. PROFILE SYNC (Legacy Compatibility)
-      const userRef = doc(db, "users", userId);
-      const userSnap = await getDoc(userRef);
-      const userData = userSnap.data();
-
-      await updateDoc(userRef, {
+      const passPayload = {
         pass: {
           active: true,
-          plan: planSnap.data()?.name || planId.toUpperCase(),
+          plan: planData.name || planId.toUpperCase(),
           purchaseDate: new Date().toISOString(),
           expiryDate: expiryDate.toISOString(),
           freePassClaimed: false
@@ -97,35 +79,29 @@ export async function POST(req: Request) {
         passStatus: 'active',
         passExpiresAt: expiryDate.toISOString(),
         status: planId,
+        planTier: Number(planData.tier || 1),
         updatedAt: serverTimestamp()
+      };
+
+      await updateDoc(userRef, passPayload);
+
+      // 3. LOG TRANSACTION
+      await setDoc(doc(db, "payment_requests", payment.id || `web-${Date.now()}`), {
+        userId,
+        planId,
+        amount: Number(payment.amount) / 100,
+        gateway: "RAZORPAY",
+        status: "APPROVED",
+        verified: true,
+        createdAt: serverTimestamp()
       });
 
-      // C. REFERRAL REWARD
-      if (userData?.referredBy) {
-        await updateDoc(doc(db, "users", userData.referredBy), {
-          coins: increment(50),
-          updatedAt: serverTimestamp()
-        }).catch(() => {});
-      }
-
-      // D. AUTOMATION
-      const userEmail = userSnap.data()?.email || payment.email;
-      if (userEmail) {
-         await sendEmail(
-            userEmail, 
-            "Elite Pass Activated 🎉", 
-            `<h2>Success!</h2><p>Your subscription for ${planSnap.data()?.name || planId} is now live.</p><p>Valid until: ${expiryDate.toLocaleDateString()}</p>`
-         );
-      }
-
-      await sendWhatsApp(`💰 Revenue Hub: ₹${Number(payment.amount)/100} captured from ${userData?.name || userId}`);
-      await logEvent({ type: "payment", message: "Pass activated via Webhook", userId, planId });
+      await logEvent({ type: "payment", message: "Pass activated via verified webhook", userId, planId });
     }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("[WEBHOOK_EXCEPTION]", error);
-    await logEvent({ type: "error", message: error.message, stack: error.stack });
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
