@@ -35,8 +35,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Student Home - Standardized PWA v45.0.
- * FIXED: Removed greeting logic to prevent repetition on tab navigation.
+ * @fileOverview Student Home - Standardized PWA v46.0.
+ * FIXED: Test title scaling and two-line clamping.
+ * FIXED: Removed forced uppercase from labels.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -246,7 +247,7 @@ export default function StudentDashboard() {
                 <CardHeader className="p-6 md:p-8 border-b border-slate-50 bg-slate-50/30">
                     <div className="space-y-0.5">
                       <h2 className="font-bold text-[22px] text-[#0F172A]">Recent Tests</h2>
-                      <p className="text-[12px] font-bold text-slate-400 tracking-widest uppercase">My History</p>
+                      <p className="text-[12px] font-bold text-slate-400 tracking-widest">My history</p>
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
@@ -262,17 +263,17 @@ export default function StudentDashboard() {
                                   <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
                                       <Zap className="h-5 w-5 text-primary" />
                                   </div>
-                                  <div className="min-w-0 space-y-1">
-                                      <p className="font-semibold text-[#0B1528] text-[18px] truncate leading-none">
+                                  <div className="min-w-0 space-y-1.5 flex-1 pr-4">
+                                      <p className="font-semibold text-[#0B1528] text-base md:text-lg line-clamp-2 leading-snug">
                                          {r.mockTitle}
                                       </p>
-                                      <div className="flex items-center gap-2 text-[13px] font-bold text-slate-400">
-                                        <span className="flex items-center gap-1"><Calendar className="h-3.5 w-3.5 text-slate-300" /> {r.timestamp ? new Date(r.timestamp).toLocaleDateString() : 'N/A'}</span>
-                                        <Badge className="bg-emerald-50 text-emerald-600 border-none font-black px-1.5 py-0 rounded text-[11px]">{r.accuracy}%</Badge>
+                                      <div className="flex items-center gap-3 text-[13px] font-bold text-slate-400">
+                                        <span className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5 text-slate-300" /> {r.timestamp ? new Date(r.timestamp).toLocaleDateString() : 'N/A'}</span>
+                                        <Badge className="bg-emerald-50 text-emerald-600 border-none font-black px-2 py-0.5 rounded text-[10px] shrink-0">{r.accuracy}%</Badge>
                                       </div>
                                   </div>
                                 </div>
-                                <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-primary transition-all group-hover:translate-x-1" />
+                                <ChevronRight className="h-5 w-5 text-slate-200 group-hover:text-primary transition-all group-hover:translate-x-1 shrink-0 ml-4" />
                             </div>
                           ))
                       ) : (
@@ -287,19 +288,19 @@ export default function StudentDashboard() {
               <Card className="border-none shadow-4xl bg-gradient-to-br from-blue-600 to-primary text-white p-6 md:p-10 rounded-2xl md:rounded-[2rem] relative overflow-hidden group">
                 <div className="absolute bottom-0 right-0 p-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000"><Flame className="h-24 w-24 md:h-32 w-32" /></div>
                 <div className="relative z-10 space-y-2 md:space-y-4 text-left">
-                    <p className="text-[12px] font-bold text-white/70 tracking-widest uppercase">Daily Streak</p>
+                    <p className="text-[12px] font-bold text-white/70 tracking-widest">Daily streak</p>
                     <div className="flex items-baseline gap-2">
                       <div className="text-[48px] md:text-7xl font-black leading-none">{resultsLoading ? "..." : stats.streak}</div>
                       <div className="space-y-0.5">
                           <p className="text-[18px] font-bold">Days</p>
-                          <p className="text-[11px] font-medium text-white/60">Study Streak</p>
+                          <p className="text-[11px] font-medium text-white/60">Study streak</p>
                       </div>
                     </div>
                 </div>
               </Card>
 
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl space-y-6">
-                 <h4 className="text-[12px] font-black uppercase text-slate-400 tracking-widest">Quick Tools</h4>
+                 <h4 className="text-[12px] font-black text-slate-400 tracking-widest">Quick Tools</h4>
                  <div className="grid grid-cols-1 gap-3">
                     <QuickToolLink href="/my-exams" label="My Exams" icon={Target} />
                     <QuickToolLink href="/analytics" label="My Progress" icon={TrendingUp} />
