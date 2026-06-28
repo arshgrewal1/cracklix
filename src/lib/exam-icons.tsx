@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v28.0 (Fidelity Refined).
+ * @fileOverview Institutional Branding Engine v29.0 (Fidelity Refined).
  * FIXED: Authority logos now respect transparency and external styling.
  */
 
@@ -71,7 +71,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   };
 
   const containerSize = sizeClasses[size];
-  const isTransparent = className?.includes('bg-transparent') || className?.includes('bg-white/10');
+  const isTransparent = className?.includes('bg-transparent') || className?.includes('bg-white/10') || bId === 'current-affairs';
 
   if (logoUrl) {
     return (

@@ -26,8 +26,8 @@ import { useRouter } from "next/navigation"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Current Affairs Center v21.0.
- * UPDATED: Optimized hero logo with transparency and removed forced uppercase.
+ * @fileOverview Official Current Affairs Center v22.0.
+ * UPDATED: Refined hero logo with transparency and removed forced uppercase.
  */
 
 const HUB_TYPES = [

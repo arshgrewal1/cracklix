@@ -17,8 +17,9 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix High-Fidelity Brand Identity v112.1.
+ * @fileOverview Cracklix High-Fidelity Brand Identity v113.1.
  * UPDATED: Optimized default sizing for BOLD professional presence.
+ * FIXED: Removed aggressive negative margins for balanced PWA headers.
  */
 export default function Logo({
   className = "",

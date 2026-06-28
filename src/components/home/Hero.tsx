@@ -24,8 +24,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Hero Hub v108.0.
- * UPDATED: Title Case normalization for refined readability.
+ * @fileOverview Institutional Hero Hub v109.0.
+ * UPDATED: Title Case normalization and refined logo scaling.
  */
 export default function Hero() {
   const db = useFirestore();
