@@ -1,6 +1,2 @@
 include ':app'
-
-def capacitorPlugins = new File(rootProject.projectDir, '../node_modules/@capacitor/android/capacitor.settings.gradle')
-if (capacitorPlugins.exists()) {
-    apply from: capacitorPlugins
-}
+apply from: 'capacitor.settings.gradle'

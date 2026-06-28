@@ -129,7 +129,7 @@ function CheckoutContent() {
       const orderData = await res.json();
       
       if (!res.ok) {
-        throw new Error(orderData.reason || orderData.error || `Gateway error: ${res.status}`);
+        throw new Error(orderData.reason || orderData.error || `Gateway error code ${res.status}`);
       }
 
       if (!(window as any).Razorpay) {
