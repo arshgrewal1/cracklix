@@ -11,6 +11,11 @@ import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
+/**
+ * @fileOverview Institutional Search Hub v12.5.
+ * FIXED: Malformed React imports and UMD global resolution.
+ */
+
 export default function SearchPage() {
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>

@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/next/server";
 import Razorpay from "razorpay";
 import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Production Hardened v5.3)
- * Optimized for diagnostic visibility and secure price auditing.
+ * Razorpay Order API (Production Hardened v5.5)
+ * FIXED: Explicit diagnostic logging and detailed error reporting.
  */
 
 export async function POST(req: Request) {
@@ -26,11 +26,12 @@ export async function POST(req: Request) {
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
     if (!keyId || !keySecret) {
-      console.error("[RAZORPAY_CONFIG_ERROR] Environment variables missing.");
+      console.error("[RAZORPAY_CONFIG_ERROR] Environment variables missing in deployment.");
       return NextResponse.json(
         { 
           success: false, 
-          reason: "Payment gateway configuration is missing on server. Verify RAZORPAY_KEY_ID and SECRET." 
+          reason: "Payment gateway configuration missing. Check RAZORPAY_KEY_ID and SECRET.",
+          debug: { id: !!keyId, secret: !!keySecret }
         },
         { status: 503 }
       );
@@ -54,8 +55,9 @@ export async function POST(req: Request) {
     const price = Number(planData?.price);
 
     if (isNaN(price) || price <= 0) {
+      console.error("[INVALID_PRICE]", { price });
       return NextResponse.json(
-        { success: false, reason: "Selected plan has an invalid price configuration." },
+        { success: false, reason: "Selected plan has an invalid price configuration in Firestore." },
         { status: 400 }
       );
     }
@@ -67,18 +69,30 @@ export async function POST(req: Request) {
 
     const amountInPaise = Math.round(price * 100);
 
-    const orderOptions = {
-      amount: amountInPaise,
-      currency: "INR",
-      receipt: `ORD_${Date.now()}_${userId.slice(-6)}`,
-      notes: {
-        userId,
-        planId,
-        planName: planData.name || "Elite Pass",
-      },
-    };
-
-    const order = await razorpay.orders.create(orderOptions);
+    let order;
+    try {
+      order = await razorpay.orders.create({
+        amount: amountInPaise,
+        currency: "INR",
+        receipt: `ORD_${Date.now()}_${userId.slice(-6)}`,
+        notes: {
+          userId,
+          planId,
+          planName: planData.name || "Elite Pass",
+        },
+      });
+    } catch (rzpError: any) {
+      console.error("[RAZORPAY_SDK_CRASH]", rzpError);
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: "Razorpay SDK rejected order creation.", 
+          reason: rzpError.description || rzpError.message,
+          metadata: rzpError.metadata 
+        },
+        { status: 500 }
+      );
+    }
 
     console.log("[RAZORPAY_ORDER_CREATED]", order.id);
 
@@ -93,16 +107,14 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("[RAZORPAY_ORDER_CRITICAL_FAILURE]", {
       message: error?.message,
-      stack: error?.stack,
-      raw: error
+      stack: error?.stack
     });
 
     return NextResponse.json(
       {
         success: false,
         error: error?.message || "Internal payment processing error.",
-        reason: error?.description || error?.message || "The server encountered a failure while contacting Razorpay.",
-        code: error?.code || "INTERNAL_ERROR"
+        reason: "The server encountered an unhandled exception while contacting Razorpay."
       },
       { status: 500 }
     );

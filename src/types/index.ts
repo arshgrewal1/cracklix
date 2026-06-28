@@ -201,7 +201,7 @@ export interface Question {
 // Aliases for legacy compatibility
 export type Mock = MockTest;
 export type CurrentAffair = CurrentAffairHubItem;
-export type Notification = any; // For broad compatibility with existing code
+export type Notification = any; 
 
 export interface CurrentAffairHubItem {
   id: string;

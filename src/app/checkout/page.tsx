@@ -26,12 +26,17 @@ import { Badge } from "@/components/ui/badge";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 
+/**
+ * @fileOverview High-Fidelity Checkout Hub v6.0.
+ * FIXED: Malformed React imports and improved error transparency.
+ */
+
 export default function CheckoutPage() {
   return (
     <Suspense
       fallback={
         <div className="h-screen flex items-center justify-center">
-          <Loader2 className="h-10 w-10 animate-spin" />
+          <Loader2 className="h-10 w-10 animate-spin text-primary" />
         </div>
       }
     >
@@ -114,11 +119,11 @@ function CheckoutContent() {
         orderData = JSON.parse(responseText);
       } catch (e) {
         console.error("[JSON_PARSE_ERROR]", responseText);
-        throw new Error("Server returned non-JSON response. Check backend logs.");
+        throw new Error("The server returned a malformed response. Check console for raw logs.");
       }
 
       if (!res.ok) {
-        console.error("[ORDER_API_ERROR]", orderData);
+        console.error("[ORDER_API_ERROR]", { status: res.status, data: orderData });
         throw new Error(orderData.reason || orderData.error || `Server error: ${res.status}`);
       }
 
@@ -126,7 +131,7 @@ function CheckoutContent() {
         throw new Error("Razorpay SDK not loaded. Please refresh the page.");
       }
 
-      // Sanitize phone for Razorpay (must be 10 digits)
+      // Sanitize phone for Razorpay (must be 10 digits for reliability in Test Mode)
       const contactNumber = profile?.phone?.replace(/\D/g, '').slice(-10) || "";
 
       const options = {
@@ -156,7 +161,7 @@ function CheckoutContent() {
             if (verifyRes.ok && verifyData.success) {
               router.push(`/payment/success?order_id=${response.razorpay_order_id}&plan=${encodeURIComponent(planData.name)}`);
             } else {
-              throw new Error(verifyData.reason || verifyData.error || "Payment verification failed.");
+              throw new Error(verifyData.reason || verifyData.error || "Payment verification handshake failed.");
             }
           } catch (err: any) {
             setErrorMessage(err.message);
@@ -180,7 +185,7 @@ function CheckoutContent() {
       const rzp = new (window as any).Razorpay(options);
       rzp.on("payment.failed", function (resp: any) {
         console.error("[RAZORPAY_FAILURE_EVENT]", resp.error);
-        setErrorMessage(resp?.error?.description || "Transaction failed");
+        setErrorMessage(resp?.error?.description || "Transaction node declined by gateway.");
         setOnlineProcessing(false);
       });
       rzp.open();
@@ -193,17 +198,17 @@ function CheckoutContent() {
 
   if (planLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
-        <Loader2 className="h-10 w-10 animate-spin" />
+      <div className="h-screen flex items-center justify-center bg-white">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
       </div>
     );
   }
 
   if (!planData) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center gap-4">
+      <div className="h-screen flex flex-col items-center justify-center gap-4 bg-white">
         <AlertCircle className="h-10 w-10 text-slate-300" />
-        <span className="font-bold">Plan Not Found</span>
+        <span className="font-bold text-[#0F172A]">Plan Not Found</span>
         <Button onClick={() => router.push('/pass')}>Return to Plans</Button>
       </div>
     );
@@ -212,7 +217,7 @@ function CheckoutContent() {
   const upiId = settings?.upiId || "arshdeepgrewal1122-1@oksbi";
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 font-body">
       <Navbar />
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"
@@ -221,18 +226,18 @@ function CheckoutContent() {
 
       <main className="container mx-auto p-4 md:p-12 max-w-4xl text-left">
         <div className="flex items-center gap-4 mb-8">
-           <button onClick={() => router.back()} className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm"><ArrowLeft className="h-5 w-5" /></button>
-           <h1 className="text-2xl md:text-4xl font-black text-[#0F172A]">Checkout</h1>
+           <button onClick={() => router.back()} className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm active:scale-95 transition-all"><ArrowLeft className="h-5 w-5" /></button>
+           <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Checkout</h1>
         </div>
 
         {errorMessage && (
           <div className="p-6 mb-8 bg-rose-50 border border-rose-100 rounded-[1.5rem] flex items-start gap-4 animate-in slide-in-from-top-4">
             <AlertCircle className="h-6 w-6 text-rose-500 shrink-0" />
             <div className="flex-1 space-y-3">
-               <p className="font-bold text-rose-700 leading-tight">Handshake Audit Failure</p>
+               <p className="font-bold text-rose-700 leading-tight">Payment Audit Failure</p>
                <p className="text-sm text-rose-600 font-medium">{errorMessage}</p>
                <Button variant="outline" size="sm" className="h-9 px-4 rounded-lg bg-white border-rose-200 text-rose-600 font-bold" onClick={handlePaymentInitiation}>
-                  <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Handshake
+                  <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Payment
                </Button>
             </div>
           </div>
@@ -249,8 +254,8 @@ function CheckoutContent() {
                 <TabsContent value="online">
                   <Card className="p-8 border-none shadow-xl rounded-[2rem] space-y-8 bg-white">
                     <div className="space-y-2">
-                       <h2 className="text-xl font-black">Pay Securely</h2>
-                       <p className="text-sm text-slate-500 font-medium">Automatic pass activation via Razorpay.</p>
+                       <h2 className="text-xl font-black text-[#0F172A]">Pay Securely</h2>
+                       <p className="text-sm text-slate-500 font-medium leading-relaxed">Automatic pass activation via encrypted Razorpay gateway.</p>
                     </div>
                     <Button
                       onClick={handlePaymentInitiation}
@@ -270,8 +275,8 @@ function CheckoutContent() {
                 <TabsContent value="manual">
                   <Card className="p-8 border-none shadow-xl rounded-[2rem] space-y-8 bg-white">
                     <div className="space-y-2">
-                       <h2 className="text-xl font-black">Manual Verification</h2>
-                       <p className="text-sm text-slate-500 font-medium">Pay via UPI and enter UTR for manual audit.</p>
+                       <h2 className="text-xl font-black text-[#0F172A]">Manual Verification</h2>
+                       <p className="text-sm text-slate-500 font-medium leading-relaxed">Pay via UPI and enter the 12-digit UTR for manual registry audit.</p>
                     </div>
 
                     <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
@@ -306,7 +311,7 @@ function CheckoutContent() {
                             planId,
                             transactionId: utr,
                           });
-                          toast({ title: "Request Staged", description: "Audit will be completed within 12 hours." });
+                          toast({ title: "Request Staged", description: "Manual audit will be completed within 12 hours." });
                           router.push("/dashboard");
                         } catch (e: any) {
                           setErrorMessage(e.message);
@@ -329,7 +334,7 @@ function CheckoutContent() {
                        <Gem className="h-6 w-6" />
                     </div>
                     <div className="space-y-0.5">
-                       <h3 className="text-lg font-black uppercase tracking-tight">{planData.name}</h3>
+                       <h3 className="text-lg font-black uppercase tracking-tight text-[#0F172A]">{planData.name}</h3>
                        <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] uppercase px-2">{planData.durationDays} Days</Badge>
                     </div>
                  </div>
@@ -338,9 +343,9 @@ function CheckoutContent() {
                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Premium Benefits</p>
                     <div className="space-y-3">
                        {planData.features?.map((f: string, i: number) => (
-                          <div key={i} className="flex items-start gap-3">
+                          <div key={i} className="flex items-start gap-3 text-left">
                              <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                             <span className="text-sm font-medium text-slate-600">{f}</span>
+                             <span className="text-sm font-medium text-slate-600 leading-snug">{f}</span>
                           </div>
                        ))}
                     </div>
