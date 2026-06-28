@@ -1,8 +1,6 @@
-
 "use client"
 
 import React, { Suspense, useMemo, useState, useEffect } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,11 +25,7 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
-
-/**
- * @fileOverview Institutional Checkout Hub v7.2 (Debug Ready).
- * FIXED: Malformed imports and enhanced backend verification handshake.
- */
+import { useSearchParams, useRouter } from "next/navigation"
 
 export default function CheckoutPage() {
   return (
@@ -78,7 +72,6 @@ function CheckoutContent() {
     setOnlineProcessing(true);
     
     try {
-      console.log("[CHECKOUT] Creating Razorpay Order for plan:", planId);
       const orderRes = await fetch(`/api/razorpay/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -103,7 +96,6 @@ function CheckoutContent() {
         order_id: orderData.id,
         handler: async (response: any) => {
           setOnlineProcessing(true);
-          console.log("[CHECKOUT] Payment success from modal. Verifying signature...");
           try {
             const verifyRes = await fetch('/api/razorpay/verify', {
               method: 'POST',
@@ -120,10 +112,8 @@ function CheckoutContent() {
             const verifyData = await verifyRes.json();
             
             if (verifyRes.ok && verifyData.success) {
-               console.log("[CHECKOUT] Verification success. Redirecting...");
                router.push("/payment/success?order_id=" + response.razorpay_order_id + "&plan=" + encodeURIComponent(planData.name));
             } else {
-               console.error("[CHECKOUT] Verification failure reason:", verifyData.reason);
                throw new Error(verifyData.reason || "Backend signature verification failed.");
             }
           } catch (err: any) {
@@ -140,7 +130,6 @@ function CheckoutContent() {
         theme: { color: "#2563EB" },
         modal: { 
           ondismiss: () => {
-             console.log("[CHECKOUT] Modal dismissed by user.");
              setOnlineProcessing(false);
           }
         }
@@ -152,14 +141,12 @@ function CheckoutContent() {
 
       const rzp = new (window as any).Razorpay(options);
       rzp.on('payment.failed', function (resp: any) {
-        console.error("[CHECKOUT] Razorpay Payment failed event:", resp.error);
         setErrorMessage(resp.error.description || "Gateway payment rejection.");
         setOnlineProcessing(false);
       });
       rzp.open();
 
     } catch (e: any) {
-      console.error("[CHECKOUT] Catch block error:", e.message);
       setErrorMessage(e.message);
       setOnlineProcessing(false);
     }
@@ -288,10 +275,10 @@ function CheckoutContent() {
 
                  <div className="mt-14 pt-8 border-t border-white/5 flex justify-between items-end">
                     <div className="text-left">
-                       <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Total</p>
+                       <p className="text-10 font-black text-slate-500 uppercase tracking-widest mb-1">Total</p>
                        <span className="text-5xl font-black text-white tabular-nums tracking-tighter">₹{planData.price}</span>
                     </div>
-                    <span className="text-[10px] font-black text-slate-500 uppercase mb-3">INR</span>
+                    <span className="text-10 font-black text-slate-500 uppercase mb-3">INR</span>
                  </div>
               </Card>
            </div>

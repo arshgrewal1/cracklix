@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -9,10 +8,6 @@ import { buttonVariants } from "@/components/ui/button"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
-/**
- * @fileOverview Refined Calendar Component v3.3.
- * FIXED: Full compatibility with react-day-picker v9 API and TypeScript orientations.
- */
 function Calendar({
   className,
   classNames,
@@ -56,31 +51,26 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        Chevron: ({ 
-          orientation, 
-          className: chevronClassName, 
-          // @ts-ignore - Accept unused props to satisfy DayPicker v9 types
-          size,
-          // @ts-ignore - Accept unused props to satisfy DayPicker v9 types
-          disabled 
-        }: { 
-          orientation?: "left" | "right" | "up" | "down"; 
-          className?: string; 
-          size?: number; 
-          disabled?: boolean; 
+        Chevron: ({
+          orientation,
+        }: {
+          orientation?: "left" | "right" | "up" | "down";
+          className?: string;
+          size?: number;
+          disabled?: boolean;
         }) => {
           switch (orientation) {
             case "left":
-              return <ChevronLeft className={cn("h-4 w-4", chevronClassName)} />;
+              return <ChevronLeft className="h-4 w-4" />;
             case "up":
-              return <ChevronLeft className={cn("h-4 w-4 rotate-90", chevronClassName)} />;
+              return <ChevronLeft className="h-4 w-4 rotate-90" />;
             case "down":
-              return <ChevronRight className={cn("h-4 w-4 rotate-90", chevronClassName)} />;
+              return <ChevronRight className="h-4 w-4 rotate-90" />;
             case "right":
             default:
-              return <ChevronRight className={cn("h-4 w-4", chevronClassName)} />;
+              return <ChevronRight className="h-4 w-4" />;
           }
-        }
+        },
       }}
       {...props}
     />

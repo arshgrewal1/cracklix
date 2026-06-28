@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
 import { ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { Badge } from "@/components/ui/badge"
 import { Exam } from "@/types"
@@ -10,10 +9,6 @@ interface ExamCardProps {
   exam: Exam
 }
 
-/**
- * @fileOverview Exam Card Component v6.4.
- * FIXED: Aligned property access with expanded Exam interface.
- */
 export default function ExamCard({ exam }: ExamCardProps) {
   const examName = exam.name || "Official Vertical"
   const examDescription = exam.description || "Official preparation vertical verified by institutional patterns."

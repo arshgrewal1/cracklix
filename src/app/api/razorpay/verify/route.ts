@@ -1,130 +1,241 @@
-
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { initializeFirebase } from "@/firebase/app";
-import { doc, getDoc, setDoc, serverTimestamp, updateDoc } from "firebase/firestore";
 import Razorpay from "razorpay";
-
-/**
- * @fileOverview Hardened Razorpay Verification Node v5.0.
- * Includes detailed diagnostic logging and server-side status auditing.
- */
+import { initializeFirebase } from "@/firebase/app";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 export async function POST(req: Request) {
-  console.log("[RAZORPAY_VERIFY] Incoming verification request...");
-  
+  console.log("[RAZORPAY_VERIFY] Incoming Request");
+
   try {
-    const body = await req.json();
     const {
       razorpay_order_id,
       razorpay_payment_id,
       razorpay_signature,
       userId,
       planId,
-    } = body;
+    } = await req.json();
 
-    console.log("[RAZORPAY_VERIFY] Payload parameters received:", { 
-      orderId: razorpay_order_id, 
-      paymentId: razorpay_payment_id, 
-      userId, 
-      planId 
+    console.log({
+      razorpay_order_id,
+      razorpay_payment_id,
+      userId,
+      planId,
     });
 
-    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !userId || !planId) {
-      console.error("[RAZORPAY_VERIFY] Missing required fields in request body.");
-      return NextResponse.json({ success: false, reason: "Missing verification tokens." }, { status: 400 });
+    if (
+      !razorpay_order_id ||
+      !razorpay_payment_id ||
+      !razorpay_signature ||
+      !userId ||
+      !planId
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Missing required fields.",
+        },
+        {
+          status: 400,
+        }
+      );
     }
 
     const keyId = process.env.RAZORPAY_KEY_ID?.trim();
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
     if (!keyId || !keySecret) {
-      console.error("[RAZORPAY_VERIFY] RAZORPAY_KEY_ID or SECRET missing from environment.");
-      return NextResponse.json({ success: false, reason: "Gateway configuration error." }, { status: 500 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Razorpay environment variables missing.",
+        },
+        {
+          status: 500,
+        }
+      );
     }
 
-    // 1. CRYPTOGRAPHIC HANDSHAKE (HMAC SHA256)
     const expectedSignature = crypto
       .createHmac("sha256", keySecret)
       .update(`${razorpay_order_id}|${razorpay_payment_id}`)
       .digest("hex");
 
-    console.log("[RAZORPAY_VERIFY] Signature Audit:", {
-      received: razorpay_signature,
-      expected: expectedSignature,
-      match: expectedSignature === razorpay_signature
-    });
+    console.log("Generated Signature:", expectedSignature);
+    console.log("Received Signature :", razorpay_signature);
 
     if (expectedSignature !== razorpay_signature) {
-      console.error("[RAZORPAY_VERIFY] Signature mismatch detected.");
-      return NextResponse.json({ success: false, reason: "Security signature mismatch." }, { status: 400 });
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Invalid payment signature.",
+        },
+        {
+          status: 400,
+        }
+      );
     }
 
-    // 2. SECONDARY AUDIT: Verify payment status directly with Razorpay
-    const rzp = new Razorpay({ key_id: keyId, key_secret: keySecret });
-    const payment = await rzp.payments.fetch(razorpay_payment_id);
-    
-    console.log("[RAZORPAY_VERIFY] Razorpay Payment Status:", payment.status);
+    const razorpay = new Razorpay({
+      key_id: keyId,
+      key_secret: keySecret,
+    });
 
-    if (payment.status !== 'captured' && payment.status !== 'authorized') {
-       return NextResponse.json({ success: false, reason: `Payment status is ${payment.status}. Expected captured.` }, { status: 400 });
+    const payment = await razorpay.payments.fetch(
+      razorpay_payment_id
+    );
+
+    console.log(payment);
+
+    const paymentStatus = String(
+      (payment as any).status ?? ""
+    ).toLowerCase();
+
+    console.log("Payment Status:", paymentStatus);
+
+    if (
+      !["captured", "authorized"].includes(paymentStatus)
+    ) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Invalid payment status: ${paymentStatus}`,
+        },
+        {
+          status: 400,
+        }
+      );
     }
 
     const { firestore: db } = initializeFirebase();
 
-    // 3. REGISTRY SYNC: Activate Pass
-    const planRef = doc(db, "passes", planId);
-    const planSnap = await getDoc(planRef);
-    
-    if (!planSnap.exists()) {
-      console.error("[RAZORPAY_VERIFY] Plan ID not found in Firestore passes collection.");
-      throw new Error("Target plan node not found.");
+    const paymentRef = doc(
+      db,
+      "payment_requests",
+      razorpay_payment_id
+    );
+
+    const paymentSnap = await getDoc(paymentRef);
+
+    if (paymentSnap.exists()) {
+      return NextResponse.json({
+        success: true,
+        message: "Payment already verified.",
+      });
     }
-    
+
+    const planRef = doc(db, "passes", planId);
+
+    const planSnap = await getDoc(planRef);
+
+    if (!planSnap.exists()) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Plan not found.",
+        },
+        {
+          status: 404,
+        }
+      );
+    }
+
     const plan = planSnap.data();
+
     const duration = Number(plan.durationDays ?? 30);
-    const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + duration);
 
-    console.log("[RAZORPAY_VERIFY] Updating user document:", userId);
-    const userRef = doc(db, "users", userId);
-    await updateDoc(userRef, {
-      pass: {
-        active: true,
-        plan: plan.name,
-        purchaseDate: new Date().toISOString(),
-        expiryDate: expiryDate.toISOString(),
-        paymentId: razorpay_payment_id,
-        orderId: razorpay_order_id,
-        freePassClaimed: false
-      },
-      passStatus: "active",
-      status: planId,
-      planTier: plan.tier || 1,
-      passExpiresAt: expiryDate.toISOString(),
-      updatedAt: serverTimestamp(),
-    });
+    const expiry = new Date();
 
-    // 4. LEDGER LOGGING
-    console.log("[RAZORPAY_VERIFY] Writing payment request record...");
-    const paymentRef = doc(db, "payment_requests", razorpay_payment_id);
-    await setDoc(paymentRef, {
-      paymentId: razorpay_payment_id,
-      orderId: razorpay_order_id,
-      signature: razorpay_signature,
-      userId,
-      planId,
-      amount: plan.price,
-      gateway: "RAZORPAY",
-      status: "APPROVED",
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
+    expiry.setDate(expiry.getDate() + duration);
 
-    console.log("[RAZORPAY_VERIFY] Verification flow completed successfully.");
-    return NextResponse.json({ success: true, paymentId: razorpay_payment_id });
-  } catch (error: any) {
-    console.error("[RAZORPAY_VERIFY_FATAL_ERROR]", error);
-    return NextResponse.json({ success: false, reason: error?.message || "Internal registry error." }, { status: 500 });
-  }
-}
+    const paymentAmount =
+      typeof (payment as any).amount === "number"
+        ? (payment as any).amount
+        : Number((payment as any).amount);
+        const userRef = doc(db, "users", userId);
+
+        await setDoc(
+          userRef,
+          {
+            pass: {
+              active: true,
+              plan: String(plan.name ?? ""),
+              purchaseDate: new Date().toISOString(),
+              expiryDate: expiry.toISOString(),
+              paymentId: razorpay_payment_id,
+              orderId: razorpay_order_id,
+              freePassClaimed: false,
+            },
+    
+            passStatus: "active",
+            status: planId,
+            planTier: Number(plan.tier ?? 1),
+            passExpiresAt: expiry.toISOString(),
+    
+            updatedAt: serverTimestamp(),
+          },
+          {
+            merge: true,
+          }
+        );
+    
+        console.log("[VERIFY] User Pass Activated");
+    
+        await setDoc(paymentRef, {
+          paymentId: razorpay_payment_id,
+          orderId: razorpay_order_id,
+          signature: razorpay_signature,
+    
+          userId,
+          planId,
+    
+          amount: Number(paymentAmount) / 100,
+          currency: String((payment as any).currency ?? "INR"),
+    
+          gateway: "RAZORPAY",
+    
+          status: paymentStatus,
+    
+          email: String((payment as any).email ?? ""),
+          contact: String((payment as any).contact ?? ""),
+    
+          razorpayResponse: payment,
+    
+          verified: true,
+    
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+    
+        console.log("[VERIFY] Payment Saved");
+    
+        return NextResponse.json({
+          success: true,
+          paymentId: razorpay_payment_id,
+          orderId: razorpay_order_id,
+          message: "Payment verified successfully.",
+        });
+      } catch (error: any) {
+        console.error("[RAZORPAY_VERIFY_ERROR]");
+        console.error(error);
+    
+        return NextResponse.json(
+          {
+            success: false,
+            error: error?.message ?? "Verification failed.",
+            stack:
+              process.env.NODE_ENV === "development"
+                ? error?.stack
+                : undefined,
+          },
+          {
+            status: 500,
+          }
+        );
+      }
+    }

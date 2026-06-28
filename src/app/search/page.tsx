@@ -12,11 +12,6 @@ import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-/**
- * @fileOverview Institutional Search Hub v2.5.
- * FIXED: Resolved malformed React imports and UMD global conflicts.
- */
-
 export default function SearchPage() {
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
@@ -65,7 +60,7 @@ function SearchContent() {
        title: e.name, 
        type: "Exam Hub", 
        href: `/exams/view?id=${e.id}`, 
-       icon: <GraduationCap />
+       icon: <GraduationCap className="h-5 w-5" />
     }))
 
     const mockMatches = (mocks || []).filter((m: any) => 
@@ -75,7 +70,7 @@ function SearchContent() {
        title: m.title, 
        type: "Practice Test", 
        href: `/mocks/view?id=${m.id}`, 
-       icon: <Zap />
+       icon: <Zap className="h-5 w-5" />
     }))
 
     const notesMatches = (notes || []).filter((n: any) => 
@@ -85,7 +80,7 @@ function SearchContent() {
        title: n.title, 
        type: "Library", 
        href: `/notes`, 
-       icon: <FileText />
+       icon: <FileText className="h-5 w-5" />
     }))
 
     return [...examMatches, ...mockMatches, ...notesMatches]
@@ -127,7 +122,7 @@ function SearchContent() {
                       <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
                          <div className="flex items-center gap-4 min-w-0 flex-1">
                             <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
-                               {isValidElement(res.icon) ? cloneElement(res.icon as ReactElement<any>, { className: "h-5 w-5" }) : res.icon}
+                               {res.icon}
                             </div>
                             <div className="text-left min-w-0 flex-1">
                                <p className="font-black text-[#0F172A] group-hover:text-primary transition-colors text-sm md:text-xl uppercase leading-tight line-clamp-1 truncate">{res.title}</p>
