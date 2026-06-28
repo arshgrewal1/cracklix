@@ -11,11 +11,6 @@ import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-/**
- * @fileOverview Institutional Search Hub v2.3.
- * FIXED: Resolved 'lucide-material' import error.
- * FIXED: Resolved React 19 UMD global conflict.
- */
 export default function SearchPage() {
   return (
     <React.Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>

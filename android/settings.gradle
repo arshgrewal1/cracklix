@@ -1,4 +1,3 @@
 include ':app'
 
-// This dynamic block handles the inclusion of Capacitor plugins automatically.
 apply from: '../node_modules/@capacitor/android/capacitor.settings.gradle'

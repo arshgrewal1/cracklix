@@ -29,11 +29,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
-/**
- * @fileOverview Institutional Checkout Hub v21.1.
- * FIXED: Resolved 'lucide-material' import error.
- * FIXED: Corrected useMemo and useDoc hook signatures.
- */
 export default function CheckoutPage() {
   return (
     <React.Suspense
