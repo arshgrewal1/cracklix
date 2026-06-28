@@ -8,12 +8,6 @@ import {
 } from "@/types";
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
-/**
- * @fileOverview Institutional CBT Store v46.0.
- * FIXED: TS1117 Resolved duplicate property keys in object literals.
- * FIXED: Language type synchronization.
- */
-
 export interface ExamStoreState {
   mockId: string | null;
   mockTitle: string;

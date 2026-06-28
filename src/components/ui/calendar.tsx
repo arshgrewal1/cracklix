@@ -12,7 +12,6 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker>
  * @fileOverview Hardened Calendar Hub v17.5 (react-day-picker v9 API).
  * FIXED: Orientation type compliance for production build.
  */
-
 function Calendar({
   className,
   classNames,
