@@ -41,7 +41,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Student Home - Typography Standardized v48.0.
+ * @fileOverview Student Home - Real-Time Study Tracker v49.0.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -50,9 +50,16 @@ export default function StudentDashboard() {
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [passCountdown, setPassCountdown] = useState("");
+  
+  // LIVE SESSION TRACKER
+  const [sessionSeconds, setSessionSeconds] = useState(0);
 
   useEffect(() => {
     setMounted(true)
+    const interval = setInterval(() => {
+      setSessionSeconds(prev => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
   }, [])
 
   useEffect(() => {
@@ -96,19 +103,41 @@ export default function StudentDashboard() {
   const { data: validMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
 
   const stats = useMemo(() => {
-    if (!rawResults || rawResults.length === 0 || !validMocks) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0h", list: [] }
+    if (!rawResults || !validMocks) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0h 0m", list: [] }
+    
     const validMockIds = new Set(validMocks.map(m => m.id));
     const filtered = rawResults.filter(r => validMockIds.has(r.mockId));
     const sorted = [...filtered].sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());
+    
     const total = sorted.length
     const correct = sorted.reduce((acc: number, r: any) => acc + (r.correctCount || 0), 0)
     const attempted = sorted.reduce((acc: number, r: any) => acc + (Object.keys(r.answers || {}).length), 0)
     const avgAcc = attempted > 0 ? Math.round((correct / attempted) * 100) : 0
-    const totalSeconds = sorted.reduce((acc: number, r: any) => acc + (Number(r.timeTaken) || 0), 0)
-    const timeFormattedValue = totalSeconds >= 3600 ? `${(totalSeconds / 3600).toFixed(1)}h` : totalSeconds >= 60 ? `${Math.floor(totalSeconds / 60)}m` : "0h";
+    
+    // SANITIZED TIME CALCULATION (Ignore values that look like timestamps > 100 hours per test)
+    const maxSafeSecondsPerTest = 3600 * 10; // 10 hours max
+    const historicalSeconds = sorted.reduce((acc: number, r: any) => {
+       const t = Number(r.timeTaken) || 0;
+       return acc + (t > maxSafeSecondsPerTest ? 0 : t);
+    }, 0);
+
+    const totalTimeSeconds = historicalSeconds + sessionSeconds;
+    
+    const h = Math.floor(totalTimeSeconds / 3600);
+    const m = Math.floor((totalTimeSeconds % 3600) / 60);
+    const timeFormattedValue = h > 0 ? `${h}h ${m}m` : `${m}m`;
+
     const uniqueDays = new Set(sorted.map((r: any) => new Date(r.timestamp).toDateString()))
-    return { total, avgAccuracy: avgAcc, streak: uniqueDays.size, readiness: Math.min(100, Math.round((avgAcc * 0.7) + (Math.min(total, 30) * 1))), hours: timeFormattedValue, list: sorted.slice(0, 8) }
-  }, [rawResults, validMocks])
+    
+    return { 
+      total, 
+      avgAccuracy: avgAcc, 
+      streak: uniqueDays.size, 
+      readiness: Math.min(100, Math.round((avgAcc * 0.7) + (Math.min(total, 30) * 1))), 
+      hours: timeFormattedValue, 
+      list: sorted.slice(0, 8) 
+    }
+  }, [rawResults, validMocks, sessionSeconds])
 
   if (!mounted || authLoading) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-8 w-8 text-primary animate-pulse" /></div>;
 
