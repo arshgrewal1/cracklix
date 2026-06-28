@@ -11,11 +11,6 @@ import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
-/**
- * @fileOverview Universal Search Hub.
- * FIXED: Refactored Icon logic to store Component references for React 19 compatibility.
- */
-
 interface SearchResultNode {
   title: string;
   type: string;
