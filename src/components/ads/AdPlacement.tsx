@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useMemo, useEffect } from 'react';
@@ -16,8 +15,8 @@ interface AdPlacementProps {
 }
 
 /**
- * @fileOverview Institutional Ad-Node v1.28.
- * FIXED: Explicit type casting for Firestore queries to resolve parameter assignability errors.
+ * @fileOverview Institutional Ad-Node v1.29.
+ * FIXED: Applied explicit type casting for Firestore queries to satisfy generic requirements.
  */
 
 export default function AdPlacement({ placement, className, examId }: AdPlacementProps) {

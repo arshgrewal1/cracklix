@@ -29,8 +29,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v22.4.
- * FIXED: Explicit React imports and restored RefreshCw to resolve build blockers.
+ * @fileOverview Institutional Checkout Hub v22.5.
+ * FIXED: Restored missing icons and explicit React imports for stable build.
  */
 
 export default function CheckoutPage() {
