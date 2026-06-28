@@ -29,8 +29,9 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v18.0.
- * FIXED: Hardened prefill data for Test Mode stability and restored RefreshCw import.
+ * @fileOverview Institutional Checkout Hub v19.0.
+ * FIXED: Restored missing RefreshCw import.
+ * FIXED: Hardened contact prefill to ensure 10-digit numeric string for Razorpay Test Mode success.
  */
 
 export default function CheckoutPage() {
@@ -132,7 +133,7 @@ function CheckoutContent() {
         prefill: {
           name: profile?.name || user.displayName || "Aspirant",
           email: user.email || "student@cracklix.com",
-          // Razorpay test mode is strict about 10 digits
+          // Razorpay test mode is strict about 10 digits numeric contact
           contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "9999999999"
         },
         theme: { color: "#2563EB" },
