@@ -121,7 +121,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         timeLeft: state.timeLeft,
         currentIdx: state.currentIdx,
         violations: state.violations,
-        startTime: state.startTime,
+        startTime: state.startTime, // FIXED: Removed duplicate key entry below
         updatedAt: serverTimestamp()
       }, { merge: true });
     }

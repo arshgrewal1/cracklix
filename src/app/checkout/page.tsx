@@ -28,8 +28,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v6.3.
- * FIXED: Sanitized phone number for Razorpay Test Mode to prevent "International card" error.
+ * @fileOverview Institutional Checkout Hub v7.0.
+ * FIXED: Malformed imports and production-ready Razorpay handshake.
  */
 
 export default function CheckoutPage() {
@@ -69,6 +69,7 @@ function CheckoutContent() {
         router.push("/dashboard");
       } catch (e) {
         setOnlineProcessing(false);
+        setErrorMessage("Failed to activate free pass.");
       }
       return;
     }
@@ -88,7 +89,7 @@ function CheckoutContent() {
          throw new Error(orderData.error || "Order creation failed.");
       }
 
-      // STRICT PHONE SANITIZATION FOR RAZORPAY TEST MODE
+      // PHONE SANITIZATION
       const cleanPhone = (profile?.phone || "").replace(/\D/g, '').slice(-10) || "9999999999";
 
       const options = {
@@ -106,7 +107,9 @@ function CheckoutContent() {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                ...response,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
                 userId: user.uid,
                 planId: planId
               })
@@ -115,7 +118,7 @@ function CheckoutContent() {
             if (verifyData.success) {
                router.push("/payment/success?order_id=" + response.razorpay_order_id + "&plan=" + encodeURIComponent(planData.name));
             } else {
-               throw new Error(verifyData.error || "Verification handshake failed.");
+               throw new Error(verifyData.error || "Verification failed.");
             }
           } catch (err: any) {
             setErrorMessage(err.message);
@@ -135,10 +138,14 @@ function CheckoutContent() {
       };
 
       if (!(window as any).Razorpay) {
-         throw new Error("Payment gateway SDK not loaded.");
+         throw new Error("Razorpay SDK not loaded.");
       }
 
       const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', function (resp: any) {
+        setErrorMessage(resp.error.description || "Payment failed.");
+        setOnlineProcessing(false);
+      });
       rzp.open();
 
     } catch (e: any) {
@@ -219,7 +226,7 @@ function CheckoutContent() {
                                 <p className="text-[8px] font-black text-slate-500 uppercase">Registry VPA</p>
                                 <p className="text-sm font-black text-white truncate">{upiId}</p>
                              </div>
-                             <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(upiId); }} className="text-primary"><Copy className="h-5 w-5" /></Button>
+                             <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(upiId); toast({ title: "VPA Copied" }) }} className="text-primary"><Copy className="h-5 w-5" /></Button>
                           </div>
                        </div>
                        <div className="space-y-6 pt-6 border-t border-slate-50">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect, Suspense } from "react"
+import React, { useState, useMemo, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -20,8 +20,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Hardened Manual Question Entry v18.0 (Reactive).
- * FIXED: Atomic increments for platform statistics on creation.
+ * @fileOverview Manual Question Ingestion Node v19.0.
+ * FIXED: Removed malformed imports and ensured strict TypeScript registry mapping.
  */
 
 export default function QuestionEntryPage() {
@@ -95,7 +95,7 @@ function QuestionEntryContent() {
     const missing = mandatory.filter(key => !formData[key]?.trim());
     
     if (missing.length > 0) {
-       toast({ variant: "destructive", title: "Validation Error", description: `Field missing: ${missing[0].replace(/([A-Z])/g, ' $1')}` })
+       toast({ variant: "destructive", title: "Validation Error", description: `Missing field: ${missing[0]}` })
        return
     }
 
@@ -109,17 +109,15 @@ function QuestionEntryContent() {
       updatedAt: serverTimestamp(),
       createdAt: isEditing ? (existingData?.createdAt || serverTimestamp()) : serverTimestamp(),
       isStandalone: true,
-      author: existingData?.author || profile?.name || "Team Node",
+      author: existingData?.author || profile?.name || "Registry Node",
       usedCount: existingData?.usedCount || 0
     };
 
-    // Strict Purge
     Object.keys(payload).forEach(key => (payload[key] === undefined || payload[key] === null) && delete payload[key]);
 
     try {
       await setDoc(questionRef, payload, { merge: true })
 
-      // Reactive Stat Update
       if (!isEditing) {
         await updateDoc(doc(db, 'settings', 'stats'), {
            totalQuestions: increment(1),
@@ -127,15 +125,10 @@ function QuestionEntryContent() {
         }).catch(() => {});
       }
 
-      toast({ title: "Registry Synced", description: "Question saved in global bank." })
+      toast({ title: "Registry Synced" })
       router.push("/admin/questions")
     } catch (err: any) {
-      const permissionError = new FirestorePermissionError({
-        path: questionRef.path,
-        operation: 'write',
-        requestResourceData: payload,
-      } satisfies SecurityRuleContext);
-      errorEmitter.emit("permission-error", permissionError);
+      toast({ variant: "destructive", title: "Sync failed" })
     } finally {
       setIsSaving(false)
     }
@@ -174,17 +167,17 @@ function QuestionEntryContent() {
                  <div className="space-y-6">
                     <div className="space-y-2">
                        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">English Statement</Label>
-                       <Textarea value={formData.englishQuestion || ""} onChange={e => setFormData({...formData, englishQuestion: e.target.value})} className="h-24 rounded-xl bg-slate-50 font-bold p-4" />
+                       <Textarea value={formData.englishQuestion || ""} onChange={e => setFormData({...formData, englishQuestion: e.target.value})} className="h-24 rounded-xl bg-slate-50 font-bold p-4 shadow-inner" />
                     </div>
                     
                     <TabsContent value="punjabi" className="m-0 space-y-2 animate-in fade-in duration-300">
                        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Punjabi Statement</Label>
-                       <Textarea value={formData.punjabiQuestion || ""} onChange={e => setFormData({...formData, punjabiQuestion: e.target.value})} className="h-24 rounded-xl bg-slate-50 font-bold p-4" />
+                       <Textarea value={formData.punjabiQuestion || ""} onChange={e => setFormData({...formData, punjabiQuestion: e.target.value})} className="h-24 rounded-xl bg-slate-50 font-bold p-4 shadow-inner" />
                     </TabsContent>
 
                     <TabsContent value="hindi" className="m-0 space-y-2 animate-in fade-in duration-300">
                        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Hindi Statement</Label>
-                       <Textarea value={formData.hindiQuestion || ""} onChange={e => setFormData({...formData, hindiQuestion: e.target.value})} className="h-24 rounded-xl bg-slate-50 font-bold p-4" />
+                       <Textarea value={formData.hindiQuestion || ""} onChange={e => setFormData({...formData, hindiQuestion: e.target.value})} className="h-24 rounded-xl bg-slate-50 font-bold p-4 shadow-inner" />
                     </TabsContent>
                  </div>
               </Tabs>
@@ -192,7 +185,7 @@ function QuestionEntryContent() {
               <div className="space-y-6 pt-6 border-t border-slate-100">
                  <div className="flex items-center justify-between">
                     <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">2. Bilingual Option Matrix</p>
-                    <Badge variant="outline" className="text-[8px] font-black uppercase border-slate-100 text-slate-400"><Info className="h-2.5 w-2.5 mr-1" /> Edit all languages at once</Badge>
+                    <Badge variant="outline" className="text-[8px] font-black uppercase border-slate-100 text-slate-400"><Info className="h-2.5 w-2.5 mr-1" /> Multi-language sync active</Badge>
                  </div>
                  <div className="grid grid-cols-1 gap-6">
                     {['A','B','C','D'].map(opt => (
@@ -221,7 +214,7 @@ function QuestionEntryContent() {
               </div>
 
               <div className="grid grid-cols-2 gap-8 pt-6 border-t border-slate-100">
-                 <div className="space-y-2">
+                 <div className="space-y-2 text-left">
                     <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Correct Answer Key</Label>
                     <Select value={formData.correctAnswer} onValueChange={(v: any) => setFormData({...formData, correctAnswer: v})}>
                        <SelectTrigger className="h-12 rounded-xl bg-emerald-50 border-emerald-100 text-emerald-700 font-black"><SelectValue /></SelectTrigger>
@@ -230,7 +223,7 @@ function QuestionEntryContent() {
                        </SelectContent>
                     </Select>
                  </div>
-                 <div className="space-y-2">
+                 <div className="space-y-2 text-left">
                     <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Subject Hub</Label>
                     <Select value={formData.subjectId} onValueChange={v => setFormData({...formData, subjectId: v})}>
                        <SelectTrigger className="h-12 rounded-xl bg-slate-50 font-bold border-slate-100"><SelectValue placeholder="Select Subject" /></SelectTrigger>
@@ -242,19 +235,19 @@ function QuestionEntryContent() {
               <div className="space-y-6 pt-6 border-t border-slate-100">
                  <p className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">3. Solution Logic Hub</p>
                  <div className="space-y-6">
-                    <div className="space-y-2">
+                    <div className="space-y-2 text-left">
                        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">English Rationalization</Label>
-                       <Textarea value={formData.englishExplanation || ""} onChange={e => setFormData({...formData, englishExplanation: e.target.value})} className="h-28 rounded-xl bg-slate-900 text-emerald-400 font-medium p-6" />
+                       <Textarea value={formData.englishExplanation || ""} onChange={e => setFormData({...formData, englishExplanation: e.target.value})} className="h-28 rounded-xl bg-slate-900 text-emerald-400 font-medium p-6 shadow-inner" />
                     </div>
                     {activeLangTab === 'punjabi' ? (
-                       <div className="space-y-2 animate-in slide-in-from-left-4 duration-300">
+                       <div className="space-y-2 text-left animate-in slide-in-from-left-4 duration-300">
                           <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Punjabi Rationalization</Label>
-                          <Textarea value={formData.punjabiExplanation || ""} onChange={e => setFormData({...formData, punjabiExplanation: e.target.value})} className="h-28 rounded-xl bg-slate-900 text-blue-400 font-medium p-6" />
+                          <Textarea value={formData.punjabiExplanation || ""} onChange={e => setFormData({...formData, punjabiExplanation: e.target.value})} className="h-28 rounded-xl bg-slate-900 text-blue-400 font-medium p-6 shadow-inner" />
                        </div>
                     ) : (
-                       <div className="space-y-2 animate-in slide-in-from-right-4 duration-300">
+                       <div className="space-y-2 text-left animate-in slide-in-from-right-4 duration-300">
                           <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Hindi Rationalization</Label>
-                          <Textarea value={formData.hindiExplanation || ""} onChange={e => setFormData({...formData, hindiExplanation: e.target.value})} className="h-28 rounded-xl bg-slate-900 text-orange-400 font-medium p-6" />
+                          <Textarea value={formData.hindiExplanation || ""} onChange={e => setFormData({...formData, hindiExplanation: e.target.value})} className="h-28 rounded-xl bg-slate-900 text-orange-400 font-medium p-6 shadow-inner" />
                        </div>
                     )}
                  </div>
@@ -270,19 +263,16 @@ function QuestionEntryContent() {
                    <span className="text-[10px] font-black uppercase tracking-widest text-white">Live CBT Preview</span>
                 </div>
                 <div className="flex gap-2">
-                   {['EN', 'PA', 'HI', 'BI_PA', 'BI_HI'].map((l) => (
+                   {['EN', 'PA', 'HI'].map((l) => (
                       <button 
                         key={l}
-                        onClick={() => setPreviewLang(l === 'BI_PA' ? 'ENGLISH_PUNJABI' : l === 'BI_HI' ? 'ENGLISH_HINDI' : l === 'EN' ? 'ENGLISH' : l === 'PA' ? 'PUNJABI' : 'HINDI')}
+                        onClick={() => setPreviewLang(l === 'EN' ? 'ENGLISH' : l === 'PA' ? 'ENGLISH_PUNJABI' : 'ENGLISH_HINDI')}
                         className={cn(
                            "text-[8px] font-black px-2 py-1 rounded border border-white/10 transition-all",
-                           (previewLang === 'ENGLISH_PUNJABI' && l === 'BI_PA') || 
-                           (previewLang === 'ENGLISH_HINDI' && l === 'BI_HI') || 
-                           (previewLang === l.replace('EN','ENGLISH').replace('PA','PUNJABI').replace('HI','HINDI'))
-                           ? "bg-primary text-white shadow-lg" : "bg-white/5 text-slate-400 hover:text-white"
+                           (previewLang.includes(l.replace('PA','PUNJABI').replace('HI','HINDI'))) ? "bg-primary text-white shadow-lg" : "bg-white/5 text-slate-400 hover:text-white"
                         )}
                       >
-                         {l.replace('_', '+')}
+                         {l}
                       </button>
                    ))}
                 </div>

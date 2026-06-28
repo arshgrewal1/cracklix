@@ -1,78 +1,76 @@
-
-import { NextResponse } from 'next/server';
-import Razorpay from 'razorpay';
-import { initializeFirebase } from '@/firebase/app';
-import { doc, getDoc } from 'firebase/firestore';
+import { NextResponse } from "next/server";
+import Razorpay from "razorpay";
+import { initializeFirebase } from "@/firebase/app";
+import { doc, getDoc } from "firebase/firestore";
 
 /**
- * @fileOverview Production Razorpay Order Engine v5.1.
- * HARDENED: Robust environment variable handling and dynamic pricing audit.
+ * @fileOverview Institutional Razorpay Order Node v3.0.
+ * FETCHES plan details from Firestore to prevent client-side price manipulation.
  */
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { planId, userId } = body;
-    
-    const { firestore: db } = initializeFirebase();
 
-    const keyId = process.env.RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
-
-    if (!keyId || !keySecret) {
-      console.error("[RAZORPAY_CONFIG_ERROR]: Credentials missing in server context.");
-      return NextResponse.json({ 
-        error: 'Payment service is temporarily unavailable.' 
-      }, { status: 503 });
+    if (!planId || !userId) {
+      return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
-    const instance = new Razorpay({
+    const keyId = process.env.RAZORPAY_KEY_ID?.trim();
+    const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
+
+    if (!keyId || !keySecret) {
+      console.error("[CONFIG_ERROR] Razorpay credentials missing.");
+      return NextResponse.json({ error: "Gateway configuration error." }, { status: 503 });
+    }
+
+    const { firestore: db } = initializeFirebase();
+
+    // AUDIT: Fetch verified price from Registry
+    const planRef = doc(db, "passes", planId);
+    const planSnap = await getDoc(planRef);
+
+    if (!planSnap.exists()) {
+      return NextResponse.json({ error: "Invalid plan node." }, { status: 404 });
+    }
+
+    const plan = planSnap.data();
+    const price = Number(plan?.price ?? 0);
+
+    if (!Number.isFinite(price) || price <= 0) {
+      return NextResponse.json({ error: "Illegal price value detected." }, { status: 400 });
+    }
+
+    const amountInPaise = Math.round(price * 100);
+
+    const razorpay = new Razorpay({
       key_id: keyId,
       key_secret: keySecret,
     });
 
-    if (!userId || !planId) {
-      return NextResponse.json({ error: 'Context missing: identity and plan node required' }, { status: 400 });
-    }
-
-    // 1. Audit Price from Firestore Registry
-    const planSnap = await getDoc(doc(db, "passes", planId));
-    if (!planSnap.exists()) {
-      return NextResponse.json({ error: 'Plan node not found in registry' }, { status: 404 });
-    }
-    
-    const planData = planSnap.data();
-    const amountInPaise = Math.round(Number(planData.price) * 100);
-
-    if (isNaN(amountInPaise) || (planData.price > 0 && amountInPaise < 100)) {
-      return NextResponse.json({ error: 'Minimum transaction limit not met (₹1)' }, { status: 400 });
-    }
-
-    // 2. Create Official Razorpay Order
-    const options = {
+    const order = await razorpay.orders.create({
       amount: amountInPaise,
       currency: "INR",
       receipt: `ORD_${Date.now()}_${userId.slice(-6)}`,
-      notes: { 
-        userId, 
-        planId, 
-        planName: planData.name 
-      }
-    };
+      notes: {
+        userId,
+        planId,
+        planName: String(plan?.name ?? "Cracklix Elite"),
+      },
+    });
 
-    const order = await instance.orders.create(options);
+    console.log(`[RAZORPAY_ORDER] Order created: ${order.id} for user: ${userId}`);
 
     return NextResponse.json({
+      success: true,
       id: order.id,
       amount: order.amount,
       currency: order.currency,
-      key: keyId
+      key: keyId,
     });
-
   } catch (error: any) {
-    console.error("[RAZORPAY_GATEWAY_CRITICAL]:", error);
-    return NextResponse.json({ 
-      error: error.message || 'Payment handshake failed.' 
-    }, { status: 500 });
+    console.error("[RAZORPAY_ORDER_ERROR]", error);
+    return NextResponse.json({ error: "Order initialization failed." }, { status: 500 });
   }
 }
