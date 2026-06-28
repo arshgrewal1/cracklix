@@ -17,8 +17,7 @@ import {
   AlertCircle,
   RefreshCw,
   ShieldCheck,
-  Tag,
-  Gift
+  Tag
 } from "lucide-react";
 import { useUser, useDoc, useFirestore } from "@/firebase";
 import { submitManualPayment } from "@/app/actions/payment";
@@ -27,11 +26,11 @@ import Script from "next/script";
 import { Badge } from "@/components/ui/badge";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { logEvent } from "@/lib/logger";
 
 /**
- * @fileOverview High-Fidelity Checkout Hub v11.0.
+ * @fileOverview High-Fidelity Checkout Hub v12.0.
  * FIXED: Advanced error extraction and Razorpay mapping correction.
+ * FIXED: Explicit React import to resolve JSX Intrinsic Elements resolution.
  */
 export default function CheckoutPage() {
   return (
@@ -129,15 +128,14 @@ function CheckoutContent() {
       
       try {
         orderData = JSON.parse(responseText);
-        console.log("[CHECKOUT RESPONSE]", orderData);
       } catch (parseErr) {
         console.error("[CHECKOUT] Malformed JSON response:", responseText);
-        throw new Error("The server returned an unreadable response. Payment node out of sync.");
+        throw new Error("The server returned an invalid response. Payment node out of sync.");
       }
 
       if (!res.ok) {
-        console.error("[CHECKOUT] API Rejection:", orderData);
-        throw new Error(orderData.reason || orderData.error || `Gateway error code ${res.status}`);
+        console.error("[RAZORPAY_ORDER_API_ERROR]", orderData);
+        throw new Error(orderData.reason || orderData.error || `Server error: ${res.status}`);
       }
 
       if (!(window as any).Razorpay) {
@@ -150,11 +148,10 @@ function CheckoutContent() {
         currency: orderData.currency,
         name: "Cracklix",
         description: `Elite Pass: ${planData.name}`,
-        order_id: orderData.orderId, // CORRECT MAPPING
+        order_id: orderData.orderId,
         handler: async function (response: any) {
           setOnlineProcessing(true);
           try {
-            console.log("[CHECKOUT] Verifying signature:", response.razorpay_payment_id);
             const verifyRes = await fetch("/api/razorpay/verify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -176,13 +173,12 @@ function CheckoutContent() {
         prefill: {
           name: profile?.name || "Aspirant",
           email: user.email || "",
-          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "", // Ensure 10 digits
+          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "",
         },
         theme: { color: "#2563EB" },
         modal: { 
           ondismiss: () => {
             setOnlineProcessing(false);
-            console.log("[CHECKOUT] Payment modal dismissed.");
           }
         }
       };
@@ -190,7 +186,7 @@ function CheckoutContent() {
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (err: any) {
-      console.error("[CHECKOUT] Initiation Failed:", err);
+      console.error("[CHECKOUT_INIT_FAILED]", err);
       setErrorMessage(err.message);
       setOnlineProcessing(false);
     }
@@ -218,7 +214,7 @@ function CheckoutContent() {
                      <p className="font-bold text-rose-700 leading-tight">Payment Node Failure</p>
                      <p className="text-sm text-rose-600 font-medium">{errorMessage}</p>
                      <Button variant="outline" size="sm" className="h-9 rounded-lg bg-white border-rose-200 text-rose-600 font-bold" onClick={handlePaymentInitiation}>
-                        <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Hub Sync
+                        <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Sync
                      </Button>
                   </div>
                 </div>
@@ -328,16 +324,6 @@ function CheckoutContent() {
                        </div>
                     </div>
                  </div>
-
-                 {profile?.referralCode && (
-                   <div className="p-5 bg-blue-50/50 rounded-2xl border border-blue-100 flex items-center gap-4">
-                      <Gift className="h-6 w-6 text-primary" />
-                      <div className="text-left">
-                         <p className="text-[10px] font-black uppercase text-blue-800">Referral Code</p>
-                         <p className="text-sm font-black text-primary tracking-widest">{profile.referralCode}</p>
-                      </div>
-                   </div>
-                 )}
               </Card>
            </div>
         </div>
