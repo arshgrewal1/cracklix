@@ -4,8 +4,8 @@ import { initializeFirebase } from '@/firebase/app';
 import { doc, getDoc } from 'firebase/firestore';
 
 /**
- * @fileOverview Production Razorpay Order Engine v2.0.
- * HARDENED: Secure order creation with dynamic pricing from Firestore.
+ * @fileOverview Production Razorpay Order Engine v2.1.
+ * FIXED: Enhanced error logging and price auditing.
  */
 
 export async function POST(req: Request) {
@@ -40,10 +40,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid plan node selected.' }, { status: 404 });
     }
     const planData = planSnap.data();
+    const amount = Math.round(Number(planData.price) * 100);
+
+    if (isNaN(amount) || amount < 100) {
+      return NextResponse.json({ error: 'Invalid plan price. Minimum amount is ₹1.' }, { status: 400 });
+    }
 
     // 2. Prepare Order Options
     const options = {
-      amount: Math.round(Number(planData.price) * 100), // Amount in paise
+      amount,
       currency: "INR",
       receipt: `RCPT_${Date.now()}_${userId.slice(-4)}`,
       notes: {
@@ -53,7 +58,7 @@ export async function POST(req: Request) {
       }
     };
 
-    console.log("[RAZORPAY_REQUEST]: Creating order for", planId);
+    console.log("[RAZORPAY_REQUEST]: Creating order for", planId, "Amount:", amount);
     const order = await instance.orders.create(options);
 
     return NextResponse.json({
@@ -65,8 +70,10 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("[RAZORPAY_ORDER_FAILURE]:", error);
+    // Propagate actual Razorpay error if available
+    const msg = error?.error?.description || error.message || 'Payment processing failed. Please try again.';
     return NextResponse.json({ 
-      error: error.message || 'Payment processing failed. Please try again.' 
+      error: msg 
     }, { status: 500 });
   }
 }

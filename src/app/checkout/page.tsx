@@ -29,8 +29,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v14.0.
- * UPDATED: Full migration to Razorpay for production reliability.
+ * @fileOverview Institutional Checkout Hub v15.0.
+ * FIXED: Restored missing RefreshCw import and hardened Razorpay handshake.
  */
 
 export default function CheckoutPage() {
@@ -64,7 +64,6 @@ function CheckoutContent() {
     if (!user || !profile || !planData || onlineProcessing) return;
     setErrorMessage(null);
 
-    // 1. Free Plan Instant Activation
     if (planData.price === 0) {
       setOnlineProcessing(true);
       try {
@@ -81,7 +80,6 @@ function CheckoutContent() {
     setOnlineProcessing(true);
     
     try {
-      // 2. Create Razorpay Order on Server
       const orderRes = await fetch(`/api/razorpay/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -94,7 +92,6 @@ function CheckoutContent() {
          throw new Error(orderData.error || "Order initialization failed.");
       }
 
-      // 3. Configure Razorpay Options
       const options = {
         key: orderData.key,
         amount: orderData.amount,
@@ -106,7 +103,6 @@ function CheckoutContent() {
         handler: async (response: any) => {
           setOnlineProcessing(true);
           try {
-            // 4. Secure Signature Verification
             const verifyRes = await fetch('/api/razorpay/verify', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -132,7 +128,7 @@ function CheckoutContent() {
         prefill: {
           name: profile?.name || user?.displayName || "",
           email: user.email || "",
-          contact: profile?.phone?.replace(/\s/g, '') || ""
+          contact: profile?.phone?.replace(/\s+/g, '') || ""
         },
         theme: {
           color: "#2563EB"
@@ -142,9 +138,12 @@ function CheckoutContent() {
         }
       };
 
-      // 5. Open Razorpay Modal
-      const rzp = new (window as any).Razorpay(options);
-      rzp.open();
+      if ((window as any).Razorpay) {
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
+      } else {
+        throw new Error("Payment gateway SDK failed to load. Please refresh.");
+      }
 
     } catch (e: any) {
       console.error("[RAZORPAY_HANDSHAKE_ERROR]:", e);

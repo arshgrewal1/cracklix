@@ -38,12 +38,12 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Center v31.0.
- * FIXED: Restored missing Link and Loader2 imports, switched to Title Case labels.
+ * @fileOverview Support Center v32.0.
+ * FIXED: Restored missing Link and Loader2 imports.
  */
 export default function SupportPage() {
   const { user, profile } = useUser()
-  const db = dbInstance();
+  const db = useFirestore();
   const { toast } = useToast()
 
   const [isRaising, setIsRaising] = useState(false)
@@ -55,16 +55,10 @@ export default function SupportPage() {
     priority: "MEDIUM",
   })
 
-  // Local helper for DB instance to avoid hook timing issues in some environments
-  function dbInstance() {
-    return useFirestore();
-  }
-
   const ticketsQuery = useMemo(() => {
-    const db = dbInstance();
     if (!db || !user) return null
     return query(collection(db, "support_tickets"), where("userId", "==", user.uid))
-  }, [user])
+  }, [user, db])
 
   const { data: rawTickets, loading: ticketsLoading } = useCollection<any>(
     ticketsQuery
@@ -80,7 +74,6 @@ export default function SupportPage() {
   }, [rawTickets])
 
   const handleRaiseTicket = async () => {
-    const db = dbInstance();
     if (!user || !db) return
     if (!formData.subject || !formData.message) {
       toast({
