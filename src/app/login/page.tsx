@@ -44,8 +44,8 @@ import Image from "next/image"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Premium Login Hub v85.0.
- * FIXED: Relocated welcome banner trigger from Dashboard to Login actions.
+ * @fileOverview Cracklix Premium Login Hub v86.0.
+ * FIXED: Removed top/bottom spacing for the logo as requested.
  */
 
 const formatCompact = (num: number) => {
@@ -113,7 +113,6 @@ function LoginContent() {
       if (mode === 'login') {
         const userCredential = await signInWithEmailAndPassword(auth, email, password)
         
-        // Fetch profile specifically for the greeting name
         const userRef = doc(db!, 'users', userCredential.user.uid)
         const userSnap = await getDoc(userRef)
         const firstName = (userSnap.data()?.name || "Aspirant").split(' ')[0]
@@ -239,11 +238,11 @@ function LoginContent() {
   return (
     <div className="min-h-[100dvh] bg-white flex flex-col lg:flex-row text-[#0F172A] font-body selection:bg-primary/20 overflow-x-hidden">
       
-      {/* LEFT PANEL: BRANDING */}
+      {/* LEFT PANEL: BRANDING (REMOVED TOP PADDING) */}
       <div className="hidden lg:flex flex-[1.1] bg-gradient-to-br from-[#020B2D] via-[#071B4D] to-[#0A2D7A] text-white p-12 xl:p-20 flex-col justify-start relative overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
 
-        <div className="relative z-10 space-y-12 xl:space-y-20 max-w-[650px] pt-12 xl:pt-20">
+        <div className="relative z-10 space-y-12 xl:space-y-20 max-w-[650px] pt-0">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
             <Logo variant="dark" align="left" className="h-[180px] xl:h-[240px]" />
           </motion.div>
@@ -269,10 +268,10 @@ function LoginContent() {
         </div>
       </div>
 
-      {/* RIGHT PANEL: AUTH */}
+      {/* RIGHT PANEL: AUTH (REMOVED LOGO BOTTOM SPACING) */}
       <div className="flex-1 flex flex-col items-center justify-start p-4 md:p-12 lg:p-20 relative bg-slate-50 lg:bg-white overflow-y-auto">
         
-        <div className="w-full flex items-center justify-between mb-8 lg:hidden">
+        <div className="w-full flex items-center justify-between mb-0 lg:hidden">
            <Link href="/" className="flex items-center gap-2 text-slate-400 font-bold uppercase text-[10px] tracking-widest hover:text-primary transition-colors">
               <ChevronLeft className="h-4 w-4" /> Home
            </Link>

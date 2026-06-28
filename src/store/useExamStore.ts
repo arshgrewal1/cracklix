@@ -44,8 +44,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Institutional CBT State Manager v46.1.
- * FIXED: Removed duplicate startTime key in set object.
+ * @fileOverview Institutional CBT State Manager v46.2.
+ * FIXED: Removed duplicate startTime key declaration.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
