@@ -60,7 +60,7 @@ export async function POST(req: Request) {
       key_secret: keySecret,
     });
 
-    // Verify payment from Razorpay
+    // Fetch payment
     const payment = await razorpay.payments.fetch(razorpay_payment_id);
 
     if (
@@ -77,7 +77,6 @@ export async function POST(req: Request) {
 
     // Duplicate protection
     const paymentRef = doc(db, "payment_requests", razorpay_payment_id);
-
     const paymentSnap = await getDoc(paymentRef);
 
     if (paymentSnap.exists()) {
@@ -87,7 +86,7 @@ export async function POST(req: Request) {
       });
     }
 
-    // Plan
+    // Get Plan
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 
@@ -104,6 +103,12 @@ export async function POST(req: Request) {
 
     const expiry = new Date();
     expiry.setDate(expiry.getDate() + duration);
+
+    // ✅ Type-safe amount conversion
+    const paymentAmount =
+      typeof (payment as any).amount === "number"
+        ? (payment as any).amount
+        : Number((payment as any).amount);
 
     // Activate Pass
     await setDoc(
@@ -138,15 +143,15 @@ export async function POST(req: Request) {
       userId,
       planId,
 
-      amount: payment.amount / 100,
-      currency: payment.currency,
+      amount: paymentAmount / 100,
+      currency: String((payment as any).currency ?? ""),
 
       gateway: "RAZORPAY",
 
-      status: payment.status,
+      status: String((payment as any).status ?? ""),
 
-      email: payment.email ?? "",
-      contact: payment.contact ?? "",
+      email: String((payment as any).email ?? ""),
+      contact: String((payment as any).contact ?? ""),
 
       createdAt: serverTimestamp(),
     });
@@ -160,7 +165,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(
       {
-        error: err.message || "Verification failed.",
+        error: err?.message || "Verification failed.",
       },
       {
         status: 500,

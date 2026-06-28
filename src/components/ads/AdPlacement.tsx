@@ -15,8 +15,8 @@ interface AdPlacementProps {
 }
 
 /**
- * @fileOverview Institutional Ad-Node v1.29.
- * FIXED: Applied explicit type casting for Firestore queries to satisfy generic requirements.
+ * @fileOverview Institutional Ad-Node v1.30.
+ * FIXED: Applied explicit type casting for Firestore queries to resolve generic mismatches.
  */
 
 export default function AdPlacement({ placement, className, examId }: AdPlacementProps) {

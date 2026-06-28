@@ -28,8 +28,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v6.2.
- * FIXED: Corrected malformed React imports to resolve JSX.IntrinsicElements errors.
+ * @fileOverview Institutional Checkout Hub v6.3.
+ * FIXED: Sanitized phone number for Razorpay Test Mode to prevent "International card" error.
  */
 
 export default function CheckoutPage() {
@@ -88,6 +88,9 @@ function CheckoutContent() {
          throw new Error(orderData.error || "Order creation failed.");
       }
 
+      // STRICT PHONE SANITIZATION FOR RAZORPAY TEST MODE
+      const cleanPhone = (profile?.phone || "").replace(/\D/g, '').slice(-10) || "9999999999";
+
       const options = {
         key: orderData.key,
         amount: orderData.amount,
@@ -123,7 +126,7 @@ function CheckoutContent() {
         prefill: {
           name: profile?.name || user.displayName || "Aspirant",
           email: user.email || "student@cracklix.com",
-          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "9999999999"
+          contact: cleanPhone
         },
         theme: { color: "#2563EB" },
         modal: { 
