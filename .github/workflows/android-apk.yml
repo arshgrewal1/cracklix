@@ -12,8 +12,6 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -22,32 +20,27 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies
-        run: npm ci
+        run: |
+          npm install
+          ls -la node_modules/@capacitor/android/capacitor.settings.gradle || (echo "ERROR: Bridge missing" && exit 1)
 
-      - name: Build Web Assets (Static Export)
+      - name: Build Next.js App
         run: npm run build
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           GOOGLE_GENAI_API_KEY: ${{ secrets.GOOGLE_GENAI_API_KEY }}
           RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
 
+      - name: Capacitor Sync
+        run: |
+          mkdir -p android/app/src/main/assets/public
+          npx cap sync android
+
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
-
-      - name: Prepare Android Assets
-        run: |
-          mkdir -p android/app/src/main/assets/public
-          npx cap sync android
-
-      - name: Verify Capacitor Bridge
-        run: |
-          if [ ! -f "node_modules/@capacitor/android/capacitor.settings.gradle" ]; then
-            echo "FATAL: Capacitor Android bridge missing from node_modules."
-            exit 1
-          fi
 
       - name: Build Android APK
         working-directory: android

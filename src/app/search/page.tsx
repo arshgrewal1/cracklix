@@ -15,7 +15,7 @@ interface SearchResultNode {
   title: string;
   type: string;
   href: string;
-  icon: LucideIcon;
+  Icon: LucideIcon;
 }
 
 export default function SearchPage() {
@@ -66,7 +66,7 @@ function SearchContent() {
        title: e.name, 
        type: "Exam Hub", 
        href: `/exams/view?id=${e.id}`, 
-       icon: GraduationCap
+       Icon: GraduationCap
     }))
 
     const mockMatches = (mocks || []).filter((m: any) => 
@@ -76,7 +76,7 @@ function SearchContent() {
        title: m.title, 
        type: "Practice Test", 
        href: `/mocks/view?id=${m.id}`, 
-       icon: Zap
+       Icon: Zap
     }))
 
     const notesMatches = (notes || []).filter((n: any) => 
@@ -86,7 +86,7 @@ function SearchContent() {
        title: n.title, 
        type: "Library", 
        href: `/notes`, 
-       icon: FileText
+       Icon: FileText
     }))
 
     return [...examMatches, ...mockMatches, ...notesMatches]
@@ -125,7 +125,7 @@ function SearchContent() {
               <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
                  <div className="grid grid-cols-1 gap-3">
                     {searchResults.map((res, i) => {
-                      const Icon = res.icon;
+                      const { Icon } = res;
                       return (
                         <Link key={i} href={res.href} className="bg-white p-5 md:p-8 rounded-[2rem] shadow-sm hover:shadow-2xl flex items-center justify-between border border-slate-100 transition-all duration-500">
                           <div className="flex items-center gap-4 min-w-0 flex-1">
