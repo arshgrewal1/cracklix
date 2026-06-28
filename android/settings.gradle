@@ -1,3 +1,4 @@
 include ':app'
 
+// This bridge allows Capacitor to automatically include plugin projects
 apply from: '../node_modules/@capacitor/android/capacitor.settings.gradle'

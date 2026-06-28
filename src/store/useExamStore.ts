@@ -9,8 +9,8 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional CBT Store v50.0.
- * FIXED: Corrected duplicate key in addViolation logic and ensured Client Boundary.
+ * @fileOverview Institutional CBT Store v50.1.
+ * FIXED: Removed "use server" and corrected duplicate key in addViolation.
  */
 
 export interface ExamStoreState {
