@@ -7,13 +7,12 @@ android {
         applicationId "com.cracklix.app"
         minSdk 23
         targetSdk 35
-        versionCode 1
-        versionName "1.0"
+        versionCode 105
+        versionName "1.0.5"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Standard Capacitor Aapt options
-             cruncherEnabled = false
-             nonConstantIds = true
+             // Strings containing '@' symbols can cause errors during build
+             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!p thumbs.db:!desktop.ini'
         }
     }
     buildTypes {
@@ -36,14 +35,14 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'androidx.appcompat:androidx.appcompat:1.6.1'
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
-    implementation 'androidx.core:core-splashscreen:1.0.1'
+    implementation 'androidx.core:core-splashscreen:1.0.0'
     implementation project(':capacitor-android')
+    implementation project(':capacitor-cordova-android-plugins')
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
-    androidTestImplementation 'androidx.test.espresso:core:3.5.1'
-    implementation project(':capacitor-cordova-android-plugins')
+    androidTestImplementation 'androidx.test.espresso:core-espresso-core:3.5.1'
 }
 
 apply from: 'capacitor.build.gradle'
@@ -54,5 +53,5 @@ try {
         apply plugin: 'com.google.gms.google-services'
     }
 } catch(Exception e) {
-    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+    logger.info("google-services.json not found, google-services plugin not applied. This is expected if you are not using Firebase.")
 }

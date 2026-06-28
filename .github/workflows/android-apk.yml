@@ -31,11 +31,14 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build Next.js
+      - name: Build Next.js Static Export
         run: npm run build
         env:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           GOOGLE_GENAI_API_KEY: ${{ secrets.GOOGLE_GENAI_API_KEY }}
+
+      - name: Initialize Assets Directory
+        run: mkdir -p android/app/src/main/assets
 
       - name: Capacitor Sync
         run: npx cap sync android

@@ -32,7 +32,7 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Institutional Mock Management Hub v20.0.
+ * @fileOverview Institutional Mock Management Hub v21.0.
  * FIXED: Resolved "count" find name error in MetricBlock.
  */
 
