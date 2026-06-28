@@ -1,6 +1,3 @@
 include ':app'
 
-def capacitorSettings = file('capacitor.settings.gradle')
-if (capacitorSettings.exists()) {
-    apply from: 'capacitor.settings.gradle'
-}
+apply from: '../node_modules/@capacitor/android/capacitor.settings.gradle'
