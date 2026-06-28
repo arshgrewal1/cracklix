@@ -19,7 +19,7 @@ import {
   ShieldCheck,
   Tag,
   QrCode
-} from "lucide-react";
+} from "lucide-material";
 import { useUser, useDoc, useFirestore } from "@/firebase";
 import { submitManualPayment } from "@/app/actions/payment";
 import { doc } from "firebase/firestore";
@@ -31,7 +31,6 @@ import Image from "next/image";
 
 /**
  * @fileOverview Institutional Checkout Hub v21.0.
- * FIXED: useMemo dependency array placement and explicit React imports for module safety.
  */
 export default function CheckoutPage() {
   return (

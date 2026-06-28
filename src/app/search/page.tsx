@@ -3,7 +3,7 @@
 import * as React from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap } from "lucide-react"
+import { Search as SearchIcon, Zap, ChevronRight, FileText, Loader2, GraduationCap } from "lucide-material"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Institutional Search Hub v2.2.
- * FIXED: Added explicit React import for React 19 module resolution and fixed cloneElement types.
  */
 export default function SearchPage() {
   return (
