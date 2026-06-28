@@ -1,3 +1,5 @@
+
 include ':app'
 
+// This script includes all of the Capacitor plugins in the project
 apply from: '../node_modules/@capacitor/android/capacitor.settings.gradle'

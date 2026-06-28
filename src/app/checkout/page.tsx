@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -29,6 +30,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
+/**
+ * @fileOverview Institutional Checkout Hub v19.0.
+ * FIXED: Standardized useDoc and useMemo signatures.
+ */
 export default function CheckoutPage() {
   return (
     <React.Suspense
