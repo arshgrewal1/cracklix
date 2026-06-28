@@ -42,7 +42,7 @@ export const MOCK_QUESTIONS: Question[] = [
   {
     id: "q1",
     englishQuestion: "Which language script is used for Punjabi?",
-    punjabiQuestion: "ਪੰਜਾਬੀ ਭਾਸ਼ਾ ਦੀ ਲਿਪੀ ਕਿਹੜੀ ਹੈ?",
+    punjabiQuestion: "ਪੰਜਾਬੀ ਭਾਸ਼ਾ ਦੀ ਲਿਪੀ ਕਿਹੜੀ hai?",
     optionAEnglish: "Devanagari",
     optionAPunjabi: "ਦੇਵਨਾਗਰੀ",
     optionBEnglish: "Gurmukhi",

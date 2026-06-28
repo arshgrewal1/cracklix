@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Refined Navbar v57.0 (PWA Optimized).
- * FIXED: Restored mobile header for authenticated users with high-fidelity brand alignment.
+ * @fileOverview Refined Navbar v58.0 (PWA Optimized).
+ * FIXED: Standardized Title Case and improved brand alignment.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -97,8 +97,46 @@ export default function Navbar() {
     (user?.email &&
       SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
 
+  const isAppMode = !!user && (
+    pathname === '/dashboard' || 
+    pathname === '/my-exams' || 
+    pathname === '/mocks' || 
+    pathname === '/pass'
+  );
+
   if (!mounted) {
     return <nav className="w-full border-b border-slate-100 bg-white h-[72px] md:h-[112px]" />;
+  }
+
+  // Mobile App Header Logic
+  if (isAppMode) {
+    return (
+      <>
+        <header className="sticky top-0 z-50 w-full bg-white border-b border-slate-100 md:hidden pt-safe">
+           <div className="h-14 flex items-center justify-between px-4">
+              <button 
+                onClick={() => setIsSidebarOpen(true)}
+                className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-700 active:scale-95 transition-all"
+              >
+                 <Menu className="w-5 h-5" />
+              </button>
+              <Logo variant="light" className="h-10 w-28" imgClassName="h-full" align="center" />
+              <Link href="/search" className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-700">
+                 <Search className="w-5 h-5" />
+              </Link>
+           </div>
+        </header>
+        <div className="hidden md:block sticky top-0 z-50 w-full bg-white border-b border-slate-100">
+           {renderNavbarContent()}
+        </div>
+        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+          <SheetContent side="left" className="w-[280px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
+            <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Hub</SheetDescription></SheetHeader>
+            <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
+          </SheetContent>
+        </Sheet>
+      </>
+    );
   }
 
   return (
@@ -119,10 +157,10 @@ export default function Navbar() {
   function renderNavbarContent() {
     return (
       <nav className="w-full h-14 md:h-[112px]">
-        <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-2">
+        <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
 
           {/* LEFT: Menu + Logo */}
-          <div className="flex items-center shrink-0 gap-2 md:gap-4 flex-1 lg:flex-none">
+          <div className="flex items-center shrink-0 gap-4 flex-1 lg:flex-none">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -133,7 +171,7 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 -ml-2 md:-ml-8" 
+              className="flex-shrink-0" 
               imgClassName="h-12 md:h-24 w-auto"
               align="left"
             />
