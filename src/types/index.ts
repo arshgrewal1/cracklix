@@ -198,7 +198,7 @@ export interface Question {
   displayId?: string;
 }
 
-// Aliases for legacy compatibility
+// Legacy Aliases
 export type Mock = MockTest;
 export type CurrentAffair = CurrentAffairHubItem;
 export type Notification = any; 

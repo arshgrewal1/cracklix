@@ -1,11 +1,11 @@
-import { NextResponse } from "next/next/server";
+import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Production Hardened v5.5)
- * FIXED: Explicit diagnostic logging and detailed error reporting.
+ * Razorpay Order API (Production Pro v6.0)
+ * Logic: Strictly audit plan prices from Firestore to prevent client-side tampering.
  */
 
 export async function POST(req: Request) {
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     if (!planId || !userId) {
       return NextResponse.json(
-        { success: false, reason: "Missing planId or userId in request payload." },
+        { success: false, reason: "Missing planId or userId." },
         { status: 400 }
       );
     }
@@ -26,25 +26,19 @@ export async function POST(req: Request) {
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
     if (!keyId || !keySecret) {
-      console.error("[RAZORPAY_CONFIG_ERROR] Environment variables missing in deployment.");
       return NextResponse.json(
-        { 
-          success: false, 
-          reason: "Payment gateway configuration missing. Check RAZORPAY_KEY_ID and SECRET.",
-          debug: { id: !!keyId, secret: !!keySecret }
-        },
+        { success: false, reason: "Payment configuration missing in server environment." },
         { status: 503 }
       );
     }
 
     const { firestore: db } = initializeFirebase();
 
-    // Securely fetch plan from Firestore to prevent tampering
+    // 1. Plan Integrity Audit
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 
     if (!planSnap.exists()) {
-      console.error(`[PLAN_NOT_FOUND] ${planId}`);
       return NextResponse.json(
         { success: false, reason: `Plan node [${planId}] not found in registry.` },
         { status: 404 }
@@ -55,46 +49,24 @@ export async function POST(req: Request) {
     const price = Number(planData?.price);
 
     if (isNaN(price) || price <= 0) {
-      console.error("[INVALID_PRICE]", { price });
       return NextResponse.json(
-        { success: false, reason: "Selected plan has an invalid price configuration in Firestore." },
+        { success: false, reason: "Invalid price configuration in registry." },
         { status: 400 }
       );
     }
 
+    // 2. Razorpay Order Node Creation
     const razorpay = new Razorpay({
       key_id: keyId,
       key_secret: keySecret,
     });
 
-    const amountInPaise = Math.round(price * 100);
-
-    let order;
-    try {
-      order = await razorpay.orders.create({
-        amount: amountInPaise,
-        currency: "INR",
-        receipt: `ORD_${Date.now()}_${userId.slice(-6)}`,
-        notes: {
-          userId,
-          planId,
-          planName: planData.name || "Elite Pass",
-        },
-      });
-    } catch (rzpError: any) {
-      console.error("[RAZORPAY_SDK_CRASH]", rzpError);
-      return NextResponse.json(
-        { 
-          success: false, 
-          error: "Razorpay SDK rejected order creation.", 
-          reason: rzpError.description || rzpError.message,
-          metadata: rzpError.metadata 
-        },
-        { status: 500 }
-      );
-    }
-
-    console.log("[RAZORPAY_ORDER_CREATED]", order.id);
+    const order = await razorpay.orders.create({
+      amount: Math.round(price * 100),
+      currency: "INR",
+      receipt: `ORD_${Date.now()}_${userId.slice(-6)}`,
+      notes: { userId, planId, planName: planData.name || "Elite Pass" },
+    });
 
     return NextResponse.json({
       success: true,
@@ -105,17 +77,9 @@ export async function POST(req: Request) {
     });
 
   } catch (error: any) {
-    console.error("[RAZORPAY_ORDER_CRITICAL_FAILURE]", {
-      message: error?.message,
-      stack: error?.stack
-    });
-
+    console.error("[RAZORPAY_ORDER_CRITICAL]", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: error?.message || "Internal payment processing error.",
-        reason: "The server encountered an unhandled exception while contacting Razorpay."
-      },
+      { success: false, error: error?.message || "Order creation failed" },
       { status: 500 }
     );
   }

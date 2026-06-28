@@ -12,7 +12,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v12.5.
+ * @fileOverview Institutional Search Hub v12.6.
  * FIXED: Malformed React imports and UMD global resolution.
  */
 
