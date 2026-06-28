@@ -22,8 +22,14 @@ jobs:
           node-version: 20
           cache: npm
 
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build Next.js Static Export
         run: npm run build
@@ -32,19 +38,10 @@ jobs:
           GOOGLE_GENAI_API_KEY: ${{ secrets.GOOGLE_GENAI_API_KEY }}
 
       - name: Initialize Android Assets
-        run: mkdir -p android/app/src/main/assets
+        run: mkdir -p android/app/src/main/assets/public
 
       - name: Capacitor Sync
         run: npx cap sync android
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-
-      - name: Decode Keystore
-        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.jks
 
       - name: Build Signed APK
         working-directory: android
