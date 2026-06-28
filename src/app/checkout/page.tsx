@@ -32,7 +32,6 @@ import Image from "next/image";
 /**
  * @fileOverview High-Fidelity Checkout Hub v14.0.
  * FIXED: useMemo dependency array placement and React namespace resolution.
- * ADDED: Dynamic UPI QR Code node for manual payments.
  */
 export default function CheckoutPage() {
   return (
@@ -77,7 +76,6 @@ function CheckoutContent() {
   );
   const { data: planData, loading: planLoading } = useDoc<any>(planRef);
 
-  // Dynamic QR Code generation for UPI ID
   const upiId = settings?.upiId || "arshdeepgrewal1122-1@oksbi";
   const upiUrl = `upi://pay?pa=${upiId}&pn=Cracklix&cu=INR`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(upiUrl)}`;
@@ -277,7 +275,6 @@ function CheckoutContent() {
                     </div>
 
                     <div className="flex flex-col md:flex-row gap-10 items-center justify-center">
-                       {/* QR CODE NODE */}
                        <div className="w-full md:w-1/2 flex flex-col items-center gap-4">
                           <div className="relative h-64 w-64 md:h-80 md:w-80 bg-white rounded-[2.5rem] border-2 border-slate-100 flex items-center justify-center overflow-hidden shadow-2xl p-6 group transition-all hover:border-primary/30">
                              <div className="relative w-full h-full">
@@ -297,7 +294,6 @@ function CheckoutContent() {
                           </div>
                        </div>
 
-                       {/* DETAILS NODE */}
                        <div className="w-full md:w-1/2 space-y-6">
                           <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
                              <div className="space-y-0.5">
