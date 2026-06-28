@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -104,7 +103,7 @@ export default function Navbar() {
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
           {/* LEFT: Menu + Logo (PWA Optimized) */}
-          <div className="flex items-center shrink-0 gap-1 md:gap-2">
+          <div className="flex items-center shrink-0 gap-3 md:gap-4">
             <button
               onClick={() => setIsSidebarOpen(true)}
               aria-label="Open menu"
@@ -115,7 +114,7 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0 -ml-2 md:-ml-8" 
+              className="flex-shrink-0" 
               imgClassName="h-14 md:h-24 w-auto"
               align="left"
             />
