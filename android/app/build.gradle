@@ -3,48 +3,46 @@ apply plugin: 'com.android.application'
 android {
     namespace "com.cracklix.app"
     compileSdk rootProject.ext.compileSdkVersion
-
     defaultConfig {
         applicationId "com.cracklix.app"
         minSdk rootProject.ext.minSdkVersion
         targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Leaves png files uncompressed, so they can be handled by and-res-guard
-             dashedInput false
+             // Capacitor optimizes transitions by default
+             // Invalid dashedInput removed from here
         }
     }
-
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
 }
 
 repositories {
-    flatDir {
+    flatDir{
         dirs 'libs'
     }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.appcompat:appcompat:$rootProject.ext.androidxAppCompatVersion"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:$rootProject.ext.androidxCoordinatorLayoutVersion"
-    implementation "androidx.core:core:$rootProject.ext.androidxCoreVersion"
-    implementation "androidx.fragment:fragment:$rootProject.ext.androidxFragmentVersion"
-    implementation "androidx.activity:activity:$rootProject.ext.androidxActivityVersion"
-    implementation "androidx.webkit:webkit:$rootProject.ext.androidxWebkitVersion"
-    testImplementation "junit:junit:$rootProject.ext.junitVersion"
-    androidTestImplementation "androidx.test.ext:junit:$rootProject.ext.androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$rootProject.ext.androidxEspressoCoreVersion"
-    
-    // Core Capacitor dependencies are handled by capacitor.build.gradle
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    implementation project(':capacitor-cordova-android-plugins')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
 }
 
 apply from: 'capacitor.build.gradle'

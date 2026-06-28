@@ -1,2 +1,6 @@
 include ':app'
-apply from: 'capacitor.settings.gradle'
+
+def capacitorSettings = file('capacitor.settings.gradle')
+if (capacitorSettings.exists()) {
+    apply from: 'capacitor.settings.gradle'
+}
