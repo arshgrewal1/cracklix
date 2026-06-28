@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -27,8 +26,8 @@ import { useRouter } from "next/navigation"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Official Current Affairs Center v20.0.
- * UPDATED: Optimized hero logo and removed all forced uppercase.
+ * @fileOverview Official Current Affairs Center v21.0.
+ * UPDATED: Optimized hero logo with transparency and removed forced uppercase.
  */
 
 const HUB_TYPES = [

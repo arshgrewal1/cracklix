@@ -106,7 +106,7 @@ export default function Navbar() {
            {renderNavbarContent()}
         </div>
         
-        {/* Mobile Safe Area Spacer: Content starts below status bar with clean border */}
+        {/* Mobile Safe Area Spacer */}
         <div className="md:hidden pt-safe w-full bg-white border-b border-slate-50 sticky top-0 z-50 shadow-sm" />
 
         <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
@@ -149,7 +149,7 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0" 
+              className="flex-shrink-0 -ml-4 md:-ml-8" 
               imgClassName="h-14 md:h-24 w-auto"
               align="left"
             />

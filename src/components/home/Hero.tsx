@@ -24,8 +24,8 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Hero Hub v107.1.
- * UPDATED: Removed forced uppercase from headlines and normalized casing.
+ * @fileOverview Institutional Hero Hub v108.0.
+ * UPDATED: Title Case normalization for refined readability.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -129,7 +129,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* 3. Action Grid - MAXIMIZED ICONS & TITLE CASE */}
+        {/* 3. Action Grid */}
         <div className="mt-8 md:mt-16 space-y-6 md:space-y-10 px-4 sm:px-6 lg:px-8">
            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8 max-w-6xl mx-auto">
               <QuickActionCard boardId="mock-test" label="Mock Tests" href="/mocks" />

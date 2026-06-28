@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v27.0 (Circular Protection).
- * FIXED: Icons now utilize rounded-full containers to prevent clipping and ensure brand consistency.
+ * @fileOverview Institutional Branding Engine v28.0 (Fidelity Refined).
+ * FIXED: Authority logos now respect transparency and external styling.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -71,16 +71,22 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   };
 
   const containerSize = sizeClasses[size];
+  const isTransparent = className?.includes('bg-transparent') || className?.includes('bg-white/10');
 
   if (logoUrl) {
     return (
-      <div className={cn("relative shrink-0 overflow-hidden flex items-center justify-center bg-white rounded-full border border-slate-100 p-2 shadow-inner", containerSize, className)}>
+      <div className={cn(
+        "relative shrink-0 overflow-hidden flex items-center justify-center p-2 transition-all",
+        !isTransparent && "bg-white rounded-full border border-slate-100 shadow-inner",
+        containerSize, 
+        className
+      )}>
         <Image 
           src={logoUrl} 
           alt="Authority" 
           fill
           sizes={size === 'sm' ? '48px' : size === 'md' ? '80px' : size === 'lg' ? '112px' : '144px'}
-          className="object-contain p-2"
+          className="object-contain p-1"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -101,7 +107,12 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   };
 
   return (
-    <div className={cn("flex items-center justify-center bg-white rounded-full border border-slate-100 p-3 shadow-inner", containerSize, className)}>
+    <div className={cn(
+      "flex items-center justify-center p-3 transition-all",
+      !isTransparent && "bg-white rounded-full border border-slate-100 shadow-inner",
+      containerSize, 
+      className
+    )}>
       {getFallbackIcon()}
     </div>
   );
