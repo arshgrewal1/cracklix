@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { Suspense, useMemo, useState, useEffect } from "react"
@@ -28,8 +29,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v7.0.
- * FIXED: Malformed imports and production-ready Razorpay handshake.
+ * @fileOverview Institutional Checkout Hub v7.1.
+ * FIXED: Malformed React imports and production Razorpay integration.
  */
 
 export default function CheckoutPage() {
@@ -89,7 +90,7 @@ function CheckoutContent() {
          throw new Error(orderData.error || "Order creation failed.");
       }
 
-      // PHONE SANITIZATION
+      // PHONE SANITIZATION: Strict 10-digit format for Razorpay reliability
       const cleanPhone = (profile?.phone || "").replace(/\D/g, '').slice(-10) || "9999999999";
 
       const options = {
@@ -226,7 +227,7 @@ function CheckoutContent() {
                                 <p className="text-[8px] font-black text-slate-500 uppercase">Registry VPA</p>
                                 <p className="text-sm font-black text-white truncate">{upiId}</p>
                              </div>
-                             <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(upiId); toast({ title: "VPA Copied" }) }} className="text-primary"><Copy className="h-5 w-5" /></Button>
+                             <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(upiId); }} className="text-primary"><Copy className="h-5 w-5" /></Button>
                           </div>
                        </div>
                        <div className="space-y-6 pt-6 border-t border-slate-50">

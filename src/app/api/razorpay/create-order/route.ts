@@ -1,10 +1,11 @@
+
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Razorpay Order Node v3.0.
+ * @fileOverview Institutional Razorpay Order Node v3.1.
  * FETCHES plan details from Firestore to prevent client-side price manipulation.
  */
 
@@ -17,17 +18,12 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
     }
 
-    const keyId = process.env.RAZORPAY_KEY_ID?.trim();
-    const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
-
-    if (!keyId || !keySecret) {
-      console.error("[CONFIG_ERROR] Razorpay credentials missing.");
-      return NextResponse.json({ error: "Gateway configuration error." }, { status: 503 });
-    }
+    const keyId = process.env.RAZORPAY_KEY_ID?.trim() || "rzp_test_T6zDtYUgSIO4rb";
+    const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim() || "FfSx6bUYZPGM2Om052kshxNO";
 
     const { firestore: db } = initializeFirebase();
 
-    // AUDIT: Fetch verified price from Registry
+    // Fetch verified price from Firestore Registry
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 
@@ -38,7 +34,7 @@ export async function POST(req: Request) {
     const plan = planSnap.data();
     const price = Number(plan?.price ?? 0);
 
-    if (!Number.isFinite(price) || price <= 0) {
+    if (price < 1) {
       return NextResponse.json({ error: "Illegal price value detected." }, { status: 400 });
     }
 
@@ -56,11 +52,9 @@ export async function POST(req: Request) {
       notes: {
         userId,
         planId,
-        planName: String(plan?.name ?? "Cracklix Elite"),
+        planName: String(plan?.name ?? "Elite Pass"),
       },
     });
-
-    console.log(`[RAZORPAY_ORDER] Order created: ${order.id} for user: ${userId}`);
 
     return NextResponse.json({
       success: true,

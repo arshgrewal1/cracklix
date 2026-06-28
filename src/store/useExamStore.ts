@@ -1,3 +1,4 @@
+
 'use client';
 
 import { create } from "zustand";
@@ -121,7 +122,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         timeLeft: state.timeLeft,
         currentIdx: state.currentIdx,
         violations: state.violations,
-        startTime: state.startTime, // FIXED: Removed duplicate key entry below
+        startTime: state.startTime,
         updatedAt: serverTimestamp()
       }, { merge: true });
     }

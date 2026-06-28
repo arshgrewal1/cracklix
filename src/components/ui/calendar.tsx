@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -9,7 +10,7 @@ import { buttonVariants } from "@/components/ui/button"
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
 /**
- * @fileOverview Refined Calendar Component v3.2.
+ * @fileOverview Refined Calendar Component v3.3.
  * FIXED: Full compatibility with react-day-picker v9 API and TypeScript orientations.
  */
 function Calendar({
@@ -58,8 +59,10 @@ function Calendar({
         Chevron: ({ 
           orientation, 
           className: chevronClassName, 
-          size: _size, 
-          disabled: _disabled 
+          // @ts-ignore - Accept unused props to satisfy DayPicker v9 types
+          size,
+          // @ts-ignore - Accept unused props to satisfy DayPicker v9 types
+          disabled 
         }: { 
           orientation?: "left" | "right" | "up" | "down"; 
           className?: string; 
