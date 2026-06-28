@@ -38,9 +38,8 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Center v28.0.
- * FIXED: Restored missing imports for Link and Loader2.
- * FIXED: Corrected Title Case labels.
+ * @fileOverview Support Center v30.0.
+ * FIXED: Resolved missing Link and Loader2 imports and Title Case labels.
  */
 export default function SupportPage() {
   const { user, profile } = useUser()
@@ -224,7 +223,7 @@ export default function SupportPage() {
               <div className="py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-30">
                 <MessageCircle className="h-16 w-16 mb-4 text-slate-300" />
                 <p className="text-xl font-bold uppercase tracking-widest">
-                  No active tickets
+                  No Active Tickets
                 </p>
               </div>
             )}

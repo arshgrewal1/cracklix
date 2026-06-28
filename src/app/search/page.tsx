@@ -13,9 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v2.8.
- * FIXED: Resolved React UMD global conflict and implemented Title Case.
- * FIXED: Properly typed cloneElement to avoid Attributes intersection error.
+ * @fileOverview Official Search Hub v3.0.
+ * FIXED: Resolved React UMD global conflict and implemented Suspense.
  */
 
 export default function SearchPage() {
@@ -64,7 +63,7 @@ function SearchContent() {
       e.boardId?.toLowerCase().includes(term)
     ).map((e: any) => ({ 
        title: e.name, 
-       type: "Exam center", 
+       type: "Exam Center", 
        href: `/exams/view?id=${e.id}`, 
        boardId: e.boardId,
        icon: <GraduationCap />
@@ -75,7 +74,7 @@ function SearchContent() {
       m.boardId?.toLowerCase().includes(term)
     ).map((m: any) => ({ 
        title: m.title, 
-       type: "Practice test", 
+       type: "Practice Test", 
        href: `/mocks/view?id=${m.id}`, 
        boardId: m.boardId, 
        icon: <Zap />
@@ -98,7 +97,7 @@ function SearchContent() {
   if (authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300">Authorizing search...</p>
+       <p className="text-[10px] font-black uppercase text-slate-300">Authorizing Search...</p>
     </div>
   )
 
@@ -110,7 +109,7 @@ function SearchContent() {
            <div className="text-center space-y-6">
               <div className="space-y-2">
                  <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-none">Find Your Test</h1>
-                 <p className="text-slate-400 font-bold text-[9px] md:text-11px uppercase tracking-[0.4em]">Instant access to the test bank</p>
+                 <p className="text-slate-400 font-bold text-[9px] md:text-11px uppercase tracking-[0.4em]">Instant Access to the Test Bank</p>
               </div>
               
               <div className="relative max-w-[700px] mx-auto group">
@@ -157,7 +156,7 @@ function SearchContent() {
                       <div className="text-center py-32 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
                         <div className="space-y-4 opacity-20 flex flex-col items-center">
                            <SearchIcon className="h-16 w-16" />
-                           <p className="text-xl font-bold tracking-tight">No results found</p>
+                           <p className="text-xl font-bold tracking-tight">No Results Found</p>
                         </div>
                       </div>
                     )}

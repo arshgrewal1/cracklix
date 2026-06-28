@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Refined Navbar v58.0 (PWA Optimized).
- * FIXED: Standardized Title Case and improved brand alignment.
+ * @fileOverview Refined Navbar v60.0.
+ * FIXED: Moved logo 20px to the left and normalized typography.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -108,7 +108,6 @@ export default function Navbar() {
     return <nav className="w-full border-b border-slate-100 bg-white h-[72px] md:h-[112px]" />;
   }
 
-  // Mobile App Header Logic
   if (isAppMode) {
     return (
       <>
@@ -120,7 +119,7 @@ export default function Navbar() {
               >
                  <Menu className="w-5 h-5" />
               </button>
-              <Logo variant="light" className="h-10 w-28" imgClassName="h-full" align="center" />
+              <Logo variant="light" className="h-10 w-28 -ml-5" imgClassName="h-full" align="center" />
               <Link href="/search" className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-700">
                  <Search className="w-5 h-5" />
               </Link>
@@ -159,7 +158,6 @@ export default function Navbar() {
       <nav className="w-full h-14 md:h-[112px]">
         <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
 
-          {/* LEFT: Menu + Logo */}
           <div className="flex items-center shrink-0 gap-4 flex-1 lg:flex-none">
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -171,13 +169,12 @@ export default function Navbar() {
 
             <Logo
               variant="light"
-              className="flex-shrink-0" 
+              className="flex-shrink-0 -ml-5" 
               imgClassName="h-12 md:h-24 w-auto"
               align="left"
             />
           </div>
 
-          {/* CENTER: Navigation Links (Desktop Only) */}
           <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-8 flex-1">
             <NavLink href="/" label="Home" active={pathname === '/'} />
             <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
@@ -186,11 +183,10 @@ export default function Navbar() {
             <NavLink href="/leaderboard" label="Top Rankers" active={pathname === '/leaderboard'} />
           </div>
 
-          {/* RIGHT: User Actions */}
           <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0 flex-1 lg:flex-none">
             {profile?.passStatus === 'active' && timeLeft && (
                <div className="hidden sm:flex flex-col items-end mr-1">
-                  <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none">Elite hub</span>
+                  <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none">Elite Hub</span>
                   <span className="text-[10px] font-bold text-slate-400 mt-1 leading-none">{timeLeft}</span>
                </div>
             )}
@@ -230,17 +226,17 @@ export default function Navbar() {
                          <h3 className="text-base font-bold text-[#0F172A] tracking-tight truncate max-w-[240px]">
                            {profile?.name || "Student"}
                          </h3>
-                         <Link href="/profile" className="text-[11px] font-bold text-[#94A3B8] hover:text-primary">My profile</Link>
+                         <Link href="/profile" className="text-[11px] font-bold text-[#94A3B8] hover:text-primary">My Profile</Link>
                        </div>
                     </div>
                     <div className="h-px w-full bg-slate-100" />
                     <div className="w-full space-y-1 text-left">
-                       <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My progress" />
-                       <ProfileMenuItem href="/pass" icon={Gem} label="Pro pass" />
+                       <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My Progress" />
+                       <ProfileMenuItem href="/pass" icon={Gem} label="Pro Pass" />
                        <ProfileMenuItem href="/profile" icon={Settings} label="Settings" />
-                       {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin panel" highlight />}
+                       {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Panel" highlight />}
                     </div>
-                    <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] font-bold text-[11px] rounded-xl transition-all border-none">Log out</Button>
+                    <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-[#FEF2F2] hover:bg-[#FEE2E2] text-[#EF4444] font-bold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
