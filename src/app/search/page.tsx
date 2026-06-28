@@ -111,7 +111,7 @@ function SearchContent() {
                       value={queryStr}
                       onChange={e => setQuery(e.target.value)}
                       autoFocus
-                      className="w-full h-12 md:h-18 pl-12 md:pl-16 pr-14 text-sm md:text-2xl rounded-2xl md:rounded-[2.5rem] border-none shadow-2xl bg-white focus:ring-4 focus:ring-primary/5 text-slate-900"
+                      className="w-full h-12 md:h-14 pl-12 md:pl-16 pr-14 text-sm md:text-2xl rounded-2xl md:rounded-[2.5rem] border-none shadow-2xl bg-white focus:ring-4 focus:ring-primary/5 text-slate-900"
                       placeholder="Search exams or tests..." 
                     />
                     {isLoading && <Loader2 className="absolute right-6 top-1/2 -translate-y-1/2 h-6 w-6 text-primary animate-spin" />}

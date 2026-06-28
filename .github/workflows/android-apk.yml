@@ -29,7 +29,7 @@ jobs:
           java-version: 17
 
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Next.js Static Export
         run: npm run build
@@ -37,7 +37,7 @@ jobs:
           NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
           GOOGLE_GENAI_API_KEY: ${{ secrets.GOOGLE_GENAI_API_KEY }}
 
-      - name: Initialize Assets Directory
+      - name: Initialize Android Assets
         run: mkdir -p android/app/src/main/assets
 
       - name: Capacitor Sync
