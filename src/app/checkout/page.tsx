@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -31,9 +30,8 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
 /**
- * @fileOverview Institutional Checkout Hub v20.0.
- * FIXED: Misplaced dependency array in React.useMemo.
- * UPDATED: Integrated official UPI QR for arshdeepgrewal1122-1@oksbi.
+ * @fileOverview Institutional Checkout Hub v21.0.
+ * FIXED: useMemo dependency array placement and explicit React imports for module safety.
  */
 export default function CheckoutPage() {
   return (

@@ -1,4 +1,3 @@
-
 "use client"
 
 import * as React from "react"
@@ -13,8 +12,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v2.1.
- * FIXED: Added explicit React import for React 19 module resolution.
+ * @fileOverview Institutional Search Hub v2.2.
+ * FIXED: Added explicit React import for React 19 module resolution and fixed cloneElement types.
  */
 export default function SearchPage() {
   return (

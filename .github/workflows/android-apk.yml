@@ -1,4 +1,3 @@
-
 name: Build Signed Android Release
 
 on:
@@ -20,7 +19,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: npm
 
       - name: Setup Java
@@ -30,7 +29,7 @@ jobs:
           java-version: 21
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build Next.js
         run: npm run build
@@ -39,10 +38,7 @@ jobs:
           GOOGLE_GENAI_API_KEY: ${{ secrets.GOOGLE_GENAI_API_KEY }}
 
       - name: Capacitor Sync
-        run: |
-          mkdir -p out
-          echo '<script>window.location.href="https://cracklix.vercel.app"</script>' > out/index.html
-          npx cap sync android
+        run: npx cap sync android
 
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/release.jks
