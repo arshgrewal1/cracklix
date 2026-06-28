@@ -13,7 +13,7 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v3.0.
+ * @fileOverview Official Search Hub v3.1.
  * FIXED: Resolved React UMD global conflict and implemented Suspense.
  */
 

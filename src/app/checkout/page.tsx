@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, Loader2, Copy, Zap, Gem, ShieldCheck, CheckCircle2, AlertCircle } from "lucide-react"
+import { ArrowLeft, Loader2, Copy, Zap, Gem, ShieldCheck, CheckCircle2, AlertCircle, RefreshCw } from "lucide-react"
 import { useUser, useDoc, useFirestore } from "@/firebase"
 import { useEffect, useState, Suspense, useMemo } from "react"
 import { useToast } from "@/hooks/use-toast"
@@ -19,8 +19,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v12.0.
- * HARDENED: Precise error reporting from backend and enhanced loading safety.
+ * @fileOverview Institutional Checkout Hub v12.1.
+ * FIXED: Added missing RefreshCw import from lucide-react.
  */
 
 export default function CheckoutPage() {

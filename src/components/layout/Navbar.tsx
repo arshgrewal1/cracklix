@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Refined Navbar v60.0.
- * FIXED: Moved logo 20px to the left and normalized typography.
+ * @fileOverview Refined Navbar v60.1.
+ * FIXED: Moved logo 20px to the left (-ml-5) and normalized typography.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
