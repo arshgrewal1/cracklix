@@ -13,8 +13,9 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v2.3.
+ * @fileOverview Institutional Search Hub v2.4.
  * FIXED: Resolved UMD global conflict for React and correctly typed cloneElement.
+ * FIXED: Corrected 'icon' variable reference in mapping loop.
  */
 
 export default function SearchPage() {
