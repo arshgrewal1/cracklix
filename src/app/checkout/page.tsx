@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ArrowLeft, Loader2, Copy, Zap, Gem, ShieldCheck, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, Loader2, Copy, Zap, Gem, ShieldCheck, CheckCircle2, AlertCircle } from "lucide-react"
 import { useUser, useDoc, useFirestore } from "@/firebase"
 import { useEffect, useState, Suspense, useMemo } from "react"
 import { useToast } from "@/hooks/use-toast"
@@ -19,8 +19,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v11.0.
- * FIXED: Enhanced error handling and loading states for Cashfree order creation.
+ * @fileOverview Institutional Checkout Hub v12.0.
+ * HARDENED: Precise error reporting from backend and enhanced loading safety.
  */
 
 export default function CheckoutPage() {
@@ -41,6 +41,7 @@ function CheckoutContent() {
   
   const [onlineProcessing, setOnlineProcessing] = useState(false);
   const [utr, setUtr] = useState("");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { data: settings } = useDoc<any>(useMemo(() => (dbInstance ? doc(dbInstance, 'settings', 'global') : null), [dbInstance]));
   const { data: planData, loading: planLoading } = useDoc<any>(useMemo(() => (dbInstance && planId ? doc(dbInstance, 'passes', planId) : null), [dbInstance, planId]));
@@ -51,6 +52,7 @@ function CheckoutContent() {
 
   const handlePaymentInitiation = async () => {
     if (!user || !profile || !planData || onlineProcessing) return;
+    setErrorMessage(null);
 
     if (planData.price === 0) {
       setOnlineProcessing(true);
@@ -69,11 +71,7 @@ function CheckoutContent() {
     const cf = (window as any).Cashfree;
     
     if (!cf) {
-       toast({ 
-         variant: "destructive", 
-         title: "Gateway Error", 
-         description: "Payment engine failed to initialize. Please refresh the page." 
-       });
+       setErrorMessage("Payment gateway failed to initialize. Please refresh the page.");
        setOnlineProcessing(false);
        return;
     }
@@ -102,6 +100,8 @@ function CheckoutContent() {
       });
 
     } catch (e: any) {
+      console.error("[CHECKOUT_ERROR]:", e);
+      setErrorMessage(e.message);
       toast({ 
         variant: "destructive", 
         title: "Order Blocked", 
@@ -132,6 +132,20 @@ function CheckoutContent() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16">
            <div className="lg:col-span-7 space-y-10">
+              
+              {errorMessage && (
+                 <div className="p-5 bg-rose-50 border border-rose-100 rounded-[2rem] flex items-start gap-4 animate-in fade-in duration-500">
+                    <AlertCircle className="h-6 w-6 text-rose-500 shrink-0 mt-0.5" />
+                    <div className="space-y-1">
+                       <p className="text-xs font-black text-rose-900 uppercase tracking-widest">Gateway Error</p>
+                       <p className="text-sm font-medium text-rose-600 leading-relaxed">{errorMessage}</p>
+                       <Button variant="ghost" onClick={handlePaymentInitiation} className="text-rose-700 h-8 p-0 hover:bg-transparent font-black uppercase text-[10px] gap-2 mt-2">
+                          <RefreshCw className="h-3 w-3" /> Retry Handshake
+                       </Button>
+                    </div>
+                 </div>
+              )}
+
               <Tabs defaultValue="online" className="w-full">
                  <TabsList className="bg-slate-100 p-1.5 h-14 rounded-2xl w-full mb-10 grid grid-cols-2 shadow-inner border border-slate-200">
                     <TabsTrigger value="online" className="rounded-xl font-bold text-sm h-full flex items-center justify-center gap-2 data-[state=active]:bg-white data-[state=active]:shadow-md transition-all">

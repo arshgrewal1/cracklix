@@ -6,8 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useFirestore } from '@/firebase';
 
 /**
- * @fileOverview Operational Anti-Cheat Node v4.17.
- * FIXED: Passed firestore instance to addViolation call to satisfy TS.
+ * @fileOverview Operational Anti-Cheat Node v4.18.
+ * FIXED: Passed firestore instance to addViolation correctly.
  */
 export default function AntiCheat() {
   const { addViolation } = useExamStore();
@@ -16,9 +16,8 @@ export default function AntiCheat() {
 
   useEffect(() => {
     const handleBlur = () => {
-      if (!db) return;
       // Violation tracking logic
-      addViolation(db);
+      addViolation(db || null);
       toast({
         variant: "destructive",
         title: "Security Warning",

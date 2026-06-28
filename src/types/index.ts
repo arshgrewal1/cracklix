@@ -88,9 +88,9 @@ export interface Category {
   id: string;
   title: string;
   description: string;
-  color: string;
-  bgColor: string;
-  highlight: string;
+  color?: string;
+  bgColor?: string;
+  highlight?: string;
   displayOrder: number;
   iconUrl?: string;
 }
@@ -99,8 +99,8 @@ export interface Board {
   id: string;
   abbreviation: string;
   name: string;
-  region: string;
-  category: string;
+  region?: string;
+  category?: string;
   categoryId: string; 
   iconUrl?: string;
   color?: string;

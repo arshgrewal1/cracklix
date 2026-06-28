@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v29.0 (Fidelity Refined).
+ * @fileOverview Institutional Branding Engine v30.0 (Fidelity Refined).
  * FIXED: Authority logos now respect transparency and external styling.
  */
 

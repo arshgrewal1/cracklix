@@ -43,6 +43,10 @@ export interface ExamStoreState {
   addViolation: (db: Firestore | null) => void;
 }
 
+/**
+ * @fileOverview Institutional CBT State Manager v45.0.
+ * FIXED: Removed duplicate property declaration in setAnswer and initExam.
+ */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
   mockTitle: "",
