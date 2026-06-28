@@ -1,2 +1,5 @@
+// Capacitor settings bridge
+// This file is mandatory for Gradle to find @capacitor/android
 include ':app'
+
 apply from: '../node_modules/@capacitor/android/capacitor.settings.gradle'

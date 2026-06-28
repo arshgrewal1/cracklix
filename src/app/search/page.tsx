@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Universal Search Hub.
- * FIXED: Refactored Icon logic from cloneElement to Component references for React 19 / TS 5 compatibility.
+ * FIXED: Refactored Icon logic to store Component references for React 19 compatibility.
  */
 
 interface SearchResultNode {
