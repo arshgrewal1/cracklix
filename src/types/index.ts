@@ -81,6 +81,16 @@ export interface SuccessStory {
   updatedAt?: any;
 }
 
+export interface Coupon {
+  id: string;
+  code: string;
+  discount: number;
+  type: 'percent' | 'fixed';
+  active: boolean;
+  updatedAt: any;
+  createdAt: any;
+}
+
 export interface UserProfile {
   id: string;
   name: string;

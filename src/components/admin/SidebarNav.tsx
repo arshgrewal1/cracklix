@@ -30,7 +30,8 @@ import {
   Calendar,
   HelpCircle,
   Wrench,
-  ChevronRight
+  ChevronRight,
+  Tag
 } from "lucide-react";
 
 import {
@@ -39,11 +40,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-/**
- * Admin Sidebar Navigation v3.1.
- * UPDATED: Removed uppercase from sectional labels for improved readability.
- */
 
 const NAV_GROUPS = [
   {
@@ -84,6 +80,7 @@ const NAV_GROUPS = [
       { label: "Revenue", href: "/admin/payments", icon: DollarSign },
       { label: "Verify UPI", href: "/admin/payments/verify", icon: Gem },
       { label: "Pass Manager", href: "/admin/passes", icon: Gem },
+      { label: "Coupon Hub", href: "/admin/coupons", icon: Tag },
       { label: "Audit Logs", href: "/admin/audit-logs", icon: History },
       { label: "System Tools", href: "/admin/maintenance", icon: Wrench },
       { label: "Platform Health", href: "/admin/health", icon: HeartPulse },
