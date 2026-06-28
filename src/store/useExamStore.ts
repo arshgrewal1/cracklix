@@ -1,3 +1,4 @@
+
 import { create } from "zustand";
 import { 
   Question, 
@@ -43,10 +44,6 @@ export interface ExamStoreState {
   addViolation: (db: Firestore | null) => void;
 }
 
-/**
- * @fileOverview Institutional CBT State Manager v54.8.
- * FIXED: Removed duplicate startTime key in setDoc operation.
- */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,
   mockTitle: "",

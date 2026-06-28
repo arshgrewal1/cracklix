@@ -1,3 +1,4 @@
+
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET';
@@ -196,55 +197,6 @@ export interface MockTest {
   published: boolean;
   languageMode: LanguageDisplayMode;
   attemptLimit: number;
-  createdAt: any;
-  updatedAt: any;
-}
-
-export interface Advertisement {
-  id: string;
-  title: string;
-  type: AdType;
-  status: AdStatus;
-  placements: AdPlacementType[];
-  desktopImageUrl?: string;
-  mobileImageUrl?: string;
-  externalUrl?: string;
-  htmlCode?: string;
-  adSenseCode?: string;
-  priority: number;
-  targeting?: {
-    examIds?: string[];
-  };
-  stats?: {
-    impressions: number;
-    clicks: number;
-  };
-  createdAt: any;
-  updatedAt: any;
-}
-
-export type AdPlacementType = 
-  | 'HOMEPAGE_TOP' 
-  | 'HOMEPAGE_MIDDLE' 
-  | 'HOMEPAGE_BOTTOM' 
-  | 'EXAM_LISTING' 
-  | 'MOCK_LISTING' 
-  | 'NOTES_PAGE' 
-  | 'CA_PAGE' 
-  | 'RESULT_PAGE' 
-  | 'SIDEBAR' 
-  | 'FOOTER';
-
-export interface CurrentAffairHubItem {
-  id: string;
-  title: string;
-  month: string;
-  year: string;
-  language: string;
-  type: CurrentAffairType;
-  pdfUrl?: string;
-  status: 'PUBLISHED' | 'DRAFT';
-  quizId?: string;
   createdAt: any;
   updatedAt: any;
 }

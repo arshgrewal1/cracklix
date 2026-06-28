@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useMemo, Suspense, isValidElement, cloneElement, ReactElement } from "react"
@@ -11,12 +12,6 @@ import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection } from "firebase/firestore"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-
-/**
- * @fileOverview Official Search Hub v6.2.
- * FIXED: Malformed import from next/navigation corrected to react.
- * FIXED: Correct typing for React.cloneElement.
- */
 
 export default function SearchPage() {
   return (

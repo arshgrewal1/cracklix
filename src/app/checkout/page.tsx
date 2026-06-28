@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { Suspense, useMemo, useState, useEffect } from "react"
@@ -26,12 +27,6 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
-
-/**
- * @fileOverview Institutional Checkout Hub v22.8.
- * FIXED: Malformed React import from next/navigation corrected to react.
- * FIXED: Restored missing RefreshCw icon.
- */
 
 export default function CheckoutPage() {
   return (
