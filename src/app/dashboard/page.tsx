@@ -36,7 +36,7 @@ import { useToast } from "@/hooks/use-toast"
 
 /**
  * @fileOverview Student Home - Standardized PWA v45.0.
- * FIXED: Implemented automatic orphan cleanup for stale test results.
+ * FIXED: Removed greeting logic to prevent repetition on tab navigation.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -44,7 +44,6 @@ export default function StudentDashboard() {
   const router = useRouter()
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
-  const [hasGreeted, setHasGreeted] = useState(false)
   const [passCountdown, setPassCountdown] = useState("");
 
   useEffect(() => {
@@ -58,17 +57,6 @@ export default function StudentDashboard() {
       }
     }
   }, [user, authLoading, router, mounted])
-
-  // GREETING LOGIC
-  useEffect(() => {
-    if (profile && !hasGreeted) {
-      toast({
-        title: `Welcome Back, ${profile.name?.split(' ')[0]}!`,
-        description: "Your preparation hub is synchronized.",
-      });
-      setHasGreeted(true);
-    }
-  }, [profile, hasGreeted, toast]);
 
   useEffect(() => {
     const expiryStr = profile?.passExpiresAt;

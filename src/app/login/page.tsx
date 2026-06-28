@@ -45,7 +45,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
  * @fileOverview Cracklix Premium Login Hub v85.0.
- * UPDATED: Normalized casing for headings and labels.
+ * FIXED: Relocated welcome banner trigger from Dashboard to Login actions.
  */
 
 const formatCompact = (num: number) => {
@@ -111,7 +111,18 @@ function LoginContent() {
     setLoading(true)
     try {
       if (mode === 'login') {
-        await signInWithEmailAndPassword(auth, email, password)
+        const userCredential = await signInWithEmailAndPassword(auth, email, password)
+        
+        // Fetch profile specifically for the greeting name
+        const userRef = doc(db!, 'users', userCredential.user.uid)
+        const userSnap = await getDoc(userRef)
+        const firstName = (userSnap.data()?.name || "Aspirant").split(' ')[0]
+
+        toast({
+          title: `Welcome Back, ${firstName}!`,
+          description: "Your preparation hub is synchronized.",
+        });
+
         router.replace(returnUrl)
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
@@ -133,7 +144,10 @@ function LoginContent() {
           pinnedExams: []
         })
 
-        toast({ title: "Account Created" })
+        toast({ 
+          title: `Welcome, ${name.split(' ')[0]}!`,
+          description: "Account created successfully." 
+        })
         router.replace(returnUrl)
       }
     } catch (error: any) {
@@ -174,6 +188,8 @@ function LoginContent() {
       const userSnap = await getDoc(userRef)
       const isSuperAdmin = SUPER_ADMIN_WHITELIST.includes(userNode.email.toLowerCase());
       
+      let finalName = userNode.displayName || "Aspirant";
+
       if (!userSnap.exists()) {
         await setDoc(userRef, {
           id: userNode.uid,
@@ -187,7 +203,15 @@ function LoginContent() {
           passType: 'FREE',
           pinnedExams: []
         })
+      } else {
+        finalName = userSnap.data()?.name || userNode.displayName || "Aspirant";
       }
+
+      toast({
+        title: `Welcome Back, ${finalName.split(' ')[0]}!`,
+        description: "Your preparation hub is synchronized.",
+      });
+
       router.replace(returnUrl)
     } catch (error: any) {
       toast({ variant: "destructive", title: "Social Auth Error", description: error.message })
