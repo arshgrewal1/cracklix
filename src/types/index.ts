@@ -247,3 +247,22 @@ export interface CurrentAffairHubItem {
   createdAt: any;
   updatedAt: any;
 }
+
+export interface AttemptResult {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  mockId: string;
+  mockTitle: string;
+  score: number;
+  correctCount: number;
+  wrongCount: number;
+  attemptedCount: number;
+  totalQuestions: number;
+  accuracy: number;
+  timeTaken: number;
+  answers: Record<number, number | null>;
+  timestamp: string;
+  createdAt: any;
+  accessLevel: AccessLevel;
+}

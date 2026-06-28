@@ -44,7 +44,7 @@ import Image from "next/image"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Premium Login Hub v86.2.
+ * @fileOverview Cracklix Premium Login Hub v86.3.
  * FIXED: Removed all spacing around logos as requested. Zero padding/margin.
  */
 
@@ -283,7 +283,7 @@ function LoginContent() {
         <motion.div 
            initial={{ opacity: 0, scale: 0.95 }} 
            animate={{ opacity: 1, scale: 1 }} 
-           className="w-full max-w-[480px] pt-0 lg:pt-20 pb-24" 
+           className="w-full max-w-[480px] pt-0 lg:pt-10 pb-24" 
         >
           <Card className="border-none shadow-5xl lg:shadow-none bg-white/92 backdrop-blur-[20px] rounded-[32px] p-6 md:p-12 space-y-6 md:space-y-10">
             <div className="space-y-2 text-center lg:text-left">
