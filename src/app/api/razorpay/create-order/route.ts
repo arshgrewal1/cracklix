@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     const plan = planSnap.data();
     const price = Number(plan?.price);
 
-    if (isNaN(price) || price <= 0) {
+    if (isNaN(price) || price < 0) {
       console.error("[RAZORPAY_ORDER] Invalid price node detected:", price);
       return NextResponse.json({ success: false, reason: "Invalid price node detected in registry." }, { status: 400 });
     }
