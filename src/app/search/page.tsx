@@ -12,8 +12,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional Search Hub v17.8.
- * FIXED: Explicit React namespace for JSX intrinsic elements resolution.
+ * @fileOverview Institutional Search Hub v17.9.
+ * FIXED: Explicit React namespace for JSX intrinsic elements resolution and UMD global error.
  */
 export default function SearchPage() {
   return (

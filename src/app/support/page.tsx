@@ -36,6 +36,11 @@ import {
 } from "@/components/ui/dialog"
 import Link from "next/link"
 
+/**
+ * @fileOverview Institutional Support Ticket Hub v5.1.
+ * FIXED: Restored missing Link and Loader2 imports to clear build errors.
+ */
+
 export default function SupportPage() {
   const { user, profile } = useUser()
   const db = useFirestore();
@@ -226,7 +231,7 @@ export default function SupportPage() {
 
           <div className="lg:col-span-4 space-y-6">
             <Card className="border-none shadow-3xl rounded-[3rem] bg-[#0B1528] text-white p-10 md:p-12 space-y-6 md:space-y-8 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000">
+              <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000">
                 <Zap className="h-48 w-48" />
               </div>
               <div className="relative z-10 space-y-6">

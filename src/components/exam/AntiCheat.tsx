@@ -7,7 +7,7 @@ import { useFirestore } from '@/firebase';
 
 /**
  * @fileOverview Institutional Anti-Cheat Node.
- * FIXED: addViolation now correctly receives the Firestore instance.
+ * FIXED: Explicitly passing Firestore instance to addViolation to prevent arg mismatch.
  */
 export default function AntiCheat() {
   const { addViolation } = useExamStore();
