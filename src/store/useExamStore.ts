@@ -44,8 +44,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Institutional CBT State Manager v54.1.
- * FIXED: Removed duplicate key declarations in setDoc payload.
+ * @fileOverview Institutional CBT State Manager v54.2.
+ * FIXED: Liquidated duplicate key 'startTime' in setDoc payload.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,

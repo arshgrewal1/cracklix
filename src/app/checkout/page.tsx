@@ -22,15 +22,15 @@ import {
 import { useUser, useDoc, useFirestore } from "@/firebase"
 import { useEffect, useState, Suspense, useMemo } from "react"
 import { useToast } from "@/hooks/use-toast"
-import { submitManualPayment, activateFreePass } from "@/app/actions/payment"
+import { activateFreePass, submitManualPayment } from "@/app/actions/payment"
 import { doc } from "firebase/firestore"
 import Script from "next/script"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v22.1.
- * FIXED: Restored RefreshCw import to resolve build failure.
+ * @fileOverview Institutional Checkout Hub v22.2.
+ * FIXED: Restored RefreshCw and improved Razorpay Test Mode prefill logic.
  */
 
 export default function CheckoutPage() {

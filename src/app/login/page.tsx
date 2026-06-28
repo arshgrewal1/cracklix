@@ -44,8 +44,8 @@ import Image from "next/image"
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Premium Login Hub v86.1.
- * FIXED: Removed all container padding for zero logo spacing as requested.
+ * @fileOverview Cracklix Premium Login Hub v86.2.
+ * FIXED: Removed all spacing around logos as requested. Zero padding/margin.
  */
 
 const formatCompact = (num: number) => {
@@ -223,6 +223,7 @@ function LoginContent() {
       toast({ variant: "destructive", title: "Email Required" })
       return
     }
+    setResetEmail(resetEmail.trim());
     setResetLoading(true)
     try {
       await sendPasswordResetEmail(auth, resetEmail)
@@ -239,12 +240,12 @@ function LoginContent() {
     <div className="min-h-[100dvh] bg-white flex flex-col lg:flex-row text-[#0F172A] font-body selection:bg-primary/20 overflow-x-hidden">
       
       {/* LEFT PANEL: BRANDING (ZERO SPACING) */}
-      <div className="hidden lg:flex flex-[1.1] bg-gradient-to-br from-[#020B2D] via-[#071B4D] to-[#0A2D7A] text-white p-12 xl:px-20 xl:py-0 flex-col justify-start relative overflow-hidden">
+      <div className="hidden lg:flex flex-[1.1] bg-gradient-to-br from-[#020B2D] via-[#071B4D] to-[#0A2D7A] text-white px-12 xl:px-20 py-0 flex-col justify-start relative overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
 
         <div className="relative z-10 space-y-12 xl:space-y-20 max-w-[650px] pt-0">
           <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}>
-            <Logo variant="dark" align="left" className="h-[180px] xl:h-[240px]" />
+            <Logo variant="dark" align="left" className="h-[180px] xl:h-[240px] -mt-4" />
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="space-y-8">
@@ -259,7 +260,7 @@ function LoginContent() {
             </p>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="grid grid-cols-2 gap-8 pt-6">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="grid grid-cols-2 gap-8 pt-6 pb-12">
             <HeroStat icon={ClipboardList} label={`${statsLoading ? '...' : formatCompact(stats?.totalMocks)}+ Mock Tests`} />
             <HeroStat icon={Zap} label={`${statsLoading ? '...' : formatCompact(stats?.totalQuestions)}+ Questions`} />
             <HeroStat icon={Users} label={`${statsLoading ? '...' : formatCompact(stats?.totalUsers)}+ Active Aspirants`} />
@@ -269,20 +270,20 @@ function LoginContent() {
       </div>
 
       {/* RIGHT PANEL: AUTH (ZERO SPACING) */}
-      <div className="flex-1 flex flex-col items-center justify-start p-4 md:p-12 lg:p-20 relative bg-slate-50 lg:bg-white overflow-y-auto">
+      <div className="flex-1 flex flex-col items-center justify-start px-4 md:px-12 lg:px-20 py-0 relative bg-slate-50 lg:bg-white overflow-y-auto">
         
-        <div className="w-full flex items-center justify-between mb-0 lg:hidden">
+        <div className="w-full flex items-center justify-between mt-0 mb-0 lg:hidden">
            <Link href="/" className="flex items-center gap-2 text-slate-400 font-bold uppercase text-[10px] tracking-widest hover:text-primary transition-colors">
               <ChevronLeft className="h-4 w-4" /> Home
            </Link>
-           <Logo variant="light" align="left" className="h-28" />
+           <Logo variant="light" align="left" className="h-28 -mt-2" />
            <div className="w-10" />
         </div>
 
         <motion.div 
            initial={{ opacity: 0, scale: 0.95 }} 
            animate={{ opacity: 1, scale: 1 }} 
-           className="w-full max-w-[480px] pt-4 lg:pt-20 pb-24" 
+           className="w-full max-w-[480px] pt-0 lg:pt-20 pb-24" 
         >
           <Card className="border-none shadow-5xl lg:shadow-none bg-white/92 backdrop-blur-[20px] rounded-[32px] p-6 md:p-12 space-y-6 md:space-y-10">
             <div className="space-y-2 text-center lg:text-left">
@@ -290,7 +291,7 @@ function LoginContent() {
                  {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                </h2>
                <p className="text-slate-400 font-bold text-[10px] md:text-[11px] uppercase tracking-widest mt-2">
-                 {mode === 'login' ? 'Access your preparation hub' : 'Join the elite preparation network'}
+                 {mode === 'login' ? 'Access your hub' : 'Join the preparation network'}
                </p>
             </div>
 
@@ -363,6 +364,7 @@ function LoginContent() {
                <p className="text-[11px] md:text-[13px] font-bold text-slate-400">
                 {mode === 'login' ? "Don't have an account?" : "Already registered?"}
                 <button 
+                  type="button"
                   onClick={() => {
                     setMode(mode === 'login' ? 'register' : 'login');
                     window.scrollTo({ top: 0, behavior: 'smooth' });

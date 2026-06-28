@@ -137,6 +137,41 @@ export interface Exam {
   activeQuestions?: number;
 }
 
+export interface Question {
+  id: string;
+  englishQuestion: string;
+  punjabiQuestion?: string;
+  hindiQuestion?: string;
+  optionAEnglish: string;
+  optionAPunjabi?: string;
+  optionAHindi?: string;
+  optionBEnglish: string;
+  optionBPunjabi?: string;
+  optionBHindi?: string;
+  optionCEnglish: string;
+  optionCPunjabi?: string;
+  optionCHindi?: string;
+  optionDEnglish: string;
+  optionDPunjabi?: string;
+  optionDHindi?: string;
+  correctAnswer: 'A' | 'B' | 'C' | 'D';
+  difficulty: Difficulty;
+  englishExplanation?: string;
+  punjabiExplanation?: string;
+  hindiExplanation?: string;
+  subjectId: string;
+  boardId?: string;
+  sectionId?: string;
+  chapterId?: string;
+  imageUrl?: string;
+  status: QuestionLifecycleStatus;
+  usedCount: number;
+  createdAt: any;
+  updatedAt: any;
+  isStandalone?: boolean;
+  author?: string;
+}
+
 export interface ExamSection {
   name: string;
   count: number;

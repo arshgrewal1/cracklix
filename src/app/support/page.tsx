@@ -20,8 +20,7 @@ import {
   ShieldCheck,
   Plus,
   X,
-  Loader2,
-  AlertCircle
+  Loader2
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
@@ -38,7 +37,7 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Official Support Center v34.7.
+ * @fileOverview Official Support Center v34.8.
  * FIXED: Restored missing Link and Loader2 component references for production build.
  */
 export default function SupportPage() {
