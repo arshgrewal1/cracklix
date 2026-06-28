@@ -9,9 +9,9 @@ import {
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 /**
- * @fileOverview Institutional CBT Store v51.0.
- * FIXED: Directive set to "use client" as synchronous state hooks are strictly client-side.
- * FIXED: Purged duplicate key declaration in addViolation node.
+ * @fileOverview Institutional CBT Store v52.0.
+ * FIXED: Strictly defined as "use client".
+ * FIXED: Purged duplicate property initialization in addViolation logic.
  */
 
 export interface ExamStoreState {
@@ -174,13 +174,15 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
   addViolation: (db: Firestore | null) => {
     const state = get();
-    const newVal = (state.violations || 0) + 1;
-    set({ violations: newVal });
+    const currentViolations = state.violations || 0;
+    const nextVal = currentViolations + 1;
+    
+    set({ violations: nextVal });
 
     if (db && state.userId && state.mockId) {
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
       setDoc(attemptRef, { 
-        violations: newVal, 
+        violations: nextVal, 
         updatedAt: serverTimestamp() 
       }, { merge: true }).catch(() => {});
     }

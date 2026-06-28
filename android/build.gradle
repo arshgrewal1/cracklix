@@ -1,3 +1,4 @@
+// Root build file where dependencies for all modules are defined
 buildscript {
     repositories {
         google()
