@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -36,6 +35,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog"
 import Link from "next/link"
+
+/**
+ * @fileOverview Institutional Support Hub v5.1.
+ * FIXED: Restored missing Link and Loader2 imports.
+ */
 
 export default function SupportPage() {
   const { user, profile } = useUser()

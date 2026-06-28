@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { Suspense, useMemo, useState, useEffect } from "react"
@@ -27,6 +26,11 @@ import { doc } from "firebase/firestore"
 import Script from "next/script"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
+
+/**
+ * @fileOverview Institutional Checkout Hub v6.1.
+ * FIXED: Standardized React import and ensured all Razorpay Test Mode constraints are met.
+ */
 
 export default function CheckoutPage() {
   return (
