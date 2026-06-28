@@ -4,8 +4,8 @@ import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Production Safe v4.2)
- * Hardened diagnostic logging and Firestore price audit.
+ * Razorpay Order API (Production Hardened v5.0)
+ * strictly uses environment variables and validates price against Firestore.
  */
 
 export async function POST(req: Request) {
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
 
     if (!planId || !userId) {
       return NextResponse.json(
-        { success: false, reason: "Missing planId or userId" },
+        { success: false, reason: "Missing planId or userId in request." },
         { status: 400 }
       );
     }
@@ -26,57 +26,51 @@ export async function POST(req: Request) {
     const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
 
     if (!keyId || !keySecret) {
-      console.error("[RAZORPAY_CONFIG_ERROR] Environment variables missing");
+      console.error("[RAZORPAY_CONFIG_ERROR] Environment variables missing in runtime.");
       return NextResponse.json(
-        {
-          success: false,
-          reason: "Razorpay environment variables missing in production node.",
-        },
-        { status: 500 }
+        { success: false, reason: "Payment gateway configuration is missing on server." },
+        { status: 503 }
       );
     }
 
     const { firestore: db } = initializeFirebase();
 
-    // Fetch canonical plan from Firestore to prevent client-side price manipulation
+    // AUDIT: Fetch canonical plan from Firestore to prevent client-side price manipulation
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 
     if (!planSnap.exists()) {
       return NextResponse.json(
-        { success: false, reason: `Plan document [${planId}] not found in registry.` },
+        { success: false, reason: `Plan node [${planId}] not found in registry.` },
         { status: 404 }
       );
     }
 
-    const plan = planSnap.data();
-    const price = Number(plan?.price);
+    const planData = planSnap.data();
+    const price = Number(planData?.price);
 
-    if (!price || isNaN(price) || price < 1) {
+    if (isNaN(price) || price <= 0) {
       return NextResponse.json(
-        {
-          success: false,
-          reason: "Invalid plan price detected in registry audit.",
-        },
+        { success: false, reason: "The selected plan has an invalid price node." },
         { status: 400 }
       );
     }
-
-    const amountInPaise = Math.round(price * 100);
 
     const razorpay = new Razorpay({
       key_id: keyId,
       key_secret: keySecret,
     });
 
+    const amountInPaise = Math.round(price * 100);
+
     const orderOptions = {
       amount: amountInPaise,
       currency: "INR",
-      receipt: `ORD_${Date.now()}_${userId?.slice?.(-6) ?? "user"}`,
+      receipt: `ORD_${Date.now()}_${userId.slice(-6)}`,
       notes: {
         userId,
         planId,
-        planName: String(plan?.name ?? "Unknown Plan"),
+        planName: planData.name || "Elite Pass",
       },
     };
 
@@ -91,17 +85,15 @@ export async function POST(req: Request) {
       currency: order.currency,
       key: keyId,
     });
+
   } catch (error: any) {
-    console.error("[RAZORPAY_ORDER_ERROR FULL]", {
-      message: error?.message,
-      stack: error?.stack,
-      raw: error,
-    });
+    console.error("[RAZORPAY_ORDER_CRITICAL_FAILURE]", error);
 
     return NextResponse.json(
       {
         success: false,
-        error: error?.message || "Razorpay order failed",
+        error: error?.message || "Internal payment processing error.",
+        code: error?.code || "INTERNAL_ERROR"
       },
       { status: 500 }
     );

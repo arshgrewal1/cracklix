@@ -12,7 +12,6 @@ import {
   ArrowLeft,
   Loader2,
   Copy,
-  Zap,
   Gem,
   ShieldCheck,
   CheckCircle2,
@@ -23,9 +22,9 @@ import { useUser, useDoc, useFirestore } from "@/firebase";
 import { activateFreePass, submitManualPayment } from "@/app/actions/payment";
 import { doc } from "firebase/firestore";
 import Script from "next/script";
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 
 export default function CheckoutPage() {
   return (
@@ -44,6 +43,7 @@ export default function CheckoutPage() {
 function CheckoutContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { toast } = useToast();
 
   const planId = searchParams.get("plan") || "monthly-pass";
 
@@ -97,10 +97,7 @@ function CheckoutContent() {
 
     setOnlineProcessing(true);
 
-    console.log("[CHECKOUT REQUEST]", {
-      planId,
-      userId: user?.uid,
-    });
+    console.log("[CHECKOUT REQUEST]", { planId, userId: user?.uid });
 
     try {
       const res = await fetch("/api/razorpay/create-order", {
@@ -112,43 +109,34 @@ function CheckoutContent() {
         }),
       });
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        let errorData;
-        try {
-          errorData = JSON.parse(errorText);
-        } catch {
-          errorData = { error: errorText };
-        }
-
-        console.error("[ORDER_API_ERROR]", {
-          status: res.status,
-          data: errorData,
-        });
-
-        throw new Error(
-          errorData?.error ||
-          errorData?.message ||
-          errorData?.reason ||
-          `Order failed with status ${res.status}`
-        );
+      const responseText = await res.text();
+      let orderData;
+      
+      try {
+        orderData = JSON.parse(responseText);
+      } catch (e) {
+        console.error("[JSON_PARSE_ERROR]", responseText);
+        throw new Error("Server returned a malformed response. Please try again.");
       }
 
-      const data = await res.json();
-      console.log("[ORDER_API_SUCCESS]", data);
+      if (!res.ok) {
+        console.error("[ORDER_API_ERROR]", orderData);
+        throw new Error(orderData.reason || orderData.error || `Server error: ${res.status}`);
+      }
 
       if (!(window as any).Razorpay) {
-        throw new Error("Razorpay SDK not loaded. Check your internet connection.");
+        throw new Error("Razorpay SDK not loaded. Check your connection.");
       }
 
       const options = {
-        key: data.key,
-        amount: data.amount,
-        currency: data.currency,
+        key: orderData.key,
+        amount: orderData.amount,
+        currency: orderData.currency,
         name: "Cracklix",
         description: `Elite Pass: ${planData.name}`,
-        order_id: data.orderId,
+        order_id: orderData.orderId,
         handler: async function (response: any) {
+          setOnlineProcessing(true);
           try {
             const verifyRes = await fetch("/api/razorpay/verify", {
               method: "POST",
@@ -165,15 +153,9 @@ function CheckoutContent() {
             const verifyData = await verifyRes.json();
 
             if (verifyRes.ok && verifyData.success) {
-              router.push(
-                `/payment/success?order_id=${response.razorpay_order_id}&plan=${encodeURIComponent(
-                  planData.name
-                )}`
-              );
+              router.push(`/payment/success?order_id=${response.razorpay_order_id}&plan=${encodeURIComponent(planData.name)}`);
             } else {
-              throw new Error(
-                verifyData.error || "Payment verification failed"
-              );
+              throw new Error(verifyData.reason || "Payment verification failed.");
             }
           } catch (err: any) {
             setErrorMessage(err.message);
@@ -182,9 +164,9 @@ function CheckoutContent() {
           }
         },
         prefill: {
-          name: profile?.name || "User",
-          email: user.email || "user@example.com",
-          contact: (profile?.phone || "9999999999").replace(/\D/g, "").slice(-10),
+          name: profile?.name || "Aspirant",
+          email: user.email || "",
+          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "",
         },
         theme: { color: "#2563EB" },
         modal: {
@@ -218,7 +200,7 @@ function CheckoutContent() {
   if (!planData) {
     return (
       <div className="h-screen flex flex-col items-center justify-center gap-4">
-        <Zap className="h-10 w-10 text-slate-300" />
+        <AlertCircle className="h-10 w-10 text-slate-300" />
         <span className="font-bold">Plan Not Found</span>
         <Button onClick={() => router.push('/pass')}>Return to Plans</Button>
       </div>
@@ -245,7 +227,7 @@ function CheckoutContent() {
           <div className="p-6 mb-8 bg-rose-50 border border-rose-100 rounded-[1.5rem] flex items-start gap-4 animate-in slide-in-from-top-4">
             <AlertCircle className="h-6 w-6 text-rose-500 shrink-0" />
             <div className="flex-1 space-y-3">
-               <p className="font-bold text-rose-700 leading-tight">Order could not be initialized</p>
+               <p className="font-bold text-rose-700 leading-tight">Order Audit Failure</p>
                <p className="text-sm text-rose-600 font-medium">{errorMessage}</p>
                <Button variant="outline" size="sm" className="h-9 px-4 rounded-lg bg-white border-rose-200 text-rose-600 font-bold" onClick={handlePaymentInitiation}>
                   <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Handshake
@@ -263,7 +245,7 @@ function CheckoutContent() {
                 </TabsList>
 
                 <TabsContent value="online">
-                  <Card className="p-8 border-none shadow-xl rounded-[2rem] space-y-8">
+                  <Card className="p-8 border-none shadow-xl rounded-[2rem] space-y-8 bg-white">
                     <div className="space-y-2">
                        <h2 className="text-xl font-black">Pay Securely</h2>
                        <p className="text-sm text-slate-500 font-medium">Automatic pass activation via Razorpay.</p>
@@ -284,7 +266,7 @@ function CheckoutContent() {
                 </TabsContent>
 
                 <TabsContent value="manual">
-                  <Card className="p-8 border-none shadow-xl rounded-[2rem] space-y-8">
+                  <Card className="p-8 border-none shadow-xl rounded-[2rem] space-y-8 bg-white">
                     <div className="space-y-2">
                        <h2 className="text-xl font-black">Manual Verification</h2>
                        <p className="text-sm text-slate-500 font-medium">Pay via UPI and enter UTR for manual audit.</p>
@@ -299,7 +281,7 @@ function CheckoutContent() {
                     </div>
 
                     <div className="space-y-2">
-                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">UTR / Transaction ID</Label>
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">UTR / Transaction ID</Label>
                        <Input
                          value={utr}
                          onChange={(e) => setUtr(e.target.value.replace(/\D/g, "").slice(0, 12))}
@@ -375,4 +357,3 @@ function CheckoutContent() {
     </div>
   );
 }
-
