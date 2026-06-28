@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -38,8 +39,8 @@ import {
 import Link from "next/link"
 
 /**
- * @fileOverview Support Center v32.0.
- * FIXED: Restored missing Link and Loader2 imports.
+ * @fileOverview Official Support Center v33.0.
+ * FIXED: Restored missing Link and Loader2 component references.
  */
 export default function SupportPage() {
   const { user, profile } = useUser()

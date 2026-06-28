@@ -30,8 +30,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v16.0.
- * UPDATED: Standardized to Razorpay Gateway.
+ * @fileOverview Institutional Checkout Hub v17.0.
+ * UPDATED: Optimized for Razorpay Standard Checkout with pre-fill logic.
  */
 
 export default function CheckoutPage() {
@@ -65,6 +65,7 @@ function CheckoutContent() {
     if (!user || !profile || !planData || onlineProcessing) return;
     setErrorMessage(null);
 
+    // 0. Handle Free Plans
     if (planData.price === 0) {
       setOnlineProcessing(true);
       try {
@@ -81,6 +82,7 @@ function CheckoutContent() {
     setOnlineProcessing(true);
     
     try {
+      // 1. Create Server-Side Order
       const orderRes = await fetch(`/api/razorpay/create-order`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -90,20 +92,22 @@ function CheckoutContent() {
       const orderData = await orderRes.json();
 
       if (!orderRes.ok) {
-         throw new Error(orderData.error || "Order initialization failed.");
+         throw new Error(orderData.error || "Order creation failed.");
       }
 
+      // 2. Open Razorpay Modal
       const options = {
         key: orderData.key,
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Cracklix",
-        description: `Pass: ${planData.name}`,
+        description: `Elite Pass: ${planData.name}`,
         image: "/logo/cracklix-icon.png",
         order_id: orderData.id,
         handler: async (response: any) => {
           setOnlineProcessing(true);
           try {
+            // 3. Verify Payment
             const verifyRes = await fetch('/api/razorpay/verify', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -116,9 +120,9 @@ function CheckoutContent() {
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
                toast({ title: "Payment Successful", description: "Your Elite Pass is now active." });
-               router.push("/payment/success?order_id=" + response.razorpay_order_id);
+               router.push("/payment/success?order_id=" + response.razorpay_order_id + "&plan=" + encodeURIComponent(planData.name));
             } else {
-               throw new Error(verifyData.error || "Verification failed.");
+               throw new Error(verifyData.error || "Verification handshake failed.");
             }
           } catch (err: any) {
             toast({ variant: "destructive", title: "Sync Error", description: err.message });
@@ -129,13 +133,19 @@ function CheckoutContent() {
         prefill: {
           name: profile?.name || "",
           email: user.email || "",
-          contact: profile?.phone?.replace(/\s+/g, '') || ""
+          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || ""
         },
         theme: { color: "#2563EB" },
-        modal: { ondismiss: () => setOnlineProcessing(false) }
+        modal: { 
+          ondismiss: () => setOnlineProcessing(false) 
+        }
       };
 
       const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', function (response: any) {
+         setErrorMessage(`Payment Failed: ${response.error.description}`);
+         setOnlineProcessing(false);
+      });
       rzp.open();
 
     } catch (e: any) {
@@ -170,10 +180,10 @@ function CheckoutContent() {
                  <div className="p-5 bg-rose-50 border border-rose-100 rounded-[2rem] flex items-start gap-4">
                     <AlertCircle className="h-6 w-6 text-rose-500 shrink-0 mt-0.5" />
                     <div className="space-y-1">
-                       <p className="text-xs font-black text-rose-900 uppercase">Gateway Error</p>
+                       <p className="text-xs font-black text-rose-900 uppercase">Gateway Alert</p>
                        <p className="text-sm font-medium text-rose-600 leading-relaxed">{errorMessage}</p>
                        <Button variant="ghost" onClick={handlePaymentInitiation} className="text-rose-700 h-8 p-0 font-bold uppercase text-[10px] gap-2 mt-2">
-                          <RefreshCw className="h-3 w-3" /> Retry Sync
+                          <RefreshCw className="h-3 w-3" /> Retry Handshake
                        </Button>
                     </div>
                  </div>
@@ -198,7 +208,7 @@ function CheckoutContent() {
                              <ShieldCheck className="h-8 w-8" />
                           </div>
                           <h2 className="text-2xl font-black text-[#0F172A]">Direct Activation</h2>
-                          <p className="text-slate-500 font-medium max-w-sm mx-auto text-sm">Instant access via encrypted Razorpay gateway.</p>
+                          <p className="text-slate-500 font-medium max-w-sm mx-auto text-sm">Instant access via official encrypted Razorpay node.</p>
                        </div>
                        <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white font-black text-sm rounded-full shadow-3xl border-none transition-all">
                           {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Zap className="h-5 w-5 mr-2" /> Pay ₹{planData.price} Now</>}
@@ -255,13 +265,13 @@ function CheckoutContent() {
                  <div className="h-1 w-12 bg-primary rounded-full mb-8" />
                  <div className="space-y-4 text-left">
                     <h3 className="text-3xl md:text-5xl font-black leading-[0.9] tracking-tighter">{planData.name}</h3>
-                    <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1">Premium Pass</Badge>
+                    <Badge className="bg-primary/20 text-primary border-none text-[8px] font-black uppercase tracking-widest px-3 py-1">Elite Tier</Badge>
                  </div>
                  
                  <div className="mt-10 pt-10 border-t border-white/5 space-y-5">
                     {planData.features?.slice(0, 5).map((f: string, i: number) => (
                        <div key={i} className="flex items-center gap-3 text-slate-400">
-                          <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                           <span className="text-[13px] font-bold tracking-tight">{f}</span>
                        </div>
                     ))}

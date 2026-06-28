@@ -1,3 +1,4 @@
+
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET';
@@ -54,182 +55,6 @@ export interface SuccessStory {
   updatedAt?: any;
 }
 
-export interface Notification {
-  id: string;
-  title: string;
-  message: string;
-  time: string;
-  isRead: boolean;
-  type: string;
-  pdfUrl?: string;
-  category?: string;
-  board?: string;
-  important?: boolean;
-}
-
-export interface UserDevice {
-  id: string;
-  browser: string;
-  platform: string;
-  lastActive: any;
-  firstLogin: any;
-  deviceName: string;
-}
-
-export interface DeviceLock {
-  deviceId: string;
-  deviceName: string;
-  lastChangedAt: any;
-  enabled: boolean;
-  enforcementLevel: 0 | 1 | 2 | 3; // 0: Off, 1: Track, 2: Warning, 3: Block
-}
-
-export interface Category {
-  id: string;
-  title: string;
-  description: string;
-  color?: string;
-  bgColor?: string;
-  highlight?: string;
-  displayOrder: number;
-  iconUrl?: string;
-}
-
-export interface Board {
-  id: string;
-  abbreviation: string;
-  name: string;
-  region?: string;
-  category?: string;
-  categoryId: string; 
-  iconUrl?: string;
-  color?: string;
-  updatedAt?: any;
-  displayOrder?: number;
-}
-
-export interface Exam {
-  id: string;
-  name: string;
-  title?: string;
-  shortTitle?: string;
-  boardId: string;
-  categoryId: string;
-  displayOrder: number;
-  isTrending?: boolean;
-  updatedAt?: any;
-  createdAt?: any;
-  iconUrl?: string;
-  description?: string;
-  totalMocks?: number;
-  activeQuestions?: number;
-  totalQuestions?: number;
-  duration?: number;
-  category?: string;
-}
-
-export interface Subject {
-  id: string;
-  name: string;
-  aliases: string[];
-}
-
-export interface ExamSection {
-  id: string;
-  name: string;
-  count: number;
-}
-
-export interface MockTest {
-  id: string;
-  title: string;
-  boardId: string;
-  boardIds: string[];
-  examIds: string[];
-  assignmentMode?: MockAssignmentMode;
-  mockType: MockType;
-  testCategory?: string;
-  accessLevel: AccessLevel;
-  duration: number;
-  totalQuestions: number;
-  totalMarks: number;
-  negativeMarks: number;
-  positiveMarks: number;
-  customPenalty?: number;
-  questionIds: string[];
-  sections: ExamSection[];
-  published: boolean;
-  languageMode: LanguageDisplayMode;
-  attemptLimit: number;
-  createdAt: any;
-  updatedAt: any;
-  isTrending?: boolean;
-  accessType?: string;
-}
-
-export type Mock = MockTest;
-
-export interface Question {
-  id: string;
-  englishQuestion: string;
-  punjabiQuestion?: string;
-  hindiQuestion?: string;
-  optionAEnglish: string;
-  optionAPunjabi?: string;
-  optionAHindi?: string;
-  optionBEnglish: string;
-  optionBPunjabi?: string;
-  optionBHindi?: string;
-  optionCEnglish: string;
-  optionCPunjabi?: string;
-  optionCHindi?: string;
-  optionDEnglish: string;
-  optionDPunjabi?: string;
-  optionDHindi?: string;
-  correctAnswer: 'A' | 'B' | 'C' | 'D';
-  difficulty: Difficulty;
-  englishExplanation?: string;
-  punjabiExplanation?: string;
-  hindiExplanation?: string;
-  subjectId: string;
-  boardId: string;
-  examId?: string;
-  sectionId?: string;
-  status: QuestionLifecycleStatus;
-  usedCount: number;
-  lastUsedDate?: string;
-  mockIdsUsedIn?: string[];
-  createdAt: any;
-  updatedAt: any;
-}
-
-export interface QueuedPass {
-  id: string;
-  name: string;
-  durationDays: number;
-  purchasedAt: string;
-  planId: string;
-}
-
-export interface AttemptResult {
-  userId: string;
-  userName: string;
-  userEmail: string;
-  mockId: string;
-  mockTitle: string;
-  score: number;
-  correctCount: number;
-  wrongCount: number;
-  attemptedCount: number;
-  totalQuestions: number;
-  accuracy: number;
-  timeTaken: number;
-  answers: Record<number, number | null>;
-  timestamp: string;
-  createdAt: any;
-  accessLevel: string;
-}
-
 export interface UserProfile {
   id: string;
   name: string;
@@ -260,7 +85,6 @@ export interface UserProfile {
   activeBrowser?: string;
   activePlatform?: string;
   lastLoginAt?: any;
-  queuedPasses?: QueuedPass[];
   pass?: {
     active: boolean;
     plan: 'FREE_PASS' | 'MONTHLY' | 'QUARTERLY' | 'YEARLY' | string;
@@ -270,18 +94,104 @@ export interface UserProfile {
   };
 }
 
-export interface Pass {
+export interface DeviceLock {
+  deviceId: string;
+  deviceName: string;
+  lastChangedAt: any;
+  enabled: boolean;
+  enforcementLevel: 0 | 1 | 2 | 3;
+}
+
+export interface Category {
+  id: string;
+  title: string;
+  description: string;
+  displayOrder: number;
+  iconUrl?: string;
+}
+
+export interface Board {
+  id: string;
+  abbreviation: string;
+  name: string;
+  categoryId: string; 
+  iconUrl?: string;
+  updatedAt?: any;
+  displayOrder?: number;
+}
+
+export interface Exam {
   id: string;
   name: string;
-  price: number;
-  durationDays: number;
-  tier: number;
-  active: boolean;
-  features: string[];
-  allowedMocks: string[];
-  allowedCategories: string[];
+  boardId: string;
+  categoryId: string;
   displayOrder: number;
+  isTrending?: boolean;
   updatedAt?: any;
+  createdAt?: any;
+  iconUrl?: string;
+  description?: string;
+  totalMocks?: number;
+  activeQuestions?: number;
+}
+
+export interface ExamSection {
+  name: string;
+  count: number;
+}
+
+export interface MockTest {
+  id: string;
+  title: string;
+  boardId: string;
+  boardIds: string[];
+  examIds: string[];
+  mockType: MockType;
+  accessLevel: AccessLevel;
+  duration: number;
+  totalQuestions: number;
+  totalMarks: number;
+  negativeMarks: number;
+  positiveMarks: number;
+  questionIds: string[];
+  sections: ExamSection[];
+  published: boolean;
+  languageMode: LanguageDisplayMode;
+  attemptLimit: number;
+  createdAt: any;
+  updatedAt: any;
+}
+
+export interface Question {
+  id: string;
+  englishQuestion: string;
+  punjabiQuestion?: string;
+  hindiQuestion?: string;
+  optionAEnglish: string;
+  optionAPunjabi?: string;
+  optionAHindi?: string;
+  optionBEnglish: string;
+  optionBPunjabi?: string;
+  optionBHindi?: string;
+  optionCEnglish: string;
+  optionCPunjabi?: string;
+  optionCHindi?: string;
+  optionDEnglish: string;
+  optionDPunjabi?: string;
+  optionDHindi?: string;
+  correctAnswer: 'A' | 'B' | 'C' | 'D';
+  difficulty: Difficulty;
+  englishExplanation?: string;
+  punjabiExplanation?: string;
+  hindiExplanation?: string;
+  subjectId: string;
+  boardId: string;
+  examId?: string;
+  sectionId?: string;
+  status: QuestionLifecycleStatus;
+  usedCount: number;
+  createdAt: any;
+  updatedAt: any;
 }
 
 export interface Advertisement {
@@ -319,9 +229,6 @@ export type AdPlacementType =
   | 'SIDEBAR' 
   | 'FOOTER';
 
-export type AdType = 'BANNER' | 'ADSENSE' | 'HTML';
-export type AdStatus = 'ACTIVE' | 'PAUSED' | 'SCHEDULED';
-
 export interface CurrentAffairHubItem {
   id: string;
   title: string;
@@ -334,25 +241,4 @@ export interface CurrentAffairHubItem {
   quizId?: string;
   createdAt: any;
   updatedAt: any;
-}
-
-export interface CurrentAffair {
-  id: string;
-  title: string;
-  date: string;
-  category: string;
-  summary: string;
-}
-
-export interface AttemptState {
-  answers: Record<number, number | null>;
-  status: Record<number, QuestionStatus>;
-  visited: number[];
-  bookmarks: number[];
-  timeLeft: number;
-  currentIdx: number;
-  currentSectionId: string;
-  violations: number;
-  startTime: number;
-  endTime: number;
 }

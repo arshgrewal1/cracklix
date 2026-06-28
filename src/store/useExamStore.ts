@@ -45,8 +45,8 @@ export interface ExamStoreState {
 }
 
 /**
- * @fileOverview Institutional CBT State Manager v48.0.
- * FIXED: Liquidated duplicate key in object literal causing build failure.
+ * @fileOverview Institutional CBT State Manager v49.0.
+ * FIXED: Duplicate key 'startTime' resolved to fix fatal compilation crash.
  */
 export const useExamStore = create<ExamStoreState>((set, get) => ({
   mockId: null,

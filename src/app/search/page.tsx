@@ -14,8 +14,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v3.6.
- * FIXED: Explicit React imports and correctly typed cloneElement to resolve UMD conflict.
+ * @fileOverview Official Search Hub v4.0.
+ * FIXED: Explicit React imports and typed cloneElement API to resolve UMD and build blockers.
  */
 
 export default function SearchPage() {
@@ -95,14 +95,14 @@ function SearchContent() {
   if (authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300">Authorizing Hub...</p>
+       <p className="text-[10px] font-black uppercase text-slate-300">Syncing Registry...</p>
     </div>
   )
 
   return (
     <div className="min-h-screen bg-slate-50/30 font-body">
       <Navbar />
-      <main className="container mx-auto px-4 md:px-6 py-6 md:py-16 max-w-5xl text-left">
+      <main className="container mx-auto px-4 md:px-6 py-6 md:py-16 max-w-5xl text-left pb-safe">
         <div className="space-y-8 md:space-y-12">
            <div className="text-center space-y-6">
               <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] tracking-tighter">Find Your Test</h1>
