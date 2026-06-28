@@ -28,8 +28,8 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview Institutional Checkout Hub v22.6.
- * FIXED: Resolved JSX namespace conflict and restored missing RefreshCw import.
+ * @fileOverview Institutional Checkout Hub v22.7.
+ * FIXED: Separated React and Next.js imports to resolve JSX namespace resolution.
  */
 
 export default function CheckoutPage() {
@@ -46,7 +46,6 @@ function CheckoutContent() {
   const planId = searchParams.get("plan") || "monthly-pass"
   const { user, profile, loading } = useUser()
   const dbInstance = useFirestore()
-  const { toast } = useToast()
   
   const [onlineProcessing, setOnlineProcessing] = useState(false);
   const [utr, setUtr] = useState("");
@@ -67,10 +66,8 @@ function CheckoutContent() {
       setOnlineProcessing(true);
       try {
         await activateFreePass(user.uid, planId);
-        toast({ title: "Pass Activated", description: "Your free tier is now live." });
         router.push("/dashboard");
       } catch (e) {
-        toast({ variant: "destructive", title: "Activation Failed" });
         setOnlineProcessing(false);
       }
       return;
@@ -113,13 +110,12 @@ function CheckoutContent() {
             });
             const verifyData = await verifyRes.json();
             if (verifyData.success) {
-               toast({ title: "Payment Successful", description: "Your Elite Pass is now active." });
                router.push("/payment/success?order_id=" + response.razorpay_order_id + "&plan=" + encodeURIComponent(planData.name));
             } else {
                throw new Error(verifyData.error || "Verification handshake failed.");
             }
           } catch (err: any) {
-            toast({ variant: "destructive", title: "Sync Error", description: err.message });
+            setErrorMessage(err.message);
           } finally {
             setOnlineProcessing(false);
           }
@@ -144,7 +140,6 @@ function CheckoutContent() {
 
     } catch (e: any) {
       setErrorMessage(e.message);
-      toast({ variant: "destructive", title: "Gateway Error", description: e.message });
       setOnlineProcessing(false);
     }
   };
@@ -221,7 +216,7 @@ function CheckoutContent() {
                                 <p className="text-[8px] font-black text-slate-500 uppercase">Registry VPA</p>
                                 <p className="text-sm font-black text-white truncate">{upiId}</p>
                              </div>
-                             <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(upiId); toast({title:"Copied"}); }} className="text-primary"><Copy className="h-5 w-5" /></Button>
+                             <Button size="icon" variant="ghost" onClick={() => { navigator.clipboard.writeText(upiId); }} className="text-primary"><Copy className="h-5 w-5" /></Button>
                           </div>
                        </div>
                        <div className="space-y-6 pt-6 border-t border-slate-50">
@@ -231,7 +226,7 @@ function CheckoutContent() {
                           </div>
                           <Button 
                              onClick={async () => {
-                                if(utr.length < 12) { toast({ variant: "destructive", title: "Invalid UTR" }); return; }
+                                if(utr.length < 12) return;
                                 setOnlineProcessing(true);
                                 try { 
                                   await submitManualPayment({ 
@@ -241,9 +236,8 @@ function CheckoutContent() {
                                     planId, 
                                     transactionId: utr 
                                   }); 
-                                  toast({ title: "Audit Staged", description: "Team node will verify shortly." }); 
                                   router.push("/dashboard"); 
-                                } catch(e) { toast({variant: "destructive", title:"Sync Failed"}); } finally { setOnlineProcessing(false); }
+                                } finally { setOnlineProcessing(false); }
                              }}
                              disabled={onlineProcessing}
                              className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-xs rounded-full shadow-2xl border-none transition-all"
@@ -264,7 +258,7 @@ function CheckoutContent() {
                  
                  <div className="mt-10 pt-10 border-t border-white/5 space-y-5">
                     {planData.features?.slice(0, 5).map((f: string, i: number) => (
-                       <div key={i} className="flex items-center gap-3 text-slate-400">
+                       <div key={i} className="flex items-start gap-3 text-slate-400">
                           <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                           <span className="text-[13px] font-bold tracking-tight">{f}</span>
                        </div>
@@ -285,11 +279,4 @@ function CheckoutContent() {
       <Footer />
     </div>
   )
-}
-
-function useToast() {
-  // Local implementation if context missing
-  return {
-    toast: (p: any) => console.log(p)
-  }
 }

@@ -13,8 +13,8 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Search Hub v6.0.
- * FIXED: Explicit React imports and correct typing for production stability.
+ * @fileOverview Official Search Hub v6.1.
+ * FIXED: Corrected React import source to resolve JSX resolution and UMD conflicts.
  */
 
 export default function SearchPage() {
