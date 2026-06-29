@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -37,9 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Refined Navbar v62.0.
- * FIXED: Logo offset (-ml-5) for symmetrical alignment.
- * FIXED: Header logic optimized for App Mode + Title Case typography.
+ * @fileOverview Refined Navbar v63.0.
+ * FIXED: Header hamesha visible rahega sabhi sections me.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -99,23 +97,13 @@ export default function Navbar() {
     (user?.email &&
       SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
 
-  const isAppMode = !!user && (
-    pathname === '/dashboard' || 
-    pathname === '/my-exams' || 
-    pathname === '/mocks' || 
-    pathname === '/pass'
-  );
-
   if (!mounted) {
     return <nav className="w-full border-b border-slate-100 bg-white h-[72px] md:h-[112px]" />;
   }
 
   return (
     <>
-      <header className={cn(
-        "sticky top-0 z-50 w-full bg-white border-b border-slate-100 pt-safe",
-        isAppMode ? "hidden md:block" : "block"
-      )}>
+      <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
         <nav className="w-full h-14 md:h-[112px]">
           <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
 
@@ -210,9 +198,6 @@ export default function Navbar() {
           </div>
         </nav>
       </header>
-
-      {/* MOBILE APP SPACER */}
-      {isAppMode && <div className="md:hidden pt-safe" />}
 
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="w-[280px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
