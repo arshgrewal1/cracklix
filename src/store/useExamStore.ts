@@ -8,11 +8,6 @@ import {
 } from "@/types";
 import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
-/**
- * @fileOverview Institutional CBT Store v54.1.
- * FIXED: Removed duplicate property in violation logging.
- */
-
 export interface ExamStoreState {
   mockId: string | null;
   mockTitle: string;
