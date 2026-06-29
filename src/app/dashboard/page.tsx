@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, isValidElement, cloneElement, ReactElement } from "react"
@@ -38,9 +39,11 @@ import { cn } from "@/lib/utils"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
+import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Student Home - Real-Time Study Tracker v49.0.
+ * @fileOverview Student Home - Real-Time Study Tracker v50.0.
+ * FIXED: Persistent live study time counter with precision formatting.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -50,13 +53,27 @@ export default function StudentDashboard() {
   const [mounted, setMounted] = useState(false)
   const [passCountdown, setPassCountdown] = useState("");
   
-  // LIVE SESSION TRACKER
+  // MOCK STORE INTEGRATION
+  const currentMockId = useExamStore(s => s.mockId);
+  const startTime = useExamStore(s => s.startTime);
+
+  // LIVE SESSION TRACKER (Dwell time on dashboard)
   const [sessionSeconds, setSessionSeconds] = useState(0);
 
   useEffect(() => {
     setMounted(true)
+    
+    // Load persisted dashboard time for today
+    const today = new Date().toDateString();
+    const saved = localStorage.getItem(`study_time_${today}`);
+    if (saved) setSessionSeconds(parseInt(saved));
+
     const interval = setInterval(() => {
-      setSessionSeconds(prev => prev + 1);
+      setSessionSeconds(prev => {
+        const next = prev + 1;
+        localStorage.setItem(`study_time_${today}`, next.toString());
+        return next;
+      });
     }, 1000);
     return () => clearInterval(interval);
   }, [])
@@ -102,7 +119,7 @@ export default function StudentDashboard() {
   const { data: validMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
 
   const stats = useMemo(() => {
-    if (!rawResults || !validMocks) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0h 0m", list: [] }
+    if (!rawResults || !validMocks) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0s", list: [] }
     
     const validMockIds = new Set(validMocks.map(m => m.id));
     const filtered = rawResults.filter(r => validMockIds.has(r.mockId));
@@ -113,18 +130,34 @@ export default function StudentDashboard() {
     const attempted = sorted.reduce((acc: number, r: any) => acc + (Object.keys(r.answers || {}).length), 0)
     const avgAcc = attempted > 0 ? Math.round((correct / attempted) * 100) : 0
     
-    // SANITIZED TIME CALCULATION (Ignore values that look like timestamps > 100 hours per test)
-    const maxSafeSecondsPerTest = 3600 * 10; // 10 hours max
+    // 1. Calculate time from all completed tests
+    const maxSafeSecondsPerTest = 3600 * 10; 
     const historicalSeconds = sorted.reduce((acc: number, r: any) => {
        const t = Number(r.timeTaken) || 0;
        return acc + (t > maxSafeSecondsPerTest ? 0 : t);
     }, 0);
 
-    const totalTimeSeconds = historicalSeconds + sessionSeconds;
+    // 2. Add time from current active mock if any
+    let activeMockSeconds = 0;
+    if (currentMockId && startTime) {
+       activeMockSeconds = Math.round((Date.now() - startTime) / 1000);
+    }
+
+    // 3. Aggregate total
+    const totalTimeSeconds = historicalSeconds + sessionSeconds + activeMockSeconds;
     
     const h = Math.floor(totalTimeSeconds / 3600);
     const m = Math.floor((totalTimeSeconds % 3600) / 60);
-    const timeFormattedValue = h > 0 ? `${h}h ${m}m` : `${m}m`;
+    const s = totalTimeSeconds % 60;
+
+    let timeFormattedValue = "";
+    if (h > 0) {
+      timeFormattedValue = `${h}h ${m}m`;
+    } else if (m > 0) {
+      timeFormattedValue = `${m}m ${s}s`;
+    } else {
+      timeFormattedValue = `${s}s`;
+    }
 
     const uniqueDays = new Set(sorted.map((r: any) => new Date(r.timestamp).toDateString()))
     
@@ -136,7 +169,7 @@ export default function StudentDashboard() {
       hours: timeFormattedValue, 
       list: sorted.slice(0, 8) 
     }
-  }, [rawResults, validMocks, sessionSeconds])
+  }, [rawResults, validMocks, sessionSeconds, currentMockId, startTime])
 
   if (!mounted || authLoading) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-8 w-8 text-primary animate-pulse" /></div>;
 
