@@ -1,23 +1,25 @@
-/**
- * @fileOverview Root Build Configuration v1.5.
- * FIXED: Block ordering (buildscript first) and variable inheritance.
- */
 buildscript {
-    // 1. Link the variables registry
-    apply from: 'variables.gradle'
-    
+    ext.kotlin_version = '2.0.21'
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:8.6.1"
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:2.0.21"
-        classpath "com.google.gms:google-services:4.4.2"
+        classpath 'com.android.tools.build:gradle:8.6.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.google.gms:google-services:4.4.2'
     }
 }
 
-// 2. Global clean task node
-tasks.register('clean', Delete) {
+apply from: "variables.gradle"
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
     delete rootProject.buildDir
 }

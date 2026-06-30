@@ -1,9 +1,7 @@
-/**
- * @fileOverview Application Node Configuration for SDK 35.
- * FIXED: Removed hallucinated DSL methods and standardized SDK property mapping.
- */
-apply plugin: 'com.android.application'
-apply plugin: 'org.jetbrains.kotlin.android'
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
 
 android {
     namespace "com.cracklix.app"
@@ -18,8 +16,8 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
-             // Standard resources config
-             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+             // navCheckDescriptor removed as it is invalid AGP DSL
+             base.enableResourceOptimizations = true
         }
     }
 
@@ -39,9 +37,8 @@ android {
         jvmTarget = '21'
     }
 
-    // Modern androidResources block
-    androidResources {
-        noCompress 'dev'
+    buildFeatures {
+        buildConfig true
     }
 }
 
@@ -53,19 +50,17 @@ repositories {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.appcompat:androidx.appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:androidx.coordinatorlayout:$androidxCoordinatorLayoutVersion"
     implementation "androidx.core:core-ktx:$androidxCoreVersion"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
-    
     implementation project(':capacitor-android')
     implementation project(':capacitor-cordova-android-plugins')
-
+    
     testImplementation "junit:junit:$junitVersion"
     androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    androidTestImplementation "androidx.test.espresso:core:$androidxEspressoCoreVersion"
 }
 
-// Capacitor build linkage
 apply from: 'capacitor.build.gradle'
 
 try {
@@ -74,5 +69,5 @@ try {
         apply plugin: 'com.google.gms.google-services'
     }
 } catch(Exception e) {
-    logger.info("google-services.json not found, skipping plugin application")
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }

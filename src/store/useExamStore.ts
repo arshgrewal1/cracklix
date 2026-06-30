@@ -174,10 +174,10 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
     if (db && state.userId && state.mockId) {
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
-      setDoc(attemptRef, { 
+      updateDoc(attemptRef, { 
         violations: nextVal, 
         updatedAt: serverTimestamp() 
-      }, { merge: true }).catch(() => {});
+      }).catch(() => {});
     }
   }
 }));
