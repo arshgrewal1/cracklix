@@ -1,3 +1,7 @@
+/**
+ * @fileOverview Master Settings Node for Capacitor 7.
+ * FIXED: Relative path for plugin autoloader and repository governance.
+ */
 pluginManagement {
     repositories {
         google()
@@ -17,17 +21,5 @@ dependencyResolutionManagement {
 rootProject.name = "android"
 include ':app'
 
-// Capacitor Plugins Inclusion
-def capacitorPlugins = []
-def pluginsJson = new groovy.json.JsonSlurper().parseText(new File(rootProject.projectDir, '../package.json').text)
-if (pluginsJson.dependencies) {
-    pluginsJson.dependencies.each { name, version ->
-        if (name.startsWith('@capacitor/')) {
-            capacitorPlugins << name
-        }
-    }
-}
-
-// Cordov Plugins Inclusion
-include ':capacitor-cordova-android-plugins'
-project(':capacitor-cordova-android-plugins').projectDir = new File(rootProject.projectDir, 'capacitor-cordova-android-plugins')
+// Capacitor Plugin Autoloader (Mandatory for project inclusion)
+apply from: '../node_modules/@capacitor/android/capacitor.settings.gradle'
