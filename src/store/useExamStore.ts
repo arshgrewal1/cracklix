@@ -6,7 +6,7 @@ import {
   QuestionStatus, 
   LanguageDisplayMode 
 } from "@/types";
-import { Firestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { Firestore, doc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 export interface ExamStoreState {
   mockId: string | null;
