@@ -16,7 +16,18 @@ dependencyResolutionManagement {
 
 rootProject.name = "android"
 include ':app'
-include ':capacitor-android'
-project(':capacitor-android').projectDir = new File('../node_modules/@capacitor/android/capacitor')
+
+// Capacitor Plugins Inclusion
+def capacitorPlugins = []
+def pluginsJson = new groovy.json.JsonSlurper().parseText(new File(rootProject.projectDir, '../package.json').text)
+if (pluginsJson.dependencies) {
+    pluginsJson.dependencies.each { name, version ->
+        if (name.startsWith('@capacitor/')) {
+            capacitorPlugins << name
+        }
+    }
+}
+
+// Cordov Plugins Inclusion
 include ':capacitor-cordova-android-plugins'
-project(':capacitor-cordova-android-plugins').projectDir = new File('capacitor-cordova-android-plugins')
+project(':capacitor-cordova-android-plugins').projectDir = new File(rootProject.projectDir, 'capacitor-cordova-android-plugins')

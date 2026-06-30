@@ -5,18 +5,22 @@ import { doc, setDoc, serverTimestamp, getDoc, updateDoc } from "firebase/firest
 import { logEvent } from "@/lib/logger";
 
 /**
- * Razorpay Enterprise Webhook Hub (v15.0)
- * Security: HMAC-SHA256 Signature Verification + Renewal Stacking Logic.
+ * Razorpay Enterprise Webhook Hub (v15.1)
+ * FIXED: Hardened JSON parsing and optional chain token checks.
  */
 export async function POST(req: Request) {
   try {
     const body = await req.text();
+    if (!body) {
+      return NextResponse.json({ error: "Empty request payload" }, { status: 400 });
+    }
+
     const signature = req.headers.get("x-razorpay-signature") || "";
     const secret = process.env.RAZORPAY_WEBHOOK_SECRET;
 
     if (!secret) {
-      await logEvent({ type: "critical", message: "RAZORPAY_WEBHOOK_SECRET missing in environment." });
-      return NextResponse.json({ error: "Configuration anomaly" }, { status: 500 });
+      await logEvent({ type: "critical", message: "RAZORPAY_WEBHOOK_SECRET missing in environment registry." });
+      return NextResponse.json({ error: "Server configuration anomaly" }, { status: 500 });
     }
 
     // 1. SIGNATURE VERIFICATION (Anti-Tampering)
@@ -26,26 +30,35 @@ export async function POST(req: Request) {
       .digest("hex");
 
     if (expectedSignature !== signature) {
-      await logEvent({ type: "critical", message: "Unauthorized webhook signature detected." });
-      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+      await logEvent({ type: "critical", message: "Unauthorized webhook signature detected. Source node discarded." });
+      return NextResponse.json({ error: "Invalid signature verification" }, { status: 401 });
     }
 
-    const event = JSON.parse(body);
+    let event;
+    try {
+      event = JSON.parse(body);
+    } catch (e) {
+      return NextResponse.json({ error: "Malformed JSON payload" }, { status: 400 });
+    }
+
     const { firestore: db } = initializeFirebase();
 
     if (event.event === "payment.captured" || event.event === "order.paid") {
-      const payment = event.payload.payment?.entity || event.payload.order?.entity;
-      const userId = payment.notes?.userId;
-      const planId = payment.notes?.planId;
+      const payloadEntity = event.payload.payment?.entity || event.payload.order?.entity;
+      if (!payloadEntity) return NextResponse.json({ success: true, message: "No entity node in payload" });
+
+      const userId = payloadEntity.notes?.userId;
+      const planId = payloadEntity.notes?.planId;
 
       if (!userId || !planId) {
-        return NextResponse.json({ success: true, warning: "Metadata missing" });
+        console.warn("[WEBHOOK] Critical metadata missing in transaction notes.");
+        return NextResponse.json({ success: true, warning: "Relationship metadata missing" });
       }
 
       // 2. SUBSCRIPTION ACTIVATION WITH RENEWAL STACKING
       const planSnap = await getDoc(doc(db, "passes", planId));
       if (!planSnap.exists()) {
-        await logEvent({ type: "error", message: "Plan not found in registry during webhook.", userId });
+        await logEvent({ type: "error", message: "Plan node not found in registry during webhook execution.", userId });
         return NextResponse.json({ success: true });
       }
 
@@ -71,7 +84,7 @@ export async function POST(req: Request) {
       const passPayload = {
         pass: {
           active: true,
-          plan: planData.name || planId.toUpperCase(),
+          plan: planData.name || String(planId).toUpperCase(),
           purchaseDate: new Date().toISOString(),
           expiryDate: expiryDate.toISOString(),
           freePassClaimed: false
@@ -86,22 +99,22 @@ export async function POST(req: Request) {
       await updateDoc(userRef, passPayload);
 
       // 3. LOG TRANSACTION
-      await setDoc(doc(db, "payment_requests", payment.id || `web-${Date.now()}`), {
+      await setDoc(doc(db, "payment_requests", payloadEntity.id || `web-${Date.now()}`), {
         userId,
         planId,
-        amount: Number(payment.amount) / 100,
+        amount: Number(payloadEntity.amount || 0) / 100,
         gateway: "RAZORPAY",
         status: "APPROVED",
         verified: true,
         createdAt: serverTimestamp()
       });
 
-      await logEvent({ type: "payment", message: "Pass activated via verified webhook", userId, planId });
+      await logEvent({ type: "payment", message: "Pass activated via verified webhook event", userId, planId });
     }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    console.error("[WEBHOOK_EXCEPTION]", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("[WEBHOOK_CRITICAL_EXCEPTION]", error);
+    return NextResponse.json({ error: "Internal webhook processing node failed.", detail: error.message }, { status: 500 });
   }
 }

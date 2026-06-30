@@ -4,8 +4,8 @@ import { initializeFirebase } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
- * Razorpay Order API (Production Hardened v18.1)
- * FIXED: Safe JSON parsing for request bodies.
+ * Razorpay Order API (Production Hardened v18.2)
+ * FIXED: Safe environment variable access and NaN price protection.
  */
 export async function POST(req: Request) {
   try {
@@ -22,15 +22,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, reason: "Incomplete identity tokens." }, { status: 400 });
     }
 
-    const keyId = process.env.RAZORPAY_KEY_ID?.trim();
-    const keySecret = process.env.RAZORPAY_KEY_SECRET?.trim();
+    const keyId = (process.env.RAZORPAY_KEY_ID || "").trim();
+    const keySecret = (process.env.RAZORPAY_KEY_SECRET || "").trim();
 
     if (!keyId || !keySecret || !keyId.startsWith('rzp_')) {
-      console.error("[RAZORPAY_ORDER] Environment anomaly: Missing keys.");
+      console.error("[RAZORPAY_ORDER] Environment anomaly: Missing or invalid keys.");
       return NextResponse.json({ 
         success: false, 
-        reason: "Invalid Razorpay API Keys.",
-        detail: "Keys must start with rzp_"
+        reason: "Internal configuration error.",
+        detail: "Razorpay keys are missing or misconfigured in the environment registry."
       }, { status: 503 });
     }
 
@@ -59,8 +59,8 @@ export async function POST(req: Request) {
     const order = await razorpay.orders.create({
       amount: amountInPaise,
       currency: "INR",
-      receipt: `ORD_${Date.now()}_${userId.slice(-5)}`,
-      notes: { userId, planId, planName: plan.name },
+      receipt: `ORD_${Date.now()}_${String(userId).slice(-5)}`,
+      notes: { userId, planId, planName: plan.name || "Elite Pass" },
     });
 
     return NextResponse.json({
@@ -73,10 +73,10 @@ export async function POST(req: Request) {
 
   } catch (err: any) {
     console.error("[RAZORPAY_CRITICAL_FAILURE]", err);
-    const errorDetail = err?.error?.description || err?.message || "Unknown error";
+    const errorDetail = err?.error?.description || err?.message || "Unknown gateway error";
     return NextResponse.json({ 
       success: false, 
-      reason: "Internal payment node failure.",
+      reason: "Internal server error during order creation.",
       error: errorDetail
     }, { status: 500 });
   }
