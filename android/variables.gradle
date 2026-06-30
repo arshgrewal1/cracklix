@@ -7,7 +7,8 @@ ext {
     androidxCoordinatorLayoutVersion = '1.2.0'
     androidxCoreVersion = '1.15.0'
     androidxFragmentVersion = '1.8.5'
-    coreSplashScreenVersion = '1.0.1'
-    androidxAnnotationVersion = '1.9.1'
-    kotlin_version = '2.0.21'
+    junitVersion = '4.13.2'
+    androidxJunitVersion = '1.2.1'
+    androidxEspressoCoreVersion = '3.6.1'
+    cordovaAndroidVersion = '10.1.1'
 }

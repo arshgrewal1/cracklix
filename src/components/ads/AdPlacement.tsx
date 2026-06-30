@@ -15,7 +15,8 @@ interface AdPlacementProps {
 }
 
 /**
- * @fileOverview Institutional Ad-Node v1.31.
+ * @fileOverview Institutional Ad-Node v1.32.
+ * FIXED: Explicit type casting for Firestore query to resolve Advertisement type mismatch.
  */
 
 export default function AdPlacement({ placement, className, examId }: AdPlacementProps) {
@@ -40,7 +41,7 @@ export default function AdPlacement({ placement, className, examId }: AdPlacemen
     return query(colRef, where('status', '==', 'ACTIVE')) as Query<Advertisement, DocumentData>;
   }, [db, isAdFree, isSafetyZone]);
 
-  const { data: ads, loading } = useCollection<Advertisement>(adsQuery);
+  const { data: ads, loading } = useCollection<Advertisement>(adsQuery as Query<Advertisement, DocumentData>);
 
   const activeAd = useMemo(() => {
     if (!ads) return null;

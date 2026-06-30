@@ -137,11 +137,11 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
     if (db && state.userId && state.mockId) {
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
-      setDoc(attemptRef, { 
+      updateDoc(attemptRef, { 
          answers: newAnswers, 
          statusMap: newStatus, 
          updatedAt: serverTimestamp() 
-      }, { merge: true }).catch(() => {});
+      }).catch(() => {});
     }
   },
 
@@ -154,7 +154,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
 
     if (db && state.userId && state.mockId) {
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
-      setDoc(attemptRef, { statusMap: newStatus, updatedAt: serverTimestamp() }, { merge: true }).catch(() => {});
+      updateDoc(attemptRef, { statusMap: newStatus, updatedAt: serverTimestamp() }).catch(() => {});
     }
   },
 
