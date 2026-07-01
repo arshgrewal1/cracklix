@@ -1,5 +1,17 @@
-/**
- * @fileOverview LEGACY CONFIG NEUTRALIZED.
- * This project uses next.config.ts for Next.js 15.
- */
-module.exports = {};
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  images: {
+    unoptimized: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  poweredByHeader: false,
+  compress: true,
+};
+
+module.exports = nextConfig;

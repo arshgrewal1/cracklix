@@ -61,7 +61,7 @@ export async function activateFreePass(userId: string, planId: string) {
     });
 
     return { success: true };
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error('Free Pass Activation Error:', e);
     throw new Error('Failed to activate free pass node.');
   }

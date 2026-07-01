@@ -26,13 +26,23 @@ import {
   Globe
 } from "lucide-react"
 import { useFirestore, useCollection } from "@/firebase"
-import { collection, doc, writeBatch, serverTimestamp } from "firebase/firestore"
+import { collection, doc, writeBatch, serverTimestamp, DocumentData, FirestoreDataConverter } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions } from "@/lib/parser"
-import { Difficulty, ContentStatus } from "@/types"
+import { Board, Subject, Question } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+
+const boardConverter: FirestoreDataConverter<Board> = {
+    toFirestore: (data: Board): DocumentData => data,
+    fromFirestore: (snap): Board => snap.data() as Board
+};
+
+const subjectConverter: FirestoreDataConverter<Subject> = {
+    toFirestore: (data: Subject): DocumentData => data,
+    fromFirestore: (snap): Subject => snap.data() as Subject
+};
 
 /**
  * @fileOverview Institutional Bulk Ingestion Hub v10.0 (PWA Hardened).
@@ -44,23 +54,21 @@ export default function BulkImportPage() {
   const db = useFirestore()
   const { toast } = useToast()
   
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]))
-  const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects") : null), [db]))
+  const { data: boards } = useCollection<Board>(useMemo(() => (db ? collection(db, "boards").withConverter(boardConverter) : null), [db]))
+  const { data: subjects } = useCollection<Subject>(useMemo(() => (db ? collection(db, "subjects").withConverter(subjectConverter) : null), [db]))
 
   const [metadata, setMetadata] = useState({
     boardId: "",
     subjectId: "",
     secondaryLanguage: "punjabi" as 'punjabi' | 'hindi',
-    difficulty: "Medium" as Difficulty,
-    status: "PUBLISHED" as ContentStatus,
   })
 
   const [rawText, setRawText] = useState("")
-  const [parsedQuestions, setParsedQuestions] = useState<any[]>([])
+  const [parsedQuestions, setParsedQuestions] = useState<Question[]>([])
   const [isSyncing, setIsSyncing] = useState(false)
   
   const [editingIndex, setEditingIndex] = useState<number | null>(null)
-  const [editForm, setEditForm] = useState<any>(null)
+  const [editForm, setEditForm] = useState<Question | null>(null)
 
   const handleImport = () => {
     if (!rawText.trim()) return
@@ -110,7 +118,7 @@ export default function BulkImportPage() {
     const batch = writeBatch(db)
 
     parsedQuestions.forEach(q => {
-      const { debug, ...cleanQ } = q;
+      const { debug, ...cleanQ } = q as Question & { debug?: any };
       const qRef = doc(collection(db, "questions"))
       batch.set(qRef, {
         ...cleanQ,
@@ -127,6 +135,7 @@ export default function BulkImportPage() {
       toast({ title: "Registry Synced", description: `${parsedQuestions.length} assets committed.` })
       router.push("/admin/questions")
     } catch (e) {
+      console.error(e);
       toast({ variant: "destructive", title: "Sync failed" })
     } finally {
       setIsSyncing(false)
@@ -169,7 +178,7 @@ export default function BulkImportPage() {
                     <SelectTrigger className="rounded-xl h-11 md:h-12 bg-slate-50 border-none font-bold text-xs">
                       <SelectValue placeholder="Select" />
                     </SelectTrigger>
-                    <SelectContent>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
+                    <SelectContent>{boards?.map((b) => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-1.5 text-left">
@@ -178,7 +187,7 @@ export default function BulkImportPage() {
                       <SelectTrigger className="rounded-xl h-11 md:h-12 bg-slate-50 border-none font-bold text-xs">
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
-                      <SelectContent>{subjects?.map((s:any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                      <SelectContent>{subjects?.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                    </Select>
                 </div>
               </div>
@@ -187,7 +196,7 @@ export default function BulkImportPage() {
                  <Label className="text-[9px] font-black text-slate-400 ml-1 flex items-center gap-2 uppercase tracking-widest">
                     <Languages className="h-3 w-3" /> Secondary Assessment Language
                  </Label>
-                 <Select value={metadata.secondaryLanguage} onValueChange={(v: any) => setMetadata({...metadata, secondaryLanguage: v})}>
+                 <Select value={metadata.secondaryLanguage} onValueChange={(v: 'punjabi' | 'hindi') => setMetadata({...metadata, secondaryLanguage: v})}>
                     <SelectTrigger className="rounded-xl h-12 md:h-14 bg-slate-900 text-white border-none font-black text-[9px] tracking-widest">
                       <SelectValue />
                     </SelectTrigger>
@@ -268,13 +277,13 @@ export default function BulkImportPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
                   <div className="space-y-2 text-left">
                      <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">English Statement</Label>
-                     <Textarea value={editForm?.englishQuestion ?? ""} onChange={e => setEditForm({...editForm, englishQuestion: e.target.value})} className="h-32 rounded-xl bg-slate-50 border-none font-bold text-sm md:text-lg p-5 shadow-inner" />
+                     <Textarea value={editForm?.englishQuestion ?? ""} onChange={e => setEditForm({ ...editForm, englishQuestion: e.target.value } as Question)} className="h-32 rounded-xl bg-slate-50 border-none font-bold text-sm md:text-lg p-5 shadow-inner" />
                   </div>
                   <div className="space-y-2 text-left">
                      <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">{isHindiMode ? 'Hindi Statement' : 'Punjabi Statement'}</Label>
                      <Textarea 
                         value={isHindiMode ? (editForm?.hindiQuestion ?? "") : (editForm?.punjabiQuestion ?? "")} 
-                        onChange={e => setEditForm({...editForm, [isHindiMode ? 'hindiQuestion' : 'punjabiQuestion']: e.target.value})} 
+                        onChange={e => setEditForm({ ...editForm, [isHindiMode ? 'hindiQuestion' : 'punjabiQuestion']: e.target.value } as Question)} 
                         className="h-32 rounded-xl bg-slate-50 border-none font-bold text-sm md:text-lg p-5 shadow-inner" 
                      />
                   </div>
@@ -290,17 +299,17 @@ export default function BulkImportPage() {
                                  <div className="h-6 w-6 md:h-7 md:w-7 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-black text-xs">{opt}</div>
                                  <Label className="text-[9px] font-black text-slate-500 uppercase tracking-widest">English Text</Label>
                               </div>
-                              <button onClick={() => setEditForm({...editForm, correctAnswer: opt})} className={cn("h-6 w-6 rounded-full border-2 transition-all flex items-center justify-center", (editForm?.correctAnswer ?? "A") === opt ? "bg-emerald-50 border-emerald-500 text-emerald-600" : "border-slate-200 hover:border-primary bg-white")}>
+                              <button onClick={() => setEditForm({ ...editForm, correctAnswer: opt } as Question)} className={cn("h-6 w-6 rounded-full border-2 transition-all flex items-center justify-center", (editForm?.correctAnswer ?? "A") === opt ? "bg-emerald-50 border-emerald-500 text-emerald-600" : "border-slate-200 hover:border-primary bg-white")}>
                                  {(editForm?.correctAnswer ?? "A") === opt && <CheckCircle2 className="h-4 w-4" />}
                               </button>
                            </div>
-                           <Input value={editForm?.[`option${opt}English`] ?? ""} onChange={e => setEditForm({...editForm, [`option${opt}English`]: e.target.value})} className="bg-white border-none font-bold h-10 md:h-12 rounded-xl" />
+                           <Input value={editForm?.[`option${opt}English` as keyof Question] ?? ""} onChange={e => setEditForm({ ...editForm, [`option${opt}English`]: e.target.value } as Question)} className="bg-white border-none font-bold h-10 md:h-12 rounded-xl" />
                            
                            <div className="pt-2 space-y-1.5">
                               <Label className="text-[8px] font-black text-slate-400 flex items-center gap-2 uppercase tracking-widest"><Globe className="h-2.5 w-2.5" /> {isHindiMode ? 'Hindi Text' : 'Punjabi Text'}</Label>
                               <Input 
-                                 value={isHindiMode ? (editForm?.[`option${opt}Hindi`] ?? "") : (editForm?.[`option${opt}Punjabi`] ?? "")} 
-                                 onChange={e => setEditForm({...editForm, [isHindiMode ? `option${opt}Hindi` : `option${opt}Punjabi`]: e.target.value})} 
+                                 value={isHindiMode ? (editForm?.[`option${opt}Hindi` as keyof Question] ?? "") : (editForm?.[`option${opt}Punjabi` as keyof Question] ?? "")} 
+                                 onChange={e => setEditForm({ ...editForm, [isHindiMode ? `option${opt}Hindi` : `option${opt}Punjabi`]: e.target.value } as Question)} 
                                  className="bg-white border-none font-bold h-10 md:h-12 rounded-xl" 
                               />
                            </div>
@@ -312,13 +321,13 @@ export default function BulkImportPage() {
                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 pt-6 border-t border-slate-50">
                   <div className="space-y-2 text-left">
                      <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">English Rationalization</Label>
-                     <Textarea value={editForm?.englishExplanation ?? ""} onChange={e => setEditForm({...editForm, englishExplanation: e.target.value})} className="h-32 rounded-2xl bg-slate-900 text-emerald-400 font-medium p-5 shadow-inner" />
+                     <Textarea value={editForm?.englishExplanation ?? ""} onChange={e => setEditForm({ ...editForm, englishExplanation: e.target.value } as Question)} className="h-32 rounded-2xl bg-slate-900 text-emerald-400 font-medium p-5 shadow-inner" />
                   </div>
                   <div className="space-y-2 text-left">
                      <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase tracking-widest">{isHindiMode ? 'Hindi Rationalization' : 'Punjabi Rationalization'}</Label>
                      <Textarea 
                         value={isHindiMode ? (editForm?.hindiExplanation ?? "") : (editForm?.punjabiExplanation ?? "")} 
-                        onChange={e => setEditForm({...editForm, [isHindiMode ? 'hindiExplanation' : 'punjabiExplanation']: e.target.value})} 
+                        onChange={e => setEditForm({ ...editForm, [isHindiMode ? 'hindiExplanation' : 'punjabiExplanation']: e.target.value } as Question)} 
                         className="h-32 rounded-2xl bg-slate-900 text-blue-400 font-medium p-5 shadow-inner" 
                      />
                   </div>

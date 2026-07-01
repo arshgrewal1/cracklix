@@ -41,8 +41,8 @@ export default function BrandMagicPage() {
       const response = await transformLogo({ logoDataUri: preview })
       setResult(response.transformedImageDataUri)
       toast({ title: "Magic Complete", description: "Your cinematic asset is ready." })
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Transformation Failed", description: err.message })
+    } catch (err: unknown) {
+      toast({ variant: "destructive", title: "Transformation Failed", description: (err as Error).message })
     } finally {
       setIsGenerating(false)
     }

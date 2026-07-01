@@ -1,14 +1,20 @@
 "use client"
 
 import { useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { ShieldCheck, Clock, User, Activity, Filter, Download } from "lucide-react"
+import { ShieldCheck, Clock, User, Activity, Download } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, limit } from "firebase/firestore"
+import { collection, query, limit, DocumentData, FirestoreDataConverter } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
+import { AuditLog } from "@/types"
+
+const auditLogConverter: FirestoreDataConverter<AuditLog> = {
+    toFirestore: (data: AuditLog): DocumentData => data,
+    fromFirestore: (snap): AuditLog => snap.data() as AuditLog
+};
 
 /**
  * @fileOverview Optimized Audit Trail Console v2.0 (PWA Optimized).
@@ -17,8 +23,8 @@ import { Button } from "@/components/ui/button"
 
 export default function AuditLogsPage() {
   const db = useFirestore()
-  const logsQuery = useMemo(() => (db ? query(collection(db, "audit_logs"), limit(50)) : null), [db])
-  const { data: allLogs, loading } = useCollection<any>(logsQuery)
+  const logsQuery = useMemo(() => (db ? query(collection(db, "audit_logs").withConverter(auditLogConverter), limit(50)) : null), [db])
+  const { data: allLogs, loading } = useCollection<AuditLog>(logsQuery)
 
   const logs = useMemo(() => {
     if (!allLogs) return []
@@ -62,12 +68,12 @@ export default function AuditLogsPage() {
                   <TableRow key={i} className="border-slate-50"><TableCell colSpan={4} className="px-6 py-6 md:px-12 md:py-8"><Skeleton className="h-10 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>
                 ))
               ) : logs && logs.length > 0 ? (
-                logs.map((log: any) => (
+                logs.map((log) => (
                   <TableRow key={log.id} className="border-slate-50 hover:bg-slate-50 transition-colors group">
                     <TableCell className="px-6 md:px-12 py-5 md:py-8">
                        <div className="flex items-center gap-2 text-slate-500">
                           <Clock className="h-3.5 w-3.5" />
-                          <span className="text-[10px] md:text-xs font-bold tabular-nums">{new Date(log.timestamp?.seconds * 1000).toLocaleString()}</span>
+                          <span className="text-[10px] md:text-xs font-bold tabular-nums">{log.timestamp ? new Date(log.timestamp.seconds * 1000).toLocaleString() : "N/A"}</span>
                        </div>
                     </TableCell>
                     <TableCell>
@@ -75,7 +81,7 @@ export default function AuditLogsPage() {
                           <div className="h-8 w-8 md:h-10 md:w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                              <User className="h-4 w-4 md:h-5 md:w-5" />
                           </div>
-                          <p className="font-bold text-[#0F172A] text-xs md:text-sm truncate max-w-[120px]">{log.adminName || 'System'}</p>
+                          <p className="font-bold text-[#0F172A] text-xs md:text-sm truncate max-w-[120px]">{log.user || 'System'}</p>
                        </div>
                     </TableCell>
                     <TableCell>

@@ -51,7 +51,7 @@ export default function SuccessStoriesPage() {
               Hall of <span className="text-primary">Rankers</span>
            </h1>
            <p className="text-slate-500 font-medium text-[11px] md:text-2xl max-w-2xl mx-auto leading-tight italic">
-              "Success stories from fellow Punjab aspirants using the Cracklix platform."
+              &quot;Success stories from fellow Punjab aspirants using the Cracklix platform.&quot;
            </p>
         </div>
 
@@ -83,7 +83,7 @@ export default function SuccessStoriesPage() {
                       <div className="space-y-2">
                          <Quote className="h-6 w-6 md:h-12 text-primary opacity-20 mx-auto md:mx-0" />
                          <blockquote className="text-base md:text-5xl font-headline font-medium italic text-[#0F172A] leading-tight tracking-tight">
-                            "{story.quote}"
+                            &quot;{story.quote}&quot;
                          </blockquote>
                       </div>
                       <div className="space-y-1">

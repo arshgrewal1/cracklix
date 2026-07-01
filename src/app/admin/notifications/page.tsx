@@ -185,7 +185,7 @@ export default function AdminNotifications() {
             <div className="flex items-center justify-between p-6 bg-white/5 rounded-2xl border border-white/5">
                <div className="space-y-1">
                   <p className="font-black text-xs uppercase tracking-widest text-primary">High Priority Alert</p>
-                  <p className="text-[10px] text-slate-500">Enable to show a "Crucial" badge and ping aspirants.</p>
+                  <p className="text-[10px] text-slate-500">Enable to show a &quot;Crucial&quot; badge and ping aspirants.</p>
                </div>
                <Switch 
                 checked={editingNotice?.important || false} 

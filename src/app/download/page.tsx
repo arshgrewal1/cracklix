@@ -122,7 +122,7 @@ export default function DownloadPage() {
                        </div>
                        <CardContent className="p-0 space-y-8 relative z-10">
                           <div className="space-y-2">
-                             <h3 className="text-2xl font-black uppercase tracking-tight">What's New</h3>
+                             <h3 className="text-2xl font-black uppercase tracking-tight">What&apos;s New</h3>
                              <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">Released: {releaseDate}</p>
                           </div>
                           <ul className="space-y-4">

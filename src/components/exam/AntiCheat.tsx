@@ -2,34 +2,49 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useExamStore } from '@/store/useExamStore';
-import { useToast } from '@/hooks/use-toast';
-import { useFirestore } from '@/firebase';
+import { Capacitor, registerPlugin } from '@capacitor/core';
+
+// Native security plugin
+const Security = registerPlugin<any>('Security');
 
 /**
- * @fileOverview Institutional Anti-Cheat Node.
- * FIXED: Explicitly passing Firestore instance to addViolation to prevent arg mismatch.
+ * @fileOverview Institutional Anti-Cheat Node v2.0.
+ * @description Leverages native Android FLAG_SECURE to prevent screenshots and screen recording
+ * during live tests. This is a OS-level feature and is more secure and user-friendly
+ * than JavaScript-based tab monitoring.
+ * 
+ * @see https://developer.android.com/reference/android/view/WindowManager.LayoutParams#FLAG_SECURE
  */
 export default function AntiCheat() {
-  const { addViolation } = useExamStore();
-  const { toast } = useToast();
-  const db = useFirestore();
 
   useEffect(() => {
-    const handleBlur = () => {
-      if (db) {
-        addViolation(db);
-        toast({
-          variant: "destructive",
-          title: "Security Warning",
-          description: "Switching tabs or windows is prohibited. This violation has been logged."
-        });
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') return;
+
+    const enableSecureMode = async () => {
+      try {
+        await Security.setPrivacyScreen({ enabled: true });
+        console.log('[AntiCheat] Secure mode enabled.');
+      } catch (e) {
+        console.error('[AntiCheat] Failed to enable secure mode:', e);
       }
     };
 
-    window.addEventListener('blur', handleBlur);
-    return () => window.removeEventListener('blur', handleBlur);
-  }, [addViolation, toast, db]);
+    const disableSecureMode = async () => {
+      try {
+        await Security.setPrivacyScreen({ enabled: false });
+        console.log('[AntiCheat] Secure mode disabled.');
+      } catch (e) {
+        console.error('[AntiCheat] Failed to disable secure mode:', e);
+      }
+    };
+
+    enableSecureMode();
+    
+    // Cleanup on unmount
+    return () => {
+      disableSecureMode();
+    };
+  }, []);
 
   return null;
 }

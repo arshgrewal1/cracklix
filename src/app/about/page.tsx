@@ -16,7 +16,7 @@ import {
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useFirestore, useDoc } from "@/firebase"
-import { doc } from "firebase/firestore"
+import { doc, DocumentReference } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
@@ -24,6 +24,12 @@ import Image from "next/image"
  * @fileOverview Institutional About Center v24.0.
  * UPDATED: Replaced picsum with local founder asset for build stability.
  */
+
+interface Stats {
+  totalUsers: number;
+  totalQuestions: number;
+  totalCategories: number;
+}
 
 export default function AboutPage() {
   const db = useFirestore();
@@ -33,8 +39,8 @@ export default function AboutPage() {
     setMounted(true);
   }, []);
 
-  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
-  const { data: stats } = useDoc<any>(statsRef);
+  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") as DocumentReference<Stats> : null), [db]);
+  const { data: stats } = useDoc<Stats>(statsRef);
 
   const liveStats = useMemo(() => {
     const totalUsers = stats?.totalUsers || 0;
@@ -79,7 +85,7 @@ export default function AboutPage() {
                     transition={{ delay: 0.1 }}
                     className="text-2xl sm:text-5xl md:text-7xl font-black leading-[1] tracking-tight uppercase"
                  >
-                    A Student's Dream <br/>
+                    A Student&apos;s Dream <br/>
                     <span className="text-primary italic">To A Nation of Learners</span>
                  </motion.h1>
 
@@ -137,7 +143,7 @@ export default function AboutPage() {
                     </div>
 
                     <div className="space-y-4 text-slate-300 text-[12px] md:text-base font-medium leading-relaxed">
-                       <p>Founded by <span className="text-white font-bold">Arshdeep Singh Grewal</span>, Cracklix was born from a student's struggle to find quality resources.</p>
+                       <p>Founded by <span className="text-white font-bold">Arshdeep Singh Grewal</span>, Cracklix was born from a student&apos;s struggle to find quality resources.</p>
                        <p>Driven by the belief that every student deserves equal access, he simplified the path to government careers across Punjab.</p>
                     </div>
 

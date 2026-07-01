@@ -42,7 +42,7 @@ export default function TermsPage() {
              <section className="space-y-4">
                 <h2 className="text-2xl font-headline font-black text-[#0F172A] uppercase">3. User Conduct</h2>
                 <p className="text-slate-600 leading-relaxed font-medium">
-                   Any attempt to scrape content, bypass security, or manipulate leaderboard rankings will result in permanent termination of the aspirant's node.
+                   Any attempt to scrape content, bypass security, or manipulate leaderboard rankings will result in permanent termination of the aspirant&apos;s node.
                 </p>
              </section>
 

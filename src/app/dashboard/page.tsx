@@ -42,8 +42,10 @@ import { useToast } from "@/hooks/use-toast"
 import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Student Home - Real-Time Study Tracker v50.0.
- * FIXED: Persistent live study time counter with precision formatting.
+ * @fileOverview Student Home - Real-Time Study Tracker v50.3.
+ * FIXED: Student name visibility issue on dark background.
+ * FIXED: Elite Pass countdown badge color and visibility.
+ * CHANGED: Made Elite Hub countdown timer live and more detailed.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -85,27 +87,35 @@ export default function StudentDashboard() {
   }, [user, authLoading, router, mounted])
 
   useEffect(() => {
-    const expiryStr = profile?.passExpiresAt;
-    if (!expiryStr) return;
-    const expiryDate = new Date(expiryStr);
+    if (!profile?.passExpiresAt) return;
+    const expiryDate = new Date(profile.passExpiresAt);
     if (isNaN(expiryDate.getTime())) return;
 
-    const interval = setInterval(() => {
+    const intervalId = setInterval(() => {
       const now = new Date().getTime();
       const diff = expiryDate.getTime() - now;
+
       if (diff <= 0) {
         setPassCountdown("Expired");
-        clearInterval(interval);
+        clearInterval(intervalId);
         return;
       }
+
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      if (d > 0) setPassCountdown(`${d}d left`);
-      else if (h > 0) setPassCountdown(`${h}h left`);
-      else setPassCountdown(`${m}m left`);
+      const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+      if (d > 0) {
+        setPassCountdown(`${d}d ${h}h ${m}m left`);
+      } else {
+        setPassCountdown(
+          `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+        );
+      }
     }, 1000);
-    return () => clearInterval(interval);
+
+    return () => clearInterval(intervalId);
   }, [profile?.passExpiresAt]);
 
   const resultsQuery = useMemo(() => {
@@ -188,14 +198,14 @@ export default function StudentDashboard() {
                   <Link href="/profile" className="shrink-0 active:scale-95 transition-all">
                     <StudentAvatar profile={profile} className="h-14 w-14 md:h-28 md:w-28 border-[3px] border-white/10 rounded-xl md:rounded-3xl bg-[#0F172A]" />
                   </Link>
-                  <div className="flex-1 space-y-1 min-w-0">
+                  <div className="flex-1 space-y-2 min-w-0">
                     <Link href="/profile" className="block group/name">
-                        <h1 className="text-[24px] md:text-3xl font-black tracking-tight truncate group-hover/name:text-primary transition-colors">
+                        <h1 className="text-[28px] md:text-5xl font-black tracking-tight text-white/90 truncate group-hover/name:text-white transition-colors">
                           {profile?.name || "Student"}
                         </h1>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <div className={cn("flex items-center gap-1 px-2 py-0.5 rounded-full font-bold text-[11px]", isActive ? "bg-primary text-white" : "bg-white/10 text-slate-400")}>
-                             <Gem className="h-3 w-3" /> {isActive ? (passCountdown || 'Active') : 'Free Pass'}
+                        <div className="flex flex-wrap items-center gap-2 mt-2">
+                          <div className={cn("flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-[12px] shadow-lg", isActive ? "bg-blue-500 text-white" : "bg-white/10 text-slate-300")}>
+                             <Gem className="h-3 w-3" /> {isActive ? (passCountdown || 'Elite Hub') : 'Free Pass'}
                           </div>
                         </div>
                     </Link>

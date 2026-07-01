@@ -206,7 +206,7 @@ export default function SupportPage() {
                             Team response
                           </p>
                           <p className="text-sm text-blue-900 font-semibold leading-relaxed italic">
-                            "{t.adminReply}"
+                            &quot;{t.adminReply}&quot;
                           </p>
                         </div>
                       )}

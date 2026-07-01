@@ -1,4 +1,3 @@
-
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET';
@@ -43,6 +42,7 @@ export interface Advertisement {
   createdAt: any;
   updatedAt: any;
 }
+export type Ad = Advertisement;
 
 export interface CalendarEvent {
   id: string;
@@ -275,6 +275,32 @@ export interface AttemptResult {
   createdAt: any;
   accessLevel: AccessLevel;
   gender?: Gender;
+}
+
+export interface Stats {
+  totalUsers: number;
+  totalMocks: number;
+  totalExams: number;
+  totalQuestions: number;
+  totalNotes: number;
+  totalPYQs: number;
+  totalAttempts: number;
+  activeStudentsToday: number;
+  averageAccuracy: number;
+}
+
+export interface AuditLog {
+  id: string;
+  user: string;
+  action: string;
+  timestamp: any;
+  details: any;
+}
+
+export interface Subject {
+    id: string;
+    name: string;
+    boardId: string;
 }
 
 export type Mock = MockTest;

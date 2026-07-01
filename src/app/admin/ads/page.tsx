@@ -8,10 +8,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Megaphone, Edit, Trash2, Zap, TrendingUp, Globe, MousePointer2, Eye } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, deleteDoc, doc, orderBy } from "firebase/firestore"
+import { collection, query, deleteDoc, doc, orderBy, DocumentData, FirestoreDataConverter } from "firebase/firestore"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
+import { Ad } from "@/types"
+
+const adConverter: FirestoreDataConverter<Ad> = {
+    toFirestore: (data: Ad): DocumentData => data,
+    fromFirestore: (snap): Ad => snap.data() as Ad
+};
 
 /**
  * @fileOverview Institutional Advertisement Manager.
@@ -22,8 +28,8 @@ export default function AdManagement() {
   const db = useFirestore()
   const { toast } = useToast()
   
-  const adsQuery = useMemo(() => (db ? query(collection(db, "ads"), orderBy("createdAt", "desc")) : null), [db])
-  const { data: ads, loading } = useCollection<any>(adsQuery)
+  const adsQuery = useMemo(() => (db ? query(collection(db, "ads").withConverter(adConverter), orderBy("createdAt", "desc")) : null), [db])
+  const { data: ads, loading } = useCollection<Ad>(adsQuery)
 
   const stats = useMemo(() => {
     if (!ads) return { total: 0, impressions: 0, clicks: 0 }
@@ -35,8 +41,9 @@ export default function AdManagement() {
   }, [ads])
 
   const handleDelete = async (id: string) => {
+    if (!db) return;
     if (!confirm("Permanently purge this campaign?")) return
-    await deleteDoc(doc(db!, "ads", id))
+    await deleteDoc(doc(db, "ads", id))
     toast({ title: "Campaign Purged", description: "Monetization node removed from cloud." })
   }
 
@@ -78,7 +85,7 @@ export default function AdManagement() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i}><TableCell colSpan={4} className="p-10"><Skeleton className="h-16 w-full rounded-2xl" /></TableCell></TableRow>
                 ))
-              ) : ads?.map((ad: any) => (
+              ) : ads?.map((ad) => (
                 <TableRow key={ad.id} className="hover:bg-slate-50 border-slate-50 transition-all group">
                   <TableCell className="px-10 py-8">
                      <div className="flex items-center gap-6">
@@ -106,7 +113,7 @@ export default function AdManagement() {
                   </TableCell>
                   <TableCell className="text-center">
                      <p className="text-3xl font-headline font-black text-[#0F172A]">
-                        {ad.stats?.impressions ? ((ad.stats.clicks / ad.stats.impressions) * 100).toFixed(1) : '0'}%
+                        {ad.stats?.impressions && ad.stats?.clicks ? ((ad.stats.clicks / ad.stats.impressions) * 100).toFixed(1) : '0'}%
                      </p>
                      <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Registry Flow</p>
                   </TableCell>
@@ -130,7 +137,7 @@ export default function AdManagement() {
   )
 }
 
-function MetricCard({ label, value, icon }: any) {
+function MetricCard({ label, value, icon }: { label: string, value: string | number, icon: React.ReactNode }) {
   return (
     <Card className="border-none shadow-xl bg-white p-10 rounded-[2.5rem] relative overflow-hidden group">
        <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform">{icon}</div>

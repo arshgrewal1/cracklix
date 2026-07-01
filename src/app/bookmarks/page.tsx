@@ -56,7 +56,7 @@ export default function BookmarksPage() {
                 Saved <br/> <span className="text-primary">MCQs</span>
               </h1>
               <p className="text-slate-500 font-medium text-lg max-w-xl">
-                Review and master questions you've bookmarked during your high-fidelity mock attempts.
+                Review and master questions you&apos;ve bookmarked during your high-fidelity mock attempts.
               </p>
             </div>
             <div className="relative w-full md:w-80">

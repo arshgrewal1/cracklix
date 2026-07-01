@@ -116,7 +116,7 @@ export default function AdminReports() {
                     </TableCell>
                     <TableCell className="max-w-xs md:max-w-md">
                        <div className="bg-slate-50 p-4 md:p-6 rounded-xl md:rounded-2xl border border-slate-100 shadow-inner">
-                          <p className="text-xs md:text-base font-medium text-slate-600 italic leading-relaxed">"{r.comment}"</p>
+                          <p className="text-xs md:text-base font-medium text-slate-600 italic leading-relaxed">&quot;{r.comment}&quot;</p>
                        </div>
                     </TableCell>
                     <TableCell>

@@ -14,7 +14,9 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "android"
+rootProject.name = "Cracklix"
+// The path to capacitor.settings.gradle has been corrected to point to the file within the android directory.
+apply from: "capacitor.settings.gradle"
+// Including the ':app' module before configuring it.
 include ':app'
-include ':capacitor-cordova-android-plugins'
-project(':capacitor-cordova-android-plugins').projectDir = new File('capacitor-cordova-android-plugins')
+project(":app").projectDir = file("app")

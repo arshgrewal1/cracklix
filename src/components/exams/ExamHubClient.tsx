@@ -1,7 +1,7 @@
 
 "use client"
 
-import React, { useMemo, useState, useEffect, Suspense } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useDoc, useCollection, useFirestore, useUser } from "@/firebase"
@@ -32,9 +32,38 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Universal Exam Hub Client v3.5.
- * FIXED: Standardized empty state message.
+ * @fileOverview Universal Exam Hub Client v3.6.
+ * FIXED: Replaced generic empty state with tab-specific, beautifully designed cards.
  */
+
+function EmptyStateCard({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) {
+  const router = useRouter();
+  
+  return (
+    <div className="py-20 md:py-28 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in-50">
+      <div className="h-20 w-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-400 dark:text-slate-500">
+         <Icon className="h-10 w-10" />
+      </div>
+      <div className="space-y-2 max-w-sm mx-auto">
+         <h3 className="text-xl font-semibold text-slate-800 dark:text-slate-200">
+           {title}
+         </h3>
+         <p className="text-slate-500 dark:text-slate-400 text-sm">
+           {description}
+         </p>
+      </div>
+      <div className="flex items-center gap-4 pt-2">
+         <Button variant="outline" onClick={() => router.push('/exams')} className="h-11 px-6 rounded-lg">
+            Browse Other Exams
+         </Button>
+         <Button onClick={() => window.location.reload()} className="h-11 px-6 rounded-lg">
+            Refresh
+         </Button>
+      </div>
+    </div>
+  );
+}
+
 
 export default function ExamHubClient() {
   const router = useRouter()
@@ -89,7 +118,7 @@ export default function ExamHubClient() {
   }, [user, profile]);
 
   const groupedContent = useMemo(() => {
-    if (!examId) return { FULL: [], SUBJECT: [], SECTIONAL: [], PYQ: [], total: 0 };
+    if (!examId) return { FULL: [], SUBJECT: [], SECTIONAL: [], PYQ: [] };
     const mocks = (rawMocks || []).filter(m => m.examId === examId || (m.examIds && m.examIds.includes(examId)));
     const pyqs = rawPyqs || [];
     return {
@@ -97,17 +126,19 @@ export default function ExamHubClient() {
       SUBJECT: mocks.filter(m => m.mockType === 'SUBJECT'),
       SECTIONAL: mocks.filter(m => m.mockType === 'SECTIONAL'),
       PYQ: pyqs,
-      total: mocks.length + pyqs.length
     }
   }, [rawMocks, rawPyqs, examId])
 
   if (examLoading || userLoading) return <div className="h-screen flex items-center justify-center bg-white"><Zap className="h-8 w-8 text-primary animate-pulse" /></div>;
   
   if (!examId || (!exam && !examLoading)) return (
-    <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6">
-       <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto text-primary shadow-xl"><AlertCircle className="h-8 w-8" /></div>
-       <h2 className="text-2xl font-black text-[#0F172A] uppercase">Mock Available Nahi Hai</h2>
-       <Button onClick={() => router.back()} variant="outline" className="rounded-xl h-12 px-8">Return Back</Button>
+    <div className="h-screen flex flex-col items-center justify-center text-center p-6 space-y-6 bg-white">
+       <div className="h-16 w-16 bg-rose-50 rounded-2xl flex items-center justify-center mx-auto text-rose-500 shadow-xl"><AlertCircle className="h-8 w-8" /></div>
+       <div className="space-y-2">
+         <h2 className="text-2xl font-black text-[#0F172A]">Exam Not Found</h2>
+         <p className="text-slate-500 font-medium max-w-sm mx-auto">The exam you are looking for does not exist or has been moved.</p>
+       </div>
+       <Button onClick={() => router.back()} variant="outline" className="rounded-xl h-12 px-8">Go Back</Button>
     </div>
   );
 
@@ -115,24 +146,24 @@ export default function ExamHubClient() {
   const activeCategory = categories?.find((c: any) => c.id === exam.categoryId);
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50/50 font-body text-left">
+    <div className="flex flex-col min-h-screen bg-slate-50/50 dark:bg-slate-900 font-body text-left">
       <Navbar />
-      <section className="bg-white border-b border-slate-100 py-6 md:py-20">
+      <section className="bg-white dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 py-6 md:py-20">
          <div className="container mx-auto px-4 max-w-7xl">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-16">
                <div className="flex items-start gap-3 md:gap-8 flex-1 min-w-0">
-                  <button onClick={() => router.back()} className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl border border-slate-100 flex items-center justify-center text-slate-400 shrink-0 hover:bg-slate-50"><ChevronLeft className="h-4 w-4" /></button>
+                  <button onClick={() => router.back()} className="h-8 w-8 md:h-10 md:w-10 rounded-lg md:rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-500 shrink-0 hover:bg-slate-50 dark:hover:bg-slate-800"><ChevronLeft className="h-4 w-4" /></button>
                   <div className="min-w-0 space-y-3">
                      <div className="flex items-center gap-2 md:gap-4">
                         <Badge className="bg-primary/10 text-primary border-none text-[8px] md:text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded shadow-sm">{activeBoard?.abbreviation || 'OFFICIAL'} Hub</Badge>
-                        <button onClick={togglePin} disabled={isPinning} className={cn("flex items-center gap-1 px-3 py-1 rounded-xl border transition-all active:scale-95 shadow-sm font-black uppercase text-[7px] md:text-[9px] tracking-widest", isPinned ? "bg-primary border-primary text-white" : "bg-white border-slate-200 text-slate-300 hover:text-primary")}>
+                        <button onClick={togglePin} disabled={isPinning} className={cn("flex items-center gap-1 px-3 py-1 rounded-xl border transition-all active:scale-95 shadow-sm font-black uppercase text-[7px] md:text-[9px] tracking-widest", isPinned ? "bg-primary border-primary text-white" : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400 dark:text-slate-300 hover:text-primary")}>
                            {isPinning ? <RefreshCw className="h-2.5 w-2.5 animate-spin" /> : isPinned ? <CheckCircle2 className="h-2.5 w-2.5" /> : <Star className="h-2.5 w-2.5" />}
                            {isPinned ? 'Following' : 'Save'}
                         </button>
                      </div>
                      <div className="flex items-center gap-4 md:gap-8">
-                        <AuthorityLogo board={activeBoard} category={activeCategory} size="md" className="w-12 h-12 md:w-28 md:h-28 rounded-xl md:rounded-[2.5rem] bg-slate-50" />
-                        <h1 className="text-xl md:text-5xl lg:text-6xl font-black text-[#0F172A] leading-tight tracking-tight">{exam.name}</h1>
+                        <AuthorityLogo board={activeBoard} category={activeCategory} size="md" className="w-12 h-12 md:w-28 md:h-28 rounded-xl md:rounded-[2.5rem] bg-slate-50 dark:bg-slate-800" />
+                        <h1 className="text-xl md:text-5xl lg:text-6xl font-black text-[#0F172A] dark:text-white leading-tight tracking-tight">{exam.name}</h1>
                      </div>
                   </div>
                </div>
@@ -141,33 +172,22 @@ export default function ExamHubClient() {
       </section>
 
       <main className="container mx-auto px-2 md:px-4 py-4 md:py-12 max-w-7xl pb-40">
-         {groupedContent.total === 0 && !mocksLoading && !pyqsLoading ? (
-            <div className="py-20 md:py-32 flex flex-col items-center justify-center text-center space-y-8 animate-in fade-in zoom-in-95">
-               <div className="h-24 w-24 md:h-32 md:w-32 bg-slate-100 rounded-[2.5rem] flex items-center justify-center text-slate-300 shadow-inner"><ClipboardList className="h-10 w-10 md:h-14 md:w-14" /></div>
-               <div className="space-y-2">
-                  <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] uppercase">Mock Available Nahi Hai</h2>
-                  <p className="text-slate-500 font-medium max-w-md mx-auto">Coming Soon: Official patterns are being uploaded.</p>
-               </div>
-               <Button onClick={() => router.back()} variant="outline" className="rounded-xl h-14 px-10 border-2 font-bold uppercase tracking-widest text-[10px]">Return Back</Button>
-            </div>
-         ) : (
-            <Tabs defaultValue="FULL" className="space-y-4 md:space-y-12">
-               <div className="bg-white border border-slate-100 rounded-xl md:rounded-[2rem] p-1 shadow-md overflow-x-auto no-scrollbar">
-                  <TabsList className="bg-transparent border-none p-0 flex h-10 md:h-14 w-full justify-start gap-1">
-                     <DashboardTab value="FULL" label="Mock Tests" icon={Zap} />
-                     <DashboardTab value="SUBJECT" label="Subjects" icon={BookOpen} />
-                     <DashboardTab value="SECTIONAL" label="Sectional" icon={List} />
-                     <DashboardTab value="PYQ" label="Papers" icon={Layers} />
-                  </TabsList>
-               </div>
-               <div className="animate-in fade-in slide-in-from-bottom-3">
-                  <TabsContent value="FULL"><MockList data={groupedContent.FULL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-                  <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-                  <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-                  <TabsContent value="PYQ"><NotesList data={groupedContent.PYQ} isPassActive={isPassActive} loading={pyqsLoading} type="PYQ" /></TabsContent>
-               </div>
-            </Tabs>
-         )}
+        <Tabs defaultValue="FULL" className="space-y-4 md:space-y-12">
+           <div className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl md:rounded-[2rem] p-1 shadow-md overflow-x-auto no-scrollbar">
+              <TabsList className="bg-transparent border-none p-0 flex h-10 md:h-14 w-full justify-start gap-1">
+                 <DashboardTab value="FULL" label="Mock Tests" icon={Zap} />
+                 <DashboardTab value="SUBJECT" label="Subjects" icon={BookOpen} />
+                 <DashboardTab value="SECTIONAL" label="Sectional" icon={List} />
+                 <DashboardTab value="PYQ" label="Papers" icon={Layers} />
+              </TabsList>
+           </div>
+           <div className="animate-in fade-in slide-in-from-bottom-3">
+              <TabsContent value="FULL"><MockList data={groupedContent.FULL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} type="FULL" /></TabsContent>
+              <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} isPassActive={isPassActive} loading={mocksLoading} boards={boards} type="SUBJECT" /></TabsContent>
+              <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} type="SECTIONAL" /></TabsContent>
+              <TabsContent value="PYQ"><NotesList data={groupedContent.PYQ} isPassActive={isPassActive} loading={pyqsLoading} type="PYQ" /></TabsContent>
+           </div>
+        </Tabs>
       </main>
       <Footer />
     </div>
@@ -176,16 +196,37 @@ export default function ExamHubClient() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-4 md:px-12 h-full font-black text-[9px] md:text-[11px] data-[state=active]:bg-[#0B1528] data-[state=active]:text-white rounded-lg md:rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-3 uppercase">
+      <TabsTrigger value={value} className="px-4 md:px-12 h-full font-black text-[9px] md:text-[11px] text-slate-500 dark:text-slate-400 data-[state=active]:bg-[#0B1528] data-[state=active]:text-white dark:data-[state=active]:bg-slate-700 rounded-lg md:rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-3 uppercase">
          <Icon className="h-3 w-3 md:h-4 md:w-4" /> {label}
       </TabsTrigger>
    )
 }
 
-function MockList({ data, isPassActive, loading, boards }: any) {
+function MockList({ data, isPassActive, loading, boards, type }: any) {
    const router = useRouter();
-   if (loading) return <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 md:h-64 w-full rounded-xl md:rounded-[2.5rem] bg-white" />)}</div>;
-   if (data.length === 0) return <div className="py-24 text-center opacity-20 flex flex-col items-center justify-center space-y-4 text-slate-300"><Zap className="h-10 w-10" /><p className="font-headline font-black text-lg md:text-xl uppercase">Mock Available Nahi Hai</p></div>;
+   if (loading) return <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 md:h-64 w-full rounded-xl md:rounded-[2.5rem] bg-white dark:bg-slate-800" />)}</div>;
+   
+   if (data.length === 0) {
+     const emptyStates: any = {
+       FULL: {
+         icon: Zap,
+         title: "No Mock Tests Available",
+         description: "Mock tests for this exam will be added soon. Please check back later."
+       },
+       SUBJECT: {
+         icon: BookOpen,
+         title: "No Subjects Available",
+         description: "Subject-wise content has not been added for this exam yet."
+       },
+       SECTIONAL: {
+         icon: List,
+         title: "No Sectional Tests Available",
+         description: "Sectional tests are currently unavailable for this exam."
+       }
+     };
+     return <EmptyStateCard {...emptyStates[type]} />;
+   }
+
    return (
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
          {data.map((mock: any) => {
@@ -193,17 +234,17 @@ function MockList({ data, isPassActive, loading, boards }: any) {
             const locked = isPremium && !isPassActive;
             const board = boards?.find((b: any) => b.id === (mock.boardIds?.[0] || mock.boardId));
             return (
-               <Card key={mock.id} className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[3rem] bg-white p-4 md:p-10 text-center flex flex-col group h-full">
-                  <div className="h-10 w-10 md:h-20 md:w-20 mx-auto mb-4 md:mb-8"><AuthorityLogo board={board} size="md" className="w-full h-full bg-slate-50 rounded-lg md:rounded-xl" /></div>
+               <Card key={mock.id} className="border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[3rem] bg-white dark:bg-slate-800/50 p-4 md:p-10 text-center flex flex-col group h-full">
+                  <div className="h-10 w-10 md:h-20 md:w-20 mx-auto mb-4 md:mb-8"><AuthorityLogo board={board} size="md" className="w-full h-full bg-slate-50 dark:bg-slate-800 rounded-lg md:rounded-xl" /></div>
                   <CardHeader className="p-0 flex-1 space-y-1 md:space-y-4">
-                     <CardTitle className="font-bold text-xs md:text-xl text-[#0F172A] leading-tight line-clamp-2">{mock.title}</CardTitle>
-                     <div className="flex items-center justify-center gap-2 md:gap-4 text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight">
+                     <CardTitle className="font-bold text-xs md:text-xl text-[#0F172A] dark:text-white leading-tight line-clamp-2">{mock.title}</CardTitle>
+                     <div className="flex items-center justify-center gap-2 md:gap-4 text-[8px] md:text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight">
                         <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" /> {mock.totalQuestions} Qs</span>
                         <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {mock.duration}m</span>
                      </div>
                   </CardHeader>
                   <CardContent className="p-0 mt-4 md:mt-8">
-                     <button onClick={() => router.push(locked ? '/pass' : `/mocks/view?id=${mock.id}`)} className={cn("w-full h-10 md:h-14 rounded-full font-black text-[9px] md:text-[11px] tracking-widest uppercase shadow-md transition-all active:scale-95 flex items-center justify-center gap-2", locked ? "bg-orange-500 text-white" : "bg-[#0F172A] text-white")}>
+                     <button onClick={() => router.push(locked ? '/pass' : `/mocks/view?id=${mock.id}`)} className={cn("w-full h-10 md:h-14 rounded-full font-black text-[9px] md:text-[11px] tracking-widest uppercase shadow-md transition-all active:scale-95 flex items-center justify-center gap-2", locked ? "bg-orange-500 text-white" : "bg-[#0F172A] dark:bg-primary text-white")}>
                         {locked ? <Lock className="h-3 w-3" /> : null} {locked ? 'Unlock' : 'Start'}
                      </button>
                   </CardContent>
@@ -215,24 +256,34 @@ function MockList({ data, isPassActive, loading, boards }: any) {
 }
 
 function NotesList({ data, isPassActive, loading, type }: any) {
-   if (loading) return <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-xl bg-white" />)}</div>;
-   if (data.length === 0) return <div className="py-24 text-center opacity-20 flex flex-col items-center justify-center space-y-4 text-slate-300"><Layers className="h-10 w-10" /><p className="font-headline font-black text-lg md:text-xl uppercase">Mock Available Nahi Hai</p></div>;
+   if (loading) return <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-xl bg-white dark:bg-slate-800" />)}</div>;
+   
+   if (data.length === 0) {
+     return (
+       <EmptyStateCard
+         icon={Layers}
+         title="No Previous Papers Available"
+         description="Previous year papers will be available here once published."
+       />
+     );
+   }
+
    return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
          {data.map((item: any) => {
             const isLocked = !item.isFree && !isPassActive;
             return (
-               <Card key={item.id} className="border border-slate-100 shadow-md rounded-2xl md:rounded-[2rem] bg-white p-4 md:p-8 flex items-center justify-between group hover:shadow-xl transition-all">
+               <Card key={item.id} className="border border-slate-100 dark:border-slate-800 shadow-md rounded-2xl md:rounded-[2rem] bg-white dark:bg-slate-800/50 p-4 md:p-8 flex items-center justify-between group hover:shadow-xl transition-all">
                   <div className="flex items-center gap-4 md:gap-6 min-w-0">
-                     <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner">
+                     <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-inner">
                         {isLocked ? <Lock className="h-4 w-4 md:h-6 md:w-6 text-amber-500" /> : <Layers className={cn("h-4 w-4 md:h-6 md:w-6", type === 'PYQ' ? 'text-emerald-500' : 'text-blue-500')} />}
                      </div>
                      <div className="min-w-0">
-                        <h3 className="text-sm md:text-lg font-black text-[#0F172A] truncate leading-none">{item.title}</h3>
-                        <p className="text-[8px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{item.category || type}</p>
+                        <h3 className="text-sm md:text-lg font-black text-[#0F172A] dark:text-white truncate leading-none">{item.title}</h3>
+                        <p className="text-[8px] md:text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">{item.category || type}</p>
                      </div>
                   </div>
-                  <button onClick={() => window.open(isLocked ? '/pass' : (item.pdfUrl || '#'), '_blank')} className={cn("h-9 md:h-11 px-5 md:px-8 rounded-full font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-md shrink-0 border-none active:scale-95 transition-all", isLocked ? "bg-orange-500 text-white" : "bg-[#0F172A] text-white")}>
+                  <button onClick={() => window.open(isLocked ? '/pass' : (item.pdfUrl || '#'), '_blank')} className={cn("h-9 md:h-11 px-5 md:px-8 rounded-full font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-md shrink-0 border-none active:scale-95 transition-all", isLocked ? "bg-orange-500 text-white" : "bg-[#0F172A] dark:bg-primary text-white")}>
                      {isLocked ? 'Unlock' : 'Get'}
                   </button>
                </Card>

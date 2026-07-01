@@ -205,7 +205,7 @@ export default function AdminSupportManagement() {
                      <AlertCircle className="h-4 w-4 text-slate-400" />
                      <p className="text-[9px] font-black uppercase text-slate-400 tracking-widest">Student Statement</p>
                   </div>
-                  <p className="text-base md:text-lg font-medium text-slate-700 leading-relaxed italic">"{selectedTicket?.message}"</p>
+                  <p className="text-base md:text-lg font-medium text-slate-700 leading-relaxed italic">&quot;{selectedTicket?.message}&quot;</p>
                </div>
 
                <div className="space-y-2 text-left">

@@ -226,7 +226,7 @@ function LoginContent() {
 
           <div className="space-y-8">
             <h1 className="text-5xl xl:text-6xl font-[900] tracking-tight text-white leading-[1.05]">
-              Punjab's Smart <br/> 
+              Punjab&apos;s Smart <br/> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-300">
                 Exam Platform
               </span>

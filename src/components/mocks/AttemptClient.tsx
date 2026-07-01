@@ -5,6 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useUser, useFirestore } from "@/firebase";
 import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
+import { useStudyTracker } from "@/hooks/useStudyTracker"; // Import the hook
 import ExamHeader from "@/components/exam/ExamHeader";
 import TacticalFooter from "@/components/exam/TacticalFooter";
 import AntiCheat from "@/components/exam/AntiCheat";
@@ -28,10 +29,6 @@ import {
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
-/**
- * @fileOverview Official Mock Attempt Client Hub v3.1.
- * FIXED: Optimized layout for safe-area insets.
- */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
   const router = useRouter();
@@ -49,6 +46,9 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const lastSegment = pathSegments[pathSegments.length - 2]; 
     return lastSegment !== 'attempt' ? lastSegment : null;
   }, [pathname, searchParams, propMockId]);
+
+  // Initialize the study tracker
+  useStudyTracker(mockId, 'MOCK', true);
 
   const [isInitializing, setIsInitializing] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
@@ -186,7 +186,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const resultRef = doc(db, "results", `${user.uid}_${mockId}`);
     const attemptRef = doc(db, "attempts", `${user.uid}_${mockId}`);
 
-    // NON-BLOCKING MUTATIONS (Background Sync)
     setDoc(resultRef, resultPayload, { merge: true })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
@@ -207,7 +206,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         errorEmitter.emit('permission-error', permissionError);
       });
     
-    // OPTIMISTIC NAVIGATION
     router.replace(`/results/view?id=${mockId}`);
     
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime]);
@@ -217,6 +215,34 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         handleSubmitFinal();
      }
   }, [timeLeft, isInitializing, initError, isSubmittingFinal, handleSubmitFinal]);
+
+  const handleSaveAndNext = useCallback(() => {
+    if (currentIdx === questions.length - 1) {
+      setShowSubmitModal(true);
+    } else {
+      setCurrentIdx(currentIdx + 1);
+    }
+  }, [currentIdx, questions.length, setCurrentIdx]);
+
+  const answeredCount = useMemo(() => Object.values(answers || {}).filter(a => a !== null && a !== undefined).length, [answers]);
+  const notAnsweredCount = useMemo(() => questions.length - answeredCount, [questions.length, answeredCount]);
+  const markedForReviewCount = 0; 
+
+  useEffect(() => {
+    if (showSubmitModal) {
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Enter' && !isSubmittingFinal) {
+          e.preventDefault();
+          handleSubmitFinal();
+        } else if (e.key === 'Escape' && !isSubmittingFinal) {
+          e.preventDefault();
+          setShowSubmitModal(false);
+        }
+      };
+      window.addEventListener('keydown', handleKeyDown);
+      return () => window.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [showSubmitModal, isSubmittingFinal, handleSubmitFinal]);
 
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8">
@@ -291,7 +317,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           
           <div className="absolute bottom-0 left-0 right-0 px-4 pb-8 bg-gradient-to-t from-white via-white/95 to-transparent pointer-events-none">
              <div className="max-w-4xl mx-auto pointer-events-auto">
-                <TacticalFooter onSubmit={() => setShowSubmitModal(true)} />
+                <TacticalFooter onSubmit={handleSaveAndNext} />
              </div>
           </div>
         </div>
@@ -326,27 +352,46 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         </DialogContent>
       </Dialog>
 
-      <Dialog open={showSubmitModal} onOpenChange={showSubmitModal && !isSubmittingFinal ? setShowSubmitModal : undefined}>
-        <DialogContent className="max-w-[280px] rounded-[1.5rem] p-6 bg-[#0B1528] text-white text-center border-none shadow-5xl z-[1300]">
-          <div className="space-y-4">
-            <DialogHeader className="sr-only">
-               <DialogTitle>Submit Test</DialogTitle>
-               <DialogDescription>Finalizing scores and results.</DialogDescription>
+      <Dialog open={showSubmitModal} onOpenChange={!isSubmittingFinal ? setShowSubmitModal : undefined}>
+        <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-[#0F172A] text-white text-center border-none shadow-2xl z-[1300] scale-in-center">
+          <div className="flex flex-col items-center">
+            <div className="relative mb-4">
+              <div className="absolute -inset-2 rounded-full bg-blue-500/30 blur-xl"></div>
+              <div className="relative h-[56px] w-[56px] bg-blue-600/20 rounded-full flex items-center justify-center text-blue-400">
+                <ShieldCheck className="h-8 w-8" />
+              </div>
+            </div>
+
+            <DialogHeader>
+              <DialogTitle className="text-white font-bold text-[30px] tracking-tight">SUBMIT TEST</DialogTitle>
             </DialogHeader>
-            <div className="h-10 w-10 bg-primary/20 rounded-xl flex items-center justify-center mx-auto text-primary shadow-lg shadow-primary/10">
-              {isSubmittingFinal ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}
+            
+            <DialogDescription className="text-slate-400 mt-2 max-w-xs">
+              Are you sure you want to submit your test? Once submitted, you cannot change your answers.
+            </DialogDescription>
+
+            <div className="flex justify-center gap-4 my-6 text-sm">
+                <div><span className="font-bold text-white">{answeredCount}</span> <span className="text-slate-400">Answered</span></div>
+                <div><span className="font-bold text-white">{notAnsweredCount}</span> <span className="text-slate-400">Not Answered</span></div>
+                <div><span className="font-bold text-white">{markedForReviewCount}</span> <span className="text-slate-400">For Review</span></div>
             </div>
-            <div className="space-y-2">
-               <h2 className="text-lg font-black uppercase text-white tracking-tight leading-none">Submit Test</h2>
-               <p className="text-[10px] font-medium text-slate-400 leading-relaxed">
-                  Are you sure you want to submit? Once submitted, you cannot change your answers.
-               </p>
-            </div>
-            <div className="flex flex-col gap-2 pt-2">
-              <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-10 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[9px] tracking-widest rounded-xl border-none shadow-xl">
-                {isSubmittingFinal ? "Processing..." : "Submit Test"}
+
+            <div className="w-full flex flex-col gap-3 mt-4">
+              <Button
+                onClick={handleSubmitFinal}
+                disabled={isSubmittingFinal}
+                className="w-full h-[56px] bg-[#2563EB] hover:bg-blue-500 text-white font-bold text-base rounded-full shadow-lg transition-all duration-300 ease-in-out disabled:opacity-50"
+              >
+                {isSubmittingFinal ? <Loader2 className="animate-spin" /> : 'SUBMIT TEST'}
               </Button>
-              <button onClick={() => setShowSubmitModal(false)} disabled={isSubmittingFinal} className="h-6 text-slate-500 font-bold uppercase text-[7px] tracking-widest hover:text-white transition-colors cursor-pointer">Continue Test</button>
+              <Button
+                variant="ghost"
+                onClick={() => setShowSubmitModal(false)}
+                disabled={isSubmittingFinal}
+                className="w-full h-[56px] text-[#94A3B8] hover:text-white font-bold text-base rounded-full transition-colors duration-300 ease-in-out disabled:opacity-50"
+              >
+                CONTINUE TEST
+              </Button>
             </div>
           </div>
         </DialogContent>

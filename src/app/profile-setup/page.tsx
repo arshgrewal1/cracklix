@@ -52,7 +52,7 @@ export default function ProfileSetup() {
           targetExam: profile.targetExam || ""
        }));
     }
-  }, [user, profile]);
+  }, [user, profile, formData.name]);
 
   const handleSubmit = async () => {
     if (!user) return;

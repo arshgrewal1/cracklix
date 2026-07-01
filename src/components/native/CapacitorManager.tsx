@@ -7,26 +7,12 @@ import { Browser } from '@capacitor/browser';
 import { StatusBar, Style } from '@capacitor/status-bar';
 import { useUser } from '@/firebase';
 
-// Bridge to our internal native Security plugin
-const Security = registerPlugin<any>('Security');
-
 /**
- * @fileOverview Production Capacitor Bridge v3.0.
+ * @fileOverview Production Capacitor Bridge v3.1.
  * Handles hardware back button, system status bars, and external browser routing.
+ * REMOVED: Global privacy screen toggle. This is now managed by AntiCheat component.
  */
 export default function CapacitorManager() {
-  const { profile } = useUser();
-
-  // 1. Role-based Screenshot Protection
-  useEffect(() => {
-    if (!Capacitor.isNativePlatform()) return;
-
-    if (profile) {
-      const isAdmin = profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN';
-      // Protect content for students, allow for admins
-      Security.setPrivacyScreen({ enabled: !isAdmin }).catch(() => {});
-    }
-  }, [profile]);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
@@ -35,7 +21,7 @@ export default function CapacitorManager() {
     let urlListenerHandle: PluginListenerHandle | null = null;
 
     const setupListeners = async () => {
-      // 2. Hardware Back Button Protocol
+      // 1. Hardware Back Button Protocol
       backListenerHandle = await App.addListener('backButton', ({ canGoBack }) => {
         if (!canGoBack) {
           App.exitApp();
@@ -44,7 +30,7 @@ export default function CapacitorManager() {
         }
       });
 
-      // 3. Status Bar Standard (Matches Website Branding)
+      // 2. Status Bar Standard (Matches Website Branding)
       try {
         await StatusBar.setStyle({ style: Style.Dark });
         await StatusBar.setBackgroundColor({ color: '#0B1528' });
@@ -53,7 +39,7 @@ export default function CapacitorManager() {
         console.warn('[NATIVE_BRIDGE] StatusBar init failed');
       }
 
-      // 4. App Deep Linking
+      // 3. App Deep Linking
       urlListenerHandle = await App.addListener('appUrlOpen', (data) => {
         const slug = data.url.split('.app').pop();
         if (slug) window.location.href = slug;
@@ -62,7 +48,7 @@ export default function CapacitorManager() {
 
     setupListeners();
 
-    // 5. External Link Interceptor (PDFs and Third-Party)
+    // 4. External Link Interceptor (PDFs and Third-Party)
     const handleLinkClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const anchor = target.closest('a');

@@ -2,11 +2,16 @@
 
 import React, { useMemo, useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Users, Zap, BarChart3, ShieldCheck, Target, CreditCard, Activity, Lock, Unlock, FileText, Newspaper, Layers, GraduationCap } from "lucide-react"
+import { Users, Zap, BarChart3, ShieldCheck, Target, Activity, FileText, Newspaper, Layers } from "lucide-react"
 import { useFirestore, useDoc } from "@/firebase"
-import { doc } from "firebase/firestore"
+import { doc, DocumentData, FirestoreDataConverter } from "firebase/firestore"
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Stats } from "@/types"
+
+const statsConverter: FirestoreDataConverter<Stats> = {
+    toFirestore: (data: Stats): DocumentData => data,
+    fromFirestore: (snap): Stats => snap.data() as Stats
+};
 
 /**
  * @fileOverview Institutional Platform Stats v17.1.
@@ -28,8 +33,8 @@ export default function AdminAnalytics() {
     setMounted(true);
   }, []);
   
-  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
-  const { data: stats, loading } = useDoc<any>(statsRef);
+  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats").withConverter(statsConverter) : null), [db]);
+  const { data: stats, loading } = useDoc<Stats>(statsRef);
 
   const dynamicChartData = useMemo(() => {
      const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -58,16 +63,16 @@ export default function AdminAnalytics() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-1">
-         <MetricCard label="Registered Users" value={loading ? "..." : formatCompact(stats?.totalUsers)} trend="Active" icon={<Users className="text-blue-400" />} />
-         <MetricCard label="Live Mock Tests" value={loading ? "..." : formatCompact(stats?.totalMocks)} trend="Published" icon={<Zap className="text-primary" />} />
-         <MetricCard label="Study Materials" value={loading ? "..." : formatCompact(stats?.totalNotes)} trend="Public" icon={<FileText className="text-emerald-500" />} />
-         <MetricCard label="Previous Papers" value={loading ? "..." : formatCompact(stats?.totalPYQs)} trend="Archive" icon={<Newspaper className="text-amber-500" />} />
+         <MetricCard label="Registered Users" value={loading ? "..." : formatCompact(stats?.totalUsers || 0)} trend="Active" icon={<Users className="text-blue-400" />} />
+         <MetricCard label="Live Mock Tests" value={loading ? "..." : formatCompact(stats?.totalMocks || 0)} trend="Published" icon={<Zap className="text-primary" />} />
+         <MetricCard label="Study Materials" value={loading ? "..." : formatCompact(stats?.totalNotes || 0)} trend="Public" icon={<FileText className="text-emerald-500" />} />
+         <MetricCard label="Previous Papers" value={loading ? "..." : formatCompact(stats?.totalPYQs || 0)} trend="Archive" icon={<Newspaper className="text-amber-500" />} />
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-1">
-         <MetricChip label="Total Questions" value={loading ? "..." : formatCompact(stats?.totalQuestions)} icon={<Layers className="text-indigo-400" />} />
-         <MetricChip label="Test Attempts" value={loading ? "..." : formatCompact(stats?.totalAttempts)} icon={<Activity className="text-rose-500" />} />
-         <MetricChip label="Active Today" value={loading ? "..." : formatCompact(stats?.activeStudentsToday)} icon={<Target className="text-emerald-400" />} />
+         <MetricChip label="Total Questions" value={loading ? "..." : formatCompact(stats?.totalQuestions || 0)} icon={<Layers className="text-indigo-400" />} />
+         <MetricChip label="Test Attempts" value={loading ? "..." : formatCompact(stats?.totalAttempts || 0)} icon={<Activity className="text-rose-500" />} />
+         <MetricChip label="Active Today" value={loading ? "..." : formatCompact(stats?.activeStudentsToday || 0)} icon={<Target className="text-emerald-400" />} />
          <MetricChip label="Avg Accuracy" value={loading ? "..." : `${stats?.averageAccuracy || 0}%`} icon={<ShieldCheck className="text-blue-500" />} />
       </div>
 
@@ -120,7 +125,7 @@ export default function AdminAnalytics() {
   )
 }
 
-function MetricCard({ label, value, trend, icon }: any) {
+function MetricCard({ label, value, trend, icon }: { label: string, value: string | number, trend: string, icon: React.ReactNode }) {
   return (
     <Card className="border-none shadow-lg rounded-2xl md:rounded-[2.5rem] p-5 md:p-10 bg-white hover:translate-y-[-4px] transition-all group border border-slate-50 text-left">
        <div className="flex items-center justify-between mb-4 md:mb-8">
@@ -133,7 +138,7 @@ function MetricCard({ label, value, trend, icon }: any) {
   )
 }
 
-function MetricChip({ label, value, icon }: any) {
+function MetricChip({ label, value, icon }: { label: string, value: string | number, icon: React.ReactNode }) {
    return (
       <Card className="border-none shadow-md bg-white rounded-xl md:rounded-3xl p-4 md:p-8 flex items-center gap-4 md:gap-6 border border-slate-50 hover:bg-slate-50/50 transition-colors text-left">
          <div className="h-8 w-8 md:h-12 md:w-12 bg-slate-50 rounded-lg md:rounded-2xl flex items-center justify-center shadow-inner">{icon}</div>
@@ -145,7 +150,7 @@ function MetricChip({ label, value, icon }: any) {
    )
 }
 
-function UsageProgress({ label, value }: any) {
+function UsageProgress({ label, value }: { label: string, value: number }) {
    return (
       <div className="space-y-2 md:space-y-3">
          <div className="flex justify-between items-center text-[8px] md:text-[10px] font-black uppercase tracking-widest text-slate-400"><span>{label}</span><span className="text-primary">{value}%</span></div>

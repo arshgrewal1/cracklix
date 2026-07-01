@@ -6,14 +6,19 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Trash2, Edit, Save, Layers, Loader2, MoveUp, MoveDown, X, FolderTree } from "lucide-react"
+import { Plus, Trash2, Edit, Save, Loader2, MoveUp, MoveDown, X, FolderTree } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, doc, setDoc, deleteDoc, serverTimestamp, orderBy, updateDoc, increment } from "firebase/firestore"
+import { collection, query, doc, setDoc, deleteDoc, serverTimestamp, orderBy, updateDoc, increment, DocumentData, FirestoreDataConverter } from "firebase/firestore"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
+import { Category } from "@/types"
+
+const categoryConverter: FirestoreDataConverter<Category> = {
+    toFirestore: (data: Category): DocumentData => data,
+    fromFirestore: (snap): Category => snap.data() as Category
+};
 
 /**
  * @fileOverview Category Manager CMS v19.0 (PWA Sync).
@@ -24,10 +29,10 @@ export default function CategoryManagement() {
   const db = useFirestore()
   const { toast } = useToast()
   
-  const catQuery = useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db])
-  const { data: categories, loading } = useCollection<any>(catQuery)
+  const catQuery = useMemo(() => (db ? query(collection(db, "categories").withConverter(categoryConverter), orderBy("displayOrder", "asc")) : null), [db])
+  const { data: categories, loading } = useCollection<Category>(catQuery)
 
-  const [editingCat, setEditingCat] = useState<any>(null)
+  const [editingCat, setEditingCat] = useState<Category | null>(null)
   const [isSaving, setIsSaving] = useState(false)
 
   const handleSave = async () => {
@@ -38,11 +43,11 @@ export default function CategoryManagement() {
     }
 
     setIsSaving(true)
-    const isNew = !editingCat.updatedAt;
+    const isNew = !(editingCat as any).updatedAt;
     try {
       await setDoc(doc(db, "categories", editingCat.id), {
         ...editingCat,
-        displayOrder: parseInt(editingCat.displayOrder) || 0,
+        displayOrder: parseInt(editingCat.displayOrder as any) || 0,
         updatedAt: serverTimestamp()
       }, { merge: true })
 
@@ -55,14 +60,14 @@ export default function CategoryManagement() {
 
       toast({ title: "Registry Synced", description: `${editingCat.title} updated.` })
       setEditingCat(null)
-    } catch (e: any) {
+    } catch (e: unknown) {
       toast({ variant: "destructive", title: "Sync Failed" })
     } finally {
       setIsSaving(false)
     }
   }
 
-  const handleReorder = async (cat: any, direction: 'up' | 'down') => {
+  const handleReorder = async (cat: Category, direction: 'up' | 'down') => {
      if (!db || !categories) return;
      const idx = categories.findIndex(c => c.id === cat.id);
      const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
@@ -107,7 +112,7 @@ export default function CategoryManagement() {
                 Array.from({ length: 5 }).map((_, i) => (
                   <TableRow key={i} className="border-slate-50"><TableCell colSpan={3} className="px-6 py-6 md:px-12 md:py-8"><Skeleton className="h-10 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>
                 ))
-              ) : categories?.map((cat: any, idx: number) => (
+              ) : categories?.map((cat, idx) => (
                 <TableRow key={cat.id} className="hover:bg-slate-50 border-slate-50 transition-colors group">
                   <TableCell className="px-6 md:px-10 py-5 md:py-8">
                      <div className="flex items-center gap-4 md:gap-6">
@@ -128,7 +133,7 @@ export default function CategoryManagement() {
                   <TableCell className="text-right px-6 md:px-10">
                      <div className="flex justify-end gap-2 md:gap-3 opacity-20 group-hover:opacity-100 transition-all">
                         <button onClick={() => setEditingCat(cat)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90"><Edit className="h-4 w-4" /></button>
-                        <button onClick={async () => { if(confirm("Purge node?")) await deleteDoc(doc(db!, "categories", cat.id)) }} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90"><Trash2 className="h-4 w-4" /></button>
+                        <button onClick={async () => { if(confirm("Purge node?") && db) await deleteDoc(doc(db, "categories", cat.id)) }} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90"><Trash2 className="h-4 w-4" /></button>
                      </div>
                   </TableCell>
                 </TableRow>
@@ -154,23 +159,23 @@ export default function CategoryManagement() {
                      <Label className="text-[9px] font-black text-slate-500 ml-1">Registry Id</Label>
                      <Input 
                         value={editingCat?.id || ""} 
-                        onChange={e => setEditingCat({...editingCat, id: e.target.value.toLowerCase().replace(/\s+/g, '-')})} 
+                        onChange={e => setEditingCat({ ...editingCat, id: e.target.value.toLowerCase().replace(/\s+/g, '-') } as Category)} 
                         className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-mono text-xs px-5" 
-                        disabled={!!editingCat?.updatedAt} 
+                        disabled={!!(editingCat as any)?.updatedAt} 
                      />
                   </div>
                   <div className="space-y-1.5 text-left">
                      <Label className="text-[9px] font-black text-slate-500 ml-1">Display Order</Label>
-                     <Input type="number" value={editingCat?.displayOrder || ""} onChange={e => setEditingCat({...editingCat, displayOrder: e.target.value})} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-black text-center" />
+                     <Input type="number" value={editingCat?.displayOrder || ""} onChange={e => setEditingCat({ ...editingCat, displayOrder: Number(e.target.value) } as Category)} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-black text-center" />
                   </div>
                </div>
                <div className="space-y-1.5 text-left">
                   <Label className="text-[9px] font-black text-slate-500 ml-1">Official Name</Label>
-                  <Input value={editingCat?.title || ""} onChange={e => setEditingCat({...editingCat, title: e.target.value})} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-bold px-5" />
+                  <Input value={editingCat?.title || ""} onChange={e => setEditingCat({ ...editingCat, title: e.target.value } as Category)} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-bold px-5" />
                </div>
                <div className="space-y-1.5 text-left">
                   <Label className="text-[9px] font-black text-slate-500 ml-1">Logo Url (PNG/SVG Node)</Label>
-                  <Input value={editingCat?.iconUrl || ""} onChange={e => setEditingCat({...editingCat, iconUrl: e.target.value})} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-mono text-xs text-primary px-5" placeholder="https://..." />
+                  <Input value={editingCat?.iconUrl || ""} onChange={e => setEditingCat({ ...editingCat, iconUrl: e.target.value } as Category)} className="h-11 md:h-12 rounded-xl bg-slate-50 border-none font-mono text-xs text-primary px-5" placeholder="https://..." />
                </div>
             </div>
             <DialogFooter className="p-6 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4 shrink-0">

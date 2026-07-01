@@ -2,21 +2,22 @@
 
 import { useState, useMemo, useEffect, Suspense } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ChevronLeft, Save, Loader2, Globe, LayoutGrid, Smartphone, Monitor } from "lucide-react"
+import { ChevronLeft, Save, Loader2, LayoutGrid, Smartphone, Monitor } from "lucide-react"
 import { useFirestore, useDoc, useCollection } from "@/firebase"
-import { doc, setDoc, serverTimestamp, collection } from "firebase/firestore"
+import { setDoc, serverTimestamp } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { AdType, AdPlacementType, AdStatus } from "@/types"
+import { Ad, AdType, AdPlacementType, AdStatus, Exam } from "@/types"
 import { cn } from "@/lib/utils"
+import { adDoc, examsCollection, adsCollection } from "@/firebase/typed-converters"
 
 const PLACEMENTS: AdPlacementType[] = [
-  'HOMEPAGE_TOP', 'HOMEPAGE_MIDDLE', 'HOMEPAGE_BOTTOM', 'EXAM_LISTING', 
+  'HOMEPAGE_TOP', 'HOMEPAGE_MIDDLE', 'HOMEPAGE_BOTTOM', 'EXAM_LISTING',
   'MOCK_LISTING', 'NOTES_PAGE', 'CA_PAGE', 'RESULT_PAGE', 'SIDEBAR', 'FOOTER'
 ];
 
@@ -38,10 +39,10 @@ function AdEntryContent() {
   const adId = searchParams.get("id")
   const isEditing = !!adId
 
-  const { data: existingAd } = useDoc<any>(useMemo(() => (db && adId ? doc(db, "ads", adId) : null), [db, adId]))
-  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]))
+  const { data: existingAd } = useDoc<Ad>(useMemo(() => (db && adId ? adDoc(adId) : null), [db, adId]))
+  const { data: exams } = useCollection<Exam>(useMemo(() => (db ? examsCollection : null), [db]))
 
-  const [formData, setFormData] = useState<any>({
+  const [formData, setFormData] = useState<Partial<Ad>>({
     title: "",
     type: "BANNER" as AdType,
     status: "ACTIVE" as AdStatus,
@@ -68,39 +69,39 @@ function AdEntryContent() {
 
   const handleSave = async () => {
     if (!db || isSaving) return
-    if (!formData.title || formData.placements.length === 0) {
+    if (!formData.title || !formData.placements || formData.placements.length === 0) {
       toast({ variant: "destructive", title: "Audit Blocked", description: "Title and Placements are mandatory." })
       return
     }
 
     setIsSaving(true)
     const finalId = adId || `ad-${Date.now()}`
-    const adRef = doc(db, "ads", finalId)
-    
-    const payload = {
+    const adRef = adDoc(finalId)
+
+    const payload: Partial<Ad> = {
       ...formData,
       id: finalId,
       updatedAt: serverTimestamp(),
       createdAt: isEditing ? (existingAd?.createdAt || serverTimestamp()) : serverTimestamp(),
-      stats: isEditing ? (existingAd.stats || { impressions: 0, clicks: 0 }) : { impressions: 0, clicks: 0 }
+      stats: isEditing ? (existingAd?.stats || { impressions: 0, clicks: 0 }) : { impressions: 0, clicks: 0 }
     }
 
     // Purge undefined/null
-    Object.keys(payload).forEach(key => (payload[key] === undefined || payload[key] === null) && delete payload[key]);
+    Object.keys(payload).forEach(key => (payload[key as keyof Ad] === undefined || payload[key as keyof Ad] === null) && delete payload[key as keyof Ad]);
 
     try {
       await setDoc(adRef, payload, { merge: true })
       toast({ title: "Campaign Deployed", description: "Monetization node successfully synced." })
       router.push("/admin/ads")
-    } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed", description: e.message })
+    } catch (e: unknown) {
+      toast({ variant: "destructive", title: "Sync Failed", description: (e as Error).message })
     } finally {
       setIsSaving(false)
     }
   }
 
   const togglePlacement = (p: AdPlacementType) => {
-    const current = formData.placements
+    const current = formData.placements || []
     setFormData({
       ...formData,
       placements: current.includes(p) ? current.filter((x: string) => x !== p) : [...current, p]
@@ -183,12 +184,12 @@ function AdEntryContent() {
               <h3 className="font-headline font-black text-xl uppercase flex items-center gap-4"><LayoutGrid className="h-6 w-6 text-primary" /> Placement Map</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                  {PLACEMENTS.map(p => (
-                    <button 
+                    <button
                        key={p}
                        onClick={() => togglePlacement(p)}
                        className={cn(
                           "px-4 py-3 rounded-xl font-black text-[9px] uppercase tracking-widest border transition-all text-center",
-                          formData.placements.includes(p) ? "bg-[#0F172A] border-[#0F172A] text-white shadow-xl" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20"
+                          formData.placements && formData.placements.includes(p) ? "bg-[#0F172A] border-[#0F172A] text-white shadow-xl" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20"
                        )}
                     >
                        {p.replace('_', ' ')}
@@ -225,11 +226,11 @@ function AdEntryContent() {
                  <div className="space-y-4">
                     <Label className="text-[9px] font-black uppercase text-slate-500">Target Specific Exams</Label>
                     <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                       {exams?.map((e: any) => (
-                          <button 
+                       {exams?.map((e: Exam) => (
+                          <button
                              key={e.id}
                              onClick={() => {
-                                const current = formData.targeting.examIds || []
+                                const current = formData.targeting?.examIds || []
                                 setFormData({...formData, targeting: { ...formData.targeting, examIds: current.includes(e.id) ? current.filter((x: string) => x !== e.id) : [...current, e.id] }})
                              }}
                              className={cn(

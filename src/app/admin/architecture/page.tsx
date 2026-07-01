@@ -2,27 +2,39 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { 
   Layers, 
   Landmark, 
-  ChevronRight, 
-  Plus, 
   Edit, 
   Link as LinkIcon,
   Info,
   Box
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, orderBy } from "firebase/firestore"
+import { collection, query, orderBy, DocumentData, FirestoreDataConverter } from "firebase/firestore"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
 import type { Category, Board, Exam } from "@/types"
 import Image from "next/image"
+
+const categoryConverter: FirestoreDataConverter<Category> = {
+    toFirestore: (data: Category): DocumentData => data,
+    fromFirestore: (snap): Category => snap.data() as Category
+};
+
+const boardConverter: FirestoreDataConverter<Board> = {
+    toFirestore: (data: Board): DocumentData => data,
+    fromFirestore: (snap): Board => snap.data() as Board
+};
+
+const examConverter: FirestoreDataConverter<Exam> = {
+    toFirestore: (data: Exam): DocumentData => data,
+    fromFirestore: (snap): Exam => snap.data() as Exam
+};
 
 /**
  * @fileOverview Punjab Registry Architect v17.0.
@@ -41,19 +53,19 @@ export default function ArchitectureManager() {
   const db = useFirestore()
   const [activeTab, setActiveTab] = useState("overview")
 
-  const { data: categories, loading: catLoading } = useCollection<Category>(useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]) as any)
-  const { data: hubs, loading: hubsLoading } = useCollection<Board>(useMemo(() => (db ? collection(db, "boards") : null), [db]) as any)
-  const { data: exams, loading: examsLoading } = useCollection<Exam>(useMemo(() => (db ? collection(db, "exams") : null), [db]) as any)
+  const { data: categories, loading: catLoading } = useCollection<Category>(useMemo(() => (db ? query(collection(db, "categories").withConverter(categoryConverter), orderBy("displayOrder", "asc")) : null), [db]))
+  const { data: hubs } = useCollection<Board>(useMemo(() => (db ? collection(db, "boards").withConverter(boardConverter) : null), [db]))
+  const { data: exams } = useCollection<Exam>(useMemo(() => (db ? collection(db, "exams").withConverter(examConverter) : null), [db]))
 
   const hierarchy = useMemo(() => {
-    if (!categories || !hubs || !exams) return [] as ExtendedCategory[]
-    return (categories as Category[]).map((cat: Category) => ({
+    if (!categories || !hubs || !exams) return []
+    return categories.map((cat) => ({
       ...cat,
-      hubs: (hubs as Board[]).filter((h: Board) => h.categoryId === cat.id).map((hub: Board) => ({
+      hubs: hubs.filter((h) => h.categoryId === cat.id).map((hub) => ({
         ...hub,
-        exams: (exams as Exam[]).filter((e: Exam) => e.boardId === hub.id || e.boardId === hub.abbreviation)
-      })) as ExtendedBoard[]
-    })) as ExtendedCategory[]
+        exams: exams.filter((e) => e.boardId === hub.id || e.boardId === hub.abbreviation)
+      }))
+    }))
   }, [categories, hubs, exams])
 
   return (
@@ -127,7 +139,7 @@ export default function ArchitectureManager() {
                               <div className="col-span-full py-10 text-center">
                                  <p className="text-[10px] font-black uppercase text-slate-300 tracking-widest">No boards found. Checking for direct exams...</p>
                                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-6">
-                                    {(exams || []).filter((e: any) => e.categoryId === cat.id).map((exam: any) => (
+                                    {(exams || []).filter((e) => e.categoryId === cat.id).map((exam) => (
                                        <div key={exam.id} className="p-3 bg-white rounded-xl border border-slate-100 text-left flex items-center justify-between">
                                           <span className="text-[10px] font-bold text-slate-500">{exam.name}</span>
                                           <Button asChild size="icon" variant="ghost" className="h-6 w-6 rounded-lg"><Link href={`/admin/architecture/linking/${exam.id}`}><LinkIcon className="h-3 w-3 text-primary" /></Link></Button>
