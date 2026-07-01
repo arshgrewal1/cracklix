@@ -1,4 +1,4 @@
-import { initializeFirebase } from "@/firebase/app";
+import { firestore } from "@/firebase/app";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 /**
@@ -14,7 +14,7 @@ export async function logEvent(data: {
   metadata?: any;
 }) {
   try {
-    const { firestore: db } = initializeFirebase();
+    const db = firestore;
 
     await addDoc(collection(db, "logs"), {
       ...data,

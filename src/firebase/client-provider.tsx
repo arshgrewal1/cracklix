@@ -1,8 +1,8 @@
 
 'use client';
 
-import { ReactNode, useMemo, useState, useEffect } from 'react';
-import { initializeFirebase } from './app';
+import { ReactNode, useState, useEffect } from 'react';
+import { app, firestore, auth, storage } from './app';
 import { FirebaseProvider } from './provider';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 import SessionGuard from '@/components/auth/SessionGuard';
@@ -18,8 +18,6 @@ export function FirebaseClientProvider({ children }: { children: ReactNode }) {
     // Ensuring hydration is complete before rendering Capacitor/Firebase nodes
     setMounted(true);
   }, []);
-
-  const { app, firestore, auth, storage } = useMemo(() => initializeFirebase(), []);
 
   if (!mounted) {
     return (

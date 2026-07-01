@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { initializeFirebase } from "@/firebase/app";
+import { firestore as db } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
@@ -22,7 +22,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Valid coupon code is required" }, { status: 400 });
     }
 
-    const { firestore: db } = initializeFirebase();
     const normalizedCode = String(code).trim().toUpperCase();
     
     if (!normalizedCode) {

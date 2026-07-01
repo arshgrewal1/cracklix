@@ -1,6 +1,6 @@
 'use client';
 
-import { initializeFirebase } from '@/firebase/app';
+import { firestore as db } from '@/firebase/app';
 import { 
   collection, 
   doc, 
@@ -16,8 +16,6 @@ import {
  */
 
 export async function activateFreePass(userId: string, planId: string) {
-  const { firestore: db } = initializeFirebase();
-
   try {
     const userRef = doc(db, 'users', userId);
     const userSnap = await getDoc(userRef);
@@ -75,7 +73,6 @@ export async function submitManualPayment(data: {
   transactionId: string;
 }) {
   const { userId, userEmail, userName, planId, transactionId } = data;
-  const { firestore: db } = initializeFirebase();
 
   try {
     const planSnap = await getDoc(doc(db, "passes", planId));
@@ -103,8 +100,6 @@ export async function submitManualPayment(data: {
 }
 
 export async function approvePaymentRequest(requestId: string, adminId: string) {
-  const { firestore: db } = initializeFirebase();
-
   try {
     const reqRef = doc(db, 'payment_requests', requestId);
     const snap = await getDoc(reqRef);

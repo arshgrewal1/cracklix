@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import Razorpay from "razorpay";
-import { initializeFirebase } from "@/firebase/app";
+import { firestore as db } from "@/firebase/app";
 import { doc, getDoc } from "firebase/firestore";
 
 /**
@@ -34,7 +34,6 @@ export async function POST(req: Request) {
       }, { status: 503 });
     }
 
-    const { firestore: db } = initializeFirebase();
     const planRef = doc(db, "passes", planId);
     const planSnap = await getDoc(planRef);
 

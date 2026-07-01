@@ -23,16 +23,19 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
 
   useEffect(() => {
     if (!query) {
+      console.log('[useCollection] Query is null, setting loading to false.');
       setData(null);
       setLoading(false);
       return;
     }
 
+    console.log('[useCollection] New query received, setting up snapshot listener...');
     setLoading(true);
 
     const unsubscribe = onSnapshot(
       query,
       (snapshot: QuerySnapshot<T>) => {
+        console.log('[useCollection] Snapshot received, processing data...');
         const items = snapshot.docs.map((doc) => ({
           ...doc.data(),
           id: doc.id,
@@ -40,8 +43,10 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setData(items as T[]);
         setLoading(false);
         setError(null);
+        console.log('[useCollection] Data processed, loading finished.');
       },
       (err) => {
+        console.error('[useCollection] Error in snapshot listener:', err);
         if (err.code === 'permission-denied') {
           const permissionError = new FirestorePermissionError({
             path: (query as any)?._query?.path?.segments?.join('/') || 'registry_node',
@@ -57,8 +62,11 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
       }
     );
 
-    return () => unsubscribe();
-  }, [query]); // Callers MUST use useMemo() for this dependency to be stable
+    return () => {
+      console.log('[useCollection] Unsubscribing from snapshot listener.');
+      unsubscribe();
+    }
+  }, [JSON.stringify(query)]); // Use JSON.stringify for a more stable dependency
 
   return { data, loading, error };
 }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { initializeFirebase } from "@/firebase/app";
+import { firestore } from "@/firebase/app";
 import { collection, getDocs, updateDoc, doc, writeBatch } from "firebase/firestore";
 
 /**
@@ -8,7 +8,7 @@ import { collection, getDocs, updateDoc, doc, writeBatch } from "firebase/firest
  */
 export async function GET() {
   try {
-    const { firestore: db } = initializeFirebase();
+    const db = firestore;
     const snap = await getDocs(collection(db, "user_passes"));
     const batch = writeBatch(db);
     let expiredCount = 0;

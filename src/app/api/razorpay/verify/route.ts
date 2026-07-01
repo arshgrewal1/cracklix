@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
 import Razorpay from "razorpay";
-import { initializeFirebase } from "@/firebase/app";
+import { firestore as db } from "@/firebase/app";
 import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
 
 /**
@@ -41,7 +41,6 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, reason: "Security signature mismatch. Transaction could not be verified." }, { status: 400 });
     }
 
-    const { firestore: db } = initializeFirebase();
     const paymentRef = doc(db, "payment_requests", razorpay_payment_id);
     const paymentSnap = await getDoc(paymentRef);
 

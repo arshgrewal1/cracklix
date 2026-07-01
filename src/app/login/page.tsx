@@ -222,7 +222,7 @@ function LoginContent() {
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
 
         <div className="relative z-10 space-y-12 xl:space-y-20 max-w-[650px]">
-          <Logo variant="dark" align="left" className="h-[180px] xl:h-[240px]" />
+        <Logo variant="dark" align="left" className="my-0" />
 
           <div className="space-y-8">
             <h1 className="text-5xl xl:text-6xl font-[900] tracking-tight text-white leading-[1.05]">

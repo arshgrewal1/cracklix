@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { initializeFirebase } from "@/firebase/app";
+import { firestore } from "@/firebase/app";
 import { doc, setDoc, serverTimestamp, getDoc, updateDoc } from "firebase/firestore";
 import { logEvent } from "@/lib/logger";
 
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Malformed JSON payload" }, { status: 400 });
     }
 
-    const { firestore: db } = initializeFirebase();
+    const db = firestore;
 
     if (event.event === "payment.captured" || event.event === "order.paid") {
       const payloadEntity = event.payload.payment?.entity || event.payload.order?.entity;
