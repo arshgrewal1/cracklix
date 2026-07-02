@@ -2,63 +2,69 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
 }
-
 android {
     namespace "com.cracklix.app"
     compileSdk rootProject.ext.compileSdkVersion
-
     defaultConfig {
         applicationId "com.cracklix.app"
         minSdk rootProject.ext.minSdkVersion
         targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.5"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // navCheckDescriptor removed as it is invalid AGP DSL
         }
     }
-
     signingConfigs {
         release {
-            // Decode base64 keystore from GitHub secret or use local file
-            def keystorePath = System.getenv('KEYSTORE_PATH') ?: 'release.jks'
+            // The keystore can be provided in two ways:
+            //   1. CI restores it to android/app/keystore.jks (see workflow), OR a
+            //      base64-encoded keystore is provided via the KEYSTORE_BASE64 env var.
+            //   2. A local file whose path is given by KEYSTORE_PATH (defaults to keystore.jks).
+            def keystorePath = System.getenv('KEYSTORE_PATH') ?: 'keystore.jks'
             def keystoreBase64 = System.getenv('KEYSTORE_BASE64')
-            
+            def resolvedKeystore = null
             if (keystoreBase64) {
-                // Create temporary keystore from base64
-                def keystoreFile = new File(buildDir, 'keystore.jks')
-                keystoreFile.bytes = keystoreBase64.decodeBase64()
-                storeFile keystoreFile
-            } else if (new File(keystorePath).exists()) {
-                storeFile file(keystorePath)
+                // Decode a base64 keystore into the build directory.
+                def decoded = new File(buildDir, 'keystore.jks')
+                decoded.parentFile.mkdirs()
+                decoded.bytes = keystoreBase64.decodeBase64()
+                resolvedKeystore = decoded
+            } else if (file(keystorePath).exists()) {
+                resolvedKeystore = file(keystorePath)
             }
-            
-            storePassword System.getenv('KEYSTORE_PASSWORD') ?: 'CrackLix@2026Release!'
-            keyAlias System.getenv('KEY_ALIAS') ?: 'cracklix-release-key'
-            keyPassword System.getenv('KEY_PASSWORD') ?: 'CrackLix@2026Release!'
+            if (resolvedKeystore != null) {
+                storeFile resolvedKeystore
+                storePassword System.getenv('KEYSTORE_PASSWORD') ?: ''
+                keyAlias System.getenv('KEY_ALIAS') ?: ''
+                keyPassword System.getenv('KEY_PASSWORD') ?: ''
+            } else {
+                // No keystore available (e.g. plain local checkout). Leave the
+                // signing config empty so debug builds still work; assembleRelease
+                // will fail fast with a clear "no keystore" message in that case.
+                println "[SIGNING] No keystore found (KEYSTORE_BASE64 unset and ${keystorePath} missing); release build will be unsigned."
+            }
         }
     }
-
     buildTypes {
         release {
+            // Only attach the signing config when a keystore is actually present,
+            // otherwise Gradle errors on the empty storeFile reference.
+            if (System.getenv('KEYSTORE_BASE64') || file(System.getenv('KEYSTORE_PATH') ?: 'keystore.jks').exists()) {
+                signingConfig signingConfigs.release
+            }
             // Enables code shrinking, obfuscation, and optimization for your release build.
             minifyEnabled true
-            
             // Enables resource shrinking, which removes unused resources.
-            shrinkResources true 
-            
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            signingConfig signingConfigs.release
         }
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-
     kotlinOptions {
         jvmTarget = '17'
     }
