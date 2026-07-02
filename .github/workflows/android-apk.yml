@@ -38,9 +38,16 @@ jobs:
       - name: Stash server-only code for static export
         run: |
           mkdir -p .ci-stash
+          # API route handlers and middleware are not statically exportable, so
+          # move them aside for the export only.
           [ -d src/app/api ] && mv src/app/api .ci-stash/api || true
           [ -f src/middleware.ts ] && mv src/middleware.ts .ci-stash/middleware.ts || true
-          [ -f src/ai/flows/bulk-parse-mcq.ts ] && mv src/ai/flows/bulk-parse-mcq.ts .ci-stash/bulk-parse-mcq.ts || true
+          # Genkit AI flows are marked "use server". Static export rejects Server
+          # Actions, but we must NOT delete the files because client components
+          # (e.g. src/app/admin/brand-magic/page.tsx) import them directly and
+          # webpack would fail with "module not found". Instead, strip only the
+          # "use server" directive; git restores the originals after the build.
+          find src/ai -type f -name '*.ts' -exec sed -i "/^['\"]use server['\"];\?/d" {} +
 
       - name: Build Web Assets (static export)
         run: npm run build:android
@@ -54,8 +61,9 @@ jobs:
         run: |
           [ -d .ci-stash/api ] && mv .ci-stash/api src/app/api || true
           [ -f .ci-stash/middleware.ts ] && mv .ci-stash/middleware.ts src/middleware.ts || true
-          [ -f .ci-stash/bulk-parse-mcq.ts ] && mv .ci-stash/bulk-parse-mcq.ts src/ai/flows/bulk-parse-mcq.ts || true
           rm -rf .ci-stash
+          # Restore the original AI flow files (re-adds the stripped "use server").
+          git checkout -- src/ai || true
 
       - name: Capacitor Sync
         run: npx cap sync android
