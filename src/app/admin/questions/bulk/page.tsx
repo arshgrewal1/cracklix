@@ -95,6 +95,7 @@ export default function BulkImportPage() {
       toast({ title: "Bank Updated", description: `${parsedQuestions.length} questions saved.` })
       setShowMockCreator(true)
     } catch (e) {
+      console.error('[BULK_IMPORT_ERROR]:', e);
       errorEmitter.emit('permission-error', new FirestorePermissionError({ path: 'questions/bulk', operation: 'write' }));
     } finally {
       setIsImporting(false)
@@ -127,7 +128,8 @@ export default function BulkImportPage() {
       toast({ title: "Series Deployed", description: "Mock test is now live." })
       router.push("/admin/mocks")
     } catch (e) {
-      toast({ variant: "destructive", title: "Deployment Failed" })
+      console.error('[MOCK_DEPLOY_ERROR]:', e);
+      toast({ variant: "destructive", title: "Deployment Failed", description: e instanceof Error ? e.message : "Could not deploy mock test." })
     }
   }
 

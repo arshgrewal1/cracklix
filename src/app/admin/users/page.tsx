@@ -98,7 +98,8 @@ export default function AspirantsManagement() {
        toast({ title: "Pass Activated", description: `${grantDialogUser.name} upgraded successfully.` })
        setGrantDialogUser(null)
     } catch (e: any) {
-       toast({ variant: "destructive", title: "Update Failed" })
+       console.error('[USER_PASS_GRANT_ERROR]:', e);
+       toast({ variant: "destructive", title: "Update Failed", description: e?.message || "Could not activate pass." })
     } finally {
        setIsProcessing(false)
     }

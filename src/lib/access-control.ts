@@ -46,6 +46,7 @@ export async function isPaymentValid(paymentId: string) {
     const snap = await getDoc(doc(db, "payment_requests", paymentId));
     return snap.exists() && snap.data()?.status === "captured" && snap.data()?.verified === true;
   } catch (e) {
+    console.error("[PAYMENT_VALIDATION_FAILURE]:", e);
     return false;
   }
 }

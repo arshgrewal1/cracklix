@@ -76,7 +76,8 @@ export default function LinkerContent({ examId }: { examId: string }) {
       }
       toast({ title: isLinked ? "Link Terminated" : "Relationship Sync Successful" })
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed" })
+      console.error('[LINKER_SYNC_ERROR]:', e);
+      toast({ variant: "destructive", title: "Sync Failed", description: e?.message || "Could not update link." })
     } finally {
       setIsSyncing(false)
     }

@@ -14,11 +14,11 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export async function sendEmail(to: string, subject: string, html: string) {
+export async function sendEmail(to: string, subject: string, html: string): Promise<{ success: boolean; error?: string }> {
   try {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
       console.warn("[EMAIL_HUB] SMTP credentials missing. Notification suppressed.");
-      return;
+      return { success: false, error: "SMTP credentials not configured" };
     }
     
     await transporter.sendMail({
@@ -27,7 +27,9 @@ export async function sendEmail(to: string, subject: string, html: string) {
       subject,
       html,
     });
+    return { success: true };
   } catch (err) {
     console.error("[EMAIL_TRANSMISSION_ERROR]:", err);
+    return { success: false, error: err instanceof Error ? err.message : "Unknown email error" };
   }
 }

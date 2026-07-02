@@ -76,7 +76,8 @@ export default function MockManagement() {
       }, { merge: true })
       toast({ title: "Registry Synced", description: `Series tier shifted to ${nextTier}.` })
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed" })
+      console.error('[MOCK_TIER_TOGGLE_ERROR]:', e);
+      toast({ variant: "destructive", title: "Sync Failed", description: e?.message || "Could not update tier." })
     } finally {
       setTogglingId(null)
     }

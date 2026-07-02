@@ -147,7 +147,8 @@ export default function MaintenancePage() {
         await batch.commit();
         toast({ title: "Operation Complete", description: "Registry modified successfully." });
      } catch (e: any) {
-        toast({ variant: "destructive", title: "Danger Tool Failure" });
+        console.error('[DANGER_TOOL_FAILURE]:', e);
+        toast({ variant: "destructive", title: "Danger Tool Failure", description: e?.message || "Operation could not be completed." });
      } finally {
         setIsProcessing(false);
         setActiveTool(null);

@@ -135,8 +135,8 @@ export default function BulkImportPage() {
       toast({ title: "Registry Synced", description: `${parsedQuestions.length} assets committed.` })
       router.push("/admin/questions")
     } catch (e) {
-      console.error(e);
-      toast({ variant: "destructive", title: "Sync failed" })
+      console.error('[BULK_IMPORT_COMMIT_ERROR]:', e);
+      toast({ variant: "destructive", title: "Sync failed", description: e instanceof Error ? e.message : "Batch commit failed." })
     } finally {
       setIsSyncing(false)
     }

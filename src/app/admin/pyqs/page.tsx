@@ -59,7 +59,8 @@ export default function AdminPYQManagement() {
       toast({ title: "Archive Updated" })
       setEditingPYQ(null)
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Sync Failed" })
+      console.error('[PYQ_SAVE_ERROR]:', err);
+      toast({ variant: "destructive", title: "Sync Failed", description: err?.message || "Could not update archive." })
     } finally {
       setIsSaving(false)
     }

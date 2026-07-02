@@ -128,7 +128,8 @@ function QuestionEntryContent() {
       toast({ title: "Registry Synced" })
       router.push("/admin/questions")
     } catch (err: any) {
-      toast({ variant: "destructive", title: "Sync failed" })
+      console.error('[QUESTION_SAVE_ERROR]:', err);
+      toast({ variant: "destructive", title: "Sync failed", description: err?.message || "Failed to save question." })
     } finally {
       setIsSaving(false)
     }
