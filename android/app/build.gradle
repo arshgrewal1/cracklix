@@ -20,13 +20,24 @@ android {
         }
     }
 
+    signingConfigs {
+        release {
+            // load keystore from android/app/keystore.jks (restored by CI)
+            storeFile file('keystore.jks')
+            storePassword System.getenv('KEYSTORE_PASSWORD') ?: ''
+            keyAlias System.getenv('KEY_ALIAS') ?: ''
+            keyPassword System.getenv('KEY_PASSWORD') ?: ''
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
+
             // Enables code shrinking, obfuscation, and optimization for your release build.
             minifyEnabled true
             
             // Enables resource shrinking, which removes unused resources.
-            // This is the modern replacement for the old 'enableResourceOptimizations' flag.
             shrinkResources true 
             
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
