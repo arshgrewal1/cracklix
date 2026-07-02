@@ -8,6 +8,7 @@
     "build:android": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "jest",
     "typecheck": "tsc --noEmit",
     "git:sync": "git add . && git commit -m 'Registry Sync' && git push origin main",
     "git:fix": "git add . && git commit -m 'Auto-fix sync' || true && git pull --rebase origin main && git push origin main",
@@ -79,6 +80,7 @@
   "devDependencies": {
     "@capacitor/cli": "^6.0.0",
     "@react-native-community/cli": "latest",
+    "@types/jest": "^30.0.0",
     "@types/katex": "^0.16.7",
     "@types/node": "^20",
     "@types/nodemailer": "^6.4.14",
@@ -87,9 +89,11 @@
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.1.0",
+    "jest": "^30.4.2",
     "null-loader": "^4.0.1",
     "postcss": "^8",
     "tailwindcss": "^3.3.0",
+    "ts-jest": "^29.4.11",
     "typescript": "^5"
   }
 }
