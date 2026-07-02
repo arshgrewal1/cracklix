@@ -70,7 +70,8 @@ export default function ExamRegistryPage() {
        await updateDoc(doc(db, "exams", id), { isTrending: !current, updatedAt: serverTimestamp() });
        toast({ title: "Discovery Updated", description: current ? "Removed from Trending" : "Added to Trending Hub" });
     } catch (e) {
-       toast({ variant: "destructive", title: "Sync Failed" });
+       console.error('[EXAM_TRENDING_TOGGLE_ERROR]:', e);
+       toast({ variant: "destructive", title: "Sync Failed", description: e instanceof Error ? e.message : "Could not update trending status." });
     }
   }
 

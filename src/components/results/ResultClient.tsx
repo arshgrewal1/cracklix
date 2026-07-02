@@ -109,6 +109,7 @@ export default function ResultClient() {
         }
       } catch (e) {
         console.error("[AUDIT_HYDRATION_ERROR]:", e);
+        toast({ variant: "destructive", title: "Load Error", description: "Could not load questions for review." });
       } finally { 
         setLoadingQuestions(false) 
       }

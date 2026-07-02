@@ -63,7 +63,9 @@ export default function CapacitorManager() {
             e.preventDefault();
             Browser.open({ url: anchor.href });
           }
-        } catch (e) {}
+        } catch (e) {
+          console.warn('[NATIVE_BRIDGE] External link intercept failed:', e);
+        }
       }
     };
 

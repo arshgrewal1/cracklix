@@ -58,7 +58,8 @@ export default function HelpCenterManagement() {
       toast({ title: "Help Hub Synced" })
       setEditingArticle(null)
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed" })
+      console.error('[HELP_ARTICLE_SAVE_ERROR]:', e);
+      toast({ variant: "destructive", title: "Sync Failed", description: e?.message || "Could not save article." })
     } finally {
       setIsSaving(false)
     }

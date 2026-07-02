@@ -53,7 +53,8 @@ export default function SuccessStoryManagement() {
       toast({ title: "Hall of Rankers Synced" })
       setEditingStory(null)
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed" })
+      console.error('[SUCCESS_STORY_SAVE_ERROR]:', e);
+      toast({ variant: "destructive", title: "Sync Failed", description: e?.message || "Could not save story." })
     } finally {
       setIsSaving(false)
     }

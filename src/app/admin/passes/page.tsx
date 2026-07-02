@@ -59,7 +59,8 @@ export default function PassManagement() {
       toast({ title: "Pass Hub Synced", description: `${payload.name} access nodes updated.` })
       setEditingPass(null)
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed" })
+      console.error('[PASS_SAVE_ERROR]:', e);
+      toast({ variant: "destructive", title: "Sync Failed", description: e?.message || "Could not update pass." })
     } finally {
       setIsSaving(false)
     }

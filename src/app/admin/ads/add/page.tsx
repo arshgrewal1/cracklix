@@ -1,12 +1,14 @@
 'use client';
 import AdEntryContent from './AdEntryContent';
 import { useEffect, useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function AdEntryPage({ searchParams }: any) {
   const { id } = searchParams;
   const [existingAd, setExistingAd] = useState(null);
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const loadData = async () => {
@@ -35,7 +37,8 @@ export default function AdEntryPage({ searchParams }: any) {
         const { data } = await examsRes.json();
         setExams(data);
       } catch (error) {
-        console.error('Failed to load data:', error);
+        console.error('[AD_DATA_LOAD_ERROR]:', error);
+        toast({ variant: "destructive", title: "Load Failed", description: "Could not load ad data. Please refresh." });
       } finally {
         setLoading(false);
       }

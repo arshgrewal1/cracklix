@@ -37,7 +37,8 @@ export default function VerifyPaymentsPage() {
       await approvePaymentRequest(requestId, admin.uid)
       toast({ title: "Pass Activated", description: "Aspirant upgraded successfully." })
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Approval Failed" })
+      console.error('[PAYMENT_APPROVAL_ERROR]:', e);
+      toast({ variant: "destructive", title: "Approval Failed", description: e?.message || "Could not approve payment." })
     } finally {
       setProcessingId(null)
     }
@@ -54,7 +55,8 @@ export default function VerifyPaymentsPage() {
       });
       toast({ title: "Request Rejected" });
     } catch (e) {
-      toast({ variant: "destructive", title: "Action Failed" });
+      console.error('[PAYMENT_REJECT_ERROR]:', e);
+      toast({ variant: "destructive", title: "Action Failed", description: e instanceof Error ? e.message : "Could not reject request." });
     }
   }
 

@@ -144,8 +144,10 @@ export default function MasterRegistryPage() {
        await batch.commit()
        toast({ title: "Normalization Complete", description: `Updated ${qSnap.size} MCQs in target hub.` })
        setMergeDialogOpen(false)
-    } catch (e: any) { toast({ variant: "destructive", title: "Merge Failed" }) }
-    finally { setIsMerging(false) }
+    } catch (e: any) {
+      console.error('[REGISTRY_MERGE_ERROR]:', e);
+      toast({ variant: "destructive", title: "Merge Failed", description: e?.message || "Normalization could not be completed." })
+    } finally { setIsMerging(false) }
   }
 
   return (

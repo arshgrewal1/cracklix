@@ -233,7 +233,8 @@ function MockBuilderContent() {
       toast({ title: "Series Deployed", description: "Registry synced." });
       router.push("/admin/mocks")
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync failed" })
+      console.error('[MOCK_PUBLISH_ERROR]:', e);
+      toast({ variant: "destructive", title: "Sync failed", description: e?.message || "Failed to publish mock series." })
     } finally {
       setIsPublishing(false)
     }

@@ -69,7 +69,9 @@ export default function MockOverviewClient() {
         if (attemptSnap.exists()) {
            setActiveAttempt(attemptSnap.data());
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error('[MOCK_OVERVIEW] Failed to fetch attempt data:', e);
+      }
 
       const userEmail = user?.email?.toLowerCase();
       const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);

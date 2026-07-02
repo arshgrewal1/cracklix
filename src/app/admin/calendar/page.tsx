@@ -51,7 +51,8 @@ export default function CalendarManagement() {
       toast({ title: "Registry Synced" })
       setEditingEvent(null)
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed" })
+      console.error('[CALENDAR_SAVE_ERROR]:', e);
+      toast({ variant: "destructive", title: "Sync Failed", description: e?.message || "Could not save event." })
     } finally {
       setIsSaving(false)
     }

@@ -100,7 +100,13 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
 
     } catch (error) {
         console.error('[StudyTracker] Failed to save session:', error);
-        // Implement a retry mechanism or save to local storage for later sync
+        try {
+          const fallbackKey = `studySession_${sessionId}`;
+          localStorage.setItem(fallbackKey, JSON.stringify(sessionData));
+          console.warn(`[StudyTracker] Session ${sessionId} saved to localStorage for later sync.`);
+        } catch (storageError) {
+          console.error('[StudyTracker] LocalStorage fallback also failed:', storageError);
+        }
     }
 
   }, [db, user, contentId, contentType]);
