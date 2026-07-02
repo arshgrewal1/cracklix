@@ -40,7 +40,16 @@ jobs:
           mkdir -p .ci-stash
           [ -d src/app/api ] && mv src/app/api .ci-stash/api || true
           [ -f src/middleware.ts ] && mv src/middleware.ts .ci-stash/middleware.ts || true
-          [ -f src/ai/flows/bulk-parse-mcq.ts ] && mv src/ai/flows/bulk-parse-mcq.ts .ci-stash/bulk-parse-mcq.ts || true
+          # Stash 'use server' AI flow files and replace with no-op stubs
+          # so client-side imports still resolve during the static build.
+          mkdir -p .ci-stash/flows
+          for f in src/ai/flows/*.ts; do
+            [ -f "$f" ] && mv "$f" .ci-stash/flows/ || true
+          done
+          # Create no-op client stubs that match the exported signatures
+          echo "export async function transformLogo(_input: any): Promise<any> { return { transformedImageDataUri: '' }; }" > src/ai/flows/transform-logo-flow.ts
+          echo "export async function rationalizeMockQuestion(_input: any): Promise<any> { return { rationalization: '' }; }" > src/ai/flows/rationalize-mock-question.ts
+          echo "export async function bulkParseMCQ(_input: any): Promise<any> { return { questions: [] }; }" > src/ai/flows/bulk-parse-mcq.ts
 
       - name: Build Web Assets (static export)
         run: npm run build:android
@@ -54,7 +63,12 @@ jobs:
         run: |
           [ -d .ci-stash/api ] && mv .ci-stash/api src/app/api || true
           [ -f .ci-stash/middleware.ts ] && mv .ci-stash/middleware.ts src/middleware.ts || true
-          [ -f .ci-stash/bulk-parse-mcq.ts ] && mv .ci-stash/bulk-parse-mcq.ts src/ai/flows/bulk-parse-mcq.ts || true
+          # Restore real AI flow files over the stubs
+          if [ -d .ci-stash/flows ]; then
+            for f in .ci-stash/flows/*.ts; do
+              [ -f "$f" ] && mv "$f" src/ai/flows/ || true
+            done
+          fi
           rm -rf .ci-stash
 
       - name: Capacitor Sync
