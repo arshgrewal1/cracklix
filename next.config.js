@@ -12,6 +12,7 @@ const nextConfig = {
   },
   poweredByHeader: false,
   compress: true,
+  staticPageGenerationTimeout: 120,
 };
 
 module.exports = nextConfig;
