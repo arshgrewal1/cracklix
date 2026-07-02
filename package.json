@@ -78,7 +78,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^6.0.0",
-    "@react-native-community/cli": "latest",
+    "@react-native-community/cli": "^15.0.1",
     "@types/katex": "^0.16.7",
     "@types/node": "^20",
     "@types/nodemailer": "^6.4.14",

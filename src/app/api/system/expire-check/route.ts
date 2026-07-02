@@ -1,12 +1,19 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { firestore } from "@/firebase/app";
-import { collection, getDocs, updateDoc, doc, writeBatch } from "firebase/firestore";
+import { collection, getDocs, doc, writeBatch } from "firebase/firestore";
 
 /**
  * @fileOverview Operational Expiry Cleanup Node.
- * Manually or programmatically liquidates expired preparation nodes from the registry.
+ * Requires a shared secret (CRON_SECRET) to prevent unauthorized invocation.
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const authHeader = req.headers.get("authorization");
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const db = firestore;
     const snap = await getDocs(collection(db, "user_passes"));
@@ -32,12 +39,11 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       expiredCount,
-      timestamp: new Date().toISOString()
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[EXPIRY_AUDIT_ERROR]:", error);
     return NextResponse.json(
-      { error: error?.message || "Registry cleanup failed" },
+      { error: "Registry cleanup failed" },
       { status: 500 }
     );
   }

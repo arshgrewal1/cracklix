@@ -86,11 +86,7 @@ export function getRazorpayCredentials(): {
 
   if (!keyId || !keySecret || !keyId.startsWith("rzp_")) {
     console.error("[RAZORPAY] Environment anomaly: Missing or invalid keys.");
-    return apiError(
-      "Internal configuration error.",
-      503,
-      "Razorpay keys are missing or misconfigured in the environment registry."
-    );
+    return apiError("Internal configuration error.", 503);
   }
 
   return { keyId, keySecret };
@@ -116,11 +112,8 @@ export function withErrorHandling(
     try {
       return await handler(req);
     } catch (err: unknown) {
-      const error = err as { error?: { description?: string }; message?: string };
       console.error(`[${logPrefix}]`, err);
-      const errorDetail =
-        error?.error?.description || error?.message || "Unknown error";
-      return apiError("Internal server error.", 500, errorDetail);
+      return apiError("Internal server error.", 500);
     }
   };
 }

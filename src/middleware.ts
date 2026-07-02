@@ -3,30 +3,51 @@ import type { NextRequest } from "next/server";
 
 /**
  * @fileOverview Production Hardened Global Middleware.
- * Logic: Simple in-memory rate limiting for API nodes + Auth routing.
+ * Logic: In-memory rate limiting for API nodes with periodic cleanup.
  */
 
-const rateMap = new Map();
+const rateMap = new Map<string, number[]>();
+const MAX_MAP_SIZE = 10000;
+let lastCleanup = Date.now();
+
+function cleanupRateMap(windowMs: number) {
+  const now = Date.now();
+  if (now - lastCleanup < windowMs) return;
+  lastCleanup = now;
+  for (const [key, timestamps] of rateMap) {
+    const valid = timestamps.filter((t) => now - t < windowMs);
+    if (valid.length === 0) {
+      rateMap.delete(key);
+    } else {
+      rateMap.set(key, valid);
+    }
+  }
+}
 
 export function middleware(req: NextRequest) {
   const url = req.nextUrl.pathname;
   
-  // 1. Rate Limiting for API Nodes (Anti-Abuse)
   if (url.startsWith("/api/")) {
-    const ip = req.headers.get("x-forwarded-for") || "unknown";
+    const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.ip || "unknown";
     const now = Date.now();
-    const limit = 40; // requests
-    const windowMs = 60 * 1000; // 1 min window
+    const limit = 40;
+    const windowMs = 60 * 1000;
+
+    cleanupRateMap(windowMs);
+
+    if (rateMap.size > MAX_MAP_SIZE) {
+      rateMap.clear();
+    }
 
     const record = rateMap.get(ip) || [];
-    const filtered = record.filter((t: number) => now - t < windowMs);
+    const filtered = record.filter((t) => now - t < windowMs);
     
     filtered.push(now);
     rateMap.set(ip, filtered);
 
     if (filtered.length > limit) {
       return NextResponse.json(
-        { error: "Too many requests. Anti-abuse node active." },
+        { error: "Too many requests." },
         { status: 429 }
       );
     }
