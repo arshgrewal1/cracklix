@@ -2,24 +2,20 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
 }
-
 android {
     namespace "com.cracklix.app"
     compileSdk rootProject.ext.compileSdkVersion
-
     defaultConfig {
         applicationId "com.cracklix.app"
         minSdk rootProject.ext.minSdkVersion
         targetSdk rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.5"
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // navCheckDescriptor removed as it is invalid AGP DSL
         }
     }
-
     signingConfigs {
         release {
             // The keystore can be provided in two ways:
@@ -29,7 +25,6 @@ android {
             def keystorePath = System.getenv('KEYSTORE_PATH') ?: 'keystore.jks'
             def keystoreBase64 = System.getenv('KEYSTORE_BASE64')
             def resolvedKeystore = null
-
             if (keystoreBase64) {
                 // Decode a base64 keystore into the build directory.
                 def decoded = new File(buildDir, 'keystore.jks')
@@ -39,7 +34,6 @@ android {
             } else if (file(keystorePath).exists()) {
                 resolvedKeystore = file(keystorePath)
             }
-
             if (resolvedKeystore != null) {
                 storeFile resolvedKeystore
                 storePassword System.getenv('KEYSTORE_PASSWORD') ?: ''
@@ -53,7 +47,6 @@ android {
             }
         }
     }
-
     buildTypes {
         release {
             // Only attach the signing config when a keystore is actually present,
@@ -61,22 +54,17 @@ android {
             if (System.getenv('KEYSTORE_BASE64') || file(System.getenv('KEYSTORE_PATH') ?: 'keystore.jks').exists()) {
                 signingConfig signingConfigs.release
             }
-
             // Enables code shrinking, obfuscation, and optimization for your release build.
             minifyEnabled true
-            
             // Enables resource shrinking, which removes unused resources.
-            shrinkResources true 
-            
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
-
     kotlinOptions {
         jvmTarget = '17'
     }
