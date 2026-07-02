@@ -42,14 +42,25 @@ jobs:
           [ -f src/middleware.ts ] && mv src/middleware.ts .ci-stash/middleware.ts || true
           # Stash 'use server' AI flow files and replace with no-op stubs
           # so client-side imports still resolve during the static build.
+          # Stubs are generated dynamically: every exported async function gets
+          # a no-op replacement that returns an empty object, and every exported
+          # type/interface is re-exported as `any`. This way new flow files are
+          # handled automatically without updating the workflow.
           mkdir -p .ci-stash/flows
           for f in src/ai/flows/*.ts; do
-            [ -f "$f" ] && mv "$f" .ci-stash/flows/ || true
+            [ -f "$f" ] || continue
+            base=$(basename "$f")
+            mv "$f" .ci-stash/flows/
+            # Build a stub by scanning the original for exported symbols
+            stub=""
+            while IFS= read -r name; do
+              stub="${stub}export async function ${name}(..._args: any[]): Promise<any> { return {}; }\n"
+            done < <(grep -oP '(?<=export async function )\w+' ".ci-stash/flows/$base")
+            while IFS= read -r name; do
+              stub="${stub}export type ${name} = any;\n"
+            done < <(grep -oP '(?<=export type )\w+' ".ci-stash/flows/$base")
+            printf '%b' "$stub" > "src/ai/flows/$base"
           done
-          # Create no-op client stubs that match the exported signatures
-          echo "export async function transformLogo(_input: any): Promise<any> { return { transformedImageDataUri: '' }; }" > src/ai/flows/transform-logo-flow.ts
-          echo "export async function rationalizeMockQuestion(_input: any): Promise<any> { return { rationalization: '' }; }" > src/ai/flows/rationalize-mock-question.ts
-          echo "export async function bulkParseMCQ(_input: any): Promise<any> { return { questions: [] }; }" > src/ai/flows/bulk-parse-mcq.ts
 
       - name: Build Web Assets (static export)
         run: npm run build:android
