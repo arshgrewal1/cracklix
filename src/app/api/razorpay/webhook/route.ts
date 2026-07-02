@@ -113,8 +113,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[WEBHOOK_CRITICAL_EXCEPTION]", error);
-    return NextResponse.json({ error: "Internal webhook processing node failed.", detail: error.message }, { status: 500 });
+    return NextResponse.json({ error: "Internal webhook processing failed." }, { status: 500 });
   }
 }

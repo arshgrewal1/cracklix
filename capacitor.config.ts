@@ -10,9 +10,9 @@ const config: CapacitorConfig = {
   webDir: 'out',
   server: {
     url: 'https://cracklix.vercel.app',
-    allowNavigation: ['*'],
+    allowNavigation: ['cracklix.vercel.app'],
     androidScheme: 'https',
-    cleartext: true
+    cleartext: false
   },
   plugins: {
     SplashScreen: {
@@ -34,7 +34,7 @@ const config: CapacitorConfig = {
     }
   },
   android: {
-    allowMixedContent: true,
+    allowMixedContent: false,
     captureInput: true,
     webContentsDebuggingEnabled: false
   }

@@ -8,17 +8,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ShieldAlert, Terminal, Activity, Zap, Loader2, Globe } from "lucide-react"
 import { useUser } from "@/firebase"
+import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Billing Debug Center.
- * Access this page to verify your Cashfree integration status.
+ * @fileOverview Institutional Billing Debug Center (Admin Only).
  */
+
+const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 export default function BillingDebugPage() {
   const { user, profile, loading: userLoading } = useUser()
+  const router = useRouter()
   const [debugData, setDebugData] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [isTesting, setIsTesting] = useState(false)
+
+  const userEmail = user?.email?.toLowerCase();
+  const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
+
+  useEffect(() => {
+    if (!userLoading && (!user || !isAdmin)) {
+      router.replace('/dashboard');
+    }
+  }, [user, isAdmin, userLoading, router]);
+
+  if (userLoading || !user || !isAdmin) return null;
 
   const runTest = async () => {
      if (!user) { setError("Must be logged in to test."); return; }
@@ -37,8 +51,8 @@ export default function BillingDebugPage() {
         const data = await res.json();
         if (data.error) setError(data.error);
         setDebugData(data);
-     } catch (e: any) {
-        setError(e.message);
+     } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : "Unknown error");
      } finally {
         setIsTesting(false);
      }
