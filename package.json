@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "NODE_OPTIONS=--max-old-space-size=4096 next build",
-    "build:android": "next build",
+    "build:android": "BUILD_TARGET=android NODE_OPTIONS=--max-old-space-size=4096 next build",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",

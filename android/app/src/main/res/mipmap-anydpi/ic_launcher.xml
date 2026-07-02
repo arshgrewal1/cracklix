@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  API-level-agnostic fallback for @mipmap/ic_launcher.
+  API 26+ uses the adaptive icon in mipmap-anydpi-v26/. This file ensures the
+  resource also resolves on API 24-25 (minSdk is 24), where adaptive icons are
+  not supported, by pointing at the vector launcher drawable.
+-->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_launcher_background"/>
+    <item android:drawable="@drawable/ic_launcher_foreground"/>
+</layer-list>
