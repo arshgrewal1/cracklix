@@ -72,3 +72,9 @@ android {
         buildConfig true
     }
 }
+
+dependencies {
+    implementation project(':capacitor-android')
+    implementation "com.google.android.material:material:$androidxMaterialVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+}

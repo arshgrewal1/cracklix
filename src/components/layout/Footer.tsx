@@ -42,7 +42,7 @@ export default function Footer() {
               imgClassName="h-full w-auto"
             />
             <p className="max-w-[320px] text-[15px] leading-relaxed text-slate-400 font-medium tracking-tight">
-              Punjab's smart exam preparation platform for every aspirant.
+              Punjab&apos;s smart exam preparation platform for every aspirant.
             </p>
             <div className="flex items-center gap-4 pt-2">
               <SocialIcon href={TELEGRAM_GROUP} icon={<MessageCircle className="h-5 w-5" />} />
