@@ -132,7 +132,7 @@ export default function Navbar() {
               <NavLink href="/leaderboard" label="Top Rankers" active={pathname === '/leaderboard'} />
             </div>
 
-            <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0 flex-1 lg:flex-none">
+            <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0">
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden sm:flex flex-col items-end mr-1">
                     <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none">Elite Hub</span>
@@ -190,7 +190,7 @@ export default function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link href="/login" className="px-4 md:px-6 h-10 md:h-12 rounded-xl bg-primary text-white font-bold text-[11px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
+                <Link href="/login" className="px-3 md:px-6 h-10 md:h-12 rounded-xl bg-primary text-white font-bold text-[11px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md whitespace-nowrap shrink-0">
                   Login
                 </Link>
               )}
