@@ -40,7 +40,7 @@ export default function AppPreview() {
                  </div>
                  <h2 className="text-[22px] md:text-[clamp(24px,4vw,36px)] font-bold tracking-tight text-[#0F172A]">Study Anywhere</h2>
               </div>
-              <p className="max-w-2xl text-[14px] md:text-[clamp(13px,1.5vw,18px)] font-medium text-slate-500">Experience Punjab's smartest platform on all mobile devices.</p>
+              <p className="max-w-2xl text-[14px] md:text-[clamp(13px,1.5vw,18px)] font-medium text-slate-500">Experience Punjab&apos;s smartest platform on all mobile devices.</p>
            </div>
         </div>
 

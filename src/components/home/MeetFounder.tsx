@@ -49,7 +49,7 @@ export default function MeetFounder() {
             </div>
 
             <p className="text-base md:text-xl text-slate-500 font-medium leading-relaxed max-w-2xl mx-auto md:mx-0">
-              Arsh Grewal is building Punjab's smartest platform to help every student prepare for their dream government job. Driven by high-fidelity preparation standards.
+              Arsh Grewal is building Punjab&apos;s smartest platform to help every student prepare for their dream government job. Driven by high-fidelity preparation standards.
             </p>
 
             <div className="pt-2 md:pt-6">
