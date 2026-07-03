@@ -62,7 +62,8 @@ export default function ExamsEntryPage() {
 
   const handleTogglePin = async (e: React.MouseEvent, examId: string) => {
     e.preventDefault(); e.stopPropagation();
-    if (!db || !user || pinningId) return;
+    if (!user) { router.push(`/login?returnUrl=${encodeURIComponent('/exams')}`); return; }
+    if (!db || pinningId) return;
     setPinningId(examId);
     const isPinned = profile?.pinnedExams?.includes(examId);
     const userRef = doc(db, "users", user.uid);
@@ -79,7 +80,7 @@ export default function ExamsEntryPage() {
     } finally { setPinningId(null); }
   };
 
-  if (authLoading || !user) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
+  if (authLoading) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-10 w-10 text-primary animate-pulse" /></div>;
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body text-left">

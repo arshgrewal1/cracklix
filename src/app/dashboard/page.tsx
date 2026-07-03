@@ -31,7 +31,10 @@ import {
   BookOpen,
   Newspaper,
   FileStack,
-  ShieldAlert
+  ShieldAlert,
+  Gift,
+  Copy,
+  Share2
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -259,6 +262,10 @@ export default function StudentDashboard() {
                 </div>
               </Card>
 
+              {profile?.referralCode && (
+                <ReferralCard referralCode={profile.referralCode} />
+              )}
+
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl space-y-6">
                  <h4 className="text-[11px] font-black text-slate-400 tracking-widest uppercase">Quick Tools</h4>
                  <div className="grid grid-cols-1 gap-2 md:gap-3">
@@ -286,6 +293,45 @@ function MetricItem({ label, val, icon }: { label: string, val: string | number,
       </div>
       <div className="text-[18px] md:text-2xl font-black text-[#0F172A] leading-none truncate tabular-nums">{val}</div>
       <p className="text-[11px] font-bold tracking-tight text-slate-400 mt-2">{label}</p>
+    </Card>
+  )
+}
+
+function ReferralCard({ referralCode }: { referralCode: string }) {
+  const { toast } = useToast()
+  const referralLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/login?ref=${referralCode}`
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(referralLink)
+    toast({ title: "Copied!", description: "Referral link copied to clipboard" })
+  }
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      await navigator.share({ title: 'Join Cracklix', text: 'Prepare for Punjab govt exams with me on Cracklix!', url: referralLink })
+    } else {
+      handleCopy()
+    }
+  }
+
+  return (
+    <Card className="border-none shadow-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white p-6 rounded-2xl md:rounded-[2rem] relative overflow-hidden group">
+      <div className="absolute top-0 right-0 p-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Gift className="h-20 w-20" /></div>
+      <div className="relative z-10 space-y-4">
+        <div className="space-y-1">
+          <p className="text-[11px] font-black text-white/70 uppercase tracking-widest">Refer &amp; Earn</p>
+          <p className="text-sm font-bold text-white/90">Invite friends and earn rewards!</p>
+        </div>
+        <div className="flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2.5 backdrop-blur-sm">
+          <span className="text-[11px] font-mono font-bold text-white/90 truncate flex-1">{referralCode}</span>
+          <button onClick={handleCopy} className="shrink-0 h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center hover:bg-white/30 transition-colors active:scale-95">
+            <Copy className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <button onClick={handleShare} className="w-full h-10 rounded-xl bg-white text-emerald-600 font-black text-[11px] uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all shadow-lg">
+          <Share2 className="h-4 w-4" /> Share Referral Link
+        </button>
+      </div>
     </Card>
   )
 }

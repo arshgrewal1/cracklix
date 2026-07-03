@@ -9,6 +9,7 @@ import CurrentAffairsPreview from "@/components/home/CurrentAffairsPreview";
 import MeritPreview from "@/components/home/MeritPreview";
 import AppPreview from "@/components/home/AppPreview";
 import MeetFounder from "@/components/home/MeetFounder";
+import SuccessStoriesPreview from "@/components/home/SuccessStoriesPreview";
 import Footer from "@/components/layout/Footer";
 import GlobalSearch from "@/components/home/GlobalSearch";
 import StatsBar from "@/components/home/StatsBar";
@@ -54,6 +55,9 @@ export default function HomePage() {
 
       {/* 9. Merit Rankings */}
       <MeritPreview />
+
+      {/* 9.5. Success Stories */}
+      <SuccessStoriesPreview />
 
       {/* 10. Mobile App */}
       <AppPreview />
