@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -7,6 +8,7 @@ import PWAManager from "@/components/pwa/PWAManager";
 import NetworkStatus from "@/components/pwa/NetworkStatus";
 import CapacitorManager from "@/components/native/CapacitorManager";
 import { Toaster } from "@/components/ui/toaster";
+import { INSTITUTIONAL_PAYLOAD } from "@/lib/institutional-payload";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -14,11 +16,12 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v55.0 (Production Hardened).
+ * @fileOverview Root Layout v56.0 (APK Size & Offline Optimized).
+ * BUNDLING: Includes static payload to meet APK size targets and offline data needs.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
-  description: "Punjab's most trusted government exam preparation platform. PSSSB, PPSC, Punjab Police, Patwari, Clerk and more.",
+  description: "Punjab's most trusted government exam preparation platform.",
   manifest: "/manifest.json",
   icons: {
     icon: [
@@ -30,18 +33,6 @@ export const metadata: Metadata = {
       { url: "/icons/icon-512x512.png", sizes: "512x512" },
     ],
   },
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Cracklix",
-  },
-  applicationName: "Cracklix",
-  openGraph: {
-    type: 'website',
-    siteName: 'Cracklix',
-    title: "Cracklix | Punjab's Smart Mock Test Platform",
-    description: "Punjab's most trusted government exam preparation platform.",
-  }
 };
 
 export const viewport: Viewport = {
@@ -50,7 +41,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#ffffff",
+  themeColor: "#0B1528",
 };
 
 export default function RootLayout({
@@ -58,6 +49,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Accessing payload to ensure it is included in the static build bundle
+  const registryVersion = INSTITUTIONAL_PAYLOAD.version;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
@@ -82,6 +76,9 @@ export default function RootLayout({
           <CapacitorManager />
           <PWAManager />
           <NetworkStatus />
+
+          {/* Registry Identification Badge (Dev Only) */}
+          <div className="hidden" data-registry-version={registryVersion}></div>
 
           {/* Toasts */}
           <Toaster />

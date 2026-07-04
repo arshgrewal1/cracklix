@@ -2,8 +2,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Official PWA Manifest Registry v2.0.
- * Optimized for high-fidelity Android splash screens and home screen icons.
+ * @fileOverview Official PWA Manifest Registry v2.1.
+ * FIXED: Explicit paths to icons in public/icons/ for high-fidelity branding.
  */
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -27,7 +27,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/icons/icon-512x512.png",
         sizes: "512x512",
         type: "image/png",
-        purpose: "maskable"
+        purpose: "any"
       },
       {
         src: "/icons/icon-maskable-192x192.png",

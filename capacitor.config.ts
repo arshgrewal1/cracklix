@@ -3,7 +3,7 @@ import { CapacitorConfig } from '@capacitor/cli';
 
 /**
  * @fileOverview Production Capacitor Configuration for Cracklix Android.
- * Hardened for signed APK release with deep linking and security flags.
+ * Hardened for offline-first APK release with local asset priority.
  */
 
 const config: CapacitorConfig = {
@@ -12,12 +12,9 @@ const config: CapacitorConfig = {
   webDir: 'out',
   bundledWebRuntime: false,
   server: {
-    // For production APKs, we point to the live URL for live updates,
-    // but the local assets in 'out' are the fallback.
-    url: 'https://cracklix.vercel.app',
-    allowNavigation: ['*'],
+    // URL removed to ensure the app loads from local 'out' directory for offline support.
     androidScheme: 'https',
-    cleartext: false // Secure HTTPS only for production
+    cleartext: false
   },
   plugins: {
     SplashScreen: {
@@ -42,7 +39,6 @@ const config: CapacitorConfig = {
     allowMixedContent: false,
     captureInput: true,
     webContentsDebuggingEnabled: false,
-    // Ensure the app can handle high-density assets
     buildOptions: {
       keystorePath: 'keystore.jks',
       keystoreAlias: 'cracklix',
