@@ -1,50 +1,70 @@
 'use client';
-import AdEntryContent from './AdEntryContent';
-import { useEffect, useState } from 'react';
 
+import { useEffect, useState } from 'react';
+import AdEntryContent from './AdEntryContent';
+import { useFirestore } from '@/firebase';
+import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
+import { Loader2 } from 'lucide-react';
+
+/**
+ * @fileOverview Ad Entry Page Node v2.0.
+ * FIXED: Replaced API-based fetching with direct Firestore Client SDK usage 
+ * to ensure compatibility with static APK builds.
+ */
 export default function AdEntryPage({ searchParams }: any) {
+  const db = useFirestore();
   const { id } = searchParams;
-  const [existingAd, setExistingAd] = useState(null);
-  const [exams, setExams] = useState([]);
+  
+  const [existingAd, setExistingAd] = useState<any>(null);
+  const [exams, setExams] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
+      if (!db) return;
+      
       try {
-        // Only load from API on CLIENT-SIDE after build
+        setLoading(true);
+
+        // 1. Fetch Existing Ad node if editing
         if (id) {
-          const adRes = await fetch('/api/firebase', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ collection: 'ads', doc: id }),
-          });
-          const { data } = await adRes.json();
-          setExistingAd(data);
+          const adSnap = await getDoc(doc(db, "ads", id));
+          if (adSnap.exists()) {
+            setExistingAd({ ...adSnap.data(), id: adSnap.id });
+          }
         }
 
-        // Load exams after build
-        const examsRes = await fetch('/api/firebase', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ collection: 'exams' }),
-        });
-        const { data } = await examsRes.json();
-        setExams(data);
+        // 2. Fetch Exams for targeting node
+        const examsSnap = await getDocs(collection(db, "exams"));
+        const examsList = examsSnap.docs.map(d => ({ ...d.data(), id: d.id }));
+        setExams(examsList);
+
       } catch (error) {
-        console.error('Failed to load data:', error);
+        console.error('[AD_INGESTION_ERROR]:', error);
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [id]);
+  }, [id, db]);
+
+  if (loading) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center space-y-4">
+        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+        <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
+          Syncing Monetization Hub...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <AdEntryContent serverExistingAd={existingAd} serverExams={exams} serverAdId={id} loading={loading} />
+    <AdEntryContent 
+      serverExistingAd={existingAd} 
+      serverExams={exams} 
+      serverAdId={id} 
+    />
   )
 }

@@ -1,5 +1,6 @@
 "use client"
 
+import React, { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { TrendingUp, Target, Users, Clock, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
@@ -13,9 +14,21 @@ const chartData = [
   { month: "Jun", score: 67 },
 ]
 
+/**
+ * @fileOverview Result Analytics Dashboard v1.1.
+ * FIXED: Added hydration guard to prevent Recharts SSR crashes.
+ */
 export default function ResultAnalytics() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in duration-500 text-left">
       <div>
         <h1 className="text-3xl font-headline font-bold">Result Analytics</h1>
         <p className="text-muted-foreground">Monitor platform-wide performance trends and student accuracy.</p>
@@ -43,7 +56,7 @@ export default function ResultAnalytics() {
                     <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
                 <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: 'currentColor', opacity: 0.5}} />
                 <YAxis axisLine={false} tickLine={false} tick={{fill: 'currentColor', opacity: 0.5}} />
                 <Area type="monotone" dataKey="score" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorScore)" strokeWidth={3} />

@@ -1,16 +1,8 @@
-import * as admin from 'firebase-admin';
-import { ServiceAccount } from 'firebase-admin';
+/**
+ * @fileOverview Institutional Server-Side Firebase Admin Node (NEUTRALIZED).
+ * FIXED: This file was causing fatal server crashes during initialization 
+ * due to missing environment variables. Admin SDK is not compatible with 
+ * static APK builds.
+ */
 
-const serviceAccount: ServiceAccount = {
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-};
-
-if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-  });
-}
-
-export const adminDB = admin.firestore();
+export const adminDB = null as any;

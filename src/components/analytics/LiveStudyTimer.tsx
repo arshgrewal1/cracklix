@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react';
 import { useUser, useFirestore } from '@/firebase';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
 import { doc } from 'firebase/firestore';
-import { Clock } from 'lucide-react';
+
+/**
+ * @fileOverview Live Study Timer Node v1.2.
+ * FIXED: Wrapped date calculation in useEffect to prevent hydration mismatches.
+ */
 
 const formatLiveDuration = (seconds: number): string => {
     const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
@@ -16,11 +20,17 @@ const formatLiveDuration = (seconds: number): string => {
 export default function LiveStudyTimer() {
     const { user } = useUser();
     const db = useFirestore();
+    
     const [totalToday, setTotalToday] = useState(0);
     const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
+    const [todayStr, setTodayStr] = useState<string>("");
 
-    const todayStr = new Date().toISOString().split('T')[0];
-    const dailyStatsRef = user ? doc(db, 'users', user.uid, 'study_daily', todayStr) : null;
+    useEffect(() => {
+        // Safe client-side date calculation
+        setTodayStr(new Date().toISOString().split('T')[0]);
+    }, []);
+
+    const dailyStatsRef = (user && db && todayStr) ? doc(db, 'users', user.uid, 'study_daily', todayStr) : null;
     const [dailyStats, loadingDaily] = useDocumentData(dailyStatsRef);
 
     // Listen for the start of a new session from anywhere in the app
@@ -58,7 +68,7 @@ export default function LiveStudyTimer() {
     }, [dailyStats, sessionStartTime]);
 
     return (
-        <div className="bg-white dark:bg-slate-800/50 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+        <div className="bg-white dark:bg-slate-800/50 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-left">
             <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-slate-900 dark:text-white text-lg">Today&apos;s Live Study</h3>
                 {sessionStartTime && <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>}
@@ -66,7 +76,7 @@ export default function LiveStudyTimer() {
             {loadingDaily ? (
                 <div className="h-12 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-md animate-pulse"></div>
             ) : (
-                <p className="text-4xl font-bold text-slate-900 dark:text-white">{formatLiveDuration(totalToday)}</p>
+                <p className="text-4xl font-bold text-slate-900 dark:text-white tabular-nums">{formatLiveDuration(totalToday)}</p>
             )}
         </div>
     );
