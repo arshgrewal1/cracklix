@@ -66,7 +66,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
       console.log('[useCollection] Unsubscribing from snapshot listener.');
       unsubscribe();
     }
-  }, [JSON.stringify(query)]); // Use JSON.stringify for a more stable dependency
+  }, [query]);
 
   return { data, loading, error };
 }

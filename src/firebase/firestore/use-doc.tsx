@@ -61,7 +61,7 @@ export function useDoc<T = DocumentData>(docRef: DocumentReference<T> | null) {
     );
 
     return () => unsubscribe();
-  }, [path]); // Crucial: Depend on the stable path string, not the unstable object reference
+  }, [path, docRef]); // Crucial: Depend on the stable path string, not the unstable object reference
 
   return { data, loading, error };
 }

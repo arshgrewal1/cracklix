@@ -137,7 +137,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }
     }
     loadExam();
-  }, [db, user, profile, mockId, initExam, router, toast]);
+  }, [db, user, profile, mockId, initExam, router, toast, isInitializing]);
 
   useEffect(() => {
     if (isInitializing || initError) return;

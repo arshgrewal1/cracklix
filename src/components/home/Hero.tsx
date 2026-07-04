@@ -67,7 +67,7 @@ export default function Hero() {
             >
               <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 animate-pulse" />
               <span className="text-[11px] md:text-sm font-bold text-slate-600 tracking-tight">
-                Punjab's smartest study platform
+                Punjab&apos;s smartest study platform
               </span>
             </motion.div>
 
