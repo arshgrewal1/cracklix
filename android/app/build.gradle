@@ -18,47 +18,46 @@ android {
     }
     signingConfigs {
         release {
-            // The keystore can be provided in two ways:
-            //   1. CI restores it to android/app/keystore.jks (see workflow), OR a
-            //      base64-encoded keystore is provided via the KEYSTORE_BASE64 env var.
-            //   2. A local file whose path is given by KEYSTORE_PATH (defaults to keystore.jks).
-            def keystorePath = System.getenv('KEYSTORE_PATH') ?: 'keystore.jks'
-            def keystoreBase64 = System.getenv('KEYSTORE_BASE64')
-            def resolvedKeystore = null
-            if (keystoreBase64) {
-                // Decode a base64 keystore into the build directory.
-                def decoded = new File(buildDir, 'keystore.jks')
-                decoded.parentFile.mkdirs()
-                decoded.bytes = keystoreBase64.decodeBase64()
-                resolvedKeystore = decoded
-            } else if (file(keystorePath).exists()) {
-                resolvedKeystore = file(keystorePath)
-            }
-            if (resolvedKeystore != null) {
-                storeFile resolvedKeystore
-                storePassword System.getenv('KEYSTORE_PASSWORD') ?: ''
-                keyAlias System.getenv('KEY_ALIAS') ?: ''
-                keyPassword System.getenv('KEY_PASSWORD') ?: ''
-            } else {
-                // No keystore available (e.g. plain local checkout). Leave the
-                // signing config empty so debug builds still work; assembleRelease
-                // will fail fast with a clear "no keystore" message in that case.
-                println "[SIGNING] No keystore found (KEYSTORE_BASE64 unset and ${keystorePath} missing); release build will be unsigned."
-            }
+            storeFile file('dummy.jks')
+            storePassword 'password'
+            keyAlias 'alias'
+            keyPassword 'password'
         }
     }
     buildTypes {
         release {
-            // Only attach the signing config when a keystore is actually present,
-            // otherwise Gradle errors on the empty storeFile reference.
-            if (System.getenv('KEYSTORE_BASE64') || file(System.getenv('KEYSTORE_PATH') ?: 'keystore.jks').exists()) {
-                signingConfig signingConfigs.release
-            }
-            // Enables code shrinking, obfuscation, and optimization for your release build.
+            signingConfig signingConfigs.release
             minifyEnabled true
-            // Enables resource shrinking, which removes unused resources.
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def abi = output.getFilter("ABI")
+            def newName
+            if (variant.buildType.name == "release") {
+                if (abi != null) {
+                    newName = "cracklix-release-${abi}.apk"
+                } else {
+                    newName = "cracklix.apk"
+                }
+            } else if (variant.buildType.name == "debug") {
+                if (abi != null) {
+                    newName = "cracklix-debug-${abi}.apk"
+                } else {
+                    newName = "cracklix-debug.apk"
+                }
+            }
+            outputFileName = newName
+        }
+    }
+    splits {
+        abi {
+            enable true
+            reset()
+            include "armeabi-v7a", "arm64-v8a", "x86_64"
+            universalApk false
         }
     }
     compileOptions {
