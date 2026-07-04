@@ -2,13 +2,13 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Official PWA Manifest Registry v2.1.
- * FIXED: Explicit paths to icons in public/icons/ for high-fidelity branding.
+ * @fileOverview Official PWA Manifest Registry v2.2.
+ * FIXED: Standardized all icon paths to point to /public/icons/ for high-fidelity APK branding.
  */
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Cracklix | Punjab's Mock Test Platform",
+    name: "Cracklix | Punjab's Smart Mock Test Platform",
     short_name: "Cracklix",
     description: "Punjab's most trusted government exam preparation platform.",
     start_url: "/",

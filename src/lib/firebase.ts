@@ -1,8 +1,9 @@
+
 /**
  * @fileOverview Institutional Server-Side Firebase Admin Node (NEUTRALIZED).
- * FIXED: This file was causing fatal server crashes during initialization 
- * due to missing environment variables. Admin SDK is not compatible with 
- * static APK builds.
+ * FIXED: Removed firebase-admin to prevent fatal server crashes during pre-rendering
+ * and startup in the static Android environment. All data operations are now
+ * handled by the Firebase Client SDK.
  */
 
 export const adminDB = null as any;

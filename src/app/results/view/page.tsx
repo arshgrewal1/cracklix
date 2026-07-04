@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { Suspense, useMemo, useEffect } from "react"
+import React, { Suspense, useMemo, useEffect, useState } from "react"
 import ResultClient from "@/components/results/ResultClient"
 import { Loader2, Zap } from "lucide-react"
 import { useDoc, useFirestore, useUser } from "@/firebase"
@@ -9,11 +10,23 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Universal Result Hub Viewer v2.2 (Static Ready).
- * FIXED: Added Suspense boundary for static export compatibility.
+ * @fileOverview Universal Result Hub Viewer v3.0 (Hydration Secured).
+ * FIXED: Added hydration guard to prevent SSR mismatches in the static APK.
  */
 
 export default function ResultViewPage() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return (
+    <div className="h-screen flex items-center justify-center bg-white">
+      <Loader2 className="animate-spin text-primary" />
+    </div>
+  );
+
   return (
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>}>
       <ResultGuard />
@@ -39,13 +52,13 @@ function ResultGuard() {
         console.log("[AUDIT] Orphan result deep-link detected. Liquidating stale record...");
         const resultId = `${user.uid}_${mockId}`;
         
-        // Background delete
+        // Background delete for data integrity
         deleteDoc(doc(db, "results", resultId)).catch(() => {});
         
         toast({
            variant: "destructive",
            title: "Registry Mismatch",
-           description: "This preparation record is no longer valid. Returning to hub."
+           description: "This record is no longer valid. Returning to hub."
         });
 
         router.replace("/dashboard");
@@ -61,7 +74,7 @@ function ResultGuard() {
      );
   }
 
-  if (!mock && mockId) return null; // Let useEffect handle redirect
+  if (!mock && mockId) return null;
 
   return <ResultClient />;
 }

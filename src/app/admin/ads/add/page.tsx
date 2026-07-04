@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -7,9 +8,8 @@ import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
 
 /**
- * @fileOverview Ad Entry Page Node v2.0.
- * FIXED: Replaced API-based fetching with direct Firestore Client SDK usage 
- * to ensure compatibility with static APK builds.
+ * @fileOverview Ad Entry Page Node v3.0 (Static Export Optimized).
+ * FIXED: Removed API route dependency. Uses direct Firestore Client SDK to load targeting data.
  */
 export default function AdEntryPage({ searchParams }: any) {
   const db = useFirestore();
@@ -34,13 +34,13 @@ export default function AdEntryPage({ searchParams }: any) {
           }
         }
 
-        // 2. Fetch Exams for targeting node
+        // 2. Fetch Exams for targeting node directly from registry
         const examsSnap = await getDocs(collection(db, "exams"));
         const examsList = examsSnap.docs.map(d => ({ ...d.data(), id: d.id }));
         setExams(examsList);
 
       } catch (error) {
-        console.error('[AD_INGESTION_ERROR]:', error);
+        console.error('[AD_REGISTRY_ERROR]:', error);
       } finally {
         setLoading(false);
       }
@@ -54,7 +54,7 @@ export default function AdEntryPage({ searchParams }: any) {
       <div className="h-screen flex flex-col items-center justify-center space-y-4">
         <Loader2 className="h-10 w-10 text-primary animate-spin" />
         <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">
-          Syncing Monetization Hub...
+          Synchronizing Registry...
         </p>
       </div>
     );

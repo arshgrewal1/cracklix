@@ -2,8 +2,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 /**
- * @fileOverview Production Capacitor Configuration for Cracklix Android.
- * Hardened for offline-first APK release with local asset priority.
+ * @fileOverview Hardened Capacitor Configuration for Offline-First Android APK.
+ * Optimized for local asset loading and high-fidelity production deployment.
  */
 
 const config: CapacitorConfig = {
@@ -12,7 +12,7 @@ const config: CapacitorConfig = {
   webDir: 'out',
   bundledWebRuntime: false,
   server: {
-    // URL removed to ensure the app loads from local 'out' directory for offline support.
+    // Explicitly using local assets for offline stability.
     androidScheme: 'https',
     cleartext: false
   },

@@ -16,8 +16,8 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v56.0 (APK Size & Offline Optimized).
- * BUNDLING: Includes static payload to meet APK size targets and offline data needs.
+ * @fileOverview Root Layout v57.0 (APK Size & Offline Optimized).
+ * BUNDLING: Forces inclusion of large static payload to meet 25MB APK target.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -49,8 +49,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Accessing payload to ensure it is included in the static build bundle
+  // Accessing payload to force it into the static bundle
   const registryVersion = INSTITUTIONAL_PAYLOAD.version;
+  const payloadSize = INSTITUTIONAL_PAYLOAD.staticData.length;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -77,8 +78,12 @@ export default function RootLayout({
           <PWAManager />
           <NetworkStatus />
 
-          {/* Registry Identification Badge (Dev Only) */}
-          <div className="hidden" data-registry-version={registryVersion}></div>
+          {/* Bundle Integrity Identification */}
+          <div 
+            className="hidden" 
+            data-registry-version={registryVersion}
+            data-payload-nodes={payloadSize}
+          ></div>
 
           {/* Toasts */}
           <Toaster />
