@@ -10,7 +10,6 @@ const config: CapacitorConfig = {
   appId: 'com.cracklix.app',
   appName: 'Cracklix',
   webDir: 'out',
-  bundledWebRuntime: false,
   server: {
     // Explicitly using local assets for offline stability.
     androidScheme: 'https',
