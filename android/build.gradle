@@ -18,9 +18,6 @@ buildscript {
     }
 }
 
-// Set the ANDROID_HOME environment variable to ensure the SDK is found.
-System.setProperty('ANDROID_HOME', '/opt/android-sdk')
-
 apply from: "variables.gradle"
 
 // The allprojects block has been removed, as repositories are now centralized in settings.gradle.
