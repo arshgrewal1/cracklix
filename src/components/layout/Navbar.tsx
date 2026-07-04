@@ -118,7 +118,7 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 -ml-5" 
+                className="flex-shrink-0 -ml-5"
                 imgClassName="h-12 md:h-24 w-auto"
                 align="left"
               />
@@ -190,7 +190,7 @@ export default function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link href="/login" className="px-4 md:px-6 h-10 md:h-12 rounded-xl bg-primary text-white font-bold text-[11px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
+                <Link href="/login" className="px-3 md:px-4 h-10 md:h-12 rounded-xl bg-primary text-white font-bold text-[10px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
                   Login
                 </Link>
               )}

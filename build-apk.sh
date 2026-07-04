@@ -4,6 +4,7 @@
 set -e
 
 echo "🔨 Preparing Web Assets..."
+export BUILD_TARGET=android
 npm run build:android
 
 echo "📦 Syncing with Capacitor..."

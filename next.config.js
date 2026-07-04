@@ -1,17 +1,16 @@
+
 /** @type {import('next').NextConfig} */
 
 // When building the Capacitor/Android bundle we must emit a static `out/`
-// directory (that is what capacitor.config.ts references via `webDir: 'out'`
-// and what `npx cap sync android` copies). We only enable static export for
-// that build target so the normal server build keeps its API routes
-// (Razorpay, coupons, health, etc.) fully functional.
+// directory (that is what capacitor.config.ts references via `webDir: 'out'`).
 const isAndroidBuild = process.env.BUILD_TARGET === 'android';
 
 const nextConfig = {
   reactStrictMode: true,
-  ...(isAndroidBuild ? { output: 'export' } : {}),
+  // Capacitor requires static export
+  output: isAndroidBuild ? 'export' : undefined,
   images: {
-    unoptimized: true,
+    unoptimized: true, // Required for static exports/Capacitor
   },
   eslint: {
     ignoreDuringBuilds: true,
@@ -21,7 +20,7 @@ const nextConfig = {
   },
   poweredByHeader: false,
   compress: true,
-  staticPageGenerationTimeout: 120,
+  staticPageGenerationTimeout: 300,
 };
 
 module.exports = nextConfig;
