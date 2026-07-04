@@ -18,48 +18,48 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('dummy.jks')
-            storePassword 'password'
-            keyAlias 'alias'
-            keyPassword 'password'
+            storeFile file('release.jks')
+            storePassword 'CrackLix@2026Release!'
+            keyAlias 'cracklix-release-key'
+            keyPassword 'CrackLix@2026Release!'
         }
     }
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-    applicationVariants.all { variant ->
-        variant.outputs.all { output ->
-            def abi = output.getFilter("ABI")
-            def newName
-            if (variant.buildType.name == "release") {
-                if (abi != null) {
-                    newName = "cracklix-release-${abi}.apk"
-                } else {
-                    newName = "cracklix.apk"
-                }
-            } else if (variant.buildType.name == "debug") {
-                if (abi != null) {
-                    newName = "cracklix-debug-${abi}.apk"
-                } else {
-                    newName = "cracklix-debug.apk"
-                }
-            }
-            outputFileName = newName
-        }
-    }
-    splits {
-        abi {
-            enable true
-            reset()
-            include "armeabi-v7a", "arm64-v8a", "x86_64"
-            universalApk false
-        }
-    }
+    // applicationVariants.all { variant ->
+    //     variant.outputs.all { output ->
+    //         def abi = output.getFilter("ABI")
+    //         def newName
+    //         if (variant.buildType.name == "release") {
+    //             if (abi != null) {
+    //                 newName = "cracklix-release-${abi}.apk"
+    //             } else {
+    //                 newName = "cracklix.apk"
+    //             }
+    //         } else if (variant.buildType.name == "debug") {
+    //             if (abi != null) {
+    //                 newName = "cracklix-debug-${abi}.apk"
+    //             } else {
+    //                 newName = "cracklix-debug.apk"
+    //             }
+    //         }
+    //         outputFileName = newName
+    //     }
+    // }
+    // splits {
+    //     abi {
+    //         enable true
+    //         reset()
+    //         include "armeabi-v7a", "arm64-v8a", "x86_64"
+    //         universalApk false
+    //     }
+    // }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
