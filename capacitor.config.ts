@@ -40,7 +40,7 @@ const config: CapacitorConfig = {
     webContentsDebuggingEnabled: false,
     buildOptions: {
       keystorePath: 'keystore.jks',
-      keystoreAlias: 'cracklix',
+      keystoreAlias: 'cracklix-release-key',
     }
   }
 };

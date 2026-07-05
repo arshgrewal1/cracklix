@@ -11,13 +11,17 @@ echo "📦 Syncing with Capacitor..."
 # Synchronize using the 'out' directory as configured in capacitor.config.ts
 npx cap sync android
 
-echo "🏗️ Building Debug APK..."
+echo "🏗️ Building Release APK..."
 cd android
-./gradlew clean assembleDebug
+./gradlew clean assembleRelease --stacktrace --info
 
 if [ $? -eq 0 ]; then
-    echo "✅ Debug APK built successfully!"
-    echo "📍 Location: android/app/build/outputs/apk/debug/app-debug.apk"
+    echo "✅ Release APK built successfully!"
+    echo "📍 Listing contents of app/build/outputs/apk..."
+    ls -l app/build/outputs/apk
+    echo "📍 Listing contents of app/build/outputs/apk/release..."
+    ls -l app/build/outputs/apk/release
+    echo "📍 Location: app/build/outputs/apk/release/app-release.apk"
 else
     echo "❌ Build failed"
     exit 1
