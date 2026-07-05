@@ -1,13 +1,7 @@
+/**
+ * @fileOverview Institutional Server-Side Admin Node (NEUTRALIZED).
+ * FIXED: Removed firebase-admin to prevent fatal crashes in the static Android build environment.
+ * All operations must use the Firebase Client SDK.
+ */
 
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
-
-const serviceKey = require('./service-key.json');
-
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(serviceKey),
-  });
-}
-
-export const adminDB = getFirestore();
+export const adminDB = null as any;

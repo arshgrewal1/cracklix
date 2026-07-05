@@ -5,17 +5,24 @@ import { doc, getDoc } from 'firebase/firestore';
 
 /**
  * @fileOverview Razorpay Order Creation Node.
- * FIXED: Bypasses 404 by providing the missing API endpoint for checkout.
+ * FIXED: Handled optional coupon codes and added JSON parse guards.
  */
 
 export async function POST(req: Request) {
   try {
-    const { planId, userId, couponCode } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { planId, userId, couponCode } = body;
+
+    if (!planId || !userId) {
+      return NextResponse.json({ error: 'Plan ID and User ID are required.' }, { status: 400 });
+    }
+
     const key_id = process.env.RAZORPAY_KEY_ID;
     const key_secret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!key_id || !key_secret) {
-      return NextResponse.json({ error: 'Razorpay keys missing in environment' }, { status: 500 });
+      console.error("[RAZORPAY_ERROR] Keys missing in environment.");
+      return NextResponse.json({ error: 'Gateway configuration missing.' }, { status: 500 });
     }
 
     const instance = new Razorpay({ key_id, key_secret });
@@ -25,20 +32,27 @@ export async function POST(req: Request) {
     const planSnap = await getDoc(planRef);
     
     if (!planSnap.exists()) {
-      return NextResponse.json({ error: 'Plan node not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Pass plan not found.' }, { status: 404 });
     }
 
     const planData = planSnap.data();
     let finalAmount = Number(planData.price);
 
-    // Apply Coupon Logic if present
-    if (couponCode) {
-      const couponRef = doc(firestore, "coupons", couponCode.toUpperCase());
-      const couponSnap = await getDoc(couponRef);
-      if (couponSnap.exists() && couponSnap.data().active) {
-        const c = couponSnap.data();
-        if (c.type === 'percent') finalAmount = finalAmount - (finalAmount * c.discount / 100);
-        else finalAmount = finalAmount - c.discount;
+    // Apply Coupon Logic if code is provided and not empty
+    if (couponCode && couponCode.trim().length > 0) {
+      try {
+        const couponRef = doc(firestore, "coupons", couponCode.toUpperCase().trim());
+        const couponSnap = await getDoc(couponRef);
+        if (couponSnap.exists() && couponSnap.data().active) {
+          const c = couponSnap.data();
+          if (c.type === 'percent') {
+            finalAmount = finalAmount - (finalAmount * (Number(c.discount) || 0) / 100);
+          } else {
+            finalAmount = finalAmount - (Number(c.discount) || 0);
+          }
+        }
+      } catch (couponErr) {
+        console.warn("[COUPON_AUDIT_SKIP] Optional coupon validation failed.");
       }
     }
 

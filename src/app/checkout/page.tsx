@@ -30,8 +30,8 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
 /**
- * @fileOverview Official Checkout Hub v3.1.
- * FIXED: Hardened JSON parsing and response validation for network requests.
+ * @fileOverview Official Checkout Hub v3.5.
+ * FIXED: Coupon code is now explicitly optional for payments.
  */
 
 async function safeJsonParse(response: Response) {
@@ -40,22 +40,15 @@ async function safeJsonParse(response: Response) {
     try {
       return await response.json();
     } catch (e) {
-      console.error("[JSON_PARSE_ERROR]", e);
-      return { error: "Failed to parse server response." };
+      return { error: "Failed to parse registry response." };
     }
   }
-  return { error: `Server returned non-JSON response (${response.status})` };
+  return { error: `Server error node (${response.status})` };
 }
 
 export default function CheckoutPage() {
   return (
-    <React.Suspense
-      fallback={
-        <div className="h-screen flex items-center justify-center">
-          <Loader2 className="h-10 w-10 animate-spin text-primary" />
-        </div>
-      }
-    >
+    <React.Suspense fallback={<div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}>
       <CheckoutContent />
     </React.Suspense>
   );
@@ -67,7 +60,6 @@ function CheckoutContent() {
   const { toast } = useToast();
 
   const planId = searchParams.get("plan") || "monthly-pass";
-
   const { user, profile, loading } = useUser();
   const dbInstance = useFirestore();
 
@@ -78,19 +70,10 @@ function CheckoutContent() {
   const [appliedCoupon, setAppliedCoupon] = React.useState<any>(null);
   const [verifyingCoupon, setVerifyingCoupon] = React.useState(false);
 
-  const settingsRef = React.useMemo(
-    () => (dbInstance ? doc(dbInstance, "settings", "global") : null), 
-    [dbInstance]
-  );
-  const { data: settings } = useDoc<any>(settingsRef);
-
-  const planRef = React.useMemo(
-    () => (dbInstance && planId ? doc(dbInstance, "passes", planId) : null), 
-    [dbInstance, planId]
-  );
+  const planRef = React.useMemo(() => (dbInstance && planId ? doc(dbInstance, "passes", planId) : null), [dbInstance, planId]);
   const { data: planData, loading: planLoading } = useDoc<any>(planRef);
 
-  const upiId = settings?.upiId || "arshdeepgrewal1122-1@oksbi";
+  const upiId = "arshdeepgrewal1122-1@oksbi";
   const upiUrl = `upi://pay?pa=${upiId}&pn=Cracklix&cu=INR`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(upiUrl)}`;
 
@@ -112,12 +95,12 @@ function CheckoutContent() {
        const data = await safeJsonParse(res);
        if (res.ok && !data.error) {
           setAppliedCoupon(data);
-          toast({ title: "Coupon Applied", description: `Discount verified.` });
+          toast({ title: "Coupon Applied", description: "Discount node verified." });
        } else {
-          toast({ variant: "destructive", title: "Invalid Code", description: data.error || "Could not verify code." });
+          toast({ variant: "destructive", title: "Coupon Invalid", description: data.error || "Code not recognized." });
        }
     } catch (e) {
-       toast({ variant: "destructive", title: "Network Error", description: "Coupon verification node timed out." });
+       toast({ variant: "destructive", title: "Registry Error", description: "Failed to verify coupon node." });
     } finally {
        setVerifyingCoupon(false);
     }
@@ -125,10 +108,10 @@ function CheckoutContent() {
 
   const discountedPrice = React.useMemo(() => {
     if (!planData) return 0;
-    const base = Number(planData.price);
+    const base = Number(planData.price) || 0;
     if (!appliedCoupon) return base;
-    if (appliedCoupon.type === 'percent') return Math.max(1, base - (base * appliedCoupon.discount / 100));
-    return Math.max(1, base - appliedCoupon.discount);
+    if (appliedCoupon.type === 'percent') return Math.max(1, base - (base * (Number(appliedCoupon.discount) || 0) / 100));
+    return Math.max(1, base - (Number(appliedCoupon.discount) || 0));
   }, [planData, appliedCoupon]);
 
   const handlePaymentInitiation = async () => {
@@ -144,52 +127,41 @@ function CheckoutContent() {
         body: JSON.stringify({ 
           planId, 
           userId: user.uid,
-          couponCode: appliedCoupon ? coupon.trim().toUpperCase() : null
+          couponCode: appliedCoupon ? coupon.trim() : null
         }),
       });
 
       const orderData = await safeJsonParse(res);
-      
-      if (!res.ok || orderData.error) {
-        throw new Error(orderData.reason || orderData.error || `Gateway error code ${res.status}`);
-      }
-
-      if (!(window as any).Razorpay) {
-        throw new Error("Razorpay SDK not loaded. Check connection.");
-      }
+      if (!res.ok || orderData.error) throw new Error(orderData.error || "Gateway failure.");
 
       const options = {
         key: orderData.key,
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Cracklix",
-        description: `Elite Pass: ${planData.name}`,
+        description: `Pass: ${planData.name}`,
         order_id: orderData.orderId,
         handler: async function (response: any) {
-          setOnlineProcessing(true);
           try {
             const verifyRes = await fetch("/api/razorpay/verify", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ ...response, userId: user.uid, planId }),
             });
-
             const vData = await safeJsonParse(verifyRes);
             if (verifyRes.ok && vData.success) {
               router.push(`/payment/success?order_id=${response.razorpay_order_id}&plan=${encodeURIComponent(planData.name)}`);
             } else {
-              throw new Error(vData.reason || vData.error || "Verification signature mismatch.");
+              throw new Error("Registry verification failed.");
             }
           } catch (err: any) {
              setErrorMessage(err.message);
-          } finally {
-            setOnlineProcessing(false);
           }
         },
         prefill: {
           name: profile?.name || "Aspirant",
           email: user.email || "",
-          contact: profile?.phone?.replace(/\D/g, '').slice(-10) || "",
+          contact: profile?.phone || "",
         },
         theme: { color: "#2563EB" },
         modal: { ondismiss: () => setOnlineProcessing(false) }
@@ -204,11 +176,11 @@ function CheckoutContent() {
   };
 
   const handleManualSubmit = async () => {
-    if (!user) return;
+    if (!user || !utr) return;
     setOnlineProcessing(true);
     try {
       await submitManualPayment({ userId: user.uid, userEmail: user.email || "", userName: profile?.name || "Aspirant", planId, transactionId: utr });
-      toast({ title: "Request Staged", description: "Manual verification in progress." });
+      toast({ title: "Audit Staged", description: "Payment node under review." });
       router.push("/dashboard");
     } catch (e: any) {
       setErrorMessage(e.message);
@@ -233,14 +205,11 @@ function CheckoutContent() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
            <div className="lg:col-span-8 space-y-6">
               {errorMessage && (
-                <div className="p-6 bg-rose-50 border border-rose-100 rounded-[1.5rem] flex items-start gap-4 animate-in slide-in-from-top-4">
+                <div className="p-6 bg-rose-50 border border-rose-100 rounded-[1.5rem] flex items-start gap-4">
                   <AlertCircle className="h-6 w-6 text-rose-500 shrink-0" />
-                  <div className="flex-1 space-y-3">
-                     <p className="font-bold text-rose-700 leading-tight">Payment Node Failure</p>
-                     <p className="text-sm text-rose-600 font-medium">{errorMessage}</p>
-                     <Button variant="outline" size="sm" className="h-9 rounded-lg bg-white border-rose-200 text-rose-600 font-bold" onClick={handlePaymentInitiation}>
-                        <RefreshCw className="h-3.5 w-3.5 mr-2" /> Retry Sync
-                     </Button>
+                  <div className="flex-1">
+                     <p className="font-bold text-rose-700">Audit failure</p>
+                     <p className="text-sm text-rose-600">{errorMessage}</p>
                   </div>
                 </div>
               )}
@@ -253,23 +222,16 @@ function CheckoutContent() {
 
                 <TabsContent value="online">
                   <Card className="p-8 border-none shadow-xl rounded-[2rem] space-y-8 bg-white">
-                    <div className="space-y-2">
-                       <h2 className="text-xl font-black text-[#0F172A]">Pro Activation</h2>
-                       <p className="text-sm text-slate-500 font-medium leading-relaxed">Verified activation via encrypted gateway.</p>
-                    </div>
-
-                    <div className="space-y-4 border-y border-slate-50 py-6">
-                       <div className="flex items-center justify-between">
-                          <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Have a promo code?</Label>
-                       </div>
+                    <div className="space-y-4">
+                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Have a promo code? (Optional)</Label>
                        <div className="flex gap-2">
                           <div className="relative flex-1">
                              <Tag className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
                              <Input 
                                 value={coupon} 
                                 onChange={e => setCoupon(e.target.value.toUpperCase())} 
-                                className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold placeholder:text-slate-300 shadow-inner" 
-                                placeholder="ENTER CODE" 
+                                className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold shadow-inner" 
+                                placeholder="PROMOCODE" 
                              />
                           </div>
                           <Button onClick={handleApplyCoupon} disabled={!coupon.trim() || verifyingCoupon} className="h-12 px-6 rounded-xl bg-[#0F172A] hover:bg-black font-black uppercase text-[10px]">
@@ -286,110 +248,62 @@ function CheckoutContent() {
                 </TabsContent>
 
                 <TabsContent value="manual">
-                  <Card className="p-8 border-none shadow-xl rounded-[2rem] space-y-8 bg-white">
-                    <div className="space-y-2">
-                       <h2 className="text-xl font-black text-[#0F172A]">Manual Audit</h2>
-                       <p className="text-sm text-slate-500 font-medium leading-relaxed">Scan the official QR below to complete your payment.</p>
-                    </div>
-
-                    <div className="flex flex-col md:flex-row gap-10 items-center justify-center">
-                       <div className="w-full md:w-1/2 flex flex-col items-center gap-4">
-                          <div className="relative h-64 w-64 md:h-80 md:w-80 bg-white rounded-[2.5rem] border-2 border-slate-100 flex items-center justify-center overflow-hidden shadow-2xl p-6 group transition-all hover:border-primary/30">
-                             <div className="relative w-full h-full">
-                                <Image 
-                                  src={qrCodeUrl} 
-                                  alt="UPI QR Code" 
-                                  fill 
-                                  className="object-contain"
-                                  unoptimized
-                                />
-                             </div>
-                             <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                          </div>
-                          <div className="flex items-center gap-2 text-slate-400 bg-slate-50 px-4 py-2 rounded-full border border-slate-100 shadow-sm">
-                             <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                             <p className="text-[10px] font-bold uppercase tracking-widest">Scan with any UPI App</p>
-                          </div>
-                       </div>
-
-                       <div className="w-full md:w-1/2 space-y-6">
-                          <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
-                             <div className="space-y-0.5">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Payable To</p>
-                                <p className="text-sm font-bold text-[#0F172A]">Cracklix Prep Hub</p>
-                             </div>
-                             <Gem className="h-5 w-5 text-primary" />
-                          </div>
-
-                          <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between shadow-sm">
-                             <div className="space-y-0.5">
-                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">UPI ID</p>
-                                <p className="text-sm font-bold text-primary">{upiId}</p>
-                             </div>
-                             <Button variant="ghost" size="icon" onClick={() => { navigator.clipboard.writeText(upiId); toast({ title: "Copied" }); }}><Copy className="h-4 w-4" /></Button>
-                          </div>
-                          
-                          <div className="space-y-2">
-                             <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">After Payment: Enter UTR / Transaction ID</Label>
-                             <Input 
-                                value={utr} 
-                                onChange={(e) => setUtr(e.target.value.replace(/\D/g, "").slice(0, 12))} 
-                                placeholder="12 digit UTR Number" 
-                                className="h-14 rounded-xl border-slate-100 bg-slate-50 font-bold shadow-inner" 
-                             />
-                          </div>
-
-                          <Button 
-                             disabled={utr.length < 12 || onlineProcessing} 
-                             className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest rounded-2xl shadow-xl text-[10px] border-none" 
-                             onClick={handleManualSubmit}
-                          >
-                             {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Verify Transaction"}
-                          </Button>
-                       </div>
-                    </div>
+                  <Card className="p-8 border-none shadow-xl rounded-[2rem] bg-white text-center space-y-10">
+                     <div className="relative h-64 w-64 md:h-80 md:w-80 mx-auto bg-white rounded-[2.5rem] border-2 border-slate-100 flex items-center justify-center overflow-hidden shadow-2xl p-6 group">
+                        <div className="relative w-full h-full">
+                           <Image src={qrCodeUrl} alt="UPI QR" fill className="object-contain" unoptimized />
+                        </div>
+                     </div>
+                     <div className="space-y-6 max-w-sm mx-auto">
+                        <div className="space-y-2">
+                           <Label className="text-[9px] font-black uppercase text-slate-400">12 Digit UTR Number</Label>
+                           <Input 
+                             value={utr} 
+                             onChange={(e) => setUtr(e.target.value.replace(/\D/g, "").slice(0, 12))} 
+                             placeholder="000000000000" 
+                             className="h-14 rounded-xl border-slate-100 bg-slate-50 font-black text-center text-xl tracking-[0.5em]" 
+                           />
+                        </div>
+                        <Button 
+                           disabled={utr.length < 12 || onlineProcessing} 
+                           className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest rounded-2xl shadow-xl text-[10px] border-none" 
+                           onClick={handleManualSubmit}
+                        >
+                           {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Submit Transaction"}
+                        </Button>
+                     </div>
                   </Card>
                 </TabsContent>
               </Tabs>
            </div>
 
-           <div className="lg:col-span-4 space-y-6">
-              <Card className="p-8 border-none shadow-xl rounded-[2rem] bg-white space-y-8 sticky top-24 border border-slate-50">
+           <div className="lg:col-span-4">
+              <Card className="p-8 border-none shadow-xl rounded-[2rem] bg-white space-y-8 sticky top-24 border border-slate-100">
                  <div className="flex items-center gap-4">
                     <div className="h-12 w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
                        <Gem className="h-6 w-6" />
                     </div>
-                    <div className="space-y-0.5 text-left">
-                       <h3 className="text-lg font-black uppercase tracking-tight text-[#0F172A]">{planData?.name}</h3>
-                       <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] uppercase px-2">{planData?.durationDays} Days Hub</Badge>
+                    <div className="text-left min-w-0">
+                       <h3 className="text-lg font-black uppercase tracking-tight text-[#0F172A] truncate">{planData?.name}</h3>
+                       <Badge className="bg-emerald-50 text-emerald-600 border-none font-black text-[9px] uppercase">{planData?.durationDays} Days</Badge>
                     </div>
                  </div>
                  
-                 <div className="space-y-4">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Summary</p>
-                    <div className="space-y-3">
-                       <div className="flex justify-between items-center text-sm font-medium text-slate-500">
-                          <span>Base Price</span>
-                          <span>₹{planData?.price}</span>
-                       </div>
-                       {appliedCoupon && (
-                          <div className="flex justify-between items-center text-sm font-bold text-emerald-600">
-                             <span className="flex items-center gap-2"><Tag className="h-3 w-3" /> Discount</span>
-                             <span>-₹{planData.price - discountedPrice}</span>
-                          </div>
-                       )}
-                       <div className="pt-4 border-t border-slate-50 flex justify-between items-center">
-                          <span className="font-bold text-[#0F172A]">Total</span>
-                          <span className="text-3xl font-black text-primary">₹{discountedPrice}</span>
-                       </div>
+                 <div className="space-y-4 pt-4 border-t border-slate-50">
+                    <div className="flex justify-between items-center text-sm font-medium text-slate-500">
+                       <span>Price</span>
+                       <span>₹{planData?.price}</span>
                     </div>
-                 </div>
-
-                 <div className="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-start gap-3">
-                    <ShieldCheck className="h-5 w-5 text-blue-600 shrink-0" />
-                    <p className="text-[10px] text-blue-700 font-bold uppercase leading-relaxed">
-                       Your preparation node will be activated immediately after verification.
-                    </p>
+                    {appliedCoupon && (
+                       <div className="flex justify-between items-center text-sm font-bold text-emerald-600">
+                          <span>Discount</span>
+                          <span>-₹{planData.price - discountedPrice}</span>
+                       </div>
+                    )}
+                    <div className="pt-4 flex justify-between items-center">
+                       <span className="font-bold text-[#0F172A]">Total</span>
+                       <span className="text-3xl font-black text-primary">₹{discountedPrice}</span>
+                    </div>
                  </div>
               </Card>
            </div>
