@@ -1,4 +1,3 @@
-
 /** @type {import('next').NextConfig} */
 
 const nextConfig = {
@@ -18,6 +17,7 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
   staticPageGenerationTimeout: 300,
+  trailingSlash: true,
 };
 
 module.exports = nextConfig;

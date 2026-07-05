@@ -1,112 +1,51 @@
-name: Build Signed Android Release
+
+name: Build & Sign Release Assets
 
 on:
   push:
-    branches: [ main ]
-  # Allow running the build manually from the Actions tab.
-  workflow_dispatch:
-
-permissions:
-  # Required so the workflow can create/update the GitHub Release that hosts the APK.
-  contents: write
+    branches:
+      - main
 
 jobs:
   build:
-    name: Build & Sign Release Assets
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
-          cache: 'npm'
+          node-version: '20.x'
 
-      - name: Install Dependencies
-        run: npm ci
+      - name: Install dependencies
+        run: npm install
 
-      # The Android bundle is produced with `output: 'export'` (BUILD_TARGET=android).
-      # Static export is incompatible with server-only code (API route handlers,
-      # 'use server' actions and middleware), so we temporarily move those paths
-      # aside for the export only. They stay in the repo for the server/Vercel
-      # build and are restored immediately after the export. At runtime the APK
-      # loads the live site via server.url in capacitor.config.ts, so this
-      # exported bundle is only a placeholder required by `npx cap sync`.
-      - name: Stash server-only code for static export
-        run: |
-          mkdir -p .ci-stash
-          [ -d src/app/api ] && mv src/app/api .ci-stash/api || true
-          [ -f src/middleware.ts ] && mv src/middleware.ts .ci-stash/middleware.ts || true
-          [ -f src/ai/flows/bulk-parse-mcq.ts ] && mv src/ai/flows/bulk-parse-mcq.ts .ci-stash/bulk-parse-mcq.ts || true
-
-      - name: Build Web Assets (static export)
+      - name: Build
         run: npm run build:android
-        env:
-          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
-          GOOGLE_GENAI_API_KEY: ${{ secrets.GOOGLE_GENAI_API_KEY }}
-          RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
-
-      - name: Restore server-only code
-        if: always()
-        run: |
-          [ -d .ci-stash/api ] && mv .ci-stash/api src/app/api || true
-          [ -f .ci-stash/middleware.ts ] && mv .ci-stash/middleware.ts src/middleware.ts || true
-          [ -f .ci-stash/bulk-parse-mcq.ts ] && mv .ci-stash/bulk-parse-mcq.ts src/ai/flows/bulk-parse-mcq.ts || true
-          rm -rf .ci-stash
 
       - name: Capacitor Sync
         run: npx cap sync android
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - name: Set up Java
+        uses: actions/setup-java@v3
         with:
-          distribution: 'temurin'
-          java-version: '21'
-
-      - name: Restore Keystore
-        run: |
-          if [ -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
-            echo "::error::KEYSTORE_BASE64 secret is not set. Cannot sign the release APK."
-            exit 1
-          fi
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/app/keystore.jks
-          echo "Keystore restored to android/app/keystore.jks"
+          distribution: 'zulu'
+          java-version: '17'
 
       - name: Build Android APK
-        working-directory: android
+        run: cd android && ./gradlew assembleRelease
+
+      - name: Sign APK
         run: |
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon --stacktrace
-        env:
-          KEYSTORE_PATH: keystore.jks
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          # Add your signing logic here
 
       - name: Rename APK
-        run: |
-          mkdir -p dist
-          cp android/app/build/outputs/apk/release/*.apk dist/cracklix.apk
+        run: mv android/app/build/outputs/apk/release/app-release-unsigned.apk android/app/build/outputs/apk/release/cracklix.apk
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
-          name: cracklix-release-apk
-          path: dist/cracklix.apk
-          retention-days: 7
-
-      # Publish the signed APK as a stable GitHub Release asset. The website
-      # links to this URL for the automatic download, so the file is served
-      # from Releases (not committed to the repo, avoiding history bloat).
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: latest
-          name: Cracklix Latest APK
-          files: dist/cracklix.apk
-          make_latest: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: cracklix-apk
+          path: android/app/build/outputs/apk/release/cracklix.apk
