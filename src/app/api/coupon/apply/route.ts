@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import { firestore } from '@/firebase/app';
 import { doc, getDoc } from 'firebase/firestore';
@@ -8,7 +9,9 @@ import { doc, getDoc } from 'firebase/firestore';
 
 export async function POST(req: Request) {
   try {
-    const { code, userId } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const { code } = body;
+    
     if (!code) return NextResponse.json({ error: "Code required" }, { status: 400 });
 
     const couponRef = doc(firestore, "coupons", code.toUpperCase().trim());

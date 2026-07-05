@@ -1,3 +1,4 @@
+
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { firestore } from '@/firebase/app';
@@ -5,7 +6,7 @@ import { doc, getDoc } from 'firebase/firestore';
 
 /**
  * @fileOverview Razorpay Order Creation Node.
- * FIXED: Handled optional coupon codes and added JSON parse guards.
+ * FIXED: Coupon code is explicitly optional. Returns 200 even if coupon validation fails.
  */
 
 export async function POST(req: Request) {
@@ -38,7 +39,7 @@ export async function POST(req: Request) {
     const planData = planSnap.data();
     let finalAmount = Number(planData.price);
 
-    // Apply Coupon Logic if code is provided and not empty
+    // Apply Optional Coupon Logic
     if (couponCode && couponCode.trim().length > 0) {
       try {
         const couponRef = doc(firestore, "coupons", couponCode.toUpperCase().trim());
@@ -56,8 +57,9 @@ export async function POST(req: Request) {
       }
     }
 
+    // Razorpay requires amount in smallest currency unit (paise)
     const options = {
-      amount: Math.round(Math.max(1, finalAmount) * 100), // convert to paisa
+      amount: Math.round(Math.max(1, finalAmount) * 100), 
       currency: "INR",
       receipt: `rcpt_${userId.slice(-6)}_${Date.now()}`,
     };
