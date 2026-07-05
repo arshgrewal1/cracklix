@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -8,6 +9,7 @@ import NetworkStatus from "@/components/pwa/NetworkStatus";
 import CapacitorManager from "@/components/native/CapacitorManager";
 import { Toaster } from "@/components/ui/toaster";
 import { INSTITUTIONAL_PAYLOAD } from "@/lib/institutional-payload";
+import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -72,6 +74,7 @@ export default function RootLayout({
           <PWAManager />
           <NetworkStatus />
           <Toaster />
+          <ServiceWorkerRegistration />
 
           {/* Bundle Integrity Guard */}
           <div className="hidden" data-node-version={registryVersion}></div>
