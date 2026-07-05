@@ -15,11 +15,15 @@ import {
   Lock,
   Landmark,
   Filter,
-  RefreshCw
+  RefreshCw,
+  Users,
+  Globe,
+  Signal,
+  CheckCircle2
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, where, orderBy } from "firebase/firestore"
+import { collection, query, where, orderBy, getCountFromServer } from "firebase/firestore"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
@@ -45,6 +49,17 @@ export default function MockTestsPage() {
 
   const { data: rawMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
   const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc")) : null), [db]))
+  const { data: allResults } = useCollection<any>(useMemo(() => (db ? collection(db, "results") : null), [db]))
+
+  const attemptCounts = useMemo(() => {
+    if (!allResults) return new Map<string, number>()
+    const counts = new Map<string, number>()
+    allResults.forEach((r: any) => {
+      const id = r.mockId
+      if (id) counts.set(id, (counts.get(id) || 0) + 1)
+    })
+    return counts
+  }, [allResults])
 
   const isPassActive = useMemo(() => {
     if (!profile) return false
@@ -121,7 +136,7 @@ export default function MockTestsPage() {
              Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[2.5rem] bg-white border border-slate-100" />)
            ) : filteredMocks.length > 0 ? (
              filteredMocks.map((mock) => (
-                <MockCard key={mock.id} mock={mock} isPassActive={isPassActive} />
+                <MockCard key={mock.id} mock={mock} isPassActive={isPassActive} attemptCount={attemptCounts.get(mock.id) || 0} />
              ))
            ) : (
              <div className="col-span-full py-32 text-center flex flex-col items-center gap-6 opacity-30">
@@ -137,10 +152,24 @@ export default function MockTestsPage() {
   )
 }
 
-function MockCard({ mock, isPassActive }: { mock: any, isPassActive: boolean }) {
+function MockCard({ mock, isPassActive, attemptCount }: { mock: any, isPassActive: boolean, attemptCount: number }) {
    const isPremium = mock.accessLevel === 'PREMIUM'
+   const isFree = !isPremium
    const locked = isPremium && !isPassActive
    const boardId = mock.boardId || mock.boardIds?.[0] || "GENERAL"
+   const difficulty = mock.difficulty || 'Medium'
+   const languages = mock.languages || ['English', 'Punjabi']
+
+   const difficultyColor = difficulty === 'Easy' 
+     ? 'bg-emerald-50 text-emerald-600' 
+     : difficulty === 'Hard' 
+       ? 'bg-red-50 text-red-600' 
+       : 'bg-blue-50 text-blue-600'
+
+   const formatAttempts = (count: number) => {
+     if (count >= 1000) return `${(count / 1000).toFixed(1)}K`
+     return count.toString()
+   }
 
    return (
       <Card className="border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] bg-white p-6 md:p-10 flex flex-col group h-full text-center relative overflow-hidden">
@@ -148,21 +177,43 @@ function MockCard({ mock, isPassActive }: { mock: any, isPassActive: boolean }) 
             <div className="h-12 w-12 md:h-16 md:w-16 flex items-center justify-center shrink-0">
                <AuthorityLogo boardId={boardId} size="md" className="shadow-lg group-hover:scale-105 transition-transform" />
             </div>
-            {isPremium && (
-               <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
-                  <Lock className="h-2.5 w-2.5" /> Elite
-               </Badge>
-            )}
+            <div className="flex items-center gap-2">
+               {isFree && (
+                  <Badge className="bg-emerald-50 text-emerald-600 border-none px-3 py-1 font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+                     <CheckCircle2 className="h-2.5 w-2.5" /> Free
+                  </Badge>
+               )}
+               {isPremium && (
+                  <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 font-black text-[8px] uppercase tracking-widest flex items-center gap-1.5 shadow-sm">
+                     <Lock className="h-2.5 w-2.5" /> Elite
+                  </Badge>
+               )}
+            </div>
          </div>
 
          <div className="flex-1 space-y-4 text-left">
             <h3 className="text-lg md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 uppercase">
                {mock.title}
             </h3>
+
+            {attemptCount > 0 && (
+               <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                  <Users className="h-3.5 w-3.5 text-slate-300" />
+                  <span>{formatAttempts(attemptCount)} attempts</span>
+               </div>
+            )}
             
-            <div className="flex flex-wrap items-center gap-4 text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight border-t border-slate-50 pt-4">
-               <span className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" /> {mock.totalQuestions} Questions</span>
-               <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-primary" /> {mock.duration} Mins</span>
+            <div className="flex flex-wrap items-center gap-3 text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight border-t border-slate-50 pt-4">
+               <span className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" /> {mock.totalQuestions} Qs</span>
+               <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5 text-primary" /> {mock.duration} Min</span>
+               <Badge className={cn("border-none px-2 py-0.5 font-black text-[7px] uppercase tracking-widest", difficultyColor)}>
+                  <Signal className="h-2.5 w-2.5 mr-1" />{difficulty}
+               </Badge>
+            </div>
+
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-slate-400">
+               <Globe className="h-3 w-3 text-slate-300" />
+               <span>{languages.join(', ')}</span>
             </div>
          </div>
 
