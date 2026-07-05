@@ -7,6 +7,7 @@ import { doc, getDoc } from 'firebase/firestore';
 /**
  * @fileOverview Razorpay Order Creation Node.
  * FIXED: Coupon code is explicitly optional. Returns 200 even if coupon validation fails.
+ * SECURITY: Validates plan existence before initializing order.
  */
 
 export async function POST(req: Request) {
@@ -22,7 +23,7 @@ export async function POST(req: Request) {
     const key_secret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!key_id || !key_secret) {
-      console.error("[RAZORPAY_ERROR] Keys missing in environment.");
+      console.error("[RAZORPAY_ERROR] Keys missing in environment. Ensure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are set.");
       return NextResponse.json({ error: 'Gateway configuration missing.' }, { status: 500 });
     }
 
@@ -33,11 +34,15 @@ export async function POST(req: Request) {
     const planSnap = await getDoc(planRef);
     
     if (!planSnap.exists()) {
-      return NextResponse.json({ error: 'Pass plan not found.' }, { status: 404 });
+      return NextResponse.json({ error: 'Pass plan not found in registry.' }, { status: 404 });
     }
 
     const planData = planSnap.data();
     let finalAmount = Number(planData.price);
+
+    if (isNaN(finalAmount)) {
+      return NextResponse.json({ error: 'Invalid plan price node.' }, { status: 500 });
+    }
 
     // Apply Optional Coupon Logic
     if (couponCode && couponCode.trim().length > 0) {
@@ -53,7 +58,7 @@ export async function POST(req: Request) {
           }
         }
       } catch (couponErr) {
-        console.warn("[COUPON_AUDIT_SKIP] Optional coupon validation failed.");
+        console.warn("[COUPON_AUDIT_SKIP] Optional coupon validation failed. Proceeding with base price.");
       }
     }
 
