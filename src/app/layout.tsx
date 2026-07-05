@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -16,8 +15,7 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v57.0 (APK Size & Offline Optimized).
- * BUNDLING: Forces inclusion of large static payload to meet 25MB APK target.
+ * @fileOverview Root Layout v58.0 (APK Size & Performance Optimized).
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -49,9 +47,8 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Accessing payload to force it into the static bundle
+  // Access registry version to ensure bundle inclusion
   const registryVersion = INSTITUTIONAL_PAYLOAD.version;
-  const payloadSize = INSTITUTIONAL_PAYLOAD.staticData.length;
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -70,23 +67,14 @@ export default function RootLayout({
             {children}
           </div>
 
-          {/* Mobile Bottom Navigation */}
           <MobileNav />
-
-          {/* Native & PWA Management */}
           <CapacitorManager />
           <PWAManager />
           <NetworkStatus />
-
-          {/* Bundle Integrity Identification */}
-          <div 
-            className="hidden" 
-            data-registry-version={registryVersion}
-            data-payload-nodes={payloadSize}
-          ></div>
-
-          {/* Toasts */}
           <Toaster />
+
+          {/* Bundle Integrity Guard */}
+          <div className="hidden" data-node-version={registryVersion}></div>
         </FirebaseClientProvider>
       </body>
     </html>
