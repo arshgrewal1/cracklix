@@ -6,6 +6,9 @@ import { collection, getDocs, updateDoc, doc, writeBatch } from "firebase/firest
  * @fileOverview Operational Expiry Cleanup Node.
  * Manually or programmatically liquidates expired preparation nodes from the registry.
  */
+
+export const dynamic = "force-static";
+
 export async function GET() {
   try {
     const db = firestore;

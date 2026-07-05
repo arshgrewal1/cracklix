@@ -3,7 +3,8 @@
 
 const nextConfig = {
   reactStrictMode: true,
-  output: 'export',
+  // Only trigger static export when explicitly building for Android
+  output: process.env.BUILD_TARGET === 'android' ? 'export' : undefined,
   images: {
     unoptimized: true, // Required for static exports/Capacitor
   },
