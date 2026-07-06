@@ -1,9 +1,15 @@
-/** @type {import('next').NextConfig} */
+const withPWA = require('next-pwa')({
+    dest: 'public',
+    register: true,
+    skipWaiting: true,
+    disable: process.env.NODE_ENV !== 'production',
+});
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  swcMinify: true,
   // Only use static export for Android builds to keep API routes working on Web/Vercel
-  // This resolves the 404 error on /api/razorpay routes when running in production web mode.
   output: process.env.BUILD_TARGET === 'android' ? 'export' : undefined,
   images: {
     unoptimized: true, // Required for static exports/Capacitor
@@ -20,4 +26,4 @@ const nextConfig = {
   trailingSlash: true,
 };
 
-module.exports = nextConfig;
+module.exports = withPWA(nextConfig);

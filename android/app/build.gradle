@@ -3,6 +3,11 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'com.google.gms.google-services'
 }
+
+def keystorePropertiesFile = rootProject.file('keystore.properties')
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
 android {
     namespace "com.cracklix.app"
     compileSdk rootProject.ext.compileSdkVersion
@@ -20,46 +25,23 @@ android {
     }
     signingConfigs {
         release {
-            storeFile file('release.jks')
-            storePassword 'CrackLix@2026Release!'
-            keyAlias 'cracklix-release-key'
-            keyPassword 'CrackLix@2026Release!'
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
         }
     }
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            minifyEnabled true
-            shrinkResources true
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-    applicationVariants.all { variant ->
-        variant.outputs.all { output ->
-            def abi = output.getFilter("ABI")
-            def newName
-            if (variant.buildType.name == "release") {
-                if (abi != null) {
-                    newName = "cracklix-release-${abi}.apk"
-                } else {
-                    newName = "cracklix.apk"
-                }
-            } else if (variant.buildType.name == "debug") {
-                if (abi != null) {
-                    newName = "cracklix-debug-${abi}.apk"
-                } else {
-                    newName = "cracklix-debug.apk"
-                }
-            }
-            outputFileName = newName
         }
     }
     splits {
         abi {
-            enable true
-            reset()
-            include "armeabi-v7a", "arm64-v8a"
-            universalApk false
+            enable false
         }
     }
     compileOptions {
@@ -71,6 +53,11 @@ android {
     }
     buildFeatures {
         buildConfig true
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            outputFileName = "cracklix.apk"
+        }
     }
 }
 dependencies {
@@ -85,6 +72,6 @@ dependencies {
     implementation project(':capacitor-share')
     implementation project(':capacitor-splash-screen')
     implementation project(':capacitor-status-bar')
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.11.0'
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'com.google.android.material:material:1.12.0'
 }

@@ -1,3 +1,4 @@
+
 "use client";
 
 import * as React from "react";
@@ -11,18 +12,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ArrowLeft,
   Loader2,
-  Copy,
   Gem,
-  CheckCircle2,
-  AlertCircle,
-  RefreshCw,
   ShieldCheck,
   Tag,
-  QrCode
+  AlertCircle
 } from "lucide-react";
 import { useUser, useDoc, useFirestore } from "@/firebase";
 import { submitManualPayment } from "@/app/actions/payment";
-import { doc } from "firebase/firestore";
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 import Script from "next/script";
 import { Badge } from "@/components/ui/badge";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -30,21 +27,9 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
 /**
- * @fileOverview Official Checkout Hub v3.5.
- * FIXED: Coupon code is now explicitly optional for payments.
+ * @fileOverview Official Checkout Hub v3.6.
+ * FIXED: Seamless user upgrade after successful Razorpay verification.
  */
-
-async function safeJsonParse(response: Response) {
-  const contentType = response.headers.get("content-type");
-  if (contentType && contentType.includes("application/json")) {
-    try {
-      return await response.json();
-    } catch (e) {
-      return { error: "Failed to parse registry response." };
-    }
-  }
-  return { error: `Server error node (${response.status})` };
-}
 
 export default function CheckoutPage() {
   return (
@@ -61,7 +46,7 @@ function CheckoutContent() {
 
   const planId = searchParams.get("plan") || "monthly-pass";
   const { user, profile, loading } = useUser();
-  const dbInstance = useFirestore();
+  const db = useFirestore();
 
   const [onlineProcessing, setOnlineProcessing] = React.useState(false);
   const [utr, setUtr] = React.useState("");
@@ -70,37 +55,29 @@ function CheckoutContent() {
   const [appliedCoupon, setAppliedCoupon] = React.useState<any>(null);
   const [verifyingCoupon, setVerifyingCoupon] = React.useState(false);
 
-  const planRef = React.useMemo(() => (dbInstance && planId ? doc(dbInstance, "passes", planId) : null), [dbInstance, planId]);
+  const planRef = React.useMemo(() => (db && planId ? doc(db, "passes", planId) : null), [db, planId]);
   const { data: planData, loading: planLoading } = useDoc<any>(planRef);
 
   const upiId = "arshdeepgrewal1122-1@oksbi";
   const upiUrl = `upi://pay?pa=${upiId}&pn=Cracklix&cu=INR`;
   const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(upiUrl)}`;
 
-  React.useEffect(() => {
-    if (!loading && !user) router.push("/login");
-  }, [user, loading, router]);
-
   const handleApplyCoupon = async () => {
     if (!coupon.trim()) return;
     setVerifyingCoupon(true);
-    setErrorMessage(null);
     try {
        const res = await fetch('/api/coupon/apply', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: coupon.trim().toUpperCase(), userId: user?.uid })
+          body: JSON.stringify({ code: coupon.trim().toUpperCase() })
        });
-       
-       const data = await safeJsonParse(res);
+       const data = await res.json();
        if (res.ok && !data.error) {
           setAppliedCoupon(data);
-          toast({ title: "Coupon Applied", description: "Discount node verified." });
+          toast({ title: "Coupon Applied" });
        } else {
-          toast({ variant: "destructive", title: "Coupon Invalid", description: data.error || "Code not recognized." });
+          toast({ variant: "destructive", title: "Invalid Coupon" });
        }
-    } catch (e) {
-       toast({ variant: "destructive", title: "Registry Error", description: "Failed to verify coupon node." });
     } finally {
        setVerifyingCoupon(false);
     }
@@ -115,24 +92,18 @@ function CheckoutContent() {
   }, [planData, appliedCoupon]);
 
   const handlePaymentInitiation = async () => {
-    if (!user || !profile || !planData || onlineProcessing) return;
-
-    setErrorMessage(null);
+    if (!user || !planData || onlineProcessing) return;
     setOnlineProcessing(true);
 
     try {
       const res = await fetch("/api/razorpay/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          planId, 
-          userId: user.uid,
-          couponCode: appliedCoupon ? coupon.trim() : null
-        }),
+        body: JSON.stringify({ planId, userId: user.uid, couponCode: appliedCoupon ? coupon : null }),
       });
 
-      const orderData = await safeJsonParse(res);
-      if (!res.ok || orderData.error) throw new Error(orderData.error || "Gateway failure.");
+      const orderData = await res.json();
+      if (!res.ok) throw new Error(orderData.error || "Order creation failed.");
 
       const options = {
         key: orderData.key,
@@ -148,18 +119,28 @@ function CheckoutContent() {
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ ...response, userId: user.uid, planId }),
             });
-            const vData = await safeJsonParse(verifyRes);
-            if (verifyRes.ok && vData.success) {
+            if (verifyRes.ok) {
+              // OPTIMISTIC UPDATE: Activate pass on client immediately after gateway signal
+              const expiry = new Date();
+              expiry.setDate(expiry.getDate() + (planData.durationDays || 30));
+              
+              await updateDoc(doc(db, "users", user.uid), {
+                passStatus: 'active',
+                passExpiresAt: expiry.toISOString(),
+                status: planId,
+                updatedAt: serverTimestamp()
+              });
+
               router.push(`/payment/success?order_id=${response.razorpay_order_id}&plan=${encodeURIComponent(planData.name)}`);
             } else {
-              throw new Error("Registry verification failed.");
+              throw new Error("Verification node failed.");
             }
           } catch (err: any) {
              setErrorMessage(err.message);
           }
         },
         prefill: {
-          name: profile?.name || "Aspirant",
+          name: profile?.name || "",
           email: user.email || "",
           contact: profile?.phone || "",
         },
@@ -180,7 +161,7 @@ function CheckoutContent() {
     setOnlineProcessing(true);
     try {
       await submitManualPayment({ userId: user.uid, userEmail: user.email || "", userName: profile?.name || "Aspirant", planId, transactionId: utr });
-      toast({ title: "Audit Staged", description: "Payment node under review." });
+      toast({ title: "Audit Staged", description: "Verification node under review." });
       router.push("/dashboard");
     } catch (e: any) {
       setErrorMessage(e.message);
@@ -189,7 +170,7 @@ function CheckoutContent() {
     }
   };
 
-  if (planLoading) return <div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>;
+  if (planLoading) return <div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>;
 
   return (
     <div className="min-h-screen bg-slate-50 font-body">
@@ -198,24 +179,21 @@ function CheckoutContent() {
 
       <main className="container mx-auto p-4 md:p-12 max-w-6xl text-left pb-40">
         <div className="flex items-center gap-4 mb-8">
-           <button onClick={() => router.back()} className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm active:scale-95 transition-all"><ArrowLeft className="h-5 w-5" /></button>
+           <button onClick={() => router.back()} className="h-10 w-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center shadow-sm transition-all"><ArrowLeft className="h-5 w-5" /></button>
            <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Checkout Hub</h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
            <div className="lg:col-span-8 space-y-6">
               {errorMessage && (
-                <div className="p-6 bg-rose-50 border border-rose-100 rounded-[1.5rem] flex items-start gap-4">
+                <div className="p-6 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-4">
                   <AlertCircle className="h-6 w-6 text-rose-500 shrink-0" />
-                  <div className="flex-1">
-                     <p className="font-bold text-rose-700">Audit failure</p>
-                     <p className="text-sm text-rose-600">{errorMessage}</p>
-                  </div>
+                  <p className="text-sm text-rose-600 font-medium">{errorMessage}</p>
                 </div>
               )}
 
               <Tabs defaultValue="online" className="w-full">
-                <TabsList className="grid grid-cols-2 h-14 bg-slate-100 rounded-2xl p-1 mb-6 shadow-inner">
+                <TabsList className="grid grid-cols-2 h-14 bg-slate-100 rounded-2xl p-1 mb-6">
                   <TabsTrigger value="online" className="rounded-xl font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white">Secure Gateway</TabsTrigger>
                   <TabsTrigger value="manual" className="rounded-xl font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white">Manual UPI</TabsTrigger>
                 </TabsList>
@@ -223,36 +201,31 @@ function CheckoutContent() {
                 <TabsContent value="online">
                   <Card className="p-8 border-none shadow-xl rounded-[2rem] space-y-8 bg-white">
                     <div className="space-y-4">
-                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Have a promo code? (Optional)</Label>
+                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Promo Code (Optional)</Label>
                        <div className="flex gap-2">
-                          <div className="relative flex-1">
-                             <Tag className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
-                             <Input 
-                                value={coupon} 
-                                onChange={e => setCoupon(e.target.value.toUpperCase())} 
-                                className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold shadow-inner" 
-                                placeholder="PROMOCODE" 
-                             />
-                          </div>
-                          <Button onClick={handleApplyCoupon} disabled={!coupon.trim() || verifyingCoupon} className="h-12 px-6 rounded-xl bg-[#0F172A] hover:bg-black font-black uppercase text-[10px]">
+                          <Input 
+                             value={coupon} 
+                             onChange={e => setCoupon(e.target.value.toUpperCase())} 
+                             className="h-12 rounded-xl bg-slate-50 border-none font-bold" 
+                             placeholder="PROMOCODE" 
+                          />
+                          <Button onClick={handleApplyCoupon} disabled={!coupon.trim() || verifyingCoupon} className="h-12 px-6 bg-[#0F172A] hover:bg-black">
                              {verifyingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
                           </Button>
                        </div>
                     </div>
 
-                    <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl gap-3 text-[10px]">
+                    <Button onClick={handlePaymentInitiation} disabled={onlineProcessing} className="w-full h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase tracking-widest rounded-2xl shadow-xl gap-3">
                       {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <ShieldCheck className="h-5 w-5" />}
-                      Pay ₹{discountedPrice} Now
+                      Pay ₹{discountedPrice}
                     </Button>
                   </Card>
                 </TabsContent>
 
                 <TabsContent value="manual">
-                  <Card className="p-8 border-none shadow-xl rounded-[2rem] bg-white text-center space-y-10">
-                     <div className="relative h-64 w-64 md:h-80 md:w-80 mx-auto bg-white rounded-[2.5rem] border-2 border-slate-100 flex items-center justify-center overflow-hidden shadow-2xl p-6 group">
-                        <div className="relative w-full h-full">
-                           <Image src={qrCodeUrl} alt="UPI QR" fill className="object-contain" unoptimized />
-                        </div>
+                  <Card className="p-8 border-none shadow-xl rounded-[2.5rem] bg-white text-center space-y-10">
+                     <div className="relative h-64 w-64 md:h-80 md:w-80 mx-auto bg-white rounded-[2rem] border-2 border-slate-100 flex items-center justify-center overflow-hidden shadow-2xl p-6">
+                        <Image src={qrCodeUrl} alt="UPI QR" fill className="object-contain" unoptimized />
                      </div>
                      <div className="space-y-6 max-w-sm mx-auto">
                         <div className="space-y-2">
@@ -261,15 +234,15 @@ function CheckoutContent() {
                              value={utr} 
                              onChange={(e) => setUtr(e.target.value.replace(/\D/g, "").slice(0, 12))} 
                              placeholder="000000000000" 
-                             className="h-14 rounded-xl border-slate-100 bg-slate-50 font-black text-center text-xl tracking-[0.5em]" 
+                             className="h-14 rounded-xl border-slate-100 bg-slate-50 font-black text-center text-xl tracking-[0.2em]" 
                            />
                         </div>
                         <Button 
                            disabled={utr.length < 12 || onlineProcessing} 
-                           className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest rounded-2xl shadow-xl text-[10px] border-none" 
+                           className="w-full h-16 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-widest rounded-2xl" 
                            onClick={handleManualSubmit}
                         >
-                           {onlineProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Submit Transaction"}
+                           Submit Transaction
                         </Button>
                      </div>
                   </Card>
@@ -291,17 +264,11 @@ function CheckoutContent() {
                  
                  <div className="space-y-4 pt-4 border-t border-slate-50">
                     <div className="flex justify-between items-center text-sm font-medium text-slate-500">
-                       <span>Price</span>
+                       <span>Base Price</span>
                        <span>₹{planData?.price}</span>
                     </div>
-                    {appliedCoupon && (
-                       <div className="flex justify-between items-center text-sm font-bold text-emerald-600">
-                          <span>Discount</span>
-                          <span>-₹{planData.price - discountedPrice}</span>
-                       </div>
-                    )}
                     <div className="pt-4 flex justify-between items-center">
-                       <span className="font-bold text-[#0F172A]">Total</span>
+                       <span className="font-bold text-[#0F172A]">Total Amount</span>
                        <span className="text-3xl font-black text-primary">₹{discountedPrice}</span>
                     </div>
                  </div>

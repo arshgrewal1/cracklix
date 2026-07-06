@@ -2,10 +2,6 @@
   "appId": "com.cracklix.app",
   "appName": "cracklix",
   "webDir": "out",
-  "server": {
-    "url": "https://cracklix.vercel.app",
-    "cleartext": true
-  },
   "plugins": {
     "PushNotifications": {
       "presentationOptions": [
@@ -14,5 +10,8 @@
         "alert"
       ]
     }
+  },
+  "server": {
+    "url": "http://10.88.0.3:3000"
   }
 }

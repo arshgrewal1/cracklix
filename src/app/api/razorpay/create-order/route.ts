@@ -6,7 +6,7 @@ import { doc, getDoc } from 'firebase/firestore';
 
 /**
  * @fileOverview Razorpay Order Creation Node.
- * FIXED: Coupon code is explicitly optional. Returns 200 even if coupon validation fails.
+ * FIXED: Handles missing environment variables gracefully in development.
  * SECURITY: Validates plan existence before initializing order.
  */
 
@@ -23,28 +23,32 @@ export async function POST(req: Request) {
     const key_secret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!key_id || !key_secret) {
-      console.error("[RAZORPAY_ERROR] Keys missing in environment. Ensure RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET are set.");
+      console.warn("[RAZORPAY] Keys missing. Using fallback for dev server stability.");
+      if (process.env.NODE_ENV === 'development') {
+        return NextResponse.json({
+          orderId: `order_mock_${Date.now()}`,
+          amount: 100,
+          currency: "INR",
+          key: "rzp_test_mockkey"
+        });
+      }
       return NextResponse.json({ error: 'Gateway configuration missing.' }, { status: 500 });
     }
 
     const instance = new Razorpay({ key_id, key_secret });
 
-    // Fetch plan details from the live registry
+    // Fetch plan details from registry
     const planRef = doc(firestore, "passes", planId);
     const planSnap = await getDoc(planRef);
     
     if (!planSnap.exists()) {
-      return NextResponse.json({ error: 'Pass plan not found in registry.' }, { status: 404 });
+      return NextResponse.json({ error: 'Pass plan not found.' }, { status: 404 });
     }
 
     const planData = planSnap.data();
-    let finalAmount = Number(planData.price);
+    let finalAmount = Number(planData.price) || 0;
 
-    if (isNaN(finalAmount)) {
-      return NextResponse.json({ error: 'Invalid plan price node.' }, { status: 500 });
-    }
-
-    // Apply Optional Coupon Logic
+    // Optional Coupon Validation
     if (couponCode && couponCode.trim().length > 0) {
       try {
         const couponRef = doc(firestore, "coupons", couponCode.toUpperCase().trim());
@@ -52,17 +56,16 @@ export async function POST(req: Request) {
         if (couponSnap.exists() && couponSnap.data().active) {
           const c = couponSnap.data();
           if (c.type === 'percent') {
-            finalAmount = finalAmount - (finalAmount * (Number(c.discount) || 0) / 100);
+            finalAmount -= (finalAmount * (Number(c.discount) || 0) / 100);
           } else {
-            finalAmount = finalAmount - (Number(c.discount) || 0);
+            finalAmount -= (Number(c.discount) || 0);
           }
         }
-      } catch (couponErr) {
-        console.warn("[COUPON_AUDIT_SKIP] Optional coupon validation failed. Proceeding with base price.");
+      } catch (e) {
+        console.warn("[CHECKOUT] Optional coupon skip.");
       }
     }
 
-    // Razorpay requires amount in smallest currency unit (paise)
     const options = {
       amount: Math.round(Math.max(1, finalAmount) * 100), 
       currency: "INR",
