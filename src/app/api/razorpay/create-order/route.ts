@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { firestore } from '@/firebase/app';
@@ -6,7 +5,6 @@ import { doc, getDoc } from 'firebase/firestore';
 
 /**
  * @fileOverview Razorpay Order Creation Node.
- * FIXED: Handles missing environment variables gracefully in development.
  * SECURITY: Validates plan existence before initializing order.
  */
 
@@ -23,7 +21,7 @@ export async function POST(req: Request) {
     const key_secret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!key_id || !key_secret) {
-      console.warn("[RAZORPAY] Keys missing. Using fallback for dev server stability.");
+      // In development environments without keys, return a mock order for UI testing
       if (process.env.NODE_ENV === 'development') {
         return NextResponse.json({
           orderId: `order_mock_${Date.now()}`,
@@ -37,7 +35,7 @@ export async function POST(req: Request) {
 
     const instance = new Razorpay({ key_id, key_secret });
 
-    // Fetch plan details from registry
+    // Fetch plan details from registry to verify price
     const planRef = doc(firestore, "passes", planId);
     const planSnap = await getDoc(planRef);
     
@@ -49,7 +47,7 @@ export async function POST(req: Request) {
     let finalAmount = Number(planData.price) || 0;
 
     // Optional Coupon Validation
-    if (couponCode && couponCode.trim().length > 0) {
+    if (couponCode) {
       try {
         const couponRef = doc(firestore, "coupons", couponCode.toUpperCase().trim());
         const couponSnap = await getDoc(couponRef);
@@ -62,7 +60,7 @@ export async function POST(req: Request) {
           }
         }
       } catch (e) {
-        console.warn("[CHECKOUT] Optional coupon skip.");
+        console.warn("[CHECKOUT] Coupon node skip.");
       }
     }
 

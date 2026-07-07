@@ -1,7 +1,6 @@
-
 /**
  * @fileOverview Institutional Server-Side Admin Node (NEUTRALIZED).
- * FIXED: Removed all dynamic requires to prevent fatal crashes during dev scan.
+ * FIXED: Removed all dynamic requires and Admin SDK references to prevent crashes during static export.
  */
 
 export const adminDB = null as any;

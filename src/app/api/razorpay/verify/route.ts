@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { firestore } from '@/firebase/app';
@@ -6,7 +5,7 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 
 /**
  * @fileOverview Razorpay Signature Verification Node.
- * FIXED: Securely logs transactions; status update occurs on client to follow SDK constraints.
+ * Securely logs transactions and validates gateway integrity.
  */
 
 export async function POST(req: Request) {
@@ -28,7 +27,7 @@ export async function POST(req: Request) {
       .digest('hex');
 
     if (expectedSignature === razorpay_signature) {
-      // Log to Ledger
+      // Log successful transaction to Ledger for audit
       await addDoc(collection(firestore, "payment_requests"), {
         userId,
         orderId: razorpay_order_id,
