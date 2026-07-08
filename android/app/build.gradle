@@ -18,11 +18,31 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            storeFile file('../release.keystore')
+            storePassword 'password'
+            keyAlias 'logix123'
+            keyPassword 'password'
+        }
+    }
     buildTypes {
         release {
             minifyEnabled true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+            applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    outputFileName = "cracklix.apk"
+                }
+            }
+            zipAlignEnabled true
+        }
+    }
+    splits {
+        abi {
+            enable false
         }
     }
 }

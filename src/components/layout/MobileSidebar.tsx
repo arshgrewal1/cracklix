@@ -26,6 +26,7 @@ import Logo from "@/components/brand/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import ShareButton from "@/components/navigation/ShareButton";
 import { Button } from "@/components/ui/button";
+import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
  * @fileOverview Mobile Sidebar v56.0.
@@ -178,6 +179,7 @@ export default function MobileSidebar({
                 variant="dark" 
                 className="w-full h-10 rounded-xl bg-primary hover:bg-blue-600 text-white text-[10px] border-none shadow-lg relative z-10" 
               />
+              <PWAInstallButton />
            </div>
         </div>
       </div>

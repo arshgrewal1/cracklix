@@ -26,6 +26,7 @@ import {
   AccordionTrigger 
 } from "@/components/ui/accordion"
 import { PLATFORM_VERSION } from "@/lib/version"
+import PWAInstallButton from "@/components/PWAInstallButton"
 
 /**
  * @fileOverview Production-Grade APK Distribution Hub v1.0.
@@ -76,19 +77,22 @@ export default function DownloadPage() {
                  </div>
 
                  <div className="flex flex-col items-center gap-6 pt-4">
-                    {apkExists ? (
-                       <Button asChild className="h-16 md:h-20 px-10 md:px-16 bg-[#0F172A] hover:bg-black text-white rounded-2xl md:rounded-[2.5rem] shadow-4xl gap-4 group transition-all active:scale-95 border-none">
-                          <a href={APK_DOWNLOAD_URL} download>
-                             <Download className="h-6 w-6 group-hover:translate-y-1 transition-transform" />
-                             <span className="font-black tracking-widest text-xs md:text-lg">Download APK v{version}</span>
-                          </a>
-                       </Button>
-                    ) : (
-                       <Button disabled className="h-16 md:h-20 px-10 md:px-16 bg-slate-200 text-slate-400 rounded-2xl md:rounded-[2.5rem] border-none gap-4">
-                          <Zap className="h-6 w-6" />
-                          <span className="font-black tracking-widest text-xs md:text-lg">APK coming soon</span>
-                       </Button>
-                    )}
+                    <div className="flex items-center gap-4">
+                      {apkExists ? (
+                         <Button asChild className="h-16 md:h-20 px-10 md:px-16 bg-[#0F172A] hover:bg-black text-white rounded-2xl md:rounded-[2.5rem] shadow-4xl gap-4 group transition-all active:scale-95 border-none">
+                            <a href={APK_DOWNLOAD_URL} download>
+                               <Download className="h-6 w-6 group-hover:translate-y-1 transition-transform" />
+                               <span className="font-black tracking-widest text-xs md:text-lg">Download APK v{version}</span>
+                            </a>
+                         </Button>
+                      ) : (
+                         <Button disabled className="h-16 md:h-20 px-10 md:px-16 bg-slate-200 text-slate-400 rounded-2xl md:rounded-[2.5rem] border-none gap-4">
+                            <Zap className="h-6 w-6" />
+                            <span className="font-black tracking-widest text-xs md:text-lg">APK coming soon</span>
+                         </Button>
+                      )}
+                      <PWAInstallButton />
+                    </div>
                     
                     <div className="flex items-center gap-8 text-slate-400 font-bold text-[9px] md:text-[11px] tracking-[0.2em]">
                        <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" /> Play Protect Verified</span>
@@ -125,7 +129,7 @@ export default function DownloadPage() {
                        </div>
                        <CardContent className="p-0 space-y-8 relative z-10">
                           <div className="space-y-2">
-                             <h3 className="text-2xl font-black tracking-tight">What&apos;s New</h3>
+                             <h3 className="text-2xl font-black tracking-tight">What'''s New</h3>
                              <p className="text-slate-400 text-sm font-bold tracking-widest">Released: {releaseDate}</p>
                           </div>
                           <ul className="space-y-4">
