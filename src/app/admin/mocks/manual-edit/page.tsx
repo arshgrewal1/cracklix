@@ -50,7 +50,7 @@ function ManualEditContent() {
   const db = useFirestore()
   const { toast } = useToast()
   
-  const mockId = searchParams.get("id")
+  const mockId = searchParams?.get("id") ?? ""
   const [questions, setQuestions] = useState<any[]>([])
   const [loadingContent, setLoadingContent] = useState(true)
   const [editingQuestion, setEditingQuestion] = useState<any>(null)

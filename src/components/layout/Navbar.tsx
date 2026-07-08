@@ -35,10 +35,6 @@ import { Button } from "@/components/ui/button";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
-/**
- * @fileOverview Refined Navbar v63.0.
- * FIXED: Header hamesha visible rahega sabhi sections me.
- */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -212,7 +208,7 @@ export default function Navbar() {
     return (
       <Link href={href} className={cn(
         "text-[15px] xl:text-[17px] font-bold transition-all whitespace-nowrap border-b-2 py-1", 
-        active ? "text-primary border-primary" : "text-slate-500 border-transparent hover:text-primary hover:border-primary/20"
+        active ? "text-primary border-primary" : "text-slate-500 border-transparent hover:text-primary hover:text-primary/20"
       )}>
         {label}
       </Link>

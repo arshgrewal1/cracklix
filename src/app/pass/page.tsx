@@ -15,11 +15,6 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Skeleton } from "@/components/ui/skeleton"
 
-/**
- * @fileOverview Pass Center - Typography Hardened v28.0.
- * UPDATED: Standardized headers to Title Case.
- */
-
 export default function PassPage() {
   const { user, profile, loading: userLoading } = useUser()
   const db = useFirestore()
@@ -74,7 +69,8 @@ export default function PassPage() {
   const passStatus = useMemo(() => {
      const expiryStr = profile?.passExpiresAt;
      if (!expiryStr) return 'none';
-     return new Date(expiryStr) > new Date() ? 'active' : 'expired';
+     const expiry = new Date(expiryStr).getTime();
+     return expiry > new Date().getTime() ? 'active' : 'expired';
   }, [profile]);
 
   if (userLoading || !user) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-8 w-8 text-primary animate-pulse" /></div>;
@@ -85,7 +81,6 @@ export default function PassPage() {
       
       <main className="container mx-auto px-3 md:px-8 py-4 md:py-12 max-w-7xl space-y-6 md:space-y-16">
         
-        {/* Pass Management Hub */}
         {mounted && profile?.passStatus && passStatus !== 'none' && (
            <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
               <Card className="max-w-4xl mx-auto border border-slate-100 bg-white rounded-2xl md:rounded-[2rem] p-3 md:p-10 shadow-xl text-left overflow-hidden relative">

@@ -44,7 +44,7 @@ function CheckoutContent() {
   const router = useRouter();
   const { toast } = useToast();
 
-  const planId = searchParams.get("plan") || "monthly-pass";
+  const planId = searchParams?.get("plan") || "monthly-pass";
   const { user, profile, loading } = useUser();
   const db = useFirestore();
 
@@ -67,7 +67,7 @@ function CheckoutContent() {
     setVerifyingCoupon(true);
     try {
        const res = await fetch('/api/coupon/apply', {
-          method: 'POST',
+          method: 'POST','''
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code: coupon.trim().toUpperCase() })
        });

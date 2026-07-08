@@ -15,7 +15,7 @@ export async function generateStaticParams() {
   ];
 }
 
-export default async function InstructionsPage(props: { params: Promise<{ id: string }> }) {
-  const { id } = await props.params;
+export default async function InstructionsPage(props: { params: { id: string } }) {
+  const { id } = props.params;
   return <InstructionsClient mockId={id} />;
 }

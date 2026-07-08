@@ -79,15 +79,15 @@ function LoginContent() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const referralFromUrl = searchParams.get("ref");
+  const referralFromUrl = searchParams?.get("ref")
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
-  const returnUrl = searchParams.get("returnUrl") || "/dashboard"
+  const returnUrl = searchParams?.get("returnUrl") || "/dashboard"
 
   useEffect(() => {
-    if (searchParams.get("returnUrl")) {
+    if (searchParams?.get("returnUrl")) {
       toast({
         title: "Login Required",
         description: "Please login to access the preparation hub.",

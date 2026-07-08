@@ -55,7 +55,7 @@ function MockBuilderContent() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const mockId = searchParams.get("id")
+  const mockId = searchParams?.get("id") ?? ""
   const isEditing = !!mockId
 
   const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc")) : null), [db]))

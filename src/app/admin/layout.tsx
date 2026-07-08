@@ -22,7 +22,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { user, profile, loading } = useUser();
   const authInstance = useAuth();
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = usePathname() ?? '';
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 

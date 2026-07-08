@@ -33,7 +33,7 @@ function QuestionBankContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   
-  const boardParam = searchParams.get('board') || 'all'
+  const boardParam = searchParams?.get('board') || 'all'
   const [searchTerm, setSearchTerm] = useState("")
   const [activeTab, setActiveTab] = useState<QuestionFilterType>('ALL')
   

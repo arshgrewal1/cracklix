@@ -17,6 +17,6 @@ export async function generateStaticParams() {
   ];
 }
 
-export default function MockOverviewPage() {
-  return <MockOverviewClient />;
+export default function MockOverviewPage({ params }: { params: { id: string } }) {
+  return <MockOverviewClient mockId={params.id} />;
 }

@@ -26,8 +26,8 @@ export default function SuccessPage() {
 function SuccessContent() {
   const searchParams = useSearchParams()
   const { user } = useUser()
-  const orderId = searchParams.get("order_id")
-  const planName = searchParams.get("plan") || "Elite Pass"
+  const orderId = searchParams?.get("order_id")
+  const planName = searchParams?.get("plan") || "Elite Pass"
   
   const [verifying, setVerifying] = useState(!!orderId)
 

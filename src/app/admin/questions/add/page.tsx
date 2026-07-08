@@ -42,7 +42,7 @@ function QuestionEntryContent() {
   const [activeLangTab, setActiveLangTab] = useState<'punjabi' | 'hindi'>('punjabi')
   const [previewLang, setPreviewLang] = useState('ENGLISH_PUNJABI')
 
-  const questionId = searchParams.get("id")
+  const questionId = searchParams?.get("id") ?? ""
   const isEditing = !!questionId
 
   const { data: existingData } = useDoc<any>(useMemo(() => (db && questionId ? doc(db, "questions", questionId) : null), [db, questionId]))
