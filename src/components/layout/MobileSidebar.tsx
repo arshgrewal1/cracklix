@@ -26,11 +26,12 @@ import Logo from "@/components/brand/Logo";
 import { Skeleton } from "@/components/ui/skeleton";
 import ShareButton from "@/components/navigation/ShareButton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Mobile Sidebar v56.1.
- * UPDATED: Direct link to install hub for improved retenion.
+ * @fileOverview Mobile Sidebar v56.2.
+ * FIXED: Added missing Badge import.
  */
 export default function MobileSidebar({
   onClose,
