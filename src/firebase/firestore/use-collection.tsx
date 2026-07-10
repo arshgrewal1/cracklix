@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   Query, 
   onSnapshot, 
@@ -14,28 +13,36 @@ import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
  * @fileOverview Production-Grade Firestore Collection Hook.
- * Hardened to prevent infinite loop loops if query objects are not memoized by the caller.
+ * FIXED: Uses stringified query footprint to prevent infinite loops from non-memoized queries.
  */
 export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<FirestoreError | null>(null);
 
+  // Generate a stable key for the query to prevent unnecessary re-subscriptions
+  const queryKey = useMemo(() => {
+    if (!query) return null;
+    // Attempt to extract a unique fingerprint from the query object
+    try {
+      return JSON.stringify((query as any)._query || query);
+    } catch (e) {
+      return (query as any).path || 'unstable_query';
+    }
+  }, [query]);
+
   useEffect(() => {
-    if (!query) {
-      console.log('[useCollection] Query is null, setting loading to false.');
+    if (!query || !queryKey) {
       setData(null);
       setLoading(false);
       return;
     }
 
-    console.log('[useCollection] New query received, setting up snapshot listener...');
     setLoading(true);
 
     const unsubscribe = onSnapshot(
       query,
       (snapshot: QuerySnapshot<T>) => {
-        console.log('[useCollection] Snapshot received, processing data...');
         const items = snapshot.docs.map((doc) => ({
           ...doc.data(),
           id: doc.id,
@@ -43,10 +50,8 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setData(items as T[]);
         setLoading(false);
         setError(null);
-        console.log('[useCollection] Data processed, loading finished.');
       },
       (err) => {
-        console.error('[useCollection] Error in snapshot listener:', err);
         if (err.code === 'permission-denied') {
           const permissionError = new FirestorePermissionError({
             path: (query as any)?._query?.path?.segments?.join('/') || 'registry_node',
@@ -58,15 +63,11 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         
         setError(err);
         setLoading(false);
-        console.error("[FIRESTORE RUNTIME ERROR]:", err);
       }
     );
 
-    return () => {
-      console.log('[useCollection] Unsubscribing from snapshot listener.');
-      unsubscribe();
-    }
-  }, [query]);
+    return () => unsubscribe();
+  }, [queryKey]);
 
   return { data, loading, error };
 }

@@ -19,10 +19,12 @@ import {
   Unlock, 
   Filter, 
   ChevronRight, 
-  UploadCloud,
+  CloudUpload,
   FileSpreadsheet,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Archive,
+  GraduationCap
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -45,7 +47,13 @@ import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+
+/**
+ * @fileOverview Enterprise MCQ Bank Management Hub v2.0.
+ * FIXED: Imported CloudUpload and stabilized filters.
+ */
 
 export default function QuestionBank() {
   return (
@@ -61,7 +69,6 @@ function QuestionBankContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   
-  // 1. FILTERS STATE
   const [searchTerm, setSearchTerm] = useState("")
   const [filters, setFilters] = useState({
     examId: searchParams.get('examId') || 'all',
@@ -72,7 +79,6 @@ function QuestionBankContent() {
     status: 'all'
   })
 
-  // 2. DATA STATE
   const [loading, setLoading] = useState(true)
   const [questions, setQuestions] = useState<any[]>([])
   const [lastDoc, setLastDoc] = useState<DocumentData | null>(null)
@@ -80,11 +86,15 @@ function QuestionBankContent() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [isBulkProcessing, setIsBulkProcessing] = useState(false)
 
-  // 3. REGISTRY LISTENERS (FOR FILTERS)
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc")) : null), [db]));
-  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
-  const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects"), orderBy("displayOrder", "asc") : null), [db]));
-  const { data: chapters } = useCollection<any>(useMemo(() => (db ? query(collection(db, "chapters"), where("subjectId", "==", filters.subjectId)) : null), [db, filters.subjectId]));
+  const boardsQuery = useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]);
+  const examsQuery = useMemo(() => (db ? query(collection(db, "exams"), orderBy("name", "asc")) : null), [db]);
+  const subjectsQuery = useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]);
+  const chaptersQuery = useMemo(() => (db && filters.subjectId !== 'all' ? query(collection(db, "chapters"), where("subjectId", "==", filters.subjectId)) : null), [db, filters.subjectId]);
+
+  const { data: boards } = useCollection<any>(boardsQuery);
+  const { data: exams } = useCollection<any>(examsQuery);
+  const { data: subjects } = useCollection<any>(subjectsQuery);
+  const { data: chapters } = useCollection<any>(chaptersQuery);
 
   const fetchQuestions = useCallback(async (nextCursor: DocumentData | null = null) => {
     if (!db) return
@@ -92,7 +102,6 @@ function QuestionBankContent() {
     try {
       const constraints: any[] = [limit(50)]
       
-      // Hierarchy Constraints
       if (filters.examId !== 'all') constraints.push(where("examId", "==", filters.examId))
       if (filters.boardId !== 'all') constraints.push(where("boardId", "==", filters.boardId))
       if (filters.subjectId !== 'all') constraints.push(where("subjectId", "==", filters.subjectId))
@@ -100,8 +109,12 @@ function QuestionBankContent() {
       if (filters.difficulty !== 'all') constraints.push(where("difficulty", "==", filters.difficulty))
       if (filters.status !== 'all') constraints.push(where("status", "==", filters.status))
 
-      if (nextCursor) constraints.push(startAfter(nextCursor))
-      else constraints.push(orderBy("updatedAt", "desc"))
+      if (nextCursor) {
+        constraints.push(startAfter(nextCursor))
+        constraints.push(orderBy("updatedAt", "desc"))
+      } else {
+        constraints.push(orderBy("updatedAt", "desc"))
+      }
 
       const q = query(collection(db, "questions"), ...constraints)
       const snap = await getDocs(q)
@@ -174,7 +187,7 @@ function QuestionBankContent() {
         
         <div className="flex gap-3 w-full md:w-auto">
            <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-8 bg-[#0F172A] hover:bg-black text-white rounded-full font-black text-[10px] tracking-widest gap-3 shadow-xl border-none">
-              <Link href="/admin/questions/bulk"><UploadCloud className="h-4 w-4" /> Bulk OCR</Link>
+              <Link href="/admin/questions/bulk"><CloudUpload className="h-4 w-4" /> Bulk OCR</Link>
            </Button>
            <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-black text-[10px] tracking-widest shadow-xl border-none">
               <Link href="/admin/questions/add"><Plus className="h-5 w-5" /> New Question</Link>
@@ -182,7 +195,6 @@ function QuestionBankContent() {
         </div>
       </div>
 
-      {/* ENTERPRISE FILTERS */}
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white mx-1 border border-slate-50 p-4 md:p-8">
          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <div className="space-y-1.5">
@@ -201,7 +213,7 @@ function QuestionBankContent() {
             </div>
             <div className="space-y-1.5">
                <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Subject</Label>
-               <select value={filters.subjectId} onChange={e => setFilters({...filters, subjectId: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+               <select value={filters.subjectId} onChange={e => setFilters({...filters, subjectId: e.target.value, chapterId: 'all'})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
                   <option value="all">All Subjects</option>
                   {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                </select>
@@ -245,7 +257,6 @@ function QuestionBankContent() {
          </div>
       </Card>
 
-      {/* DATA GRID */}
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[1000px]">
@@ -268,6 +279,7 @@ function QuestionBankContent() {
                 Array.from({ length: 5 }).map((_, i) => (<TableRow key={i}><TableCell colSpan={5} className="p-8"><Skeleton className="h-12 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>))
               ) : filteredQuestions.length > 0 ? filteredQuestions.map((q: any) => {
                  const subject = subjects?.find((s: any) => s.id === q.subjectId);
+                 const chapter = chapters?.find((c: any) => c.id === q.chapterId);
                  return (
                   <TableRow key={q.id} className={cn("hover:bg-slate-50 transition-all group border-slate-50", selectedIds.includes(q.id) && "bg-primary/5")}>
                     <TableCell className="px-6 text-center">
@@ -282,8 +294,8 @@ function QuestionBankContent() {
                     </TableCell>
                     <TableCell>
                        <div className="space-y-1">
-                          <p className="text-[10px] font-bold text-[#0F172A]">{subject?.name || q.subjectId}</p>
-                          <p className="text-[9px] text-slate-400 font-medium uppercase tracking-tight">{q.chapterId || 'No Chapter'}</p>
+                          <p className="text-[10px] font-bold text-[#0F172A]">{subject?.name || q.subjectId || 'No Subject'}</p>
+                          <p className="text-[9px] text-slate-400 font-medium uppercase tracking-tight">{chapter?.name || q.chapterId || 'No Chapter'}</p>
                        </div>
                     </TableCell>
                     <TableCell className="text-center">
@@ -324,7 +336,6 @@ function QuestionBankContent() {
         </div>
       )}
 
-      {/* BULK TOOLBAR */}
       {selectedIds.length > 0 && (
          <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-12 duration-500 w-[95vw] max-w-2xl">
             <div className="bg-[#0F172A] text-white px-8 py-4 rounded-[2rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl">
