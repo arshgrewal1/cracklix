@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { 
   Query, 
   onSnapshot, 
@@ -8,26 +8,28 @@ import {
   DocumentData, 
   FirestoreError 
 } from 'firebase/firestore';
-import { errorEmitter } from '../error-emitter';
+import { errorEmitter } from '../provider';
 import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
- * @fileOverview Production-Grade Firestore Collection Hook.
- * FIXED: Uses stringified query footprint to prevent infinite loops from non-memoized queries.
+ * @fileOverview Production-Grade Firestore Collection Hook v3.0.
+ * FIXED: Implemented deep comparison check to prevent infinite loops when queries are not memoized.
  */
 export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<FirestoreError | null>(null);
+  
+  const dataRef = useRef<string>("");
 
-  // Generate a stable key for the query to prevent unnecessary re-subscriptions
+  // Generate a stable key for the query
   const queryKey = useMemo(() => {
     if (!query) return null;
-    // Attempt to extract a unique fingerprint from the query object
     try {
-      return JSON.stringify((query as any)._query || query);
+      // Use the internal path or a stringified version of the query structure
+      return (query as any)._query?.path?.segments?.join('/') || JSON.stringify(query);
     } catch (e) {
-      return (query as any).path || 'unstable_query';
+      return 'unstable_query';
     }
   }, [query]);
 
@@ -47,7 +49,14 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           ...doc.data(),
           id: doc.id,
         }));
-        setData(items as T[]);
+
+        // Deep comparison check
+        const dataString = JSON.stringify(items);
+        if (dataString !== dataRef.current) {
+          dataRef.current = dataString;
+          setData(items as T[]);
+        }
+        
         setLoading(false);
         setError(null);
       },
@@ -58,7 +67,11 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
             operation: 'list',
           } satisfies SecurityRuleContext);
 
-          errorEmitter.emit('permission-error', permissionError);
+          // We use the global error emitter
+          const emitter = (window as any).__firebaseErrorEmitter;
+          if (emitter) {
+            emitter.emit('permission-error', permissionError);
+          }
         }
         
         setError(err);

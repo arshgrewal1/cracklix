@@ -8,8 +8,8 @@ import { UserProfile } from '@/types';
 import { getDeviceId } from '@/lib/device';
 
 /**
- * @fileOverview Hardened Auth Hub v15.0.
- * SECURITY: Real-time pass audit on every handshake.
+ * @fileOverview Hardened Auth Hub v16.0.
+ * FIXED: Implemented deep comparison for profile state to prevent Navbar recursion loops.
  */
 export function useUser() {
   const auth = useAuth();
@@ -22,6 +22,7 @@ export function useUser() {
   const [currentDeviceId, setCurrentDeviceId] = useState<string>("");
   
   const profileLoaded = useRef(false);
+  const profileDataRef = useRef<string>("");
 
   useEffect(() => {
     getDeviceId().then(id => {
@@ -45,6 +46,7 @@ export function useUser() {
         }
       } else {
         setProfile(null);
+        profileDataRef.current = "";
         setProfileLoading(false);
         profileLoaded.current = true;
       }
@@ -68,11 +70,11 @@ export function useUser() {
           
           let passStatus: 'active' | 'expired' | 'none' = data.passStatus || 'none';
           
-          // 1. INSTITUTIONAL PASS AUDIT
+          // 1. INSTITUTIONAL PASS AUDIT (ONLY TRIGGER ONCE IF CHANGE NEEDED)
           if (data.passExpiresAt) {
              const expiryDate = new Date(data.passExpiresAt);
              if (now > expiryDate && data.passStatus === 'active') {
-                // Auto-expire session node
+                // Only update if not already marked expired to prevent loops
                 await updateDoc(doc(db, 'users', user.uid), {
                    passStatus: 'expired',
                    updatedAt: serverTimestamp()
@@ -83,11 +85,18 @@ export function useUser() {
              }
           }
 
-          setProfile({ 
+          const profileObj = { 
             ...data, 
             id: docSnap.id, 
             passStatus 
-          } as UserProfile);
+          } as UserProfile;
+
+          // Stability Check: Prevent re-rendering if data is effectively identical
+          const profileString = JSON.stringify(profileObj);
+          if (profileString !== profileDataRef.current) {
+             profileDataRef.current = profileString;
+             setProfile(profileObj);
+          }
         } else {
           setProfile(null);
         }

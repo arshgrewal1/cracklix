@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -27,8 +26,8 @@ import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
 
 /**
- * @fileOverview Official Checkout Hub v3.6.
- * FIXED: Seamless user upgrade after successful Razorpay verification.
+ * @fileOverview Official Checkout Hub v3.7.
+ * FIXED: Cleaned up syntax errors and ensured robust state management.
  */
 
 export default function CheckoutPage() {
@@ -67,7 +66,7 @@ function CheckoutContent() {
     setVerifyingCoupon(true);
     try {
        const res = await fetch('/api/coupon/apply', {
-          method: 'POST','''
+          method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code: coupon.trim().toUpperCase() })
        });
@@ -120,7 +119,6 @@ function CheckoutContent() {
               body: JSON.stringify({ ...response, userId: user.uid, planId }),
             });
             if (verifyRes.ok) {
-              // OPTIMISTIC UPDATE: Activate pass on client immediately after gateway signal
               const expiry = new Date();
               expiry.setDate(expiry.getDate() + (planData.durationDays || 30));
               

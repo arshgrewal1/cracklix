@@ -51,8 +51,8 @@ import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Enterprise MCQ Bank Management Hub v2.0.
- * FIXED: Imported CloudUpload and stabilized filters.
+ * @fileOverview Enterprise MCQ Bank Management Hub v2.1.
+ * FIXED: Standardized CloudUpload icon usage and stabilized data hooks.
  */
 
 export default function QuestionBank() {
@@ -111,10 +111,9 @@ function QuestionBankContent() {
 
       if (nextCursor) {
         constraints.push(startAfter(nextCursor))
-        constraints.push(orderBy("updatedAt", "desc"))
-      } else {
-        constraints.push(orderBy("updatedAt", "desc"))
       }
+      
+      constraints.push(orderBy("updatedAt", "desc"))
 
       const q = query(collection(db, "questions"), ...constraints)
       const snap = await getDocs(q)
