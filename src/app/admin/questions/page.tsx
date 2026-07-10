@@ -52,9 +52,9 @@ import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Enterprise MCQ Bank Management Hub v3.1.
- * FIXED: Implemented specific error handling for missing Firestore indexes.
- * FIXED: Hardened filtering to prevent "leakage" of Current Affairs into other subject views.
+ * @fileOverview Enterprise MCQ Bank Management Hub v4.0.
+ * FIXED: Implemented Zero-Friction Fallback for missing Firestore Indexes.
+ * FIXED: Strictly isolated Board/Subject filtering to prevent cross-contamination.
  */
 
 export default function QuestionBank() {
@@ -102,12 +102,11 @@ function QuestionBankContent() {
     if (!db) return
     setLoading(true)
     
-    // Clear list if not fetching next page to prevent showing stale/incorrect results
     if (!nextCursor) {
       setQuestions([])
     }
 
-    try {
+    const buildQuery = (withOrderBy: boolean) => {
       const constraints: any[] = [limit(50)]
       
       if (filters.examId !== 'all') constraints.push(where("examId", "==", filters.examId))
@@ -121,10 +120,14 @@ function QuestionBankContent() {
         constraints.push(startAfter(nextCursor))
       }
       
-      // Strict descending order by updated timestamp
-      constraints.push(orderBy("updatedAt", "desc"))
+      if (withOrderBy) {
+        constraints.push(orderBy("updatedAt", "desc"))
+      }
+      return query(collection(db, "questions"), ...constraints)
+    }
 
-      const q = query(collection(db, "questions"), ...constraints)
+    try {
+      const q = buildQuery(true)
       const snap = await getDocs(q)
       const newQs = snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }))
       
@@ -138,27 +141,49 @@ function QuestionBankContent() {
       setLastDoc(snap.docs[snap.docs.length - 1] || null)
       setHasMore(snap.docs.length === 50)
     } catch (e: any) {
-      console.error("[BANK_FETCH_ERROR]:", e)
-      setQuestions([])
-      
-      // Contextual handle for Firestore Index requirement
+      // 1. ZERO-FRICTION FALLBACK FOR MISSING INDEX
       if (e.code === 'failed-precondition' || e.message?.includes('index')) {
-        const indexUrl = e.message?.match(/https:\/\/console\.firebase\.google\.com[^\s]*/)?.[0];
-        toast({ 
-          variant: "destructive", 
-          duration: 10000,
-          title: "Firestore Index Required", 
-          description: (
-            <div className="space-y-3">
-              <p>This filter combination requires a composite index.</p>
-              {indexUrl && (
-                <Button asChild size="sm" className="bg-white text-rose-600 hover:bg-slate-100">
-                  <a href={indexUrl} target="_blank" rel="noopener noreferrer">Create Index Now</a>
-                </Button>
-              )}
-            </div>
-          )
-        })
+        console.warn("[REGISTRY_AUDIT] Missing index node. Initializing client-side sort fallback...");
+        try {
+          const fallbackQ = buildQuery(false)
+          const snap = await getDocs(fallbackQ)
+          let newQs = snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }))
+          
+          // Institutional Client-Side Sort
+          newQs.sort((a: any, b: any) => {
+            const tA = a.updatedAt?.seconds || 0;
+            const tB = b.updatedAt?.seconds || 0;
+            return tB - tA;
+          });
+
+          if (nextCursor) {
+            setQuestions(prev => [...prev, ...newQs])
+          } else { 
+            setQuestions(newQs)
+          }
+          
+          setLastDoc(snap.docs[snap.docs.length - 1] || null)
+          setHasMore(snap.docs.length === 50)
+
+          const indexUrl = e.message?.match(/https:\/\/console\.firebase\.google\.com[^\s]*/)?.[0];
+          toast({ 
+            variant: "default", 
+            duration: 10000,
+            title: "Hub Optimization Required", 
+            description: (
+              <div className="space-y-3">
+                <p>Showing unsorted results while we optimize the registry. Speed up the hub by authorizing the sync.</p>
+                {indexUrl && (
+                  <Button asChild size="sm" className="bg-[#0F172A] text-white hover:bg-black rounded-full w-full">
+                    <a href={indexUrl} target="_blank" rel="noopener noreferrer">Authorize Speed Sync</a>
+                  </Button>
+                )}
+              </div>
+            )
+          })
+        } catch (fallbackErr) {
+          toast({ variant: "destructive", title: "Registry Error", description: "Critical failure in bank synchronization." })
+        }
       } else {
         toast({ variant: "destructive", title: "Registry Sync Failed", description: e.message })
       }
@@ -233,7 +258,7 @@ function QuestionBankContent() {
         
         <div className="flex gap-3 w-full md:w-auto">
            <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-8 bg-[#0F172A] hover:bg-black text-white rounded-full font-black text-[10px] tracking-widest gap-3 shadow-xl border-none">
-              <Link href="/admin/questions/bulk"><CloudUpload className="h-4 w-4" /> Bulk OCR</Link>
+              <Link href="/admin/bulk-import"><CloudUpload className="h-4 w-4" /> Bulk OCR</Link>
            </Button>
            <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-black text-[10px] tracking-widest shadow-xl border-none">
               <Link href="/admin/questions/add"><Plus className="h-5 w-5" /> New Question</Link>
@@ -332,7 +357,7 @@ function QuestionBankContent() {
             </TableHeader>
             <TableBody>
               {loading && questions.length === 0 ? (
-                Array.from({ length: 5 }).map((_, i) => (<TableRow key={i}><TableCell colSpan={5} className="p-8"><Skeleton className="h-12 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>))
+                <AdminTableSkeleton rows={5} columns={5} />
               ) : filteredQuestions.length > 0 ? filteredQuestions.map((q: any) => {
                  const subject = subjects?.find((s: any) => s.id === q.subjectId);
                  const chapter = chapters?.find((c: any) => c.id === q.chapterId);
