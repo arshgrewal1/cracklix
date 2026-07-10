@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Smartphone, ArrowRight, Zap, Download } from 'lucide-react';
+import { Smartphone, ArrowRight, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 
@@ -13,8 +13,8 @@ interface PWAInstallButtonProps {
 }
 
 /**
- * @fileOverview Institutional PWA Install Trigger v3.0.
- * Direct trigger for the browser's native installation prompt.
+ * @fileOverview Institutional PWA Install Trigger v4.0.
+ * Direct trigger for the browser's native installation prompt or redirect to instructions.
  */
 export default function PWAInstallButton({ 
   className, 
@@ -44,7 +44,7 @@ export default function PWAInstallButton({
       )}
     >
       <Smartphone className="h-4 w-4 md:h-5 md:w-5 group-hover:rotate-12 transition-transform" />
-      {showLabel && <span>{canInstall ? 'Install Hub' : 'Setup App'}</span>}
+      {showLabel && <span>{canInstall ? 'Install Hub Now' : 'Setup App Hub'}</span>}
       <ArrowRight className="h-4 w-4 opacity-40 ml-1 group-hover:translate-x-1 transition-transform" />
     </Button>
   );

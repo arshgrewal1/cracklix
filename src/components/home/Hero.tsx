@@ -12,7 +12,8 @@ import {
   Newspaper,
   Play,
   LayoutGrid,
-  ChevronRight
+  ChevronRight,
+  Smartphone
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -22,10 +23,11 @@ import { doc } from "firebase/firestore";
 import { AuthorityLogo } from "@/lib/exam-icons";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Institutional Hero Hub v110.0.
- * UPDATED: Title Case normalization and refined typography scale.
+ * @fileOverview Institutional Hero Hub v111.0.
+ * UPDATED: Integrated direct PWA Install CTA.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -102,11 +104,7 @@ export default function Hero() {
                     <Play className="h-4 w-4 md:h-6 md:w-6 fill-current" /> Start Prep
                   </Link>
                </Button>
-               <Button asChild variant="outline" className="sm:flex-1 h-12 md:h-14 rounded-full font-bold text-[13px] md:text-lg tracking-tight border-2 border-slate-200 hover:border-primary/30 hover:bg-slate-50 transition-all active:scale-95 text-[#0F172A]">
-                  <Link href="/exams" className="flex items-center justify-center gap-3">
-                    <LayoutGrid className="h-4 w-4 md:h-6 md:w-6" /> View Exams
-                  </Link>
-               </Button>
+               <PWAInstallButton className="sm:flex-1 h-12 md:h-14" variant="outline" />
             </div>
           </div>
 
@@ -144,11 +142,7 @@ export default function Hero() {
                     <Play className="h-4 w-4 fill-current" /> Start Prep
                   </Link>
               </Button>
-              <Button asChild variant="outline" className="w-full sm:flex-1 h-12 px-10 rounded-full font-bold text-[13px] tracking-tight border-2 border-slate-200 hover:border-primary/30 hover:bg-slate-50 transition-all active:scale-[0.98] text-[#0F172A]">
-                  <Link href="/exams" className="flex items-center justify-center gap-2.5">
-                    <LayoutGrid className="h-4 w-4" /> View Exams
-                  </Link>
-              </Button>
+              <PWAInstallButton className="w-full sm:flex-1 h-12" variant="outline" />
            </div>
         </div>
 

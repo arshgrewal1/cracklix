@@ -125,7 +125,7 @@ export default function Navbar() {
               <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
               <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
               <NavLink href="/current-affairs" label="Current Affairs" active={pathname === '/current-affairs'} />
-              <NavLink href="/leaderboard" label="Top Rankers" active={pathname === '/leaderboard'} />
+              <NavLink href="/install" label="Install Hub" active={pathname === '/install'} />
             </div>
 
             <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0 flex-1 lg:flex-none">

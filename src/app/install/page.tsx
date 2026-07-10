@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -13,11 +12,10 @@ import {
   PlusSquare,
   Share,
   Monitor,
-  Download,
   AlertCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
@@ -26,8 +24,8 @@ import { PLATFORM_VERSION } from "@/lib/version";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official Direct PWA Install Hub v4.0.
- * Rebuilt with higher-fidelity design and aggressive PWA conversion nodes.
+ * @fileOverview Official PWA Install Hub v5.0.
+ * Optimized for direct browser-to-home-screen conversion.
  */
 
 export default function InstallPwaPage() {
@@ -56,11 +54,11 @@ export default function InstallPwaPage() {
 
                  <div className="space-y-6">
                     <h1 className="text-4xl md:text-8xl font-black tracking-tighter leading-[0.9] antialiased uppercase">
-                       Crack Exams <br className="hidden md:block" /> 
-                       <span className="text-primary italic">From Home Screen.</span>
+                       From Your <br className="hidden md:block" /> 
+                       <span className="text-primary italic">Home Screen.</span>
                     </h1>
                     <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-snug">
-                       Install the official Cracklix app directly from your browser. Zero downloads, zero lag, and instant offline access.
+                       Install the official Cracklix hub directly from your browser. Zero downloads, zero lag, and instant offline registry access.
                     </p>
                  </div>
 
@@ -84,9 +82,9 @@ export default function InstallPwaPage() {
                     ) : (
                       <div className="space-y-4">
                         <div className="inline-flex items-center gap-3 bg-amber-500/10 text-amber-500 border border-amber-500/20 px-6 py-3 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest shadow-lg">
-                           <AlertCircle className="h-4 w-4" /> Safari / External Browser Detected
+                           <AlertCircle className="h-4 w-4" /> Setup Required
                         </div>
-                        <p className="text-slate-400 font-bold text-sm md:text-lg">Follow instructions below to add Cracklix manually.</p>
+                        <p className="text-slate-400 font-bold text-sm md:text-lg">Follow the manual instructions below to add Cracklix to your home screen.</p>
                       </div>
                     )}
                  </div>
@@ -100,40 +98,17 @@ export default function InstallPwaPage() {
            </div>
         </section>
 
-        {/* FEATURE MATRIX */}
-        <section className="py-24 bg-white">
-           <div className="container mx-auto px-4 max-w-7xl">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-                 <AppFeature 
-                    icon={Zap} 
-                    title="No Downloads" 
-                    desc="Install instantly without the Play Store. Saves your device storage and data." 
-                 />
-                 <AppFeature 
-                    icon={ShieldCheck} 
-                    title="Offline Hub" 
-                    desc="The PWA caches your study notes and attempted mocks for access without internet." 
-                 />
-                 <AppFeature 
-                    icon={PlusSquare} 
-                    title="Native Feel" 
-                    desc="Launches in full-screen mode just like a native app. No browser address bars." 
-                 />
-              </div>
-           </div>
-        </section>
-
         {/* INSTALLATION STEPS */}
-        <section className="py-24 bg-slate-50 border-y border-slate-100">
+        <section className="py-24 bg-white">
            <div className="container mx-auto px-4 max-w-5xl">
               <div className="text-center space-y-4 mb-16">
-                 <h2 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tight uppercase">Setup Instructions</h2>
+                 <h2 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tight uppercase">Installation Guide</h2>
                  <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.3em]">Institutional Browser Protocols</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 {/* ANDROID/CHROME */}
-                <div className="space-y-8 p-10 bg-white rounded-[3rem] shadow-xl border border-slate-100 relative overflow-hidden">
+                <div className="space-y-8 p-10 bg-slate-50 rounded-[3rem] shadow-xl border border-slate-100 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 opacity-5"><Zap className="h-32 w-32" /></div>
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 bg-blue-50 text-primary rounded-2xl flex items-center justify-center"><Smartphone className="h-6 w-6" /></div>
@@ -147,7 +122,7 @@ export default function InstallPwaPage() {
                 </div>
 
                 {/* IOS/SAFARI */}
-                <div className="space-y-8 p-10 bg-white rounded-[3rem] shadow-xl border border-slate-100 relative overflow-hidden">
+                <div className="space-y-8 p-10 bg-slate-50 rounded-[3rem] shadow-xl border border-slate-100 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-8 opacity-5"><Share className="h-32 w-32" /></div>
                   <div className="flex items-center gap-4">
                     <div className="h-12 w-12 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center"><Share className="h-6 w-6" /></div>
@@ -169,24 +144,10 @@ export default function InstallPwaPage() {
   )
 }
 
-function AppFeature({ icon: Icon, title, desc }: any) {
-   return (
-      <div className="p-10 rounded-[3rem] bg-slate-50 border border-slate-100 space-y-6 text-left hover:translate-y-[-8px] transition-all duration-500">
-         <div className="h-14 w-14 bg-white rounded-2xl flex items-center justify-center text-primary shadow-xl">
-            <Icon className="h-6 w-6" />
-         </div>
-         <div className="space-y-2">
-            <h3 className="text-xl font-black text-[#0F172A] uppercase">{title}</h3>
-            <p className="text-sm text-slate-500 font-medium leading-relaxed">{desc}</p>
-         </div>
-      </div>
-   )
-}
-
 function InstallStep({ num, text }: { num: string, text: string }) {
    return (
       <div className="flex items-center gap-5 group">
-         <div className="h-9 w-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center font-black text-xs text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-all">
+         <div className="h-9 w-9 rounded-full bg-white border border-slate-200 flex items-center justify-center font-black text-xs text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-all">
             {num}
          </div>
          <p className="text-sm text-slate-600 font-bold leading-tight">{text}</p>
