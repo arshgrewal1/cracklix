@@ -51,8 +51,9 @@ import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Enterprise MCQ Bank Management Hub v2.2.
- * UPDATED: Cascading filters for Board -> Exam to prevent data overload.
+ * @fileOverview Enterprise MCQ Bank Management Hub v3.0.
+ * FIXED: Implemented cascading filters and strict data clearing on fetch.
+ * FIXED: Subject dropdown now filters by Board selection.
  */
 
 export default function QuestionBank() {
@@ -99,6 +100,12 @@ function QuestionBankContent() {
   const fetchQuestions = useCallback(async (nextCursor: DocumentData | null = null) => {
     if (!db) return
     setLoading(true)
+    
+    // Clear list if not fetching next page to prevent showing stale/incorrect results
+    if (!nextCursor) {
+      setQuestions([])
+    }
+
     try {
       const constraints: any[] = [limit(50)]
       
@@ -119,20 +126,32 @@ function QuestionBankContent() {
       const snap = await getDocs(q)
       const newQs = snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }))
       
-      if (nextCursor) setQuestions(prev => [...prev, ...newQs])
-      else { 
+      if (nextCursor) {
+        setQuestions(prev => [...prev, ...newQs])
+      } else { 
         setQuestions(newQs)
         setSelectedIds([]) 
       }
       
       setLastDoc(snap.docs[snap.docs.length - 1] || null)
       setHasMore(snap.docs.length === 50)
-    } catch (e) {
+    } catch (e: any) {
       console.error("[BANK_FETCH_ERROR]:", e)
+      // On error, clear the list so user knows something went wrong
+      setQuestions([])
+      if (e.code === 'failed-precondition') {
+        toast({ 
+          variant: "destructive", 
+          title: "Index Required", 
+          description: "This specific filter combination requires a Firestore Index. Check console for URL." 
+        })
+      } else {
+        toast({ variant: "destructive", title: "Sync Failed", description: e.message })
+      }
     } finally { 
       setLoading(false) 
     }
-  }, [db, filters]);
+  }, [db, filters, toast]);
 
   useEffect(() => { 
     fetchQuestions(null) 
@@ -172,19 +191,18 @@ function QuestionBankContent() {
     }
   }
 
-  // Cascading Logic: Filter the list of available exams based on selected board
+  // Cascading Logic: Filter available Exams by Board
   const availableExams = useMemo(() => {
      if (!exams) return [];
      if (filters.boardId === 'all') return exams;
      return exams.filter((e: any) => e.boardId === filters.boardId);
   }, [exams, filters.boardId]);
 
-  // Filtering subjects based on Board if the hierarchy allows (mock logic if not strictly tied)
+  // Cascading Logic: Filter available Subjects by Board
   const availableSubjects = useMemo(() => {
      if (!subjects) return [];
      if (filters.boardId === 'all') return subjects;
-     // Subjects are currently global, but we filter if there's a loose match in metadata or just provide the full list
-     return subjects;
+     return subjects.filter((s: any) => s.boardId === filters.boardId);
   }, [subjects, filters.boardId]);
 
   return (
@@ -216,7 +234,7 @@ function QuestionBankContent() {
                <select 
                   value={filters.boardId} 
                   onChange={e => {
-                     setFilters({...filters, boardId: e.target.value, examId: 'all'});
+                     setFilters({...filters, boardId: e.target.value, examId: 'all', subjectId: 'all', chapterId: 'all'});
                   }} 
                   className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none"
                >
