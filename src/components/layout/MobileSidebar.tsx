@@ -29,8 +29,8 @@ import { Button } from "@/components/ui/button";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Mobile Sidebar v56.0.
- * FIXED: Close button visibility and logo alignment.
+ * @fileOverview Mobile Sidebar v56.1.
+ * UPDATED: Direct link to install hub for improved retenion.
  */
 export default function MobileSidebar({
   onClose,
@@ -165,6 +165,19 @@ export default function MobileSidebar({
                 </Link>
               );
             })}
+            
+            {/* DIRECT INSTALL LINK */}
+            <Link
+               href="/install"
+               onClick={onClose}
+               className={cn(
+                 "flex h-12 items-center gap-4 rounded-xl px-4 transition-all bg-primary/5 text-primary border border-primary/10 mt-2"
+               )}
+            >
+               <Award className="h-5 w-5 shrink-0" />
+               <span className="font-bold text-[14px] tracking-tight">Install Official App</span>
+               <Badge className="ml-auto bg-primary text-white text-[8px] font-black uppercase">Direct</Badge>
+            </Link>
           </div>
         </div>
 
@@ -179,7 +192,7 @@ export default function MobileSidebar({
                 variant="dark" 
                 className="w-full h-10 rounded-xl bg-primary hover:bg-blue-600 text-white text-[10px] border-none shadow-lg relative z-10" 
               />
-              <PWAInstallButton />
+              <PWAInstallButton variant="primary" />
            </div>
         </div>
       </div>

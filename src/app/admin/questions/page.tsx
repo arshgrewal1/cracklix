@@ -179,6 +179,14 @@ function QuestionBankContent() {
      return exams.filter((e: any) => e.boardId === filters.boardId);
   }, [exams, filters.boardId]);
 
+  // Filtering subjects based on Board if the hierarchy allows (mock logic if not strictly tied)
+  const availableSubjects = useMemo(() => {
+     if (!subjects) return [];
+     if (filters.boardId === 'all') return subjects;
+     // Subjects are currently global, but we filter if there's a loose match in metadata or just provide the full list
+     return subjects;
+  }, [subjects, filters.boardId]);
+
   return (
     <div className="space-y-6 md:space-y-10 text-left pb-32 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
@@ -231,7 +239,7 @@ function QuestionBankContent() {
                <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Subject</Label>
                <select value={filters.subjectId} onChange={e => setFilters({...filters, subjectId: e.target.value, chapterId: 'all'})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
                   <option value="all">All Subjects</option>
-                  {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  {availableSubjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                </select>
             </div>
             <div className="space-y-1.5">
