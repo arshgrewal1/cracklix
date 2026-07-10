@@ -51,8 +51,8 @@ import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Enterprise MCQ Bank Management Hub v2.1.
- * FIXED: Standardized CloudUpload icon usage and stabilized data hooks.
+ * @fileOverview Enterprise MCQ Bank Management Hub v2.2.
+ * UPDATED: Cascading filters for Board -> Exam to prevent data overload.
  */
 
 export default function QuestionBank() {
@@ -172,6 +172,13 @@ function QuestionBankContent() {
     }
   }
 
+  // Cascading Logic: Filter the list of available exams based on selected board
+  const availableExams = useMemo(() => {
+     if (!exams) return [];
+     if (filters.boardId === 'all') return exams;
+     return exams.filter((e: any) => e.boardId === filters.boardId);
+  }, [exams, filters.boardId]);
+
   return (
     <div className="space-y-6 md:space-y-10 text-left pb-32 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
@@ -198,16 +205,26 @@ function QuestionBankContent() {
          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <div className="space-y-1.5">
                <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Board</Label>
-               <select value={filters.boardId} onChange={e => setFilters({...filters, boardId: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+               <select 
+                  value={filters.boardId} 
+                  onChange={e => {
+                     setFilters({...filters, boardId: e.target.value, examId: 'all'});
+                  }} 
+                  className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none"
+               >
                   <option value="all">All Boards</option>
                   {boards?.map((b: any) => <option key={b.id} value={b.id}>{b.abbreviation}</option>)}
                </select>
             </div>
             <div className="space-y-1.5">
                <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Exam</Label>
-               <select value={filters.examId} onChange={e => setFilters({...filters, examId: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+               <select 
+                  value={filters.examId} 
+                  onChange={e => setFilters({...filters, examId: e.target.value})} 
+                  className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none"
+               >
                   <option value="all">All Exams</option>
-                  {exams?.map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
+                  {availableExams.map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
                </select>
             </div>
             <div className="space-y-1.5">
