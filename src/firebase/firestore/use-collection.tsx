@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
@@ -8,12 +9,12 @@ import {
   DocumentData, 
   FirestoreError 
 } from 'firebase/firestore';
-import { errorEmitter } from '../provider';
+import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
- * @fileOverview Production-Grade Firestore Collection Hook v3.0.
- * FIXED: Implemented deep comparison check to prevent infinite loops when queries are not memoized.
+ * @fileOverview Production-Grade Firestore Collection Hook v3.1.
+ * FIXED: Implemented deep comparison check and robust error handling for missing indexes.
  */
 export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
@@ -50,7 +51,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           id: doc.id,
         }));
 
-        // Deep comparison check
+        // Deep comparison check to prevent infinite loops
         const dataString = JSON.stringify(items);
         if (dataString !== dataRef.current) {
           dataRef.current = dataString;
@@ -61,17 +62,15 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setError(null);
       },
       (err) => {
+        console.error("[FIRESTORE_COLLECTION_ERROR]:", err);
+        
         if (err.code === 'permission-denied') {
           const permissionError = new FirestorePermissionError({
             path: (query as any)?._query?.path?.segments?.join('/') || 'registry_node',
             operation: 'list',
           } satisfies SecurityRuleContext);
 
-          // We use the global error emitter
-          const emitter = (window as any).__firebaseErrorEmitter;
-          if (emitter) {
-            emitter.emit('permission-error', permissionError);
-          }
+          errorEmitter.emit('permission-error', permissionError);
         }
         
         setError(err);

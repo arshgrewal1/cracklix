@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, useCallback, Suspense } from "react"
@@ -51,9 +52,9 @@ import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Enterprise MCQ Bank Management Hub v3.0.
- * FIXED: Implemented cascading filters and strict data clearing on fetch.
- * FIXED: Subject dropdown now filters by Board selection.
+ * @fileOverview Enterprise MCQ Bank Management Hub v3.1.
+ * FIXED: Implemented specific error handling for missing Firestore indexes.
+ * FIXED: Hardened filtering to prevent "leakage" of Current Affairs into other subject views.
  */
 
 export default function QuestionBank() {
@@ -120,6 +121,7 @@ function QuestionBankContent() {
         constraints.push(startAfter(nextCursor))
       }
       
+      // Strict descending order by updated timestamp
       constraints.push(orderBy("updatedAt", "desc"))
 
       const q = query(collection(db, "questions"), ...constraints)
@@ -137,16 +139,28 @@ function QuestionBankContent() {
       setHasMore(snap.docs.length === 50)
     } catch (e: any) {
       console.error("[BANK_FETCH_ERROR]:", e)
-      // On error, clear the list so user knows something went wrong
       setQuestions([])
-      if (e.code === 'failed-precondition') {
+      
+      // Contextual handle for Firestore Index requirement
+      if (e.code === 'failed-precondition' || e.message?.includes('index')) {
+        const indexUrl = e.message?.match(/https:\/\/console\.firebase\.google\.com[^\s]*/)?.[0];
         toast({ 
           variant: "destructive", 
-          title: "Index Required", 
-          description: "This specific filter combination requires a Firestore Index. Check console for URL." 
+          duration: 10000,
+          title: "Firestore Index Required", 
+          description: (
+            <div className="space-y-3">
+              <p>This filter combination requires a composite index.</p>
+              {indexUrl && (
+                <Button asChild size="sm" className="bg-white text-rose-600 hover:bg-slate-100">
+                  <a href={indexUrl} target="_blank" rel="noopener noreferrer">Create Index Now</a>
+                </Button>
+              )}
+            </div>
+          )
         })
       } else {
-        toast({ variant: "destructive", title: "Sync Failed", description: e.message })
+        toast({ variant: "destructive", title: "Registry Sync Failed", description: e.message })
       }
     } finally { 
       setLoading(false) 
