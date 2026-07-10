@@ -1,7 +1,8 @@
-export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Mixed';
-export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'CONTENT_MANAGER' | 'STUDENT';
+export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Mixed';
+export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR' | 'REVIEWER' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET';
-export type ContentStatus = 'DRAFT' | 'REVIEW' | 'PUBLISHED' | 'ARCHIVED';
+export type QuestionType = 'MCQ' | 'MULTIPLE_CORRECT' | 'TRUE_FALSE' | 'FILL_BLANK' | 'ASSERTION_REASON' | 'STATEMENT_BASED' | 'PARAGRAPH_BASED' | 'MATCH_FOLLOWING' | 'SEQUENCE' | 'IMAGE_BASED' | 'TABLE_BASED' | 'CASE_STUDY' | 'AUDIO_BASED' | 'VIDEO_BASED';
+export type ContentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_CHANGES' | 'PUBLISHED' | 'ARCHIVED' | 'LOCKED';
 export type QuestionLifecycleStatus = 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
 export type Gender = 'Male' | 'Female' | 'Other';
 
@@ -161,6 +162,54 @@ export interface Board {
   displayOrder?: number;
 }
 
+export interface Subject {
+  id: string;
+  name: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  displayOrder: number;
+  isActive: boolean;
+  categoryId?: string;
+  boardId?: string;
+  updatedAt?: any;
+  createdAt?: any;
+}
+
+export interface Chapter {
+  id: string;
+  subjectId: string;
+  name: string;
+  description?: string;
+  displayOrder: number;
+  isActive: boolean;
+  updatedAt?: any;
+  createdAt?: any;
+}
+
+export interface Topic {
+  id: string;
+  chapterId: string;
+  subjectId: string;
+  name: string;
+  description?: string;
+  displayOrder: number;
+  isActive: boolean;
+  updatedAt?: any;
+  createdAt?: any;
+}
+
+export interface Subtopic {
+  id: string;
+  topicId: string;
+  chapterId: string;
+  subjectId: string;
+  name: string;
+  displayOrder: number;
+  updatedAt?: any;
+  createdAt?: any;
+}
+
 export interface Exam {
   id: string;
   name: string;
@@ -178,6 +227,15 @@ export interface Exam {
 
 export interface Question {
   id: string;
+  examId?: string;
+  boardId?: string;
+  subjectId: string;
+  chapterId?: string;
+  topicId?: string;
+  subtopicId?: string;
+  questionType: QuestionType;
+  difficulty: Difficulty;
+  language: LanguageDisplayMode;
   englishQuestion: string;
   punjabiQuestion?: string;
   hindiQuestion?: string;
@@ -193,23 +251,39 @@ export interface Question {
   optionDEnglish: string;
   optionDPunjabi?: string;
   optionDHindi?: string;
-  correctAnswer: 'A' | 'B' | 'C' | 'D';
-  difficulty: Difficulty;
+  optionEEnglish?: string;
+  optionEPunjabi?: string;
+  optionEHindi?: string;
+  correctAnswer: string; // "A" | "B" etc or index
   englishExplanation?: string;
   punjabiExplanation?: string;
   hindiExplanation?: string;
-  subjectId: string;
-  boardId?: string;
-  sectionId?: string;
-  chapterId?: string;
-  imageUrl?: string;
-  status: QuestionLifecycleStatus;
-  usedCount: number;
+  detailedExplanation?: string;
+  hint?: string;
+  formula?: string;
+  latexSupport?: boolean;
+  referenceBook?: string;
+  referencePage?: string;
+  isPreviousYear?: boolean;
+  examYear?: number;
+  shift?: string;
+  session?: string;
+  marks: number;
+  negativeMarks: number;
+  estimatedTime?: number; // in seconds
+  tags: string[];
+  status: ContentStatus;
+  visibility: 'PUBLIC' | 'PRIVATE';
+  createdBy: string;
+  reviewedBy?: string;
+  approvedBy?: string;
+  publishedAt?: any;
   createdAt: any;
   updatedAt: any;
-  isStandalone?: boolean;
-  author?: string;
-  displayId?: string;
+  usedCount: number;
+  imageUrl?: string;
+  audioUrl?: string;
+  videoUrl?: string;
 }
 
 export interface CurrentAffairHubItem {
@@ -295,12 +369,6 @@ export interface AuditLog {
   action: string;
   timestamp: any;
   details: any;
-}
-
-export interface Subject {
-    id: string;
-    name: string;
-    boardId: string;
 }
 
 export type Mock = MockTest;

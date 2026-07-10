@@ -6,37 +6,73 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Search, Edit, Trash2, Database, Loader2, RefreshCw, Landmark, Lock, Unlock } from "lucide-react"
+import { 
+  Plus, 
+  Search, 
+  Edit, 
+  Trash2, 
+  Database, 
+  Loader2, 
+  RefreshCw, 
+  Landmark, 
+  Lock, 
+  Unlock, 
+  Filter, 
+  ChevronRight, 
+  UploadCloud,
+  FileSpreadsheet,
+  CheckCircle2,
+  AlertCircle
+} from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, doc, where, limit, getDocs, startAfter, writeBatch, serverTimestamp, orderBy, DocumentData, deleteDoc } from "firebase/firestore"
+import { 
+  collection, 
+  query, 
+  doc, 
+  where, 
+  limit, 
+  getDocs, 
+  startAfter, 
+  writeBatch, 
+  serverTimestamp, 
+  orderBy, 
+  DocumentData, 
+  deleteDoc 
+} from "firebase/firestore"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
-type QuestionFilterType = 'ALL' | 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
-
 export default function QuestionBank() {
   return (
-    <Suspense fallback={<div className="h-96 flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}>
+    <Suspense fallback={<div className="h-screen flex items-center justify-center"><Loader2 className="animate-spin text-primary" /></div>}>
       <QuestionBankContent />
     </Suspense>
   )
 }
 
 function QuestionBankContent() {
-  const dbInstance = useFirestore()
+  const db = useFirestore()
   const { toast } = useToast()
   const searchParams = useSearchParams()
   const router = useRouter()
   
-  const boardParam = searchParams?.get('board') || 'all'
+  // 1. FILTERS STATE
   const [searchTerm, setSearchTerm] = useState("")
-  const [activeTab, setActiveTab] = useState<QuestionFilterType>('ALL')
-  
+  const [filters, setFilters] = useState({
+    examId: searchParams.get('examId') || 'all',
+    boardId: searchParams.get('boardId') || 'all',
+    subjectId: searchParams.get('subjectId') || 'all',
+    chapterId: 'all',
+    difficulty: 'all',
+    status: 'all'
+  })
+
+  // 2. DATA STATE
   const [loading, setLoading] = useState(true)
   const [questions, setQuestions] = useState<any[]>([])
   const [lastDoc, setLastDoc] = useState<DocumentData | null>(null)
@@ -44,53 +80,84 @@ function QuestionBankContent() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [isBulkProcessing, setIsBulkProcessing] = useState(false)
 
-  const { data: boards } = useCollection<any>(useMemo(() => (dbInstance ? query(collection(dbInstance, "boards"), orderBy("displayOrder", "asc")) : null), [dbInstance]));
+  // 3. REGISTRY LISTENERS (FOR FILTERS)
+  const { data: boards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("displayOrder", "asc")) : null), [db]));
+  const { data: exams } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
+  const { data: subjects } = useCollection<any>(useMemo(() => (db ? collection(db, "subjects"), orderBy("displayOrder", "asc") : null), [db]));
+  const { data: chapters } = useCollection<any>(useMemo(() => (db ? query(collection(db, "chapters"), where("subjectId", "==", filters.subjectId)) : null), [db, filters.subjectId]));
 
   const fetchQuestions = useCallback(async (nextCursor: DocumentData | null = null) => {
-    if (!dbInstance) return
+    if (!db) return
     setLoading(true)
     try {
       const constraints: any[] = [limit(50)]
-      if (activeTab !== 'ALL') {
-        if (activeTab === 'REPEATED') constraints.push(where("usedCount", ">", 1))
-        else constraints.push(where("status", "==", activeTab))
-      }
-      if (boardParam !== "all") constraints.push(where("boardId", "==", boardParam))
-      if (nextCursor) constraints.push(startAfter(nextCursor))
+      
+      // Hierarchy Constraints
+      if (filters.examId !== 'all') constraints.push(where("examId", "==", filters.examId))
+      if (filters.boardId !== 'all') constraints.push(where("boardId", "==", filters.boardId))
+      if (filters.subjectId !== 'all') constraints.push(where("subjectId", "==", filters.subjectId))
+      if (filters.chapterId !== 'all') constraints.push(where("chapterId", "==", filters.chapterId))
+      if (filters.difficulty !== 'all') constraints.push(where("difficulty", "==", filters.difficulty))
+      if (filters.status !== 'all') constraints.push(where("status", "==", filters.status))
 
-      const q = query(collection(dbInstance, "questions"), ...constraints)
+      if (nextCursor) constraints.push(startAfter(nextCursor))
+      else constraints.push(orderBy("updatedAt", "desc"))
+
+      const q = query(collection(db, "questions"), ...constraints)
       const snap = await getDocs(q)
       const newQs = snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }))
       
       if (nextCursor) setQuestions(prev => [...prev, ...newQs])
-      else { setQuestions(newQs); setSelectedIds([]); }
+      else { 
+        setQuestions(newQs)
+        setSelectedIds([]) 
+      }
       
       setLastDoc(snap.docs[snap.docs.length - 1] || null)
       setHasMore(snap.docs.length === 50)
-    } finally { setLoading(false) }
-  }, [dbInstance, boardParam, activeTab]);
+    } catch (e) {
+      console.error("[BANK_FETCH_ERROR]:", e)
+    } finally { 
+      setLoading(false) 
+    }
+  }, [db, filters]);
 
-  useEffect(() => { fetchQuestions(null) }, [boardParam, activeTab, fetchQuestions]);
+  useEffect(() => { 
+    fetchQuestions(null) 
+  }, [filters, fetchQuestions]);
 
   const filteredQuestions = useMemo(() => {
     if (!questions) return []
+    if (!searchTerm.trim()) return questions;
+    const term = searchTerm.toLowerCase().trim();
     return questions.filter((q: any) => {
-        const term = searchTerm.toLowerCase().trim();
-        const qText = (q.englishQuestion || "").toLowerCase();
-        return qText.includes(term) || (q.id || "").toLowerCase().includes(term);
+        return (q.englishQuestion || "").toLowerCase().includes(term) || 
+               (q.id || "").toLowerCase().includes(term) ||
+               (q.tags || []).some((t: string) => t.toLowerCase().includes(term));
     })
   }, [questions, searchTerm])
 
-  const handleBulkStatusChange = (newStatus: string) => {
-    if (!dbInstance || selectedIds.length === 0) return;
+  const handleBulkAction = async (action: string) => {
+    if (!db || selectedIds.length === 0) return;
     setIsBulkProcessing(true);
-    const batch = writeBatch(dbInstance);
-    selectedIds.forEach((id: string) => batch.update(doc(dbInstance, "questions", id), { status: newStatus, updatedAt: serverTimestamp() }));
-    batch.commit().then(() => {
-       setQuestions(prev => prev.map((q: any) => selectedIds.includes(q.id) ? { ...q, status: newStatus } : q));
-       setSelectedIds([]);
-       toast({ title: "Registry Synced" });
-    }).finally(() => setIsBulkProcessing(false));
+    const batch = writeBatch(db);
+    
+    selectedIds.forEach((id: string) => {
+      const ref = doc(db, "questions", id);
+      if (action === 'DELETE') batch.delete(ref);
+      else if (action === 'PUBLISH') batch.update(ref, { status: 'PUBLISHED', updatedAt: serverTimestamp() });
+      else if (action === 'ARCHIVE') batch.update(ref, { status: 'ARCHIVED', updatedAt: serverTimestamp() });
+      else if (action === 'LOCK') batch.update(ref, { status: 'LOCKED', updatedAt: serverTimestamp() });
+    });
+
+    try {
+      await batch.commit();
+      toast({ title: "Bulk Action Successful", description: `${selectedIds.length} nodes processed.` });
+      fetchQuestions(null);
+    } finally {
+      setIsBulkProcessing(false);
+      setSelectedIds([]);
+    }
   }
 
   return (
@@ -99,74 +166,151 @@ function QuestionBankContent() {
         <div className="space-y-1">
           <div className="flex items-center gap-2 mb-1">
              <Database className="h-4 w-4 text-primary" />
-             <span className="text-[9px] font-black text-slate-400 tracking-tight">Registry Bank Hub</span>
+             <span className="text-[9px] font-black text-slate-400 tracking-tight">Enterprise Asset Bank</span>
           </div>
           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">MCQ Bank</h1>
-          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Master collection of preparation nodes across Punjab.</p>
+          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Master question repository with complete institutional hierarchy.</p>
         </div>
         
-        <Button asChild className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-black text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-3">
-           <Link href="/admin/questions/add"><Plus className="h-4 w-4" /> Add Question</Link>
-        </Button>
+        <div className="flex gap-3 w-full md:w-auto">
+           <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-8 bg-[#0F172A] hover:bg-black text-white rounded-full font-black text-[10px] tracking-widest gap-3 shadow-xl border-none">
+              <Link href="/admin/questions/bulk"><UploadCloud className="h-4 w-4" /> Bulk OCR</Link>
+           </Button>
+           <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-black text-[10px] tracking-widest shadow-xl border-none">
+              <Link href="/admin/questions/add"><Plus className="h-5 w-5" /> New Question</Link>
+           </Button>
+        </div>
       </div>
 
-      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2 px-1">
-         <FilterChip active={activeTab === 'ALL'} label="All Nodes" onClick={() => setActiveTab('ALL')} />
-         <FilterChip active={activeTab === 'UNUSED'} label="Unused" onClick={() => setActiveTab('UNUSED')} color="text-blue-500" />
-         <FilterChip active={activeTab === 'USED'} label="Used" onClick={() => setActiveTab('USED')} color="text-emerald-500" />
-         <FilterChip active={activeTab === 'LOCKED'} label="Locked" onClick={() => setActiveTab('LOCKED')} color="text-amber-500" />
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4 px-1">
-         <div className="relative flex-1 group">
-            <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+      {/* ENTERPRISE FILTERS */}
+      <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white mx-1 border border-slate-50 p-4 md:p-8">
+         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="space-y-1.5">
+               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Board</Label>
+               <select value={filters.boardId} onChange={e => setFilters({...filters, boardId: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+                  <option value="all">All Boards</option>
+                  {boards?.map((b: any) => <option key={b.id} value={b.id}>{b.abbreviation}</option>)}
+               </select>
+            </div>
+            <div className="space-y-1.5">
+               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Exam</Label>
+               <select value={filters.examId} onChange={e => setFilters({...filters, examId: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+                  <option value="all">All Exams</option>
+                  {exams?.map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
+               </select>
+            </div>
+            <div className="space-y-1.5">
+               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Subject</Label>
+               <select value={filters.subjectId} onChange={e => setFilters({...filters, subjectId: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+                  <option value="all">All Subjects</option>
+                  {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+               </select>
+            </div>
+            <div className="space-y-1.5">
+               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Chapter</Label>
+               <select value={filters.chapterId} onChange={e => setFilters({...filters, chapterId: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+                  <option value="all">All Chapters</option>
+                  {chapters?.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+               </select>
+            </div>
+            <div className="space-y-1.5">
+               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Level</Label>
+               <select value={filters.difficulty} onChange={e => setFilters({...filters, difficulty: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+                  <option value="all">All Levels</option>
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
+                  <option value="Expert">Expert</option>
+               </select>
+            </div>
+            <div className="space-y-1.5">
+               <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Status</Label>
+               <select value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+                  <option value="all">All Status</option>
+                  <option value="PUBLISHED">Published</option>
+                  <option value="DRAFT">Draft</option>
+                  <option value="LOCKED">Locked</option>
+                  <option value="ARCHIVED">Archived</option>
+               </select>
+            </div>
+         </div>
+         <div className="relative mt-6 group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-primary transition-colors" />
             <Input 
-              className="h-14 md:h-16 pl-14 rounded-2xl md:rounded-full bg-white border-slate-50 shadow-inner font-bold text-[#0F172A]" 
-              placeholder="Search statements..." 
-              value={searchTerm} 
-              onChange={e => setSearchTerm(e.target.value)} 
+               className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold text-sm" 
+               placeholder="Search by statement, ID, or keywords..." 
+               value={searchTerm} 
+               onChange={e => setSearchTerm(e.target.value)} 
             />
          </div>
-         <Select value={boardParam} onValueChange={(v) => router.push(`/admin/questions?board=${v}`)}>
-            <SelectTrigger className="w-full md:w-64 h-14 md:h-16 rounded-2xl md:rounded-full bg-white border-slate-50 shadow-inner font-bold text-xs">
-               <div className="flex items-center gap-3"><Landmark className="h-4 w-4 text-slate-300" /> <SelectValue placeholder="All Boards Hub" /></div>
-            </SelectTrigger>
-            <SelectContent><SelectItem value="all">All Boards Hub</SelectItem>{boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Hub</SelectItem>)}</SelectContent>
-         </Select>
-      </div>
+      </Card>
 
+      {/* DATA GRID */}
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
-          <Table className="min-w-[900px]">
+          <Table className="min-w-[1000px]">
             <TableHeader className="bg-slate-50/50">
               <TableRow className="h-14 border-slate-100">
-                <TableHead className="w-16 px-6 text-center"><Checkbox checked={selectedIds.length === filteredQuestions.length && filteredQuestions.length > 0} onCheckedChange={(checked) => setSelectedIds(checked ? filteredQuestions.map((q: any) => q.id) : [])} /></TableHead>
-                <TableHead className="px-6 text-[9px] font-black text-slate-400 tracking-tight">Statement & Node</TableHead>
-                <TableHead className="text-[9px] font-black text-slate-400 tracking-tight text-center">Status</TableHead>
+                <TableHead className="w-16 px-6 text-center">
+                  <Checkbox 
+                    checked={selectedIds.length === filteredQuestions.length && filteredQuestions.length > 0} 
+                    onCheckedChange={(checked) => setSelectedIds(checked ? filteredQuestions.map((q: any) => q.id) : [])} 
+                  />
+                </TableHead>
+                <TableHead className="px-6 text-[9px] font-black text-slate-400 tracking-tight">Statement & Identity</TableHead>
+                <TableHead className="text-[9px] font-black text-slate-400 tracking-tight">Hierarchy Context</TableHead>
+                <TableHead className="text-[9px] font-black text-slate-400 tracking-tight text-center">Type</TableHead>
                 <TableHead className="text-right px-10 text-[9px] font-black text-slate-400 tracking-tight">Audit</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading && questions.length === 0 ? (
-                Array.from({ length: 5 }).map((_, i) => (<TableRow key={i}><TableCell colSpan={4} className="p-8"><Skeleton className="h-12 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>))
-              ) : filteredQuestions.map((q: any) => (
-                <TableRow key={q.id} className={cn("hover:bg-slate-50 transition-all group border-slate-50", selectedIds.includes(q.id) && "bg-primary/5")}>
-                  <TableCell className="px-6 text-center"><Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={(checked) => setSelectedIds(prev => checked ? [...prev, q.id] : prev.filter(id => id !== q.id))} /></TableCell>
-                  <TableCell className="px-6 py-6 text-left max-w-md">
-                     <p className="text-[9px] font-black text-primary uppercase tracking-tight mb-1.5">{q.subjectId || "General Hub"}</p>
-                     <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-2">{q.englishQuestion}</p>
-                  </TableCell>
-                  <TableCell className="text-center">
-                     <LifecycleBadge status={q.status || 'UNUSED'} />
-                  </TableCell>
-                  <TableCell className="text-right px-10">
-                     <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
-                        <Button variant="ghost" size="icon" className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90" asChild><Link href={`/admin/questions/add?id=${q.id}`}><Edit className="h-4 w-4" /></Link></Button>
-                        <button className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={() => { if(confirm("Purge node?")) deleteDoc(doc(dbInstance!, "questions", q.id)) }}><Trash2 className="h-4 w-4" /></button>
-                     </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                Array.from({ length: 5 }).map((_, i) => (<TableRow key={i}><TableCell colSpan={5} className="p-8"><Skeleton className="h-12 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>))
+              ) : filteredQuestions.length > 0 ? filteredQuestions.map((q: any) => {
+                 const subject = subjects?.find((s: any) => s.id === q.subjectId);
+                 return (
+                  <TableRow key={q.id} className={cn("hover:bg-slate-50 transition-all group border-slate-50", selectedIds.includes(q.id) && "bg-primary/5")}>
+                    <TableCell className="px-6 text-center">
+                      <Checkbox checked={selectedIds.includes(q.id)} onCheckedChange={(checked) => setSelectedIds(prev => checked ? [...prev, q.id] : prev.filter(id => id !== q.id))} />
+                    </TableCell>
+                    <TableCell className="px-6 py-6 text-left max-w-md">
+                       <div className="flex items-center gap-2 mb-1.5">
+                          <Badge className="bg-slate-100 text-slate-500 border-none text-[8px] font-black uppercase rounded-sm">{q.id.slice(-8)}</Badge>
+                          <Badge className={cn("border-none text-[8px] font-black px-2 py-0.5 rounded-sm", q.difficulty === 'Expert' ? 'bg-rose-50 text-rose-600' : 'bg-blue-50 text-blue-600')}>{q.difficulty}</Badge>
+                       </div>
+                       <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-2">{q.englishQuestion}</p>
+                    </TableCell>
+                    <TableCell>
+                       <div className="space-y-1">
+                          <p className="text-[10px] font-bold text-[#0F172A]">{subject?.name || q.subjectId}</p>
+                          <p className="text-[9px] text-slate-400 font-medium uppercase tracking-tight">{q.chapterId || 'No Chapter'}</p>
+                       </div>
+                    </TableCell>
+                    <TableCell className="text-center">
+                       <Badge variant="outline" className="border-slate-100 text-slate-400 text-[8px] font-black uppercase px-2">{q.questionType || 'MCQ'}</Badge>
+                    </TableCell>
+                    <TableCell className="text-right px-10">
+                       <div className="flex justify-end gap-2 opacity-20 group-hover:opacity-100 transition-all">
+                          <Button variant="ghost" size="icon" className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary" asChild>
+                             <Link href={`/admin/questions/add?id=${q.id}`}><Edit className="h-4 w-4" /></Link>
+                          </Button>
+                          <button className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={async () => { if(confirm("Purge asset from registry?")) { await deleteDoc(doc(db!, "questions", q.id)); fetchQuestions(null); } }}>
+                             <Trash2 className="h-4 w-4" />
+                          </button>
+                       </div>
+                    </TableCell>
+                  </TableRow>
+                 )
+              }) : (
+                 <TableRow>
+                    <TableCell colSpan={5} className="h-80 text-center">
+                       <div className="flex flex-col items-center justify-center opacity-10 space-y-4">
+                          <AlertCircle className="h-16 w-16 text-slate-400" />
+                          <p className="font-black text-2xl uppercase tracking-widest">No Assets Found</p>
+                       </div>
+                    </TableCell>
+                 </TableRow>
+              )}
             </TableBody>
           </Table>
         </CardContent>
@@ -175,54 +319,30 @@ function QuestionBankContent() {
       {hasMore && (
         <div className="flex justify-center mt-6">
           <Button variant="outline" onClick={() => fetchQuestions(lastDoc)} disabled={loading} className="gap-3 h-11 px-8 rounded-full font-black uppercase text-[10px] tracking-widest border-slate-100">
-            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />} Load more nodes
+            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />} Sync next 50 nodes
           </Button>
         </div>
       )}
 
+      {/* BULK TOOLBAR */}
       {selectedIds.length > 0 && (
-         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-12 duration-500 w-[95vw] max-w-md">
-            <div className="bg-[#0F172A] text-white px-6 py-4 rounded-3xl shadow-5xl flex items-center justify-between border border-white/10">
-               <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 bg-primary/20 rounded-lg flex items-center justify-center text-primary font-black text-xs">{selectedIds.length}</div>
-                  <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Selected</p>
+         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-12 duration-500 w-[95vw] max-w-2xl">
+            <div className="bg-[#0F172A] text-white px-8 py-4 rounded-[2rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl">
+               <div className="flex items-center gap-4">
+                  <div className="h-11 w-11 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black text-sm">{selectedIds.length}</div>
+                  <div>
+                    <p className="text-[11px] font-black uppercase tracking-widest">Assets Selected</p>
+                    <p className="text-[8px] font-bold text-slate-500 uppercase">Registry Normalization Active</p>
+                  </div>
                </div>
-               <div className="flex items-center gap-2">
-                  <button onClick={() => handleBulkStatusChange('LOCKED')} disabled={isBulkProcessing} className="p-2.5 rounded-xl bg-white/5 hover:bg-blue-600 transition-all active:scale-90"><Lock className="h-4 w-4" /></button>
-                  <button onClick={() => handleBulkStatusChange('UNUSED')} disabled={isBulkProcessing} className="p-2.5 rounded-xl bg-white/5 hover:bg-emerald-600 transition-all active:scale-90"><Unlock className="h-4 w-4" /></button>
-                  <button onClick={() => { if(confirm(`Purge ${selectedIds.length} nodes?`)) { const batch = writeBatch(dbInstance!); selectedIds.forEach(id => batch.delete(doc(dbInstance!, 'questions', id))); batch.commit(); setSelectedIds([]); } }} disabled={isBulkProcessing} className="p-2.5 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90"><Trash2 className="h-4 w-4" /></button>
+               <div className="flex items-center gap-3">
+                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-emerald-600 transition-all font-black text-[9px] uppercase tracking-widest"><CheckCircle2 className="h-4 w-4" /> Publish</button>
+                  <button onClick={() => handleBulkAction('LOCK')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-amber-600 transition-all active:scale-90"><Lock className="h-4 w-4" /></button>
+                  <button onClick={() => handleBulkAction('DELETE')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90"><Trash2 className="h-4 w-4" /></button>
                </div>
             </div>
          </div>
       )}
     </div>
   )
-}
-
-function FilterChip({ active, label, onClick, color = "" }: any) {
-   return (
-      <button 
-        onClick={onClick} 
-        className={cn(
-          "px-6 py-2 rounded-full font-bold text-[10px] tracking-tight transition-all border-2 whitespace-nowrap active:scale-95", 
-          active ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : `bg-white border-slate-100 hover:bg-slate-50 ${color}`
-        )}
-      >
-        {label}
-      </button>
-   )
-}
-
-function LifecycleBadge({ status }: { status: string }) {
-   const styles: Record<string, string> = { 
-     'UNUSED': 'bg-blue-50 text-blue-600', 
-     'USED': 'bg-emerald-50 text-emerald-600', 
-     'LOCKED': 'bg-amber-50 text-amber-600',
-     'DUPLICATE': 'bg-rose-50 text-rose-600'
-   };
-   return (
-      <Badge className={cn("border-none px-2.5 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest", styles[status] || styles.UNUSED)}>
-        {status}
-      </Badge>
-   )
 }

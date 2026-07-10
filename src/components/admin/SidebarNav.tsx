@@ -31,7 +31,10 @@ import {
   HelpCircle,
   Wrench,
   ChevronRight,
-  Tag
+  Tag,
+  NotebookTabs,
+  Library,
+  Fingerprint
 } from "lucide-react";
 
 import {
@@ -46,19 +49,26 @@ const NAV_GROUPS = [
     label: "Management",
     items: [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-      { label: "Categories", href: "/admin/categories", icon: FolderTree },
-      { label: "Boards", href: "/admin/exams", icon: Building2 },
-      { label: "Exam Registry", href: "/admin/exam-registry", icon: GraduationCap },
-      { label: "Subjects", href: "/admin/subjects", icon: BookOpen },
       { label: "MCQ Bank", href: "/admin/questions", icon: Database },
-      { label: "Bulk Import", href: "/admin/bulk-import", icon: UploadCloud },
+      { label: "Bulk Ingestion", href: "/admin/bulk-import", icon: UploadCloud },
+      { label: "Review Center", href: "/admin/qa", icon: Activity },
     ],
   },
-
+  {
+    label: "Question Structure",
+    items: [
+      { label: "Exams", href: "/admin/exam-registry", icon: GraduationCap },
+      { label: "Boards", href: "/admin/exams", icon: Building2 },
+      { label: "Subjects", href: "/admin/subjects", icon: BookOpen },
+      { label: "Chapters", href: "/admin/chapters", icon: NotebookTabs },
+      { label: "Topics", href: "/admin/topics", icon: Library },
+      { label: "Folders", href: "/admin/categories", icon: FolderTree },
+      { label: "Tags", href: "/admin/coupons", icon: Tag },
+    ],
+  },
   {
     label: "Content Hub",
     items: [
-      { label: "Content Pulse", href: "/admin/qa", icon: Activity },
       { label: "Mock Builder", href: "/admin/mocks/builder", icon: PenSquare },
       { label: "Mock Manager", href: "/admin/mocks", icon: ClipboardList },
       { label: "Current Affairs", href: "/admin/current-affairs", icon: Newspaper },
@@ -67,10 +77,8 @@ const NAV_GROUPS = [
       { label: "Exam Calendar", href: "/admin/calendar", icon: Calendar },
       { label: "Success Stories", href: "/admin/success-stories", icon: Trophy },
       { label: "Help Center", href: "/admin/help-center", icon: HelpCircle },
-      { label: "Free Hub CMS", href: "/admin/free-content", icon: FileCode2 },
     ],
   },
-
   {
     label: "Governance",
     items: [
@@ -78,12 +86,10 @@ const NAV_GROUPS = [
       { label: "Devices", href: "/admin/devices", icon: Smartphone },
       { label: "Support", href: "/admin/support", icon: MessageCircle },
       { label: "Revenue", href: "/admin/payments", icon: DollarSign },
-      { label: "Verify UPI", href: "/admin/payments/verify", icon: Gem },
+      { label: "Verify Payments", href: "/admin/payments/verify", icon: Gem },
       { label: "Pass Manager", href: "/admin/passes", icon: Gem },
-      { label: "Coupon Hub", href: "/admin/coupons", icon: Tag },
-      { label: "Audit Logs", href: "/admin/audit-logs", icon: History },
-      { label: "System Tools", href: "/admin/maintenance", icon: Wrench },
-      { label: "Platform Health", href: "/admin/health", icon: HeartPulse },
+      { label: "Audit Trail", href: "/admin/audit-logs", icon: History },
+      { label: "System Health", href: "/admin/health", icon: HeartPulse },
       { label: "Global Settings", href: "/admin/settings", icon: Settings },
     ],
   },
@@ -101,7 +107,7 @@ export default function SidebarNav({
         {NAV_GROUPS.map((group) => (
           <div key={group.label} className="space-y-2">
             {isOpen ? (
-              <p className="px-4 text-[10px] font-bold tracking-tight text-slate-400">
+              <p className="px-4 text-[10px] font-bold tracking-tight text-slate-400 uppercase">
                 {group.label}
               </p>
             ) : (

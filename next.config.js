@@ -8,7 +8,6 @@ const withPWA = require('next-pwa')({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   // Only use static export for Android builds to keep API routes working on Web/Vercel
   output: process.env.BUILD_TARGET === 'android' ? 'export' : undefined,
   images: {
