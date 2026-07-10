@@ -17,8 +17,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Hardened Social Share Hub v14.0.
- * UPDATED: Optimized to share the direct /install hub for immediate application distribution.
+ * @fileOverview Hardened Social Share Hub v15.0.
+ * UPDATED: Optimized to share the direct /install hub for immediate PWA application distribution.
  */
 export default function ShareButton({ 
   className = "", 
@@ -34,7 +34,7 @@ export default function ShareButton({
   const { data: settings, loading } = useDoc<any>(settingsRef);
 
   const shareTitle = "Cracklix Official Hub";
-  const shareDesc = "Practice mock tests and access study material on the official Cracklix App. Direct install below.";
+  const shareDesc = "Practice mock tests and access study material instantly. Install the official app from your browser below.";
   const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/install` : 'https://cracklix.com/install';
 
   const handleShare = async () => {
@@ -100,7 +100,7 @@ export default function ShareButton({
                 <Share2 className="h-6 w-6 md:h-8 md:w-8" />
              </div>
              <DialogTitle className="text-2xl md:text-3xl font-black text-[#0F172A] uppercase leading-tight">Broadcast App</DialogTitle>
-             <DialogDescription className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-2">Distribute Direct Install Node</DialogDescription>
+             <DialogDescription className="text-slate-400 text-[10px] font-bold uppercase tracking-widest mt-2">Distribute Direct Install Hub</DialogDescription>
           </DialogHeader>
 
           <div className="px-6 md:px-8 pb-8 space-y-3 md:space-y-4">

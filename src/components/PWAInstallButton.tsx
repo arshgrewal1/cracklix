@@ -2,9 +2,9 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Smartphone, Sparkles, ArrowRight } from 'lucide-react';
+import { Smartphone, ArrowRight, Zap, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
+import { usePWAInstall } from '@/hooks/use-pwa-install';
 
 interface PWAInstallButtonProps {
   className?: string;
@@ -13,17 +13,28 @@ interface PWAInstallButtonProps {
 }
 
 /**
- * @fileOverview Institutional Application Install Trigger v2.0.
- * High-fidelity call to action for direct app distribution.
+ * @fileOverview Institutional PWA Install Trigger v3.0.
+ * Direct trigger for the browser's native installation prompt.
  */
 export default function PWAInstallButton({ 
   className, 
   variant = 'primary',
   showLabel = true 
 }: PWAInstallButtonProps) {
+  const { canInstall, installApp, isInstalled } = usePWAInstall();
+
+  if (isInstalled) return null;
+
   return (
     <Button
-      asChild
+      onClick={(e) => {
+        e.preventDefault();
+        if (canInstall) {
+          installApp();
+        } else {
+          window.location.href = '/install';
+        }
+      }}
       className={cn(
         "h-14 px-8 rounded-full font-black uppercase text-[10px] tracking-[0.2em] gap-3 shadow-2xl transition-all active:scale-95 group border-none",
         variant === 'primary' ? "bg-primary hover:bg-blue-700 text-white" : 
@@ -32,11 +43,9 @@ export default function PWAInstallButton({
         className
       )}
     >
-      <Link href="/install">
-        <Smartphone className="h-4 w-4 md:h-5 md:w-5 group-hover:rotate-12 transition-transform" />
-        {showLabel && <span>Install Hub</span>}
-        <ArrowRight className="h-4 w-4 opacity-40 ml-1 group-hover:translate-x-1 transition-transform" />
-      </Link>
+      <Smartphone className="h-4 w-4 md:h-5 md:w-5 group-hover:rotate-12 transition-transform" />
+      {showLabel && <span>{canInstall ? 'Install Hub' : 'Setup App'}</span>}
+      <ArrowRight className="h-4 w-4 opacity-40 ml-1 group-hover:translate-x-1 transition-transform" />
     </Button>
   );
 }

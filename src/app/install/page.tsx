@@ -1,161 +1,187 @@
 'use client';
 
+import React from "react";
+import { motion } from "framer-motion";
+import { 
+  Smartphone, 
+  ShieldCheck, 
+  Zap, 
+  ArrowRight, 
+  Layers, 
+  CheckCircle,
+  PlusSquare,
+  Share,
+  Monitor
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { useEffect, useState } from "react";
-import { CheckCircle, Download, ShieldCheck, Smartphone, Zap, ArrowRight, Layers } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
-import { PLATFORM_VERSION } from "@/lib/version";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import { motion } from "framer-motion";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
+import { PLATFORM_VERSION } from "@/lib/version";
 
 /**
- * @fileOverview Official Direct Install Hub v2.0.
- * High-fidelity landing page for APK distribution and PWA setup.
+ * @fileOverview Official Direct PWA Install Hub v3.0.
+ * Rebuilt to focus entirely on browser-based application installation.
  */
 
-const CURRENT_BUILD_VERSION = `v${PLATFORM_VERSION.version}`;
-const BUILD_DATE = PLATFORM_VERSION.releaseDate;
-const APK_DOWNLOAD_URL = "https://github.com/arshgrewal1/cracklix/releases/latest/download/cracklix.apk";
-
 export default function InstallPwaPage() {
-   const [buildProgress, setBuildProgress] = useState(10);
-   const [apkFound, setApkFound] = useState(false);
+  const { canInstall, installApp, isInstalled } = usePWAInstall();
+  const { version, releaseDate } = PLATFORM_VERSION;
 
-   const handleDownload = () => {
-      window.open(APK_DOWNLOAD_URL, '_blank');
-   };
+  return (
+    <div className="min-h-screen bg-white font-body text-left selection:bg-primary/10">
+      <Navbar />
+      
+      <main>
+        {/* PREMIUM INSTALL HERO */}
+        <section className="relative pt-16 pb-24 md:pt-32 md:pb-48 overflow-hidden bg-[#0B1528] text-white">
+           <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-primary/20 blur-[160px] rounded-full" />
+           
+           <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
+              <motion.div
+                 initial={{ opacity: 0, y: 20 }}
+                 animate={{ opacity: 1, y: 0 }}
+                 className="space-y-10 max-w-4xl mx-auto"
+              >
+                 <div className="inline-flex items-center gap-3 px-6 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl">
+                    <Zap className="h-4 w-4 text-primary animate-pulse" />
+                    <span className="text-[10px] md:text-xs font-black tracking-[0.3em] uppercase">Official Hub Node v{version}</span>
+                 </div>
 
-   useEffect(() => {
-      let active = true;
-      const timer = setInterval(() => {
-         setBuildProgress(prev => (prev >= 90 ? 90 : prev + 10));
-      }, 150);
+                 <div className="space-y-6">
+                    <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] antialiased">
+                       Crack Exams <br className="hidden md:block" /> 
+                       <span className="text-primary">From Your Home Screen.</span>
+                    </h1>
+                    <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-snug">
+                       Install the official Cracklix app directly from your browser. Zero downloads, zero lag, and instant offline access.
+                    </p>
+                 </div>
 
-      fetch(APK_DOWNLOAD_URL, { method: 'HEAD' })
-         .then(res => {
-            if (!active) return;
-            setBuildProgress(100);
-            if (res.ok) {
-               setApkFound(true);
-            }
-         })
-         .catch(() => {
-            if (active) setBuildProgress(100);
-         });
+                 <div className="flex flex-col md:flex-row items-center justify-center gap-6 pt-6">
+                    {isInstalled ? (
+                      <div className="flex items-center gap-3 px-8 py-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                        <CheckCircle className="h-6 w-6 text-emerald-500" />
+                        <span className="font-black uppercase tracking-widest text-sm text-emerald-400">Hub Already Installed</span>
+                      </div>
+                    ) : canInstall ? (
+                      <Button 
+                        onClick={installApp}
+                        className="h-16 md:h-24 px-10 md:px-16 bg-primary hover:bg-blue-700 text-white rounded-2xl md:rounded-[2.5rem] shadow-5xl gap-4 group transition-all active:scale-95 border-none"
+                      >
+                         <Smartphone className="h-6 w-6 md:h-8 md:w-8 group-hover:rotate-12 transition-transform" />
+                         <div className="flex flex-col items-start text-left">
+                            <span className="font-black tracking-tight text-xs md:text-xl leading-none">Install Now</span>
+                            <span className="text-[8px] md:text-[10px] opacity-60 uppercase font-black tracking-widest">Add to Home Screen</span>
+                         </div>
+                      </Button>
+                    ) : (
+                      <div className="space-y-4">
+                        <Badge className="bg-amber-500/10 text-amber-500 border-none px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-2">Safari / Other Browser Detected</Badge>
+                        <p className="text-slate-400 font-bold text-sm">Follow instructions below to add Cracklix manually.</p>
+                      </div>
+                    )}
+                 </div>
 
-      return () => {
-         active = false;
-         clearInterval(timer);
-      };
-   }, []);
-   
-   return (
-      <div className="min-h-screen bg-white font-body text-left">
-         <Navbar />
-         
-         <main className="container mx-auto px-4 py-12 md:py-24 max-w-7xl">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 md:gap-24 items-center">
-               
-               {/* BRAND IDENTITY & FEATURES */}
-               <motion.div 
-                  initial={{ opacity: 0, x: -30 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="space-y-10 md:space-y-16"
-               >
+                 <div className="flex items-center justify-center gap-10 text-slate-500 font-black text-[9px] md:text-[12px] tracking-widest pt-4">
+                    <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" /> SECURED</span>
+                    <span className="flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /> INSTANT SYNC</span>
+                    <span className="flex items-center gap-2"><Monitor className="h-4 w-4 text-primary" /> ALL DEVICES</span>
+                 </div>
+              </motion.div>
+           </div>
+        </section>
+
+        {/* FEATURE MATRIX */}
+        <section className="py-24 bg-white">
+           <div className="container mx-auto px-4 max-w-7xl">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
+                 <AppFeature 
+                    icon={Zap} 
+                    title="No Downloads" 
+                    desc="Install instantly without the Play Store. Saves your device storage and data." 
+                 />
+                 <AppFeature 
+                    icon={ShieldCheck} 
+                    title="Offline Hub" 
+                    desc="The PWA caches your study notes and attempted mocks for access without internet." 
+                 />
+                 <AppFeature 
+                    icon={PlusSquare} 
+                    title="Native Feel" 
+                    desc="Launches in full-screen mode just like a native app. No browser address bars." 
+                 />
+              </div>
+           </div>
+        </section>
+
+        {/* INSTALLATION STEPS */}
+        <section className="py-24 bg-slate-50 border-y border-slate-100">
+           <div className="container mx-auto px-4 max-w-5xl">
+              <div className="text-center space-y-4 mb-16">
+                 <h2 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tight uppercase">Setup Instructions</h2>
+                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.3em]">Institutional Browser Protocols</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                {/* ANDROID/CHROME */}
+                <div className="space-y-8 p-10 bg-white rounded-[3rem] shadow-xl border border-slate-100">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 bg-blue-50 text-primary rounded-2xl flex items-center justify-center"><Smartphone className="h-6 w-6" /></div>
+                    <h3 className="text-xl font-black text-[#0F172A] uppercase">Android / Chrome</h3>
+                  </div>
                   <div className="space-y-6">
-                     <div className="inline-flex items-center gap-3 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20">
-                        <Zap className="h-4 w-4 text-primary animate-pulse" />
-                        <span className="text-[10px] font-black tracking-widest text-primary uppercase">Institutional Mobile Node</span>
-                     </div>
-                     <h1 className="text-4xl md:text-7xl font-black text-[#0F172A] tracking-tighter leading-[0.95] antialiased">
-                        Get the Full <br/> <span className="text-primary">Experience.</span>
-                     </h1>
-                     <p className="text-base md:text-xl text-slate-500 font-medium leading-relaxed max-w-xl">
-                        Install the official Android app to unlock high-fidelity mock tests, offline study nodes, and instant merit notifications.
-                     </p>
+                    <InstallStep num="1" text="Tap the three dots (⋮) in the top right corner of Chrome." />
+                    <InstallStep num="2" text="Select 'Install App' or 'Add to Home Screen' from the menu." />
+                    <InstallStep num="3" text="Confirm the installation to add Cracklix to your drawer." />
                   </div>
+                </div>
 
-                  <div className="grid grid-cols-1 gap-6">
-                     <FeatureItem title="Secure Native Build" desc="Digitally signed Android APK verified for institutional data integrity." />
-                     <FeatureItem title="Zero Latency Hub" desc="Optimized rendering engine built for high-speed test practice." />
-                     <FeatureItem title="Offline Registry" desc="Access your vault and attempted mocks without an internet connection." />
+                {/* IOS/SAFARI */}
+                <div className="space-y-8 p-10 bg-white rounded-[3rem] shadow-xl border border-slate-100">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center"><Share className="h-6 w-6" /></div>
+                    <h3 className="text-xl font-black text-[#0F172A] uppercase">iOS / Safari</h3>
                   </div>
-               </motion.div>
+                  <div className="space-y-6">
+                    <InstallStep num="1" text="Tap the 'Share' icon (square with up arrow) at the bottom." />
+                    <InstallStep num="2" text="Scroll down and tap 'Add to Home Screen'." />
+                    <InstallStep num="3" text="Tap 'Add' in the top right to finish the setup." />
+                  </div>
+                </div>
+              </div>
+           </div>
+        </section>
+      </main>
 
-               {/* DOWNLOAD / INSTALL CARD */}
-               <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-               >
-                  <Card className="p-8 md:p-14 border-none shadow-5xl rounded-[3rem] bg-[#0B1528] text-white relative overflow-hidden group">
-                     <div className="absolute top-0 right-0 p-10 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000">
-                        <Smartphone className="h-64 w-64" />
-                     </div>
-
-                     <div className="relative z-10 flex flex-col items-center text-center space-y-10">
-                        <div className="h-20 w-20 md:h-24 md:w-24 bg-primary/20 rounded-[2.5rem] flex items-center justify-center text-primary shadow-2xl">
-                           <Download className="h-10 w-10 md:h-12 md:w-12 animate-bounce" />
-                        </div>
-                        
-                        <div className="space-y-2">
-                           <h2 className="text-2xl md:text-4xl font-black tracking-tight">Direct Install</h2>
-                           <p className="text-slate-400 font-bold uppercase text-[9px] md:text-xs tracking-[0.3em]">Build {CURRENT_BUILD_VERSION} • {BUILD_DATE}</p>
-                        </div>
-
-                        <div className="w-full space-y-6">
-                           {!apkFound ? (
-                              <div className="w-full space-y-3">
-                                 <div className="flex justify-between text-[10px] font-black uppercase text-slate-500 tracking-widest">
-                                    <span>Syncing build node...</span>
-                                    <span>{buildProgress}%</span>
-                                 </div>
-                                 <Progress value={buildProgress} className="h-2 bg-white/5" />
-                              </div>
-                           ) : (
-                              <div className="space-y-6">
-                                 <Button 
-                                    onClick={handleDownload}
-                                    className="w-full h-16 md:h-20 bg-primary hover:bg-blue-700 text-white gap-4 rounded-2xl md:rounded-[2rem] font-black uppercase tracking-widest text-xs md:text-lg shadow-2xl transition-all active:scale-95 border-none"
-                                 >
-                                    <Download className="h-6 w-6" /> Download APK Node
-                                 </Button>
-                                 <div className="flex items-center justify-center gap-6 text-slate-500 font-black text-[9px] tracking-[0.2em] uppercase">
-                                    <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" /> Verified</span>
-                                    <span className="flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /> 15.4MB</span>
-                                 </div>
-                              </div>
-                           )}
-                        </div>
-
-                        <div className="pt-8 border-t border-white/5 w-full">
-                           <p className="text-[10px] text-slate-500 font-bold uppercase leading-relaxed">
-                              * Recommended for PPSC, PSSSB and Punjab Police aspirants for best performance.
-                           </p>
-                        </div>
-                     </div>
-                  </Card>
-               </motion.div>
-
-            </div>
-         </main>
-         
-         <Footer />
-      </div>
-   );
+      <Footer />
+    </div>
+  )
 }
 
-function FeatureItem({ title, desc }: { title: string, desc: string }) {
+function AppFeature({ icon: Icon, title, desc }: any) {
    return (
-      <div className="flex items-start gap-6 group">
-         <div className="h-12 w-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-primary group-hover:text-white transition-all duration-300">
-            <CheckCircle className="h-6 w-6" />
+      <div className="p-10 rounded-[3rem] bg-slate-50 border border-slate-100 space-y-6 text-left hover:translate-y-[-8px] transition-all duration-500">
+         <div className="h-14 w-14 bg-white rounded-2xl flex items-center justify-center text-primary shadow-xl">
+            <Icon className="h-6 w-6" />
          </div>
-         <div className="space-y-1">
-            <h3 className="text-lg font-black text-[#0F172A] uppercase tracking-tight">{title}</h3>
+         <div className="space-y-2">
+            <h3 className="text-xl font-black text-[#0F172A] uppercase">{title}</h3>
             <p className="text-sm text-slate-500 font-medium leading-relaxed">{desc}</p>
          </div>
+      </div>
+   )
+}
+
+function InstallStep({ num, text }: { num: string, text: string }) {
+   return (
+      <div className="flex items-center gap-5 group">
+         <div className="h-9 w-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center font-black text-xs text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-all">
+            {num}
+         </div>
+         <p className="text-sm text-slate-600 font-bold leading-tight">{text}</p>
       </div>
    )
 }

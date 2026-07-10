@@ -30,8 +30,8 @@ import { Badge } from "@/components/ui/badge";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Mobile Sidebar v56.2.
- * FIXED: Added missing Badge import.
+ * @fileOverview Mobile Sidebar v57.0.
+ * Replaced APK references with direct Install Hub branding.
  */
 export default function MobileSidebar({
   onClose,
@@ -177,7 +177,7 @@ export default function MobileSidebar({
             >
                <Award className="h-5 w-5 shrink-0" />
                <span className="font-bold text-[14px] tracking-tight">Install Official App</span>
-               <Badge className="ml-auto bg-primary text-white text-[8px] font-black uppercase">Direct</Badge>
+               <Badge className="ml-auto bg-primary text-white text-[8px] font-black uppercase">Instant</Badge>
             </Link>
           </div>
         </div>
@@ -187,7 +187,7 @@ export default function MobileSidebar({
            <div className="bg-[#0B1528] rounded-[1.5rem] p-4 space-y-3 border border-white/5 shadow-xl relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12 group-hover:scale-110 transition-transform"><Award className="h-12 w-12" /></div>
               <div className="relative z-10 text-left">
-                <h4 className="text-[10px] font-black text-white tracking-widest uppercase">Spread the Word</h4>
+                <h4 className="text-[10px] font-black text-white tracking-widest uppercase">Share Experience</h4>
               </div>
               <ShareButton 
                 variant="dark" 
