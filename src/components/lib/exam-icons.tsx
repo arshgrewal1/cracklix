@@ -6,6 +6,7 @@ import Image from "next/image"
 /**
  * @fileOverview Institutional Branding Engine v31.0 (Fidelity Refined).
  * FIXED: Authority logos now respect transparency and external styling.
+ * UPDATED: Removed current-affairs transparency exception to allow circular nodes.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -71,7 +72,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   };
 
   const containerSize = sizeClasses[size];
-  const isTransparent = className?.includes('bg-transparent') || className?.includes('bg-white/10') || bId === 'current-affairs';
+  const isTransparent = className?.includes('bg-transparent') || className?.includes('bg-white/10');
 
   if (logoUrl) {
     return (

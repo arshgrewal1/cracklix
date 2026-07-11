@@ -23,8 +23,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Center v120.3.
- * UPDATED: Removed numeric counts from action cards as per user request.
+ * @fileOverview Institutional Hero Center v121.0.
+ * UPDATED: Normalized QuickActionCard containers for consistent circular icons.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -180,7 +180,7 @@ function QuickActionCard({ boardId, label, sub, href }: { boardId: string, label
       <Card className="w-full mx-auto border border-slate-100 shadow-lg hover:shadow-2xl transition-all duration-700 rounded-[2rem] bg-white group overflow-hidden flex flex-col p-5 md:p-8 text-left items-start justify-center relative h-full min-h-[140px] md:min-h-[180px]">
         <div className="flex justify-center mb-4 md:mb-6 shrink-0">
           <div className="h-10 w-10 md:h-14 md:w-14 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-700">
-             <AuthorityLogo boardId={boardId} size="md" className="border-none shadow-none w-full h-full bg-slate-50" />
+             <AuthorityLogo boardId={boardId} size="md" className="p-0" />
           </div>
         </div>
         <div className="min-w-0 space-y-0.5">
