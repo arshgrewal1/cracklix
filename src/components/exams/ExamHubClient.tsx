@@ -31,7 +31,7 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Shared Exam Center Client Hub v24.3.
+ * @fileOverview Shared Exam Center Client Hub v25.0.
  * OPTIMIZED: Compact Category selector for mobile/PWA (48px height).
  */
 
@@ -172,8 +172,8 @@ export default function ExamHubClient() {
 
       <main className="container mx-auto px-2 md:px-4 py-8 md:py-12 max-w-7xl pb-40">
         <Tabs defaultValue="FULL" className="space-y-8 md:space-y-12">
-           {/* CATEGORY SELECTOR OPTIMIZATION */}
-           <div className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar flex items-center h-12 md:h-14">
+           {/* CATEGORY SELECTOR OPTIMIZATION - 48PX HEIGHT */}
+           <div className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar flex items-center h-12">
               <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-start gap-1 snap-x snap-mandatory">
                  <DashboardTab value="FULL" label="Full Mock Tests" icon={Zap} />
                  <DashboardTab value="SUBJECT" label="Subject Tests" icon={BookOpen} />
@@ -196,8 +196,8 @@ export default function ExamHubClient() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-4 md:px-8 h-full font-bold text-[11px] md:text-[14px] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800/50 border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white dark:data-[state=active]:bg-slate-700 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 md:gap-3 snap-start">
-         <Icon className="h-4 w-4 md:h-[18px] md:w-[18px] shrink-0" /> {label}
+      <TabsTrigger value={value} className="px-4 md:px-6 h-full font-bold text-[13px] md:text-[14px] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800/50 border border-slate-50 dark:border-slate-700 data-[state=active]:border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white dark:data-[state=active]:bg-slate-700 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 md:gap-3 snap-start">
+         <Icon className="h-[18px] w-[18px] shrink-0" /> {label}
       </TabsTrigger>
    )
 }
