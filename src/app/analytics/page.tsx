@@ -27,17 +27,12 @@ const formatConciseDuration = (seconds: number) => {
   return `${m}m`;
 }
 
-/**
- * @fileOverview Institutional Analytics Hub v2.2 (Stability Fixed).
- * FIXED: Added missing Card import.
- */
 export default function AnalyticsPage() {
   const { user } = useUser();
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
   const [baseStats, setBaseStats] = useState({ today: 0, lifetime: 0, totalSessions: 0 });
 
-  // Page tracking
   const { elapsedSeconds } = useStudyTracker('analytics', 'OTHER');
 
   useEffect(() => {

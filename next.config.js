@@ -2,16 +2,15 @@ const withPWA = require('next-pwa')({
     dest: 'public',
     register: true,
     skipWaiting: true,
-    disable: process.env.NODE_ENV === 'development', // Fix startup noise and potential dev crashes
+    disable: process.env.NODE_ENV === 'development',
 });
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Only use static export for Android builds to keep API routes working on Web/Vercel
   output: process.env.BUILD_TARGET === 'android' ? 'export' : undefined,
   images: {
-    unoptimized: true, // Required for static exports/Capacitor
+    unoptimized: true,
   },
   typescript: {
     ignoreBuildErrors: true,

@@ -10,10 +10,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-/**
- * @fileOverview High-Fidelity Animated Counter Node.
- * FIXED: Hardened parsing for non-numeric stats like "24x7".
- */
 function Counter({ value, suffix = "+" }: { value: number | string; suffix?: string }) {
   const [displayValue, setDisplayValue] = useState(0);
   const [mounted, setMounted] = useState(false);
@@ -49,10 +45,6 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
   return <span>{displayValue.toLocaleString()}{suffix}</span>;
 }
 
-/**
- * @fileOverview Premium Institutional Stats Bar v3.5.
- * FIXED: Robust null guards for settings registry.
- */
 export default function StatsBar() {
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);

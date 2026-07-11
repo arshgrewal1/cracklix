@@ -43,11 +43,6 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-/**
- * @fileOverview Admin Sidebar Navigation v4.6 (Audit Fixed).
- * FIXED: Standardized all icon imports to prevent ReferenceErrors.
- */
-
 const NAV_GROUPS = [
   {
     label: "Management",
