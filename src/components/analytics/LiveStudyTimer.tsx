@@ -8,20 +8,16 @@ import { Clock, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Real-Time Study Stopwatch v2.0.
- * Displays live progress from the global tracking node.
+ * @fileOverview Real-Time Study Stopwatch v2.1 (Full Detail).
  */
 
-const formatLiveDuration = (seconds: number): string => {
-    if (seconds < 60) return `0m ${String(seconds).padStart(2, '0')}s`;
-    
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    
-    if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m`;
-    return `${m}m ${String(s).padStart(2, '0')}s`;
-};
+const formatFullDuration = (seconds: number) => {
+  if (isNaN(seconds) || seconds < 0) return "00h 00m 00s";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+}
 
 export default function LiveStudyTimer() {
     const { user } = useUser();
@@ -38,7 +34,6 @@ export default function LiveStudyTimer() {
     useEffect(() => {
         if (dailyStats) {
             setTodayBase(dailyStats.totalDuration || 0);
-            // When DB updates, we reset our local "since sync" increment to avoid double counting
             setLiveIncrement(0);
         }
     }, [dailyStats]);
@@ -46,8 +41,7 @@ export default function LiveStudyTimer() {
     useEffect(() => {
         const handleSync = (e: any) => {
             if (e.detail.dayStr === todayStr) {
-                // If progress was synced, the todayBase will update from DB via the dailyStats hook
-                // We don't need to do anything here except potentially log
+                // Progress synced via dailyStats hook
             }
         };
 
@@ -61,7 +55,6 @@ export default function LiveStudyTimer() {
         window.addEventListener('study_session_start', handleStart);
         window.addEventListener('study_session_end', handleEnd);
 
-        // Local ticker for the UI
         let ticker: NodeJS.Timeout;
         if (isTracking) {
             ticker = setInterval(() => {
@@ -80,7 +73,7 @@ export default function LiveStudyTimer() {
     const displayTotal = todayBase + liveIncrement;
 
     return (
-        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 md:p-8 rounded-[2rem] shadow-xl text-left relative overflow-hidden group">
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 md:p-8 rounded-[2rem] shadow-xl text-left relative overflow-hidden group h-full flex flex-col justify-center">
             <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 group-hover:scale-110 transition-transform">
                 <Clock className="h-24 w-24" />
             </div>
@@ -105,8 +98,8 @@ export default function LiveStudyTimer() {
                     {loadingDaily && todayBase === 0 ? (
                         <div className="h-12 w-48 bg-slate-50 animate-pulse rounded-xl" />
                     ) : (
-                        <h2 className="text-4xl md:text-5xl font-black text-[#0F172A] dark:text-white tracking-tighter tabular-nums">
-                            {formatLiveDuration(displayTotal)}
+                        <h2 className="text-4xl md:text-5xl font-black text-[#0F172A] dark:text-white tracking-tighter tabular-nums antialiased leading-none">
+                            {formatFullDuration(displayTotal)}
                         </h2>
                     )}
                 </div>

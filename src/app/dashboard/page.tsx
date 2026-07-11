@@ -11,7 +11,6 @@ import { Badge } from "@/components/ui/badge"
 import { 
   Trophy, 
   Target, 
-  ClipboardList, 
   Zap, 
   ChevronRight, 
   Clock, 
@@ -34,18 +33,23 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useStudyTracker } from "@/hooks/useStudyTracker"
 
 /**
- * @fileOverview Student Progress Portal v55.0 (Live Metrics Enabled).
+ * @fileOverview Student Progress Portal v56.0 (Refined Metrics).
  */
 
-const formatDuration = (seconds: number) => {
-  if (isNaN(seconds) || seconds < 0) return "0m 00s";
+const formatFullDuration = (seconds: number) => {
+  if (isNaN(seconds) || seconds < 0) return "00h 00m 00s";
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;
-  
-  if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m`;
-  if (m > 0) return `${m}m ${String(s).padStart(2, '0')}s`;
-  return `0m ${String(s).padStart(2, '0')}s`;
+  return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+}
+
+const formatConciseDuration = (seconds: number) => {
+  if (isNaN(seconds) || seconds <= 0) return "0m";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
 }
 
 export default function StudentDashboard() {
@@ -55,11 +59,9 @@ export default function StudentDashboard() {
   const [mounted, setMounted] = useState(false)
   const [passCountdown, setPassCountdown] = useState("");
   
-  // Real-time local increments for live cards
-  const [liveIncrement, setLiveIncrement] = useState(0);
-  const [baseStats, setBaseStats] = useState({ today: 0, week: 0, month: 0, year: 0, lifetime: 0 });
+  const [baseStats, setBaseStats] = useState({ today: 0, lifetime: 0 });
 
-  // Initialize Page Tracker (Dashboard view counts as study/planning time)
+  // Initialize Page Tracker
   const { elapsedSeconds, isActive } = useStudyTracker('dashboard', 'DASHBOARD');
 
   useEffect(() => {
@@ -101,7 +103,9 @@ export default function StudentDashboard() {
     });
 
     const unsubStats = onSnapshot(statsRef, (snap) => {
-      if (snap.exists()) setBaseStats(prev => ({ ...prev, lifetime: snap.data().totalStudyTime || 0 }));
+      if (snap.exists()) {
+        setBaseStats(prev => ({ ...prev, lifetime: snap.data().totalStudyTime || 0 }));
+      }
     });
 
     return () => {
@@ -150,10 +154,10 @@ export default function StudentDashboard() {
               </section>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5">
-                 <MetricItem label="Today's study" val={formatDuration(baseStats.today + elapsedSeconds)} icon={<Clock />} active={isActive} />
-                 <MetricItem label="This week" val={formatDuration(baseStats.today + elapsedSeconds)} icon={<Calendar />} />
-                 <MetricItem label="This month" val={formatDuration(baseStats.today + elapsedSeconds)} icon={<BarChart />} />
-                 <MetricItem label="Yearly goal" val={formatDuration(baseStats.today + elapsedSeconds)} icon={<AreaChart />} />
+                 <MetricItem label="Today's study" val={formatConciseDuration(baseStats.today + elapsedSeconds)} icon={<Clock />} active={isActive} />
+                 <MetricItem label="This week" val={formatConciseDuration(baseStats.today + elapsedSeconds)} icon={<Calendar />} />
+                 <MetricItem label="This month" val={formatConciseDuration(baseStats.today + elapsedSeconds)} icon={<BarChart />} />
+                 <MetricItem label="Yearly goal" val={formatConciseDuration(baseStats.today + elapsedSeconds)} icon={<AreaChart />} />
               </div>
 
               <Card className="border-none shadow-lg rounded-2xl md:rounded-[2rem] bg-white overflow-hidden border border-slate-50">
@@ -184,12 +188,28 @@ export default function StudentDashboard() {
           </div>
 
           <div className="lg:col-span-4 space-y-5">
-               <Card className="border-none shadow-xl bg-blue-600 text-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] relative overflow-hidden group">
+               <Card className="border-none shadow-xl bg-blue-600 text-white p-6 md:p-10 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden group">
                 <div className="absolute bottom-0 right-0 p-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Activity className="h-20 w-20 md:h-24 md:w-24" /></div>
-                <div className="relative z-10 text-left">
-                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Lifetime Study</p>
-                    <div className="flex items-baseline gap-1 mt-1">
-                      <div className="text-4xl md:text-5xl font-black leading-none">{formatDuration(baseStats.lifetime + elapsedSeconds)}</div>
+                <div className="relative z-10 text-left space-y-6">
+                    <div>
+                      <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest flex items-center gap-2">
+                        🔥 Lifetime Study
+                      </p>
+                      <div className="text-3xl md:text-4xl lg:text-5xl font-black leading-none mt-2 tracking-tighter tabular-nums">
+                        {formatFullDuration(baseStats.lifetime + elapsedSeconds)}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-6 border-t border-white/10 pt-6">
+                      <div>
+                        <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Today</p>
+                        <p className="text-base font-black tabular-nums">{formatConciseDuration(baseStats.today + elapsedSeconds)}</p>
+                      </div>
+                      <div className="w-px h-8 bg-white/10" />
+                      <div>
+                        <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Week</p>
+                        <p className="text-base font-black tabular-nums">{formatConciseDuration(baseStats.today + elapsedSeconds)}</p>
+                      </div>
                     </div>
                 </div>
               </Card>

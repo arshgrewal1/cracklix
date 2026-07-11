@@ -5,23 +5,29 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { useUser, useFirestore } from '@/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { Zap, Clock, Calendar, TrendingUp, BarChart2, Star } from 'lucide-react';
+import { Zap, Clock, Calendar, TrendingUp, BarChart2, Star, Activity } from 'lucide-react';
 import LiveStudyTimer from '@/components/analytics/LiveStudyTimer';
 import { useStudyTracker } from '@/hooks/useStudyTracker';
+import { cn } from '@/lib/utils';
 
-const formatDuration = (seconds: number): string => {
-    if (typeof seconds !== 'number' || seconds < 0) return '0m 00s';
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    
-    if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m`;
-    if (m > 0) return `${m}m ${String(s).padStart(2, '0')}s`;
-    return `0m ${String(s).padStart(2, '0')}s`;
-};
+const formatFullDuration = (seconds: number) => {
+  if (isNaN(seconds) || seconds < 0) return "00h 00m 00s";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+}
+
+const formatConciseDuration = (seconds: number) => {
+  if (isNaN(seconds) || seconds <= 0) return "0m";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
 
 /**
- * @fileOverview Institutional Analytics Hub v2.0 (Live Updates).
+ * @fileOverview Institutional Analytics Hub v2.1 (Refined Stats).
  */
 export default function AnalyticsPage() {
   const { user } = useUser();
@@ -81,9 +87,9 @@ export default function AnalyticsPage() {
 
           <div className="lg:col-span-1">
             <StatCard 
-              title="Lifetime study" 
-              value={formatDuration(baseStats.lifetime + elapsedSeconds)}
-              icon={BarChart2} 
+              title="🔥 Lifetime study" 
+              value={formatFullDuration(baseStats.lifetime + elapsedSeconds)}
+              icon={Activity} 
               color="indigo" 
               loading={!mounted}
             />
@@ -97,7 +103,26 @@ export default function AnalyticsPage() {
             loading={!mounted}
           />
 
-          <StatCard title="Current streak" value="--" icon={Star} color="rose" loading={true} />
+          <div className="col-span-full grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8 mt-4">
+             <Card className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl flex items-center justify-between">
+                <div>
+                   <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Today</p>
+                   <p className="text-2xl md:text-3xl font-black text-[#0F172A]">{formatConciseDuration(baseStats.today + elapsedSeconds)}</p>
+                </div>
+                <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center shadow-inner">
+                   <Clock className="h-6 w-6" />
+                </div>
+             </Card>
+             <Card className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl flex items-center justify-between">
+                <div>
+                   <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Week</p>
+                   <p className="text-2xl md:text-3xl font-black text-[#0F172A]">{formatConciseDuration(baseStats.today + elapsedSeconds)}</p>
+                </div>
+                <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center shadow-inner">
+                   <Calendar className="h-6 w-6" />
+                </div>
+             </Card>
+          </div>
         </div>
       </main>
       <Footer />
@@ -107,10 +132,10 @@ export default function AnalyticsPage() {
 
 function StatCard({ title, value, icon: Icon, color, loading }: any) {
   return (
-    <div className="bg-white dark:bg-slate-800/50 p-6 md:p-8 rounded-[2rem] shadow-xl border border-slate-100 dark:border-slate-800 flex flex-col justify-between group">
+    <div className="bg-white dark:bg-slate-800/50 p-6 md:p-8 rounded-[2rem] shadow-xl border border-slate-100 dark:border-slate-800 flex flex-col justify-between group h-full">
       <div>
         <div className={cn(
-          "w-12 h-12 rounded-xl flex items-center justify-center mb-6 shadow-inner transition-transform group-hover:scale-110",
+          "w-12 h-12 rounded-xl flex items-center justify-center mb-6 shadow-inner transition-all group-hover:scale-110",
           color === 'indigo' ? "bg-indigo-50 text-indigo-500" : 
           color === 'amber' ? "bg-amber-50 text-amber-500" : "bg-rose-50 text-rose-500"
         )}>
@@ -120,7 +145,7 @@ function StatCard({ title, value, icon: Icon, color, loading }: any) {
         {loading ? (
           <div className="h-8 w-3/4 bg-slate-50 animate-pulse rounded-lg mt-2" />
         ) : (
-          <p className="text-3xl font-black text-[#0F172A] dark:text-white tabular-nums">{value}</p>
+          <p className="text-xl md:text-2xl font-black text-[#0F172A] dark:text-white tabular-nums tracking-tighter">{value}</p>
         )}
       </div>
     </div>
