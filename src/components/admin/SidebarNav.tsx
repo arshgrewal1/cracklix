@@ -45,6 +45,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+/**
+ * @fileOverview Admin Sidebar Navigation v4.1.
+ * UPDATED: Normalized casing to Title Case.
+ */
+
 const NAV_GROUPS = [
   {
     label: "Management",
@@ -101,6 +106,11 @@ const NAV_GROUPS = [
     ],
   },
 ];
+
+interface SidebarNavProps {
+  isOpen: boolean;
+  pathname: string;
+}
 
 export default function SidebarNav({
   isOpen,
@@ -184,9 +194,4 @@ export default function SidebarNav({
       </nav>
     </TooltipProvider>
   );
-}
-
-interface SidebarNavProps {
-  isOpen: boolean;
-  pathname: string;
 }

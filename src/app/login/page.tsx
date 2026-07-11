@@ -43,7 +43,7 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Hub v89.0.
+ * @fileOverview Cracklix Premium Login Hub v89.1.
  * FIXED: Recursion loop by stabilizing searchParams usage.
  * UPDATED: Title Case normalization and "Password" terminology.
  */

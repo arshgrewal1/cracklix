@@ -41,8 +41,9 @@ import { useToast } from "@/hooks/use-toast"
 import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Student Home - Real-Time Study Tracker v50.5.
+ * @fileOverview Student Home - Real-Time Study Tracker v50.6.
  * UPDATED: Title Case normalization across all dashboard nodes.
+ * REMOVED: Forced uppercase from metrics and action cards.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();

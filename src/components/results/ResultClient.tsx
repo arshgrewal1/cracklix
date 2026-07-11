@@ -33,9 +33,9 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Result Node Hub Client v4.0.
- * FIXED: Removed stray </div> tag causing syntax error.
- * UPDATED: Title Case normalization and Overlap correction.
+ * @fileOverview Official Result Node Hub Client v4.1.
+ * FIXED: Overlapping UI resolved via strict grid distribution.
+ * UPDATED: Title Case normalization (Uppercase restricted to Boards).
  */
 
 export default function ResultClient() {
@@ -151,31 +151,35 @@ export default function ResultClient() {
       <Navbar />
       <main className="container mx-auto px-4 md:px-8 py-6 md:py-10 max-w-7xl space-y-6 md:space-y-12">
         
-        {/* SUMMARY HUB */}
-        <div className="bg-[#0B1528] rounded-[2rem] shadow-5xl overflow-hidden p-6 md:p-12 flex flex-col lg:flex-row items-center justify-between gap-8 border border-white/5">
-           <div className="flex items-center gap-5 md:gap-10 min-w-0 flex-1 w-full text-center lg:text-left">
-              <div className="h-12 w-12 md:h-20 md:w-20 rounded-2xl md:rounded-3xl bg-primary/10 flex items-center justify-center text-primary shrink-0 shadow-2xl border border-primary/20 transition-transform hover:rotate-6">
-                 <Trophy className="h-6 w-6 md:h-10 md:w-10" />
+        {/* RESTRUCTURED SUMMARY HUB - PREVENTS OVERLAP */}
+        <div className="bg-[#0B1528] rounded-[2rem] shadow-5xl overflow-hidden p-6 md:p-12 flex flex-col lg:grid lg:grid-cols-12 items-center gap-10 border border-white/5">
+           
+           {/* LEFT: TITLE BLOCK */}
+           <div className="flex items-center gap-5 md:gap-8 lg:col-span-4 w-full text-center lg:text-left">
+              <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl md:rounded-3xl bg-primary/10 flex items-center justify-center text-primary shrink-0 shadow-2xl border border-primary/20 transition-transform hover:rotate-6">
+                 <Trophy className="h-6 w-6 md:h-8 md:w-8" />
               </div>
-              <div className="min-w-0 flex-1 space-y-2">
-                 <h1 className="text-xl md:text-4xl font-black text-white tracking-tight leading-tight">
+              <div className="min-w-0 flex-1 space-y-1">
+                 <h1 className="text-xl md:text-3xl font-black text-white tracking-tight leading-tight line-clamp-2">
                    {sessionData?.mockTitle || "Practice Result"}
                  </h1>
-                 <p className="text-[10px] md:text-[12px] font-bold text-slate-400 tracking-widest uppercase">Performance Hub</p>
+                 <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest uppercase">Performance Hub</p>
               </div>
            </div>
 
-           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-12 shrink-0 w-full lg:w-auto px-2">
+           {/* CENTER: RESULTS GRID */}
+           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 lg:col-span-6 shrink-0 w-full lg:w-auto px-2 border-y lg:border-y-0 lg:border-x border-white/5 py-6 lg:py-0">
               <ResultPill label="Score" val={(sessionData?.score || 0).toFixed(1)} color={(sessionData?.score || 0) < 0 ? "text-rose-400" : "text-primary"} />
               <ResultPill label="Rank" val={`#${merit.rank}`} color="text-white" />
               <ResultPill label="Accuracy" val={`${sessionData?.accuracy || 0}%`} color="text-emerald-400" />
               <ResultPill label="Time" val={formatTime(sessionData?.timeTaken || 0)} color="text-amber-400" />
            </div>
 
-           <div className="shrink-0 w-full lg:w-auto">
-              <Button asChild className="w-full lg:w-auto h-12 md:h-16 px-10 bg-primary hover:bg-blue-700 text-white font-bold text-sm md:text-lg tracking-tight rounded-xl md:rounded-2xl shadow-xl transition-all border-none active:scale-95">
+           {/* RIGHT: ACTION HUB */}
+           <div className="lg:col-span-2 w-full flex justify-center lg:justify-end">
+              <Button asChild className="w-full lg:w-auto h-12 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white font-bold text-xs md:text-sm tracking-tight rounded-xl md:rounded-2xl shadow-xl transition-all border-none active:scale-95">
                  <Link href={`/mocks/instructions?id=${mockId}`} className="flex items-center justify-center gap-3">
-                    <RefreshCw className="h-5 w-5" /> Re-Attempt
+                    <RefreshCw className="h-4 w-4" /> Re-Attempt
                  </Link>
               </Button>
            </div>
@@ -293,9 +297,9 @@ export default function ResultClient() {
 
 function ResultPill({ label, val, color, className }: any) {
    return (
-      <div className={cn("flex flex-col items-center lg:items-start gap-2", className)}>
+      <div className={cn("flex flex-col items-center lg:items-start gap-1", className)}>
          <span className="text-[10px] md:text-[11px] font-bold text-slate-500 tracking-widest">{label}</span>
-         <span className={cn("text-xl md:text-5xl font-black leading-tight tabular-nums tracking-tighter", color)}>{val}</span>
+         <span className={cn("text-xl md:text-4xl font-black leading-tight tabular-nums tracking-tighter", color)}>{val}</span>
       </div>
    )
 }
