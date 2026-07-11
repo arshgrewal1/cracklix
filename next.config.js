@@ -13,9 +13,6 @@ const nextConfig = {
   images: {
     unoptimized: true, // Required for static exports/Capacitor
   },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   typescript: {
     ignoreBuildErrors: true,
   },
