@@ -14,8 +14,8 @@ const statsConverter: FirestoreDataConverter<Stats> = {
 };
 
 /**
- * @fileOverview Institutional Platform Stats v17.1.
- * PWA SYNC: Removed uppercase, reduced font scales, and normalized Title Case.
+ * @fileOverview Institutional Platform Stats v17.2.
+ * FIXED: Added mounted check for Recharts to prevent hydration errors.
  */
 
 const formatCompact = (num: number) => {
@@ -47,7 +47,11 @@ export default function AdminAnalytics() {
      }));
   }, [stats]);
 
-  if (!mounted) return null;
+  if (!mounted) return (
+     <div className="h-screen flex items-center justify-center">
+        <Loader2 className="h-10 w-10 text-primary animate-spin" />
+     </div>
+  );
 
   return (
     <div className="space-y-6 md:space-y-12 pb-20 text-left animate-in fade-in duration-500">
@@ -77,7 +81,7 @@ export default function AdminAnalytics() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 px-1">
-         <Card className="lg:col-span-8 border-none shadow-xl rounded-2xl md:rounded-[3.5rem] bg-white overflow-hidden border border-slate-50">
+         <Card className="lg:col-span-8 border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white overflow-hidden border border-slate-50">
             <CardHeader className="p-6 md:p-12 border-b border-slate-50 bg-slate-50/30 text-left">
                <CardTitle className="text-lg md:text-3xl font-black text-[#0F172A]">User Growth Index</CardTitle>
                <CardDescription className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Projection based on live registration nodes.</CardDescription>
@@ -108,7 +112,7 @@ export default function AdminAnalytics() {
             </CardContent>
          </Card>
 
-         <Card className="lg:col-span-4 border-none shadow-xl rounded-2xl md:rounded-[3.5rem] bg-[#0F172A] text-white p-6 md:p-12 space-y-6 md:space-y-12 overflow-hidden relative">
+         <Card className="lg:col-span-4 border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-[#0F172A] text-white p-6 md:p-12 space-y-6 md:space-y-12 overflow-hidden relative">
             <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><ShieldCheck className="h-44 md:h-64 w-44 md:w-64" /></div>
             <div className="space-y-1 relative z-10 text-left"><p className="text-[9px] font-black uppercase tracking-[0.2em] text-primary">Operational Matrix</p><h3 className="text-xl md:text-3xl font-black leading-none">Content Health</h3></div>
             <div className="space-y-6 md:space-y-8 relative z-10">
@@ -123,6 +127,10 @@ export default function AdminAnalytics() {
       </div>
     </div>
   )
+}
+
+function Loader2({ className }: any) {
+  return <RefreshCw className={cn("animate-spin", className)} />
 }
 
 function MetricCard({ label, value, trend, icon }: { label: string, value: string | number, trend: string, icon: React.ReactNode }) {

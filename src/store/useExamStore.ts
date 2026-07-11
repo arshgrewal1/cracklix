@@ -44,7 +44,7 @@ export interface ExamStoreState {
   markForReview: (idx: number, db: Firestore | null) => void;
   saveAndNext: (db: Firestore | null) => void;
   addViolation: (db: Firestore | null) => void;
-  persistGuestData: () => void;
+  persistGuestData: (force?: boolean) => void;
 }
 
 export const useExamStore = create<ExamStoreState>((set, get) => ({
@@ -68,7 +68,6 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
     
-    // Check if we have guest data in storage if no resume data passed
     let effectiveResume = resumeData;
     if (!effectiveResume && !userId) {
        const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
@@ -100,8 +99,10 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   tick: () => {
     const state = get();
     if (state.questions.length > 0 && state.timeLeft > 0 && !state.isPaused) {
-      set({ timeLeft: state.timeLeft - 1 });
-      if (state.timeLeft % 30 === 0) state.persistGuestData();
+      const nextTime = state.timeLeft - 1;
+      set({ timeLeft: nextTime });
+      // Throttled persistence for performance
+      if (nextTime % 30 === 0) state.persistGuestData();
     }
   },
 
@@ -113,7 +114,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       currentIdx,
       visited: visited.includes(currentIdx) ? visited : [...visited, currentIdx]
     });
-    get().persistGuestData();
+    get().persistGuestData(true);
   },
 
   setLanguage: (language) => set({ language }),
@@ -139,7 +140,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         updatedAt: serverTimestamp()
       }, { merge: true }).catch(() => {});
     } else {
-      state.persistGuestData();
+      state.persistGuestData(true);
     }
   },
 
@@ -159,7 +160,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
          updatedAt: serverTimestamp() 
       }).catch(() => {});
     } else {
-      state.persistGuestData();
+      state.persistGuestData(true);
     }
   },
 
@@ -174,7 +175,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
       updateDoc(attemptRef, { statusMap: newStatus, updatedAt: serverTimestamp() }).catch(() => {});
     } else {
-      state.persistGuestData();
+      state.persistGuestData(true);
     }
   },
 
@@ -201,7 +202,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     }
   },
 
-  persistGuestData: () => {
+  persistGuestData: (force = false) => {
     const state = get();
     if (!state.userId && state.mockId) {
        const payload = {

@@ -41,7 +41,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Student Home - Real-Time Study Tracker v51.0.
+ * @fileOverview Student Home - Performance Tracker v52.0.
+ * FIXED: Stabilized timer initialization to prevent hydration mismatch.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -51,29 +52,28 @@ export default function StudentDashboard() {
   const [mounted, setMounted] = useState(false)
   const [passCountdown, setPassCountdown] = useState("");
   
-  // MOCK STORE INTEGRATION
   const currentMockId = useExamStore(s => s.mockId);
   const startTime = useExamStore(s => s.startTime);
 
-  // LIVE SESSION TRACKER (Dwell time on dashboard)
   const [sessionSeconds, setSessionSeconds] = useState(0);
 
   useEffect(() => {
     setMounted(true)
     
-    // Load persisted dashboard time for today
-    const today = new Date().toDateString();
-    const saved = localStorage.getItem(`study_time_${today}`);
-    if (saved) setSessionSeconds(parseInt(saved));
+    if (typeof window !== 'undefined') {
+      const today = new Date().toDateString();
+      const saved = localStorage.getItem(`study_time_${today}`);
+      if (saved) setSessionSeconds(parseInt(saved));
 
-    const interval = setInterval(() => {
-      setSessionSeconds(prev => {
-        const next = prev + 1;
-        localStorage.setItem(`study_time_${today}`, next.toString());
-        return next;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
+      const interval = setInterval(() => {
+        setSessionSeconds(prev => {
+          const next = prev + 1;
+          localStorage.setItem(`study_time_${today}`, next.toString());
+          return next;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
   }, [])
 
   useEffect(() => {
@@ -125,7 +125,7 @@ export default function StudentDashboard() {
   const { data: validMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
 
   const stats = useMemo(() => {
-    if (!rawResults || !validMocks) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0s", list: [] }
+    if (!rawResults || !validMocks || !mounted) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0s", list: [] }
     
     const validMockIds = new Set(validMocks.map(m => m.id));
     const filtered = rawResults.filter(r => validMockIds.has(r.mockId));
@@ -176,7 +176,7 @@ export default function StudentDashboard() {
       hours: timeFormattedValue, 
       list: sorted.slice(0, 8) 
     }
-  }, [rawResults, validMocks, sessionSeconds, currentMockId, startTime])
+  }, [rawResults, validMocks, sessionSeconds, currentMockId, startTime, mounted])
 
   if (!mounted || authLoading) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-8 w-8 text-primary animate-pulse" /></div>;
 

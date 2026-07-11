@@ -17,7 +17,7 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v60.0 (PWA Hardened).
+ * @fileOverview Root Layout v61.0 (PWA Hardened).
  * FIXED: Changed Script strategy to afterInteractive to resolve Runtime ChunkLoadError.
  */
 export const metadata: Metadata = {
@@ -50,7 +50,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Access registry version to ensure bundle inclusion
   const registryVersion = INSTITUTIONAL_PAYLOAD.version;
 
   return (
@@ -87,7 +86,6 @@ export default function RootLayout({
           <Toaster />
           <ServiceWorkerRegistration />
 
-          {/* Bundle Integrity Guard */}
           <div className="hidden" data-node-version={registryVersion}></div>
         </FirebaseClientProvider>
       </body>

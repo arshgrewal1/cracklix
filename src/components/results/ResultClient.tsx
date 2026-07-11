@@ -37,7 +37,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Performance Analysis Center v5.2.
+ * @fileOverview Official Performance Analysis Center v5.3.
+ * FIXED: Resolved syntax errors and overlapping UI pills.
  */
 
 export default function ResultClient() {
@@ -58,14 +59,14 @@ export default function ResultClient() {
   }, [])
 
   const mockId = useMemo(() => {
-    const queryId = searchParams.get('id');
+    const queryId = searchParams?.get('id');
     if (queryId) return queryId;
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSegment = pathSegments[pathSegments.length - 1];
     return lastSegment !== 'view' ? lastSegment : null;
   }, [pathname, searchParams]);
 
-  const isGuestMode = searchParams.get('guest') === 'true' || !user;
+  const isGuestMode = !user || searchParams?.get('guest') === 'true';
 
   const resultRef = useMemo(() => (db && user && mockId ? doc(db, "results", `${user.uid}_${mockId}`) : null), [db, user, mockId]);
   const { data: cloudSession, loading: resultLoading } = useDoc<any>(resultRef);

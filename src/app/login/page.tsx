@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense, useEffect, useMemo, useCallback } from "react"
+import React, { useState, Suspense, useEffect, useMemo, useCallback, useRef } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -43,7 +43,8 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Portal v92.0.
+ * @fileOverview Cracklix Premium Login Portal v93.0.
+ * FIXED: Stabilized searchParams usage to prevent Maximum update depth exceeded error.
  */
 
 export default function LoginPage() {
@@ -73,9 +74,12 @@ function LoginContent() {
   const [resetLoading, setResetLoading] = useState(false)
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
   
-  const returnUrl = useMemo(() => searchParams.get("returnUrl") || "/dashboard", [searchParams]);
-  const referralFromUrl = useMemo(() => searchParams.get("ref"), [searchParams]);
-  const initialMode = useMemo(() => searchParams.get("mode"), [searchParams]);
+  // Stabilize search params
+  const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/dashboard", [searchParams]);
+  const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
+  const initialMode = useMemo(() => searchParams?.get("mode"), [searchParams]);
+
+  const hasFiredToast = useRef(false);
 
   useEffect(() => {
      if (initialMode === 'register') setMode('register');
@@ -87,7 +91,10 @@ function LoginContent() {
      const resultKeys = keys.filter(k => k.startsWith('cracklix_guest_result_'));
      
      if (resultKeys.length > 0) {
-        toast({ title: "Syncing Data", description: "Transferring guest attempts to your account." });
+        if (!hasFiredToast.current) {
+          toast({ title: "Syncing Data", description: "Transferring guest attempts to your account." });
+          hasFiredToast.current = true;
+        }
         
         for (const key of resultKeys) {
            try {
@@ -242,7 +249,7 @@ function LoginContent() {
 
           <div className="space-y-8">
             <h1 className="text-5xl xl:text-6xl font-[900] tracking-tight text-white leading-[1.05]">
-              Punjab's Smart <br/> 
+              Punjab&apos;s Smart <br/> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-300">
                 Exam Platform
               </span>
@@ -281,8 +288,8 @@ function LoginContent() {
               {mode === 'register' && (
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-bold text-slate-400 ml-1">Full Name</Label>
-                  <div className="relative">
-                    <User className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
+                  <div className="relative group">
+                    <User className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                     <Input value={name} onChange={(e) => setName(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="e.g. Arsh Grewal" />
                   </div>
                 </div>
@@ -290,8 +297,8 @@ function LoginContent() {
               
               <div className="space-y-1.5">
                 <Label className="text-[10px] font-bold text-slate-400 ml-1">Email Address</Label>
-                <div className="relative">
-                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
+                <div className="relative group">
+                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                   <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="name@domain.com" />
                 </div>
               </div>
@@ -299,10 +306,10 @@ function LoginContent() {
               <div className="space-y-4">
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-bold text-slate-400 ml-1">Password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
+                  <div className="relative group">
+                    <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                     <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] pl-12 md:pl-14 pr-12 font-bold shadow-inner" placeholder="Password" />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary transition-colors">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
                   </div>
                 </div>
 
@@ -312,7 +319,7 @@ function LoginContent() {
                       <Checkbox id="remember" className="rounded-md" />
                       <label htmlFor="remember" className="text-[11px] font-bold text-slate-500 uppercase tracking-wider cursor-pointer">Remember me</label>
                     </div>
-                    <button type="button" onClick={() => setIsResetDialogOpen(true)} className="text-[11px] font-black text-primary">Forgot password?</button>
+                    <button type="button" onClick={() => setIsResetDialogOpen(true)} className="text-[11px] font-black text-primary hover:underline">Forgot password?</button>
                   </div>
                 )}
               </div>
