@@ -101,7 +101,6 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     if (state.questions.length > 0 && state.timeLeft > 0 && !state.isPaused) {
       const nextTime = state.timeLeft - 1;
       set({ timeLeft: nextTime });
-      // Throttled persistence for performance
       if (nextTime % 30 === 0) state.persistGuestData();
     }
   },
@@ -182,8 +181,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   saveAndNext: (db) => {
     const state = get();
     if (state.currentIdx < (state.questions?.length || 0) - 1) {
-      const nextIdx = state.currentIdx + 1;
-      state.setCurrentIdx(nextIdx);
+      state.setCurrentIdx(state.currentIdx + 1);
     }
   },
 

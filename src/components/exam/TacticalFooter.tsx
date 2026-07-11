@@ -7,38 +7,35 @@ import { cn } from '@/lib/utils';
 import { useCallback } from 'react';
 
 /**
- * @fileOverview Test Action Bar v40.0.
- * FIXED: Implemented "Review & Next" logic and last-question "Submit" transformation.
+ * @fileOverview Test Action Bar v41.0.
+ * FIXED: Standardized actions to use store logic directly for better reliability.
  */
 export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
   const currentIdx = useExamStore(s => s.currentIdx);
   const questions = useExamStore(s => s.questions);
   const clearAnswer = useExamStore(s => s.clearAnswer);
   const markForReview = useExamStore(s => s.markForReview);
-  const setCurrentIdx = useExamStore(s => s.setCurrentIdx);
+  const saveAndNext = useExamStore(s => s.saveAndNext);
   
   const db = useFirestore();
-  
-  const isLastQuestion = currentIdx === questions.length - 1;
+  const isLastQuestion = currentIdx === (questions?.length || 0) - 1;
 
   const handleReviewLater = useCallback(() => {
     markForReview(currentIdx, db);
-    if (!isLastQuestion) {
-      setCurrentIdx(currentIdx + 1);
-    }
-  }, [currentIdx, db, isLastQuestion, markForReview, setCurrentIdx]);
+    saveAndNext(db);
+  }, [currentIdx, db, markForReview, saveAndNext]);
 
   const handleClear = useCallback(() => {
     clearAnswer(currentIdx, db);
   }, [currentIdx, db, clearAnswer]);
   
   return (
-    <div className="w-full bg-white md:bg-transparent border-t border-slate-100 md:border-t-0 p-3 md:p-0 fixed bottom-0 left-0 right-0 md:static z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] md:shadow-none">
-      <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 md:gap-4">
+    <div className="w-full bg-white border-t border-slate-100 p-3 md:p-6 md:bg-transparent md:border-none z-50">
+      <div className="max-w-4xl mx-auto grid grid-cols-3 gap-2 md:gap-6">
         <Button 
           variant="outline" 
           onClick={handleReviewLater}
-          className="h-14 md:h-16 rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm px-1 leading-[1.1]"
+          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm px-1 leading-tight uppercase tracking-wider"
         >
           Review Later
         </Button>
@@ -46,7 +43,7 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
         <Button 
           variant="outline" 
           onClick={handleClear}
-          className="h-14 md:h-16 rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm px-1"
+          className="h-12 md:h-16 rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] border-slate-200 text-[#334155] bg-white active:scale-95 shadow-sm px-1 leading-tight uppercase tracking-wider"
         >
           Clear
         </Button>
@@ -54,7 +51,7 @@ export default function TacticalFooter({ onSubmit }: { onSubmit: () => void }) {
         <Button 
           onClick={onSubmit}
           className={cn(
-            "h-14 md:h-16 text-white rounded-2xl font-black text-[9px] md:text-[11px] shadow-xl border-none active:scale-95 px-1 transition-all",
+            "h-12 md:h-16 text-white rounded-xl md:rounded-2xl font-black text-[9px] md:text-[11px] shadow-xl border-none active:scale-95 px-1 transition-all leading-tight uppercase tracking-wider",
             isLastQuestion ? "bg-emerald-600 hover:bg-emerald-700" : "bg-primary hover:bg-blue-700"
           )}
         >
