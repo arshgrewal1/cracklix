@@ -11,7 +11,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { 
   Clock, 
   BookOpen, 
-  ShieldCheck, 
   ChevronRight,
   Zap,
   ChevronLeft,
@@ -20,7 +19,8 @@ import {
   Layers,
   RefreshCw,
   Star,
-  CheckCircle2
+  CheckCircle2,
+  Newspaper
 } from "lucide-react"
 import { useParams, useRouter } from "next/navigation"
 import Link from "next/link"
@@ -81,6 +81,7 @@ export default function ExamHubPage() {
       FULL: mocks.filter((m:any) => m.mockType === 'FULL'),
       SUBJECT: mocks.filter((m:any) => m.mockType === 'SUBJECT'),
       SECTIONAL: mocks.filter((m:any) => m.mockType === 'SECTIONAL'),
+      CA: mocks.filter((m:any) => m.mockType === 'CA_QUIZ'),
       PYQ: (rawPyqs || [])
     }
   }, [rawMocks, rawPyqs, examId])
@@ -122,13 +123,13 @@ export default function ExamHubPage() {
       </section>
 
       <main className="container mx-auto px-4 py-12 max-w-7xl pb-40">
-         <Tabs defaultValue="FULL" className="space-y-12">
-            <div className="bg-white border border-slate-100 rounded-[2rem] p-1.5 shadow-xl overflow-x-auto no-scrollbar">
-               <TabsList className="bg-transparent border-none p-0 flex h-14 w-full justify-start gap-2">
+         <Tabs defaultValue="FULL" className="space-y-8 md:space-y-12">
+            <div className="bg-white border border-slate-100 rounded-xl md:rounded-[2rem] p-1 shadow-xl overflow-x-auto no-scrollbar">
+               <TabsList className="bg-transparent border-none p-0 flex h-11 md:h-12 w-full justify-start gap-1 snap-x snap-mandatory">
                   <DashboardTab value="FULL" label="Full Mock Tests" icon={Zap} />
                   <DashboardTab value="SUBJECT" label="Subject Tests" icon={BookOpen} />
                   <DashboardTab value="SECTIONAL" label="Sectional Tests" icon={List} />
-                  <DashboardTab value="PYQ" label="Official Papers" icon={Layers} />
+                  <DashboardTab value="CA" label="Current Affairs" icon={Newspaper} />
                </TabsList>
             </div>
 
@@ -136,7 +137,7 @@ export default function ExamHubPage() {
                <TabsContent value="FULL"><MockList data={groupedContent.FULL} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
                <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
                <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-               <TabsContent value="PYQ"><NotesList data={groupedContent.PYQ} isPassActive={isPassActive} loading={pyqsLoading} type="PYQ" /></TabsContent>
+               <TabsContent value="CA"><MockList data={groupedContent.CA} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
             </div>
          </Tabs>
       </main>
@@ -147,8 +148,8 @@ export default function ExamHubPage() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-8 md:px-12 h-full font-black text-[10px] md:text-[11px] uppercase tracking-widest text-slate-400 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-3">
-         <Icon className="h-4 w-4" /> {label}
+      <TabsTrigger value={value} className="px-4 md:px-8 h-full font-black text-[10px] md:text-[11px] uppercase tracking-tight text-slate-400 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-lg md:rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-3 snap-start">
+         <Icon className="h-4 w-4 shrink-0" /> {label}
       </TabsTrigger>
    )
 }
@@ -156,7 +157,12 @@ function DashboardTab({ value, label, icon: Icon }: { value: string, label: stri
 function MockList({ data, results, isPassActive, loading, boards }: any) {
    const router = useRouter();
    if (loading) return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[2.5rem] bg-white" />)}</div>;
-   if (data.length === 0) return <div className="py-24 text-center opacity-20 flex flex-col items-center gap-4 text-slate-300"><Zap className="h-12 w-12" /><p className="font-headline font-black text-xl uppercase tracking-widest">Section Empty</p></div>;
+   if (data.length === 0) return (
+     <div className="py-24 text-center opacity-30 flex flex-col items-center gap-4 text-slate-300">
+        <Zap className="h-12 w-12" />
+        <p className="font-headline font-black text-xl uppercase tracking-widest">No Tests Found</p>
+     </div>
+   );
 
    return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -181,40 +187,9 @@ function MockList({ data, results, isPassActive, loading, boards }: any) {
                   </CardHeader>
                   <CardContent className="p-0 mt-8">
                      <Button onClick={() => router.push(locked ? '/pass' : `/mocks/${mock.id}/instructions`)} className={cn("w-full h-12 rounded-xl font-black text-[11px] tracking-[0.2em] uppercase shadow-lg border-none transition-all active:scale-95", locked ? "bg-amber-500 hover:bg-amber-600" : "bg-[#0F172A] hover:bg-black")}>
-                        {locked ? <><Lock className="h-4 w-4 mr-2" /> Unlock Exam</> : 'Start Exam'}
+                        {locked ? <Lock className="h-4 w-4 mr-2" /> : null} {locked ? 'Unlock Exam' : 'Start Exam'}
                      </Button>
                   </CardContent>
-               </Card>
-            )
-         })}
-      </div>
-   )
-}
-
-function NotesList({ data, isPassActive, loading, type }: any) {
-   if (loading) return <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-28 w-full rounded-2xl bg-white" />)}</div>;
-   if (data.length === 0) return <div className="py-24 text-center opacity-20 flex flex-col items-center gap-4 text-slate-300"><Layers className="h-12 w-12" /><p className="font-headline font-black text-xl uppercase tracking-widest">No Items Found</p></div>;
-
-   return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-         {data.map((item: any) => {
-            const isLocked = !item.isFree && !isPassActive;
-            return (
-               <Card key={item.id} className="border border-slate-100 shadow-xl rounded-[2rem] bg-white p-8 flex items-center justify-between group transition-all hover:shadow-2xl">
-                  <div className="flex items-center gap-6 min-w-0">
-                     <div className="h-14 w-14 rounded-2xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:bg-blue-50 transition-colors">
-                        {isLocked ? <Lock className="h-6 w-6 text-amber-500" /> : <Layers className={cn("h-6 w-6", type === 'PYQ' ? 'text-emerald-500' : 'text-blue-500')} />}
-                     </div>
-                     <div className="min-w-0">
-                        <h3 className="text-lg font-black text-[#0F172A] truncate max-w-[300px] uppercase leading-none">{item.title}</h3>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-2">{item.category || type} Node</p>
-                     </div>
-                  </div>
-                  <Button asChild className="h-11 px-8 bg-[#0F172A] hover:bg-black text-white rounded-xl font-black uppercase text-[10px] tracking-widest shadow-md shrink-0">
-                     <Link href={isLocked ? '/pass' : (item.pdfUrl || '#')} target={isLocked ? '_self' : '_blank'}>
-                        {isLocked ? 'UNLOCK' : 'DOWNLOAD'}
-                     </Link>
-                  </Button>
                </Card>
             )
          })}

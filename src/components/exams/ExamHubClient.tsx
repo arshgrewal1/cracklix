@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -22,7 +21,7 @@ import {
   Star,
   CheckCircle2,
   AlertCircle,
-  ClipboardList
+  Newspaper
 } from "lucide-react"
 import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -30,11 +29,6 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
-
-/**
- * @fileOverview Universal Exam Hub Client v3.6.
- * FIXED: Replaced generic empty state with tab-specific, beautifully designed cards.
- */
 
 function EmptyStateCard({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) {
   const router = useRouter();
@@ -63,7 +57,6 @@ function EmptyStateCard({ icon: Icon, title, description }: { icon: React.Elemen
     </div>
   );
 }
-
 
 export default function ExamHubClient() {
   const router = useRouter()
@@ -118,13 +111,14 @@ export default function ExamHubClient() {
   }, [user, profile]);
 
   const groupedContent = useMemo(() => {
-    if (!examId) return { FULL: [], SUBJECT: [], SECTIONAL: [], PYQ: [] };
+    if (!examId) return { FULL: [], SUBJECT: [], SECTIONAL: [], CA: [], PYQ: [] };
     const mocks = (rawMocks || []).filter(m => m.examId === examId || (m.examIds && m.examIds.includes(examId)));
     const pyqs = rawPyqs || [];
     return {
       FULL: mocks.filter(m => m.mockType === 'FULL'),
       SUBJECT: mocks.filter(m => m.mockType === 'SUBJECT'),
       SECTIONAL: mocks.filter(m => m.mockType === 'SECTIONAL'),
+      CA: mocks.filter(m => m.mockType === 'CA_QUIZ'),
       PYQ: pyqs,
     }
   }, [rawMocks, rawPyqs, examId])
@@ -172,20 +166,20 @@ export default function ExamHubClient() {
       </section>
 
       <main className="container mx-auto px-2 md:px-4 py-4 md:py-12 max-w-7xl pb-40">
-        <Tabs defaultValue="FULL" className="space-y-4 md:space-y-12">
+        <Tabs defaultValue="FULL" className="space-y-6 md:space-y-12">
            <div className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl md:rounded-[2rem] p-1 shadow-md overflow-x-auto no-scrollbar">
-              <TabsList className="bg-transparent border-none p-0 flex h-10 md:h-14 w-full justify-start gap-1">
+              <TabsList className="bg-transparent border-none p-0 flex h-11 md:h-12 w-full justify-start gap-1 snap-x snap-mandatory">
                  <DashboardTab value="FULL" label="Mock Tests" icon={Zap} />
                  <DashboardTab value="SUBJECT" label="Subjects" icon={BookOpen} />
                  <DashboardTab value="SECTIONAL" label="Sectional" icon={List} />
-                 <DashboardTab value="PYQ" label="Papers" icon={Layers} />
+                 <DashboardTab value="CA" label="Current Affairs" icon={Newspaper} />
               </TabsList>
            </div>
            <div className="animate-in fade-in slide-in-from-bottom-3">
               <TabsContent value="FULL"><MockList data={groupedContent.FULL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} type="FULL" /></TabsContent>
               <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} isPassActive={isPassActive} loading={mocksLoading} boards={boards} type="SUBJECT" /></TabsContent>
               <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} type="SECTIONAL" /></TabsContent>
-              <TabsContent value="PYQ"><NotesList data={groupedContent.PYQ} isPassActive={isPassActive} loading={pyqsLoading} type="PYQ" /></TabsContent>
+              <TabsContent value="CA"><MockList data={groupedContent.CA} isPassActive={isPassActive} loading={mocksLoading} boards={boards} type="CA" /></TabsContent>
            </div>
         </Tabs>
       </main>
@@ -196,8 +190,8 @@ export default function ExamHubClient() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-4 md:px-12 h-full font-black text-[9px] md:text-[11px] text-slate-500 dark:text-slate-400 data-[state=active]:bg-[#0B1528] data-[state=active]:text-white dark:data-[state=active]:bg-slate-700 rounded-lg md:rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-3 uppercase">
-         <Icon className="h-3 w-3 md:h-4 md:w-4" /> {label}
+      <TabsTrigger value={value} className="px-4 md:px-12 h-full font-black text-[9px] md:text-[11px] text-slate-500 dark:text-slate-400 data-[state=active]:bg-[#0B1528] data-[state=active]:text-white dark:data-[state=active]:bg-slate-700 rounded-lg md:rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-3 uppercase snap-start">
+         <Icon className="h-4 w-4 shrink-0" /> {label}
       </TabsTrigger>
    )
 }
@@ -222,6 +216,11 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
          icon: List,
          title: "No Sectional Tests Available",
          description: "Sectional tests are currently unavailable for this exam."
+       },
+       CA: {
+         icon: Newspaper,
+         title: "No Current Affairs Quizzes",
+         description: "Daily and monthly CA quizzes for this exam will appear here."
        }
      };
      return <EmptyStateCard {...emptyStates[type]} />;
@@ -248,44 +247,6 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
                         {locked ? <Lock className="h-3 w-3" /> : null} {locked ? 'Unlock' : 'Start'}
                      </button>
                   </CardContent>
-               </Card>
-            )
-         })}
-      </div>
-   )
-}
-
-function NotesList({ data, isPassActive, loading, type }: any) {
-   if (loading) return <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-xl bg-white dark:bg-slate-800" />)}</div>;
-   
-   if (data.length === 0) {
-     return (
-       <EmptyStateCard
-         icon={Layers}
-         title="No Previous Papers Available"
-         description="Previous year papers will be available here once published."
-       />
-     );
-   }
-
-   return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-         {data.map((item: any) => {
-            const isLocked = !item.isFree && !isPassActive;
-            return (
-               <Card key={item.id} className="border border-slate-100 dark:border-slate-800 shadow-md rounded-2xl md:rounded-[2rem] bg-white dark:bg-slate-800/50 p-4 md:p-8 flex items-center justify-between group hover:shadow-xl transition-all">
-                  <div className="flex items-center gap-4 md:gap-6 min-w-0">
-                     <div className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-center shrink-0 shadow-inner">
-                        {isLocked ? <Lock className="h-4 w-4 md:h-6 md:w-6 text-amber-500" /> : <Layers className={cn("h-4 w-4 md:h-6 md:w-6", type === 'PYQ' ? 'text-emerald-500' : 'text-blue-500')} />}
-                     </div>
-                     <div className="min-w-0">
-                        <h3 className="text-sm md:text-lg font-black text-[#0F172A] dark:text-white truncate leading-none">{item.title}</h3>
-                        <p className="text-[8px] md:text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1">{item.category || type}</p>
-                     </div>
-                  </div>
-                  <button onClick={() => window.open(isLocked ? '/pass' : (item.pdfUrl || '#'), '_blank')} className={cn("h-9 md:h-11 px-5 md:px-8 rounded-full font-black uppercase text-[9px] md:text-[10px] tracking-widest shadow-md shrink-0 border-none active:scale-95 transition-all", isLocked ? "bg-orange-500 text-white" : "bg-[#0F172A] dark:bg-primary text-white")}>
-                     {isLocked ? 'Unlock' : 'Get'}
-                  </button>
                </Card>
             )
          })}
