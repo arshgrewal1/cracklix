@@ -35,7 +35,8 @@ import {
   NotebookTabs,
   Library,
   Fingerprint,
-  FileJson
+  FileJson,
+  CreditCard
 } from "lucide-react";
 
 import {
@@ -46,8 +47,8 @@ import {
 } from "@/components/ui/tooltip";
 
 /**
- * @fileOverview Admin Sidebar Navigation v4.2.
- * UPDATED: Normalized casing to Title Case and replaced "Hub" terminology.
+ * @fileOverview Admin Sidebar Navigation v4.5.
+ * UPDATED: Added Subscription and Revenue nodes.
  */
 
 const NAV_GROUPS = [
@@ -72,11 +73,13 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "Current Affairs",
+    label: "Revenue Hub",
     items: [
-      { label: "CA Center", href: "/admin/current-affairs", icon: Newspaper },
-      { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
-      { label: "CA Ingestion", href: "/admin/current-affairs/bulk", icon: UploadCloud },
+      { label: "Revenue Portal", href: "/admin/revenue", icon: DollarSign },
+      { label: "Active Passes", href: "/admin/subscriptions", icon: CreditCard },
+      { label: "Verify Payments", href: "/admin/payments/verify", icon: ShieldCheck },
+      { label: "Pass Manager", href: "/admin/passes", icon: Gem },
+      { label: "Coupon Codes", href: "/admin/coupons", icon: Tag },
     ],
   },
   {
@@ -97,9 +100,6 @@ const NAV_GROUPS = [
       { label: "Students", href: "/admin/users", icon: Users },
       { label: "Devices", href: "/admin/devices", icon: Smartphone },
       { label: "Support Desk", href: "/admin/support", icon: MessageCircle },
-      { label: "Revenue Portal", href: "/admin/payments", icon: DollarSign },
-      { label: "Verify Payments", href: "/admin/payments/verify", icon: Gem },
-      { label: "Pass Manager", href: "/admin/passes", icon: Gem },
       { label: "Audit Trail", href: "/admin/audit-logs", icon: History },
       { label: "System Health", href: "/admin/health", icon: HeartPulse },
       { label: "Global Settings", href: "/admin/settings", icon: Settings },

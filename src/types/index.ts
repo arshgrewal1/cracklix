@@ -21,6 +21,9 @@ export type AdType = 'BANNER' | 'ADSENSE' | 'HTML';
 export type AdStatus = 'ACTIVE' | 'PAUSED' | 'SCHEDULED';
 export type AdPlacementType = 'HOMEPAGE_TOP' | 'HOMEPAGE_MIDDLE' | 'HOMEPAGE_BOTTOM' | 'EXAM_LISTING' | 'MOCK_LISTING' | 'NOTES_PAGE' | 'CA_PAGE' | 'RESULT_PAGE' | 'SIDEBAR' | 'FOOTER';
 
+export type SubscriptionStatus = 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'REFUNDED';
+export type PaymentStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'FAILED';
+
 export interface Advertisement {
   id: string;
   title: string;
@@ -369,6 +372,28 @@ export interface AuditLog {
   action: string;
   timestamp: any;
   details: any;
+}
+
+export interface Subscription {
+  id: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  userPhone?: string;
+  planId: string;
+  planName: string;
+  amount: number;
+  currency: string;
+  paymentId: string;
+  orderId: string;
+  status: SubscriptionStatus;
+  purchaseDate: any;
+  activationDate: any;
+  expiryDate: any;
+  validityDays: number;
+  invoiceNumber: string;
+  couponUsed?: string | null;
+  updatedAt: any;
 }
 
 export type Mock = MockTest;

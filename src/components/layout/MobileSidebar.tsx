@@ -12,7 +12,8 @@ import {
   Landmark,
   BookOpen,
   X,
-  Award
+  Award,
+  CreditCard
 } from "lucide-react";
 
 import Link from "next/link";
@@ -29,7 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Mobile Sidebar v60.0.
+ * @fileOverview Mobile Sidebar v61.0.
  */
 export default function MobileSidebar({
   onClose,
@@ -61,6 +62,7 @@ export default function MobileSidebar({
   const mainItems = [
     { label: "Home", href: "/", icon: Home },
     { label: "My Exam Center", href: "/my-exams", icon: Target },
+    { label: "My Purchases", href: "/my-purchases", icon: CreditCard },
     { label: "Exam Explorer", href: "/exams", icon: Landmark },
     { label: "Practice Tests", href: "/mocks", icon: Zap },
     { label: "Current Affairs", href: "/current-affairs", icon: Newspaper },
