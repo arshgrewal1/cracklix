@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -8,14 +9,14 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
-import { ShieldCheck, Save, RefreshCw, QrCode, Share2, Smartphone, Apple, Play, Info, Megaphone, Target, Zap, Gift, Clock, MessageCircle, Star } from "lucide-react"
+import { ShieldCheck, Save, RefreshCw, QrCode, Share2, Smartphone, Apple, Play, Info, Megaphone, Target, Zap, Gift, Clock, MessageCircle, Star, User } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview Institutional Administrative Portal v16.1.
- * FIXED: Removed uppercase from primary buttons.
+ * @fileOverview Institutional Administrative Portal v17.0.
+ * UPDATED: Added Founder Settings tab for live content management.
  */
 
 export default function AdminSettings() {
@@ -46,7 +47,16 @@ export default function AdminSettings() {
     freeTrialEnabled: true,
     freeTrialDays: 7,
     trustBadgeText: "Aspirants Trust Cracklix",
-    trustBadgeCount: 10000
+    trustBadgeCount: 10000,
+    // Founder Details
+    founderName: "Arsh Grewal",
+    founderRole: "Founder & Lead Developer",
+    founderBio: "Hi, I'm Arsh Grewal. As a student from Punjab, I personally experienced the struggle of finding a single, reliable platform dedicated to Punjab Government Exam preparation. Most resources were either scattered, outdated, or lacked the premium experience that modern aspirants deserve.",
+    founderQuote: "Empowering every aspirant in Punjab with institutional-grade preparation technology.",
+    founderMission: "To build Punjab's smartest, most trusted and student-first exam preparation platform where every aspirant gets access to quality mock tests and a premium preparation experience.",
+    founderCommitment: "I am committed to continuously evolving this platform into Punjab's most trusted learning node. My goal is to ensure that quality preparation is accessible, affordable, and accurate for everyone—from Bathinda to Amritsar.",
+    founderBuildingSince: "19 July 2026",
+    founderEmail: "cracklixhelp@gmail.com"
   });
 
   useEffect(() => {
@@ -71,7 +81,7 @@ export default function AdminSettings() {
            </div>
           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight">System Portal</h1>
         </div>
-        <Button onClick={handleSave} className="w-full md:w-auto bg-primary hover:bg-blue-700 h-11 md:h-12 px-10 rounded-full font-bold shadow-xl gap-2 transition-all active:scale-95 border-none">
+        <Button onClick={handleSave} className="w-full md:w-auto h-11 md:h-12 px-10 rounded-full font-bold shadow-xl gap-2 transition-all active:scale-95 border-none">
           <Save className="h-4 w-4" /> Commit Settings
         </Button>
       </div>
@@ -80,6 +90,7 @@ export default function AdminSettings() {
         <TabsList className="bg-slate-100 border border-slate-200 p-1.5 h-14 md:h-16 rounded-2xl mb-8 flex w-full md:w-auto overflow-x-auto no-scrollbar justify-start gap-2">
           <TabsTrigger value="monetization" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Pass & Payments</TabsTrigger>
           <TabsTrigger value="homepage" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Global Content</TabsTrigger>
+          <TabsTrigger value="founder" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Founder Profile</TabsTrigger>
           <TabsTrigger value="website" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Share & Mobile</TabsTrigger>
           <TabsTrigger value="social" className="rounded-xl px-6 md:px-8 font-black uppercase text-[9px] h-full whitespace-nowrap data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Support Info</TabsTrigger>
         </TabsList>
@@ -135,6 +146,63 @@ export default function AdminSettings() {
                  </div>
               </Card>
            </div>
+        </TabsContent>
+
+        <TabsContent value="founder" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-6 md:p-14 space-y-8 md:space-y-12 text-left border border-slate-50">
+              <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
+                 <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 shadow-inner">
+                    <User className="h-6 w-6" />
+                 </div>
+                 <div>
+                    <h3 className="text-xl md:text-2xl font-black text-[#0F172A]">Founder Details</h3>
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Meet the Founder Registry</p>
+                 </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                 <div className="space-y-6">
+                    <div className="space-y-2">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Full Name</Label>
+                       <Input value={formData.founderName} onChange={e => setFormData({...formData, founderName: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Role / Tagline</Label>
+                       <Input value={formData.founderRole} onChange={e => setFormData({...formData, founderRole: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Building Since</Label>
+                       <Input value={formData.founderBuildingSince} onChange={e => setFormData({...formData, founderBuildingSince: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Direct Email</Label>
+                       <Input value={formData.founderEmail} onChange={e => setFormData({...formData, founderEmail: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
+                    </div>
+                 </div>
+
+                 <div className="space-y-6">
+                    <div className="space-y-2">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Main Narrative (Bio)</Label>
+                       <Textarea value={formData.founderBio} onChange={e => setFormData({...formData, founderBio: e.target.value})} className="min-h-[150px] rounded-2xl bg-slate-50 border-none font-medium leading-relaxed" />
+                    </div>
+                    <div className="space-y-2">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Mission Statement</Label>
+                       <Textarea value={formData.founderMission} onChange={e => setFormData({...formData, founderMission: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 border-none font-medium leading-relaxed" />
+                    </div>
+                 </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 pt-8 border-t border-slate-50">
+                 <div className="space-y-2">
+                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Featured Quote</Label>
+                    <Input value={formData.founderQuote} onChange={e => setFormData({...formData, founderQuote: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold italic" />
+                 </div>
+                 <div className="space-y-2">
+                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Final Commitment</Label>
+                    <Textarea value={formData.founderCommitment} onChange={e => setFormData({...formData, founderCommitment: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 border-none font-medium leading-relaxed" />
+                 </div>
+              </div>
+           </Card>
         </TabsContent>
 
         <TabsContent value="homepage" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">

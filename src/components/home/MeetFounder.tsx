@@ -1,19 +1,33 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { motion, useInView, animate } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, User, Target, MapPin, Briefcase } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useDoc, useFirestore } from "@/firebase";
+import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Meet Founder section v5.5.
- * FIXED: Hook dependency size mismatch by stabilizing the useEffect array.
+ * @fileOverview Meet Founder section v6.0.
+ * UPDATED: Connected to live Firestore settings for dynamic admin control.
  */
 export default function MeetFounder() {
+  const db = useFirestore();
+  const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
+  const { data: settings } = useDoc<any>(settingsRef);
+
+  const founder = {
+    name: settings?.founderName || "Arsh Grewal",
+    bio: settings?.founderBio || "Hi, I'm Arsh Grewal. I'm a student from Punjab who understands how challenging government exam preparation can be. Instead of waiting for someone else to build the perfect platform, I decided to build it myself. Cracklix is my mission to provide modern mock tests, high-quality study resources, and a better learning experience for every Punjab Government Exam aspirant.",
+    quote: settings?.founderQuote || "Dream big. Build bigger. Help thousands along the way.",
+    buildingSince: settings?.founderBuildingSince || "19 July 2026",
+    mission: settings?.founderMission || "To build Punjab's smartest, most trusted and student-first exam preparation platform where every aspirant gets access to quality mock tests and a premium preparation experience."
+  };
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
@@ -50,7 +64,7 @@ export default function MeetFounder() {
               <div className="relative h-64 w-64 md:h-80 md:w-80 rounded-full overflow-hidden border-8 border-white shadow-2xl bg-slate-100">
                 <Image
                   src="/founder.png"
-                  alt="Arsh Grewal"
+                  alt={founder.name}
                   fill
                   className="object-cover"
                   sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
@@ -63,7 +77,7 @@ export default function MeetFounder() {
 
             <div className="flex-1 space-y-6 text-center lg:text-left">
               <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-medium">
-                Hi, I'm Arsh Grewal. I'm a student from Punjab who understands how challenging government exam preparation can be. Instead of waiting for someone else to build the perfect platform, I decided to build it myself. Cracklix is my mission to provide modern mock tests, high-quality study resources, and a better learning experience for every Punjab Government Exam aspirant.
+                {founder.bio}
               </p>
               <p className="text-slate-500 font-medium italic">
                 Every feature, every design improvement is created with one goal: Helping students prepare with confidence.
@@ -75,20 +89,20 @@ export default function MeetFounder() {
             <div className="bg-white/50 backdrop-blur-xl border border-blue-100/50 rounded-[32px] p-8 shadow-lg h-full text-left">
               <h3 className="text-2xl font-bold text-[#0F172A]">My Mission</h3>
               <p className="mt-4 text-slate-600 text-lg font-medium leading-relaxed">
-                To build Punjab's smartest, most trusted and student-first exam preparation platform where every aspirant gets access to quality mock tests and a premium preparation experience.
+                {founder.mission}
               </p>
             </div>
             <div className="text-center py-8">
               <p className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-tight italic">
-                "Dream big.<br/>Build bigger.<br/>Help thousands along the way."
+                "{founder.quote.split('.').join('".<br/>"')}"
               </p>
-              <p className="mt-4 text-slate-500 font-medium">— Arsh Grewal</p>
+              <p className="mt-4 text-slate-500 font-medium">— {founder.name}</p>
             </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-24">
             <StatCard icon={<User />} label="Student Founder" isInView={isInView} />
-            <StatCard icon={<Briefcase />} label="Building Since" value="19 July 2026" isInView={isInView} delay={0.1} />
+            <StatCard icon={<Briefcase />} label="Building Since" value={founder.buildingSince} isInView={isInView} delay={0.1} />
             <StatCard icon={<MapPin />} label="Punjab, India" isInView={isInView} delay={0.2} />
             <StatCard icon={<Target />} label="Student-First Mission" isInView={isInView} delay={0.3} />
           </div>
@@ -115,7 +129,7 @@ export default function MeetFounder() {
               <p>As a student, I experienced how difficult it can be to find one reliable platform dedicated to Punjab Government Exam preparation.</p>
               <p>Most platforms were either outdated, complicated or lacked a premium learning experience.</p>
               <p>So I started building Cracklix. My goal isn't just to create another exam website. I want to build a platform that students genuinely enjoy using every day—a platform that motivates them, tracks their progress, and helps them move one step closer to achieving their government job dream.</p>
-              <p className="font-bold">— Arsh Grewal</p>
+              <p className="font-bold">— {founder.name}</p>
           </DialogDescription>
         </DialogContent>
       </Dialog>
@@ -127,8 +141,7 @@ function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.Rea
   const [count, setCount] = useState(0);
   
   useEffect(() => {
-    const isNumeric = value && /^\d+$/.test(value);
-    if (isInView && isNumeric && value) {
+    if (isInView && value && /^\d+$/.test(value)) {
       const controls = animate(0, parseInt(value), {
         duration: 2,
         delay,
