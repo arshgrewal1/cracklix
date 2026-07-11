@@ -12,14 +12,17 @@ import Link from 'next/link';
 
 /**
  * @fileOverview High-Fidelity Animated Counter Node.
+ * FIXED: Handles non-numeric strings (like 24x7) without parsing errors.
  */
 function Counter({ value, suffix = "+" }: { value: number | string; suffix?: string }) {
   const [displayValue, setDisplayValue] = useState(0);
+  
+  // Detect if the value is a string intended for direct display (like '24x7')
+  const isSpecialString = typeof value === 'string' && (value.includes('x') || isNaN(Number(value.replace(/\D/g, ''))));
   const numericValue = typeof value === 'string' ? parseInt(value.replace(/\D/g, '')) || 0 : value;
-  const isStringValue = typeof value === 'string' && isNaN(parseInt(value.replace(/\D/g, '')));
 
   useEffect(() => {
-    if (isStringValue) return;
+    if (isSpecialString) return;
     
     let startTime: number | null = null;
     const duration = 2000; // 2 seconds
@@ -27,22 +30,22 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
       const progress = Math.min((currentTime - startTime) / duration, 1);
-      setDisplayValue(Math.floor(progress * numericValue));
+      setDisplayValue(Math.floor(progress * (numericValue as number)));
       if (progress < 1) {
         requestAnimationFrame(animate);
       }
     };
     requestAnimationFrame(animate);
-  }, [numericValue, isStringValue]);
+  }, [numericValue, isSpecialString]);
 
-  if (isStringValue) return <span>{value}</span>;
+  if (isSpecialString) return <span>{value}</span>;
 
   return <span>{displayValue.toLocaleString()}{suffix}</span>;
 }
 
 /**
- * @fileOverview Premium Institutional Stats Bar v3.1.
- * FIXED: Sync with real registry counts and interactive Support Hub.
+ * @fileOverview Premium Institutional Stats Bar v3.2.
+ * FIXED: Sync with real registry counts and interactive 24x7 Support Hub.
  */
 export default function StatsBar() {
   const db = useFirestore();

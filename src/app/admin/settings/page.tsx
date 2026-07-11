@@ -37,8 +37,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Administrative Portal v19.0.
- * UPDATED: Added Platform Statistics visibility and Trend Label controls.
+ * @fileOverview Institutional Administrative Portal v19.1.
+ * FIXED: Standardized 24x7 support terminology.
  */
 
 export default function AdminSettings() {
@@ -336,7 +336,6 @@ export default function AdminSettings() {
            </div>
         </TabsContent>
 
-        {/* REST OF TABS CONTENT REMAIN UNCHANGED */}
         <TabsContent value="homepage" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-6 md:p-14 space-y-10 text-left border border-slate-50">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
