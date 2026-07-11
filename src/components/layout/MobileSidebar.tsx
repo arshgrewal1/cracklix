@@ -30,8 +30,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Mobile Sidebar v66.0.
- * UPDATED: Refined header height to align with overall branding updates.
+ * @fileOverview Mobile Sidebar v67.0.
+ * RESTORED: Fixed logo sizing and visibility in the header.
  */
 export default function MobileSidebar({
   onClose,
@@ -76,12 +76,12 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
-      {/* HEADER - REFINED HEIGHT */}
+      {/* HEADER - RESTORED LOGO VISIBILITY */}
       <div className="h-[80px] md:h-[110px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
          <Logo
            variant="light"
            align="left"
-           className="h-18 md:h-22 w-auto flex-1"
+           className="h-16 md:h-20 w-44 md:w-56 -ml-2"
            imgClassName="h-full w-auto"
            onClick={onClose}
          />

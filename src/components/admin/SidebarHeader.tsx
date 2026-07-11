@@ -5,14 +5,9 @@ import { cn } from "@/lib/utils";
 import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
-interface SidebarHeaderProps {
-  isOpen: boolean;
-  onToggle: () => void;
-}
-
 /**
- * Cracklix Admin Sidebar Header v47.0.
- * UPDATED: Refined desktop scaling to match new professional branding standards.
+ * Cracklix Admin Sidebar Header v48.0.
+ * FIXED: Replaced non-standard h-18 with standard h-16 for collapsed logo.
  */
 export default function SidebarHeader({
   isOpen,
@@ -32,7 +27,7 @@ export default function SidebarHeader({
         align={isOpen ? "left" : "center"}
         className="transition-all duration-300"
         imgClassName={cn(
-          isOpen ? "h-24 md:h-24" : "h-18 md:h-18"
+          isOpen ? "h-24 md:h-24" : "h-16 md:h-16"
         )}
       />
 
@@ -42,4 +37,9 @@ export default function SidebarHeader({
       />
     </div>
   );
+}
+
+interface SidebarHeaderProps {
+  isOpen: boolean;
+  onToggle: () => void;
 }
