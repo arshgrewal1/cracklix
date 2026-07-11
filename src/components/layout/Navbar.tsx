@@ -125,13 +125,13 @@ export default function Navbar() {
               <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
               <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
               <NavLink href="/current-affairs" label="Current Affairs" active={pathname === '/current-affairs'} />
-              <NavLink href="/install" label="Install Hub" active={pathname === '/install'} />
+              <NavLink href="/install" label="Install App" active={pathname === '/install'} />
             </div>
 
             <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0 flex-1 lg:flex-none">
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden sm:flex flex-col items-end mr-1">
-                    <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none">Elite Hub</span>
+                    <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none">Elite Access</span>
                     <span className="text-[10px] font-bold text-slate-400 mt-1 leading-none">{timeLeft}</span>
                  </div>
               )}
@@ -197,7 +197,7 @@ export default function Navbar() {
 
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
         <SheetContent side="left" className="w-[280px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
-          <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Discovery Hub</SheetDescription></SheetHeader>
+          <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Menu</SheetDescription></SheetHeader>
           <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
         </SheetContent>
       </Sheet>

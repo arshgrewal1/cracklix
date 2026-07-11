@@ -18,8 +18,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview High-Density Category Explorer v31.0.
- * UPDATED: Normalized typography - removed uppercase and reduced header scale.
+ * @fileOverview High-Density Category Explorer v31.1.
+ * UPDATED: Replaced 'Hub' with 'Center' and 'Selection Board'.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -69,10 +69,10 @@ export default function ExamsEntryPage() {
     try {
       if (isPinned) {
         await updateDoc(userRef, { pinnedExams: arrayRemove(examId), updatedAt: serverTimestamp() });
-        toast({ title: "Removed from hub" });
+        toast({ title: "Removed from my list" });
       } else {
         await updateDoc(userRef, { pinnedExams: arrayUnion(examId), updatedAt: serverTimestamp() });
-        toast({ title: "Added to your hub" });
+        toast({ title: "Added to my list" });
       }
     } catch (err) {
       toast({ variant: "destructive", title: "Sync failed" });
@@ -90,10 +90,10 @@ export default function ExamsEntryPage() {
           <div className="space-y-3">
              <div className="flex items-center gap-2">
                 <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-inner"><Landmark className="h-5 w-5" /></div>
-                <span className="text-[10px] font-black text-slate-400 tracking-wider">Registry Discovery</span>
+                <span className="text-[10px] font-black text-slate-400 tracking-wider">Official Registry</span>
              </div>
              <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-[#0F172A] leading-tight tracking-tight">Exam Selection</h1>
-             <p className="text-slate-500 font-medium text-[12px] md:text-xl max-w-3xl">Find your exam vertical or browse by recruitment category below.</p>
+             <p className="text-slate-500 font-medium text-[12px] md:text-xl max-w-3xl">Find your specific exam vertical or browse by recruitment category below.</p>
           </div>
 
           <div className="relative max-w-3xl group">
@@ -123,7 +123,7 @@ export default function ExamsEntryPage() {
                                   </div>
                                   <div className="min-w-0">
                                      <p className="font-bold text-[#0F172A] truncate text-base md:text-lg">{e.name}</p>
-                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{board?.abbreviation || 'PSSSB'} HUB</p>
+                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{board?.abbreviation || 'Selection'} Center</p>
                                   </div>
                                </Link>
                                <button 
@@ -163,7 +163,7 @@ export default function ExamsEntryPage() {
                     <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] md:rounded-[3rem] bg-white group overflow-hidden h-full flex flex-col p-5 md:p-10">
                        <div className="flex justify-between items-start mb-6 md:mb-12">
                           <AuthorityLogo category={cat} size="sm" className="w-12 h-12 md:w-20 md:h-20 bg-slate-50 rounded-xl md:rounded-[2rem] shadow-inner group-hover:scale-105 transition-transform" />
-                          <Badge className="bg-[#0F172A] text-white border-none text-[7px] md:text-[10px] font-black px-3 py-1 rounded shadow-sm">Canonical</Badge>
+                          <Badge className="bg-[#0F172A] text-white border-none text-[7px] md:text-[10px] font-black px-3 py-1 rounded shadow-sm">Verified</Badge>
                        </div>
                        <h3 className="text-sm md:text-xl xl:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight mb-4 md:mb-6">{cat.title}</h3>
                        
@@ -174,7 +174,7 @@ export default function ExamsEntryPage() {
 
                        <div className="mt-8 md:mt-16 pt-4 border-t border-slate-50">
                           <Button variant="ghost" className="w-full h-10 md:h-14 rounded-xl md:rounded-2xl bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[9px] md:text-[11px] tracking-tight border-none shadow-md gap-3">
-                             Explore Hub <ChevronRight className="h-4 w-4" />
+                             Explore Portal <ChevronRight className="h-4 w-4" />
                           </Button>
                        </div>
                     </Card>

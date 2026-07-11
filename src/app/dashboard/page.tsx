@@ -41,9 +41,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Student Home - Real-Time Study Tracker v50.6.
- * UPDATED: Title Case normalization across all dashboard nodes.
- * REMOVED: Forced uppercase from metrics and action cards.
+ * @fileOverview Student Home - Real-Time Study Tracker v50.7.
+ * UPDATED: Replaced 'Hub' with 'Center' and 'Portal'.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -131,27 +130,28 @@ export default function StudentDashboard() {
     
     const validMockIds = new Set(validMocks.map(m => m.id));
     const filtered = rawResults.filter(r => validMockIds.has(r.mockId));
-    const sorted = [...filtered].sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());
+    const sorted = [...filtered].sort((a, b) => {
+      const dateA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+      const dateB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+      return dateB - dateA;
+    });
     
     const total = sorted.length
     const correct = sorted.reduce((acc: number, r: any) => acc + (r.correctCount || 0), 0)
     const attempted = sorted.reduce((acc: number, r: any) => acc + (Object.keys(r.answers || {}).length), 0)
     const avgAcc = attempted > 0 ? Math.round((correct / attempted) * 100) : 0
     
-    // 1. Calculate time from all completed tests
     const maxSafeSecondsPerTest = 3600 * 10; 
     const historicalSeconds = sorted.reduce((acc: number, r: any) => {
        const t = Number(r.timeTaken) || 0;
        return acc + (t > maxSafeSecondsPerTest ? 0 : t);
     }, 0);
 
-    // 2. Add time from current active mock if any
     let activeMockSeconds = 0;
     if (currentMockId && startTime) {
        activeMockSeconds = Math.round((Date.now() - startTime) / 1000);
     }
 
-    // 3. Aggregate total
     const totalTimeSeconds = historicalSeconds + sessionSeconds + activeMockSeconds;
     
     const h = Math.floor(totalTimeSeconds / 3600);
@@ -203,7 +203,7 @@ export default function StudentDashboard() {
                         </h1>
                         <div className="flex flex-wrap items-center gap-2 mt-2">
                           <div className={cn("flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-[12px] shadow-lg", isActive ? "bg-blue-500 text-white" : "bg-white/10 text-slate-300")}>
-                             <Gem className="h-3 w-3" /> {isActive ? (passCountdown || 'Elite Hub') : 'Free Pass'}
+                             <Gem className="h-3 w-3" /> {isActive ? (passCountdown || 'Elite Pass') : 'Free Pass'}
                           </div>
                         </div>
                     </Link>
@@ -264,7 +264,7 @@ export default function StudentDashboard() {
                     <QuickToolLink href="/current-affairs" label="Current Affairs" icon={Newspaper} />
                     <QuickToolLink href="/notes" label="Study Material" icon={BookOpen} />
                     <QuickToolLink href="/pyqs" label="Old Papers" icon={FileStack} />
-                    <QuickToolLink href="/leaderboard" label="Hall of Rankers" icon={Trophy} />
+                    <QuickToolLink href="/leaderboard" label="Rank List" icon={Trophy} />
                     {isAdmin && <QuickToolLink href="/admin" label="Admin Panel" icon={ShieldAlert} highlight />}
                  </div>
               </div>

@@ -37,7 +37,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Result Node Hub Client v5.0 (Guest Support).
+ * @fileOverview Official Result Hub Client v5.1 (Vocabulary Standardized).
  */
 
 export default function ResultClient() {
@@ -67,7 +67,6 @@ export default function ResultClient() {
 
   const isGuestMode = searchParams.get('guest') === 'true' || !user;
 
-  // FETCH RESULT DATA (Cloud or Local)
   const resultRef = useMemo(() => (db && user && mockId ? doc(db, "results", `${user.uid}_${mockId}`) : null), [db, user, mockId]);
   const { data: cloudSession, loading: resultLoading } = useDoc<any>(resultRef);
 
@@ -176,7 +175,7 @@ export default function ResultClient() {
                  <h1 className="text-xl md:text-3xl font-black text-white tracking-tight leading-tight line-clamp-2">
                    {sessionData?.mockTitle || "Practice Result"}
                  </h1>
-                 <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest">Performance Hub</p>
+                 <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest">Performance Center</p>
               </div>
            </div>
 
@@ -200,7 +199,7 @@ export default function ResultClient() {
            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <TabsList className="bg-white border border-slate-100 p-1.5 h-12 md:h-16 rounded-xl md:rounded-2xl shadow-md inline-flex gap-2">
                  <TabsTrigger value="SOLUTIONS" className="rounded-lg md:rounded-xl px-6 md:px-10 font-bold text-[11px] md:text-sm h-full data-[state=active]:bg-[#0B1228] data-[state=active]:text-white transition-all">Solutions</TabsTrigger>
-                 <TabsTrigger value="TOPPER" className="rounded-lg md:rounded-xl px-6 md:px-10 font-bold text-[11px] md:text-sm h-full data-[state=active]:bg-[#0B1228] data-[state=active]:text-white transition-all">Leaderboard</TabsTrigger>
+                 <TabsTrigger value="TOPPER" className="rounded-lg md:rounded-xl px-6 md:px-10 font-bold text-[11px] md:text-sm h-full data-[state=active]:bg-[#0B1228] data-[state=active]:text-white transition-all">Rank List</TabsTrigger>
               </TabsList>
               
               <div className="flex flex-wrap items-center gap-2">
@@ -225,7 +224,7 @@ export default function ResultClient() {
                              <h2 className="text-xl md:text-3xl font-black tracking-tight">Unlock Your Rank</h2>
                           </div>
                           <p className="text-blue-100 font-medium text-sm md:text-lg leading-relaxed">
-                             Create a free account to unlock State Rank, All India Rank, and advanced AI-powered topic analysis for this test.
+                             Create a free account to unlock state rank, district performance, and advanced topic analysis for this test.
                           </p>
                        </div>
                        <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -233,7 +232,7 @@ export default function ResultClient() {
                              <Link href={`/login?returnUrl=${encodeURIComponent(pathname + '?id=' + mockId)}&mode=register`}>Create Free Account</Link>
                           </Button>
                           <Button asChild variant="ghost" className="w-full sm:w-auto text-white hover:bg-white/10 font-bold text-sm">
-                             <Link href={`/login?returnUrl=${encodeURIComponent(pathname + '?id=' + mockId)}`}>Login Hub</Link>
+                             <Link href={`/login?returnUrl=${encodeURIComponent(pathname + '?id=' + mockId)}`}>Login Portal</Link>
                           </Button>
                        </div>
                     </div>
@@ -289,10 +288,10 @@ export default function ResultClient() {
                     </div>
                     <div className="space-y-2">
                        <h3 className="text-2xl font-black text-[#0F172A]">Merit Registry Locked</h3>
-                       <p className="text-slate-500 font-medium max-w-xs mx-auto">Login to compare your scores with verified toppers across the platform.</p>
+                       <p className="text-slate-500 font-medium max-w-xs mx-auto">Login to compare your scores with verified toppers across the state.</p>
                     </div>
                     <Button asChild className="h-14 px-10 bg-primary rounded-full font-bold">
-                       <Link href="/login">Authenticate Now</Link>
+                       <Link href="/login">Access Portal</Link>
                     </Button>
                  </div>
               ) : (
@@ -302,7 +301,7 @@ export default function ResultClient() {
                           <div className="flex items-center gap-4">
                               <Users className="h-6 w-6 text-primary" />
                               <div>
-                                <p className="text-[11px] md:sm font-bold text-slate-500 tracking-tight">Registry Node</p>
+                                <p className="text-[11px] md:sm font-bold text-slate-500 tracking-tight">Official Registry</p>
                                 <p className="text-base md:text-xl font-black text-[#0F172A]">{merit.total} Verified Aspirants</p>
                               </div>
                           </div>
@@ -332,7 +331,7 @@ export default function ResultClient() {
                                     </div>
                                   </div>
                                   <div className="shrink-0 ml-4">
-                                    <Badge className={cn("border-none text-[10px] md:text-lg font-black px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl tabular-nums shadow-lg", r.accuracy > 85 ? "bg-emerald-50 text-emerald-600" : r.accuracy > 60 ? "bg-amber-50 text-amber-600" : "bg-slate-100 text-slate-500")}>{r.accuracy}%</Badge>
+                                    <Badge className={cn("border-none text-[10px] md:text-lg font-black px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl tabular-nums shadow-lg", r.accuracy > 85 ? "bg-emerald-50 text-emerald-600" : r.accuracy > 60 ? "bg-amber-50 text-amber-600" : "bg-100 text-slate-500")}>{r.accuracy}%</Badge>
                                   </div>
                               </div>
                               );

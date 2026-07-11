@@ -122,11 +122,11 @@ export default function SupportPage() {
             <div className="flex items-center gap-3">
               <MessageCircle className="h-5 w-5 text-primary" />
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">
-                Support desk
+                Support Desk
               </span>
             </div>
             <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-8xl font-black text-[#0F172A] tracking-tight leading-[0.9] break-words antialiased">
-              Support Hub
+              Support Center
             </h1>
             <p className="text-slate-500 font-medium text-lg max-w-xl leading-tight tracking-tight">
               Raise tickets for institutional issues or pass activation assistance.
@@ -234,7 +234,7 @@ export default function SupportPage() {
                   <HelpCircle className="h-8 w-8 fill-current" />
                 </div>
                 <h3 className="text-3xl font-black uppercase leading-tight">
-                  Help center
+                  Help Center
                 </h3>
                 <p className="text-slate-400 text-sm font-medium leading-relaxed">
                   Browse help articles to solve your problems instantly.

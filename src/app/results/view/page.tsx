@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { Suspense, useMemo, useEffect, useState } from "react"
@@ -10,8 +9,8 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Universal Result Hub Viewer v3.0 (Hydration Secured).
- * FIXED: Added hydration guard to prevent SSR mismatches in the static APK.
+ * @fileOverview Universal Result Hub Viewer v3.1 (Naming Optimized).
+ * FIXED: Removed 'Hub' from UI strings.
  */
 
 export default function ResultViewPage() {
@@ -49,16 +48,15 @@ function ResultGuard() {
 
   useEffect(() => {
      if (!mockLoading && mockId && !mock && user && db) {
-        console.log("[AUDIT] Orphan result deep-link detected. Liquidating stale record...");
+        console.log("[AUDIT] Orphan result link detected. Cleaning record...");
         const resultId = `${user.uid}_${mockId}`;
         
-        // Background delete for data integrity
         deleteDoc(doc(db, "results", resultId)).catch(() => {});
         
         toast({
            variant: "destructive",
            title: "Registry Mismatch",
-           description: "This record is no longer valid. Returning to hub."
+           description: "This record is no longer valid. Returning to dashboard."
         });
 
         router.replace("/dashboard");

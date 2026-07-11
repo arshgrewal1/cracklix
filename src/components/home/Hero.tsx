@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -29,8 +28,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Hub v118.0.
- * FIXED: Removed forced uppercase from action card labels and subtitles.
+ * @fileOverview Institutional Hero Center v119.0.
+ * UPDATED: Replaced 'Hub' with 'Center' and 'Platform'.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -44,7 +43,7 @@ export default function Hero() {
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats } = useDoc<any>(statsRef);
 
-  const boardHubs = [
+  const boardSelections = [
     { label: "PPSC", href: "/exams/hub/ppsc" },
     { label: "PSSSB", href: "/exams/hub/psssb" },
     { label: "Punjab Police", href: "/exams/hub/punjab-police" },
@@ -61,7 +60,7 @@ export default function Hero() {
         
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-center px-4 sm:px-6 lg:px-8">
 
-          {/* 1. Text Content Hub */}
+          {/* 1. Text Content Center */}
           <div className="text-center lg:text-left space-y-4 md:space-y-8 flex flex-col order-1">
             
             <motion.div 
@@ -86,7 +85,7 @@ export default function Hero() {
               </p>
                 
               <div className="flex flex-wrap justify-center lg:justify-start gap-1.5 md:gap-2 max-w-xl mx-auto lg:mx-0">
-                {boardHubs.map((board, i) => (
+                {boardSelections.map((board, i) => (
                   <Link 
                     key={i} 
                     href={board.href}
@@ -133,7 +132,7 @@ export default function Hero() {
             >
               <Image 
                 src="/images/hero-student.png" 
-                alt="Cracklix Study Hub" 
+                alt="Cracklix Preparation Center" 
                 fill
                 className="object-contain drop-shadow-[0_20px_50px_rgba(22,119,255,0.2)]" 
                 priority
@@ -166,7 +165,7 @@ export default function Hero() {
               <QuickActionCard 
                 boardId="current-affairs" 
                 label="Current Affairs" 
-                sub="Daily Hub" 
+                sub="Daily Updates" 
                 href="/current-affairs" 
               />
            </div>
