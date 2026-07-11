@@ -14,8 +14,8 @@ import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview Institutional Administrative Portal v16.0.
- * PWA SYNC: Removed uppercase, reduced font scales, and normalized Title Case.
+ * @fileOverview Institutional Administrative Portal v16.1.
+ * FIXED: Removed uppercase from primary buttons.
  */
 
 export default function AdminSettings() {
@@ -71,7 +71,7 @@ export default function AdminSettings() {
            </div>
           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight">System Portal</h1>
         </div>
-        <Button onClick={handleSave} className="w-full md:w-auto bg-primary hover:bg-blue-700 h-11 md:h-12 px-10 rounded-full font-black uppercase tracking-widest text-[10px] shadow-xl gap-2 transition-all active:scale-95 border-none">
+        <Button onClick={handleSave} className="w-full md:w-auto bg-primary hover:bg-blue-700 h-11 md:h-12 px-10 rounded-full font-bold shadow-xl gap-2 transition-all active:scale-95 border-none">
           <Save className="h-4 w-4" /> Commit Settings
         </Button>
       </div>

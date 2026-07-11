@@ -8,9 +8,6 @@ import {
   Zap, 
   Layers, 
   CheckCircle,
-  Monitor,
-  Download,
-  ArrowRight,
   ChevronRight,
   Sparkles
 } from "lucide-react";
@@ -21,8 +18,8 @@ import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { PLATFORM_VERSION } from "@/lib/version";
 
 /**
- * @fileOverview Official Direct App Hub v11.0.
- * DIRECT ACTION: A high-fidelity, single-focus node for application setup.
+ * @fileOverview Official Direct App Hub v11.1.
+ * FIXED: Removed uppercase from buttons.
  */
 
 export default function InstallPwaPage() {
@@ -66,7 +63,7 @@ export default function InstallPwaPage() {
                         className="flex items-center gap-4 px-12 py-6 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl shadow-2xl"
                       >
                         <CheckCircle className="h-8 w-8 text-emerald-500" />
-                        <span className="font-black uppercase tracking-widest text-lg md:text-xl text-emerald-400">Application Verified</span>
+                        <span className="font-bold text-lg md:text-xl text-emerald-400">Application Verified</span>
                       </motion.div>
                     ) : (
                       <Button 
@@ -75,8 +72,8 @@ export default function InstallPwaPage() {
                       >
                          <Smartphone className="h-8 w-8 md:h-12 md:w-12 group-hover:rotate-12 transition-transform" />
                          <div className="flex flex-col items-start text-left">
-                            <span className="font-black tracking-tight text-xl md:text-3xl leading-none uppercase">Install Hub Now</span>
-                            <span className="text-[9px] md:text-[11px] opacity-60 uppercase font-black tracking-widest mt-2">Authorize Registry Sync</span>
+                            <span className="font-black tracking-tight text-xl md:text-3xl leading-none">Install App Now</span>
+                            <span className="text-[11px] md:text-sm opacity-60 font-bold mt-2">Authorize Registry Sync</span>
                          </div>
                          <ChevronRight className="h-5 w-5 md:h-8 md:w-8 ml-auto opacity-30 group-hover:translate-x-2 transition-transform" />
                       </Button>

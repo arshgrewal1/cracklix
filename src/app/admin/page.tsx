@@ -26,9 +26,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard v28.0 (Live Sync Hardened)
- * FIXED: Comprehensive recalculation for Revenue and Active Passes.
- * FIXED: Auto-sync on mount for real-time governance.
+ * Admin Dashboard v28.1 (Fidelity Refined)
+ * FIXED: Removed uppercase from buttons and synced counts.
  */
 
 export default function AdminDashboard() {
@@ -99,7 +98,6 @@ export default function AdminDashboard() {
      }
   }
 
-  // Trigger sync on mount to ensure fresh metrics
   useEffect(() => {
     if (db) {
       handleSyncLiveStats();
@@ -134,10 +132,10 @@ export default function AdminDashboard() {
           <p className="text-slate-500 text-[11px] md:text-lg font-medium">Coordinate preparation nodes and session integrity.</p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto shrink-0">
-           <button onClick={handleSyncLiveStats} disabled={isStatsSyncing} className="flex-1 sm:flex-none h-11 px-6 rounded-full border border-slate-200 font-black text-[10px] tracking-widest text-[#0F172A] hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+           <button onClick={handleSyncLiveStats} disabled={isStatsSyncing} className="flex-1 sm:flex-none h-11 px-6 rounded-full border border-slate-200 font-bold text-[13px] text-[#0F172A] hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
               {isStatsSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Sync
            </button>
-           <Button onClick={handlePushToRegistry} disabled={isSyncing} className="flex-1 sm:flex-none h-11 px-8 bg-primary hover:bg-blue-700 text-white shadow-xl rounded-full border-none font-black text-[10px] tracking-widest">
+           <Button onClick={handlePushToRegistry} disabled={isSyncing} className="flex-1 sm:flex-none h-11 px-8 bg-primary hover:bg-blue-700 text-white shadow-xl rounded-full border-none font-bold text-sm">
               {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />} Seed
            </Button>
         </div>
@@ -169,7 +167,7 @@ export default function AdminDashboard() {
                      </Badge>
                   </div>
                ))}
-               <Button asChild variant="ghost" className="w-full h-11 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary">
+               <Button asChild variant="ghost" className="w-full h-11 text-[11px] font-bold text-slate-400 hover:text-primary">
                   <Link href="/admin/users">Open Student Hub <ChevronRight className="h-3 w-3 md:h-4 md:w-4 ml-1" /></Link>
                </Button>
             </CardContent>
@@ -203,7 +201,7 @@ function AdminMetricCard({ label, value, sub, icon, href, highlight }: any) {
       <Card className={cn(
         "border-none shadow-xl bg-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] transition-all duration-500 text-left h-full",
         "group-hover:translate-y-[-4px] border border-slate-50",
-        highlight && "ring-2 ring-rose-500/20 bg-rose-50/5"
+        highlight && "ring-2 ring-primary/10 bg-primary/5"
       )}>
          <div className="flex items-center gap-4 md:gap-6">
             <div className="h-12 w-12 md:h-14 md:w-14 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center border border-slate-50 shadow-inner shrink-0 group-hover:scale-110 transition-transform">
@@ -224,10 +222,10 @@ function AdminQuickLink({ label, href, highlight }: any) {
    return (
       <Link href={href} className="group">
          <div className={cn(
-           "flex items-center justify-between p-3 md:p-4 bg-white/5 border border-white/5 rounded-xl md:rounded-2xl hover:bg-white/10 transition-all active:scale-95",
+           "flex items-center justify-between p-3 md:p-4 bg-white/5 border border-white/5 rounded-xl md:rounded-2xl hover:bg-white/10 transition-all active:scale-[0.98]",
            highlight && "border-rose-500/30 bg-rose-50/5"
          )}>
-            <span className="text-[9px] md:text-[10px] font-black tracking-widest ml-1 md:ml-2">{label}</span>
+            <span className="text-[11px] font-bold ml-1 md:ml-2">{label}</span>
             <ChevronRight className={cn("h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-1", highlight ? "text-rose-50" : "text-primary")} />
          </div>
       </Link>

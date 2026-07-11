@@ -25,7 +25,7 @@ import {
   Languages,
   Globe
 } from "lucide-react"
-import { useFirestore, useCollection } from "@/firebase"
+import { useCollection, useFirestore } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, DocumentData, FirestoreDataConverter } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions } from "@/lib/parser"
@@ -43,11 +43,6 @@ const subjectConverter: FirestoreDataConverter<Subject> = {
     toFirestore: (data: Subject): DocumentData => data,
     fromFirestore: (snap): Subject => snap.data() as Subject
 };
-
-/**
- * @fileOverview Institutional Bulk Ingestion Hub v10.0 (PWA Hardened).
- * PWA SYNC: Removed all uppercase headers/labels, implemented high-density Title Case.
- */
 
 export default function BulkImportPage() {
   const router = useRouter()
@@ -78,7 +73,6 @@ export default function BulkImportPage() {
     }
 
     const result = parseBulkQuestions(rawText, metadata);
-    // Explicitly enforce UNUSED status for all parsed questions
     const questionsWithStatus = result.questions.map(q => ({ 
        ...q, 
        status: 'UNUSED',
@@ -156,7 +150,7 @@ export default function BulkImportPage() {
             <p className="text-slate-500 font-medium text-[11px] md:text-lg mt-1">Stacked Multi-Language Mapping Hub.</p>
           </div>
         </div>
-        <Button onClick={handleSaveToRegistry} disabled={isSyncing || parsedQuestions.length === 0} className="w-full md:w-auto bg-[#0F172A] hover:bg-black text-white font-black text-[9px] md:text-[11px] tracking-widest rounded-full h-11 md:h-14 px-8 md:px-12 gap-3 shadow-xl">
+        <Button onClick={handleSaveToRegistry} disabled={isSyncing || parsedQuestions.length === 0} className="w-full md:w-auto bg-[#0F172A] hover:bg-black text-white font-bold rounded-full h-11 md:h-14 px-8 md:px-12 gap-3 shadow-xl">
           {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4 text-primary" />} Commit Staged Assets
         </Button>
       </div>
@@ -197,7 +191,7 @@ export default function BulkImportPage() {
                     <Languages className="h-3 w-3" /> Secondary Assessment Language
                  </Label>
                  <Select value={metadata.secondaryLanguage} onValueChange={(v: 'punjabi' | 'hindi') => setMetadata({...metadata, secondaryLanguage: v})}>
-                    <SelectTrigger className="rounded-xl h-12 md:h-14 bg-slate-900 text-white border-none font-black text-[9px] tracking-widest">
+                    <SelectTrigger className="rounded-xl h-12 md:h-14 bg-slate-900 text-white border-none font-bold text-[13px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -216,7 +210,7 @@ export default function BulkImportPage() {
                 placeholder={`Q15. English Statement...\n${isHindiMode ? 'Hindi Statement...' : 'Punjabi Statement...'}\n(A) Option EN\n${isHindiMode ? 'Hindi Text' : 'Punjabi Text'}\nAnswer: C\nExplanation: Text...`}
                 className="min-h-[400px] md:min-h-[500px] rounded-2xl md:rounded-[2.5rem] bg-white border-none p-6 md:p-12 text-sm font-bold shadow-xl leading-relaxed resize-none focus-visible:ring-primary text-[#0F172A] shadow-inner"
             />
-            <Button onClick={handleImport} className="w-full h-14 md:h-20 bg-primary hover:bg-orange-600 text-white font-black text-[10px] md:text-[11px] tracking-widest rounded-2xl md:rounded-[2.5rem] shadow-2xl gap-3 transition-all active:scale-95 border-none">
+            <Button onClick={handleImport} className="w-full h-14 md:h-20 bg-primary hover:bg-orange-600 text-white font-bold rounded-2xl md:rounded-[2.5rem] shadow-2xl gap-3 transition-all active:scale-95 border-none">
                Initialize Ingestion <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
             </Button>
           </div>
@@ -237,7 +231,7 @@ export default function BulkImportPage() {
                   <div key={idx} className="relative group">
                     <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-6 md:p-12 text-left group border border-slate-50 transition-all hover:border-primary/20">
                        <div className="flex justify-between items-start mb-6 md:mb-10 border-b border-slate-50 pb-4 md:pb-8">
-                          <Badge className="bg-[#0F172A] text-white border-none text-[8px] md:text-[9px] font-black px-4 py-1.5 rounded-lg uppercase tracking-widest">Asset {idx + 1}</Badge>
+                          <Badge className="bg-[#0F172A] text-white border-none text-[8px] md:text-[9px] font-bold px-4 py-1.5 rounded-lg uppercase tracking-widest">Asset {idx + 1}</Badge>
                           <div className="flex gap-2 md:gap-3">
                              <button className="h-10 w-10 md:h-12 md:w-12 rounded-xl text-blue-500 bg-blue-50 shadow-sm flex items-center justify-center active:scale-90 transition-all" onClick={() => handleOpenEdit(idx)}><Edit className="h-5 w-5" /></button>
                              <button className="h-10 w-10 md:h-12 md:w-12 rounded-xl text-rose-500 bg-rose-50 shadow-sm flex items-center justify-center active:scale-90 transition-all" onClick={() => handleDelete(idx)}><Trash2 className="h-5 w-5" /></button>
@@ -253,7 +247,7 @@ export default function BulkImportPage() {
            ) : (
              <div className="h-full flex flex-col items-center justify-center text-slate-300 opacity-20 pt-40">
                 <FileText className="h-32 w-32 md:h-48 md:w-48 mb-8" />
-                <p className="font-headline font-black uppercase text-xl md:text-3xl tracking-[0.3em]">Awaiting Hub</p>
+                <p className="font-headline font-black uppercase text-xl md:text-3xl tracking-[0.4em]">Awaiting Hub</p>
              </div>
            )}
         </div>
@@ -334,8 +328,8 @@ export default function BulkImportPage() {
                </div>
             </div>
             <DialogFooter className="p-6 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4 shrink-0">
-               <Button variant="ghost" onClick={() => setEditingIndex(null)} className="h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400 tracking-widest">Discard</Button>
-               <Button onClick={handleSaveEdit} className="bg-[#0F172A] hover:bg-black text-white h-11 md:h-14 px-10 rounded-full font-black text-[10px] tracking-[0.2em] flex-1 shadow-xl transition-all active:scale-95 border-none gap-3">
+               <Button variant="ghost" onClick={() => setEditingIndex(null)} className="h-11 md:h-12 px-6 font-bold text-xs text-slate-400">Discard</Button>
+               <Button onClick={handleSaveEdit} className="bg-[#0F172A] hover:bg-black text-white h-11 md:h-14 px-10 rounded-full font-bold text-sm flex-1 shadow-xl transition-all active:scale-95 border-none gap-3">
                   <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5" /> Apply Modifications
                </Button>
             </DialogFooter>

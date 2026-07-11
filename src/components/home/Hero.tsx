@@ -28,8 +28,7 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Hub v116.0.
- * UPDATED: Full live registry synchronization for Study Notes, Mocks, and PYQs.
+ * @fileOverview Institutional Hero Hub v117.0.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -44,8 +43,8 @@ export default function Hero() {
   const { data: stats } = useDoc<any>(statsRef);
 
   const boardHubs = [
-    { label: "PSSSB", href: "/exams/hub/psssb" },
     { label: "PPSC", href: "/exams/hub/ppsc" },
+    { label: "PSSSB", href: "/exams/hub/psssb" },
     { label: "Punjab Police", href: "/exams/hub/punjab-police" },
     { label: "PSPCL", href: "/exams/hub/pspcl" },
     { label: "PSTET", href: "/exams/hub/pstet" },
@@ -70,7 +69,7 @@ export default function Hero() {
             >
               <Star className="h-3.5 w-3.5 text-primary fill-primary animate-pulse" />
               <span className="text-[11px] md:text-sm font-black uppercase tracking-widest text-slate-600">
-                Punjab&apos;s Smartest Platform
+                Punjab's Smartest Platform
               </span>
             </motion.div>
 
@@ -81,7 +80,7 @@ export default function Hero() {
               </h1>
 
               <p className="text-[15px] md:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium tracking-tight">
-                Practice with high-fidelity mock tests and official notes curated by Punjab&apos;s leading prep experts.
+                Practice with high-fidelity mock tests and official notes curated by Punjab's leading prep experts.
               </p>
                 
               <div className="flex flex-wrap justify-center lg:justify-start gap-1.5 md:gap-2 max-w-xl mx-auto lg:mx-0">
@@ -98,7 +97,7 @@ export default function Hero() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-6 w-full max-w-lg mx-auto lg:mx-0">
-               <Button asChild className="sm:flex-[1.2] h-14 md:h-18 px-10 bg-primary hover:bg-blue-700 text-white font-black uppercase tracking-widest text-xs md:text-sm rounded-2xl md:rounded-[1.5rem] shadow-4xl active:scale-95 transition-all border-none">
+               <Button asChild className="sm:flex-[1.2] h-14 md:h-18 px-10 bg-primary hover:bg-blue-700 text-white font-bold text-sm md:text-lg rounded-2xl md:rounded-[1.5rem] shadow-4xl active:scale-95 transition-all border-none">
                   <Link href="/mocks" className="flex items-center justify-center gap-3">
                     <Play className="h-4 w-4 md:h-6 md:w-6 fill-current" /> Start Preparation
                   </Link>
@@ -107,7 +106,7 @@ export default function Hero() {
                {!isInstalled ? (
                   <PWAInstallButton className="sm:flex-1 h-14 md:h-18" variant="outline" />
                ) : (
-                  <Button asChild variant="outline" className="sm:flex-1 h-14 md:h-18 rounded-2xl md:rounded-[1.5rem] border-2 border-slate-200 bg-white text-[#0F172A] font-black uppercase text-[10px] tracking-widest shadow-sm transition-all active:scale-95">
+                  <Button asChild variant="outline" className="sm:flex-1 h-14 md:h-18 rounded-2xl md:rounded-[1.5rem] border-2 border-slate-200 bg-white text-[#0F172A] font-bold text-sm md:text-lg shadow-sm transition-all active:scale-95">
                      <Link href="/exams" className="flex items-center justify-center gap-3">
                         <Target className="h-4 w-4 md:h-6 md:w-6 text-primary" /> Browse Exams
                      </Link>

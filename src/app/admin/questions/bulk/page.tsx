@@ -21,8 +21,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { MockType } from "@/types"
 
 /**
- * @fileOverview Institutional Bulk Ingestion Hub v4.2.
- * ACCESSIBILITY: Added DialogDescription for ARIA compliance.
+ * @fileOverview Institutional Bulk Ingestion Hub v4.3.
+ * FIXED: Removed uppercase and tracking from buttons.
  */
 
 export default function BulkImportPage() {
@@ -152,7 +152,7 @@ Correct Answer: (B) West / ਸਹੀ ਉੱਤਰ: ਪੱਛਮ * English Explan
           </div>
         </div>
         <div className="flex gap-4">
-           <Button onClick={handleCommitToBank} disabled={isImporting || parsedQuestions.length === 0} className="bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl h-16 px-12 gap-3 shadow-3xl">
+           <Button onClick={handleCommitToBank} disabled={isImporting || parsedQuestions.length === 0} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-2xl h-16 px-12 gap-3 shadow-3xl">
               <Rocket className="h-5 w-5" /> {isImporting ? 'Syncing...' : 'Commit to Bank'}
            </Button>
         </div>
@@ -202,7 +202,7 @@ Correct Answer: (B) West / ਸਹੀ ਉੱਤਰ: ਪੱਛਮ * English Explan
                 />
               </div>
               
-              <Button onClick={handleParse} className="w-full h-20 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.3em] gap-4 rounded-[2rem] shadow-4xl">
+              <Button onClick={handleParse} className="w-full h-20 bg-[#0F172A] hover:bg-black text-white font-bold gap-4 rounded-[2rem] shadow-4xl">
                 <Zap className="h-6 w-6 text-primary fill-current" /> Initialize Extraction
               </Button>
             </CardContent>
@@ -221,7 +221,7 @@ Correct Answer: (B) West / ਸਹੀ ਉੱਤਰ: ਪੱਛਮ * English Explan
                   {parsedQuestions.map((q, idx) => (
                     <div key={idx} className="space-y-8 pb-12 border-b border-slate-100 last:border-0 last:pb-0">
                        <div className="flex items-center justify-between">
-                          <Badge className="bg-[#0F172A] text-white border-none text-[10px] font-black uppercase px-4 py-1 rounded-lg">Question {idx + 1}</Badge>
+                          <Badge className="bg-[#0F172A] text-white border-none text-[10px] font-bold px-4 py-1 rounded-lg">Question {idx + 1}</Badge>
                        </div>
                        <QuestionRenderer language="bilingual" question={q} showSolution={true} />
                     </div>
@@ -246,12 +246,12 @@ Correct Answer: (B) West / ਸਹੀ ਉੱਤਰ: ਪੱਛਮ * English Explan
           <div className="p-12 space-y-12">
             <div className="text-center space-y-4">
                <div className="h-20 w-20 bg-primary/20 rounded-[2.5rem] flex items-center justify-center mx-auto text-primary shadow-2xl"><Rocket className="h-10 w-10" /></div>
-               <DialogTitle className="text-4xl font-headline font-black uppercase tracking-tight">Deploy Series</DialogTitle>
+               <DialogTitle className="text-4xl font-headline font-black tracking-tight">Deploy Series</DialogTitle>
                <DialogDescription className="text-slate-400 text-lg font-medium">{parsedQuestions.length} questions saved. Initialize mock test now?</DialogDescription>
             </div>
             <DialogFooter className="flex flex-col sm:flex-row gap-4">
-               <Button variant="ghost" onClick={() => router.push("/admin/questions")} className="h-14 px-8 rounded-2xl text-slate-400 hover:text-white font-bold uppercase text-[10px]">View Bank</Button>
-               <Button onClick={handleDeployMock} className="flex-1 h-16 bg-primary hover:bg-orange-600 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl shadow-3xl shadow-primary/20 gap-3">
+               <Button variant="ghost" onClick={() => router.push("/admin/questions")} className="h-14 px-8 rounded-2xl text-slate-400 hover:text-white font-bold text-sm">View Bank</Button>
+               <Button onClick={handleDeployMock} className="flex-1 h-16 bg-primary hover:bg-orange-600 text-white font-bold rounded-2xl shadow-3xl shadow-primary/20 gap-3">
                   <ClipboardCheck className="h-5 w-5" /> Initialize Series
                </Button>
             </DialogFooter>

@@ -39,8 +39,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v24.0.
- * UPDATED: Added marking scheme (Positive/Negative) and Exam Vertical targeting.
+ * @fileOverview Enterprise Mock Builder Hub v24.1.
+ * FIXED: Removed uppercase from primary action buttons.
  */
 
 export default function MockBuilderPage() {
@@ -269,7 +269,7 @@ function MockBuilderContent() {
             <p className="text-slate-500 font-medium text-[11px] md:text-lg mt-1.5">Institutional component registry hub.</p>
           </div>
         </div>
-        <Button onClick={handlePublish} disabled={isPublishing} className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-3">
+        <Button onClick={handlePublish} disabled={isPublishing} className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-bold shadow-xl border-none transition-all active:scale-95 gap-3">
           {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-5 w-5" />} Commit to Registry
         </Button>
       </div>
@@ -372,8 +372,8 @@ function MockBuilderContent() {
 
         <div className="lg:col-span-8 space-y-6 md:space-y-10">
            <div className="flex items-center gap-2 bg-white p-1.5 rounded-full border border-slate-100 shadow-sm w-fit">
-              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-6 md:px-10 py-2.5 rounded-full font-black uppercase text-[9px] md:text-[10px] tracking-widest transition-all", activeRightTab === 'BANK' ? "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:bg-slate-50")}>Registry Bank</button>
-              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-6 md:px-10 py-2.5 rounded-full font-black uppercase text-[9px] md:text-[10px] tracking-widest transition-all", activeRightTab === 'ASSEMBLY' ? "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:bg-slate-50")}>Assembly Hub</button>
+              <button onClick={() => setActiveRightTab('BANK')} className={cn("px-6 md:px-10 py-2.5 rounded-full font-bold text-[10px] md:text-[11px] transition-all", activeRightTab === 'BANK' ? "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:bg-slate-50")}>Registry Bank</button>
+              <button onClick={() => setActiveRightTab('ASSEMBLY')} className={cn("px-6 md:px-10 py-2.5 rounded-full font-bold text-[10px] md:text-[11px] transition-all", activeRightTab === 'ASSEMBLY' ? "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:bg-slate-50")}>Assembly Hub</button>
            </div>
 
            {activeRightTab === 'BANK' ? (
@@ -391,7 +391,7 @@ function MockBuilderContent() {
                       </div>
                       <div className="space-y-1.5">
                          <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Subject node</Label>
-                         <select value={filterSubject} onChange={e => setSubjectFilter(e.target.value)} className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 outline-none font-bold text-xs"><option value="all" className="bg-[#0F172A]">All Subject Nodes</option>{subjects?.map((s: any) => <option key={s.id} value={s.id} className="bg-[#0F172A]">{s.name}</option>)}</select>
+                         <select value={filterSubject} onChange={e => setSubjectFilter(e.target.value)} className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 outline-none font-bold text-xs"><option value="all" className="bg-[#0F172A]">All Subject Nodes</option>{subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}</select>
                       </div>
                    </div>
                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 pt-6 border-t border-white/10">
@@ -402,7 +402,7 @@ function MockBuilderContent() {
                          </div>
                          <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/10"><span className="text-[8px] font-black uppercase text-slate-400">Unused Only</span><Switch checked={hideUsed} onCheckedChange={setHideUsed} /></div>
                       </div>
-                      <Button onClick={handleLinkQuestions} disabled={bankSelection.length === 0} className="w-full md:w-auto h-12 md:h-16 px-10 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest rounded-full shadow-2xl border-none gap-3 active:scale-95">
+                      <Button onClick={handleLinkQuestions} disabled={bankSelection.length === 0} className="w-full md:w-auto h-12 md:h-16 px-10 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full shadow-2xl border-none gap-3 active:scale-95">
                          Link Staged Assets <CheckCircle2 className="h-5 w-5" />
                       </Button>
                    </div>
@@ -433,7 +433,7 @@ function MockBuilderContent() {
                       </div>
                    )}
                    {filteredBank.length > displayLimit && (
-                      <Button variant="ghost" onClick={() => setDisplayLimit((d: number) => d + 100)} className="w-full h-14 rounded-2xl text-slate-400 font-bold uppercase text-[9px] tracking-widest">
+                      <Button variant="ghost" onClick={() => setDisplayLimit((d: number) => d + 100)} className="w-full h-14 rounded-2xl text-slate-400 font-bold text-[11px]">
                          Load More ({filteredBank.length - displayLimit} Remaining)
                       </Button>
                    )}
@@ -449,7 +449,7 @@ function MockBuilderContent() {
                    </div>
                    <Popover>
                       <PopoverTrigger asChild>
-                         <Button className="w-full md:w-auto h-11 md:h-12 px-8 bg-[#0F172A] hover:bg-black text-white rounded-full font-black uppercase text-[9px] tracking-widest shadow-xl border-none gap-3">
+                         <Button className="w-full md:w-auto h-11 md:h-12 px-8 bg-[#0F172A] hover:bg-black text-white rounded-full font-bold text-sm shadow-xl border-none gap-3">
                             <Plus className="h-4 w-4" /> Add Section Node
                          </Button>
                       </PopoverTrigger>
@@ -481,7 +481,7 @@ function MockBuilderContent() {
                                </div>
                             </div>
                             <div className="flex gap-2">
-                               <Button onClick={() => setActiveSectionId(sec.id)} variant={activeSectionId === sec.id ? "default" : "ghost"} className="h-9 rounded-full font-black text-[9px] uppercase tracking-widest">
+                               <Button onClick={() => setActiveSectionId(sec.id)} variant={activeSectionId === sec.id ? "default" : "ghost"} className="h-9 rounded-full font-bold text-[10px]">
                                   {activeSectionId === sec.id ? "Active" : "Focus"}
                                </Button>
                                <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10">

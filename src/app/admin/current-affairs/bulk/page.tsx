@@ -13,12 +13,13 @@ import { useFirestore } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, setDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseBulkQuestions } from "@/lib/parser"
-import { Zap, Database, ChevronLeft, Rocket, CheckCircle2, Settings2, ClipboardCheck, Info, Newspaper } from "lucide-react"
+import { Zap, Database, ChevronLeft, Rocket, CheckCircle2, Settings2, ClipboardCheck, Info, Newspaper, ChevronRight } from "lucide-react"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
+import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Institutional CA Ingestion Hub v1.0.
+ * @fileOverview Institutional CA Ingestion Hub v1.2.
  */
 
 export default function CABulkImportPage() {
@@ -101,7 +102,7 @@ export default function CABulkImportPage() {
       month: months[now.getMonth()],
       year: now.getFullYear().toString(),
       status: "PUBLISHED",
-      questions: parsedQuestions, // Using the local parsed array for immediate Hub data
+      questions: parsedQuestions, 
       language: metadata.secondaryLanguage === 'punjabi' ? "English & Punjabi" : "English & Hindi",
       duration: 15,
       positiveMarks: 1,
@@ -131,25 +132,25 @@ export default function CABulkImportPage() {
             <p className="text-slate-500 font-medium text-[11px] md:text-lg mt-1">Bulk process Current Affairs for all sections.</p>
           </div>
         </div>
-        <Button onClick={handleCommitToBank} disabled={isImporting || parsedQuestions.length === 0} className="bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-full h-11 md:h-14 px-8 md:px-10 gap-3 shadow-xl border-none">
+        <Button onClick={handleCommitToBank} disabled={isImporting || parsedQuestions.length === 0} className="bg-primary hover:bg-blue-700 text-white font-bold h-11 md:h-14 px-8 md:px-10 gap-3 shadow-xl border-none">
           {isImporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />} Commit to Bank
         </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 px-1">
-        <div className="lg:col-span-5 space-y-6 md:space-y-8">
+        <div className="lg:col-span-5 space-y-8">
           <Card className="border-none bg-white shadow-xl rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-slate-50">
             <div className="h-1.5 w-full bg-primary" />
             <CardHeader className="p-6 md:p-10 pb-4">
-              <CardTitle className="font-black text-xl md:text-2xl uppercase flex items-center gap-4">
+              <CardTitle className="font-black text-xl md:text-2xl flex items-center gap-4">
                 <Settings2 className="h-6 w-6 text-primary" /> Configuration
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 md:p-10 pt-4 space-y-6 md:space-y-8">
+            <CardContent className="p-6 md:p-10 pt-4 space-y-6 space-y-8">
               <div className="space-y-2">
                 <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Language mapping</Label>
                 <Select value={metadata.secondaryLanguage} onValueChange={val => setMetadata({...metadata, secondaryLanguage: val})}>
-                  <SelectTrigger className="rounded-xl bg-slate-50 border-none h-12 md:h-14 font-black uppercase text-[10px] tracking-widest">
+                  <SelectTrigger className="rounded-xl bg-slate-50 border-none h-12 md:h-14 font-bold text-[13px]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -169,7 +170,7 @@ export default function CABulkImportPage() {
                 />
               </div>
               
-              <Button onClick={handleParse} className="w-full h-14 md:h-20 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.3em] gap-4 rounded-xl md:rounded-[2.5rem] shadow-2xl">
+              <Button onClick={handleParse} className="w-full h-14 md:h-20 bg-[#0F172A] hover:bg-black text-white font-black gap-4 rounded-xl md:rounded-[2.5rem] shadow-2xl">
                 <Zap className="h-6 w-6 text-primary fill-current" /> Initialize Extraction
               </Button>
             </CardContent>
@@ -180,14 +181,14 @@ export default function CABulkImportPage() {
            {parsedQuestions.length > 0 ? (
             <Card className="border-none bg-white shadow-2xl rounded-[3rem] h-full flex flex-col overflow-hidden border border-slate-50">
                <CardHeader className="p-8 md:p-12 bg-slate-50/50 border-b border-slate-100">
-                  <CardTitle className="font-black text-xl md:text-3xl uppercase flex items-center gap-4 text-[#0F172A]">
+                  <CardTitle className="font-black text-xl md:text-3xl flex items-center gap-4 text-[#0F172A]">
                     <CheckCircle2 className="h-8 w-8 text-emerald-600" /> Staged Nodes ({parsedQuestions.length})
                   </CardTitle>
                </CardHeader>
                <CardContent className="p-6 md:p-12 flex-1 overflow-y-auto custom-scrollbar space-y-12">
                   {parsedQuestions.map((q, idx) => (
                     <div key={idx} className="space-y-8 pb-12 border-b border-slate-100 last:border-0 last:pb-0">
-                       <Badge className="bg-[#0F172A] text-white border-none text-[10px] font-black uppercase px-4 py-1 rounded-lg">Question {idx + 1}</Badge>
+                       <Badge className="bg-[#0F172A] text-white border-none text-[10px] font-bold px-4 py-1 rounded-lg">Question {idx + 1}</Badge>
                        <QuestionRenderer language={metadata.secondaryLanguage === 'punjabi' ? 'ENGLISH_PUNJABI' : 'ENGLISH_HINDI'} question={q} showSolution={true} />
                     </div>
                   ))}
@@ -207,12 +208,12 @@ export default function CABulkImportPage() {
           <div className="p-10 md:p-16 space-y-10">
             <div className="text-center space-y-4">
                <div className="h-20 w-20 bg-primary/20 rounded-[2rem] flex items-center justify-center mx-auto text-primary shadow-2xl"><Rocket className="h-10 w-10" /></div>
-               <DialogTitle className="text-3xl md:text-4xl font-black uppercase tracking-tight">Deploy CA Hub</DialogTitle>
+               <DialogTitle className="text-3xl md:text-4xl font-black tracking-tight">Deploy CA Hub</DialogTitle>
                <DialogDescription className="text-slate-400 text-sm md:text-lg font-medium">Commit {parsedQuestions.length} nodes and publish to feed?</DialogDescription>
             </div>
             <DialogFooter className="flex flex-col sm:flex-row gap-4">
-               <Button variant="ghost" onClick={() => router.push("/admin/current-affairs/bank")} className="h-14 px-8 rounded-2xl text-slate-400 hover:text-white font-bold uppercase text-[10px]">Open Bank</Button>
-               <Button onClick={handleDeployHub} className="flex-1 h-14 md:h-18 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-[0.2em] rounded-2xl shadow-3xl gap-3 border-none">
+               <Button variant="ghost" onClick={() => router.push("/admin/current-affairs/bank")} className="h-14 px-8 rounded-2xl text-slate-400 hover:text-white font-bold text-sm">Open Bank</Button>
+               <Button onClick={handleDeployHub} className="flex-1 h-14 md:h-18 bg-primary hover:bg-blue-700 text-white font-black rounded-2xl shadow-3xl gap-3 border-none">
                   <ClipboardCheck className="h-5 w-5" /> Publish Hub
                </Button>
             </DialogFooter>

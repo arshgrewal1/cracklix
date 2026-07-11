@@ -20,8 +20,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Manual Question Ingestion Node v19.0.
- * FIXED: Removed malformed imports and ensured strict TypeScript registry mapping.
+ * @fileOverview Manual Question Ingestion Node v19.1.
+ * FIXED: Removed uppercase from buttons.
  */
 
 export default function QuestionEntryPage() {
@@ -146,7 +146,7 @@ function QuestionEntryContent() {
             <p className="text-[10px] uppercase font-black tracking-widest text-slate-400 mt-1">Manual Content Ingestion</p>
           </div>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 gap-3 font-black px-10 h-14 shadow-xl rounded-2xl uppercase tracking-widest text-xs" onClick={handleSave} disabled={isSaving}>
+        <Button className="bg-primary hover:bg-primary/90 gap-3 font-bold px-10 h-14 shadow-xl rounded-2xl" onClick={handleSave} disabled={isSaving}>
            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit to Bank
         </Button>
       </div>

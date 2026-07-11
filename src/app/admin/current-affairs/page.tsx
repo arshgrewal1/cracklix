@@ -29,9 +29,8 @@ import { CurrentAffairHubItem } from "@/types"
 import { parseBulkQuestions } from "@/lib/parser"
 
 /**
- * @fileOverview Institutional Current Affairs Hub v25.0 (PWA Optimized).
- * FIXED: Removed all uppercase headers and labels to match Title Case design system.
- * ALIGNMENT: Perfectly mirrors user provided screenshot.
+ * @fileOverview Institutional Current Affairs Hub v25.1.
+ * FIXED: Removed uppercase from buttons.
  */
 
 export default function AdminCurrentAffairs() {
@@ -106,7 +105,7 @@ export default function AdminCurrentAffairs() {
           <h1 className="text-3xl md:text-5xl font-black text-primary tracking-tight leading-tight">Ca Manager</h1>
           <p className="text-slate-500 font-medium text-sm md:text-lg">Coordinate coverage hub.</p>
         </div>
-        <Button onClick={() => setEditingItem({ title: "", type: "DAILY", month: "January", year: "2026", status: "PUBLISHED", questions: [], language: "English & Punjabi", duration: 15, positiveMarks: 1, negativeMarks: 0.25 })} className="w-full md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none active:scale-95 gap-3">
+        <Button onClick={() => setEditingItem({ title: "", type: "DAILY", month: "January", year: "2026", status: "PUBLISHED", questions: [], language: "English & Punjabi", duration: 15, positiveMarks: 1, negativeMarks: 0.25 })} className="w-full md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-bold shadow-xl border-none active:scale-95 gap-3">
           <Plus className="h-5 w-5" /> Initialize Ca Hub
         </Button>
       </div>
@@ -218,7 +217,7 @@ export default function AdminCurrentAffairs() {
                          <h4 className="text-lg font-black text-[#0F172A]">Bulk extraction</h4>
                       </div>
                       <Textarea value={bulkText} onChange={e => setBulkText(e.target.value)} className="min-h-[250px] md:min-h-[400px] rounded-2xl bg-white border-none p-6 text-sm font-medium leading-relaxed shadow-sm" placeholder="Paste raw question blocks here..." />
-                      <Button onClick={handleProcessBulk} className="w-full h-14 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-xl gap-2 active:scale-95 border-none shadow-lg">
+                      <Button onClick={handleProcessBulk} className="w-full h-14 bg-[#0F172A] hover:bg-black text-white font-bold rounded-xl gap-2 active:scale-95 border-none shadow-lg">
                          Initialize extraction <ChevronRight className="h-4 w-4" />
                       </Button>
                    </div>
@@ -227,8 +226,8 @@ export default function AdminCurrentAffairs() {
           </div>
 
           <DialogFooter className="px-6 md:px-10 py-6 md:py-8 bg-slate-50 flex flex-row items-center gap-4 border-t border-slate-100 shrink-0">
-            <Button variant="ghost" onClick={() => setEditingItem(null)} className="h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400">Discard</Button>
-            <Button onClick={handleSave} disabled={isSaving} className="flex-1 h-11 md:h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-full shadow-xl gap-2 active:scale-95 border-none">
+            <Button variant="ghost" onClick={() => setEditingItem(null)} className="h-11 md:h-12 px-6 font-bold text-xs text-slate-400">Discard</Button>
+            <Button onClick={handleSave} disabled={isSaving} className="flex-1 h-11 md:h-14 bg-primary hover:bg-blue-700 text-white font-bold rounded-full shadow-xl gap-2 active:scale-95 border-none">
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Rocket className="h-4 w-4" />} Commit to Registry
             </Button>
           </DialogFooter>
