@@ -9,7 +9,10 @@ import {
   Layers, 
   CheckCircle,
   Monitor,
-  Download
+  Download,
+  ArrowRight,
+  ChevronRight,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
@@ -18,8 +21,8 @@ import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { PLATFORM_VERSION } from "@/lib/version";
 
 /**
- * @fileOverview Official Direct App Hub v10.0.
- * ONE-CLICK: Focused entirely on direct installation for maximum student retention.
+ * @fileOverview Official Direct App Hub v11.0.
+ * DIRECT ACTION: A high-fidelity, single-focus node for application setup.
  */
 
 export default function InstallPwaPage() {
@@ -38,11 +41,11 @@ export default function InstallPwaPage() {
               <motion.div
                  initial={{ opacity: 0, y: 20 }}
                  animate={{ opacity: 1, y: 0 }}
-                 className="space-y-8"
+                 className="space-y-8 md:space-y-12"
               >
                  <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-xl">
-                    <Zap className="h-4 w-4 text-primary animate-pulse" />
-                    <span className="text-[10px] md:text-xs font-black tracking-[0.3em] uppercase">V{version} Production Node</span>
+                    <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+                    <span className="text-[10px] md:text-xs font-black tracking-[0.3em] uppercase">V{version} Production Hub</span>
                  </div>
 
                  <div className="space-y-6">
@@ -50,8 +53,8 @@ export default function InstallPwaPage() {
                        Direct <br className="hidden md:block" /> 
                        <span className="text-primary italic">Setup.</span>
                     </h1>
-                    <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-snug">
-                       Install the official Cracklix application directly to your home screen. Fast, secure, and ready for offline preparation.
+                    <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-snug tracking-tight">
+                       Synchronize the official preparation registry with your home screen. One-click setup for the smartest exam experience.
                     </p>
                  </div>
 
@@ -63,26 +66,27 @@ export default function InstallPwaPage() {
                         className="flex items-center gap-4 px-12 py-6 bg-emerald-500/10 border border-emerald-500/20 rounded-3xl shadow-2xl"
                       >
                         <CheckCircle className="h-8 w-8 text-emerald-500" />
-                        <span className="font-black uppercase tracking-widest text-lg md:text-xl text-emerald-400">Application Active</span>
+                        <span className="font-black uppercase tracking-widest text-lg md:text-xl text-emerald-400">Application Verified</span>
                       </motion.div>
                     ) : (
                       <Button 
                         onClick={installApp}
-                        className="h-20 md:h-28 w-full max-w-[400px] bg-primary hover:bg-blue-700 text-white rounded-[2rem] md:rounded-[3rem] shadow-5xl gap-4 group transition-all active:scale-95 border-none"
+                        className="h-20 md:h-28 w-full max-w-[440px] bg-primary hover:bg-blue-700 text-white rounded-[2rem] md:rounded-[3rem] shadow-5xl gap-4 md:gap-8 group transition-all active:scale-95 border-none"
                       >
-                         <Smartphone className="h-8 w-8 md:h-10 md:w-10 group-hover:rotate-12 transition-transform" />
+                         <Smartphone className="h-8 w-8 md:h-12 md:w-12 group-hover:rotate-12 transition-transform" />
                          <div className="flex flex-col items-start text-left">
-                            <span className="font-black tracking-tight text-xl md:text-3xl leading-none uppercase">Install App Now</span>
-                            <span className="text-[9px] md:text-[11px] opacity-60 uppercase font-black tracking-widest mt-1.5">One-Step Platform Setup</span>
+                            <span className="font-black tracking-tight text-xl md:text-3xl leading-none uppercase">Install Hub Now</span>
+                            <span className="text-[9px] md:text-[11px] opacity-60 uppercase font-black tracking-widest mt-2">Authorize Registry Sync</span>
                          </div>
+                         <ChevronRight className="h-5 w-5 md:h-8 md:w-8 ml-auto opacity-30 group-hover:translate-x-2 transition-transform" />
                       </Button>
                     )}
                  </div>
 
-                 <div className="flex items-center justify-center gap-8 md:gap-12 text-slate-500 font-black text-[10px] md:text-[13px] tracking-widest pt-12">
-                    <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" /> SECURE</span>
-                    <span className="flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /> SYNCED</span>
-                    <span className="flex items-center gap-2"><Monitor className="h-4 w-4 text-primary" /> UNIVERSAL</span>
+                 <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12 text-slate-500 font-black text-[10px] md:text-[13px] tracking-widest pt-12 uppercase">
+                    <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" /> Secure</div>
+                    <div className="flex items-center gap-2"><Zap className="h-4 w-4 text-primary" /> Instant</div>
+                    <div className="flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /> Unified</div>
                  </div>
               </motion.div>
            </div>

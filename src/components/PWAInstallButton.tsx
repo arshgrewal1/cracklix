@@ -13,8 +13,8 @@ interface PWAInstallButtonProps {
 }
 
 /**
- * @fileOverview Institutional PWA Install Trigger v5.3.
- * FIXED: Aggressive check for already installed status to auto-hide the button.
+ * @fileOverview Institutional PWA Install Trigger v5.4.
+ * REFINED: Label and icon behavior for a cleaner direct installation CTA.
  */
 export default function PWAInstallButton({ 
   className, 
@@ -28,8 +28,7 @@ export default function PWAInstallButton({
     setMounted(true);
   }, []);
 
-  // Strict check: If user is on the installed app, do not show the button anywhere.
-  if (!mounted || isInstalled) return null;
+  if (!mounted) return null;
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();

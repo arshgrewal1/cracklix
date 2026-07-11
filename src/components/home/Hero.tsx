@@ -10,7 +10,8 @@ import {
   ChevronRight,
   Smartphone,
   ShieldCheck,
-  Layers
+  Layers,
+  Target
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,15 +22,17 @@ import { AuthorityLogo } from "@/lib/exam-icons";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import PWAInstallButton from "@/components/PWAInstallButton";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Hub v113.2.
- * UPDATED: Restored original 'outline' style for Install Hub button and removed from Sidebar.
- * LOGIC: Hidden automatically if app is already installed.
+ * @fileOverview Institutional Hero Hub v114.0.
+ * RESTORED: Heading to "Crack Punjab Exams with Confidence".
+ * FIXED: Balanced button logic - if app is installed, shows "Browse Exams" instead of hiding.
  */
 export default function Hero() {
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
+  const { isInstalled } = usePWAInstall();
 
   useEffect(() => {
     setMounted(true);
@@ -72,7 +75,7 @@ export default function Hero() {
             <div className="space-y-4 md:space-y-6">
               <h1 className="text-[32px] md:text-6xl lg:text-7xl font-[900] tracking-tighter text-[#0F172A] leading-[1.05] md:leading-[0.95] antialiased">
                 Crack Punjab Exams <br className="hidden md:block"/>
-                <span className="text-primary italic">with Precision</span>
+                <span className="text-primary italic">with Confidence</span>
               </h1>
 
               <p className="text-[15px] md:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium tracking-tight">
@@ -98,7 +101,17 @@ export default function Hero() {
                     <Play className="h-4 w-4 md:h-6 md:w-6 fill-current" /> Start Preparation
                   </Link>
                </Button>
-               <PWAInstallButton className="sm:flex-1 h-14 md:h-18" variant="outline" />
+               
+               {/* BALANCED BUTTON LOGIC: If installed, show Browse Exams to keep the layout balanced */}
+               {!isInstalled ? (
+                  <PWAInstallButton className="sm:flex-1 h-14 md:h-18" variant="outline" />
+               ) : (
+                  <Button asChild variant="outline" className="sm:flex-1 h-14 md:h-18 rounded-2xl md:rounded-[1.5rem] border-2 border-slate-200 bg-white text-[#0F172A] font-black uppercase text-[10px] tracking-widest shadow-sm transition-all active:scale-95">
+                     <Link href="/exams" className="flex items-center justify-center gap-3">
+                        <Target className="h-4 w-4 md:h-6 md:w-6 text-primary" /> Browse Exams
+                     </Link>
+                  </Button>
+               )}
             </div>
 
             <div className="flex items-center justify-center lg:justify-start gap-6 pt-4 text-slate-400 font-black text-[9px] md:text-[11px] tracking-widest">
@@ -145,7 +158,7 @@ export default function Hero() {
 function QuickActionCard({ boardId, label, sub, href }: { boardId: string, label: string, sub: string, href: string }) {
   return (
     <Link href={href} className="block group h-full">
-      <Card className="w-full mx-auto border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-700 rounded-[2rem] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-6 md:p-10 text-left items-start justify-center relative">
+      <Card className="w-full mx-auto border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-700 rounded-[2rem] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-6 md:p-10 text-left items-start justify-center relative h-full min-h-[160px] md:min-h-[220px]">
         <div className="flex justify-center mb-6 md:mb-12 shrink-0">
           <div className="h-12 w-12 md:h-20 md:w-20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-700">
              <AuthorityLogo boardId={boardId} size="md" className="border-none shadow-none w-full h-full bg-slate-50" />
