@@ -91,7 +91,7 @@ export default function Hero() {
                 ))}
               </div>
 
-              {/* Founder Trust Badge - Premium Layout */}
+              {/* Founder Trust Badge - Premium Layout - Optimized Scale */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -100,21 +100,21 @@ export default function Hero() {
               >
                 <Link 
                   href="/meet-founder" 
-                  className="inline-flex flex-col md:flex-row items-center gap-6 md:gap-12 px-8 py-8 md:px-12 md:py-8 rounded-[2.5rem] md:rounded-[3rem] bg-white border border-slate-100 hover:border-primary/20 transition-all duration-500 group shadow-xl hover:shadow-2xl"
+                  className="inline-flex flex-col md:flex-row items-center gap-5 md:gap-8 px-6 py-6 md:px-8 md:py-6 rounded-[2rem] md:rounded-[2.5rem] bg-white border border-slate-100 hover:border-primary/20 transition-all duration-500 group shadow-xl hover:shadow-2xl"
                 >
-                  <div className="space-y-3 text-center md:text-left">
-                     <p className="text-[18px] md:text-3xl font-[900] text-[#0F172A] tracking-tighter leading-tight md:whitespace-nowrap">
+                  <div className="space-y-2 text-center md:text-left">
+                     <p className="text-[16px] md:text-xl font-[900] text-[#0F172A] tracking-tighter leading-tight md:whitespace-nowrap">
                         🚀 One Vision. One Mission.
                      </p>
-                     <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.5em] leading-none">
+                     <p className="text-[9px] md:text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] leading-none">
                         — Arsh Grewal
                      </p>
                   </div>
                   
-                  <div className="hidden md:block w-px h-14 bg-slate-100" />
+                  <div className="hidden md:block w-px h-10 bg-slate-100" />
                   
-                  <span className="flex items-center gap-2 text-primary font-black text-[12px] md:text-lg uppercase tracking-widest whitespace-nowrap group-hover:gap-5 transition-all">
-                    Meet the founder <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
+                  <span className="flex items-center gap-2 text-primary font-black text-[11px] md:text-sm uppercase tracking-widest whitespace-nowrap group-hover:gap-4 transition-all">
+                    Meet the founder <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>
               </motion.div>
