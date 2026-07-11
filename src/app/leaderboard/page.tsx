@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -16,8 +15,8 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Top Rankers Hub v18.0.
- * UPDATED: Global deduplication logic and Title Case normalization.
+ * @fileOverview Institutional Top Rankers Hub v19.0.
+ * FIXED: Resolved uniqueMap undefined reference error.
  */
 
 export default function LeaderboardPage() {
@@ -40,7 +39,7 @@ export default function LeaderboardPage() {
   const { data: results, loading: resultsLoading } = useCollection<any>(meritQuery)
   const { data: users, loading: usersLoading } = useCollection<any>(usersQuery)
 
-  const meritList = useMemo(() => {
+  const finalSortedList = useMemo(() => {
     if (!results || !mounted) return []
     const lowerSearch = searchTerm.toLowerCase();
     
@@ -74,15 +73,8 @@ export default function LeaderboardPage() {
       }
     });
 
-    return Array.from(uniqueMap.values()).sort((a, b) => b.score - a.score);
-    // Note: Re-deducing merit list from the map and sorting by highest score
+    return Array.from(uniqueRankers.values()).sort((a, b) => b.score - a.score);
   }, [results, users, searchTerm, mounted]);
-
-  // Actually reconstruct the sorted list from the map
-  const finalSortedList = useMemo(() => {
-     const list = Array.from(meritList); // already deduplicated in useMemo above
-     return list.sort((a, b) => (b.score || 0) - (a.score || 0));
-  }, [meritList]);
 
   const podium = useMemo(() => finalSortedList.slice(0, 3), [finalSortedList]);
 

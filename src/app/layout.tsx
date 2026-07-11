@@ -17,7 +17,8 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v59.0 (PWA Hardened).
+ * @fileOverview Root Layout v60.0 (PWA Hardened).
+ * FIXED: Changed Script strategy to afterInteractive to resolve Runtime ChunkLoadError.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -64,7 +65,7 @@ export default function RootLayout({
           overflow-x-hidden
         `}
       >
-        <Script id="pwa-install-handler" strategy="beforeInteractive">
+        <Script id="pwa-install-handler" strategy="afterInteractive">
           {`
             window.addEventListener('beforeinstallprompt', (e) => {
               e.preventDefault();

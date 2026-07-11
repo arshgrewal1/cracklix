@@ -33,7 +33,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Result Node Hub Client v4.1.
+ * @fileOverview Official Result Node Hub Client v4.2.
+ * FIXED: Removed extra div that was causing syntax errors.
  * FIXED: Overlapping UI resolved via strict grid distribution.
  * UPDATED: Title Case normalization (Uppercase restricted to Boards).
  */
@@ -151,10 +152,8 @@ export default function ResultClient() {
       <Navbar />
       <main className="container mx-auto px-4 md:px-8 py-6 md:py-10 max-w-7xl space-y-6 md:space-y-12">
         
-        {/* RESTRUCTURED SUMMARY HUB - PREVENTS OVERLAP */}
         <div className="bg-[#0B1528] rounded-[2rem] shadow-5xl overflow-hidden p-6 md:p-12 flex flex-col lg:grid lg:grid-cols-12 items-center gap-10 border border-white/5">
            
-           {/* LEFT: TITLE BLOCK */}
            <div className="flex items-center gap-5 md:gap-8 lg:col-span-4 w-full text-center lg:text-left">
               <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl md:rounded-3xl bg-primary/10 flex items-center justify-center text-primary shrink-0 shadow-2xl border border-primary/20 transition-transform hover:rotate-6">
                  <Trophy className="h-6 w-6 md:h-8 md:w-8" />
@@ -167,7 +166,6 @@ export default function ResultClient() {
               </div>
            </div>
 
-           {/* CENTER: RESULTS GRID */}
            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 lg:col-span-6 shrink-0 w-full lg:w-auto px-2 border-y lg:border-y-0 lg:border-x border-white/5 py-6 lg:py-0">
               <ResultPill label="Score" val={(sessionData?.score || 0).toFixed(1)} color={(sessionData?.score || 0) < 0 ? "text-rose-400" : "text-primary"} />
               <ResultPill label="Rank" val={`#${merit.rank}`} color="text-white" />
@@ -175,9 +173,8 @@ export default function ResultClient() {
               <ResultPill label="Time" val={formatTime(sessionData?.timeTaken || 0)} color="text-amber-400" />
            </div>
 
-           {/* RIGHT: ACTION HUB */}
            <div className="lg:col-span-2 w-full flex justify-center lg:justify-end">
-              <Button asChild className="w-full lg:w-auto h-12 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white font-bold text-xs md:text-sm tracking-tight rounded-xl md:rounded-2xl shadow-xl transition-all border-none active:scale-95">
+              <Button asChild className="w-full md:w-auto h-12 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white font-bold text-xs md:text-sm tracking-tight rounded-xl md:rounded-2xl shadow-xl transition-all border-none active:scale-95">
                  <Link href={`/mocks/instructions?id=${mockId}`} className="flex items-center justify-center gap-3">
                     <RefreshCw className="h-4 w-4" /> Re-Attempt
                  </Link>
@@ -185,7 +182,6 @@ export default function ResultClient() {
            </div>
         </div>
 
-        {/* ANALYSIS TABS */}
         <Tabs defaultValue="SOLUTIONS" className="space-y-6 md:space-y-10">
            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <TabsList className="bg-white border border-slate-100 p-1.5 h-12 md:h-16 rounded-xl md:rounded-2xl shadow-md inline-flex gap-2">

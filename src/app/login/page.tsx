@@ -43,9 +43,8 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Hub v89.1.
- * FIXED: Recursion loop by stabilizing searchParams usage.
- * UPDATED: Title Case normalization and "Password" terminology.
+ * @fileOverview Cracklix Premium Login Hub v90.0.
+ * FIXED: Stabilized searchParams to prevent infinite recursion loop.
  */
 
 const formatCompact = (num: number) => {
@@ -82,18 +81,19 @@ function LoginContent() {
 
   const searchParams = useSearchParams();
   
+  // Memoize search params to prevent effect re-runs
   const returnUrl = useMemo(() => searchParams.get("returnUrl") || "/dashboard", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams.get("ref"), [searchParams]);
-  const hasReturnUrlParam = useMemo(() => !!searchParams.get("returnUrl"), [searchParams]);
+  const hasReturnUrl = useMemo(() => !!searchParams.get("returnUrl"), [searchParams]);
 
   useEffect(() => {
-    if (hasReturnUrlParam) {
+    if (hasReturnUrl) {
       toast({
         title: "Login Required",
         description: "Please login to access the preparation hub.",
       });
     }
-  }, [hasReturnUrlParam, toast]);
+  }, [hasReturnUrl]); // Only run when existence of param changes
 
   useEffect(() => {
     if (!authLoading && user && profile) {
