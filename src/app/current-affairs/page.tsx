@@ -24,10 +24,10 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { AuthorityLogo } from "@/lib/exam-icons"
-import { useStudyAnalytics } from "@/hooks/use-study-analytics";
+import { useStudyTracker } from "@/hooks/useStudyTracker";
 
 /**
- * @fileOverview Official Current Affairs Center v22.1 (Study Analytics Integration).
+ * @fileOverview Official Current Affairs Center v23.0 (Real-Time Tracking).
  */
 
 const HUB_TYPES = [
@@ -44,14 +44,9 @@ export default function CurrentAffairsCenter() {
   const router = useRouter()
   const [activeType, setActiveType] = useState("DAILY")
   const [searchTerm, setSearchTerm] = useState("")
-  const { startTracking, stopTracking } = useStudyAnalytics('current-affairs');
-
-  useEffect(() => {
-    startTracking();
-    return () => {
-      stopTracking();
-    };
-  }, [startTracking, stopTracking]);
+  
+  // Real-time tracking
+  useStudyTracker('current-affairs', 'CA');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -107,7 +102,7 @@ export default function CurrentAffairsCenter() {
       {authLoading ? (
          <div className="flex-1 flex flex-col items-center justify-center space-y-6 py-20">
             <Zap className="h-10 w-10 text-primary animate-pulse" />
-            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Syncing Study Hub...</p>
+            <p className="text-[10px] font-black uppercase text-slate-400">Syncing Center...</p>
          </div>
       ) : (
          <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 max-w-[1600px] space-y-12 md:space-y-24">
@@ -205,7 +200,7 @@ export default function CurrentAffairsCenter() {
                         ) : (
                            <div className="py-32 text-center border-2 border-dashed border-slate-200 rounded-[4rem] opacity-20 flex flex-col items-center gap-6">
                               <Zap className="h-16 w-16 text-slate-300" />
-                              <p className="font-bold text-2xl tracking-widest">Repository Empty</p>
+                              <p className="font-bold text-2xl tracking-widest">Archive Empty</p>
                            </div>
                         )}
                      </div>
@@ -217,7 +212,7 @@ export default function CurrentAffairsCenter() {
                                  <Medal className="h-7 w-7 text-primary" />
                                  <h3 className="font-headline font-black text-2xl tracking-tight">Top Merit</h3>
                               </div>
-                              <p className="text-slate-400 text-[11px] font-bold tracking-widest uppercase">Institutional Merit</p>
+                              <p className="text-slate-400 text-[11px] font-bold tracking-widest uppercase">Official Rankings</p>
                            </div>
                            <CardContent className="p-8 md:p-12 space-y-8">
                               {topRankers?.map((res: any, idx: number) => {

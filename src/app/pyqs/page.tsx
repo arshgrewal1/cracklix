@@ -3,7 +3,7 @@
 import { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
-import { useCollection, useFirestore } from "@/firebase"
+import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, orderBy } from "firebase/firestore"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -17,28 +17,25 @@ import {
   ChevronRight,
   FileStack,
   Loader2,
-  Sparkles
+  Sparkles,
+  Zap
 } from "lucide-react"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { AuthorityLogo } from "@/lib/exam-icons"
-import { useStudyAnalytics } from "@/hooks/use-study-analytics";
+import { useStudyTracker } from "@/hooks/useStudyTracker";
 
 /**
- * @fileOverview Official PYQ Hub v2.6 (Study Analytics Integration).
+ * @fileOverview Official PYQ Hub v2.7 (Real-Time Tracking).
  */
 
 export default function PYQPage() {
   const db = useFirestore()
+  const { user } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
-  const { startTracking, stopTracking } = useStudyAnalytics('pyq');
-
-  useEffect(() => {
-    startTracking();
-    return () => {
-      stopTracking();
-    };
-  }, [startTracking, stopTracking]);
+  
+  // Real-time tracking
+  useStudyTracker('pyq-archives', 'PYQ');
 
   const pyqQuery = useMemo(() => {
     if (!db) return null
@@ -64,7 +61,7 @@ export default function PYQPage() {
   }, [pyqs, searchTerm])
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50/50 font-body">
+    <div className="flex flex-col min-h-screen bg-slate-50/50 font-body text-left">
       <Navbar />
       
       <main className="container mx-auto px-4 md:px-6 py-12 md:py-20 max-w-5xl text-center">
@@ -73,12 +70,12 @@ export default function PYQPage() {
           <div className="space-y-4 md:space-y-6">
             <div className="flex items-center justify-center gap-3">
                <AuthorityLogo boardId="pyq" size="sm" className="bg-transparent shadow-none p-0" />
-               <Badge className="bg-primary/10 text-primary border-none px-4 py-1 rounded-full font-black text-[10px] tracking-widest">Archive Node</Badge>
+               <Badge className="bg-primary/10 text-primary border-none px-4 py-1 rounded-full font-black text-[10px] tracking-widest shadow-sm">Archive Node</Badge>
             </div>
             <h1 className="text-2xl md:text-5xl font-headline font-black text-[#0F172A] tracking-tight leading-tight">
               Previous Year Papers
             </h1>
-            <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl mx-auto">
+            <p className="text-slate-500 font-medium text-sm md:text-xl max-w-2xl mx-auto leading-snug">
               Authentic exam papers with verified official answer keys.
             </p>
           </div>
@@ -87,7 +84,7 @@ export default function PYQPage() {
              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
              <Input 
                 className="h-14 md:h-16 pl-14 rounded-2xl md:rounded-[1.5rem] bg-white border-none shadow-xl text-base md:text-lg font-bold text-[#0F172A]" 
-                placeholder="Search institutional archives..." 
+                placeholder="Search official archives..." 
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
              />
@@ -149,8 +146,8 @@ export default function PYQPage() {
             ) : (
               <div className="py-32 flex flex-col items-center justify-center text-slate-300 opacity-20 text-center">
                  <Sparkles className="h-16 w-16 mb-6" />
-                 <p className="font-headline font-black text-xl uppercase tracking-[0.3em]">Registry Hub Empty</p>
-                 <p className="text-sm font-bold uppercase mt-2">Awaiting institutional archive push.</p>
+                 <p className="font-headline font-black text-xl uppercase tracking-[0.3em]">Vault Empty</p>
+                 <p className="text-sm font-bold uppercase mt-2">Awaiting official archive push.</p>
               </div>
             )}
           </div>

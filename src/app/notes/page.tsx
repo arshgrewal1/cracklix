@@ -5,7 +5,7 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Download, Search, BookOpen, Clock, ShieldCheck, Zap, Layers, GraduationCap, FileArchive, Info, Lock } from "lucide-react"
+import { FileText, Download, Search, BookOpen, Clock, Zap, Lock, FileArchive, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -15,10 +15,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { useStudyAnalytics } from "@/hooks/use-study-analytics";
+import { AuthorityLogo } from "@/lib/exam-icons"
+import { useStudyTracker } from "@/hooks/useStudyTracker";
 
 /**
- * @fileOverview Institutional Download Center v2.5 (Study Analytics Integration).
+ * @fileOverview Official Download Center v2.6 (Real-Time Tracking).
  */
 
 export default function NotesLibrary() {
@@ -27,14 +28,9 @@ export default function NotesLibrary() {
   const pathname = usePathname()
   const { user, profile, loading: authLoading } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
-  const { startTracking, stopTracking } = useStudyAnalytics('notes');
-
-  useEffect(() => {
-    startTracking();
-    return () => {
-      stopTracking();
-    };
-  }, [startTracking, stopTracking]);
+  
+  // Real-time tracking
+  useStudyTracker('notes-library', 'PDF');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -58,7 +54,7 @@ export default function NotesLibrary() {
   if (authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase text-slate-300">Synchronizing Registry...</p>
+       <p className="text-[10px] font-black uppercase text-slate-300">Syncing Hub...</p>
     </div>
   );
 
@@ -72,10 +68,10 @@ export default function NotesLibrary() {
             <div className="space-y-4 text-left">
               <div className="flex items-center gap-3">
                  <Zap className="h-4 w-4 md:h-5 md:w-5 text-primary" />
-                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Official Study Assets</span>
+                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Official Study Material</span>
               </div>
               <h1 className="text-4xl md:text-6xl font-headline font-black text-[#0F172A] tracking-tight uppercase leading-[0.9]">
-                Download <br/> <span className="text-primary">Center</span>
+                Download <br/> <span className="text-primary">Portal</span>
               </h1>
               <p className="text-slate-500 font-medium text-base md:text-lg max-w-xl">
                 Verified study materials curated for all upcoming Punjab recruitment verticals.
@@ -85,7 +81,7 @@ export default function NotesLibrary() {
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
               <Input 
                 className="pl-16 h-16 rounded-2xl bg-white border-none shadow-2xl shadow-slate-200/50 text-lg font-medium" 
-                placeholder="Search repository..." 
+                placeholder="Search resources..." 
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
               />
@@ -102,7 +98,7 @@ export default function NotesLibrary() {
                     <Info className="h-4 w-4" /> Exam Syllabus
                   </TabsTrigger>
                   <TabsTrigger value="archives" className="rounded-xl px-6 md:px-8 font-black uppercase text-[10px] gap-2 h-full shrink-0 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">
-                    <FileArchive className="h-4 w-4" /> E-Book Center
+                    <FileArchive className="h-4 w-4" /> E-Book Hub
                   </TabsTrigger>
                </TabsList>
              </div>
@@ -121,16 +117,16 @@ export default function NotesLibrary() {
           </Tabs>
 
           <div className="bg-[#0B1528] rounded-[3rem] md:rounded-[4rem] p-10 md:p-16 text-white relative overflow-hidden shadow-4xl group">
-             <div className="absolute top-0 right-0 p-12 opacity-10 rotate-12 group-hover:scale-125 transition-transform"><GraduationCap className="h-40 w-40" /></div>
+             <div className="absolute top-0 right-0 p-12 opacity-10 rotate-12 group-hover:scale-125 transition-transform"><AuthorityLogo boardId="study-material" size="xl" className="h-40 w-40 opacity-10" /></div>
              <div className="relative z-10 max-w-2xl space-y-6 text-left">
                 <div className="flex items-center gap-4">
                    <ShieldCheck className="h-6 w-6 text-primary" />
-                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Management Verified</span>
+                   <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Registry Verified</span>
                 </div>
-                <h2 className="text-3xl md:text-4xl font-headline font-black uppercase leading-tight">Master the <br/> Punjab Study Base</h2>
+                <h2 className="text-3xl md:text-4xl font-headline font-black uppercase leading-tight">Master the <br/> Preparation Base</h2>
                 <p className="text-slate-400 text-base md:text-lg font-medium">Download our exclusive summary guides verified for upcoming state exams.</p>
                 <Button asChild className="w-full md:w-auto h-16 px-12 bg-white text-black hover:bg-slate-200 font-black uppercase tracking-widest text-xs rounded-2xl gap-3 shadow-2xl mt-4 border-none">
-                   <Link href="/pass">Unlock Premium Resources <Zap className="h-5 w-5 fill-current" /></Link>
+                   <Link href="/pass">Unlock Premium Hub <Zap className="h-5 w-5 fill-current" /></Link>
                 </Button>
              </div>
           </div>
@@ -149,10 +145,10 @@ function NotesGrid({ data, loading, profile }: any) {
    );
 
    if (!data || data.length === 0) return (
-      <div className="h-80 flex flex-col items-center justify-center text-slate-300 bg-white rounded-[4rem] border-2 border-dashed border-slate-100 shadow-inner">
+      <div className="py-24 text-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100 shadow-inner">
          <FileArchive className="h-16 w-16 mb-6 opacity-10" />
-         <p className="font-headline font-black text-xl uppercase">Repository Empty</p>
-         <p className="text-sm font-bold opacity-50 mt-1 uppercase tracking-widest">Awaiting official content push.</p>
+         <p className="font-headline font-black text-xl uppercase">Vault Empty</p>
+         <p className="text-sm font-bold opacity-50 mt-1 uppercase tracking-widest">Awaiting content push.</p>
       </div>
    );
 
@@ -191,9 +187,9 @@ function DownloadCard({ asset, profile }: { asset: any, profile: any }) {
                      {asset.subjectId || 'GENERAL'}
                   </Badge>
                   {asset.isFree ? (
-                     <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">FREE ASSET</span>
+                     <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Free Note</span>
                   ) : (
-                     <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">ELITE PASS</span>
+                     <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">Elite Pass</span>
                   )}
                </div>
                <h3 className="text-xl md:text-2xl font-headline font-black text-[#0F172A] leading-tight group-hover:text-primary transition-colors flex-1 uppercase">

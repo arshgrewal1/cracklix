@@ -2,162 +2,179 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUser, useFirestore } from '@/firebase';
-import { doc, writeBatch, serverTimestamp, getDoc, increment } from 'firebase/firestore';
+import { doc, writeBatch, serverTimestamp, increment } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
 import { Capacitor } from '@capacitor/core';
 import { App, AppState } from '@capacitor/app';
 
-// Define the types for the study tracker
-export type StudyContentType = 'MOCK' | 'PRACTICE' | 'SUBJECT' | 'PDF' | 'VIDEO' | 'OTHER';
+export type StudyContentType = 'MOCK' | 'PRACTICE' | 'SUBJECT' | 'PDF' | 'VIDEO' | 'OTHER' | 'DASHBOARD' | 'CA' | 'PYQ';
 
 export interface StudySession {
   sessionId: string;
   userId: string;
   contentId: string;
   contentType: StudyContentType;
-  startTime: number; // UTC timestamp
-  endTime: number; // UTC timestamp
-  duration: number; // in seconds
+  startTime: number;
+  endTime: number;
+  duration: number;
 }
 
+const INACTIVITY_THRESHOLD = 60 * 1000; // 60 seconds
+const SYNC_INTERVAL = 30 * 1000; // 30 seconds
+
 /**
- * @fileoverview Core Study Tracking Hook v1.1
- * @description This hook is the heart of the study analytics system.
- * It now dispatches custom events for real-time UI updates.
+ * @fileOverview Institutional Real-Time Study Tracker v2.0.
+ * FIXED: Local ticker for live UI updates and robust inactivity handling.
  */
 export function useStudyTracker(contentId: string | null, contentType: StudyContentType, enabled: boolean = true) {
   const { user } = useUser();
   const db = useFirestore();
-  const [isTracking, setIsTracking] = useState(false);
-  const sessionRef = useRef<{ sessionId: string | null; startTime: number | null; }>({
+  
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [isActive, setIsActive] = useState(false);
+  
+  const sessionRef = useRef<{ sessionId: string | null; startTime: number | null; lastSyncTime: number; }>({
     sessionId: null,
     startTime: null,
+    lastSyncTime: 0
   });
 
-  const endSession = useCallback(async (isAppClosing = false) => {
-    if (!db || !user || !sessionRef.current.sessionId || !sessionRef.current.startTime) {
-      return;
-    }
+  const lastActivityRef = useRef<number>(Date.now());
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-    const { sessionId, startTime } = sessionRef.current;
-    
-    // Reset state immediately to prevent duplicate sessions
-    sessionRef.current = { sessionId: null, startTime: null };
-    setIsTracking(false);
-    window.dispatchEvent(new CustomEvent('studySessionEnd'));
+  const saveProgress = useCallback(async (durationToSync: number, isFinal = false) => {
+    if (!db || !user || !sessionRef.current.sessionId || durationToSync <= 0) return;
 
-    const endTime = Date.now();
-    const duration = Math.round((endTime - startTime) / 1000);
+    const { sessionId } = sessionRef.current;
+    const today = new Date();
+    const dayStr = today.toISOString().split('T')[0];
 
-    // Ignore short sessions (less than 10s) to reduce noise, unless the app is closing.
-    if (duration < 10 && !isAppClosing) {
-      console.log(`[StudyTracker] Session ignored (duration < 10s): ${duration}s`);
-      return;
-    }
-
-    console.log(`[StudyTracker] Ending session. ID: ${sessionId}, Duration: ${duration}s`);
-
-    const sessionData: StudySession = {
-      sessionId,
-      userId: user.uid,
-      contentId: contentId || 'unknown',
-      contentType,
-      startTime,
-      endTime,
-      duration,
-    };
-    
     try {
-        const batch = writeBatch(db);
+      const batch = writeBatch(db);
+      const sessionDocRef = doc(db, 'users', user.uid, 'study_sessions', sessionId);
+      const dailyAggRef = doc(db, 'users', user.uid, 'study_daily', dayStr);
+      const userStatsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
 
-        // 1. Save the individual session document
-        const sessionDocRef = doc(db, 'users', user.uid, 'study_sessions', sessionId);
-        batch.set(sessionDocRef, { ...sessionData, createdAt: serverTimestamp() });
+      batch.set(sessionDocRef, {
+        sessionId,
+        userId: user.uid,
+        contentId: contentId || 'portal',
+        contentType,
+        duration: increment(durationToSync),
+        updatedAt: serverTimestamp(),
+        ...(isFinal ? { endTime: Date.now(), status: 'COMPLETED' } : { status: 'ACTIVE' })
+      }, { merge: true });
 
-        // 2. Update daily aggregate
-        const today = new Date();
-        const dayStr = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString().split('T')[0]; // YYYY-MM-DD
-        const dailyAggRef = doc(db, 'users', user.uid, 'study_daily', dayStr);
+      batch.set(dailyAggRef, {
+        userId: user.uid,
+        date: dayStr,
+        totalDuration: increment(durationToSync),
+        sessionCount: isFinal ? increment(1) : increment(0),
+        lastUpdated: serverTimestamp(),
+      }, { merge: true });
 
-        batch.set(dailyAggRef, {
-            userId: user.uid,
-            date: dayStr,
-            totalDuration: increment(duration),
-            sessionCount: increment(1),
-            lastUpdated: serverTimestamp(),
-        }, { merge: true });
+      batch.set(userStatsRef, {
+        totalStudyTime: increment(durationToSync),
+        lastSessionDate: serverTimestamp(),
+      }, { merge: true });
 
-        // 3. Update overall user stats
-        const userStatsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
-        batch.set(userStatsRef, {
-            totalStudyTime: increment(duration),
-            totalSessions: increment(1),
-            lastSessionDate: serverTimestamp(),
-        }, { merge: true });
-        
-        await batch.commit();
-        console.log(`[StudyTracker] Session ${sessionId} and aggregates saved successfully.`);
+      await batch.commit();
+      
+      // Dispatch global event for other components to update UI live
+      window.dispatchEvent(new CustomEvent('study_progress_sync', { 
+        detail: { duration: durationToSync, dayStr } 
+      }));
 
     } catch (error) {
-        console.error('[StudyTracker] Failed to save session:', error);
-        // Implement a retry mechanism or save to local storage for later sync
+      console.error('[StudyTracker] Sync failure:', error);
     }
-
   }, [db, user, contentId, contentType]);
 
-
   const startSession = useCallback(() => {
-    if (!db || !user || sessionRef.current.sessionId || !contentId || !enabled) {
-      return;
-    }
-    const newSessionId = nanoid();
-    const startTime = Date.now();
-    sessionRef.current = {
-      sessionId: newSessionId,
-      startTime: startTime,
-    };
-    setIsTracking(true);
-    console.log(`[StudyTracker] Starting session: ${newSessionId} for content: ${contentId}`);
-    window.dispatchEvent(new CustomEvent('studySessionStart', { detail: { startTime } }));
-  }, [db, user, contentId, enabled]);
+    if (!user || sessionRef.current.sessionId || !enabled) return;
 
-  // Main effect to handle app/page lifecycle
+    const sid = nanoid();
+    sessionRef.current = {
+      sessionId: sid,
+      startTime: Date.now(),
+      lastSyncTime: Date.now()
+    };
+    setIsActive(true);
+    lastActivityRef.current = Date.now();
+
+    window.dispatchEvent(new CustomEvent('study_session_start', { 
+      detail: { sessionId: sid, contentType } 
+    }));
+  }, [user, enabled, contentType]);
+
+  const endSession = useCallback(async () => {
+    if (!sessionRef.current.sessionId) return;
+    
+    const now = Date.now();
+    const totalSessionDuration = Math.round((now - (sessionRef.current.startTime || now)) / 1000);
+    const unSyncedDuration = Math.round((now - sessionRef.current.lastSyncTime) / 1000);
+
+    setIsActive(false);
+    if (intervalRef.current) clearInterval(intervalRef.current);
+
+    await saveProgress(unSyncedDuration, true);
+    
+    sessionRef.current = { sessionId: null, startTime: null, lastSyncTime: 0 };
+    setElapsedSeconds(0);
+    
+    window.dispatchEvent(new CustomEvent('study_session_end'));
+  }, [saveProgress]);
+
+  // Main Ticker & Inactivity Loop
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !user) return;
 
     startSession();
 
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'hidden') {
-        endSession();
-      } else if (document.visibilityState === 'visible') {
-        startSession();
-      }
-    };
-    
-    let appStateListener: any = null;
-    if (Capacitor.isNativePlatform()) {
-        appStateListener = App.addListener('appStateChange', (state: AppState) => {
-            if (!state.isActive) {
-                endSession(true);
-            } else {
-                startSession();
-            }
-        });
-    } else {
-        document.addEventListener('visibilitychange', handleVisibilityChange);
-    }
-    
-    // Cleanup on component unmount
-    return () => {
-      endSession(true);
-      if (appStateListener) {
-        appStateListener.remove();
-      } else {
-        document.removeEventListener('visibilitychange', handleVisibilityChange);
-      }
-    };
-  }, [startSession, endSession, enabled]);
+    intervalRef.current = setInterval(() => {
+      const now = Date.now();
+      const timeSinceActivity = now - lastActivityRef.current;
 
-  return { isTracking };
+      if (timeSinceActivity > INACTIVITY_THRESHOLD) {
+        if (isActive) setIsActive(false);
+        return;
+      }
+
+      if (!isActive) setIsActive(true);
+
+      // Increment local UI state
+      setElapsedSeconds(prev => {
+        const next = prev + 1;
+        
+        // Throttled sync every 30s
+        if (next % 30 === 0) {
+          const unSynced = Math.round((Date.now() - sessionRef.current.lastSyncTime) / 1000);
+          saveProgress(unSynced);
+          sessionRef.current.lastSyncTime = Date.now();
+        }
+        
+        return next;
+      });
+    }, 1000);
+
+    const activityHandler = () => {
+      lastActivityRef.current = Date.now();
+    };
+
+    window.addEventListener('mousemove', activityHandler);
+    window.addEventListener('keydown', activityHandler);
+    window.addEventListener('scroll', activityHandler);
+    window.addEventListener('touchstart', activityHandler);
+
+    return () => {
+      window.removeEventListener('mousemove', activityHandler);
+      window.removeEventListener('keydown', activityHandler);
+      window.removeEventListener('scroll', activityHandler);
+      window.removeEventListener('touchstart', activityHandler);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      endSession();
+    };
+  }, [enabled, user, isActive, startSession, endSession, saveProgress]);
+
+  return { elapsedSeconds, isActive };
 }

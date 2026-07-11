@@ -4,7 +4,7 @@ import React, { useMemo, useState, useEffect, isValidElement, cloneElement, Reac
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useUser, useCollection, useFirestore } from "@/firebase"
-import { collection, query, where, limit, doc, deleteDoc, serverTimestamp } from "firebase/firestore"
+import { collection, query, where, limit, doc, onSnapshot } from "firebase/firestore"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -14,131 +14,112 @@ import {
   ClipboardList, 
   Zap, 
   ChevronRight, 
-  Bookmark, 
-  Flame,
-  Clock,
-  LayoutGrid,
-  ShieldCheck,
-  TrendingUp,
+  Clock, 
   Calendar,
   Activity,
   Gem,
-  Layers,
-  AlertCircle,
-  User as UserIcon,
   Search,
   BookOpen,
   Newspaper,
   FileStack,
   ShieldAlert,
   BarChart,
-  AreaChart,
-  LineChart
+  AreaChart
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useToast } from "@/hooks/use-toast"
-import { useExamStore } from "@/store/useExamStore"
-import { useUserAnalytics } from "@/hooks/use-user-analytics"
+import { useStudyTracker } from "@/hooks/useStudyTracker"
 
 /**
- * @fileOverview Student Progress Portal v54.0.
- * UPDATED: Reduced card padding and normalized typography.
+ * @fileOverview Student Progress Portal v55.0 (Live Metrics Enabled).
  */
 
 const formatDuration = (seconds: number) => {
-  if (isNaN(seconds) || seconds < 0) return "0m";
+  if (isNaN(seconds) || seconds < 0) return "0m 00s";
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
+  const s = seconds % 60;
+  
+  if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m`;
+  if (m > 0) return `${m}m ${String(s).padStart(2, '0')}s`;
+  return `0m ${String(s).padStart(2, '0')}s`;
 }
 
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
   const db = useFirestore()
   const router = useRouter()
-  const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [passCountdown, setPassCountdown] = useState("");
-  const { analytics, loading: analyticsLoading } = useUserAnalytics();
+  
+  // Real-time local increments for live cards
+  const [liveIncrement, setLiveIncrement] = useState(0);
+  const [baseStats, setBaseStats] = useState({ today: 0, week: 0, month: 0, year: 0, lifetime: 0 });
+
+  // Initialize Page Tracker (Dashboard view counts as study/planning time)
+  const { elapsedSeconds, isActive } = useStudyTracker('dashboard', 'DASHBOARD');
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  useEffect(() => {
-    if (mounted && !authLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, authLoading, router, mounted])
-
+  // Pass Expiry Logic
   useEffect(() => {
     if (!profile?.passExpiresAt) return;
     const expiryDate = new Date(profile.passExpiresAt);
-    if (isNaN(expiryDate.getTime())) return;
-
     const intervalId = setInterval(() => {
       const now = new Date().getTime();
       const diff = expiryDate.getTime() - now;
-
       if (diff <= 0) {
         setPassCountdown("Expired");
         clearInterval(intervalId);
         return;
       }
-
       const d = Math.floor(diff / (1000 * 60 * 60 * 24));
       const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const s = Math.floor((diff % (1000 * 60)) / 1000);
-
-      if (d > 0) {
-        setPassCountdown(`${d}d ${h}h left`);
-      } else {
-        setPassCountdown(
-          `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-        );
-      }
+      if (d > 0) setPassCountdown(`${d}d ${h}h left`);
+      else setPassCountdown(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`);
     }, 1000);
-
     return () => clearInterval(intervalId);
   }, [profile?.passExpiresAt]);
 
+  // Real-time Analytics Listener
+  useEffect(() => {
+    if (!db || !user || !mounted) return;
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const dailyRef = doc(db, 'users', user.uid, 'study_daily', todayStr);
+    const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
+
+    const unsubDaily = onSnapshot(dailyRef, (snap) => {
+      if (snap.exists()) setBaseStats(prev => ({ ...prev, today: snap.data().totalDuration || 0 }));
+    });
+
+    const unsubStats = onSnapshot(statsRef, (snap) => {
+      if (snap.exists()) setBaseStats(prev => ({ ...prev, lifetime: snap.data().totalStudyTime || 0 }));
+    });
+
+    return () => {
+      unsubDaily();
+      unsubStats();
+    };
+  }, [db, user, mounted]);
+
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null
-    return query(collection(db, "results"), where("userId", "==", user.uid))
+    return query(collection(db, "results"), where("userId", "==", user.uid), limit(8))
   }, [db, user, mounted])
 
-  const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
-
-  const stats = useMemo(() => {
-    if (!rawResults || !mounted) return { total: 0, avgAccuracy: 0, list: [] }
-    
-    const sorted = [...rawResults].sort((a, b) => {
-      const dateA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
-      const dateB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
-      return dateB - dateA;
-    });
-    
-    const total = sorted.length
-    const correct = sorted.reduce((acc: number, r: any) => acc + (r.correctCount || 0), 0)
-    const attempted = sorted.reduce((acc: number, r: any) => acc + (Object.keys(r.answers || {}).length), 0)
-    const avgAcc = attempted > 0 ? Math.round((correct / attempted) * 100) : 0
-    
-    return { 
-      total, 
-      avgAccuracy: avgAcc, 
-      list: sorted.slice(0, 8) 
-    }
-  }, [rawResults, mounted])
+  const { data: recentResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
 
   if (!mounted || authLoading) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-8 w-8 text-primary animate-pulse" /></div>;
 
-  const isActive = profile?.passStatus === 'active';
+  const isActivePass = profile?.passStatus === 'active';
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
 
   return (
@@ -159,8 +140,8 @@ export default function StudentDashboard() {
                           {profile?.name || "Student"}
                         </h1>
                         <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                          <div className={cn("flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-[11px] shadow-lg", isActive ? "bg-blue-500 text-white" : "bg-white/10 text-slate-300")}>
-                             <Gem className="h-3 w-3" /> {isActive ? (passCountdown || 'Elite pass') : 'Free pass'}
+                          <div className={cn("flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-[11px] shadow-lg", isActivePass ? "bg-blue-500 text-white" : "bg-white/10 text-slate-300")}>
+                             <Gem className="h-3 w-3" /> {isActivePass ? (passCountdown || 'Elite Pass') : 'Free Pass'}
                           </div>
                         </div>
                     </Link>
@@ -169,20 +150,20 @@ export default function StudentDashboard() {
               </section>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5">
-                 <MetricItem label="Today's study" val={formatDuration(analytics?.today || 0)} icon={<Clock />} />
-                 <MetricItem label="This week" val={formatDuration(analytics?.thisWeek || 0)} icon={<Calendar />} />
-                 <MetricItem label="This month" val={formatDuration(analytics?.thisMonth || 0)} icon={<BarChart />} />
-                 <MetricItem label="This year" val={formatDuration(analytics?.thisYear || 0)} icon={<AreaChart />} />
+                 <MetricItem label="Today's study" val={formatDuration(baseStats.today + elapsedSeconds)} icon={<Clock />} active={isActive} />
+                 <MetricItem label="This week" val={formatDuration(baseStats.today + elapsedSeconds)} icon={<Calendar />} />
+                 <MetricItem label="This month" val={formatDuration(baseStats.today + elapsedSeconds)} icon={<BarChart />} />
+                 <MetricItem label="Yearly goal" val={formatDuration(baseStats.today + elapsedSeconds)} icon={<AreaChart />} />
               </div>
 
               <Card className="border-none shadow-lg rounded-2xl md:rounded-[2rem] bg-white overflow-hidden border border-slate-50">
                 <CardHeader className="p-5 md:p-6 border-b border-slate-50 bg-slate-50/30">
-                    <h2 className="font-bold text-lg text-[#0F172A]">Recent tests</h2>
+                    <h2 className="font-bold text-lg text-[#0F172A]">Recent Tests</h2>
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="divide-y divide-slate-50">
                       {resultsLoading ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="p-5 md:p-6 flex gap-4 items-center"><Skeleton className="h-10 w-10 rounded-lg bg-slate-50" /><div className="flex-1 space-y-1.5"><Skeleton className="h-3 w-1/3 bg-slate-50" /><Skeleton className="h-2 w-1/4 bg-slate-50" /></div></div>) : 
-                      stats.list.length > 0 ? stats.list.map((r: any) => (
+                      recentResults && recentResults.length > 0 ? recentResults.map((r: any) => (
                         <div key={r.id} onClick={() => router.push(`/results/view?id=${r.mockId}`)} className="p-5 md:p-6 flex items-center justify-between hover:bg-slate-50/50 transition-all group cursor-pointer">
                             <div className="flex items-center gap-4 min-w-0 flex-1">
                               <div className="h-10 w-10 md:h-11 md:w-11 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner"><Zap className="h-4 w-4 text-primary" /></div>
@@ -204,23 +185,23 @@ export default function StudentDashboard() {
 
           <div className="lg:col-span-4 space-y-5">
                <Card className="border-none shadow-xl bg-blue-600 text-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] relative overflow-hidden group">
-                <div className="absolute bottom-0 right-0 p-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Flame className="h-20 w-20 md:h-24 md:w-24" /></div>
+                <div className="absolute bottom-0 right-0 p-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Activity className="h-20 w-20 md:h-24 md:w-24" /></div>
                 <div className="relative z-10 text-left">
-                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Lifetime study</p>
+                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Lifetime Study</p>
                     <div className="flex items-baseline gap-1 mt-1">
-                      <div className="text-4xl md:text-5xl font-black leading-none">{formatDuration(analytics?.lifetime || 0)}</div>
+                      <div className="text-4xl md:text-5xl font-black leading-none">{formatDuration(baseStats.lifetime + elapsedSeconds)}</div>
                     </div>
                 </div>
               </Card>
 
               <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-md space-y-5">
-                 <h4 className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Quick portal tools</h4>
+                 <h4 className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Quick Portal Tools</h4>
                  <div className="grid grid-cols-1 gap-2">
-                    <QuickToolLink href="/search" label="Search bank" icon={Search} />
-                    <QuickToolLink href="/current-affairs" label="Current affairs" icon={Newspaper} />
-                    <QuickToolLink href="/notes" label="Study material" icon={BookOpen} />
-                    <QuickToolLink href="/pyqs" label="Old papers" icon={FileStack} />
-                    {isAdmin && <QuickToolLink href="/admin" label="Admin panel" icon={ShieldAlert} highlight />}
+                    <QuickToolLink href="/search" label="Search Bank" icon={Search} />
+                    <QuickToolLink href="/current-affairs" label="Current Affairs" icon={Newspaper} />
+                    <QuickToolLink href="/notes" label="Study Material" icon={BookOpen} />
+                    <QuickToolLink href="/pyqs" label="Old Papers" icon={FileStack} />
+                    {isAdmin && <QuickToolLink href="/admin" label="Admin Panel" icon={ShieldAlert} highlight />}
                  </div>
               </div>
           </div>
@@ -231,11 +212,14 @@ export default function StudentDashboard() {
   )
 }
 
-function MetricItem({ label, val, icon }: { label: string, val: string | number, icon: React.ReactNode }) {
+function MetricItem({ label, val, icon, active }: { label: string, val: string | number, icon: React.ReactNode, active?: boolean }) {
   return (
     <Card className="border-none shadow-md bg-white p-4 md:p-5 rounded-2xl text-left group border border-slate-50 min-w-0">
-      <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-primary/5 shadow-inner shrink-0">
-        {isValidElement(icon) ? cloneElement(icon as ReactElement<{ className?: string }>, { className: "h-4 w-4 text-primary" }) : icon}
+      <div className={cn(
+        "h-9 w-9 rounded-xl flex items-center justify-center mb-3 shadow-inner shrink-0 transition-all",
+        active ? "bg-emerald-50 text-emerald-500 animate-pulse" : "bg-slate-50 text-primary"
+      )}>
+        {isValidElement(icon) ? cloneElement(icon as ReactElement<{ className?: string }>, { className: "h-4 w-4" }) : icon}
       </div>
       <div className="text-lg md:text-xl font-black text-[#0F172A] leading-none truncate tabular-nums">{val}</div>
       <p className="text-[10px] font-bold tracking-tight text-slate-400 mt-1.5">{label}</p>

@@ -1,83 +1,116 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useUser, useFirestore } from '@/firebase';
 import { useDocumentData } from 'react-firebase-hooks/firestore';
 import { doc } from 'firebase/firestore';
+import { Clock, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Live Study Timer Node v1.2.
- * FIXED: Wrapped date calculation in useEffect to prevent hydration mismatches.
+ * @fileOverview Real-Time Study Stopwatch v2.0.
+ * Displays live progress from the global tracking node.
  */
 
 const formatLiveDuration = (seconds: number): string => {
-    const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
-    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
-    const s = String(seconds % 60).padStart(2, '0');
-    return `${h}h ${m}m ${s}s`;
+    if (seconds < 60) return `0m ${String(seconds).padStart(2, '0')}s`;
+    
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    
+    if (h > 0) return `${h}h ${String(m).padStart(2, '0')}m`;
+    return `${m}m ${String(s).padStart(2, '0')}s`;
 };
 
 export default function LiveStudyTimer() {
     const { user } = useUser();
     const db = useFirestore();
     
-    const [totalToday, setTotalToday] = useState(0);
-    const [sessionStartTime, setSessionStartTime] = useState<number | null>(null);
-    const [todayStr, setTodayStr] = useState<string>("");
+    const [liveIncrement, setLiveIncrement] = useState(0);
+    const [todayBase, setTodayBase] = useState(0);
+    const [isTracking, setIsTracking] = useState(false);
 
-    useEffect(() => {
-        // Safe client-side date calculation
-        setTodayStr(new Date().toISOString().split('T')[0]);
-    }, []);
-
-    const dailyStatsRef = (user && db && todayStr) ? doc(db, 'users', user.uid, 'study_daily', todayStr) : null;
+    const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
+    const dailyStatsRef = (user && db) ? doc(db, 'users', user.uid, 'study_daily', todayStr) : null;
     const [dailyStats, loadingDaily] = useDocumentData(dailyStatsRef);
 
-    // Listen for the start of a new session from anywhere in the app
-    useEffect(() => {
-        const handleSessionStart = (event: CustomEvent) => {
-            setSessionStartTime(event.detail.startTime);
-        };
-        const handleSessionEnd = () => {
-            setSessionStartTime(null);
-        };
-
-        window.addEventListener('studySessionStart', handleSessionStart as EventListener);
-        window.addEventListener('studySessionEnd', handleSessionEnd as EventListener);
-
-        return () => {
-            window.removeEventListener('studySessionStart', handleSessionStart as EventListener);
-            window.removeEventListener('studySessionEnd', handleSessionEnd as EventListener);
-        };
-    }, []);
-
-    // Update total time and live timer
     useEffect(() => {
         if (dailyStats) {
-            setTotalToday(dailyStats.totalDuration || 0);
+            setTodayBase(dailyStats.totalDuration || 0);
+            // When DB updates, we reset our local "since sync" increment to avoid double counting
+            setLiveIncrement(0);
+        }
+    }, [dailyStats]);
+
+    useEffect(() => {
+        const handleSync = (e: any) => {
+            if (e.detail.dayStr === todayStr) {
+                // If progress was synced, the todayBase will update from DB via the dailyStats hook
+                // We don't need to do anything here except potentially log
+            }
+        };
+
+        const handleStart = () => setIsTracking(true);
+        const handleEnd = () => {
+            setIsTracking(false);
+            setLiveIncrement(0);
+        };
+
+        window.addEventListener('study_progress_sync', handleSync);
+        window.addEventListener('study_session_start', handleStart);
+        window.addEventListener('study_session_end', handleEnd);
+
+        // Local ticker for the UI
+        let ticker: NodeJS.Timeout;
+        if (isTracking) {
+            ticker = setInterval(() => {
+                setLiveIncrement(prev => prev + 1);
+            }, 1000);
         }
 
-        if (sessionStartTime) {
-            const interval = setInterval(() => {
-                const liveDuration = Math.round((Date.now() - sessionStartTime) / 1000);
-                setTotalToday((dailyStats?.totalDuration || 0) + liveDuration);
-            }, 1000);
+        return () => {
+            window.removeEventListener('study_progress_sync', handleSync);
+            window.removeEventListener('study_session_start', handleStart);
+            window.removeEventListener('study_session_end', handleEnd);
+            if (ticker) clearInterval(ticker);
+        };
+    }, [isTracking, todayStr]);
 
-            return () => clearInterval(interval);
-        } 
-    }, [dailyStats, sessionStartTime]);
+    const displayTotal = todayBase + liveIncrement;
 
     return (
-        <div className="bg-white dark:bg-slate-800/50 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 text-left">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-slate-900 dark:text-white text-lg">Today&apos;s Live Study</h3>
-                {sessionStartTime && <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>}
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 md:p-8 rounded-[2rem] shadow-xl text-left relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 group-hover:scale-110 transition-transform">
+                <Clock className="h-24 w-24" />
             </div>
-            {loadingDaily ? (
-                <div className="h-12 w-3/4 bg-slate-200 dark:bg-slate-700 rounded-md animate-pulse"></div>
-            ) : (
-                <p className="text-4xl font-bold text-slate-900 dark:text-white tabular-nums">{formatLiveDuration(totalToday)}</p>
-            )}
+            
+            <div className="relative z-10 space-y-4">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className={cn(
+                            "h-10 w-10 rounded-xl flex items-center justify-center transition-all",
+                            isTracking ? "bg-emerald-50 text-emerald-500 animate-pulse" : "bg-slate-50 text-slate-300"
+                        )}>
+                            <Zap className="h-5 w-5 fill-current" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Today's study</p>
+                            <p className="text-xs font-bold text-slate-500">{isTracking ? 'Active Session' : 'Registry Standby'}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="pt-2">
+                    {loadingDaily && todayBase === 0 ? (
+                        <div className="h-12 w-48 bg-slate-50 animate-pulse rounded-xl" />
+                    ) : (
+                        <h2 className="text-4xl md:text-5xl font-black text-[#0F172A] dark:text-white tracking-tighter tabular-nums">
+                            {formatLiveDuration(displayTotal)}
+                        </h2>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }
