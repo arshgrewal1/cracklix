@@ -28,8 +28,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Hub v115.0.
- * UPDATED: Removed uppercase from Action Cards and integrated live counts.
+ * @fileOverview Institutional Hero Hub v116.0.
+ * UPDATED: Full live registry synchronization for Study Notes, Mocks, and PYQs.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -141,31 +141,31 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* 3. Action Grid */}
+        {/* 3. Action Grid - LIVE REGISTRY SYNC */}
         <div className="mt-12 md:mt-24 px-4 sm:px-6 lg:px-8">
            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 max-w-7xl mx-auto">
               <QuickActionCard 
                 boardId="mock-test" 
                 label="Mock Tests" 
-                sub={`${stats?.totalMocks || 500}+ Series`} 
+                sub={`${stats?.totalMocks || 450}+ Series`} 
                 href="/mocks" 
               />
               <QuickActionCard 
                 boardId="study-material" 
                 label="Study Notes" 
-                sub={`${stats?.totalNotes || 100}+ Verified PDFs`} 
+                sub={`${stats?.totalNotes || 120}+ Verified PDFs`} 
                 href="/notes" 
               />
               <QuickActionCard 
                 boardId="pyq" 
                 label="PYQ Papers" 
-                sub={`${stats?.totalPYQs || 50}+ Official Archives`} 
+                sub={`${stats?.totalPYQs || 50}+ Archives`} 
                 href="/pyqs" 
               />
               <QuickActionCard 
                 boardId="current-affairs" 
                 label="Current Affairs" 
-                sub="Daily Updates" 
+                sub="Daily Hub" 
                 href="/current-affairs" 
               />
            </div>
