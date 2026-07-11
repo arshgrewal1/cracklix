@@ -134,7 +134,7 @@ export default function SupportPage() {
           </div>
           <button
             onClick={() => setIsRaising(true)}
-            className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-3xl flex items-center gap-2 transition-all active:scale-95 border-none"
+            className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-2xl shadow-3xl flex items-center gap-2 transition-all active:scale-95 border-none"
           >
             <Plus className="h-5 w-5" /> Raise New Ticket
           </button>
@@ -217,7 +217,7 @@ export default function SupportPage() {
             ) : (
               <div className="py-20 bg-white rounded-[3rem] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-center opacity-30">
                 <MessageCircle className="h-16 w-16 mb-4 text-slate-300" />
-                <p className="text-xl font-bold uppercase tracking-widest">
+                <p className="text-xl font-bold tracking-tight">
                   No active tickets
                 </p>
               </div>
@@ -233,7 +233,7 @@ export default function SupportPage() {
                 <div className="h-14 w-14 bg-primary/20 rounded-2xl flex items-center justify-center text-primary shadow-2xl">
                   <HelpCircle className="h-8 w-8 fill-current" />
                 </div>
-                <h3 className="text-3xl font-black uppercase leading-tight">
+                <h3 className="text-3xl font-black leading-tight text-white">
                   Help Center
                 </h3>
                 <p className="text-slate-400 text-sm font-medium leading-relaxed">
@@ -242,7 +242,7 @@ export default function SupportPage() {
                 <Button
                   asChild
                   variant="outline"
-                  className="w-full h-14 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-black uppercase text-[10px] tracking-widest group"
+                  className="w-full h-14 border-white/10 bg-white/5 text-white hover:bg-white/10 rounded-2xl font-bold text-[10px] tracking-widest group"
                 >
                   <Link href="/help">
                     View Help Articles{" "}
@@ -272,14 +272,14 @@ export default function SupportPage() {
                 <X className="h-5 w-5 text-slate-400" />
               </button>
             </div>
-            <DialogDescription className="text-slate-400 font-bold text-[9px] md:text-sm mt-1 uppercase tracking-widest">
+            <DialogDescription className="text-slate-400 font-bold text-[9px] md:text-sm mt-1 tracking-widest uppercase">
               Our team will audit your issue.
             </DialogDescription>
           </DialogHeader>
           <div className="px-6 md:px-10 pb-6 md:pb-10 space-y-6 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">
+                <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase">
                   Issue type
                 </Label>
                 <select
@@ -297,7 +297,7 @@ export default function SupportPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">
+                <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase">
                   Priority
                 </Label>
                 <select
@@ -315,7 +315,7 @@ export default function SupportPage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">
+              <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase">
                 Subject headline
               </Label>
               <Input
@@ -328,7 +328,7 @@ export default function SupportPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">
+              <Label className="text-[9px] font-black text-slate-500 ml-1 uppercase">
                 Statement of issue
               </Label>
               <Textarea
@@ -344,14 +344,14 @@ export default function SupportPage() {
           <div className="p-6 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4 shrink-0">
             <button
               onClick={() => setIsRaising(false)}
-              className="h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400 bg-transparent border-none cursor-pointer hover:text-slate-600 transition-colors"
+              className="h-11 md:h-12 px-6 font-bold text-[10px] text-slate-400 bg-transparent border-none cursor-pointer hover:text-slate-600 transition-colors uppercase"
             >
               Discard
             </button>
             <Button
               onClick={handleRaiseTicket}
               disabled={raisingLoading}
-              className="flex-1 bg-primary hover:bg-blue-700 text-white h-11 md:h-12 rounded-full font-black uppercase text-[10px] transition-all flex items-center justify-center gap-2 border-none shadow-xl"
+              className="flex-1 bg-primary hover:bg-blue-700 text-white h-11 md:h-12 rounded-full font-bold text-[10px] transition-all flex items-center justify-center gap-2 border-none shadow-xl uppercase"
             >
               {raisingLoading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
