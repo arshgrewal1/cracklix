@@ -34,7 +34,8 @@ import {
   Tag,
   NotebookTabs,
   Library,
-  Fingerprint
+  Fingerprint,
+  FileJson
 } from "lucide-react";
 
 import {
@@ -63,7 +64,14 @@ const NAV_GROUPS = [
       { label: "Chapters", href: "/admin/chapters", icon: NotebookTabs },
       { label: "Topics", href: "/admin/topics", icon: Library },
       { label: "Folders", href: "/admin/categories", icon: FolderTree },
-      { label: "Tags", href: "/admin/coupons", icon: Tag },
+    ],
+  },
+  {
+    label: "Current Affairs",
+    items: [
+      { label: "CA Hubs", href: "/admin/current-affairs", icon: Newspaper },
+      { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
+      { label: "CA Ingestion", href: "/admin/current-affairs/bulk", icon: UploadCloud },
     ],
   },
   {
@@ -71,7 +79,6 @@ const NAV_GROUPS = [
     items: [
       { label: "Mock Builder", href: "/admin/mocks/builder", icon: PenSquare },
       { label: "Mock Manager", href: "/admin/mocks", icon: ClipboardList },
-      { label: "Current Affairs", href: "/admin/current-affairs", icon: Newspaper },
       { label: "Study Notes", href: "/admin/notes", icon: NotebookPen },
       { label: "PYQ Archive", href: "/admin/pyqs", icon: Archive },
       { label: "Exam Calendar", href: "/admin/calendar", icon: Calendar },
@@ -139,7 +146,7 @@ export default function SidebarNav({
                     )}
                   >
                     <Icon className={cn(
-                      "h-4 w-4 shrink-0 transition-transform",
+                      "h-4 w-4 shrink-0",
                       isActive ? "text-white" : "group-hover:scale-110"
                     )} />
 
