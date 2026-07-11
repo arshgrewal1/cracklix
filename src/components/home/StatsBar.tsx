@@ -3,7 +3,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useDoc, useFirestore } from '@/firebase';
 import { doc } from 'firebase/firestore';
-import { Zap, ClipboardList, ShieldCheck, Users, Headset } from 'lucide-react';
+import { Zap, ClipboardList, ShieldCheck, Users, Headset, TrendingUp } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -40,8 +40,8 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
 }
 
 /**
- * @fileOverview Premium Institutional Stats Bar v2.0.
- * Includes dynamic visibility logic and glassmorphism design.
+ * @fileOverview Premium Institutional Stats Bar v3.0.
+ * UPDATED: Added dynamic trend badges (e.g. +28 this week) as per Cracklix standards.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -66,6 +66,14 @@ export default function StatsBar() {
       showStudents: false
     };
 
+    const trends = settings?.statsTrends || {
+      questions: "+28 this week",
+      mocks: "+2 added today",
+      categories: "Updated daily",
+      students: "+84 this week",
+      support: "Live now"
+    };
+
     const mode = settings?.studentCounterMode || 'manual';
     const threshold = settings?.studentCounterThreshold || 1000;
     const totalUsers = stats?.totalUsers || 0;
@@ -76,14 +84,14 @@ export default function StatsBar() {
       : s.showStudents;
 
     const pool = [];
-    if (s.showQuestions) pool.push({ label: "Practice questions", val: stats?.totalQuestions || 12000, icon: <Zap />, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20" });
-    if (s.showMocks) pool.push({ label: "Mock tests", val: stats?.totalMocks || 450, icon: <ClipboardList />, color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20" });
-    if (s.showCategories) pool.push({ label: "Exam categories", val: stats?.totalCategories || 85, icon: <ShieldCheck />, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20" });
+    if (s.showQuestions) pool.push({ label: "Practice questions", val: stats?.totalQuestions || 12000, trend: trends.questions, icon: <Zap />, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20" });
+    if (s.showMocks) pool.push({ label: "Mock tests", val: stats?.totalMocks || 450, trend: trends.mocks, icon: <ClipboardList />, color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20" });
+    if (s.showCategories) pool.push({ label: "Exam categories", val: stats?.totalCategories || 85, trend: trends.categories, icon: <ShieldCheck />, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20" });
     
     if (shouldShowStudents) {
-      pool.push({ label: "Verified students", val: totalUsers, icon: <Users />, color: "text-blue-600", bg: "bg-blue-600/10", border: "border-blue-600/20" });
+      pool.push({ label: "Verified students", val: totalUsers, trend: trends.students, icon: <Users />, color: "text-blue-600", bg: "bg-blue-600/10", border: "border-blue-600/20" });
     } else if (s.showSupport) {
-      pool.push({ label: "Student support", val: "24x7", icon: <Headset />, color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20", noSuffix: true });
+      pool.push({ label: "Student support", val: "24x7", trend: trends.support, icon: <Headset />, color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20", noSuffix: true });
     }
 
     return pool.slice(0, 4);
@@ -97,7 +105,7 @@ export default function StatsBar() {
         <div className="grid gap-4 md:gap-8 grid-cols-2 md:grid-cols-4">
           {statsLoading || settingsLoading ? (
             Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-28 md:h-32 w-full rounded-[22px] bg-slate-50" />
+              <Skeleton key={i} className="h-32 md:h-36 w-full rounded-[22px] bg-slate-50" />
             ))
           ) : (
             activeStats.map((item, i) => (
@@ -108,7 +116,7 @@ export default function StatsBar() {
                 transition={{ delay: i * 0.1 }}
               >
                 <Card className={cn(
-                  "relative group h-[110px] md:h-[130px] border border-slate-100 bg-white shadow-sm hover:shadow-2xl transition-all duration-300 rounded-[22px] p-4 md:p-6 flex flex-col items-center justify-center gap-2 overflow-hidden hover:-translate-y-1 active:scale-95 cursor-default"
+                  "relative group h-[130px] md:h-[150px] border border-slate-100 bg-white shadow-sm hover:shadow-2xl transition-all duration-300 rounded-[22px] p-4 md:p-6 flex flex-col items-center justify-center gap-2 overflow-hidden hover:-translate-y-1 active:scale-95 cursor-default"
                 )}>
                   {/* Glass Background Node */}
                   <div className={cn("absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-3xl opacity-20", item.bg)} />
@@ -122,13 +130,21 @@ export default function StatsBar() {
                     {React.cloneElement(item.icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}
                   </div>
 
-                  <div className="text-center space-y-0.5 z-10">
+                  <div className="text-center space-y-0.5 z-10 w-full">
                     <div className="text-lg md:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tighter leading-none antialiased">
                       <Counter value={item.val} suffix={item.noSuffix ? "" : "+"} />
                     </div>
                     <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight truncate px-1">
                       {item.label}
                     </p>
+                    
+                    {item.trend && (
+                      <div className="mt-1 flex items-center justify-center gap-1 animate-in fade-in slide-in-from-bottom-1">
+                         <span className="text-[8px] md:text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50 flex items-center gap-1">
+                           <TrendingUp className="h-2 w-2" /> {item.trend}
+                         </span>
+                      </div>
+                    )}
                   </div>
                 </Card>
               </motion.div>

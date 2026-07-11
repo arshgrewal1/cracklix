@@ -28,7 +28,8 @@ import {
   LayoutGrid,
   BarChart3,
   Eye,
-  EyeOff
+  EyeOff,
+  TrendingUp
 } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -36,8 +37,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Administrative Portal v18.0.
- * UPDATED: Added Platform Statistics visibility controls.
+ * @fileOverview Institutional Administrative Portal v19.0.
+ * UPDATED: Added Platform Statistics visibility and Trend Label controls.
  */
 
 export default function AdminSettings() {
@@ -80,6 +81,13 @@ export default function AdminSettings() {
       showSupport: true,
       showStudents: false
     },
+    statsTrends: {
+      questions: "+28 this week",
+      mocks: "+2 this month",
+      categories: "Updated regularly",
+      students: "+84 this week",
+      support: "Live now"
+    },
     studentCounterMode: "manual" as "manual" | "auto",
     studentCounterThreshold: 1000,
     // Founder Details
@@ -97,7 +105,8 @@ export default function AdminSettings() {
     if (remoteSettings) setFormData(prev => ({ 
       ...prev, 
       ...remoteSettings,
-      statsVisibility: { ...prev.statsVisibility, ...(remoteSettings.statsVisibility || {}) }
+      statsVisibility: { ...prev.statsVisibility, ...(remoteSettings.statsVisibility || {}) },
+      statsTrends: { ...prev.statsTrends, ...(remoteSettings.statsTrends || {}) }
     }));
   }, [remoteSettings]);
 
@@ -201,31 +210,46 @@ export default function AdminSettings() {
                        </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                       <VisibilityToggle 
-                         label="Practice Questions" 
-                         icon={<Zap className="text-blue-500" />} 
-                         checked={formData.statsVisibility.showQuestions} 
-                         onChange={(v) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showQuestions: v}})} 
-                       />
-                       <VisibilityToggle 
-                         label="Mock Tests" 
-                         icon={<LayoutGrid className="text-purple-500" />} 
-                         checked={formData.statsVisibility.showMocks} 
-                         onChange={(v) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showMocks: v}})} 
-                       />
-                       <VisibilityToggle 
-                         label="Exam Categories" 
-                         icon={<ShieldCheck className="text-emerald-500" />} 
-                         checked={formData.statsVisibility.showCategories} 
-                         onChange={(v) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showCategories: v}})} 
-                       />
-                       <VisibilityToggle 
-                         label="Student Support" 
-                         icon={<MessageCircle className="text-orange-500" />} 
-                         checked={formData.statsVisibility.showSupport} 
-                         onChange={(v) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showSupport: v}})} 
-                       />
+                    <div className="space-y-6">
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <VisibilityToggle 
+                            label="Practice Questions" 
+                            icon={<Zap className="text-blue-500" />} 
+                            checked={formData.statsVisibility.showQuestions} 
+                            onChange={(v) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showQuestions: v}})} 
+                          />
+                          <VisibilityToggle 
+                            label="Mock Tests" 
+                            icon={<LayoutGrid className="text-purple-500" />} 
+                            checked={formData.statsVisibility.showMocks} 
+                            onChange={(v) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showMocks: v}})} 
+                          />
+                          <VisibilityToggle 
+                            label="Exam Categories" 
+                            icon={<ShieldCheck className="text-emerald-500" />} 
+                            checked={formData.statsVisibility.showCategories} 
+                            onChange={(v) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showCategories: v}})} 
+                          />
+                          <VisibilityToggle 
+                            label="Student Support" 
+                            icon={<MessageCircle className="text-orange-500" />} 
+                            checked={formData.statsVisibility.showSupport} 
+                            onChange={(v) => setFormData({...formData, statsVisibility: {...formData.statsVisibility, showSupport: v}})} 
+                          />
+                       </div>
+
+                       <div className="pt-6 border-t border-slate-50">
+                          <h4 className="text-[10px] font-black uppercase text-primary tracking-widest mb-6 flex items-center gap-2">
+                             <TrendingUp className="h-3 w-3" /> Growth Trend Labels (Custom Badges)
+                          </h4>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                             <TrendInput label="Questions Trend" value={formData.statsTrends.questions} onChange={(v) => setFormData({...formData, statsTrends: {...formData.statsTrends, questions: v}})} />
+                             <TrendInput label="Mocks Trend" value={formData.statsTrends.mocks} onChange={(v) => setFormData({...formData, statsTrends: {...formData.statsTrends, mocks: v}})} />
+                             <TrendInput label="Categories Trend" value={formData.statsTrends.categories} onChange={(v) => setFormData({...formData, statsTrends: {...formData.statsTrends, categories: v}})} />
+                             <TrendInput label="Students Trend" value={formData.statsTrends.students} onChange={(v) => setFormData({...formData, statsTrends: {...formData.statsTrends, students: v}})} />
+                             <TrendInput label="Support Trend" value={formData.statsTrends.support} onChange={(v) => setFormData({...formData, statsTrends: {...formData.statsTrends, support: v}})} />
+                          </div>
+                       </div>
                     </div>
                  </Card>
 
@@ -312,7 +336,7 @@ export default function AdminSettings() {
            </div>
         </TabsContent>
 
-        {/* REST OF TABS Content REMAIN SAME AS PREVIOUS IMPLEMENTATION */}
+        {/* REST OF TABS CONTENT REMAIN UNCHANGED */}
         <TabsContent value="homepage" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
           <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-6 md:p-14 space-y-10 text-left border border-slate-50">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
@@ -357,8 +381,6 @@ export default function AdminSettings() {
              </div>
           </Card>
         </TabsContent>
-
-        {/* ... (Keep other tabs) */}
       </Tabs>
     </div>
   )
@@ -372,6 +394,20 @@ function VisibilityToggle({ label, icon, checked, onChange }: any) {
             <span className="text-[11px] font-bold text-slate-700">{label}</span>
          </div>
          <Switch checked={checked} onCheckedChange={onChange} />
+      </div>
+   )
+}
+
+function TrendInput({ label, value, onChange }: { label: string, value: string, onChange: (v: string) => void }) {
+   return (
+      <div className="space-y-1.5 text-left">
+         <Label className="text-[8px] font-black uppercase text-slate-400 ml-1">{label}</Label>
+         <Input 
+            value={value} 
+            onChange={(e) => onChange(e.target.value)} 
+            placeholder="e.g. +28 this week" 
+            className="h-10 bg-slate-50 border-none font-bold text-[11px]"
+         />
       </div>
    )
 }
