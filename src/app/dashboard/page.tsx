@@ -33,8 +33,19 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useStudyTracker } from "@/hooks/useStudyTracker"
 
 /**
- * @fileOverview Student Progress Portal v56.0 (Refined Metrics).
+ * @fileOverview Student Progress Portal v57.0 (Live Dashboard Metrics).
  */
+
+const formatStudyTime = (seconds: number) => {
+  if (isNaN(seconds) || seconds < 0) return "0m 00s";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  
+  if (h > 0) return `${h}h ${m}m`;
+  if (m > 0) return `${m}m ${s}s`;
+  return `0m ${s}s`;
+}
 
 const formatFullDuration = (seconds: number) => {
   if (isNaN(seconds) || seconds < 0) return "00h 00m 00s";
@@ -42,14 +53,6 @@ const formatFullDuration = (seconds: number) => {
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;
   return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
-}
-
-const formatConciseDuration = (seconds: number) => {
-  if (isNaN(seconds) || seconds <= 0) return "0m";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
 }
 
 export default function StudentDashboard() {
@@ -154,10 +157,10 @@ export default function StudentDashboard() {
               </section>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5">
-                 <MetricItem label="Today's study" val={formatConciseDuration(baseStats.today + elapsedSeconds)} icon={<Clock />} active={isActive} />
-                 <MetricItem label="This week" val={formatConciseDuration(baseStats.today + elapsedSeconds)} icon={<Calendar />} />
-                 <MetricItem label="This month" val={formatConciseDuration(baseStats.today + elapsedSeconds)} icon={<BarChart />} />
-                 <MetricItem label="Yearly goal" val={formatConciseDuration(baseStats.today + elapsedSeconds)} icon={<AreaChart />} />
+                 <MetricItem label="Today's study" val={formatStudyTime(baseStats.today + elapsedSeconds)} icon={<Clock />} active={isActive} />
+                 <MetricItem label="This week" val={formatStudyTime(baseStats.today + elapsedSeconds)} icon={<Calendar />} />
+                 <MetricItem label="This month" val={formatStudyTime(baseStats.today + elapsedSeconds)} icon={<BarChart />} />
+                 <MetricItem label="Yearly goal" val={formatStudyTime(baseStats.today + elapsedSeconds)} icon={<AreaChart />} />
               </div>
 
               <Card className="border-none shadow-lg rounded-2xl md:rounded-[2rem] bg-white overflow-hidden border border-slate-50">
@@ -203,12 +206,12 @@ export default function StudentDashboard() {
                     <div className="flex gap-6 border-t border-white/10 pt-6">
                       <div>
                         <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Today</p>
-                        <p className="text-base font-black tabular-nums">{formatConciseDuration(baseStats.today + elapsedSeconds)}</p>
+                        <p className="text-base font-black tabular-nums">{formatStudyTime(baseStats.today + elapsedSeconds)}</p>
                       </div>
                       <div className="w-px h-8 bg-white/10" />
                       <div>
                         <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Week</p>
-                        <p className="text-base font-black tabular-nums">{formatConciseDuration(baseStats.today + elapsedSeconds)}</p>
+                        <p className="text-base font-black tabular-nums">{formatStudyTime(baseStats.today + elapsedSeconds)}</p>
                       </div>
                     </div>
                 </div>

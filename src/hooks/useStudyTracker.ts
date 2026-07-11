@@ -4,26 +4,14 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUser, useFirestore } from '@/firebase';
 import { doc, writeBatch, serverTimestamp, increment } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
-import { Capacitor } from '@capacitor/core';
-import { App, AppState } from '@capacitor/app';
 
 export type StudyContentType = 'MOCK' | 'PRACTICE' | 'SUBJECT' | 'PDF' | 'VIDEO' | 'OTHER' | 'DASHBOARD' | 'CA' | 'PYQ';
-
-export interface StudySession {
-  sessionId: string;
-  userId: string;
-  contentId: string;
-  contentType: StudyContentType;
-  startTime: number;
-  endTime: number;
-  duration: number;
-}
 
 const INACTIVITY_THRESHOLD = 60 * 1000; // 60 seconds
 const SYNC_INTERVAL = 30 * 1000; // 30 seconds
 
 /**
- * @fileOverview Institutional Real-Time Study Tracker v2.0.
+ * @fileOverview Institutional Real-Time Study Tracker v3.0.
  * FIXED: Local ticker for live UI updates and robust inactivity handling.
  */
 export function useStudyTracker(contentId: string | null, contentType: StudyContentType, enabled: boolean = true) {
@@ -69,13 +57,13 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
         userId: user.uid,
         date: dayStr,
         totalDuration: increment(durationToSync),
-        sessionCount: isFinal ? increment(1) : increment(0),
         lastUpdated: serverTimestamp(),
       }, { merge: true });
 
       batch.set(userStatsRef, {
         totalStudyTime: increment(durationToSync),
         lastSessionDate: serverTimestamp(),
+        totalSessions: isFinal ? increment(1) : increment(0)
       }, { merge: true });
 
       await batch.commit();
@@ -111,13 +99,14 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
     if (!sessionRef.current.sessionId) return;
     
     const now = Date.now();
-    const totalSessionDuration = Math.round((now - (sessionRef.current.startTime || now)) / 1000);
     const unSyncedDuration = Math.round((now - sessionRef.current.lastSyncTime) / 1000);
 
     setIsActive(false);
     if (intervalRef.current) clearInterval(intervalRef.current);
 
-    await saveProgress(unSyncedDuration, true);
+    if (unSyncedDuration > 0) {
+      await saveProgress(unSyncedDuration, true);
+    }
     
     sessionRef.current = { sessionId: null, startTime: null, lastSyncTime: 0 };
     setElapsedSeconds(0);
@@ -125,7 +114,6 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
     window.dispatchEvent(new CustomEvent('study_session_end'));
   }, [saveProgress]);
 
-  // Main Ticker & Inactivity Loop
   useEffect(() => {
     if (!enabled || !user) return;
 
@@ -147,10 +135,13 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
         const next = prev + 1;
         
         // Throttled sync every 30s
-        if (next % 30 === 0) {
-          const unSynced = Math.round((Date.now() - sessionRef.current.lastSyncTime) / 1000);
-          saveProgress(unSynced);
-          sessionRef.current.lastSyncTime = Date.now();
+        if (next > 0 && next % 30 === 0) {
+          const nowSync = Date.now();
+          const unSynced = Math.round((nowSync - sessionRef.current.lastSyncTime) / 1000);
+          if (unSynced > 0) {
+            saveProgress(unSynced);
+            sessionRef.current.lastSyncTime = nowSync;
+          }
         }
         
         return next;
@@ -159,18 +150,30 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
 
     const activityHandler = () => {
       lastActivityRef.current = Date.now();
+      if (!isActive) setIsActive(true);
+    };
+
+    const handleVisibility = () => {
+       if (document.hidden) {
+          setIsActive(false);
+       } else {
+          lastActivityRef.current = Date.now();
+          setIsActive(true);
+       }
     };
 
     window.addEventListener('mousemove', activityHandler);
     window.addEventListener('keydown', activityHandler);
     window.addEventListener('scroll', activityHandler);
     window.addEventListener('touchstart', activityHandler);
+    document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
       window.removeEventListener('mousemove', activityHandler);
       window.removeEventListener('keydown', activityHandler);
       window.removeEventListener('scroll', activityHandler);
       window.removeEventListener('touchstart', activityHandler);
+      document.removeEventListener('visibilitychange', handleVisibility);
       if (intervalRef.current) clearInterval(intervalRef.current);
       endSession();
     };
