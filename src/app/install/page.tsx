@@ -6,43 +6,32 @@ import {
   Smartphone, 
   ShieldCheck, 
   Zap, 
-  ArrowRight, 
   Layers, 
   CheckCircle,
-  Share,
-  Monitor,
-  AlertCircle,
-  HelpCircle,
-  ChevronDown
+  Monitor
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { PLATFORM_VERSION } from "@/lib/version";
-import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Official App Hub v8.0.
- * DIRECT: Overhauled for high-fidelity app distribution.
+ * @fileOverview Official App Hub v9.0.
+ * DIRECT: Removed manual instructions to focus on high-fidelity direct setup.
  */
 
 export default function InstallPwaPage() {
   const { canInstall, installApp, isInstalled } = usePWAInstall();
   const { version } = PLATFORM_VERSION;
 
-  const scrollToInstructions = () => {
-    const el = document.getElementById('instructions');
-    el?.scrollIntoView({ behavior: 'smooth' });
-  };
-
   return (
     <div className="min-h-screen bg-white font-body text-left selection:bg-primary/10">
       <Navbar />
       
       <main>
-        {/* PREMIUM INSTALL HERO */}
-        <section className="relative pt-12 pb-24 md:pt-32 md:pb-48 overflow-hidden bg-[#0B1528] text-white">
+        {/* PREMIUM INSTALL HERO - NOW THE ONLY SECTION */}
+        <section className="relative min-h-[80vh] flex items-center pt-12 pb-24 md:pt-32 md:pb-48 overflow-hidden bg-[#0B1528] text-white">
            <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-primary/20 blur-[160px] rounded-full" />
            
            <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
@@ -72,7 +61,7 @@ export default function InstallPwaPage() {
                         <CheckCircle className="h-8 w-8 text-emerald-500" />
                         <span className="font-black uppercase tracking-widest text-sm md:text-lg text-emerald-400">Application Active</span>
                       </div>
-                    ) : canInstall ? (
+                    ) : (
                       <Button 
                         onClick={installApp}
                         className="h-16 md:h-24 px-10 md:px-16 bg-primary hover:bg-blue-700 text-white rounded-2xl md:rounded-[2.5rem] shadow-5xl gap-4 group transition-all active:scale-95 border-none"
@@ -81,17 +70,6 @@ export default function InstallPwaPage() {
                          <div className="flex flex-col items-start text-left">
                             <span className="font-black tracking-tight text-base md:text-2xl leading-none uppercase">Install App Now</span>
                             <span className="text-[8px] md:text-[10px] opacity-60 uppercase font-black tracking-widest mt-1">Direct Platform Setup</span>
-                         </div>
-                      </Button>
-                    ) : (
-                      <Button 
-                        onClick={scrollToInstructions}
-                        className="h-16 md:h-24 px-10 md:px-16 bg-white/5 border border-white/10 hover:bg-white/10 text-white rounded-2xl md:rounded-[2.5rem] shadow-5xl gap-4 group transition-all active:scale-95"
-                      >
-                         <HelpCircle className="h-6 w-6 md:h-8 md:w-8 text-primary" />
-                         <div className="flex flex-col items-start text-left">
-                            <span className="font-black tracking-tight text-base md:text-2xl leading-none uppercase">Setup Instructions</span>
-                            <span className="text-[8px] md:text-[10px] opacity-60 uppercase font-black tracking-widest mt-1">Manual Browser Config</span>
                          </div>
                       </Button>
                     )}
@@ -105,58 +83,9 @@ export default function InstallPwaPage() {
               </motion.div>
            </div>
         </section>
-
-        {/* INSTALLATION STEPS */}
-        <section id="instructions" className="py-24 bg-white scroll-mt-20">
-           <div className="container mx-auto px-4 max-w-5xl">
-              <div className="text-center space-y-4 mb-16">
-                 <h2 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tight uppercase">Setup Instructions</h2>
-                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-[0.3em]">Manual Hub Initialization</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div className="space-y-8 p-10 bg-slate-50 rounded-[3rem] shadow-xl border border-slate-100 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-8 opacity-5"><Zap className="h-32 w-32" /></div>
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 bg-blue-50 text-primary rounded-2xl flex items-center justify-center"><Smartphone className="h-6 w-6" /></div>
-                    <h3 className="text-xl font-black text-[#0F172A] uppercase">Android / Chrome</h3>
-                  </div>
-                  <div className="space-y-6 relative z-10">
-                    <InstallStep num="1" text="Tap the three dots (⋮) in the top right corner of Chrome." />
-                    <InstallStep num="2" text="Select 'Install App' or 'Add to Home Screen' from the menu." />
-                    <InstallStep num="3" text="Confirm to add the Cracklix hub to your app drawer." />
-                  </div>
-                </div>
-
-                <div className="space-y-8 p-10 bg-slate-50 rounded-[3rem] shadow-xl border border-slate-100 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 p-8 opacity-5"><Share className="h-32 w-32" /></div>
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center"><Share className="h-6 w-6" /></div>
-                    <h3 className="text-xl font-black text-[#0F172A] uppercase">iOS / Safari</h3>
-                  </div>
-                  <div className="space-y-6 relative z-10">
-                    <InstallStep num="1" text="Tap the 'Share' icon (square with up arrow) at the bottom." />
-                    <InstallStep num="2" text="Scroll down and tap 'Add to Home Screen'." />
-                    <InstallStep num="3" text="Tap 'Add' in the top right to complete the setup." />
-                  </div>
-                </div>
-              </div>
-           </div>
-        </section>
       </main>
 
       <Footer />
     </div>
   )
-}
-
-function InstallStep({ num, text }: { num: string, text: string }) {
-   return (
-      <div className="flex items-center gap-5 group">
-         <div className="h-9 w-9 rounded-full bg-white border border-slate-200 flex items-center justify-center font-black text-xs text-primary shrink-0 group-hover:bg-primary group-hover:text-white transition-all shadow-sm">
-            {num}
-         </div>
-         <p className="text-sm text-slate-600 font-bold leading-tight">{text}</p>
-      </div>
-   )
 }
