@@ -2,18 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import { X, Zap, Download } from 'lucide-react';
+import { X, Zap, Smartphone, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
 import { Capacitor } from '@capacitor/core';
+import { usePWAInstall } from '@/hooks/use-pwa-install';
 
 /**
- * @fileOverview Institutional Mobile App Prompt v1.2.
- * UPDATED: Added environment checks to hide prompt if app is already installed or running natively.
+ * @fileOverview Institutional Mobile App Prompt v1.3.
+ * UPDATED: Facilitates direct PWA installation instead of APK download.
  */
 export default function PWAManager() {
   const pathname = usePathname();
+  const { canInstall, installApp, isInstalled } = usePWAInstall();
   const [showPrompt, setShowPrompt] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -28,12 +29,12 @@ export default function PWAManager() {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
 
       // 3. Other existing checks
-      const isMobile = window.innerWidth < 1024; // Prompt browser users on mobile/tablet resolutions
+      const isMobile = window.innerWidth < 1024; 
       const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin');
       const isDismissed = localStorage.getItem('cracklix_app_prompt_dismissed') === 'true';
       
-      // LOGIC: Only show if NOT native, NOT standalone, is on mobile resolution, NOT in exam, and NOT dismissed
-      if (!isNative && !isStandalone && isMobile && !isExcluded && !isDismissed) {
+      // LOGIC: Only show if NOT native, NOT standalone, is on mobile resolution, NOT in exam, NOT installed already and NOT dismissed
+      if (!isNative && !isStandalone && isMobile && !isExcluded && !isDismissed && !isInstalled) {
         setShowPrompt(true);
       }
     };
@@ -41,7 +42,15 @@ export default function PWAManager() {
     // Show prompt after 5 seconds to let the main content load
     const timer = setTimeout(checkStatus, 5000);
     return () => clearTimeout(timer);
-  }, [pathname]);
+  }, [pathname, isInstalled]);
+
+  const handleInstallAction = () => {
+    if (canInstall) {
+      installApp();
+    } else {
+      window.location.href = '/install';
+    }
+  };
 
   if (!mounted || !showPrompt) return null;
 
@@ -62,7 +71,7 @@ export default function PWAManager() {
                    </div>
                    <div className="text-left">
                       <h4 className="text-sm font-black uppercase tracking-tight">Official App</h4>
-                      <p className="text-[9px] font-black uppercase text-primary tracking-widest">Cracklix Android</p>
+                      <p className="text-[9px] font-black uppercase text-primary tracking-widest">Cracklix Web App</p>
                    </div>
                 </div>
                 <button 
@@ -76,15 +85,15 @@ export default function PWAManager() {
                 </button>
              </div>
              <p className="text-[13px] font-bold text-slate-300 leading-snug">
-               Get the official Cracklix app for a smoother testing experience and instant job alerts.
+               Install the official Cracklix app on your home screen for a smoother experience and instant job alerts.
              </p>
              <Button 
-               asChild
-               className="w-full h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl border-none shadow-3xl"
+               onClick={handleInstallAction}
+               className="w-full h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl border-none shadow-3xl flex items-center justify-center gap-2 group"
              >
-               <Link href="/install">
-                  <Download className="h-4 w-4 mr-2" /> DOWNLOAD APK
-               </Link>
+               <Smartphone className="h-4 w-4 transition-transform group-hover:rotate-12" /> 
+               INSTALL APP
+               <ChevronRight className="h-3.5 w-3.5 ml-1 opacity-50 group-hover:translate-x-1 transition-transform" />
              </Button>
           </div>
         </div>
