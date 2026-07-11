@@ -31,8 +31,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v5.5 (Working Action Nodes).
- * FIXED: Footer positioning and button hit-testing to ensure Save & Next works reliably.
+ * @fileOverview Official Mock Attempt Hub v5.6 (Swipe Navigation Enabled).
+ * FIXED: Optimized touch handling for horizontal swipes while ignoring vertical scroll.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -61,8 +61,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [mockData, setMockData] = useState<any>(null);
 
-  const touchStartX = useRef<number | null>(null);
-  const touchEndX = useRef<number | null>(null);
+  // Swipe Navigation Refs
+  const touchStart = useRef({ x: 0, y: 0 });
 
   const {
     initExam,
@@ -81,16 +81,31 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     saveAndNext
   } = useExamStore();
 
-  const handleTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.targetTouches[0].clientX; };
-  const handleTouchMove = (e: React.TouchEvent) => { touchEndX.current = e.targetTouches[0].clientX; };
-  const handleTouchEnd = () => {
-    if (touchStartX.current === null || touchEndX.current === null) return;
-    const deltaX = touchStartX.current - touchEndX.current;
-    const threshold = 80;
-    if (deltaX > threshold && currentIdx < questions.length - 1) setCurrentIdx(currentIdx + 1);
-    else if (deltaX < -threshold && currentIdx > 0) setCurrentIdx(currentIdx - 1);
-    touchStartX.current = null;
-    touchEndX.current = null;
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStart.current = {
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY
+    };
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    
+    const deltaX = touchStart.current.x - touchEndX;
+    const deltaY = touchStart.current.y - touchEndY;
+
+    // Threshold check: 80px horizontal movement
+    // Comparison: Horizontal delta must be greater than vertical to ignore scrolls
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 80) {
+      if (deltaX > 0 && currentIdx < questions.length - 1) {
+        // Swipe Left -> Next Question
+        setCurrentIdx(currentIdx + 1);
+      } else if (deltaX < 0 && currentIdx > 0) {
+        // Swipe Right -> Previous Question
+        setCurrentIdx(currentIdx - 1);
+      }
+    }
   };
 
   useEffect(() => {
@@ -225,7 +240,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           )}
         </AnimatePresence>
         
-        <div className="flex-1 flex flex-col min-h-0" onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd}>
+        <div 
+          className="flex-1 flex flex-col min-h-0" 
+          onTouchStart={handleTouchStart} 
+          onTouchEnd={handleTouchEnd}
+        >
           <SubjectTabs />
           <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center px-4 pt-4 pb-12">
             <div className="w-full max-w-4xl">
