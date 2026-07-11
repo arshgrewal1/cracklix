@@ -23,8 +23,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Center v120.2.
- * UPDATED: Optimized sizing and typography for premium mobile look.
+ * @fileOverview Institutional Hero Center v120.3.
+ * UPDATED: Removed numeric counts from action cards as per user request.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -162,10 +162,10 @@ export default function Hero() {
         {/* 3. Action Grid */}
         <div className="mt-8 md:mt-16 px-4 sm:px-6 lg:px-8">
            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 max-w-7xl mx-auto">
-              <QuickActionCard boardId="mock-test" label="Mock Tests" sub={`${stats?.totalMocks || 450}+ series`} href="/mocks" />
-              <QuickActionCard boardId="study-material" label="Study Notes" sub={`${stats?.totalNotes || 120}+ PDFs`} href="/notes" />
-              <QuickActionCard boardId="pyq" label="PYQ Papers" sub={`${stats?.totalPYQs || 50}+ archives`} href="/pyqs" />
-              <QuickActionCard boardId="current-affairs" label="Current Affairs" sub="Daily updates" href="/current-affairs" />
+              <QuickActionCard boardId="mock-test" label="Mock Tests" sub="Full mock series" href="/mocks" />
+              <QuickActionCard boardId="study-material" label="Study Notes" sub="Premium PDF notes" href="/notes" />
+              <QuickActionCard boardId="pyq" label="PYQ Papers" sub="Solved old papers" href="/pyqs" />
+              <QuickActionCard boardId="current-affairs" label="Current Affairs" sub="Daily hub updates" href="/current-affairs" />
            </div>
         </div>
 
