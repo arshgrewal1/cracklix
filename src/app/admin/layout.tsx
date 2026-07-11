@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v16.1.
- * FIXED: Refined mobile sidebar z-index and spacing.
+ * @fileOverview Admin Layout v16.2.
+ * UPDATED: Increased logo size in the header.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser();
@@ -105,7 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Logo
                 variant="light"
                 className="shrink-0 -ml-4"
-                imgClassName="h-10 md:h-16"
+                imgClassName="h-12 md:h-20"
               />
             </div>
             

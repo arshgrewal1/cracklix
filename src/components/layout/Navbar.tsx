@@ -114,8 +114,8 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 -ml-5"
-                imgClassName="h-12 md:h-24 w-auto"
+                className="flex-shrink-0 -ml-4"
+                imgClassName="h-14 md:h-28 w-auto"
                 align="left"
               />
             </div>
