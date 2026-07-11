@@ -29,8 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Mobile Sidebar v59.0.
- * UPDATED: Removed PWA Install from Sidebar to prevent clutter. Managed via Home and Header.
+ * @fileOverview Mobile Sidebar v60.0.
  */
 export default function MobileSidebar({
   onClose,
@@ -61,7 +60,7 @@ export default function MobileSidebar({
 
   const mainItems = [
     { label: "Home", href: "/", icon: Home },
-    { label: "My Exam Hub", href: "/my-exams", icon: Target },
+    { label: "My Exam Center", href: "/my-exams", icon: Target },
     { label: "Exam Explorer", href: "/exams", icon: Landmark },
     { label: "Practice Tests", href: "/mocks", icon: Zap },
     { label: "Current Affairs", href: "/current-affairs", icon: Newspaper },
@@ -119,7 +118,7 @@ export default function MobileSidebar({
                   {profile?.name || user?.displayName || "Aspirant"}
                 </h3>
                 <p className="mt-1.5 text-[8px] text-slate-400 font-bold tracking-widest uppercase">
-                  Account Hub
+                  Account Center
                 </p>
               </div>
 
@@ -131,7 +130,7 @@ export default function MobileSidebar({
         {/* NAVIGATION LIST */}
         <div className="px-2">
           <p className="mb-2 px-4 text-[10px] font-black text-slate-400 tracking-widest uppercase">
-            Discovery Hub
+            Explore
           </p>
 
           <div className="space-y-1">

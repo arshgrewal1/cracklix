@@ -18,8 +18,7 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview High-Density Category Explorer v31.1.
- * UPDATED: Replaced 'Hub' with 'Center' and 'Selection Board'.
+ * @fileOverview High-Density Category Explorer v32.0.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -123,7 +122,7 @@ export default function ExamsEntryPage() {
                                   </div>
                                   <div className="min-w-0">
                                      <p className="font-bold text-[#0F172A] truncate text-base md:text-lg">{e.name}</p>
-                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{board?.abbreviation || 'Selection'} Center</p>
+                                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{board?.abbreviation || 'Selection'} Board</p>
                                   </div>
                                </Link>
                                <button 

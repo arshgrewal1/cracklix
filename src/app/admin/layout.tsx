@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from "react";
@@ -15,8 +14,7 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v15.0.
- * FIXED: Sidebar now automatically collapses on navigation to ensure unblocked functional focus.
+ * @fileOverview Admin Layout v16.0.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser();
@@ -71,7 +69,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!mounted || loading) return (
     <div className="h-screen w-full bg-[#0F172A] flex flex-col items-center justify-center space-y-6 text-center">
        <ShieldCheck className="h-10 w-10 md:h-12 md:w-12 text-blue-600 animate-pulse" />
-       <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500">Securing Registry Center...</p>
+       <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500">Securing Admin Panel...</p>
     </div>
   );
   

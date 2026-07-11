@@ -37,7 +37,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Result Hub Client v5.1 (Vocabulary Standardized).
+ * @fileOverview Official Performance Analysis Center v5.2.
  */
 
 export default function ResultClient() {
@@ -175,7 +175,7 @@ export default function ResultClient() {
                  <h1 className="text-xl md:text-3xl font-black text-white tracking-tight leading-tight line-clamp-2">
                    {sessionData?.mockTitle || "Practice Result"}
                  </h1>
-                 <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest">Performance Center</p>
+                 <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest">Score Center</p>
               </div>
            </div>
 
@@ -209,7 +209,7 @@ export default function ResultClient() {
               </div>
            </div>
 
-           <TabsContent value="SOLUTIONS" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+           <TabsContent value="SOLUTIONS" className="space-y-6 md:space-y-10 animate-in fade-in duration-500">
               {isGuestMode && (
                  <Card className="border-none bg-blue-600 text-white rounded-[2rem] md:rounded-[3rem] overflow-hidden p-8 md:p-12 relative shadow-4xl group">
                     <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000">
@@ -287,7 +287,7 @@ export default function ResultClient() {
                        <Lock className="h-10 w-10" />
                     </div>
                     <div className="space-y-2">
-                       <h3 className="text-2xl font-black text-[#0F172A]">Merit Registry Locked</h3>
+                       <h3 className="text-2xl font-black text-[#0F172A]">Merit List Locked</h3>
                        <p className="text-slate-500 font-medium max-w-xs mx-auto">Login to compare your scores with verified toppers across the state.</p>
                     </div>
                     <Button asChild className="h-14 px-10 bg-primary rounded-full font-bold">
@@ -313,7 +313,7 @@ export default function ResultClient() {
 
                         <div className="divide-y divide-slate-100">
                           {merit.list?.slice(0, 100).map((r: any, i: number) => {
-                              const name = (r.userName && r.userName !== 'Aspirant' && !r.userName.includes('@')) ? r.userName : (r.userEmail || "Aspirant");
+                              const name = (r.userName && r.userName !== 'Aspirant' && r.userName !== 'Student' && !r.userName.includes('@')) ? r.userName : (r.userEmail || "Aspirant");
                               const isCurrentUser = r.userId === user?.uid;
                               
                               return (

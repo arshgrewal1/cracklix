@@ -43,7 +43,7 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Hub v91.0 (Guest Sync Integrated).
+ * @fileOverview Cracklix Premium Login Portal v92.0.
  */
 
 export default function LoginPage() {
@@ -273,7 +273,7 @@ function LoginContent() {
                  {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                </h2>
                <p className="text-slate-400 font-bold text-[10px] md:text-[11px] uppercase tracking-widest">
-                 {mode === 'login' ? 'Access your hub' : 'Join the preparation network'}
+                 {mode === 'login' ? 'Access your portal' : 'Join the preparation network'}
                </p>
             </div>
 
@@ -319,7 +319,7 @@ function LoginContent() {
 
               <div className="pt-2 flex flex-col gap-4">
                 <Button type="submit" className="w-full h-14 md:h-18 bg-blue-600 text-white font-bold text-xs rounded-full shadow-xl border-none transition-all active:scale-[0.98]" disabled={loading}>
-                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (mode === 'login' ? "Continue to Hub" : "Create My Account")}
+                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (mode === 'login' ? "Continue" : "Create My Account")}
                 </Button>
                 <div className="flex items-center gap-3 py-1">
                   <div className="h-px flex-1 bg-slate-100" />
@@ -340,7 +340,7 @@ function LoginContent() {
                   onClick={() => setMode(mode === 'login' ? 'register' : 'login')} 
                   className="text-primary font-black ml-2 hover:underline"
                 >
-                  {mode === 'login' ? 'Create Account' : 'Login Hub'}
+                  {mode === 'login' ? 'Create Account' : 'Login Portal'}
                 </button>
                </p>
             </div>
@@ -378,7 +378,7 @@ function HeroStat({ icon: Icon, label }: { icon: any, label: string }) {
       <div className="h-10 w-10 md:h-12 md:w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
         <Icon className="h-5 w-5 md:h-6 md:w-6 text-primary" />
       </div>
-      <span className="text-[11px] md:text-sm xl:text-lg font-bold tracking-tight text-slate-200">{label}</span>
+      <span className="text-[11px] md:sm xl:text-lg font-bold tracking-tight text-slate-200">{label}</span>
     </div>
   )
 }

@@ -41,8 +41,7 @@ import { useToast } from "@/hooks/use-toast"
 import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Student Home - Real-Time Study Tracker v50.7.
- * UPDATED: Replaced 'Hub' with 'Center' and 'Portal'.
+ * @fileOverview Student Home - Real-Time Study Tracker v51.0.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
