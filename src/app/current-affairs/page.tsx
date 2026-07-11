@@ -27,7 +27,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useStudyTracker } from "@/hooks/useStudyTracker";
 
 /**
- * @fileOverview Official Current Affairs Center v23.0 (Real-Time Tracking).
+ * @fileOverview Official Current Affairs Center v23.1.
+ * FIXED: Standardized icons to circular "Hero" style nodes.
  */
 
 const HUB_TYPES = [
@@ -111,7 +112,7 @@ export default function CurrentAffairsCenter() {
                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><AuthorityLogo boardId="current-affairs" size="xl" className="h-96 w-96 opacity-5" /></div>
                   <div className="space-y-10 relative z-10 max-w-5xl">
                     <div className="flex items-center gap-4">
-                        <AuthorityLogo boardId="current-affairs" size="md" className="bg-white/10 border-white/20 shadow-none p-0" />
+                        <AuthorityLogo boardId="current-affairs" size="md" className="p-0" />
                         <Badge className="bg-primary text-white border-none px-4 py-1.5 rounded-full font-bold text-[10px] tracking-widest shadow-xl">
                             Registry Updates
                         </Badge>
@@ -158,12 +159,8 @@ export default function CurrentAffairsCenter() {
                               {filteredItems.map((item) => (
                                  <Card key={item.id} className="bg-white border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] overflow-hidden group text-left border border-slate-100 p-6 md:p-12">
                                     <CardContent className="p-0 flex flex-col md:flex-row items-center gap-8 md:gap-12">
-                                       <div className={cn(
-                                          "h-24 w-24 md:h-32 md:w-32 rounded-full flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
-                                          item.type === 'DAILY' ? 'bg-orange-50 text-primary' : 
-                                          item.type === 'WEEKLY' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'
-                                       )}>
-                                          <AuthorityLogo boardId="current-affairs" size="lg" className="bg-transparent shadow-none p-0 opacity-80" />
+                                       <div className="h-24 w-24 md:h-32 md:w-32 shrink-0 group-hover:scale-110 transition-transform">
+                                          <AuthorityLogo boardId="current-affairs" size="lg" className="p-0 shadow-lg" />
                                        </div>
                                        <div className="flex-1 space-y-3 w-full">
                                           <div className="flex items-center justify-between">

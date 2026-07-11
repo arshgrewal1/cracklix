@@ -4,9 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v31.0 (Fidelity Refined).
- * FIXED: Authority logos now respect transparency and external styling.
- * UPDATED: Removed current-affairs transparency exception to allow circular nodes.
+ * @fileOverview Institutional Branding Engine v32.0 (Fidelity Refined).
+ * UPDATED: Reduced padding to allow logos to fill the circular nodes more prominently.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -72,12 +71,12 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   };
 
   const containerSize = sizeClasses[size];
-  const isTransparent = className?.includes('bg-transparent') || className?.includes('bg-white/10');
+  const isTransparent = className?.includes('bg-transparent') || className?.includes('bg-white/10') || className?.includes('p-0');
 
   if (logoUrl) {
     return (
       <div className={cn(
-        "relative shrink-0 overflow-hidden flex items-center justify-center p-2 transition-all",
+        "relative shrink-0 overflow-hidden flex items-center justify-center transition-all p-2",
         !isTransparent && "bg-white rounded-full border border-slate-100 shadow-inner",
         containerSize, 
         className
@@ -87,7 +86,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           alt="Authority" 
           fill
           sizes={size === 'sm' ? '48px' : size === 'md' ? '80px' : size === 'lg' ? '112px' : '144px'}
-          className="object-contain p-1"
+          className="object-contain"
           referrerPolicy="no-referrer"
         />
       </div>
