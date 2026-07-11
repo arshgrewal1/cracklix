@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, Suspense, useEffect, useMemo } from "react"
-import { useRouter, usePathname } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -43,8 +43,9 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Hub v88.0.
- * FIXED: Removed searchParams from useEffect deps to prevent recursion crash.
+ * @fileOverview Cracklix Premium Login Hub v89.0.
+ * FIXED: Recursion loop by stabilizing searchParams usage.
+ * UPDATED: Title Case normalization and "Password" terminology.
  */
 
 const formatCompact = (num: number) => {
@@ -79,28 +80,29 @@ function LoginContent() {
   const db = useFirestore()
   const { toast } = useToast()
 
-  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
-  const referralFromUrl = searchParams?.get("ref")
-  const returnUrl = searchParams?.get("returnUrl") || "/dashboard"
-  const returnUrlParam = searchParams?.get("returnUrl");
-
-  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
-  const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
+  const searchParams = useSearchParams();
+  
+  const returnUrl = useMemo(() => searchParams.get("returnUrl") || "/dashboard", [searchParams]);
+  const referralFromUrl = useMemo(() => searchParams.get("ref"), [searchParams]);
+  const hasReturnUrlParam = useMemo(() => !!searchParams.get("returnUrl"), [searchParams]);
 
   useEffect(() => {
-    if (returnUrlParam) {
+    if (hasReturnUrlParam) {
       toast({
         title: "Login Required",
         description: "Please login to access the preparation hub.",
       });
     }
-  }, [returnUrlParam, toast]);
+  }, [hasReturnUrlParam, toast]);
 
   useEffect(() => {
     if (!authLoading && user && profile) {
       router.replace(returnUrl);
     }
   }, [user, profile, authLoading, router, returnUrl]);
+
+  const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
+  const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -303,7 +305,7 @@ function LoginContent() {
               </div>
 
               <div className="pt-2 flex flex-col gap-4">
-                <Button type="submit" className="w-full h-14 md:h-18 bg-blue-600 text-white font-bold text-xs uppercase tracking-widest rounded-full shadow-xl border-none transition-all active:scale-[0.98]" disabled={loading}>
+                <Button type="submit" className="w-full h-14 md:h-18 bg-blue-600 text-white font-bold text-xs rounded-full shadow-xl border-none transition-all active:scale-[0.98]" disabled={loading}>
                   {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (mode === 'login' ? "Continue to Hub" : "Create My Account")}
                 </Button>
                 <div className="flex items-center gap-3 py-1">
@@ -311,7 +313,7 @@ function LoginContent() {
                   <span className="text-[9px] font-bold text-slate-300 uppercase">OR</span>
                   <div className="h-px flex-1 bg-slate-100" />
                 </div>
-                <Button variant="outline" className="w-full h-14 border-2 border-slate-100 text-[#0F172A] gap-3 rounded-full font-bold text-[10px] md:text-[11px] hover:bg-slate-50 uppercase tracking-tight shadow-sm" onClick={handleGoogleSignIn} disabled={loading}>
+                <Button variant="outline" className="w-full h-14 border-2 border-slate-100 text-[#0F172A] gap-3 rounded-full font-bold text-[10px] md:text-[11px] hover:bg-slate-50 shadow-sm" onClick={handleGoogleSignIn} disabled={loading}>
                    <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={20} height={20} className="h-5 w-5" alt="Google Logo" /> Google Login
                 </Button>
               </div>
@@ -347,7 +349,7 @@ function LoginContent() {
             </div>
           </div>
           <DialogFooter>
-            <Button onClick={() => handleResetPassword()} disabled={resetLoading} className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] tracking-widest rounded-full shadow-xl transition-all border-none">
+            <Button onClick={() => handleResetPassword()} disabled={resetLoading} className="w-full h-16 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] rounded-full shadow-xl transition-all border-none">
               {resetLoading ? "Processing..." : "Send Reset Link"}
             </Button>
           </DialogFooter>

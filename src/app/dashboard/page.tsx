@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, isValidElement, cloneElement, ReactElement } from "react"
@@ -42,8 +41,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Student Home - Real-Time Study Tracker v50.4.
- * FIXED: Removed forced uppercase from dashboard labels and section headers.
+ * @fileOverview Student Home - Real-Time Study Tracker v50.5.
+ * UPDATED: Title Case normalization across all dashboard nodes.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();

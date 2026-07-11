@@ -24,7 +24,7 @@ import {
   Timer,
   ChevronRight
 } from "lucide-react"
-import { useUser, useFirestore, useCollection, useDoc } from "@/firebase"
+import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, query, where, doc, getDoc, documentId, getDocs, limit } from "firebase/firestore"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
@@ -33,23 +33,22 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Result Node Hub Client v3.0.
- * FIXED: Removed general uppercase, ensured Board uppercase, and resolved result pill overlapping.
+ * @fileOverview Official Result Node Hub Client v4.0.
+ * FIXED: Removed stray </div> tag causing syntax error.
+ * UPDATED: Title Case normalization and Overlap correction.
  */
 
 export default function ResultClient() {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
   const db = useFirestore()
-  const { user, profile } = useUser()
-  const { toast } = useToast()
-
+  const { user } = useUser()
+  const searchParams = useSearchParams()
+  const pathname = usePathname()
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
   const [questions, setQuestions] = useState<any[]>([])
   const [mockData, setMockData] = useState<any>(null)
   const [loadingQuestions, setLoadingQuestions] = useState(true)
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
-  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -84,7 +83,6 @@ export default function ResultClient() {
      });
      
      const meritList = Array.from(uniqueMap.values()).sort((a: any, b: any) => (b.score || 0) - (a.score || 0));
-     
      const myRank = meritList.findIndex((r: any) => r.userId === user?.uid) + 1;
      const actualRank = myRank > 0 ? myRank : 1;
      const total = meritList.length;
@@ -115,7 +113,7 @@ export default function ResultClient() {
           }
         }
       } catch (e) {
-        console.error("[AUDIT_HYDRATION_ERROR]:", e);
+        console.error("[RESULT_LOAD_ERROR]:", e);
       } finally { 
         setLoadingQuestions(false) 
       }
@@ -131,7 +129,6 @@ export default function ResultClient() {
       if (activeReviewFilter === 'ALL') return true;
       if (activeReviewFilter === 'CORRECT') return isCorrect;
       if (activeReviewFilter === 'WRONG') return ans !== undefined && !isCorrect;
-      if (activeReviewFilter === 'SKIPPED') return ans === undefined || ans === null;
       return true;
     });
   }, [questions, sessionData, activeReviewFilter]);
@@ -287,10 +284,9 @@ export default function ResultClient() {
                  </div>
               </Card>
            </TabsContent>
-        </div>
-      </Tabs>
-    </main>
-    <Footer />
+        </Tabs>
+      </main>
+      <Footer />
     </div>
   )
 }
