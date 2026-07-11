@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, Suspense, useEffect, useMemo } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -43,7 +43,8 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Hub v87.0.
+ * @fileOverview Cracklix Premium Login Hub v87.1.
+ * UPDATED: Simplified password placeholder text.
  */
 
 const formatCompact = (num: number) => {
@@ -74,17 +75,16 @@ function LoginContent() {
   
   const { user, profile, loading: authLoading } = useUser()
   const router = useRouter()
-  const searchParams = useSearchParams()
   const auth = useAuth()
   const db = useFirestore()
   const { toast } = useToast()
 
+  const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const referralFromUrl = searchParams?.get("ref")
+  const returnUrl = searchParams?.get("returnUrl") || "/dashboard"
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
-
-  const returnUrl = searchParams?.get("returnUrl") || "/dashboard"
 
   useEffect(() => {
     if (searchParams?.get("returnUrl")) {
@@ -285,7 +285,7 @@ function LoginContent() {
                   <Label className="text-[10px] font-bold text-slate-400 ml-1">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300" />
-                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] pl-12 md:pl-14 pr-12 font-bold shadow-inner" placeholder="Secret key" />
+                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] pl-12 md:pl-14 pr-12 font-bold shadow-inner" placeholder="Password" />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">{showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
                   </div>
                 </div>
