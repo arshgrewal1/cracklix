@@ -23,8 +23,7 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Test Rules Hub - Simplified Language v2.2.
- * FIXED: Direct cloneElement usage to resolve build failures.
+ * @fileOverview Test Rules Hub - Guest Mode Enabled v3.0.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -50,17 +49,25 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
   const { data: mock, loading } = useDoc<any>(useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]));
 
   useEffect(() => {
-    if (!userLoading && !user) {
-       router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
-    }
-  }, [user, userLoading, router, pathname]);
-
-  useEffect(() => {
      async function auditAccess() {
-        if (loading || userLoading || !user || !mock || !profile || !db) return;
+        if (loading || userLoading || !mock || !db || !mockId) return;
+
+        const tier = (mock.accessLevel || 'FREE').toUpperCase();
+        
+        // ALLOW GUESTS FOR FREE TESTS
+        if (tier === 'FREE') {
+           setAccessChecked(true);
+           return;
+        }
+
+        // REDIRECT TO LOGIN IF GUEST TRIES PREMIUM
+        if (!user) {
+           router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+           return;
+        }
 
         const userEmail = user.email?.toLowerCase();
-        const isAdmin = profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
+        const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
         
         if (isAdmin) {
            setAccessChecked(true);
@@ -68,7 +75,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
         }
 
         const now = new Date();
-        const expiry = profile.passExpiresAt ? new Date(profile.passExpiresAt) : null;
+        const expiry = profile?.passExpiresAt ? new Date(profile.passExpiresAt) : null;
         if (!expiry || now > expiry) {
            if (mock.accessLevel === 'PREMIUM') {
               setAccessError("Your Pro Pass has expired. Please renew to access this test.");
@@ -76,7 +83,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
            }
         }
 
-        const passId = profile.status || 'free-pass';
+        const passId = profile?.status || 'free-pass';
         const passRef = doc(db, "passes", passId);
         const passSnap = await getDoc(passRef);
         
@@ -97,9 +104,9 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
         setAccessChecked(true);
      }
      auditAccess();
-  }, [mock, loading, user, userLoading, profile, db, mockId]);
+  }, [mock, loading, user, userLoading, profile, db, mockId, router, pathname]);
 
-  if (loading || userLoading || (user && mock && !accessChecked && !accessError)) return (
+  if (loading || userLoading || (mock && !accessChecked && !accessError)) return (
     <div className="h-screen flex flex-col items-center justify-center bg-white space-y-6">
        <Zap className="h-10 w-10 text-primary animate-pulse" />
        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-300">Checking Access...</p>
@@ -126,7 +133,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
      </div>
   );
 
-  if (!user || !mock) return null;
+  if (!mock) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body select-none">

@@ -22,7 +22,11 @@ import {
   Users,
   Clock,
   Timer,
-  ChevronRight
+  ChevronRight,
+  Gem,
+  ArrowRight,
+  Lock,
+  UserPlus
 } from "lucide-react"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, query, where, doc, getDoc, documentId, getDocs, limit } from "firebase/firestore"
@@ -33,9 +37,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Result Node Hub Client v4.3.
- * FIXED: Removed forced uppercase from student names and metrics.
- * UPDATED: Title Case normalization for high-fidelity branding.
+ * @fileOverview Official Result Node Hub Client v5.0 (Guest Support).
  */
 
 export default function ResultClient() {
@@ -49,6 +51,7 @@ export default function ResultClient() {
   const [mockData, setMockData] = useState<any>(null)
   const [loadingQuestions, setLoadingQuestions] = useState(true)
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
+  const [guestResult, setGuestResult] = useState<any>(null);
 
   useEffect(() => {
     setMounted(true)
@@ -62,8 +65,20 @@ export default function ResultClient() {
     return lastSegment !== 'view' ? lastSegment : null;
   }, [pathname, searchParams]);
 
+  const isGuestMode = searchParams.get('guest') === 'true' || !user;
+
+  // FETCH RESULT DATA (Cloud or Local)
   const resultRef = useMemo(() => (db && user && mockId ? doc(db, "results", `${user.uid}_${mockId}`) : null), [db, user, mockId]);
-  const { data: sessionData, loading: resultLoading } = useDoc<any>(resultRef);
+  const { data: cloudSession, loading: resultLoading } = useDoc<any>(resultRef);
+
+  useEffect(() => {
+     if (isGuestMode && mockId) {
+        const stored = localStorage.getItem(`cracklix_guest_result_${mockId}`);
+        if (stored) setGuestResult(JSON.parse(stored));
+     }
+  }, [isGuestMode, mockId]);
+
+  const sessionData = user ? cloudSession : guestResult;
 
   const globalResultsQuery = useMemo(() => {
     if (!db || !mockId) return null
@@ -73,7 +88,7 @@ export default function ResultClient() {
   const { data: rawGlobalResults } = useCollection<any>(globalResultsQuery)
 
   const merit = useMemo(() => {
-     if (!rawGlobalResults || !sessionData) return { rank: '?', total: 0, percentile: 0, list: [] };
+     if (!rawGlobalResults || !sessionData || !user) return { rank: '?', total: 0, percentile: 0, list: [] };
      
      const uniqueMap = new Map<string, any>();
      [...rawGlobalResults].forEach((r: any) => {
@@ -139,7 +154,7 @@ export default function ResultClient() {
      return `${m}m ${s}s`;
   };
 
-  if (!mounted || resultLoading || (loadingQuestions && questions.length === 0)) return (
+  if (!mounted || (resultLoading && user) || (loadingQuestions && questions.length === 0)) return (
      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
         <Loader2 className="h-8 w-8 text-primary animate-spin" />
         <p className="text-[10px] font-black uppercase text-slate-300">Syncing Results...</p>
@@ -167,7 +182,7 @@ export default function ResultClient() {
 
            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 lg:col-span-6 shrink-0 w-full lg:w-auto px-2 border-y lg:border-y-0 lg:border-x border-white/5 py-6 lg:py-0">
               <ResultPill label="Score" val={(sessionData?.score || 0).toFixed(1)} color={(sessionData?.score || 0) < 0 ? "text-rose-400" : "text-primary"} />
-              <ResultPill label="Rank" val={`#${merit.rank}`} color="text-white" />
+              <ResultPill label="Rank" val={user ? `#${merit.rank}` : 'Guest'} color="text-white" />
               <ResultPill label="Accuracy" val={`${sessionData?.accuracy || 0}%`} color="text-emerald-400" />
               <ResultPill label="Time" val={formatTime(sessionData?.timeTaken || 0)} color="text-amber-400" />
            </div>
@@ -196,6 +211,35 @@ export default function ResultClient() {
            </div>
 
            <TabsContent value="SOLUTIONS" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
+              {isGuestMode && (
+                 <Card className="border-none bg-blue-600 text-white rounded-[2rem] md:rounded-[3rem] overflow-hidden p-8 md:p-12 relative shadow-4xl group">
+                    <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform duration-1000">
+                       <Zap className="h-48 w-48" />
+                    </div>
+                    <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 items-center gap-10">
+                       <div className="space-y-4 md:space-y-6">
+                          <div className="flex items-center gap-3">
+                             <div className="h-10 w-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-xl">
+                                <Gem className="h-5 w-5 text-white" />
+                             </div>
+                             <h2 className="text-xl md:text-3xl font-black tracking-tight">Unlock Your Rank</h2>
+                          </div>
+                          <p className="text-blue-100 font-medium text-sm md:text-lg leading-relaxed">
+                             Create a free account to unlock State Rank, All India Rank, and advanced AI-powered topic analysis for this test.
+                          </p>
+                       </div>
+                       <div className="flex flex-col sm:flex-row items-center gap-4">
+                          <Button asChild className="w-full sm:w-auto h-14 px-10 bg-white text-blue-600 hover:bg-slate-50 font-black text-sm rounded-full shadow-2xl border-none">
+                             <Link href={`/login?returnUrl=${encodeURIComponent(pathname + '?id=' + mockId)}&mode=register`}>Create Free Account</Link>
+                          </Button>
+                          <Button asChild variant="ghost" className="w-full sm:w-auto text-white hover:bg-white/10 font-bold text-sm">
+                             <Link href={`/login?returnUrl=${encodeURIComponent(pathname + '?id=' + mockId)}`}>Login Hub</Link>
+                          </Button>
+                       </div>
+                    </div>
+                 </Card>
+              )}
+
               {filteredQuestions.length > 0 ? filteredQuestions.map((q: any) => {
                  const ans = sessionData?.answers?.[q.index];
                  const isCorrect = ans !== undefined && ['A','B','C','D'][ans] === q.correctAnswer;
@@ -238,50 +282,65 @@ export default function ResultClient() {
            </TabsContent>
 
            <TabsContent value="TOPPER" className="animate-in fade-in duration-500">
-              <Card className="border-none shadow-3xl rounded-[3rem] bg-white p-6 md:p-12 text-left border border-slate-100 overflow-hidden">
-                 <div className="space-y-8">
-                    <div className="p-6 md:p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
-                       <div className="flex items-center gap-4">
-                          <Users className="h-6 w-6 text-primary" />
-                          <div>
-                            <p className="text-[11px] md:text-sm font-bold text-slate-500 tracking-tight">Registry Node</p>
-                            <p className="text-base md:text-xl font-black text-[#0F172A]">{merit.total} Verified Aspirants</p>
-                          </div>
-                       </div>
-                       <div className="flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl border border-slate-100 shadow-sm">
-                          <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                          <span className="text-[10px] font-black uppercase text-emerald-600 tracking-widest">Live Merit Sync</span>
-                       </div>
+              {isGuestMode ? (
+                 <div className="py-40 text-center space-y-8 bg-white rounded-[3rem] border border-slate-100 shadow-xl">
+                    <div className="h-20 w-20 bg-slate-50 rounded-3xl flex items-center justify-center mx-auto text-slate-300 shadow-inner">
+                       <Lock className="h-10 w-10" />
                     </div>
-
-                    <div className="divide-y divide-slate-100">
-                       {merit.list?.slice(0, 100).map((r: any, i: number) => {
-                          const name = (r.userName && r.userName !== 'Aspirant' && !r.userName.includes('@')) ? r.userName : (r.userEmail || "Aspirant");
-                          const isCurrentUser = r.userId === user?.uid;
-                          
-                          return (
-                           <div key={r.id} className={cn("flex items-center justify-between py-6 md:py-8 md:px-10 rounded-[2rem] transition-all duration-500 my-2", isCurrentUser ? "bg-primary/5 ring-1 ring-primary/20 shadow-2xl scale-[1.02]" : "hover:bg-slate-50")}>
-                              <div className="flex items-center gap-6 md:gap-10 flex-1 min-w-0">
-                                 <span className={cn("font-black w-10 md:w-16 text-sm md:text-3xl tabular-nums", i < 3 ? "text-primary" : "text-slate-200")}>#{i+1}</span>
-                                 <StudentAvatar profile={{ name, gender: r.gender }} className="h-10 w-10 md:h-20 md:w-20 rounded-xl md:rounded-[2.5rem] border-2 border-white shadow-xl bg-slate-50" />
-                                 <div className="min-w-0 flex-1">
-                                    <p className={cn("font-black text-sm md:text-2xl truncate tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{name} {isCurrentUser && "(You)"}</p>
-                                    <div className="flex items-center gap-4 mt-2">
-                                       <p className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Score: {(r.score || 0).toFixed(1)}</p>
-                                       <div className="h-1 w-1 rounded-full bg-slate-200" />
-                                       <p className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Accuracy: {r.accuracy}%</p>
-                                    </div>
-                                 </div>
-                              </div>
-                              <div className="shrink-0 ml-4">
-                                 <Badge className={cn("border-none text-[10px] md:text-lg font-black px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl tabular-nums shadow-lg", r.accuracy > 85 ? "bg-emerald-50 text-emerald-600" : r.accuracy > 60 ? "bg-amber-50 text-amber-600" : "bg-slate-100 text-slate-500")}>{r.accuracy}%</Badge>
-                              </div>
-                           </div>
-                          );
-                       })}
+                    <div className="space-y-2">
+                       <h3 className="text-2xl font-black text-[#0F172A]">Merit Registry Locked</h3>
+                       <p className="text-slate-500 font-medium max-w-xs mx-auto">Login to compare your scores with verified toppers across the platform.</p>
                     </div>
+                    <Button asChild className="h-14 px-10 bg-primary rounded-full font-bold">
+                       <Link href="/login">Authenticate Now</Link>
+                    </Button>
                  </div>
-              </Card>
+              ) : (
+                 <Card className="border-none shadow-3xl rounded-[3rem] bg-white p-6 md:p-12 text-left border border-slate-100 overflow-hidden">
+                    <div className="space-y-8">
+                        <div className="p-6 md:p-10 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                          <div className="flex items-center gap-4">
+                              <Users className="h-6 w-6 text-primary" />
+                              <div>
+                                <p className="text-[11px] md:sm font-bold text-slate-500 tracking-tight">Registry Node</p>
+                                <p className="text-base md:text-xl font-black text-[#0F172A]">{merit.total} Verified Aspirants</p>
+                              </div>
+                          </div>
+                          <div className="flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl border border-slate-100 shadow-sm">
+                              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                              <span className="text-[10px] font-black uppercase text-emerald-600 tracking-widest">Live Merit Sync</span>
+                          </div>
+                        </div>
+
+                        <div className="divide-y divide-slate-100">
+                          {merit.list?.slice(0, 100).map((r: any, i: number) => {
+                              const name = (r.userName && r.userName !== 'Aspirant' && !r.userName.includes('@')) ? r.userName : (r.userEmail || "Aspirant");
+                              const isCurrentUser = r.userId === user?.uid;
+                              
+                              return (
+                              <div key={r.id} className={cn("flex items-center justify-between py-6 md:py-8 md:px-10 rounded-[2rem] transition-all duration-500 my-2", isCurrentUser ? "bg-primary/5 ring-1 ring-primary/20 shadow-2xl scale-[1.02]" : "hover:bg-slate-50")}>
+                                  <div className="flex items-center gap-6 md:gap-10 flex-1 min-w-0">
+                                    <span className={cn("font-black w-10 md:w-16 text-sm md:text-3xl tabular-nums", i < 3 ? "text-primary" : "text-slate-200")}>#{i+1}</span>
+                                    <StudentAvatar profile={{ name, gender: r.gender }} className="h-10 w-10 md:h-20 md:w-20 rounded-xl md:rounded-[2.5rem] border-2 border-white shadow-xl bg-slate-50" />
+                                    <div className="min-w-0 flex-1">
+                                        <p className={cn("font-black text-sm md:text-2xl truncate tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{name} {isCurrentUser && "(You)"}</p>
+                                        <div className="flex items-center gap-4 mt-2">
+                                          <p className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Score: {(r.score || 0).toFixed(1)}</p>
+                                          <div className="h-1 w-1 rounded-full bg-slate-200" />
+                                          <p className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Accuracy: {r.accuracy}%</p>
+                                        </div>
+                                    </div>
+                                  </div>
+                                  <div className="shrink-0 ml-4">
+                                    <Badge className={cn("border-none text-[10px] md:text-lg font-black px-4 md:px-8 py-2 md:py-3 rounded-xl md:rounded-2xl tabular-nums shadow-lg", r.accuracy > 85 ? "bg-emerald-50 text-emerald-600" : r.accuracy > 60 ? "bg-amber-50 text-amber-600" : "bg-slate-100 text-slate-500")}>{r.accuracy}%</Badge>
+                                  </div>
+                              </div>
+                              );
+                          })}
+                        </div>
+                    </div>
+                 </Card>
+              )}
            </TabsContent>
         </Tabs>
       </main>
@@ -306,4 +365,3 @@ function FilterBtn({ active, onClick, label, count, icon, activeColor }: any) {
       </button>
    )
 }
-

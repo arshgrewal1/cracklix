@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, Suspense, useEffect, useMemo } from "react"
+import React, { useState, Suspense, useEffect, useMemo, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -32,7 +32,7 @@ import {
   sendPasswordResetEmail,
   updateProfile
 } from "firebase/auth"
-import { doc, setDoc, getDoc, serverTimestamp } from "firebase/firestore"
+import { doc, setDoc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { motion } from "framer-motion"
@@ -43,15 +43,8 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Hub v90.0.
- * FIXED: Stabilized searchParams to prevent infinite recursion loop.
+ * @fileOverview Cracklix Premium Login Hub v91.0 (Guest Sync Integrated).
  */
-
-const formatCompact = (num: number) => {
-  if (!num || num === 0) return "0";
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-  return num.toString();
-};
 
 export default function LoginPage() {
   return (
@@ -62,6 +55,13 @@ export default function LoginPage() {
 }
 
 function LoginContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const auth = useAuth()
+  const db = useFirestore()
+  const { toast } = useToast()
+  const { user, profile, loading: authLoading } = useUser()
+
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -73,33 +73,59 @@ function LoginContent() {
   const [resetLoading, setResetLoading] = useState(false)
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
   
-  const { user, profile, loading: authLoading } = useUser()
-  const router = useRouter()
-  const auth = useAuth()
-  const db = useFirestore()
-  const { toast } = useToast()
-
-  const searchParams = useSearchParams();
-  
-  // Memoize search params to prevent effect re-runs
   const returnUrl = useMemo(() => searchParams.get("returnUrl") || "/dashboard", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams.get("ref"), [searchParams]);
-  const hasReturnUrl = useMemo(() => !!searchParams.get("returnUrl"), [searchParams]);
+  const initialMode = useMemo(() => searchParams.get("mode"), [searchParams]);
 
   useEffect(() => {
-    if (hasReturnUrl) {
-      toast({
-        title: "Login Required",
-        description: "Please login to access the preparation hub.",
-      });
-    }
-  }, [hasReturnUrl]); // Only run when existence of param changes
+     if (initialMode === 'register') setMode('register');
+  }, [initialMode]);
+
+  const syncGuestData = useCallback(async (uid: string, userName: string, userEmail: string) => {
+     if (!db) return;
+     const keys = Object.keys(localStorage);
+     const resultKeys = keys.filter(k => k.startsWith('cracklix_guest_result_'));
+     
+     if (resultKeys.length > 0) {
+        toast({ title: "Syncing Data", description: "Transferring guest attempts to your account." });
+        
+        for (const key of resultKeys) {
+           try {
+              const data = JSON.parse(localStorage.getItem(key) || '{}');
+              const mockId = data.mockId;
+              if (!mockId) continue;
+
+              const resultRef = doc(db, "results", `${uid}_${mockId}`);
+              const attemptRef = doc(db, "attempts", `${uid}_${mockId}`);
+
+              await setDoc(resultRef, {
+                 ...data,
+                 userId: uid,
+                 userName,
+                 userEmail,
+                 createdAt: serverTimestamp()
+              }, { merge: true });
+
+              await setDoc(attemptRef, {
+                 status: 'COMPLETED',
+                 updatedAt: serverTimestamp()
+              }, { merge: true });
+
+              localStorage.removeItem(key);
+           } catch (e) {
+              console.error("[GUEST_SYNC_FAILURE]:", e);
+           }
+        }
+     }
+  }, [db, toast]);
 
   useEffect(() => {
     if (!authLoading && user && profile) {
-      router.replace(returnUrl);
+      syncGuestData(user.uid, profile.name, user.email || "").then(() => {
+         router.replace(returnUrl);
+      });
     }
-  }, [user, profile, authLoading, router, returnUrl]);
+  }, [user, profile, authLoading, router, returnUrl, syncGuestData]);
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
@@ -114,18 +140,7 @@ function LoginContent() {
     setLoading(true)
     try {
       if (mode === 'login') {
-        const userCredential = await signInWithEmailAndPassword(auth, email, password)
-        
-        const userRef = doc(db!, 'users', userCredential.user.uid)
-        const userSnap = await getDoc(userRef)
-        const firstName = (userSnap.data()?.name || "Aspirant").split(' ')[0]
-
-        toast({
-          title: `Welcome Back, ${firstName}!`,
-          description: "Your preparation hub is synchronized.",
-        });
-
-        router.replace(returnUrl)
+        await signInWithEmailAndPassword(auth, email, password)
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password)
         const userNode = userCredential.user
@@ -146,12 +161,6 @@ function LoginContent() {
           referredBy: referralFromUrl || null,
           coins: 0
         })
-
-        toast({ 
-          title: `Welcome, ${name.split(' ')[0]}!`,
-          description: "Account created successfully." 
-        })
-        router.replace(returnUrl)
       }
     } catch (error: any) {
       toast({ variant: "destructive", title: "Auth Failed", description: error.message })
@@ -193,8 +202,6 @@ function LoginContent() {
           coins: 0
         })
       }
-
-      router.replace(returnUrl)
     } catch (error: any) {
       toast({ variant: "destructive", title: "Social Auth Error", description: error.message })
       setLoading(false)
@@ -218,6 +225,12 @@ function LoginContent() {
     }
   }
 
+  const formatCompact = (num: number) => {
+    if (!num || num === 0) return "0";
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+    return num.toString();
+  };
+
   return (
     <div className="min-h-[100dvh] bg-white flex flex-col lg:flex-row text-[#0F172A] font-body selection:bg-primary/20 overflow-x-hidden">
       
@@ -229,7 +242,7 @@ function LoginContent() {
 
           <div className="space-y-8">
             <h1 className="text-5xl xl:text-6xl font-[900] tracking-tight text-white leading-[1.05]">
-              Punjab&apos;s Smart <br/> 
+              Punjab's Smart <br/> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-300">
                 Exam Platform
               </span>

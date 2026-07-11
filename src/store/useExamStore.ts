@@ -24,11 +24,12 @@ export interface ExamStoreState {
   language: LanguageDisplayMode;
   baseLanguageMode: LanguageDisplayMode;
   violations: number;
+  isGuest: boolean;
 
   initExam: (
     mockId: string, 
     title: string, 
-    userId: string, 
+    userId: string | null, 
     questions: Question[], 
     duration: number, 
     resumeData?: any,
@@ -43,6 +44,7 @@ export interface ExamStoreState {
   markForReview: (idx: number, db: Firestore | null) => void;
   saveAndNext: (db: Firestore | null) => void;
   addViolation: (db: Firestore | null) => void;
+  persistGuestData: () => void;
 }
 
 export const useExamStore = create<ExamStoreState>((set, get) => ({
@@ -61,27 +63,37 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
   language: "ENGLISH_PUNJABI",
   baseLanguageMode: "ENGLISH_PUNJABI",
   violations: 0,
+  isGuest: false,
 
   initExam: (mockId, title, userId, questions, duration, resumeData, languageMode) => {
     const finalLang: LanguageDisplayMode = (languageMode || "ENGLISH_PUNJABI") as LanguageDisplayMode;
-    const isResuming = resumeData && resumeData.status !== 'COMPLETED';
+    
+    // Check if we have guest data in storage if no resume data passed
+    let effectiveResume = resumeData;
+    if (!effectiveResume && !userId) {
+       const stored = localStorage.getItem(`cracklix_guest_attempt_${mockId}`);
+       if (stored) effectiveResume = JSON.parse(stored);
+    }
+
+    const isResuming = effectiveResume && effectiveResume.status !== 'COMPLETED';
     
     set({
       mockId,
       mockTitle: title,
       userId,
+      isGuest: !userId,
       questions,
       isPaused: false,
       language: finalLang,
       baseLanguageMode: finalLang,
-      answers: isResuming ? (resumeData.answers || {}) : {},
-      status: isResuming ? (resumeData.statusMap || {}) : {},
-      visited: isResuming ? (resumeData.visited || [0]) : [0],
-      bookmarks: isResuming ? (resumeData.bookmarks || []) : [],
-      timeLeft: isResuming ? (resumeData.timeLeft || duration * 60) : (duration * 60),
-      currentIdx: isResuming ? (resumeData.currentIdx || 0) : 0,
-      startTime: isResuming ? (resumeData.startTime || Date.now()) : Date.now(),
-      violations: isResuming ? (resumeData.violations || 0) : 0,
+      answers: isResuming ? (effectiveResume.answers || {}) : {},
+      status: isResuming ? (effectiveResume.statusMap || {}) : {},
+      visited: isResuming ? (effectiveResume.visited || [0]) : [0],
+      bookmarks: isResuming ? (effectiveResume.bookmarks || []) : [],
+      timeLeft: isResuming ? (effectiveResume.timeLeft || duration * 60) : (duration * 60),
+      currentIdx: isResuming ? (effectiveResume.currentIdx || 0) : 0,
+      startTime: isResuming ? (effectiveResume.startTime || Date.now()) : Date.now(),
+      violations: isResuming ? (effectiveResume.violations || 0) : 0,
     });
   },
 
@@ -89,6 +101,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     const state = get();
     if (state.questions.length > 0 && state.timeLeft > 0 && !state.isPaused) {
       set({ timeLeft: state.timeLeft - 1 });
+      if (state.timeLeft % 30 === 0) state.persistGuestData();
     }
   },
 
@@ -100,6 +113,7 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
       currentIdx,
       visited: visited.includes(currentIdx) ? visited : [...visited, currentIdx]
     });
+    get().persistGuestData();
   },
 
   setLanguage: (language) => set({ language }),
@@ -124,6 +138,8 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         startTime: state.startTime,
         updatedAt: serverTimestamp()
       }, { merge: true }).catch(() => {});
+    } else {
+      state.persistGuestData();
     }
   },
 
@@ -142,6 +158,8 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
          statusMap: newStatus, 
          updatedAt: serverTimestamp() 
       }).catch(() => {});
+    } else {
+      state.persistGuestData();
     }
   },
 
@@ -155,6 +173,8 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
     if (db && state.userId && state.mockId) {
       const attemptRef = doc(db, "attempts", `${state.userId}_${state.mockId}`);
       updateDoc(attemptRef, { statusMap: newStatus, updatedAt: serverTimestamp() }).catch(() => {});
+    } else {
+      state.persistGuestData();
     }
   },
 
@@ -178,6 +198,24 @@ export const useExamStore = create<ExamStoreState>((set, get) => ({
         violations: nextVal, 
         updatedAt: serverTimestamp() 
       }).catch(() => {});
+    }
+  },
+
+  persistGuestData: () => {
+    const state = get();
+    if (!state.userId && state.mockId) {
+       const payload = {
+          answers: state.answers,
+          statusMap: state.status,
+          visited: state.visited,
+          bookmarks: state.bookmarks,
+          timeLeft: state.timeLeft,
+          currentIdx: state.currentIdx,
+          startTime: state.startTime,
+          violations: state.violations,
+          status: 'IN_PROGRESS'
+       };
+       localStorage.setItem(`cracklix_guest_attempt_${state.mockId}`, JSON.stringify(payload));
     }
   }
 }));

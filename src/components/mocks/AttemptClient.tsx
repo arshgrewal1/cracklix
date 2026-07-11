@@ -30,6 +30,10 @@ import {
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
+/**
+ * @fileOverview Official Mock Attempt Hub v5.0 (Guest Mode Support).
+ */
+
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -47,7 +51,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     return lastSegment !== 'attempt' ? lastSegment : null;
   }, [pathname, searchParams, propMockId]);
 
-  useStudyTracker(mockId, 'MOCK', true);
+  // Disable study tracker for guests to prevent Firestore permission errors
+  useStudyTracker(mockId, 'MOCK', !!user);
 
   const [isInitializing, setIsInitializing] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
@@ -75,10 +80,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
   useEffect(() => {
     async function loadExam() {
-      if (!db || !user || !mockId || !profile) {
-         if (!mockId && !isInitializing) setInitError("Attempt identity node lost.");
-         return;
-      }
+      if (!db || !mockId) return;
       
       try {
         const mockSnap = await getDoc(doc(db, "mocks", mockId));
@@ -88,23 +90,31 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         setMockData(mData);
 
         const tier = (mData.accessLevel || 'FREE').toUpperCase();
-        const userEmail = user.email?.toLowerCase();
-        const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
         
-        let hasActivePass = false;
-        if (isAdmin) {
-          hasActivePass = true;
-        } else if (profile?.passExpiresAt) {
-          const expiryDate = new Date(profile.passExpiresAt);
-          if (!isNaN(expiryDate.getTime()) && expiryDate > new Date() && profile.pass?.active !== false) {
-            hasActivePass = true;
-          }
-        }
+        // ACCESS AUDIT
+        if (tier === 'PREMIUM') {
+           if (!user || !profile) {
+              router.replace(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+              return;
+           }
+           const userEmail = user.email?.toLowerCase();
+           const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || (userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail));
+           
+           let hasActivePass = false;
+           if (isAdmin) {
+             hasActivePass = true;
+           } else if (profile?.passExpiresAt) {
+             const expiryDate = new Date(profile.passExpiresAt);
+             if (!isNaN(expiryDate.getTime()) && expiryDate > new Date() && profile.pass?.active !== false) {
+               hasActivePass = true;
+             }
+           }
 
-        if (tier === 'PREMIUM' && !hasActivePass) {
-           toast({ variant: "destructive", title: "Access Blocked", description: "Premium Mock requires an active Elite Pass." });
-           router.replace('/pass');
-           return;
+           if (!hasActivePass) {
+              toast({ variant: "destructive", title: "Access Blocked", description: "Premium Mock requires an active Elite Pass." });
+              router.replace('/pass');
+              return;
+           }
         }
 
         const questionIds: string[] = mData.questionIds || [];
@@ -122,8 +132,13 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
         if (sortedQs.length === 0) throw new Error("Registry Mismatch: Questions could not be synced.");
 
-        const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
-        initExam(mockId, mData.title || "Elite Series", user.uid, sortedQs, mData.duration || 120, attemptSnap.exists() ? attemptSnap.data() : undefined, mData.languageMode);
+        let resumeData = undefined;
+        if (user) {
+           const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
+           if (attemptSnap.exists()) resumeData = attemptSnap.data();
+        }
+
+        initExam(mockId, mData.title || "Elite Series", user?.uid || null, sortedQs, mData.duration || 120, resumeData, mData.languageMode);
       } catch (err: any) {
         setInitError(err.message);
       } finally { 
@@ -131,7 +146,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }
     }
     loadExam();
-  }, [db, user, profile, mockId, initExam, router, toast, isInitializing]);
+  }, [db, user, profile, mockId, initExam, router, toast, pathname]);
 
   useEffect(() => {
     if (isInitializing || initError) return;
@@ -140,7 +155,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   }, [isInitializing, initError, tick]);
 
   const handleSubmitFinal = useCallback(() => {
-    if (!db || isSubmittingFinal || !user || !mockData || !mockId) return;
+    if (!db || isSubmittingFinal || !mockData || !mockId) return;
     setIsSubmittingFinal(true);
     
     let correctCount = 0;
@@ -162,10 +177,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const timeTaken = Math.round((Date.now() - startTime) / 1000);
     const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
 
-    const resultPayload = {
-      userId: user.uid, 
-      userName: profile?.name || 'Aspirant', 
-      userEmail: user.email || "",
+    const resultPayload: any = {
       mockId, 
       mockTitle: mockData.title || mockTitle,
       score: parseFloat(rawScore.toFixed(2)),
@@ -173,22 +185,34 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       totalQuestions: questions.length, 
       accuracy, timeTaken, answers: answers || {}, 
       timestamp: new Date().toISOString(), 
-      createdAt: serverTimestamp(),
       accessLevel: (mockData.accessLevel || 'FREE').toUpperCase() 
     };
 
-    const resultRef = doc(db, "results", `${user.uid}_${mockId}`);
-    const attemptRef = doc(db, "attempts", `${user.uid}_${mockId}`);
+    if (user) {
+      resultPayload.userId = user.uid;
+      resultPayload.userName = profile?.name || 'Aspirant';
+      resultPayload.userEmail = user.email || "";
+      resultPayload.createdAt = serverTimestamp();
 
-    setDoc(resultRef, resultPayload, { merge: true }).catch(async (serverError) => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: resultRef.path, operation: 'write', requestResourceData: resultPayload }));
-    });
+      const resultRef = doc(db, "results", `${user.uid}_${mockId}`);
+      const attemptRef = doc(db, "attempts", `${user.uid}_${mockId}`);
 
-    updateDoc(attemptRef, { status: 'COMPLETED', updatedAt: serverTimestamp() }).catch(async (serverError) => {
-        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: attemptRef.path, operation: 'update', requestResourceData: { status: 'COMPLETED' } }));
-    });
-    
-    router.replace(`/results/view?id=${mockId}`);
+      setDoc(resultRef, resultPayload, { merge: true }).catch(async (serverError) => {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({ path: resultRef.path, operation: 'write', requestResourceData: resultPayload }));
+      });
+
+      updateDoc(attemptRef, { status: 'COMPLETED', updatedAt: serverTimestamp() }).catch(async (serverError) => {
+          errorEmitter.emit('permission-error', new FirestorePermissionError({ path: attemptRef.path, operation: 'update', requestResourceData: { status: 'COMPLETED' } }));
+      });
+      
+      localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
+      router.replace(`/results/view?id=${mockId}`);
+    } else {
+      // GUEST SUBMISSION: Save to localStorage for conversion later
+      localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify(resultPayload));
+      localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
+      router.replace(`/results/view?id=${mockId}&guest=true`);
+    }
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime]);
 
   useEffect(() => {
@@ -224,7 +248,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           <h2 className="text-2xl font-black text-[#0F172A] leading-tight">Sync Failure</h2>
           <p className="text-slate-500 font-medium max-w-sm mx-auto">{initError || "Mock context lost during resolution."}</p>
        </div>
-       <Button onClick={() => router.replace('/dashboard')} className="h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-bold text-sm">Return to Dashboard</Button>
+       <Button onClick={() => router.replace('/dashboard')} className="h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-bold text-sm">Return to Hub</Button>
     </div>
   );
 
@@ -297,7 +321,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         </SheetContent>
       </Sheet>
 
-      {/* OVERHAULED EXIT DIALOG */}
       <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
         <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-white text-center border-none shadow-5xl z-[1300] animate-in zoom-in-95 duration-200">
           <div className="flex flex-col items-center">
@@ -324,7 +347,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               <div className="grid grid-cols-2 gap-3">
                  <Button
                     variant="outline"
-                    onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/dashboard'); }}
+                    onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/'); }}
                     className="h-12 border-slate-200 text-slate-500 font-bold rounded-xl hover:bg-slate-50"
                  >
                     <Save className="h-4 w-4 mr-2" /> Save & Exit
