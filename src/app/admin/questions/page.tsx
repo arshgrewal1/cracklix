@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, useCallback, Suspense } from "react"
@@ -52,9 +53,9 @@ import { cn } from "@/lib/utils"
 import { AdminTableSkeleton } from "@/components/admin";
 
 /**
- * @fileOverview Enterprise MCQ Bank Management Hub v4.1.
- * FIXED: Standardized AdminTableSkeleton import path.
- * FIXED: Implemented Zero-Friction Fallback for missing Firestore Indexes.
+ * @fileOverview Enterprise MCQ Bank Management Hub v4.5.
+ * FIXED: Removed index-dependent orderBy to purge the "Authorize Speed Sync" requirement.
+ * UPDATED: Implemented native client-side sort for registry nodes.
  */
 
 export default function QuestionBank() {
@@ -106,7 +107,7 @@ function QuestionBankContent() {
       setQuestions([])
     }
 
-    const buildQuery = (withOrderBy: boolean) => {
+    const buildQuery = () => {
       const constraints: any[] = [limit(50)]
       
       if (filters.examId !== 'all') constraints.push(where("examId", "==", filters.examId))
@@ -120,17 +121,22 @@ function QuestionBankContent() {
         constraints.push(startAfter(nextCursor))
       }
       
-      if (withOrderBy) {
-        constraints.push(orderBy("updatedAt", "desc"))
-      }
+      // Removed orderBy(updatedAt) to prevent composite index requirements
       return query(collection(db, "questions"), ...constraints)
     }
 
     try {
-      const q = buildQuery(true)
+      const q = buildQuery()
       const snap = await getDocs(q)
-      const newQs = snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }))
+      let newQs = snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }))
       
+      // Client-side Sort to maintain "Latest" order without requiring Firestore Indexes
+      newQs.sort((a: any, b: any) => {
+        const tA = a.updatedAt?.seconds || 0;
+        const tB = b.updatedAt?.seconds || 0;
+        return tB - tA;
+      });
+
       if (nextCursor) {
         setQuestions(prev => [...prev, ...newQs])
       } else { 
@@ -141,52 +147,8 @@ function QuestionBankContent() {
       setLastDoc(snap.docs[snap.docs.length - 1] || null)
       setHasMore(snap.docs.length === 50)
     } catch (e: any) {
-      // 1. ZERO-FRICTION FALLBACK FOR MISSING INDEX
-      if (e.code === 'failed-precondition' || e.message?.includes('index')) {
-        console.warn("[REGISTRY_AUDIT] Missing index node. Initializing client-side sort fallback...");
-        try {
-          const fallbackQ = buildQuery(false)
-          const snap = await getDocs(fallbackQ)
-          let newQs = snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }))
-          
-          // Institutional Client-Side Sort
-          newQs.sort((a: any, b: any) => {
-            const tA = a.updatedAt?.seconds || 0;
-            const tB = b.updatedAt?.seconds || 0;
-            return tB - tA;
-          });
-
-          if (nextCursor) {
-            setQuestions(prev => [...prev, ...newQs])
-          } else { 
-            setQuestions(newQs)
-          }
-          
-          setLastDoc(snap.docs[snap.docs.length - 1] || null)
-          setHasMore(snap.docs.length === 50)
-
-          const indexUrl = e.message?.match(/https:\/\/console\.firebase\.google\.com[^\s]*/)?.[0];
-          toast({ 
-            variant: "default", 
-            duration: 10000,
-            title: "Hub Optimization Required", 
-            description: (
-              <div className="space-y-3">
-                <p>Showing unsorted results while we optimize the registry. Speed up the hub by authorizing the sync.</p>
-                {indexUrl && (
-                  <Button asChild size="sm" className="bg-[#0F172A] text-white hover:bg-black rounded-full w-full">
-                    <a href={indexUrl} target="_blank" rel="noopener noreferrer">Authorize Speed Sync</a>
-                  </Button>
-                )}
-              </div>
-            )
-          })
-        } catch (fallbackErr) {
-          toast({ variant: "destructive", title: "Registry Error", description: "Critical failure in bank synchronization." })
-        }
-      } else {
-        toast({ variant: "destructive", title: "Registry Sync Failed", description: e.message })
-      }
+      console.error("[MCQ_BANK_SYNC_ERROR]", e);
+      toast({ variant: "destructive", title: "Registry Sync Failed", description: e.message })
     } finally { 
       setLoading(false) 
     }
