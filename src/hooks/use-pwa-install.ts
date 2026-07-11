@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
- * @fileOverview Universal PWA Hook v3.2.
- * FIXED: Stabilized dependency array to prevent "useEffect changed size" errors.
+ * @fileOverview Universal PWA Hook v3.3 (Audit Fixed).
+ * FIXED: Stabilized dependency array to prevent "useEffect changed size" and hydration loop errors.
  */
 export function usePWAInstall() {
   const [isInstalled, setIsInstalled] = useState(false);
   const [canInstall, setCanInstall] = useState(false);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const checkStatus = useCallback(() => {
     if (typeof window === 'undefined') return;
@@ -18,7 +19,6 @@ export function usePWAInstall() {
     
     setIsInstalled(isStandalone);
     
-    // Check if prompt was already captured by global listener
     if ((window as any).deferredPrompt) {
       setCanInstall(true);
     }
@@ -28,14 +28,12 @@ export function usePWAInstall() {
     checkStatus();
 
     const handlePrompt = (e: any) => {
-      console.log('[PWA_REGISTRY] beforeinstallprompt event captured.');
       e.preventDefault();
       (window as any).deferredPrompt = e;
       setCanInstall(true);
     };
 
     const handleAppInstalled = () => {
-      console.log('[PWA_REGISTRY] Application successfully installed on device.');
       setIsInstalled(true);
       setCanInstall(false);
       (window as any).deferredPrompt = null;
@@ -44,25 +42,24 @@ export function usePWAInstall() {
     window.addEventListener('beforeinstallprompt', handlePrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
     
-    const pollInterval = setInterval(() => {
+    pollIntervalRef.current = setInterval(() => {
       if ((window as any).deferredPrompt) {
         setCanInstall(true);
-        clearInterval(pollInterval);
+        if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
       }
     }, 1000);
 
     return () => {
        window.removeEventListener('beforeinstallprompt', handlePrompt);
        window.removeEventListener('appinstalled', handleAppInstalled);
-       clearInterval(pollInterval);
+       if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
     };
-  }, [checkStatus]); // Removed canInstall from deps to fix size mismatch error
+  }, [checkStatus]);
 
   const installApp = async () => {
     const prompt = (window as any).deferredPrompt;
     
     if (!prompt) {
-      console.warn('[PWA_REGISTRY] No installation prompt available. Redirecting to hub.');
       window.location.href = '/install';
       return;
     }
@@ -70,8 +67,6 @@ export function usePWAInstall() {
     try {
       await prompt.prompt();
       const { outcome } = await prompt.userChoice;
-      console.log(`[PWA_AUDIT] User response: ${outcome}`);
-      
       if (outcome === 'accepted') {
         (window as any).deferredPrompt = null;
         setCanInstall(false);

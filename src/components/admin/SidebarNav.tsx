@@ -23,19 +23,15 @@ import {
   History,
   HeartPulse,
   Settings,
-  FileCode2,
   NotebookPen,
   MessageCircle,
   Trophy,
   Calendar,
   HelpCircle,
-  Wrench,
   ChevronRight,
   Tag,
   NotebookTabs,
   Library,
-  Fingerprint,
-  FileJson,
   CreditCard,
   ShieldCheck
 } from "lucide-react";
@@ -48,8 +44,8 @@ import {
 } from "@/components/ui/tooltip";
 
 /**
- * @fileOverview Admin Sidebar Navigation v4.5.
- * UPDATED: Added Subscription and Revenue nodes.
+ * @fileOverview Admin Sidebar Navigation v4.6 (Audit Fixed).
+ * FIXED: Standardized all icon imports to prevent ReferenceErrors.
  */
 
 const NAV_GROUPS = [

@@ -23,8 +23,9 @@ const ALL_LANG_MODES: { label: string, value: LanguageDisplayMode }[] = [
 ];
 
 /**
- * @fileOverview Staff CBT Header v39.1.
- * FIXED: Comprehensive layout refinement to prevent overlapping elements on mobile Android.
+ * @fileOverview Staff CBT Header v39.2 (Audit Fixed).
+ * FIXED: Optimized flex-basis and shrinking to prevent collision on mobile Android.
+ * Z-INDEX: Increased dropdown z-index to stay above the question container.
  */
 export default function ExamHeader({ 
   onPaletteToggle, 
@@ -54,19 +55,19 @@ export default function ExamHeader({
 
   return (
     <header className="bg-[#0B1528] text-white flex flex-col shrink-0 z-[100] border-b border-white/5 shadow-xl sticky top-0 pt-safe">
-      <div className="h-14 md:h-18 flex items-center justify-between px-2 md:px-8 gap-0.5 md:gap-4 pt-[env(safe-area-inset-top)]">
+      <div className="h-14 md:h-18 flex items-center justify-between px-2 md:px-8 gap-1 md:gap-4">
         
         {/* LEFT: Progress */}
-        <div className="flex items-center gap-0.5 md:gap-4 flex-1 min-w-0">
+        <div className="flex items-center gap-1 md:gap-4 flex-1 min-w-0">
            <button 
              onClick={onExitRequest} 
-             className="p-1.5 text-slate-400 hover:text-white transition-all active:scale-90 shrink-0"
+             className="p-1 text-slate-400 hover:text-white transition-all active:scale-90 shrink-0"
            >
               <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
            </button>
            
            <div className="flex items-center gap-1 bg-white/10 px-1.5 md:px-3 py-1 md:py-1.5 rounded-lg border border-white/10 shrink-0 shadow-inner">
-              <span className="text-[10px] md:text-xl font-black text-primary tabular-nums">
+              <span className="text-[11px] md:text-xl font-black text-primary tabular-nums">
                  {currentIdx + 1}
               </span>
               <span className="text-[8px] md:text-xs font-bold text-slate-500">
@@ -75,8 +76,8 @@ export default function ExamHeader({
            </div>
         </div>
 
-        {/* CENTER: Timer */}
-        <div className="flex justify-center shrink-0">
+        {/* CENTER: Timer (Fixed Width to prevent jitter) */}
+        <div className="flex justify-center shrink-0 min-w-[80px] md:min-w-[140px]">
            <Timer 
              onTimeUp={() => {}} 
              initialSeconds={timeLeft} 
@@ -89,17 +90,17 @@ export default function ExamHeader({
            {availableModes.length > 1 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                   <button className="h-7 w-7 md:h-11 md:w-11 bg-white/10 text-white hover:bg-white/20 border border-white/10 rounded-lg flex items-center justify-center transition-all shrink-0">
-                      <Languages className="h-3.5 w-3.5 md:h-5 md:w-5 text-primary" />
+                   <button className="h-8 w-8 md:h-11 md:w-11 bg-white/10 text-white hover:bg-white/20 border border-white/10 rounded-lg flex items-center justify-center transition-all shrink-0">
+                      <Languages className="h-4 w-4 md:h-5 md:w-5 text-primary" />
                    </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-[#0F172A] border-white/10 text-white rounded-2xl shadow-5xl p-2 z-[2000]">
+                <DropdownMenuContent align="end" className="w-52 bg-[#0F172A] border-white/10 text-white rounded-2xl shadow-5xl p-2 z-[2000]">
                    {availableModes.map((mode) => (
                       <DropdownMenuItem 
                         key={mode.value} 
                         onSelect={() => setLanguage(mode.value)}
                         className={cn(
-                          "text-[11px] font-bold px-4 py-3 rounded-xl cursor-pointer mb-1 last:mb-0 transition-all",
+                          "text-[10px] md:text-[11px] font-bold px-4 py-3 rounded-xl cursor-pointer mb-1 last:mb-0 transition-all",
                           language === mode.value ? "bg-primary text-white" : "hover:bg-white/5 text-slate-400"
                         )}
                       >
@@ -112,14 +113,14 @@ export default function ExamHeader({
 
            <button 
              onClick={() => setPaused(!isPaused)}
-             className="h-7 w-7 md:h-11 md:w-11 bg-white/10 text-white border border-white/10 rounded-lg flex items-center justify-center active:scale-90 transition-all shrink-0"
+             className="h-8 w-8 md:h-11 md:w-11 bg-white/10 text-white border border-white/10 rounded-lg flex items-center justify-center active:scale-90 transition-all shrink-0"
            >
-             {isPaused ? <Play className="h-3.5 w-3.5 md:h-5 md:w-5 fill-current text-primary" /> : <Pause className="h-3.5 w-3.5 md:h-5 md:w-5 fill-current" />}
+             {isPaused ? <Play className="h-4 w-4 md:h-5 md:w-5 fill-current text-primary" /> : <Pause className="h-4 w-4 md:h-5 md:w-5 fill-current" />}
            </button>
            
            <button 
              onClick={onPaletteToggle}
-             className="bg-primary hover:bg-blue-600 text-white h-7 md:h-11 px-2 md:px-5 rounded-lg font-black uppercase text-[8px] md:text-[10px] tracking-widest flex items-center justify-center shadow-lg active:scale-95 border-none transition-all"
+             className="bg-primary hover:bg-blue-700 text-white h-8 md:h-11 px-3 md:px-5 rounded-lg font-black uppercase text-[8px] md:text-[10px] tracking-widest flex items-center justify-center shadow-lg active:scale-95 border-none transition-all"
            >
               Map
            </button>

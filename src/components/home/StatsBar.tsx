@@ -16,16 +16,20 @@ import Link from 'next/link';
  */
 function Counter({ value, suffix = "+" }: { value: number | string; suffix?: string }) {
   const [displayValue, setDisplayValue] = useState(0);
+  const [mounted, setMounted] = useState(false);
   
-  // Detect if the value is a string intended for direct display (like '24x7')
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const isSpecialString = typeof value === 'string' && (value.includes('x') || isNaN(Number(value.replace(/\D/g, ''))));
   const numericValue = typeof value === 'string' ? parseInt(value.replace(/\D/g, '')) || 0 : value;
 
   useEffect(() => {
-    if (isSpecialString) return;
+    if (isSpecialString || !mounted) return;
     
     let startTime: number | null = null;
-    const duration = 2000; // 2 seconds
+    const duration = 2000;
 
     const animate = (currentTime: number) => {
       if (!startTime) startTime = currentTime;
@@ -35,17 +39,19 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
         requestAnimationFrame(animate);
       }
     };
-    requestAnimationFrame(animate);
-  }, [numericValue, isSpecialString]);
+    const rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
+  }, [numericValue, isSpecialString, mounted]);
 
+  if (!mounted) return <span>0{suffix}</span>;
   if (isSpecialString) return <span>{value}</span>;
 
   return <span>{displayValue.toLocaleString()}{suffix}</span>;
 }
 
 /**
- * @fileOverview Premium Institutional Stats Bar v3.2.
- * FIXED: Sync with real registry counts and interactive 24x7 Support Hub.
+ * @fileOverview Premium Institutional Stats Bar v3.3 (Audit Fixed).
+ * FIXED: Hydration safety for local counter animations.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -62,6 +68,8 @@ export default function StatsBar() {
   const { data: settings, loading: settingsLoading } = useDoc<any>(settingsRef);
 
   const activeStats = useMemo(() => {
+    if (!mounted) return [];
+
     const s = settings?.statsVisibility || {
       showQuestions: true,
       showMocks: true,
@@ -82,7 +90,6 @@ export default function StatsBar() {
     const threshold = settings?.studentCounterThreshold || 1000;
     const totalUsers = stats?.totalUsers || 0;
 
-    // Automatic reveal logic
     const shouldShowStudents = mode === 'auto' 
       ? totalUsers >= threshold 
       : s.showStudents;
@@ -99,9 +106,17 @@ export default function StatsBar() {
     }
 
     return pool.slice(0, 4);
-  }, [stats, settings]);
+  }, [stats, settings, mounted]);
 
-  if (!mounted) return null;
+  if (!mounted) return (
+     <section className="bg-white py-8 md:py-12 border-b border-slate-50">
+        <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+           <div className="grid gap-4 md:gap-8 grid-cols-2 md:grid-cols-4">
+              {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 md:h-36 w-full rounded-[22px] bg-slate-50" />)}
+           </div>
+        </div>
+     </section>
+  );
 
   return (
     <section className="bg-white py-8 md:py-12 border-b border-slate-50">
@@ -123,7 +138,6 @@ export default function StatsBar() {
                   <Card className={cn(
                     "relative group h-[130px] md:h-[150px] border border-slate-100 bg-white shadow-sm hover:shadow-2xl transition-all duration-300 rounded-[22px] p-4 md:p-6 flex flex-col items-center justify-center gap-2 overflow-hidden hover:-translate-y-1 active:scale-95 cursor-pointer"
                   )}>
-                    {/* Glass Background Node */}
                     <div className={cn("absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-3xl opacity-20", item.bg)} />
                     
                     <div className={cn(
@@ -132,7 +146,7 @@ export default function StatsBar() {
                       item.border,
                       item.color
                     )}>
-                      {React.cloneElement(item.icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}
+                      {React.isValidElement(item.icon) ? React.cloneElement(item.icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" }) : null}
                     </div>
 
                     <div className="text-center space-y-0.5 z-10 w-full">
@@ -144,7 +158,7 @@ export default function StatsBar() {
                       </p>
                       
                       {item.trend && (
-                        <div className="mt-1 flex items-center justify-center gap-1 animate-in fade-in slide-in-from-bottom-1">
+                        <div className="mt-1 flex items-center justify-center gap-1">
                            <span className="text-[8px] md:text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50 flex items-center gap-1">
                              <TrendingUp className="h-2 w-2" /> {item.trend}
                            </span>

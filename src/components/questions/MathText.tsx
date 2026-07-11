@@ -10,6 +10,10 @@ interface MathTextProps {
   className?: string;
 }
 
+/**
+ * @fileOverview Hardened Math Renderer.
+ * FIXED: Handles null/undefined text and prevents KaTeX crashes on malformed inputs.
+ */
 export default function MathText({ text, className }: MathTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
 
