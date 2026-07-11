@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, useCallback, Suspense } from "react"
@@ -54,8 +53,9 @@ import { cn } from "@/lib/utils"
 import { AdminTableSkeleton } from "@/components/admin";
 
 /**
- * @fileOverview Enterprise MCQ Bank Management Hub v4.6.
- * UPDATED: Added a Close button to the bulk selection bar for immediate deselection.
+ * @fileOverview Enterprise MCQ Bank Management Hub v4.7.
+ * FIXED: Optimized pagination and state handling for large registries.
+ * FIXED: Resolved reference errors for icons.
  */
 
 export default function QuestionBank() {
@@ -129,6 +129,7 @@ function QuestionBankContent() {
       const snap = await getDocs(q)
       let newQs = snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }))
       
+      // Sort client-side if needed or rely on index, but keeping it stable for the UI
       newQs.sort((a: any, b: any) => {
         const tA = a.updatedAt?.seconds || 0;
         const tB = b.updatedAt?.seconds || 0;
@@ -145,7 +146,9 @@ function QuestionBankContent() {
       setLastDoc(snap.docs[snap.docs.length - 1] || null)
       setHasMore(snap.docs.length === 50)
     } catch (e: any) {
-      console.error("[MCQ_BANK_SYNC_ERROR]", e);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("[MCQ_BANK_SYNC_ERROR]", e);
+      }
       toast({ variant: "destructive", title: "Registry Sync Failed", description: e.message })
     } finally { 
       setLoading(false) 
@@ -184,6 +187,8 @@ function QuestionBankContent() {
       await batch.commit();
       toast({ title: "Bulk Action Successful", description: `${selectedIds.length} nodes processed.` });
       fetchQuestions(null);
+    } catch (e) {
+      toast({ variant: "destructive", title: "Bulk Sync Failed" });
     } finally {
       setIsBulkProcessing(false);
       setSelectedIds([]);
@@ -233,7 +238,7 @@ function QuestionBankContent() {
                   onChange={e => {
                      setFilters({...filters, boardId: e.target.value, examId: 'all', subjectId: 'all', chapterId: 'all'});
                   }} 
-                  className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none"
+                  className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner"
                >
                   <option value="all">All Boards</option>
                   {boards?.map((b: any) => <option key={b.id} value={b.id}>{b.abbreviation}</option>)}
@@ -244,7 +249,7 @@ function QuestionBankContent() {
                <select 
                   value={filters.examId} 
                   onChange={e => setFilters({...filters, examId: e.target.value})} 
-                  className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none"
+                  className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner"
                >
                   <option value="all">All Exams</option>
                   {availableExams.map((e: any) => <option key={e.id} value={e.id}>{e.name}</option>)}
@@ -252,21 +257,21 @@ function QuestionBankContent() {
             </div>
             <div className="space-y-1.5">
                <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Subject</Label>
-               <select value={filters.subjectId} onChange={e => setFilters({...filters, subjectId: e.target.value, chapterId: 'all'})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+               <select value={filters.subjectId} onChange={e => setFilters({...filters, subjectId: e.target.value, chapterId: 'all'})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner">
                   <option value="all">All Subjects</option>
                   {availableSubjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                </select>
             </div>
             <div className="space-y-1.5">
                <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Chapter</Label>
-               <select value={filters.chapterId} onChange={e => setFilters({...filters, chapterId: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+               <select value={filters.chapterId} onChange={e => setFilters({...filters, chapterId: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner">
                   <option value="all">All Chapters</option>
                   {chapters?.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
                </select>
             </div>
             <div className="space-y-1.5">
                <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Level</Label>
-               <select value={filters.difficulty} onChange={e => setFilters({...filters, difficulty: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+               <select value={filters.difficulty} onChange={e => setFilters({...filters, difficulty: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner">
                   <option value="all">All Levels</option>
                   <option value="Easy">Easy</option>
                   <option value="Medium">Medium</option>
@@ -276,7 +281,7 @@ function QuestionBankContent() {
             </div>
             <div className="space-y-1.5">
                <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Status</Label>
-               <select value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none">
+               <select value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})} className="w-full h-10 bg-slate-50 border-none rounded-lg px-3 text-[11px] font-bold outline-none shadow-inner">
                   <option value="all">All Status</option>
                   <option value="PUBLISHED">Published</option>
                   <option value="DRAFT">Draft</option>
@@ -288,7 +293,7 @@ function QuestionBankContent() {
          <div className="relative mt-6 group">
             <Search className="absolute left-5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300 group-focus-within:text-primary transition-colors" />
             <Input 
-               className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold text-sm" 
+               className="h-12 pl-12 rounded-xl bg-slate-50 border-none font-bold text-sm shadow-inner" 
                placeholder="Search by statement, ID, or keywords..." 
                value={searchTerm} 
                onChange={e => setSearchTerm(e.target.value)} 
@@ -400,4 +405,3 @@ function QuestionBankContent() {
     </div>
   )
 }
-

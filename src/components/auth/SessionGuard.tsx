@@ -8,7 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { doc } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Takeover Session Guard v15.0 (Global Logout Aware).
+ * @fileOverview Hardened Takeover Session Guard v15.1.
+ * FIXED: Added handshake suppression and null guards to prevent race conditions during hydration.
  */
 export default function SessionGuard() {
   const { user, profile, loading } = useUser();
@@ -22,18 +23,37 @@ export default function SessionGuard() {
   const mountedAt = useRef(Date.now());
 
   // Listen to Global Maintenance/Security Node
-  const { data: globalSettings } = useDoc<any>(doc(db!, 'settings', 'global'));
+  const globalRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
+  const { data: globalSettings } = useDoc<any>(globalRef);
 
   useEffect(() => {
+    // 1. Initial Guards
     if (loading || !user || !profile || isSigningOut.current || !globalSettings) return;
     
+    // 2. Safe-zone routing
     if (pathname === '/login' || pathname === '/profile-setup') return;
 
-    // 1. Handshake Suppression
+    // 3. Handshake Suppression (2s delay to allow profile sync to settle)
     if (Date.now() - mountedAt.current < 2000) return;
 
-    // 2. Global Force Logout Check
-    // If the maintenance timestamp is newer than user's last login, invalidate session.
+    const terminateSession = async (title: string, desc: string) => {
+      if (isSigningOut.current) return;
+      isSigningOut.current = true;
+      
+      toast({ variant: "destructive", title, description: desc });
+      
+      try {
+        await signOut(auth);
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('cracklix_session_id');
+        }
+        router.replace('/login');
+      } catch (e) {
+        isSigningOut.current = false;
+      }
+    };
+
+    // 4. Global Force Logout Check
     if (globalSettings.maintenanceModeAt) {
        const maintenanceTime = globalSettings.maintenanceModeAt.seconds * 1000;
        const lastLoginTime = profile.lastLoginAt?.seconds ? profile.lastLoginAt.seconds * 1000 : 0;
@@ -44,28 +64,17 @@ export default function SessionGuard() {
        }
     }
 
-    // 3. Multi-Device Takeover Check
-    const localSessionId = localStorage.getItem('cracklix_session_id');
+    // 5. Multi-Device Takeover Check
+    const localSessionId = typeof window !== 'undefined' ? localStorage.getItem('cracklix_session_id') : null;
     const cloudSessionId = profile.activeDeviceId;
 
     if (cloudSessionId && localSessionId && cloudSessionId !== localSessionId) {
        terminateSession("Session Expired", "Your account was logged in on another device.");
     }
 
-    async function terminateSession(title: string, desc: string) {
-      isSigningOut.current = true;
-      toast({ variant: "destructive", title, description: desc });
-      
-      try {
-        await signOut(auth);
-        localStorage.removeItem('cracklix_session_id');
-        router.replace('/login');
-      } finally {
-        isSigningOut.current = false;
-      }
-    }
-
   }, [user, profile, loading, auth, router, toast, pathname, globalSettings]);
 
   return null;
 }
+
+import { useMemo } from 'react';

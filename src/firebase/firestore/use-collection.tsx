@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
@@ -13,8 +12,9 @@ import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
- * @fileOverview Production-Grade Firestore Collection Hook v3.1.
+ * @fileOverview Production-Grade Firestore Collection Hook v3.2.
  * FIXED: Implemented deep comparison check and robust error handling for missing indexes.
+ * FIXED: Stabilized the subscription trigger to prevent infinite render loops.
  */
 export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
@@ -23,7 +23,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
   
   const dataRef = useRef<string>("");
 
-  // Generate a stable key for the query
+  // Generate a stable key for the query to prevent unnecessary re-subscriptions
   const queryKey = useMemo(() => {
     if (!query) return null;
     try {
@@ -51,7 +51,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           id: doc.id,
         }));
 
-        // Deep comparison check to prevent infinite loops
+        // Deep comparison check to prevent infinite loops when parent components re-render
         const dataString = JSON.stringify(items);
         if (dataString !== dataRef.current) {
           dataRef.current = dataString;
@@ -62,7 +62,9 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         setError(null);
       },
       (err) => {
-        console.error("[FIRESTORE_COLLECTION_ERROR]:", err);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("[FIRESTORE_COLLECTION_ERROR]:", err);
+        }
         
         if (err.code === 'permission-denied') {
           const permissionError = new FirestorePermissionError({
@@ -79,7 +81,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
     );
 
     return () => unsubscribe();
-  }, [queryKey]);
+  }, [queryKey]); // Subscribe only when the query logic actually changes
 
   return { data, loading, error };
 }

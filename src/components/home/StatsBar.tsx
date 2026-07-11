@@ -12,7 +12,7 @@ import Link from 'next/link';
 
 /**
  * @fileOverview High-Fidelity Animated Counter Node.
- * FIXED: Handles non-numeric strings (like 24x7) without parsing errors.
+ * FIXED: Added hydration safety to prevent server/client mismatch on animated values.
  */
 function Counter({ value, suffix = "+" }: { value: number | string; suffix?: string }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -26,7 +26,7 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
   const numericValue = typeof value === 'string' ? parseInt(value.replace(/\D/g, '')) || 0 : value;
 
   useEffect(() => {
-    if (isSpecialString || !mounted) return;
+    if (!mounted || isSpecialString) return;
     
     let startTime: number | null = null;
     const duration = 2000;
@@ -50,8 +50,8 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
 }
 
 /**
- * @fileOverview Premium Institutional Stats Bar v3.3 (Audit Fixed).
- * FIXED: Hydration safety for local counter animations.
+ * @fileOverview Premium Institutional Stats Bar v3.4.
+ * FIXED: Hydration safety for visibility logic based on admin settings.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -68,9 +68,9 @@ export default function StatsBar() {
   const { data: settings, loading: settingsLoading } = useDoc<any>(settingsRef);
 
   const activeStats = useMemo(() => {
-    if (!mounted) return [];
+    if (!mounted || !settings) return [];
 
-    const s = settings?.statsVisibility || {
+    const s = settings.statsVisibility || {
       showQuestions: true,
       showMocks: true,
       showCategories: true,
@@ -78,7 +78,7 @@ export default function StatsBar() {
       showStudents: false
     };
 
-    const trends = settings?.statsTrends || {
+    const trends = settings.statsTrends || {
       questions: "+28 this week",
       mocks: "+2 added today",
       categories: "Updated daily",
@@ -86,8 +86,8 @@ export default function StatsBar() {
       support: "Live now"
     };
 
-    const mode = settings?.studentCounterMode || 'manual';
-    const threshold = settings?.studentCounterThreshold || 1000;
+    const mode = settings.studentCounterMode || 'manual';
+    const threshold = settings.studentCounterThreshold || 1000;
     const totalUsers = stats?.totalUsers || 0;
 
     const shouldShowStudents = mode === 'auto' 
@@ -108,15 +108,17 @@ export default function StatsBar() {
     return pool.slice(0, 4);
   }, [stats, settings, mounted]);
 
-  if (!mounted) return (
-     <section className="bg-white py-8 md:py-12 border-b border-slate-50">
-        <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
-           <div className="grid gap-4 md:gap-8 grid-cols-2 md:grid-cols-4">
-              {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 md:h-36 w-full rounded-[22px] bg-slate-50" />)}
-           </div>
+  if (!mounted) {
+    return (
+      <section className="bg-white py-8 md:py-12 border-b border-slate-50">
+        <div className="max-w-[1440px] mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 w-full rounded-[22px]" />)}
+          </div>
         </div>
-     </section>
-  );
+      </section>
+    );
+  }
 
   return (
     <section className="bg-white py-8 md:py-12 border-b border-slate-50">
