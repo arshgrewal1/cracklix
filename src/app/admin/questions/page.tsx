@@ -25,7 +25,8 @@ import {
   CheckCircle2,
   AlertCircle,
   Archive,
-  GraduationCap
+  GraduationCap,
+  X
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -53,9 +54,8 @@ import { cn } from "@/lib/utils"
 import { AdminTableSkeleton } from "@/components/admin";
 
 /**
- * @fileOverview Enterprise MCQ Bank Management Hub v4.5.
- * FIXED: Removed index-dependent orderBy to purge the "Authorize Speed Sync" requirement.
- * UPDATED: Implemented native client-side sort for registry nodes.
+ * @fileOverview Enterprise MCQ Bank Management Hub v4.6.
+ * UPDATED: Added a Close button to the bulk selection bar for immediate deselection.
  */
 
 export default function QuestionBank() {
@@ -121,7 +121,6 @@ function QuestionBankContent() {
         constraints.push(startAfter(nextCursor))
       }
       
-      // Removed orderBy(updatedAt) to prevent composite index requirements
       return query(collection(db, "questions"), ...constraints)
     }
 
@@ -130,7 +129,6 @@ function QuestionBankContent() {
       const snap = await getDocs(q)
       let newQs = snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }))
       
-      // Client-side Sort to maintain "Latest" order without requiring Firestore Indexes
       newQs.sort((a: any, b: any) => {
         const tA = a.updatedAt?.seconds || 0;
         const tB = b.updatedAt?.seconds || 0;
@@ -192,14 +190,12 @@ function QuestionBankContent() {
     }
   }
 
-  // Cascading Logic: Filter available Exams by Board
   const availableExams = useMemo(() => {
      if (!exams) return [];
      if (filters.boardId === 'all') return exams;
      return exams.filter((e: any) => e.boardId === filters.boardId);
   }, [exams, filters.boardId]);
 
-  // Cascading Logic: Filter available Subjects by Board
   const availableSubjects = useMemo(() => {
      if (!subjects) return [];
      if (filters.boardId === 'all') return subjects;
@@ -380,19 +376,23 @@ function QuestionBankContent() {
       )}
 
       {selectedIds.length > 0 && (
-         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-12 duration-500 w-[95vw] max-w-2xl">
-            <div className="bg-[#0F172A] text-white px-8 py-4 rounded-[2rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl">
+         <div className="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom-12 duration-500 w-[95vw] max-w-3xl">
+            <div className="bg-[#0F172A] text-white px-6 md:px-8 py-4 rounded-[2rem] shadow-5xl flex items-center justify-between border border-white/10 backdrop-blur-xl relative">
                <div className="flex items-center gap-4">
                   <div className="h-11 w-11 bg-primary/20 rounded-xl flex items-center justify-center text-primary font-black text-sm">{selectedIds.length}</div>
-                  <div>
+                  <div className="hidden sm:block">
                     <p className="text-[11px] font-black uppercase tracking-widest">Assets Selected</p>
                     <p className="text-[8px] font-bold text-slate-500 uppercase">Registry Normalization Active</p>
                   </div>
                </div>
                <div className="flex items-center gap-3">
-                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 hover:bg-emerald-600 transition-all font-black text-[9px] uppercase tracking-widest"><CheckCircle2 className="h-4 w-4" /> Publish</button>
+                  <button onClick={() => handleBulkAction('PUBLISH')} disabled={isBulkProcessing} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/5 hover:bg-emerald-600 transition-all font-black text-[9px] uppercase tracking-widest"><CheckCircle2 className="h-4 w-4" /> Publish</button>
                   <button onClick={() => handleBulkAction('LOCK')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-amber-600 transition-all active:scale-90"><Lock className="h-4 w-4" /></button>
                   <button onClick={() => handleBulkAction('DELETE')} disabled={isBulkProcessing} className="p-3 rounded-xl bg-white/5 hover:bg-rose-600 transition-all active:scale-90"><Trash2 className="h-4 w-4" /></button>
+                  <div className="w-px h-8 bg-white/10 mx-1" />
+                  <button onClick={() => setSelectedIds([])} className="p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-all active:scale-90 text-slate-400 hover:text-white" title="Clear Selection">
+                     <X className="h-4 w-4" />
+                  </button>
                </div>
             </div>
          </div>
@@ -400,3 +400,4 @@ function QuestionBankContent() {
     </div>
   )
 }
+
