@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v66.0.
- * UPDATED: Logo shifted as far left as possible to align with sidebar toggle.
+ * @fileOverview Cracklix Navigation Hub v67.0.
+ * UPDATED: Refined desktop header height and logo scale.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -98,20 +98,20 @@ export default function Navbar() {
       SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-[80px] md:h-[140px]" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-[80px] md:h-[120px]" />;
   }
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
-        <nav className="w-full h-20 md:h-[140px]">
+        <nav className="w-full h-20 md:h-[120px]">
           <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-2 md:px-6 h-full flex items-center justify-between gap-4">
 
             <div className="flex items-center shrink-0 gap-1 md:gap-2 flex-1 lg:flex-none">
               <button
                 onClick={() => setisSidebarOpen(true)}
                 aria-label="Open menu"
-                className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
+                className="flex items-center justify-center w-10 h-10 md:w-11 md:h-11 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
               >
                 <Menu className="w-5 h-5 md:w-6 md:h-6" />
               </button>
@@ -119,7 +119,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0 -ml-5 md:-ml-7"
-                imgClassName="h-20 md:h-48 w-auto"
+                imgClassName="h-20 md:h-40 w-auto"
                 align="left"
               />
             </div>
@@ -142,17 +142,17 @@ export default function Navbar() {
 
               <Link
                 href="/search"
-                className="w-10 h-10 md:h-12 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm"
+                className="w-10 h-10 md:h-11 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm"
               >
                 <Search className="w-5 h-5" />
               </Link>
 
               {loading ? (
-                <Skeleton className="w-10 h-10 md:h-12 rounded-xl bg-slate-100" />
+                <Skeleton className="w-10 h-10 md:h-11 rounded-xl bg-slate-100" />
               ) : user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="w-10 h-10 md:h-12 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all shadow-sm">
+                    <button className="w-10 h-10 md:h-11 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all shadow-sm">
                       <StudentAvatar
                         profile={profile}
                         className="w-full h-full border-none"
@@ -190,7 +190,7 @@ export default function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link href="/login" className="px-3 md:px-4 h-10 md:h-12 rounded-xl bg-primary text-white font-bold text-[10px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
+                <Link href="/login" className="px-3 md:px-4 h-10 md:h-11 rounded-xl bg-primary text-white font-bold text-[10px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
                   Login
                 </Link>
               )}

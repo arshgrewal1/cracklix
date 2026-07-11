@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v19.0.
- * UPDATED: Logo shifted closer to the sidebar toggle button.
+ * @fileOverview Admin Layout v20.0.
+ * UPDATED: Refined top header height and logo scale for a clean administrative portal.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser();
@@ -93,7 +93,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
       )}>
         <header className="pt-safe border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 shrink-0">
-          <div className="h-[80px] md:h-[132px] flex items-center px-2 md:px-6 justify-between">
+          <div className="h-[80px] md:h-[110px] flex items-center px-2 md:px-6 justify-between">
             <div className="flex items-center h-full gap-0 md:gap-1">
               <button 
                 onClick={toggleSidebar}
@@ -105,7 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Logo
                 variant="light"
                 className="shrink-0 -ml-5 md:-ml-7"
-                imgClassName="h-24 md:h-40"
+                imgClassName="h-24 md:h-32"
               />
             </div>
             

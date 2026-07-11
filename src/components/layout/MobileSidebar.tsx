@@ -30,8 +30,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Mobile Sidebar v65.0.
- * UPDATED: Increased header and logo size for PWA dominance.
+ * @fileOverview Mobile Sidebar v66.0.
+ * UPDATED: Refined header height to align with overall branding updates.
  */
 export default function MobileSidebar({
   onClose,
@@ -76,12 +76,12 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
-      {/* HEADER - INCREASED HEIGHT */}
-      <div className="h-[100px] md:h-[120px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
+      {/* HEADER - REFINED HEIGHT */}
+      <div className="h-[80px] md:h-[110px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
          <Logo
            variant="light"
            align="left"
-           className="h-20 md:h-24 w-auto flex-1"
+           className="h-18 md:h-22 w-auto flex-1"
            imgClassName="h-full w-auto"
            onClick={onClose}
          />
