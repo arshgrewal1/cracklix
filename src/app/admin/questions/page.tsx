@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, useCallback, Suspense } from "react"
@@ -50,12 +49,12 @@ import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
-import AdminTableSkeleton from "@/components/layout/AdminTableSkeleton";
+import { AdminTableSkeleton } from "@/components/admin";
 
 /**
- * @fileOverview Enterprise MCQ Bank Management Hub v4.0.
+ * @fileOverview Enterprise MCQ Bank Management Hub v4.1.
+ * FIXED: Standardized AdminTableSkeleton import path.
  * FIXED: Implemented Zero-Friction Fallback for missing Firestore Indexes.
- * FIXED: Strictly isolated Board/Subject filtering to prevent cross-contamination.
  */
 
 export default function QuestionBank() {

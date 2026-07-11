@@ -13,10 +13,11 @@ import { useToast } from "@/hooks/use-toast"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
-import { useFirestoreCrud } from "@/hooks/use-firestore-crud"
+import { useFirestoreCrud } from "@/hooks/useFirestoreCrud"
 
 /**
- * @fileOverview Subject Registry Hub v18.0.
+ * @fileOverview Subject Registry Hub v18.1.
+ * FIXED: Standardized hook import for useFirestoreCrud.
  * FIXED: Added Board Hub association for cascading dropdown support in MCQ Bank.
  */
 
@@ -89,24 +90,15 @@ export default function SubjectRegistryPage() {
 
   return (
     <div className="space-y-6 md:space-y-12 pb-32 text-left animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
-        <div className="space-y-1">
-           <div className="flex items-center gap-2 mb-1">
-              <SearchCode className="h-4 w-4 text-primary" />
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Canonical Mapping Registry</span>
-           </div>
-          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Subject List</h1>
-          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Normalize preparation nodes.</p>
-        </div>
-        <div className="flex gap-3 w-full sm:w-auto">
-           <Button onClick={() => setMergeDialogOpen(true)} variant="outline" className="flex-1 sm:flex-none h-11 md:h-14 px-6 rounded-full font-black uppercase text-[10px] tracking-widest gap-2 border-slate-200 bg-white shadow-sm">
-              <GitMerge className="h-4 w-4 text-emerald-500" /> Deep Merge
-           </Button>
-           <Button onClick={() => setEditingSubject({ name: "", boardId: boardFilter !== 'all' ? boardFilter : "", aliases: [], description: "" })} className="flex-1 sm:flex-none h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase tracking-widest text-[10px] shadow-xl border-none active:scale-95 gap-2">
-              <Plus className="h-4 w-4" /> Register Node
-           </Button>
-        </div>
-      </div>
+      <AdminPageHeader
+        icon={SearchCode}
+        label="Canonical Mapping Registry"
+        title="Subject List"
+        subtitle="Normalize preparation nodes."
+        actionLabel="Register Node"
+        actionIcon={Plus}
+        onAction={() => setEditingSubject({ name: "", boardId: boardFilter !== 'all' ? boardFilter : "", aliases: [], description: "" })}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-1">
          <div className="relative group">
@@ -159,7 +151,7 @@ export default function SubjectRegistryPage() {
                   </TableCell>
                   <TableCell className="text-right px-6 md:px-12">
                     <div className="flex justify-end gap-2 md:gap-3 opacity-20 group-hover:opacity-100 transition-all">
-                       <button onClick={() => setEditingSubject(s)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-4 w-4 md:h-5 md:w-5" /></button>
+                       <button onClick={() => setEditingSubject(s)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-4 w-4" /></button>
                        <button onClick={async () => { if(confirm("Permanently purge this subject node?")) await deleteDoc(doc(db!, "subjects", s.id)) }} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-4 w-4 md:h-5 md:w-5" /></button>
                     </div>
                   </TableCell>
@@ -170,42 +162,66 @@ export default function SubjectRegistryPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!editingSubject} onOpenChange={o => !o && !isSaving && setEditingSubject(null)}>
-         <DialogContent className="sm:max-w-xl w-[95vw] max-h-[95vh] rounded-3xl md:rounded-[3rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
-            <div className="h-2 w-full bg-[#0F172A] shrink-0" />
-            <DialogHeader className="p-6 md:p-10 pb-2 md:pb-4 shrink-0">
-               <div className="flex justify-between items-center">
-                  <DialogTitle className="text-xl md:text-3xl font-black text-[#0F172A]">Subject Architect</DialogTitle>
-                  <button onClick={() => setEditingSubject(null)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors"><X className="h-5 w-5 text-slate-400" /></button>
-               </div>
-               <DialogDescription className="text-slate-400 font-bold text-[9px] md:text-sm mt-1">Modify canonical registry mappings.</DialogDescription>
+      <AdminDialogShell
+        open={!!editingSubject}
+        onOpenChange={o => !o && !isSaving && setEditingSubject(null)}
+        title="Subject Architect"
+        description="Modify canonical registry mappings."
+        isSaving={isSaving}
+        onSave={handleSaveSubject}
+        onDiscard={() => setEditingSubject(null)}
+        saveLabel="Commit Hub"
+      >
+         <div className="space-y-6 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
+            <div className="space-y-2 text-left">
+               <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Parent Board Hub</Label>
+               <select value={editingSubject?.boardId || ""} onChange={e => setEditingSubject({...editingSubject, boardId: e.target.value})} className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-5 font-bold text-sm outline-none shadow-inner">
+                  <option value="" disabled>Select Board</option>
+                  {boards?.map(b => <option key={b.id} value={b.id}>{b.abbreviation} Hub</option>)}
+               </select>
+            </div>
+            <div className="space-y-2 text-left">
+               <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Canonical Name</Label>
+               <Input value={editingSubject?.name ?? ""} onChange={e => setEditingSubject({...editingSubject, name: e.target.value})} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-bold px-5" placeholder="e.g. Punjab History" />
+            </div>
+            <div className="space-y-2 text-left">
+               <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Relational Aliases</Label>
+               <Textarea 
+                 value={typeof editingSubject?.aliases === 'string' ? editingSubject.aliases : editingSubject?.aliases?.join(', ') || ""} 
+                 onChange={e => setEditingSubject({...editingSubject, aliases: e.target.value})} 
+                 className="min-h-[120px] rounded-xl border-slate-100 bg-slate-50 p-5 font-medium leading-relaxed shadow-inner resize-none" 
+                 placeholder="Separate by commas (e.g. Modern Punjab, Sikh Empire)..."
+               />
+            </div>
+         </div>
+      </AdminDialogShell>
+
+      <Dialog open={mergeDialogOpen} onOpenChange={(o) => mergeDialogOpen && !isMerging ? setMergeDialogOpen(o) : undefined}>
+         <DialogContent className="sm:max-w-xl rounded-[2.5rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left">
+            <div className="h-2 w-full bg-emerald-500" />
+            <DialogHeader className="p-10 pb-4">
+               <DialogTitle className="text-2xl font-black font-headline uppercase flex items-center gap-3"><GitMerge className="h-6 w-6 text-emerald-500" /> Normalization Engine</DialogTitle>
+               <DialogDescription className="text-slate-400 text-sm font-medium">Consolidate duplicate subject nodes into one canonical hub.</DialogDescription>
             </DialogHeader>
-            <div className="px-6 md:px-10 pb-6 md:pb-10 space-y-6 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
-               <div className="space-y-2 text-left">
-                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Parent Board Hub</Label>
-                  <select value={editingSubject?.boardId || ""} onChange={e => setEditingSubject({...editingSubject, boardId: e.target.value})} className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-5 font-bold text-sm outline-none shadow-inner">
-                     <option value="" disabled>Select Board</option>
-                     {boards?.map(b => <option key={b.id} value={b.id}>{b.abbreviation} Hub</option>)}
+            <div className="p-10 space-y-8">
+               <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Source Node (TO BE PURGED)</Label>
+                  <select value={mergeSource} onChange={e => setMergeSource(e.target.value)} className="w-full h-14 bg-slate-50 border-none rounded-xl px-4 font-bold text-sm outline-none">
+                     <option value="">Select Source</option>
+                     {subjects?.map((s:any) => <option key={s.id} value={s.id}>{s.name}</option>)}
                   </select>
                </div>
-               <div className="space-y-2 text-left">
-                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Canonical Name</Label>
-                  <Input value={editingSubject?.name ?? ""} onChange={e => setEditingSubject({...editingSubject, name: e.target.value})} className="h-12 md:h-14 rounded-xl border-slate-200 bg-slate-50 font-bold px-5" placeholder="e.g. Punjab History" />
-               </div>
-               <div className="space-y-2 text-left">
-                  <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Relational Aliases</Label>
-                  <Textarea 
-                    value={typeof editingSubject?.aliases === 'string' ? editingSubject.aliases : editingSubject?.aliases?.join(', ') || ""} 
-                    onChange={e => setEditingSubject({...editingSubject, aliases: e.target.value})} 
-                    className="min-h-[120px] rounded-xl border-slate-100 bg-slate-50 p-5 font-medium leading-relaxed shadow-inner resize-none" 
-                    placeholder="Separate by commas (e.g. Modern Punjab, Sikh Empire)..."
-                  />
+               <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Target Hub (CANONICAL)</Label>
+                  <select value={mergeTarget} onChange={e => setMergeTarget(e.target.value)} className="w-full h-14 bg-[#0F172A] text-white border-none rounded-xl px-4 font-bold text-sm outline-none">
+                     <option value="">Select Canonical Hub</option>
+                     {subjects?.filter((s:any) => s.id !== mergeSource).map((s:any) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  </select>
                </div>
             </div>
-            <DialogFooter className="p-6 md:p-10 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4 shrink-0">
-               <Button variant="ghost" onClick={() => setEditingSubject(null)} className="h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400">Discard</Button>
-               <Button onClick={handleSaveSubject} disabled={isSaving} className="flex-1 h-11 md:h-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-full shadow-xl border-none active:scale-95 gap-2">
-                  {isSaving ? <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin" /> : <Save className="h-3 w-3 md:h-4 md:w-4" />} Commit Hub
+            <DialogFooter className="p-10 pt-0">
+               <Button onClick={handleDeepMerge} disabled={isMerging || !mergeSource || !mergeTarget} className="w-full h-16 bg-emerald-600 hover:bg-emerald-700 text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl transition-all">
+                  {isMerging ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-4 w-4" />} Authorize Deep Merge
                </Button>
             </DialogFooter>
          </DialogContent>
