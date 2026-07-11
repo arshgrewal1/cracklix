@@ -23,8 +23,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Center v121.0.
- * UPDATED: Centered QuickActionCard content to match platform standards.
+ * @fileOverview Institutional Hero Center v122.0.
+ * UPDATED: Premium Founder Tagline Layout.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -70,7 +70,7 @@ export default function Hero() {
             </motion.div>
 
             <div className="space-y-4 md:space-y-6">
-              <h1 className="text-[36px] md:text-5xl lg:text-[50px] font-black tracking-tighter text-[#0F172A] leading-[1.1] md:leading-[1.05] antialiased">
+              <h1 className="text-[36px] md:text-5xl lg:text-[50px] font-black tracking-tighter text-[#0F172A] masonry-heading leading-[1.1] md:leading-[1.05] antialiased">
                 Crack Punjab Exams <br className="hidden md:block"/>
                 <span className="text-primary italic">with confidence</span>
               </h1>
@@ -91,7 +91,7 @@ export default function Hero() {
                 ))}
               </div>
 
-              {/* Founder Trust Badge */}
+              {/* Founder Trust Badge - Premium Layout */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -100,16 +100,21 @@ export default function Hero() {
               >
                 <Link 
                   href="/meet-founder" 
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50/30 border border-blue-100/50 hover:bg-white hover:border-primary/20 transition-all duration-300 group shadow-sm"
+                  className="inline-flex flex-col md:flex-row items-center gap-4 md:gap-8 px-6 py-5 md:px-8 md:py-4 rounded-[2rem] bg-blue-50/30 border border-blue-100/50 hover:bg-white hover:border-primary/20 transition-all duration-300 group shadow-sm"
                 >
-                  <p className="text-[13px] md:text-base font-medium text-slate-500 leading-none">
-                    ✨ Built with passion in Punjab. Developed by{" "}
-                    <span className="text-[#0F172A] font-bold group-hover:underline decoration-primary underline-offset-4">
-                      Arsh Grewal
-                    </span>
-                  </p>
-                  <span className="flex items-center gap-1 text-primary font-bold text-[11px] md:text-xs ml-1 whitespace-nowrap">
-                    Meet the founder <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                  <div className="space-y-1.5 text-center md:text-left">
+                     <p className="text-[15px] md:text-xl font-[900] text-[#0F172A] tracking-tight leading-none">
+                        🚀 One Vision. One Mission.
+                     </p>
+                     <p className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-[0.3em] leading-none">
+                        — Arsh Grewal
+                     </p>
+                  </div>
+                  
+                  <div className="hidden md:block w-px h-10 bg-slate-200/60" />
+                  
+                  <span className="flex items-center gap-2 text-primary font-black text-[11px] md:text-sm uppercase tracking-widest whitespace-nowrap group-hover:gap-3 transition-all">
+                    Meet the founder <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </Link>
               </motion.div>
