@@ -11,8 +11,8 @@ interface SidebarHeaderProps {
 }
 
 /**
- * Cracklix Admin Sidebar Header v39.0.
- * UPDATED: Increased logo sizes for better visibility.
+ * Cracklix Admin Sidebar Header v40.0.
+ * UPDATED: Further increased logo sizes for premium presence.
  */
 export default function SidebarHeader({
   isOpen,
@@ -32,7 +32,7 @@ export default function SidebarHeader({
         align={isOpen ? "left" : "center"}
         className="transition-all duration-300"
         imgClassName={cn(
-          isOpen ? "h-14 md:h-16" : "h-12 md:h-14"
+          isOpen ? "h-18 md:h-24" : "h-16 md:h-18"
         )}
       />
 
