@@ -36,7 +36,8 @@ import {
   Library,
   Fingerprint,
   FileJson,
-  CreditCard
+  CreditCard,
+  ShieldCheck
 } from "lucide-react";
 
 import {
