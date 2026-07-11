@@ -17,8 +17,8 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v61.3 (Stability Optimized).
- * FIXED: Moved script strategy to afterInteractive to prevent ChunkLoadError.
+ * @fileOverview Root Layout v61.4 (Stability Optimized).
+ * FIXED: Metadata and Viewport aligned with Next.js 15.1 standards.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
