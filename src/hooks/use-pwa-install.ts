@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
 /**
- * @fileOverview Universal PWA Hook v2.0.
- * Hardened to capture and persist the installation prompt across the platform lifecycle.
+ * @fileOverview Universal PWA Hook v3.0.
+ * Hardened to capture and trigger the installation prompt with maximum reliability.
  */
 export function usePWAInstall() {
   const [isInstalled, setIsInstalled] = useState(false);
@@ -12,10 +12,12 @@ export function usePWAInstall() {
 
   const checkStatus = useCallback(() => {
     if (typeof window === 'undefined') return;
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || (window.navigator as any).standalone === true;
+    
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                        (window.navigator as any).standalone === true;
+    
     setIsInstalled(isStandalone);
     
-    // Check if the prompt was already captured and saved to the window object
     if ((window as any).deferredPrompt) {
       setCanInstall(true);
     }
@@ -25,6 +27,7 @@ export function usePWAInstall() {
     checkStatus();
 
     const handlePrompt = (e: any) => {
+      console.log('[PWA_REGISTRY] beforeinstallprompt event captured.');
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
       // Stash the event so it can be triggered later.
@@ -34,8 +37,7 @@ export function usePWAInstall() {
     };
 
     const handleAppInstalled = () => {
-      // Log the installation to the registry
-      console.log('[PWA_REGISTRY] Hub successfully installed.');
+      console.log('[PWA_REGISTRY] Application successfully installed on device.');
       setIsInstalled(true);
       setCanInstall(false);
       (window as any).deferredPrompt = null;
@@ -44,6 +46,11 @@ export function usePWAInstall() {
     window.addEventListener('beforeinstallprompt', handlePrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
     
+    // Fallback check: if the event already fired before mount
+    if ((window as any).deferredPrompt) {
+      setCanInstall(true);
+    }
+
     return () => {
        window.removeEventListener('beforeinstallprompt', handlePrompt);
        window.removeEventListener('appinstalled', handleAppInstalled);
@@ -52,18 +59,30 @@ export function usePWAInstall() {
 
   const installApp = async () => {
     const prompt = (window as any).deferredPrompt;
-    if (!prompt) return;
+    
+    if (!prompt) {
+      console.warn('[PWA_REGISTRY] No installation prompt available in current browser context.');
+      // If we can't trigger the prompt, we redirect to ensure the user is on the right page
+      if (window.location.pathname !== '/install/') {
+        window.location.href = '/install/';
+      }
+      return;
+    }
 
-    // Show the install prompt
-    prompt.prompt();
-    
-    // Wait for the user to respond to the prompt
-    const { outcome } = await prompt.userChoice;
-    console.log(`[PWA_AUDIT] User response to install: ${outcome}`);
-    
-    if (outcome === 'accepted') {
-      (window as any).deferredPrompt = null;
-      setCanInstall(false);
+    try {
+      // Show the install prompt
+      await prompt.prompt();
+      
+      // Wait for the user to respond to the prompt
+      const { outcome } = await prompt.userChoice;
+      console.log(`[PWA_AUDIT] User response to installation: ${outcome}`);
+      
+      if (outcome === 'accepted') {
+        (window as any).deferredPrompt = null;
+        setCanInstall(false);
+      }
+    } catch (err) {
+      console.error('[PWA_INSTALL_ERROR]:', err);
     }
   };
 

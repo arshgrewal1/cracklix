@@ -2,7 +2,7 @@ const withPWA = require('next-pwa')({
     dest: 'public',
     register: true,
     skipWaiting: true,
-    disable: process.env.NODE_ENV !== 'production',
+    disable: false, // Enabled in development so the user can test the installation prompt
 });
 
 /** @type {import('next').NextConfig} */
