@@ -13,15 +13,18 @@ import {
   ArrowRight,
   Heart,
   Zap,
-  Star
+  Star,
+  Calendar,
+  Briefcase,
+  MapPin
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 /**
- * @fileOverview Official Meet the Founder Page.
- * Detailed narrative and mission for Arsh Grewal.
+ * @fileOverview Official Meet the Founder Page v2.0.
+ * UPDATED: Real data nodes and corrected support email.
  */
 export default function MeetFounderPage() {
   return (
@@ -60,12 +63,12 @@ export default function MeetFounderPage() {
                   animate={{ opacity: 1, y: 0 }}
                   className="space-y-4"
                 >
-                  <Badge label="Founder & Developer" />
+                  <Badge label="Founder & Lead Developer" />
                   <h1 className="text-4xl md:text-7xl font-[900] text-[#0F172A] tracking-tighter leading-[0.95]">
                     Arsh <span className="text-primary">Grewal.</span>
                   </h1>
                   <p className="text-lg md:text-2xl text-slate-500 font-medium leading-relaxed italic">
-                    "Empowering every aspirant in Punjab with institutional-grade technology."
+                    "Empowering every aspirant in Punjab with institutional-grade preparation technology."
                   </p>
                 </motion.div>
                 
@@ -89,7 +92,7 @@ export default function MeetFounderPage() {
               <p>
                 Instead of waiting for a solution, I decided to build it. <span className="text-primary font-black">Cracklix</span> was born out of a mission to simplify the preparation journey for every student in our state. Every feature, from the high-fidelity CBT engine to the daily current affairs, is developed with precision and a student-first philosophy.
               </p>
-              <div className="bg-[#0F172A] p-10 md:p-16 rounded-[3rem] text-white space-y-6 relative overflow-hidden not-prose">
+              <div className="bg-[#0F172A] p-10 md:p-16 rounded-[3rem] text-white space-y-6 relative overflow-hidden not-prose shadow-2xl">
                  <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Star className="h-48 w-48 text-primary fill-primary" /></div>
                  <h2 className="text-3xl md:text-4xl font-black tracking-tight leading-tight">My Commitment</h2>
                  <p className="text-slate-400">
@@ -110,9 +113,9 @@ export default function MeetFounderPage() {
             <div className="pt-12 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8">
                <div className="text-center md:text-left space-y-1">
                   <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.4em]">Connect Directly</p>
-                  <p className="text-xl font-bold text-[#0F172A]">management@cracklix.com</p>
+                  <p className="text-xl md:text-2xl font-bold text-[#0F172A]">cracklixhelp@gmail.com</p>
                </div>
-               <Button asChild className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[11px] tracking-widest rounded-2xl shadow-xl border-none">
+               <Button asChild className="h-16 px-10 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[11px] tracking-widest rounded-2xl shadow-xl border-none active:scale-95 transition-all">
                   <Link href="/contact">Get in Touch <MessageCircle className="ml-2 h-4 w-4" /></Link>
                </Button>
             </div>
@@ -120,12 +123,14 @@ export default function MeetFounderPage() {
         </section>
 
         {/* STATS STRIP */}
-        <section className="py-12 bg-slate-50 border-y border-slate-100">
-           <div className="container mx-auto px-4 max-w-6xl grid grid-cols-2 md:grid-cols-4 gap-8">
-              <MinimalStat value="10K+" label="Aspirants" />
-              <MinimalStat value="450+" label="Mock Series" />
-              <MinimalStat value="12K+" label="MCQ Bank" />
-              <MinimalStat value="100%" label="Verified" />
+        <section className="py-12 md:py-24 bg-slate-50 border-y border-slate-100">
+           <div className="container mx-auto px-4 max-w-6xl">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+                 <MinimalStat value="10K+" label="Aspirants" icon={Target} />
+                 <MinimalStat value="450+" label="Mock Series" icon={Zap} />
+                 <MinimalStat value="12K+" label="MCQ Bank" icon={ShieldCheck} />
+                 <MinimalStat value="19 July" label="Building Since" icon={Briefcase} subValue="2026" />
+              </div>
            </div>
         </section>
       </main>
@@ -152,11 +157,19 @@ function FeatureChip({ icon: Icon, label }: { icon: any, label: string }) {
   );
 }
 
-function MinimalStat({ value, label }: { value: string, label: string }) {
+function MinimalStat({ value, label, icon: Icon, subValue }: { value: string, label: string, icon: any, subValue?: string }) {
   return (
-    <div className="text-center space-y-1">
-       <p className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter">{value}</p>
-       <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+    <div className="text-center space-y-3 group">
+       <div className="h-12 w-12 md:h-16 md:w-16 bg-white rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm mx-auto flex items-center justify-center text-slate-300 group-hover:text-primary transition-all group-hover:scale-110">
+          <Icon className="h-6 w-6 md:h-8 md:w-8" />
+       </div>
+       <div className="space-y-1">
+          <p className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">
+            {value}
+            {subValue && <span className="text-xs md:text-lg text-slate-400 ml-1 block md:inline">{subValue}</span>}
+          </p>
+          <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+       </div>
     </div>
   );
 }
