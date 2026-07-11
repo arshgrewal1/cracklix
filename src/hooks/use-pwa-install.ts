@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
 /**
- * @fileOverview Universal PWA Hook v3.0.
- * Hardened to capture and trigger the installation prompt with maximum reliability.
+ * @fileOverview Universal PWA Hook v3.1.
+ * FIXED: Aggressive global check for stashed deferredPrompt to enable one-click install.
  */
 export function usePWAInstall() {
   const [isInstalled, setIsInstalled] = useState(false);
@@ -18,6 +18,7 @@ export function usePWAInstall() {
     
     setIsInstalled(isStandalone);
     
+    // Check if prompt was already captured by global listener
     if ((window as any).deferredPrompt) {
       setCanInstall(true);
     }
@@ -28,11 +29,8 @@ export function usePWAInstall() {
 
     const handlePrompt = (e: any) => {
       console.log('[PWA_REGISTRY] beforeinstallprompt event captured.');
-      // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
-      // Stash the event so it can be triggered later.
       (window as any).deferredPrompt = e;
-      // Update UI notify the user they can install the PWA
       setCanInstall(true);
     };
 
@@ -46,36 +44,34 @@ export function usePWAInstall() {
     window.addEventListener('beforeinstallprompt', handlePrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
     
-    // Fallback check: if the event already fired before mount
-    if ((window as any).deferredPrompt) {
-      setCanInstall(true);
-    }
+    // Polling check for browsers that might delay the global window assignment
+    const pollInterval = setInterval(() => {
+      if ((window as any).deferredPrompt && !canInstall) {
+        setCanInstall(true);
+        clearInterval(pollInterval);
+      }
+    }, 1000);
 
     return () => {
        window.removeEventListener('beforeinstallprompt', handlePrompt);
        window.removeEventListener('appinstalled', handleAppInstalled);
+       clearInterval(pollInterval);
     };
-  }, [checkStatus]);
+  }, [checkStatus, canInstall]);
 
   const installApp = async () => {
     const prompt = (window as any).deferredPrompt;
     
     if (!prompt) {
-      console.warn('[PWA_REGISTRY] No installation prompt available in current browser context.');
-      // If we can't trigger the prompt, we redirect to ensure the user is on the right page
-      if (window.location.pathname !== '/install/') {
-        window.location.href = '/install/';
-      }
+      console.warn('[PWA_REGISTRY] No installation prompt available. Redirecting to hub.');
+      window.location.href = '/install';
       return;
     }
 
     try {
-      // Show the install prompt
       await prompt.prompt();
-      
-      // Wait for the user to respond to the prompt
       const { outcome } = await prompt.userChoice;
-      console.log(`[PWA_AUDIT] User response to installation: ${outcome}`);
+      console.log(`[PWA_AUDIT] User response: ${outcome}`);
       
       if (outcome === 'accepted') {
         (window as any).deferredPrompt = null;

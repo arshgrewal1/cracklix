@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -10,6 +9,7 @@ import CapacitorManager from "@/components/native/CapacitorManager";
 import { Toaster } from "@/components/ui/toaster";
 import { INSTITUTIONAL_PAYLOAD } from "@/lib/institutional-payload";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import Script from "next/script";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -17,7 +17,7 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v58.0 (APK Size & Performance Optimized).
+ * @fileOverview Root Layout v59.0 (PWA Hardened).
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -64,6 +64,16 @@ export default function RootLayout({
           overflow-x-hidden
         `}
       >
+        <Script id="pwa-install-handler" strategy="beforeInteractive">
+          {`
+            window.addEventListener('beforeinstallprompt', (e) => {
+              e.preventDefault();
+              window.deferredPrompt = e;
+              console.log('[PWA_REGISTRY] beforeinstallprompt event captured and stashed.');
+            });
+          `}
+        </Script>
+
         <FirebaseClientProvider>
           <div className="min-h-screen flex flex-col">
             {children}

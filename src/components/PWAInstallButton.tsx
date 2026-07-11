@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Smartphone, ArrowRight, Zap } from 'lucide-react';
+import { Smartphone, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 
@@ -13,8 +13,8 @@ interface PWAInstallButtonProps {
 }
 
 /**
- * @fileOverview Institutional PWA Install Trigger v5.0.
- * DIRECT: Optimized labels for a "download app" feel as requested.
+ * @fileOverview Institutional PWA Install Trigger v5.1.
+ * FIXED: Optimized variants for light/dark backgrounds.
  */
 export default function PWAInstallButton({ 
   className, 
@@ -39,7 +39,8 @@ export default function PWAInstallButton({
         "h-14 px-8 rounded-full font-black uppercase text-[10px] tracking-[0.2em] gap-3 shadow-2xl transition-all active:scale-95 group border-none",
         variant === 'primary' ? "bg-primary hover:bg-blue-700 text-white" : 
         variant === 'dark' ? "bg-[#0B1528] hover:bg-black text-white" : 
-        variant === 'outline' ? "bg-white/5 border-white/10 text-white hover:bg-white/10" : "bg-white border-slate-200 text-[#0F172A] hover:bg-slate-50",
+        variant === 'outline' ? "border-2 border-slate-200 bg-white text-[#0F172A] hover:bg-slate-50" : 
+        "bg-white border-slate-200 text-[#0F172A] hover:bg-slate-50",
         className
       )}
     >
