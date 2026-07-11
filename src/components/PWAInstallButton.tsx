@@ -13,8 +13,8 @@ interface PWAInstallButtonProps {
 }
 
 /**
- * @fileOverview Institutional PWA Install Trigger v4.0.
- * Direct trigger for the browser's native installation prompt or redirect to instructions.
+ * @fileOverview Institutional PWA Install Trigger v5.0.
+ * DIRECT: Optimized labels for a "download app" feel as requested.
  */
 export default function PWAInstallButton({ 
   className, 
@@ -44,7 +44,7 @@ export default function PWAInstallButton({
       )}
     >
       <Smartphone className="h-4 w-4 md:h-5 md:w-5 group-hover:rotate-12 transition-transform" />
-      {showLabel && <span>{canInstall ? 'Install Hub Now' : 'Setup App Hub'}</span>}
+      {showLabel && <span>{canInstall ? 'Install App Now' : 'Download Official App'}</span>}
       <ArrowRight className="h-4 w-4 opacity-40 ml-1 group-hover:translate-x-1 transition-transform" />
     </Button>
   );

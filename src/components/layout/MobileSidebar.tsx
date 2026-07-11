@@ -30,8 +30,8 @@ import { Badge } from "@/components/ui/badge";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Mobile Sidebar v57.0.
- * Replaced APK references with direct Install Hub branding.
+ * @fileOverview Mobile Sidebar v58.0.
+ * UPDATED: Removed redundant Setup Hub links and promoted Direct PWA Installation.
  */
 export default function MobileSidebar({
   onClose,
@@ -75,7 +75,7 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
-      {/* HEADER: FIXED CLOSE BUTTON VISIBILITY */}
+      {/* HEADER */}
       <div className="h-[80px] md:h-[112px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
          <Logo
            variant="light"
@@ -129,6 +129,14 @@ export default function MobileSidebar({
           </Link>
         </div>
 
+        {/* DIRECT INSTALL TRIGGER */}
+        <div className="px-4 pb-6">
+           <PWAInstallButton 
+             variant="primary" 
+             className="w-full h-14 rounded-2xl shadow-xl" 
+           />
+        </div>
+
         {/* NAVIGATION LIST */}
         <div className="px-2">
           <p className="mb-2 px-4 text-[10px] font-black text-slate-400 tracking-widest uppercase">
@@ -166,34 +174,21 @@ export default function MobileSidebar({
                 </Link>
               );
             })}
-            
-            {/* DIRECT INSTALL LINK */}
-            <Link
-               href="/install"
-               onClick={onClose}
-               className={cn(
-                 "flex h-12 items-center gap-4 rounded-xl px-4 transition-all bg-primary/5 text-primary border border-primary/10 mt-2"
-               )}
-            >
-               <Award className="h-5 w-5 shrink-0" />
-               <span className="font-bold text-[14px] tracking-tight">Install Official App</span>
-               <Badge className="ml-auto bg-primary text-white text-[8px] font-black uppercase">Instant</Badge>
-            </Link>
           </div>
         </div>
 
         {/* SHARE APP PROMO */}
         <div className="px-2 py-6">
-           <div className="bg-[#0B1528] rounded-[1.5rem] p-4 space-y-3 border border-white/5 shadow-xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12 group-hover:scale-110 transition-transform"><Award className="h-12 w-12" /></div>
+           <div className="bg-[#0B1528] rounded-[1.5rem] p-6 space-y-4 border border-white/5 shadow-xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 rotate-12 group-hover:scale-110 transition-transform"><Award className="h-16 w-16" /></div>
               <div className="relative z-10 text-left">
-                <h4 className="text-[10px] font-black text-white tracking-widest uppercase">Share Experience</h4>
+                <h4 className="text-[10px] font-black text-white tracking-[0.3em] uppercase">Community</h4>
+                <p className="text-[13px] font-bold text-slate-400 mt-2">Help others prepare smarter.</p>
               </div>
               <ShareButton 
                 variant="dark" 
-                className="w-full h-10 rounded-xl bg-primary hover:bg-blue-600 text-white text-[10px] border-none shadow-lg relative z-10" 
+                className="w-full h-14 rounded-xl bg-primary hover:bg-blue-700 text-white text-[10px] border-none shadow-lg relative z-10" 
               />
-              <PWAInstallButton variant="primary" />
            </div>
         </div>
       </div>
