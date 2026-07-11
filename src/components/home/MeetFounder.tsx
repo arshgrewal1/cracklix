@@ -9,7 +9,8 @@ import Link from "next/link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Meet Founder section v5.3 - Fixed animate TypeError & Visibility.
+ * @fileOverview Meet Founder section v5.4.
+ * FIXED: animate TypeError and updated Building Since date.
  */
 export default function MeetFounder() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -86,7 +87,7 @@ export default function MeetFounder() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-24">
             <StatCard icon={<User />} label="Student Founder" isInView={isInView} />
-            <StatCard icon={<Briefcase />} label="Building Since" value="2023" isInView={isInView} delay={0.1} />
+            <StatCard icon={<Briefcase />} label="Building Since" value="19 July 2026" isInView={isInView} delay={0.1} />
             <StatCard icon={<MapPin />} label="Punjab, India" isInView={isInView} delay={0.2} />
             <StatCard icon={<Target />} label="Student-First Mission" isInView={isInView} delay={0.3} />
           </div>
@@ -123,9 +124,10 @@ export default function MeetFounder() {
 
 function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.ReactNode; label: string; value?: string; isInView: boolean; delay?: number }) {
   const [count, setCount] = useState(0);
+  const isNumeric = value && /^\d+$/.test(value);
 
   useEffect(() => {
-    if (isInView && value && !isNaN(parseInt(value))) {
+    if (isInView && isNumeric) {
       const controls = animate(0, parseInt(value), {
         duration: 2,
         delay,
@@ -133,7 +135,7 @@ function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.Rea
       });
       return () => controls.stop();
     }
-  }, [isInView, value, delay]);
+  }, [isInView, value, delay, isNumeric]);
 
   return (
     <motion.div
@@ -143,7 +145,11 @@ function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.Rea
       transition={{ duration: 0.5, delay: delay + 0.2, ease: "easeOut" }}
     >
       <div className="text-primary">{icon}</div>
-      {value ? <p className="text-4xl font-black text-[#0F172A] tabular-nums">{count}</p> : null}
+      {value ? (
+        <p className="text-xl md:text-3xl font-black text-[#0F172A] tabular-nums leading-tight">
+          {isNumeric ? count : value}
+        </p>
+      ) : null}
       <p className="text-[10px] md:text-sm font-bold text-slate-500 uppercase tracking-widest">{label}</p>
     </motion.div>
   );
