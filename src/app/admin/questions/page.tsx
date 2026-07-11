@@ -50,6 +50,7 @@ import { useToast } from "@/hooks/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import AdminTableSkeleton from "@/components/layout/AdminTableSkeleton";
 
 /**
  * @fileOverview Enterprise MCQ Bank Management Hub v4.0.

@@ -6,14 +6,11 @@ import {
   Zap,
   Star,
   ArrowRight,
-  ClipboardList,
-  BookOpen,
-  FileStack,
-  Newspaper,
   Play,
-  LayoutGrid,
   ChevronRight,
-  Smartphone
+  Smartphone,
+  ShieldCheck,
+  Layers
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -26,8 +23,8 @@ import { cn } from "@/lib/utils";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Institutional Hero Hub v111.0.
- * UPDATED: Integrated direct PWA Install CTA.
+ * @fileOverview Institutional Hero Hub v112.0.
+ * UPDATED: Integrated highly visible PWA Install CTA.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -46,81 +43,83 @@ export default function Hero() {
     { label: "Punjab Police", href: "/exams/hub/punjab-police" },
     { label: "PSPCL", href: "/exams/hub/pspcl" },
     { label: "PSTET", href: "/exams/hub/pstet" },
-    { label: "ETT Cader", href: "/exams/hub/teaching-hub" },
-    { label: "Master Cader", href: "/exams/hub/teaching-hub" },
     { label: "And Others", href: "/exams" }
   ];
 
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden bg-white pt-6 pb-10 md:pt-10 md:pb-14 border-b border-slate-50">
+    <section className="relative overflow-hidden bg-white pt-6 pb-10 md:pt-16 md:pb-24 border-b border-slate-50">
       <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto">
         
         <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-center px-4 sm:px-6 lg:px-8">
 
           {/* 1. Text Content Hub */}
-          <div className="text-center lg:text-left space-y-4 md:space-y-6 flex flex-col order-1">
+          <div className="text-center lg:text-left space-y-4 md:space-y-8 flex flex-col order-1">
             
             <motion.div 
                initial={{ opacity: 0, y: -10 }}
                animate={{ opacity: 1, y: 0 }}
-               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50/50 border border-blue-100/50 w-fit mx-auto lg:mx-0"
+               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50/50 border border-blue-100/50 w-fit mx-auto lg:mx-0"
             >
-              <Star className="h-3 w-3 text-yellow-500 fill-yellow-500 animate-pulse" />
-              <span className="text-[11px] md:text-sm font-bold text-slate-600 tracking-tight">
-                Punjab&apos;s smartest study platform
+              <Star className="h-3.5 w-3.5 text-primary fill-primary animate-pulse" />
+              <span className="text-[11px] md:text-sm font-black uppercase tracking-widest text-slate-600">
+                Punjab&apos;s Smartest Platform
               </span>
             </motion.div>
 
-            <div className="space-y-3 md:space-y-5">
-              <h1 className="text-[26px] md:text-5xl lg:text-6xl xl:text-7xl font-[900] tracking-tighter text-[#0F172A] leading-[1.05] md:leading-[0.95] antialiased">
-                Crack Punjab Govt Exams <br className="hidden md:block"/>
-                <span className="text-primary italic">with Confidence</span>
+            <div className="space-y-4 md:space-y-6">
+              <h1 className="text-[32px] md:text-6xl lg:text-7xl font-[900] tracking-tighter text-[#0F172A] leading-[1.05] md:leading-[0.95] antialiased">
+                Crack Punjab Exams <br className="hidden md:block"/>
+                <span className="text-primary italic">with Precision</span>
               </h1>
 
-              <div className="space-y-4 md:space-y-5">
-                <p className="text-[14px] md:text-xl text-slate-600 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-bold tracking-tight">
-                  Mock tests and notes checked by official patterns.
-                </p>
+              <p className="text-[15px] md:text-xl text-slate-500 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium tracking-tight">
+                Practice with high-fidelity mock tests and official notes curated by Punjab&apos;s leading prep experts.
+              </p>
                 
-                <div className="flex flex-wrap justify-center lg:justify-start gap-1.5 md:gap-2 max-w-xl mx-auto lg:mx-0">
-                  {boardHubs.map((board, i) => (
-                    <Link 
-                      key={i} 
-                      href={board.href}
-                      className="px-2.5 py-0.5 rounded-lg bg-slate-50 border border-slate-100 text-[10px] md:text-[11px] font-bold text-slate-400 whitespace-nowrap shadow-sm hover:border-primary/30 hover:text-primary transition-all active:scale-95"
-                    >
-                      {board.label}
-                    </Link>
-                  ))}
-                </div>
+              <div className="flex flex-wrap justify-center lg:justify-start gap-1.5 md:gap-2 max-w-xl mx-auto lg:mx-0">
+                {boardHubs.map((board, i) => (
+                  <Link 
+                    key={i} 
+                    href={board.href}
+                    className="px-3 py-1 rounded-lg bg-slate-50 border border-slate-100 text-[10px] font-bold text-slate-400 whitespace-nowrap shadow-sm hover:border-primary/30 hover:text-primary transition-all active:scale-95 uppercase tracking-wider"
+                  >
+                    {board.label}
+                  </Link>
+                ))}
               </div>
             </div>
 
-            <div className="hidden lg:flex flex-col sm:flex-row gap-4 pt-4 w-full max-w-lg">
-               <Button asChild className="sm:flex-1 h-12 md:h-14 px-10 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-[13px] md:text-lg tracking-tight rounded-full active:scale-95 transition-all border-none">
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 w-full max-w-lg mx-auto lg:mx-0">
+               <Button asChild className="sm:flex-[1.2] h-14 md:h-18 px-10 bg-primary hover:bg-blue-700 text-white font-black uppercase tracking-widest text-xs md:text-sm rounded-2xl md:rounded-[1.5rem] shadow-4xl active:scale-95 transition-all border-none">
                   <Link href="/mocks" className="flex items-center justify-center gap-3">
-                    <Play className="h-4 w-4 md:h-6 md:w-6 fill-current" /> Start Prep
+                    <Play className="h-4 w-4 md:h-6 md:w-6 fill-current" /> Start Preparation
                   </Link>
                </Button>
-               <PWAInstallButton className="sm:flex-1 h-12 md:h-14" variant="outline" />
+               <PWAInstallButton className="sm:flex-1 h-14 md:h-18" variant="outline" />
+            </div>
+
+            <div className="flex items-center justify-center lg:justify-start gap-6 pt-4 text-slate-400 font-black text-[9px] md:text-[11px] tracking-widest">
+               <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" /> OFFICIAL PATTERNS</span>
+               <span className="flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /> INSTANT REGISTRY</span>
             </div>
           </div>
 
           {/* 2. Hero Image */}
-          <div className="flex flex-col items-center w-full max-w-[280px] lg:max-w-none mx-auto lg:mx-0 order-2">
+          <div className="flex flex-col items-center w-full max-w-[320px] lg:max-w-none mx-auto lg:mx-0 order-2 relative">
+            <div className="absolute inset-0 bg-primary/10 blur-[140px] rounded-full" />
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }} 
               animate={{ opacity: 1, scale: 1 }} 
-              transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }} 
-              className="relative w-full aspect-square overflow-visible"
+              transition={{ duration: 1, ease: "easeOut", delay: 0.2 }} 
+              className="relative w-full aspect-square overflow-visible z-10"
             >
               <Image 
                 src="/images/hero-student.png" 
-                alt="Cracklix Study" 
+                alt="Cracklix Study Hub" 
                 fill
-                className="object-contain drop-shadow-[0_20px_50px_rgba(22,119,255,0.15)] lg:drop-shadow-[0_25px_60px_rgba(22,119,255,0.15)]" 
+                className="object-contain drop-shadow-[0_20px_50px_rgba(22,119,255,0.2)]" 
                 priority
               />
             </motion.div>
@@ -128,21 +127,12 @@ export default function Hero() {
         </div>
 
         {/* 3. Action Grid */}
-        <div className="mt-8 md:mt-16 space-y-6 md:space-y-10 px-4 sm:px-6 lg:px-8">
-           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8 max-w-6xl mx-auto">
-              <QuickActionCard boardId="mock-test" label="Mock Tests" href="/mocks" />
-              <QuickActionCard boardId="study-material" label="Study Notes" href="/notes" />
-              <QuickActionCard boardId="pyq" label="PYQ Papers" href="/pyqs" />
-              <QuickActionCard boardId="current-affairs" label="Current Affairs" href="/current-affairs" />
-           </div>
-
-           <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full max-w-xl mx-auto px-4 lg:hidden">
-              <Button asChild className="w-full sm:flex-1 h-12 px-10 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold text-[13px] tracking-tight shadow-xl shadow-blue-500/20 rounded-full active:scale-[0.98] transition-all border-none">
-                  <Link href="/mocks" className="flex items-center justify-center gap-2.5">
-                    <Play className="h-4 w-4 fill-current" /> Start Prep
-                  </Link>
-              </Button>
-              <PWAInstallButton className="w-full sm:flex-1 h-12" variant="outline" />
+        <div className="mt-12 md:mt-24 px-4 sm:px-6 lg:px-8">
+           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 max-w-7xl mx-auto">
+              <QuickActionCard boardId="mock-test" label="Mock Tests" sub="500+ Series" href="/mocks" />
+              <QuickActionCard boardId="study-material" label="Study Notes" sub="Verified PDFs" href="/notes" />
+              <QuickActionCard boardId="pyq" label="PYQ Papers" sub="Official Archives" href="/pyqs" />
+              <QuickActionCard boardId="current-affairs" label="Latest G.K" sub="Daily Updates" href="/current-affairs" />
            </div>
         </div>
 
@@ -151,19 +141,23 @@ export default function Hero() {
   );
 }
 
-function QuickActionCard({ boardId, label, href }: { boardId: string, label: string, href: string }) {
+function QuickActionCard({ boardId, label, sub, href }: { boardId: string, label: string, sub: string, href: string }) {
   return (
     <Link href={href} className="block group h-full">
-      <Card className="w-full mx-auto border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[1.5rem] md:rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-4 pt-5 pb-3 md:p-8 text-center items-center justify-center">
-        <div className="flex justify-center mb-3 md:mb-6 shrink-0">
-          <div className="h-14 w-14 md:h-24 md:w-24 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-             <AuthorityLogo boardId={boardId} size="md" className="border-none shadow-none w-full h-full" />
+      <Card className="w-full mx-auto border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-700 rounded-[2rem] md:rounded-[3rem] bg-white group overflow-hidden flex flex-col p-6 md:p-10 text-left items-start justify-center relative">
+        <div className="flex justify-center mb-6 md:mb-12 shrink-0">
+          <div className="h-12 w-12 md:h-20 md:w-20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-700">
+             <AuthorityLogo boardId={boardId} size="md" className="border-none shadow-none w-full h-full bg-slate-50" />
           </div>
         </div>
-        <div className="min-w-0">
-           <h3 className="text-[12px] md:text-lg font-bold tracking-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-1">
+        <div className="min-w-0 space-y-1">
+           <h3 className="text-[14px] md:text-2xl font-black tracking-tight text-[#0F172A] group-hover:text-primary transition-colors uppercase leading-none">
               {label}
            </h3>
+           <p className="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">{sub}</p>
+        </div>
+        <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
+           <ChevronRight className="h-5 w-5 text-primary" />
         </div>
       </Card>
     </Link>
