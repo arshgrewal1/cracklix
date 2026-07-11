@@ -7,7 +7,6 @@ import LatestMocks from "@/components/home/LatestMocks";
 import ContinueLearning from "@/components/home/ContinueLearning";
 import CurrentAffairsPreview from "@/components/home/CurrentAffairsPreview";
 import MeritPreview from "@/components/home/MeritPreview";
-import AppPreview from "@/components/home/AppPreview";
 import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
 import GlobalSearch from "@/components/home/GlobalSearch";
@@ -55,10 +54,7 @@ export default function HomePage() {
       {/* 9. Merit Rankings */}
       <MeritPreview />
 
-      {/* 10. Mobile App */}
-      <AppPreview />
-
-      {/* 11. Founder Section */}
+      {/* 10. Founder Section */}
       <MeetFounder />
       
       <Footer />
