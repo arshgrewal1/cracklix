@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, Suspense, useEffect, useMemo, useCallback, useRef } from "react"
@@ -31,7 +32,7 @@ import {
   sendPasswordResetEmail,
   updateProfile
 } from "firebase/auth"
-import { doc, setDoc, getDoc, serverTimestamp, updateDoc } from "firebase/firestore"
+import { doc, setDoc, getDoc, serverTimestamp, updateDoc, increment } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { motion } from "framer-motion"
@@ -42,14 +43,13 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Portal v95.1.
- * FIXED: Stabilized hooks and useSearchParams to resolve Maximum update depth exceeded.
- * FIXED: Wrapped syncGuestData in useCallback for dependency stability.
+ * @fileOverview Cracklix Premium Login Portal v96.0
+ * UPDATED: Integrated incremental user counter for stats registry.
  */
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>}>
+    <Suspense fallback={<div className="h-screen w-full flex flex-col items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>}>
       <LoginContent />
     </Suspense>
   )
@@ -74,7 +74,6 @@ function LoginContent() {
   const [resetLoading, setResetLoading] = useState(false)
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
   
-  // Memoize parameters to prevent loop triggers
   const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/dashboard", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
   const initialMode = useMemo(() => searchParams?.get("mode"), [searchParams]);
@@ -167,6 +166,12 @@ function LoginContent() {
           referredBy: referralFromUrl || null,
           coins: 0
         })
+
+        // Increment global user count incrementally
+        await updateDoc(doc(db!, 'settings', 'stats'), {
+           totalUsers: increment(1),
+           updatedAt: serverTimestamp()
+        }).catch(() => {});
       }
     } catch (error: any) {
       toast({ variant: "destructive", title: "Authentication Failed", description: error.message })
@@ -207,6 +212,12 @@ function LoginContent() {
           referredBy: referralFromUrl || null,
           coins: 0
         })
+
+        // Increment global user count incrementally
+        await updateDoc(doc(db!, 'settings', 'stats'), {
+          totalUsers: increment(1),
+          updatedAt: serverTimestamp()
+        }).catch(() => {});
       }
     } catch (error: any) {
       toast({ variant: "destructive", title: "Social Login Error", description: error.message })

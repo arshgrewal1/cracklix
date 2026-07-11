@@ -1,3 +1,4 @@
+
 'use client';
 
 import { firestore as db } from '@/firebase/app';
@@ -7,12 +8,13 @@ import {
   addDoc, 
   serverTimestamp,
   updateDoc,
-  getDoc
+  getDoc,
+  increment
 } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Testbook-Style Subscription Actions v5.2.
- * CONVERTED: From Server Actions to Client Functions for static export compatibility.
+ * @fileOverview Hardened Testbook-Style Subscription Actions v5.3.
+ * UPDATED: Integrated incremental statistics update for revenue and active passes.
  */
 
 export async function activateFreePass(userId: string, planId: string) {
@@ -57,6 +59,14 @@ export async function activateFreePass(userId: string, planId: string) {
       planTier: planData.tier || 0,
       updatedAt: serverTimestamp()
     });
+
+    // Increment global active pass counter if new activation
+    if (!isPassActive) {
+      await updateDoc(doc(db, 'settings', 'stats'), {
+        activePasses: increment(1),
+        updatedAt: serverTimestamp()
+      }).catch(() => {});
+    }
 
     return { success: true };
   } catch (e: unknown) {
@@ -151,6 +161,13 @@ export async function approvePaymentRequest(requestId: string, adminId: string) 
       approvedBy: adminId,
       updatedAt: serverTimestamp()
     });
+
+    // Incremental Stats Update (Reduces read quota consumption)
+    await updateDoc(doc(db, 'settings', 'stats'), {
+      totalRevenue: increment(Number(data.amount) || 0),
+      activePasses: isPassActive ? increment(0) : increment(1),
+      updatedAt: serverTimestamp()
+    }).catch(() => {});
 
     return { success: true };
   } catch (e) {

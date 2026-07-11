@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -39,8 +40,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v24.1.
- * FIXED: Removed uppercase from primary action buttons.
+ * @fileOverview Enterprise Mock Builder Hub v24.2.
+ * UPDATED: Integrated incremental statistics update for mock test registry.
  */
 
 export default function MockBuilderPage() {
@@ -234,6 +235,7 @@ function MockBuilderContent() {
       });
       await batch.commit();
 
+      // Atomic Statistics Increment
       if (!isEditing) {
         await updateDoc(doc(db, 'settings', 'stats'), {
            totalMocks: increment(1),
@@ -269,7 +271,7 @@ function MockBuilderContent() {
             <p className="text-slate-500 font-medium text-[11px] md:text-lg mt-1.5">Institutional component registry hub.</p>
           </div>
         </div>
-        <Button onClick={handlePublish} disabled={isPublishing} className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-bold shadow-xl border-none transition-all active:scale-95 gap-3">
+        <Button onClick={handlePublish} disabled={isPublishing} className="w-full md:w-auto h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white font-bold shadow-xl border-none transition-all active:scale-95 gap-3">
           {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-5 w-5" />} Commit to Registry
         </Button>
       </div>
@@ -352,7 +354,7 @@ function MockBuilderContent() {
                     <Label className="text-[10px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><GraduationCap className="h-3.5 w-3.5" /> Exam Vertical Hub</Label>
                     <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto custom-scrollbar pr-1">
                        {uniqueExams.map((e: any) => (
-                          <div key={e.id} onClick={() => toggleExamId(e.id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group">
+                          <div key={e.id} onClick={() => toggleExamId(id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group">
                              <div className={cn("h-4 w-4 rounded border-2 flex items-center justify-center shrink-0 transition-all", mockData.examIds?.includes(e.id) ? "border-primary bg-primary" : "border-slate-300 bg-white")}>
                                 {mockData.examIds?.includes(e.id) && <Check className="h-2.5 w-2.5 text-white stroke-[4px]" />}
                              </div>
@@ -449,7 +451,7 @@ function MockBuilderContent() {
                    </div>
                    <Popover>
                       <PopoverTrigger asChild>
-                         <Button className="w-full md:w-auto h-11 md:h-12 px-8 bg-[#0F172A] hover:bg-black text-white rounded-full font-bold text-sm shadow-xl border-none gap-3">
+                         <Button className="w-full md:w-auto h-11 md:h-12 px-8 bg-[#0F172A] hover:bg-black text-white font-bold text-sm shadow-xl border-none gap-3">
                             <Plus className="h-4 w-4" /> Add Section Node
                          </Button>
                       </PopoverTrigger>

@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -26,9 +27,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Panel Dashboard v28.2 (Normalization Sync)
- * FIXED: Removed uppercase from buttons and synced counts.
- * UPDATED: Replaced Hub with Portal/Panel terminology.
+ * Admin Panel Dashboard v29.0
+ * FIXED: Removed quota-heavy auto-sync on mount.
+ * FIXED: Integrated error handling for Firestore quota limits.
  */
 
 export default function AdminDashboard() {
@@ -46,6 +47,10 @@ export default function AdminDashboard() {
   const pendingReqQuery = useMemo(() => (db ? query(collection(db, "payment_requests"), where("status", "==", "PENDING"), limit(10)) : null), [db]);
   const { data: pendingNodes } = useCollection<any>(pendingReqQuery);
 
+  /**
+   * Emergency Rebuild: This scans the entire DB. 
+   * Use sparingly as it consumes significant quota.
+   */
   const handleSyncLiveStats = async () => {
      if (!db) return;
      setIsStatsSyncing(true);
@@ -87,23 +92,23 @@ export default function AdminDashboard() {
            totalPYQs: pyqCount.data().count,
            totalAttempts: rCount.data().count,
            activePasses: activePassesCount.data().count,
-           updatedAt: serverTimestamp()
+           updatedAt: serverTimestamp(),
+           lastFullSyncAt: serverTimestamp()
         }, { merge: true });
 
         toast({ title: "Registry Synced", description: "All performance nodes updated." });
      } catch (err: any) {
         console.error("[SYNC_ERROR]", err);
-        toast({ variant: "destructive", title: "Sync Failed", description: err.message });
+        const isQuota = err.message?.includes('quota') || err.code === 'resource-exhausted';
+        toast({ 
+          variant: "destructive", 
+          title: isQuota ? "Quota Exceeded" : "Sync Failed", 
+          description: isQuota ? "Firebase free tier limit reached. Counters will update incrementally." : err.message 
+        });
      } finally {
         setIsStatsSyncing(false);
      }
   }
-
-  useEffect(() => {
-    if (db) {
-      handleSyncLiveStats();
-    }
-  }, [db]);
 
   const handlePushToRegistry = async () => {
     if (!db) return
