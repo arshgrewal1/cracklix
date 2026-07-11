@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v20.0.
- * UPDATED: Refined top header height and logo scale for a clean administrative portal.
+ * @fileOverview Admin Layout v21.0.
+ * UPDATED: Refined desktop header height and logo scale for a clean administrative portal.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser();
@@ -105,7 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Logo
                 variant="light"
                 className="shrink-0 -ml-5 md:-ml-7"
-                imgClassName="h-24 md:h-32"
+                imgClassName="h-24 md:h-28"
               />
             </div>
             

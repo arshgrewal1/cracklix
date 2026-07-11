@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v67.0.
- * UPDATED: Refined desktop header height and logo scale.
+ * @fileOverview Cracklix Navigation Hub v68.0.
+ * UPDATED: Refined desktop header height and reduced logo scale for better integration.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -98,13 +98,13 @@ export default function Navbar() {
       SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-[80px] md:h-[120px]" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-[80px] md:h-[110px]" />;
   }
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
-        <nav className="w-full h-20 md:h-[120px]">
+        <nav className="w-full h-20 md:h-[110px]">
           <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-2 md:px-6 h-full flex items-center justify-between gap-4">
 
             <div className="flex items-center shrink-0 gap-1 md:gap-2 flex-1 lg:flex-none">
@@ -119,7 +119,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0 -ml-5 md:-ml-7"
-                imgClassName="h-20 md:h-40 w-auto"
+                imgClassName="h-20 md:h-32 w-auto"
                 align="left"
               />
             </div>
