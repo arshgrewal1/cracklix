@@ -23,12 +23,6 @@ const nextConfig = {
   compress: true,
   staticPageGenerationTimeout: 300,
   trailingSlash: true,
-  experimental: {
-    allowedDevOrigins: [
-      '6000-firebase-studio-1780356784378.cluster-cd3bsnf6r5bemwki2bxljme5as.cloudworkstations.dev',
-      '9000-firebase-studio-1780356784378.cluster-cd3bsnf6r5bemwki2bxljme5as.cloudworkstations.dev'
-    ]
-  }
 };
 
 module.exports = withPWA(nextConfig);
