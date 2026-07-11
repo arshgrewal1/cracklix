@@ -46,8 +46,8 @@ import {
 } from "@/components/ui/tooltip";
 
 /**
- * @fileOverview Admin Sidebar Navigation v4.1.
- * UPDATED: Normalized casing to Title Case.
+ * @fileOverview Admin Sidebar Navigation v4.2.
+ * UPDATED: Normalized casing to Title Case and replaced "Hub" terminology.
  */
 
 const NAV_GROUPS = [
@@ -63,8 +63,8 @@ const NAV_GROUPS = [
   {
     label: "Question Structure",
     items: [
-      { label: "Exams", href: "/admin/exam-registry", icon: GraduationCap },
-      { label: "Boards", href: "/admin/exams", icon: Building2 },
+      { label: "Exam Center", href: "/admin/exam-registry", icon: GraduationCap },
+      { label: "Selection Boards", href: "/admin/exams", icon: Building2 },
       { label: "Subjects", href: "/admin/subjects", icon: BookOpen },
       { label: "Chapters", href: "/admin/chapters", icon: NotebookTabs },
       { label: "Topics", href: "/admin/topics", icon: Library },
@@ -74,13 +74,13 @@ const NAV_GROUPS = [
   {
     label: "Current Affairs",
     items: [
-      { label: "CA Hubs", href: "/admin/current-affairs", icon: Newspaper },
+      { label: "CA Center", href: "/admin/current-affairs", icon: Newspaper },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "CA Ingestion", href: "/admin/current-affairs/bulk", icon: UploadCloud },
     ],
   },
   {
-    label: "Content Hub",
+    label: "Content Portal",
     items: [
       { label: "Mock Builder", href: "/admin/mocks/builder", icon: PenSquare },
       { label: "Mock Manager", href: "/admin/mocks", icon: ClipboardList },
@@ -96,8 +96,8 @@ const NAV_GROUPS = [
     items: [
       { label: "Students", href: "/admin/users", icon: Users },
       { label: "Devices", href: "/admin/devices", icon: Smartphone },
-      { label: "Support", href: "/admin/support", icon: MessageCircle },
-      { label: "Revenue", href: "/admin/payments", icon: DollarSign },
+      { label: "Support Desk", href: "/admin/support", icon: MessageCircle },
+      { label: "Revenue Portal", href: "/admin/payments", icon: DollarSign },
       { label: "Verify Payments", href: "/admin/payments/verify", icon: Gem },
       { label: "Pass Manager", href: "/admin/passes", icon: Gem },
       { label: "Audit Trail", href: "/admin/audit-logs", icon: History },

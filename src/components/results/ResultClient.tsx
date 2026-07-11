@@ -37,8 +37,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Performance Analysis Center v5.3.
- * FIXED: Resolved syntax errors and overlapping UI pills.
+ * @fileOverview Official Performance Analysis Center v5.4.
+ * FIXED: Overlapping UI metrics and repaired syntax errors.
  */
 
 export default function ResultClient() {
@@ -176,7 +176,7 @@ export default function ResultClient() {
                  <h1 className="text-xl md:text-3xl font-black text-white tracking-tight leading-tight line-clamp-2">
                    {sessionData?.mockTitle || "Practice Result"}
                  </h1>
-                 <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest">Score Center</p>
+                 <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest uppercase">Performance Analysis</p>
               </div>
            </div>
 
@@ -200,7 +200,7 @@ export default function ResultClient() {
            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <TabsList className="bg-white border border-slate-100 p-1.5 h-12 md:h-16 rounded-xl md:rounded-2xl shadow-md inline-flex gap-2">
                  <TabsTrigger value="SOLUTIONS" className="rounded-lg md:rounded-xl px-6 md:px-10 font-bold text-[11px] md:text-sm h-full data-[state=active]:bg-[#0B1228] data-[state=active]:text-white transition-all">Solutions</TabsTrigger>
-                 <TabsTrigger value="TOPPER" className="rounded-lg md:rounded-xl px-6 md:px-10 font-bold text-[11px] md:text-sm h-full data-[state=active]:bg-[#0B1228] data-[state=active]:text-white transition-all">Rank List</TabsTrigger>
+                 <TabsTrigger value="TOPPER" className="rounded-lg md:rounded-xl px-6 md:px-10 font-bold text-[11px] md:text-sm h-full data-[state=active]:bg-[#0B1228] data-[state=active]:text-white transition-all">Merit List</TabsTrigger>
               </TabsList>
               
               <div className="flex flex-wrap items-center gap-2">
@@ -351,9 +351,9 @@ export default function ResultClient() {
 
 function ResultPill({ label, val, color, className }: any) {
    return (
-      <div className={cn("flex flex-col items-center lg:items-start gap-1", className)}>
-         <span className="text-[10px] md:text-[11px] font-bold text-slate-500 tracking-widest">{label}</span>
-         <span className={cn("text-xl md:text-4xl font-black leading-tight tabular-nums tracking-tighter", color)}>{val}</span>
+      <div className={cn("flex flex-col items-center lg:items-start gap-1.5 md:gap-2", className)}>
+         <span className="text-[10px] md:text-[11px] font-bold text-slate-500 tracking-widest uppercase">{label}</span>
+         <span className={cn("text-xl md:text-4xl font-black leading-tight tabular-nums tracking-tighter antialiased", color)}>{val}</span>
       </div>
    )
 }

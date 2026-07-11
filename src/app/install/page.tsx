@@ -18,8 +18,9 @@ import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { PLATFORM_VERSION } from "@/lib/version";
 
 /**
- * @fileOverview Official Direct App Hub v12.0.
- * UPDATED: Matched colors to high-fidelity screenshot with midnight theme and vibrant blue accents.
+ * @fileOverview Official Direct App Portal v12.1.
+ * UPDATED: Matched high-fidelity midnight theme with refined radial blue glow.
+ * NORMALIZED: Removed forced uppercase and replaced Hub terminology.
  */
 
 export default function InstallPwaPage() {
@@ -30,9 +31,9 @@ export default function InstallPwaPage() {
     <div className="min-h-screen bg-[#0B1528] font-body text-left selection:bg-primary/10 flex flex-col">
       <Navbar />
       
-      <main className="flex-1 flex flex-col items-center justify-center p-4 relative">
-        {/* BACKGROUND GLOW */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl aspect-square bg-primary/10 blur-[140px] rounded-full pointer-events-none" />
+      <main className="flex-1 flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        {/* REFINED RADIAL GLOW */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl aspect-square bg-primary/15 blur-[160px] rounded-full pointer-events-none" />
 
         <section className="relative w-full max-w-5xl mx-auto py-12 md:py-24 text-white z-10">
            <div className="text-center space-y-8 md:space-y-16">
@@ -47,7 +48,7 @@ export default function InstallPwaPage() {
                     <span className="text-[10px] md:text-xs font-black tracking-[0.3em] uppercase text-white/90">V{version} Production Portal</span>
                  </div>
 
-                 {/* HERO GRAPHIC - MATCHING SCREENSHOT */}
+                 {/* HERO GRAPHIC - HIGH FIDELITY */}
                  <div className="relative py-4">
                     <h1 className="flex flex-col items-center justify-center font-black tracking-tighter leading-[0.8] md:leading-[0.75] select-none antialiased italic">
                        <span className="text-[60px] md:text-[140px] lg:text-[180px] text-[#1E293B]/40 uppercase">Direct</span>

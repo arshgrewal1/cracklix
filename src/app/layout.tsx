@@ -17,7 +17,7 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v61.0 (PWA Hardened).
+ * @fileOverview Root Layout v61.1 (Hydration Fixed).
  * FIXED: Changed Script strategy to afterInteractive to resolve Runtime ChunkLoadError.
  */
 export const metadata: Metadata = {

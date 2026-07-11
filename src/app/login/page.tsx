@@ -20,8 +20,7 @@ import {
   ClipboardList,
   Users,
   FileText,
-  ChevronLeft,
-  AlertCircle
+  ChevronLeft
 } from "lucide-react"
 import { useAuth, useFirestore, useUser, useDoc } from "@/firebase"
 import { 
@@ -43,8 +42,8 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Portal v93.0.
- * FIXED: Stabilized searchParams usage to prevent Maximum update depth exceeded error.
+ * @fileOverview Cracklix Premium Login Portal v94.0.
+ * FIXED: Stabilized searchParams and toast triggers to resolve Maximum update depth exceeded error.
  */
 
 export default function LoginPage() {
@@ -74,19 +73,22 @@ function LoginContent() {
   const [resetLoading, setResetLoading] = useState(false)
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
   
-  // Stabilize search params
+  // Memoized URL parameters to prevent effect loop
   const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/dashboard", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
   const initialMode = useMemo(() => searchParams?.get("mode"), [searchParams]);
 
   const hasFiredToast = useRef(false);
+  const syncAttempted = useRef(false);
 
   useEffect(() => {
      if (initialMode === 'register') setMode('register');
   }, [initialMode]);
 
   const syncGuestData = useCallback(async (uid: string, userName: string, userEmail: string) => {
-     if (!db) return;
+     if (!db || syncAttempted.current) return;
+     syncAttempted.current = true;
+
      const keys = Object.keys(localStorage);
      const resultKeys = keys.filter(k => k.startsWith('cracklix_guest_result_'));
      
@@ -326,7 +328,7 @@ function LoginContent() {
 
               <div className="pt-2 flex flex-col gap-4">
                 <Button type="submit" className="w-full h-14 md:h-18 bg-blue-600 text-white font-bold text-xs rounded-full shadow-xl border-none transition-all active:scale-[0.98]" disabled={loading}>
-                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (mode === 'login' ? "Continue" : "Create My Account")}
+                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (mode === 'login' ? "Continue" : "Create Account")}
                 </Button>
                 <div className="flex items-center gap-3 py-1">
                   <div className="h-px flex-1 bg-slate-100" />

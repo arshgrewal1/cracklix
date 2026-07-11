@@ -41,8 +41,9 @@ import { useToast } from "@/hooks/use-toast"
 import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Student Home - Performance Tracker v52.0.
- * FIXED: Stabilized timer initialization to prevent hydration mismatch.
+ * @fileOverview Student Progress Portal v53.0.
+ * FIXED: Stabilized study time tracking to prevent hydration mismatch.
+ * UPDATED: Normalized vocabulary (Hub -> Center/Portal).
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -257,13 +258,13 @@ export default function StudentDashboard() {
               </Card>
 
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl space-y-6">
-                 <h4 className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">Quick Tools</h4>
+                 <h4 className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">Quick Portal Tools</h4>
                  <div className="grid grid-cols-1 gap-2 md:gap-3">
                     <QuickToolLink href="/search" label="Search Bank" icon={Search} />
                     <QuickToolLink href="/current-affairs" label="Current Affairs" icon={Newspaper} />
                     <QuickToolLink href="/notes" label="Study Material" icon={BookOpen} />
                     <QuickToolLink href="/pyqs" label="Old Papers" icon={FileStack} />
-                    <QuickToolLink href="/leaderboard" label="Rank List" icon={Trophy} />
+                    <QuickToolLink href="/leaderboard" label="Merit List" icon={Trophy} />
                     {isAdmin && <QuickToolLink href="/admin" label="Admin Panel" icon={ShieldAlert} highlight />}
                  </div>
               </div>

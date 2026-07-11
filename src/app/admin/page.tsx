@@ -26,8 +26,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard v28.1 (Fidelity Refined)
+ * Admin Panel Dashboard v28.2 (Normalization Sync)
  * FIXED: Removed uppercase from buttons and synced counts.
+ * UPDATED: Replaced Hub with Portal/Panel terminology.
  */
 
 export default function AdminDashboard() {
@@ -128,7 +129,7 @@ export default function AdminDashboard() {
                  <span className="text-[9px] font-black text-emerald-600 tracking-tight">Governance Active</span>
               </div>
            </div>
-          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Admin Hub</h1>
+          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Admin Panel</h1>
           <p className="text-slate-500 text-[11px] md:text-lg font-medium">Coordinate preparation nodes and session integrity.</p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto shrink-0">
@@ -136,7 +137,7 @@ export default function AdminDashboard() {
               {isStatsSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Sync
            </button>
            <Button onClick={handlePushToRegistry} disabled={isSyncing} className="flex-1 sm:flex-none h-11 px-8 bg-primary hover:bg-blue-700 text-white shadow-xl rounded-full border-none font-bold text-sm">
-              {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />} Seed
+              {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />} Seed Registry
            </Button>
         </div>
       </div>
@@ -163,12 +164,12 @@ export default function AdminDashboard() {
                         </div>
                      </div>
                      <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase border-slate-200 px-2 py-0.5 rounded shadow-sm">
-                        {u.passStatus === 'active' ? (u.pass?.plan || 'Elite') : 'Free Hub'}
+                        {u.passStatus === 'active' ? (u.pass?.plan || 'Elite') : 'Free Portal'}
                      </Badge>
                   </div>
                ))}
                <Button asChild variant="ghost" className="w-full h-11 text-[11px] font-bold text-slate-400 hover:text-primary">
-                  <Link href="/admin/users">Open Student Hub <ChevronRight className="h-3 w-3 md:h-4 md:w-4 ml-1" /></Link>
+                  <Link href="/admin/users">Open Student Portal <ChevronRight className="h-3 w-3 md:h-4 md:w-4 ml-1" /></Link>
                </Button>
             </CardContent>
          </Card>
@@ -184,8 +185,8 @@ export default function AdminDashboard() {
                   <div className="grid grid-cols-1 gap-2 md:gap-3">
                      <AdminQuickLink label="Mock Builder" href="/admin/mocks/builder" />
                      <AdminQuickLink label="Platform Stats" href="/admin/analytics" />
-                     <AdminQuickLink label="Verify Payments" href="/admin/payments/verify" highlight={hasPending} />
-                     <AdminQuickLink label="System Tools" href="/admin/maintenance" />
+                     <QuickActionCard label="Verify Payments" href="/admin/payments/verify" highlight={hasPending} />
+                     <AdminQuickLink label="System Portal" href="/admin/maintenance" />
                   </div>
                </div>
             </Card>
@@ -208,7 +209,7 @@ function AdminMetricCard({ label, value, sub, icon, href, highlight }: any) {
                {icon}
             </div>
             <div className="min-w-0 flex-1">
-               <p className="text-[8px] md:text-[9px] font-black text-slate-400 mb-1 truncate tracking-tight">{label}</p>
+               <p className="text-[8px] md:text-[9px] font-black text-slate-400 mb-1 truncate tracking-tight uppercase">{label}</p>
                <div className="text-lg md:text-3xl font-black text-[#0F172A] leading-none tabular-nums truncate">{value}</div>
                <p className="text-[7px] md:text-[8px] font-bold text-slate-300 uppercase mt-2 truncate">{sub}</p>
             </div>
@@ -230,4 +231,18 @@ function AdminQuickLink({ label, href, highlight }: any) {
          </div>
       </Link>
    )
+}
+
+function QuickActionCard({ label, href, highlight }: any) {
+    return (
+      <Link href={href} className="group">
+         <div className={cn(
+           "flex items-center justify-between p-3 md:p-4 bg-white/5 border border-white/5 rounded-xl md:rounded-2xl hover:bg-white/10 transition-all active:scale-[0.98]",
+           highlight && "border-emerald-500/30 bg-emerald-50/5"
+         )}>
+            <span className={cn("text-[11px] font-bold ml-1 md:ml-2", highlight ? "text-emerald-400" : "text-white")}>{label}</span>
+            <ChevronRight className={cn("h-3 w-3 md:h-4 md:w-4 transition-transform group-hover:translate-x-1", highlight ? "text-emerald-400" : "text-primary")} />
+         </div>
+      </Link>
+    )
 }
