@@ -3,20 +3,30 @@
 
 Punjab's most advanced government exam preparation platform.
 
-## 🚀 Git Sync Commands (Fixes the "Not Pushing" issue)
+## 🚀 First-Time Repository Setup
 
-If `git push` is failing or nothing is happening, run these in the terminal:
+If you are setting up the repository for the first time, run these commands in the terminal:
 
-### 1. Standard Fix (Safe)
-This will fetch remote changes, merge them with your work, and then push.
 ```bash
-npm run git:fix
+git init
+git branch -M main
+git remote add origin https://github.com/arshgrewal1/cracklix.git
+git add .
+git commit -m "Initial commit from Firebase Studio"
+git push -u origin main
 ```
 
-### 2. The Nuclear Option (Use only if #1 fails)
-This will overwrite the GitHub version with your local version.
+Alternatively, use the automated setup command:
 ```bash
-npm run git:force
+npm run git:setup
+```
+
+## 🔄 Daily Synchronization
+
+To push your latest changes to GitHub after the initial setup:
+
+```bash
+npm run git:sync
 ```
 
 ## 🔐 Git Authentication Fix (GitHub Token)
@@ -28,9 +38,9 @@ GitHub no longer accepts your account password for terminal operations. You must
 3.  **Copy Token**: Copy the generated `ghp_...` string.
 4.  **Use Token**: When the terminal asks for your **Password**, paste the **Token** instead.
 
-Alternatively, you can update your remote to include the token (useful for cloud environments):
+Alternatively, update your remote URL to include the token to avoid repeated prompts:
 ```bash
-git remote set-url origin https://<YOUR_TOKEN>@github.com/arshgrewal1122/cracklix.git
+git remote set-url origin https://<YOUR_TOKEN>@github.com/arshgrewal1/cracklix.git
 ```
 
 ## 🛠️ Tech Stack
@@ -44,13 +54,9 @@ git remote set-url origin https://<YOUR_TOKEN>@github.com/arshgrewal1122/crackli
 3. **Crucial**: Add the following Environment Variables in the Vercel Settings:
    - `GOOGLE_GENAI_API_KEY`: Your Google AI API Key.
    - `NEXT_PUBLIC_FIREBASE_API_KEY`: (From src/firebase/config.ts).
-   - `CASHFREE_CLIENT_ID`: Your Cashfree App ID.
-   - `CASHFREE_CLIENT_SECRET`: Your Cashfree Secret Key.
+   - `RAZORPAY_KEY_ID`: Your Razorpay App ID.
+   - `RAZORPAY_KEY_SECRET`: Your Razorpay Secret Key.
 4. Click **Deploy**.
 
 ---
 Developed by **Arsh Grewal**
-# cracklix
-# cracklix
-# app
-# app
