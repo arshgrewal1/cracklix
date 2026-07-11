@@ -167,11 +167,11 @@ export default function ExamHubClient() {
 
       <main className="container mx-auto px-2 md:px-4 py-4 md:py-12 max-w-7xl pb-40">
         <Tabs defaultValue="FULL" className="space-y-6 md:space-y-12">
-           <div className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-xl md:rounded-[2rem] p-1 shadow-md overflow-x-auto no-scrollbar">
+           <div className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar">
               <TabsList className="bg-transparent border-none p-0 flex h-11 md:h-12 w-full justify-start gap-1 snap-x snap-mandatory">
-                 <DashboardTab value="FULL" label="Mock Tests" icon={Zap} />
-                 <DashboardTab value="SUBJECT" label="Subjects" icon={BookOpen} />
-                 <DashboardTab value="SECTIONAL" label="Sectional" icon={List} />
+                 <DashboardTab value="FULL" label="Full Mock Tests" icon={Zap} />
+                 <DashboardTab value="SUBJECT" label="Subject Tests" icon={BookOpen} />
+                 <DashboardTab value="SECTIONAL" label="Sectional Tests" icon={List} />
                  <DashboardTab value="CA" label="Current Affairs" icon={Newspaper} />
               </TabsList>
            </div>
@@ -190,15 +190,15 @@ export default function ExamHubClient() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-4 md:px-12 h-full font-black text-[9px] md:text-[11px] text-slate-500 dark:text-slate-400 data-[state=active]:bg-[#0B1528] data-[state=active]:text-white dark:data-[state=active]:bg-slate-700 rounded-lg md:rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-3 uppercase snap-start">
-         <Icon className="h-4 w-4 shrink-0" /> {label}
+      <TabsTrigger value={value} className="px-3 md:px-6 h-full font-bold text-[13px] md:text-[14px] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800/50 border border-slate-50 dark:border-slate-700 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white dark:data-[state=active]:bg-slate-700 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 snap-start">
+         <Icon className="h-4 w-4 md:h-[18px] md:w-[18px] shrink-0" /> {label}
       </TabsTrigger>
    )
 }
 
 function MockList({ data, isPassActive, loading, boards, type }: any) {
    const router = useRouter();
-   if (loading) return <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-40 md:h-64 w-full rounded-xl md:rounded-[2.5rem] bg-white dark:bg-slate-800" />)}</div>;
+   if (loading) return <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">{Array.from({ length: 3 }).map((_, i) => <Skeleton className="h-40 md:h-64 w-full rounded-xl md:rounded-[2.5rem] bg-white dark:bg-slate-800" key={i} />)}</div>;
    
    if (data.length === 0) {
      const emptyStates: any = {

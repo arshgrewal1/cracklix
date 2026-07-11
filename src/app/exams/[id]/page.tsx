@@ -124,7 +124,7 @@ export default function ExamHubPage() {
 
       <main className="container mx-auto px-4 py-12 max-w-7xl pb-40">
          <Tabs defaultValue="FULL" className="space-y-8 md:space-y-12">
-            <div className="bg-white border border-slate-100 rounded-xl md:rounded-[2rem] p-1 shadow-xl overflow-x-auto no-scrollbar">
+            <div className="bg-white border border-slate-100 rounded-2xl p-1 shadow-lg overflow-x-auto no-scrollbar">
                <TabsList className="bg-transparent border-none p-0 flex h-11 md:h-12 w-full justify-start gap-1 snap-x snap-mandatory">
                   <DashboardTab value="FULL" label="Full Mock Tests" icon={Zap} />
                   <DashboardTab value="SUBJECT" label="Subject Tests" icon={BookOpen} />
@@ -148,15 +148,15 @@ export default function ExamHubPage() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-4 md:px-8 h-full font-black text-[10px] md:text-[11px] uppercase tracking-tight text-slate-400 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white rounded-lg md:rounded-[1.5rem] transition-all whitespace-nowrap flex items-center gap-1.5 md:gap-3 snap-start">
-         <Icon className="h-4 w-4 shrink-0" /> {label}
+      <TabsTrigger value={value} className="px-3 md:px-6 h-full font-bold text-[13px] md:text-[14px] text-slate-500 bg-white border border-slate-50 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:border-[#0F172A] rounded-xl transition-all whitespace-nowrap flex items-center gap-2 snap-start">
+         <Icon className="h-4 w-4 md:h-[18px] md:w-[18px] shrink-0" /> {label}
       </TabsTrigger>
    )
 }
 
 function MockList({ data, results, isPassActive, loading, boards }: any) {
    const router = useRouter();
-   if (loading) return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[2.5rem] bg-white" />)}</div>;
+   if (loading) return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{Array.from({ length: 3 }).map((_, i) => <Skeleton className="h-80 w-full rounded-[2.5rem] bg-white" key={i} />)}</div>;
    if (data.length === 0) return (
      <div className="py-24 text-center opacity-30 flex flex-col items-center gap-4 text-slate-300">
         <Zap className="h-12 w-12" />
