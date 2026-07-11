@@ -1,14 +1,14 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, animate } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Check, User, Target, MapPin, Briefcase } from "lucide-react";
 import Image from "next/image";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Meet Founder section v5.0 - Premium Redesign.
+ * @fileOverview Meet Founder section v5.1 - Fixed motion.animate Error.
  */
 
 export default function MeetFounder() {
@@ -124,7 +124,7 @@ function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.Rea
 
   useEffect(() => {
     if (isInView && value) {
-      const animation = motion.animate(0, parseInt(value), {
+      const animation = animate(0, parseInt(value), {
         duration: 2,
         delay,
         onUpdate: (latest) => setCount(Math.round(latest)),

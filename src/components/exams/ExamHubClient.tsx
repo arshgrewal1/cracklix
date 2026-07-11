@@ -30,6 +30,11 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
+/**
+ * @fileOverview Shared Exam Center Client Hub v24.3.
+ * OPTIMIZED: Compact Category selector for mobile/PWA (48px height).
+ */
+
 function EmptyStateCard({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) {
   const router = useRouter();
   
@@ -142,7 +147,7 @@ export default function ExamHubClient() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50/50 dark:bg-slate-900 font-body text-left">
       <Navbar />
-      <section className="bg-white dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 py-6 md:py-20">
+      <section className="bg-white dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 py-10 md:py-20">
          <div className="container mx-auto px-4 max-w-7xl">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-16">
                <div className="flex items-start gap-3 md:gap-8 flex-1 min-w-0">
@@ -165,10 +170,11 @@ export default function ExamHubClient() {
          </div>
       </section>
 
-      <main className="container mx-auto px-2 md:px-4 py-4 md:py-12 max-w-7xl pb-40">
-        <Tabs defaultValue="FULL" className="space-y-6 md:space-y-12">
-           <div className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar flex items-center">
-              <TabsList className="bg-transparent border-none p-0 flex h-10 w-full justify-start gap-1 snap-x snap-mandatory">
+      <main className="container mx-auto px-2 md:px-4 py-8 md:py-12 max-w-7xl pb-40">
+        <Tabs defaultValue="FULL" className="space-y-8 md:space-y-12">
+           {/* CATEGORY SELECTOR OPTIMIZATION */}
+           <div className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar flex items-center h-12 md:h-14">
+              <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-start gap-1 snap-x snap-mandatory">
                  <DashboardTab value="FULL" label="Full Mock Tests" icon={Zap} />
                  <DashboardTab value="SUBJECT" label="Subject Tests" icon={BookOpen} />
                  <DashboardTab value="SECTIONAL" label="Sectional Tests" icon={List} />
@@ -190,7 +196,7 @@ export default function ExamHubClient() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-3 md:px-5 h-full font-bold text-[13px] md:text-[14px] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800/50 border border-slate-50 dark:border-slate-700 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white dark:data-[state=active]:bg-slate-700 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 snap-start">
+      <TabsTrigger value={value} className="px-4 md:px-8 h-full font-bold text-[11px] md:text-[14px] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800/50 border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white dark:data-[state=active]:bg-slate-700 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 md:gap-3 snap-start">
          <Icon className="h-4 w-4 md:h-[18px] md:w-[18px] shrink-0" /> {label}
       </TabsTrigger>
    )

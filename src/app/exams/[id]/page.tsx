@@ -30,6 +30,10 @@ import { cn } from "@/lib/utils"
 import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
+/**
+ * @fileOverview Exam Center v24.2.
+ * OPTIMIZED: Compact Category selector for mobile/PWA.
+ */
 export default function ExamHubPage() {
   const params = useParams()
   const router = useRouter()
@@ -96,7 +100,7 @@ export default function ExamHubPage() {
     <div className="flex flex-col min-h-screen bg-slate-50/50 font-body text-left">
       <Navbar />
       
-      <section className="bg-white border-b border-slate-100 py-14 md:py-20 relative overflow-hidden">
+      <section className="bg-white border-b border-slate-100 py-10 md:py-20 relative overflow-hidden">
          <div className="container mx-auto px-4 max-w-7xl relative z-10">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-10 md:gap-16">
                <div className="flex items-start gap-6 flex-1 min-w-0">
@@ -110,22 +114,22 @@ export default function ExamHubPage() {
                         </button>
                      </div>
                      <div className="flex items-center gap-6">
-                        <AuthorityLogo board={activeBoard} category={activeCategory} size="xl" className="shadow-inner rounded-[2rem] bg-slate-50 p-4" />
-                        <h1 className="text-3xl md:text-6xl font-black text-[#0F172A] leading-tight tracking-tight">
+                        <AuthorityLogo board={activeBoard} category={activeCategory} size="md" className="shadow-inner rounded-xl md:rounded-[2rem] bg-slate-50 p-3 md:p-4" />
+                        <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] leading-tight tracking-tight">
                            {exam.name}
                         </h1>
                      </div>
-                     <p className="text-sm md:text-xl font-bold text-slate-400 max-w-3xl leading-snug">Prepare with verified official patterns and expert solutions.</p>
                   </div>
                </div>
             </div>
          </div>
       </section>
 
-      <main className="container mx-auto px-4 py-12 max-w-7xl pb-40">
+      <main className="container mx-auto px-4 py-8 md:py-12 max-w-7xl pb-40">
          <Tabs defaultValue="FULL" className="space-y-8 md:space-y-12">
-            <div className="bg-white border border-slate-100 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar flex items-center">
-               <TabsList className="bg-transparent border-none p-0 flex h-10 w-full justify-start gap-1 snap-x snap-mandatory">
+            {/* CATEGORY SELECTOR OPTIMIZATION */}
+            <div className="bg-white border border-slate-100 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar flex items-center h-12 md:h-14">
+               <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-start gap-1 snap-x snap-mandatory">
                   <DashboardTab value="FULL" label="Full Mock Tests" icon={Zap} />
                   <DashboardTab value="SUBJECT" label="Subject Tests" icon={BookOpen} />
                   <DashboardTab value="SECTIONAL" label="Sectional Tests" icon={List} />
@@ -134,10 +138,10 @@ export default function ExamHubPage() {
             </div>
 
             <div className="animate-in fade-in slide-in-from-bottom-3 duration-700">
-               <TabsContent value="FULL"><MockList data={groupedContent.FULL} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-               <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-               <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
-               <TabsContent value="CA"><MockList data={groupedContent.CA} results={userResults} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
+               <TabsContent value="FULL"><MockList data={groupedContent.FULL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
+               <TabsContent value="SUBJECT"><MockList data={groupedContent.SUBJECT} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
+               <TabsContent value="SECTIONAL"><MockList data={groupedContent.SECTIONAL} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
+               <TabsContent value="CA"><MockList data={groupedContent.CA} isPassActive={isPassActive} loading={mocksLoading} boards={boards} /></TabsContent>
             </div>
          </Tabs>
       </main>
@@ -148,7 +152,7 @@ export default function ExamHubPage() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-3 md:px-5 h-full font-bold text-[13px] md:text-[14px] text-slate-500 bg-white border border-slate-50 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:border-[#0F172A] rounded-xl transition-all whitespace-nowrap flex items-center gap-2 snap-start">
+      <TabsTrigger value={value} className="px-4 md:px-8 h-full font-bold text-[11px] md:text-[14px] text-slate-500 bg-white border border-transparent data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:shadow-lg rounded-xl transition-all whitespace-nowrap flex items-center gap-2 md:gap-3 snap-start">
          <Icon className="h-4 w-4 md:h-[18px] md:w-[18px] shrink-0" /> {label}
       </TabsTrigger>
    )
@@ -156,7 +160,7 @@ function DashboardTab({ value, label, icon: Icon }: { value: string, label: stri
 
 function MockList({ data, results, isPassActive, loading, boards }: any) {
    const router = useRouter();
-   if (loading) return <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">{Array.from({ length: 3 }).map((_, i) => <Skeleton className="h-80 w-full rounded-[2.5rem] bg-white" key={i} />)}</div>;
+   if (loading) return <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">{Array.from({ length: 3 }).map((_, i) => <Skeleton className="h-64 w-full rounded-2xl md:rounded-[2.5rem] bg-white" key={i} />)}</div>;
    if (data.length === 0) return (
      <div className="py-24 text-center opacity-30 flex flex-col items-center gap-4 text-slate-300">
         <Zap className="h-12 w-12" />
@@ -165,29 +169,29 @@ function MockList({ data, results, isPassActive, loading, boards }: any) {
    );
 
    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-8">
          {data.map((mock: any) => {
             const isPremium = mock.accessLevel === 'PREMIUM';
             const locked = isPremium && !isPassActive;
             const board = boards?.find((b: any) => b.id === (mock.boardIds?.[0] || mock.boardId));
 
             return (
-               <Card key={mock.id} className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white p-10 text-center flex flex-col h-[400px] group relative overflow-hidden">
-                  <div className="h-14 w-14 mx-auto mb-8">
-                     <AuthorityLogo board={board} size="lg" className="shadow-inner rounded-xl bg-slate-50 p-2" />
+               <Card key={mock.id} className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-2xl md:rounded-[2.5rem] bg-white p-4 md:p-10 text-center flex flex-col group relative overflow-hidden h-full">
+                  <div className="h-10 w-10 md:h-16 md:w-16 mx-auto mb-4 md:mb-8">
+                     <AuthorityLogo board={board} size="md" className="w-full h-full shadow-inner rounded-lg bg-slate-50 p-1 md:p-2" />
                   </div>
-                  <CardHeader className="p-0 flex-1 space-y-5">
-                     <CardTitle className="font-black text-xl md:text-2xl text-[#0F172A] leading-tight line-clamp-2">
+                  <CardHeader className="p-0 flex-1 space-y-2 md:space-y-5">
+                     <CardTitle className="font-black text-xs md:text-2xl text-[#0F172A] leading-tight line-clamp-2">
                         {mock.title}
                      </CardTitle>
-                     <div className="flex items-center justify-center gap-6 text-[11px] font-bold text-slate-400 uppercase tracking-widest"> 
-                        <span className="flex items-center gap-2"><BookOpen className="h-4 w-4" /> {mock.totalQuestions} Items</span>
-                        <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> {mock.duration}m Time</span>
+                     <div className="flex items-center justify-center gap-2 md:gap-6 text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight"> 
+                        <span className="flex items-center gap-1"><BookOpen className="h-3 w-3 md:h-4 md:w-4" /> {mock.totalQuestions} Qs</span>
+                        <span className="flex items-center gap-1"><Clock className="h-3 w-3 md:h-4 md:w-4" /> {mock.duration}m</span>
                      </div>
                   </CardHeader>
-                  <CardContent className="p-0 mt-8">
-                     <Button onClick={() => router.push(locked ? '/pass' : `/mocks/instructions?id=${mock.id}`)} className={cn("w-full h-12 rounded-xl font-black text-[11px] tracking-[0.2em] uppercase shadow-lg border-none transition-all active:scale-95", locked ? "bg-amber-500 hover:bg-amber-600" : "bg-[#0F172A] hover:bg-black")}>
-                        {locked ? <Lock className="h-4 w-4 mr-2" /> : null} {locked ? 'Unlock Exam' : 'Start Exam'}
+                  <CardContent className="p-0 mt-4 md:mt-8">
+                     <Button onClick={() => router.push(locked ? '/pass' : `/mocks/instructions?id=${mock.id}`)} className={cn("w-full h-10 md:h-14 rounded-full font-black text-[9px] md:text-[11px] tracking-widest uppercase shadow-lg border-none transition-all active:scale-95", locked ? "bg-amber-500 hover:bg-amber-600" : "bg-[#0F172A] hover:bg-black")}>
+                        {locked ? <Lock className="h-3 w-3 mr-2" /> : null} {locked ? 'Unlock' : 'Start'}
                      </Button>
                   </CardContent>
                </Card>
