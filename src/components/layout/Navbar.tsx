@@ -36,12 +36,12 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v65.0.
- * UPDATED: Significant size increase for logo and header for elite branding.
+ * @fileOverview Cracklix Navigation Hub v66.0.
+ * UPDATED: Logo shifted as far left as possible to align with sidebar toggle.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setisSidebarOpen] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
 
   const { user, profile, loading } = useUser();
@@ -105,11 +105,11 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
         <nav className="w-full h-20 md:h-[140px]">
-          <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
+          <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-2 md:px-6 h-full flex items-center justify-between gap-4">
 
-            <div className="flex items-center shrink-0 gap-4 flex-1 lg:flex-none">
+            <div className="flex items-center shrink-0 gap-1 md:gap-2 flex-1 lg:flex-none">
               <button
-                onClick={() => setIsSidebarOpen(true)}
+                onClick={() => setisSidebarOpen(true)}
                 aria-label="Open menu"
                 className="flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-xl border border-slate-200 bg-white text-slate-700 shadow-sm active:scale-95 transition-all shrink-0 hover:border-primary/30 z-10"
               >
@@ -118,7 +118,7 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 -ml-4"
+                className="flex-shrink-0 -ml-5 md:-ml-7"
                 imgClassName="h-20 md:h-48 w-auto"
                 align="left"
               />
@@ -199,10 +199,10 @@ export default function Navbar() {
         </nav>
       </header>
 
-      <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+      <Sheet open={isSidebarOpen} onOpenChange={setisSidebarOpen}>
         <SheetContent side="left" className="w-[300px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
           <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Menu</SheetDescription></SheetHeader>
-          <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
+          <MobileSidebar onClose={() => setisSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
     </>
