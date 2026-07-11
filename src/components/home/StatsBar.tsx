@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
 
 /**
  * @fileOverview High-Fidelity Animated Counter Node.
@@ -40,8 +41,8 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
 }
 
 /**
- * @fileOverview Premium Institutional Stats Bar v3.0.
- * UPDATED: Added dynamic trend badges (e.g. +28 this week) as per Cracklix standards.
+ * @fileOverview Premium Institutional Stats Bar v3.1.
+ * FIXED: Sync with real registry counts and interactive Support Hub.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -84,14 +85,14 @@ export default function StatsBar() {
       : s.showStudents;
 
     const pool = [];
-    if (s.showQuestions) pool.push({ label: "Practice questions", val: stats?.totalQuestions || 12000, trend: trends.questions, icon: <Zap />, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20" });
-    if (s.showMocks) pool.push({ label: "Mock tests", val: stats?.totalMocks || 450, trend: trends.mocks, icon: <ClipboardList />, color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20" });
-    if (s.showCategories) pool.push({ label: "Exam categories", val: stats?.totalCategories || 85, trend: trends.categories, icon: <ShieldCheck />, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20" });
+    if (s.showQuestions) pool.push({ label: "Practice questions", val: stats?.totalQuestions || 0, trend: trends.questions, icon: <Zap />, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20", href: "/exams" });
+    if (s.showMocks) pool.push({ label: "Mock tests", val: stats?.totalMocks || 0, trend: trends.mocks, icon: <ClipboardList />, color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20", href: "/mocks" });
+    if (s.showCategories) pool.push({ label: "Exam categories", val: stats?.totalCategories || 0, trend: trends.categories, icon: <ShieldCheck />, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20", href: "/exams" });
     
     if (shouldShowStudents) {
-      pool.push({ label: "Verified students", val: totalUsers, trend: trends.students, icon: <Users />, color: "text-blue-600", bg: "bg-blue-600/10", border: "border-blue-600/20" });
+      pool.push({ label: "Verified students", val: totalUsers, trend: trends.students, icon: <Users />, color: "text-blue-600", bg: "bg-blue-600/10", border: "border-blue-600/20", href: "/leaderboard" });
     } else if (s.showSupport) {
-      pool.push({ label: "Student support", val: "24x7", trend: trends.support, icon: <Headset />, color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20", noSuffix: true });
+      pool.push({ label: "Student support", val: "24x7", trend: trends.support, icon: <Headset />, color: "text-orange-500", bg: "bg-orange-500/10", border: "border-orange-500/20", noSuffix: true, href: "/support" });
     }
 
     return pool.slice(0, 4);
@@ -115,38 +116,40 @@ export default function StatsBar() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
               >
-                <Card className={cn(
-                  "relative group h-[130px] md:h-[150px] border border-slate-100 bg-white shadow-sm hover:shadow-2xl transition-all duration-300 rounded-[22px] p-4 md:p-6 flex flex-col items-center justify-center gap-2 overflow-hidden hover:-translate-y-1 active:scale-95 cursor-default"
-                )}>
-                  {/* Glass Background Node */}
-                  <div className={cn("absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-3xl opacity-20", item.bg)} />
-                  
-                  <div className={cn(
-                    "h-10 w-10 md:h-12 md:w-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform duration-500 group-hover:scale-110 shadow-inner z-10",
-                    item.bg,
-                    item.border,
-                    item.color
+                <Link href={item.href || "#"}>
+                  <Card className={cn(
+                    "relative group h-[130px] md:h-[150px] border border-slate-100 bg-white shadow-sm hover:shadow-2xl transition-all duration-300 rounded-[22px] p-4 md:p-6 flex flex-col items-center justify-center gap-2 overflow-hidden hover:-translate-y-1 active:scale-95 cursor-pointer"
                   )}>
-                    {React.cloneElement(item.icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}
-                  </div>
-
-                  <div className="text-center space-y-0.5 z-10 w-full">
-                    <div className="text-lg md:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tighter leading-none antialiased">
-                      <Counter value={item.val} suffix={item.noSuffix ? "" : "+"} />
-                    </div>
-                    <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight truncate px-1">
-                      {item.label}
-                    </p>
+                    {/* Glass Background Node */}
+                    <div className={cn("absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-3xl opacity-20", item.bg)} />
                     
-                    {item.trend && (
-                      <div className="mt-1 flex items-center justify-center gap-1 animate-in fade-in slide-in-from-bottom-1">
-                         <span className="text-[8px] md:text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50 flex items-center gap-1">
-                           <TrendingUp className="h-2 w-2" /> {item.trend}
-                         </span>
+                    <div className={cn(
+                      "h-10 w-10 md:h-12 md:w-12 rounded-2xl flex items-center justify-center shrink-0 border transition-transform duration-500 group-hover:scale-110 shadow-inner z-10",
+                      item.bg,
+                      item.border,
+                      item.color
+                    )}>
+                      {React.cloneElement(item.icon as React.ReactElement, { className: "h-5 w-5 md:h-6 md:w-6" })}
+                    </div>
+
+                    <div className="text-center space-y-0.5 z-10 w-full">
+                      <div className="text-lg md:text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tighter leading-none antialiased">
+                        <Counter value={item.val} suffix={item.noSuffix ? "" : "+"} />
                       </div>
-                    )}
-                  </div>
-                </Card>
+                      <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-tight truncate px-1">
+                        {item.label}
+                      </p>
+                      
+                      {item.trend && (
+                        <div className="mt-1 flex items-center justify-center gap-1 animate-in fade-in slide-in-from-bottom-1">
+                           <span className="text-[8px] md:text-[9px] font-black uppercase text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100/50 flex items-center gap-1">
+                             <TrendingUp className="h-2 w-2" /> {item.trend}
+                           </span>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                </Link>
               </motion.div>
             ))
           )}
