@@ -11,7 +11,10 @@ import {
   Smartphone,
   ShieldCheck,
   Layers,
-  Target
+  Target,
+  FileText,
+  BookOpen,
+  FileStack
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -25,9 +28,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Hub v114.0.
- * RESTORED: Heading to "Crack Punjab Exams with Confidence".
- * FIXED: Balanced button logic - if app is installed, shows "Browse Exams" instead of hiding.
+ * @fileOverview Institutional Hero Hub v115.0.
+ * UPDATED: Removed uppercase from Action Cards and integrated live counts.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -102,7 +104,6 @@ export default function Hero() {
                   </Link>
                </Button>
                
-               {/* BALANCED BUTTON LOGIC: If installed, show Browse Exams to keep the layout balanced */}
                {!isInstalled ? (
                   <PWAInstallButton className="sm:flex-1 h-14 md:h-18" variant="outline" />
                ) : (
@@ -143,10 +144,30 @@ export default function Hero() {
         {/* 3. Action Grid */}
         <div className="mt-12 md:mt-24 px-4 sm:px-6 lg:px-8">
            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8 max-w-7xl mx-auto">
-              <QuickActionCard boardId="mock-test" label="Mock Tests" sub="500+ Series" href="/mocks" />
-              <QuickActionCard boardId="study-material" label="Study Notes" sub="Verified PDFs" href="/notes" />
-              <QuickActionCard boardId="pyq" label="PYQ Papers" sub="Official Archives" href="/pyqs" />
-              <QuickActionCard boardId="current-affairs" label="Latest G.K" sub="Daily Updates" href="/current-affairs" />
+              <QuickActionCard 
+                boardId="mock-test" 
+                label="Mock Tests" 
+                sub={`${stats?.totalMocks || 500}+ Series`} 
+                href="/mocks" 
+              />
+              <QuickActionCard 
+                boardId="study-material" 
+                label="Study Notes" 
+                sub={`${stats?.totalNotes || 100}+ Verified PDFs`} 
+                href="/notes" 
+              />
+              <QuickActionCard 
+                boardId="pyq" 
+                label="PYQ Papers" 
+                sub={`${stats?.totalPYQs || 50}+ Official Archives`} 
+                href="/pyqs" 
+              />
+              <QuickActionCard 
+                boardId="current-affairs" 
+                label="Current Affairs" 
+                sub="Daily Updates" 
+                href="/current-affairs" 
+              />
            </div>
         </div>
 
@@ -165,10 +186,10 @@ function QuickActionCard({ boardId, label, sub, href }: { boardId: string, label
           </div>
         </div>
         <div className="min-w-0 space-y-1">
-           <h3 className="text-[14px] md:text-2xl font-black tracking-tight text-[#0F172A] group-hover:text-primary transition-colors uppercase leading-none">
+           <h3 className="text-[14px] md:text-2xl font-black tracking-tight text-[#0F172A] group-hover:text-primary transition-colors leading-none">
               {label}
            </h3>
-           <p className="text-[8px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">{sub}</p>
+           <p className="text-[8px] md:text-[11px] font-bold text-slate-400 tracking-widest">{sub}</p>
         </div>
         <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
            <ChevronRight className="h-5 w-5 text-primary" />
