@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect } from "react";
@@ -9,8 +10,8 @@ import Link from "next/link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Meet Founder section v5.4.
- * FIXED: animate TypeError and updated Building Since date.
+ * @fileOverview Meet Founder section v5.5.
+ * FIXED: Hook dependency size mismatch by stabilizing the useEffect array.
  */
 export default function MeetFounder() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -124,10 +125,10 @@ export default function MeetFounder() {
 
 function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.ReactNode; label: string; value?: string; isInView: boolean; delay?: number }) {
   const [count, setCount] = useState(0);
-  const isNumeric = value && /^\d+$/.test(value);
-
+  
   useEffect(() => {
-    if (isInView && isNumeric) {
+    const isNumeric = value && /^\d+$/.test(value);
+    if (isInView && isNumeric && value) {
       const controls = animate(0, parseInt(value), {
         duration: 2,
         delay,
@@ -135,7 +136,7 @@ function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.Rea
       });
       return () => controls.stop();
     }
-  }, [isInView, value, delay, isNumeric]);
+  }, [isInView, value, delay]);
 
   return (
     <motion.div
@@ -147,7 +148,7 @@ function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.Rea
       <div className="text-primary">{icon}</div>
       {value ? (
         <p className="text-xl md:text-3xl font-black text-[#0F172A] tabular-nums leading-tight">
-          {isNumeric ? count : value}
+          {value && /^\d+$/.test(value) ? count : value}
         </p>
       ) : null}
       <p className="text-[10px] md:text-sm font-bold text-slate-500 uppercase tracking-widest">{label}</p>
