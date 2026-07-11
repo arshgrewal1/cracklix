@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 
 /**
- * @fileOverview Universal PWA Hook v3.1.
- * FIXED: Aggressive global check for stashed deferredPrompt to enable one-click install.
+ * @fileOverview Universal PWA Hook v3.2.
+ * FIXED: Stabilized dependency array to prevent "useEffect changed size" errors.
  */
 export function usePWAInstall() {
   const [isInstalled, setIsInstalled] = useState(false);
@@ -44,9 +44,8 @@ export function usePWAInstall() {
     window.addEventListener('beforeinstallprompt', handlePrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
     
-    // Polling check for browsers that might delay the global window assignment
     const pollInterval = setInterval(() => {
-      if ((window as any).deferredPrompt && !canInstall) {
+      if ((window as any).deferredPrompt) {
         setCanInstall(true);
         clearInterval(pollInterval);
       }
@@ -57,7 +56,7 @@ export function usePWAInstall() {
        window.removeEventListener('appinstalled', handleAppInstalled);
        clearInterval(pollInterval);
     };
-  }, [checkStatus, canInstall]);
+  }, [checkStatus]); // Removed canInstall from deps to fix size mismatch error
 
   const installApp = async () => {
     const prompt = (window as any).deferredPrompt;
