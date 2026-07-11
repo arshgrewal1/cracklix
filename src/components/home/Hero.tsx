@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -28,7 +29,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Hub v117.0.
+ * @fileOverview Institutional Hero Hub v118.0.
+ * FIXED: Removed forced uppercase from action card labels and subtitles.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -68,7 +70,7 @@ export default function Hero() {
                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50/50 border border-blue-100/50 w-fit mx-auto lg:mx-0"
             >
               <Star className="h-3.5 w-3.5 text-primary fill-primary animate-pulse" />
-              <span className="text-[11px] md:text-sm font-black uppercase tracking-widest text-slate-600">
+              <span className="text-[11px] md:text-sm font-bold uppercase tracking-widest text-slate-600">
                 Punjab's Smartest Platform
               </span>
             </motion.div>
@@ -114,9 +116,9 @@ export default function Hero() {
                )}
             </div>
 
-            <div className="flex items-center justify-center lg:justify-start gap-6 pt-4 text-slate-400 font-black text-[9px] md:text-[11px] tracking-widest">
-               <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" /> OFFICIAL PATTERNS</span>
-               <span className="flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /> INSTANT REGISTRY</span>
+            <div className="flex items-center justify-center lg:justify-start gap-6 pt-4 text-slate-400 font-bold text-[9px] md:text-[11px] tracking-widest uppercase">
+               <span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-500" /> Official Patterns</span>
+               <span className="flex items-center gap-2"><Layers className="h-4 w-4 text-primary" /> Instant Registry</span>
             </div>
           </div>
 
@@ -185,10 +187,10 @@ function QuickActionCard({ boardId, label, sub, href }: { boardId: string, label
           </div>
         </div>
         <div className="min-w-0 space-y-1">
-           <h3 className="text-[14px] md:text-2xl font-black tracking-tight text-[#0F172A] group-hover:text-primary transition-colors leading-none">
+           <h3 className="text-[14px] md:text-2xl font-bold tracking-tight text-[#0F172A] group-hover:text-primary transition-colors leading-none">
               {label}
            </h3>
-           <p className="text-[8px] md:text-[11px] font-bold text-slate-400 tracking-widest">{sub}</p>
+           <p className="text-[8px] md:text-[11px] font-bold text-slate-400 tracking-tight">{sub}</p>
         </div>
         <div className="absolute bottom-6 right-6 md:bottom-10 md:right-10 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">
            <ChevronRight className="h-5 w-5 text-primary" />

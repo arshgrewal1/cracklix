@@ -42,10 +42,8 @@ import { useToast } from "@/hooks/use-toast"
 import { useExamStore } from "@/store/useExamStore"
 
 /**
- * @fileOverview Student Home - Real-Time Study Tracker v50.3.
- * FIXED: Student name visibility issue on dark background.
- * FIXED: Elite Pass countdown badge color and visibility.
- * CHANGED: Made Elite Hub countdown timer live and more detailed.
+ * @fileOverview Student Home - Real-Time Study Tracker v50.4.
+ * FIXED: Removed forced uppercase from dashboard labels and section headers.
  */
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
@@ -232,10 +230,10 @@ export default function StudentDashboard() {
                             <div className="flex items-center gap-4 md:gap-6 min-w-0 flex-1">
                               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner"><Zap className="h-5 w-5 text-primary" /></div>
                               <div className="min-w-0 space-y-1 flex-1">
-                                  <p className="font-semibold text-[#0B1528] text-[15px] md:text-[16px] line-clamp-2 leading-snug">{r.mockTitle}</p>
-                                  <div className="flex items-center gap-3 text-[12px] font-bold text-slate-400 uppercase tracking-tight">
+                                  <p className="font-semibold text-[#0B1228] text-[15px] md:text-[16px] line-clamp-2 leading-snug">{r.mockTitle}</p>
+                                  <div className="flex items-center gap-3 text-[12px] font-bold text-slate-400 tracking-tight">
                                     <span>Score: {r.score}</span>
-                                    <Badge className="bg-emerald-50 text-emerald-600 border-none font-black px-2 py-0.5 rounded text-[9px]">{r.accuracy}%</Badge>
+                                    <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold px-2 py-0.5 rounded text-[9px]">{r.accuracy}%</Badge>
                                   </div>
                               </div>
                             </div>
@@ -251,7 +249,7 @@ export default function StudentDashboard() {
               <Card className="border-none shadow-4xl bg-blue-600 text-white p-6 md:p-10 rounded-2xl md:rounded-[2rem] relative overflow-hidden group">
                 <div className="absolute bottom-0 right-0 p-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Flame className="h-24 w-24 md:h-32 w-32" /></div>
                 <div className="relative z-10 text-left">
-                    <p className="text-[11px] font-bold text-white/70 uppercase tracking-widest">Daily streak</p>
+                    <p className="text-[11px] font-bold text-white/70 uppercase tracking-widest">Daily Streak</p>
                     <div className="flex items-baseline gap-2">
                       <div className="text-[48px] md:text-7xl font-black leading-none">{stats.streak}</div>
                       <p className="text-[16px] font-bold">Days</p>
@@ -260,7 +258,7 @@ export default function StudentDashboard() {
               </Card>
 
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl space-y-6">
-                 <h4 className="text-[11px] font-black text-slate-400 tracking-widest uppercase">Quick Tools</h4>
+                 <h4 className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">Quick Tools</h4>
                  <div className="grid grid-cols-1 gap-2 md:gap-3">
                     <QuickToolLink href="/search" label="Search Bank" icon={Search} />
                     <QuickToolLink href="/current-affairs" label="Current Affairs" icon={Newspaper} />

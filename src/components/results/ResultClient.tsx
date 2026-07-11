@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, isValidElement, cloneElement, ReactElement } from "react"
@@ -30,8 +31,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Result Node Hub Client v2.2.
- * UPDATED: Removed uppercase from labels and buttons for refined readability.
+ * @fileOverview Official Result Node Hub Client v2.3.
+ * UPDATED: Removed forced uppercase from headings and labels.
  */
 
 export default function ResultClient() {
@@ -142,12 +143,12 @@ export default function ResultClient() {
            <AlertCircle className="h-8 w-8" />
         </div>
         <div className="space-y-1">
-           <h2 className="text-xl font-headline font-black uppercase text-[#0F172A]">Result node missing</h2>
+           <h2 className="text-xl font-bold text-[#0F172A]">Result node missing</h2>
            <p className="text-slate-500 font-medium text-sm max-w-xs mx-auto">
               Your results for mock could not be verified in the cloud.
            </p>
         </div>
-        <Button asChild className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-11 px-8 font-black uppercase text-[10px]"><Link href="/dashboard">Return Dashboard</Link></Button>
+        <Button asChild className="bg-[#0F172A] hover:bg-black text-white rounded-xl h-11 px-8 font-bold text-sm"><Link href="/dashboard">Return Dashboard</Link></Button>
      </div>
   );
 
@@ -162,8 +163,8 @@ export default function ResultClient() {
                  <Trophy className="h-6 w-6 md:h-8 md:w-8" />
               </div>
               <div className="min-w-0 flex-1 space-y-1.5">
-                 <h1 className="text-lg md:text-3xl font-black text-white uppercase tracking-tight leading-tight">{sessionData?.mockTitle || "Practice Result"}</h1>
-                 <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Performance hub</p>
+                 <h1 className="text-lg md:text-3xl font-black text-white tracking-tight leading-tight">{sessionData?.mockTitle || "Practice Result"}</h1>
+                 <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest uppercase">Performance Hub</p>
               </div>
            </div>
 
@@ -176,7 +177,7 @@ export default function ResultClient() {
            </div>
 
            <div className="flex gap-4 shrink-0 w-full lg:w-auto">
-              <Button asChild className="w-full lg:w-auto h-12 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white font-black text-[10px] tracking-widest rounded-xl shadow-xl transition-all border-none active:scale-95">
+              <Button asChild className="w-full lg:w-auto h-12 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white font-bold text-sm tracking-tight rounded-xl shadow-xl transition-all border-none active:scale-95">
                  <Link href={`/mocks/instructions?id=${mockId}`} className="flex items-center justify-center gap-3">
                     <RefreshCw className="h-4 w-4" /> Re-Attempt
                  </Link>
@@ -187,8 +188,8 @@ export default function ResultClient() {
         <Tabs defaultValue="SOLUTIONS" className="space-y-6 md:space-y-8">
            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <TabsList className="bg-white border border-slate-100 p-1.5 h-12 md:h-14 rounded-xl shadow-md inline-flex">
-                 <TabsTrigger value="SOLUTIONS" className="rounded-lg px-6 md:px-8 font-black text-[9px] md:text-[10px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white transition-all">Solutions</TabsTrigger>
-                 <TabsTrigger value="TOPPER" className="rounded-lg px-6 md:px-8 font-black text-[9px] md:text-[10px] h-full data-[state=active]:bg-[#0B1528] data-[state=active]:text-white transition-all">Leaderboard</TabsTrigger>
+                 <TabsTrigger value="SOLUTIONS" className="rounded-lg px-6 md:px-8 font-bold text-xs h-full data-[state=active]:bg-[#0B1228] data-[state=active]:text-white transition-all">Solutions</TabsTrigger>
+                 <TabsTrigger value="TOPPER" className="rounded-lg px-6 md:px-8 font-bold text-xs h-full data-[state=active]:bg-[#0B1228] data-[state=active]:text-white transition-all">Leaderboard</TabsTrigger>
               </TabsList>
               
               <div className="flex flex-wrap gap-2">
@@ -209,8 +210,8 @@ export default function ResultClient() {
                        <CardContent className="p-6 md:p-10 lg:p-14">
                           <div className="flex items-center justify-between mb-6 md:mb-10">
                              <div className="flex items-center gap-3">
-                                <span className={cn("h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-xl flex items-center justify-center font-black text-xs md:text-xl shadow-inner", isCorrect ? "bg-emerald-50 text-emerald-600" : isSkipped ? "bg-slate-50 text-slate-400" : "bg-rose-50 text-rose-600")}>{q.index + 1}</span>
-                                <Badge variant="outline" className="border-slate-100 text-slate-400 uppercase text-[8px] md:text-[10px] font-black px-2 py-0.5 rounded">{(q.subjectId || "GK").toUpperCase()}</Badge>
+                                <span className={cn("h-8 w-8 md:h-12 md:w-12 rounded-lg md:rounded-xl flex items-center justify-center font-bold text-xs md:text-xl shadow-inner", isCorrect ? "bg-emerald-50 text-emerald-600" : isSkipped ? "bg-slate-50 text-slate-400" : "bg-rose-50 text-rose-600")}>{q.index + 1}</span>
+                                <Badge variant="outline" className="border-slate-100 text-slate-400 text-[8px] md:text-[10px] font-bold px-2 py-0.5 rounded">{(q.subjectId || "GK")}</Badge>
                              </div>
                              {isCorrect ? (
                                 <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[8px] md:text-[10px] px-3 py-1 rounded-full shadow-sm">Correct</Badge>
@@ -235,7 +236,7 @@ export default function ResultClient() {
               }) : (
                  <div className="py-24 text-center opacity-30 flex flex-col items-center justify-center space-y-4">
                     <AlertCircle className="h-12 w-12 text-slate-300" />
-                    <p className="font-headline font-black text-xl">No items found</p>
+                    <p className="font-bold text-xl">No items found</p>
                  </div>
               )}
            </TabsContent>
@@ -261,12 +262,12 @@ export default function ResultClient() {
                                  <span className={cn("font-black w-6 md:w-10 text-xs md:text-2xl tabular-nums", i < 3 ? "text-primary" : "text-slate-300")}>#{i+1}</span>
                                  <StudentAvatar profile={{ name, gender: r.gender }} className="h-8 w-8 md:h-14 md:w-14 rounded-lg md:rounded-2xl border border-white shadow-sm" />
                                  <div className="min-w-0 flex-1">
-                                    <p className={cn("font-black text-xs md:text-xl truncate", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{name} {isCurrentUser && "(You)"}</p>
-                                    <p className="text-[7px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Score: {(r.score || 0).toFixed(1)}</p>
+                                    <p className={cn("font-bold text-sm md:text-xl truncate", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{name} {isCurrentUser && "(You)"}</p>
+                                    <p className="text-[7px] md:text-[10px] font-bold text-slate-400 tracking-widest uppercase">Score: {(r.score || 0).toFixed(1)}</p>
                                  </div>
                               </div>
                               <div className="shrink-0 ml-4">
-                                 <Badge className={cn("border-none text-[9px] md:text-sm font-black px-2.5 md:px-5 py-1 rounded-lg tabular-nums shadow-sm", r.accuracy > 85 ? "bg-emerald-50 text-emerald-600" : r.accuracy > 60 ? "bg-amber-50 text-amber-600" : "bg-slate-100 text-slate-500")}>{r.accuracy}%</Badge>
+                                 <Badge className={cn("border-none text-[9px] md:text-sm font-bold px-2.5 md:px-5 py-1 rounded-lg tabular-nums shadow-sm", r.accuracy > 85 ? "bg-emerald-50 text-emerald-600" : r.accuracy > 60 ? "bg-amber-50 text-amber-600" : "bg-slate-100 text-slate-500")}>{r.accuracy}%</Badge>
                               </div>
                            </div>
                           );
@@ -285,8 +286,8 @@ export default function ResultClient() {
 function ResultPill({ label, val, color, className }: any) {
    return (
       <div className={cn("flex flex-col items-center lg:items-start gap-1", className)}>
-         <span className="text-[7px] md:text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">{label}</span>
-         <span className={cn("text-lg md:text-3xl font-headline font-black leading-none tabular-nums tracking-tighter", color)}>{val}</span>
+         <span className="text-[7px] md:text-[10px] font-bold text-slate-400 tracking-tight leading-none">{label}</span>
+         <span className={cn("text-lg md:text-3xl font-black leading-none tabular-nums tracking-tighter", color)}>{val}</span>
       </div>
    )
 }

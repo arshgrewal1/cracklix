@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -19,8 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Mobile-First Question Hub v46.0 (Space Optimized).
- * FIXED: Reduced padding and optimized spacing for the CBT environment.
+ * @fileOverview Precision Mobile-First Question Hub v47.0.
+ * FIXED: Removed forced uppercase from category and solution labels.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -77,8 +78,8 @@ export default function QuestionRenderer({
       {!showSolution && (
         <div className="flex items-center justify-between mb-6 border-b border-slate-50 pb-4">
            <div className="flex items-center gap-3">
-              <span className="font-black text-[10px] md:text-sm text-white bg-[#0B1528] px-3 py-1 rounded-lg shadow-xl">Q {q.displayId || '1'}</span>
-              <div className="flex items-center gap-2 text-slate-400 font-black text-[9px] md:text-xs tabular-nums bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+              <span className="font-bold text-[10px] md:text-sm text-white bg-[#0B1228] px-3 py-1 rounded-lg shadow-xl">Q {q.displayId || '1'}</span>
+              <div className="flex items-center gap-2 text-slate-400 font-bold text-[9px] md:text-xs tabular-nums bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
                  <Clock className="h-3 w-3 text-primary" />
                  <span>{formatTime(timeLeft)}</span>
               </div>
@@ -146,11 +147,11 @@ export default function QuestionRenderer({
       {showSolution && (
         <div className="mt-6 pt-6 border-t border-slate-100 space-y-4">
            <div className="flex items-center gap-3">
-              <Badge className="bg-[#0F172A] text-white border-none font-black text-[8px] md:text-[10px] uppercase px-4 py-1 rounded-xl tracking-widest shadow-lg">Rationale</Badge>
+              <Badge className="bg-[#0B1228] text-white border-none font-bold text-[8px] md:text-[10px] px-4 py-1 rounded-xl shadow-lg">Rationale</Badge>
               <div className="h-px flex-1 bg-slate-50" />
            </div>
            <div className="bg-slate-50 p-4 md:p-8 rounded-xl md:rounded-[2.5rem] border border-slate-100 text-slate-500 leading-relaxed font-medium text-[11px] md:text-base space-y-4 shadow-inner">
-              <p className="font-black text-[9px] md:text-[11px] uppercase text-[#0B1528] pb-2 border-b border-slate-200/50 flex items-center gap-3">
+              <p className="font-bold text-[9px] md:text-[11px] text-[#0B1228] pb-2 border-b border-slate-200/50 flex items-center gap-3">
                  <ShieldCheck className="h-4 w-4 text-emerald-500" /> Official Key: {q.correctAnswer}
               </p>
               <div className="space-y-4">
