@@ -30,7 +30,10 @@ import {
   BookOpen,
   Newspaper,
   FileStack,
-  ShieldAlert
+  ShieldAlert,
+  BarChart,
+  AreaChart,
+  LineChart
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
@@ -39,12 +42,21 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { useExamStore } from "@/store/useExamStore"
+import { useUserAnalytics } from "@/hooks/use-user-analytics"
 
 /**
- * @fileOverview Student Progress Portal v53.0.
- * FIXED: Stabilized study time tracking to prevent hydration mismatch.
- * UPDATED: Normalized vocabulary (Hub -> Center/Portal).
+ * @fileOverview Student Progress Portal v54.0.
+ * NEW: Replaced session timer with comprehensive study analytics.
  */
+
+const formatDuration = (seconds: number) => {
+  if (isNaN(seconds) || seconds < 0) return "0m";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
   const db = useFirestore()
@@ -52,29 +64,10 @@ export default function StudentDashboard() {
   const { toast } = useToast()
   const [mounted, setMounted] = useState(false)
   const [passCountdown, setPassCountdown] = useState("");
-  
-  const currentMockId = useExamStore(s => s.mockId);
-  const startTime = useExamStore(s => s.startTime);
-
-  const [sessionSeconds, setSessionSeconds] = useState(0);
+  const { analytics, loading: analyticsLoading } = useUserAnalytics();
 
   useEffect(() => {
     setMounted(true)
-    
-    if (typeof window !== 'undefined') {
-      const today = new Date().toDateString();
-      const saved = localStorage.getItem(`study_time_${today}`);
-      if (saved) setSessionSeconds(parseInt(saved));
-
-      const interval = setInterval(() => {
-        setSessionSeconds(prev => {
-          const next = prev + 1;
-          localStorage.setItem(`study_time_${today}`, next.toString());
-          return next;
-        });
-      }, 1000);
-      return () => clearInterval(interval);
-    }
   }, [])
 
   useEffect(() => {
@@ -120,17 +113,12 @@ export default function StudentDashboard() {
     return query(collection(db, "results"), where("userId", "==", user.uid))
   }, [db, user, mounted])
 
-  const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]);
-
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
-  const { data: validMocks, loading: mocksLoading } = useCollection<any>(mocksQuery)
 
   const stats = useMemo(() => {
-    if (!rawResults || !validMocks || !mounted) return { total: 0, avgAccuracy: 0, streak: 0, readiness: 0, hours: "0s", list: [] }
+    if (!rawResults || !mounted) return { total: 0, avgAccuracy: 0, list: [] }
     
-    const validMockIds = new Set(validMocks.map(m => m.id));
-    const filtered = rawResults.filter(r => validMockIds.has(r.mockId));
-    const sorted = [...filtered].sort((a, b) => {
+    const sorted = [...rawResults].sort((a, b) => {
       const dateA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
       const dateB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
       return dateB - dateA;
@@ -141,43 +129,12 @@ export default function StudentDashboard() {
     const attempted = sorted.reduce((acc: number, r: any) => acc + (Object.keys(r.answers || {}).length), 0)
     const avgAcc = attempted > 0 ? Math.round((correct / attempted) * 100) : 0
     
-    const maxSafeSecondsPerTest = 3600 * 10; 
-    const historicalSeconds = sorted.reduce((acc: number, r: any) => {
-       const t = Number(r.timeTaken) || 0;
-       return acc + (t > maxSafeSecondsPerTest ? 0 : t);
-    }, 0);
-
-    let activeMockSeconds = 0;
-    if (currentMockId && startTime) {
-       activeMockSeconds = Math.round((Date.now() - startTime) / 1000);
-    }
-
-    const totalTimeSeconds = historicalSeconds + sessionSeconds + activeMockSeconds;
-    
-    const h = Math.floor(totalTimeSeconds / 3600);
-    const m = Math.floor((totalTimeSeconds % 3600) / 60);
-    const s = totalTimeSeconds % 60;
-
-    let timeFormattedValue = "";
-    if (h > 0) {
-      timeFormattedValue = `${h}h ${m}m`;
-    } else if (m > 0) {
-      timeFormattedValue = `${m}m ${s}s`;
-    } else {
-      timeFormattedValue = `${s}s`;
-    }
-
-    const uniqueDays = new Set(sorted.map((r: any) => new Date(r.timestamp).toDateString()))
-    
     return { 
       total, 
       avgAccuracy: avgAcc, 
-      streak: uniqueDays.size, 
-      readiness: Math.min(100, Math.round((avgAcc * 0.7) + (Math.min(total, 30) * 1))), 
-      hours: timeFormattedValue, 
       list: sorted.slice(0, 8) 
     }
-  }, [rawResults, validMocks, sessionSeconds, currentMockId, startTime, mounted])
+  }, [rawResults, mounted])
 
   if (!mounted || authLoading) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-8 w-8 text-primary animate-pulse" /></div>;
 
@@ -212,10 +169,10 @@ export default function StudentDashboard() {
               </section>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-5">
-                <MetricItem label="Progress" val={`${stats.readiness}%`} icon={<TrendingUp className="text-primary" />} />
-                <MetricItem label="Accuracy" val={`${stats.avgAccuracy}%`} icon={<Target className="text-emerald-500" />} />
-                <MetricItem label="Tests" val={stats.total} icon={<ClipboardList className="text-blue-500" />} />
-                <MetricItem label="Study Time" val={stats.hours} icon={<Clock className="text-amber-500" />} />
+                 <MetricItem label="Today's Study" val={formatDuration(analytics?.today || 0)} icon={<Clock className="text-primary" />} />
+                 <MetricItem label="This Week" val={formatDuration(analytics?.thisWeek || 0)} icon={<Calendar className="text-emerald-500" />} />
+                 <MetricItem label="This Month" val={formatDuration(analytics?.thisMonth || 0)} icon={<BarChart className="text-blue-500" />} />
+                 <MetricItem label="This Year" val={formatDuration(analytics?.thisYear || 0)} icon={<AreaChart className="text-amber-500" />} />
               </div>
 
               <Card className="border-none shadow-xl rounded-2xl md:rounded-[2rem] bg-white overflow-hidden border border-slate-100">
@@ -246,16 +203,23 @@ export default function StudentDashboard() {
           </div>
 
           <div className="lg:col-span-4 space-y-6">
-              <Card className="border-none shadow-4xl bg-blue-600 text-white p-6 md:p-10 rounded-2xl md:rounded-[2rem] relative overflow-hidden group">
+               <Card className="border-none shadow-4xl bg-blue-600 text-white p-6 md:p-10 rounded-2xl md:rounded-[2rem] relative overflow-hidden group">
                 <div className="absolute bottom-0 right-0 p-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Flame className="h-24 w-24 md:h-32 w-32" /></div>
                 <div className="relative z-10 text-left">
-                    <p className="text-[11px] font-bold text-white/70 uppercase tracking-widest">Daily Streak</p>
+                    <p className="text-[11px] font-bold text-white/70 uppercase tracking-widest">Lifetime Study</p>
                     <div className="flex items-baseline gap-2">
-                      <div className="text-[48px] md:text-7xl font-black leading-none">{stats.streak}</div>
-                      <p className="text-[16px] font-bold">Days</p>
+                      <div className="text-[48px] md:text-7xl font-black leading-none">{formatDuration(analytics?.lifetime || 0)}</div>
                     </div>
                 </div>
               </Card>
+
+              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl space-y-6">
+                 <h4 className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">Extra Insights</h4>
+                 <div className="grid grid-cols-2 gap-4">
+                    <InsightCard label="Longest Session" value={formatDuration(analytics?.longestSession || 0)} />
+                    <InsightCard label="Most Studied" value={analytics?.mostStudiedSubject || "N/A"} />
+                 </div>
+              </div>
 
               <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl space-y-6">
                  <h4 className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">Quick Portal Tools</h4>
@@ -285,6 +249,15 @@ function MetricItem({ label, val, icon }: { label: string, val: string | number,
       <div className="text-[18px] md:text-2xl font-black text-[#0F172A] leading-none truncate tabular-nums">{val}</div>
       <p className="text-[11px] font-bold tracking-tight text-slate-400 mt-2">{label}</p>
     </Card>
+  )
+}
+
+function InsightCard({ label, value }: { label: string, value: string | number }) {
+  return (
+    <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-4">
+      <p className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">{label}</p>
+      <p className="text-lg font-bold text-[#0F172A] truncate">{value}</p>
+    </div>
   )
 }
 

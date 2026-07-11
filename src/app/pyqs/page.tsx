@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore } from "@/firebase"
@@ -22,15 +22,23 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { AuthorityLogo } from "@/lib/exam-icons"
+import { useStudyAnalytics } from "@/hooks/use-study-analytics";
 
 /**
- * @fileOverview Official PYQ Hub v2.5.
- * REFINED: Reduced font sizes and removed uppercase for better readability.
+ * @fileOverview Official PYQ Hub v2.6 (Study Analytics Integration).
  */
 
 export default function PYQPage() {
   const db = useFirestore()
   const [searchTerm, setSearchTerm] = useState("")
+  const { startTracking, stopTracking } = useStudyAnalytics('pyq');
+
+  useEffect(() => {
+    startTracking();
+    return () => {
+      stopTracking();
+    };
+  }, [startTracking, stopTracking]);
 
   const pyqQuery = useMemo(() => {
     if (!db) return null

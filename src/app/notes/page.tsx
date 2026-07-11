@@ -15,9 +15,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { useStudyAnalytics } from "@/hooks/use-study-analytics";
 
 /**
- * @fileOverview Institutional Download Center v2.4 (Simplified Language).
+ * @fileOverview Institutional Download Center v2.5 (Study Analytics Integration).
  */
 
 export default function NotesLibrary() {
@@ -26,6 +27,14 @@ export default function NotesLibrary() {
   const pathname = usePathname()
   const { user, profile, loading: authLoading } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
+  const { startTracking, stopTracking } = useStudyAnalytics('notes');
+
+  useEffect(() => {
+    startTracking();
+    return () => {
+      stopTracking();
+    };
+  }, [startTracking, stopTracking]);
 
   useEffect(() => {
     if (!authLoading && !user) {

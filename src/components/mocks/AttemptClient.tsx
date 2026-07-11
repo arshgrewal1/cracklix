@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useUser, useFirestore } from "@/firebase";
 import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
-import { useStudyTracker } from "@/hooks/useStudyTracker"; 
+import { useStudyAnalytics } from "@/hooks/use-study-analytics"; 
 import ExamHeader from "@/components/exam/ExamHeader";
 import TacticalFooter from "@/components/exam/TacticalFooter";
 import AntiCheat from "@/components/exam/AntiCheat";
@@ -31,7 +31,9 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v5.0 (Guest Mode Support).
+ * @fileOverview Official Mock Attempt Hub v5.2 (Swipe Navigation Enabled).
+ * ADDED: Horizontal swipe gesture support for question navigation.
+ * FIXED: Normalized typography and terminology across CBT components.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -41,6 +43,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const db = useFirestore();
   const { user, profile } = useUser();
   const { toast } = useToast();
+  const { startTracking, stopTracking } = useStudyAnalytics('mock');
 
   const mockId = useMemo(() => {
     if (propMockId) return propMockId;
@@ -51,9 +54,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     return lastSegment !== 'attempt' ? lastSegment : null;
   }, [pathname, searchParams, propMockId]);
 
-  // Disable study tracker for guests to prevent Firestore permission errors
-  useStudyTracker(mockId, 'MOCK', !!user);
-
   const [isInitializing, setIsInitializing] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
@@ -61,6 +61,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const [showExitModal, setShowExitModal] = useState(false);
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [mockData, setMockData] = useState<any>(null);
+
+  // SWIPE NAVIGATION HANDLERS
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
 
   const {
     initExam,
@@ -77,6 +81,39 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     timeLeft,
     setCurrentIdx
   } = useExamStore();
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current === null || touchEndX.current === null) return;
+    
+    const deltaX = touchStartX.current - touchEndX.current;
+    const threshold = 80; // 80px swipe requirement
+
+    if (deltaX > threshold && currentIdx < questions.length - 1) {
+      // Swipe Left -> Next
+      setCurrentIdx(currentIdx + 1);
+    } else if (deltaX < -threshold && currentIdx > 0) {
+      // Swipe Right -> Previous
+      setCurrentIdx(currentIdx - 1);
+    }
+
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
+
+  useEffect(() => {
+    startTracking();
+    return () => {
+      stopTracking();
+    };
+  }, [startTracking, stopTracking]);
 
   useEffect(() => {
     async function loadExam() {
@@ -208,7 +245,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
       router.replace(`/results/view?id=${mockId}`);
     } else {
-      // GUEST SUBMISSION: Save to localStorage for conversion later
+      // GUEST SUBMISSION
       localStorage.setItem(`cracklix_guest_result_${mockId}`, JSON.stringify(resultPayload));
       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
       router.replace(`/results/view?id=${mockId}&guest=true`);
@@ -235,7 +272,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8">
        <Zap className="h-12 w-12 text-primary animate-pulse" />
-       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Synchronizing Hub...</p>
+       <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary">Synchronizing Center...</p>
     </div>
   );
 
@@ -248,7 +285,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           <h2 className="text-2xl font-black text-[#0F172A] leading-tight">Sync Failure</h2>
           <p className="text-slate-500 font-medium max-w-sm mx-auto">{initError || "Mock context lost during resolution."}</p>
        </div>
-       <Button onClick={() => router.replace('/dashboard')} className="h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-bold text-sm">Return to Hub</Button>
+       <Button onClick={() => router.replace('/dashboard')} className="h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-bold text-sm">Return to Portal</Button>
     </div>
   );
 
@@ -273,7 +310,12 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           )}
         </AnimatePresence>
         
-        <div className="flex-1 flex flex-col min-h-0 relative">
+        <div 
+          className="flex-1 flex flex-col min-h-0 relative"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
           <SubjectTabs />
           
           <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center px-4 pt-4 pb-40 md:pb-32">
@@ -281,9 +323,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               {questions.length > 0 && questions[currentIdx] ? (
                 <motion.div 
                   key={currentIdx} 
-                  initial={{ opacity: 0, y: 5 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  transition={{ duration: 0.2 }}
+                  initial={{ opacity: 0, x: 20 }} 
+                  animate={{ opacity: 1, x: 0 }} 
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.25, ease: "easeOut" }}
                   className="w-full"
                 >
                   <QuestionRenderer 

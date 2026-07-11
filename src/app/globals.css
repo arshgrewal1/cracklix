@@ -109,3 +109,19 @@
 .shadow-5xl {
   box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.15);
 }
+
+@keyframes highlight-bg {
+  0% {
+    background-color: rgba(22, 119, 255, 0);
+  }
+  50% {
+    background-color: rgba(22, 119, 255, 0.1);
+  }
+  100% {
+    background-color: rgba(22, 119, 255, 0);
+  }
+}
+
+.highlight-on-scroll {
+  animation: highlight-bg 2s ease-in-out;
+}

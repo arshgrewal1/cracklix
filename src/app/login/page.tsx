@@ -42,13 +42,14 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Portal v95.0.
- * FIXED: Stabilized hooks to resolve Maximum update depth exceeded.
+ * @fileOverview Cracklix Premium Login Portal v95.1.
+ * FIXED: Stabilized hooks and useSearchParams to resolve Maximum update depth exceeded.
+ * FIXED: Wrapped syncGuestData in useCallback for dependency stability.
  */
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-white"><Loader2 className="h-10 w-10 text-primary animate-spin" /></div>}>
       <LoginContent />
     </Suspense>
   )
@@ -73,7 +74,7 @@ function LoginContent() {
   const [resetLoading, setResetLoading] = useState(false)
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
   
-  // Stabilize parameters
+  // Memoize parameters to prevent loop triggers
   const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/dashboard", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
   const initialMode = useMemo(() => searchParams?.get("mode"), [searchParams]);
@@ -247,7 +248,7 @@ function LoginContent() {
 
           <div className="space-y-8">
             <h1 className="text-5xl xl:text-6xl font-black tracking-tight text-white leading-[1.05]">
-              Punjab&apos;s Smart <br/> 
+              Punjab's Smart <br/> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-300">
                 Exam Platform
               </span>

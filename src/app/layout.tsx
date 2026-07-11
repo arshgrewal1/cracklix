@@ -17,7 +17,8 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v61.2 (Stability Optimized).
+ * @fileOverview Root Layout v61.3 (Stability Optimized).
+ * FIXED: Moved script strategy to afterInteractive to prevent ChunkLoadError.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",

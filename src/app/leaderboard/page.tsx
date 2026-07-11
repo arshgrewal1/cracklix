@@ -15,8 +15,9 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Top Rankers Center v20.0.
+ * @fileOverview Official Top Rankers Center v20.1.
  * FIXED: Repaired uniqueRankers reference mismatch causing runtime crash.
+ * NORMALIZED: Removed forced uppercase from general headers and student names.
  */
 
 export default function LeaderboardPage() {
@@ -93,7 +94,7 @@ export default function LeaderboardPage() {
                   <div className="h-10 w-10 md:h-14 md:w-14 bg-primary/10 rounded-2xl md:rounded-3xl flex items-center justify-center text-primary shadow-2xl">
                      <ShieldCheck className="h-6 w-6 md:h-8 md:w-8" />
                   </div>
-                  <span className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest">Official Rank List</span>
+                  <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Official Rank List</span>
                </div>
                <h1 className="text-4xl md:text-7xl lg:text-8xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased">Top Rankers</h1>
                <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl leading-tight tracking-tight italic">Registry of all-time highest scores across Punjab recruitment verticals.</p>
@@ -101,7 +102,7 @@ export default function LeaderboardPage() {
             <div className="relative w-full md:w-[500px] group">
                <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-blue-400/10 rounded-2xl blur opacity-20 transition duration-1000"></div>
                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-300 group-focus:text-primary transition-colors" />
-               <Input className="h-16 md:h-20 pl-16 rounded-2xl md:rounded-[2rem] bg-white border-none shadow-2xl text-lg md:text-xl font-bold text-[#0F172A]" placeholder="Search student node..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+               <Input className="h-16 md:h-20 pl-16 rounded-2xl md:rounded-[2rem] bg-white border-none shadow-2xl text-lg md:text-xl font-bold text-[#0F172A]" placeholder="Search student..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
             </div>
          </div>
 
@@ -115,7 +116,7 @@ export default function LeaderboardPage() {
 
          <Card className="border-none shadow-4xl rounded-[3rem] md:rounded-[4.5rem] bg-white overflow-hidden">
             <CardContent className="p-0">
-               <div className="p-8 md:p-14 border-b border-slate-50 bg-slate-50/50 grid grid-cols-12 text-[10px] md:text-[13px] font-black text-slate-400 uppercase tracking-widest">
+               <div className="p-8 md:p-14 border-b border-slate-50 bg-slate-50/30 grid grid-cols-12 text-[10px] md:text-[13px] font-bold text-slate-400 uppercase tracking-widest">
                  <div className="col-span-2 md:col-span-1">Rank</div>
                  <div className="col-span-6 md:col-span-7">Student Identity</div>
                  <div className="col-span-2 text-center">Best Score</div>
@@ -131,9 +132,9 @@ export default function LeaderboardPage() {
                            <div className="col-span-6 md:col-span-7 flex items-center gap-6 md:gap-12">
                               <StudentAvatar profile={entry.profile || entry} className="h-12 w-12 md:h-24 md:w-24 rounded-2xl md:rounded-[2.5rem] border-2 md:border-4 border-white shadow-xl bg-slate-50" />
                               <div className="min-w-0">
-                                 <p className={cn("font-black text-base md:text-3xl truncate leading-none tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{entry.name} {isCurrentUser && "(You)"}</p>
+                                 <p className={cn("font-bold text-base md:text-3xl truncate leading-none tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{entry.name} {isCurrentUser && "(You)"}</p>
                                  <div className="flex items-center gap-3 md:gap-6 mt-2 md:mt-4">
-                                     <Badge className="bg-primary/5 text-primary border-none text-[8px] md:text-[11px] font-black uppercase tracking-widest px-3 py-1">{entry.profile?.targetExam || 'Elite Portal'}</Badge>
+                                     <Badge className="bg-primary/5 text-primary border-none text-[8px] md:text-[11px] font-bold uppercase tracking-widest px-3 py-1">{entry.profile?.targetExam || 'Elite Portal'}</Badge>
                                      <span className="hidden sm:inline-flex items-center gap-2 text-[10px] md:text-[12px] font-bold text-slate-300 uppercase tracking-widest truncate"><Activity className="h-4 w-4" /> Best: {entry.mockTitle}</span>
                                  </div>
                               </div>
@@ -168,7 +169,7 @@ function PodiumCard({ rank, data, color, isMain }: any) {
             <div className={cn("absolute -bottom-6 left-1/2 -translate-x-1/2 h-12 w-12 md:h-20 md:w-20 rounded-[1.5rem] md:rounded-[2.5rem] flex items-center justify-center shadow-2xl border-4 md:border-[6px] border-white transition-transform group-hover:rotate-12", color)}>
                {rank === 1 ? <Trophy className="h-6 w-6 md:h-10 md:w-10 text-white fill-current" /> : rank === 2 ? <Medal className="h-6 w-6 md:h-10 md:w-10 text-white fill-current" /> : <Target className="h-6 w-6 md:h-10 md:w-10 text-white" />}
             </div>
-            {isMain && (<div className="absolute -top-12 left-1/2 -translate-x-1/2 animate-bounce"><Badge className="bg-primary text-white border-none font-black text-[10px] md:text-[13px] px-6 py-2 rounded-full shadow-5xl uppercase tracking-[0.2em]">Merit #1</Badge></div>)}
+            {isMain && (<div className="absolute -top-12 left-1/2 -translate-x-1/2 animate-bounce"><Badge className="bg-primary text-white border-none font-bold text-[10px] md:text-[13px] px-6 py-2 rounded-full shadow-5xl uppercase tracking-[0.2em]">Merit #1</Badge></div>)}
          </div>
          <div className="text-center space-y-4 w-full">
             <h3 className={cn("font-black text-[#0F172A] tracking-tight leading-tight", isMain ? "text-2xl md:text-5xl" : "text-xl md:text-3xl")}>{data?.name || 'Aspirant'}</h3>

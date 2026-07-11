@@ -24,10 +24,10 @@ import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { AuthorityLogo } from "@/lib/exam-icons"
+import { useStudyAnalytics } from "@/hooks/use-study-analytics";
 
 /**
- * @fileOverview Official Current Affairs Center v22.0.
- * UPDATED: Refined hero logo with transparency and removed forced uppercase.
+ * @fileOverview Official Current Affairs Center v22.1 (Study Analytics Integration).
  */
 
 const HUB_TYPES = [
@@ -44,6 +44,14 @@ export default function CurrentAffairsCenter() {
   const router = useRouter()
   const [activeType, setActiveType] = useState("DAILY")
   const [searchTerm, setSearchTerm] = useState("")
+  const { startTracking, stopTracking } = useStudyAnalytics('current-affairs');
+
+  useEffect(() => {
+    startTracking();
+    return () => {
+      stopTracking();
+    };
+  }, [startTracking, stopTracking]);
 
   useEffect(() => {
     if (!authLoading && !user) {

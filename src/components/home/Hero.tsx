@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useMemo, useEffect, useState } from "react";
+import React, { useMemo, useEffect, useState, MouseEvent } from "react";
 import { motion } from "framer-motion";
 import {
   Zap,
@@ -29,8 +29,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Center v120.0.
- * UPDATED: Added founder trust badge to increase credibility and authenticity.
+ * @fileOverview Institutional Hero Center v120.1.
+ * UPDATED: Implemented smooth scroll to founder section and updated trust badge.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -52,6 +52,29 @@ export default function Hero() {
     { label: "PSTET", href: "/exams/hub/pstet" },
     { label: "And Others", href: "/exams" }
   ];
+
+  const handleScroll = (e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) => {
+    e.preventDefault();
+    const href = e.currentTarget.href;
+    const targetId = href.replace(/.*#/, "");
+    const elem = document.getElementById(targetId);
+    if (elem) {
+      const headerOffset = 80; // Offset for sticky header
+      const elementPosition = elem.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
+
+      // Briefly highlight the section
+      elem.classList.add('highlight-on-scroll');
+      setTimeout(() => {
+          elem.classList.remove('highlight-on-scroll');
+      }, 2000); // Highlight for 2 seconds
+    }
+  };
 
   if (!mounted) return null;
 
@@ -104,10 +127,11 @@ export default function Hero() {
                 transition={{ delay: 0.3 }}
                 className="flex justify-center lg:justify-start pt-2"
               >
-                <Link 
-                  href="/meet-founder" 
+                <a 
+                  href="#founder-section" 
+                  onClick={handleScroll}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50/30 border border-blue-100/50 hover:bg-white hover:border-primary/20 transition-all duration-300 group shadow-sm"
-                  aria-label="Built with Passion in Punjab. Founded and Developed by Arsh Grewal. Click to meet the founder."
+                  aria-label="Built with Passion in Punjab. Founded and Developed by Arsh Grewal. Click to learn more about the founder."
                 >
                   <p className="text-[13px] md:text-[15px] font-medium text-slate-500 leading-none">
                     ✨ Built with Passion in Punjab. Founded & Developed by{" "}
@@ -118,7 +142,7 @@ export default function Hero() {
                   <span className="flex items-center gap-1 text-primary font-bold text-[11px] md:text-xs ml-1 whitespace-nowrap">
                     Meet the Founder <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                   </span>
-                </Link>
+                </a>
               </motion.div>
             </div>
 

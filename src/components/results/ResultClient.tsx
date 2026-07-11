@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
-import { useParams, useRouter, useSearchParams, usePathname } from "next/navigation"
+import React, { useState, useMemo, useEffect, Suspense } from "react"
+import { useRouter, useSearchParams, usePathname } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -37,8 +37,10 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Performance Analysis Center v5.5.
- * FIXED: Repaired syntax error and overlapping UI metrics.
+ * @fileOverview Official Performance Analysis Center v5.7.
+ * FIXED: Syntax error resolved by removing orphaned div.
+ * FIXED: UI Overlap fixed by adjusting grid span and pill spacing.
+ * NORMALIZED: Removed forced uppercase from general labels.
  */
 
 export default function ResultClient() {
@@ -168,7 +170,7 @@ export default function ResultClient() {
         
         <div className="bg-[#0B1528] rounded-[2rem] shadow-5xl overflow-hidden p-6 md:p-12 flex flex-col lg:grid lg:grid-cols-12 items-center gap-10 border border-white/5">
            
-           <div className="flex items-center gap-5 md:gap-8 lg:col-span-4 w-full text-center lg:text-left">
+           <div className="flex items-center gap-5 md:gap-8 lg:col-span-5 w-full text-center lg:text-left">
               <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl md:rounded-3xl bg-primary/10 flex items-center justify-center text-primary shrink-0 shadow-2xl border border-primary/20 transition-transform hover:rotate-6">
                  <Trophy className="h-6 w-6 md:h-8 md:w-8" />
               </div>
@@ -180,7 +182,7 @@ export default function ResultClient() {
               </div>
            </div>
 
-           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 lg:col-span-6 shrink-0 w-full lg:w-auto px-2 border-y lg:border-y-0 lg:border-x border-white/5 py-6 lg:py-0">
+           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 lg:col-span-5 shrink-0 w-full lg:w-auto px-2 border-y lg:border-y-0 lg:border-x border-white/5 py-6 lg:py-0">
               <ResultPill label="Score" val={(sessionData?.score || 0).toFixed(1)} color={(sessionData?.score || 0) < 0 ? "text-rose-400" : "text-primary"} />
               <ResultPill label="Rank" val={user ? `#${merit.rank}` : 'Guest'} color="text-white" />
               <ResultPill label="Accuracy" val={`${sessionData?.accuracy || 0}%`} color="text-emerald-400" />
@@ -229,7 +231,7 @@ export default function ResultClient() {
                           </p>
                        </div>
                        <div className="flex flex-col sm:flex-row items-center gap-4">
-                          <Button asChild className="w-full sm:w-auto h-14 px-10 bg-white text-blue-600 hover:bg-slate-50 font-black text-sm rounded-full shadow-2xl border-none">
+                          <Button asChild className="w-full sm:w-auto h-14 px-10 bg-white text-blue-600 font-black text-sm rounded-full shadow-2xl border-none">
                              <Link href={`/login?returnUrl=${encodeURIComponent(pathname + '?id=' + mockId)}&mode=register`}>Create Free Account</Link>
                           </Button>
                           <Button asChild variant="ghost" className="w-full sm:w-auto text-white hover:bg-white/10 font-bold text-sm">
@@ -323,7 +325,7 @@ export default function ResultClient() {
                                     <span className={cn("font-black w-10 md:w-16 text-sm md:text-3xl tabular-nums", i < 3 ? "text-primary" : "text-slate-200")}>#{i+1}</span>
                                     <StudentAvatar profile={{ name, gender: r.gender }} className="h-10 w-10 md:h-20 md:w-20 rounded-xl md:rounded-[2.5rem] border-2 border-white shadow-xl bg-slate-50" />
                                     <div className="min-w-0 flex-1">
-                                        <p className={cn("font-black text-sm md:text-2xl truncate tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{name} {isCurrentUser && "(You)"}</p>
+                                        <p className={cn("font-black text-sm md:text-xl tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{name} {isCurrentUser && "(You)"}</p>
                                         <div className="flex items-center gap-4 mt-2">
                                           <p className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Score: {(r.score || 0).toFixed(1)}</p>
                                           <div className="h-1 w-1 rounded-full bg-slate-200" />
@@ -351,9 +353,9 @@ export default function ResultClient() {
 
 function ResultPill({ label, val, color, className }: any) {
    return (
-      <div className={cn("flex flex-col items-center lg:items-start gap-2", className)}>
-         <span className="text-[10px] md:text-[11px] font-bold text-slate-500 tracking-widest uppercase">{label}</span>
-         <span className={cn("text-xl md:text-4xl font-black tabular-nums tracking-tighter antialiased leading-tight", color)}>{val}</span>
+      <div className={cn("flex flex-col items-center lg:items-start gap-3", className)}>
+         <span className="text-[10px] md:text-[12px] font-bold text-slate-500 tracking-widest uppercase leading-none">{label}</span>
+         <span className={cn("text-xl md:text-4xl font-black tabular-nums tracking-tighter antialiased leading-[1.1]", color)}>{val}</span>
       </div>
    )
 }
