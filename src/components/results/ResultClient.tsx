@@ -1,7 +1,6 @@
-
 "use client"
 
-import React, { useState, useMemo, useEffect, Suspense, isValidElement, cloneElement, ReactElement } from "react"
+import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
 import { useParams, useRouter, useSearchParams, usePathname } from "next/navigation"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
@@ -34,8 +33,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Result Node Hub Client v2.5.
- * FIXED: Advanced metrics integration (Percentile, Time) and Title Case normalization.
+ * @fileOverview Official Result Node Hub Client v3.0.
+ * FIXED: Removed general uppercase, ensured Board uppercase, and resolved result pill overlapping.
  */
 
 export default function ResultClient() {
@@ -90,7 +89,6 @@ export default function ResultClient() {
      const actualRank = myRank > 0 ? myRank : 1;
      const total = meritList.length;
      
-     // Calculate Percentile
      const percentile = total > 1 
        ? Math.round(((total - actualRank) / (total - 1)) * 1000) / 10 
        : 100;
@@ -126,16 +124,16 @@ export default function ResultClient() {
   }, [db, mockId]);
 
   const filteredQuestions = useMemo(() => {
-     if (!sessionData) return [];
-     return questions.map((q: any, i: number) => ({ ...q, index: i })).filter((q: any) => {
-        const ans = sessionData.answers?.[q.index];
-        const isCorrect = ans !== undefined && ['A','B','C','D'][ans] === q.correctAnswer;
-        if (activeReviewFilter === 'ALL') return true;
-        if (activeReviewFilter === 'CORRECT') return isCorrect;
-        if (activeReviewFilter === 'WRONG') return ans !== undefined && !isCorrect;
-        if (activeReviewFilter === 'SKIPPED') return ans === undefined || ans === null;
-        return true;
-     });
+    if (!sessionData) return [];
+    return questions.map((q: any, i: number) => ({ ...q, index: i })).filter((q: any) => {
+      const ans = sessionData.answers?.[q.index];
+      const isCorrect = ans !== undefined && ['A','B','C','D'][ans] === q.correctAnswer;
+      if (activeReviewFilter === 'ALL') return true;
+      if (activeReviewFilter === 'CORRECT') return isCorrect;
+      if (activeReviewFilter === 'WRONG') return ans !== undefined && !isCorrect;
+      if (activeReviewFilter === 'SKIPPED') return ans === undefined || ans === null;
+      return true;
+    });
   }, [questions, sessionData, activeReviewFilter]);
 
   const formatTime = (seconds: number) => {
@@ -147,7 +145,7 @@ export default function ResultClient() {
   if (!mounted || resultLoading || (loadingQuestions && questions.length === 0)) return (
      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
         <Loader2 className="h-8 w-8 text-primary animate-spin" />
-        <p className="text-[10px] font-black uppercase text-slate-300">Auditing Session...</p>
+        <p className="text-[10px] font-black uppercase text-slate-300">Syncing Results...</p>
      </div>
   );
 
@@ -163,7 +161,9 @@ export default function ResultClient() {
                  <Trophy className="h-6 w-6 md:h-10 md:w-10" />
               </div>
               <div className="min-w-0 flex-1 space-y-2">
-                 <h1 className="text-xl md:text-4xl font-black text-white tracking-tight leading-tight uppercase">{sessionData?.mockTitle || "Practice Result"}</h1>
+                 <h1 className="text-xl md:text-4xl font-black text-white tracking-tight leading-tight">
+                   {sessionData?.mockTitle || "Practice Result"}
+                 </h1>
                  <p className="text-[10px] md:text-[12px] font-bold text-slate-400 tracking-widest uppercase">Performance Hub</p>
               </div>
            </div>
@@ -199,7 +199,6 @@ export default function ResultClient() {
               </div>
            </div>
 
-           {/* SOLUTIONS CONTENT */}
            <TabsContent value="SOLUTIONS" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-500">
               {filteredQuestions.length > 0 ? filteredQuestions.map((q: any) => {
                  const ans = sessionData?.answers?.[q.index];
@@ -237,12 +236,11 @@ export default function ResultClient() {
               }) : (
                  <div className="py-32 text-center opacity-30 flex flex-col items-center justify-center space-y-6">
                     <AlertCircle className="h-20 w-20 text-slate-300" />
-                    <p className="font-bold text-2xl uppercase tracking-widest">No matching results found</p>
+                    <p className="font-bold text-2xl">No matching results found</p>
                  </div>
               )}
            </TabsContent>
 
-           {/* LEADERBOARD CONTENT */}
            <TabsContent value="TOPPER" className="animate-in fade-in duration-500">
               <Card className="border-none shadow-3xl rounded-[3rem] bg-white p-6 md:p-12 text-left border border-slate-100 overflow-hidden">
                  <div className="space-y-8">
@@ -289,18 +287,19 @@ export default function ResultClient() {
                  </div>
               </Card>
            </TabsContent>
-        </Tabs>
-      </main>
-      <Footer />
+        </div>
+      </Tabs>
+    </main>
+    <Footer />
     </div>
   )
 }
 
 function ResultPill({ label, val, color, className }: any) {
    return (
-      <div className={cn("flex flex-col items-center lg:items-start gap-1", className)}>
-         <span className="text-[8px] md:text-[11px] font-bold text-slate-500 tracking-widest uppercase">{label}</span>
-         <span className={cn("text-xl md:text-4xl font-black leading-none tabular-nums tracking-tighter", color)}>{val}</span>
+      <div className={cn("flex flex-col items-center lg:items-start gap-2", className)}>
+         <span className="text-[10px] md:text-[11px] font-bold text-slate-500 tracking-widest">{label}</span>
+         <span className={cn("text-xl md:text-5xl font-black leading-tight tabular-nums tracking-tighter", color)}>{val}</span>
       </div>
    )
 }

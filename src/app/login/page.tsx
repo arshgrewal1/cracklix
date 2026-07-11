@@ -43,8 +43,8 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Hub v87.1.
- * UPDATED: Simplified password placeholder text.
+ * @fileOverview Cracklix Premium Login Hub v88.0.
+ * FIXED: Removed searchParams from useEffect deps to prevent recursion crash.
  */
 
 const formatCompact = (num: number) => {
@@ -82,18 +82,19 @@ function LoginContent() {
   const searchParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const referralFromUrl = searchParams?.get("ref")
   const returnUrl = searchParams?.get("returnUrl") || "/dashboard"
+  const returnUrlParam = searchParams?.get("returnUrl");
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   useEffect(() => {
-    if (searchParams?.get("returnUrl")) {
+    if (returnUrlParam) {
       toast({
         title: "Login Required",
         description: "Please login to access the preparation hub.",
       });
     }
-  }, [searchParams, toast]);
+  }, [returnUrlParam, toast]);
 
   useEffect(() => {
     if (!authLoading && user && profile) {
