@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -26,8 +26,9 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Dashboard v27.0 (Typography Hardened)
- * UPDATED: Title Case normalization for all headers and strings.
+ * Admin Dashboard v28.0 (Live Sync Hardened)
+ * FIXED: Comprehensive recalculation for Revenue and Active Passes.
+ * FIXED: Auto-sync on mount for real-time governance.
  */
 
 export default function AdminDashboard() {
@@ -37,7 +38,7 @@ export default function AdminDashboard() {
   const [isStatsSyncing, setIsStatsSyncing] = useState(false)
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
-  const { data: stats } = useDoc<any>(statsRef);
+  const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
 
   const recentUsersQuery = useMemo(() => (db ? query(collection(db, "users"), orderBy("createdAt", "desc"), limit(5)) : null), [db]);
   const { data: recentUsers } = useCollection<any>(recentUsersQuery);
@@ -49,7 +50,18 @@ export default function AdminDashboard() {
      if (!db) return;
      setIsStatsSyncing(true);
      try {
-        const [qCount, mCount, uCount, rCount, eCount, nCount, pyqCount, pSnap] = await Promise.all([
+        const [
+          qCount, 
+          mCount, 
+          uCount, 
+          rCount, 
+          eCount, 
+          nCount, 
+          pyqCount, 
+          pSnap, 
+          catCount,
+          activePassesCount
+        ] = await Promise.all([
            getCountFromServer(collection(db, "questions")),
            getCountFromServer(collection(db, "mocks")),
            getCountFromServer(collection(db, "users")),
@@ -57,7 +69,9 @@ export default function AdminDashboard() {
            getCountFromServer(collection(db, "exams")),
            getCountFromServer(collection(db, "notes")),
            getCountFromServer(collection(db, "pyqs")),
-           getDocs(query(collection(db, "payment_requests"), where("status", "==", "APPROVED")))
+           getDocs(query(collection(db, "payment_requests"), where("status", "==", "APPROVED"))),
+           getCountFromServer(collection(db, "categories")),
+           getCountFromServer(query(collection(db, "users"), where("passStatus", "==", "active")))
         ]);
 
         const totalRev = pSnap.docs.reduce((acc: number, d: DocumentData) => acc + (Number(d.data().amount) || 0), 0);
@@ -66,26 +80,38 @@ export default function AdminDashboard() {
            totalQuestions: qCount.data().count,
            totalMocks: mCount.data().count,
            totalUsers: uCount.data().count,
-           totalCategories: eCount.data().count,
+           totalExams: eCount.data().count,
+           totalCategories: catCount.data().count,
            totalRevenue: totalRev,
            totalNotes: nCount.data().count,
            totalPYQs: pyqCount.data().count,
            totalAttempts: rCount.data().count,
+           activePasses: activePassesCount.data().count,
            updatedAt: serverTimestamp()
         }, { merge: true });
 
-        toast({ title: "Counters Synchronized" });
+        toast({ title: "Registry Synced", description: "All performance nodes updated." });
+     } catch (err: any) {
+        console.error("[SYNC_ERROR]", err);
+        toast({ variant: "destructive", title: "Sync Failed", description: err.message });
      } finally {
         setIsStatsSyncing(false);
      }
   }
+
+  // Trigger sync on mount to ensure fresh metrics
+  useEffect(() => {
+    if (db) {
+      handleSyncLiveStats();
+    }
+  }, [db]);
 
   const handlePushToRegistry = async () => {
     if (!db) return
     setIsSyncing(true)
     try {
       await seedInitialData(db)
-      toast({ title: "Registry Rebuilt" })
+      toast({ title: "Registry Rebuilt", description: "Default nodes pushed successfully." })
       await handleSyncLiveStats()
     } finally {
       setIsSyncing(false)
@@ -108,7 +134,7 @@ export default function AdminDashboard() {
           <p className="text-slate-500 text-[11px] md:text-lg font-medium">Coordinate preparation nodes and session integrity.</p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto shrink-0">
-           <button onClick={handleSyncLiveStats} disabled={isStatsSyncing} className="flex-1 sm:flex-none h-11 px-6 rounded-full border border-slate-200 font-black text-[10px] tracking-widest text-[#0F172A] hover:bg-slate-50 transition-all">
+           <button onClick={handleSyncLiveStats} disabled={isStatsSyncing} className="flex-1 sm:flex-none h-11 px-6 rounded-full border border-slate-200 font-black text-[10px] tracking-widest text-[#0F172A] hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
               {isStatsSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Sync
            </button>
            <Button onClick={handlePushToRegistry} disabled={isSyncing} className="flex-1 sm:flex-none h-11 px-8 bg-primary hover:bg-blue-700 text-white shadow-xl rounded-full border-none font-black text-[10px] tracking-widest">
@@ -119,12 +145,12 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
          <AdminMetricCard label="Gross Revenue" value={`₹${(stats?.totalRevenue || 0).toLocaleString()}`} sub="Verified Flow" icon={<DollarSign className="text-emerald-500" />} href="/admin/payments" />
-         <AdminMetricCard label="Active Passes" value={stats?.activePasses || 0} sub="Elite Aspirants" icon={<Gem className="text-primary" />} href="/admin/users" />
+         <AdminMetricCard label="Active Passes" value={statsLoading ? "..." : (stats?.activePasses || 0)} sub="Elite Aspirants" icon={<Gem className="text-primary" />} href="/admin/users" />
          <AdminMetricCard label="Audit Queue" value={pendingNodes?.length || 0} sub="Pending UPI" icon={<AlertCircle className={cn(hasPending ? "text-rose-500 animate-pulse" : "text-slate-300")} />} href="/admin/payments/verify" highlight={hasPending} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-         <Card className="lg:col-span-8 border-none shadow-xl bg-white rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-slate-50">
+         <Card className="lg:col-span-8 border-none shadow-xl bg-white rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-slate-100">
             <CardHeader className="p-5 md:p-8 border-b border-slate-50 bg-slate-50/30">
                <CardTitle className="text-sm md:text-xl font-black text-[#0F172A] tracking-tight">Recent Registrations</CardTitle>
             </CardHeader>
@@ -139,7 +165,7 @@ export default function AdminDashboard() {
                         </div>
                      </div>
                      <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase border-slate-200 px-2 py-0.5 rounded shadow-sm">
-                        {u.pass?.active ? (u.pass.plan || 'Elite') : 'Free Hub'}
+                        {u.passStatus === 'active' ? (u.pass?.plan || 'Elite') : 'Free Hub'}
                      </Badge>
                   </div>
                ))}
@@ -151,7 +177,7 @@ export default function AdminDashboard() {
 
          <div className="lg:col-span-4 space-y-6 md:space-y-8">
             <Card className="border-none shadow-xl bg-[#0F172A] text-white p-6 md:p-8 rounded-2xl md:rounded-[2.5rem] relative overflow-hidden group">
-               <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><ShieldCheck className="h-44 w-44 md:h-64 md:w-64" /></div>
+               <div className="absolute top-0 right-0 p-8 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><ShieldCheck className="h-44 w-44 md:h-64 w-64" /></div>
                <div className="relative z-10 space-y-6 md:space-y-8 text-left">
                   <div className="space-y-1">
                      <h3 className="text-xl md:text-2xl font-black tracking-tight">Quick Tools</h3>
@@ -175,7 +201,7 @@ function AdminMetricCard({ label, value, sub, icon, href, highlight }: any) {
   return (
     <Link href={href} className="block group">
       <Card className={cn(
-        "border-none shadow-xl bg-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] transition-all duration-500 text-left",
+        "border-none shadow-xl bg-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] transition-all duration-500 text-left h-full",
         "group-hover:translate-y-[-4px] border border-slate-50",
         highlight && "ring-2 ring-rose-500/20 bg-rose-50/5"
       )}>
