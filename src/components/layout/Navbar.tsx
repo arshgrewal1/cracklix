@@ -35,6 +35,10 @@ import { Button } from "@/components/ui/button";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
+/**
+ * @fileOverview Cracklix Navigation Hub v65.0.
+ * UPDATED: Significant size increase for logo and header for elite branding.
+ */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -94,13 +98,13 @@ export default function Navbar() {
       SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-[72px] md:h-[112px]" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-[80px] md:h-[140px]" />;
   }
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
-        <nav className="w-full h-14 md:h-[112px]">
+        <nav className="w-full h-20 md:h-[140px]">
           <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between gap-4">
 
             <div className="flex items-center shrink-0 gap-4 flex-1 lg:flex-none">
@@ -115,7 +119,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0 -ml-4"
-                imgClassName="h-16 md:h-36 w-auto"
+                imgClassName="h-20 md:h-48 w-auto"
                 align="left"
               />
             </div>
@@ -196,7 +200,7 @@ export default function Navbar() {
       </header>
 
       <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-        <SheetContent side="left" className="w-[280px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
+        <SheetContent side="left" className="w-[300px] p-0 border-none bg-white z-[2001] shadow-2xl [&>button]:hidden">
           <SheetHeader className="sr-only"><SheetTitle>Menu</SheetTitle><SheetDescription>Navigation Menu</SheetDescription></SheetHeader>
           <MobileSidebar onClose={() => setIsSidebarOpen(false)} />
         </SheetContent>
