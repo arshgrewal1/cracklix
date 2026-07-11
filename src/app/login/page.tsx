@@ -42,8 +42,8 @@ import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
 
 /**
- * @fileOverview Cracklix Premium Login Portal v94.0.
- * FIXED: Stabilized searchParams and toast triggers to resolve Maximum update depth exceeded error.
+ * @fileOverview Cracklix Premium Login Portal v95.0.
+ * FIXED: Stabilized hooks to resolve Maximum update depth exceeded.
  */
 
 export default function LoginPage() {
@@ -73,12 +73,11 @@ function LoginContent() {
   const [resetLoading, setResetLoading] = useState(false)
   const [isResetDialogOpen, setIsResetDialogOpen] = useState(false)
   
-  // Memoized URL parameters to prevent effect loop
+  // Stabilize parameters
   const returnUrl = useMemo(() => searchParams?.get("returnUrl") || "/dashboard", [searchParams]);
   const referralFromUrl = useMemo(() => searchParams?.get("ref"), [searchParams]);
   const initialMode = useMemo(() => searchParams?.get("mode"), [searchParams]);
 
-  const hasFiredToast = useRef(false);
   const syncAttempted = useRef(false);
 
   useEffect(() => {
@@ -93,10 +92,7 @@ function LoginContent() {
      const resultKeys = keys.filter(k => k.startsWith('cracklix_guest_result_'));
      
      if (resultKeys.length > 0) {
-        if (!hasFiredToast.current) {
-          toast({ title: "Syncing Data", description: "Transferring guest attempts to your account." });
-          hasFiredToast.current = true;
-        }
+        toast({ title: "Syncing Data", description: "Transferring guest attempts to your account." });
         
         for (const key of resultKeys) {
            try {
@@ -142,7 +138,7 @@ function LoginContent() {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     if (mode === 'register' && password !== confirmPassword) {
-      toast({ variant: "destructive", title: "Wait", description: "Passwords must match." })
+      toast({ variant: "destructive", title: "Passwords Mismatch", description: "Passwords must match." })
       return
     }
 
@@ -172,7 +168,7 @@ function LoginContent() {
         })
       }
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Auth Failed", description: error.message })
+      toast({ variant: "destructive", title: "Authentication Failed", description: error.message })
       setLoading(false)
     }
   }
@@ -212,7 +208,7 @@ function LoginContent() {
         })
       }
     } catch (error: any) {
-      toast({ variant: "destructive", title: "Social Auth Error", description: error.message })
+      toast({ variant: "destructive", title: "Social Login Error", description: error.message })
       setLoading(false)
     }
   }
@@ -250,22 +246,22 @@ function LoginContent() {
         <Logo variant="dark" align="left" className="my-0" />
 
           <div className="space-y-8">
-            <h1 className="text-5xl xl:text-6xl font-[900] tracking-tight text-white leading-[1.05]">
+            <h1 className="text-5xl xl:text-6xl font-black tracking-tight text-white leading-[1.05]">
               Punjab&apos;s Smart <br/> 
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-blue-300">
                 Exam Platform
               </span>
             </h1>
             <p className="text-base xl:text-xl text-slate-300 font-medium leading-relaxed">
-              Real-time mock tests and performance analytics verified by the Punjab recruitment registry.
+              Practice mock tests and performance analytics verified by official recruitment standards.
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-8">
             <HeroStat icon={ClipboardList} label={`${statsLoading ? '...' : formatCompact(stats?.totalMocks)}+ Mock Tests`} />
             <HeroStat icon={Zap} label={`${statsLoading ? '...' : formatCompact(stats?.totalQuestions)}+ Questions`} />
-            <HeroStat icon={Users} label={`${statsLoading ? '...' : formatCompact(stats?.totalUsers)}+ Active Aspirants`} />
-            <HeroStat icon={ShieldCheck} label="Real Exam Pattern" />
+            <HeroStat icon={Users} label={`${statsLoading ? '...' : formatCompact(stats?.totalUsers)}+ Aspirants`} />
+            <HeroStat icon={ShieldCheck} label="Official Patterns" />
           </div>
         </div>
       </div>
@@ -278,11 +274,11 @@ function LoginContent() {
         >
           <Card className="border-none shadow-5xl lg:shadow-none bg-white rounded-[32px] p-6 md:p-12 space-y-6 md:space-y-10">
             <div className="space-y-2 text-center lg:text-left">
-               <h2 className="text-2xl md:text-4xl font-[900] tracking-tight text-[#0F172A]">
+               <h2 className="text-2xl md:text-4xl font-black tracking-tight text-[#0F172A]">
                  {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                </h2>
                <p className="text-slate-400 font-bold text-[10px] md:text-[11px] uppercase tracking-widest">
-                 {mode === 'login' ? 'Access your portal' : 'Join the preparation network'}
+                 {mode === 'login' ? 'Access your portal' : 'Join the preparation portal'}
                </p>
             </div>
 
@@ -328,7 +324,7 @@ function LoginContent() {
 
               <div className="pt-2 flex flex-col gap-4">
                 <Button type="submit" className="w-full h-14 md:h-18 bg-blue-600 text-white font-bold text-xs rounded-full shadow-xl border-none transition-all active:scale-[0.98]" disabled={loading}>
-                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : (mode === 'login' ? "Continue" : "Create Account")}
+                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Continue"}
                 </Button>
                 <div className="flex items-center gap-3 py-1">
                   <div className="h-px flex-1 bg-slate-100" />
@@ -361,7 +357,7 @@ function LoginContent() {
         <DialogContent className="bg-white rounded-[2rem] max-w-[440px] p-8 md:p-12 shadow-5xl text-left border-none">
           <DialogHeader className="text-center space-y-4">
             <div className="h-14 w-14 md:h-16 md:w-16 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto text-primary shadow-xl">{resetLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : <RefreshCw className="h-6 w-6" />}</div>
-            <DialogTitle className="text-xl md:text-2xl font-[900] tracking-tight text-[#0F172A]">Recover Account</DialogTitle>
+            <DialogTitle className="text-xl md:text-2xl font-black tracking-tight text-[#0F172A]">Recover Account</DialogTitle>
             <DialogDescription className="text-slate-400 text-[10px] md:sm font-bold text-center mt-2 leading-relaxed">Enter your email for reset link.</DialogDescription>
           </DialogHeader>
           <div className="py-8 space-y-6">

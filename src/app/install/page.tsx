@@ -18,9 +18,7 @@ import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { PLATFORM_VERSION } from "@/lib/version";
 
 /**
- * @fileOverview Official Direct App Portal v13.0.
- * UPDATED: Normalized background to light theme to match site-wide header color.
- * FIXED: Scaled down hero text sizes for better side margins.
+ * @fileOverview Official Direct App Portal v14.0 (Design Hardened).
  */
 
 export default function InstallPwaPage() {
@@ -48,11 +46,11 @@ export default function InstallPwaPage() {
                     <span className="text-[10px] md:text-[11px] font-black tracking-widest uppercase text-slate-400">V{version} Production Portal</span>
                  </div>
 
-                 {/* HERO GRAPHIC - SCALED DOWN FOR BETTER MARGINS */}
+                 {/* HERO GRAPHIC - NORMALIZED SCALE */}
                  <div className="relative py-2">
                     <h1 className="flex flex-col items-center justify-center font-black tracking-tighter leading-[0.85] md:leading-[0.8] select-none antialiased italic">
-                       <span className="text-[48px] md:text-[100px] lg:text-[120px] text-slate-200 uppercase">Direct</span>
-                       <span className="text-[56px] md:text-[120px] lg:text-[140px] text-primary uppercase mt-[-10px] md:mt-[-20px]">Setup.</span>
+                       <span className="text-[48px] md:text-[100px] lg:text-[110px] text-slate-200 uppercase">Direct</span>
+                       <span className="text-[56px] md:text-[120px] lg:text-[130px] text-primary uppercase mt-[-10px] md:mt-[-20px]">Setup.</span>
                     </h1>
                  </div>
 

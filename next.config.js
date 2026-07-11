@@ -2,7 +2,7 @@ const withPWA = require('next-pwa')({
     dest: 'public',
     register: true,
     skipWaiting: true,
-    disable: false, // Enabled in development so the user can test the installation prompt
+    disable: process.env.NODE_ENV === 'development', // Fix startup noise and potential dev crashes
 });
 
 /** @type {import('next').NextConfig} */
@@ -23,6 +23,12 @@ const nextConfig = {
   compress: true,
   staticPageGenerationTimeout: 300,
   trailingSlash: true,
+  experimental: {
+    allowedDevOrigins: [
+      '6000-firebase-studio-1780356784378.cluster-cd3bsnf6r5bemwki2bxljme5as.cloudworkstations.dev',
+      '9000-firebase-studio-1780356784378.cluster-cd3bsnf6r5bemwki2bxljme5as.cloudworkstations.dev'
+    ]
+  }
 };
 
 module.exports = withPWA(nextConfig);

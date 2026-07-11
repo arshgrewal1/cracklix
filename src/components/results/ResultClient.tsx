@@ -37,8 +37,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Performance Analysis Center v5.4.
- * FIXED: Overlapping UI metrics and repaired syntax errors.
+ * @fileOverview Official Performance Analysis Center v5.5.
+ * FIXED: Repaired syntax error and overlapping UI metrics.
  */
 
 export default function ResultClient() {
@@ -303,7 +303,7 @@ export default function ResultClient() {
                               <Users className="h-6 w-6 text-primary" />
                               <div>
                                 <p className="text-[11px] md:sm font-bold text-slate-500 tracking-tight">Official Registry</p>
-                                <p className="text-base md:text-xl font-black text-[#0F172A]">{merit.total} Verified Aspirants</p>
+                                <p className="text-base md:text-xl font-black text-[#0F172A]">{merit.total} Aspirants</p>
                               </div>
                           </div>
                           <div className="flex items-center gap-3 bg-white px-5 py-2.5 rounded-2xl border border-slate-100 shadow-sm">
@@ -351,9 +351,9 @@ export default function ResultClient() {
 
 function ResultPill({ label, val, color, className }: any) {
    return (
-      <div className={cn("flex flex-col items-center lg:items-start gap-1.5 md:gap-2", className)}>
+      <div className={cn("flex flex-col items-center lg:items-start gap-2", className)}>
          <span className="text-[10px] md:text-[11px] font-bold text-slate-500 tracking-widest uppercase">{label}</span>
-         <span className={cn("text-xl md:text-4xl font-black leading-tight tabular-nums tracking-tighter antialiased", color)}>{val}</span>
+         <span className={cn("text-xl md:text-4xl font-black tabular-nums tracking-tighter antialiased leading-tight", color)}>{val}</span>
       </div>
    )
 }

@@ -15,9 +15,8 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Top Rankers Hub v19.1.
- * FIXED: Removed forced uppercase from student names and headers.
- * UPDATED: Title Case normalization for premium appearance.
+ * @fileOverview Institutional Top Rankers Center v20.0.
+ * FIXED: Repaired uniqueRankers reference mismatch causing runtime crash.
  */
 
 export default function LeaderboardPage() {
@@ -57,7 +56,6 @@ export default function LeaderboardPage() {
                      r.userEmail || 
                      "Aspirant";
         
-        // Ensure name isn't forced uppercase
         const name = rawName;
         const email = userProfile?.email || r.userEmail || "---";
 
@@ -135,7 +133,7 @@ export default function LeaderboardPage() {
                               <div className="min-w-0">
                                  <p className={cn("font-black text-base md:text-3xl truncate leading-none tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{entry.name} {isCurrentUser && "(You)"}</p>
                                  <div className="flex items-center gap-3 md:gap-6 mt-2 md:mt-4">
-                                     <Badge className="bg-primary/5 text-primary border-none text-[8px] md:text-[11px] font-black uppercase tracking-widest px-3 py-1">{entry.profile?.targetExam || 'Elite Hub'}</Badge>
+                                     <Badge className="bg-primary/5 text-primary border-none text-[8px] md:text-[11px] font-black uppercase tracking-widest px-3 py-1">{entry.profile?.targetExam || 'Elite Portal'}</Badge>
                                      <span className="hidden sm:inline-flex items-center gap-2 text-[10px] md:text-[12px] font-bold text-slate-300 uppercase tracking-widest truncate"><Activity className="h-4 w-4" /> Best: {entry.mockTitle}</span>
                                  </div>
                               </div>
@@ -151,7 +149,7 @@ export default function LeaderboardPage() {
                            </div>
                         </div>
                        )
-                     }) : (<div className="py-48 flex flex-col items-center justify-center text-slate-300 opacity-20 text-center space-y-8"><Zap className="h-32 w-32" /><p className="font-headline font-black text-3xl uppercase tracking-widest">Merit Registry Empty</p></div>)}
+                     }) : (<div className="py-48 flex flex-col items-center justify-center text-slate-300 opacity-20 text-center space-y-8"><Zap className="h-32 w-32" /><p className="font-headline font-black text-3xl uppercase tracking-widest">Merit List Empty</p></div>)}
                </div>
             </CardContent>
          </Card>

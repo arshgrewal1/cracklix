@@ -17,8 +17,7 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v61.1 (Hydration Fixed).
- * FIXED: Changed Script strategy to afterInteractive to resolve Runtime ChunkLoadError.
+ * @fileOverview Root Layout v61.2 (Stability Optimized).
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -69,7 +68,7 @@ export default function RootLayout({
             window.addEventListener('beforeinstallprompt', (e) => {
               e.preventDefault();
               window.deferredPrompt = e;
-              console.log('[PWA_REGISTRY] beforeinstallprompt event captured and stashed.');
+              console.log('[PWA_REGISTRY] beforeinstallprompt event captured.');
             });
           `}
         </Script>
