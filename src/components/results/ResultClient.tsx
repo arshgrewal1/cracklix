@@ -33,10 +33,9 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Result Node Hub Client v4.2.
- * FIXED: Removed extra div that was causing syntax errors.
- * FIXED: Overlapping UI resolved via strict grid distribution.
- * UPDATED: Title Case normalization (Uppercase restricted to Boards).
+ * @fileOverview Official Result Node Hub Client v4.3.
+ * FIXED: Removed forced uppercase from student names and metrics.
+ * UPDATED: Title Case normalization for high-fidelity branding.
  */
 
 export default function ResultClient() {
@@ -162,7 +161,7 @@ export default function ResultClient() {
                  <h1 className="text-xl md:text-3xl font-black text-white tracking-tight leading-tight line-clamp-2">
                    {sessionData?.mockTitle || "Practice Result"}
                  </h1>
-                 <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest uppercase">Performance Hub</p>
+                 <p className="text-[10px] md:text-[11px] font-bold text-slate-400 tracking-widest">Performance Hub</p>
               </div>
            </div>
 
@@ -245,7 +244,7 @@ export default function ResultClient() {
                        <div className="flex items-center gap-4">
                           <Users className="h-6 w-6 text-primary" />
                           <div>
-                            <p className="text-[11px] md:text-sm font-bold text-slate-500 tracking-tight uppercase">Registry Node</p>
+                            <p className="text-[11px] md:text-sm font-bold text-slate-500 tracking-tight">Registry Node</p>
                             <p className="text-base md:text-xl font-black text-[#0F172A]">{merit.total} Verified Aspirants</p>
                           </div>
                        </div>
@@ -266,7 +265,7 @@ export default function ResultClient() {
                                  <span className={cn("font-black w-10 md:w-16 text-sm md:text-3xl tabular-nums", i < 3 ? "text-primary" : "text-slate-200")}>#{i+1}</span>
                                  <StudentAvatar profile={{ name, gender: r.gender }} className="h-10 w-10 md:h-20 md:w-20 rounded-xl md:rounded-[2.5rem] border-2 border-white shadow-xl bg-slate-50" />
                                  <div className="min-w-0 flex-1">
-                                    <p className={cn("font-black text-sm md:text-2xl truncate tracking-tight uppercase", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{name} {isCurrentUser && "(You)"}</p>
+                                    <p className={cn("font-black text-sm md:text-2xl truncate tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{name} {isCurrentUser && "(You)"}</p>
                                     <div className="flex items-center gap-4 mt-2">
                                        <p className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Score: {(r.score || 0).toFixed(1)}</p>
                                        <div className="h-1 w-1 rounded-full bg-slate-200" />
@@ -307,3 +306,4 @@ function FilterBtn({ active, onClick, label, count, icon, activeColor }: any) {
       </button>
    )
 }
+

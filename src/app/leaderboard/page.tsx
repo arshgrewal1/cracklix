@@ -15,8 +15,9 @@ import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Institutional Top Rankers Hub v19.0.
- * FIXED: Resolved uniqueMap undefined reference error.
+ * @fileOverview Institutional Top Rankers Hub v19.1.
+ * FIXED: Removed forced uppercase from student names and headers.
+ * UPDATED: Title Case normalization for premium appearance.
  */
 
 export default function LeaderboardPage() {
@@ -50,11 +51,14 @@ export default function LeaderboardPage() {
       const existing = uniqueRankers.get(r.userId);
       if (!existing || existing.score < r.score) {
         const userProfile = users?.find((u: any) => u.id === r.userId);
-        const name = userProfile?.name || 
+        const rawName = userProfile?.name || 
                      (r.userName && r.userName !== 'Aspirant' && r.userName !== 'Student' && !r.userName.includes('@') ? r.userName : null) || 
                      userProfile?.email || 
                      r.userEmail || 
                      "Aspirant";
+        
+        // Ensure name isn't forced uppercase
+        const name = rawName;
         const email = userProfile?.email || r.userEmail || "---";
 
         if (!searchTerm || (name.toLowerCase().includes(lowerSearch) || email.toLowerCase().includes(lowerSearch))) {
@@ -129,7 +133,7 @@ export default function LeaderboardPage() {
                            <div className="col-span-6 md:col-span-7 flex items-center gap-6 md:gap-12">
                               <StudentAvatar profile={entry.profile || entry} className="h-12 w-12 md:h-24 md:w-24 rounded-2xl md:rounded-[2.5rem] border-2 md:border-4 border-white shadow-xl bg-slate-50" />
                               <div className="min-w-0">
-                                 <p className={cn("font-black text-base md:text-3xl truncate leading-none uppercase tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{entry.name} {isCurrentUser && "(You)"}</p>
+                                 <p className={cn("font-black text-base md:text-3xl truncate leading-none tracking-tight", isCurrentUser ? "text-primary" : "text-[#0F172A]")}>{entry.name} {isCurrentUser && "(You)"}</p>
                                  <div className="flex items-center gap-3 md:gap-6 mt-2 md:mt-4">
                                      <Badge className="bg-primary/5 text-primary border-none text-[8px] md:text-[11px] font-black uppercase tracking-widest px-3 py-1">{entry.profile?.targetExam || 'Elite Hub'}</Badge>
                                      <span className="hidden sm:inline-flex items-center gap-2 text-[10px] md:text-[12px] font-bold text-slate-300 uppercase tracking-widest truncate"><Activity className="h-4 w-4" /> Best: {entry.mockTitle}</span>
@@ -169,7 +173,7 @@ function PodiumCard({ rank, data, color, isMain }: any) {
             {isMain && (<div className="absolute -top-12 left-1/2 -translate-x-1/2 animate-bounce"><Badge className="bg-primary text-white border-none font-black text-[10px] md:text-[13px] px-6 py-2 rounded-full shadow-5xl uppercase tracking-[0.2em]">Merit #1</Badge></div>)}
          </div>
          <div className="text-center space-y-4 w-full">
-            <h3 className={cn("font-black text-[#0F172A] tracking-tight leading-tight uppercase", isMain ? "text-2xl md:text-5xl" : "text-xl md:text-3xl")}>{data?.name || 'Aspirant'}</h3>
+            <h3 className={cn("font-black text-[#0F172A] tracking-tight leading-tight", isMain ? "text-2xl md:text-5xl" : "text-xl md:text-3xl")}>{data?.name || 'Aspirant'}</h3>
             <div className="flex items-center justify-center gap-8 md:gap-14">
                <div className="text-center"><p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-1">Score</p><p className="text-xl md:text-4xl font-black text-primary tabular-nums tracking-tighter">{(data?.score || 0).toFixed(1)}</p></div>
                <div className="h-10 md:h-14 w-px bg-slate-100" />
