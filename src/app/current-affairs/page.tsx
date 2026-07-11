@@ -159,7 +159,7 @@ export default function CurrentAffairsCenter() {
                                  <Card key={item.id} className="bg-white border-none shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] overflow-hidden group text-left border border-slate-100 p-6 md:p-12">
                                     <CardContent className="p-0 flex flex-col md:flex-row items-center gap-8 md:gap-12">
                                        <div className={cn(
-                                          "h-24 w-24 md:h-32 md:w-32 rounded-[2.5rem] flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
+                                          "h-24 w-24 md:h-32 md:w-32 rounded-full flex items-center justify-center shrink-0 shadow-inner group-hover:scale-110 transition-transform",
                                           item.type === 'DAILY' ? 'bg-orange-50 text-primary' : 
                                           item.type === 'WEEKLY' ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600'
                                        )}>
