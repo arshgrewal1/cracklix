@@ -27,11 +27,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import ShareButton from "@/components/navigation/ShareButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Mobile Sidebar v58.0.
- * UPDATED: Removed redundant Setup Hub links and promoted Direct PWA Installation.
+ * @fileOverview Mobile Sidebar v59.0.
+ * UPDATED: Removed PWA Install from Sidebar to prevent clutter. Managed via Home and Header.
  */
 export default function MobileSidebar({
   onClose,
@@ -127,14 +126,6 @@ export default function MobileSidebar({
               <ChevronRight className="h-4 w-4 shrink-0 text-slate-300" />
             </div>
           </Link>
-        </div>
-
-        {/* DIRECT INSTALL TRIGGER */}
-        <div className="px-4 pb-6">
-           <PWAInstallButton 
-             variant="primary" 
-             className="w-full h-14 rounded-2xl shadow-xl" 
-           />
         </div>
 
         {/* NAVIGATION LIST */}

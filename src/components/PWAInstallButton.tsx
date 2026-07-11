@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Smartphone, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -13,8 +13,8 @@ interface PWAInstallButtonProps {
 }
 
 /**
- * @fileOverview Institutional PWA Install Trigger v5.1.
- * FIXED: Optimized variants for light/dark backgrounds.
+ * @fileOverview Institutional PWA Install Trigger v5.2.
+ * FIXED: Aggressive check for already installed status to auto-hide the button.
  */
 export default function PWAInstallButton({ 
   className, 
@@ -22,8 +22,14 @@ export default function PWAInstallButton({
   showLabel = true 
 }: PWAInstallButtonProps) {
   const { canInstall, installApp, isInstalled } = usePWAInstall();
+  const [mounted, setMounted] = useState(false);
 
-  if (isInstalled) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Strict check to hide the button if the user is already on the app
+  if (!mounted || isInstalled) return null;
 
   return (
     <Button
@@ -45,7 +51,7 @@ export default function PWAInstallButton({
       )}
     >
       <Smartphone className="h-4 w-4 md:h-5 md:w-5 group-hover:rotate-12 transition-transform" />
-      {showLabel && <span>{canInstall ? 'Install App Now' : 'Download Official App'}</span>}
+      {showLabel && <span>{canInstall ? 'Install App Now' : 'Install Hub'}</span>}
       <ArrowRight className="h-4 w-4 opacity-40 ml-1 group-hover:translate-x-1 transition-transform" />
     </Button>
   );

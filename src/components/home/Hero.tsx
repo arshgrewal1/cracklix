@@ -23,8 +23,9 @@ import { cn } from "@/lib/utils";
 import PWAInstallButton from "@/components/PWAInstallButton";
 
 /**
- * @fileOverview Institutional Hero Hub v112.1.
- * FIXED: Changed PWA button to 'dark' variant for better visibility on white backgrounds.
+ * @fileOverview Institutional Hero Hub v113.2.
+ * UPDATED: Restored original 'outline' style for Install Hub button and removed from Sidebar.
+ * LOGIC: Hidden automatically if app is already installed.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -97,7 +98,7 @@ export default function Hero() {
                     <Play className="h-4 w-4 md:h-6 md:w-6 fill-current" /> Start Preparation
                   </Link>
                </Button>
-               <PWAInstallButton className="sm:flex-1 h-14 md:h-18" variant="dark" />
+               <PWAInstallButton className="sm:flex-1 h-14 md:h-18" variant="outline" />
             </div>
 
             <div className="flex items-center justify-center lg:justify-start gap-6 pt-4 text-slate-400 font-black text-[9px] md:text-[11px] tracking-widest">
