@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Meet Founder section v5.2 - Fixed Visibility & Standalone Link.
+ * @fileOverview Meet Founder section v5.3 - Fixed animate TypeError & Visibility.
  */
 export default function MeetFounder() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -60,19 +60,19 @@ export default function MeetFounder() {
             </motion.div>
 
             <div className="flex-1 space-y-6 text-center lg:text-left">
-              <p className="text-lg md:text-xl text-slate-600 leading-relaxed">
+              <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-medium">
                 Hi, I'm Arsh Grewal. I'm a student from Punjab who understands how challenging government exam preparation can be. Instead of waiting for someone else to build the perfect platform, I decided to build it myself. Cracklix is my mission to provide modern mock tests, high-quality study resources, and a better learning experience for every Punjab Government Exam aspirant.
               </p>
-              <p className="text-slate-500 font-medium">
+              <p className="text-slate-500 font-medium italic">
                 Every feature, every design improvement is created with one goal: Helping students prepare with confidence.
               </p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-24 items-start">
-            <div className="bg-white/50 backdrop-blur-xl border border-blue-100/50 rounded-[32px] p-8 shadow-lg h-full">
+            <div className="bg-white/50 backdrop-blur-xl border border-blue-100/50 rounded-[32px] p-8 shadow-lg h-full text-left">
               <h3 className="text-2xl font-bold text-[#0F172A]">My Mission</h3>
-              <p className="mt-4 text-slate-600 text-lg">
+              <p className="mt-4 text-slate-600 text-lg font-medium leading-relaxed">
                 To build Punjab's smartest, most trusted and student-first exam preparation platform where every aspirant gets access to quality mock tests and a premium preparation experience.
               </p>
             </div>
@@ -105,15 +105,15 @@ export default function MeetFounder() {
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-2xl p-10 bg-white/80 backdrop-blur-2xl rounded-[32px] border-blue-100/50 shadow-2xl">
+        <DialogContent className="max-w-2xl p-10 bg-white rounded-[32px] border-none shadow-5xl">
           <DialogHeader>
             <DialogTitle className="text-3xl font-black text-[#0F172A]">Why I Started Cracklix</DialogTitle>
           </DialogHeader>
-          <DialogDescription className="text-slate-600 text-lg leading-relaxed mt-6 space-y-6">
+          <DialogDescription className="text-slate-600 text-lg leading-relaxed mt-6 space-y-6 text-left font-medium">
               <p>As a student, I experienced how difficult it can be to find one reliable platform dedicated to Punjab Government Exam preparation.</p>
               <p>Most platforms were either outdated, complicated or lacked a premium learning experience.</p>
               <p>So I started building Cracklix. My goal isn't just to create another exam website. I want to build a platform that students genuinely enjoy using every day—a platform that motivates them, tracks their progress, and helps them move one step closer to achieving their government job dream.</p>
-              <p className="font-medium">— Arsh Grewal</p>
+              <p className="font-bold">— Arsh Grewal</p>
           </DialogDescription>
         </DialogContent>
       </Dialog>
@@ -125,13 +125,13 @@ function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.Rea
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (isInView && value) {
-      const animationControl = animate(0, parseInt(value), {
+    if (isInView && value && !isNaN(parseInt(value))) {
+      const controls = animate(0, parseInt(value), {
         duration: 2,
         delay,
         onUpdate: (latest) => setCount(Math.round(latest)),
       });
-      return () => animationControl.stop();
+      return () => controls.stop();
     }
   }, [isInView, value, delay]);
 
@@ -142,9 +142,9 @@ function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.Rea
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
       transition={{ duration: 0.5, delay: delay + 0.2, ease: "easeOut" }}
     >
-      <div className="text-primary">{React.cloneElement(icon as React.ReactElement, { className: "h-8 w-8" })}</div>
-      {value ? <motion.p className="text-4xl font-bold text-[#0F172A]">{count}</motion.p> : null}
-      <p className="text-sm font-semibold text-slate-500 whitespace-nowrap">{label}</p>
+      <div className="text-primary">{icon}</div>
+      {value ? <p className="text-4xl font-black text-[#0F172A] tabular-nums">{count}</p> : null}
+      <p className="text-[10px] md:text-sm font-bold text-slate-500 uppercase tracking-widest">{label}</p>
     </motion.div>
   );
 }
