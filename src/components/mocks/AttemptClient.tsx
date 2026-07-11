@@ -5,7 +5,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useUser, useFirestore } from "@/firebase";
 import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
-import { useStudyTracker } from "@/hooks/useStudyTracker"; // Import the hook
+import { useStudyTracker } from "@/hooks/useStudyTracker"; 
 import ExamHeader from "@/components/exam/ExamHeader";
 import TacticalFooter from "@/components/exam/TacticalFooter";
 import AntiCheat from "@/components/exam/AntiCheat";
@@ -13,7 +13,7 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer";
 import QuestionPalette from "@/components/mocks/QuestionPalette";
 import SubjectTabs from "@/components/exam/SubjectTabs";
 import { Button } from "@/components/ui/button";
-import { Loader2, Play, ShieldCheck, Zap, AlertCircle } from "lucide-react";
+import { Loader2, Play, ShieldCheck, Zap, AlertCircle, Save, LogOut } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
@@ -25,10 +25,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
-
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
   const router = useRouter();
@@ -47,7 +47,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     return lastSegment !== 'attempt' ? lastSegment : null;
   }, [pathname, searchParams, propMockId]);
 
-  // Initialize the study tracker
   useStudyTracker(mockId, 'MOCK', true);
 
   const [isInitializing, setIsInitializing] = useState(true);
@@ -83,9 +82,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       
       try {
         const mockSnap = await getDoc(doc(db, "mocks", mockId));
-        if (!mockSnap.exists()) {
-           throw new Error("Test registry node not found.");
-        }
+        if (!mockSnap.exists()) throw new Error("Test registry node not found.");
         
         const mData = mockSnap.data();
         setMockData(mData);
@@ -123,10 +120,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         }
         
         const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
-        
-        if (sortedQs.length === 0) {
-           throw new Error("Registry Mismatch: Questions could not be synced.");
-        }
+        if (sortedQs.length === 0) throw new Error("Registry Mismatch: Questions could not be synced.");
 
         const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
         initExam(mockId, mData.title || "Elite Series", user.uid, sortedQs, mData.duration || 120, attemptSnap.exists() ? attemptSnap.data() : undefined, mData.languageMode);
@@ -186,28 +180,15 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const resultRef = doc(db, "results", `${user.uid}_${mockId}`);
     const attemptRef = doc(db, "attempts", `${user.uid}_${mockId}`);
 
-    setDoc(resultRef, resultPayload, { merge: true })
-      .catch(async (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: resultRef.path,
-          operation: 'write',
-          requestResourceData: resultPayload,
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
+    setDoc(resultRef, resultPayload, { merge: true }).catch(async (serverError) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: resultRef.path, operation: 'write', requestResourceData: resultPayload }));
+    });
 
-    updateDoc(attemptRef, { status: 'COMPLETED', updatedAt: serverTimestamp() })
-      .catch(async (serverError) => {
-        const permissionError = new FirestorePermissionError({
-          path: attemptRef.path,
-          operation: 'update',
-          requestResourceData: { status: 'COMPLETED' }
-        } satisfies SecurityRuleContext);
-        errorEmitter.emit('permission-error', permissionError);
-      });
+    updateDoc(attemptRef, { status: 'COMPLETED', updatedAt: serverTimestamp() }).catch(async (serverError) => {
+        errorEmitter.emit('permission-error', new FirestorePermissionError({ path: attemptRef.path, operation: 'update', requestResourceData: { status: 'COMPLETED' } }));
+    });
     
     router.replace(`/results/view?id=${mockId}`);
-    
   }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime]);
 
   useEffect(() => {
@@ -226,23 +207,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
   const answeredCount = useMemo(() => Object.values(answers || {}).filter(a => a !== null && a !== undefined).length, [answers]);
   const notAnsweredCount = useMemo(() => questions.length - answeredCount, [questions.length, answeredCount]);
-  const markedForReviewCount = 0; 
-
-  useEffect(() => {
-    if (showSubmitModal) {
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Enter' && !isSubmittingFinal) {
-          e.preventDefault();
-          handleSubmitFinal();
-        } else if (e.key === 'Escape' && !isSubmittingFinal) {
-          e.preventDefault();
-          setShowSubmitModal(false);
-        }
-      };
-      window.addEventListener('keydown', handleKeyDown);
-      return () => window.removeEventListener('keydown', handleKeyDown);
-    }
-  }, [showSubmitModal, isSubmittingFinal, handleSubmitFinal]);
 
   if (isInitializing) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-[#0B1528] space-y-8">
@@ -257,10 +221,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           <AlertCircle className="h-8 w-8" />
        </div>
        <div className="space-y-2">
-          <h2 className="text-2xl font-black text-[#0F172A] uppercase leading-tight">Sync Failure</h2>
+          <h2 className="text-2xl font-black text-[#0F172A] leading-tight">Sync Failure</h2>
           <p className="text-slate-500 font-medium max-w-sm mx-auto">{initError || "Mock context lost during resolution."}</p>
        </div>
-       <Button onClick={() => router.replace('/dashboard')} className="h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-black uppercase text-[10px]">Return to Dashboard</Button>
+       <Button onClick={() => router.replace('/dashboard')} className="h-14 px-10 bg-[#0F172A] text-white rounded-2xl font-bold text-sm">Return to Dashboard</Button>
     </div>
   );
 
@@ -278,8 +242,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
                 <div className="h-12 w-12 bg-orange-50 rounded-xl flex items-center justify-center mx-auto text-primary shadow-xl">
                   <Play className="h-6 w-6 fill-current" />
                 </div>
-                <h2 className="text-lg font-black text-[#0F172A] uppercase">Test Paused</h2>
-                <Button onClick={() => setPaused(false)} className="w-full h-12 bg-primary text-white rounded-xl font-black uppercase text-[9px]">Resume Now</Button>
+                <h2 className="text-lg font-bold text-[#0F172A]">Test Paused</h2>
+                <Button onClick={() => setPaused(false)} className="w-full h-12 bg-primary text-white rounded-xl font-bold text-sm">Resume Now</Button>
               </div>
             </motion.div>
           )}
@@ -309,7 +273,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               ) : (
                 <div className="py-20 text-center opacity-20">
                    <Zap className="h-10 w-10 mx-auto mb-4" />
-                   <p className="font-black uppercase tracking-widest text-xs">Registry Node Syncing...</p>
+                   <p className="font-bold text-slate-300">Syncing...</p>
                 </div>
               )}
             </div>
@@ -333,64 +297,95 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         </SheetContent>
       </Sheet>
 
+      {/* OVERHAULED EXIT DIALOG */}
       <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
-        <DialogContent className="max-w-[240px] rounded-[1.2rem] p-4 md:p-6 bg-white text-center shadow-5xl border-none z-[1300]">
-          <div className="space-y-3">
-            <DialogHeader className="sr-only">
-               <DialogTitle>Save & Exit?</DialogTitle>
-               <DialogDescription>Your attempt state is cached.</DialogDescription>
-            </DialogHeader>
-            <div className="h-8 w-8 bg-blue-50 rounded-lg flex items-center justify-center mx-auto text-blue-500 shadow-sm">
-              <Zap className="h-4 w-4" />
+        <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-white text-center border-none shadow-5xl z-[1300] animate-in zoom-in-95 duration-200">
+          <div className="flex flex-col items-center">
+            <div className="h-14 w-14 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mb-6 shadow-inner">
+               <AlertCircle className="h-8 w-8" />
             </div>
-            <h2 className="text-sm font-black uppercase text-[#0F172A] leading-tight">Save & Exit?</h2>
-            <div className="flex gap-2 pt-1">
-              <Button variant="ghost" onClick={() => setShowExitModal(false)} className="flex-1 h-8 font-black uppercase text-[7px] tracking-widest">Stay</Button>
-              <Button onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/dashboard'); }} className="flex-1 h-8 bg-primary text-white rounded-lg font-black uppercase text-[7px] border-none shadow-lg">Exit</Button>
+
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-black text-[#0F172A] tracking-tight">Finish Test?</DialogTitle>
+              <DialogDescription className="text-slate-500 font-medium mt-2 leading-relaxed">
+                You still have questions remaining. Would you like to submit your answers now or continue your preparation?
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="w-full flex flex-col gap-3 mt-8">
+              <Button
+                onClick={handleSubmitFinal}
+                disabled={isSubmittingFinal}
+                className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg transition-all"
+              >
+                {isSubmittingFinal ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4 mr-2" />}
+                Submit Test
+              </Button>
+              <div className="grid grid-cols-2 gap-3">
+                 <Button
+                    variant="outline"
+                    onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/dashboard'); }}
+                    className="h-12 border-slate-200 text-slate-500 font-bold rounded-xl hover:bg-slate-50"
+                 >
+                    <Save className="h-4 w-4 mr-2" /> Save & Exit
+                 </Button>
+                 <Button
+                    variant="ghost"
+                    onClick={() => setShowExitModal(false)}
+                    className="h-12 text-[#0F172A] font-bold rounded-xl bg-slate-50 hover:bg-slate-100"
+                 >
+                    Continue
+                 </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
       <Dialog open={showSubmitModal} onOpenChange={!isSubmittingFinal ? setShowSubmitModal : undefined}>
-        <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-[#0F172A] text-white text-center border-none shadow-2xl z-[1300] scale-in-center">
+        <DialogContent className="w-[90%] max-w-[420px] rounded-[24px] p-8 bg-[#0F172A] text-white text-center border-none shadow-2xl z-[1300]">
           <div className="flex flex-col items-center">
-            <div className="relative mb-4">
+            <div className="relative mb-6">
               <div className="absolute -inset-2 rounded-full bg-blue-500/30 blur-xl"></div>
-              <div className="relative h-[56px] w-[56px] bg-blue-600/20 rounded-full flex items-center justify-center text-blue-400">
+              <div className="relative h-16 w-16 bg-blue-600/20 rounded-full flex items-center justify-center text-blue-400 border border-blue-500/30 shadow-2xl">
                 <ShieldCheck className="h-8 w-8" />
               </div>
             </div>
 
             <DialogHeader>
-              <DialogTitle className="text-white font-bold text-[30px] tracking-tight">SUBMIT TEST</DialogTitle>
+              <DialogTitle className="text-white font-black text-3xl tracking-tight">Submit Test</DialogTitle>
+              <DialogDescription className="text-slate-400 mt-2 max-w-xs mx-auto leading-relaxed">
+                Confirm your submission. Once committed to the registry, you cannot modify your answers.
+              </DialogDescription>
             </DialogHeader>
-            
-            <DialogDescription className="text-slate-400 mt-2 max-w-xs">
-              Are you sure you want to submit your test? Once submitted, you cannot change your answers.
-            </DialogDescription>
 
-            <div className="flex justify-center gap-4 my-6 text-sm">
-                <div><span className="font-bold text-white">{answeredCount}</span> <span className="text-slate-400">Answered</span></div>
-                <div><span className="font-bold text-white">{notAnsweredCount}</span> <span className="text-slate-400">Not Answered</span></div>
-                <div><span className="font-bold text-white">{markedForReviewCount}</span> <span className="text-slate-400">For Review</span></div>
+            <div className="flex justify-center gap-6 my-8 py-4 border-y border-white/5 w-full">
+                <div className="text-center">
+                   <p className="text-2xl font-black text-white tabular-nums">{answeredCount}</p>
+                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Answered</p>
+                </div>
+                <div className="w-px h-10 bg-white/10" />
+                <div className="text-center">
+                   <p className="text-2xl font-black text-white tabular-nums">{notAnsweredCount}</p>
+                   <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Remaining</p>
+                </div>
             </div>
 
-            <div className="w-full flex flex-col gap-3 mt-4">
+            <div className="w-full flex flex-col gap-3">
               <Button
                 onClick={handleSubmitFinal}
                 disabled={isSubmittingFinal}
-                className="w-full h-[56px] bg-[#2563EB] hover:bg-blue-500 text-white font-bold text-base rounded-full shadow-lg transition-all duration-300 ease-in-out disabled:opacity-50"
+                className="w-full h-16 bg-blue-600 hover:bg-blue-500 text-white font-black rounded-xl shadow-xl transition-all active:scale-95 border-none"
               >
-                {isSubmittingFinal ? <Loader2 className="animate-spin" /> : 'SUBMIT TEST'}
+                {isSubmittingFinal ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Confirm Submission'}
               </Button>
               <Button
                 variant="ghost"
                 onClick={() => setShowSubmitModal(false)}
                 disabled={isSubmittingFinal}
-                className="w-full h-[56px] text-[#94A3B8] hover:text-white font-bold text-base rounded-full transition-colors duration-300 ease-in-out disabled:opacity-50"
+                className="w-full h-12 text-slate-400 hover:text-white font-bold transition-colors"
               >
-                CONTINUE TEST
+                Return to Test
               </Button>
             </div>
           </div>
