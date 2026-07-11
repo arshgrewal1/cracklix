@@ -23,8 +23,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Center v122.0.
- * UPDATED: Premium Founder Tagline Layout.
+ * @fileOverview Institutional Hero Center v123.0.
+ * UPDATED: Premium Founder Tagline Layout with optimized mobile/desktop scaling.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -96,25 +96,25 @@ export default function Hero() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
-                className="flex justify-center lg:justify-start pt-2"
+                className="flex justify-center lg:justify-start pt-4"
               >
                 <Link 
                   href="/meet-founder" 
-                  className="inline-flex flex-col md:flex-row items-center gap-4 md:gap-8 px-6 py-5 md:px-8 md:py-4 rounded-[2rem] bg-blue-50/30 border border-blue-100/50 hover:bg-white hover:border-primary/20 transition-all duration-300 group shadow-sm"
+                  className="inline-flex flex-col md:flex-row items-center gap-6 md:gap-12 px-8 py-8 md:px-12 md:py-8 rounded-[2.5rem] md:rounded-[3rem] bg-white border border-slate-100 hover:border-primary/20 transition-all duration-500 group shadow-xl hover:shadow-2xl"
                 >
-                  <div className="space-y-1.5 text-center md:text-left">
-                     <p className="text-[15px] md:text-xl font-[900] text-[#0F172A] tracking-tight leading-none">
+                  <div className="space-y-3 text-center md:text-left">
+                     <p className="text-[18px] md:text-3xl font-[900] text-[#0F172A] tracking-tighter leading-tight md:whitespace-nowrap">
                         🚀 One Vision. One Mission.
                      </p>
-                     <p className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-[0.3em] leading-none">
+                     <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.5em] leading-none">
                         — Arsh Grewal
                      </p>
                   </div>
                   
-                  <div className="hidden md:block w-px h-10 bg-slate-200/60" />
+                  <div className="hidden md:block w-px h-14 bg-slate-100" />
                   
-                  <span className="flex items-center gap-2 text-primary font-black text-[11px] md:text-sm uppercase tracking-widest whitespace-nowrap group-hover:gap-3 transition-all">
-                    Meet the founder <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  <span className="flex items-center gap-2 text-primary font-black text-[12px] md:text-lg uppercase tracking-widest whitespace-nowrap group-hover:gap-5 transition-all">
+                    Meet the founder <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
                   </span>
                 </Link>
               </motion.div>
