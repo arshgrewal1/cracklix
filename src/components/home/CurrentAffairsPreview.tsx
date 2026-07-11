@@ -13,8 +13,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Current Affairs Preview Hub v20.0.
- * UPDATED: Increased logo sizes for better visibility.
+ * @fileOverview Current Affairs Preview Hub v21.0.
+ * FIXED: Icons now strictly follow circular container standards.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -37,15 +37,13 @@ export default function CurrentAffairsPreview() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 text-left px-1">
            <div className="space-y-1">
               <div className="flex items-center gap-3 md:gap-5">
-                 <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-blue-50 flex items-center justify-center text-primary shadow-inner shrink-0">
-                    <AuthorityLogo boardId="current-affairs" size="md" className="bg-transparent shadow-none p-0" />
-                 </div>
+                 <AuthorityLogo boardId="current-affairs" size="md" />
                  <h2 className="text-[22px] md:text-[clamp(24px,4vw,36px)] font-bold tracking-tight text-[#0F172A]">Current Affairs</h2>
               </div>
               <p className="max-w-2xl text-[14px] md:text-[clamp(13px,1.5vw,18px)] font-medium text-slate-500">Stay updated with daily verified news and tests.</p>
            </div>
            <Link href="/current-affairs" className="text-primary font-bold text-[13px] md:text-[15px] tracking-tight hover:underline flex items-center gap-2 group shrink-0">
-              View All <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              View all <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
            </Link>
         </div>
 
@@ -65,9 +63,7 @@ export default function CurrentAffairsPreview() {
                     <Card className="border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[24px] md:rounded-[3rem] bg-white p-4 md:p-10 flex flex-col group h-full min-h-[230px] md:min-h-[400px] relative overflow-hidden">
                        
                        <div className="flex justify-center mb-4 md:mb-10 shrink-0">
-                          <div className="h-16 w-16 md:h-28 md:w-28 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                              <AuthorityLogo boardId="current-affairs" size="lg" className="bg-transparent shadow-none p-0 w-full h-full opacity-80" />
-                          </div>
+                          <AuthorityLogo boardId="current-affairs" size="lg" />
                        </div>
 
                        <div className="flex-1 flex flex-col justify-start text-center min-w-0">
