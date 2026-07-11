@@ -124,8 +124,8 @@ export default function ExamHubPage() {
 
       <main className="container mx-auto px-4 py-12 max-w-7xl pb-40">
          <Tabs defaultValue="FULL" className="space-y-8 md:space-y-12">
-            <div className="bg-white border border-slate-100 rounded-2xl p-1 shadow-lg overflow-x-auto no-scrollbar">
-               <TabsList className="bg-transparent border-none p-0 flex h-11 md:h-12 w-full justify-start gap-1 snap-x snap-mandatory">
+            <div className="bg-white border border-slate-100 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar flex items-center">
+               <TabsList className="bg-transparent border-none p-0 flex h-10 w-full justify-start gap-1 snap-x snap-mandatory">
                   <DashboardTab value="FULL" label="Full Mock Tests" icon={Zap} />
                   <DashboardTab value="SUBJECT" label="Subject Tests" icon={BookOpen} />
                   <DashboardTab value="SECTIONAL" label="Sectional Tests" icon={List} />
@@ -148,7 +148,7 @@ export default function ExamHubPage() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-3 md:px-6 h-full font-bold text-[13px] md:text-[14px] text-slate-500 bg-white border border-slate-50 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:border-[#0F172A] rounded-xl transition-all whitespace-nowrap flex items-center gap-2 snap-start">
+      <TabsTrigger value={value} className="px-3 md:px-5 h-full font-bold text-[13px] md:text-[14px] text-slate-500 bg-white border border-slate-50 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white data-[state=active]:border-[#0F172A] rounded-xl transition-all whitespace-nowrap flex items-center gap-2 snap-start">
          <Icon className="h-4 w-4 md:h-[18px] md:w-[18px] shrink-0" /> {label}
       </TabsTrigger>
    )
@@ -165,7 +165,7 @@ function MockList({ data, results, isPassActive, loading, boards }: any) {
    );
 
    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
          {data.map((mock: any) => {
             const isPremium = mock.accessLevel === 'PREMIUM';
             const locked = isPremium && !isPassActive;
@@ -186,7 +186,7 @@ function MockList({ data, results, isPassActive, loading, boards }: any) {
                      </div>
                   </CardHeader>
                   <CardContent className="p-0 mt-8">
-                     <Button onClick={() => router.push(locked ? '/pass' : `/mocks/${mock.id}/instructions`)} className={cn("w-full h-12 rounded-xl font-black text-[11px] tracking-[0.2em] uppercase shadow-lg border-none transition-all active:scale-95", locked ? "bg-amber-500 hover:bg-amber-600" : "bg-[#0F172A] hover:bg-black")}>
+                     <Button onClick={() => router.push(locked ? '/pass' : `/mocks/instructions?id=${mock.id}`)} className={cn("w-full h-12 rounded-xl font-black text-[11px] tracking-[0.2em] uppercase shadow-lg border-none transition-all active:scale-95", locked ? "bg-amber-500 hover:bg-amber-600" : "bg-[#0F172A] hover:bg-black")}>
                         {locked ? <Lock className="h-4 w-4 mr-2" /> : null} {locked ? 'Unlock Exam' : 'Start Exam'}
                      </Button>
                   </CardContent>

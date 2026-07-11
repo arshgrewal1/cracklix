@@ -167,8 +167,8 @@ export default function ExamHubClient() {
 
       <main className="container mx-auto px-2 md:px-4 py-4 md:py-12 max-w-7xl pb-40">
         <Tabs defaultValue="FULL" className="space-y-6 md:space-y-12">
-           <div className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar">
-              <TabsList className="bg-transparent border-none p-0 flex h-11 md:h-12 w-full justify-start gap-1 snap-x snap-mandatory">
+           <div className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar flex items-center">
+              <TabsList className="bg-transparent border-none p-0 flex h-10 w-full justify-start gap-1 snap-x snap-mandatory">
                  <DashboardTab value="FULL" label="Full Mock Tests" icon={Zap} />
                  <DashboardTab value="SUBJECT" label="Subject Tests" icon={BookOpen} />
                  <DashboardTab value="SECTIONAL" label="Sectional Tests" icon={List} />
@@ -190,7 +190,7 @@ export default function ExamHubClient() {
 
 function DashboardTab({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
    return (
-      <TabsTrigger value={value} className="px-3 md:px-6 h-full font-bold text-[13px] md:text-[14px] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800/50 border border-slate-50 dark:border-slate-700 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white dark:data-[state=active]:bg-slate-700 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 snap-start">
+      <TabsTrigger value={value} className="px-3 md:px-5 h-full font-bold text-[13px] md:text-[14px] text-slate-500 dark:text-slate-400 bg-white dark:bg-slate-800/50 border border-slate-50 dark:border-slate-700 data-[state=active]:bg-[#0F172A] data-[state=active]:text-white dark:data-[state=active]:bg-slate-700 rounded-xl transition-all whitespace-nowrap flex items-center gap-2 snap-start">
          <Icon className="h-4 w-4 md:h-[18px] md:w-[18px] shrink-0" /> {label}
       </TabsTrigger>
    )
@@ -243,7 +243,7 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
                      </div>
                   </CardHeader>
                   <CardContent className="p-0 mt-4 md:mt-8">
-                     <button onClick={() => router.push(locked ? '/pass' : `/mocks/view?id=${mock.id}`)} className={cn("w-full h-10 md:h-14 rounded-full font-black text-[9px] md:text-[11px] tracking-widest uppercase shadow-md transition-all active:scale-95 flex items-center justify-center gap-2", locked ? "bg-orange-500 text-white" : "bg-[#0F172A] dark:bg-primary text-white")}>
+                     <button onClick={() => router.push(locked ? '/pass' : `/mocks/view?id=${mock.id}`)} className={cn("w-full h-10 md:h-14 rounded-full font-black text-[9px] md:text-[11px] tracking-widest uppercase shadow-md transition-all active:scale-95 flex items-center justify-center gap-2", locked ? "bg-orange-50 text-white" : "bg-[#0F172A] dark:bg-primary text-white")}>
                         {locked ? <Lock className="h-3 w-3" /> : null} {locked ? 'Unlock' : 'Start'}
                      </button>
                   </CardContent>
