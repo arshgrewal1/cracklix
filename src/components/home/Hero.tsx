@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -28,8 +29,8 @@ import PWAInstallButton from "@/components/PWAInstallButton";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Institutional Hero Center v119.0.
- * UPDATED: Replaced 'Hub' with 'Center' and 'Platform'.
+ * @fileOverview Institutional Hero Center v120.0.
+ * UPDATED: Added founder trust badge to increase credibility and authenticity.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -95,6 +96,30 @@ export default function Hero() {
                   </Link>
                 ))}
               </div>
+
+              {/* Founder Trust Badge */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex justify-center lg:justify-start pt-2"
+              >
+                <Link 
+                  href="/meet-founder" 
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-50/30 border border-blue-100/50 hover:bg-white hover:border-primary/20 transition-all duration-300 group shadow-sm"
+                  aria-label="Built with Passion in Punjab. Founded and Developed by Arsh Grewal. Click to meet the founder."
+                >
+                  <p className="text-[13px] md:text-[15px] font-medium text-slate-500 leading-none">
+                    ✨ Built with Passion in Punjab. Founded & Developed by{" "}
+                    <span className="text-[#0F172A] font-bold group-hover:underline decoration-primary underline-offset-4">
+                      Arsh Grewal
+                    </span>
+                  </p>
+                  <span className="flex items-center gap-1 text-primary font-bold text-[11px] md:text-xs ml-1 whitespace-nowrap">
+                    Meet the Founder <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Link>
+              </motion.div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-6 w-full max-w-lg mx-auto lg:mx-0">
