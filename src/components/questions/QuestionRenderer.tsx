@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -20,8 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Mobile-First Question Hub v47.0.
- * FIXED: Removed forced uppercase from category and solution labels.
+ * @fileOverview Precision Mobile-First Question Hub v48.0.
+ * FIXED: Removed forced uppercase from Q-Tag and solution rationale headers.
  */
 export default function QuestionRenderer({ 
   question, 
