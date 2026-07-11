@@ -46,7 +46,7 @@ import { useUserAnalytics } from "@/hooks/use-user-analytics"
 
 /**
  * @fileOverview Student Progress Portal v54.0.
- * NEW: Replaced session timer with comprehensive study analytics.
+ * UPDATED: Reduced card padding and normalized typography.
  */
 
 const formatDuration = (seconds: number) => {
@@ -97,7 +97,7 @@ export default function StudentDashboard() {
       const s = Math.floor((diff % (1000 * 60)) / 1000);
 
       if (d > 0) {
-        setPassCountdown(`${d}d ${h}h ${m}m left`);
+        setPassCountdown(`${d}d ${h}h left`);
       } else {
         setPassCountdown(
           `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
@@ -144,23 +144,23 @@ export default function StudentDashboard() {
   return (
     <div className="min-h-[100dvh] bg-slate-50/50 font-body pb-safe text-left">
       <Navbar />
-      <main className="container mx-auto px-4 py-6 md:py-10 max-w-7xl space-y-6 md:space-y-8">
+      <main className="container mx-auto px-4 py-5 md:py-8 max-w-7xl space-y-5 md:space-y-8">
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-          <div className="lg:col-span-8 space-y-6 md:space-y-8">
-              <section className="bg-[#0B1528] text-white p-6 md:p-10 rounded-2xl md:rounded-[3rem] shadow-2xl relative overflow-hidden group">
-                <div className="relative z-10 flex flex-row items-center gap-4 md:gap-10">
+          <div className="lg:col-span-8 space-y-5 md:space-y-8">
+              <section className="bg-[#0B1528] text-white p-5 md:p-8 rounded-2xl md:rounded-[2.5rem] shadow-xl relative overflow-hidden group">
+                <div className="relative z-10 flex flex-row items-center gap-4 md:gap-8">
                   <Link href="/profile" className="shrink-0 active:scale-95 transition-all">
-                    <StudentAvatar profile={profile} className="h-14 w-14 md:h-28 md:w-28 border-[3px] border-white/10 rounded-xl md:rounded-3xl bg-[#0F172A]" />
+                    <StudentAvatar profile={profile} className="h-14 w-14 md:h-24 md:w-24 border-[3px] border-white/10 rounded-xl md:rounded-2xl bg-[#0F172A]" />
                   </Link>
-                  <div className="flex-1 space-y-2 min-w-0">
+                  <div className="flex-1 min-w-0">
                     <Link href="/profile" className="block group/name">
-                        <h1 className="text-[28px] md:text-5xl font-black tracking-tight text-white/90 truncate group-hover/name:text-white transition-colors">
+                        <h1 className="text-xl md:text-4xl font-bold tracking-tight text-white/90 truncate">
                           {profile?.name || "Student"}
                         </h1>
-                        <div className="flex flex-wrap items-center gap-2 mt-2">
-                          <div className={cn("flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-[12px] shadow-lg", isActive ? "bg-blue-500 text-white" : "bg-white/10 text-slate-300")}>
-                             <Gem className="h-3 w-3" /> {isActive ? (passCountdown || 'Elite Pass') : 'Free Pass'}
+                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                          <div className={cn("flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-[11px] shadow-lg", isActive ? "bg-blue-500 text-white" : "bg-white/10 text-slate-300")}>
+                             <Gem className="h-3 w-3" /> {isActive ? (passCountdown || 'Elite pass') : 'Free pass'}
                           </div>
                         </div>
                     </Link>
@@ -168,68 +168,59 @@ export default function StudentDashboard() {
                 </div>
               </section>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 md:gap-5">
-                 <MetricItem label="Today's Study" val={formatDuration(analytics?.today || 0)} icon={<Clock className="text-primary" />} />
-                 <MetricItem label="This Week" val={formatDuration(analytics?.thisWeek || 0)} icon={<Calendar className="text-emerald-500" />} />
-                 <MetricItem label="This Month" val={formatDuration(analytics?.thisMonth || 0)} icon={<BarChart className="text-blue-500" />} />
-                 <MetricItem label="This Year" val={formatDuration(analytics?.thisYear || 0)} icon={<AreaChart className="text-amber-500" />} />
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5">
+                 <MetricItem label="Today's study" val={formatDuration(analytics?.today || 0)} icon={<Clock />} />
+                 <MetricItem label="This week" val={formatDuration(analytics?.thisWeek || 0)} icon={<Calendar />} />
+                 <MetricItem label="This month" val={formatDuration(analytics?.thisMonth || 0)} icon={<BarChart />} />
+                 <MetricItem label="This year" val={formatDuration(analytics?.thisYear || 0)} icon={<AreaChart />} />
               </div>
 
-              <Card className="border-none shadow-xl rounded-2xl md:rounded-[2rem] bg-white overflow-hidden border border-slate-100">
-                <CardHeader className="p-6 md:p-8 border-b border-slate-50 bg-slate-50/30">
-                    <h2 className="font-bold text-[20px] text-[#0F172A]">Recent Tests</h2>
+              <Card className="border-none shadow-lg rounded-2xl md:rounded-[2rem] bg-white overflow-hidden border border-slate-50">
+                <CardHeader className="p-5 md:p-6 border-b border-slate-50 bg-slate-50/30">
+                    <h2 className="font-bold text-lg text-[#0F172A]">Recent tests</h2>
                 </CardHeader>
                 <CardContent className="p-0">
                     <div className="divide-y divide-slate-50">
-                      {resultsLoading ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="p-6 md:p-8 flex gap-4 items-center"><Skeleton className="h-10 w-10 rounded-lg bg-slate-50" /><div className="flex-1 space-y-1.5"><Skeleton className="h-3 w-1/3 bg-slate-50" /><Skeleton className="h-2 w-1/4 bg-slate-50" /></div></div>) : 
+                      {resultsLoading ? Array.from({ length: 3 }).map((_, i) => <div key={i} className="p-5 md:p-6 flex gap-4 items-center"><Skeleton className="h-10 w-10 rounded-lg bg-slate-50" /><div className="flex-1 space-y-1.5"><Skeleton className="h-3 w-1/3 bg-slate-50" /><Skeleton className="h-2 w-1/4 bg-slate-50" /></div></div>) : 
                       stats.list.length > 0 ? stats.list.map((r: any) => (
-                        <div key={r.id} onClick={() => router.push(`/results/view?id=${r.mockId}`)} className="p-6 md:p-8 flex items-center justify-between hover:bg-slate-50/50 transition-all group cursor-pointer">
-                            <div className="flex items-center gap-4 md:gap-6 min-w-0 flex-1">
-                              <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner"><Zap className="h-5 w-5 text-primary" /></div>
-                              <div className="min-w-0 space-y-1 flex-1">
-                                  <p className="font-semibold text-[#0B1228] text-[15px] md:text-[16px] line-clamp-2 leading-snug">{r.mockTitle}</p>
-                                  <div className="flex items-center gap-3 text-[12px] font-bold text-slate-400 tracking-tight">
+                        <div key={r.id} onClick={() => router.push(`/results/view?id=${r.mockId}`)} className="p-5 md:p-6 flex items-center justify-between hover:bg-slate-50/50 transition-all group cursor-pointer">
+                            <div className="flex items-center gap-4 min-w-0 flex-1">
+                              <div className="h-10 w-10 md:h-11 md:w-11 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner"><Zap className="h-4 w-4 text-primary" /></div>
+                              <div className="min-w-0 space-y-0.5 flex-1">
+                                  <p className="font-bold text-[#0B1228] text-sm md:text-base line-clamp-1 leading-snug">{r.mockTitle}</p>
+                                  <div className="flex items-center gap-3 text-[11px] font-bold text-slate-400 tracking-tight">
                                     <span>Score: {r.score}</span>
-                                    <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold px-2 py-0.5 rounded text-[9px]">{r.accuracy}%</Badge>
+                                    <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold px-1.5 py-0 rounded text-[9px]">{r.accuracy}%</Badge>
                                   </div>
                               </div>
                             </div>
                             <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-primary transition-all group-hover:translate-x-1 shrink-0 ml-4" />
                         </div>
-                      )) : <div className="p-12 text-center opacity-30 text-sm font-bold text-slate-400">No tests taken yet.</div>}
+                      )) : <div className="p-10 text-center opacity-30 text-sm font-bold text-slate-400">No tests taken yet.</div>}
                     </div>
                 </CardContent>
               </Card>
           </div>
 
-          <div className="lg:col-span-4 space-y-6">
-               <Card className="border-none shadow-4xl bg-blue-600 text-white p-6 md:p-10 rounded-2xl md:rounded-[2rem] relative overflow-hidden group">
-                <div className="absolute bottom-0 right-0 p-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Flame className="h-24 w-24 md:h-32 w-32" /></div>
+          <div className="lg:col-span-4 space-y-5">
+               <Card className="border-none shadow-xl bg-blue-600 text-white p-5 md:p-8 rounded-2xl md:rounded-[2rem] relative overflow-hidden group">
+                <div className="absolute bottom-0 right-0 p-4 opacity-10 rotate-12 group-hover:scale-110 transition-transform"><Flame className="h-20 w-20 md:h-24 md:w-24" /></div>
                 <div className="relative z-10 text-left">
-                    <p className="text-[11px] font-bold text-white/70 uppercase tracking-widest">Lifetime Study</p>
-                    <div className="flex items-baseline gap-2">
-                      <div className="text-[48px] md:text-7xl font-black leading-none">{formatDuration(analytics?.lifetime || 0)}</div>
+                    <p className="text-[10px] font-bold text-white/70 uppercase tracking-widest">Lifetime study</p>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <div className="text-4xl md:text-5xl font-black leading-none">{formatDuration(analytics?.lifetime || 0)}</div>
                     </div>
                 </div>
               </Card>
 
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl space-y-6">
-                 <h4 className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">Extra Insights</h4>
-                 <div className="grid grid-cols-2 gap-4">
-                    <InsightCard label="Longest Session" value={formatDuration(analytics?.longestSession || 0)} />
-                    <InsightCard label="Most Studied" value={analytics?.mostStudiedSubject || "N/A"} />
-                 </div>
-              </div>
-
-              <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-xl space-y-6">
-                 <h4 className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">Quick Portal Tools</h4>
-                 <div className="grid grid-cols-1 gap-2 md:gap-3">
-                    <QuickToolLink href="/search" label="Search Bank" icon={Search} />
-                    <QuickToolLink href="/current-affairs" label="Current Affairs" icon={Newspaper} />
-                    <QuickToolLink href="/notes" label="Study Material" icon={BookOpen} />
-                    <QuickToolLink href="/pyqs" label="Old Papers" icon={FileStack} />
-                    <QuickToolLink href="/leaderboard" label="Merit List" icon={Trophy} />
-                    {isAdmin && <QuickToolLink href="/admin" label="Admin Panel" icon={ShieldAlert} highlight />}
+              <div className="bg-white p-5 rounded-2xl border border-slate-100 shadow-md space-y-5">
+                 <h4 className="text-[10px] font-bold text-slate-400 tracking-widest uppercase">Quick portal tools</h4>
+                 <div className="grid grid-cols-1 gap-2">
+                    <QuickToolLink href="/search" label="Search bank" icon={Search} />
+                    <QuickToolLink href="/current-affairs" label="Current affairs" icon={Newspaper} />
+                    <QuickToolLink href="/notes" label="Study material" icon={BookOpen} />
+                    <QuickToolLink href="/pyqs" label="Old papers" icon={FileStack} />
+                    {isAdmin && <QuickToolLink href="/admin" label="Admin panel" icon={ShieldAlert} highlight />}
                  </div>
               </div>
           </div>
@@ -242,31 +233,22 @@ export default function StudentDashboard() {
 
 function MetricItem({ label, val, icon }: { label: string, val: string | number, icon: React.ReactNode }) {
   return (
-    <Card className="border-none shadow-lg bg-white p-4 md:p-6 rounded-2xl text-left group border border-slate-100 min-w-0">
-      <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center mb-4 group-hover:bg-primary/5 shadow-inner shrink-0">
-        {isValidElement(icon) ? cloneElement(icon as ReactElement<{ className?: string }>, { className: "h-5 w-5" }) : icon}
+    <Card className="border-none shadow-md bg-white p-4 md:p-5 rounded-2xl text-left group border border-slate-50 min-w-0">
+      <div className="h-9 w-9 rounded-xl bg-slate-50 flex items-center justify-center mb-3 group-hover:bg-primary/5 shadow-inner shrink-0">
+        {isValidElement(icon) ? cloneElement(icon as ReactElement<{ className?: string }>, { className: "h-4 w-4 text-primary" }) : icon}
       </div>
-      <div className="text-[18px] md:text-2xl font-black text-[#0F172A] leading-none truncate tabular-nums">{val}</div>
-      <p className="text-[11px] font-bold tracking-tight text-slate-400 mt-2">{label}</p>
+      <div className="text-lg md:text-xl font-black text-[#0F172A] leading-none truncate tabular-nums">{val}</div>
+      <p className="text-[10px] font-bold tracking-tight text-slate-400 mt-1.5">{label}</p>
     </Card>
-  )
-}
-
-function InsightCard({ label, value }: { label: string, value: string | number }) {
-  return (
-    <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-4">
-      <p className="text-[11px] font-bold text-slate-400 tracking-widest uppercase">{label}</p>
-      <p className="text-lg font-bold text-[#0F172A] truncate">{value}</p>
-    </div>
   )
 }
 
 function QuickToolLink({ href, label, icon: Icon, highlight }: any) {
    return (
-      <Link href={href} className={cn("flex items-center justify-between p-3.5 rounded-xl border transition-all active:scale-[0.98] group", highlight ? "border-primary/20 bg-primary/5 hover:bg-primary/10" : "border-slate-50 bg-slate-50/50 hover:bg-slate-100")}>
+      <Link href={href} className={cn("flex items-center justify-between p-3 rounded-xl border transition-all active:scale-[0.98] group", highlight ? "border-primary/10 bg-primary/5" : "border-slate-50 bg-slate-50/50 hover:bg-slate-100")}>
          <div className="flex items-center gap-3">
-            <Icon className={cn("h-4.5 w-4.5", highlight ? "text-primary" : "text-slate-500 group-hover:text-primary")} />
-            <span className={cn("text-[13px] font-bold", highlight ? "text-primary" : "text-[#0F172A]")}>{label}</span>
+            <Icon className={cn("h-4 w-4", highlight ? "text-primary" : "text-slate-500 group-hover:text-primary")} />
+            <span className={cn("text-sm font-bold", highlight ? "text-primary" : "text-[#0F172A]")}>{label}</span>
          </div>
          <ChevronRight className="h-3.5 w-3.5 text-slate-300 group-hover:text-primary transition-all" />
       </Link>

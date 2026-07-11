@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 
 /**
  * Production Mobile Bottom Navigation v1.6.
+ * UPDATED: Refined label size and improved vertical spacing.
  */
 
 export default function MobileNav() {
@@ -56,9 +57,9 @@ export default function MobileNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-[1000] border-t border-slate-100 bg-white shadow-[0_-4px_30px_rgba(0,0,0,0.04)] md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-[1000] border-t border-slate-100 bg-white/95 backdrop-blur-md shadow-[0_-4px_25px_rgba(0,0,0,0.03)] md:hidden">
 
-      <div className="flex h-[72px] items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
+      <div className="flex h-[64px] items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
 
         {navItems.map((item) => {
           const isActive =
@@ -72,25 +73,25 @@ export default function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-1 flex-col items-center justify-center"
+              className="flex flex-1 flex-col items-center justify-center h-full"
             >
               <div
                 className={cn(
-                  "flex flex-col items-center justify-center rounded-[1.25rem] transition-all duration-300",
+                  "flex flex-col items-center justify-center rounded-2xl transition-all duration-300",
 
                   isActive
-                    ? "h-[50px] w-[62px] bg-primary text-white shadow-lg shadow-primary/20"
-                    : "h-[50px] w-[62px] text-slate-400"
+                    ? "h-[46px] w-[58px] bg-primary text-white shadow-md shadow-primary/10"
+                    : "h-[46px] w-[58px] text-slate-400"
                 )}
               >
                 <Icon
-                  className="h-[20px] w-[20px]"
+                  className="h-[18px] w-[18px]"
                   fill={isActive ? "currentColor" : "none"}
                 />
 
                 <span
                   className={cn(
-                    "mt-0.5 text-[10px] font-bold tracking-tight",
+                    "mt-0.5 text-[9px] font-bold tracking-tight",
 
                     isActive
                       ? "text-white"

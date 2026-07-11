@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect, useMemo } from "react";
@@ -13,7 +12,7 @@ import { doc } from "firebase/firestore";
 
 /**
  * @fileOverview Meet Founder section v6.0.
- * UPDATED: Connected to live Firestore settings for dynamic admin control.
+ * UPDATED: Normalized typography and reduced section spacing.
  */
 export default function MeetFounder() {
   const db = useFirestore();
@@ -22,10 +21,10 @@ export default function MeetFounder() {
 
   const founder = {
     name: settings?.founderName || "Arsh Grewal",
-    bio: settings?.founderBio || "Hi, I'm Arsh Grewal. I'm a student from Punjab who understands how challenging government exam preparation can be. Instead of waiting for someone else to build the perfect platform, I decided to build it myself. Cracklix is my mission to provide modern mock tests, high-quality study resources, and a better learning experience for every Punjab Government Exam aspirant.",
-    quote: settings?.founderQuote || "Dream big. Build bigger. Help thousands along the way.",
+    bio: settings?.founderBio || "I'm Arsh Grewal, a student from Punjab dedicated to building Punjab's smartest exam preparation platform.",
+    quote: settings?.founderQuote || "Empowering every aspirant in Punjab with institutional-grade technology.",
     buildingSince: settings?.founderBuildingSince || "19 July 2026",
-    mission: settings?.founderMission || "To build Punjab's smartest, most trusted and student-first exam preparation platform where every aspirant gets access to quality mock tests and a premium preparation experience."
+    mission: settings?.founderMission || "To build a trusted, student-first exam preparation platform."
   };
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,106 +32,69 @@ export default function MeetFounder() {
   const isInView = useInView(ref, { once: true, amount: 0.2 });
 
   return (
-    <section id="founder-section" className="relative py-24 md:py-48 bg-white overflow-hidden" ref={ref}>
+    <section id="founder-section" className="relative py-12 md:py-24 bg-white overflow-hidden" ref={ref}>
       <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-20%] left-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[150px]" />
-        <div className="absolute bottom-[-20%] right-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[150px]" />
+        <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px]" />
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <motion.div 
-          initial={{ opacity: 0, y: 50 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <div className="text-center mb-16">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50/50 border border-blue-100/50 text-sm font-bold text-slate-600">
+          <div className="text-center mb-10 md:mb-16">
+            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50/50 border border-blue-100/50 text-xs font-bold text-slate-600">
               🚀 Student • Founder • Developer
             </span>
-            <h2 className="text-4xl md:text-6xl font-black text-[#0F172A] tracking-tighter mt-4">
-              Meet the Founder
+            <h2 className="text-3xl md:text-[50px] font-black text-[#0F172A] tracking-tighter mt-4 leading-tight">
+              Meet the founder
             </h2>
           </div>
 
-          <div className="flex flex-col lg:flex-row items-center gap-16">
+          <div className="flex flex-col lg:flex-row items-center gap-10 md:gap-16">
             <motion.div 
               className="relative shrink-0"
-              initial={{ scale: 0.9 }} 
-              animate={isInView ? { scale: 1 } : { scale: 0.9 }}
-              transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ scale: 0.95 }} 
+              animate={isInView ? { scale: 1 } : { scale: 0.95 }}
+              transition={{ duration: 0.8 }}
             >
-              <div className="relative h-64 w-64 md:h-80 md:w-80 rounded-full overflow-hidden border-8 border-white shadow-2xl bg-slate-100">
+              <div className="relative h-48 w-48 md:h-80 md:w-80 rounded-full overflow-hidden border-4 md:border-8 border-white shadow-xl bg-slate-100">
                 <Image
                   src="/founder.png"
                   alt={founder.name}
                   fill
                   className="object-cover"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  sizes="(max-width: 768px) 150px, 320px"
                 />
               </div>
-              <div className="absolute bottom-2 right-2 h-16 w-16 bg-blue-500 rounded-full border-4 border-white flex items-center justify-center text-white shadow-xl">
-                <Check className="h-8 w-8" />
+              <div className="absolute bottom-1 right-1 h-12 w-12 md:h-16 md:w-16 bg-blue-500 rounded-full border-4 border-white flex items-center justify-center text-white shadow-lg">
+                <Check className="h-6 w-6 md:h-8 md:w-8" />
               </div>
             </motion.div>
 
-            <div className="flex-1 space-y-6 text-center lg:text-left">
-              <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-medium">
+            <div className="flex-1 space-y-4 md:space-y-6 text-center lg:text-left">
+              <p className="text-base md:text-xl text-slate-600 leading-relaxed font-medium">
                 {founder.bio}
               </p>
-              <p className="text-slate-500 font-medium italic">
-                Every feature, every design improvement is created with one goal: Helping students prepare with confidence.
+              <p className="text-sm md:text-lg text-slate-400 font-medium italic">
+                "{founder.quote}"
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-24 items-start">
-            <div className="bg-white/50 backdrop-blur-xl border border-blue-100/50 rounded-[32px] p-8 shadow-lg h-full text-left">
-              <h3 className="text-2xl font-bold text-[#0F172A]">My Mission</h3>
-              <p className="mt-4 text-slate-600 text-lg font-medium leading-relaxed">
-                {founder.mission}
-              </p>
-            </div>
-            <div className="text-center py-8">
-              <p className="text-3xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-tight italic">
-                "{founder.quote.split('.').join('".<br/>"')}"
-              </p>
-              <p className="mt-4 text-slate-500 font-medium">— {founder.name}</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mt-24">
-            <StatCard icon={<User />} label="Student Founder" isInView={isInView} />
-            <StatCard icon={<Briefcase />} label="Building Since" value={founder.buildingSince} isInView={isInView} delay={0.1} />
-            <StatCard icon={<MapPin />} label="Punjab, India" isInView={isInView} delay={0.2} />
-            <StatCard icon={<Target />} label="Student-First Mission" isInView={isInView} delay={0.3} />
-          </div>
-
-          <div className="text-center mt-24">
+          <div className="text-center mt-12 md:mt-20">
             <Button
               asChild
-              className="h-16 px-12 bg-primary hover:bg-blue-700 text-white font-bold text-lg rounded-full shadow-4xl transition-all active:scale-95 border-none"
+              className="h-[52px] md:h-16 px-10 bg-[#0B1528] hover:bg-black text-white font-bold text-sm md:text-base rounded-full shadow-xl transition-all active:scale-95 border-none"
             >
               <Link href="/meet-founder">
-                Read My Journey <ArrowRight className="h-5 w-5 ml-2" />
+                Read my story <ArrowRight className="h-4 w-4 ml-2" />
               </Link>
             </Button>
           </div>
         </motion.div>
       </div>
-
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-2xl p-10 bg-white rounded-[32px] border-none shadow-5xl">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-black text-[#0F172A]">Why I Started Cracklix</DialogTitle>
-          </DialogHeader>
-          <DialogDescription className="text-slate-600 text-lg leading-relaxed mt-6 space-y-6 text-left font-medium">
-              <p>As a student, I experienced how difficult it can be to find one reliable platform dedicated to Punjab Government Exam preparation.</p>
-              <p>Most platforms were either outdated, complicated or lacked a premium learning experience.</p>
-              <p>So I started building Cracklix. My goal isn't just to create another exam website. I want to build a platform that students genuinely enjoy using every day—a platform that motivates them, tracks their progress, and helps them move one step closer to achieving their government job dream.</p>
-              <p className="font-bold">— {founder.name}</p>
-          </DialogDescription>
-        </DialogContent>
-      </Dialog>
     </section>
   );
 }
@@ -153,18 +115,18 @@ function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.Rea
 
   return (
     <motion.div
-      className="bg-white/60 backdrop-blur-lg border border-blue-100/50 rounded-[32px] p-6 text-center flex flex-col items-center justify-center space-y-3 h-full shadow-lg"
-      initial={{ opacity: 0, y: 30 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-      transition={{ duration: 0.5, delay: delay + 0.2, ease: "easeOut" }}
+      className="bg-white/60 backdrop-blur-lg border border-blue-100/50 rounded-[2rem] p-5 text-center flex flex-col items-center justify-center space-y-2 h-full shadow-md"
+      initial={{ opacity: 0, y: 20 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+      transition={{ duration: 0.4, delay: delay + 0.1, ease: "easeOut" }}
     >
-      <div className="text-primary">{icon}</div>
+      <div className="text-primary scale-90">{icon}</div>
       {value ? (
-        <p className="text-xl md:text-3xl font-black text-[#0F172A] tabular-nums leading-tight">
+        <p className="text-lg md:text-2xl font-black text-[#0F172A] tabular-nums leading-tight">
           {value && /^\d+$/.test(value) ? count : value}
         </p>
       ) : null}
-      <p className="text-[10px] md:text-sm font-bold text-slate-500 uppercase tracking-widest">{label}</p>
+      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
     </motion.div>
   );
 }
