@@ -14,7 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v16.0.
+ * @fileOverview Admin Layout v16.1.
+ * FIXED: Refined mobile sidebar z-index and spacing.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading } = useUser();
@@ -92,8 +93,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
       )}>
         <header className="pt-safe border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 shrink-0">
-          <div className="h-[80px] md:h-[112px] flex items-center px-4 md:px-10 justify-between">
-            <div className="flex items-center h-full">
+          <div className="h-[72px] md:h-[112px] flex items-center px-4 md:px-10 justify-between">
+            <div className="flex items-center h-full gap-2">
               <button 
                 onClick={toggleSidebar}
                 className="bg-white border border-slate-200 text-slate-700 h-10 w-10 md:h-11 md:w-11 rounded-xl shadow-sm flex items-center justify-center active:scale-95 transition-all hover:border-primary/30 z-10"
@@ -103,8 +104,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
               <Logo
                 variant="light"
-                className="shrink-0 ml-1 md:ml-2"
-                imgClassName="h-12 md:h-16"
+                className="shrink-0 -ml-4"
+                imgClassName="h-10 md:h-16"
               />
             </div>
             

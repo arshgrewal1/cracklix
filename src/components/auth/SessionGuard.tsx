@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 import { useUser, useAuth, useDoc, useFirestore } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter, usePathname } from 'next/navigation';
@@ -8,8 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { doc } from 'firebase/firestore';
 
 /**
- * @fileOverview Hardened Takeover Session Guard v15.1.
- * FIXED: Added handshake suppression and null guards to prevent race conditions during hydration.
+ * @fileOverview Hardened Takeover Session Guard v15.2.
+ * FIXED: Standardized hook import order.
  */
 export default function SessionGuard() {
   const { user, profile, loading } = useUser();
@@ -76,5 +76,3 @@ export default function SessionGuard() {
 
   return null;
 }
-
-import { useMemo } from 'react';

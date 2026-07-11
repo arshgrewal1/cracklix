@@ -12,7 +12,7 @@ import Link from 'next/link';
 
 /**
  * @fileOverview High-Fidelity Animated Counter Node.
- * FIXED: Added hydration safety to prevent server/client mismatch on animated values.
+ * FIXED: Hardened parsing for non-numeric stats like "24x7".
  */
 function Counter({ value, suffix = "+" }: { value: number | string; suffix?: string }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -22,11 +22,11 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
     setMounted(true);
   }, []);
 
-  const isSpecialString = typeof value === 'string' && (value.includes('x') || isNaN(Number(value.replace(/\D/g, ''))));
+  const isNonNumeric = typeof value === 'string' && (value.includes('x') || value.includes(':') || isNaN(Number(value.replace(/\D/g, ''))));
   const numericValue = typeof value === 'string' ? parseInt(value.replace(/\D/g, '')) || 0 : value;
 
   useEffect(() => {
-    if (!mounted || isSpecialString) return;
+    if (!mounted || isNonNumeric) return;
     
     let startTime: number | null = null;
     const duration = 2000;
@@ -41,17 +41,17 @@ function Counter({ value, suffix = "+" }: { value: number | string; suffix?: str
     };
     const rafId = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(rafId);
-  }, [numericValue, isSpecialString, mounted]);
+  }, [numericValue, isNonNumeric, mounted]);
 
   if (!mounted) return <span>0{suffix}</span>;
-  if (isSpecialString) return <span>{value}</span>;
+  if (isNonNumeric) return <span>{value}</span>;
 
   return <span>{displayValue.toLocaleString()}{suffix}</span>;
 }
 
 /**
- * @fileOverview Premium Institutional Stats Bar v3.4.
- * FIXED: Hydration safety for visibility logic based on admin settings.
+ * @fileOverview Premium Institutional Stats Bar v3.5.
+ * FIXED: Robust null guards for settings registry.
  */
 export default function StatsBar() {
   const db = useFirestore();
@@ -68,9 +68,9 @@ export default function StatsBar() {
   const { data: settings, loading: settingsLoading } = useDoc<any>(settingsRef);
 
   const activeStats = useMemo(() => {
-    if (!mounted || !settings) return [];
+    if (!mounted) return [];
 
-    const s = settings.statsVisibility || {
+    const s = settings?.statsVisibility || {
       showQuestions: true,
       showMocks: true,
       showCategories: true,
@@ -78,7 +78,7 @@ export default function StatsBar() {
       showStudents: false
     };
 
-    const trends = settings.statsTrends || {
+    const trends = settings?.statsTrends || {
       questions: "+28 this week",
       mocks: "+2 added today",
       categories: "Updated daily",
@@ -86,8 +86,8 @@ export default function StatsBar() {
       support: "Live now"
     };
 
-    const mode = settings.studentCounterMode || 'manual';
-    const threshold = settings.studentCounterThreshold || 1000;
+    const mode = settings?.studentCounterMode || 'manual';
+    const threshold = settings?.studentCounterThreshold || 1000;
     const totalUsers = stats?.totalUsers || 0;
 
     const shouldShowStudents = mode === 'auto' 

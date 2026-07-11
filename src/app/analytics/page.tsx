@@ -6,6 +6,7 @@ import Footer from '@/components/layout/Footer';
 import { useUser, useFirestore } from '@/firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { Zap, Clock, Calendar, TrendingUp, BarChart2, Star, Activity } from 'lucide-react';
+import { Card } from '@/components/ui/card';
 import LiveStudyTimer from '@/components/analytics/LiveStudyTimer';
 import { useStudyTracker } from '@/hooks/useStudyTracker';
 import { cn } from '@/lib/utils';
@@ -27,7 +28,8 @@ const formatConciseDuration = (seconds: number) => {
 }
 
 /**
- * @fileOverview Institutional Analytics Hub v2.1 (Refined Stats).
+ * @fileOverview Institutional Analytics Hub v2.2 (Stability Fixed).
+ * FIXED: Added missing Card import.
  */
 export default function AnalyticsPage() {
   const { user } = useUser();
