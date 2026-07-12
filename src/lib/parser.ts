@@ -1,34 +1,56 @@
-
 /**
- * @fileOverview Institutional Smart Text Ingestion Parser v6.0.
+ * @fileOverview Institutional Master Text Ingestion Parser v8.0.
  * Optimized for high-fidelity MCQ extraction from raw, noisy, or OCR-generated text.
- * Handles bilingual (English + Punjabi/Hindi) stacked patterns automatically.
+ * Strictly adheres to Lead Software Architect's production guidelines.
  */
 
-export interface ParsedResults {
-  questions: any[];
-  rawCount: number;
+export interface ParsedMCQ {
+  id: string;
+  englishQuestion: string;
+  punjabiQuestion?: string;
+  hindiQuestion?: string;
+  optionAEnglish: string;
+  optionAPunjabi?: string;
+  optionAHindi?: string;
+  optionBEnglish: string;
+  optionBPunjabi?: string;
+  optionBHindi?: string;
+  optionCEnglish: string;
+  optionCPunjabi?: string;
+  optionCHindi?: string;
+  optionDEnglish: string;
+  optionDPunjabi?: string;
+  optionDHindi?: string;
+  correctAnswer: string;
+  englishExplanation?: string;
+  punjabiExplanation?: string;
+  diagram_required?: boolean;
+  diagram_caption?: string;
+  isValid: boolean;
+  validationErrors: string[];
 }
 
 /**
- * Normalizes and cleans raw text from common OCR errors and metadata noise.
+ * Preprocessor: Removes OCR garbage, headers, footers and noise.
  */
-export function cleanRawText(text: string): string {
+export function preprocessText(text: string): string {
   if (!text) return "";
   
   return text
     .replace(/\r\n/g, '\n')
-    // Remove page numbering and common headers
+    // Remove Page Numbering: "Page 1 of 20", "1/20"
     .replace(/Page\s+\d+\s+of\s+\d+/gi, '')
+    .replace(/\d+\s*\/\s*\d+/g, '')
+    // Remove Common Noise
     .replace(/Section\s+[A-Z]/gi, '')
-    // Remove OCR noise and bullets
-    .replace(/[\|_]{2,}/g, '') 
-    .replace(/[\u2022\u2023\u25E6\u2043\u2219]/g, '')
+    .replace(/Copyright\s+.*$/gim, '')
+    .replace(/https?:\/\/[^\s]+/gi, '')
+    .replace(/www\.[^\s]+/gi, '')
+    // Repair broken lines (OCR specific)
+    .replace(/([a-z,])\n([a-z])/g, '$1 $2') 
     // Normalize punctuation
-    .replace(/,{2,}/g, ',')
+    .replace(/[\|_]{2,}/g, '') 
     .replace(/\.{3,}/g, '...')
-    // Remove non-essential bullets at start of lines
-    .replace(/^\s*[\-\*\+•]\s*/gm, '')
     // Trim and collapse whitespace
     .replace(/ +/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
@@ -36,109 +58,112 @@ export function cleanRawText(text: string): string {
 }
 
 /**
- * Detects script types and splits bilingual blocks.
+ * Intelligently splits mixed English/Punjabi/Hindi blocks.
  */
-function splitBilingualNode(text: string): [string, string] {
+function parseMultilingualNode(text: string): { en: string, pa: string, hi: string } {
   const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-  if (lines.length === 0) return ["", ""];
-  
-  if (text.includes(' / ')) {
-    const parts = text.split(' / ');
-    return [parts[0].trim(), parts[1]?.trim() || ""];
-  }
-
-  let english = "";
-  let punjabi = "";
+  const result = { en: "", pa: "", hi: "" };
 
   lines.forEach(line => {
-    // Detect Punjabi characters (U+0A00 to U+0A7F)
-    const hasGurmukhi = /[\u0A00-\u0A7F]/.test(line);
-    if (hasGurmukhi) {
-      punjabi += (punjabi ? "\n" : "") + line;
-    } else {
-      english += (english ? " " : "") + line;
-    }
+    const isPunjabi = /[\u0A00-\u0A7F]/.test(line);
+    const isHindi = /[\u0900-\u097F]/.test(line);
+    
+    if (isPunjabi) result.pa += (result.pa ? "\n" : "") + line;
+    else if (isHindi) result.hi += (result.hi ? "\n" : "") + line;
+    else result.en += (result.en ? " " : "") + line;
   });
 
-  return [english.trim(), punjabi.trim()];
+  return { 
+    en: result.en.trim(), 
+    pa: result.pa.trim(), 
+    hi: result.hi.trim() 
+  };
 }
 
-export function parseBulkQuestions(rawText: string, metadata: any): ParsedResults {
-  const cleaned = cleanRawText(rawText);
-  if (!cleaned) return { questions: [], rawCount: 0 };
+/**
+ * The Master Regex Extractor.
+ */
+export function parseMCQBlocks(rawText: string): ParsedMCQ[] {
+  const cleaned = preprocessText(rawText);
+  if (!cleaned) return [];
 
-  // Split by Question Marker (Start of line with Q1, 1., or Question)
-  const blocks = ("\n" + cleaned).split(/\n(?=(?:\d+|Q\d+|Question\s*\d*)[\.\)\s\:]+)/i).filter(b => b.trim().length > 15);
+  // Question Splitter: Matches Q1., 1., (1), Question 1:
+  const blocks = cleaned.split(/\n(?=(?:\d+|Q\d+|Question\s*\d*)[\.\)\s\:]+)/i).filter(b => b.trim().length > 10);
   
-  const results: any[] = [];
+  const results: ParsedMCQ[] = [];
 
-  blocks.forEach((block, index) => {
-    try {
-      const b = block.trim();
+  blocks.forEach((block, idx) => {
+    const b = block.trim();
+    const errors: string[] = [];
+    
+    // 1. Extract Question Text
+    const qMatch = b.match(/^([\s\S]+?)(?=\n?\(?[A-D][\.\)\s①-④])/i);
+    const rawQ = qMatch ? qMatch[1].replace(/^(?:\d+|Q\d+|Question\s*\d*)[\.\)\s\:]+/i, '').trim() : b;
+    const qNodes = parseMultilingualNode(rawQ);
+
+    // 2. Extract Options A-D
+    const getOpt = (letter: string, marker: string, nextLetter: string | null) => {
+      const start = `\\n?\\(?${marker}[\\.\\)\\s]+`;
+      const end = nextLetter 
+        ? `(?=\\n?\\(?${nextLetter}[\\.\\)\\s①-④])` 
+        : `(?=\\n?(?:Answer|ਉੱਤਰ|उत्तर|Key|Explanation|ਵਿਆਖਿਆ|Rationale|Diagram|Figure))`;
       
-      // 1. QUESTION EXTRACTION
-      const qBlockMatch = b.match(/^([\s\S]+?)(?=\n?\(?A[\.\)\s])/i);
-      if (!qBlockMatch) return;
-      
-      const rawQ = qBlockMatch[1].replace(/^(?:\d+|Q\d+|Question\s*\d*)[\.\)\s\:]+/i, '').trim();
-      const [enQ, paQ] = splitBilingualNode(rawQ);
+      const regex = new RegExp(`${start}([\\s\\S]+?)${end}`, 'i');
+      const m = b.match(regex);
+      return m ? parseMultilingualNode(m[1].trim()) : null;
+    };
 
-      // 2. OPTIONS EXTRACTION (A-D)
-      const extractOpt = (letter: string, next: string | null) => {
-        const startPattern = `\\n?\\(?${letter}[\\.\\)\\s]+`;
-        const endPattern = next 
-          ? `(?=\\n?\\(?${next}[\\.\\)\\s])` 
-          : `(?=\\n?(?:Answer|ਉੱਤਰ|उत्तर|Sahi Uttar|Explanation|ਵਿਆਖਿਆ|व्याख्या|Official Key|Rationale))`;
-        
-        const regex = new RegExp(`${startPattern}([\\s\\S]+?)${endPattern}`, 'i');
-        const match = b.match(regex);
-        return match ? splitBilingualNode(match[1].trim()) : ["", ""];
-      };
+    const optA = getOpt('A', '[A①]', 'B') || getOpt('A', 'A', 'B');
+    const optB = getOpt('B', '[B②]', 'C') || getOpt('B', 'B', 'C');
+    const optC = getOpt('C', '[C③]', 'D') || getOpt('C', 'C', 'D');
+    const optD = getOpt('D', '[D④]', null) || getOpt('D', 'D', null);
 
-      const [enA, paA] = extractOpt('A', 'B');
-      const [enB, paB] = extractOpt('B', 'C');
-      const [enC, paC] = extractOpt('C', 'D');
-      const [enD, paD] = extractOpt('D', null);
+    // 3. Extract Answer Key
+    const ansMatch = b.match(/(?:Answer|ਉੱਤਰ|उत्तर|Key)[:\s]*\(?([A-D])\)?/i);
+    const ans = ansMatch ? ansMatch[1].toUpperCase() : "";
 
-      // 3. ANSWER KEY EXTRACTION
-      let correctAnswer = "A";
-      const ansMatch = b.match(/(?:Answer|ਉੱਤਰ|उत्तर|Sahi Uttar|Official Key|Key)[:\s]*\(?([A-D])\)?/i);
-      if (ansMatch) {
-        correctAnswer = ansMatch[1].toUpperCase();
-      }
+    // 4. Extract Explanation
+    const expMatch = b.match(/(?:Explanation|ਵਿਆਖਿਆ|व्याख्या|Rationale|Solution)[:\s]*([\s\S]+?)(?=\n?Diagram|Figure|$)/i);
+    const expNodes = expMatch ? parseMultilingualNode(expMatch[1].trim()) : { en: "", pa: "", hi: "" };
 
-      // 4. EXPLANATION EXTRACTION
-      const expMatch = b.match(/(?:Explanation|ਵਿਆਖਿਆ|व्याख्या|Rationale|Solution)[:\s]*([\s\S]+)$/i);
-      let [enExp, paExp] = ["", ""];
-      if (expMatch) {
-        [enExp, paExp] = splitBilingualNode(expMatch[1].trim());
-      }
+    // 5. Detect Diagram/Figure references
+    const hasDiagram = /diagram|figure|image|graph|map/i.test(b);
+    const diagMatch = b.match(/(?:Diagram|Figure|Image)[:\s]*([\s\S]+)$/i);
 
-      if (enQ && enA) {
-        results.push({
-          ...metadata,
-          id: `q-node-${Date.now()}-${index}`,
-          englishQuestion: enQ,
-          punjabiQuestion: paQ || "",
-          optionAEnglish: enA,
-          optionAPunjabi: paA || "",
-          optionBEnglish: enB,
-          optionBPunjabi: paB || "",
-          optionCEnglish: enC,
-          optionCPunjabi: paC || "",
-          optionDEnglish: enD,
-          optionDPunjabi: paD || "",
-          correctAnswer,
-          englishExplanation: enExp || "",
-          punjabiExplanation: paExp || "",
-          status: 'UNUSED',
-          usedCount: 0
-        });
-      }
-    } catch (e) {
-      console.warn(`[PARSER] Block ${index} failed:`, e);
-    }
+    // Validation Node
+    if (!qNodes.en && !qNodes.pa && !qNodes.hi) errors.push("Question text missing");
+    if (!optA) errors.push("Option A missing");
+    if (!optB) errors.push("Option B missing");
+    if (!optC) errors.push("Option C missing");
+    if (!optD) errors.push("Option D missing");
+    if (!ans) errors.push("Correct answer key missing");
+
+    results.push({
+      id: `q-temp-${idx}-${Date.now()}`,
+      englishQuestion: qNodes.en,
+      punjabiQuestion: qNodes.pa,
+      hindiQuestion: qNodes.hi,
+      optionAEnglish: optA?.en || "",
+      optionAPunjabi: optA?.pa || "",
+      optionAHindi: optA?.hi || "",
+      optionBEnglish: optB?.en || "",
+      optionBPunjabi: optB?.pa || "",
+      optionBHindi: optB?.hi || "",
+      optionCEnglish: optC?.en || "",
+      optionCPunjabi: optC?.pa || "",
+      optionCHindi: optC?.hi || "",
+      optionDEnglish: optD?.en || "",
+      optionDPunjabi: optD?.pa || "",
+      optionDHindi: optD?.hi || "",
+      correctAnswer: ans,
+      englishExplanation: expNodes.en,
+      punjabiExplanation: expNodes.pa,
+      diagram_required: hasDiagram,
+      diagram_caption: diagMatch ? diagMatch[1].trim() : "",
+      isValid: errors.length === 0,
+      validationErrors: errors
+    });
   });
 
-  return { questions: results, rawCount: blocks.length };
+  return results;
 }

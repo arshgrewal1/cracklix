@@ -287,6 +287,9 @@ export interface Question {
   imageUrl?: string;
   audioUrl?: string;
   videoUrl?: string;
+  diagram_required?: boolean;
+  diagram_caption?: string;
+  table_data?: string;
 }
 
 export interface CurrentAffairHubItem {
