@@ -34,17 +34,23 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat, isQuestionStart } from "@/lib/parser"
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
-  { label: "Reasoning & Logic", value: "REASONING" },
   { label: "Current Affairs (English + Punjabi)", value: "CURRENT_AFFAIRS" },
   { label: "Simple Bilingual MCQ (Eng + Pun/Hin)", value: "BILINGUAL_MCQ" },
   { label: "English Only MCQ", value: "ENGLISH_ONLY" },
   { label: "Punjabi Only MCQ", value: "PUNJABI_ONLY" },
-  { label: "Mathematics Hub", value: "MATHEMATICS" }
+  { label: "Mathematics Hub", value: "MATHEMATICS" },
+  { label: "Reasoning & Logic", value: "REASONING" },
+  { label: "Diagram Based", value: "DIAGRAM" },
+  { label: "Table Based", value: "TABLE" },
+  { label: "Graph Based", value: "GRAPH" },
+  { label: "Match the Following", value: "MATCHING" },
+  { label: "Assertion & Reason", value: "ASSERTION" },
+  { label: "Fill in the Blank", value: "FILL_BLANK" }
 ];
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v41.0.
- * FIXED: Restored missing action buttons to header and optimized layout for long audits.
+ * @fileOverview Modular Industrial Ingestion Hub v43.0.
+ * RESTORED: Complete list of 12 question types in the dropdown menu.
  */
 export default function BulkIngestionPage() {
   const router = useRouter()
@@ -60,7 +66,7 @@ export default function BulkIngestionPage() {
     subjectId: "",
     secondaryLanguage: "punjabi" as "punjabi" | "hindi" | "english" | "punjabi_only" | "hindi_only",
     difficulty: "Medium" as any,
-    parserFormat: "REASONING" as ParserFormat
+    parserFormat: "CURRENT_AFFAIRS" as ParserFormat
   })
 
   const [rawText, setRawText] = useState("")
