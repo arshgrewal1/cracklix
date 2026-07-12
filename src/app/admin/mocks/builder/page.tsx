@@ -41,8 +41,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { AdminPageHeader } from "@/components/admin"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v25.0 (Refined).
- * FIXED: Balanced layout and consistent administrative typography.
+ * @fileOverview Enterprise Mock Builder Hub v26.0 (High-Fidelity).
+ * FIXED: Visibility issues in dropdowns by forcing dark backgrounds and white text.
+ * REFINED: Replaced native selects with high-fidelity Shadcn nodes.
  */
 
 export default function MockBuilderPage() {
@@ -378,19 +379,40 @@ function MockBuilderContent() {
                    <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12"><Database className="h-64 w-64" /></div>
                    <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="space-y-1.5">
-                         <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Board source</Label>
-                         <select value={filterBoard} onChange={e => { setFilterBoard(e.target.value); setFilterExam('all'); }} className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 outline-none font-bold text-xs"><option value="all" className="bg-[#0F172A]">All Sources</option>{boards?.map((b: any) => <option key={b.id} value={b.id} className="bg-[#0F172A]">{b.abbreviation} HUB</option>)}</select>
+                         <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Board Center</Label>
+                         <Select value={filterBoard} onValueChange={(v) => { setFilterBoard(v); setFilterExam('all'); }}>
+                            <SelectTrigger className="w-full h-11 bg-white/5 border-white/10 rounded-xl px-4 font-bold text-xs text-white">
+                               <SelectValue placeholder="All Boards Hub" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#0B1528] border-white/10 text-white">
+                               <SelectItem value="all">All Boards Hub</SelectItem>
+                               {boards?.map((b: any) => <SelectItem key={b.id} value={b.id}>{b.abbreviation} HUB</SelectItem>)}
+                            </SelectContent>
+                         </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                         <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Vertical hub</Label>
+                         <Select value={filterExam} onValueChange={setFilterExam}>
+                            <SelectTrigger className="w-full h-11 bg-white/5 border-white/10 rounded-xl px-4 font-bold text-xs text-white">
+                               <SelectValue placeholder="All Exams Hub" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#0B1528] border-white/10 text-white">
+                               <SelectItem value="all">All Exams Hub</SelectItem>
+                               {uniqueExams.map((e: any) => <SelectItem key={e.id} value={e.id}>{e.name}</SelectItem>)}
+                            </SelectContent>
+                         </Select>
                       </div>
                       <div className="space-y-1.5">
                          <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Subject hub</Label>
-                         <select value={filterSubject} onChange={e => setSubjectFilter(e.target.value)} className="w-full h-11 bg-white/5 border border-white/10 rounded-xl px-4 outline-none font-bold text-xs"><option value="all" className="bg-[#0F172A]">All Subjects</option>{subjects?.map((s: any) => <option key={s.id} value={s.id} className="bg-[#0F172A]">{s.name}</option>)}</select>
-                      </div>
-                      <div className="space-y-1.5">
-                         <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Exclusion</Label>
-                         <div className="flex items-center gap-3 h-11 bg-white/5 border border-white/10 rounded-xl px-4">
-                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex-1">Hide Used</span>
-                            <Switch checked={hideUsed} onCheckedChange={setHideUsed} />
-                         </div>
+                         <Select value={filterSubject} onValueChange={setSubjectFilter}>
+                            <SelectTrigger className="w-full h-11 bg-white/5 border-white/10 rounded-xl px-4 font-bold text-xs text-white">
+                               <SelectValue placeholder="All Subject Nodes" />
+                            </SelectTrigger>
+                            <SelectContent className="bg-[#0B1528] border-white/10 text-white">
+                               <SelectItem value="all">All Subject Nodes</SelectItem>
+                               {subjects?.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                            </SelectContent>
+                         </Select>
                       </div>
                    </div>
                    <div className="relative z-10 flex flex-col md:flex-row items-center gap-6 pt-6 border-t border-white/10">
