@@ -6,8 +6,8 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v50.0.
- * FIXED: Structural cleanup for alignment during sidebar transition.
+ * Cracklix Admin Sidebar Header v51.0.
+ * RESTORED: Toggle button visibility regardless of isOpen state to ensure expansion is possible.
  */
 export default function SidebarHeader({
   isOpen,
@@ -20,7 +20,7 @@ export default function SidebarHeader({
     <div
       className={cn(
         "h-[90px] md:h-[110px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300",
-        isOpen ? "justify-between gap-2" : "justify-center"
+        isOpen ? "justify-between" : "flex-col justify-center py-4 gap-4"
       )}
     >
       <Logo
@@ -31,12 +31,10 @@ export default function SidebarHeader({
         className="transition-all duration-300"
       />
 
-      {isOpen && (
-        <SidebarToggle
-          isOpen={isOpen}
-          onToggle={onToggle}
-        />
-      )}
+      <SidebarToggle
+        isOpen={isOpen}
+        onToggle={onToggle}
+      />
     </div>
   );
 }
