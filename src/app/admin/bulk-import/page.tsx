@@ -33,13 +33,12 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Ingestion Hub v50.0.
- * FIXED: Implemented Parser Format selection for highly-reliable local processing.
- * FIXED: Massive 850px height and stable administrative button shape.
+ * @fileOverview Modular Industrial Ingestion Hub v52.0.
+ * FIXED: Advanced Current Affairs logic for perfect bilingual splitting.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
-  { label: "Current Affairs (EN+PA/HI)", value: "CURRENT_AFFAIRS" },
+  { label: "Current Affairs (Bilingual)", value: "CURRENT_AFFAIRS" },
   { label: "Simple Bilingual MCQ", value: "BILINGUAL_MCQ" },
   { label: "English Only MCQ", value: "ENGLISH_ONLY" },
   { label: "Punjabi Only MCQ", value: "PUNJABI_ONLY" },
@@ -68,7 +67,7 @@ export default function BulkIngestionPage() {
     subjectId: "",
     secondaryLanguage: "punjabi",
     difficulty: "Medium" as any,
-    parserFormat: "BILINGUAL_MCQ" as ParserFormat
+    parserFormat: "CURRENT_AFFAIRS" as ParserFormat
   })
 
   const [rawText, setRawText] = useState("")
@@ -89,7 +88,7 @@ export default function BulkIngestionPage() {
       const result = parseBulkQuestions(sanitizedText, metadata);
 
       if (!result?.questions || result.questions.length === 0) {
-         throw new Error("No questions detected. Verify question prefix like Q1. or Question 1.");
+         throw new Error("No questions detected. Ensure each question block starts with Q1, Q2, etc.");
       }
 
       const validated = result.questions.map(q => {
@@ -103,7 +102,7 @@ export default function BulkIngestionPage() {
       });
       
       setStagedQuestions(validated);
-      toast({ title: "Parsing Success", description: `${validated.length} nodes identified using ${metadata.parserFormat} logic.` });
+      toast({ title: "Parsing Success", description: `${validated.length} nodes structured locally.` });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Parsing Error", description: e.message });
     } finally {
@@ -148,7 +147,7 @@ export default function BulkIngestionPage() {
         icon={ClipboardList}
         label="Modular Industrial Ingestion"
         title="Local Ingestion Hub"
-        subtitle="Zero AI dependency. Predictable local regex parsing for all 13+ platform formats."
+        subtitle="Zero AI dependency. Predictable local regex parsing for bilingual Current Affairs."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50">Reset Staging</Button>
@@ -165,7 +164,7 @@ export default function BulkIngestionPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
         {/* INPUT PANEL */}
-        <div className="lg:col-span-6 space-y-8">
+        <div className="lg:col-span-5 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-8">
                  <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
@@ -248,7 +247,7 @@ export default function BulkIngestionPage() {
         </div>
 
         {/* STAGING AREA */}
-        <div className="lg:col-span-6 space-y-8">
+        <div className="lg:col-span-7 space-y-8">
            <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-5">
                  <Layers className="h-6 w-6 text-primary" />

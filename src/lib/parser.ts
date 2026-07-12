@@ -1,5 +1,5 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v20.0.
+ * @fileOverview Institutional Specialized Local Parser v21.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for 13+ question formats.
  * 
  * Strategy:
@@ -23,19 +23,27 @@ export type ParserFormat =
   | 'FILL_BLANK' 
   | 'TRUE_FALSE';
 
+/**
+ * Pre-processes raw text to remove institutional noise.
+ * Removes headers, footers, page numbers, and extra spaces.
+ */
 export function preprocessText(text: string): string {
   if (!text) return "";
   
   return text
     .replace(/\r\n/g, '\n')
-    // Remove decorative separators (Equal lines)
+    // 1. Remove Section Headers & Decorative lines
     .replace(/^={3,}.*?={3,}$/gm, '')
-    // Remove Page Numbers / Footers
+    .replace(/^(?:CURRENT AFFAIRS|GENERAL KNOWLEDGE|MONTHLY UPDATE).*?$/gim, '')
+    // 2. Remove Page Numbers & Progress Nodes
     .replace(/Page\s+\d+\s+of\s+\d+/gi, '')
     .replace(/\d+\s*\/\s*\d+/g, '')
+    // 3. Remove Copyright & URLs
     .replace(/Copyright.*?Arsh Grewal/gi, '')
     .replace(/www\.cracklix\.com/gi, '')
-    // Normalize whitespace but keep line breaks for math/logic
+    .replace(/https?:\/\/\S+/gi, '')
+    // 4. Normalize Punctuation & Whitespace
+    .replace(/\.{2,}/g, '.') // No double dots
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
@@ -50,6 +58,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   const questions: any[] = [];
   
   // Split by Question markers (Universal start-of-block detection)
+  // Supports Q1, Question 1, Punjabi Prefix, Hindi Prefix
   const blocks = rawText.split(/(?=\n\s*(?:Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.)|^(?:Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.))/i);
 
   blocks.forEach(block => {
@@ -63,6 +72,13 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
       diagram_required: false,
       correctAnswer: 'A'
     };
+
+    // Auto-detect visual asset markers
+    if (block.includes('[DIAGRAM]') || block.includes('[IMAGE]') || block.includes('[MAP]') || block.includes('[BAR GRAPH]')) {
+      q.diagram_required = true;
+      const match = block.match(/\[(DIAGRAM|IMAGE|MAP|BAR GRAPH)\]/i);
+      q.diagram_caption = match ? `${match[1]} asset required` : "Visual asset required";
+    }
 
     // Dispatch to specific format logic
     switch (format) {
@@ -94,33 +110,54 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 
 /**
  * STRATEGY: Current Affairs / Bilingual
- * Handles stacked English and Local scripts.
+ * Handles stacked English and Local scripts line-by-line.
  */
 function parseBilingual(block: string, q: any, secondaryLang: string) {
   const punjabiRegex = /[\u0A00-\u0A7F]/;
   const hindiRegex = /[\u0900-\u097F]/;
   const scriptRegex = secondaryLang === 'hindi' ? hindiRegex : punjabiRegex;
-
-  // Split question text from options
-  const optionSplitRegex = /\n\s*(?:\(?A[\)\.\-]\s+)/i;
-  const parts = block.split(optionSplitRegex);
-  const qPart = parts[0];
-  const rest = block.substring(qPart.length);
-
-  // 1. Extract Question Statements
-  const qLines = qPart.split('\n').map(l => l.trim()).filter(Boolean);
-  q.englishQuestion = qLines.filter(l => !scriptRegex.test(l)).join('\n').replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '').trim();
-  
-  const localLines = qLines.filter(l => scriptRegex.test(l));
   const localKey = secondaryLang === 'hindi' ? 'hindiQuestion' : 'punjabiQuestion';
-  q[localKey] = localLines.join('\n').replace(/^(?:ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.)\s*/i, '').trim();
+  const expLocalKey = secondaryLang === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
 
-  // 2. Extract Options (Stacked format)
-  const labels = ['A', 'B', 'C', 'D'];
-  labels.forEach((label, i) => {
-    const next = labels[i + 1] || 'Answer|Ans|Official';
-    const reg = new RegExp(`(?:\\n\\s*|\\s+)[\\(\\[]?${label}[\\)\\]\\.\\-]\\s*([\\s\\S]*?)(?=(?:\\n\\s*|\\s+)[\\(\\[]?${next}[\\)\\]\\.\\-]|$)`, 'i');
-    const match = rest.match(reg);
+  // 1. Identify Answer & Explanation Boundaries
+  const answerMatch = block.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर)\s*[:\-]?\s*\(?([A-D])\)?/i);
+  const explStartIndex = block.search(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या)\s*[:\-]?/i);
+  
+  let restOfBlock = block;
+  let explanationPart = "";
+
+  if (explStartIndex !== -1) {
+    explanationPart = block.substring(explStartIndex);
+    restOfBlock = block.substring(0, explStartIndex);
+  }
+
+  // 2. Extract Options (Strict Line Anchor)
+  const optionLabels = ['A', 'B', 'C', 'D'];
+  const optionsMap: any = {};
+  let questionPart = restOfBlock;
+
+  optionLabels.forEach((label, i) => {
+    const currentRegex = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*`, 'i');
+    const splitIndex = questionPart.search(currentRegex);
+    
+    if (splitIndex !== -1 && i === 0) {
+      // Everything before the first "A)" is the question
+      const tempQ = questionPart.substring(0, splitIndex);
+      questionPart = tempQ;
+    }
+  });
+
+  // Extract Question Statements
+  const qLines = questionPart.split('\n').map(l => l.trim()).filter(Boolean);
+  q.englishQuestion = qLines.filter(l => !scriptRegex.test(l)).join('\n').replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '').trim();
+  q[localKey] = qLines.filter(l => scriptRegex.test(l)).join('\n').replace(/^(?:ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.)\s*/i, '').trim();
+
+  // Extract Option Values
+  optionLabels.forEach((label, i) => {
+    const nextLabel = optionLabels[i + 1] || "(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर)";
+    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${nextLabel}[\\)\\.\\-]|\\n\\s*(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर)|$)`, 'i');
+    const match = block.match(reg);
+    
     if (match) {
       const optLines = match[1].trim().split('\n').map(l => l.trim()).filter(Boolean);
       q[`option${label}English`] = optLines.filter(l => !scriptRegex.test(l))[0] || "";
@@ -129,14 +166,14 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
     }
   });
 
-  // 3. Key & Rationale
-  q.correctAnswer = (block.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर)\s*[:\-]?\s*\(?([A-D])\)?/i)?.[1] || "A").toUpperCase();
-  
-  const expMatch = block.match(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या)\s*[:\-]?\s*([\s\S]*)$/i);
-  if (expMatch) {
-    const expLines = expMatch[1].trim().split('\n').map(l => l.trim()).filter(Boolean);
+  // 3. Set Answer
+  q.correctAnswer = (answerMatch?.[1] || "A").toUpperCase();
+
+  // 4. Process Explanation
+  if (explanationPart) {
+    const expClean = explanationPart.replace(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या)\s*[:\-]?\s*/i, '').trim();
+    const expLines = expClean.split('\n').map(l => l.trim()).filter(Boolean);
     q.englishExplanation = expLines.filter(l => !scriptRegex.test(l)).join('\n');
-    const expLocalKey = secondaryLang === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
     q[expLocalKey] = expLines.filter(l => scriptRegex.test(l)).join('\n');
   }
 
@@ -148,16 +185,13 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
  * Preserves math characters and LaTeX logic.
  */
 function parseMath(block: string, q: any) {
-  q.questionType = 'MCQ';
-  const optionSplitRegex = /\n\s*(?:\(?A[\)\.\-]\s+)/i;
-  const parts = block.split(optionSplitRegex);
-  
+  const parts = block.split(/\n\s*A[\)\.\-]\s+/i);
   q.englishQuestion = parts[0].trim().replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '');
   
   const labels = ['A', 'B', 'C', 'D'];
   labels.forEach((label, i) => {
     const next = labels[i + 1] || 'Answer|Ans';
-    const reg = new RegExp(`[\\(\\[]?${label}[\\)\\]\\.\\-]\\s*([\\s\\S]*?)(?=[\\(\\[]?${next}[\\)\\]\\.\\-]|$)`, 'i');
+    const reg = new RegExp(`${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=${next}[\\)\\.\\-]|$)`, 'i');
     const match = block.match(reg);
     if (match) q[`option${label}English`] = match[1].trim();
   });
@@ -168,19 +202,13 @@ function parseMath(block: string, q: any) {
 
 /**
  * STRATEGY: Diagram / Reasoning
- * Detects assets and handles logic.
  */
 function parseDiagram(block: string, q: any) {
-  if (block.includes('[DIAGRAM]') || block.includes('[IMAGE]') || block.includes('[FIGURE]')) {
-    q.diagram_required = true;
-    q.diagram_caption = "Geometry/Reasoning Figure required";
-  }
   return parseSimple(block, q);
 }
 
 /**
  * STRATEGY: Table
- * Extracts Markdown data.
  */
 function parseTable(block: string, q: any) {
   const tableMatch = block.match(/\|[\s\S]*?\|/);
@@ -196,14 +224,13 @@ function parseReasoning(block: string, q: any) {
 }
 
 function parseSimple(block: string, q: any) {
-  const optionSplitRegex = /\n\s*(?:\(?A[\)\.\-]\s+)/i;
-  const parts = block.split(optionSplitRegex);
+  const parts = block.split(/\n\s*A[\)\.\-]\s+/i);
   q.englishQuestion = parts[0].trim().replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '');
   
   const labels = ['A', 'B', 'C', 'D'];
   labels.forEach((label, i) => {
     const next = labels[i + 1] || 'Answer|Ans';
-    const reg = new RegExp(`[\\(\\[]?${label}[\\)\\]\\.\\-]\\s*([\\s\\S]*?)(?=[\\(\\[]?${next}[\\)\\]\\.\\-]|$)`, 'i');
+    const reg = new RegExp(`${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=${next}[\\)\\.\\-]|$)`, 'i');
     const match = block.match(reg);
     if (match) q[`option${label}English`] = match[1].trim();
   });
