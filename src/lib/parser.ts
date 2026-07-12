@@ -1,8 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v63.0.
- * FIXED: Multi-question segmentation for all dedicated formats.
- * FIXED: OCR resilience for question markers (Q l, Q-2, etc).
+ * @fileOverview Institutional Deterministic Ingestion Hub v64.0.
+ * FIXED: Master Question Splitter and iteration loop for multi-question documents.
  */
 
 import { serverTimestamp } from 'firebase/firestore';
@@ -23,7 +22,7 @@ export type ParserFormat =
   | 'TRUE_FALSE';
 
 // --- CONSTANT REGISTRY ---
-export const QUESTION_SENTINEL_REGEX = /^\s*(?:Q|Question|QUESTION|Q\.)\s*(?:NO\.?\s*)?[-.:]?\s*\d+(?:[\.\s:]|$)/i;
+export const QUESTION_SENTINEL_REGEX = /^\s*(?:(?:Q|Question|QUESTION|Q\.)\s*(?:NO\.?\s*)?[-.:\s]*)?(\d+|[lI])(?:[\.\s:)]|$)/i;
 
 export const NOISE_PATTERNS = [
   /^Page\s*\d+/i,
@@ -65,14 +64,15 @@ const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
 
 export function isQuestionStart(line: string): boolean {
   if (!line) return false;
-  return QUESTION_SENTINEL_REGEX.test(line.trim());
+  return QUESTION_SENTINEL_REGEX.test(line);
 }
 
 /**
  * Splits raw text into individual question blocks based on standard markers.
+ * FIXED: Uses improved regex to handle multiple numbering styles and newlines.
  */
 function segmentTextByQuestions(text: string): string[] {
-  const markerRegex = /(?:\n|^)\s*(?:(?:Q|Question|QUESTION|Q\.)\s*(?:NO\.?\s*)?[-.:\s]*)?(\d+|[lI])(?:[\.\s:]|$)/gi;
+  const markerRegex = /(?:\r?\n|^)\s*(?:(?:Q|Question|QUESTION|Q\.)\s*(?:NO\.?\s*)?[-.:\s]*)?(\d+|[lI])(?:[\.\s:)]|$)/gi;
   const matches = Array.from(text.matchAll(markerRegex));
   
   if (matches.length === 0) return [text];
@@ -83,7 +83,7 @@ function segmentTextByQuestions(text: string): string[] {
     const end = i < matches.length - 1 ? matches[i + 1].index : text.length;
     chunks.push(text.substring(start, end).trim());
   }
-  return chunks;
+  return chunks.filter(c => c.length > 0);
 }
 
 export function preprocessText(text: string): string {
@@ -149,7 +149,7 @@ function parseSingleAssertionReason(text: string, metadata: any) {
 
   lines.forEach((line) => {
     const trimmed = line.trim();
-    if (!trimmed || QUESTION_SENTINEL_REGEX.test(line)) return;
+    if (!trimmed || isQuestionStart(line)) return;
 
     const isAssertEn = assertEnRegex.test(trimmed);
     const isAssertPa = assertPaRegex.test(trimmed);
@@ -225,16 +225,11 @@ function parseSingleAssertionReason(text: string, metadata: any) {
 
 export function parseAssertionReason(rawText: string, metadata: any) {
   const chunks = segmentTextByQuestions(rawText);
-  console.log(`TOTAL QUESTIONS FOUND: ${chunks.length}`);
-  
   const questions: any[] = [];
-  chunks.forEach((chunk, index) => {
-    console.log(`PROCESSING QUESTION: Q${index + 1}`);
+  chunks.forEach((chunk) => {
     const q = parseSingleAssertionReason(chunk, metadata);
     if (q) questions.push(q);
   });
-
-  console.log(`SUCCESSFULLY PARSED: ${questions.length}/${chunks.length} QUESTIONS`);
   return { questions };
 }
 
@@ -279,12 +274,6 @@ export function parseMatching(rawText: string, metadata: any) {
         }
       }
       return;
-    }
-
-    const isMetadata = NOISE_PATTERNS.some(p => p.test(trimmed)) || trimmed.includes('@');
-    if (isMetadata) {
-       if (state === 'EXPL') finalize();
-       return;
     }
 
     if (!currentQ) return;
@@ -388,12 +377,6 @@ export function parseDiagram(rawText: string, metadata: any) {
       return;
     }
 
-    const isMetadata = NOISE_PATTERNS.some(p => p.test(trimmed)) || trimmed.includes('@');
-    if (isMetadata) {
-       if (state === 'EXPLANATION') finalize();
-       return;
-    }
-
     if (!currentQ) return;
 
     const opt = detectOptionMarker(line);
@@ -465,12 +448,6 @@ export function parseTable(rawText: string, metadata: any) {
       return;
     }
 
-    const isMetadata = NOISE_PATTERNS.some(p => p.test(trimmed)) || trimmed.includes('@');
-    if (isMetadata) {
-       if (state === 'EXPLANATION') finalize();
-       return;
-    }
-
     if (!currentQ) return;
     const opt = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
@@ -530,12 +507,6 @@ export function parseGraph(rawText: string, metadata: any) {
       const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
       if (content) currentQ.englishQuestion = content;
       return;
-    }
-
-    const isMetadata = NOISE_PATTERNS.some(p => p.test(trimmed)) || trimmed.includes('@');
-    if (isMetadata) {
-       if (state === 'EXPL') finalize();
-       return;
     }
 
     if (!currentQ) return;
@@ -630,14 +601,36 @@ function parseDeterministicBilingual(rawText: string, metadata: any) {
 
 export function parseBulkQuestions(rawText: string, metadata: any) {
   if (!rawText || !rawText.trim()) return { questions: [] };
+  
+  console.log(`Document Length: ${rawText.length}`);
+  const processedText = preprocessText(rawText);
+  const chunks = segmentTextByQuestions(processedText);
+  console.log(`Questions Found: ${chunks.length}`);
+
+  const allQuestions: any[] = [];
   const fmt = metadata.parserFormat;
-  if (fmt === 'DIAGRAM') return parseDiagram(rawText, metadata);
-  if (fmt === 'MATCHING') return parseMatching(rawText, metadata);
-  if (fmt === 'TABLE') return parseTable(rawText, metadata);
-  if (fmt === 'GRAPH') return parseGraph(rawText, metadata);
-  if (fmt === 'ASSERTION') return parseAssertionReason(rawText, metadata);
-  if (fmt === 'FILL_BLANK') return parseFillBlank(rawText, metadata);
-  return parseDeterministicBilingual(rawText, metadata);
+
+  chunks.forEach((chunk, index) => {
+    console.log(`Processing Question ${index + 1}`);
+    let result: any = { questions: [] };
+
+    if (fmt === 'DIAGRAM') result = parseDiagram(chunk, metadata);
+    else if (fmt === 'MATCHING') result = parseMatching(chunk, metadata);
+    else if (fmt === 'TABLE') result = parseTable(chunk, metadata);
+    else if (fmt === 'GRAPH') result = parseGraph(chunk, metadata);
+    else if (fmt === 'ASSERTION') result = parseAssertionReason(chunk, metadata);
+    else if (fmt === 'FILL_BLANK') result = parseFillBlank(chunk, metadata);
+    else result = parseDeterministicBilingual(chunk, metadata);
+
+    if (result && result.questions && result.questions.length > 0) {
+      allQuestions.push(...result.questions);
+    } else {
+      console.warn(`Question ${index + 1} failed to produce results.`);
+    }
+  });
+
+  console.log(`Successfully Parsed: ${allQuestions.length}/${chunks.length} Questions`);
+  return { questions: allQuestions };
 }
 
 export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
