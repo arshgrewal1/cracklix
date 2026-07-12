@@ -1,7 +1,8 @@
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v25.0.
+ * @fileOverview Institutional Deterministic Ingestion Hub v26.0.
  * FIXED: Greedy question extraction - reads ALL lines until Option A sentinel.
  * FIXED: Multiline support for complex reasoning (Direction Sense, Puzzles, Series).
+ * FIXED: Deduplication logic - Identical bilingual options (numbers/math) are purged.
  * RULES: English and Punjabi fields isolated; numbers stowed in English; multiline aware.
  * WHITESPACE: Block-level trim only; internal spacing and line breaks preserved.
  */
@@ -110,6 +111,9 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
     } else {
        q = parseDeterministicBilingual(trimmedBlock, q, metadata.secondaryLanguage);
     }
+    
+    // Final check to remove empty or undefined fields from the payload
+    Object.keys(q).forEach(key => (q[key] === undefined || q[key] === null || q[key] === "") && delete q[key]);
     
     questions.push(q);
   });
@@ -255,12 +259,17 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
   q.englishExplanation = sanitizeExplanation(englishExpLines.join('\n'));
   q[expLocalKey] = sanitizeExplanation(localExpLines.join('\n'));
 
-  // Deduplicate identical options (e.g. numeric results)
+  // INSTITUTIONAL DEDUPLICATION: Purge identical bilingual options (Numbers, Math, Symbols)
   ['A', 'B', 'C', 'D'].forEach(opt => {
-     const engVal = (q[`option${opt}English`] || "").trim();
-     const localVal = (q[secondaryLang === 'hindi' ? `option${opt}Hindi` : `option${opt}Punjabi`] || "").trim();
-     if (engVal === localVal) {
-        q[secondaryLang === 'hindi' ? `option${opt}Hindi` : `option${opt}Punjabi`] = "";
+     const engField = `option${opt}English`;
+     const locField = secondaryLang === 'hindi' ? `option${opt}Hindi` : `option${opt}Punjabi`;
+     
+     const engVal = (q[engField] || "").trim();
+     const localVal = (q[locField] || "").trim();
+
+     // Rule #3: If identical, delete the local field entirely to prevent redundant registry nodes
+     if (engVal && localVal && engVal === localVal) {
+        delete q[locField];
      }
   });
 
