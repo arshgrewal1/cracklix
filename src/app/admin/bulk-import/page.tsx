@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -60,7 +61,7 @@ export default function BulkIngestionPage() {
   const [metadata, setMetadata] = useState({
     boardId: "",
     subjectId: "",
-    secondaryLanguage: "punjabi" as "punjabi" | "hindi" | "english",
+    secondaryLanguage: "punjabi" as "punjabi" | "hindi" | "english" | "punjabi_only" | "hindi_only",
     difficulty: "Medium" as any,
     parserFormat: "ENGLISH_ONLY" as ParserFormat
   })
@@ -141,6 +142,17 @@ export default function BulkIngestionPage() {
     }
   }
 
+  const getRendererLanguage = (mode: string) => {
+    switch(mode) {
+      case 'punjabi': return "ENGLISH_PUNJABI";
+      case 'hindi': return "ENGLISH_HINDI";
+      case 'english': return "ENGLISH";
+      case 'punjabi_only': return "PUNJABI";
+      case 'hindi_only': return "HINDI";
+      default: return "ENGLISH_PUNJABI";
+    }
+  }
+
   return (
     <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-12">
       
@@ -205,21 +217,29 @@ export default function BulkIngestionPage() {
                     </div>
                  </div>
 
-                 <div className="space-y-2">
+                 <div className="space-y-3">
                     <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Globe className="h-3 w-3" /> Language Hub</Label>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex overflow-x-auto no-scrollbar pb-2 gap-3 snap-x snap-mandatory">
                        <button 
-                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'punjabi'})}
-                         className={cn("flex-1 min-w-[120px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2", metadata.secondaryLanguage === 'punjabi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
+                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'punjabi', parserFormat: 'BILINGUAL_MCQ'})}
+                         className={cn("flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", metadata.secondaryLanguage === 'punjabi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
                        >English + Punjabi</button>
                        <button 
-                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'hindi'})}
-                         className={cn("flex-1 min-w-[120px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2", metadata.secondaryLanguage === 'hindi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
+                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'hindi', parserFormat: 'BILINGUAL_MCQ'})}
+                         className={cn("flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", metadata.secondaryLanguage === 'hindi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
                        >English + Hindi</button>
                        <button 
-                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'english'})}
-                         className={cn("flex-1 min-w-[120px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2", metadata.secondaryLanguage === 'english' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
+                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'english', parserFormat: 'ENGLISH_ONLY'})}
+                         className={cn("flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", metadata.secondaryLanguage === 'english' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
                        >English Only</button>
+                       <button 
+                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'punjabi_only', parserFormat: 'PUNJABI_ONLY'})}
+                         className={cn("flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", metadata.secondaryLanguage === 'punjabi_only' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
+                       >Punjabi Only</button>
+                       <button 
+                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'hindi_only', parserFormat: 'BILINGUAL_MCQ'})} // Use bilingual parser, metadata handles script
+                         className={cn("flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", metadata.secondaryLanguage === 'hindi_only' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
+                       >Hindi Only</button>
                     </div>
                  </div>
               </div>
@@ -279,14 +299,14 @@ export default function BulkIngestionPage() {
                           <div className="space-y-10">
                              <QuestionRenderer 
                                 question={q} 
-                                language={metadata.secondaryLanguage === 'punjabi' ? "ENGLISH_PUNJABI" : metadata.secondaryLanguage === 'hindi' ? "ENGLISH_HINDI" : "ENGLISH"} 
+                                language={getRendererLanguage(metadata.secondaryLanguage)} 
                                 showSolution={true} 
                                 className="p-0 shadow-none border-none max-w-none"
                              />
                           </div>
                        ) : (
-                          <div className="space-y-6">
-                             <div className="p-8 bg-rose-50 rounded-[2rem] border border-rose-100 space-y-4 shadow-inner text-left">
+                          <div className="space-y-6 text-left">
+                             <div className="p-8 bg-rose-50 rounded-[2rem] border border-rose-100 space-y-4 shadow-inner">
                                 <h4 className="font-bold text-base uppercase tracking-widest text-rose-600 flex items-center gap-2"><Info className="h-4 w-4" /> Structural Violation</h4>
                                 <div className="space-y-2">
                                    {q.validationErrors.map((err: string, i: number) => (
