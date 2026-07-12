@@ -1,7 +1,8 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v29.0.
+ * @fileOverview Institutional Specialized Local Parser v30.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Table formats.
  * FIXED: Advanced Table Extraction logic to preserve structured grid data.
+ * UPDATED: Implemented Graph Parser with specific chart type detection.
  */
 
 export type ParserFormat = 
@@ -49,10 +50,10 @@ export function preprocessText(text: string): string {
 
 /**
  * Detects visual asset keywords and sets administrative flags.
- * Keywords: Figure, Diagram, Image, Map, Graph, Flowchart
+ * Keywords: Figure, Diagram, Image, Map, Graph, Flowchart, Bar Graph, Pie Chart, Line Graph, Histogram
  */
 function detectVisualAssets(block: string, q: any) {
-  const assetRegex = /(?:\[)?(?:Figure|Diagram|Image|Map|Graph|Flowchart|Table)(?:\])?/i;
+  const assetRegex = /(?:\[)?(?:Figure|Diagram|Image|Map|Graph|Flowchart|Table|Bar Graph|Pie Chart|Line Graph|Histogram)(?:\])?/i;
   const match = block.match(assetRegex);
   
   if (match) {
@@ -92,6 +93,9 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
       case 'TABLE':
         q = parseTable(block, q, metadata.secondaryLanguage);
         break;
+      case 'GRAPH':
+        q = parseGraph(block, q, metadata.secondaryLanguage);
+        break;
       case 'ENGLISH_ONLY':
         q = parseEnglishOnly(block, q);
         break;
@@ -113,6 +117,15 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   });
 
   return { questions };
+}
+
+/**
+ * STRATEGY: Graph Question Parser
+ */
+function parseGraph(block: string, q: any, secondaryLang: string) {
+  // Graph questions often have numeric data lines or label markers (e.g. 2022 = 50)
+  // We reuse bilingual logic but ensure we keep data lines in the question statement
+  return parseBilingual(block, q, secondaryLang);
 }
 
 /**
@@ -148,8 +161,8 @@ function parseMath(block: string, q: any) {
     restOfBlock = block.substring(0, explStartIndex);
   }
 
-  // STRICT OPTION BOUNDARY
-  const optAMatch = restOfBlock.match(/\n\s*A[\)\.\-]\s+/i);
+  // STRICT OPTION BOUNDARY (Line anchored)
+  const optAMatch = restOfBlock.match(/\n\s*\(?A[\)\.\-]\s+/i);
   let questionPart = restOfBlock;
   let optionsPart = "";
 
@@ -163,7 +176,7 @@ function parseMath(block: string, q: any) {
   const labels = ['A', 'B', 'C', 'D'];
   labels.forEach((label, i) => {
     const next = labels[i + 1] || "(?:Official Key|Answer|Ans|Correct Answer)";
-    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${next}[\\)\\.\\-]|$)`, 'i');
+    const reg = new RegExp(`\\n\\s*\\(?${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*\\(?${next}[\\)\\.\\-]|$)`, 'i');
     const match = optionsPart.match(reg);
     if (match) q[`option${label}English`] = match[1].trim();
   });
@@ -197,7 +210,7 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
     restOfBlock = block.substring(0, explStartIndex);
   }
 
-  const optAMatch = restOfBlock.match(/\n\s*A[\)\.\-]\s+/i);
+  const optAMatch = restOfBlock.match(/\n\s*\(?A[\)\.\-]\s+/i);
   let questionPart = restOfBlock;
   let optionsPart = "";
 
@@ -213,7 +226,7 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
   const optionLabels = ['A', 'B', 'C', 'D'];
   optionLabels.forEach((label, i) => {
     const nextLabel = optionLabels[i + 1] || "(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ)";
-    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${nextLabel}[\\)\\.\\-]|$)`, 'i');
+    const reg = new RegExp(`\\n\\s*\\(?${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*\\(?${nextLabel}[\\)\\.\\-]|$)`, 'i');
     const match = optionsPart.match(reg);
     
     if (match) {
@@ -248,7 +261,7 @@ function parseEnglishOnly(block: string, q: any) {
     restOfBlock = block.substring(0, explStartIndex);
   }
 
-  const optAMatch = restOfBlock.match(/\n\s*A[\)\.\-]\s+/i);
+  const optAMatch = restOfBlock.match(/\n\s*\(?A[\)\.\-]\s+/i);
   let questionPart = restOfBlock;
   let optionsPart = "";
 
@@ -262,7 +275,7 @@ function parseEnglishOnly(block: string, q: any) {
   const labels = ['A', 'B', 'C', 'D'];
   labels.forEach((label, i) => {
     const next = labels[i + 1] || "(?:Official Key|Answer|Ans|Correct Answer)";
-    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${next}[\\)\\.\\-]|$)`, 'i');
+    const reg = new RegExp(`\\n\\s*\\(?${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*\\(?${next}[\\)\\.\\-]|$)`, 'i');
     const match = optionsPart.match(reg);
     if (match) q[`option${label}English`] = match[1].trim();
   });
@@ -287,7 +300,7 @@ function parsePunjabiOnly(block: string, q: any) {
     restOfBlock = block.substring(0, explStartIndex);
   }
 
-  const optAMatch = restOfBlock.match(/\n\s*A[\)\.\-]\s+/i);
+  const optAMatch = restOfBlock.match(/\n\s*\(?A[\)\.\-]\s+/i);
   let questionPart = restOfBlock;
   let optionsPart = "";
 
@@ -301,7 +314,7 @@ function parsePunjabiOnly(block: string, q: any) {
   const labels = ['A', 'B', 'C', 'D'];
   labels.forEach((label, i) => {
     const next = labels[i + 1] || "(?:Official Key|Answer|Ans|ਉੱਤਰ|ਸਹੀ ਉੱਤਰ)";
-    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${next}[\\)\\.\\-]|$)`, 'i');
+    const reg = new RegExp(`\\n\\s*\\(?${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*\\(?${next}[\\)\\.\\-]|$)`, 'i');
     const match = optionsPart.match(reg);
     if (match) q[`option${label}Punjabi`] = match[1].trim();
   });
@@ -315,7 +328,7 @@ function parsePunjabiOnly(block: string, q: any) {
 }
 
 function parseSimple(block: string, q: any) {
-  const optAMatch = block.match(/\n\s*A[\)\.\-]\s+/i);
+  const optAMatch = block.match(/\n\s*\(?A[\)\.\-]\s+/i);
   let questionPart = block;
   let optionsPart = block;
 
@@ -329,7 +342,7 @@ function parseSimple(block: string, q: any) {
   const labels = ['A', 'B', 'C', 'D'];
   labels.forEach((label, i) => {
     const next = labels[i + 1] || '(?:Answer|Ans)';
-    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${next}[\\)\\.\\-]|$)`, 'i');
+    const reg = new RegExp(`\\n\\s*\\(?${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*\\(?${next}[\\)\\.\\-]|$)`, 'i');
     const match = optionsPart.match(reg);
     if (match) q[`option${label}English`] = match[1].trim();
   });

@@ -24,7 +24,8 @@ import {
   Braces,
   X,
   Image as ImageIcon,
-  Table as TableIcon
+  Table as TableIcon,
+  BarChart3
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy, updateDoc, increment } from "firebase/firestore"
@@ -36,9 +37,8 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v61.0.
- * FIXED: Hydration error resolved by replacing p with div in error list.
- * UPDATED: Implemented Industrial Table Data Parser with structural row-column extraction.
+ * @fileOverview Modular Industrial Ingestion Hub v62.0.
+ * UPDATED: Added Graph / Chart Based ingestion strategy.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
@@ -49,9 +49,12 @@ const FORMATS: { label: string, value: ParserFormat }[] = [
   { label: "Mathematics Hub", value: "MATHEMATICS" },
   { label: "Diagram / Image Based", value: "DIAGRAM" },
   { label: "Table Based Hub", value: "TABLE" },
+  { label: "Graph / Chart Based", value: "GRAPH" },
   { label: "Reasoning & Logic", value: "REASONING" },
   { label: "Match the Following", value: "MATCHING" },
-  { label: "Assertion & Reason", value: "ASSERTION" }
+  { label: "Assertion & Reason", value: "ASSERTION" },
+  { label: "Fill in the Blank", value: "FILL_BLANK" },
+  { label: "True / False", value: "TRUE_FALSE" }
 ];
 
 export default function BulkIngestionPage() {
@@ -157,7 +160,7 @@ export default function BulkIngestionPage() {
         subtitle="Zero AI dependency. Dedicated local strategies for Current Affairs, Math and Table data."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
-           <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50">Reset Staging</Button>
+           <button onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50 transition-all">Reset Staging</button>
            <Button 
             onClick={handleFinalCommit} 
             disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
@@ -236,7 +239,7 @@ export default function BulkIngestionPage() {
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
-                        placeholder="Paste question blocks with math or table markers here..."
+                        placeholder="Paste question blocks with math, graph or table markers here..."
                         className="min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>
@@ -276,7 +279,8 @@ export default function BulkIngestionPage() {
                           <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] uppercase tracking-widest px-4 py-1.5 rounded-lg">Staged Node #{idx + 1}</Badge>
                           {q.diagram_required && (
                              <Badge className="bg-amber-50 text-amber-600 border-none text-[8px] font-black uppercase px-3 py-1 rounded shadow-sm flex items-center gap-2">
-                                <ImageIcon className="h-3 w-3" /> Asset Map Required
+                                {metadata.parserFormat === 'GRAPH' ? <BarChart3 className="h-3 w-3" /> : <ImageIcon className="h-3 w-3" />} 
+                                {metadata.parserFormat === 'GRAPH' ? 'Graph reference' : 'Asset Map Required'}
                              </Badge>
                           )}
                           {q.table_data && (
@@ -293,7 +297,9 @@ export default function BulkIngestionPage() {
                           <div className="space-y-10">
                              {q.diagram_required && (
                                 <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center gap-4">
-                                   <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center text-amber-500 shadow-sm"><ImageIcon className="h-5 w-5" /></div>
+                                   <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center text-amber-500 shadow-sm">
+                                      {metadata.parserFormat === 'GRAPH' ? <BarChart3 className="h-5 w-5" /> : <ImageIcon className="h-5 w-5" />}
+                                   </div>
                                    <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{q.diagram_caption}</p>
                                 </div>
                              )}
