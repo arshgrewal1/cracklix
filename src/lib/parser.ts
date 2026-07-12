@@ -1,8 +1,7 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v37.0.
+ * @fileOverview Institutional Specialized Local Parser v38.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Assertion-Reason formats.
- * FIXED: Advanced block splitting that treats "Question X" as a hard boundary.
- * FIXED: Liquidates noise such as website URLs and next question headers from explanation strings.
+ * FIXED: Hardened pre-processor to liquidate "Page", "Copyright", and "Ads" noise.
  */
 
 export type ParserFormat = 
@@ -38,11 +37,15 @@ export function preprocessText(text: string): string {
     .replace(/ਪੰਨਾ\s+\d+\s+of\s+\d+/gi, '')
     .replace(/Page\s+\d+/gi, '')
     .replace(/ਪੰਨਾ\s+\d+/gi, '')
+    .replace(/^\s*(?:Page|ਪੰਨਾ)\s*\d+\s*$/gim, '') 
     .replace(/^\s*\d+\s*$/gm, '') 
-    // 3. Remove OCR Garbage & Symbols (Keep math symbols like ^, √, ∫, and visual markers like [] or blanks ____)
+    // 3. Remove OCR Garbage, Copyright & Commercial Noise
     .replace(/[~►❖⚬▪•]/g, '')
     .replace(/Copyright.*?Arsh Grewal/gi, '')
+    .replace(/Copyright\s*©\s*\d{4}/gi, '')
+    .replace(/Random Advertisement/gi, '')
     .replace(/www\.cracklix\.com/gi, '')
+    .replace(/Visit www\.example\.com/gi, '')
     .replace(/https?:\/\/\S+/gi, '')
     // 4. Normalize Punctuation (Protect math decimals and ellipses)
     .replace(/\.{3,}/g, '...')
@@ -319,8 +322,14 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
   q.correctAnswer = (answerMatch?.[1] || "A").toUpperCase();
 
   if (explanationPart) {
-    const expClean = explanationPart.replace(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या|Rationale)\s*[:\-]?\s*/i, '').trim();
-    // HARDENED: Split to stop at the next question boundary if it accidentally merged
+    // Aggressive cleaning for explanation
+    const expClean = explanationPart
+      .replace(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या|Rationale)\s*[:\-]?\s*/i, '')
+      .replace(/Visit www\.example\.com/gi, '')
+      .replace(/Random Advertisement/gi, '')
+      .replace(/Copyright\s*©\s*\d{4}/gi, '')
+      .trim();
+
     const truncatedExp = expClean.split(/(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+)(?:[\.\s:]|$)/i)[0].trim();
     const expLines = truncatedExp.split('\n').map(l => l.trim()).filter(Boolean);
     q.englishExplanation = expLines.filter(l => !scriptRegex.test(l)).join('\n');
