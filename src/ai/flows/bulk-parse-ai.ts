@@ -1,12 +1,12 @@
 
 'use server';
 /**
- * @fileOverview Production AI Bulk Ingestion Engine v3.0.
- * UPDATED: Supports dynamic API Key rotation from the high-fidelity key pool.
+ * @fileOverview Production AI Bulk Ingestion Engine v4.0.
+ * FIXED: Resolved 404 Model Not Found error by using native model refs.
  */
 
 import { genkit } from 'genkit';
-import { googleAI } from '@genkit-ai/google-genai';
+import { googleAI, gemini15Flash } from '@genkit-ai/google-genai';
 import { z } from 'genkit';
 
 const MCQSchema = z.object({
@@ -32,33 +32,29 @@ const BulkParseOutputSchema = z.object({
   questions: z.array(MCQSchema),
 });
 
-/**
- * Bulk Parse Entry Point.
- * Initialized Genkit dynamically per-request to support API key rotation from the pool.
- */
 export async function bulkParseMCQ(input: { rawText: string, examType?: string, apiKey?: string }): Promise<any> {
   const { rawText, examType, apiKey } = input;
 
   if (!apiKey) {
-     throw new Error("AI Operation Blocked: API Key node not provided by manager.");
+     throw new Error("AI Registry Sync Blocked: API Key node not provided.");
   }
 
-  // Initialize isolated Genkit instance for this rotation node
-  const ai = genkit({
+  // Initialize isolated Genkit instance with the provided key from the rotation pool
+  const aiInstance = genkit({
     plugins: [googleAI({ apiKey })],
-    model: 'googleai/gemini-1.5-flash',
   });
 
-  const prompt = ai.definePrompt({
-    name: 'bulkParseMCQPrompt',
-    input: z.object({ rawText: z.string(), examType: z.string().optional() }),
-    output: { schema: BulkParseOutputSchema },
-    prompt: `You are an expert Government Exam MCQ Parser. 
+  try {
+    const response = await aiInstance.generate({
+      model: gemini15Flash,
+      input: { rawText, examType },
+      output: { schema: BulkParseOutputSchema },
+      prompt: `You are an expert Government Exam MCQ Parser. 
 Your task is to take the entire provided RAW TEXT and extract EVERY valid MCQ found within it.
 
 TEXT TO PARSE:
 ---
-{{{rawText}}}
+${rawText}
 ---
 
 RULES:
@@ -69,15 +65,13 @@ RULES:
 5. Identify Math (LaTeX), Reasoning (Puzzles), and Tables.
 6. Set "diagram_required" to true if the text mentions Figure, Diagram, or Map.
 7. Return ONLY a valid JSON object containing an array of questions.
-8. NEVER hallucinate or generate fake content. If a part is missing, leave it empty.
+8. NEVER hallucinate or generate fake content.
 
-TARGET EXAM CONTEXT: {{{examType}}}`,
-  });
+TARGET EXAM CONTEXT: ${examType || 'General Punjab Exam'}`,
+    });
 
-  try {
-    const { output } = await prompt({ rawText, examType });
-    if (!output) throw new Error("AI extraction node returned empty registry.");
-    return output;
+    if (!response.output) throw new Error("AI extraction node returned empty registry.");
+    return response.output;
   } catch (error: any) {
     console.error("[AI_INGEST_NODE_FAILURE]:", error.message);
     throw error;

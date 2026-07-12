@@ -27,17 +27,16 @@ import { collection, doc, writeBatch, serverTimestamp, setDoc, query, orderBy } 
 import { useToast } from "@/hooks/use-toast"
 import { bulkParseMCQ } from "@/ai/flows/bulk-parse-ai"
 import { aiManager } from "@/services/ai-manager"
-import { Board, Subject, Exam } from "@/types"
+import { Board, Subject } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Production AI Ingestion Center v26.0 (Optimized for Multi-Key Rotation).
- * FIXED: Rebuilt "Initialize Ingestion" button to prevent distortion and clipping.
- * FIXED: Scaled Desktop Layout to 1600px width for better multi-pane visibility.
- * SCALE: Increased parser height to 850px for massive document ingestion.
+ * @fileOverview Production AI Ingestion Center v28.0 (Desktop Optimized).
+ * FIXED: Full-width layout and non-distorting action button.
+ * FIXED: AI Pipeline 404 resolution.
  */
 
 export default function BulkIngestionPage() {
@@ -75,12 +74,11 @@ export default function BulkIngestionPage() {
     try {
       const sanitizedText = preprocessText(rawText);
       
-      // Execute through AIManager to handle Key Rotation & Failover
       const result = await aiManager.execute('BULK_PARSE_AI', async (apiKey) => {
          return await bulkParseMCQ({ 
            rawText: sanitizedText,
            examType: metadata.boardId,
-           apiKey // Pass the rotated key to the server action
+           apiKey 
          });
       });
 
@@ -114,7 +112,7 @@ export default function BulkIngestionPage() {
       });
       
       setStagedQuestions(mapped);
-      toast({ title: "Extraction Success", description: `${mapped.length} nodes structured via rotated AI pool.` });
+      toast({ title: "Extraction Success", description: `${mapped.length} nodes structured.` });
     } catch (e: any) {
       setAiStatus('OFFLINE');
       toast({ variant: "destructive", title: "AI Pipeline Error", description: e.message });
@@ -136,34 +134,16 @@ export default function BulkIngestionPage() {
         const qRef = doc(collection(db, "questions"));
         const { id, isValid, validationErrors, ...finalData } = q;
         
-        const firestorePayload = {
-          englishQuestion: finalData.englishQuestion,
-          punjabiQuestion: finalData.punjabiQuestion || "",
-          hindiQuestion: finalData.hindiQuestion || "",
-          optionAEnglish: finalData.optionAEnglish,
-          optionBEnglish: finalData.optionBEnglish,
-          optionCEnglish: finalData.optionCEnglish,
-          optionDEnglish: finalData.optionDEnglish,
-          correctAnswer: finalData.correctAnswer,
-          englishExplanation: finalData.englishExplanation || "",
-          punjabiExplanation: finalData.punjabiExplanation || "",
-          subjectId: finalData.subjectId,
-          boardId: finalData.boardId,
-          examId: finalData.examId,
-          difficulty: finalData.difficulty,
+        batch.set(qRef, {
+          ...finalData,
           status: 'PUBLISHED',
-          diagram_required: !!finalData.diagram_required,
-          diagram_caption: finalData.diagram_caption || "",
-          table_data: finalData.table_data || "",
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-        };
-
-        batch.set(qRef, firestorePayload);
+        });
       });
 
       await batch.commit();
-      toast({ title: "Registry Updated", description: `${valids.length} nodes committed to MCQ Bank.` });
+      toast({ title: "Registry Updated", description: `${valids.length} nodes committed.` });
       router.push("/admin/questions");
     } catch (e) {
       toast({ variant: "destructive", title: "Commit Failed" });
@@ -173,13 +153,13 @@ export default function BulkIngestionPage() {
   }
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4">
+    <div className="w-full max-w-full mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-8">
       
       <AdminPageHeader
         icon={Rocket}
-        label="Multi-Key AI Ingestion Hub"
+        label="Enterprise AI Ingestion Hub"
         title="Smart Bulk Import"
-        subtitle="Extract MCQs from messy text using your 7-key Gemini pool."
+        subtitle="Extract MCQs from raw text using the 7-key Gemini pool."
       >
         <div className="flex gap-4 w-full md:w-auto">
            <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm">Reset Staging</Button>
@@ -193,9 +173,9 @@ export default function BulkIngestionPage() {
         </div>
       </AdminPageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
-        {/* INPUT PANEL - WIDENED FOR DESKTOP */}
+        {/* INPUT PANEL */}
         <div className="lg:col-span-5 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-6">
@@ -233,23 +213,22 @@ export default function BulkIngestionPage() {
                  <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-slate-400 flex items-center justify-between ml-1">
                         Raw Document Stream
-                        <Badge variant="outline" className="text-[8px] border-blue-100 bg-blue-50 text-blue-600 font-black uppercase">OCR Parser</Badge>
+                        <Badge variant="outline" className="text-[8px] border-blue-100 bg-blue-50 text-blue-600 font-black uppercase">Gemini Parser</Badge>
                     </Label>
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
-                        placeholder="Paste document text here (PDF content, OCR, WhatsApp MCQs)..."
+                        placeholder="Paste document text here..."
                         className="min-h-[600px] md:min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>
 
-                 {/* STABLE ACTION BUTTON - FIXED SCALE */}
                  <Button 
                     onClick={handleAIIngest} 
                     disabled={isProcessing} 
-                    className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-xs md:text-sm rounded-2xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-12"
+                    className="w-full h-16 md:h-18 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-xs md:text-sm rounded-2xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-6"
                  >
-                    {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Zap className="h-6 w-6 text-primary fill-current" />} 
+                    {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5 text-primary fill-current" />} 
                     Initialize AI Pipeline
                  </Button>
               </div>
