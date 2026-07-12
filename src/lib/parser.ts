@@ -2,6 +2,7 @@
 /**
  * @fileOverview Institutional Deterministic Ingestion Hub v57.0.
  * FIXED: Moved all constants to the top to prevent ReferenceErrors during runtime.
+ * FIXED: Refactored parseMatching for continuous scanning and priority marker detection.
  */
 
 export type ParserFormat = 
@@ -36,7 +37,7 @@ const NOISE_PATTERNS = [
 ];
 
 const ANS_MARKERS = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ"];
-const EXPL_MARKERS = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale", "ENGLISH EXPLANATION", "PUNJABI EXPLANATION"];
+const EXPL_MARKERS = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale", "ENGLISH EXPLANATION", "PUNJABI EXPLANATION"];
 const INSTR_KEYWORDS = ["Choose the correct matching", "Select the correct answer", "Choose the correct option", "Match correctly", "Pick the correct combination", "ਸਹੀ ਮਿਲਾਨ ਦੀ ਚੋਣ ਕਰੋ", "ਸਹੀ ਉੱਤਰ ਚੁਣੋ"];
 const MATCHING_HEADER_KEYWORDS = ["List I", "List II", "Column I", "Column II", "Group A", "Group B", "Country", "Currency", "Scientist", "Discovery", "Animal", "Young One", "State", "Capital"];
 const ACTUAL_QUESTION_KEYWORDS = /^\s*(Which|What|Who|How|Where|When|Identify|Choose|Find|Observe|Count|Select|During\s?which|How\s?many|How\s?much)\s/i;
@@ -88,19 +89,23 @@ function parseMatching(rawText: string, metadata: any) {
   const lines = rawText.split(/\r?\n/);
   const questions: any[] = [];
   let currentQ: any = null;
-  let state: 'INTRO_EN' | 'INTRO_PA' | 'MATCHING_TABLE' | 'INSTR_EN' | 'INSTR_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL' = 'INTRO_EN';
+  let state: 'IDLE' | 'INTRO_EN' | 'INTRO_PA' | 'MATCHING_TABLE' | 'INSTR_EN' | 'INSTR_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL' = 'IDLE';
 
   const finalize = () => {
     if (currentQ) {
-       questions.push(currentQ);
+       if (currentQ.englishQuestion?.trim() || currentQ.matchingData?.rows?.length > 0) {
+         questions.push(currentQ);
+       }
     }
     currentQ = null;
+    state = 'IDLE';
   };
 
   lines.forEach((line) => {
     const trimmed = line.trim();
     if (!trimmed && state !== 'MATCHING_TABLE') return;
 
+    // 1. HIGHEST PRIORITY: NEW QUESTION MARKER
     if (isQuestionStart(line)) {
       finalize();
       currentQ = { 
@@ -120,6 +125,14 @@ function parseMatching(rawText: string, metadata: any) {
 
     if (!currentQ) return;
 
+    // 2. TERMINATION TRIGGERS (Noise/Metadata)
+    const isNoise = NOISE_PATTERNS.some(pattern => pattern.test(trimmed));
+    if (isNoise) {
+       if (state === 'EXPL') finalize();
+       return; 
+    }
+
+    // 3. STATE TRANSITION DETECTORS
     const opt = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
@@ -138,15 +151,18 @@ function parseMatching(rawText: string, metadata: any) {
        currentQ.matchingData.rightHeader = parts[1]?.trim() || "List II";
        return;
     }
-    else if (opt && state !== 'MATCHING_TABLE') state = 'OPTIONS';
+    else if (opt && state !== 'MATCHING_TABLE' && state !== 'INTRO_EN' && state !== 'INTRO_PA') {
+       state = 'OPTIONS';
+    }
 
+    // 4. DATA COLLECTION BASED ON STATE
     switch (state) {
       case 'INTRO_EN':
         if (GURMUKHI_REGEX.test(trimmed)) { state = 'INTRO_PA'; currentQ.punjabiQuestion = trimmed; }
-        else { currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed; }
+        else if (trimmed) { currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed; }
         break;
       case 'INTRO_PA': 
-        currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed; 
+        if (trimmed) { currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed; }
         break;
       case 'MATCHING_TABLE':
         if (trimmed) {
@@ -161,10 +177,13 @@ function parseMatching(rawText: string, metadata: any) {
         break;
       case 'INSTR_EN':
         if (GURMUKHI_REGEX.test(trimmed)) { state = 'INSTR_PA'; currentQ.punjabiInstruction = trimmed; }
-        else { currentQ.englishInstruction = (currentQ.englishInstruction || "") + (currentQ.englishInstruction ? '\n' : '') + trimmed; }
+        else if (trimmed) {
+          const cleanInstr = trimmed.replace(new RegExp(`^(?:${INSTR_KEYWORDS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
+          currentQ.englishInstruction = (currentQ.englishInstruction || "") + (currentQ.englishInstruction ? '\n' : '') + (cleanInstr || trimmed);
+        }
         break;
       case 'INSTR_PA': 
-        currentQ.punjabiInstruction = (currentQ.punjabiInstruction || "") + (currentQ.punjabiInstruction ? '\n' : '') + trimmed; 
+        if (trimmed) { currentQ.punjabiInstruction = (currentQ.punjabiInstruction || "") + (currentQ.punjabiInstruction ? '\n' : '') + trimmed; }
         break;
       case 'OPTIONS': 
         if (opt) currentQ[`option${opt.opt}English`] = opt.text; 
@@ -176,8 +195,11 @@ function parseMatching(rawText: string, metadata: any) {
       case 'EXPL':
         const explClean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
         if (explClean) {
-          if (GURMUKHI_REGEX.test(explClean)) currentQ.punjabiExplanation = (currentQ.punjabiExplanation || "") + (currentQ.punjabiExplanation ? '\n' : '') + explClean;
-          else currentQ.englishExplanation = (currentQ.englishExplanation || "") + (currentQ.englishExplanation ? '\n' : '') + explClean;
+          if (GURMUKHI_REGEX.test(explClean)) {
+            currentQ.punjabiExplanation = (currentQ.punjabiExplanation || "") + (currentQ.punjabiExplanation ? '\n' : '') + explClean;
+          } else {
+            currentQ.englishExplanation = (currentQ.englishExplanation || "") + (currentQ.englishExplanation ? '\n' : '') + explClean;
+          }
         }
         break;
     }
@@ -418,4 +440,3 @@ export function validateMCQSchema(q: any): { errors: string[], warnings: string[
   if (!q.correctAnswer) errors.push("Answer missing.");
   return { errors, warnings };
 }
-
