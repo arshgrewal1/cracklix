@@ -20,7 +20,8 @@ import {
   ChevronRight,
   ClipboardList,
   Globe,
-  Info
+  Info,
+  Braces
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy } from "firebase/firestore"
@@ -29,13 +30,29 @@ import { Board, Subject } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 import { AdminPageHeader } from "@/components/admin"
-import { preprocessText, parseBulkQuestions, validateMCQSchema } from "@/lib/parser"
+import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Universal Ingestion Hub v46.0.
- * FIXED: Hydration error (p replaced with div for error items).
- * FIXED: Standardized button pill and parser scaling.
+ * @fileOverview Modular Ingestion Hub v50.0.
+ * FIXED: Implemented Parser Format selection for highly-reliable local processing.
+ * FIXED: Massive 850px height and stable administrative button shape.
  */
+
+const FORMATS: { label: string, value: ParserFormat }[] = [
+  { label: "Current Affairs (EN+PA/HI)", value: "CURRENT_AFFAIRS" },
+  { label: "Simple Bilingual MCQ", value: "BILINGUAL_MCQ" },
+  { label: "English Only MCQ", value: "ENGLISH_ONLY" },
+  { label: "Punjabi Only MCQ", value: "PUNJABI_ONLY" },
+  { label: "Mathematics Hub", value: "MATHEMATICS" },
+  { label: "Reasoning & Logic", value: "REASONING" },
+  { label: "Diagram / Image Based", value: "DIAGRAM" },
+  { label: "Table Data Based", value: "TABLE" },
+  { label: "Graph / Chart Based", value: "GRAPH" },
+  { label: "Match the Following", value: "MATCHING" },
+  { label: "Assertion & Reason", value: "ASSERTION" },
+  { label: "Fill in the Blank", value: "FILL_BLANK" },
+  { label: "True / False Node", value: "TRUE_FALSE" }
+];
 
 export default function BulkIngestionPage() {
   const router = useRouter()
@@ -51,6 +68,7 @@ export default function BulkIngestionPage() {
     subjectId: "",
     secondaryLanguage: "punjabi",
     difficulty: "Medium" as any,
+    parserFormat: "BILINGUAL_MCQ" as ParserFormat
   })
 
   const [rawText, setRawText] = useState("")
@@ -71,7 +89,7 @@ export default function BulkIngestionPage() {
       const result = parseBulkQuestions(sanitizedText, metadata);
 
       if (!result?.questions || result.questions.length === 0) {
-         throw new Error("No questions detected. Verify format: Q1. (A) ... Ans: A");
+         throw new Error("No questions detected. Verify question prefix like Q1. or Question 1.");
       }
 
       const validated = result.questions.map(q => {
@@ -85,7 +103,7 @@ export default function BulkIngestionPage() {
       });
       
       setStagedQuestions(validated);
-      toast({ title: "Parsing Success", description: `${validated.length} nodes identified.` });
+      toast({ title: "Parsing Success", description: `${validated.length} nodes identified using ${metadata.parserFormat} logic.` });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Parsing Error", description: e.message });
     } finally {
@@ -128,9 +146,9 @@ export default function BulkIngestionPage() {
       
       <AdminPageHeader
         icon={ClipboardList}
-        label="Industrial Scale Ingestion"
-        title="Universal Bulk Import"
-        subtitle="Process Math, Diagrams, Tables and Bilingual text locally."
+        label="Modular Industrial Ingestion"
+        title="Local Ingestion Hub"
+        subtitle="Zero AI dependency. Predictable local regex parsing for all 13+ platform formats."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50">Reset Staging</Button>
@@ -149,10 +167,22 @@ export default function BulkIngestionPage() {
         {/* INPUT PANEL */}
         <div className="lg:col-span-6 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
-              <div className="space-y-6">
+              <div className="space-y-8">
                  <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
-                    <Settings className="h-6 w-6 text-primary" />
-                    <h3 className="font-bold text-xl uppercase text-[#0F172A]">Registry Target</h3>
+                    <Braces className="h-6 w-6 text-primary" />
+                    <h3 className="font-bold text-xl uppercase text-[#0F172A]">Parser Architecture</h3>
+                 </div>
+
+                 <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Question Format Node</Label>
+                    <Select value={metadata.parserFormat} onValueChange={(v: ParserFormat) => setMetadata({...metadata, parserFormat: v})}>
+                       <SelectTrigger className="h-14 bg-blue-50 border-none rounded-xl font-black text-primary px-5 shadow-inner">
+                          <SelectValue placeholder="Select Format Strategy" />
+                       </SelectTrigger>
+                       <SelectContent className="bg-[#0B1528] text-white border-white/10 max-h-80">
+                          {FORMATS.map(f => <SelectItem key={f.value} value={f.value} className="focus:bg-primary/20">{f.label}</SelectItem>)}
+                       </SelectContent>
+                    </Select>
                  </div>
                  
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -195,7 +225,7 @@ export default function BulkIngestionPage() {
                  <div className="space-y-2">
                     <div className="flex items-center justify-between px-1">
                        <Label className="text-[10px] font-black uppercase text-slate-400">Raw Document Stream</Label>
-                       <Badge variant="outline" className="bg-slate-50 text-[8px] border-slate-200">Supports Math & Visuals</Badge>
+                       <Badge variant="outline" className="bg-slate-50 text-[8px] border-slate-200">Local Validation Active</Badge>
                     </div>
                     <Textarea 
                         value={rawText}
@@ -208,10 +238,10 @@ export default function BulkIngestionPage() {
                  <Button 
                     onClick={handleLocalParse} 
                     disabled={isProcessing} 
-                    className="w-full h-14 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-[11px] rounded-xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-12"
+                    className="w-full h-14 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] rounded-xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-12"
                  >
                     {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5 text-primary fill-current" />} 
-                    Initialize Ingestion
+                    Initialize Ingestion Pipeline
                  </Button>
               </div>
            </Card>
@@ -238,8 +268,7 @@ export default function BulkIngestionPage() {
                     <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
                        <div className="flex items-center gap-4">
                           <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] uppercase tracking-widest px-4 py-1.5 rounded-lg">Staged Node #{idx + 1}</Badge>
-                          {q.diagram_required && <Badge className="bg-primary/10 text-primary border-none text-[8px] font-bold uppercase">Visual Node</Badge>}
-                          {q.questionType === 'TABLE_BASED' && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold uppercase">Table Node</Badge>}
+                          {q.diagram_required && <Badge className="bg-primary/10 text-primary border-none text-[8px] font-bold uppercase">Asset Required</Badge>}
                        </div>
                        <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                     </CardHeader>
@@ -257,7 +286,7 @@ export default function BulkIngestionPage() {
                        ) : (
                           <div className="space-y-6">
                              <div className="p-8 bg-rose-50 rounded-[2rem] border border-rose-100 space-y-4 shadow-inner">
-                                <h4 className="font-bold text-base uppercase tracking-widest text-rose-600">Regex Logic Failure</h4>
+                                <h4 className="font-bold text-base uppercase tracking-widest text-rose-600 flex items-center gap-2"><Info className="h-4 w-4" /> Structural Violation</h4>
                                 <div className="space-y-2">
                                    {q.validationErrors.map((err: string, i: number) => (
                                       <div key={i} className="text-sm font-bold text-rose-400 flex items-center gap-2">
@@ -276,7 +305,7 @@ export default function BulkIngestionPage() {
                     <Database className="h-24 w-24" />
                     <div className="space-y-2">
                        <p className="font-bold text-3xl uppercase tracking-[0.4em]">Staging Hub Empty</p>
-                       <p className="text-sm font-bold uppercase tracking-widest text-primary">Awaiting Document Entry</p>
+                       <p className="text-sm font-bold uppercase tracking-widest text-primary">Awaiting specialized format parsing</p>
                     </div>
                  </div>
               )}
