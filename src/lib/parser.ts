@@ -1,8 +1,7 @@
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v30.0.
- * FIXED: Structural Fidelity Protocol - Preserves all newlines and paragraph breaks.
- * FIXED: Gurmukhi Integrity Check - Rejects non-Punjabi scripts in local fields.
- * RULES: Character-perfect fidelity; standardized Explanation labels.
+ * @fileOverview Institutional Deterministic Ingestion Hub v31.0.
+ * FIXED: Implemented Script Sanitization to allow partial Punjabi imports.
+ * UPDATED: Added Production Mode (auto-cleaning) and Strict Mode (fatal errors).
  */
 
 export type ParserFormat = 
@@ -20,6 +19,8 @@ export type ParserFormat =
   | 'FILL_BLANK' 
   | 'TRUE_FALSE';
 
+export type ParserMode = 'PRODUCTION' | 'STRICT';
+
 const NOISE_PATTERNS = [
   /Advertisement/i, /Advertisements/i, /Sponsored/i, 
   /Download Our App/i, /Install App/i, /Get the App/i,
@@ -34,25 +35,21 @@ const NOISE_PATTERNS = [
 ];
 
 /**
- * Validates if string contains only Gurmukhi, English, and standard symbols.
- * Explicitly rejects Devanagari (Hindi) and other Indic scripts in Punjabi fields.
+ * Removes characters belonging to non-Gurmukhi Indic scripts.
+ * Keeps Gurmukhi (0A00-0A7F), ASCII (0000-007F), and standard dandas (0964-0965).
  */
-export function isStrictlyGurmukhi(text: string): boolean {
-  if (!text) return true;
-  // Reject Devanagari (Hindi) range: \u0900-\u097F
-  const hasHindi = /[\u0900-\u097F]/.test(text);
-  if (hasHindi) return false;
+export function sanitizePunjabi(text: string): string {
+  if (!text) return "";
+  return text.replace(/[^\u0A00-\u0A7F\u0000-\u007F\u0964\u0965]/g, '');
+}
 
-  // Allow Gurmukhi range: \u0A00-\u0A7F along with ASCII and standard punctuation
-  // If it has any non-Gurmukhi Indic characters, return false
-  const indicRegex = /[\u0900-\u0D7F]/; // Broad range of Indic scripts
-  const gurmukhiOnly = text.split('').every(char => {
-    const code = char.charCodeAt(0);
-    // Gurmukhi or ASCII/Common symbols
-    return (code >= 0x0A00 && code <= 0x0A7F) || code < 127 || char === '।';
-  });
-
-  return gurmukhiOnly;
+/**
+ * Detects if a string contains characters from other Indic scripts (Hindi/Tamil/etc.)
+ */
+export function hasIndicContamination(text: string): boolean {
+  if (!text) return false;
+  const contaminationRegex = /[\u0900-\u097F\u0980-\u09FF\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F]/;
+  return contaminationRegex.test(text);
 }
 
 export function preprocessText(text: string): string {
@@ -60,7 +57,7 @@ export function preprocessText(text: string): string {
   const lines = text.split(/\r?\n/);
   const cleanLines = lines.filter(line => {
     const trimmed = line.trim();
-    if (!trimmed) return true; // Keep blank lines for paragraph preservation
+    if (!trimmed) return true; 
     const isNoise = NOISE_PATTERNS.some(pattern => pattern.test(trimmed));
     const hasURL = /https?:\/\/[^\s]+/.test(trimmed) || /www\.[^\s]+/.test(trimmed);
     return !isNoise && !hasURL;
@@ -96,7 +93,7 @@ const Q_MARKER_REGEX = /^\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|Q
 const ANS_MARKERS = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ"];
 const EXPL_MARKERS = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
 
-export function parseBulkQuestions(rawText: string, metadata: any) {
+export function parseBulkQuestions(rawText: string, metadata: any, mode: ParserMode = 'PRODUCTION') {
   const cleanedText = preprocessText(rawText);
   if (!cleanedText) return { questions: [] };
 
@@ -118,6 +115,20 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
     currentQ[localKey] = (currentQ[localKey] || "").trim();
     currentQ.englishExplanation = (currentQ.englishExplanation || "").trim();
     currentQ[expLocalKey] = (currentQ[expLocalKey] || "").trim();
+
+    // PRODUCTION MODE: Sanitization against non-Gurmukhi Indic scripts
+    if (mode === 'PRODUCTION') {
+       const pFields = [
+         localKey, 
+         'optionAPunjabi', 'optionBPunjabi', 'optionCPunjabi', 'optionDPunjabi', 
+         'punjabiExplanation'
+       ];
+       pFields.forEach(f => {
+          if (currentQ[f]) {
+             currentQ[f] = sanitizePunjabi(currentQ[f]).trim();
+          }
+       });
+    }
 
     // Identity-Purge deduplication for options
     ['A', 'B', 'C', 'D'].forEach(opt => {
@@ -149,7 +160,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
     const isAnsMarker = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExplMarker = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
 
-    // STATE TRANSITIONS
     if (isQStart) {
       if (currentQ) finalizeQuestion();
       state = 'QUESTION';
@@ -172,32 +182,24 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
       state = 'EXPLANATION';
     }
 
-    // DATA ACCUMULATION - Strictly Arrival Order with whitespace preservation
     if (state === 'QUESTION' && currentQ) {
       const textLine = isQStart ? line.replace(Q_MARKER_REGEX, '').trim() : line;
-      
-      // Preserve blank lines
       if (trimmed === "" && !isQStart) {
-        // Find which field was last updated and append the newline
         if (currentQ.englishQuestion.length > 0) currentQ.englishQuestion += "\n";
         if (currentQ[localKey].length > 0) currentQ[localKey] += "\n";
         return;
       }
-
       if (punjabiRegex.test(line)) {
         currentQ[localKey] = (currentQ[localKey] || "") + (currentQ[localKey] ? "\n" : "") + textLine;
       } else {
         currentQ.englishQuestion = (currentQ.englishQuestion || "") + (currentQ.englishQuestion ? "\n" : "") + textLine;
       }
     } 
-    
     else if (state === 'OPTIONS' && currentQ && currentOption) {
       const engKey = `option${currentOption}English`;
       const locKeyField = metadata.secondaryLanguage === 'hindi' ? `option${currentOption}Hindi` : `option${currentOption}Punjabi`;
-      
       const text = optMatch ? optMatch.text : line;
       if (trimmed === "" && !optMatch) return;
-
       if (punjabiRegex.test(text)) {
         const curVal = (currentQ[locKeyField] || "").trim();
         if (curVal !== text.trim()) {
@@ -210,7 +212,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
         }
       }
     }
-
     else if (state === 'ANSWER' && currentQ) {
       const match = trimmed.match(/(?:Answer|Official Key|Correct Answer|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ)\s*[:\-]?\s*\(?([A-D1-4])\)?/i);
       if (match) {
@@ -219,7 +220,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
         currentQ.correctAnswer = map[val] || val;
       }
     }
-
     else if (state === 'EXPLANATION' && currentQ) {
       const markerRegex = new RegExp(`^(?:${EXPL_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i');
       const text = line.replace(markerRegex, '');
@@ -228,7 +228,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
          currentQ[expLocalKey] += "\n";
          return;
       }
-
       if (punjabiRegex.test(text)) {
         currentQ[expLocalKey] = (currentQ[expLocalKey] || "") + (currentQ[expLocalKey] ? "\n" : "") + text;
       } else {
@@ -238,32 +237,41 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   });
 
   if (currentQ) finalizeQuestion();
-
   return { questions };
 }
 
-export function validateMCQSchema(q: any): string[] {
+export function validateMCQSchema(q: any, mode: ParserMode = 'PRODUCTION'): { errors: string[], warnings: string[] } {
   const errors: string[] = [];
+  const warnings: string[] = [];
+
+  // Fatal errors (Both modes)
   if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion) {
      errors.push("Statement node missing.");
   }
 
-  // Strictly Gurmukhi check for Punjabi fields
-  if (q.punjabiQuestion && !isStrictlyGurmukhi(q.punjabiQuestion)) {
-     errors.push("Bilingual Violation: Punjabi field contains non-Gurmukhi script (Hindi/Other).");
-  }
-  if (q.punjabiExplanation && !isStrictlyGurmukhi(q.punjabiExplanation)) {
-     errors.push("Bilingual Violation: Punjabi Explanation contains non-Gurmukhi script.");
-  }
+  // Script Integrity check
+  const pFields = ['punjabiQuestion', 'optionAPunjabi', 'optionBPunjabi', 'optionCPunjabi', 'optionDPunjabi', 'punjabiExplanation'];
+  pFields.forEach(field => {
+    const val = q[field];
+    if (val && hasIndicContamination(val)) {
+       if (mode === 'STRICT') {
+          errors.push(`Bilingual Violation in ${field}: Non-Gurmukhi Indic script detected.`);
+       } else {
+          warnings.push(`OCR Noise in ${field}: Detected and purged non-Gurmukhi characters.`);
+       }
+    }
+  });
 
   const optCount = ['A', 'B', 'C', 'D'].filter(l => 
     (q[`option${l}English`] || "").trim() || 
     (q[`option${l}Punjabi`] || "").trim() || 
     (q[`option${l}Hindi`] || "").trim()
   ).length;
+
   if (optCount !== 4) {
      errors.push(`Registry Violation: ${optCount} options detected (Exactly 4 required).`);
   }
   if (!q.correctAnswer) errors.push("Answer key missing.");
-  return errors;
+
+  return { errors, warnings };
 }

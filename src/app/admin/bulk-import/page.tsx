@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
+import { Switch } from "@/components/ui/switch"
 import { 
   Loader2, 
   Trash2, 
@@ -17,12 +18,10 @@ import {
   ClipboardList, 
   Globe, 
   Braces, 
-  Image as ImageIcon, 
-  Table as TableIcon, 
-  BarChart3, 
   Info, 
   Zap, 
-  Layers
+  Layers,
+  AlertTriangle
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy, updateDoc, increment } from "firebase/firestore"
@@ -31,7 +30,7 @@ import { Board, Subject } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 import { AdminPageHeader } from "@/components/admin"
-import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
+import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat, ParserMode } from "@/lib/parser"
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
   { label: "Current Affairs (English + Punjabi)", value: "CURRENT_AFFAIRS" },
@@ -70,6 +69,7 @@ export default function BulkIngestionPage() {
   const [stagedQuestions, setStagedQuestions] = useState<any[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
+  const [parserMode, setParserMode] = useState<ParserMode>("PRODUCTION")
 
   const handleLocalParse = () => {
     if (!rawText.trim()) return
@@ -81,24 +81,25 @@ export default function BulkIngestionPage() {
     setIsProcessing(true)
     try {
       const sanitizedText = preprocessText(rawText);
-      const result = parseBulkQuestions(sanitizedText, metadata);
+      const result = parseBulkQuestions(sanitizedText, metadata, parserMode);
 
       if (!result?.questions || result.questions.length === 0) {
          throw new Error("No questions detected. Ensure each question block starts with Q1, Q2, etc.");
       }
 
       const validated = result.questions.map(q => {
-         const validationErrors = validateMCQSchema(q);
+         const { errors, warnings } = validateMCQSchema(q, parserMode);
          return {
             ...q,
-            isValid: validationErrors.length === 0,
-            validationErrors,
+            isValid: errors.length === 0,
+            validationErrors: errors,
+            validationWarnings: warnings,
             createdBy: profile?.name || "Administrator"
          }
       });
       
       setStagedQuestions(validated);
-      toast({ title: "Extraction Success", description: `${validated.length} nodes structured locally.` });
+      toast({ title: "Extraction Complete", description: `${validated.length} nodes processed.` });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Parsing Error", description: e.message });
     } finally {
@@ -116,7 +117,7 @@ export default function BulkIngestionPage() {
     try {
       valids.forEach(q => {
         const qRef = doc(collection(db, "questions"));
-        const { isValid, validationErrors, ...finalData } = q;
+        const { isValid, validationErrors, validationWarnings, ...finalData } = q;
         
         batch.set(qRef, {
           ...finalData,
@@ -160,7 +161,7 @@ export default function BulkIngestionPage() {
         icon={ClipboardList}
         label="Modular Industrial Ingestion"
         title="MCQ Ingestion Hub"
-        subtitle="Deterministic extraction rules for English and Bilingual nodes."
+        subtitle="Resilient extraction for English and Bilingual nodes."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <button onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50 transition-all">Reset Staging</button>
@@ -217,29 +218,32 @@ export default function BulkIngestionPage() {
                     </div>
                  </div>
 
+                 <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="space-y-0.5">
+                       <p className="text-[10px] font-black uppercase text-slate-500">Strict script validation</p>
+                       <p className="text-[8px] font-bold text-slate-400 uppercase">Reject on OCR noise</p>
+                    </div>
+                    <Switch 
+                       checked={parserMode === 'STRICT'} 
+                       onCheckedChange={checked => setParserMode(checked ? 'STRICT' : 'PRODUCTION')} 
+                    />
+                 </div>
+
                  <div className="space-y-3">
                     <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Globe className="h-3 w-3" /> Language Hub</Label>
                     <div className="flex overflow-x-auto no-scrollbar pb-2 gap-3 snap-x snap-mandatory">
-                       <button 
-                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'punjabi', parserFormat: 'BILINGUAL_MCQ'})}
-                         className={cn("flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", metadata.secondaryLanguage === 'punjabi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
-                       >English + Punjabi</button>
-                       <button 
-                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'hindi', parserFormat: 'BILINGUAL_MCQ'})}
-                         className={cn("flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", metadata.secondaryLanguage === 'hindi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
-                       >English + Hindi</button>
-                       <button 
-                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'english', parserFormat: 'ENGLISH_ONLY'})}
-                         className={cn("flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", metadata.secondaryLanguage === 'english' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
-                       >English Only</button>
-                       <button 
-                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'punjabi_only', parserFormat: 'PUNJABI_ONLY'})}
-                         className={cn("flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", metadata.secondaryLanguage === 'punjabi_only' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
-                       >Punjabi Only</button>
-                       <button 
-                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'hindi_only', parserFormat: 'BILINGUAL_MCQ'})} // Use bilingual parser, metadata handles script
-                         className={cn("flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", metadata.secondaryLanguage === 'hindi_only' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
-                       >Hindi Only</button>
+                       {['punjabi', 'hindi', 'english', 'punjabi_only', 'hindi_only'].map((lang) => (
+                          <button 
+                            key={lang}
+                            onClick={() => setMetadata({...metadata, secondaryLanguage: lang as any})}
+                            className={cn(
+                               "flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", 
+                               metadata.secondaryLanguage === lang ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20"
+                            )}
+                          >
+                             {lang.replace('_', ' ')}
+                          </button>
+                       ))}
                     </div>
                  </div>
               </div>
@@ -248,7 +252,9 @@ export default function BulkIngestionPage() {
                  <div className="space-y-2">
                     <div className="flex items-center justify-between px-1">
                        <Label className="text-[10px] font-black uppercase text-slate-400">Raw Document Stream</Label>
-                       <Badge variant="outline" className="bg-slate-50 text-[8px] border-slate-200">Local Sanitization Active</Badge>
+                       <Badge variant="outline" className="bg-slate-50 text-[8px] border-slate-200">
+                          {parserMode === 'PRODUCTION' ? 'Production Mode Active' : 'Strict Audit Active'}
+                       </Badge>
                     </div>
                     <Textarea 
                         value={rawText}
@@ -297,6 +303,21 @@ export default function BulkIngestionPage() {
                     <CardContent className="p-6 md:p-12 lg:p-16 pt-4">
                        {q.isValid ? (
                           <div className="space-y-10">
+                             {q.validationWarnings?.length > 0 && (
+                                <div className="p-6 bg-amber-50 rounded-2xl border border-amber-100 mb-8 flex items-start gap-4">
+                                   <AlertTriangle className="h-6 w-6 text-amber-500 shrink-0 mt-1" />
+                                   <div className="space-y-2">
+                                      <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest">OCR Script Warnings</p>
+                                      <ul className="space-y-1">
+                                         {q.validationWarnings.map((w: string, i: number) => (
+                                            <li key={i} className="text-[11px] font-bold text-amber-500 flex items-center gap-2">
+                                               <div className="h-1 w-1 rounded-full bg-amber-400" /> {w}
+                                            </li>
+                                         ))}
+                                      </ul>
+                                   </div>
+                                </div>
+                             )}
                              <QuestionRenderer 
                                 question={q} 
                                 language={getRendererLanguage(metadata.secondaryLanguage)} 
