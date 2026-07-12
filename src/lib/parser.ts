@@ -1,8 +1,7 @@
 /**
- * @fileOverview Institutional Text Sanitizer & Universal Local Regex Parser v15.0.
- * RESTORED: Local parsing logic for high-speed offline ingestion.
+ * @fileOverview Institutional Text Sanitizer & Universal Local Regex Parser v16.0.
+ * FIXED: Line-anchored option detection to prevent splitting on letters within words (e.g. Find ∠ABC).
  * SUPPORTED: English + Punjabi and English + Hindi workflows.
- * UPDATED: Optimized for [MAP], [DIAGRAM], [IMAGE], [BAR GRAPH], and [TABLE] markers.
  */
 
 export function preprocessText(text: string): string {
@@ -23,7 +22,7 @@ export function preprocessText(text: string): string {
 
 /**
  * Universal Local Regex Parser for high-fidelity MCQs.
- * Handles:
+ * Optimized to handle:
  * 1. Standard: Q1. Text... (A) Opt... Ans: B
  * 2. Visuals: [DIAGRAM], [MAP], [IMAGE], [BAR GRAPH]
  * 3. Data: Markdown Tables
@@ -33,7 +32,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   const questions: any[] = [];
   
   // Split by Question markers (Q1., Question 1., etc)
-  const blocks = rawText.split(/(?=Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.)/i);
+  const blocks = rawText.split(/(?=\n\s*(?:Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.)|^(?:Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.))/i);
 
   const secondaryLang = metadata.secondaryLanguage || 'punjabi';
   const punjabiRegex = /[\u0A00-\u0A7F]/;
@@ -41,6 +40,12 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 
   blocks.forEach(block => {
     if (!block.trim() || block.length < 10) return;
+
+    // Detect the first option marker at the start of a line to separate question text
+    const optionSplitRegex = /\n\s*(?:[\\(\\[]?A[\\)\\]\\.\\-])/i;
+    const parts = block.split(optionSplitRegex);
+    const questionTextPart = parts[0];
+    const optionsAndRest = block.substring(questionTextPart.length);
 
     const q: any = { 
       ...metadata,
@@ -72,22 +77,19 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
     const ansMatch = block.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर)\s*[:\-]?\s*\(?([A-D])\)?/i);
     q.correctAnswer = ansMatch ? ansMatch[1].toUpperCase() : "A";
 
-    // 4. Extract Options (Handles Bilingual Splitting & English-Only)
+    // 4. Extract Options (Anchored to line breaks for precision)
     const extractOpt = (label: string, nextLabel: string) => {
-       // Support both (A) and A) formats
-       const regex = new RegExp(`[\\(\\[]?${label}[\\)\\]\\.\\-]\\s*([\\s\\S]*?)(?=[\\(\\[]?${nextLabel}[\\)\\]\\.\\-]|Official Key|Answer|Ans|ਉੱਤਰ|उत्तर|Explanation|Solution|ਵਿਆਖਿਆ|$)`, 'i');
-       const match = block.match(regex);
+       const regex = new RegExp(`(?:\\n\\s*|\\s+)[\\(\\[]?${label}[\\)\\]\\.\\-]\\s*([\\s\\S]*?)(?=(?:\\n\\s*|\\s+)[\\(\\[]?${nextLabel}[\\)\\]\\.\\-]|Official Key|Answer|Ans|ਉੱਤਰ|उत्तर|Explanation|Solution|ਵਿਆਖਿਆ|$)`, 'i');
+       const match = optionsAndRest.match(regex);
        if (!match) return { en: "", local: "" };
        
        const content = match[1].trim();
        const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
        
-       // Handle "Option / ਵਿਕਲਪ" or separate lines logic
        if (content.includes(' / ')) {
           const parts = content.split(' / ');
           return { en: parts[0]?.trim() || "", local: parts[1]?.trim() || parts[0]?.trim() || "" };
        } else if (lines.length > 1) {
-          // Check if second line is a different script
           const isSecondLineLocal = punjabiRegex.test(lines[1]) || hindiRegex.test(lines[1]);
           if (isSecondLineLocal) {
              return { en: lines[0], local: lines[1] };
@@ -100,7 +102,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
     const optA = extractOpt('A', 'B');
     const optB = extractOpt('B', 'C');
     const optC = extractOpt('C', 'D');
-    const optD = extractOpt('D', 'Z'); // Using Z as anchor for last option
+    const optD = extractOpt('D', 'Z'); 
 
     q.optionAEnglish = optA.en;
     q.optionBEnglish = optB.en;
@@ -119,17 +121,13 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
        q.optionDHindi = optD.local;
     }
 
-    // 5. Extract Question Statements
-    const qTextPart = block.split(/[\\(\\[]?[A-D][\\)\\]\\.\\-]/i)[0];
-    // Filter out visual markers and noise
-    const cleanQTextPart = qTextPart.replace(/\[.*?\]/g, '').trim();
+    // 5. Extract Question Statements from the isolated part
+    const cleanQTextPart = questionTextPart.replace(/\[.*?\]/g, '').trim();
     const qLines = cleanQTextPart.split('\n').map(l => l.trim()).filter(Boolean);
     
-    // Detect English lines (usually first)
     const enLines = qLines.filter(l => !punjabiRegex.test(l) && !hindiRegex.test(l));
     q.englishQuestion = enLines.join('\n').replace(/^(?:Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.)\s*/i, '').trim();
     
-    // Detect Secondary Language lines
     if (secondaryLang === 'punjabi') {
        const paLines = qLines.filter(l => punjabiRegex.test(l));
        q.punjabiQuestion = paLines.join('\n').replace(/^(?:ਪ੍ਰਸ਼ਨ\s*\d+\.)\s*/i, '').trim();

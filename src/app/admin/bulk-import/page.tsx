@@ -32,10 +32,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Universal Ingestion Hub v45.0.
- * FIXED: Hydration error (div inside p).
- * FIXED: Support for [MAP], [DIAGRAM], [TABLE], [IMAGE] markers.
- * FIXED: Massive 850px desktop workspace and stable action button.
+ * @fileOverview Universal Ingestion Hub v46.0.
+ * FIXED: Hydration error (p replaced with div for error items).
+ * FIXED: Standardized button pill and parser scaling.
  */
 
 export default function BulkIngestionPage() {
