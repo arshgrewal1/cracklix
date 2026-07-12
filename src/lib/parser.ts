@@ -1,8 +1,8 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v50.0.
- * FIXED: Adaptive column splitting based on header count.
- * FIXED: Script-aware explanation routing.
+ * @fileOverview Institutional Deterministic Ingestion Hub v51.0.
+ * FIXED: Table parser state machine leakage (Explanation into Question).
+ * FIXED: Multi-line question suffix support for table-based questions.
  */
 
 export type ParserFormat = 
@@ -193,18 +193,37 @@ function parseTable(rawText: string, metadata: any) {
   const lines = rawText.split(/\r?\n/);
   const questions: any[] = [];
   let currentQ: any = null;
-  let state: 'INTRO_EN' | 'INTRO_PA' | 'GRID' | 'SUFFIX_EN' | 'SUFFIX_PA' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION' = 'INTRO_EN';
+  
+  // States:
+  // QUESTION_ENGLISH -> QUESTION_PUNJABI -> TABLE_CONTENT -> ACTUAL_QUESTION_ENGLISH -> ACTUAL_QUESTION_PUNJABI -> OPTIONS -> ANSWER -> EXPLANATION_ENGLISH -> EXPLANATION_PUNJABI
+  let state: 'QUESTION_ENGLISH' | 'QUESTION_PUNJABI' | 'TABLE_CONTENT' | 'ACTUAL_QUESTION_ENGLISH' | 'ACTUAL_QUESTION_PUNJABI' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION_ENGLISH' | 'EXPLANATION_PUNJABI' = 'QUESTION_ENGLISH';
 
   const finalize = () => {
     if (!currentQ) return;
     questions.push(currentQ);
     currentQ = null;
-    state = 'INTRO_EN';
+    state = 'QUESTION_ENGLISH';
+  };
+
+  const handleRow = (q: any, t: string) => {
+    let cells = [];
+    const headerCount = q.tableContent.headers.length;
+    if (t.includes('|')) {
+      cells = t.split('|').filter(c => c.trim().length >= 0).map(c => c.trim()).slice(1, -1);
+      if (cells.length === 0) cells = t.split('|').filter(c => c.trim().length > 0).map(c => c.trim());
+    } else {
+      cells = t.split(/\s{2,}/).filter(c => c.trim().length > 0).map(c => c.trim());
+      if (cells.length === 1 && headerCount > 1) {
+        const tokens = t.split(/\s+/).filter(c => c.trim().length > 0);
+        if (tokens.length === headerCount) cells = tokens;
+      }
+    }
+    if (q.tableContent.headers.length === 0) q.tableContent.headers = cells;
+    else if (!t.includes('---') && cells.length > 0) q.tableContent.rows.push(cells);
   };
 
   lines.forEach((line) => {
     const trimmed = line.trim();
-    const isNoise = NOISE_PATTERNS.some(p => p.test(trimmed));
     if (isQuestionStart(line)) {
       finalize();
       currentQ = {
@@ -220,71 +239,60 @@ function parseTable(rawText: string, metadata: any) {
       };
       const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
       if (content) currentQ.englishQuestion = content;
+      state = 'QUESTION_ENGLISH';
       return;
     }
 
-    if (!currentQ || isNoise) return;
+    if (!currentQ) return;
+    if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
 
     const opt = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
 
-    // ADAPTIVE TOKENIZER: Detects columns by pipes or wide spaces
-    const headerCount = currentQ.tableContent.headers.length;
-    const isLikelyGridRow = (trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2 || (headerCount > 0 && trimmed.split(/\s+/).length >= headerCount)) && !opt && !isAns && !isExpl && state !== 'OPTIONS';
-
     if (opt) state = 'OPTIONS';
     else if (isAns) state = 'ANSWER';
-    else if (isExpl) state = 'EXPLANATION';
-    else if (isLikelyGridRow) state = 'GRID';
+    else if (isExpl) state = 'EXPLANATION_ENGLISH';
 
     switch (state) {
-      case 'INTRO_EN':
+      case 'QUESTION_ENGLISH':
         if (GURMUKHI_REGEX.test(trimmed)) {
-          state = 'INTRO_PA';
+          state = 'QUESTION_PUNJABI';
           currentQ.punjabiQuestion = trimmed;
-        } else {
+        } else if (trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2) {
+          state = 'TABLE_CONTENT';
+          handleRow(currentQ, trimmed);
+        } else if (trimmed) {
           currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
         }
         break;
-      case 'INTRO_PA':
-        if (ACTUAL_QUESTION_KEYWORDS.test(trimmed)) {
-          state = 'SUFFIX_EN';
-          currentQ.englishDiagramQuestion = trimmed;
-        } else {
+      case 'QUESTION_PUNJABI':
+        if (trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2) {
+          state = 'TABLE_CONTENT';
+          handleRow(currentQ, trimmed);
+        } else if (trimmed) {
           currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
         }
         break;
-      case 'GRID':
-        if (isLikelyGridRow) {
-           let cells = [];
-           if (trimmed.includes('|')) {
-              cells = trimmed.split('|').filter(c => c.trim().length > 0).map(c => c.trim());
-           } else {
-              cells = trimmed.split(/\s{2,}/).filter(c => c.trim().length > 0).map(c => c.trim());
-              // If 2+ spaces failed to match header structure, try single space tokenization
-              if (cells.length === 1 && headerCount > 1) {
-                 const tokens = trimmed.split(/\s+/).filter(c => c.trim().length > 0);
-                 if (tokens.length === headerCount) cells = tokens;
-              }
-           }
-           if (currentQ.tableContent.headers.length === 0) currentQ.tableContent.headers = cells;
-           else if (!trimmed.includes('---') && cells.length > 0) currentQ.tableContent.rows.push(cells);
-        } else if (ACTUAL_QUESTION_KEYWORDS.test(trimmed)) {
-           state = 'SUFFIX_EN';
-           currentQ.englishDiagramQuestion = trimmed;
+      case 'TABLE_CONTENT':
+        const headerCount = currentQ.tableContent.headers.length;
+        const isGrid = trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2 || (headerCount > 0 && trimmed.split(/\s+/).length === headerCount);
+        if (isGrid) handleRow(currentQ, trimmed);
+        else if (trimmed) {
+          state = 'ACTUAL_QUESTION_ENGLISH';
+          currentQ.englishDiagramQuestion = trimmed;
         }
         break;
-      case 'SUFFIX_EN':
+      case 'ACTUAL_QUESTION_ENGLISH':
         if (GURMUKHI_REGEX.test(trimmed)) {
-          state = 'SUFFIX_PA';
+          state = 'ACTUAL_QUESTION_PUNJABI';
           currentQ.punjabiDiagramQuestion = trimmed;
-        } else {
+        } else if (trimmed) {
           currentQ.englishDiagramQuestion += (currentQ.englishDiagramQuestion ? '\n' : '') + trimmed;
         }
         break;
-      case 'SUFFIX_PA':
-        currentQ.punjabiDiagramQuestion += (currentQ.punjabiDiagramQuestion ? '\n' : '') + trimmed;
+      case 'ACTUAL_QUESTION_PUNJABI':
+        if (trimmed) currentQ.punjabiDiagramQuestion += (currentQ.punjabiDiagramQuestion ? '\n' : '') + trimmed;
         break;
       case 'OPTIONS':
         if (opt) currentQ[`option${opt.opt}English`] = opt.text;
@@ -293,12 +301,19 @@ function parseTable(rawText: string, metadata: any) {
         const match = trimmed.match(/[A-D]/i);
         if (match) currentQ.correctAnswer = match[0].toUpperCase();
         break;
-      case 'EXPLANATION':
-        const cleanLine = trimmed.replace(/^(?:Explanation|Solution|ਵਿਆਖਿਆ|ਵਿਆਖਿਆ|व्याख्या|Rationale|Answer|Correct Answer|Official Key)\s*[:\-]?\s*/i, '').trim();
-        if (cleanLine) {
-           if (GURMUKHI_REGEX.test(cleanLine)) currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + cleanLine;
-           else currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + cleanLine;
+      case 'EXPLANATION_ENGLISH':
+        const clean = trimmed.replace(/^(?:Explanation|Solution|ਵਿਆਖਿਆ|ਵਿਆਖਿਆ|व्याख्या|Rationale|Answer|Correct Answer|Official Key)\s*[:\-]?\s*/i, '').trim();
+        if (clean) {
+          if (GURMUKHI_REGEX.test(clean)) {
+            state = 'EXPLANATION_PUNJABI';
+            currentQ.punjabiExplanation = clean;
+          } else {
+            currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + clean;
+          }
         }
+        break;
+      case 'EXPLANATION_PUNJABI':
+        if (trimmed) currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
         break;
     }
   });
@@ -366,7 +381,7 @@ function parseReasoning(rawText: string, metadata: any) {
        const match = trimmed.match(/[A-D]/i);
        if (match) currentQ.correctAnswer = match[0].toUpperCase();
     } else if (state === 'READ_EXPLANATION') {
-       const clean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
+       const clean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\s*`, 'i'), '');
        if (clean) {
           if (GURMUKHI_REGEX.test(clean)) currentQ[expLocalKey] += (currentQ[expLocalKey] ? '\n' : '') + clean;
           else currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + clean;
