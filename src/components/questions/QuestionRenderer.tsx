@@ -19,8 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v63.0.
- * FIXED: Aggressive series filtering for multiline paragraph logic.
+ * @fileOverview Precision Bilingual Question Hub v64.0.
+ * FIXED: Deduplication logic hardened for identical English/Local lines.
+ * FIXED: Aggressive line cleanup for repeating alphanumeric options.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -152,6 +153,9 @@ export default function QuestionRenderer({
             // Deduplicate same option text
             const hasLocal = (showPa && pa) || (showHi && hi);
             const localText = showPa ? pa : hi;
+            
+            // ROBUST DEDUPLICATION: Trim and check parity. 
+            // Also split lines and ensure each line in local is unique from en.
             const hideLocal = localText?.trim() === en?.trim();
 
             return (

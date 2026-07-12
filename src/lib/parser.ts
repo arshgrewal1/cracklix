@@ -1,8 +1,7 @@
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v26.0.
- * FIXED: Greedy question extraction - reads ALL lines until Option A sentinel.
- * FIXED: Multiline support for complex reasoning (Direction Sense, Puzzles, Series).
- * FIXED: Deduplication logic - Identical bilingual options (numbers/math) are purged.
+ * @fileOverview Institutional Deterministic Ingestion Hub v27.0.
+ * FIXED: Line-level deduplication for options - prevents repeated lines (e.g. EPH\nEPH).
+ * FIXED: Cross-field identity purge - deletes local field if identical to English (Numbers/Math).
  * RULES: English and Punjabi fields isolated; numbers stowed in English; multiline aware.
  * WHITESPACE: Block-level trim only; internal spacing and line breaks preserved.
  */
@@ -88,7 +87,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 
   const content = cleanedText.substring(firstIndex);
   // Split using a lookahead to keep the question markers attached to the start of the block
-  const blocks = content.split(/(?=\n\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$)|^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$))/i);
+  const blocks = content.split(/(?=\n\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+)(?:[\.\s:]|$)|^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+)(?:[\.\s:]|$))/i);
 
   blocks.forEach(block => {
     const trimmedBlock = block.trim();
@@ -220,10 +219,18 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
          // This is a translation line or continuation of previous option
          if (scriptRegex.test(trimmedLine)) {
             const optLocalKey = secondaryLang === 'hindi' ? `option${currentOption}Hindi` : `option${currentOption}Punjabi`;
-            q[optLocalKey] = (q[optLocalKey] || "") + (q[optLocalKey] ? "\n" : "") + trimmedLine;
+            const currentVal = (q[optLocalKey] || "").trim();
+            // INTERNAL DEDUPLICATION: Don't append if it's the exact same text (common with numbers)
+            if (currentVal !== trimmedLine) {
+               q[optLocalKey] = (q[optLocalKey] || "") + (q[optLocalKey] ? "\n" : "") + trimmedLine;
+            }
          } else {
             const optKey = `option${currentOption}English`;
-            q[optKey] = (q[optKey] || "") + (q[optKey] ? "\n" : "") + trimmedLine;
+            const currentVal = (q[optKey] || "").trim();
+            // INTERNAL DEDUPLICATION: Don't append if it's the exact same text
+            if (currentVal !== trimmedLine) {
+               q[optKey] = (q[optKey] || "") + (q[optKey] ? "\n" : "") + trimmedLine;
+            }
          }
       }
     } 
@@ -315,7 +322,11 @@ function parseDeterministicEnglish(block: string, q: any) {
       if (optMatch) {
          q[`option${currentOption}English`] = optMatch.text;
       } else if (trimmedLine !== "") {
-         q[`option${currentOption}English`] = (q[`option${currentOption}English`] || "") + "\n" + trimmedLine;
+         const current = (q[`option${currentOption}English`] || "").trim();
+         // DEDUPLICATION: Prevent repeated English lines (e.g. 12\n12)
+         if (current !== trimmedLine) {
+            q[`option${currentOption}English`] = (q[`option${currentOption}English`] || "") + "\n" + trimmedLine;
+         }
       }
     } else if (section === 'ANSWER') {
       const match = trimmedLine.match(/(?:Answer|Official Key|Correct Answer)\s*[:\-]?\s*\(?([A-D1-4])\)?/i);
