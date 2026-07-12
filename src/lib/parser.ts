@@ -1,9 +1,8 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v35.0.
+ * @fileOverview Institutional Specialized Local Parser v36.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Assertion-Reason formats.
- * FIXED: Advanced Table Extraction logic to preserve structured grid data.
- * UPDATED: Implemented Fill in the Blank Parser for completion-style questions.
- * HARDENED: Strict removal of headers, footers, page numbers, and copyright text.
+ * FIXED: Strips trailing commas and dots from options to ensure clean data nodes.
+ * UPDATED: Optimized explanation extraction to remove redundant labels.
  */
 
 export type ParserFormat = 
@@ -274,7 +273,7 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
   const localKey = secondaryLang === 'hindi' ? 'hindiQuestion' : 'punjabiQuestion';
   const expLocalKey = secondaryLang === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
 
-  const answerMatch = block.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ)\s*[:\-]?\s*\(?([A-D])\)?/i);
+  const answerMatch = block.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ|Correct Answer)\s*[:\-]?\s*\(?([A-D])\)?/i);
   const explStartIndex = block.search(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या|Rationale)\s*[:\-]?/i);
   
   let restOfBlock = block;
@@ -300,15 +299,18 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
 
   const optionLabels = ['A', 'B', 'C', 'D'];
   optionLabels.forEach((label, i) => {
-    const nextLabel = optionLabels[i + 1] || "(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ)";
+    const nextLabel = optionLabels[i + 1] || "(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ|Correct Answer)";
     const reg = new RegExp(`\\n\\s*\\(?${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*\\(?${nextLabel}[\\)\\.\\-]|$)`, 'i');
     const match = optionsPart.match(reg);
     
     if (match) {
       const optLines = match[1].trim().split('\n').map(l => l.trim()).filter(Boolean);
-      q[`option${label}English`] = optLines.filter(l => !scriptRegex.test(l))[0] || "";
+      // CLEANUP: Remove trailing commas and dots from options
+      const cleanOpt = (text: string) => text.replace(/[,\.]$/, '').trim();
+      
+      q[`option${label}English`] = cleanOpt(optLines.filter(l => !scriptRegex.test(l))[0] || "");
       const optLocalKey = secondaryLang === 'hindi' ? `option${label}Hindi` : `option${label}Punjabi`;
-      q[optLocalKey] = optLines.filter(l => scriptRegex.test(l))[0] || "";
+      q[optLocalKey] = cleanOpt(optLines.filter(l => scriptRegex.test(l))[0] || "");
     }
   });
 
@@ -352,7 +354,10 @@ function parseEnglishOnly(block: string, q: any) {
     const next = labels[i + 1] || "(?:Official Key|Answer|Ans|Correct Answer)";
     const reg = new RegExp(`\\n\\s*\\(?${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*\\(?${next}[\\)\\.\\-]|$)`, 'i');
     const match = optionsPart.match(reg);
-    if (match) q[`option${label}English`] = match[1].trim();
+    if (match) {
+       const cleanOpt = (text: string) => text.replace(/[,\.]$/, '').trim();
+       q[`option${label}English`] = cleanOpt(match[1].trim());
+    }
   });
 
   q.correctAnswer = (answerMatch?.[1] || "A").toUpperCase();
@@ -391,7 +396,10 @@ function parsePunjabiOnly(block: string, q: any) {
     const next = labels[i + 1] || "(?:Official Key|Answer|Ans|ਉੱਤਰ|ਸਹੀ ਉੱਤਰ)";
     const reg = new RegExp(`\\n\\s*\\(?${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*\\(?${next}[\\)\\.\\-]|$)`, 'i');
     const match = optionsPart.match(reg);
-    if (match) q[`option${label}Punjabi`] = match[1].trim();
+    if (match) {
+       const cleanOpt = (text: string) => text.replace(/[,\.]$/, '').trim();
+       q[`option${label}Punjabi`] = cleanOpt(match[1].trim());
+    }
   });
 
   q.correctAnswer = (answerMatch?.[1] || "A").toUpperCase();
@@ -409,3 +417,4 @@ export function validateMCQSchema(q: any): string[] {
   if (!q.correctAnswer) errors.push("Answer key registry failed.");
   return errors;
 }
+

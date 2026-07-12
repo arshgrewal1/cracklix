@@ -19,9 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v51.0.
- * FIXED: Strictly stacks English Bold on top of Local Medium for both Question and Options.
- * FIXED: Unified option pills to prevent "optioning" distortion.
+ * @fileOverview Precision Bilingual Question Hub v52.0.
+ * FIXED: Updated solution label to "Correct Answer" as requested.
+ * FIXED: Optimized rationale container for clean explanation display.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -168,7 +168,7 @@ export default function QuestionRenderer({
            </div>
            <div className="bg-slate-50 p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] border border-slate-100 text-slate-500 leading-relaxed font-medium text-sm md:text-lg space-y-6 shadow-inner">
               <p className="font-black text-[11px] md:text-sm text-[#0F172A] pb-3 border-b border-slate-200/50 flex items-center gap-3 uppercase tracking-tight">
-                 <ShieldCheck className="h-5 w-5 text-emerald-500" /> Official Correct Node: Option {q.correctAnswer}
+                 <ShieldCheck className="h-5 w-5 text-emerald-500" /> Correct Answer: Option {q.correctAnswer}
               </p>
               <div className="space-y-6">
                 {showEn && q.englishExplanation && <div className="font-bold text-slate-700"><MathText text={q.englishExplanation} className="text-inherit" /></div>}
@@ -181,3 +181,4 @@ export default function QuestionRenderer({
     </div>
   );
 }
+
