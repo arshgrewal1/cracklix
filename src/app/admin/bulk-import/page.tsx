@@ -20,7 +20,8 @@ import {
   Table as TableIcon,
   BarChart3,
   Info,
-  Zap
+  Zap,
+  Layers
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy, updateDoc, increment } from "firebase/firestore"
@@ -32,9 +33,8 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v68.0.
- * UPDATED: Multi-strategy mapping for CA, Math, Tables, Assertion-Reason, and Fill in the Blank.
- * FIXED: Hydration error by replacing p tags with div in validation list.
+ * @fileOverview Modular Industrial Ingestion Hub v69.0.
+ * FIXED: Imported missing Layers icon and corrected ImageIcon alias.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
