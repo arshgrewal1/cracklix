@@ -20,7 +20,7 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v65.0.
+ * @fileOverview Institutional Question Renderer v66.0.
  * FIXED: Standardized English and Punjabi typography weights, sizes, and colors.
  */
 export default function QuestionRenderer({ 
