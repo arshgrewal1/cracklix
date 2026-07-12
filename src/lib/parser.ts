@@ -1,8 +1,8 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v54.0.
- * FIXED: Redesigned Match the Following parser with dual-column structured block capture.
- * FIXED: Hardened question sentinel regex to prevent skipping Variations like "QUESTION NO.1".
+ * @fileOverview Institutional Deterministic Ingestion Hub v55.0.
+ * FIXED: Isolated Match-Following parser state machine to prevent list labels (A., B.) from being misidentified as MCQ options.
+ * FIXED: Hardened instruction sentinels to definitively terminate matching block capture.
  */
 
 export type ParserFormat = 
@@ -91,6 +91,7 @@ function parseMatching(rawText: string, metadata: any) {
   // States: INTRO_EN -> INTRO_PA -> MATCHING -> INSTR_EN -> INSTR_PA -> OPTIONS -> ANSWER -> EXPL_EN -> EXPL_PA
   let state: 'INTRO_EN' | 'INTRO_PA' | 'MATCHING' | 'INSTR_EN' | 'INSTR_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL_EN' | 'EXPL_PA' = 'INTRO_EN';
 
+  const MATCHING_START_MARKERS = ["List I", "List II", "Column I", "Column II", "Group A", "Group B", "Match the following"];
   const INSTR_KEYWORDS = [
     "Choose the correct matching",
     "Select the correct answer",
@@ -103,7 +104,7 @@ function parseMatching(rawText: string, metadata: any) {
 
   const finalize = () => {
     if (!currentQ) return;
-    if (currentQ.matchingBlock.leftColumn.length > 0) {
+    if (currentQ.matchingBlock.leftColumn.length > 0 || currentQ.matchingContent) {
       questions.push(currentQ);
     }
     currentQ = null;
@@ -111,8 +112,9 @@ function parseMatching(rawText: string, metadata: any) {
 
   lines.forEach((line) => {
     const trimmed = line.trim();
-    
-    // PRIORITY: New Question Marker finalized the previous state immediately.
+    if (!trimmed && state !== 'MATCHING') return;
+
+    // 1. PRIORITY: New Question Marker
     if (isQuestionStart(line)) {
       finalize();
       currentQ = {
@@ -133,38 +135,37 @@ function parseMatching(rawText: string, metadata: any) {
     }
 
     if (!currentQ) return;
-    
-    // METADATA FILTER: Skip page headers, generated artifacts etc.
     if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
 
+    // 2. DETECT INTERRUPTS
     const opt = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isInstr = INSTR_KEYWORDS.some(k => trimmed.toLowerCase().includes(k.toLowerCase()));
+    const isMatchingStart = MATCHING_START_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
 
     // Deterministic State Shifts
     if (isAns) state = 'ANSWER';
     else if (isExpl) state = 'EXPL_EN';
-    else if (opt) state = 'OPTIONS';
     else if (isInstr) state = 'INSTR_EN';
-    else if ((state === 'INTRO_EN' || state === 'INTRO_PA') && /^(List|Column|Group|A\.|1\.|I\.)/i.test(trimmed)) {
-       state = 'MATCHING';
-    }
+    else if (isMatchingStart && (state === 'INTRO_EN' || state === 'INTRO_PA')) state = 'MATCHING';
+    else if (opt && (state === 'INSTR_EN' || state === 'INSTR_PA' || state === 'OPTIONS')) state = 'OPTIONS';
 
+    // 3. EXECUTE STATE LOGIC
     switch (state) {
       case 'INTRO_EN':
         if (GURMUKHI_REGEX.test(trimmed)) {
            state = 'INTRO_PA';
            currentQ.punjabiQuestion = trimmed;
-        } else if (trimmed) {
+        } else {
            currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
         }
         break;
       case 'INTRO_PA':
-        if (trimmed) currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
+        currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
         break;
       case 'MATCHING':
-        // RAW BLOCK SPLITTER: Identifies Column I vs Column II by whitespace density.
+        // Inside MATCHING, we NEVER run opt detection to prevent A. List I labels from becoming options.
         const colParts = line.split(/\s{3,}/); 
         if (colParts.length >= 2) {
            currentQ.matchingBlock.leftColumn.push(colParts[0].trim());
@@ -178,12 +179,12 @@ function parseMatching(rawText: string, metadata: any) {
         if (GURMUKHI_REGEX.test(trimmed)) {
            state = 'INSTR_PA';
            currentQ.punjabiInstruction = trimmed;
-        } else if (trimmed) {
+        } else {
            currentQ.englishInstruction += (currentQ.englishInstruction ? '\n' : '') + trimmed;
         }
         break;
       case 'INSTR_PA':
-        if (trimmed) currentQ.punjabiInstruction += (currentQ.punjabiInstruction ? '\n' : '') + trimmed;
+        currentQ.punjabiInstruction += (currentQ.punjabiInstruction ? '\n' : '') + trimmed;
         break;
       case 'OPTIONS':
         if (opt) currentQ[`option${opt.opt}English`] = opt.text;
@@ -204,7 +205,7 @@ function parseMatching(rawText: string, metadata: any) {
         }
         break;
       case 'EXPL_PA':
-        if (trimmed) currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
+        currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
         break;
     }
   });
@@ -217,9 +218,6 @@ function parseGraph(rawText: string, metadata: any) {
   const lines = rawText.split(/\r?\n/);
   const questions: any[] = [];
   let currentQ: any = null;
-  
-  // States: 
-  // INTRO_EN -> INTRO_PA -> GRAPH_CONTENT -> ACTUAL_EN -> ACTUAL_PA -> OPTIONS -> ANSWER -> EXPL_EN -> EXPL_PA
   let state: 'INTRO_EN' | 'INTRO_PA' | 'GRAPH' | 'ACTUAL_EN' | 'ACTUAL_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL_EN' | 'EXPL_PA' = 'INTRO_EN';
 
   const finalize = () => {
@@ -250,12 +248,7 @@ function parseGraph(rawText: string, metadata: any) {
     }
 
     if (!currentQ) return;
-    
-    const isNoise = NOISE_PATTERNS.some(p => p.test(trimmed));
-    const isSeparator = /^[-\s\.\*_=|+\/\\]{3,}$/.test(trimmed);
-    if (isNoise || isSeparator) {
-       return;
-    }
+    if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
 
     const opt = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
@@ -268,22 +261,13 @@ function parseGraph(rawText: string, metadata: any) {
     const isGraphArtifact = /[│─┌┐└┘├┤┼┴┬→←↑↓▲▼★■●○|]/.test(trimmed);
     const isLikelyData = trimmed.length > 0 && trimmed.length < 30 && !trimmed.includes(' ') && /[0-9]/.test(trimmed);
     
-    if ((state === 'INTRO_EN' || state === 'INTRO_PA') && (isGraphArtifact || isLikelyData)) {
-       state = 'GRAPH';
-    }
-
-    if (state === 'GRAPH' && ACTUAL_QUESTION_KEYWORDS.test(trimmed)) {
-       state = 'ACTUAL_EN';
-    }
+    if ((state === 'INTRO_EN' || state === 'INTRO_PA') && (isGraphArtifact || isLikelyData)) state = 'GRAPH';
+    if (state === 'GRAPH' && ACTUAL_QUESTION_KEYWORDS.test(trimmed)) state = 'ACTUAL_EN';
 
     switch (state) {
       case 'INTRO_EN':
-        if (GURMUKHI_REGEX.test(trimmed)) {
-           state = 'INTRO_PA';
-           currentQ.punjabiQuestion = trimmed;
-        } else {
-           currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
-        }
+        if (GURMUKHI_REGEX.test(trimmed)) { state = 'INTRO_PA'; currentQ.punjabiQuestion = trimmed; }
+        else { currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed; }
         break;
       case 'INTRO_PA':
         currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
@@ -292,12 +276,8 @@ function parseGraph(rawText: string, metadata: any) {
         currentQ.graphContent += line + '\n';
         break;
       case 'ACTUAL_EN':
-        if (GURMUKHI_REGEX.test(trimmed)) {
-           state = 'ACTUAL_PA';
-           currentQ.punjabiActualQuestion = trimmed;
-        } else {
-           currentQ.englishActualQuestion += (currentQ.englishActualQuestion ? '\n' : '') + trimmed;
-        }
+        if (GURMUKHI_REGEX.test(trimmed)) { state = 'ACTUAL_PA'; currentQ.punjabiActualQuestion = trimmed; }
+        else { currentQ.englishActualQuestion += (currentQ.englishActualQuestion ? '\n' : '') + trimmed; }
         break;
       case 'ACTUAL_PA':
         currentQ.punjabiActualQuestion += (currentQ.punjabiActualQuestion ? '\n' : '') + trimmed;
@@ -306,19 +286,14 @@ function parseGraph(rawText: string, metadata: any) {
         if (opt) currentQ[`option${opt.opt}English`] = opt.text;
         break;
       case 'ANSWER':
-        const ansClean = trimmed.replace(/^(?:Answer|Official Key|Correct Answer|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ)\s*[:\-]?\s*/i, '').trim();
-        const match = ansClean.match(/[A-D]/i);
+        const match = trimmed.match(/[A-D]/i);
         if (match) currentQ.correctAnswer = match[0].toUpperCase();
         break;
       case 'EXPL_EN':
-        const explClean = trimmed.replace(/^(?:Explanation|Solution|ਵਿਆਖਿਆ|ਵਿਆਖਿਆ|व्याख्या|Rationale|Answer|Correct Answer|Official Key)\s*[:\-]?\s*/i, '').trim();
+        const explClean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
         if (explClean) {
-          if (GURMUKHI_REGEX.test(explClean)) {
-             state = 'EXPL_PA';
-             currentQ.punjabiExplanation = explClean;
-          } else {
-             currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + explClean;
-          }
+          if (GURMUKHI_REGEX.test(explClean)) { state = 'EXPL_PA'; currentQ.punjabiExplanation = explClean; }
+          else { currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + explClean; }
         }
         break;
       case 'EXPL_PA':
@@ -348,10 +323,7 @@ function parseDiagram(rawText: string, metadata: any) {
 
   lines.forEach((line) => {
     const trimmed = line.trim();
-    const isNoise = NOISE_PATTERNS.some(p => p.test(trimmed));
-    const isQStart = isQuestionStart(line);
-
-    if (isQStart) {
+    if (isQuestionStart(line)) {
       finalize();
       currentQ = {
         ...metadata,
@@ -368,7 +340,8 @@ function parseDiagram(rawText: string, metadata: any) {
       return;
     }
 
-    if (!currentQ || isNoise) return;
+    if (!currentQ) return;
+    if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
 
     const opt = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
@@ -383,39 +356,19 @@ function parseDiagram(rawText: string, metadata: any) {
                                    (trimmed.length < 25 && /^(Input|Output|Start|End|Yes|No|X|Y|Z)/i.test(trimmed));
 
        if (bodySubState === 'INTRO_EN') {
-          if (GURMUKHI_REGEX.test(trimmed)) {
-             bodySubState = 'INTRO_PA';
-             currentQ.punjabiQuestion = trimmed;
-          } else if (isLikelyDiagramLine) {
-             bodySubState = 'DIAGRAM';
-             currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line;
-          } else {
-             currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
-          }
+          if (GURMUKHI_REGEX.test(trimmed)) { bodySubState = 'INTRO_PA'; currentQ.punjabiQuestion = trimmed; }
+          else if (isLikelyDiagramLine) { bodySubState = 'DIAGRAM'; currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line; }
+          else { currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed; }
        } else if (bodySubState === 'INTRO_PA') {
-          if (isLikelyDiagramLine) {
-             bodySubState = 'DIAGRAM';
-             currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line;
-          } else if (ACTUAL_QUESTION_KEYWORDS.test(trimmed)) {
-             bodySubState = 'SUFFIX_EN';
-             currentQ.englishDiagramQuestion = trimmed;
-          } else {
-             currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
-          }
+          if (isLikelyDiagramLine) { bodySubState = 'DIAGRAM'; currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line; }
+          else if (ACTUAL_QUESTION_KEYWORDS.test(trimmed)) { bodySubState = 'SUFFIX_EN'; currentQ.englishDiagramQuestion = trimmed; }
+          else { currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed; }
        } else if (bodySubState === 'DIAGRAM') {
-          if (ACTUAL_QUESTION_KEYWORDS.test(trimmed) || (trimmed.endsWith('?') && trimmed.length > 25)) {
-             bodySubState = 'SUFFIX_EN';
-             currentQ.englishDiagramQuestion = trimmed;
-          } else {
-             currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line;
-          }
+          if (ACTUAL_QUESTION_KEYWORDS.test(trimmed)) { bodySubState = 'SUFFIX_EN'; currentQ.englishDiagramQuestion = trimmed; }
+          else { currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line; }
        } else if (bodySubState === 'SUFFIX_EN') {
-          if (GURMUKHI_REGEX.test(trimmed)) {
-             bodySubState = 'SUFFIX_PA';
-             currentQ.punjabiDiagramQuestion = trimmed;
-          } else {
-             currentQ.englishDiagramQuestion += (currentQ.englishDiagramQuestion ? '\n' : '') + trimmed;
-          }
+          if (GURMUKHI_REGEX.test(trimmed)) { bodySubState = 'SUFFIX_PA'; currentQ.punjabiDiagramQuestion = trimmed; }
+          else { currentQ.englishDiagramQuestion += (currentQ.englishDiagramQuestion ? '\n' : '') + trimmed; }
        } else if (bodySubState === 'SUFFIX_PA') {
           currentQ.punjabiDiagramQuestion += (currentQ.punjabiDiagramQuestion ? '\n' : '') + trimmed;
        }
@@ -425,7 +378,7 @@ function parseDiagram(rawText: string, metadata: any) {
        const match = trimmed.match(/[A-D]/i);
        if (match) currentQ.correctAnswer = match[0].toUpperCase();
     } else if (state === 'EXPLANATION') {
-       const clean = trimmed.replace(/^(?:Explanation|Solution|ਵਿਆਖਿਆ|ਵਿਆਖਿਆ|व्याख्या|Rationale|Answer|Correct Answer|Official Key)\s*[:\-]?\s*/i, '').trim();
+       const clean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
        if (clean) {
           if (GURMUKHI_REGEX.test(clean)) currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + clean;
           else currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + clean;
@@ -441,7 +394,6 @@ function parseTable(rawText: string, metadata: any) {
   const lines = rawText.split(/\r?\n/);
   const questions: any[] = [];
   let currentQ: any = null;
-  
   let state: 'QUESTION_ENGLISH' | 'QUESTION_PUNJABI' | 'TABLE_CONTENT' | 'ACTUAL_QUESTION_ENGLISH' | 'ACTUAL_QUESTION_PUNJABI' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION_ENGLISH' | 'EXPLANATION_PUNJABI' = 'QUESTION_ENGLISH';
 
   const finalize = () => {
@@ -502,40 +454,23 @@ function parseTable(rawText: string, metadata: any) {
 
     switch (state) {
       case 'QUESTION_ENGLISH':
-        if (GURMUKHI_REGEX.test(trimmed)) {
-          state = 'QUESTION_PUNJABI';
-          currentQ.punjabiQuestion = trimmed;
-        } else if (trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2) {
-          state = 'TABLE_CONTENT';
-          handleRow(currentQ, trimmed);
-        } else if (trimmed) {
-          currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
-        }
+        if (GURMUKHI_REGEX.test(trimmed)) { state = 'QUESTION_PUNJABI'; currentQ.punjabiQuestion = trimmed; }
+        else if (trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2) { state = 'TABLE_CONTENT'; handleRow(currentQ, trimmed); }
+        else if (trimmed) { currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed; }
         break;
       case 'QUESTION_PUNJABI':
-        if (trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2) {
-          state = 'TABLE_CONTENT';
-          handleRow(currentQ, trimmed);
-        } else if (trimmed) {
-          currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
-        }
+        if (trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2) { state = 'TABLE_CONTENT'; handleRow(currentQ, trimmed); }
+        else if (trimmed) { currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed; }
         break;
       case 'TABLE_CONTENT':
         const headerCount = currentQ.tableContent.headers.length;
         const isGrid = trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2 || (headerCount > 0 && trimmed.split(/\s+/).length === headerCount);
         if (isGrid) handleRow(currentQ, trimmed);
-        else if (trimmed) {
-          state = 'ACTUAL_QUESTION_ENGLISH';
-          currentQ.englishDiagramQuestion = trimmed;
-        }
+        else if (trimmed) { state = 'ACTUAL_QUESTION_ENGLISH'; currentQ.englishDiagramQuestion = trimmed; }
         break;
       case 'ACTUAL_QUESTION_ENGLISH':
-        if (GURMUKHI_REGEX.test(trimmed)) {
-          state = 'ACTUAL_QUESTION_PUNJABI';
-          currentQ.punjabiDiagramQuestion = trimmed;
-        } else if (trimmed) {
-          currentQ.englishDiagramQuestion += (currentQ.englishDiagramQuestion ? '\n' : '') + trimmed;
-        }
+        if (GURMUKHI_REGEX.test(trimmed)) { state = 'ACTUAL_QUESTION_PUNJABI'; currentQ.punjabiDiagramQuestion = trimmed; }
+        else if (trimmed) { currentQ.englishDiagramQuestion += (currentQ.englishDiagramQuestion ? '\n' : '') + trimmed; }
         break;
       case 'ACTUAL_QUESTION_PUNJABI':
         if (trimmed) currentQ.punjabiDiagramQuestion += (currentQ.punjabiDiagramQuestion ? '\n' : '') + trimmed;
@@ -548,14 +483,10 @@ function parseTable(rawText: string, metadata: any) {
         if (match) currentQ.correctAnswer = match[0].toUpperCase();
         break;
       case 'EXPLANATION_ENGLISH':
-        const clean = trimmed.replace(/^(?:Explanation|Solution|ਵਿਆਖਿਆ|ਵਿਆਖਿਆ|व्याख्या|Rationale|Answer|Correct Answer|Official Key)\s*[:\-]?\s*/i, '').trim();
+        const clean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
         if (clean) {
-          if (GURMUKHI_REGEX.test(clean)) {
-            state = 'EXPLANATION_PUNJABI';
-            currentQ.punjabiExplanation = clean;
-          } else {
-            currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + clean;
-          }
+          if (GURMUKHI_REGEX.test(clean)) { state = 'EXPLANATION_PUNJABI'; currentQ.punjabiExplanation = clean; }
+          else { currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + clean; }
         }
         break;
       case 'EXPLANATION_PUNJABI':
@@ -701,3 +632,4 @@ export function validateMCQSchema(q: any): { errors: string[], warnings: string[
   if (!q.correctAnswer) errors.push("Answer missing.");
   return { errors, warnings };
 }
+
