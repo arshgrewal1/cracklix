@@ -21,7 +21,8 @@ import {
   Info, 
   Zap, 
   Layers,
-  AlertTriangle
+  AlertTriangle,
+  ArrowUp
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy, updateDoc, increment } from "firebase/firestore"
@@ -30,24 +31,21 @@ import { Board, Subject } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 import { AdminPageHeader } from "@/components/admin"
-import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat, ParserMode, isQuestionStart } from "@/lib/parser"
+import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat, isQuestionStart } from "@/lib/parser"
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
+  { label: "Reasoning & Logic", value: "REASONING" },
   { label: "Current Affairs (English + Punjabi)", value: "CURRENT_AFFAIRS" },
   { label: "Simple Bilingual MCQ (Eng + Pun/Hin)", value: "BILINGUAL_MCQ" },
   { label: "English Only MCQ", value: "ENGLISH_ONLY" },
   { label: "Punjabi Only MCQ", value: "PUNJABI_ONLY" },
-  { label: "Mathematics Hub", value: "MATHEMATICS" },
-  { label: "Reasoning & Logic", value: "REASONING" },
-  { label: "Diagram / Image Based", value: "DIAGRAM" },
-  { label: "Table Based Hub", value: "TABLE" },
-  { label: "Graph / Chart Based", value: "GRAPH" },
-  { label: "Match the Following", value: "MATCHING" },
-  { label: "Assertion & Reason", value: "ASSERTION" },
-  { label: "Fill in the Blank", value: "FILL_BLANK" },
-  { label: "True / False", value: "TRUE_FALSE" }
+  { label: "Mathematics Hub", value: "MATHEMATICS" }
 ];
 
+/**
+ * @fileOverview Modular Industrial Ingestion Hub v41.0.
+ * FIXED: Restored missing action buttons to header and optimized layout for long audits.
+ */
 export default function BulkIngestionPage() {
   const router = useRouter()
   const db = useFirestore()
@@ -62,7 +60,7 @@ export default function BulkIngestionPage() {
     subjectId: "",
     secondaryLanguage: "punjabi" as "punjabi" | "hindi" | "english" | "punjabi_only" | "hindi_only",
     difficulty: "Medium" as any,
-    parserFormat: "ENGLISH_ONLY" as ParserFormat
+    parserFormat: "REASONING" as ParserFormat
   })
 
   const [rawText, setRawText] = useState("")
@@ -84,10 +82,7 @@ export default function BulkIngestionPage() {
       console.log("[DEBUG_INGESTION] Raw Input Length:", rawText.length);
 
       const sanitizedText = preprocessText(rawText);
-      console.log("[DEBUG_INGESTION] Input After Preprocessing (Snippet):", sanitizedText.slice(0, 100));
       
-      // SHARED VALIDATION PROTOCOL: Verify if any question markers exist
-      // FIXED: Added trim() to each line to ensure line endings don't break regex matching
       const lines = sanitizedText.split('\n');
       const hasAnyQuestion = lines.some(line => isQuestionStart(line.trim()));
       
@@ -175,14 +170,20 @@ export default function BulkIngestionPage() {
   return (
     <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-12">
       
+      {/* 1. HEADER ACTION BAR */}
       <AdminPageHeader
         icon={ClipboardList}
         label="Modular Industrial Ingestion"
         title="MCQ Ingestion Hub"
         subtitle="Resilient extraction for English and Bilingual nodes."
       >
-        <div className="flex gap-4 w-full md:w-auto shrink-0">
-           <button onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50 transition-all">Reset Staging</button>
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto shrink-0">
+           <button 
+             onClick={() => setStagedQuestions([])} 
+             className="h-12 md:h-14 px-6 rounded-xl border border-slate-200 font-bold text-[11px] uppercase tracking-tight shadow-sm bg-white hover:bg-slate-50 transition-all"
+           >
+             Reset Staging
+           </button>
            <Button 
             onClick={handleLocalParse} 
             disabled={isProcessing} 
@@ -202,8 +203,9 @@ export default function BulkIngestionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
+        {/* 2. CONFIGURATION PANEL */}
         <div className="lg:col-span-5 space-y-8">
-           <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
+           <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden sticky top-24">
               <div className="space-y-8">
                  <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                     <Braces className="h-6 w-6 text-primary" />
@@ -280,13 +282,22 @@ export default function BulkIngestionPage() {
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
                         placeholder="Paste Q1 questions here..."
-                        className="min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
+                        className="min-h-[400px] md:min-h-[500px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>
+                 
+                 <Button 
+                    onClick={handleLocalParse} 
+                    disabled={isProcessing || !rawText.trim()} 
+                    className="w-full h-16 bg-primary hover:bg-blue-700 text-white rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-2xl gap-3 border-none active:scale-95 transition-all"
+                 >
+                    {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Zap className="h-6 w-6 text-white fill-current" />} Initialize Ingestion
+                 </Button>
               </div>
            </Card>
         </div>
 
+        {/* 3. AUDIT STAGING AREA */}
         <div className="lg:col-span-7 space-y-8">
            <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-5">
@@ -360,6 +371,24 @@ export default function BulkIngestionPage() {
                        <p className="font-bold text-3xl uppercase tracking-[0.4em]">Staging Hub Empty</p>
                        <p className="text-sm font-bold uppercase tracking-widest text-primary">Awaiting deterministic format parsing</p>
                     </div>
+                 </div>
+              )}
+              
+              {stagedQuestions.length > 5 && (
+                 <div className="flex flex-col md:flex-row gap-4 pt-10">
+                    <Button 
+                       onClick={handleFinalCommit} 
+                       disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
+                       className="flex-1 h-16 md:h-20 bg-primary hover:bg-blue-700 text-white rounded-3xl font-black uppercase text-[11px] tracking-widest gap-3 shadow-4xl border-none active:scale-95 transition-all"
+                    >
+                       {isSyncing ? <Loader2 className="h-6 w-6 animate-spin" /> : <CheckCircle2 className="h-6 w-6" />} Commit Verified Bank
+                    </Button>
+                    <button 
+                      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                      className="h-16 md:h-20 px-8 rounded-3xl bg-slate-50 border border-slate-200 text-slate-400 hover:text-[#0F172A] transition-all flex items-center justify-center gap-2 font-black uppercase text-[9px] tracking-widest"
+                    >
+                      <ArrowUp className="h-4 w-4" /> Top
+                    </button>
                  </div>
               )}
            </div>
