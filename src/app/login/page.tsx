@@ -10,7 +10,7 @@ import Logo from "@/components/brand/Logo"
 import { 
   Mail, 
   Lock, 
-  User, 
+  User as UserIcon, 
   Eye, 
   EyeOff, 
   Loader2, 
@@ -21,14 +21,15 @@ import {
   Users,
   ChevronLeft
 } from "lucide-react"
-import { useAuth, useFirestore, useUser } from "@/firebase"
+import { useAuth, useFirestore, useUser, useDoc } from "@/firebase"
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
   signInWithPopup, 
   GoogleAuthProvider,
   sendPasswordResetEmail,
-  updateProfile
+  updateProfile,
+  User
 } from "firebase/auth"
 import { doc, setDoc, getDoc, serverTimestamp, updateDoc, increment } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
@@ -118,7 +119,6 @@ function LoginContent() {
 
   useEffect(() => {
     if (!authLoading && user) {
-      // Proceed with redirect as soon as user is authenticated
       const profileName = profile?.name || user.displayName || name || "Aspirant";
       syncGuestData(user.uid, profileName, user.email || "").then(() => {
          router.replace(returnUrl);
@@ -283,7 +283,7 @@ function LoginContent() {
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-bold text-slate-400 ml-1">Full Name</Label>
                   <div className="relative group">
-                    <User className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
+                    <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
                     <Input value={name} onChange={(e) => setName(e.target.value)} required className="h-14 md:h-16 rounded-2xl bg-slate-50 border-none text-[#0F172A] font-bold pl-12 md:pl-14 shadow-inner" placeholder="e.g. Arsh Grewal" />
                   </div>
                 </div>
