@@ -19,8 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v60.0.
- * FIXED: Implemented identical bilingual option suppression (numeric deduplication).
+ * @fileOverview Precision Bilingual Question Hub v61.0.
+ * FIXED: Series/Number Line lines are now automatically detected and moved after Punjabi text.
+ * STYLING: Enhanced prominent display for Reasoning sequences with Primary Blue accents.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -64,6 +65,39 @@ export default function QuestionRenderer({
   const englishQ = q.englishQuestion || q.questionEn || q.questionText || "";
   const punjabiQ = q.punjabiQuestion || q.questionPa || "";
   const hindiQ = q.hindiQuestion || q.questionHi || "";
+
+  // DETERMINISTIC SERIES DETECTION (Number Line Protocol)
+  const isSeriesLine = (line: string) => {
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+    
+    // Numeric sequence: 2, 6, 12... or 121 : 11 :: 169 : ?
+    const hasDigits = /\d/.test(trimmed);
+    const hasSeriesSymbols = /[,\?::]/.test(trimmed);
+    const wordMatch = trimmed.match(/[a-zA-Z]{2,}/g);
+    const wordCount = wordMatch ? wordMatch.length : 0;
+    
+    // Alphabetic series: A, C, F, J, ?
+    const alphabeticSeries = /^[A-Z](?:\s*,\s*[A-Z])+\s*,\s*\?$/i.test(trimmed);
+    
+    // Logic: Symbolic structure with very few "standard" dictionary words
+    return (hasDigits && (wordCount <= 2 || hasSeriesSymbols)) || alphabeticSeries;
+  };
+
+  const splitQuestionContent = (text: string) => {
+    const lines = text.split('\n');
+    const textLines = lines.filter(l => !isSeriesLine(l));
+    const seriesLines = lines.filter(l => isSeriesLine(l));
+    return {
+      text: textLines.join('\n').trim(),
+      series: seriesLines.join('\n').trim()
+    };
+  };
+
+  const enProc = splitQuestionContent(englishQ);
+  const localProc = splitQuestionContent(showPa ? punjabiQ : showHi ? hindiQ : "");
+
+  const combinedSeries = [enProc.series, localProc.series].filter(Boolean).join('\n').trim();
   
   const OPT_LABELS = ['A', 'B', 'C', 'D'];
 
@@ -91,21 +125,30 @@ export default function QuestionRenderer({
       )}
 
       {/* QUESTION STATEMENTS */}
-      <div className={cn("space-y-4 px-1", showSolution ? "mb-6" : "mb-10")}>
-         {showEn && englishQ && (
+      <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
+         {/* 1. English Instruction Text */}
+         {showEn && enProc.text && (
            <div className={cn("font-[800] text-[#0F172A] antialiased leading-snug md:leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
-             <MathText text={englishQ} />
+             <MathText text={enProc.text} />
            </div>
          )}
-         {(showPa && punjabiQ) ? (
+
+         {/* 2. Punjabi/Hindi Instruction Text */}
+         {localProc.text && (
            <div className={cn("font-bold text-[#0F172A] antialiased leading-snug md:leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
-             <MathText text={punjabiQ} />
+             <MathText text={localProc.text} />
            </div>
-         ) : (showHi && hindiQ) ? (
-           <div className={cn("font-bold text-[#0F172A] antialiased leading-snug md:leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
-             <MathText text={hindiQ} />
+         )}
+
+         {/* 3. Number Line / Reasoning Series (Always at Bottom) */}
+         {combinedSeries && (
+           <div className={cn(
+             "font-black text-primary antialiased leading-snug md:leading-relaxed break-words py-5 border-l-4 border-primary/30 pl-6 bg-primary/5 rounded-r-[1.5rem] shadow-inner mt-4", 
+             showSolution ? "text-base md:text-xl" : "text-[22px] md:text-4xl"
+           )}>
+             <MathText text={combinedSeries} />
            </div>
-         ) : null}
+         )}
       </div>
 
       {/* OPTIONS MATRIX */}
@@ -117,7 +160,7 @@ export default function QuestionRenderer({
             const hi = q[`option${key}Hindi`];
             const isSelected = selectedAnswer === idx;
             
-            // DEDUPLICATION: Only show local script if it differs from English text (e.g. avoid showing "38" twice)
+            // DEDUPLICATION: Suppress local script if numeric/identical
             const showPaLine = showPa && pa && pa.trim() !== en?.trim();
             const showHiLine = showHi && hi && hi.trim() !== en?.trim();
 
@@ -161,13 +204,12 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      {/* UNIFIED SOLUTION HUB - INDUSTRIAL STANDARD */}
+      {/* UNIFIED SOLUTION HUB */}
       {showSolution && (
         <div className="mt-10 border border-slate-100 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-slate-50/50 shadow-2xl relative">
            <div className="absolute top-0 left-0 w-2 md:w-3 h-full bg-emerald-500" />
            
            <div className="p-8 md:p-14 space-y-10">
-              {/* PART 1: CORRECT ANSWER NODE */}
               <div className="space-y-4">
                  <div className="flex items-center gap-3 font-[900] text-[11px] md:text-sm text-emerald-600 tracking-[0.1em]">
                     <ShieldCheck className="h-5 w-5" /> Verified Answer
@@ -186,7 +228,6 @@ export default function QuestionRenderer({
 
               <div className="h-px w-full bg-slate-200/50 ml-8" />
 
-              {/* PART 2: RATIONALE NODE */}
               <div className="space-y-6">
                  <div className="flex items-center gap-3 font-[900] text-[11px] md:text-sm text-slate-400 tracking-[0.1em]">
                     <Info className="h-5 w-5" /> Institutional Rationale
@@ -225,3 +266,4 @@ export default function QuestionRenderer({
     </div>
   );
 }
+
