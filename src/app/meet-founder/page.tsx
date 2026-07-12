@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from "react";
@@ -27,7 +26,7 @@ import { doc } from "firebase/firestore";
 
 /**
  * @fileOverview Official Meet the Founder Page v3.0.
- * UPDATED: Connected to Firestore settings for dynamic content management.
+ * UPDATED: Fully synchronized with System Portal data.
  */
 export default function MeetFounderPage() {
   const db = useFirestore();
@@ -42,7 +41,7 @@ export default function MeetFounderPage() {
     mission: settings?.founderMission || "To build Punjab's smartest, most trusted and student-first exam preparation platform where every aspirant gets access to quality mock tests and a premium preparation experience.",
     commitment: settings?.founderCommitment || "I am committed to continuously evolving this platform into Punjab's most trusted learning node. My goal is to ensure that quality preparation is accessible, affordable, and accurate for everyone—from Bathinda to Amritsar.",
     buildingSince: settings?.founderBuildingSince || "19 July 2026",
-    email: settings?.founderEmail || "cracklixhelp@gmail.com"
+    email: settings?.founderEmail || settings?.supportEmail || "cracklixhelp@gmail.com"
   };
 
   return (
@@ -104,7 +103,11 @@ export default function MeetFounderPage() {
         <section className="py-20 md:py-32 bg-white">
           <div className="container mx-auto px-4 md:px-8 max-w-4xl space-y-12 md:space-y-20">
             <div className="prose prose-slate max-w-none space-y-8 text-lg md:text-xl text-slate-600 leading-relaxed font-medium">
-              <div dangerouslySetInnerHTML={{ __html: founder.bio.split('\n').map(p => `<p>${p}</p>`).join('') }} />
+              <div className="space-y-6">
+                {founder.bio.split('\n').filter(Boolean).map((p, i) => (
+                   <p key={i}>{p}</p>
+                ))}
+              </div>
               
               <div className="bg-[#0F172A] p-10 md:p-16 rounded-[3rem] text-white space-y-6 relative overflow-hidden not-prose shadow-2xl">
                  <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12"><Star className="h-48 w-48 text-primary fill-primary" /></div>
@@ -171,7 +174,7 @@ function FeatureChip({ icon: Icon, label }: { icon: any, label: string }) {
   );
 }
 
-function MinimalStat({ value, label, icon: Icon, subValue }: { value: string, label: string, icon: any, subValue?: string }) {
+function MinimalStat({ value, label, icon: Icon }: { value: string, label: string, icon: any }) {
   return (
     <div className="text-center space-y-3 group">
        <div className="h-12 w-12 md:h-16 md:w-16 bg-white rounded-2xl md:rounded-3xl border border-slate-100 shadow-sm mx-auto flex items-center justify-center text-slate-300 group-hover:text-primary transition-all group-hover:scale-110">
@@ -180,7 +183,6 @@ function MinimalStat({ value, label, icon: Icon, subValue }: { value: string, la
        <div className="space-y-1">
           <p className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tighter leading-none">
             {value}
-            {subValue && <span className="text-xs md:text-lg text-slate-400 ml-1 block md:inline">{subValue}</span>}
           </p>
           <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
        </div>

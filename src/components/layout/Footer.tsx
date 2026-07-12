@@ -1,6 +1,6 @@
 'use client';
 
-import React from "react";
+import React, { useMemo } from "react";
 import Link from "next/link";
 import {
   Mail,
@@ -20,13 +20,27 @@ import {
 } from "@/lib/constants";
 import PLATFORM_VERSION from "@/lib/version";
 import { Badge } from "@/components/ui/badge";
+import { useDoc, useFirestore } from "@/firebase";
+import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Footer Hub v21.0.
- * UPDATED: Normalized casing for category headers.
+ * @fileOverview Institutional Footer Hub v22.0.
+ * UPDATED: Synchronized with dynamic system settings.
  */
 export default function Footer() {
+  const db = useFirestore();
+  const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
+  const { data: settings } = useDoc<any>(settingsRef);
+
   const currentYear = new Date().getFullYear();
+
+  const info = {
+    email: settings?.supportEmail || SUPPORT_EMAIL,
+    phone: settings?.supportPhone || SUPPORT_PHONE,
+    telegram: settings?.telegramUrl || TELEGRAM_GROUP,
+    instagram: settings?.instagramUrl || INSTAGRAM_PROFILE,
+    footerText: settings?.footerText || "Punjab's most advanced government exam portal."
+  };
 
   return (
     <footer className="border-t border-slate-50 bg-[#020617] font-body text-white">
@@ -42,11 +56,11 @@ export default function Footer() {
               imgClassName="h-full w-auto"
             />
             <p className="max-w-[320px] text-[15px] leading-relaxed text-slate-400 font-medium tracking-tight">
-              Punjab&apos;s smart exam preparation platform for every aspirant.
+              {info.footerText}
             </p>
             <div className="flex items-center gap-4 pt-2">
-              <SocialIcon href={TELEGRAM_GROUP} icon={<MessageCircle className="h-5 w-5" />} />
-              <SocialIcon href={INSTAGRAM_PROFILE} icon={<Instagram className="h-5 w-5" />} />
+              <SocialIcon href={info.telegram} icon={<MessageCircle className="h-5 w-5" />} />
+              <SocialIcon href={info.instagram} icon={<Instagram className="h-5 w-5" />} />
               <SocialIcon href="/download" icon={<Download className="h-5 w-5" />} />
             </div>
           </div>
@@ -57,7 +71,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <FooterLink href="/">Home</FooterLink>
               <FooterLink href="/exams">Exams</FooterLink>
-              <FooterLink href="/download">Download App</FooterLink>
+              <FooterLink href="/install">Download App</FooterLink>
               <FooterLink href="/contact">Contact</FooterLink>
               <FooterLink href="/privacy">Privacy Policy</FooterLink>
             </ul>
@@ -70,7 +84,7 @@ export default function Footer() {
               <FooterLink href="/mocks">Mock Tests</FooterLink>
               <FooterLink href="/pyqs">Previous Papers</FooterLink>
               <FooterLink href="/notes">Study Material</FooterLink>
-              <FooterLink href="/about">About Arsh Grewal</FooterLink>
+              <FooterLink href="/meet-founder">Meet Arsh Grewal</FooterLink>
             </ul>
           </div>
 
@@ -80,14 +94,14 @@ export default function Footer() {
             <div className="space-y-4">
               <div className="flex items-center gap-3 text-[14px] md:text-[15px] text-slate-400">
                 <Phone className="h-4 w-4 text-primary shrink-0" />
-                <a href={`tel:${SUPPORT_PHONE}`} className="hover:text-white transition-colors font-bold whitespace-nowrap">
-                  {SUPPORT_PHONE}
+                <a href={`tel:${info.phone.replace(/\D/g, '')}`} className="hover:text-white transition-colors font-bold whitespace-nowrap">
+                  {info.phone}
                 </a>
               </div>
               <div className="flex items-center gap-3 text-[14px] md:text-[15px] text-slate-400">
                 <Mail className="h-4 w-4 text-primary shrink-0" />
-                <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-white transition-colors font-bold break-all md:break-normal">
-                  {SUPPORT_EMAIL}
+                <a href={`mailto:${info.email}`} className="hover:text-white transition-colors font-bold break-all md:break-normal">
+                  {info.email}
                 </a>
               </div>
             </div>

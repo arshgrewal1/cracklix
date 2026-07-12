@@ -1,5 +1,6 @@
 "use client"
 
+import React, { useMemo } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Mail, Phone, MapPin, Send, MessageSquare, ShieldCheck } from "lucide-react"
@@ -9,12 +10,19 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { useToast } from "@/hooks/use-toast"
 import { useState } from "react"
+import { useDoc, useFirestore } from "@/firebase"
+import { doc } from "firebase/firestore"
 
 /**
- * @fileOverview Institutional Support Hub v2.0 (High Density).
+ * @fileOverview Institutional Support Hub v2.1.
+ * UPDATED: Dynamically pulls contact info from System Portal.
  */
 
 export default function ContactPage() {
+  const db = useFirestore()
+  const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db])
+  const { data: settings } = useDoc<any>(settingsRef)
+
   const { toast } = useToast()
   const [sending, setSending] = useState(false)
 
@@ -27,6 +35,12 @@ export default function ContactPage() {
       const form = e.target as HTMLFormElement
       form.reset()
     }, 1500)
+  }
+
+  const supportInfo = {
+    email: settings?.supportEmail || "cracklixhelp@gmail.com",
+    phone: settings?.supportPhone || "+91 98881 88602",
+    address: settings?.address || "Shergarh, Punjab"
   }
 
   return (
@@ -49,11 +63,11 @@ export default function ContactPage() {
             </div>
 
             <div className="space-y-6 md:space-y-10">
-               <ContactInfo icon={<Mail className="h-4 w-4 md:h-5 md:h-5" />} label="Email Node" value="cracklixhelp@gmail.com" />
-               <a href="https://wa.me/919888188602" target="_blank" className="block group">
-                 <ContactInfo icon={<Phone className="h-4 w-4 md:h-5 md:h-5" />} label="WhatsApp Hub" value="+91 98881 88602" />
+               <ContactInfo icon={<Mail className="h-4 w-4 md:h-5 md:h-5" />} label="Email Node" value={supportInfo.email} />
+               <a href={`https://wa.me/${supportInfo.phone.replace(/\D/g, '')}`} target="_blank" className="block group">
+                 <ContactInfo icon={<Phone className="h-4 w-4 md:h-5 md:h-5" />} label="WhatsApp Hub" value={supportInfo.phone} />
                </a>
-               <ContactInfo icon={<MapPin className="h-4 w-4 md:h-5 md:h-5" />} label="HQs Node" value="Shergarh, Punjab" />
+               <ContactInfo icon={<MapPin className="h-4 w-4 md:h-5 md:h-5" />} label="HQs Node" value={supportInfo.address} />
             </div>
 
             <div className="pt-8 border-t border-slate-100 flex items-center gap-3 text-emerald-600">
@@ -63,7 +77,7 @@ export default function ContactPage() {
           </div>
 
           <div className="lg:col-span-7">
-            <Card className="border-none shadow-4xl rounded-[2rem] md:rounded-[3.5rem] bg-white overflow-hidden">
+            <Card className="border-none shadow-4xl rounded-[2rem] md:rounded-[3rem] bg-white overflow-hidden">
                <div className="h-1.5 w-full bg-primary" />
                <CardContent className="p-6 md:p-16">
                   <form onSubmit={handleSubmit} className="space-y-6">

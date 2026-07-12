@@ -48,8 +48,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Administrative Portal v19.5.
- * FIXED: Implemented missing content for Founder, Distribution, and Social tabs.
+ * @fileOverview Institutional Administrative Portal v20.0.
+ * FIXED: Full implementation of all tabs (Founder, Distribution, Social).
  */
 
 export default function AdminSettings() {
