@@ -1,6 +1,6 @@
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v15.0.
- * FIXED: Implemented strict formatting preservation for English and Punjabi.
+ * @fileOverview Institutional Deterministic Ingestion Hub v18.0.
+ * FIXED: Implemented strict Reasoning Parser with multiline support and no math labels.
  * RULES: Preserve original case, internal spacing, line breaks, and Unicode symbols.
  * WHITESPACE: Trim only leading/trailing of the whole block; never collapse internal spaces.
  */
@@ -105,7 +105,9 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 
     const format: ParserFormat = metadata.parserFormat || 'BILINGUAL_MCQ';
 
-    if (format === 'ENGLISH_ONLY' || format === 'MATHEMATICS') {
+    if (format === 'REASONING') {
+       q = parseReasoning(trimmedBlock, q, metadata.secondaryLanguage);
+    } else if (format === 'ENGLISH_ONLY' || format === 'MATHEMATICS') {
        q = parseDeterministicEnglish(trimmedBlock, q);
     } else {
        q = parseDeterministicBilingual(trimmedBlock, q, metadata.secondaryLanguage);
@@ -115,6 +117,91 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   });
 
   return { questions };
+}
+
+/**
+ * REASONING PARSER v2.0
+ * Strictly multiline, zero math preprocessing, exact source preservation.
+ */
+function parseReasoning(block: string, q: any, secondaryLang: string) {
+  const lines = block.split('\n');
+  const punjabiRegex = /[\u0A00-\u0A7F]/;
+  const hindiRegex = /[\u0900-\u097F]/;
+  const scriptRegex = secondaryLang === 'hindi' ? hindiRegex : punjabiRegex;
+  const localKey = secondaryLang === 'hindi' ? 'hindiQuestion' : 'punjabiQuestion';
+  const expLocalKey = secondaryLang === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
+
+  let state: 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION' = 'QUESTION';
+  
+  const englishQLines: string[] = [];
+  const localQLines: string[] = [];
+  const englishExpLines: string[] = [];
+  const localExpLines: string[] = [];
+  
+  const optMarkers = ['A', 'B', 'C', 'D'];
+  const ansMarkers = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ"];
+  const explMarkers = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
+
+  const qMarkerRegex = /^(?:Q\d+|Question\s*\d+|QUESTION\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i;
+
+  lines.forEach((line, idx) => {
+    const trimmedLine = line.trim();
+    
+    // DETECTION: Transition to Options
+    if (trimmedLine.match(/^\(?[A-E][\)\.\s:]/i)) {
+      state = 'OPTIONS';
+    } 
+    // DETECTION: Transition to Answer
+    else if (ansMarkers.some(m => trimmedLine.toLowerCase().includes(m.toLowerCase()))) {
+      state = 'ANSWER';
+    }
+    // DETECTION: Transition to Explanation
+    else if (explMarkers.some(m => trimmedLine.toLowerCase().includes(m.toLowerCase()))) {
+      state = 'EXPLANATION';
+    }
+
+    if (state === 'QUESTION') {
+      const cleanLine = idx === 0 ? line.replace(qMarkerRegex, '') : line;
+      if (cleanLine.trim() || (idx > 0 && lines[idx-1].trim() && idx < lines.length -1 && lines[idx+1].trim())) {
+        if (scriptRegex.test(cleanLine)) {
+          localQLines.push(cleanLine);
+        } else {
+          englishQLines.push(cleanLine);
+        }
+      }
+    } else if (state === 'OPTIONS') {
+      optMarkers.forEach(opt => {
+        const regex = new RegExp(`^\\(?${opt}[\\)\\.\\s:]\\s*(.*)`, 'i');
+        const match = line.match(regex);
+        if (match) {
+          const content = match[1];
+          if (scriptRegex.test(content)) {
+            const optLocalKey = secondaryLang === 'hindi' ? `option${opt}Hindi` : `option${opt}Punjabi`;
+            q[optLocalKey] = content.trim();
+          } else {
+            q[`option${opt}English`] = content.trim();
+          }
+        }
+      });
+    } else if (state === 'ANSWER') {
+      const match = trimmedLine.match(/(?:Answer|Official Key|Correct Answer|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ)\s*[:\-]?\s*\(?([A-D])\)?/i);
+      if (match) q.correctAnswer = match[1].toUpperCase();
+    } else if (state === 'EXPLANATION') {
+      const text = line.replace(new RegExp(`^(?:${explMarkers.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
+      if (scriptRegex.test(text)) {
+        localExpLines.push(text);
+      } else {
+        englishExpLines.push(text);
+      }
+    }
+  });
+
+  q.englishQuestion = englishQLines.join('\n').trim();
+  q[localKey] = localQLines.join('\n').trim();
+  q.englishExplanation = sanitizeExplanation(englishExpLines.join('\n'));
+  q[expLocalKey] = sanitizeExplanation(localExpLines.join('\n'));
+
+  return q;
 }
 
 function parseDeterministicEnglish(block: string, q: any) {
@@ -270,4 +357,3 @@ export function validateMCQSchema(q: any): string[] {
 
   return errors;
 }
-
