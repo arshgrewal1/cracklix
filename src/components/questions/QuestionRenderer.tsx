@@ -20,8 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v50.0.
- * FIXED: Professional table grid styling and enhanced bilingual solution display.
+ * @fileOverview Institutional Question Renderer v52.0.
+ * FIXED: Implemented multi-part rendering sequence for Graph and Diagram content.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -87,19 +87,21 @@ export default function QuestionRenderer({
       )}
 
       <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
+         {/* SECTION 1: INTRO EN */}
          {showEn && q.englishQuestion && (
            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
              <MathText text={q.englishQuestion} />
            </div>
          )}
          
+         {/* SECTION 2: INTRO LOCAL */}
          {showLocal && q.punjabiQuestion && (
            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
              <MathText text={q.punjabiQuestion} />
            </div>
          )}
 
-         {/* TABLE RENDERER - HIGH FIDELITY GRID */}
+         {/* SECTION 3: VISUAL CONTENT (TABLE / DIAGRAM / GRAPH) */}
          {q.tableContent?.rows?.length > 0 && (
            <div className="my-8 overflow-x-auto rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
              <Table className="w-full border-collapse">
@@ -130,15 +132,23 @@ export default function QuestionRenderer({
             </div>
          )}
 
-         {showEn && q.englishDiagramQuestion && (
-            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
-              <MathText text={q.englishDiagramQuestion} />
+         {q.graphContent && (
+            <div className="my-6 p-6 md:p-10 bg-slate-50 text-[#0F172A] rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[10px] md:text-sm overflow-x-auto whitespace-pre leading-relaxed shadow-inner border border-slate-200 relative group">
+               <div className="absolute top-2 right-4 opacity-20 pointer-events-none uppercase text-[8px] font-black tracking-widest">Graph Registry</div>
+               {q.graphContent}
             </div>
          )}
 
-         {showLocal && q.punjabiDiagramQuestion && (
+         {/* SECTION 4: ACTUAL QUESTION (SUFFIX) */}
+         {showEn && (q.englishDiagramQuestion || q.englishActualQuestion) && (
+            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
+              <MathText text={q.englishDiagramQuestion || q.englishActualQuestion} />
+            </div>
+         )}
+
+         {showLocal && (q.punjabiDiagramQuestion || q.punjabiActualQuestion) && (
             <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
-              <MathText text={q.punjabiDiagramQuestion} />
+              <MathText text={q.punjabiDiagramQuestion || q.punjabiActualQuestion} />
             </div>
          )}
       </div>

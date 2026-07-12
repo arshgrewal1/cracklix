@@ -254,6 +254,9 @@ export interface Question {
   punjabiQuestionSuffix?: string;
   hindiQuestionSuffix?: string;
   diagramContent?: string;
+  graphContent?: string;
+  englishActualQuestion?: string;
+  punjabiActualQuestion?: string;
   tableContent?: TableContent;
   optionAEnglish: string;
   optionAPunjabi?: string;
@@ -270,7 +273,7 @@ export interface Question {
   optionEEnglish?: string;
   optionEPunjabi?: string;
   optionEHindi?: string;
-  correctAnswer: string; // "A" | "B" etc or index
+  correctAnswer: string; 
   englishExplanation?: string;
   punjabiExplanation?: string;
   hindiExplanation?: string;
@@ -286,7 +289,7 @@ export interface Question {
   session?: string;
   marks: number;
   negativeMarks: number;
-  estimatedTime?: number; // in seconds
+  estimatedTime?: number; 
   tags: string[];
   status: ContentStatus;
   visibility: 'PUBLIC' | 'PRIVATE';

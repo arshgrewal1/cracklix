@@ -1,8 +1,8 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v51.0.
- * FIXED: Table parser state machine leakage (Explanation into Question).
- * FIXED: Multi-line question suffix support for table-based questions.
+ * @fileOverview Institutional Deterministic Ingestion Hub v52.0.
+ * FIXED: Implemented dedicated Graph Parser with 9-state machine.
+ * FIXED: Decoupled Graph segmentation from text-based logic.
  */
 
 export type ParserFormat = 
@@ -43,8 +43,8 @@ const NOISE_PATTERNS = [
 ];
 
 const ANS_MARKERS = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ"];
-const EXPL_MARKERS = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
-const ACTUAL_QUESTION_KEYWORDS = /^\s*(Which|What|Who|How|Where|When|Identify|Choose|Find|Observe|Count|Select)\s/i;
+const EXPL_MARKERS = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale", "ENGLISH EXPLANATION", "PUNJABI EXPLANATION"];
+const ACTUAL_QUESTION_KEYWORDS = /^\s*(Which|What|Who|How|Where|When|Identify|Choose|Find|Observe|Count|Select|During\s?which|How\s?many|How\s?much)\s/i;
 const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
 
 export function preprocessText(text: string): string {
@@ -70,10 +70,10 @@ function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: s
     { regex: /^\s*[\(]?(2)[\)\.]\s*(.*)/, val: 'B' },
     { regex: /^\s*[\(]?(3)[\)\.]\s*(.*)/, val: 'C' },
     { regex: /^\s*[\(]?(4)[\)\.]\s*(.*)/, val: 'D' },
-    { regex: /^\s*[①❶]\s*(.*)/, val: 'A' },
-    { regex: /^\s*[②❷]\s*(.*)/, val: 'B' },
-    { regex: /^\s*[③❸]\s*(.*)/, val: 'C' },
-    { regex: /^\s*[④❹]\s*(.*)/, val: 'D' }
+    { regex: /^\s*[①\u2776]\s*(.*)/, val: 'A' },
+    { regex: /^\s*[②\u2777]\s*(.*)/, val: 'B' },
+    { regex: /^\s*[③\u2778]\s*(.*)/, val: 'C' },
+    { regex: /^\s*[④\u2779]\s*(.*)/, val: 'D' }
   ];
 
   for (const p of patterns) {
@@ -81,6 +81,128 @@ function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: s
     if (match) return { opt: p.val as any, text: match[match.length - 1].trim() };
   }
   return null;
+}
+
+function parseGraph(rawText: string, metadata: any) {
+  const lines = rawText.split(/\r?\n/);
+  const questions: any[] = [];
+  let currentQ: any = null;
+  
+  // States: 
+  // INTRO_EN -> INTRO_PA -> GRAPH_CONTENT -> ACTUAL_EN -> ACTUAL_PA -> OPTIONS -> ANSWER -> EXPL_EN -> EXPL_PA
+  let state: 'INTRO_EN' | 'INTRO_PA' | 'GRAPH' | 'ACTUAL_EN' | 'ACTUAL_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL_EN' | 'EXPL_PA' = 'INTRO_EN';
+
+  const finalize = () => {
+    if (!currentQ) return;
+    questions.push(currentQ);
+    currentQ = null;
+    state = 'INTRO_EN';
+  };
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (isQuestionStart(line)) {
+      finalize();
+      currentQ = {
+        ...metadata,
+        id: `q-graph-${Math.random().toString(36).substr(2, 9)}`,
+        questionType: 'IMAGE_BASED',
+        englishQuestion: "", punjabiQuestion: "", graphContent: "",
+        englishActualQuestion: "", punjabiActualQuestion: "",
+        optionAEnglish: "", optionBEnglish: "", optionCEnglish: "", optionDEnglish: "",
+        correctAnswer: "", englishExplanation: "", punjabiExplanation: "",
+        status: 'PUBLISHED'
+      };
+      const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      if (content) currentQ.englishQuestion = content;
+      state = 'INTRO_EN';
+      return;
+    }
+
+    if (!currentQ) return;
+    
+    // Terminate on noise or metadata
+    const isNoise = NOISE_PATTERNS.some(p => p.test(trimmed));
+    const isSeparator = /^[-\s\.\*_=|+\/\\]{3,}$/.test(trimmed);
+    if (isNoise || isSeparator) {
+       if (state === 'EXPL_EN' || state === 'EXPL_PA') finalize();
+       return;
+    }
+
+    const opt = detectOptionMarker(line);
+    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+
+    if (opt) state = 'OPTIONS';
+    else if (isAns) state = 'ANSWER';
+    else if (isExpl) state = 'EXPL_EN';
+
+    // Graph transitions
+    const isGraphArtifact = /[│─┌┐└┘├┤┼┴┬→←↑↓▲▼★■●○|]/.test(trimmed);
+    const isLikelyData = trimmed.length > 0 && trimmed.length < 30 && !trimmed.includes(' ') && /[0-9]/.test(trimmed);
+    
+    if ((state === 'INTRO_EN' || state === 'INTRO_PA') && (isGraphArtifact || isLikelyData)) {
+       state = 'GRAPH';
+    }
+
+    // Question suffix detection after graph block
+    if (state === 'GRAPH' && ACTUAL_QUESTION_KEYWORDS.test(trimmed)) {
+       state = 'ACTUAL_EN';
+    }
+
+    switch (state) {
+      case 'INTRO_EN':
+        if (GURMUKHI_REGEX.test(trimmed)) {
+           state = 'INTRO_PA';
+           currentQ.punjabiQuestion = trimmed;
+        } else {
+           currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
+        }
+        break;
+      case 'INTRO_PA':
+        currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
+        break;
+      case 'GRAPH':
+        currentQ.graphContent += line + '\n';
+        break;
+      case 'ACTUAL_EN':
+        if (GURMUKHI_REGEX.test(trimmed)) {
+           state = 'ACTUAL_PA';
+           currentQ.punjabiActualQuestion = trimmed;
+        } else {
+           currentQ.englishActualQuestion += (currentQ.englishActualQuestion ? '\n' : '') + trimmed;
+        }
+        break;
+      case 'ACTUAL_PA':
+        currentQ.punjabiActualQuestion += (currentQ.punjabiActualQuestion ? '\n' : '') + trimmed;
+        break;
+      case 'OPTIONS':
+        if (opt) currentQ[`option${opt.opt}English`] = opt.text;
+        break;
+      case 'ANSWER':
+        const ansClean = trimmed.replace(/^(?:Answer|Official Key|Correct Answer|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ)\s*[:\-]?\s*/i, '').trim();
+        const match = ansClean.match(/[A-D]/i);
+        if (match) currentQ.correctAnswer = match[0].toUpperCase();
+        break;
+      case 'EXPL_EN':
+        const explClean = trimmed.replace(/^(?:Explanation|Solution|ਵਿਆਖਿਆ|ਵਿਆਖਿਆ|व्याख्या|Rationale|ENGLISH EXPLANATION|PUNJABI EXPLANATION)\s*[:\-]?\s*/i, '').trim();
+        if (explClean) {
+          if (GURMUKHI_REGEX.test(explClean)) {
+             state = 'EXPL_PA';
+             currentQ.punjabiExplanation = explClean;
+          } else {
+             currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + explClean;
+          }
+        }
+        break;
+      case 'EXPL_PA':
+        currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
+        break;
+    }
+  });
+
+  finalize();
+  return { questions };
 }
 
 function parseDiagram(rawText: string, metadata: any) {
@@ -194,8 +316,6 @@ function parseTable(rawText: string, metadata: any) {
   const questions: any[] = [];
   let currentQ: any = null;
   
-  // States:
-  // QUESTION_ENGLISH -> QUESTION_PUNJABI -> TABLE_CONTENT -> ACTUAL_QUESTION_ENGLISH -> ACTUAL_QUESTION_PUNJABI -> OPTIONS -> ANSWER -> EXPLANATION_ENGLISH -> EXPLANATION_PUNJABI
   let state: 'QUESTION_ENGLISH' | 'QUESTION_PUNJABI' | 'TABLE_CONTENT' | 'ACTUAL_QUESTION_ENGLISH' | 'ACTUAL_QUESTION_PUNJABI' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION_ENGLISH' | 'EXPLANATION_PUNJABI' = 'QUESTION_ENGLISH';
 
   const finalize = () => {
@@ -441,13 +561,14 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   if (metadata.parserFormat === 'DIAGRAM') return parseDiagram(rawText, metadata);
   if (metadata.parserFormat === 'REASONING') return parseReasoning(rawText, metadata);
   if (metadata.parserFormat === 'TABLE') return parseTable(rawText, metadata);
+  if (metadata.parserFormat === 'GRAPH') return parseGraph(rawText, metadata);
   return parseDeterministicBilingual(rawText, metadata);
 }
 
 export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion && !q.diagramContent && !q.tableContent?.rows?.length) errors.push("Question content missing.");
+  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion && !q.diagramContent && !q.graphContent && !q.tableContent?.rows?.length) errors.push("Question content missing.");
   const optCount = ['A', 'B', 'C', 'D'].filter(l => (q[`option${l}English`] || "").trim() || (q[`option${l}Punjabi`] || "").trim() || (q[`option${l}Hindi`] || "").trim()).length;
   if (optCount < 4) errors.push("Less than four options detected.");
   if (!q.correctAnswer) errors.push("Answer missing.");
