@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, Suspense, useEffect, useMemo, useCallback, useRef } from "react"
@@ -20,10 +19,9 @@ import {
   RefreshCw, 
   ClipboardList,
   Users,
-  FileText,
   ChevronLeft
 } from "lucide-react"
-import { useAuth, useFirestore, useUser, useDoc } from "@/firebase"
+import { useAuth, useFirestore, useUser } from "@/firebase"
 import { 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword, 
@@ -37,15 +35,9 @@ import { useToast } from "@/hooks/use-toast"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { motion } from "framer-motion"
 import { Checkbox } from "@/components/ui/checkbox"
-import Link from "next/link"
 import { Capacitor } from "@capacitor/core"
 import Image from "next/image"
 import { generateReferralCode } from "@/lib/referral"
-
-/**
- * @fileOverview Cracklix Premium Login Portal v96.0
- * UPDATED: Integrated incremental user counter for stats registry.
- */
 
 export default function LoginPage() {
   return (
@@ -125,12 +117,14 @@ function LoginContent() {
   }, [db, toast]);
 
   useEffect(() => {
-    if (!authLoading && user && profile) {
-      syncGuestData(user.uid, profile.name, user.email || "").then(() => {
+    if (!authLoading && user) {
+      // Proceed with redirect as soon as user is authenticated
+      const profileName = profile?.name || user.displayName || name || "Aspirant";
+      syncGuestData(user.uid, profileName, user.email || "").then(() => {
          router.replace(returnUrl);
       });
     }
-  }, [user, profile, authLoading, router, returnUrl, syncGuestData]);
+  }, [user, profile, authLoading, router, returnUrl, syncGuestData, name]);
 
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
   const { data: stats, loading: statsLoading } = useDoc<any>(statsRef);
@@ -167,7 +161,6 @@ function LoginContent() {
           coins: 0
         })
 
-        // Increment global user count incrementally
         await updateDoc(doc(db!, 'settings', 'stats'), {
            totalUsers: increment(1),
            updatedAt: serverTimestamp()
@@ -213,7 +206,6 @@ function LoginContent() {
           coins: 0
         })
 
-        // Increment global user count incrementally
         await updateDoc(doc(db!, 'settings', 'stats'), {
           totalUsers: increment(1),
           updatedAt: serverTimestamp()
@@ -250,13 +242,10 @@ function LoginContent() {
 
   return (
     <div className="min-h-[100dvh] bg-white flex flex-col lg:flex-row text-[#0F172A] font-body selection:bg-primary/20 overflow-x-hidden">
-      
       <div className="hidden lg:flex flex-[1.1] bg-[#020B2D] text-white px-12 xl:px-20 py-0 flex-col justify-center relative overflow-hidden">
         <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
-
         <div className="relative z-10 space-y-12 xl:space-y-20 max-w-[650px]">
-        <Logo variant="dark" align="left" className="my-0" />
-
+          <Logo variant="dark" align="left" className="my-0" />
           <div className="space-y-8">
             <h1 className="text-5xl xl:text-6xl font-black tracking-tight text-white leading-[1.05]">
               Punjab's Smart <br/> 
@@ -268,7 +257,6 @@ function LoginContent() {
               Practice mock tests and performance analytics verified by official recruitment standards.
             </p>
           </div>
-
           <div className="grid grid-cols-2 gap-8">
             <HeroStat icon={ClipboardList} label={`${statsLoading ? '...' : formatCompact(stats?.totalMocks)}+ Mock Tests`} />
             <HeroStat icon={Zap} label={`${statsLoading ? '...' : formatCompact(stats?.totalQuestions)}+ Questions`} />
@@ -279,11 +267,7 @@ function LoginContent() {
       </div>
 
       <div className="flex-1 flex flex-col items-center justify-center px-4 md:px-12 lg:px-20 py-0 relative bg-slate-50 lg:bg-white overflow-y-auto">
-        <motion.div 
-           initial={{ opacity: 0, scale: 0.95 }} 
-           animate={{ opacity: 1, scale: 1 }} 
-           className="w-full max-w-[480px] py-12" 
-        >
+        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-[480px] py-12">
           <Card className="border-none shadow-5xl lg:shadow-none bg-white rounded-[32px] p-6 md:p-12 space-y-6 md:space-y-10">
             <div className="space-y-2 text-center lg:text-left">
                <h2 className="text-2xl md:text-4xl font-black tracking-tight text-[#0F172A]">
@@ -335,28 +319,28 @@ function LoginContent() {
               </div>
 
               <div className="pt-2 flex flex-col gap-4">
-                <Button type="submit" className="w-full h-14 md:h-18 bg-blue-600 text-white font-bold text-xs rounded-full shadow-xl border-none transition-all active:scale-[0.98]" disabled={loading}>
-                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Continue"}
+                <Button type="submit" className="w-full h-14 md:h-18 bg-blue-600 text-white font-bold text-xs rounded-full shadow-xl border-none transition-all active:scale-[0.98]" disabled={loading || (user && !authLoading)}>
+                  {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : user ? "Redirecting..." : "Continue"}
                 </Button>
-                <div className="flex items-center gap-3 py-1">
-                  <div className="h-px flex-1 bg-slate-100" />
-                  <span className="text-[9px] font-bold text-slate-300 uppercase">OR</span>
-                  <div className="h-px flex-1 bg-slate-100" />
-                </div>
-                <Button variant="outline" className="w-full h-14 border-2 border-slate-100 text-[#0F172A] gap-3 rounded-full font-bold text-[10px] md:text-[11px] hover:bg-slate-50 shadow-sm" onClick={handleGoogleSignIn} disabled={loading}>
-                   <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={20} height={20} className="h-5 w-5" alt="Google Logo" /> Google Login
-                </Button>
+                {!user && (
+                  <>
+                    <div className="flex items-center gap-3 py-1">
+                      <div className="h-px flex-1 bg-slate-100" />
+                      <span className="text-[9px] font-bold text-slate-300 uppercase">OR</span>
+                      <div className="h-px flex-1 bg-slate-100" />
+                    </div>
+                    <Button variant="outline" className="w-full h-14 border-2 border-slate-100 text-[#0F172A] gap-3 rounded-full font-bold text-[10px] md:text-[11px] hover:bg-slate-50 shadow-sm" onClick={handleGoogleSignIn} disabled={loading}>
+                       <Image src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" width={20} height={20} className="h-5 w-5" alt="Google Logo" /> Google Login
+                    </Button>
+                  </>
+                )}
               </div>
             </form>
 
             <div className="text-center pt-8 border-t border-slate-50">
                <p className="text-[11px] md:text-[13px] font-bold text-slate-400">
                 {mode === 'login' ? "Don't have an account?" : "Already registered?"}
-                <button 
-                  type="button"
-                  onClick={() => setMode(mode === 'login' ? 'register' : 'login')} 
-                  className="text-primary font-black ml-2 hover:underline"
-                >
+                <button type="button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')} className="text-primary font-black ml-2 hover:underline">
                   {mode === 'login' ? 'Create Account' : 'Login Portal'}
                 </button>
                </p>
