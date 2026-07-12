@@ -274,6 +274,14 @@ export interface Question {
     rightColumn: string[];
   };
   tableContent?: TableContent;
+  assertion?: {
+    english: string;
+    punjabi: string;
+  };
+  reason?: {
+    english: string;
+    punjabi: string;
+  };
   optionAEnglish: string;
   optionAPunjabi?: string;
   optionAHindi?: string;
@@ -427,7 +435,7 @@ export interface Subscription {
   expiryDate: any;
   validityDays: number;
   invoiceNumber: string;
-  couponUsed?: string | null;
+  countUsed?: string | null;
   updatedAt: any;
 }
 

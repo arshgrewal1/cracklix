@@ -20,9 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v56.0.
- * FIXED: Implemented high-fidelity 2-column rendering for structured Matching blocks.
- * FIXED: Balanced font scaling and padding for premium PWA experience.
+ * @fileOverview Institutional Question Renderer v61.0.
+ * FIXED: Implemented high-fidelity rendering for ASSERTION_REASON nodes.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -88,19 +87,60 @@ export default function QuestionRenderer({
       )}
 
       <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
+         {/* ASSERTION & REASON HUB v61.0 */}
+         {q.questionType === 'ASSERTION_REASON' && q.assertion && q.reason && (
+            <div className="space-y-6 mb-8 p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner relative overflow-hidden group">
+               <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
+                  <Zap className="h-3 w-3" /> Logic Hub
+               </div>
+               
+               <div className="space-y-4">
+                  <div className="space-y-2">
+                     <p className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
+                        <ShieldCheck className="h-3 w-3" /> Assertion (A) / ਕਥਨ (A)
+                     </p>
+                     <div className="font-[800] text-[#0F172A] text-base md:text-xl leading-relaxed">
+                        <MathText text={q.assertion.english} />
+                     </div>
+                     {q.assertion.punjabi && (
+                        <div className="font-bold text-slate-500 text-sm md:text-lg mt-1">
+                           <MathText text={q.assertion.punjabi} />
+                        </div>
+                     )}
+                  </div>
+
+                  <div className="h-px w-full bg-slate-200/50" />
+
+                  <div className="space-y-2">
+                     <p className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
+                        <ShieldCheck className="h-3 w-3" /> Reason (R) / ਕਾਰਨ (R)
+                     </p>
+                     <div className="font-[800] text-[#0F172A] text-base md:text-xl leading-relaxed">
+                        <MathText text={q.reason.english} />
+                     </div>
+                     {q.reason.punjabi && (
+                        <div className="font-bold text-slate-500 text-sm md:text-lg mt-1">
+                           <MathText text={q.reason.punjabi} />
+                        </div>
+                     )}
+                  </div>
+               </div>
+            </div>
+         )}
+
          {/* INTRO HUB */}
-         {showEn && q.englishQuestion && (
+         {showEn && q.englishQuestion && q.questionType !== 'ASSERTION_REASON' && (
            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
              <MathText text={q.englishQuestion} />
            </div>
          )}
-         {showLocal && q.punjabiQuestion && (
+         {showLocal && q.punjabiQuestion && q.questionType !== 'ASSERTION_REASON' && (
            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
              <MathText text={q.punjabiQuestion} />
            </div>
          )}
 
-         {/* STRUCTURED MATCHING GRID v56.0 */}
+         {/* STRUCTURED MATCHING GRID */}
          {q.matchingData?.rows?.length > 0 && (
             <div className="my-8 overflow-hidden rounded-[2rem] border-2 border-slate-100 bg-white shadow-2xl relative group">
                <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
@@ -244,3 +284,4 @@ export default function QuestionRenderer({
     </div>
   );
 }
+
