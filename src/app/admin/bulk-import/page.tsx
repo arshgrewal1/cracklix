@@ -35,9 +35,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v63.0.
+ * @fileOverview Modular Industrial Ingestion Hub v65.0.
  * FIXED: Hydration error resolved by replacing <p> with <div> in error list.
- * UPDATED: Multi-strategy mapping for CA, Math, Tables, and Graphs.
+ * UPDATED: Multi-strategy mapping for CA, Math, Tables, and Matching pairs.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
@@ -284,7 +284,7 @@ export default function BulkIngestionPage() {
                           )}
                           {q.table_data && (
                              <Badge className="bg-blue-50 text-blue-600 border-none text-[8px] font-black uppercase px-3 py-1 rounded shadow-sm flex items-center gap-2">
-                                <TableIcon className="h-3 w-3" /> Table Structure
+                                <TableIcon className="h-3 w-3" /> {metadata.parserFormat === 'MATCHING' ? 'Matching Hub' : 'Table Structure'}
                              </Badge>
                           )}
                        </div>

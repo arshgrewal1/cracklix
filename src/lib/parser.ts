@@ -1,8 +1,8 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v31.0.
+ * @fileOverview Institutional Specialized Local Parser v32.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Table formats.
  * FIXED: Advanced Table Extraction logic to preserve structured grid data.
- * UPDATED: Implemented Graph Parser with specific chart type detection.
+ * UPDATED: Implemented Matching Parser for dual-column relational questions.
  * HARDENED: Strict removal of headers, footers, page numbers, and copyright text.
  */
 
@@ -93,6 +93,9 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
     detectVisualAssets(block, q);
 
     switch (format) {
+      case 'MATCHING':
+        q = parseMatching(block, q, metadata.secondaryLanguage);
+        break;
       case 'TABLE':
         q = parseTable(block, q, metadata.secondaryLanguage);
         break;
@@ -120,6 +123,38 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   });
 
   return { questions };
+}
+
+/**
+ * STRATEGY: Match the Following Parser
+ */
+function parseMatching(block: string, q: any, secondaryLang: string) {
+  const lines = block.split('\n');
+  const matchingRows: string[] = [];
+  const otherLines: string[] = [];
+
+  // Identify column markers like (a)...(i) or A...1
+  const matchingRegex = /^[A-E]\.\s+.*?\s+(?:\d+|[I|V|X]+)\.\s+/i;
+  
+  lines.forEach(line => {
+    if (matchingRegex.test(line.trim())) {
+      matchingRows.push(line.trim());
+    } else {
+      otherLines.push(line);
+    }
+  });
+
+  if (matchingRows.length > 0) {
+    // Construct Markdown Table
+    const tableHeader = "| Column I | Column II |\n|---|---|";
+    const tableRows = matchingRows.map(row => {
+       const parts = row.split(/\s+(?=\d+\.|[I|V|X]+\.)/i);
+       return `| ${parts[0]?.trim() || ""} | ${parts[1]?.trim() || ""} |`;
+    }).join('\n');
+    q.table_data = `${tableHeader}\n${tableRows}`;
+  }
+
+  return parseBilingual(otherLines.join('\n'), q, secondaryLang);
 }
 
 /**
@@ -160,7 +195,6 @@ function parseMath(block: string, q: any) {
     restOfBlock = block.substring(0, explStartIndex);
   }
 
-  // Find the exact line where options start to prevent merging math into options
   const optAMatch = restOfBlock.match(/\n\s*\(?A[\)\.\-]\s+/i);
   let questionPart = restOfBlock;
   let optionsPart = "";
