@@ -1,7 +1,7 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v28.0.
- * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Diagram formats.
- * FIXED: Re-engineered option splitting to handle Math formulas and preserve Diagram references.
+ * @fileOverview Institutional Specialized Local Parser v29.0.
+ * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Table formats.
+ * FIXED: Advanced Table Extraction logic to preserve structured grid data.
  */
 
 export type ParserFormat = 
@@ -41,7 +41,7 @@ export function preprocessText(text: string): string {
     .replace(/Copyright.*?Arsh Grewal/gi, '')
     .replace(/www\.cracklix\.com/gi, '')
     .replace(/https?:\/\/\S+/gi, '')
-    // 4. Normalize Whitespace
+    // 4. Normalize Whitespace (Be careful not to kill table spacing)
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
@@ -80,14 +80,18 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
       status: 'PUBLISHED',
       questionType: 'MCQ',
       diagram_required: false,
-      correctAnswer: 'A'
+      correctAnswer: 'A',
+      table_data: ""
     };
 
-    // Global Visual Asset Detection (Runs for all formats)
+    // Global Visual Asset Detection
     detectVisualAssets(block, q);
 
     // Dispatch to specific format logic
     switch (format) {
+      case 'TABLE':
+        q = parseTable(block, q, metadata.secondaryLanguage);
+        break;
       case 'ENGLISH_ONLY':
         q = parseEnglishOnly(block, q);
         break;
@@ -96,12 +100,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
         break;
       case 'MATHEMATICS':
         q = parseMath(block, q);
-        break;
-      case 'DIAGRAM':
-      case 'GRAPH':
-      case 'TABLE':
-        // Diagram/Table formats usually follow the bilingual or english structure
-        q = parseBilingual(block, q, metadata.secondaryLanguage);
         break;
       case 'CURRENT_AFFAIRS':
       case 'BILINGUAL_MCQ':
@@ -115,6 +113,24 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   });
 
   return { questions };
+}
+
+/**
+ * STRATEGY: Table Question Parser
+ */
+function parseTable(block: string, q: any, secondaryLang: string) {
+  // 1. Identify Table Block (Lines starting/ending with | or having multiple pipes)
+  const lines = block.split('\n');
+  const tableLines = lines.filter(l => l.includes('|'));
+  
+  if (tableLines.length > 0) {
+    q.table_data = tableLines.join('\n');
+    // Remove table lines from block for standard processing
+    const cleanBlock = lines.filter(l => !l.includes('|')).join('\n');
+    return parseBilingual(cleanBlock, q, secondaryLang);
+  }
+
+  return parseBilingual(block, q, secondaryLang);
 }
 
 /**
