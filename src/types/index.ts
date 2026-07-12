@@ -259,6 +259,10 @@ export interface Question {
   englishQuestion: string;
   punjabiQuestion?: string;
   hindiQuestion?: string;
+  englishAssertion?: string;
+  punjabiAssertion?: string;
+  englishReason?: string;
+  punjabiReason?: string;
   englishDiagramQuestion?: string;
   punjabiDiagramQuestion?: string;
   englishActualQuestion?: string;
@@ -274,14 +278,6 @@ export interface Question {
     rightColumn: string[];
   };
   tableContent?: TableContent;
-  assertion?: {
-    english: string;
-    punjabi: string;
-  };
-  reason?: {
-    english: string;
-    punjabi: string;
-  };
   optionAEnglish: string;
   optionAPunjabi?: string;
   optionAHindi?: string;

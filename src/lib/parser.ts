@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v70.0.
- * FIXED: Assertion & Reason bilingual block grouping to prevent interleaving.
+ * @fileOverview Institutional Deterministic Ingestion Hub v71.0.
+ * FIXED: Assertion & Reason field-sequential ordering (Interleaved) to prevent block language reordering.
  */
 
 import { serverTimestamp } from 'firebase/firestore';
@@ -113,37 +113,32 @@ export function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', 
   return null;
 }
 
-// --- CONTINUOUS ASSERTION & REASON SCANNER (BLOCK MODE) ---
+// --- SEQUENTIAL ASSERTION & REASON SCANNER (FIELD MODE) ---
 
 export function parseAssertionReason(fullText: string, metadata: any) {
   const lines = fullText.split(/\r?\n/);
   const questions: any[] = [];
   
   let currentQ: any = null;
-  let enAssert = ""; let enReason = "";
-  let paAssert = ""; let paReason = "";
+  let enAssert = ""; let paAssert = "";
+  let enReason = ""; let paReason = "";
 
   let state: 'IDLE' | 'ASSERT_EN' | 'ASSERT_PA' | 'REASON_EN' | 'REASON_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL' = 'IDLE';
 
   const finalize = () => {
     if (currentQ) {
-      // BUILD BLOCKS: Do NOT interleave. English block first, then Punjabi block.
-      let enBlock = "";
-      if (enAssert) enBlock += `Assertion:\n${enAssert.trim()}`;
-      if (enReason) enBlock += `\n\nReason:\n${enReason.trim()}`;
-      currentQ.englishQuestion = enBlock;
+      currentQ.englishAssertion = enAssert.trim();
+      currentQ.punjabiAssertion = paAssert.trim();
+      currentQ.englishReason = enReason.trim();
+      currentQ.punjabiReason = paReason.trim();
 
-      let paBlock = "";
-      if (paAssert) paBlock += `ਕਥਨ:\n${paAssert.trim()}`;
-      if (paReason) paBlock += `\n\nਕਾਰਨ:\n${paReason.trim()}`;
-      currentQ.punjabiQuestion = paBlock;
+      // Population of English question for bank previews
+      currentQ.englishQuestion = `Assertion: ${enAssert.trim()}\nReason: ${enReason.trim()}`;
+      currentQ.punjabiQuestion = `ਕਥਨ: ${paAssert.trim()}\nਕਾਰਨ: ${paReason.trim()}`;
 
-      // Validation: Must have core logic statements
-      if ((enAssert || paAssert) && (enReason || paReason)) {
-        questions.push(currentQ);
-      }
+      if (enAssert || paAssert) questions.push(currentQ);
     }
-    enAssert = ""; enReason = ""; paAssert = ""; paReason = "";
+    enAssert = ""; paAssert = ""; enReason = ""; paReason = "";
   };
 
   const assertEnRegex = /^\s*(?:Assertion|Assertlon|Assertion:|Assertion\s*\(A\)|Assertion\(A\)|A\)|Statement|Statement\s*\(A\)|Assertion\s*-)\s*[:\-]?/i;
@@ -162,8 +157,8 @@ export function parseAssertionReason(fullText: string, metadata: any) {
         ...metadata,
         id: `q-ar-${Math.random().toString(36).substr(2, 9)}`,
         questionType: 'ASSERTION_REASON',
-        englishQuestion: "", 
-        punjabiQuestion: "",
+        englishAssertion: "", punjabiAssertion: "",
+        englishReason: "", punjabiReason: "",
         correctAnswer: "",
         englishExplanation: "",
         punjabiExplanation: "",
@@ -177,26 +172,20 @@ export function parseAssertionReason(fullText: string, metadata: any) {
 
     if (!currentQ) continue;
 
-    if (NOISE_PATTERNS.some(p => p.test(trimmed)) && (state === 'EXPL' || state === 'ANSWER')) {
-      finalize();
-      currentQ = null;
-      continue;
-    }
-
     const optMarker = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     
-    // TRANSITION LOGIC
-    if (assertEnRegex.test(trimmed)) { state = 'ASSERT_EN'; }
-    else if (assertPaRegex.test(trimmed)) { state = 'ASSERT_PA'; }
-    else if (reasonEnRegex.test(trimmed)) { state = 'REASON_EN'; }
-    else if (reasonPaRegex.test(trimmed)) { state = 'REASON_PA'; }
-    else if (isAns) { state = 'ANSWER'; }
-    else if (isExpl) { state = 'EXPL'; }
-    else if (optMarker && (enReason || paReason)) { state = 'OPTIONS'; }
+    // SEQUENTIAL STATE TRANSITION LOGIC
+    if (assertEnRegex.test(trimmed)) state = 'ASSERT_EN';
+    else if (assertPaRegex.test(trimmed)) state = 'ASSERT_PA';
+    else if (reasonEnRegex.test(trimmed)) state = 'REASON_EN';
+    else if (reasonPaRegex.test(trimmed)) state = 'REASON_PA';
+    else if (isAns) state = 'ANSWER';
+    else if (isExpl) state = 'EXPL';
+    else if (optMarker && (enReason || paReason)) state = 'OPTIONS';
     else {
-      // Heuristic fallback for unlabeled lines
+      // Script detection fallback
       if (state === 'ASSERT_EN' && GURMUKHI_REGEX.test(trimmed)) state = 'ASSERT_PA';
       if (state === 'REASON_EN' && GURMUKHI_REGEX.test(trimmed)) state = 'REASON_PA';
     }
