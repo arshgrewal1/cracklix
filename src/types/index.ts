@@ -242,6 +242,7 @@ export interface Question {
   englishQuestion: string;
   punjabiQuestion?: string;
   hindiQuestion?: string;
+  diagramContent?: string;
   optionAEnglish: string;
   optionAPunjabi?: string;
   optionAHindi?: string;

@@ -19,9 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v36.0.
- * FIXED: Implemented Series Isolation - moves logic sequences below bilingual instructions.
- * FIXED: Standardized Explanation labels.
+ * @fileOverview Institutional Question Renderer v37.0.
+ * FIXED: Implemented Diagram content rendering node for high-fidelity ASCII/Symbol layouts.
+ * FIXED: Series Isolation - moves logic sequences below bilingual instructions.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -133,6 +133,14 @@ export default function QuestionRenderer({
            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
              <MathText text={localNode.statement} />
            </div>
+         )}
+
+         {/* HIGH-FIDELITY DIAGRAM NODE */}
+         {q.diagramContent && (
+            <div className="my-6 p-6 md:p-10 bg-[#0F172A] text-emerald-400 rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[10px] md:text-sm overflow-x-auto whitespace-pre leading-relaxed shadow-inner border border-white/5 relative group">
+               <div className="absolute top-2 right-4 opacity-20 pointer-events-none uppercase text-[8px] font-black tracking-widest">ASCII HUB</div>
+               {q.diagramContent}
+            </div>
          )}
 
          {commonSeries && (

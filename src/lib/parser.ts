@@ -1,10 +1,10 @@
-
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v42.0.
+ * @fileOverview Institutional Deterministic Ingestion Hub v43.0.
  * FIXED: Sentinel Regex supports EOL ($) and is hardened against non-printable characters.
  * FIXED: Metadata filter purges Page headers/footers, URLs, and Copyright artifacts.
- * FIXED: parseReasoning finalizes the last question in the stream (Bug 2).
+ * FIXED: parseReasoning finalizes the last question in the stream.
+ * ADDED: parseDiagram - Dedicated parser for ASCII/Symbol based questions.
  */
 
 export type ParserFormat = 
@@ -88,6 +88,66 @@ function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: s
   return null;
 }
 
+function parseDiagram(rawText: string, metadata: any) {
+  const lines = rawText.split('\n');
+  const questions: any[] = [];
+  let currentQ: any = null;
+  let subState: 'BODY' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION' = 'BODY';
+  
+  const finalizeQuestion = () => {
+    if (!currentQ) return;
+    questions.push(currentQ);
+    currentQ = null;
+  };
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    const isQ = isQuestionStart(trimmed);
+    const opt = detectOptionMarker(line);
+    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+
+    if (isQ) {
+      finalizeQuestion();
+      subState = 'BODY';
+      currentQ = {
+        ...metadata,
+        id: `q-diagram-${Math.random().toString(36).substr(2, 9)}`,
+        questionType: 'IMAGE_BASED',
+        englishQuestion: line.replace(QUESTION_SENTINEL_REGEX, '').trim() || "Diagram Question",
+        punjabiQuestion: "",
+        diagramContent: "",
+        optionAEnglish: "", optionBEnglish: "", optionCEnglish: "", optionDEnglish: "",
+        correctAnswer: "",
+        englishExplanation: "",
+        status: 'PUBLISHED'
+      };
+      return;
+    }
+
+    if (!currentQ) return;
+
+    if (opt) subState = 'OPTIONS';
+    else if (isAns) subState = 'ANSWER';
+    else if (isExpl) subState = 'EXPLANATION';
+
+    if (subState === 'BODY') {
+       // Literal append for diagrams to preserve ASCII layout
+       currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line;
+    } else if (subState === 'OPTIONS' && opt) {
+       currentQ[`option${opt.opt}English`] = opt.text;
+    } else if (subState === 'ANSWER') {
+       const match = trimmed.match(/[A-D]/i);
+       if (match) currentQ.correctAnswer = match[0].toUpperCase();
+    } else if (subState === 'EXPLANATION') {
+       currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + line;
+    }
+  });
+
+  finalizeQuestion();
+  return { questions };
+}
+
 function parseReasoning(rawText: string, metadata: any) {
   const lines = rawText.split('\n');
   const questions: any[] = [];
@@ -125,9 +185,7 @@ function parseReasoning(rawText: string, metadata: any) {
 
   lines.forEach((line) => {
     const trimmed = line.trim();
-    if (!trimmed && state !== 'READ_QUESTION' && state !== 'READ_EXPLANATION') return;
     
-    // Metadata Filter: Skip noise lines inside the reasoning loop (Bug 1 Fix)
     const isNoise = NOISE_PATTERNS.some(pattern => pattern.test(trimmed));
     if (isNoise) return;
 
@@ -221,29 +279,31 @@ function parseReasoning(rawText: string, metadata: any) {
     }
   });
 
-  // FINAL QUESTION COMMIT: Finalize the last question in the document stream (Bug 2 Fix)
   if (currentQ) finalizeQuestion();
   
   return { questions };
 }
 
 export function parseBulkQuestions(rawText: string, metadata: any) {
-  const cleanedText = preprocessText(rawText);
-  if (!cleanedText) return { questions: [] };
+  if (!rawText || !rawText.trim()) return { questions: [] };
 
-  if (metadata.parserFormat === 'REASONING') {
-    return parseReasoning(cleanedText, metadata);
+  if (metadata.parserFormat === 'DIAGRAM') {
+    return parseDiagram(rawText, metadata);
   }
 
-  return parseDeterministicBilingual(cleanedText, metadata);
+  if (metadata.parserFormat === 'REASONING') {
+    return parseReasoning(rawText, metadata);
+  }
+
+  return parseDeterministicBilingual(rawText, metadata);
 }
 
 export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion) {
-     errors.push("Question missing.");
+  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion && !q.diagramContent) {
+     errors.push("Question content missing.");
   }
 
   const optCount = ['A', 'B', 'C', 'D'].filter(l => 
@@ -289,3 +349,4 @@ function parseDeterministicBilingual(rawText: string, metadata: any) {
   });
   return { questions };
 }
+

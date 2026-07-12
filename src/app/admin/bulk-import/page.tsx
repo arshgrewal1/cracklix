@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -49,8 +48,8 @@ const FORMATS: { label: string, value: ParserFormat }[] = [
 ];
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v43.0.
- * RESTORED: Complete list of 12 question types in the dropdown menu.
+ * @fileOverview Modular Industrial Ingestion Hub v43.1.
+ * FIXED: Diagram parser bypasses noise filtering to preserve ASCII integrity.
  */
 export default function BulkIngestionPage() {
   const router = useRouter()
@@ -84,22 +83,20 @@ export default function BulkIngestionPage() {
     setIsProcessing(true)
     try {
       console.log("[DEBUG_INGESTION] Start Parse Flow");
-      console.log("[DEBUG_INGESTION] Selected Question Type:", metadata.parserFormat);
-      console.log("[DEBUG_INGESTION] Raw Input Length:", rawText.length);
-
-      const sanitizedText = preprocessText(rawText);
       
-      const lines = sanitizedText.split('\n');
+      // DIAGRAM FIX: Skip preprocessing to preserve boxes, arrows, and layouts
+      const inputToParse = metadata.parserFormat === 'DIAGRAM' 
+        ? rawText 
+        : preprocessText(rawText);
+      
+      const lines = inputToParse.split('\n');
       const hasAnyQuestion = lines.some(line => isQuestionStart(line.trim()));
       
-      console.log("[DEBUG_INGESTION] Question Detection Result:", hasAnyQuestion);
-
       if (!hasAnyQuestion) {
          throw new Error("No questions detected. Please ensure your content uses supported markers like Q1, Q.1, or Question 1.");
       }
 
-      const result = parseBulkQuestions(sanitizedText, metadata);
-      console.log("[DEBUG_INGESTION] Detected Question Count:", result?.questions?.length || 0);
+      const result = parseBulkQuestions(inputToParse, metadata);
 
       if (!result?.questions || result.questions.length === 0) {
          throw new Error("Parser failed to extract questions. Please verify your document structure.");
@@ -176,7 +173,6 @@ export default function BulkIngestionPage() {
   return (
     <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-12">
       
-      {/* 1. HEADER ACTION BAR */}
       <AdminPageHeader
         icon={ClipboardList}
         label="Modular Industrial Ingestion"
@@ -209,7 +205,6 @@ export default function BulkIngestionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
-        {/* 2. CONFIGURATION PANEL */}
         <div className="lg:col-span-5 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden sticky top-24">
               <div className="space-y-8">
@@ -303,7 +298,6 @@ export default function BulkIngestionPage() {
            </Card>
         </div>
 
-        {/* 3. AUDIT STAGING AREA */}
         <div className="lg:col-span-7 space-y-8">
            <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-5">
