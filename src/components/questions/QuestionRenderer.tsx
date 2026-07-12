@@ -19,8 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v59.0.
- * FIXED: Added language-specific rationale labels (English/Punjabi/Hindi) for better clarity.
+ * @fileOverview Precision Bilingual Question Hub v60.0.
+ * FIXED: Implemented identical bilingual option suppression (numeric deduplication).
  */
 export default function QuestionRenderer({ 
   question, 
@@ -117,6 +117,10 @@ export default function QuestionRenderer({
             const hi = q[`option${key}Hindi`];
             const isSelected = selectedAnswer === idx;
             
+            // DEDUPLICATION: Only show local script if it differs from English text (e.g. avoid showing "38" twice)
+            const showPaLine = showPa && pa && pa.trim() !== en?.trim();
+            const showHiLine = showHi && hi && hi.trim() !== en?.trim();
+
             return (
               <div 
                 key={key} 
@@ -140,12 +144,12 @@ export default function QuestionRenderer({
                       <MathText text={en} />
                     </div>
                   )}
-                  {showPa && pa && (
+                  {showPaLine && (
                     <div className={cn("font-bold leading-tight break-words text-[#0F172A]", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>
                       <MathText text={pa} />
                     </div>
                   )}
-                  {showHi && hi && (
+                  {showHiLine && (
                     <div className={cn("font-bold leading-tight break-words text-[#0F172A]", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>
                       <MathText text={hi} />
                     </div>

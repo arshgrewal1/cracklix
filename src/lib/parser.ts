@@ -120,8 +120,8 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 }
 
 /**
- * DETERMINISTIC BILINGUAL ENGINE v5.0
- * Handles Script Isolation, Multiline accumulation, and strict boundary detection.
+ * DETERMINISTIC BILINGUAL ENGINE v6.0
+ * FIXED: Deduplicates identical lines in options to prevent stacked repetitions (e.g. 38/38).
  */
 function parseDeterministicBilingual(block: string, q: any, secondaryLang: string) {
   const lines = block.split('\n');
@@ -158,7 +158,6 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
 
     if (isNewOption) {
       state = 'OPTIONS';
-      // Identify which specific option it is
       const circleMap: Record<string, string> = { '①': 'A', '②': 'B', '③': 'C', '④': 'D', '❶': 'A', '❷': 'B', '❸': 'C', '❹': 'D' };
       for (const [char, label] of Object.entries(circleMap)) {
          if (trimmedLine.startsWith(char)) { currentOption = label as any; break; }
@@ -180,22 +179,26 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
          if (scriptRegex.test(text)) localQLines.push(text);
          else englishQLines.push(text);
       } else {
-         englishQLines.push(line); // Preserve blank line in English stream
+         englishQLines.push(line); 
       }
     } else if (state === 'OPTIONS' && currentOption) {
-      // Circle Support Normalization
       const text = trimmedLine.replace(/^\(?[A-D][\)\.\s:]+\s*/i, '').replace(/^[①②③④❶❷❸❹]\s*/, '');
       if (text.trim()) {
          if (scriptRegex.test(text)) {
             const optLocalKey = secondaryLang === 'hindi' ? `option${currentOption}Hindi` : `option${currentOption}Punjabi`;
-            q[optLocalKey] = (q[optLocalKey] || "") + (q[optLocalKey] ? "\n" : "") + text;
+            const currentVal = q[optLocalKey] || "";
+            if (!currentVal.split('\n').some((l: string) => l.trim() === text.trim())) {
+               q[optLocalKey] = (currentVal ? currentVal + "\n" : "") + text;
+            }
          } else {
             const optKey = `option${currentOption}English`;
-            q[optKey] = (q[optKey] || "") + (q[optKey] ? "\n" : "") + text;
+            const currentVal = q[optKey] || "";
+            if (!currentVal.split('\n').some((l: string) => l.trim() === text.trim())) {
+               q[optKey] = (currentVal ? currentVal + "\n" : "") + text;
+            }
          }
       }
     } else if (state === 'ANSWER') {
-      // Circle support in answer mapping
       const circleToLabel: Record<string, string> = { '①': 'A', '②': 'B', '③': 'C', '④': 'D', '❶': 'A', '❷': 'B', '❸': 'C', '❹': 'D' };
       Object.entries(circleToLabel).forEach(([char, label]) => {
          if (trimmedLine.includes(char)) q.correctAnswer = label;
@@ -255,7 +258,13 @@ function parseDeterministicEnglish(block: string, q: any) {
       englishQLines.push(text);
     } else if (section === 'OPTIONS' && currentOption) {
       const text = trimmedLine.replace(/^\(?[A-D][\)\.\s:]+\s*/i, '').replace(/^[①②③④❶❷❸❹]\s*/, '');
-      if (text.trim()) q[`option${currentOption}English`] = (q[`option${currentOption}English`] || "") + (q[`option${currentOption}English`] ? "\n" : "") + text;
+      if (text.trim()) {
+         const optKey = `option${currentOption}English`;
+         const currentVal = q[optKey] || "";
+         if (!currentVal.split('\n').some((l: string) => l.trim() === text.trim())) {
+            q[optKey] = (currentVal ? currentVal + "\n" : "") + text;
+         }
+      }
     } else if (section === 'ANSWER') {
       const match = trimmedLine.match(/(?:Answer|Official Key|Correct Answer)\s*[:\-]?\s*\(?([A-D])\)?/i);
       if (match) q.correctAnswer = match[1].toUpperCase();
