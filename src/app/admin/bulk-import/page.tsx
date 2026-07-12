@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -11,19 +11,16 @@ import { Badge } from "@/components/ui/badge"
 import { 
   Loader2, 
   Trash2, 
-  Rocket, 
-  Zap, 
-  Layers, 
   Database,
   CheckCircle2,
-  ChevronRight,
   ClipboardList,
   Globe,
   Braces,
   Image as ImageIcon,
   Table as TableIcon,
   BarChart3,
-  Info
+  Info,
+  Zap
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy, updateDoc, increment } from "firebase/firestore"
@@ -35,14 +32,14 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v67.0.
+ * @fileOverview Modular Industrial Ingestion Hub v68.0.
  * UPDATED: Multi-strategy mapping for CA, Math, Tables, Assertion-Reason, and Fill in the Blank.
  * FIXED: Hydration error by replacing p tags with div in validation list.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
   { label: "Current Affairs (English + Punjabi)", value: "CURRENT_AFFAIRS" },
-  { label: "Bilingual MCQ (Eng + Pun/Hin)", value: "BILINGUAL_MCQ" },
+  { label: "Simple Bilingual MCQ (Eng + Pun/Hin)", value: "BILINGUAL_MCQ" },
   { label: "English Only MCQ", value: "ENGLISH_ONLY" },
   { label: "Punjabi Only MCQ", value: "PUNJABI_ONLY" },
   { label: "Mathematics Hub", value: "MATHEMATICS" },
@@ -59,7 +56,7 @@ const FORMATS: { label: string, value: ParserFormat }[] = [
 export default function BulkIngestionPage() {
   const router = useRouter()
   const db = useFirestore()
-  const { user, profile } = useUser()
+  const { profile } = useUser()
   const { toast } = useToast()
   
   const { data: boards } = useCollection<Board>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]))
@@ -115,7 +112,7 @@ export default function BulkIngestionPage() {
 
   const handleFinalCommit = async () => {
     const valids = stagedQuestions.filter(q => q.isValid);
-    if (valids.length === 0 || !db || !user) return;
+    if (valids.length === 0 || !db) return;
 
     setIsSyncing(true);
     const batch = writeBatch(db);
@@ -172,7 +169,6 @@ export default function BulkIngestionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
-        {/* INPUT PANEL */}
         <div className="lg:col-span-5 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-8">
@@ -255,7 +251,6 @@ export default function BulkIngestionPage() {
            </Card>
         </div>
 
-        {/* STAGING AREA */}
         <div className="lg:col-span-7 space-y-8">
            <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-5">

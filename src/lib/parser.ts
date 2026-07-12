@@ -1,5 +1,5 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v34.0.
+ * @fileOverview Institutional Specialized Local Parser v35.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Assertion-Reason formats.
  * FIXED: Advanced Table Extraction logic to preserve structured grid data.
  * UPDATED: Implemented Fill in the Blank Parser for completion-style questions.
@@ -124,6 +124,13 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
       case 'BILINGUAL_MCQ':
         q = parseBilingual(block, q, metadata.secondaryLanguage);
         break;
+      case 'REASONING':
+        q = parseReasoning(block, q, metadata.secondaryLanguage);
+        break;
+      case 'DIAGRAM':
+        q = parseBilingual(block, q, metadata.secondaryLanguage);
+        q.diagram_required = true;
+        break;
       default:
         q = parseBilingual(block, q, metadata.secondaryLanguage);
     }
@@ -172,10 +179,16 @@ function parseMatching(block: string, q: any, secondaryLang: string) {
 }
 
 /**
+ * STRATEGY: Reasoning Hub
+ */
+function parseReasoning(block: string, q: any, secondaryLang: string) {
+  return parseBilingual(block, q, secondaryLang);
+}
+
+/**
  * STRATEGY: Fill in the Blank Parser
  */
 function parseFillBlank(block: string, q: any, secondaryLang: string) {
-  // Logic remains same as bilingual, ensuring underscores are preserved via preprocessor
   return parseBilingual(block, q, secondaryLang);
 }
 
@@ -210,7 +223,7 @@ function parseTable(block: string, q: any, secondaryLang: string) {
 }
 
 /**
- * STRATEGY: Mathematics Hub
+ * STRATEGY: Mathematics Hub - Absolute symbol preservation
  */
 function parseMath(block: string, q: any) {
   const answerMatch = block.match(/(?:Official Key|Answer|Ans|Correct Answer)\s*[:\-]?\s*([A-D])/i);
