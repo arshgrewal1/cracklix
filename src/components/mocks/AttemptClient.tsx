@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useUser, useFirestore } from "@/firebase";
+import { useUser, useAuth } from "@/firebase";
 import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
 import { useStudyAnalytics } from "@/hooks/use-study-analytics"; 
@@ -31,8 +31,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v5.6 (Swipe Navigation Enabled).
- * FIXED: Optimized touch handling for horizontal swipes while ignoring vertical scroll.
+ * @fileOverview Official Mock Attempt Hub v5.7 (UI & Navigation Hardened).
+ * FIXED: Stacked buttons in exit modal to prevent horizontal clipping.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -96,13 +96,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const deltaY = touchStart.current.y - touchEndY;
 
     // Threshold check: 80px horizontal movement
-    // Comparison: Horizontal delta must be greater than vertical to ignore scrolls
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 80) {
       if (deltaX > 0 && currentIdx < questions.length - 1) {
-        // Swipe Left -> Next Question
         setCurrentIdx(currentIdx + 1);
       } else if (deltaX < 0 && currentIdx > 0) {
-        // Swipe Right -> Previous Question
         setCurrentIdx(currentIdx - 1);
       }
     }
@@ -268,7 +265,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         </div>
       </main>
 
-      <Sheet open={isPaletteOpen} onOpenChange={setIsPaletteOpen}>
+      <Sheet open={isPaletteOpen} onOpenChange={isPaletteOpen ? setIsPaletteOpen : undefined}>
         <SheetContent side="right" className="p-0 border-none w-[280px] md:w-[320px] h-full shadow-5xl z-[1200]">
           <SheetHeader className="sr-only"><SheetTitle>Navigation Palette</SheetTitle><SheetDescription>Navigate through questions.</SheetDescription></SheetHeader>
           <QuestionPalette onSelect={(idx: number) => { setCurrentIdx(idx); setIsPaletteOpen(false); }} onSubmit={() => { setIsPaletteOpen(false); setShowSubmitModal(true); }} />
@@ -282,10 +279,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
             <DialogHeader><DialogTitle className="text-2xl font-black text-[#0F172A]">Finish Test?</DialogTitle><DialogDescription className="text-slate-500 font-medium mt-2">You still have questions remaining. Would you like to submit now?</DialogDescription></DialogHeader>
             <div className="w-full flex flex-col gap-3 mt-8">
               <Button onClick={handleSubmitFinal} disabled={isSubmittingFinal} className="w-full h-14 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg">Submit Test</Button>
-              <div className="grid grid-cols-2 gap-3">
-                 <Button variant="outline" onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/'); }} className="h-12 border-slate-200 text-slate-500 font-bold rounded-xl"><Save className="h-4 w-4 mr-2" /> Save & Exit</Button>
-                 <Button variant="ghost" onClick={() => setShowExitModal(false)} className="h-12 text-[#0F172A] font-bold rounded-xl bg-slate-50">Continue</Button>
-              </div>
+              <Button variant="outline" onClick={() => { setPaused(false); setShowExitModal(false); router.replace('/'); }} className="h-12 border-slate-200 text-slate-500 font-bold rounded-xl"><Save className="h-4 w-4 mr-2" /> Save & Exit</Button>
+              <Button variant="ghost" onClick={() => setShowExitModal(false)} className="h-12 text-[#0F172A] font-bold rounded-xl bg-slate-50">Continue</Button>
             </div>
           </div>
         </DialogContent>
