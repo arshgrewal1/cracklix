@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v62.0.
- * FIXED: Multi-question segmentation for Assertion & Reason nodes.
+ * @fileOverview Institutional Deterministic Ingestion Hub v63.0.
+ * FIXED: Multi-question segmentation for all dedicated formats.
  * FIXED: OCR resilience for question markers (Q l, Q-2, etc).
  */
 
@@ -68,6 +68,24 @@ export function isQuestionStart(line: string): boolean {
   return QUESTION_SENTINEL_REGEX.test(line.trim());
 }
 
+/**
+ * Splits raw text into individual question blocks based on standard markers.
+ */
+function segmentTextByQuestions(text: string): string[] {
+  const markerRegex = /(?:\n|^)\s*(?:(?:Q|Question|QUESTION|Q\.)\s*(?:NO\.?\s*)?[-.:\s]*)?(\d+|[lI])(?:[\.\s:]|$)/gi;
+  const matches = Array.from(text.matchAll(markerRegex));
+  
+  if (matches.length === 0) return [text];
+
+  const chunks: string[] = [];
+  for (let i = 0; i < matches.length; i++) {
+    const start = matches[i].index!;
+    const end = i < matches.length - 1 ? matches[i + 1].index : text.length;
+    chunks.push(text.substring(start, end).trim());
+  }
+  return chunks;
+}
+
 export function preprocessText(text: string): string {
   if (!text) return "";
   const lines = text.split(/\r?\n/);
@@ -106,65 +124,33 @@ export function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', 
 
 // --- SPECIALIZED PARSERS ---
 
-export function parseAssertionReason(rawText: string, metadata: any) {
-  const lines = rawText.split(/\r?\n/);
-  const questions: any[] = [];
-  let currentQ: any = null;
-  let state = 'IDLE';
+/**
+ * Parses a single block of text as an Assertion & Reason question.
+ */
+function parseSingleAssertionReason(text: string, metadata: any) {
+  const lines = text.split(/\r?\n/);
+  let currentQ: any = {
+    ...metadata,
+    id: `q-ar-${Math.random().toString(36).substr(2, 9)}`,
+    questionType: 'ASSERTION_REASON',
+    assertion: { english: "", punjabi: "" },
+    reason: { english: "", punjabi: "" },
+    status: 'PUBLISHED',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
 
   const assertEnRegex = /^\s*(?:Assertion|Assertlon|Assertion:)\s*(?:\(A\))?[:\-]?/i;
   const assertPaRegex = /^\s*(?:ਕਥਨ)\s*(?:\(A\))?[:\-]?/i;
   const reasonEnRegex = /^\s*(?:Reason|Reas0n|Reason:)\s*(?:\(R\))?[:\-]?/i;
   const reasonPaRegex = /^\s*(?:ਕਾਰਨ|ਕਾਰਣ|कारन)\s*(?:\(R\))?[:\-]?/i;
 
-  // HARDENED Boundary Detector (Supports Q1, 1., Q l, Q-2, etc)
-  const qStartRegex = /^\s*(?:(?:Q|Question|QUESTION|Q\.)\s*(?:NO\.?\s*)?[-.:\s]*)?(\d+|[lI])(?:[\.\s:]|$)/i;
-
-  const finalize = () => {
-    if (currentQ) {
-      if (currentQ.assertion) {
-        currentQ.assertion.english = currentQ.assertion.english.trim();
-        currentQ.assertion.punjabi = currentQ.assertion.punjabi.trim();
-      }
-      if (currentQ.reason) {
-        currentQ.reason.english = currentQ.reason.english.trim();
-        currentQ.reason.punjabi = currentQ.reason.punjabi.trim();
-      }
-      // Set canonical fields for registry
-      currentQ.englishQuestion = currentQ.assertion?.english || "Assertion & Reason";
-      currentQ.punjabiQuestion = currentQ.assertion?.punjabi || "";
-      questions.push(currentQ);
-    }
-    currentQ = null;
-    state = 'IDLE';
-  };
+  let state = 'ASSERT_EN';
 
   lines.forEach((line) => {
     const trimmed = line.trim();
-    if (!trimmed) return;
+    if (!trimmed || QUESTION_SENTINEL_REGEX.test(line)) return;
 
-    const isNewQ = qStartRegex.test(line);
-    const isNoise = NOISE_PATTERNS.some(p => p.test(trimmed)) || trimmed.includes('@');
-
-    if (isNewQ) {
-      finalize();
-      currentQ = {
-        ...metadata,
-        id: `q-ar-${Math.random().toString(36).substr(2, 9)}`,
-        questionType: 'ASSERTION_REASON',
-        assertion: { english: "", punjabi: "" },
-        reason: { english: "", punjabi: "" },
-        status: 'PUBLISHED',
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      };
-      state = 'ASSERT_EN';
-      return;
-    }
-
-    if (!currentQ) return;
-
-    // Detect Global Interrupts for state switching
     const isAssertEn = assertEnRegex.test(trimmed);
     const isAssertPa = assertPaRegex.test(trimmed);
     const isReasonEn = reasonEnRegex.test(trimmed);
@@ -180,10 +166,6 @@ export function parseAssertionReason(rawText: string, metadata: any) {
     else if (optMarker) state = 'OPTIONS';
     else if (isAns) state = 'ANSWER';
     else if (isExpl) state = 'EXPL';
-    else if (isNoise && (state === 'EXPL' || state === 'ANSWER')) {
-      finalize();
-      return;
-    }
 
     const cleanLine = trimmed.replace(assertEnRegex, '')
                              .replace(assertPaRegex, '')
@@ -226,7 +208,33 @@ export function parseAssertionReason(rawText: string, metadata: any) {
     }
   });
 
-  finalize();
+  if (currentQ.assertion) {
+    currentQ.assertion.english = currentQ.assertion.english.trim();
+    currentQ.assertion.punjabi = currentQ.assertion.punjabi.trim();
+    currentQ.englishQuestion = currentQ.assertion.english || "Assertion & Reason Question";
+    currentQ.punjabiQuestion = currentQ.assertion.punjabi || "";
+  }
+  
+  if (currentQ.reason) {
+    currentQ.reason.english = currentQ.reason.english.trim();
+    currentQ.reason.punjabi = currentQ.reason.punjabi.trim();
+  }
+
+  return currentQ;
+}
+
+export function parseAssertionReason(rawText: string, metadata: any) {
+  const chunks = segmentTextByQuestions(rawText);
+  console.log(`TOTAL QUESTIONS FOUND: ${chunks.length}`);
+  
+  const questions: any[] = [];
+  chunks.forEach((chunk, index) => {
+    console.log(`PROCESSING QUESTION: Q${index + 1}`);
+    const q = parseSingleAssertionReason(chunk, metadata);
+    if (q) questions.push(q);
+  });
+
+  console.log(`SUCCESSFULLY PARSED: ${questions.length}/${chunks.length} QUESTIONS`);
   return { questions };
 }
 

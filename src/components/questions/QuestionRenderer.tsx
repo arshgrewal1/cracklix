@@ -20,8 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v61.0.
- * FIXED: Implemented high-fidelity rendering for ASSERTION_REASON nodes.
+ * @fileOverview Institutional Question Renderer v63.0.
+ * FIXED: Standardized English and Punjabi typography weights and colors.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -103,7 +103,7 @@ export default function QuestionRenderer({
                         <MathText text={q.assertion.english} />
                      </div>
                      {q.assertion.punjabi && (
-                        <div className="font-bold text-slate-500 text-sm md:text-lg mt-1">
+                        <div className="font-[800] text-[#0F172A] text-sm md:text-lg mt-1">
                            <MathText text={q.assertion.punjabi} />
                         </div>
                      )}
@@ -119,7 +119,7 @@ export default function QuestionRenderer({
                         <MathText text={q.reason.english} />
                      </div>
                      {q.reason.punjabi && (
-                        <div className="font-bold text-slate-500 text-sm md:text-lg mt-1">
+                        <div className="font-[800] text-[#0F172A] text-sm md:text-lg mt-1">
                            <MathText text={q.reason.punjabi} />
                         </div>
                      )}
@@ -135,7 +135,7 @@ export default function QuestionRenderer({
            </div>
          )}
          {showLocal && q.punjabiQuestion && q.questionType !== 'ASSERTION_REASON' && (
-           <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
+           <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
              <MathText text={q.punjabiQuestion} />
            </div>
          )}
@@ -176,7 +176,7 @@ export default function QuestionRenderer({
             </div>
          )}
          {(showLocal && (q.punjabiInstruction || q.punjabiActualQuestion || q.punjabiDiagramQuestion)) && (
-            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
+            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
                <MathText text={q.punjabiInstruction || q.punjabiActualQuestion || q.punjabiDiagramQuestion} />
             </div>
          )}
@@ -225,7 +225,7 @@ export default function QuestionRenderer({
                     </div>
                   )}
                   {showLocal && localText && !hideLocal && (
-                    <div className={cn("font-bold leading-tight break-words text-[#0F172A]", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>
+                    <div className={cn("font-[800] leading-tight break-words text-[#0F172A]", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>
                       <MathText text={localText} />
                     </div>
                   )}
@@ -271,7 +271,7 @@ export default function QuestionRenderer({
                     {q.punjabiExplanation && (
                        <div className="space-y-2">
                           <p className="text-[10px] md:text-[11px] font-black text-primary uppercase tracking-widest">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</p>
-                          <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
+                          <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl">
                              <MathText text={q.punjabiExplanation} className="text-inherit" />
                           </div>
                        </div>
@@ -284,4 +284,3 @@ export default function QuestionRenderer({
     </div>
   );
 }
-
