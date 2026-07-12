@@ -1,7 +1,8 @@
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v14.0.
+ * @fileOverview Institutional Deterministic Ingestion Hub v15.0.
  * FIXED: Implemented strict formatting preservation for English and Punjabi.
- * RULES: Preserve case, internal spacing, line breaks, and Unicode symbols.
+ * RULES: Preserve original case, internal spacing, line breaks, and Unicode symbols.
+ * WHITESPACE: Trim only leading/trailing of the whole block; never collapse internal spaces.
  */
 
 export type ParserFormat = 
@@ -33,7 +34,7 @@ const NOISE_PATTERNS = [
   /www\./i, /http/i, /\.co/i, /\.com/i, /\.in/i, /\.net/i, /\.org/i
 ];
 
-// Termination markers for explanations to prevent bleeding into next question
+// Termination markers for explanations
 const EXPLANATION_END_MARKERS = [
   /^[=\-\*\_]{3,}$/,
   /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i,
@@ -49,12 +50,9 @@ export function preprocessText(text: string): string {
   const lines = text.split(/\r?\n/);
   const cleanLines = lines.filter(line => {
     const trimmed = line.trim();
-    if (!trimmed) return true; // Preserve blank lines
+    if (!trimmed) return true; // Preserve blank lines for block logic
     
-    // Check if line contains URL or blacklisted keyword
     const isNoise = NOISE_PATTERNS.some(pattern => pattern.test(trimmed));
-    
-    // Additional Check: If it's a URL-heavy line, purge it
     const hasURL = /https?:\/\/[^\s]+/.test(trimmed) || /www\.[^\s]+/.test(trimmed);
     
     return !isNoise && !hasURL;
@@ -70,18 +68,12 @@ function sanitizeExplanation(text: string): string {
 
   for (const line of lines) {
     const trimmed = line.trim();
-    // Stop if we hit a termination marker
-    if (trimmed && EXPLANATION_END_MARKERS.some(marker => patternMatch(trimmed, marker))) break;
-    // PRESERVE: We keep the line as is to maintain internal spacing and line breaks
+    if (trimmed && EXPLANATION_END_MARKERS.some(marker => marker.test(trimmed))) break;
+    // PRESERVE: Keep original line including internal spaces and intended blank lines
     cleanLines.push(line);
   }
 
-  // Join and trim only the very start and end of the entire block
   return cleanLines.join('\n').trim();
-}
-
-function patternMatch(text: string, pattern: RegExp): boolean {
-  return pattern.test(text);
 }
 
 export function parseBulkQuestions(rawText: string, metadata: any) {
@@ -90,7 +82,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 
   const questions: any[] = [];
   
-  // Deterministic Split: Starts with Q1, Q2, Question 1, etc.
   const questionStartRegex = /(?:^|\n)\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i;
   const firstIndex = cleanedText.search(questionStartRegex);
   
@@ -114,7 +105,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 
     const format: ParserFormat = metadata.parserFormat || 'BILINGUAL_MCQ';
 
-    // Route to logic strategy
     if (format === 'ENGLISH_ONLY' || format === 'MATHEMATICS') {
        q = parseDeterministicEnglish(trimmedBlock, q);
     } else {
@@ -127,12 +117,8 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   return { questions };
 }
 
-/**
- * STRATEGY: Deterministic English Parser (Zero-Normalization)
- */
 function parseDeterministicEnglish(block: string, q: any) {
   const lines = block.split('\n');
-  
   const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i;
   
   let section: 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION' = 'QUESTION';
@@ -147,9 +133,6 @@ function parseDeterministicEnglish(block: string, q: any) {
     const trimmedLine = line.trim();
     if (!trimmedLine && section !== 'EXPLANATION' && section !== 'QUESTION') return;
     
-    const isFirstLine = idx === 0;
-    
-    // Check for state changes
     if (trimmedLine.match(/^\(?[A-E][\)\.\s:]/i)) {
       section = 'OPTIONS';
     } else if (ansMarkers.some(m => trimmedLine.toLowerCase().includes(m.toLowerCase()))) {
@@ -158,15 +141,14 @@ function parseDeterministicEnglish(block: string, q: any) {
       section = 'EXPLANATION';
     }
 
-    // Process based on section - PRESERVE SPACES AND CASE
     if (section === 'QUESTION') {
-      const text = isFirstLine ? line.replace(qMarkerRegex, '') : line;
+      const text = idx === 0 ? line.replace(qMarkerRegex, '') : line;
       englishQuestionLines.push(text);
     } else if (section === 'OPTIONS') {
       optMarkers.forEach(opt => {
         const regex = new RegExp(`^\\(?${opt}[\\)\\.\\s:]\\s*(.*)`, 'i');
         const match = line.match(regex);
-        if (match) q[`option${opt}English`] = match[1].trim(); // Only trim outer
+        if (match) q[`option${opt}English`] = match[1].trim(); 
       });
     } else if (section === 'ANSWER') {
       const match = trimmedLine.match(/(?:Answer|Official Key|Correct Answer)\s*[:\-]?\s*\(?([A-D])\)?/i);
@@ -183,9 +165,6 @@ function parseDeterministicEnglish(block: string, q: any) {
   return q;
 }
 
-/**
- * STRATEGY: Deterministic Bilingual Parser (Zero-Normalization)
- */
 function parseDeterministicBilingual(block: string, q: any, secondaryLang: string) {
   const lines = block.split('\n');
   const punjabiRegex = /[\u0A00-\u0A7F]/;
@@ -208,8 +187,6 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
     const trimmedLine = line.trim();
     if (!trimmedLine && section !== 'EXPLANATION' && section !== 'QUESTION') return;
     
-    const isFirstLine = idx === 0;
-
     if (trimmedLine.match(/^\(?[A-E][\)\.\s:]/i)) {
       section = 'OPTIONS';
     } else if (ansMarkers.some(m => trimmedLine.toLowerCase().includes(m.toLowerCase()))) {
@@ -219,8 +196,8 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
     }
 
     if (section === 'QUESTION') {
-      const text = isFirstLine ? line.replace(/^(?:Q\d+|Question\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i, '') : line;
-      if (text.trim()) {
+      const text = idx === 0 ? line.replace(/^(?:Q\d+|Question\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i, '') : line;
+      if (text.trim() || cleanLinesInBlock(idx, lines)) {
         if (scriptRegex.test(text)) localQLines.push(text);
         else englishQLines.push(text);
       }
@@ -256,6 +233,12 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
   return q;
 }
 
+function cleanLinesInBlock(idx: number, lines: string[]): boolean {
+    // Helper to see if a blank line should be preserved within a text block
+    if (idx === 0 || idx === lines.length - 1) return false;
+    return lines[idx-1].trim().length > 0 && lines[idx+1].trim().length > 0;
+}
+
 export function validateMCQSchema(q: any): string[] {
   const errors: string[] = [];
   if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion) errors.push("Statement node missing.");
@@ -273,12 +256,18 @@ export function validateMCQSchema(q: any): string[] {
 
   if (!q.correctAnswer) errors.push("Answer key missing.");
 
-  const qMarkerRegex = /(?:^|\n)\s*(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i;
+  const qMarkerRegex = /(?:^|\n)\s*(?:Q\d+|Question\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i;
   const explanation = (q.englishExplanation || "") + (q.punjabiExplanation || "") + (q.hindiExplanation || "");
   
   if (qMarkerRegex.test(explanation)) {
      errors.push("Structural Failure: Explanation contains next question marker.");
   }
 
+  const leakMarkers = ["Question", "Option A", "Option B", "Advertisement", "www.", "Page", "Copyright"];
+  leakMarkers.forEach(marker => {
+    if (explanation.includes(marker)) errors.push(`Integrity Violation: Explanation contains forbidden node "${marker}".`);
+  });
+
   return errors;
 }
+
