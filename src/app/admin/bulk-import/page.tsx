@@ -34,9 +34,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v56.0.
+ * @fileOverview Modular Industrial Ingestion Hub v58.0.
  * FIXED: Hydration error resolved by replacing p with div in staging list.
- * UPDATED: Added Punjabi Only strategy support.
+ * UPDATED: Mathematics strategy support with equation preservation.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
@@ -234,7 +234,7 @@ export default function BulkIngestionPage() {
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
-                        placeholder="Paste Q1. (A) English format here..."
+                        placeholder="Paste question blocks with math symbols here..."
                         className="min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>

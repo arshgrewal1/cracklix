@@ -1,6 +1,7 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v25.0.
+ * @fileOverview Institutional Specialized Local Parser v26.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Punjabi Only formats.
+ * FIXED: Re-engineered option splitting to handle Math formulas without accidental splits.
  */
 
 export type ParserFormat = 
@@ -20,7 +21,7 @@ export type ParserFormat =
 
 /**
  * Pre-processes raw text to remove institutional noise and OCR garbage.
- * Removes headers, footers, page numbers, strange symbols and extra spaces.
+ * Removes headers, footers, page numbers, and strange symbols while PRESERVING math symbols.
  */
 export function preprocessText(text: string): string {
   if (!text) return "";
@@ -34,14 +35,13 @@ export function preprocessText(text: string): string {
     .replace(/Page\s+\d+\s+of\s+\d+/gi, '')
     .replace(/ਪੰਨਾ\s+\d+\s+of\s+\d+/gi, '')
     .replace(/\d+\s*\/\s*\d+/g, '')
-    .replace(/^\s*\d+\s*$/gm, '') // Isolated numbers on a line (likely page numbers)
-    // 3. Remove OCR Garbage & Symbols
-    .replace(/[~^•▪►❖⚬]/g, '')
+    .replace(/^\s*\d+\s*$/gm, '') 
+    // 3. Remove OCR Garbage & Symbols (Keep math symbols like ^, √, ∫, etc.)
+    .replace(/[~►❖⚬▪•]/g, '')
     .replace(/Copyright.*?Arsh Grewal/gi, '')
     .replace(/www\.cracklix\.com/gi, '')
     .replace(/https?:\/\/\S+/gi, '')
-    // 4. Normalize Punctuation & Whitespace
-    .replace(/\.{2,}/g, '.') 
+    // 4. Normalize Whitespace
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
@@ -84,15 +84,12 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
       case 'PUNJABI_ONLY':
         q = parsePunjabiOnly(block, q);
         break;
-      case 'CURRENT_AFFAIRS':
-      case 'BILINGUAL_MCQ':
-        q = parseBilingual(block, q, metadata.secondaryLanguage);
-        break;
       case 'MATHEMATICS':
         q = parseMath(block, q);
         break;
-      case 'TABLE':
-        q = parseTable(block, q);
+      case 'CURRENT_AFFAIRS':
+      case 'BILINGUAL_MCQ':
+        q = parseBilingual(block, q, metadata.secondaryLanguage);
         break;
       default:
         q = parseSimple(block, q);
@@ -105,8 +102,51 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 }
 
 /**
+ * STRATEGY: Mathematics Hub
+ * Hardened to preserve complex equations, integrals and superscripts.
+ */
+function parseMath(block: string, q: any) {
+  const answerMatch = block.match(/(?:Official Key|Answer|Ans|Correct Answer)\s*[:\-]?\s*([A-D])/i);
+  const explStartIndex = block.search(/(?:Explanation|Solution|Rationale)\s*[:\-]?/i);
+  
+  let restOfBlock = block;
+  let explanationPart = "";
+
+  if (explStartIndex !== -1) {
+    explanationPart = block.substring(explStartIndex);
+    restOfBlock = block.substring(0, explStartIndex);
+  }
+
+  // STRICT OPTION BOUNDARY: Only split on A) at start of a line to protect internal formulas
+  const optAMatch = restOfBlock.match(/\n\s*A[\)\.\-]\s+/i);
+  let questionPart = restOfBlock;
+  let optionsPart = "";
+
+  if (optAMatch && optAMatch.index !== undefined) {
+     questionPart = restOfBlock.substring(0, optAMatch.index);
+     optionsPart = restOfBlock.substring(optAMatch.index);
+  }
+
+  q.englishQuestion = questionPart.replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '').trim();
+  
+  const labels = ['A', 'B', 'C', 'D'];
+  labels.forEach((label, i) => {
+    const next = labels[i + 1] || "(?:Official Key|Answer|Ans|Correct Answer)";
+    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${next}[\\)\\.\\-]|$)`, 'i');
+    const match = optionsPart.match(reg);
+    if (match) q[`option${label}English`] = match[1].trim();
+  });
+
+  q.correctAnswer = (answerMatch?.[1] || "A").toUpperCase();
+  if (explanationPart) {
+    q.englishExplanation = explanationPart.replace(/(?:Explanation|Solution|Rationale)\s*[:\-]?\s*/i, '').trim();
+  }
+
+  return q;
+}
+
+/**
  * STRATEGY: Punjabi Only MCQ
- * Isolates Gurmukhi text and ensures Unicode preservation.
  */
 function parsePunjabiOnly(block: string, q: any) {
   const answerMatch = block.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|ਸਹੀ ਉੱਤਰ)\s*[:\-]?\s*([A-D])/i);
@@ -200,7 +240,7 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
   const expLocalKey = secondaryLang === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
 
   const answerMatch = block.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर)\s*[:\-]?\s*\(?([A-D])\)?/i);
-  const explStartIndex = block.search(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याਖਿਆ|व्याख्या)\s*[:\-]?/i);
+  const explStartIndex = block.search(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या)\s*[:\-]?/i);
   
   let restOfBlock = block;
   let explanationPart = "";
@@ -240,52 +280,13 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
   q.correctAnswer = (answerMatch?.[1] || "A").toUpperCase();
 
   if (explanationPart) {
-    const expClean = explanationPart.replace(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याਖਿਆ|व्याख्या)\s*[:\-]?\s*/i, '').trim();
+    const expClean = explanationPart.replace(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या)\s*[:\-]?\s*/i, '').trim();
     const expLines = expClean.split('\n').map(l => l.trim()).filter(Boolean);
     q.englishExplanation = expLines.filter(l => !scriptRegex.test(l)).join('\n');
     q[expLocalKey] = expLines.filter(l => scriptRegex.test(l)).join('\n');
   }
 
   return q;
-}
-
-/**
- * STRATEGY: Mathematics
- */
-function parseMath(block: string, q: any) {
-  const optAMatch = block.match(/\n\s*A[\)\.\-]\s+/i);
-  let questionPart = block;
-  let optionsPart = block;
-
-  if (optAMatch && optAMatch.index !== undefined) {
-    questionPart = block.substring(0, optAMatch.index);
-    optionsPart = block.substring(optAMatch.index);
-  }
-
-  q.englishQuestion = questionPart.trim().replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '');
-  
-  const labels = ['A', 'B', 'C', 'D'];
-  labels.forEach((label, i) => {
-    const next = labels[i + 1] || '(?:Answer|Ans)';
-    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${next}[\\)\\.\\-]|$)`, 'i');
-    const match = optionsPart.match(reg);
-    if (match) q[`option${label}English`] = match[1].trim();
-  });
-
-  q.correctAnswer = (block.match(/(?:Answer|Ans|Official Key)\s*[:\-]?\s*([A-D])/i)?.[1] || "A").toUpperCase();
-  return q;
-}
-
-/**
- * STRATEGY: Table
- */
-function parseTable(block: string, q: any) {
-  const tableMatch = block.match(/\|[\s\S]*?\|/);
-  if (tableMatch) {
-    q.table_data = tableMatch[0].trim();
-    q.questionType = 'TABLE_BASED';
-  }
-  return parseSimple(block, q);
 }
 
 function parseSimple(block: string, q: any) {
