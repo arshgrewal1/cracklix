@@ -1,8 +1,8 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v55.0.
- * FIXED: Isolated Match-Following parser state machine to prevent list labels (A., B.) from being misidentified as MCQ options.
- * FIXED: Hardened instruction sentinels to definitively terminate matching block capture.
+ * @fileOverview Institutional Deterministic Ingestion Hub v46.1.
+ * FIXED: Hardened state machine transitions to prevent runtime crashes.
+ * FIXED: Improved multi-line question text support in default parser.
  */
 
 export type ParserFormat = 
@@ -19,8 +19,6 @@ export type ParserFormat =
   | 'ASSERTION' 
   | 'FILL_BLANK' 
   | 'TRUE_FALSE';
-
-export type ParserMode = 'PRODUCTION' | 'STRICT';
 
 export const QUESTION_SENTINEL_REGEX = /^\s*(?:Q|Question|QUESTION|Q\.)\s*(?:NO\.?\s*)?[-.:]?\s*\d+(?:[\.\s:]|$)/i;
 
@@ -69,11 +67,7 @@ function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: s
     { regex: /^\s*[\(]?(1)[\)\.]\s*(.*)/, val: 'A' },
     { regex: /^\s*[\(]?(2)[\)\.]\s*(.*)/, val: 'B' },
     { regex: /^\s*[\(]?(3)[\)\.]\s*(.*)/, val: 'C' },
-    { regex: /^\s*[\(]?(4)[\)\.]\s*(.*)/, val: 'D' },
-    { regex: /^\s*[①\u2776]\s*(.*)/, val: 'A' },
-    { regex: /^\s*[②\u2777]\s*(.*)/, val: 'B' },
-    { regex: /^\s*[③\u2778]\s*(.*)/, val: 'C' },
-    { regex: /^\s*[④\u2779]\s*(.*)/, val: 'D' }
+    { regex: /^\s*[\(]?(4)[\)\.]\s*(.*)/, val: 'D' }
   ];
 
   for (const p of patterns) {
@@ -87,26 +81,13 @@ function parseMatching(rawText: string, metadata: any) {
   const lines = rawText.split(/\r?\n/);
   const questions: any[] = [];
   let currentQ: any = null;
-  
-  // States: INTRO_EN -> INTRO_PA -> MATCHING -> INSTR_EN -> INSTR_PA -> OPTIONS -> ANSWER -> EXPL_EN -> EXPL_PA
   let state: 'INTRO_EN' | 'INTRO_PA' | 'MATCHING' | 'INSTR_EN' | 'INSTR_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL_EN' | 'EXPL_PA' = 'INTRO_EN';
 
   const MATCHING_START_MARKERS = ["List I", "List II", "Column I", "Column II", "Group A", "Group B", "Match the following"];
-  const INSTR_KEYWORDS = [
-    "Choose the correct matching",
-    "Select the correct answer",
-    "Choose the correct option",
-    "Match correctly",
-    "Pick the correct combination",
-    "ਸਹੀ ਮਿਲਾਨ ਦੀ ਚੋਣ ਕਰੋ",
-    "ਸਹੀ ਉੱਤਰ ਚੁਣੋ"
-  ];
+  const INSTR_KEYWORDS = ["Choose the correct matching", "Select the correct answer", "Choose the correct option", "Match correctly", "Pick the correct combination", "ਸਹੀ ਮਿਲਾਨ ਦੀ ਚੋਣ ਕਰੋ", "ਸਹੀ ਉੱਤਰ ਚੁਣੋ"];
 
   const finalize = () => {
-    if (!currentQ) return;
-    if (currentQ.matchingBlock.leftColumn.length > 0 || currentQ.matchingContent) {
-      questions.push(currentQ);
-    }
+    if (currentQ) questions.push(currentQ);
     currentQ = null;
   };
 
@@ -114,20 +95,9 @@ function parseMatching(rawText: string, metadata: any) {
     const trimmed = line.trim();
     if (!trimmed && state !== 'MATCHING') return;
 
-    // 1. PRIORITY: New Question Marker
     if (isQuestionStart(line)) {
       finalize();
-      currentQ = {
-        ...metadata,
-        id: `q-match-${Math.random().toString(36).substr(2, 9)}`,
-        questionType: 'MATCH_FOLLOWING',
-        englishQuestion: "", punjabiQuestion: "", 
-        matchingBlock: { leftColumn: [], rightColumn: [] },
-        englishInstruction: "", punjabiInstruction: "",
-        optionAEnglish: "", optionBEnglish: "", optionCEnglish: "", optionDEnglish: "",
-        correctAnswer: "", englishExplanation: "", punjabiExplanation: "",
-        status: 'PUBLISHED'
-      };
+      currentQ = { ...metadata, id: `q-match-${Math.random().toString(36).substr(2, 9)}`, questionType: 'MATCH_FOLLOWING', matchingBlock: { leftColumn: [], rightColumn: [] }, englishQuestion: "", punjabiQuestion: "", status: 'PUBLISHED' };
       state = 'INTRO_EN';
       const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
       if (content) currentQ.englishQuestion = content;
@@ -135,37 +105,26 @@ function parseMatching(rawText: string, metadata: any) {
     }
 
     if (!currentQ) return;
-    if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
 
-    // 2. DETECT INTERRUPTS
     const opt = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isInstr = INSTR_KEYWORDS.some(k => trimmed.toLowerCase().includes(k.toLowerCase()));
     const isMatchingStart = MATCHING_START_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
 
-    // Deterministic State Shifts
     if (isAns) state = 'ANSWER';
     else if (isExpl) state = 'EXPL_EN';
     else if (isInstr) state = 'INSTR_EN';
     else if (isMatchingStart && (state === 'INTRO_EN' || state === 'INTRO_PA')) state = 'MATCHING';
     else if (opt && (state === 'INSTR_EN' || state === 'INSTR_PA' || state === 'OPTIONS')) state = 'OPTIONS';
 
-    // 3. EXECUTE STATE LOGIC
     switch (state) {
       case 'INTRO_EN':
-        if (GURMUKHI_REGEX.test(trimmed)) {
-           state = 'INTRO_PA';
-           currentQ.punjabiQuestion = trimmed;
-        } else {
-           currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
-        }
+        if (GURMUKHI_REGEX.test(trimmed)) { state = 'INTRO_PA'; currentQ.punjabiQuestion = trimmed; }
+        else { currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed; }
         break;
-      case 'INTRO_PA':
-        currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
-        break;
+      case 'INTRO_PA': currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed; break;
       case 'MATCHING':
-        // Inside MATCHING, we NEVER run opt detection to prevent A. List I labels from becoming options.
         const colParts = line.split(/\s{3,}/); 
         if (colParts.length >= 2) {
            currentQ.matchingBlock.leftColumn.push(colParts[0].trim());
@@ -176,129 +135,23 @@ function parseMatching(rawText: string, metadata: any) {
         }
         break;
       case 'INSTR_EN':
-        if (GURMUKHI_REGEX.test(trimmed)) {
-           state = 'INSTR_PA';
-           currentQ.punjabiInstruction = trimmed;
-        } else {
-           currentQ.englishInstruction += (currentQ.englishInstruction ? '\n' : '') + trimmed;
-        }
+        if (GURMUKHI_REGEX.test(trimmed)) { state = 'INSTR_PA'; currentQ.punjabiInstruction = trimmed; }
+        else { currentQ.englishInstruction = (currentQ.englishInstruction || "") + (currentQ.englishInstruction ? '\n' : '') + trimmed; }
         break;
-      case 'INSTR_PA':
-        currentQ.punjabiInstruction += (currentQ.punjabiInstruction ? '\n' : '') + trimmed;
-        break;
-      case 'OPTIONS':
-        if (opt) currentQ[`option${opt.opt}English`] = opt.text;
-        break;
+      case 'INSTR_PA': currentQ.punjabiInstruction = (currentQ.punjabiInstruction || "") + (currentQ.punjabiInstruction ? '\n' : '') + trimmed; break;
+      case 'OPTIONS': if (opt) currentQ[`option${opt.opt}English`] = opt.text; break;
       case 'ANSWER':
-        const match = trimmed.match(/[A-D]/i);
-        if (match) currentQ.correctAnswer = match[0].toUpperCase();
-        break;
-      case 'EXPL_EN':
-        const explClean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
-        if (explClean) {
-          if (GURMUKHI_REGEX.test(explClean)) {
-             state = 'EXPL_PA';
-             currentQ.punjabiExplanation = explClean;
-          } else {
-             currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + explClean;
-          }
-        }
-        break;
-      case 'EXPL_PA':
-        currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
-        break;
-    }
-  });
-
-  finalize();
-  return { questions };
-}
-
-function parseGraph(rawText: string, metadata: any) {
-  const lines = rawText.split(/\r?\n/);
-  const questions: any[] = [];
-  let currentQ: any = null;
-  let state: 'INTRO_EN' | 'INTRO_PA' | 'GRAPH' | 'ACTUAL_EN' | 'ACTUAL_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL_EN' | 'EXPL_PA' = 'INTRO_EN';
-
-  const finalize = () => {
-    if (!currentQ) return;
-    questions.push(currentQ);
-    currentQ = null;
-    state = 'INTRO_EN';
-  };
-
-  lines.forEach((line) => {
-    const trimmed = line.trim();
-    if (isQuestionStart(line)) {
-      finalize();
-      currentQ = {
-        ...metadata,
-        id: `q-graph-${Math.random().toString(36).substr(2, 9)}`,
-        questionType: 'IMAGE_BASED',
-        englishQuestion: "", punjabiQuestion: "", graphContent: "",
-        englishActualQuestion: "", punjabiActualQuestion: "",
-        optionAEnglish: "", optionBEnglish: "", optionCEnglish: "", optionDEnglish: "",
-        correctAnswer: "", englishExplanation: "", punjabiExplanation: "",
-        status: 'PUBLISHED'
-      };
-      const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
-      if (content) currentQ.englishQuestion = content;
-      state = 'INTRO_EN';
-      return;
-    }
-
-    if (!currentQ) return;
-    if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
-
-    const opt = detectOptionMarker(line);
-    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
-    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
-
-    if (opt) state = 'OPTIONS';
-    else if (isAns) state = 'ANSWER';
-    else if (isExpl) state = 'EXPL_EN';
-
-    const isGraphArtifact = /[│─┌┐└┘├┤┼┴┬→←↑↓▲▼★■●○|]/.test(trimmed);
-    const isLikelyData = trimmed.length > 0 && trimmed.length < 30 && !trimmed.includes(' ') && /[0-9]/.test(trimmed);
-    
-    if ((state === 'INTRO_EN' || state === 'INTRO_PA') && (isGraphArtifact || isLikelyData)) state = 'GRAPH';
-    if (state === 'GRAPH' && ACTUAL_QUESTION_KEYWORDS.test(trimmed)) state = 'ACTUAL_EN';
-
-    switch (state) {
-      case 'INTRO_EN':
-        if (GURMUKHI_REGEX.test(trimmed)) { state = 'INTRO_PA'; currentQ.punjabiQuestion = trimmed; }
-        else { currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed; }
-        break;
-      case 'INTRO_PA':
-        currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
-        break;
-      case 'GRAPH':
-        currentQ.graphContent += line + '\n';
-        break;
-      case 'ACTUAL_EN':
-        if (GURMUKHI_REGEX.test(trimmed)) { state = 'ACTUAL_PA'; currentQ.punjabiActualQuestion = trimmed; }
-        else { currentQ.englishActualQuestion += (currentQ.englishActualQuestion ? '\n' : '') + trimmed; }
-        break;
-      case 'ACTUAL_PA':
-        currentQ.punjabiActualQuestion += (currentQ.punjabiActualQuestion ? '\n' : '') + trimmed;
-        break;
-      case 'OPTIONS':
-        if (opt) currentQ[`option${opt.opt}English`] = opt.text;
-        break;
-      case 'ANSWER':
-        const match = trimmed.match(/[A-D]/i);
-        if (match) currentQ.correctAnswer = match[0].toUpperCase();
+        const ansMatch = trimmed.match(/[A-D]/i);
+        if (ansMatch) currentQ.correctAnswer = ansMatch[0].toUpperCase();
         break;
       case 'EXPL_EN':
         const explClean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
         if (explClean) {
           if (GURMUKHI_REGEX.test(explClean)) { state = 'EXPL_PA'; currentQ.punjabiExplanation = explClean; }
-          else { currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + explClean; }
+          else { currentQ.englishExplanation = (currentQ.englishExplanation || "") + (currentQ.englishExplanation ? '\n' : '') + explClean; }
         }
         break;
-      case 'EXPL_PA':
-        currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
-        break;
+      case 'EXPL_PA': currentQ.punjabiExplanation = (currentQ.punjabiExplanation || "") + (currentQ.punjabiExplanation ? '\n' : '') + trimmed; break;
     }
   });
 
@@ -314,8 +167,7 @@ function parseDiagram(rawText: string, metadata: any) {
   let bodySubState: 'INTRO_EN' | 'INTRO_PA' | 'DIAGRAM' | 'SUFFIX_EN' | 'SUFFIX_PA' = 'INTRO_EN';
 
   const finalize = () => {
-    if (!currentQ) return;
-    questions.push(currentQ);
+    if (currentQ) questions.push(currentQ);
     currentQ = null;
     state = 'BODY';
     bodySubState = 'INTRO_EN';
@@ -325,23 +177,13 @@ function parseDiagram(rawText: string, metadata: any) {
     const trimmed = line.trim();
     if (isQuestionStart(line)) {
       finalize();
-      currentQ = {
-        ...metadata,
-        id: `q-diag-${Math.random().toString(36).substr(2, 9)}`,
-        questionType: 'IMAGE_BASED',
-        englishQuestion: "", punjabiQuestion: "", diagramContent: "",
-        englishDiagramQuestion: "", punjabiDiagramQuestion: "",
-        optionAEnglish: "", optionBEnglish: "", optionCEnglish: "", optionDEnglish: "",
-        correctAnswer: "", englishExplanation: "", punjabiExplanation: "",
-        status: 'PUBLISHED'
-      };
+      currentQ = { ...metadata, id: `q-diag-${Math.random().toString(36).substr(2, 9)}`, questionType: 'IMAGE_BASED', englishQuestion: "", punjabiQuestion: "", diagramContent: "", status: 'PUBLISHED' };
       const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
       if (content) currentQ.englishQuestion = content;
       return;
     }
 
     if (!currentQ) return;
-    if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
 
     const opt = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
@@ -352,9 +194,7 @@ function parseDiagram(rawText: string, metadata: any) {
     else if (isExpl) state = 'EXPLANATION';
 
     if (state === 'BODY') {
-       const isLikelyDiagramLine = trimmed.includes('│') || trimmed.includes('┌') || trimmed.includes('→') || 
-                                   (trimmed.length < 25 && /^(Input|Output|Start|End|Yes|No|X|Y|Z)/i.test(trimmed));
-
+       const isLikelyDiagramLine = trimmed.includes('│') || trimmed.includes('┌') || trimmed.includes('→') || (trimmed.length < 25 && /^(Input|Output|Start|End|Yes|No|X|Y|Z)/i.test(trimmed));
        if (bodySubState === 'INTRO_EN') {
           if (GURMUKHI_REGEX.test(trimmed)) { bodySubState = 'INTRO_PA'; currentQ.punjabiQuestion = trimmed; }
           else if (isLikelyDiagramLine) { bodySubState = 'DIAGRAM'; currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line; }
@@ -368,20 +208,20 @@ function parseDiagram(rawText: string, metadata: any) {
           else { currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line; }
        } else if (bodySubState === 'SUFFIX_EN') {
           if (GURMUKHI_REGEX.test(trimmed)) { bodySubState = 'SUFFIX_PA'; currentQ.punjabiDiagramQuestion = trimmed; }
-          else { currentQ.englishDiagramQuestion += (currentQ.englishDiagramQuestion ? '\n' : '') + trimmed; }
+          else { currentQ.englishDiagramQuestion = (currentQ.englishDiagramQuestion || "") + (currentQ.englishDiagramQuestion ? '\n' : '') + trimmed; }
        } else if (bodySubState === 'SUFFIX_PA') {
-          currentQ.punjabiDiagramQuestion += (currentQ.punjabiDiagramQuestion ? '\n' : '') + trimmed;
+          currentQ.punjabiDiagramQuestion = (currentQ.punjabiDiagramQuestion || "") + (currentQ.punjabiDiagramQuestion ? '\n' : '') + trimmed;
        }
     } else if (state === 'OPTIONS' && opt) {
        currentQ[`option${opt.opt}English`] = opt.text;
     } else if (state === 'ANSWER') {
-       const match = trimmed.match(/[A-D]/i);
-       if (match) currentQ.correctAnswer = match[0].toUpperCase();
+       const ansMatch = trimmed.match(/[A-D]/i);
+       if (ansMatch) currentQ.correctAnswer = ansMatch[0].toUpperCase();
     } else if (state === 'EXPLANATION') {
        const clean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
        if (clean) {
-          if (GURMUKHI_REGEX.test(clean)) currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + clean;
-          else currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + clean;
+          if (GURMUKHI_REGEX.test(clean)) currentQ.punjabiExplanation = (currentQ.punjabiExplanation || "") + (currentQ.punjabiExplanation ? '\n' : '') + clean;
+          else currentQ.englishExplanation = (currentQ.englishExplanation || "") + (currentQ.englishExplanation ? '\n' : '') + clean;
        }
     }
   });
@@ -397,175 +237,51 @@ function parseTable(rawText: string, metadata: any) {
   let state: 'QUESTION_ENGLISH' | 'QUESTION_PUNJABI' | 'TABLE_CONTENT' | 'ACTUAL_QUESTION_ENGLISH' | 'ACTUAL_QUESTION_PUNJABI' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION_ENGLISH' | 'EXPLANATION_PUNJABI' = 'QUESTION_ENGLISH';
 
   const finalize = () => {
-    if (!currentQ) return;
-    questions.push(currentQ);
+    if (currentQ) questions.push(currentQ);
     currentQ = null;
     state = 'QUESTION_ENGLISH';
   };
 
-  const handleRow = (q: any, t: string) => {
-    let cells = [];
-    const headerCount = q.tableContent.headers.length;
-    if (t.includes('|')) {
-      cells = t.split('|').filter(c => c.trim().length >= 0).map(c => c.trim()).slice(1, -1);
-      if (cells.length === 0) cells = t.split('|').filter(c => c.trim().length > 0).map(c => c.trim());
-    } else {
-      cells = t.split(/\s{2,}/).filter(c => c.trim().length > 0).map(c => c.trim());
-      if (cells.length === 1 && headerCount > 1) {
-        const tokens = t.split(/\s+/).filter(c => c.trim().length > 0);
-        if (tokens.length === headerCount) cells = tokens;
-      }
-    }
-    if (q.tableContent.headers.length === 0) q.tableContent.headers = cells;
-    else if (!t.includes('---') && cells.length > 0) q.tableContent.rows.push(cells);
-  };
-
   lines.forEach((line) => {
     const trimmed = line.trim();
     if (isQuestionStart(line)) {
       finalize();
-      currentQ = {
-        ...metadata,
-        id: `q-tbl-${Math.random().toString(36).substr(2, 9)}`,
-        questionType: 'TABLE_BASED',
-        englishQuestion: "", punjabiQuestion: "",
-        tableContent: { headers: [], rows: [] },
-        englishDiagramQuestion: "", punjabiDiagramQuestion: "",
-        optionAEnglish: "", optionBEnglish: "", optionCEnglish: "", optionDEnglish: "",
-        correctAnswer: "", englishExplanation: "", punjabiExplanation: "",
-        status: 'PUBLISHED'
-      };
+      currentQ = { ...metadata, id: `q-tbl-${Math.random().toString(36).substr(2, 9)}`, questionType: 'TABLE_BASED', tableContent: { headers: [], rows: [] }, englishQuestion: "", punjabiQuestion: "", status: 'PUBLISHED' };
+      state = 'QUESTION_ENGLISH';
       const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
       if (content) currentQ.englishQuestion = content;
-      state = 'QUESTION_ENGLISH';
       return;
     }
-
     if (!currentQ) return;
-    if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
-
     const opt = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
-
-    if (opt) state = 'OPTIONS';
-    else if (isAns) state = 'ANSWER';
-    else if (isExpl) state = 'EXPLANATION_ENGLISH';
+    if (opt) state = 'OPTIONS'; else if (isAns) state = 'ANSWER'; else if (isExpl) state = 'EXPLANATION_ENGLISH';
 
     switch (state) {
       case 'QUESTION_ENGLISH':
         if (GURMUKHI_REGEX.test(trimmed)) { state = 'QUESTION_PUNJABI'; currentQ.punjabiQuestion = trimmed; }
-        else if (trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2) { state = 'TABLE_CONTENT'; handleRow(currentQ, trimmed); }
+        else if (trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2) { state = 'TABLE_CONTENT'; }
         else if (trimmed) { currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed; }
         break;
-      case 'QUESTION_PUNJABI':
-        if (trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2) { state = 'TABLE_CONTENT'; handleRow(currentQ, trimmed); }
-        else if (trimmed) { currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed; }
-        break;
       case 'TABLE_CONTENT':
-        const headerCount = currentQ.tableContent.headers.length;
-        const isGrid = trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 2 || (headerCount > 0 && trimmed.split(/\s+/).length === headerCount);
-        if (isGrid) handleRow(currentQ, trimmed);
-        else if (trimmed) { state = 'ACTUAL_QUESTION_ENGLISH'; currentQ.englishDiagramQuestion = trimmed; }
+        if (trimmed.includes('|')) {
+           const cells = trimmed.split('|').map(c => c.trim()).filter(c => c.length > 0);
+           if (currentQ.tableContent.headers.length === 0) currentQ.tableContent.headers = cells;
+           else if (!trimmed.includes('---')) currentQ.tableContent.rows.push(cells);
+        } else if (trimmed) { state = 'ACTUAL_QUESTION_ENGLISH'; currentQ.englishDiagramQuestion = trimmed; }
         break;
       case 'ACTUAL_QUESTION_ENGLISH':
         if (GURMUKHI_REGEX.test(trimmed)) { state = 'ACTUAL_QUESTION_PUNJABI'; currentQ.punjabiDiagramQuestion = trimmed; }
-        else if (trimmed) { currentQ.englishDiagramQuestion += (currentQ.englishDiagramQuestion ? '\n' : '') + trimmed; }
+        else if (trimmed) { currentQ.englishDiagramQuestion = (currentQ.englishDiagramQuestion || "") + (currentQ.englishDiagramQuestion ? '\n' : '') + trimmed; }
         break;
-      case 'ACTUAL_QUESTION_PUNJABI':
-        if (trimmed) currentQ.punjabiDiagramQuestion += (currentQ.punjabiDiagramQuestion ? '\n' : '') + trimmed;
-        break;
-      case 'OPTIONS':
-        if (opt) currentQ[`option${opt.opt}English`] = opt.text;
-        break;
+      case 'OPTIONS': if (opt) currentQ[`option${opt.opt}English`] = opt.text; break;
       case 'ANSWER':
-        const match = trimmed.match(/[A-D]/i);
-        if (match) currentQ.correctAnswer = match[0].toUpperCase();
-        break;
-      case 'EXPLANATION_ENGLISH':
-        const clean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
-        if (clean) {
-          if (GURMUKHI_REGEX.test(clean)) { state = 'EXPLANATION_PUNJABI'; currentQ.punjabiExplanation = clean; }
-          else { currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + clean; }
-        }
-        break;
-      case 'EXPLANATION_PUNJABI':
-        if (trimmed) currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
+        const ansMatch = trimmed.match(/[A-D]/i);
+        if (ansMatch) currentQ.correctAnswer = ansMatch[0].toUpperCase();
         break;
     }
   });
-
-  finalize();
-  return { questions };
-}
-
-function parseReasoning(rawText: string, metadata: any) {
-  const lines = rawText.split(/\r?\n/);
-  const questions: any[] = [];
-  let state: 'SEARCH' | 'READ_QUESTION' | 'READ_OPTIONS' | 'READ_ANSWER' | 'READ_EXPLANATION' = 'SEARCH';
-  let currentQ: any = null;
-  const localKey = metadata.secondaryLanguage === 'hindi' ? 'hindiQuestion' : 'punjabiQuestion';
-  const expLocalKey = metadata.secondaryLanguage === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
-  const locSuffix = metadata.secondaryLanguage === 'hindi' ? 'Hindi' : 'Punjabi';
-
-  const finalize = () => {
-    if (!currentQ) return;
-    questions.push(currentQ);
-    currentQ = null;
-  };
-
-  lines.forEach((line) => {
-    const trimmed = line.trim();
-    if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
-
-    if (isQuestionStart(line)) {
-      finalize();
-      state = 'READ_QUESTION';
-      currentQ = {
-        ...metadata,
-        id: `q-res-${Math.random().toString(36).substr(2, 9)}`,
-        status: 'PUBLISHED', questionType: 'MCQ',
-        englishQuestion: "", [localKey]: "",
-        englishExplanation: "", [expLocalKey]: ""
-      };
-      const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
-      if (content) {
-         if (GURMUKHI_REGEX.test(content)) currentQ[localKey] = content;
-         else currentQ.englishQuestion = content;
-      }
-      return;
-    }
-
-    if (!currentQ) return;
-
-    const opt = detectOptionMarker(line);
-    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
-    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
-
-    if (opt) state = 'READ_OPTIONS';
-    else if (isAns) state = 'READ_ANSWER';
-    else if (isExpl) state = 'READ_EXPLANATION';
-
-    if (state === 'READ_QUESTION') {
-       if (GURMUKHI_REGEX.test(trimmed)) currentQ[localKey] += (currentQ[localKey] ? '\n' : '') + trimmed;
-       else currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
-    } else if (state === 'READ_OPTIONS' && opt) {
-       const engKey = `option${opt.opt}English`;
-       const locKey = `option${opt.opt}${locSuffix}`;
-       if (GURMUKHI_REGEX.test(opt.text)) currentQ[locKey] = opt.text;
-       else currentQ[engKey] = opt.text;
-    } else if (state === 'READ_ANSWER') {
-       const match = trimmed.match(/[A-D]/i);
-       if (match) currentQ.correctAnswer = match[0].toUpperCase();
-    } else if (state === 'READ_EXPLANATION') {
-       const clean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
-       if (clean) {
-          if (GURMUKHI_REGEX.test(clean)) currentQ[expLocalKey] += (currentQ[expLocalKey] ? '\n' : '') + clean;
-          else currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + clean;
-       }
-    }
-  });
-
   finalize();
   return { questions };
 }
@@ -573,42 +289,17 @@ function parseReasoning(rawText: string, metadata: any) {
 function parseDeterministicBilingual(rawText: string, metadata: any) {
   const blocks = rawText.split(/\n\s*\n/).filter(b => b.trim().length > 0);
   const questions: any[] = [];
-  const locSuffix = metadata.secondaryLanguage === 'hindi' ? 'Hindi' : 'Punjabi';
-  
   blocks.forEach(block => {
-    const q: any = { 
-      ...metadata, 
-      id: `q-det-${Math.random().toString(36).substr(2, 9)}`, 
-      status: 'PUBLISHED',
-      englishQuestion: "", punjabiQuestion: "", hindiQuestion: ""
-    };
+    const q: any = { ...metadata, id: `q-det-${Math.random().toString(36).substr(2, 9)}`, status: 'PUBLISHED', englishQuestion: "", punjabiQuestion: "", hindiQuestion: "" };
     const lines = block.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    let foundMarker = false;
-    let foundOptions = false;
-
+    let foundMarker = false; let foundOptions = false;
     lines.forEach(line => {
-      const opt = detectOptionMarker(line);
-      const isQ = isQuestionStart(line);
-
-      if (isQ) {
-        foundMarker = true;
-        const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
-        if (content) {
-           if (GURMUKHI_REGEX.test(content)) q[`punjabiQuestion`] = content;
-           else q.englishQuestion = content;
-        }
-      } else if (opt) {
-         foundOptions = true;
-         const engKey = `option${opt.opt}English`;
-         const locKey = `option${opt.opt}${locSuffix}`;
-         if (GURMUKHI_REGEX.test(opt.text)) q[locKey] = opt.text;
-         else q[engKey] = opt.text;
-      } else if (foundMarker && !foundOptions) {
-         if (GURMUKHI_REGEX.test(line)) q[`punjabiQuestion`] += (q[`punjabiQuestion`] ? '\n' : '') + line;
-         else q.englishQuestion += (q.englishQuestion ? '\n' : '') + line;
-      }
+      const opt = detectOptionMarker(line); const isQ = isQuestionStart(line);
+      if (isQ) { foundMarker = true; const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim(); if (content) { if (GURMUKHI_REGEX.test(content)) q[`punjabiQuestion`] = content; else q.englishQuestion = content; } }
+      else if (opt) { foundOptions = true; q[`option${opt.opt}English`] = opt.text; }
+      else if (foundMarker && !foundOptions) { if (GURMUKHI_REGEX.test(line)) q[`punjabiQuestion`] += (q[`punjabiQuestion`] ? '\n' : '') + line; else q.englishQuestion += (q.englishQuestion ? '\n' : '') + line; }
     });
-    questions.push(q);
+    if (q.englishQuestion) questions.push(q);
   });
   return { questions };
 }
@@ -616,20 +307,17 @@ function parseDeterministicBilingual(rawText: string, metadata: any) {
 export function parseBulkQuestions(rawText: string, metadata: any) {
   if (!rawText || !rawText.trim()) return { questions: [] };
   if (metadata.parserFormat === 'DIAGRAM') return parseDiagram(rawText, metadata);
-  if (metadata.parserFormat === 'REASONING') return parseReasoning(rawText, metadata);
-  if (metadata.parserFormat === 'TABLE') return parseTable(rawText, metadata);
-  if (metadata.parserFormat === 'GRAPH') return parseGraph(rawText, metadata);
   if (metadata.parserFormat === 'MATCHING') return parseMatching(rawText, metadata);
+  if (metadata.parserFormat === 'TABLE') return parseTable(rawText, metadata);
   return parseDeterministicBilingual(rawText, metadata);
 }
 
 export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion && !q.diagramContent && !q.graphContent && !q.matchingContent && !q.matchingBlock?.leftColumn?.length && !q.tableContent?.rows?.length) errors.push("Question content missing.");
-  const optCount = ['A', 'B', 'C', 'D'].filter(l => (q[`option${l}English`] || "").trim() || (q[`option${l}Punjabi`] || "").trim() || (q[`option${l}Hindi`] || "").trim()).length;
+  if (!q.englishQuestion && !q.punjabiQuestion) errors.push("Question content missing.");
+  const optCount = ['A', 'B', 'C', 'D'].filter(l => (q[`option${l}English`] || "").trim()).length;
   if (optCount < 4) errors.push("Less than four options detected.");
   if (!q.correctAnswer) errors.push("Answer missing.");
   return { errors, warnings };
 }
-
