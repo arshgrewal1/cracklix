@@ -19,9 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v57.0.
+ * @fileOverview Precision Bilingual Question Hub v58.0.
  * FIXED: Unified Authority Black (#0F172A) for all scripts.
- * FIXED: Unified Correct Answer & Explanation into a single solution container.
+ * FIXED: Removed forced uppercase from solution headers for Title Case standard.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -166,7 +166,7 @@ export default function QuestionRenderer({
            <div className="p-8 md:p-14 space-y-10">
               {/* PART 1: CORRECT ANSWER NODE */}
               <div className="space-y-4">
-                 <div className="flex items-center gap-3 font-[900] text-[11px] md:text-sm text-emerald-600 uppercase tracking-[0.2em]">
+                 <div className="flex items-center gap-3 font-[900] text-[11px] md:text-sm text-emerald-600 tracking-[0.1em]">
                     <ShieldCheck className="h-5 w-5" /> Verified Answer
                  </div>
                  <div className="pl-8 space-y-2">
@@ -185,7 +185,7 @@ export default function QuestionRenderer({
 
               {/* PART 2: RATIONALE NODE */}
               <div className="space-y-6">
-                 <div className="flex items-center gap-3 font-[900] text-[11px] md:text-sm text-slate-400 uppercase tracking-[0.2em]">
+                 <div className="flex items-center gap-3 font-[900] text-[11px] md:text-sm text-slate-400 tracking-[0.1em]">
                     <Info className="h-5 w-5" /> Institutional Rationale
                  </div>
                  
