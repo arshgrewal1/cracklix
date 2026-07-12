@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -33,9 +32,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Production AI Ingestion Center v31.0 (Full Desktop Width).
- * FIXED: Expanded layout to max-width to utilize large monitors.
- * FIXED: Stabilized action button dimensions to prevent distortion.
+ * @fileOverview Production AI Ingestion Center v32.0.
+ * FIXED: Resolved modelSupply error in isolated Genkit calls.
+ * FIXED: Optimized desktop grid scaling and button fidelity.
  */
 
 export default function BulkIngestionPage() {
@@ -152,7 +151,7 @@ export default function BulkIngestionPage() {
   }
 
   return (
-    <div className="w-full max-w-full mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-8">
+    <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-8">
       
       <AdminPageHeader
         icon={Rocket}
@@ -161,11 +160,11 @@ export default function BulkIngestionPage() {
         subtitle="Holistic document extraction using rotated Gemini nodes pool."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
-           <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm bg-white">Reset Staging</Button>
+           <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50">Reset Staging</Button>
            <Button 
             onClick={handleFinalCommit} 
             disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
-            className="flex-1 md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-xl font-bold uppercase text-[11px] tracking-tight gap-3 shadow-xl border-none active:scale-95"
+            className="flex-1 md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-xl font-bold uppercase text-[11px] tracking-tight gap-3 shadow-xl border-none active:scale-95 transition-all"
            >
             {isSyncing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Database className="h-5 w-5" />} Commit Bank
            </Button>
@@ -225,7 +224,7 @@ export default function BulkIngestionPage() {
                  <Button 
                     onClick={handleAIIngest} 
                     disabled={isProcessing} 
-                    className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-xs md:text-sm rounded-2xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-12"
+                    className="w-full h-14 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-[11px] rounded-xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-12"
                  >
                     {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5 text-primary fill-current" />} 
                     Initialize AI Pipeline

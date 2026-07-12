@@ -1,12 +1,11 @@
-
 'use server';
 /**
- * @fileOverview Production AI Bulk Ingestion Engine v6.0.
- * FIXED: Resolved 404 error by using native model constants from google-genai plugin.
+ * @fileOverview Production AI Bulk Ingestion Engine v7.0.
+ * FIXED: Supply model string to isolated generate calls.
  */
 
 import { genkit } from 'genkit';
-import { googleAI, gemini15Flash } from '@genkit-ai/google-genai';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'genkit';
 
 const MCQSchema = z.object({
@@ -39,14 +38,14 @@ export async function bulkParseMCQ(input: { rawText: string, examType?: string, 
      throw new Error("AI Hub Offline: Target API key not provided.");
   }
 
-  // Initialize isolated Genkit instance with the provided key and native flash model
+  // Initialize isolated Genkit instance with the provided key
   const aiInstance = genkit({
     plugins: [googleAI({ apiKey })],
   });
 
   try {
     const response = await aiInstance.generate({
-      model: gemini15Flash, // Use native model constant to ensure correct endpoint discovery
+      model: 'googleai/gemini-1.5-flash', 
       output: { schema: BulkParseOutputSchema },
       prompt: `You are an expert Government Exam MCQ Parser. 
 Your task is to take the entire provided RAW TEXT and extract EVERY valid MCQ found within it.
@@ -64,7 +63,6 @@ RULES:
 5. Identify Math (LaTeX), Reasoning (Puzzles), and Tables.
 6. Set "diagram_required" to true if the text mentions Figure, Diagram, or Map.
 7. Return ONLY a valid JSON object containing an array of questions.
-8. NEVER hallucinate or generate fake content.
 
 TARGET EXAM CONTEXT: ${examType || 'General Punjab Exam'}`,
     });
