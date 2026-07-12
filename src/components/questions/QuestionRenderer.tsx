@@ -19,9 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v61.0.
- * FIXED: Series/Number Line lines are now automatically detected and moved after Punjabi text.
- * STYLING: Enhanced prominent display for Reasoning sequences with Primary Blue accents.
+ * @fileOverview Precision Bilingual Question Hub v62.0.
+ * FIXED: Markers like "Q2" are now filtered out to prevent redundant rendering and misclassification as series lines.
+ * FIXED: Number Line sequences strictly follow English/Punjabi text as per institutional standard.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -71,6 +71,9 @@ export default function QuestionRenderer({
     const trimmed = line.trim();
     if (!trimmed) return false;
     
+    // EXCLUDE REDUNDANT MARKERS (Q1, Q2, etc.) from being treated as series
+    if (/^Q\d+$/i.test(trimmed)) return false;
+    
     // Numeric sequence: 2, 6, 12... or 121 : 11 :: 169 : ?
     const hasDigits = /\d/.test(trimmed);
     const hasSeriesSymbols = /[,\?::]/.test(trimmed);
@@ -86,8 +89,11 @@ export default function QuestionRenderer({
 
   const splitQuestionContent = (text: string) => {
     const lines = text.split('\n');
-    const textLines = lines.filter(l => !isSeriesLine(l));
-    const seriesLines = lines.filter(l => isSeriesLine(l));
+    // FILTER: Remove redundant "Q{number}" lines as they are handled by the top badge
+    const filteredLines = lines.filter(l => !/^Q\d+$/i.test(l.trim()));
+    
+    const textLines = filteredLines.filter(l => !isSeriesLine(l));
+    const seriesLines = filteredLines.filter(l => isSeriesLine(l));
     return {
       text: textLines.join('\n').trim(),
       series: seriesLines.join('\n').trim()
@@ -111,7 +117,7 @@ export default function QuestionRenderer({
       {!showSolution && (
         <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-5">
            <div className="flex items-center gap-3">
-              <span className="font-black text-[11px] md:text-sm text-white bg-[#0F172A] px-4 py-1.5 rounded-full shadow-lg">Q {q.displayId || '1'}</span>
+              <span className="font-black text-[11px] md:text-sm text-white bg-[#0F172A] px-4 py-1.5 rounded-full shadow-lg shrink-0">Q {q.displayId || '1'}</span>
               <div className="flex items-center gap-2 text-[#0F172A] font-bold text-[10px] md:text-xs tabular-nums bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
                  <Clock className="h-3.5 w-3.5 text-primary" />
                  <span>{formatTime(timeLeft)}</span>
@@ -266,4 +272,3 @@ export default function QuestionRenderer({
     </div>
   );
 }
-
