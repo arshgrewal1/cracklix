@@ -21,7 +21,8 @@ import {
   ClipboardList,
   Globe,
   Info,
-  Braces
+  Braces,
+  X
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy } from "firebase/firestore"
@@ -33,23 +34,21 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v52.0.
- * FIXED: Advanced Current Affairs logic for perfect bilingual splitting.
+ * @fileOverview Modular Industrial Ingestion Hub v53.0.
+ * FIXED: Advanced script detection for clean Bilingual MCQs.
+ * FIXED: Hydration error resolved by replacing p with div in staging list.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
+  { label: "Bilingual MCQ (Eng+Pun/Hin)", value: "BILINGUAL_MCQ" },
   { label: "Current Affairs (Bilingual)", value: "CURRENT_AFFAIRS" },
-  { label: "Simple Bilingual MCQ", value: "BILINGUAL_MCQ" },
   { label: "English Only MCQ", value: "ENGLISH_ONLY" },
   { label: "Punjabi Only MCQ", value: "PUNJABI_ONLY" },
   { label: "Mathematics Hub", value: "MATHEMATICS" },
   { label: "Reasoning & Logic", value: "REASONING" },
-  { label: "Diagram / Image Based", value: "DIAGRAM" },
   { label: "Table Data Based", value: "TABLE" },
-  { label: "Graph / Chart Based", value: "GRAPH" },
   { label: "Match the Following", value: "MATCHING" },
   { label: "Assertion & Reason", value: "ASSERTION" },
-  { label: "Fill in the Blank", value: "FILL_BLANK" },
   { label: "True / False Node", value: "TRUE_FALSE" }
 ];
 
@@ -67,7 +66,7 @@ export default function BulkIngestionPage() {
     subjectId: "",
     secondaryLanguage: "punjabi",
     difficulty: "Medium" as any,
-    parserFormat: "CURRENT_AFFAIRS" as ParserFormat
+    parserFormat: "BILINGUAL_MCQ" as ParserFormat
   })
 
   const [rawText, setRawText] = useState("")
@@ -146,8 +145,8 @@ export default function BulkIngestionPage() {
       <AdminPageHeader
         icon={ClipboardList}
         label="Modular Industrial Ingestion"
-        title="Local Ingestion Hub"
-        subtitle="Zero AI dependency. Predictable local regex parsing for bilingual Current Affairs."
+        title="MCQ Ingestion Hub"
+        subtitle="Zero AI dependency. Predictable local script detection for high-fidelity bilingual MCQs."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50">Reset Staging</Button>
@@ -169,11 +168,11 @@ export default function BulkIngestionPage() {
               <div className="space-y-8">
                  <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                     <Braces className="h-6 w-6 text-primary" />
-                    <h3 className="font-bold text-xl uppercase text-[#0F172A]">Parser Architecture</h3>
+                    <h3 className="font-bold text-xl uppercase text-[#0F172A]">Parser Strategy</h3>
                  </div>
 
                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Question Format Node</Label>
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Ingestion Format Node</Label>
                     <Select value={metadata.parserFormat} onValueChange={(v: ParserFormat) => setMetadata({...metadata, parserFormat: v})}>
                        <SelectTrigger className="h-14 bg-blue-50 border-none rounded-xl font-black text-primary px-5 shadow-inner">
                           <SelectValue placeholder="Select Format Strategy" />
@@ -206,7 +205,7 @@ export default function BulkIngestionPage() {
                  </div>
 
                  <div className="space-y-2">
-                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Globe className="h-3 w-3" /> Language Mapping</Label>
+                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Globe className="h-3 w-3" /> Language Hub</Label>
                     <div className="flex gap-3">
                        <button 
                          onClick={() => setMetadata({...metadata, secondaryLanguage: 'punjabi'})}
@@ -224,12 +223,12 @@ export default function BulkIngestionPage() {
                  <div className="space-y-2">
                     <div className="flex items-center justify-between px-1">
                        <Label className="text-[10px] font-black uppercase text-slate-400">Raw Document Stream</Label>
-                       <Badge variant="outline" className="bg-slate-50 text-[8px] border-slate-200">Local Validation Active</Badge>
+                       <Badge variant="outline" className="bg-slate-50 text-[8px] border-slate-200">Local Sanitization Active</Badge>
                     </div>
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
-                        placeholder="Paste Q1. (A) ... Ans: B format here..."
+                        placeholder="Paste Q1. (A) English / Local script format here..."
                         className="min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>

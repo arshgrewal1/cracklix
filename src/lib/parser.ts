@@ -1,5 +1,5 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v21.0.
+ * @fileOverview Institutional Specialized Local Parser v22.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for 13+ question formats.
  * 
  * Strategy:
@@ -24,8 +24,8 @@ export type ParserFormat =
   | 'TRUE_FALSE';
 
 /**
- * Pre-processes raw text to remove institutional noise.
- * Removes headers, footers, page numbers, and extra spaces.
+ * Pre-processes raw text to remove institutional noise and OCR garbage.
+ * Removes headers, footers, page numbers, strange symbols and extra spaces.
  */
 export function preprocessText(text: string): string {
   if (!text) return "";
@@ -34,16 +34,18 @@ export function preprocessText(text: string): string {
     .replace(/\r\n/g, '\n')
     // 1. Remove Section Headers & Decorative lines
     .replace(/^={3,}.*?={3,}$/gm, '')
-    .replace(/^(?:CURRENT AFFAIRS|GENERAL KNOWLEDGE|MONTHLY UPDATE).*?$/gim, '')
+    .replace(/^(?:CURRENT AFFAIRS|GENERAL KNOWLEDGE|MONTHLY UPDATE|MOCK TEST|SECTION).*?$/gim, '')
     // 2. Remove Page Numbers & Progress Nodes
     .replace(/Page\s+\d+\s+of\s+\d+/gi, '')
     .replace(/\d+\s*\/\s*\d+/g, '')
-    // 3. Remove Copyright & URLs
+    .replace(/^\s*\d+\s*$/gm, '') // Isolated numbers on a line (likely page numbers)
+    // 3. Remove OCR Garbage & Symbols
+    .replace(/[~^•▪►❖⚬]/g, '')
     .replace(/Copyright.*?Arsh Grewal/gi, '')
     .replace(/www\.cracklix\.com/gi, '')
     .replace(/https?:\/\/\S+/gi, '')
     // 4. Normalize Punctuation & Whitespace
-    .replace(/\.{2,}/g, '.') // No double dots
+    .replace(/\.{2,}/g, '.') 
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
@@ -51,14 +53,12 @@ export function preprocessText(text: string): string {
 
 /**
  * Main Entry Point for local parsing.
- * Dispatches to specialized strategies based on format selection.
  */
 export function parseBulkQuestions(rawText: string, metadata: any) {
   const format: ParserFormat = metadata.parserFormat || 'BILINGUAL_MCQ';
   const questions: any[] = [];
   
-  // Split by Question markers (Universal start-of-block detection)
-  // Supports Q1, Question 1, Punjabi Prefix, Hindi Prefix
+  // Split by Question markers
   const blocks = rawText.split(/(?=\n\s*(?:Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.)|^(?:Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.))/i);
 
   blocks.forEach(block => {
@@ -92,9 +92,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
       case 'REASONING':
         q = parseReasoning(block, q);
         break;
-      case 'DIAGRAM':
-        q = parseDiagram(block, q);
-        break;
       case 'TABLE':
         q = parseTable(block, q);
         break;
@@ -109,8 +106,8 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 }
 
 /**
- * STRATEGY: Current Affairs / Bilingual
- * Handles stacked English and Local scripts line-by-line.
+ * STRATEGY: Bilingual MCQ / Current Affairs
+ * Advanced script detection and block splitting.
  */
 function parseBilingual(block: string, q: any, secondaryLang: string) {
   const punjabiRegex = /[\u0A00-\u0A7F]/;
@@ -119,9 +116,9 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
   const localKey = secondaryLang === 'hindi' ? 'hindiQuestion' : 'punjabiQuestion';
   const expLocalKey = secondaryLang === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
 
-  // 1. Identify Answer & Explanation Boundaries
+  // 1. Isolate Answer & Explanation early
   const answerMatch = block.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर)\s*[:\-]?\s*\(?([A-D])\)?/i);
-  const explStartIndex = block.search(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या)\s*[:\-]?/i);
+  const explStartIndex = block.search(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याਖਿਆ|व्याख्या)\s*[:\-]?/i);
   
   let restOfBlock = block;
   let explanationPart = "";
@@ -131,32 +128,27 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
     restOfBlock = block.substring(0, explStartIndex);
   }
 
-  // 2. Extract Options (Strict Line Anchor)
-  const optionLabels = ['A', 'B', 'C', 'D'];
-  const optionsMap: any = {};
+  // 2. Identify Options Start (Strict Boundary)
+  const optAMatch = restOfBlock.match(/\n\s*A[\)\.\-]\s+/i);
   let questionPart = restOfBlock;
+  let optionsPart = "";
 
-  optionLabels.forEach((label, i) => {
-    const currentRegex = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*`, 'i');
-    const splitIndex = questionPart.search(currentRegex);
-    
-    if (splitIndex !== -1 && i === 0) {
-      // Everything before the first "A)" is the question
-      const tempQ = questionPart.substring(0, splitIndex);
-      questionPart = tempQ;
-    }
-  });
+  if (optAMatch && optAMatch.index !== undefined) {
+     questionPart = restOfBlock.substring(0, optAMatch.index);
+     optionsPart = restOfBlock.substring(optAMatch.index);
+  }
 
-  // Extract Question Statements
+  // Question Extraction
   const qLines = questionPart.split('\n').map(l => l.trim()).filter(Boolean);
   q.englishQuestion = qLines.filter(l => !scriptRegex.test(l)).join('\n').replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '').trim();
   q[localKey] = qLines.filter(l => scriptRegex.test(l)).join('\n').replace(/^(?:ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.)\s*/i, '').trim();
 
-  // Extract Option Values
+  // Options Extraction
+  const optionLabels = ['A', 'B', 'C', 'D'];
   optionLabels.forEach((label, i) => {
     const nextLabel = optionLabels[i + 1] || "(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर)";
-    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${nextLabel}[\\)\\.\\-]|\\n\\s*(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर)|$)`, 'i');
-    const match = block.match(reg);
+    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${nextLabel}[\\)\\.\\-]|$)`, 'i');
+    const match = optionsPart.match(reg);
     
     if (match) {
       const optLines = match[1].trim().split('\n').map(l => l.trim()).filter(Boolean);
@@ -171,7 +163,7 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
 
   // 4. Process Explanation
   if (explanationPart) {
-    const expClean = explanationPart.replace(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या)\s*[:\-]?\s*/i, '').trim();
+    const expClean = explanationPart.replace(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याਖਿਆ|व्याख्या)\s*[:\-]?\s*/i, '').trim();
     const expLines = expClean.split('\n').map(l => l.trim()).filter(Boolean);
     q.englishExplanation = expLines.filter(l => !scriptRegex.test(l)).join('\n');
     q[expLocalKey] = expLines.filter(l => scriptRegex.test(l)).join('\n');
@@ -182,29 +174,29 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
 
 /**
  * STRATEGY: Mathematics
- * Preserves math characters and LaTeX logic.
  */
 function parseMath(block: string, q: any) {
-  const parts = block.split(/\n\s*A[\)\.\-]\s+/i);
-  q.englishQuestion = parts[0].trim().replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '');
+  const optAMatch = block.match(/\n\s*A[\)\.\-]\s+/i);
+  let questionPart = block;
+  let optionsPart = block;
+
+  if (optAMatch && optAMatch.index !== undefined) {
+    questionPart = block.substring(0, optAMatch.index);
+    optionsPart = block.substring(optAMatch.index);
+  }
+
+  q.englishQuestion = questionPart.trim().replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '');
   
   const labels = ['A', 'B', 'C', 'D'];
   labels.forEach((label, i) => {
-    const next = labels[i + 1] || 'Answer|Ans';
-    const reg = new RegExp(`${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=${next}[\\)\\.\\-]|$)`, 'i');
-    const match = block.match(reg);
+    const next = labels[i + 1] || '(?:Answer|Ans)';
+    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${next}[\\)\\.\\-]|$)`, 'i');
+    const match = optionsPart.match(reg);
     if (match) q[`option${label}English`] = match[1].trim();
   });
 
-  q.correctAnswer = (block.match(/(?:Answer|Ans)\s*[:\-]?\s*([A-D])/i)?.[1] || "A").toUpperCase();
+  q.correctAnswer = (block.match(/(?:Answer|Ans|Official Key)\s*[:\-]?\s*([A-D])/i)?.[1] || "A").toUpperCase();
   return q;
-}
-
-/**
- * STRATEGY: Diagram / Reasoning
- */
-function parseDiagram(block: string, q: any) {
-  return parseSimple(block, q);
 }
 
 /**
@@ -224,14 +216,22 @@ function parseReasoning(block: string, q: any) {
 }
 
 function parseSimple(block: string, q: any) {
-  const parts = block.split(/\n\s*A[\)\.\-]\s+/i);
-  q.englishQuestion = parts[0].trim().replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '');
+  const optAMatch = block.match(/\n\s*A[\)\.\-]\s+/i);
+  let questionPart = block;
+  let optionsPart = block;
+
+  if (optAMatch && optAMatch.index !== undefined) {
+     questionPart = block.substring(0, optAMatch.index);
+     optionsPart = block.substring(optAMatch.index);
+  }
+
+  q.englishQuestion = questionPart.trim().replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '');
   
   const labels = ['A', 'B', 'C', 'D'];
   labels.forEach((label, i) => {
-    const next = labels[i + 1] || 'Answer|Ans';
-    const reg = new RegExp(`${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=${next}[\\)\\.\\-]|$)`, 'i');
-    const match = block.match(reg);
+    const next = labels[i + 1] || '(?:Answer|Ans)';
+    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${next}[\\)\\.\\-]|$)`, 'i');
+    const match = optionsPart.match(reg);
     if (match) q[`option${label}English`] = match[1].trim();
   });
 
