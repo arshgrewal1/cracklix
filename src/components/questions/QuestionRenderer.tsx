@@ -7,6 +7,7 @@ import MathText from './MathText';
 import { Clock, AlertTriangle, Bookmark, ShieldCheck, Info, Zap } from 'lucide-react';
 import { useExamStore } from '@/store/useExamStore';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface QuestionRendererProps {
   question: Partial<Question> & { displayId?: string };
@@ -19,9 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v46.0.
- * FIXED: Diagram questions now render with 5-part body structure.
- * Order: Setup EN -> Setup PA -> Diagram -> Suffix EN -> Suffix PA.
+ * @fileOverview Institutional Question Renderer v47.0.
+ * FIXED: Implemented high-fidelity structured table rendering.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -74,7 +74,7 @@ export default function QuestionRenderer({
         <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-5">
            <div className="flex items-center gap-3">
               <span className="font-black text-[11px] md:text-sm text-white bg-[#0F172A] px-4 py-1.5 rounded-full shadow-lg shrink-0">Q {q.displayId || '1'}</span>
-              <div className="flex items-center gap-2 text-[#0F172A] font-bold text-[10px] md:text-xs tabular-nums bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+              <div className="flex items-center gap-2 text-[#0F172A] font-bold text-[10px] md:xs tabular-nums bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
                  <Clock className="h-3.5 w-3.5 text-primary" />
                  <span>{formatTime(timeLeft)}</span>
               </div>
@@ -87,21 +87,42 @@ export default function QuestionRenderer({
       )}
 
       <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
-         {/* SECTION 1: English Question Setup */}
          {showEn && q.englishQuestion && (
            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
              <MathText text={q.englishQuestion} />
            </div>
          )}
          
-         {/* SECTION 2: Punjabi Question Setup */}
          {showLocal && q.punjabiQuestion && (
            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
              <MathText text={q.punjabiQuestion} />
            </div>
          )}
 
-         {/* SECTION 3: Diagram Block */}
+         {/* TABLE RENDERER - HIGH FIDELITY */}
+         {q.tableContent?.rows?.length > 0 && (
+           <div className="my-8 overflow-x-auto rounded-2xl border border-slate-100 bg-white shadow-xl">
+             <Table className="w-full border-collapse">
+               <TableHeader className="bg-slate-50">
+                 <TableRow className="border-b border-slate-100">
+                    {q.tableContent.headers.map((h: string, i: number) => (
+                      <TableHead key={i} className="p-4 font-black uppercase text-[10px] md:text-xs text-[#0F172A] border-r border-slate-100 last:border-0">{h}</TableHead>
+                    ))}
+                 </TableRow>
+               </TableHeader>
+               <TableBody>
+                  {q.tableContent.rows.map((row: string[], ri: number) => (
+                    <TableRow key={ri} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors last:border-0">
+                       {row.map((cell, ci) => (
+                         <TableCell key={ci} className="p-4 font-bold text-xs md:text-base text-slate-700 border-r border-slate-50 last:border-0">{cell}</TableCell>
+                       ))}
+                    </TableRow>
+                  ))}
+               </TableBody>
+             </Table>
+           </div>
+         )}
+
          {q.diagramContent && (
             <div className="my-6 p-6 md:p-10 bg-[#0F172A] text-emerald-400 rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[10px] md:text-sm overflow-x-auto whitespace-pre leading-relaxed shadow-inner border border-white/5 relative group">
                <div className="absolute top-2 right-4 opacity-20 pointer-events-none uppercase text-[8px] font-black tracking-widest">Diagram Hub</div>
@@ -109,14 +130,12 @@ export default function QuestionRenderer({
             </div>
          )}
 
-         {/* SECTION 4: Actual Question Sentence (English) */}
          {showEn && q.englishDiagramQuestion && (
             <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
               <MathText text={q.englishDiagramQuestion} />
             </div>
          )}
 
-         {/* SECTION 5: Actual Question Sentence (Punjabi) */}
          {showLocal && q.punjabiDiagramQuestion && (
             <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
               <MathText text={q.punjabiDiagramQuestion} />

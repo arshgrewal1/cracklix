@@ -1,8 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v46.0.
- * FIXED: Diagram parser redesigned for 8-section segmentation.
- * FIXED: Actual question keywords and script detection logic hardened.
+ * @fileOverview Institutional Deterministic Ingestion Hub v47.0.
+ * FIXED: Redesigned Table parser for structured grid layout instead of ASCII.
  */
 
 export type ParserFormat = 
@@ -38,7 +37,7 @@ const NOISE_PATTERNS = [
   /^https?:\/\//i,
   /^Copyright/i,
   /^©/i,
-  /^[-\s\.\*_=]{3,}$/, // Separator lines
+  /^[-\s\.\*_=]{3,}$/, 
   /^\s*[\.·,]{1,}\s*$/
 ];
 
@@ -83,16 +82,6 @@ function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: s
   return null;
 }
 
-function isDiagramLine(line: string): boolean {
-  const trimmed = line.trim();
-  if (!trimmed) return true; // Blank lines inside diagrams
-  const symbols = /[│┌┐└┘├┤┬┴┼━┃┏┓┗┛┣┫┳┻╋→←↑↓▲▼◀▶★■●○\|\-\+\_\=\\\/]/;
-  // If it contains symbols OR is very short and lacks standard sentence markers
-  if (symbols.test(line)) return true;
-  if (trimmed.length < 25 && !trimmed.endsWith('.') && !trimmed.endsWith('?')) return true;
-  return false;
-}
-
 function parseDiagram(rawText: string, metadata: any) {
   const lines = rawText.split(/\r?\n/);
   const questions: any[] = [];
@@ -109,14 +98,8 @@ function parseDiagram(rawText: string, metadata: any) {
   lines.forEach((line) => {
     const trimmed = line.trim();
     if (!trimmed && state !== 'DIAGRAM') return;
+    if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
 
-    // NOISE FILTER
-    if (NOISE_PATTERNS.some(p => p.test(trimmed))) {
-      if (state === 'EXPLANATION') state = 'COMPLETE';
-      return;
-    }
-
-    // NEW QUESTION MARKER
     if (isQuestionStart(line)) {
       if (currentQ) finalize();
       currentQ = {
@@ -146,7 +129,6 @@ function parseDiagram(rawText: string, metadata: any) {
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
 
-    // GLOBAL TERMINATORS
     if (opt) state = 'OPTIONS';
     else if (isAns) state = 'ANSWER';
     else if (isExpl) state = 'EXPLANATION';
@@ -156,7 +138,7 @@ function parseDiagram(rawText: string, metadata: any) {
         if (GURMUKHI_REGEX.test(line)) {
           state = 'INTRO_PA';
           currentQ.punjabiQuestion = trimmed;
-        } else if (isDiagramLine(line)) {
+        } else if (trimmed.includes('│') || trimmed.includes('┌') || trimmed.includes('→')) {
           state = 'DIAGRAM';
           currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line;
         } else {
@@ -165,7 +147,7 @@ function parseDiagram(rawText: string, metadata: any) {
         break;
 
       case 'INTRO_PA':
-        if (isDiagramLine(line)) {
+        if (trimmed.includes('│') || trimmed.includes('┌') || trimmed.includes('→')) {
           state = 'DIAGRAM';
           currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line;
         } else if (ACTUAL_QUESTION_KEYWORDS.test(line)) {
@@ -226,36 +208,135 @@ function parseDiagram(rawText: string, metadata: any) {
   return { questions };
 }
 
-function parseReasoning(rawText: string, metadata: any) {
+function parseTable(rawText: string, metadata: any) {
   const lines = rawText.split(/\r?\n/);
   const questions: any[] = [];
-  let state: 'SEARCH_QUESTION' | 'READ_QUESTION' | 'READ_OPTIONS' | 'READ_ANSWER' | 'READ_EXPLANATION' = 'SEARCH_QUESTION';
   let currentQ: any = null;
-  let currentOption: 'A' | 'B' | 'C' | 'D' | null = null;
-  const punjabiRegex = /[\u0A00-\u0A7F]/;
-  const localKey = metadata.secondaryLanguage === 'hindi' ? 'hindiQuestion' : 'punjabiQuestion';
-  const expLocalKey = metadata.secondaryLanguage === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
-  const locSuffix = metadata.secondaryLanguage === 'hindi' ? 'Hindi' : 'Punjabi';
+  let state: 'INTRO_EN' | 'INTRO_PA' | 'GRID' | 'SUFFIX_EN' | 'SUFFIX_PA' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION' = 'INTRO_EN';
 
-  const finalizeQuestion = () => {
+  const finalize = () => {
     if (!currentQ) return;
-    Object.keys(currentQ).forEach(key => {
-      if (typeof currentQ[key] === 'string') {
-        currentQ[key] = currentQ[key].trim();
-      }
-    });
     questions.push(currentQ);
     currentQ = null;
   };
 
   lines.forEach((line) => {
     const trimmed = line.trim();
-    
-    // NOISE SKIP
-    if (NOISE_PATTERNS.some(pattern => pattern.test(trimmed))) {
-      if (state === 'READ_EXPLANATION') finalizeQuestion();
+    if (!trimmed && state !== 'GRID') return;
+    if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
+
+    if (isQuestionStart(line)) {
+      if (currentQ) finalize();
+      currentQ = {
+        ...metadata,
+        id: `q-tbl-${Math.random().toString(36).substr(2, 9)}`,
+        questionType: 'TABLE_BASED',
+        englishQuestion: "",
+        punjabiQuestion: "",
+        tableContent: { headers: [], rows: [] },
+        englishDiagramQuestion: "",
+        punjabiDiagramQuestion: "",
+        optionAEnglish: "", optionBEnglish: "", optionCEnglish: "", optionDEnglish: "",
+        correctAnswer: "",
+        englishExplanation: "",
+        punjabiExplanation: "",
+        status: 'PUBLISHED'
+      };
+      state = 'INTRO_EN';
+      const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      if (content) currentQ.englishQuestion = content;
       return;
     }
+
+    if (!currentQ) return;
+
+    const opt = detectOptionMarker(line);
+    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+
+    if (opt) state = 'OPTIONS';
+    else if (isAns) state = 'ANSWER';
+    else if (isExpl) state = 'EXPLANATION';
+    else if (trimmed.includes('|') && state !== 'OPTIONS') state = 'GRID';
+
+    switch (state) {
+      case 'INTRO_EN':
+        if (GURMUKHI_REGEX.test(line)) {
+          state = 'INTRO_PA';
+          currentQ.punjabiQuestion = trimmed;
+        } else {
+          currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
+        }
+        break;
+      case 'INTRO_PA':
+        if (ACTUAL_QUESTION_KEYWORDS.test(line)) {
+          state = 'SUFFIX_EN';
+          currentQ.englishDiagramQuestion = trimmed;
+        } else {
+          currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
+        }
+        break;
+      case 'GRID':
+        if (trimmed.startsWith('|')) {
+           const cells = trimmed.split('|').filter(c => c.trim() || c === "").map(c => c.trim());
+           if (currentQ.tableContent.headers.length === 0) {
+              currentQ.tableContent.headers = cells;
+           } else if (!trimmed.includes('---')) {
+              currentQ.tableContent.rows.push(cells);
+           }
+        } else if (ACTUAL_QUESTION_KEYWORDS.test(line)) {
+           state = 'SUFFIX_EN';
+           currentQ.englishDiagramQuestion = trimmed;
+        }
+        break;
+      case 'SUFFIX_EN':
+        if (GURMUKHI_REGEX.test(line)) {
+          state = 'SUFFIX_PA';
+          currentQ.punjabiDiagramQuestion = trimmed;
+        } else {
+          currentQ.englishDiagramQuestion += (currentQ.englishDiagramQuestion ? '\n' : '') + trimmed;
+        }
+        break;
+      case 'SUFFIX_PA':
+        currentQ.punjabiDiagramQuestion += (currentQ.punjabiDiagramQuestion ? '\n' : '') + trimmed;
+        break;
+      case 'OPTIONS':
+        if (opt) currentQ[`option${opt.opt}English`] = opt.text;
+        break;
+      case 'ANSWER':
+        const match = trimmed.match(/[A-D]/i);
+        if (match) currentQ.correctAnswer = match[0].toUpperCase();
+        break;
+      case 'EXPLANATION':
+        if (GURMUKHI_REGEX.test(trimmed)) currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
+        else currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + trimmed;
+        break;
+    }
+  });
+
+  finalize();
+  return { questions };
+}
+
+function parseReasoning(rawText: string, metadata: any) {
+  const lines = rawText.split(/\r?\n/);
+  const questions: any[] = [];
+  let state: 'SEARCH_QUESTION' | 'READ_QUESTION' | 'READ_OPTIONS' | 'READ_ANSWER' | 'READ_EXPLANATION' = 'SEARCH_QUESTION';
+  let currentQ: any = null;
+  let currentOption: 'A' | 'B' | 'C' | 'D' | null = null;
+  const localKey = metadata.secondaryLanguage === 'hindi' ? 'hindiQuestion' : 'punjabiQuestion';
+  const expLocalKey = metadata.secondaryLanguage === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
+  const locSuffix = metadata.secondaryLanguage === 'hindi' ? 'Hindi' : 'Punjabi';
+
+  const finalizeQuestion = () => {
+    if (!currentQ) return;
+    questions.push(currentQ);
+    currentQ = null;
+  };
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (NOISE_PATTERNS.some(pattern => pattern.test(trimmed))) return;
 
     if (isQuestionStart(line)) {
       if (currentQ) finalizeQuestion();
@@ -270,7 +351,7 @@ function parseReasoning(rawText: string, metadata: any) {
       };
       const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
       if (content) {
-         if (punjabiRegex.test(content)) currentQ[localKey] = content;
+         if (GURMUKHI_REGEX.test(content)) currentQ[localKey] = content;
          else currentQ.englishQuestion = content;
       }
       return;
@@ -292,14 +373,14 @@ function parseReasoning(rawText: string, metadata: any) {
     }
 
     if (state === 'READ_QUESTION') {
-       if (punjabiRegex.test(line)) currentQ[localKey] += (currentQ[localKey] ? '\n' : '') + trimmed;
+       if (GURMUKHI_REGEX.test(line)) currentQ[localKey] += (currentQ[localKey] ? '\n' : '') + trimmed;
        else currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
     } 
     else if (state === 'READ_OPTIONS' && currentOption) {
       const engKey = `option${currentOption}English`;
       const locKeyField = `option${currentOption}${locSuffix}`;
       const text = optMatch ? optMatch.text : trimmed;
-      if (punjabiRegex.test(text)) currentQ[locKeyField] = (currentQ[locKeyField] || "") + (currentQ[locKeyField] ? "\n" : "") + text;
+      if (GURMUKHI_REGEX.test(text)) currentQ[locKeyField] = (currentQ[locKeyField] || "") + (currentQ[locKeyField] ? "\n" : "") + text;
       else currentQ[engKey] = (currentQ[engKey] || "") + (currentQ[engKey] ? "\n" : "") + text;
     }
     else if (state === 'READ_ANSWER') {
@@ -308,7 +389,7 @@ function parseReasoning(rawText: string, metadata: any) {
     }
     else if (state === 'READ_EXPLANATION') {
        const cleanLine = line.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
-       if (punjabiRegex.test(cleanLine)) currentQ[expLocalKey] += (currentQ[expLocalKey] ? '\n' : '') + cleanLine;
+       if (GURMUKHI_REGEX.test(cleanLine)) currentQ[expLocalKey] += (currentQ[expLocalKey] ? '\n' : '') + cleanLine;
        else currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + cleanLine;
     }
   });
@@ -321,7 +402,6 @@ function parseDeterministicBilingual(rawText: string, metadata: any) {
   const blocks = rawText.split(/\n\s*\n/).filter(b => b.trim().length > 0);
   const questions: any[] = [];
   const locSuffix = metadata.secondaryLanguage === 'hindi' ? 'Hindi' : 'Punjabi';
-  const punjabiRegex = /[\u0A00-\u0A7F]/;
   
   blocks.forEach(block => {
     const q: any = { 
@@ -344,7 +424,7 @@ function parseDeterministicBilingual(rawText: string, metadata: any) {
         foundMarker = true;
         const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
         if (content) {
-           if (punjabiRegex.test(content)) q[`punjabiQuestion`] = content;
+           if (GURMUKHI_REGEX.test(content)) q[`punjabiQuestion`] = content;
            else q.englishQuestion = content;
         }
       }
@@ -356,7 +436,7 @@ function parseDeterministicBilingual(rawText: string, metadata: any) {
          else if (q[engKey].trim() !== optMatch.text.trim()) q[locKey] = optMatch.text;
       }
       else if (foundMarker && !foundOptions) {
-         if (punjabiRegex.test(line)) q[`punjabiQuestion`] = (q[`punjabiQuestion`] ? q[`punjabiQuestion`] + '\n' : '') + line;
+         if (GURMUKHI_REGEX.test(line)) q[`punjabiQuestion`] = (q[`punjabiQuestion`] ? q[`punjabiQuestion`] + '\n' : '') + line;
          else q.englishQuestion = (q.englishQuestion ? q.englishQuestion + '\n' : '') + line;
       }
     });
@@ -370,15 +450,48 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   if (!rawText || !rawText.trim()) return { questions: [] };
   if (metadata.parserFormat === 'DIAGRAM') return parseDiagram(rawText, metadata);
   if (metadata.parserFormat === 'REASONING') return parseReasoning(rawText, metadata);
+  if (metadata.parserFormat === 'TABLE') return parseTable(rawText, metadata);
   return parseDeterministicBilingual(rawText, metadata);
 }
 
 export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion && !q.diagramContent) errors.push("Question content missing.");
+  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion && !q.diagramContent && !q.tableContent?.rows?.length) errors.push("Question content missing.");
   const optCount = ['A', 'B', 'C', 'D'].filter(l => (q[`option${l}English`] || "").trim() || (q[`option${l}Punjabi`] || "").trim() || (q[`option${l}Hindi`] || "").trim()).length;
   if (optCount < 4) errors.push("Less than four options detected.");
   if (!q.correctAnswer) errors.push("Answer missing.");
   return { errors, warnings };
+}
+
+export function renderMarkdownTable(rawText: string): string {
+  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  const tableRows = lines.filter(l => l.startsWith('|') && l.endsWith('|'));
+  
+  if (tableRows.length < 2) return rawText.replace(/\n/g, '<br/>');
+
+  const header = tableRows[0].split('|').filter(c => c.trim().length >= 0).slice(1, -1);
+  const dataRows = tableRows.slice(2).map(r => r.split('|').filter(c => c.trim().length >= 0).slice(1, -1));
+
+  const html = `
+    <div class="my-3 overflow-x-auto rounded-lg border border-white/10 bg-white/5 shadow-xl w-full">
+      <table class="w-full text-left border-collapse min-w-[280px]">
+        <thead>
+          <tr class="bg-[#F97316]/10 border-b border-white/10">
+            ${header.map(col => `<th class="p-2 font-black uppercase text-[8px] md:text-xs tracking-tight text-[#F97316]">${col.trim()}</th>`).join('')}
+          </tr>
+        </thead>
+        <tbody>
+          ${dataRows.map(row => `
+            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
+              ${row.map(cell => `<td class="p-2 font-bold text-[10px] md:text-sm text-inherit">${cell.trim()}</td>`).join('')}
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+
+  const remainingText = lines.filter(l => !l.startsWith('|')).join('\n');
+  return html + (remainingText ? `<div class="mt-2 font-[700] text-inherit leading-relaxed text-[12px] md:text-base">${remainingText}</div>` : "");
 }

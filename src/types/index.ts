@@ -228,6 +228,12 @@ export interface Exam {
   activeQuestions?: number;
 }
 
+export interface TableContent {
+  headers: string[];
+  rows: string[][];
+  caption?: string;
+}
+
 export interface Question {
   id: string;
   examId?: string;
@@ -248,6 +254,7 @@ export interface Question {
   punjabiQuestionSuffix?: string;
   hindiQuestionSuffix?: string;
   diagramContent?: string;
+  tableContent?: TableContent;
   optionAEnglish: string;
   optionAPunjabi?: string;
   optionAHindi?: string;
