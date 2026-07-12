@@ -32,7 +32,15 @@ import {
   TrendingUp,
   Users,
   CheckCircle2,
-  X
+  X,
+  Instagram,
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  Award,
+  Briefcase,
+  Heart
 } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -40,8 +48,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Administrative Portal v19.3.
- * FIXED: Restored missing CheckCircle2 and X icon imports.
+ * @fileOverview Institutional Administrative Portal v19.5.
+ * FIXED: Implemented missing content for Founder, Distribution, and Social tabs.
  */
 
 export default function AdminSettings() {
@@ -65,6 +73,7 @@ export default function AdminSettings() {
     supportPhone: "+91 98881 88602",
     supportEmail: "cracklixhelp@gmail.com",
     telegramUrl: "https://t.me/cracklixapp",
+    instagramUrl: "https://www.instagram.com/arshgrewal_official/",
     playStoreUrl: "",
     appStoreUrl: "",
     adSenseEnabled: false,
@@ -382,6 +391,107 @@ export default function AdminSettings() {
                 <Textarea value={formData.footerText} onChange={e => setFormData({...formData, footerText: e.target.value})} className="min-h-[100px] rounded-2xl border-slate-50 bg-slate-50 font-medium leading-relaxed" />
              </div>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="founder" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-6 md:p-14 space-y-10 text-left border border-slate-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                 <div className="space-y-6">
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Founder Full Name</Label>
+                       <Input value={formData.founderName} onChange={e => setFormData({...formData, founderName: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
+                    </div>
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Professional Role</Label>
+                       <Input value={formData.founderRole} onChange={e => setFormData({...formData, founderRole: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
+                    </div>
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Founder Short Quote</Label>
+                       <Input value={formData.founderQuote} onChange={e => setFormData({...formData, founderQuote: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-medium italic" />
+                    </div>
+                 </div>
+                 <div className="space-y-6">
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Official Mission</Label>
+                       <Textarea value={formData.founderMission} onChange={e => setFormData({...formData, founderMission: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 border-none font-medium leading-relaxed" />
+                    </div>
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Building Since (Date Label)</Label>
+                       <Input value={formData.founderBuildingSince} onChange={e => setFormData({...formData, founderBuildingSince: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
+                    </div>
+                 </div>
+              </div>
+              <div className="space-y-2 text-left">
+                 <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Founder Biography (Detailed)</Label>
+                 <Textarea value={formData.founderBio} onChange={e => setFormData({...formData, founderBio: e.target.value})} className="min-h-[150px] rounded-2xl bg-slate-50 border-none font-medium leading-relaxed" />
+              </div>
+              <div className="space-y-2 text-left">
+                 <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Commitment Statement</Label>
+                 <Textarea value={formData.founderCommitment} onChange={e => setFormData({...formData, founderCommitment: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 border-none font-medium leading-relaxed" />
+              </div>
+           </Card>
+        </TabsContent>
+
+        <TabsContent value="website" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-6 md:p-14 space-y-10 text-left border border-slate-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                 <div className="space-y-6">
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Primary URL</Label>
+                       <Input value={formData.shareUrl} onChange={e => setFormData({...formData, shareUrl: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-mono text-xs text-primary" />
+                    </div>
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Share Headline (SEO)</Label>
+                       <Input value={formData.shareTitle} onChange={e => setFormData({...formData, shareTitle: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
+                    </div>
+                 </div>
+                 <div className="space-y-6">
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Play Store URL</Label>
+                       <Input value={formData.playStoreUrl} onChange={e => setFormData({...formData, playStoreUrl: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-mono text-xs" placeholder="https://play.google.com/..." />
+                    </div>
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">App Store URL</Label>
+                       <Input value={formData.appStoreUrl} onChange={e => setFormData({...formData, appStoreUrl: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-mono text-xs" placeholder="https://apps.apple.com/..." />
+                    </div>
+                 </div>
+              </div>
+              <div className="space-y-2 text-left">
+                 <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">SEO Description (Metadata)</Label>
+                 <Textarea value={formData.shareDescription} onChange={e => setFormData({...formData, shareDescription: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 border-none font-medium leading-relaxed" />
+              </div>
+           </Card>
+        </TabsContent>
+
+        <TabsContent value="social" className="space-y-6 md:space-y-10 animate-in fade-in slide-in-from-bottom-2 duration-300">
+           <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-6 md:p-14 space-y-10 text-left border border-slate-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+                 <div className="space-y-6">
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Phone className="h-3 w-3" /> Support Phone (WhatsApp)</Label>
+                       <Input value={formData.supportPhone} onChange={e => setFormData({...formData, supportPhone: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
+                    </div>
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Mail className="h-3 w-3" /> Support Email</Label>
+                       <Input value={formData.supportEmail} onChange={e => setFormData({...formData, supportEmail: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-bold" />
+                    </div>
+                 </div>
+                 <div className="space-y-6">
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><MessageCircle className="h-3 w-3" /> Telegram Community URL</Label>
+                       <Input value={formData.telegramUrl} onChange={e => setFormData({...formData, telegramUrl: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-mono text-xs text-blue-500" />
+                    </div>
+                    <div className="space-y-2 text-left">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Instagram className="h-3 w-3" /> Instagram Profile URL</Label>
+                       <Input value={formData.instagramUrl} onChange={e => setFormData({...formData, instagramUrl: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-mono text-xs text-rose-500" />
+                    </div>
+                 </div>
+              </div>
+              <div className="space-y-2 text-left">
+                 <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><MapPin className="h-3 w-3" /> Institutional HQs Address</Label>
+                 <Input value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-none font-medium" />
+              </div>
+           </Card>
         </TabsContent>
       </Tabs>
     </div>
