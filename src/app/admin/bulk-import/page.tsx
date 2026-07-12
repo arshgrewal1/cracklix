@@ -23,7 +23,8 @@ import {
   ArrowUp,
   FileBarChart,
   Target,
-  PenLine
+  PenLine,
+  Languages
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy, updateDoc, increment } from "firebase/firestore"
@@ -49,9 +50,17 @@ const FORMATS: { label: string, value: ParserFormat, icon: any }[] = [
   { label: "Fill in the Blank", value: "FILL_BLANK", icon: PenLine }
 ];
 
+const LANGUAGE_MODES = [
+  { label: "English + Punjabi", value: "ENGLISH_PUNJABI" },
+  { label: "English + Hindi", value: "ENGLISH_HINDI" },
+  { label: "English Only", value: "ENGLISH" },
+  { label: "Punjabi Only", value: "PUNJABI" },
+  { label: "Hindi Only", value: "HINDI" }
+];
+
 /**
- * @fileOverview Institutional Bulk Ingestion Hub v47.0.
- * UPDATED: Integrated 12 dedicated question formats with specialized routing.
+ * @fileOverview Institutional Bulk Ingestion Hub v48.0.
+ * RESTORED: Multi-language mode selector (EN+PA, EN+HI, etc).
  */
 export default function BulkIngestionPage() {
   const router = useRouter()
@@ -65,7 +74,7 @@ export default function BulkIngestionPage() {
   const [metadata, setMetadata] = useState({
     boardId: "",
     subjectId: "",
-    secondaryLanguage: "punjabi" as "punjabi" | "hindi" | "english",
+    languageMode: "ENGLISH_PUNJABI",
     difficulty: "Medium" as any,
     parserFormat: "BILINGUAL_MCQ" as ParserFormat
   })
@@ -84,20 +93,24 @@ export default function BulkIngestionPage() {
 
     setIsProcessing(true)
     try {
-      // Specialized pre-processing for raw block parsers
-      const needsRawInput = ['DIAGRAM', 'MATCHING', 'TABLE', 'GRAPH'].includes(metadata.parserFormat);
+      const needsRawInput = ['DIAGRAM', 'MATCHING', 'TABLE', 'GRAPH', 'ASSERTION'].includes(metadata.parserFormat);
       const inputToParse = needsRawInput ? rawText : preprocessText(rawText);
       
-      const result = parseBulkQuestions(inputToParse, metadata);
+      const result = parseBulkQuestions(inputToParse, {
+         ...metadata,
+         // Map legacy internal keys for parser compatibility
+         secondaryLanguage: metadata.languageMode.includes('HINDI') ? 'hindi' : 'punjabi'
+      });
 
       if (!result?.questions || result.questions.length === 0) {
          throw new Error("No questions detected. Verify formatting and question markers.");
       }
 
-      const validated = result.questions.map((q) => {
+      const validated = result.questions.map((q: any) => {
          const { errors, warnings } = validateMCQSchema(q);
          return {
             ...q,
+            language: metadata.languageMode,
             isValid: errors.length === 0,
             validationErrors: errors,
             validationWarnings: warnings,
@@ -167,44 +180,70 @@ export default function BulkIngestionPage() {
         <div className="lg:col-span-5 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-8 border border-slate-50">
               <div className="space-y-6">
-                 <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Select Question Type</Label>
-                    <Select value={metadata.parserFormat} onValueChange={(v: ParserFormat) => setMetadata({...metadata, parserFormat: v})}>
-                       <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5">
-                          <SelectValue placeholder="Format" />
-                       </SelectTrigger>
-                       <SelectContent className="bg-[#0B1528] text-white border-white/10">
-                          {FORMATS.map(f => {
-                             const Icon = f.icon;
-                             return (
-                                <SelectItem key={f.value} value={f.value} className="py-3">
-                                   <div className="flex items-center gap-3">
-                                      <Icon className="h-4 w-4 text-primary" />
-                                      <span>{f.label}</span>
-                                   </div>
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Question Format</Label>
+                        <Select value={metadata.parserFormat} onValueChange={(v: ParserFormat) => setMetadata({...metadata, parserFormat: v})}>
+                        <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold px-4">
+                            <SelectValue placeholder="Format" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#0B1528] text-white border-white/10">
+                            {FORMATS.map(f => (
+                                <SelectItem key={f.value} value={f.value} className="py-2">
+                                    <div className="flex items-center gap-2">
+                                        <f.icon className="h-3.5 w-3.5 text-primary" />
+                                        <span>{f.label}</span>
+                                    </div>
                                 </SelectItem>
-                             )
-                          })}
-                       </SelectContent>
-                    </Select>
+                            ))}
+                        </SelectContent>
+                        </Select>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Language Mode</Label>
+                        <Select value={metadata.languageMode} onValueChange={(v) => setMetadata({...metadata, languageMode: v})}>
+                        <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold px-4">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#0B1528] text-white border-white/10">
+                            {LANGUAGE_MODES.map(m => (
+                                <SelectItem key={m.value} value={m.value} className="py-2">
+                                    <div className="flex items-center gap-2">
+                                        <Languages className="h-3.5 w-3.5 text-primary" />
+                                        <span>{m.label}</span>
+                                    </div>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                        </Select>
+                    </div>
                  </div>
+
                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
-                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Board</Label>
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Board Hub</Label>
                        <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v})}>
                           <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold"><SelectValue placeholder="Board" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white">{boards?.map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation}</SelectItem>)}</SelectContent>
                        </Select>
                     </div>
                     <div className="space-y-2">
-                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Subject</Label>
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Subject Node</Label>
                        <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
                           <SelectTrigger className="h-12 bg-slate-50 border-none rounded-xl font-bold"><SelectValue placeholder="Subject" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white">{subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                        </Select>
                     </div>
                  </div>
-                 <Textarea value={rawText} onChange={(e) => setRawText(e.target.value)} placeholder="Paste text blocks here..." className="min-h-[400px] rounded-2xl bg-slate-50 border-none p-6 font-medium text-sm shadow-inner resize-none" />
+
+                 <Textarea 
+                    value={rawText} 
+                    onChange={(e) => setRawText(e.target.value)} 
+                    placeholder="Paste text blocks from PDF/Docs here..." 
+                    className="min-h-[400px] rounded-2xl bg-slate-50 border-none p-6 font-medium text-sm shadow-inner resize-none" 
+                 />
+
                  <Button onClick={handleLocalParse} disabled={isProcessing || !rawText.trim()} className="w-full h-16 bg-primary hover:bg-blue-700 text-white rounded-2xl font-black uppercase text-[11px] tracking-widest shadow-2xl gap-3 active:scale-95 transition-all">
                     {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Zap className="h-6 w-6 text-white fill-current" />} Initialize Ingestion
                  </Button>
@@ -227,7 +266,7 @@ export default function BulkIngestionPage() {
                     </CardHeader>
                     <CardContent className="p-6 md:p-10 pt-4">
                        {q.isValid ? (
-                          <QuestionRenderer question={q} language="ENGLISH_PUNJABI" showSolution={true} className="p-0 shadow-none border-none max-w-none" />
+                          <QuestionRenderer question={q} language={metadata.languageMode} showSolution={true} className="p-0 shadow-none border-none max-w-none" />
                        ) : (
                           <div className="p-6 bg-rose-50 rounded-2xl border border-rose-100 space-y-3">
                              <h4 className="font-bold text-rose-600 flex items-center gap-2 uppercase text-[10px]"><AlertTriangle className="h-4 w-4" /> Structural Violation</h4>
