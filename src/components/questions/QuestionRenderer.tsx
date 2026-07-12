@@ -20,8 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v66.0.
- * FIXED: Standardized English and Punjabi typography weights, sizes, and colors.
+ * @fileOverview Institutional Question Renderer v70.0.
+ * FIXED: Sequential block rendering for Assertion & Reason to prevent language interleaving.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -86,58 +86,15 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
-         {/* ASSERTION & REASON HUB */}
-         {q.questionType === 'ASSERTION_REASON' && q.assertion && q.reason && (
-            <div className="space-y-6 mb-8 p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner relative overflow-hidden group">
-               <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
-                  <Zap className="h-3 w-3" /> Logic Hub
-               </div>
-               
-               <div className="space-y-4">
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
-                        <ShieldCheck className="h-3 w-3" /> Assertion (A) / ਕਥਨ (A)
-                     </p>
-                     <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
-                        <MathText text={q.assertion.english} />
-                     </div>
-                     {q.assertion.punjabi && (
-                        <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl mt-2 border-t border-slate-200/50 pt-2">
-                           <MathText text={q.assertion.punjabi} />
-                        </div>
-                     )}
-                  </div>
-
-                  <div className="h-px w-full bg-slate-200/50" />
-
-                  <div className="space-y-2">
-                     <p className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
-                        <ShieldCheck className="h-3 w-3" /> Reason (R) / ਕਾਰਨ (R)
-                     </p>
-                     <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
-                        <MathText text={q.reason.english} />
-                     </div>
-                     {q.reason.punjabi && (
-                        <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl mt-2 border-t border-slate-200/50 pt-2">
-                           <MathText text={q.reason.punjabi} />
-                        </div>
-                     )}
-                  </div>
-               </div>
+      <div className={cn(
+         "space-y-6 px-1", 
+         showSolution ? "mb-6" : "mb-10",
+         q.questionType === 'ASSERTION_REASON' && "p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner relative overflow-hidden"
+      )}>
+         {q.questionType === 'ASSERTION_REASON' && (
+            <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
+               <Zap className="h-3 w-3" /> Logic Hub
             </div>
-         )}
-
-         {/* INTRO HUB */}
-         {showEn && q.englishQuestion && q.questionType !== 'ASSERTION_REASON' && (
-           <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
-             <MathText text={q.englishQuestion} />
-           </div>
-         )}
-         {showLocal && q.punjabiQuestion && q.questionType !== 'ASSERTION_REASON' && (
-           <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4 border-t border-slate-100 pt-4", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
-             <MathText text={q.punjabiQuestion} />
-           </div>
          )}
 
          {/* STRUCTURED MATCHING GRID */}
@@ -167,6 +124,18 @@ export default function QuestionRenderer({
                   </TableBody>
                </Table>
             </div>
+         )}
+
+         {/* INTRO BLOCKS - NON-INTERLEAVED */}
+         {showEn && q.englishQuestion && (
+           <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
+             <MathText text={q.englishQuestion} />
+           </div>
+         )}
+         {showLocal && q.punjabiQuestion && (
+           <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4 border-t border-slate-100 pt-4", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
+             <MathText text={q.punjabiQuestion} />
+           </div>
          )}
       </div>
 

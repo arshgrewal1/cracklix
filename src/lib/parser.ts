@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v69.0.
- * FIXED: Assertion & Reason continuous scanner with support for standalone labels and strict ordering.
+ * @fileOverview Institutional Deterministic Ingestion Hub v70.0.
+ * FIXED: Assertion & Reason bilingual block grouping to prevent interleaving.
  */
 
 import { serverTimestamp } from 'firebase/firestore';
@@ -113,48 +113,55 @@ export function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', 
   return null;
 }
 
-// --- CONTINUOUS ASSERTION & REASON SCANNER ---
+// --- CONTINUOUS ASSERTION & REASON SCANNER (BLOCK MODE) ---
 
 export function parseAssertionReason(fullText: string, metadata: any) {
   const lines = fullText.split(/\r?\n/);
   const questions: any[] = [];
   
   let currentQ: any = null;
+  let enAssert = ""; let enReason = "";
+  let paAssert = ""; let paReason = "";
+
   let state: 'IDLE' | 'ASSERT_EN' | 'ASSERT_PA' | 'REASON_EN' | 'REASON_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL' = 'IDLE';
 
   const finalize = () => {
     if (currentQ) {
-      const hasContent = (currentQ.assertion.english || currentQ.assertion.punjabi) && 
-                         (currentQ.reason.english || currentQ.reason.punjabi);
-      if (hasContent) {
-        currentQ.englishQuestion = currentQ.assertion.english || "Assertion & Reason Question";
-        currentQ.punjabiQuestion = currentQ.assertion.punjabi || "";
+      // BUILD BLOCKS: Do NOT interleave. English block first, then Punjabi block.
+      let enBlock = "";
+      if (enAssert) enBlock += `Assertion:\n${enAssert.trim()}`;
+      if (enReason) enBlock += `\n\nReason:\n${enReason.trim()}`;
+      currentQ.englishQuestion = enBlock;
+
+      let paBlock = "";
+      if (paAssert) paBlock += `ਕਥਨ:\n${paAssert.trim()}`;
+      if (paReason) paBlock += `\n\nਕਾਰਨ:\n${paReason.trim()}`;
+      currentQ.punjabiQuestion = paBlock;
+
+      // Validation: Must have core logic statements
+      if ((enAssert || paAssert) && (enReason || paReason)) {
         questions.push(currentQ);
       }
     }
+    enAssert = ""; enReason = ""; paAssert = ""; paReason = "";
   };
 
   const assertEnRegex = /^\s*(?:Assertion|Assertlon|Assertion:|Assertion\s*\(A\)|Assertion\(A\)|A\)|Statement|Statement\s*\(A\)|Assertion\s*-)\s*[:\-]?/i;
   const assertPaRegex = /^\s*(?:ਕਥਨ|ਕਥਨ:|ਕਥਨ\s*\(A\))\s*[:\-]?/;
   const reasonEnRegex = /^\s*(?:Reason|Reas0n|Reason:|Reason\s*\(R\)|Reason\(R\)|R\)|Reason\s*-)\s*[:\-]?/i;
   const reasonPaRegex = /^\s*(?:ਕਾਰਨ|ਕਾਰਨ:|ਕਾਰਨ\s*\(R\))\s*[:\-]?/;
-  const ansRegex = /^\s*(?:Answer|Correct Answer|Official Key|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ|Sahi Uttar)\s*[:\-]?/i;
-  const explRegex = /^\s*(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या|Rationale|ENGLISH EXPLANATION|PUNJABI EXPLANATION)\s*[:\-]?/i;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    // Boundary Detection: New Question
     if (isQuestionStart(line)) {
       finalize();
       currentQ = {
         ...metadata,
         id: `q-ar-${Math.random().toString(36).substr(2, 9)}`,
         questionType: 'ASSERTION_REASON',
-        assertion: { english: "", punjabi: "" },
-        reason: { english: "", punjabi: "" },
         englishQuestion: "", 
         punjabiQuestion: "",
         correctAnswer: "",
@@ -170,7 +177,6 @@ export function parseAssertionReason(fullText: string, metadata: any) {
 
     if (!currentQ) continue;
 
-    // Metadata & Noise Filter
     if (NOISE_PATTERNS.some(p => p.test(trimmed)) && (state === 'EXPL' || state === 'ANSWER')) {
       finalize();
       currentQ = null;
@@ -178,60 +184,46 @@ export function parseAssertionReason(fullText: string, metadata: any) {
     }
 
     const optMarker = detectOptionMarker(line);
+    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     
-    // State Transitions
+    // TRANSITION LOGIC
     if (assertEnRegex.test(trimmed)) { state = 'ASSERT_EN'; }
     else if (assertPaRegex.test(trimmed)) { state = 'ASSERT_PA'; }
     else if (reasonEnRegex.test(trimmed)) { state = 'REASON_EN'; }
     else if (reasonPaRegex.test(trimmed)) { state = 'REASON_PA'; }
-    else if (ansRegex.test(trimmed)) { state = 'ANSWER'; }
-    else if (explRegex.test(trimmed)) { state = 'EXPL'; }
-    else if (optMarker && (state === 'REASON_PA' || state === 'REASON_EN' || state === 'OPTIONS')) { state = 'OPTIONS'; }
+    else if (isAns) { state = 'ANSWER'; }
+    else if (isExpl) { state = 'EXPL'; }
+    else if (optMarker && (enReason || paReason)) { state = 'OPTIONS'; }
     else {
-      // Heuristic: Auto-transition to Punjabi if Gurmukhi detected in English states
+      // Heuristic fallback for unlabeled lines
       if (state === 'ASSERT_EN' && GURMUKHI_REGEX.test(trimmed)) state = 'ASSERT_PA';
       if (state === 'REASON_EN' && GURMUKHI_REGEX.test(trimmed)) state = 'REASON_PA';
     }
 
-    // Extraction Logic
-    let cleanContent = trimmed;
-    if (assertEnRegex.test(trimmed)) cleanContent = trimmed.replace(assertEnRegex, '').trim();
-    else if (assertPaRegex.test(trimmed)) cleanContent = trimmed.replace(assertPaRegex, '').trim();
-    else if (reasonEnRegex.test(trimmed)) cleanContent = trimmed.replace(reasonEnRegex, '').trim();
-    else if (reasonPaRegex.test(trimmed)) cleanContent = trimmed.replace(reasonPaRegex, '').trim();
+    let clean = trimmed;
+    if (state === 'ASSERT_EN') clean = trimmed.replace(assertEnRegex, '').trim();
+    else if (state === 'ASSERT_PA') clean = trimmed.replace(assertPaRegex, '').trim();
+    else if (state === 'REASON_EN') clean = trimmed.replace(reasonEnRegex, '').trim();
+    else if (state === 'REASON_PA') clean = trimmed.replace(reasonPaRegex, '').trim();
 
-    if (!cleanContent && (assertEnRegex.test(trimmed) || assertPaRegex.test(trimmed) || reasonEnRegex.test(trimmed) || reasonPaRegex.test(trimmed))) continue;
+    if (!clean && ['ASSERT_EN', 'ASSERT_PA', 'REASON_EN', 'REASON_PA'].includes(state)) continue;
 
     switch (state) {
-      case 'ASSERT_EN':
-        currentQ.assertion.english += (currentQ.assertion.english ? '\n' : '') + cleanContent;
-        break;
-      case 'ASSERT_PA':
-        currentQ.assertion.punjabi += (currentQ.assertion.punjabi ? '\n' : '') + cleanContent;
-        break;
-      case 'REASON_EN':
-        currentQ.reason.english += (currentQ.reason.english ? '\n' : '') + cleanContent;
-        break;
-      case 'REASON_PA':
-        currentQ.reason.punjabi += (currentQ.reason.punjabi ? '\n' : '') + cleanContent;
-        break;
-      case 'OPTIONS':
-        if (optMarker) {
-          currentQ[`option${optMarker.opt}English`] = optMarker.text;
-        }
-        break;
+      case 'ASSERT_EN': enAssert += (enAssert ? '\n' : '') + clean; break;
+      case 'ASSERT_PA': paAssert += (paAssert ? '\n' : '') + clean; break;
+      case 'REASON_EN': enReason += (enReason ? '\n' : '') + clean; break;
+      case 'REASON_PA': paReason += (paReason ? '\n' : '') + clean; break;
+      case 'OPTIONS': if (optMarker) currentQ[`option${optMarker.opt}English`] = optMarker.text; break;
       case 'ANSWER':
         const ansMatch = trimmed.match(/[A-D]/i);
         if (ansMatch) currentQ.correctAnswer = ansMatch[0].toUpperCase();
         break;
       case 'EXPL':
-        const explText = trimmed.replace(explRegex, '').replace(ansRegex, '').trim();
+        const explText = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
         if (explText) {
-          if (GURMUKHI_REGEX.test(explText)) {
-            currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + explText;
-          } else {
-            currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + explText;
-          }
+          if (GURMUKHI_REGEX.test(explText)) currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + explText;
+          else currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + explText;
         }
         break;
     }
@@ -393,14 +385,21 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   const processedText = preprocessText(rawText);
   const fmt = metadata.parserFormat;
 
+  console.log(`[INGESTION] Document Length: ${processedText.length}`);
+
   if (fmt === 'ASSERTION') {
-    return parseAssertionReason(processedText, metadata);
+    const result = parseAssertionReason(processedText, metadata);
+    console.log(`[INGESTION] Successfully Parsed: ${result.questions.length} Assertion & Reason nodes.`);
+    return result;
   }
 
   const chunks = segmentTextByQuestions(processedText);
+  console.log(`[INGESTION] Questions Found: ${chunks.length}`);
+  
   const allQuestions: any[] = [];
 
-  chunks.forEach((chunk) => {
+  chunks.forEach((chunk, i) => {
+    console.log(`[INGESTION] Processing Question ${i + 1}`);
     let result: any = { questions: [] };
     if (fmt === 'MATCHING') result = parseMatching(chunk, metadata);
     else result = parseDeterministicBilingual(chunk, metadata);
@@ -410,6 +409,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
     }
   });
 
+  console.log(`[INGESTION] Final Audit: ${allQuestions.length}/${chunks.length} Questions saved.`);
   return { questions: allQuestions };
 }
 
