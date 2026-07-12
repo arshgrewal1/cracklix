@@ -25,7 +25,7 @@ import {
   X
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, doc, writeBatch, serverTimestamp, query, orderBy } from "firebase/firestore"
+import { collection, doc, writeBatch, serverTimestamp, query, orderBy, updateDoc, increment } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Board, Subject } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
@@ -34,8 +34,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v55.0.
+ * @fileOverview Modular Industrial Ingestion Hub v56.0.
  * FIXED: Hydration error resolved by replacing p with div in staging list.
+ * UPDATED: Added Punjabi Only strategy support.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
@@ -129,6 +130,12 @@ export default function BulkIngestionPage() {
       });
 
       await batch.commit();
+
+      await updateDoc(doc(db, 'settings', 'stats'), {
+         totalQuestions: increment(valids.length),
+         updatedAt: serverTimestamp()
+      }).catch(() => {});
+
       toast({ title: "Registry Updated", description: `${valids.length} nodes committed.` });
       router.push("/admin/questions");
     } catch (e) {

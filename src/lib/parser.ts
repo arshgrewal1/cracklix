@@ -1,6 +1,6 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v23.0.
- * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, and Math formats.
+ * @fileOverview Institutional Specialized Local Parser v25.0.
+ * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Punjabi Only formats.
  */
 
 export type ParserFormat = 
@@ -29,9 +29,10 @@ export function preprocessText(text: string): string {
     .replace(/\r\n/g, '\n')
     // 1. Remove Section Headers & Decorative lines
     .replace(/^={3,}.*?={3,}$/gm, '')
-    .replace(/^(?:CURRENT AFFAIRS|GENERAL KNOWLEDGE|MONTHLY UPDATE|MOCK TEST|SECTION|ENGLISH|PUNJABI|REASONING|MATH).*?$/gim, '')
+    .replace(/^(?:CURRENT AFFAIRS|GENERAL KNOWLEDGE|MONTHLY UPDATE|MOCK TEST|SECTION|ENGLISH|PUNJABI|REASONING|MATH|PUNJABI SECTION).*?$/gim, '')
     // 2. Remove Page Numbers & Progress Nodes
     .replace(/Page\s+\d+\s+of\s+\d+/gi, '')
+    .replace(/ਪੰਨਾ\s+\d+\s+of\s+\d+/gi, '')
     .replace(/\d+\s*\/\s*\d+/g, '')
     .replace(/^\s*\d+\s*$/gm, '') // Isolated numbers on a line (likely page numbers)
     // 3. Remove OCR Garbage & Symbols
@@ -80,6 +81,9 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
       case 'ENGLISH_ONLY':
         q = parseEnglishOnly(block, q);
         break;
+      case 'PUNJABI_ONLY':
+        q = parsePunjabiOnly(block, q);
+        break;
       case 'CURRENT_AFFAIRS':
       case 'BILINGUAL_MCQ':
         q = parseBilingual(block, q, metadata.secondaryLanguage);
@@ -101,8 +105,50 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 }
 
 /**
+ * STRATEGY: Punjabi Only MCQ
+ * Isolates Gurmukhi text and ensures Unicode preservation.
+ */
+function parsePunjabiOnly(block: string, q: any) {
+  const answerMatch = block.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|ਸਹੀ ਉੱਤਰ)\s*[:\-]?\s*([A-D])/i);
+  const explStartIndex = block.search(/(?:Explanation|Solution|ਵਿਆਖਿਆ|Rationale)\s*[:\-]?/i);
+  
+  let restOfBlock = block;
+  let explanationPart = "";
+
+  if (explStartIndex !== -1) {
+    explanationPart = block.substring(explStartIndex);
+    restOfBlock = block.substring(0, explStartIndex);
+  }
+
+  const optAMatch = restOfBlock.match(/\n\s*A[\)\.\-]\s+/i);
+  let questionPart = restOfBlock;
+  let optionsPart = "";
+
+  if (optAMatch && optAMatch.index !== undefined) {
+     questionPart = restOfBlock.substring(0, optAMatch.index);
+     optionsPart = restOfBlock.substring(optAMatch.index);
+  }
+
+  q.punjabiQuestion = questionPart.replace(/^(?:Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.)\s*/i, '').trim();
+  
+  const labels = ['A', 'B', 'C', 'D'];
+  labels.forEach((label, i) => {
+    const next = labels[i + 1] || "(?:Official Key|Answer|Ans|ਉੱਤਰ|ਸਹੀ ਉੱਤਰ)";
+    const reg = new RegExp(`\\n\\s*${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*${next}[\\)\\.\\-]|$)`, 'i');
+    const match = optionsPart.match(reg);
+    if (match) q[`option${label}Punjabi`] = match[1].trim();
+  });
+
+  q.correctAnswer = (answerMatch?.[1] || "A").toUpperCase();
+  if (explanationPart) {
+    q.punjabiExplanation = explanationPart.replace(/(?:Explanation|Solution|ਵਿਆਖਿਆ|Rationale)\s*[:\-]?\s*/i, '').trim();
+  }
+
+  return q;
+}
+
+/**
  * STRATEGY: English Only MCQ
- * Strips all unnecessary text and isolates standard English MCQ components.
  */
 function parseEnglishOnly(block: string, q: any) {
   const answerMatch = block.match(/(?:Official Key|Answer|Ans|Correct Answer)\s*[:\-]?\s*([A-D])/i);
@@ -116,7 +162,6 @@ function parseEnglishOnly(block: string, q: any) {
     restOfBlock = block.substring(0, explStartIndex);
   }
 
-  // Find start of options using a strict boundary
   const optAMatch = restOfBlock.match(/\n\s*A[\)\.\-]\s+/i);
   let questionPart = restOfBlock;
   let optionsPart = "";
