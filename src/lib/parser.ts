@@ -1,8 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v52.0.
- * FIXED: Implemented dedicated Graph Parser with 9-state machine.
- * FIXED: Decoupled Graph segmentation from text-based logic.
+ * @fileOverview Institutional Deterministic Ingestion Hub v53.0.
+ * FIXED: Implemented dedicated Match the Following Parser with 8-state machine.
  */
 
 export type ParserFormat = 
@@ -83,6 +82,123 @@ function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: s
   return null;
 }
 
+function parseMatching(rawText: string, metadata: any) {
+  const lines = rawText.split(/\r?\n/);
+  const questions: any[] = [];
+  let currentQ: any = null;
+  
+  // States: INTRO_EN -> INTRO_PA -> MATCHING -> INSTR_EN -> INSTR_PA -> OPTIONS -> ANSWER -> EXPL_EN -> EXPL_PA
+  let state: 'INTRO_EN' | 'INTRO_PA' | 'MATCHING' | 'INSTR_EN' | 'INSTR_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL_EN' | 'EXPL_PA' = 'INTRO_EN';
+
+  const INSTR_KEYWORDS = [
+    "Choose the correct matching",
+    "Select the correct answer",
+    "Choose the correct option",
+    "Match correctly",
+    "Pick the correct combination",
+    "ਸਹੀ ਮਿਲਾਨ ਦੀ ਚੋਣ ਕਰੋ",
+    "ਸਹੀ ਉੱਤਰ ਚੁਣੋ"
+  ];
+
+  const finalize = () => {
+    if (!currentQ) return;
+    questions.push(currentQ);
+    currentQ = null;
+  };
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (isQuestionStart(line)) {
+      finalize();
+      currentQ = {
+        ...metadata,
+        id: `q-match-${Math.random().toString(36).substr(2, 9)}`,
+        questionType: 'MATCH_FOLLOWING',
+        englishQuestion: "", punjabiQuestion: "", matchingContent: "",
+        englishInstruction: "", punjabiInstruction: "",
+        optionAEnglish: "", optionBEnglish: "", optionCEnglish: "", optionDEnglish: "",
+        correctAnswer: "", englishExplanation: "", punjabiExplanation: "",
+        status: 'PUBLISHED'
+      };
+      state = 'INTRO_EN';
+      const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      if (content) currentQ.englishQuestion = content;
+      return;
+    }
+
+    if (!currentQ) return;
+    if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
+
+    const opt = detectOptionMarker(line);
+    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isInstr = INSTR_KEYWORDS.some(k => trimmed.toLowerCase().includes(k.toLowerCase()));
+
+    if (opt) state = 'OPTIONS';
+    else if (isAns) state = 'ANSWER';
+    else if (isExpl) state = 'EXPL_EN';
+    else if (isInstr) state = 'INSTR_EN';
+
+    // Transition to Matching if we see list patterns and not in instruction/options
+    if ((state === 'INTRO_EN' || state === 'INTRO_PA') && /^(List|Column|Group|A\.|1\.|I\.)/i.test(trimmed)) {
+       state = 'MATCHING';
+    }
+
+    switch (state) {
+      case 'INTRO_EN':
+        if (GURMUKHI_REGEX.test(trimmed)) {
+           state = 'INTRO_PA';
+           currentQ.punjabiQuestion = trimmed;
+        } else {
+           currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
+        }
+        break;
+      case 'INTRO_PA':
+        currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
+        break;
+      case 'MATCHING':
+        currentQ.matchingContent += line + '\n';
+        break;
+      case 'INSTR_EN':
+        if (GURMUKHI_REGEX.test(trimmed)) {
+           state = 'INSTR_PA';
+           currentQ.punjabiInstruction = trimmed;
+        } else {
+           currentQ.englishInstruction += (currentQ.englishInstruction ? '\n' : '') + trimmed;
+        }
+        break;
+      case 'INSTR_PA':
+        currentQ.punjabiInstruction += (currentQ.punjabiInstruction ? '\n' : '') + trimmed;
+        break;
+      case 'OPTIONS':
+        if (opt) currentQ[`option${opt.opt}English`] = opt.text;
+        break;
+      case 'ANSWER':
+        const ansClean = trimmed.replace(/^(?:Answer|Official Key|Correct Answer|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ)\s*[:\-]?\s*/i, '').trim();
+        const match = ansClean.match(/[A-D]/i);
+        if (match) currentQ.correctAnswer = match[0].toUpperCase();
+        break;
+      case 'EXPL_EN':
+        const explClean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
+        if (explClean) {
+          if (GURMUKHI_REGEX.test(explClean)) {
+             state = 'EXPL_PA';
+             currentQ.punjabiExplanation = explClean;
+          } else {
+             currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + explClean;
+          }
+        }
+        break;
+      case 'EXPL_PA':
+        currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
+        break;
+    }
+  });
+
+  finalize();
+  return { questions };
+}
+
 function parseGraph(rawText: string, metadata: any) {
   const lines = rawText.split(/\r?\n/);
   const questions: any[] = [];
@@ -121,11 +237,9 @@ function parseGraph(rawText: string, metadata: any) {
 
     if (!currentQ) return;
     
-    // Terminate on noise or metadata
     const isNoise = NOISE_PATTERNS.some(p => p.test(trimmed));
     const isSeparator = /^[-\s\.\*_=|+\/\\]{3,}$/.test(trimmed);
     if (isNoise || isSeparator) {
-       if (state === 'EXPL_EN' || state === 'EXPL_PA') finalize();
        return;
     }
 
@@ -137,7 +251,6 @@ function parseGraph(rawText: string, metadata: any) {
     else if (isAns) state = 'ANSWER';
     else if (isExpl) state = 'EXPL_EN';
 
-    // Graph transitions
     const isGraphArtifact = /[│─┌┐└┘├┤┼┴┬→←↑↓▲▼★■●○|]/.test(trimmed);
     const isLikelyData = trimmed.length > 0 && trimmed.length < 30 && !trimmed.includes(' ') && /[0-9]/.test(trimmed);
     
@@ -145,7 +258,6 @@ function parseGraph(rawText: string, metadata: any) {
        state = 'GRAPH';
     }
 
-    // Question suffix detection after graph block
     if (state === 'GRAPH' && ACTUAL_QUESTION_KEYWORDS.test(trimmed)) {
        state = 'ACTUAL_EN';
     }
@@ -501,7 +613,7 @@ function parseReasoning(rawText: string, metadata: any) {
        const match = trimmed.match(/[A-D]/i);
        if (match) currentQ.correctAnswer = match[0].toUpperCase();
     } else if (state === 'READ_EXPLANATION') {
-       const clean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\s*`, 'i'), '');
+       const clean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
        if (clean) {
           if (GURMUKHI_REGEX.test(clean)) currentQ[expLocalKey] += (currentQ[expLocalKey] ? '\n' : '') + clean;
           else currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + clean;
@@ -562,13 +674,14 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   if (metadata.parserFormat === 'REASONING') return parseReasoning(rawText, metadata);
   if (metadata.parserFormat === 'TABLE') return parseTable(rawText, metadata);
   if (metadata.parserFormat === 'GRAPH') return parseGraph(rawText, metadata);
+  if (metadata.parserFormat === 'MATCHING') return parseMatching(rawText, metadata);
   return parseDeterministicBilingual(rawText, metadata);
 }
 
 export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion && !q.diagramContent && !q.graphContent && !q.tableContent?.rows?.length) errors.push("Question content missing.");
+  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion && !q.diagramContent && !q.graphContent && !q.matchingContent && !q.tableContent?.rows?.length) errors.push("Question content missing.");
   const optCount = ['A', 'B', 'C', 'D'].filter(l => (q[`option${l}English`] || "").trim() || (q[`option${l}Punjabi`] || "").trim() || (q[`option${l}Hindi`] || "").trim()).length;
   if (optCount < 4) errors.push("Less than four options detected.");
   if (!q.correctAnswer) errors.push("Answer missing.");

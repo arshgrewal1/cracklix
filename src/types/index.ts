@@ -250,13 +250,13 @@ export interface Question {
   hindiQuestion?: string;
   englishDiagramQuestion?: string;
   punjabiDiagramQuestion?: string;
-  englishQuestionSuffix?: string;
-  punjabiQuestionSuffix?: string;
-  hindiQuestionSuffix?: string;
-  diagramContent?: string;
-  graphContent?: string;
   englishActualQuestion?: string;
   punjabiActualQuestion?: string;
+  englishInstruction?: string;
+  punjabiInstruction?: string;
+  diagramContent?: string;
+  graphContent?: string;
+  matchingContent?: string;
   tableContent?: TableContent;
   optionAEnglish: string;
   optionAPunjabi?: string;
