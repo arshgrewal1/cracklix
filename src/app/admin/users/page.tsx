@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState } from "react"
@@ -31,8 +32,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Student Hub v26.0 (PWA Optimized).
- * PWA SYNC: Removed uppercase, reduced font scales, and normalized Title Case as per screenshot.
+ * @fileOverview Student Hub v27.0 (High-Fidelity).
+ * FIXED: Refined typography and increased layout breathing room for a premium SaaS look.
  */
 
 export default function AspirantsManagement() {
@@ -81,6 +82,8 @@ export default function AspirantsManagement() {
              freePassClaimed: selectedPass.id === 'free-pass'
           },
           status: selectedPass.id,
+          passStatus: 'active',
+          passExpiresAt: expiryDate.toISOString(),
           updatedAt: serverTimestamp()
        })
 
@@ -88,7 +91,7 @@ export default function AspirantsManagement() {
           userId: grantDialogUser.id,
           planId: selectedPass.id,
           planName: selectedPass.name,
-          status: 'active',
+          status: 'ACTIVE',
           startDate: serverTimestamp(),
           expiryDate: expiryDate.toISOString(),
           grantedBy: admin?.uid || "Admin",
@@ -105,75 +108,79 @@ export default function AspirantsManagement() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-12 text-[#0F172A] text-left animate-in fade-in duration-500">
+    <div className="space-y-10 md:space-y-16 text-[#0F172A] text-left animate-in fade-in duration-500 pt-2">
       <div className="flex justify-between items-center px-1">
-        <div className="space-y-1.5">
+        <div className="space-y-3">
            <div className="flex items-center gap-2">
               <ShieldCheck className="h-4 w-4 text-primary" />
-              <span className="text-[9px] md:text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">Aspirant Registry Hub</span>
+              <span className="text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-slate-400">Aspirant Registry Hub</span>
            </div>
-          <h1 className="text-2xl md:text-5xl font-black text-primary tracking-tight">Student Hub</h1>
-          <p className="text-slate-500 font-medium text-[11px] md:text-lg">Monitoring {aspirants?.length || 0} student preparation profiles.</p>
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-primary tracking-tight leading-none">Student Hub</h1>
+          <p className="text-slate-500 font-medium text-[13px] md:text-lg max-w-2xl leading-tight">Monitoring {aspirants?.length || 0} student preparation profiles and access tiers.</p>
         </div>
       </div>
 
       <div className="relative group px-1">
          <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
          <Input 
-           className="h-14 md:h-16 pl-14 rounded-2xl md:rounded-full bg-white border-slate-50 shadow-inner text-base md:text-lg font-bold" 
-           placeholder="Search identity..." 
+           className="h-16 md:h-20 pl-16 rounded-2xl md:rounded-[2rem] bg-white border-slate-100 shadow-xl text-base md:text-xl font-bold" 
+           placeholder="Search by name or email node..." 
            value={searchTerm} 
            onChange={e => setSearchTerm(e.target.value)} 
          />
       </div>
 
-      <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
+      <Card className="border-none shadow-3xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
         <CardContent className="p-0 text-left">
           <Table>
             <TableHeader className="bg-slate-50/50">
-              <TableRow className="border-slate-50 h-14 md:h-20">
-                <TableHead className="px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Student Identity</TableHead>
-                <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Registry Status</TableHead>
-                <TableHead className="text-right px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Actions</TableHead>
+              <TableRow className="border-slate-50 h-16 md:h-24">
+                <TableHead className="px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Student Identity</TableHead>
+                <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Registry Status</TableHead>
+                <TableHead className="text-right px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
-                Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="border-slate-50"><TableCell colSpan={3} className="px-6 py-6 md:px-12 md:py-10"><Skeleton className="h-10 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>)
+                Array.from({ length: 5 }).map((_, i) => <TableRow key={i} className="border-slate-50"><TableCell colSpan={3} className="px-8 py-8 md:py-12"><Skeleton className="h-12 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>)
               ) : filteredAspirants.map((aspirant: any) => {
                  const pass = aspirant.pass;
-                 const isActive = pass?.active && new Date(pass.expiryDate) > new Date();
+                 const isActive = aspirant.passStatus === 'active';
                  return (
                   <TableRow key={aspirant.id} className="border-slate-50 hover:bg-slate-50 transition-colors group">
-                    <TableCell className="px-6 md:px-12 py-5 md:py-10">
-                      <div className="flex items-center gap-4 md:gap-6">
-                        <StudentAvatar profile={aspirant} className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl shadow-inner bg-slate-50" />
+                    <TableCell className="px-8 md:px-12 py-6 md:py-12">
+                      <div className="flex items-center gap-4 md:gap-8">
+                        <StudentAvatar profile={aspirant} className="h-12 w-12 md:h-16 md:w-16 rounded-xl md:rounded-2xl shadow-xl bg-slate-50 border-2 border-white" />
                         <div className="min-w-0">
-                          <p className="font-bold text-[#0F172A] text-sm md:text-lg leading-tight truncate">{aspirant.name}</p>
-                          <p className="text-[9px] text-slate-400 font-bold mt-1 truncate lowercase">{aspirant.email}</p>
+                          <p className="font-bold text-[#0F172A] text-base md:text-2xl leading-tight truncate">{aspirant.name}</p>
+                          <p className="text-[10px] md:text-[12px] text-slate-400 font-bold mt-1.5 truncate lowercase tracking-tight">{aspirant.email}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                       <div className="space-y-1">
-                          <Badge className={cn("border-none px-3 py-1 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest", isActive ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500")}>
-                             {isActive ? (pass.plan || 'ELITE') : 'FREE HUB'}
+                       <div className="space-y-2">
+                          <Badge className={cn("border-none px-4 py-1 rounded-full text-[9px] md:text-[11px] font-black uppercase tracking-widest shadow-sm", isActive ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-500")}>
+                             {isActive ? (aspirant.status || 'ELITE') : 'FREE HUB'}
                           </Badge>
-                          {isActive && <p className="text-[8px] md:text-[9px] font-black text-slate-300 uppercase tracking-widest ml-1">Exp: {new Date(pass.expiryDate).toLocaleDateString()}</p>}
+                          {isActive && aspirant.passExpiresAt && (
+                            <p className="text-[9px] md:text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1 flex items-center gap-1.5">
+                               <Clock className="h-3 w-3" /> Exp: {new Date(aspirant.passExpiresAt).toLocaleDateString('en-GB')}
+                            </p>
+                          )}
                        </div>
                     </TableCell>
-                    <TableCell className="text-right px-6 md:px-12">
+                    <TableCell className="text-right px-8 md:px-12">
                       <DropdownMenu>
                          <DropdownMenuTrigger asChild>
-                            <button className="h-9 w-9 md:h-11 md:w-11 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-100 flex items-center justify-center text-slate-400 transition-all"><MoreVertical className="h-4 w-4 md:h-5 md:w-5" /></button>
+                            <button className="h-10 w-10 md:h-14 md:w-14 rounded-xl md:rounded-2xl hover:bg-white border border-transparent hover:border-slate-100 flex items-center justify-center text-slate-400 transition-all shadow-sm active:scale-90"><MoreVertical className="h-5 w-5 md:h-6 md:w-6" /></button>
                          </DropdownMenuTrigger>
-                         <DropdownMenuContent align="end" className="w-56 md:w-64 bg-white rounded-2xl md:rounded-[2rem] p-3 md:p-4 shadow-5xl border border-slate-50 z-[2001]">
-                            <DropdownMenuItem onClick={() => setGrantDialogUser(aspirant)} className="rounded-xl px-4 py-2.5 md:py-3 gap-3 focus:bg-primary/5 text-slate-600 focus:text-primary font-bold text-xs">
-                               <Gem className="h-4 w-4" /> Grant Elite Pass
+                         <DropdownMenuContent align="end" className="w-56 md:w-72 bg-white rounded-[2rem] p-3 md:p-5 shadow-5xl border border-slate-50 z-[2001]">
+                            <DropdownMenuItem onClick={() => setGrantDialogUser(aspirant)} className="rounded-xl px-4 py-3 md:py-4 gap-4 focus:bg-primary/5 text-slate-600 focus:text-primary font-bold text-xs md:text-sm">
+                               <Gem className="h-5 w-5" /> Grant Elite Pass
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-slate-50 my-2" />
-                            <DropdownMenuItem onClick={async () => { if(confirm("Permanently delete profile?")) await deleteDoc(doc(db!, "users", aspirant.id)) }} className="rounded-xl px-4 py-2.5 md:py-3 gap-3 text-rose-500 focus:bg-rose-50 focus:text-rose-600 font-bold text-xs">
-                               <Trash2 className="h-4 w-4" /> Delete Profile
+                            <DropdownMenuItem onClick={async () => { if(confirm("Permanently delete profile?")) await deleteDoc(doc(db!, "users", aspirant.id)) }} className="rounded-xl px-4 py-3 md:py-4 gap-4 text-rose-500 focus:bg-rose-50 focus:text-rose-600 font-bold text-xs md:text-sm">
+                               <Trash2 className="h-5 w-5" /> Delete Profile
                             </DropdownMenuItem>
                          </DropdownMenuContent>
                       </DropdownMenu>
@@ -187,28 +194,28 @@ export default function AspirantsManagement() {
       </Card>
 
       <Dialog open={!!grantDialogUser} onOpenChange={o => !o && !isProcessing && setGrantDialogUser(null)}>
-         <DialogContent className="bg-white rounded-3xl md:rounded-[3rem] max-w-md w-[95vw] p-8 md:p-10 shadow-5xl text-left border-none">
+         <DialogContent className="bg-white rounded-[2rem] md:rounded-[3rem] max-w-md w-[95vw] p-8 md:p-14 shadow-5xl text-left border-none">
             <div className="h-2 w-full bg-primary absolute top-0 left-0" />
-            <DialogHeader className="text-center space-y-3 pt-4">
-               <DialogTitle className="text-xl md:text-2xl font-black text-[#0F172A]">Aspirant Registry</DialogTitle>
-               <DialogDescription className="text-slate-500 font-medium text-[11px] md:text-sm">Update node status for {grantDialogUser?.name}.</DialogDescription>
+            <DialogHeader className="text-center space-y-4 pt-4">
+               <DialogTitle className="text-2xl md:text-3xl font-black text-[#0F172A] tracking-tight">Access Authority</DialogTitle>
+               <DialogDescription className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">Modify preparation tier for {grantDialogUser?.name}.</DialogDescription>
             </DialogHeader>
-            <div className="py-6 md:py-8 space-y-6">
+            <div className="py-8 md:py-10 space-y-8">
                <div className="space-y-2">
-                  <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Plan Selection</Label>
-                  <select value={grantPlanId} onChange={e => setGrantPlanId(e.target.value)} className="w-full h-12 md:h-14 bg-slate-50 border-none rounded-xl px-5 outline-none font-bold text-[#0F172A]">
+                  <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Plan Selection</Label>
+                  <select value={grantPlanId} onChange={e => setGrantPlanId(e.target.value)} className="w-full h-14 md:h-16 bg-slate-50 border-none rounded-2xl px-6 outline-none font-black text-[#0F172A] text-base shadow-inner appearance-none cursor-pointer">
                      <option value="" disabled>Select Pass</option>
                      {passes?.map((p: any) => <option key={p.id} value={p.id}>{p.name}</option>)}
                   </select>
                </div>
                <div className="space-y-2">
-                  <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Grant Days</Label>
-                  <Input type="number" value={grantDuration} onChange={e => setGrantDuration(e.target.value)} className="h-12 md:h-14 bg-slate-50 border-none rounded-xl font-black text-lg md:text-xl text-center" />
+                  <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Validity (Days)</Label>
+                  <Input type="number" value={grantDuration} onChange={e => setGrantDuration(e.target.value)} className="h-14 md:h-16 bg-slate-50 border-none rounded-2xl font-black text-xl md:text-3xl text-center text-primary shadow-inner" />
                </div>
             </div>
             <DialogFooter>
-               <Button onClick={handleGrantPass} disabled={isProcessing} className="w-full bg-primary hover:bg-blue-700 text-white h-12 md:h-14 rounded-full font-black uppercase tracking-widest text-[10px] border-none shadow-xl">
-                  {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify & Commit"}
+               <Button onClick={handleGrantPass} disabled={isProcessing} className="w-full bg-[#0F172A] hover:bg-black text-white h-14 md:h-18 rounded-full font-black uppercase tracking-[0.2em] text-xs border-none shadow-4xl active:scale-95 transition-all">
+                  {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : "Authorize & Commit"}
                </Button>
             </DialogFooter>
          </DialogContent>
