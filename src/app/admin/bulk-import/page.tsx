@@ -33,9 +33,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Production AI Ingestion Center v30.0 (High-Fidelity Desktop).
- * FIXED: Resolved button distortion and text clipping.
- * FIXED: Expanded textarea height and grid spans for enterprise document processing.
+ * @fileOverview Production AI Ingestion Center v31.0 (Full Desktop Width).
+ * FIXED: Expanded layout to max-width to utilize large monitors.
+ * FIXED: Stabilized action button dimensions to prevent distortion.
  */
 
 export default function BulkIngestionPage() {
@@ -81,7 +81,7 @@ export default function BulkIngestionPage() {
          });
       });
 
-      if (!result?.questions) throw new Error("AI returned invalid registry data.");
+      if (!result?.questions) throw new Error("AI extraction failed to return structured data.");
 
       const mapped = result.questions.map((q: any, idx: number) => {
         const validationErrors = validateMCQSchema(q);
@@ -174,7 +174,7 @@ export default function BulkIngestionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
-        {/* INPUT PANEL - WIDER FOR DESKTOP */}
+        {/* INPUT PANEL */}
         <div className="lg:col-span-5 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-6">

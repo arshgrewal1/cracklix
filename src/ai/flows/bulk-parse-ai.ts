@@ -1,12 +1,12 @@
 
 'use server';
 /**
- * @fileOverview Production AI Bulk Ingestion Engine v5.0.
- * FIXED: Resolved 'Must supply a model' error by using string ID and corrected generate() syntax.
+ * @fileOverview Production AI Bulk Ingestion Engine v6.0.
+ * FIXED: Resolved 404 error by using native model constants from google-genai plugin.
  */
 
 import { genkit } from 'genkit';
-import { googleAI } from '@genkit-ai/google-genai';
+import { googleAI, gemini15Flash } from '@genkit-ai/google-genai';
 import { z } from 'genkit';
 
 const MCQSchema = z.object({
@@ -36,17 +36,17 @@ export async function bulkParseMCQ(input: { rawText: string, examType?: string, 
   const { rawText, examType, apiKey } = input;
 
   if (!apiKey) {
-     throw new Error("AI Registry Sync Blocked: API Key node not provided.");
+     throw new Error("AI Hub Offline: Target API key not provided.");
   }
 
-  // Initialize isolated Genkit instance for the specific key
+  // Initialize isolated Genkit instance with the provided key and native flash model
   const aiInstance = genkit({
     plugins: [googleAI({ apiKey })],
   });
 
   try {
     const response = await aiInstance.generate({
-      model: 'googleai/gemini-1.5-flash',
+      model: gemini15Flash, // Use native model constant to ensure correct endpoint discovery
       output: { schema: BulkParseOutputSchema },
       prompt: `You are an expert Government Exam MCQ Parser. 
 Your task is to take the entire provided RAW TEXT and extract EVERY valid MCQ found within it.
@@ -69,10 +69,10 @@ RULES:
 TARGET EXAM CONTEXT: ${examType || 'General Punjab Exam'}`,
     });
 
-    if (!response.output) throw new Error("AI extraction node returned empty registry.");
+    if (!response.output) throw new Error("AI extraction failed to return structured data.");
     return response.output;
   } catch (error: any) {
-    console.error("[AI_INGEST_NODE_FAILURE]:", error.message);
+    console.error("[AI_EXTRACTION_FAILURE]:", error.message);
     throw error;
   }
 }
