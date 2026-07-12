@@ -33,8 +33,8 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v70.0.
- * FIXED: Added missing CardHeader and CardTitle imports to resolve runtime errors.
+ * @fileOverview Modular Industrial Ingestion Hub v72.0.
+ * FIXED: Hydration error by replacing <p> with <div> in validation list.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
