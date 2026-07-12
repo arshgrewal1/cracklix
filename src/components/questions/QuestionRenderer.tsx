@@ -20,8 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v63.0.
- * FIXED: Standardized English and Punjabi typography weights and colors.
+ * @fileOverview Institutional Question Renderer v65.0.
+ * FIXED: Standardized English and Punjabi typography weights, sizes, and colors.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -87,7 +87,7 @@ export default function QuestionRenderer({
       )}
 
       <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
-         {/* ASSERTION & REASON HUB v61.0 */}
+         {/* ASSERTION & REASON HUB */}
          {q.questionType === 'ASSERTION_REASON' && q.assertion && q.reason && (
             <div className="space-y-6 mb-8 p-6 md:p-10 bg-slate-50 rounded-[2rem] border border-slate-100 shadow-inner relative overflow-hidden group">
                <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
@@ -99,11 +99,11 @@ export default function QuestionRenderer({
                      <p className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
                         <ShieldCheck className="h-3 w-3" /> Assertion (A) / ਕਥਨ (A)
                      </p>
-                     <div className="font-[800] text-[#0F172A] text-base md:text-xl leading-relaxed">
+                     <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
                         <MathText text={q.assertion.english} />
                      </div>
                      {q.assertion.punjabi && (
-                        <div className="font-[800] text-[#0F172A] text-sm md:text-lg mt-1">
+                        <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl mt-2 border-t border-slate-200/50 pt-2">
                            <MathText text={q.assertion.punjabi} />
                         </div>
                      )}
@@ -115,11 +115,11 @@ export default function QuestionRenderer({
                      <p className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
                         <ShieldCheck className="h-3 w-3" /> Reason (R) / ਕਾਰਨ (R)
                      </p>
-                     <div className="font-[800] text-[#0F172A] text-base md:text-xl leading-relaxed">
+                     <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
                         <MathText text={q.reason.english} />
                      </div>
                      {q.reason.punjabi && (
-                        <div className="font-[800] text-[#0F172A] text-sm md:text-lg mt-1">
+                        <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl mt-2 border-t border-slate-200/50 pt-2">
                            <MathText text={q.reason.punjabi} />
                         </div>
                      )}
@@ -130,12 +130,12 @@ export default function QuestionRenderer({
 
          {/* INTRO HUB */}
          {showEn && q.englishQuestion && q.questionType !== 'ASSERTION_REASON' && (
-           <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
+           <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
              <MathText text={q.englishQuestion} />
            </div>
          )}
          {showLocal && q.punjabiQuestion && q.questionType !== 'ASSERTION_REASON' && (
-           <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
+           <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4 border-t border-slate-100 pt-4", showSolution ? "text-[16px] md:text-xl" : "text-[18px] md:text-3xl")}>
              <MathText text={q.punjabiQuestion} />
            </div>
          )}
@@ -166,26 +166,6 @@ export default function QuestionRenderer({
                      ))}
                   </TableBody>
                </Table>
-            </div>
-         )}
-
-         {/* SUFFIX / INSTRUCTION HUB */}
-         {(showEn && (q.englishInstruction || q.englishActualQuestion || q.englishDiagramQuestion)) && (
-            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
-               <MathText text={q.englishInstruction || q.englishActualQuestion || q.englishDiagramQuestion} />
-            </div>
-         )}
-         {(showLocal && (q.punjabiInstruction || q.punjabiActualQuestion || q.punjabiDiagramQuestion)) && (
-            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
-               <MathText text={q.punjabiInstruction || q.punjabiActualQuestion || q.punjabiDiagramQuestion} />
-            </div>
-         )}
-
-         {/* DIAGRAM HUB FALLBACK */}
-         {q.diagramContent && (
-            <div className="my-6 p-6 md:p-10 bg-[#0F172A] text-emerald-400 rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[10px] md:text-sm overflow-x-auto whitespace-pre leading-relaxed shadow-inner border border-white/5 relative">
-               <div className="absolute top-2 right-4 opacity-20 pointer-events-none uppercase text-[8px] font-black tracking-widest">Logic Box</div>
-               {q.diagramContent}
             </div>
          )}
       </div>
