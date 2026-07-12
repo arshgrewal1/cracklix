@@ -33,7 +33,9 @@ import {
   NotebookTabs,
   Library,
   CreditCard,
-  ShieldCheck
+  ShieldCheck,
+  FileJson,
+  Zap
 } from "lucide-react";
 
 import {
@@ -49,6 +51,7 @@ const NAV_GROUPS = [
     items: [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
       { label: "MCQ Bank", href: "/admin/questions", icon: Database },
+      { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "Bulk Ingestion", href: "/admin/bulk-import", icon: UploadCloud },
       { label: "Review Center", href: "/admin/qa", icon: Activity },
     ],
@@ -79,6 +82,7 @@ const NAV_GROUPS = [
     items: [
       { label: "Mock Builder", href: "/admin/mocks/builder", icon: PenSquare },
       { label: "Mock Manager", href: "/admin/mocks", icon: ClipboardList },
+      { label: "CA Manager", href: "/admin/current-affairs", icon: Newspaper },
       { label: "Study Notes", href: "/admin/notes", icon: NotebookPen },
       { label: "PYQ Archive", href: "/admin/pyqs", icon: Archive },
       { label: "Exam Calendar", href: "/admin/calendar", icon: Calendar },
