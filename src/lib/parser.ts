@@ -1,8 +1,8 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v66.0.
- * FIXED: Re-engineered loop logic to ensure all questions in a document are parsed.
- * FIXED: Implemented strict state reset per question chunk.
+ * @fileOverview Institutional Deterministic Ingestion Hub v67.0.
+ * REDESIGN: Assertion & Reason Parser implemented as a continuous scanner.
+ * FIXED: Multi-question blocks Q1-Q9+ now captured sequentially.
  */
 
 import { serverTimestamp } from 'firebase/firestore';
@@ -23,7 +23,7 @@ export type ParserFormat =
   | 'TRUE_FALSE';
 
 // --- CONSTANT REGISTRY ---
-export const QUESTION_SENTINEL_REGEX = /(?:\r?\n|^)\s*(?:(?:Q|Question|QUESTION|Q\.)\s*(?:NO\.?\s*)?[-.:\s]*)?(\d+|[lI])(?:[\.\s:)]|$)/i;
+export const QUESTION_SENTINEL_REGEX = /(?:\r?\n|^)\s*(?:(?:Q|Question|QUESTION|Q\.|Q\s|Question\s|QUESTION\s|QUESTION\sNO\.?|Question\sNO\.?)\s*)?(\d+|[lI])(?:[\.\s:)\-]|(?=\r?\n)|$)/i;
 
 export const NOISE_PATTERNS = [
   /^Page\s*\d+/i,
@@ -119,69 +119,99 @@ export function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', 
   return null;
 }
 
-// --- SPECIALIZED PARSERS ---
+// --- REDESIGNED ASSERTION & REASON SCANNER ---
 
-function parseSingleAssertionReason(text: string, metadata: any) {
-  const lines = text.split(/\r?\n/);
-  let currentQ: any = {
-    ...metadata,
-    id: `q-ar-${Math.random().toString(36).substr(2, 9)}`,
-    questionType: 'ASSERTION_REASON',
-    assertion: { english: "", punjabi: "" },
-    reason: { english: "", punjabi: "" },
-    status: 'PUBLISHED',
-    createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
+export function parseAssertionReason(fullText: string, metadata: any) {
+  const lines = fullText.split(/\r?\n/);
+  const questions: any[] = [];
+  
+  let currentQ: any = null;
+  let state: 'IDLE' | 'ASSERT_EN' | 'ASSERT_PA' | 'REASON_EN' | 'REASON_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL' = 'IDLE';
+
+  const finalize = () => {
+    if (currentQ) {
+      const hasContent = (currentQ.assertion.english || currentQ.assertion.punjabi) && 
+                         (currentQ.reason.english || currentQ.reason.punjabi);
+      if (hasContent) {
+        currentQ.englishQuestion = currentQ.assertion.english || currentQ.assertion.punjabi || "Assertion & Reason Question";
+        currentQ.punjabiQuestion = currentQ.assertion.punjabi || "";
+        questions.push(currentQ);
+      }
+    }
   };
 
-  const assertEnRegex = /^\s*(?:Assertion|Assertlon|Assertion:)\s*(?:\(A\))?[:\-]?/i;
-  const assertPaRegex = /^\s*(?:ਕਥਨ)\s*(?:\(A\))?[:\-]?/i;
-  const reasonEnRegex = /^\s*(?:Reason|Reas0n|Reason:)\s*(?:\(R\))?[:\-]?/i;
-  const reasonPaRegex = /^\s*(?:ਕਾਰਨ|ਕਾਰਣ|कारन)\s*(?:\(R\))?[:\-]?/i;
+  const assertEnRegex = /^\s*(?:Assertion|Assertlon|Assertion:|Assertion\s*\(A\)|Assertion\(A\)|A\)|Statement|Statement\s*\(A\)|Assertion\s*-)\s*[:\-]?/i;
+  const assertPaRegex = /^\s*(?:ਕਥਨ|ਕਥਨ:|ਕਥਨ\s*\(A\))\s*[:\-]?/;
+  const reasonEnRegex = /^\s*(?:Reason|Reas0n|Reason:|Reason\s*\(R\)|Reason\(R\)|R\)|Reason\s*-)\s*[:\-]?/i;
+  const reasonPaRegex = /^\s*(?:ਕਾਰਨ|ਕਾਰਨ:|ਕਾਰਨ\s*\(R\))\s*[:\-]?/;
+  const ansRegex = /^\s*(?:Answer|Correct Answer|Official Key|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ|Sahi Uttar)\s*[:\-]?/i;
+  const explRegex = /^\s*(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या|Rationale|ENGLISH EXPLANATION|PUNJABI EXPLANATION)\s*[:\-]?/i;
 
-  let state = 'ASSERT_EN';
-
-  lines.forEach((line) => {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     const trimmed = line.trim();
-    if (!trimmed) return;
+    if (!trimmed) continue;
 
-    // Check if current line starts a new question marker (shouldn't happen in chunked mode but for safety)
-    if (isQuestionStart(line) && line !== lines[0]) return;
+    // Detect Question Marker (Highest Priority Boundary)
+    if (isQuestionStart(line)) {
+      finalize();
+      currentQ = {
+        ...metadata,
+        id: `q-ar-${Math.random().toString(36).substr(2, 9)}`,
+        questionType: 'ASSERTION_REASON',
+        assertion: { english: "", punjabi: "" },
+        reason: { english: "", punjabi: "" },
+        englishQuestion: "", 
+        punjabiQuestion: "",
+        correctAnswer: "",
+        englishExplanation: "",
+        punjabiExplanation: "",
+        status: 'PUBLISHED',
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+      state = 'IDLE';
+      continue;
+    }
 
-    const isAssertEn = assertEnRegex.test(trimmed);
-    const isAssertPa = assertPaRegex.test(trimmed);
-    const isReasonEn = reasonEnRegex.test(trimmed);
-    const isReasonPa = reasonPaRegex.test(trimmed);
+    if (!currentQ) continue;
+
+    // Noise Filter
+    if (NOISE_PATTERNS.some(p => p.test(trimmed))) {
+      if (state === 'EXPL') finalize(); // Noise after explanation terminates the question
+      continue;
+    }
+
+    // State Transitions
     const optMarker = detectOptionMarker(line);
-    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
-    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    
+    if (assertEnRegex.test(trimmed)) { state = 'ASSERT_EN'; }
+    else if (assertPaRegex.test(trimmed)) { state = 'ASSERT_PA'; }
+    else if (reasonEnRegex.test(trimmed)) { state = 'REASON_EN'; }
+    else if (reasonPaRegex.test(trimmed)) { state = 'REASON_PA'; }
+    else if (optMarker && (state === 'REASON_PA' || state === 'REASON_EN' || state === 'OPTIONS')) { state = 'OPTIONS'; }
+    else if (ansRegex.test(trimmed)) { state = 'ANSWER'; }
+    else if (explRegex.test(trimmed)) { state = 'EXPL'; }
 
-    if (isAssertEn) state = 'ASSERT_EN';
-    else if (isAssertPa) state = 'ASSERT_PA';
-    else if (isReasonEn) state = 'REASON_EN';
-    else if (isReasonPa) state = 'REASON_PA';
-    else if (optMarker) state = 'OPTIONS';
-    else if (isAns) state = 'ANSWER';
-    else if (isExpl) state = 'EXPL';
-
-    const cleanLine = trimmed.replace(assertEnRegex, '')
-                             .replace(assertPaRegex, '')
-                             .replace(reasonEnRegex, '')
-                             .replace(reasonPaRegex, '')
-                             .trim();
+    // Content Extraction
+    let content = trimmed;
+    if (state === 'ASSERT_EN') content = trimmed.replace(assertEnRegex, '').trim();
+    if (state === 'ASSERT_PA') content = trimmed.replace(assertPaRegex, '').trim();
+    if (state === 'REASON_EN') content = trimmed.replace(reasonEnRegex, '').trim();
+    if (state === 'REASON_PA') content = trimmed.replace(reasonPaRegex, '').trim();
 
     switch (state) {
       case 'ASSERT_EN':
-        if (cleanLine) currentQ.assertion.english += (currentQ.assertion.english ? '\n' : '') + cleanLine;
+        if (content) currentQ.assertion.english += (currentQ.assertion.english ? '\n' : '') + content;
         break;
       case 'ASSERT_PA':
-        if (cleanLine) currentQ.assertion.punjabi += (currentQ.assertion.punjabi ? '\n' : '') + cleanLine;
+        if (content) currentQ.assertion.punjabi += (currentQ.assertion.punjabi ? '\n' : '') + content;
         break;
       case 'REASON_EN':
-        if (cleanLine) currentQ.reason.english += (currentQ.reason.english ? '\n' : '') + cleanLine;
+        if (content) currentQ.reason.english += (currentQ.reason.english ? '\n' : '') + content;
         break;
       case 'REASON_PA':
-        if (cleanLine) currentQ.reason.punjabi += (currentQ.reason.punjabi ? '\n' : '') + cleanLine;
+        if (content) currentQ.reason.punjabi += (currentQ.reason.punjabi ? '\n' : '') + content;
         break;
       case 'OPTIONS':
         if (optMarker) {
@@ -193,37 +223,115 @@ function parseSingleAssertionReason(text: string, metadata: any) {
         if (ansMatch) currentQ.correctAnswer = ansMatch[0].toUpperCase();
         break;
       case 'EXPL':
-        const explText = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '').trim();
-        if (explText) {
-          if (GURMUKHI_REGEX.test(explText)) {
-            currentQ.punjabiExplanation = (currentQ.punjabiExplanation || "") + (currentQ.punjabiExplanation ? '\n' : '') + explText;
+        const cleanExpl = trimmed.replace(explRegex, '').replace(ansRegex, '').trim();
+        if (cleanExpl) {
+          if (GURMUKHI_REGEX.test(cleanExpl)) {
+            currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + cleanExpl;
           } else {
-            currentQ.englishExplanation = (currentQ.englishExplanation || "") + (currentQ.englishExplanation ? '\n' : '') + explText;
+            currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + cleanExpl;
           }
         }
         break;
     }
-  });
+  }
 
-  currentQ.assertion.english = currentQ.assertion.english.trim();
-  currentQ.assertion.punjabi = currentQ.assertion.punjabi.trim();
-  currentQ.reason.english = currentQ.reason.english.trim();
-  currentQ.reason.punjabi = currentQ.reason.punjabi.trim();
-
-  currentQ.englishQuestion = currentQ.assertion.english || "Assertion & Reason Question";
-  currentQ.punjabiQuestion = currentQ.assertion.punjabi || "";
-
-  return currentQ;
+  finalize();
+  return { questions };
 }
 
-export function parseAssertionReason(chunk: string, metadata: any) {
-  const q = parseSingleAssertionReason(chunk, metadata);
-  return { questions: q ? [q] : [] };
-}
+// --- REMAINDER OF PARSERS ---
 
 export function parseMatching(chunk: string, metadata: any) {
-  // Implementation for single chunk matching
-  return { questions: [] }; 
+  const lines = chunk.split(/\r?\n/);
+  let currentQ: any = { 
+    ...metadata, 
+    id: `q-match-${Math.random().toString(36).substr(2, 9)}`,
+    status: 'PUBLISHED',
+    questionType: 'MATCH_FOLLOWING',
+    matchingData: { leftHeader: "List I", rightHeader: "List II", rows: [] },
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
+
+  let state: 'INTRO' | 'TABLE' | 'INSTR' | 'OPTIONS' | 'ANSWER' | 'EXPL' = 'INTRO';
+  let introLines: string[] = [];
+  let instructionLines: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    if (isQuestionStart(line) && line !== lines[0]) break;
+    if (NOISE_PATTERNS.some(p => p.test(trimmed))) {
+       if (state === 'EXPL') break;
+       continue;
+    }
+
+    const opt = detectOptionMarker(line);
+    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isInstr = INSTR_KEYWORDS.some(k => trimmed.toLowerCase().includes(k.toLowerCase()));
+
+    // Layout Analysis for Header Detection
+    const parts = trimmed.split(/\s{3,}/);
+    const isHeaderRow = parts.length === 2 && (
+      trimmed.toLowerCase().includes('list') || 
+      trimmed.toLowerCase().includes('column') || 
+      trimmed.toLowerCase().includes('group') ||
+      trimmed.toLowerCase().includes('country') ||
+      trimmed.toLowerCase().includes('scientist') ||
+      trimmed.toLowerCase().includes('river') ||
+      trimmed.toLowerCase().includes('author') ||
+      trimmed.toLowerCase().includes('freedom fighter')
+    );
+
+    if (isHeaderRow && state === 'INTRO') {
+       state = 'TABLE';
+       currentQ.matchingData.leftHeader = parts[0].trim();
+       currentQ.matchingData.rightHeader = parts[1].trim();
+       continue;
+    } else if (isInstr) {
+       state = 'INSTR';
+    } else if (opt) {
+       state = 'OPTIONS';
+    } else if (isAns) {
+       state = 'ANSWER';
+    } else if (isExpl) {
+       state = 'EXPL';
+    }
+
+    switch (state) {
+      case 'INTRO':
+        introLines.push(trimmed);
+        break;
+      case 'TABLE':
+        if (parts.length === 2) {
+           currentQ.matchingData.rows.push({ left: parts[0].trim(), right: parts[1].trim() });
+        }
+        break;
+      case 'INSTR':
+        instructionLines.push(trimmed);
+        break;
+      case 'OPTIONS':
+        if (opt) currentQ[`option${opt.opt}English`] = opt.text;
+        break;
+      case 'ANSWER':
+        const ansMatch = trimmed.match(/[A-D]/i);
+        if (ansMatch) currentQ.correctAnswer = ansMatch[0].toUpperCase();
+        break;
+      case 'EXPL':
+        const clean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
+        if (clean) {
+          if (GURMUKHI_REGEX.test(clean)) currentQ.punjabiExplanation = (currentQ.punjabiExplanation || "") + (currentQ.punjabiExplanation ? '\n' : '') + clean;
+          else currentQ.englishExplanation = (currentQ.englishExplanation || "") + (currentQ.englishExplanation ? '\n' : '') + clean;
+        }
+        break;
+    }
+  }
+
+  currentQ.englishQuestion = introLines.join('\n');
+  if (instructionLines.length > 0) currentQ.englishQuestion += '\n\n' + instructionLines.join('\n');
+
+  return { questions: [currentQ] };
 }
 
 function parseDeterministicBilingual(chunk: string, metadata: any) {
@@ -283,37 +391,26 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   if (!rawText || !rawText.trim()) return { questions: [] };
   
   const processedText = preprocessText(rawText);
-  const chunks = segmentTextByQuestions(processedText);
-  
-  console.log(`Document Length: ${rawText.length}`);
-  console.log(`Document Questions Found: ${chunks.length}`);
-
-  const allQuestions: any[] = [];
   const fmt = metadata.parserFormat;
 
+  if (fmt === 'ASSERTION') {
+    return parseAssertionReason(processedText, metadata);
+  }
+
+  const chunks = segmentTextByQuestions(processedText);
+  const allQuestions: any[] = [];
+
   chunks.forEach((chunk, index) => {
-    const qNo = `Q${index + 1}`;
-    console.log(`Processing ${qNo}`);
-    
     let result: any = { questions: [] };
 
-    if (fmt === 'ASSERTION') result = parseAssertionReason(chunk, metadata);
-    else if (fmt === 'MATCHING') result = parseMatching(chunk, metadata);
+    if (fmt === 'MATCHING') result = parseMatching(chunk, metadata);
     else result = parseDeterministicBilingual(chunk, metadata);
 
     if (result && result.questions && result.questions.length > 0) {
-      const q = result.questions[0];
-      const { errors } = validateMCQSchema(q);
-      if (errors.length === 0) {
-        console.log(`Validation Passed`);
-      } else {
-        console.warn(`Validation Failed for ${qNo}: ${errors.join(', ')}`);
-      }
       allQuestions.push(...result.questions);
     }
   });
 
-  console.log(`Questions Parsed: ${allQuestions.length}/${chunks.length}`);
   return { questions: allQuestions };
 }
 
@@ -325,8 +422,4 @@ export function validateMCQSchema(q: any): { errors: string[], warnings: string[
   if (optCount < 4) errors.push("Less than four options detected.");
   if (!q.correctAnswer) errors.push("Answer missing.");
   return { errors, warnings };
-}
-
-export function parseFillBlank(rawText: string, metadata: any) {
-  return parseBulkQuestions(rawText, { ...metadata, questionType: 'FILL_BLANK' });
 }
