@@ -19,9 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v58.0.
- * FIXED: Unified Authority Black (#0F172A) for all scripts.
- * FIXED: Removed forced uppercase from solution headers for Title Case standard.
+ * @fileOverview Precision Bilingual Question Hub v59.0.
+ * FIXED: Added language-specific rationale labels (English/Punjabi/Hindi) for better clarity.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -191,19 +190,29 @@ export default function QuestionRenderer({
                  
                  <div className="pl-8 space-y-8">
                     {showEn && q.englishExplanation && (
-                       <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl">
-                          <MathText text={q.englishExplanation} className="text-inherit" />
+                       <div className="space-y-2">
+                          <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">English Rationale</p>
+                          <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl">
+                             <MathText text={q.englishExplanation} className="text-inherit" />
+                          </div>
                        </div>
                     )}
-                    {(showPa && q.punjabiExplanation) ? (
-                       <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
-                          <MathText text={q.punjabiExplanation} className="text-inherit" />
+                    {showPa && q.punjabiExplanation && (
+                       <div className="space-y-2">
+                          <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">ਪੰਜਾਬੀ Rationale</p>
+                          <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
+                             <MathText text={q.punjabiExplanation} className="text-inherit" />
+                          </div>
                        </div>
-                    ) : (showHi && q.hindiExplanation) ? (
-                       <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
-                          <MathText text={q.hindiExplanation} className="text-inherit" />
+                    )}
+                    {showHi && q.hindiExplanation && (
+                       <div className="space-y-2">
+                          <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">हिन्दी Rationale</p>
+                          <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
+                             <MathText text={q.hindiExplanation} className="text-inherit" />
+                          </div>
                        </div>
-                    ) : null}
+                    )}
                  </div>
               </div>
            </div>
