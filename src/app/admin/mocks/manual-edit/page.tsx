@@ -21,7 +21,9 @@ import {
   AlertTriangle,
   Search,
   BookOpen,
-  X
+  X,
+  Layers,
+  Settings
 } from "lucide-react"
 import { useFirestore, useDoc, useUser } from "@/firebase"
 import { doc, setDoc, serverTimestamp, collection, query, where, documentId, getDocs } from "firebase/firestore"
@@ -32,8 +34,8 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 
 /**
- * @fileOverview High-Fidelity Manual Content Editor v1.5.
- * FIXED: Responsive header stack to prevent button/title overlap on mobile.
+ * @fileOverview High-Fidelity Manual Content Editor v2.0 (Refined).
+ * FIXED: Standardized typography and resolved spatial imbalances in the editor.
  */
 
 export default function ManualMockEditPage() {
@@ -119,59 +121,63 @@ function ManualEditContent() {
   return (
     <div className="max-w-7xl mx-auto space-y-6 md:space-y-12 pb-32 text-left pt-2 md:pt-6">
       
-      {/* HEADER - RESPONSIVE STACK */}
+      {/* 1. HEADER HUB */}
       <div className="flex flex-col md:flex-row md:items-center justify-between px-4 gap-6">
         <div className="flex items-center gap-4 md:gap-6">
           <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-2xl h-10 w-10 md:h-12 md:w-12 border border-slate-200 bg-white shadow-sm shrink-0">
             <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
           </Button>
           <div className="text-left min-w-0 flex-1">
-            <h1 className="text-2xl md:text-4xl font-headline font-black text-[#0F172A] uppercase tracking-tight truncate">{mock?.title || "Mock Editor"}</h1>
-            <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-widest mt-1">Manual Content Hub • {questions.length} Questions</p>
+            <h1 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight truncate uppercase leading-none">{mock?.title || "Manual Editor"}</h1>
+            <p className="text-[10px] md:text-[11px] font-black uppercase text-slate-400 tracking-widest mt-2">Content Modification Hub • {questions.length} Nodes</p>
           </div>
         </div>
-        <Button className="w-full md:w-auto bg-[#0F172A] hover:bg-black text-white h-12 md:h-14 px-8 md:px-10 rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-2xl gap-3" onClick={() => router.back()}>
-          <ClipboardCheck className="h-4 w-4 text-primary" /> Finish Audit
+        <Button className="w-full md:w-auto bg-[#0F172A] hover:bg-black text-white h-12 md:h-14 px-8 md:px-10 rounded-xl md:rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl gap-3 transition-all active:scale-95" onClick={() => router.back()}>
+          <CheckCircle2 className="h-4 w-4 text-primary" /> Finish Content Audit
         </Button>
       </div>
 
-      {/* CONTENT LIST */}
-      <div className="space-y-10 md:space-y-16 px-4">
+      {/* 2. SECTIONAL CONTENT LIST */}
+      <div className="space-y-10 md:space-y-20 px-4">
         {sections.map(([name, qList]) => (
-          <div key={name} className="space-y-6 md:space-y-8">
+          <div key={name} className="space-y-6 md:space-y-10">
             <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
-               <div className="h-8 w-8 bg-primary/10 rounded-xl flex items-center justify-center text-primary">
-                  <BookOpen className="h-4 w-4" />
+               <div className="h-10 w-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary shadow-inner shrink-0">
+                  <Layers className="h-5 w-5" />
                </div>
-               <h2 className="text-lg md:text-2xl font-headline font-black uppercase text-[#0F172A]">{name}</h2>
-               <Badge className="bg-slate-50 text-slate-400 border-none font-black text-[8px] md:text-[9px] uppercase px-3 py-1">{qList.length} Nodes</Badge>
+               <div className="min-w-0">
+                  <h2 className="text-xl md:text-3xl font-black uppercase text-[#0F172A] leading-none">{name}</h2>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">{qList.length} Ingested Nodes</p>
+               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 md:gap-6">
                {qList.map((q) => (
                   <Card key={q.id} className="border-none shadow-xl rounded-[2rem] md:rounded-[2.5rem] bg-white group hover:shadow-2xl transition-all border border-slate-100 overflow-hidden">
-                     <CardContent className="p-6 md:p-10 flex flex-col md:flex-row items-start gap-6 md:gap-10">
-                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-slate-50 flex items-center justify-center text-[#0F172A] font-black text-base md:text-lg shadow-inner shrink-0">
+                     <CardContent className="p-6 md:p-12 flex flex-col md:flex-row items-start gap-6 md:gap-10">
+                        <div className="h-10 w-10 md:h-16 md:w-16 rounded-xl md:rounded-[2rem] bg-slate-50 flex items-center justify-center text-[#0F172A] font-black text-base md:text-2xl shadow-inner shrink-0 group-hover:scale-105 transition-transform">
                            {q.originalIndex}
                         </div>
-                        <div className="flex-1 space-y-4 min-w-0">
-                           <div className="space-y-2">
-                              <p className="font-bold text-base md:text-lg text-[#0F172A] leading-snug">{q.englishQuestion}</p>
-                              <p className="font-bold text-base md:text-lg text-slate-400 leading-snug">{q.punjabiQuestion || q.hindiQuestion}</p>
+                        <div className="flex-1 space-y-4 md:space-y-6 min-w-0">
+                           <div className="space-y-3">
+                              <div className="font-bold text-base md:text-xl text-[#0F172A] leading-snug"><MathText text={q.englishQuestion} /></div>
+                              {(q.punjabiQuestion || q.hindiQuestion) && (
+                                 <div className="font-bold text-sm md:text-lg text-slate-400 leading-snug"><MathText text={q.punjabiQuestion || q.hindiQuestion} /></div>
+                              )}
                            </div>
                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                               {['A','B','C','D'].map(opt => (
-                                <div key={opt} className={cn("p-2.5 md:p-3 rounded-xl border-2 text-[10px] md:text-[11px] font-black uppercase tracking-tight", q.correctAnswer === opt ? "bg-emerald-50 border-emerald-500 text-emerald-700" : "bg-slate-50 border-transparent text-slate-400")}>
-                                   <span className="mr-2 opacity-50">{opt}</span> {q[`option${opt}English`]}
+                                <div key={opt} className={cn("p-3 md:p-4 rounded-xl border-2 text-[10px] md:text-[11px] font-black uppercase tracking-tight", q.correctAnswer === opt ? "bg-emerald-50 border-emerald-500 text-emerald-700 shadow-sm" : "bg-slate-50/50 border-transparent text-slate-400")}>
+                                   <span className="mr-3 opacity-50">{opt}</span> {q[`option${opt}English`]}
                                 </div>
                               ))}
                            </div>
                         </div>
                         <Button 
                           onClick={() => setEditingQuestion({...q})} 
-                          className="w-full md:w-auto h-11 md:h-12 px-6 md:px-8 bg-slate-50 hover:bg-primary text-slate-600 hover:text-white rounded-xl font-black uppercase text-[9px] md:text-[10px] tracking-widest gap-2 shadow-sm shrink-0"
+                          className="w-full md:w-auto h-12 md:h-14 px-8 md:px-10 bg-slate-50 hover:bg-primary text-[#0F172A] hover:text-white rounded-xl md:rounded-2xl font-black uppercase text-[9px] md:text-[11px] tracking-widest gap-2 shadow-sm shrink-0 border-none transition-all active:scale-95"
                         >
-                           <Edit className="h-4 w-4" /> Edit Content
+                           <Edit className="h-4 w-4" /> Edit Node
                         </Button>
                      </CardContent>
                   </Card>
@@ -181,94 +187,101 @@ function ManualEditContent() {
         ))}
       </div>
 
-      {/* EDIT DIALOG */}
+      {/* 3. EDIT DIALOG - HARDENED */}
       <Dialog open={!!editingQuestion} onOpenChange={o => !o && setEditingQuestion(null)}>
-         <DialogContent className="sm:max-w-5xl max-h-[95vh] overflow-y-auto rounded-[2rem] md:rounded-[3rem] bg-white border-none shadow-5xl p-0 text-left flex flex-col">
+         <DialogContent className="sm:max-w-5xl w-[95vw] max-h-[95vh] overflow-hidden rounded-[2rem] md:rounded-[3.5rem] bg-white border-none shadow-5xl p-0 text-left flex flex-col">
             <div className="h-2 w-full bg-[#0F172A] shrink-0" />
             
             <Tabs value={activeLangTab} onValueChange={(v: any) => setActiveLangTab(v)} className="flex-1 flex flex-col overflow-hidden">
-               <DialogHeader className="p-6 md:p-10 pb-4 flex flex-col md:flex-row items-center justify-between shrink-0 gap-4">
-                  <div className="flex items-center gap-4 md:gap-6 w-full md:w-auto">
-                     <div className="h-10 w-10 md:h-12 md:w-12 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary shadow-inner">
-                        <Edit className="h-5 w-5 md:h-6 md:w-6" />
+               <DialogHeader className="p-6 md:p-14 pb-4 flex flex-col md:flex-row items-center justify-between shrink-0 gap-6 border-b border-slate-50">
+                  <div className="flex items-center gap-4 md:gap-8 w-full md:w-auto">
+                     <div className="h-12 w-12 md:h-16 md:w-16 bg-primary/10 rounded-xl md:rounded-[2rem] flex items-center justify-center text-primary shadow-inner">
+                        <Settings className="h-6 w-6 md:h-8 md:w-8" />
                      </div>
-                     <DialogTitle className="text-xl md:text-3xl font-black font-headline uppercase text-[#0F172A]">Edit Question {editingQuestion?.originalIndex}</DialogTitle>
-                     <DialogDescription className="sr-only">Edit question statement, options and rationalization.</DialogDescription>
+                     <div className="text-left">
+                        <DialogTitle className="text-xl md:text-4xl font-black font-headline uppercase text-[#0F172A] leading-none">Modify Asset</DialogTitle>
+                        <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest mt-2">Node {editingQuestion?.originalIndex} • Bilingual Hub</p>
+                     </div>
                   </div>
-                  <TabsList className="bg-slate-100 p-1 h-11 md:h-12 rounded-xl w-full md:w-auto">
-                     <TabsTrigger value="punjabi" className="flex-1 md:flex-none rounded-lg px-4 md:px-6 font-black uppercase text-[8px] md:text-[9px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Punjab Hub</TabsTrigger>
-                     <TabsTrigger value="hindi" className="flex-1 md:flex-none rounded-lg px-4 md:px-6 font-black uppercase text-[8px] md:text-[9px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white">Hindi Hub</TabsTrigger>
+                  <TabsList className="bg-slate-100 p-1 h-11 md:h-14 rounded-xl md:rounded-2xl w-full md:w-auto shadow-inner">
+                     <TabsTrigger value="punjabi" className="flex-1 md:flex-none rounded-lg md:rounded-xl px-4 md:px-10 font-black uppercase text-[8px] md:text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Punjab Hub</TabsTrigger>
+                     <TabsTrigger value="hindi" className="flex-1 md:flex-none rounded-lg md:rounded-xl px-4 md:px-10 font-black uppercase text-[8px] md:text-[10px] data-[state=active]:bg-[#0F172A] data-[state=active]:text-white transition-all">Hindi Hub</TabsTrigger>
                   </TabsList>
                </DialogHeader>
 
-               <div className="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-10 pb-10 space-y-8 md:space-y-10">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                     <div className="space-y-2">
-                        <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 ml-1">English Statement</Label>
-                        <Textarea value={editingQuestion?.englishQuestion || ""} onChange={e => setEditingQuestion({...editingQuestion, englishQuestion: e.target.value})} className="h-28 md:h-32 rounded-xl md:rounded-2xl bg-slate-50 border-none font-bold text-base md:text-lg p-4 md:p-6 shadow-inner" />
+               <div className="flex-1 overflow-y-auto custom-scrollbar px-6 md:px-14 py-8 md:py-12 space-y-10 md:space-y-16">
+                  {/* STATEMENT GRID */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-14">
+                     <div className="space-y-3">
+                        <Label className="text-[10px] md:text-[11px] font-black uppercase text-slate-500 ml-1">English Statement</Label>
+                        <Textarea value={editingQuestion?.englishQuestion || ""} onChange={e => setEditingQuestion({...editingQuestion, englishQuestion: e.target.value})} className="h-32 md:h-44 rounded-xl md:rounded-[2rem] bg-slate-50 border-none font-bold text-base md:text-xl p-6 md:p-10 shadow-inner" />
                      </div>
-                     <TabsContent value="punjabi" className="m-0 space-y-2 animate-in fade-in duration-300">
-                        <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 ml-1">Punjabi Statement</Label>
-                        <Textarea value={editingQuestion?.punjabiQuestion || ""} onChange={e => setEditingQuestion({...editingQuestion, punjabiQuestion: e.target.value})} className="h-28 md:h-32 rounded-xl md:rounded-2xl bg-slate-50 border-none font-bold text-base md:text-lg p-4 md:p-6 shadow-inner" />
+                     <TabsContent value="punjabi" className="m-0 space-y-3 animate-in fade-in duration-300">
+                        <Label className="text-[10px] md:text-[11px] font-black uppercase text-slate-500 ml-1">Punjabi Statement</Label>
+                        <Textarea value={editingQuestion?.punjabiQuestion || ""} onChange={e => setEditingQuestion({...editingQuestion, punjabiQuestion: e.target.value})} className="h-32 md:h-44 rounded-xl md:rounded-[2rem] bg-slate-50 border-none font-bold text-base md:text-xl p-6 md:p-10 shadow-inner" />
                      </TabsContent>
-                     <TabsContent value="hindi" className="m-0 space-y-2 animate-in fade-in duration-300">
-                        <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500 ml-1">Hindi Statement</Label>
-                        <Textarea value={editingQuestion?.hindiQuestion || ""} onChange={e => setEditingQuestion({...editingQuestion, hindiQuestion: e.target.value})} className="h-28 md:h-32 rounded-xl md:rounded-2xl bg-slate-50 border-none font-bold text-base md:text-lg p-4 md:p-6 shadow-inner" />
+                     <TabsContent value="hindi" className="m-0 space-y-3 animate-in fade-in duration-300">
+                        <Label className="text-[10px] md:text-[11px] font-black uppercase text-slate-500 ml-1">Hindi Statement</Label>
+                        <Textarea value={editingQuestion?.hindiQuestion || ""} onChange={e => setEditingQuestion({...editingQuestion, hindiQuestion: e.target.value})} className="h-32 md:h-44 rounded-xl md:rounded-[2rem] bg-slate-50 border-none font-bold text-base md:text-xl p-6 md:p-10 shadow-inner" />
                      </TabsContent>
                   </div>
 
-                  <div className="space-y-6">
-                     <p className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] ml-1">Options Matrix</p>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                  {/* OPTION HUB */}
+                  <div className="space-y-8">
+                     <p className="text-[10px] md:text-[11px] font-black text-primary uppercase tracking-[0.3em] ml-1">2. Option Matrix</p>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
                         {['A','B','C','D'].map(opt => (
-                           <div key={opt} className="bg-slate-50/50 p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] border border-slate-100 space-y-4">
+                           <div key={opt} className="bg-slate-50/50 p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] border border-slate-100 space-y-6 shadow-sm">
                               <div className="flex items-center justify-between">
-                                 <div className="flex items-center gap-2 md:gap-3">
-                                    <div className="h-6 w-6 md:h-7 md:w-7 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-black text-[10px]">{opt}</div>
-                                    <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500">English Text</Label>
+                                 <div className="flex items-center gap-3 md:gap-4">
+                                    <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-[#0F172A] text-white flex items-center justify-center font-black text-xs md:text-lg shadow-xl">{opt}</div>
+                                    <Label className="text-[10px] md:text-[11px] font-black uppercase text-slate-500">English Option</Label>
                                  </div>
-                                 <button onClick={() => setEditingQuestion({...editingQuestion, correctAnswer: opt})} className={cn("h-6 w-6 rounded-full border-2 transition-all flex items-center justify-center", editingQuestion?.correctAnswer === opt ? "bg-emerald-50 border-emerald-500 text-white" : "border-slate-200 hover:border-primary")}>
-                                    {editingQuestion?.correctAnswer === opt && <CheckCircle2 className="h-4 w-4" />}
+                                 <button onClick={() => setEditingQuestion({...editingQuestion, correctAnswer: opt})} className={cn("h-8 w-8 md:h-10 md:w-10 rounded-full border-2 transition-all flex items-center justify-center", editingQuestion?.correctAnswer === opt ? "bg-emerald-500 border-emerald-500 text-white shadow-xl" : "border-slate-200 hover:border-primary bg-white")}>
+                                    {editingQuestion?.correctAnswer === opt && <CheckCircle2 className="h-5 w-5" />}
                                  </button>
                               </div>
-                              <Input value={editingQuestion?.[`option${opt}English`] || ""} onChange={e => setEditingQuestion({...editingQuestion, [`option${opt}English`]: e.target.value})} className="bg-white border-none font-bold h-10 md:h-12 rounded-lg md:rounded-xl" />
-                              
-                              <div className="pt-2 space-y-2">
-                                 <Label className="text-[8px] md:text-[9px] font-black uppercase text-slate-400 flex items-center gap-2"><Globe className="h-3 w-3" /> {activeLangTab === 'punjabi' ? 'Punjabi' : 'Hindi'}</Label>
-                                 <Input 
-                                    value={activeLangTab === 'punjabi' ? (editingQuestion?.[`option${opt}Punjabi`] || "") : (editingQuestion?.[`option${opt}Hindi`] || "")} 
-                                    onChange={e => setEditingQuestion({...editingQuestion, [activeLangTab === 'punjabi' ? `option${opt}Punjabi` : `option${opt}Hindi`]: e.target.value})} 
-                                    className="bg-white border-none font-bold h-10 md:h-12 rounded-lg md:rounded-xl" 
-                                 />
+                              <div className="space-y-4">
+                                 <Input value={editingQuestion?.[`option${opt}English`] || ""} onChange={e => setEditingQuestion({...editingQuestion, [`option${opt}English`]: e.target.value})} className="bg-white border-none font-bold h-12 md:h-16 rounded-xl md:rounded-2xl px-6 shadow-sm" />
+                                 <div className="pt-2 space-y-2">
+                                    <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 flex items-center gap-2 tracking-widest"><Globe className="h-3 w-3" /> {activeLangTab === 'punjabi' ? 'Punjabi Text' : 'Hindi Text'}</Label>
+                                    <Input 
+                                       value={activeLangTab === 'punjabi' ? (editingQuestion?.[`option${opt}Punjabi`] || "") : (editingQuestion?.[`option${opt}Hindi`] || "")} 
+                                       onChange={e => setEditingQuestion({...editingQuestion, [activeLangTab === 'punjabi' ? `option${opt}Punjabi` : `option${opt}Hindi`]: e.target.value})} 
+                                       className="bg-white border-none font-bold h-12 md:h-16 rounded-xl md:rounded-2xl px-6 shadow-sm" 
+                                    />
+                                 </div>
                               </div>
                            </div>
                         ))}
                      </div>
                   </div>
 
-                  <div className="space-y-6 pt-6 border-t border-slate-100">
-                     <p className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] ml-1">Rationalization (Explanation)</p>
-                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
-                        <div className="space-y-2">
-                           <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500">English Logic</Label>
-                           <Textarea value={editingQuestion?.englishExplanation || ""} onChange={e => setEditingQuestion({...editingQuestion, englishExplanation: e.target.value})} className="h-28 md:h-32 rounded-xl md:rounded-2xl bg-slate-900 text-emerald-400 font-medium p-4 md:p-6 shadow-2xl" />
+                  {/* RATIONALE HUB */}
+                  <div className="space-y-8 pt-10 border-t border-slate-50">
+                     <p className="text-[10px] md:text-[11px] font-black text-primary uppercase tracking-[0.3em] ml-1">3. Solution Rationale</p>
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-14">
+                        <div className="space-y-3">
+                           <Label className="text-[10px] md:text-[11px] font-black uppercase text-slate-500 ml-1">English Rationale</Label>
+                           <Textarea value={editingQuestion?.englishExplanation || ""} onChange={e => setEditingQuestion({...editingQuestion, englishExplanation: e.target.value})} className="h-32 md:h-52 rounded-xl md:rounded-[2.5rem] bg-slate-900 text-emerald-400 font-medium p-6 md:p-10 shadow-2xl leading-relaxed" placeholder="Type verified English logic..." />
                         </div>
-                        <div className="space-y-2">
-                           <Label className="text-[9px] md:text-[10px] font-black uppercase text-slate-500">{activeLangTab === 'punjabi' ? 'Punjabi Logic' : 'Hindi Logic'}</Label>
+                        <div className="space-y-3">
+                           <Label className="text-[10px] md:text-[11px] font-black uppercase text-slate-500 ml-1">{activeLangTab === 'punjabi' ? 'Punjabi Rationale' : 'Hindi Rationale'}</Label>
                            <Textarea 
                               value={activeLangTab === 'punjabi' ? (editingQuestion?.punjabiExplanation || "") : (editingQuestion?.hindiExplanation || "")} 
                               onChange={e => setEditingQuestion({...editingQuestion, [activeLangTab === 'punjabi' ? 'punjabiExplanation' : 'hindiExplanation']: e.target.value})} 
-                              className="h-28 md:h-32 rounded-xl md:rounded-2xl bg-slate-900 text-blue-400 font-medium p-4 md:p-6 shadow-2xl" 
+                              className="h-32 md:h-52 rounded-xl md:rounded-[2.5rem] bg-slate-900 text-blue-400 font-medium p-6 md:p-10 shadow-2xl leading-relaxed" 
+                              placeholder={`Type verified ${activeLangTab} logic...`}
                            />
                         </div>
                      </div>
                   </div>
                </div>
 
-               <DialogFooter className="p-6 md:p-10 pt-4 bg-slate-50 flex flex-row gap-4 shrink-0">
-                  <Button variant="ghost" onClick={() => setEditingQuestion(null)} className="flex-1 md:flex-none h-12 md:h-14 px-6 md:px-10 font-black uppercase text-[10px] md:text-[11px] text-slate-400 tracking-widest">Discard</Button>
-                  <Button onClick={handleSaveQuestion} className="bg-[#0F172A] hover:bg-black text-white h-12 md:h-14 px-10 md:px-16 rounded-xl md:rounded-2xl font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] flex-1 shadow-2xl transition-all active:scale-95 gap-3">
-                     <CheckCircle2 className="h-5 w-5" /> Commit Registry Sync
+               <DialogFooter className="p-6 md:p-14 pt-4 bg-slate-50 border-t border-slate-100 flex flex-row gap-4 items-center shrink-0">
+                  <Button variant="ghost" onClick={() => setEditingQuestion(null)} className="flex-1 md:flex-none h-12 md:h-18 px-6 md:px-12 font-black uppercase text-[10px] md:text-[11px] text-slate-400 tracking-widest bg-transparent">Discard</Button>
+                  <Button onClick={handleSaveQuestion} className="bg-[#0F172A] hover:bg-black text-white h-12 md:h-18 px-12 md:px-24 rounded-xl md:rounded-full font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] flex-1 shadow-2xl transition-all active:scale-95 gap-3 border-none">
+                     <CheckCircle2 className="h-5 w-5" /> Commit Node Registry Sync
                   </Button>
                </DialogFooter>
             </Tabs>
@@ -276,4 +289,9 @@ function ManualEditContent() {
       </Dialog>
     </div>
   )
+}
+
+function MathText({ text }: { text: string }) {
+   if (!text) return null;
+   return <div className="leading-relaxed">{text}</div>;
 }
