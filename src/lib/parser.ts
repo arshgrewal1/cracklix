@@ -1,8 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v67.0.
- * REDESIGN: Assertion & Reason Parser implemented as a continuous scanner.
- * FIXED: Multi-question blocks Q1-Q9+ now captured sequentially.
+ * @fileOverview Institutional Deterministic Ingestion Hub v68.0.
+ * FIXED: Assertion & Reason strict bilingual sequencing (Assert EN -> Assert PA -> Reason EN -> Reason PA).
  */
 
 import { serverTimestamp } from 'firebase/firestore';
@@ -133,7 +132,7 @@ export function parseAssertionReason(fullText: string, metadata: any) {
       const hasContent = (currentQ.assertion.english || currentQ.assertion.punjabi) && 
                          (currentQ.reason.english || currentQ.reason.punjabi);
       if (hasContent) {
-        currentQ.englishQuestion = currentQ.assertion.english || currentQ.assertion.punjabi || "Assertion & Reason Question";
+        currentQ.englishQuestion = currentQ.assertion.english || "Assertion & Reason Question";
         currentQ.punjabiQuestion = currentQ.assertion.punjabi || "";
         questions.push(currentQ);
       }
@@ -152,7 +151,7 @@ export function parseAssertionReason(fullText: string, metadata: any) {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    // Detect Question Marker (Highest Priority Boundary)
+    // Boundary: New Question
     if (isQuestionStart(line)) {
       finalize();
       currentQ = {
@@ -176,42 +175,50 @@ export function parseAssertionReason(fullText: string, metadata: any) {
 
     if (!currentQ) continue;
 
-    // Noise Filter
-    if (NOISE_PATTERNS.some(p => p.test(trimmed))) {
-      if (state === 'EXPL') finalize(); // Noise after explanation terminates the question
+    // Metadata Terminate
+    if (NOISE_PATTERNS.some(p => p.test(trimmed)) && state === 'EXPL') {
+      finalize();
+      currentQ = null;
       continue;
     }
 
-    // State Transitions
     const optMarker = detectOptionMarker(line);
     
+    // State Transitions with Script Heuristics
     if (assertEnRegex.test(trimmed)) { state = 'ASSERT_EN'; }
     else if (assertPaRegex.test(trimmed)) { state = 'ASSERT_PA'; }
     else if (reasonEnRegex.test(trimmed)) { state = 'REASON_EN'; }
     else if (reasonPaRegex.test(trimmed)) { state = 'REASON_PA'; }
-    else if (optMarker && (state === 'REASON_PA' || state === 'REASON_EN' || state === 'OPTIONS')) { state = 'OPTIONS'; }
     else if (ansRegex.test(trimmed)) { state = 'ANSWER'; }
     else if (explRegex.test(trimmed)) { state = 'EXPL'; }
+    else if (optMarker && (state === 'REASON_PA' || state === 'REASON_EN' || state === 'OPTIONS')) { state = 'OPTIONS'; }
+    else {
+      // Continuation heuristic: If we see Gurmukhi in Assert EN mode, it's actually Assert PA
+      if (state === 'ASSERT_EN' && GURMUKHI_REGEX.test(trimmed)) state = 'ASSERT_PA';
+      if (state === 'REASON_EN' && GURMUKHI_REGEX.test(trimmed)) state = 'REASON_PA';
+    }
 
     // Content Extraction
     let content = trimmed;
-    if (state === 'ASSERT_EN') content = trimmed.replace(assertEnRegex, '').trim();
-    if (state === 'ASSERT_PA') content = trimmed.replace(assertPaRegex, '').trim();
-    if (state === 'REASON_EN') content = trimmed.replace(reasonEnRegex, '').trim();
-    if (state === 'REASON_PA') content = trimmed.replace(reasonPaRegex, '').trim();
+    if (assertEnRegex.test(trimmed)) content = trimmed.replace(assertEnRegex, '').trim();
+    else if (assertPaRegex.test(trimmed)) content = trimmed.replace(assertPaRegex, '').trim();
+    else if (reasonEnRegex.test(trimmed)) content = trimmed.replace(reasonEnRegex, '').trim();
+    else if (reasonPaRegex.test(trimmed)) content = trimmed.replace(reasonPaRegex, '').trim();
+
+    if (!content && (assertEnRegex.test(trimmed) || assertPaRegex.test(trimmed) || reasonEnRegex.test(trimmed) || reasonPaRegex.test(trimmed))) continue;
 
     switch (state) {
       case 'ASSERT_EN':
-        if (content) currentQ.assertion.english += (currentQ.assertion.english ? '\n' : '') + content;
+        currentQ.assertion.english += (currentQ.assertion.english ? '\n' : '') + content;
         break;
       case 'ASSERT_PA':
-        if (content) currentQ.assertion.punjabi += (currentQ.assertion.punjabi ? '\n' : '') + content;
+        currentQ.assertion.punjabi += (currentQ.assertion.punjabi ? '\n' : '') + content;
         break;
       case 'REASON_EN':
-        if (content) currentQ.reason.english += (currentQ.reason.english ? '\n' : '') + content;
+        currentQ.reason.english += (currentQ.reason.english ? '\n' : '') + content;
         break;
       case 'REASON_PA':
-        if (content) currentQ.reason.punjabi += (currentQ.reason.punjabi ? '\n' : '') + content;
+        currentQ.reason.punjabi += (currentQ.reason.punjabi ? '\n' : '') + content;
         break;
       case 'OPTIONS':
         if (optMarker) {
@@ -261,6 +268,8 @@ export function parseMatching(chunk: string, metadata: any) {
     const trimmed = line.trim();
     if (!trimmed) continue;
     if (isQuestionStart(line) && line !== lines[0]) break;
+    
+    // Metadata Terminate
     if (NOISE_PATTERNS.some(p => p.test(trimmed))) {
        if (state === 'EXPL') break;
        continue;
@@ -393,6 +402,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   const processedText = preprocessText(rawText);
   const fmt = metadata.parserFormat;
 
+  // Use Continuous Scanning Machine for Assertion/Reason
   if (fmt === 'ASSERTION') {
     return parseAssertionReason(processedText, metadata);
   }
