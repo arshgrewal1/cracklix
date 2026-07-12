@@ -1,6 +1,6 @@
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v22.0.
- * FIXED: Greedy question extraction - reads until the first valid option marker.
+ * @fileOverview Institutional Deterministic Ingestion Hub v23.0.
+ * FIXED: Greedy question extraction - reads ALL lines until Option A sentinel.
  * RULES: English and Punjabi fields isolated; numbers stowed in English; multiline aware.
  * WHITESPACE: Block-level trim only; internal spacing and line breaks preserved.
  */
@@ -35,7 +35,7 @@ const NOISE_PATTERNS = [
 
 const EXPLANATION_END_MARKERS = [
   /^[=\-\*\_]{3,}$/,
-  /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i,
+  /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$)/i,
   /^Page/i,
   /^Download Our App/i,
   /^Copyright/i,
@@ -72,13 +72,13 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   if (!cleanedText) return { questions: [] };
 
   const questions: any[] = [];
-  const questionStartRegex = /(?:^|\n)\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i;
+  const questionStartRegex = /(?:^|\n)\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$)/i;
   const firstIndex = cleanedText.search(questionStartRegex);
   
   if (firstIndex === -1) return { questions: [] };
 
   const content = cleanedText.substring(firstIndex);
-  const blocks = content.split(/(?=\n\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)|^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$))/i);
+  const blocks = content.split(/(?=\n\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$)|^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$))/i);
 
   blocks.forEach(block => {
     const trimmedBlock = block.trim();
@@ -150,7 +150,7 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
   const ansMarkers = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ"];
   const explMarkers = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
 
-  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)\s*/i;
+  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$)\s*/i;
 
   lines.forEach((line, idx) => {
     const trimmedLine = line.trim();
@@ -245,7 +245,7 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
 
 function parseDeterministicEnglish(block: string, q: any) {
   const lines = block.split('\n');
-  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)\s*/i;
+  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$)\s*/i;
   
   let section: 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION' = 'QUESTION';
   let currentOption: 'A' | 'B' | 'C' | 'D' | null = null;
@@ -312,7 +312,7 @@ export function validateMCQSchema(q: any): string[] {
 
   if (!q.correctAnswer) errors.push("Answer key missing.");
 
-  const qMarkerRegex = /(?:^|\n)\s*(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i;
+  const qMarkerRegex = /(?:^|\n)\s*(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+)(?:[\.\s:]|$)/i;
   const explanation = (q.englishExplanation || "") + (q.punjabiExplanation || "") + (q.hindiExplanation || "");
   if (qMarkerRegex.test(explanation)) {
      errors.push("Structural Failure: Explanation contains next question marker.");
