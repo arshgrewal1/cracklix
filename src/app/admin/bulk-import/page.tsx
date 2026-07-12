@@ -18,7 +18,8 @@ import {
   Database,
   CheckCircle2,
   ChevronRight,
-  ClipboardList
+  ClipboardList,
+  Globe
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy } from "firebase/firestore"
@@ -30,9 +31,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Local Bulk Ingestion Hub v40.0.
- * RESTORED: 100% Offline Regex Parser logic.
- * FIXED: Desktop width optimized to 1600px and button distortion resolved.
+ * @fileOverview Local Bulk Ingestion Hub v41.0.
+ * RESTORED: 100% Offline Regex Parser logic with Dual-Language Hub.
+ * FIXED: Desktop width optimized to 1600px and button fidelity preserved.
  */
 
 export default function BulkIngestionPage() {
@@ -47,6 +48,7 @@ export default function BulkIngestionPage() {
   const [metadata, setMetadata] = useState({
     boardId: "",
     subjectId: "",
+    secondaryLanguage: "punjabi",
     difficulty: "Medium" as any,
   })
 
@@ -125,9 +127,9 @@ export default function BulkIngestionPage() {
       
       <AdminPageHeader
         icon={ClipboardList}
-        label="High-Speed Ingestion Hub"
+        label="High-Speed Local Ingestion"
         title="Bulk Import"
-        subtitle="Process documents locally using cracklix regex engine."
+        subtitle="Process bilingual documents locally using the cracklix regex engine."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50">Reset Staging</Button>
@@ -143,7 +145,7 @@ export default function BulkIngestionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
-        {/* INPUT PANEL - Widened for Desktop Stability */}
+        {/* INPUT PANEL */}
         <div className="lg:col-span-6 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-6">
@@ -154,6 +156,7 @@ export default function BulkIngestionPage() {
                  
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Board hub</Label>
                        <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v})}>
                           <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner text-[#0F172A]"><SelectValue placeholder="Board Hub" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white border-white/10">
@@ -162,12 +165,27 @@ export default function BulkIngestionPage() {
                        </Select>
                     </div>
                     <div className="space-y-2">
+                       <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Subject node</Label>
                        <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
                           <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner text-[#0F172A]"><SelectValue placeholder="Subject Node" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white border-white/10 max-h-80">
                              {subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                           </SelectContent>
                        </Select>
+                    </div>
+                 </div>
+
+                 <div className="space-y-2">
+                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Globe className="h-3 w-3" /> Language Mapping</Label>
+                    <div className="flex gap-3">
+                       <button 
+                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'punjabi'})}
+                         className={cn("flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2", metadata.secondaryLanguage === 'punjabi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
+                       >English + Punjabi</button>
+                       <button 
+                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'hindi'})}
+                         className={cn("flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2", metadata.secondaryLanguage === 'hindi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
+                       >English + Hindi</button>
                     </div>
                  </div>
               </div>
@@ -185,7 +203,6 @@ export default function BulkIngestionPage() {
                     />
                  </div>
 
-                 {/* FINAL BUTTON FIX: No distortion, Fixed pill shape */}
                  <Button 
                     onClick={handleLocalParse} 
                     disabled={isProcessing} 
@@ -227,7 +244,7 @@ export default function BulkIngestionPage() {
                        {q.isValid ? (
                           <QuestionRenderer 
                              question={q} 
-                             language="ENGLISH_PUNJABI" 
+                             language={metadata.secondaryLanguage === 'punjabi' ? "ENGLISH_PUNJABI" : "ENGLISH_HINDI"} 
                              showSolution={true} 
                              className="p-0 shadow-none border-none max-w-none"
                           />
