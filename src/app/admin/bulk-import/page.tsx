@@ -14,18 +14,16 @@ import {
   Rocket, 
   Zap, 
   Layers, 
-  Settings, 
   Database,
   CheckCircle2,
   ChevronRight,
   ClipboardList,
   Globe,
-  Info,
   Braces,
-  X,
   Image as ImageIcon,
   Table as TableIcon,
-  BarChart3
+  BarChart3,
+  Info
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy, updateDoc, increment } from "firebase/firestore"
@@ -37,20 +35,21 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v62.0.
- * UPDATED: Added Graph / Chart Based ingestion strategy.
+ * @fileOverview Modular Industrial Ingestion Hub v63.0.
+ * FIXED: Hydration error resolved by replacing <p> with <div> in error list.
+ * UPDATED: Multi-strategy mapping for CA, Math, Tables, and Graphs.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
-  { label: "Bilingual MCQ (Eng+Pun/Hin)", value: "BILINGUAL_MCQ" },
-  { label: "Current Affairs (Bilingual)", value: "CURRENT_AFFAIRS" },
+  { label: "Current Affairs (English + Punjabi)", value: "CURRENT_AFFAIRS" },
+  { label: "Bilingual MCQ (Eng + Pun/Hin)", value: "BILINGUAL_MCQ" },
   { label: "English Only MCQ", value: "ENGLISH_ONLY" },
   { label: "Punjabi Only MCQ", value: "PUNJABI_ONLY" },
   { label: "Mathematics Hub", value: "MATHEMATICS" },
+  { label: "Reasoning & Logic", value: "REASONING" },
   { label: "Diagram / Image Based", value: "DIAGRAM" },
   { label: "Table Based Hub", value: "TABLE" },
   { label: "Graph / Chart Based", value: "GRAPH" },
-  { label: "Reasoning & Logic", value: "REASONING" },
   { label: "Match the Following", value: "MATCHING" },
   { label: "Assertion & Reason", value: "ASSERTION" },
   { label: "Fill in the Blank", value: "FILL_BLANK" },
@@ -71,7 +70,7 @@ export default function BulkIngestionPage() {
     subjectId: "",
     secondaryLanguage: "punjabi",
     difficulty: "Medium" as any,
-    parserFormat: "BILINGUAL_MCQ" as ParserFormat
+    parserFormat: "CURRENT_AFFAIRS" as ParserFormat
   })
 
   const [rawText, setRawText] = useState("")
@@ -106,7 +105,7 @@ export default function BulkIngestionPage() {
       });
       
       setStagedQuestions(validated);
-      toast({ title: "Parsing Success", description: `${validated.length} nodes structured locally.` });
+      toast({ title: "Extraction Success", description: `${validated.length} nodes structured locally.` });
     } catch (e: any) {
       toast({ variant: "destructive", title: "Parsing Error", description: e.message });
     } finally {
@@ -157,7 +156,7 @@ export default function BulkIngestionPage() {
         icon={ClipboardList}
         label="Modular Industrial Ingestion"
         title="MCQ Ingestion Hub"
-        subtitle="Zero AI dependency. Dedicated local strategies for Current Affairs, Math and Table data."
+        subtitle="Dedicated local strategies for Current Affairs, Math and Table data. No AI required."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <button onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50 transition-all">Reset Staging</button>
@@ -179,7 +178,7 @@ export default function BulkIngestionPage() {
               <div className="space-y-8">
                  <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                     <Braces className="h-6 w-6 text-primary" />
-                    <h3 className="font-bold text-xl uppercase text-[#0F172A]">Parser Strategy</h3>
+                    <h3 className="font-bold text-xl uppercase text-[#0F172A]">Ingestion Logic</h3>
                  </div>
 
                  <div className="space-y-2">
@@ -239,7 +238,7 @@ export default function BulkIngestionPage() {
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
-                        placeholder="Paste question blocks with math, graph or table markers here..."
+                        placeholder="Paste question blocks with math or table markers here..."
                         className="min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>

@@ -1,8 +1,9 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v30.0.
+ * @fileOverview Institutional Specialized Local Parser v31.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Table formats.
  * FIXED: Advanced Table Extraction logic to preserve structured grid data.
  * UPDATED: Implemented Graph Parser with specific chart type detection.
+ * HARDENED: Strict removal of headers, footers, page numbers, and copyright text.
  */
 
 export type ParserFormat = 
@@ -31,18 +32,23 @@ export function preprocessText(text: string): string {
     .replace(/\r\n/g, '\n')
     // 1. Remove Section Headers & Decorative lines (preserve single separators if needed)
     .replace(/^={3,}.*?={3,}$/gm, '')
-    .replace(/^(?:CURRENT AFFAIRS|GENERAL KNOWLEDGE|MONTHLY UPDATE|MOCK TEST|SECTION|ENGLISH|PUNJABI|REASONING|MATH|PUNJABI SECTION).*?$/gim, '')
+    .replace(/^-{3,}.*?-{3,}$/gm, '')
+    .replace(/^(?:CURRENT AFFAIRS|GENERAL KNOWLEDGE|MONTHLY UPDATE|MOCK TEST|SECTION|ENGLISH|PUNJABI|REASONING|MATH|PUNJABI SECTION|DAILY UPDATES|QUIZ|GK UPDATES).*?$/gim, '')
     // 2. Remove Page Numbers & Progress Nodes
     .replace(/Page\s+\d+\s+of\s+\d+/gi, '')
     .replace(/ਪੰਨਾ\s+\d+\s+of\s+\d+/gi, '')
-    .replace(/\d+\s*\/\s*\d+/g, '')
+    .replace(/Page\s+\d+/gi, '')
+    .replace(/ਪੰਨਾ\s+\d+/gi, '')
     .replace(/^\s*\d+\s*$/gm, '') 
     // 3. Remove OCR Garbage & Symbols (Keep math symbols like ^, √, ∫, and visual markers like [])
     .replace(/[~►❖⚬▪•]/g, '')
     .replace(/Copyright.*?Arsh Grewal/gi, '')
     .replace(/www\.cracklix\.com/gi, '')
     .replace(/https?:\/\/\S+/gi, '')
-    // 4. Normalize Whitespace (Be careful not to kill table spacing)
+    // 4. Normalize Punctuation (Protect math decimals)
+    .replace(/\.{3,}/g, '...')
+    .replace(/\.\./g, '.')
+    // 5. Normalize Whitespace
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
@@ -50,7 +56,6 @@ export function preprocessText(text: string): string {
 
 /**
  * Detects visual asset keywords and sets administrative flags.
- * Keywords: Figure, Diagram, Image, Map, Graph, Flowchart, Bar Graph, Pie Chart, Line Graph, Histogram
  */
 function detectVisualAssets(block: string, q: any) {
   const assetRegex = /(?:\[)?(?:Figure|Diagram|Image|Map|Graph|Flowchart|Table|Bar Graph|Pie Chart|Line Graph|Histogram)(?:\])?/i;
@@ -69,7 +74,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   const format: ParserFormat = metadata.parserFormat || 'BILINGUAL_MCQ';
   const questions: any[] = [];
   
-  // Split by Question markers
+  // Split by Question markers (Line anchored)
   const blocks = rawText.split(/(?=\n\s*(?:Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.)|^(?:Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.))/i);
 
   blocks.forEach(block => {
@@ -85,10 +90,8 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
       table_data: ""
     };
 
-    // Global Visual Asset Detection
     detectVisualAssets(block, q);
 
-    // Dispatch to specific format logic
     switch (format) {
       case 'TABLE':
         q = parseTable(block, q, metadata.secondaryLanguage);
@@ -110,7 +113,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
         q = parseBilingual(block, q, metadata.secondaryLanguage);
         break;
       default:
-        q = parseSimple(block, q);
+        q = parseBilingual(block, q, metadata.secondaryLanguage);
     }
 
     questions.push(q);
@@ -123,8 +126,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
  * STRATEGY: Graph Question Parser
  */
 function parseGraph(block: string, q: any, secondaryLang: string) {
-  // Graph questions often have numeric data lines or label markers (e.g. 2022 = 50)
-  // We reuse bilingual logic but ensure we keep data lines in the question statement
   return parseBilingual(block, q, secondaryLang);
 }
 
@@ -132,13 +133,11 @@ function parseGraph(block: string, q: any, secondaryLang: string) {
  * STRATEGY: Table Question Parser
  */
 function parseTable(block: string, q: any, secondaryLang: string) {
-  // 1. Identify Table Block (Lines starting/ending with | or having multiple pipes)
   const lines = block.split('\n');
   const tableLines = lines.filter(l => l.includes('|'));
   
   if (tableLines.length > 0) {
     q.table_data = tableLines.join('\n');
-    // Remove table lines from block for standard processing
     const cleanBlock = lines.filter(l => !l.includes('|')).join('\n');
     return parseBilingual(cleanBlock, q, secondaryLang);
   }
@@ -161,7 +160,7 @@ function parseMath(block: string, q: any) {
     restOfBlock = block.substring(0, explStartIndex);
   }
 
-  // STRICT OPTION BOUNDARY (Line anchored)
+  // Find the exact line where options start to prevent merging math into options
   const optAMatch = restOfBlock.match(/\n\s*\(?A[\)\.\-]\s+/i);
   let questionPart = restOfBlock;
   let optionsPart = "";
@@ -324,30 +323,6 @@ function parsePunjabiOnly(block: string, q: any) {
     q.punjabiExplanation = explanationPart.replace(/(?:Explanation|Solution|ਵਿਆਖਿਆ|Rationale)\s*[:\-]?\s*/i, '').trim();
   }
 
-  return q;
-}
-
-function parseSimple(block: string, q: any) {
-  const optAMatch = block.match(/\n\s*\(?A[\)\.\-]\s+/i);
-  let questionPart = block;
-  let optionsPart = block;
-
-  if (optAMatch && optAMatch.index !== undefined) {
-     questionPart = block.substring(0, optAMatch.index);
-     optionsPart = block.substring(optAMatch.index);
-  }
-
-  q.englishQuestion = questionPart.trim().replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '');
-  
-  const labels = ['A', 'B', 'C', 'D'];
-  labels.forEach((label, i) => {
-    const next = labels[i + 1] || '(?:Answer|Ans)';
-    const reg = new RegExp(`\\n\\s*\\(?${label}[\\)\\.\\-]\\s*([\\s\\S]*?)(?=\\n\\s*\\(?${next}[\\)\\.\\-]|$)`, 'i');
-    const match = optionsPart.match(reg);
-    if (match) q[`option${label}English`] = match[1].trim();
-  });
-
-  q.correctAnswer = (block.match(/(?:Answer|Ans|Official Key)\s*[:\-]?\s*([A-D])/i)?.[1] || "A").toUpperCase();
   return q;
 }
 
