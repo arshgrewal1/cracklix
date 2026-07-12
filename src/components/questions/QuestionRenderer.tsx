@@ -20,8 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v48.0.
- * FIXED: Normalized font sizes for introductory and suffix questions.
+ * @fileOverview Institutional Question Renderer v50.0.
+ * FIXED: Professional table grid styling and enhanced bilingual solution display.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -99,22 +99,22 @@ export default function QuestionRenderer({
            </div>
          )}
 
-         {/* TABLE RENDERER - HIGH FIDELITY */}
+         {/* TABLE RENDERER - HIGH FIDELITY GRID */}
          {q.tableContent?.rows?.length > 0 && (
-           <div className="my-8 overflow-x-auto rounded-2xl border border-slate-100 bg-white shadow-xl">
+           <div className="my-8 overflow-x-auto rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
              <Table className="w-full border-collapse">
-               <TableHeader className="bg-slate-50">
-                 <TableRow className="border-b border-slate-100">
+               <TableHeader className="bg-slate-50/50">
+                 <TableRow className="border-b border-slate-200 h-14">
                     {q.tableContent.headers.map((h: string, i: number) => (
-                      <TableHead key={i} className="p-4 font-black uppercase text-[10px] md:text-xs text-[#0F172A] border-r border-slate-100 last:border-0">{h}</TableHead>
+                      <TableHead key={i} className="px-6 py-4 font-black uppercase text-[10px] md:text-xs text-[#0F172A] border-r border-slate-100 last:border-0">{h}</TableHead>
                     ))}
                  </TableRow>
                </TableHeader>
                <TableBody>
                   {q.tableContent.rows.map((row: string[], ri: number) => (
-                    <TableRow key={ri} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors last:border-0">
+                    <TableRow key={ri} className="border-b border-slate-50 hover:bg-slate-50/30 transition-colors last:border-0 h-12 md:h-16">
                        {row.map((cell, ci) => (
-                         <TableCell key={ci} className="p-4 font-bold text-xs md:text-base text-slate-700 border-r border-slate-50 last:border-0">{cell}</TableCell>
+                         <TableCell key={ci} className="px-6 py-3 font-bold text-xs md:text-base text-slate-700 border-r border-slate-50 last:border-0">{cell}</TableCell>
                        ))}
                     </TableRow>
                   ))}
@@ -213,19 +213,19 @@ export default function QuestionRenderer({
                  </div>
                  
                  <div className="pl-8 space-y-8">
-                    {showEn && q.englishExplanation && (
+                    {q.englishExplanation && (
                        <div className="space-y-2">
-                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">English Explanation</p>
+                          <p className="text-[10px] md:text-[11px] font-black text-slate-400 uppercase tracking-widest">English Rationale</p>
                           <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl">
                              <MathText text={q.englishExplanation} className="text-inherit" />
                           </div>
                        </div>
                     )}
-                    {showLocal && (q.punjabiExplanation || q.hindiExplanation) && (
+                    {q.punjabiExplanation && (
                        <div className="space-y-2">
-                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Punjabi Explanation</p>
+                          <p className="text-[10px] md:text-[11px] font-black text-primary uppercase tracking-widest">ਪੰਜਾਬੀ ਵਿਆਖਿਆ</p>
                           <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
-                             <MathText text={q.punjabiExplanation || q.hindiExplanation} className="text-inherit" />
+                             <MathText text={q.punjabiExplanation} className="text-inherit" />
                           </div>
                        </div>
                     )}

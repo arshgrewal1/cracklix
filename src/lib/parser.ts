@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v48.0.
- * FIXED: Hardened noise filter to purge ASCII table borders (+---+).
+ * @fileOverview Institutional Deterministic Ingestion Hub v49.0.
+ * FIXED: Space-separated table detection for PDF copy-pastes.
  */
 
 export type ParserFormat = 
@@ -37,7 +37,7 @@ const NOISE_PATTERNS = [
   /^https?:\/\//i,
   /^Copyright/i,
   /^©/i,
-  /^[-\s\.\*_=|+\/\\]{3,}$/, // Hardened separator line to catch ASCII borders like +---+
+  /^[-\s\.\*_=|+\/\\]{3,}$/,
   /^\s*[\.·,]{1,}\s*$/
 ];
 
@@ -254,10 +254,13 @@ function parseTable(rawText: string, metadata: any) {
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
 
+    // HEURISTIC: Lines with 3+ distinct words are likely grid rows if not in options state
+    const isLikelyGridRow = (trimmed.includes('|') || trimmed.split(/\s{2,}/).length >= 3) && !opt && !isAns && !isExpl && state !== 'OPTIONS';
+
     if (opt) state = 'OPTIONS';
     else if (isAns) state = 'ANSWER';
     else if (isExpl) state = 'EXPLANATION';
-    else if (trimmed.includes('|') && state !== 'OPTIONS') state = 'GRID';
+    else if (isLikelyGridRow) state = 'GRID';
 
     switch (state) {
       case 'INTRO_EN':
@@ -269,7 +272,9 @@ function parseTable(rawText: string, metadata: any) {
         }
         break;
       case 'INTRO_PA':
-        if (ACTUAL_QUESTION_KEYWORDS.test(line)) {
+        if (isLikelyGridRow) {
+          state = 'GRID';
+        } else if (ACTUAL_QUESTION_KEYWORDS.test(line)) {
           state = 'SUFFIX_EN';
           currentQ.englishDiagramQuestion = trimmed;
         } else {
@@ -277,8 +282,11 @@ function parseTable(rawText: string, metadata: any) {
         }
         break;
       case 'GRID':
-        if (trimmed.startsWith('|')) {
-           const cells = trimmed.split('|').filter(c => c.trim() || c === "").map(c => c.trim());
+        if (isLikelyGridRow) {
+           const cells = trimmed.includes('|') 
+            ? trimmed.split('|').filter(c => c.trim().length > 0).map(c => c.trim())
+            : trimmed.split(/\s{2,}/).filter(c => c.trim().length > 0).map(c => c.trim());
+            
            if (currentQ.tableContent.headers.length === 0) {
               currentQ.tableContent.headers = cells;
            } else if (!trimmed.includes('---')) {
@@ -308,8 +316,13 @@ function parseTable(rawText: string, metadata: any) {
         if (match) currentQ.correctAnswer = match[0].toUpperCase();
         break;
       case 'EXPLANATION':
-        if (GURMUKHI_REGEX.test(trimmed)) currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
-        else currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + trimmed;
+        const cleanLine = trimmed.replace(/^(?:Explanation|Solution|ਵਿਆਖਿਆ|ਵਿਆਖਿਆ|व्याख्या|Rationale|Answer|Correct Answer|Official Key)\s*[:\-]?\s*/i, '').trim();
+        if (!cleanLine) break;
+        if (GURMUKHI_REGEX.test(cleanLine)) {
+          currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + cleanLine;
+        } else {
+          currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + cleanLine;
+        }
         break;
     }
   });
@@ -462,36 +475,4 @@ export function validateMCQSchema(q: any): { errors: string[], warnings: string[
   if (optCount < 4) errors.push("Less than four options detected.");
   if (!q.correctAnswer) errors.push("Answer missing.");
   return { errors, warnings };
-}
-
-export function renderMarkdownTable(rawText: string): string {
-  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-  const tableRows = lines.filter(l => l.startsWith('|') && l.endsWith('|'));
-  
-  if (tableRows.length < 2) return rawText.replace(/\n/g, '<br/>');
-
-  const header = tableRows[0].split('|').filter(c => c.trim().length >= 0).slice(1, -1);
-  const dataRows = tableRows.slice(2).map(r => r.split('|').filter(c => c.trim().length >= 0).slice(1, -1));
-
-  const html = `
-    <div class="my-3 overflow-x-auto rounded-lg border border-white/10 bg-white/5 shadow-xl w-full">
-      <table class="w-full text-left border-collapse min-w-[280px]">
-        <thead>
-          <tr class="bg-[#F97316]/10 border-b border-white/10">
-            ${header.map(col => `<th class="p-2 font-black uppercase text-[8px] md:text-xs tracking-tight text-[#F97316]">${col.trim()}</th>`).join('')}
-          </tr>
-        </thead>
-        <tbody>
-          ${dataRows.map(row => `
-            <tr class="border-b border-white/5 hover:bg-white/5 transition-colors">
-              ${row.map(cell => `<td class="p-2 font-bold text-[10px] md:text-sm text-inherit">${cell.trim()}</td>`).join('')}
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    </div>
-  `;
-
-  const remainingText = lines.filter(l => !l.startsWith('|')).join('\n');
-  return html + (remainingText ? `<div class="mt-2 font-[700] text-inherit leading-relaxed text-[12px] md:text-base">${remainingText}</div>` : "");
 }
