@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUser, useFirestore } from '@/firebase';
-import { doc, writeBatch, serverTimestamp, increment } from 'firebase/firestore';
+import { doc, writeBatch, serverTimestamp, increment, getDoc } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
 
 export type StudyContentType = 'MOCK' | 'PRACTICE' | 'SUBJECT' | 'PDF' | 'VIDEO' | 'OTHER' | 'DASHBOARD' | 'CA' | 'PYQ';
@@ -11,14 +11,39 @@ const INACTIVITY_THRESHOLD = 60 * 1000; // 60 seconds
 const SYNC_INTERVAL = 30 * 1000; // 30 seconds
 
 /**
- * @fileOverview Institutional Real-Time Study Tracker v3.0.
- * FIXED: Local ticker for live UI updates and robust inactivity handling.
+ * Helper to calculate period identifiers for tracking resets.
+ */
+const getPeriodIds = (date: Date) => {
+  const d = new Date(date);
+  
+  // Today: YYYY-MM-DD
+  const today = d.toISOString().split('T')[0];
+  
+  // Week: Find the most recent Monday
+  const day = d.getDay(); 
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  const monday = new Date(d.setDate(diff));
+  const week = monday.toISOString().split('T')[0];
+  
+  // Month: YYYY-MM
+  const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+  
+  // Year: YYYY
+  const year = `${date.getFullYear()}`;
+  
+  return { today, week, month, year };
+};
+
+/**
+ * @fileOverview Institutional Real-Time Study Tracker v4.0.
+ * FIXED: Implemented Multi-Period (Week/Month/Year) reset logic and sync.
  */
 export function useStudyTracker(contentId: string | null, contentType: StudyContentType, enabled: boolean = true) {
   const { user } = useUser();
   const db = useFirestore();
   
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [unSyncedSeconds, setUnSyncedSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
   
   const sessionRef = useRef<{ sessionId: string | null; startTime: number | null; lastSyncTime: number; }>({
@@ -29,20 +54,22 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
 
   const lastActivityRef = useRef<number>(Date.now());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const statsCache = useRef<any>(null);
 
   const saveProgress = useCallback(async (durationToSync: number, isFinal = false) => {
     if (!db || !user || !sessionRef.current.sessionId || durationToSync <= 0) return;
 
     const { sessionId } = sessionRef.current;
-    const today = new Date();
-    const dayStr = today.toISOString().split('T')[0];
+    const now = new Date();
+    const periods = getPeriodIds(now);
 
     try {
       const batch = writeBatch(db);
       const sessionDocRef = doc(db, 'users', user.uid, 'study_sessions', sessionId);
-      const dailyAggRef = doc(db, 'users', user.uid, 'study_daily', dayStr);
+      const dailyAggRef = doc(db, 'users', user.uid, 'study_daily', periods.today);
       const userStatsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
 
+      // 1. Log Session Activity
       batch.set(sessionDocRef, {
         sessionId,
         userId: user.uid,
@@ -53,33 +80,75 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
         ...(isFinal ? { endTime: Date.now(), status: 'COMPLETED' } : { status: 'ACTIVE' })
       }, { merge: true });
 
+      // 2. Log Daily Aggregate
       batch.set(dailyAggRef, {
         userId: user.uid,
-        date: dayStr,
+        date: periods.today,
         totalDuration: increment(durationToSync),
         lastUpdated: serverTimestamp(),
       }, { merge: true });
 
-      batch.set(userStatsRef, {
+      // 3. Multi-Period Statistical Hub
+      const statsUpdate: any = {
         totalStudyTime: increment(durationToSync),
         lastSessionDate: serverTimestamp(),
         totalSessions: isFinal ? increment(1) : increment(0)
-      }, { merge: true });
+      };
+
+      // Week Logic
+      if (statsCache.current?.lastWeekId === periods.week) {
+        statsUpdate.thisWeekTime = increment(durationToSync);
+      } else {
+        statsUpdate.thisWeekTime = durationToSync;
+        statsUpdate.lastWeekId = periods.week;
+        if (statsCache.current) statsCache.current.lastWeekId = periods.week;
+      }
+
+      // Month Logic
+      if (statsCache.current?.lastMonthId === periods.month) {
+        statsUpdate.thisMonthTime = increment(durationToSync);
+      } else {
+        statsUpdate.thisMonthTime = durationToSync;
+        statsUpdate.lastMonthId = periods.month;
+        if (statsCache.current) statsCache.current.lastMonthId = periods.month;
+      }
+
+      // Year Logic
+      if (statsCache.current?.lastYearId === periods.year) {
+        statsUpdate.thisYearTime = increment(durationToSync);
+      } else {
+        statsUpdate.thisYearTime = durationToSync;
+        statsUpdate.lastYearId = periods.year;
+        if (statsCache.current) statsCache.current.lastYearId = periods.year;
+      }
+
+      batch.set(userStatsRef, statsUpdate, { merge: true });
 
       await batch.commit();
       
-      // Dispatch global event for other components to update UI live
+      setUnSyncedSeconds(0);
       window.dispatchEvent(new CustomEvent('study_progress_sync', { 
-        detail: { duration: durationToSync, dayStr } 
+        detail: { duration: durationToSync, dayStr: periods.today } 
       }));
 
     } catch (error) {
-      console.error('[StudyTracker] Sync failure:', error);
+      console.error('[StudyTracker] Period sync failure:', error);
     }
   }, [db, user, contentId, contentType]);
 
-  const startSession = useCallback(() => {
-    if (!user || sessionRef.current.sessionId || !enabled) return;
+  const startSession = useCallback(async () => {
+    if (!user || sessionRef.current.sessionId || !enabled || !db) return;
+
+    // Capture period markers from registry to ensure correct reset logic
+    try {
+      const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
+      const snap = await getDoc(statsRef);
+      if (snap.exists()) {
+        statsCache.current = snap.data();
+      }
+    } catch (e) {
+      console.error('[StudyTracker] Stats anchor fetch failed:', e);
+    }
 
     const sid = nanoid();
     sessionRef.current = {
@@ -88,12 +157,14 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
       lastSyncTime: Date.now()
     };
     setIsActive(true);
+    setElapsedSeconds(0);
+    setUnSyncedSeconds(0);
     lastActivityRef.current = Date.now();
 
     window.dispatchEvent(new CustomEvent('study_session_start', { 
       detail: { sessionId: sid, contentType } 
     }));
-  }, [user, enabled, contentType]);
+  }, [user, enabled, db, contentType]);
 
   const endSession = useCallback(async () => {
     if (!sessionRef.current.sessionId) return;
@@ -110,12 +181,13 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
     
     sessionRef.current = { sessionId: null, startTime: null, lastSyncTime: 0 };
     setElapsedSeconds(0);
+    setUnSyncedSeconds(0);
     
     window.dispatchEvent(new CustomEvent('study_session_end'));
   }, [saveProgress]);
 
   useEffect(() => {
-    if (!enabled || !user) return;
+    if (!enabled || !user || !db) return;
 
     startSession();
 
@@ -130,20 +202,19 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
 
       if (!isActive) setIsActive(true);
 
-      // Increment local UI state
-      setElapsedSeconds(prev => {
+      setElapsedSeconds(prev => prev + 1);
+      setUnSyncedSeconds(prev => {
         const next = prev + 1;
         
-        // Throttled sync every 30s
+        // Sync triggers every 30s
         if (next > 0 && next % 30 === 0) {
           const nowSync = Date.now();
-          const unSynced = Math.round((nowSync - sessionRef.current.lastSyncTime) / 1000);
-          if (unSynced > 0) {
-            saveProgress(unSynced);
+          const duration = Math.round((nowSync - sessionRef.current.lastSyncTime) / 1000);
+          if (duration > 0) {
+            saveProgress(duration);
             sessionRef.current.lastSyncTime = nowSync;
           }
         }
-        
         return next;
       });
     }, 1000);
@@ -177,7 +248,7 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
       if (intervalRef.current) clearInterval(intervalRef.current);
       endSession();
     };
-  }, [enabled, user, isActive, startSession, endSession, saveProgress]);
+  }, [enabled, user, db, isActive, startSession, endSession, saveProgress]);
 
-  return { elapsedSeconds, isActive };
+  return { elapsedSeconds, unSyncedSeconds, isActive };
 }

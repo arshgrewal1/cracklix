@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -12,6 +11,26 @@ import LiveStudyTimer from '@/components/analytics/LiveStudyTimer';
 import { useStudyTracker } from '@/hooks/useStudyTracker';
 import { cn } from '@/lib/utils';
 
+/**
+ * @fileOverview Official Study Analytics Center v2.2.
+ * FIXED: Independent period tracking for Week, Month, and Year.
+ */
+
+const formatStudyTime = (seconds: number) => {
+  if (isNaN(seconds) || seconds < 0) return "0m 00s";
+  
+  const d = Math.floor(seconds / (3600 * 24));
+  const h = Math.floor((seconds % (3600 * 24)) / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  if (d > 0) return `${d}d ${h}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m ${pad(s)}s`;
+}
+
 const formatFullDuration = (seconds: number) => {
   if (isNaN(seconds) || seconds < 0) return "00h 00m 00s";
   const h = Math.floor(seconds / 3600);
@@ -20,21 +39,20 @@ const formatFullDuration = (seconds: number) => {
   return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
 }
 
-const formatConciseDuration = (seconds: number) => {
-  if (isNaN(seconds) || seconds <= 0) return "0m";
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-}
-
 export default function AnalyticsPage() {
   const { user } = useUser();
   const db = useFirestore();
   const [mounted, setMounted] = useState(false);
-  const [baseStats, setBaseStats] = useState({ today: 0, lifetime: 0, totalSessions: 0 });
+  const [baseStats, setBaseStats] = useState({ 
+    today: 0, 
+    week: 0,
+    month: 0,
+    year: 0,
+    lifetime: 0,
+    totalSessions: 0 
+  });
 
-  const { elapsedSeconds } = useStudyTracker('analytics', 'OTHER');
+  const { unSyncedSeconds, isActive } = useStudyTracker('analytics', 'OTHER');
 
   useEffect(() => {
     setMounted(true);
@@ -57,6 +75,9 @@ export default function AnalyticsPage() {
         setBaseStats(prev => ({ 
           ...prev, 
           lifetime: data.totalStudyTime || 0,
+          week: data.thisWeekTime || 0,
+          month: data.thisMonthTime || 0,
+          year: data.thisYearTime || 0,
           totalSessions: data.totalSessions || 0 
         }));
       }
@@ -86,7 +107,7 @@ export default function AnalyticsPage() {
           <div className="lg:col-span-1">
             <StatCard 
               title="🔥 Lifetime study" 
-              value={formatFullDuration(baseStats.lifetime + elapsedSeconds)}
+              value={formatFullDuration(baseStats.lifetime + unSyncedSeconds)}
               icon={Activity} 
               color="indigo" 
               loading={!mounted}
@@ -101,31 +122,35 @@ export default function AnalyticsPage() {
             loading={!mounted}
           />
 
-          <div className="col-span-full grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8 mt-4">
-             <Card className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl flex items-center justify-between">
-                <div>
-                   <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Today</p>
-                   <p className="text-2xl md:text-3xl font-black text-[#0F172A]">{formatConciseDuration(baseStats.today + elapsedSeconds)}</p>
-                </div>
-                <div className="h-12 w-12 rounded-2xl bg-emerald-50 text-emerald-500 flex items-center justify-center shadow-inner">
-                   <Clock className="h-6 w-6" />
-                </div>
-             </Card>
-             <Card className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl flex items-center justify-between">
-                <div>
-                   <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Week</p>
-                   <p className="text-2xl md:text-3xl font-black text-[#0F172A]">{formatConciseDuration(baseStats.today + elapsedSeconds)}</p>
-                </div>
-                <div className="h-12 w-12 rounded-2xl bg-blue-50 text-blue-500 flex items-center justify-center shadow-inner">
-                   <Calendar className="h-6 w-6" />
-                </div>
-             </Card>
+          <div className="col-span-full grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 mt-4">
+             <PeriodCard label="This Week" val={baseStats.week + unSyncedSeconds} icon={Calendar} color="blue" />
+             <PeriodCard label="This Month" val={baseStats.month + unSyncedSeconds} icon={Clock} color="emerald" />
+             <PeriodCard label="This Year" val={baseStats.year + unSyncedSeconds} icon={Zap} color="purple" />
           </div>
         </div>
       </main>
       <Footer />
     </div>
   );
+}
+
+function PeriodCard({ label, val, icon: Icon, color }: any) {
+  return (
+    <Card className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl flex items-center justify-between">
+      <div>
+          <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
+          <p className="text-2xl md:text-3xl font-black text-[#0F172A]">{formatStudyTime(val)}</p>
+      </div>
+      <div className={cn(
+        "h-12 w-12 rounded-2xl flex items-center justify-center shadow-inner",
+        color === 'blue' ? "bg-blue-50 text-blue-500" :
+        color === 'emerald' ? "bg-emerald-50 text-emerald-500" :
+        "bg-purple-50 text-purple-500"
+      )}>
+          <Icon className="h-6 w-6" />
+      </div>
+    </Card>
+  )
 }
 
 function StatCard({ title, value, icon: Icon, color, loading }: any) {

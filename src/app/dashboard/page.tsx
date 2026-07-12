@@ -33,18 +33,23 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useStudyTracker } from "@/hooks/useStudyTracker"
 
 /**
- * @fileOverview Student Progress Portal v57.0 (Live Dashboard Metrics).
+ * @fileOverview Student Progress Portal v58.0.
+ * FIXED: Independent multi-period tracking for Week, Month, Year and Lifetime.
  */
 
 const formatStudyTime = (seconds: number) => {
   if (isNaN(seconds) || seconds < 0) return "0m 00s";
-  const h = Math.floor(seconds / 3600);
+  
+  const d = Math.floor(seconds / (3600 * 24));
+  const h = Math.floor((seconds % (3600 * 24)) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;
-  
+
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  if (d > 0) return `${d}d ${h}h`;
   if (h > 0) return `${h}h ${m}m`;
-  if (m > 0) return `${m}m ${s}s`;
-  return `0m ${s}s`;
+  return `${m}m ${pad(s)}s`;
 }
 
 const formatFullDuration = (seconds: number) => {
@@ -62,10 +67,16 @@ export default function StudentDashboard() {
   const [mounted, setMounted] = useState(false)
   const [passCountdown, setPassCountdown] = useState("");
   
-  const [baseStats, setBaseStats] = useState({ today: 0, lifetime: 0 });
+  const [baseStats, setBaseStats] = useState({ 
+    today: 0, 
+    week: 0,
+    month: 0,
+    year: 0,
+    lifetime: 0 
+  });
 
-  // Initialize Page Tracker
-  const { elapsedSeconds, isActive } = useStudyTracker('dashboard', 'DASHBOARD');
+  // Initialize Page Tracker - UnSynced seconds allow real-time display without DB lag
+  const { unSyncedSeconds, isActive } = useStudyTracker('dashboard', 'DASHBOARD');
 
   useEffect(() => {
     setMounted(true)
@@ -93,7 +104,7 @@ export default function StudentDashboard() {
     return () => clearInterval(intervalId);
   }, [profile?.passExpiresAt]);
 
-  // Real-time Analytics Listener
+  // Real-time Analytics Hub Listener
   useEffect(() => {
     if (!db || !user || !mounted) return;
 
@@ -107,7 +118,14 @@ export default function StudentDashboard() {
 
     const unsubStats = onSnapshot(statsRef, (snap) => {
       if (snap.exists()) {
-        setBaseStats(prev => ({ ...prev, lifetime: snap.data().totalStudyTime || 0 }));
+        const data = snap.data();
+        setBaseStats(prev => ({ 
+          ...prev, 
+          lifetime: data.totalStudyTime || 0,
+          week: data.thisWeekTime || 0,
+          month: data.thisMonthTime || 0,
+          year: data.thisYearTime || 0
+        }));
       }
     });
 
@@ -157,10 +175,10 @@ export default function StudentDashboard() {
               </section>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5">
-                 <MetricItem label="Today's study" val={formatStudyTime(baseStats.today + elapsedSeconds)} icon={<Clock />} active={isActive} />
-                 <MetricItem label="This week" val={formatStudyTime(baseStats.today + elapsedSeconds)} icon={<Calendar />} />
-                 <MetricItem label="This month" val={formatStudyTime(baseStats.today + elapsedSeconds)} icon={<BarChart />} />
-                 <MetricItem label="Yearly goal" val={formatStudyTime(baseStats.today + elapsedSeconds)} icon={<AreaChart />} />
+                 <MetricItem label="Today's study" val={formatStudyTime(baseStats.today + unSyncedSeconds)} icon={<Clock />} active={isActive} />
+                 <MetricItem label="This week" val={formatStudyTime(baseStats.week + unSyncedSeconds)} icon={<Calendar />} />
+                 <MetricItem label="This month" val={formatStudyTime(baseStats.month + unSyncedSeconds)} icon={<BarChart />} />
+                 <MetricItem label="Yearly goal" val={formatStudyTime(baseStats.year + unSyncedSeconds)} icon={<AreaChart />} />
               </div>
 
               <Card className="border-none shadow-lg rounded-2xl md:rounded-[2rem] bg-white overflow-hidden border border-slate-50">
@@ -199,19 +217,19 @@ export default function StudentDashboard() {
                         🔥 Lifetime Study
                       </p>
                       <div className="text-3xl md:text-4xl lg:text-5xl font-black leading-none mt-2 tracking-tighter tabular-nums">
-                        {formatFullDuration(baseStats.lifetime + elapsedSeconds)}
+                        {formatFullDuration(baseStats.lifetime + unSyncedSeconds)}
                       </div>
                     </div>
 
                     <div className="flex gap-6 border-t border-white/10 pt-6">
-                      <div>
+                      <div className="flex-1">
                         <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Today</p>
-                        <p className="text-base font-black tabular-nums">{formatStudyTime(baseStats.today + elapsedSeconds)}</p>
+                        <p className="text-base font-black tabular-nums">{formatStudyTime(baseStats.today + unSyncedSeconds)}</p>
                       </div>
                       <div className="w-px h-8 bg-white/10" />
-                      <div>
+                      <div className="flex-1">
                         <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Week</p>
-                        <p className="text-base font-black tabular-nums">{formatStudyTime(baseStats.today + elapsedSeconds)}</p>
+                        <p className="text-base font-black tabular-nums">{formatStudyTime(baseStats.week + unSyncedSeconds)}</p>
                       </div>
                     </div>
                 </div>
