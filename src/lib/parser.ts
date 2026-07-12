@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v47.0.
- * FIXED: Redesigned Table parser for structured grid layout instead of ASCII.
+ * @fileOverview Institutional Deterministic Ingestion Hub v48.0.
+ * FIXED: Hardened noise filter to purge ASCII table borders (+---+).
  */
 
 export type ParserFormat = 
@@ -37,12 +37,12 @@ const NOISE_PATTERNS = [
   /^https?:\/\//i,
   /^Copyright/i,
   /^©/i,
-  /^[-\s\.\*_=]{3,}$/, 
+  /^[-\s\.\*_=|+\/\\]{3,}$/, // Hardened separator line to catch ASCII borders like +---+
   /^\s*[\.·,]{1,}\s*$/
 ];
 
 const ANS_MARKERS = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ"];
-const EXPL_MARKERS = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
+const EXPL_MARKERS = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "ਵਿਆਖਿਆ|ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
 const ACTUAL_QUESTION_KEYWORDS = /^\s*(Which|What|Who|How|Where|When|Identify|Choose|Find|Observe|Count|Select)\s/i;
 const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
 

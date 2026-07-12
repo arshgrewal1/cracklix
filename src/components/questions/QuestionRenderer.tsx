@@ -20,8 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v47.0.
- * FIXED: Implemented high-fidelity structured table rendering.
+ * @fileOverview Institutional Question Renderer v48.0.
+ * FIXED: Normalized font sizes for introductory and suffix questions.
  */
 export default function QuestionRenderer({ 
   question, 
