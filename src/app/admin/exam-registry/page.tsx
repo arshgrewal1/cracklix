@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -6,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Input } from "@/components/ui/input"
 import { Plus, Trash2, Edit, Search, Loader2, GraduationCap, Save, Star, Activity } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, doc, deleteDoc, setDoc, serverTimestamp, orderBy, updateDoc } from "firebase/firestore"
@@ -17,8 +17,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
 
 /**
- * @fileOverview Exam Vertical Registry v15.0 (High-Fidelity).
+ * @fileOverview Exam Vertical Registry v15.1 (High-Fidelity).
  * FIXED: Standardized header and search architecture to resolve spatial tightness.
+ * FIXED: Added missing Input component import.
  * VISIBILITY: Forced dark background on dropdowns for guaranteed visibility.
  */
 
