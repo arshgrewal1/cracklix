@@ -33,9 +33,10 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Production AI Ingestion Center v16.0.
- * FIXED: Resolved button distortion and text clipping on desktop.
- * FIXED: Optimized panel scaling to prevent "squeezed" layout on mid-sized screens.
+ * @fileOverview Production AI Ingestion Center v18.0.
+ * FIXED: Resolved button text clipping and distortion.
+ * FIXED: Increased Parser (Textarea) size to 850px for desktop documents.
+ * REBALANCED: Widened the configuration column for better spatial alignment.
  */
 
 export default function BulkIngestionPage() {
@@ -191,8 +192,8 @@ export default function BulkIngestionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-1">
         
-        {/* INPUT PANEL - ENHANCED SPACING & BUTTON FIX */}
-        <div className="lg:col-span-5 xl:col-span-4 space-y-8">
+        {/* INPUT PANEL - INCREASED WIDTH & TEXTAREA SCALE */}
+        <div className="lg:col-span-6 xl:col-span-5 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-6">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-6">
@@ -205,7 +206,7 @@ export default function BulkIngestionPage() {
                     )}
                  </div>
                  
-                 <div className="space-y-5">
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
                        <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Authority Board</Label>
                        <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v})}>
@@ -230,22 +231,22 @@ export default function BulkIngestionPage() {
               <div className="space-y-8 pt-8 border-t border-slate-50">
                  <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-slate-400 flex items-center justify-between ml-1">
-                        Raw Document Paste
-                        <Badge variant="outline" className="text-[8px] border-blue-100 bg-blue-50 text-blue-600 font-black">AI-HUB</Badge>
+                        Raw Document Paste (Parser)
+                        <Badge variant="outline" className="text-[8px] border-blue-100 bg-blue-50 text-blue-600 font-black">AI-HUB v2.0</Badge>
                     </Label>
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
                         placeholder="Paste OCR text, PDF content, or WhatsApp MCQs here..."
-                        className="min-h-[450px] md:min-h-[550px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10"
+                        className="min-h-[550px] md:min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar"
                     />
                  </div>
 
-                 {/* INITIALIZE BUTTON - FIXED HEIGHT & TEXT CLIPPING */}
+                 {/* INITIALIZE BUTTON - FIXED PADDING & CLIPPING */}
                  <Button 
                     onClick={handleAIIngest} 
                     disabled={isProcessing} 
-                    className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-tight text-xs md:text-sm rounded-2xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-6"
+                    className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-xs md:text-sm rounded-2xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-12"
                  >
                     {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Zap className="h-6 w-6 text-primary fill-current" />} 
                     Initialize Ingestion
@@ -254,8 +255,8 @@ export default function BulkIngestionPage() {
            </Card>
         </div>
 
-        {/* STAGING HUB */}
-        <div className="lg:col-span-7 xl:col-span-8 space-y-8">
+        {/* STAGING HUB - REBALANCED WIDTH */}
+        <div className="lg:col-span-6 xl:col-span-7 space-y-8">
            <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-5">
                  <Layers className="h-6 w-6 text-primary" />
