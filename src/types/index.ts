@@ -242,6 +242,8 @@ export interface Question {
   englishQuestion: string;
   punjabiQuestion?: string;
   hindiQuestion?: string;
+  englishDiagramQuestion?: string;
+  punjabiDiagramQuestion?: string;
   englishQuestionSuffix?: string;
   punjabiQuestionSuffix?: string;
   hindiQuestionSuffix?: string;

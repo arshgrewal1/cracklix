@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Question, LanguageDisplayMode } from '@/types';
 import { cn } from '@/lib/utils';
 import MathText from './MathText';
@@ -19,8 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v44.0.
- * FIXED: Diagram questions now render with Middle-Diagram layout (Intro -> Diagram -> Suffix).
+ * @fileOverview Institutional Question Renderer v46.0.
+ * FIXED: Diagram questions now render with 5-part body structure.
+ * Order: Setup EN -> Setup PA -> Diagram -> Suffix EN -> Suffix PA.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -60,41 +61,6 @@ export default function QuestionRenderer({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const rawEn = q.englishQuestion || q.questionEn || q.questionText || "";
-  const rawLocal = q.punjabiQuestion || q.questionPa || q.hindiQuestion || q.questionHi || "";
-
-  const isSeriesLine = (line: string) => {
-    const trimmed = line.trim();
-    if (!trimmed) return false;
-    const alphanumeric = trimmed.replace(/[^a-zA-Z0-9]/g, '');
-    if (alphanumeric.length === 0) return false;
-    const letters = (trimmed.match(/[a-z]/gi) || []).length;
-    const digits = (trimmed.match(/[0-9]/g) || []).length;
-    const separators = (trimmed.match(/[,\-\>\:\?]/g) || []).length;
-    const words = trimmed.split(/\s+/).filter(w => w.length > 3).length;
-    return (digits > 0 && words <= 2) || (separators >= 2 && words <= 2) || (letters > 0 && letters < 12 && digits > 3);
-  };
-
-  const processText = (text: string) => {
-    const lines = text.split('\n');
-    const statementLines: string[] = [];
-    const seriesLines: string[] = [];
-
-    lines.forEach(l => {
-      if (isSeriesLine(l)) seriesLines.push(l);
-      else if (l.trim()) statementLines.push(l);
-    });
-
-    return {
-      statement: statementLines.join('\n'),
-      series: seriesLines.join('\n')
-    };
-  };
-
-  const enNode = processText(rawEn);
-  const localNode = processText(rawLocal);
-  const commonSeries = [enNode.series, localNode.series].filter(Boolean).join('\n');
-
   const OPT_LABELS = ['A', 'B', 'C', 'D'];
 
   return (
@@ -121,50 +87,39 @@ export default function QuestionRenderer({
       )}
 
       <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
-         {/* INTRO TEXT (PHASE 1) */}
-         {showEn && enNode.statement && (
+         {/* SECTION 1: English Question Setup */}
+         {showEn && q.englishQuestion && (
            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
-             <MathText text={enNode.statement} />
+             <MathText text={q.englishQuestion} />
            </div>
          )}
-         {showLocal && localNode.statement && (
+         
+         {/* SECTION 2: Punjabi Question Setup */}
+         {showLocal && q.punjabiQuestion && (
            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
-             <MathText text={localNode.statement} />
+             <MathText text={q.punjabiQuestion} />
            </div>
          )}
 
-         {/* DIAGRAM NODE (PHASE 2) */}
+         {/* SECTION 3: Diagram Block */}
          {q.diagramContent && (
             <div className="my-6 p-6 md:p-10 bg-[#0F172A] text-emerald-400 rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[10px] md:text-sm overflow-x-auto whitespace-pre leading-relaxed shadow-inner border border-white/5 relative group">
-               <div className="absolute top-2 right-4 opacity-20 pointer-events-none uppercase text-[8px] font-black tracking-widest">ASCII HUB</div>
+               <div className="absolute top-2 right-4 opacity-20 pointer-events-none uppercase text-[8px] font-black tracking-widest">Diagram Hub</div>
                {q.diagramContent}
             </div>
          )}
 
-         {/* SUFFIX QUESTION SENTENCE (PHASE 3) */}
-         {showEn && q.englishQuestionSuffix && (
-            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
-              <MathText text={q.englishQuestionSuffix} />
-            </div>
-         )}
-         {showLocal && (q.punjabiQuestionSuffix || q.hindiQuestionSuffix) && (
-            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
-              <MathText text={q.punjabiQuestionSuffix || q.hindiQuestionSuffix} />
+         {/* SECTION 4: Actual Question Sentence (English) */}
+         {showEn && q.englishDiagramQuestion && (
+            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
+              <MathText text={q.englishDiagramQuestion} />
             </div>
          )}
 
-         {commonSeries && (
-            <div className={cn(
-              "p-6 md:p-10 rounded-2xl md:rounded-[2rem] bg-blue-50/50 border border-blue-100/50 shadow-inner mt-4 animate-in zoom-in-95 duration-500",
-              showSolution ? "md:p-8" : ""
-            )}>
-               <div className="flex items-center gap-3 mb-4 opacity-30">
-                  <Zap className="h-4 w-4 text-primary fill-current" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">Logic Hub</span>
-               </div>
-               <div className={cn("font-black text-[#0F172A] antialiased leading-tight text-center", showSolution ? "text-lg md:text-3xl" : "text-2xl md:text-5xl")}>
-                  <MathText text={commonSeries} />
-               </div>
+         {/* SECTION 5: Actual Question Sentence (Punjabi) */}
+         {showLocal && q.punjabiDiagramQuestion && (
+            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
+              <MathText text={q.punjabiDiagramQuestion} />
             </div>
          )}
       </div>
@@ -228,11 +183,6 @@ export default function QuestionRenderer({
                     <p className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight">
                        Option {q.correctAnswer}: {q[`option${q.correctAnswer}English`]}
                     </p>
-                    {showLocal && q[`option${q.correctAnswer}${renderLang.includes('HINDI') ? 'Hindi' : 'Punjabi'}`] && (
-                       <p className="text-lg md:text-2xl font-bold text-[#0F172A] opacity-80">
-                          {q[`option${q.correctAnswer}${renderLang.includes('HINDI') ? 'Hindi' : 'Punjabi'}`]}
-                       </p>
-                    )}
                  </div>
               </div>
 
@@ -254,7 +204,7 @@ export default function QuestionRenderer({
                     )}
                     {showLocal && (q.punjabiExplanation || q.hindiExplanation) && (
                        <div className="space-y-2">
-                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">{renderLang.includes('HINDI') ? 'Hindi' : 'Punjabi'} Explanation</p>
+                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">Punjabi Explanation</p>
                           <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
                              <MathText text={q.punjabiExplanation || q.hindiExplanation} className="text-inherit" />
                           </div>
