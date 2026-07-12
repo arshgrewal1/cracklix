@@ -15,11 +15,11 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v22.0.
- * FIXED: Reduced logo scale for a refined administrative look.
+ * @fileOverview Admin Layout v23.0.
+ * FIXED: Hardened loading state to prevent "white screen" while user profile is being verified.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  const { user, profile, loading } = useUser();
+  const { user, profile, loading, profileLoading } = useUser();
   const authInstance = useAuth();
   const router = useRouter();
   const pathname = usePathname() ?? '';
@@ -36,7 +36,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   }, []);
 
-  // SIDEBAR AUTO-COLLAPSE ON NAVIGATION
   useEffect(() => {
     if (mounted && window.innerWidth < 1024) {
       setIsSidebarOpen(false);
@@ -45,17 +44,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const userEmail = user?.email?.toLowerCase();
   const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
-  const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
+  
+  // Guard against missing profile while authenticated
+  const isAdmin = (profile && (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN')) || isFounder;
+
+  const isAccessBlocked = !loading && mounted && (!user || (!isAdmin && !profileLoading));
 
   useEffect(() => {
-    if (!loading && mounted) {
+    if (isAccessBlocked) {
       if (!user) {
         router.replace(`/login?returnUrl=${encodeURIComponent(pathname)}`);
-      } else if (!isAdmin) {
+      } else {
         router.replace('/dashboard');
       }
     }
-  }, [user, profile, loading, router, isAdmin, mounted, pathname]);
+  }, [isAccessBlocked, user, router, pathname]);
 
   const toggleSidebar = () => {
     const newState = !isSidebarOpen;
@@ -68,7 +71,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/login');
   };
 
-  if (!mounted || loading) return (
+  // Wait for both Auth AND Profile (if user present)
+  const isGlobalLoading = !mounted || loading || (user && !profile && profileLoading);
+
+  if (isGlobalLoading) return (
     <div className="h-screen w-full bg-[#0F172A] flex flex-col items-center justify-center space-y-6 text-center">
        <ShieldCheck className="h-10 w-10 md:h-12 md:w-12 text-blue-600 animate-pulse" />
        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500">Securing Admin Panel...</p>

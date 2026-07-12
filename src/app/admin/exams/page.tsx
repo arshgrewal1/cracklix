@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Edit, Trash2, Building2, Save, Loader2, X } from "lucide-react"
+import { Plus, Edit, Trash2, Building2, Save, Loader2 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, doc, deleteDoc, setDoc, serverTimestamp, orderBy } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
@@ -17,9 +17,8 @@ import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 /**
- * @fileOverview Authority Hub CMS v14.0 (Standardized & Hardened).
- * FIXED: Typography tightness and spatial imbalances in the header.
- * VISIBILITY: Forced dark background on selects to resolve "invisible text" issues.
+ * @fileOverview Authority Hub CMS v15.0 (Standardized & Hardened).
+ * FIXED: Removed problematic module-level imports to resolve initialization crash.
  */
 
 export default function ExamManagement() {
@@ -77,7 +76,6 @@ export default function ExamManagement() {
   return (
     <div className="space-y-10 md:space-y-16 text-left pb-32 animate-in fade-in duration-700 pt-2">
       
-      {/* 1. HEADER HUB - STANDARDIZED SPACING */}
       <AdminPageHeader
         icon={Building2}
         label="Institutional Board Registry"
@@ -88,7 +86,6 @@ export default function ExamManagement() {
         onAction={() => setEditingBoard({ abbreviation: "", name: "", iconUrl: "", categoryId: "", displayOrder: (boards?.length || 0) + 1 })}
       />
 
-      {/* 2. SEARCH HUB */}
       <div className="max-w-2xl">
         <AdminSearchInput
           value={searchTerm}
@@ -97,7 +94,6 @@ export default function ExamManagement() {
         />
       </div>
 
-      {/* 3. DATA LEDGER */}
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[800px]">
@@ -152,7 +148,6 @@ export default function ExamManagement() {
         </CardContent>
       </Card>
 
-      {/* 4. DIALOG HUB - HIGH FIDELITY SELECTS */}
       <AdminDialogShell
         open={!!editingBoard}
         onOpenChange={(open) => !open && !isSaving && setEditingBoard(null)}
@@ -184,12 +179,12 @@ export default function ExamManagement() {
          <div className="space-y-1.5 text-left">
             <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Vertical Category Hub</Label>
             <Select value={editingBoard?.categoryId || ""} onValueChange={(v) => setEditingBoard({...editingBoard, categoryId: v})}>
-               <SelectTrigger className="h-12 md:h-16 rounded-xl md:rounded-2xl bg-slate-50 border-none font-bold px-6 shadow-inner">
+               <SelectTrigger className="h-12 md:h-16 rounded-xl md:rounded-2xl bg-slate-50 border-none font-bold px-6 shadow-inner text-[#0F172A]">
                   <SelectValue placeholder="Select Parent Category" />
                </SelectTrigger>
                <SelectContent className="bg-[#0B1528] border-white/10 text-white">
                   {categories?.map((c: any) => (
-                     <SelectItem key={c.id} value={c.id} className="focus:bg-primary/20">
+                     <SelectItem key={c.id} value={c.id} className="focus:bg-primary/20 cursor-pointer">
                         {c.title}
                      </SelectItem>
                   ))}

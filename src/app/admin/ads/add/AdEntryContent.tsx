@@ -1,3 +1,4 @@
+
 'use client'
 
 import { useState, useMemo, useEffect, Suspense } from "react"
@@ -10,16 +11,20 @@ import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronLeft, Save, Loader2, LayoutGrid, Smartphone, Monitor } from "lucide-react"
 import { useFirestore, useDoc, useCollection } from "@/firebase"
-import { setDoc, serverTimestamp } from "firebase/firestore"
+import { setDoc, serverTimestamp, doc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Ad, AdType, AdPlacementType, AdStatus, Exam } from "@/types"
 import { cn } from "@/lib/utils"
-import { adDoc, examsCollection, adsCollection } from "@/firebase/typed-converters"
 
 const PLACEMENTS: AdPlacementType[] = [
   'HOMEPAGE_TOP', 'HOMEPAGE_MIDDLE', 'HOMEPAGE_BOTTOM', 'EXAM_LISTING',
   'MOCK_LISTING', 'NOTES_PAGE', 'CA_PAGE', 'RESULT_PAGE', 'SIDEBAR', 'FOOTER'
 ];
+
+/**
+ * @fileOverview Ad Entry Page Content v4.0.
+ * FIXED: Removed problematic module-level getFirestore calls.
+ */
 
 export default function AdEntryContent({ serverExistingAd, serverExams, serverAdId }: any) {
   const router = useRouter()
@@ -63,7 +68,7 @@ export default function AdEntryContent({ serverExistingAd, serverExams, serverAd
 
     setIsSaving(true)
     const finalId = serverAdId || `ad-${Date.now()}`
-    const adRef = adDoc(finalId)
+    const adRef = doc(db, "ads", finalId)
 
     const payload: Partial<Ad> = {
       ...formData,
@@ -120,13 +125,13 @@ export default function AdEntryContent({ serverExistingAd, serverExams, serverAd
                  <div className="space-y-3">
                     <Label className="text-[10px] font-black uppercase text-slate-400 tracking-widest ml-1">Ad Engine</Label>
                     <Select value={formData.type} onValueChange={(v: AdType) => setFormData({...formData, type: v})}>
-                       <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-black uppercase text-[10px]">
+                       <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none font-black uppercase text-[10px] text-[#0F172A]">
                           <SelectValue />
                        </SelectTrigger>
-                       <SelectContent>
-                          <SelectItem value="BANNER">Direct Image Banner</SelectItem>
-                          <SelectItem value="ADSENSE">Google AdSense Node</SelectItem>
-                          <SelectItem value="HTML">Custom HTML/Affiliate</SelectItem>
+                       <SelectContent className="bg-[#0B1528] border-white/10 text-white">
+                          <SelectItem value="BANNER" className="cursor-pointer">Direct Image Banner</SelectItem>
+                          <SelectItem value="ADSENSE" className="cursor-pointer">Google AdSense Node</SelectItem>
+                          <SelectItem value="HTML" className="cursor-pointer">Custom HTML/Affiliate</SelectItem>
                        </SelectContent>
                     </Select>
                  </div>
@@ -194,10 +199,10 @@ export default function AdEntryContent({ serverExistingAd, serverExams, serverAd
                        <SelectTrigger className="h-12 rounded-xl bg-white/5 border-none font-bold">
                           <SelectValue />
                        </SelectTrigger>
-                       <SelectContent>
-                          <SelectItem value="ACTIVE">System Online</SelectItem>
-                          <SelectItem value="PAUSED">System Paused</SelectItem>
-                          <SelectItem value="SCHEDULED">Scheduled Node</SelectItem>
+                       <SelectContent className="bg-[#0B1528] border-white/10 text-white">
+                          <SelectItem value="ACTIVE" className="cursor-pointer">System Online</SelectItem>
+                          <SelectItem value="PAUSED" className="cursor-pointer">System Paused</SelectItem>
+                          <SelectItem value="SCHEDULED" className="cursor-pointer">Scheduled Node</SelectItem>
                        </SelectContent>
                     </Select>
                  </div>

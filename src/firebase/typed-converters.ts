@@ -5,14 +5,18 @@ import {
     SnapshotOptions,
     DocumentData,
     collection,
-    CollectionReference,
     doc,
-    DocumentReference,
-    getFirestore
+    getFirestore,
+    Firestore
 } from 'firebase/firestore';
 import { Ad, Exam } from '@/types';
 
-const adConverter: FirestoreDataConverter<Ad> = {
+/**
+ * @fileOverview Institutional Data Converters v2.0.
+ * FIXED: Removed module-level getFirestore() calls to prevent initialization crashes.
+ */
+
+export const adConverter: FirestoreDataConverter<Ad> = {
     toFirestore(ad: Ad): DocumentData {
         return { ...ad };
     },
@@ -28,11 +32,10 @@ const adConverter: FirestoreDataConverter<Ad> = {
     },
 };
 
-export const adsCollection = collection(getFirestore(), 'ads').withConverter(adConverter);
+export const getAdsCollection = (db: Firestore) => collection(db, 'ads').withConverter(adConverter);
+export const getAdDoc = (db: Firestore, id: string) => doc(db, 'ads', id).withConverter(adConverter);
 
-export const adDoc = (id: string) => doc(getFirestore(), 'ads', id).withConverter(adConverter);
-
-const examConverter: FirestoreDataConverter<Exam> = {
+export const examConverter: FirestoreDataConverter<Exam> = {
     toFirestore(exam: Exam): DocumentData {
         return { ...exam };
     },
@@ -48,8 +51,5 @@ const examConverter: FirestoreDataConverter<Exam> = {
     },
 };
 
-export const examsCollection = collection(getFirestore(), 'exams').withConverter(examConverter);
-
-export const examDoc = (id: string) => doc(getFirestore(), 'exams', id).withConverter(examConverter);
-
-
+export const getExamsCollection = (db: Firestore) => collection(db, 'exams').withConverter(examConverter);
+export const getExamDoc = (db: Firestore, id: string) => doc(db, 'exams', id).withConverter(examConverter);
