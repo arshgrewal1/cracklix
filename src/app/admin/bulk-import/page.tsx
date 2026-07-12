@@ -33,7 +33,7 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Production AI Ingestion Center v20.0.
+ * @fileOverview Production AI Ingestion Center v21.0.
  * FIXED: Resolved button text clipping and circular distortion.
  * FIXED: Optimized desktop grid spans to prevent layout squeezing.
  * SCALED: Increased parser height to 850px for enterprise documents.
@@ -81,7 +81,7 @@ export default function BulkIngestionPage() {
          });
       });
 
-      if (!result?.questions) throw new Error("Invalid response hub.");
+      if (!result?.questions) throw new Error("AI returned invalid registry data.");
 
       const mapped = result.questions.map((q: any, idx: number) => {
         const validationErrors = validateMCQSchema(q);
@@ -209,7 +209,7 @@ export default function BulkIngestionPage() {
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
                        <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v})}>
-                          <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner"><SelectValue placeholder="Select Board Hub" /></SelectTrigger>
+                          <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner text-[#0F172A]"><SelectValue placeholder="Select Board Hub" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white border-white/10">
                              {boards?.map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Hub</SelectItem>)}
                           </SelectContent>
@@ -217,7 +217,7 @@ export default function BulkIngestionPage() {
                     </div>
                     <div className="space-y-2">
                        <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
-                          <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner"><SelectValue placeholder="Select Subject Node" /></SelectTrigger>
+                          <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner text-[#0F172A]"><SelectValue placeholder="Select Subject Node" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white border-white/10 max-h-80">
                              {subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                           </SelectContent>
@@ -236,7 +236,7 @@ export default function BulkIngestionPage() {
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
                         placeholder="Paste OCR text, PDF content, or WhatsApp MCQs here..."
-                        className="min-h-[550px] md:min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar"
+                        className="min-h-[550px] md:min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>
 
@@ -274,7 +274,7 @@ export default function BulkIngestionPage() {
                        <div className="flex items-center gap-4">
                           <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] uppercase tracking-widest px-4 py-1.5 rounded-lg">AI Node #{idx + 1}</Badge>
                        </div>
-                       <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center active:scale-90 opacity-0 group-hover:opacity-100 transition-all"><Trash2 className="h-5 w-5" /></button>
+                       <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                     </CardHeader>
 
                     <CardContent className="p-6 md:p-12 lg:p-16 pt-4">
