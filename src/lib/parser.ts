@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v68.0.
- * FIXED: Assertion & Reason strict bilingual sequencing (Assert EN -> Assert PA -> Reason EN -> Reason PA).
+ * @fileOverview Institutional Deterministic Ingestion Hub v69.0.
+ * FIXED: Assertion & Reason continuous scanner with support for standalone labels and strict ordering.
  */
 
 import { serverTimestamp } from 'firebase/firestore';
@@ -56,7 +56,6 @@ export const INSTR_KEYWORDS = [
   "Find the correct matching.",
   "Select the correctly matched option."
 ];
-export const ACTUAL_QUESTION_KEYWORDS = /^\s*(Which|What|Who|How|Where|When|Identify|Choose|Find|Observe|Count|Select|During\s?which|How\s?many|How\s?much)\s/i;
 
 const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
 
@@ -101,10 +100,6 @@ export function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', 
     { regex: /^\s*[\(]?([B])[\)\.]\s*(.*)/i, val: 'B' },
     { regex: /^\s*[\(]?([C])[\)\.]\s*(.*)/i, val: 'C' },
     { regex: /^\s*[\(]?([D])[\)\.]\s*(.*)/i, val: 'D' },
-    { regex: /^\s*[\(]?(1)[\)\.]\s*(.*)/, val: 'A' },
-    { regex: /^\s*[\(]?(2)[\)\.]\s*(.*)/, val: 'B' },
-    { regex: /^\s*[\(]?(3)[\)\.]\s*(.*)/, val: 'C' },
-    { regex: /^\s*[\(]?(4)[\)\.]\s*(.*)/, val: 'D' },
     { regex: /^\s*([①❶])\s*(.*)/, val: 'A' },
     { regex: /^\s*([②❷])\s*(.*)/, val: 'B' },
     { regex: /^\s*([③❸])\s*(.*)/, val: 'C' },
@@ -118,7 +113,7 @@ export function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', 
   return null;
 }
 
-// --- REDESIGNED ASSERTION & REASON SCANNER ---
+// --- CONTINUOUS ASSERTION & REASON SCANNER ---
 
 export function parseAssertionReason(fullText: string, metadata: any) {
   const lines = fullText.split(/\r?\n/);
@@ -151,7 +146,7 @@ export function parseAssertionReason(fullText: string, metadata: any) {
     const trimmed = line.trim();
     if (!trimmed) continue;
 
-    // Boundary: New Question
+    // Boundary Detection: New Question
     if (isQuestionStart(line)) {
       finalize();
       currentQ = {
@@ -175,8 +170,8 @@ export function parseAssertionReason(fullText: string, metadata: any) {
 
     if (!currentQ) continue;
 
-    // Metadata Terminate
-    if (NOISE_PATTERNS.some(p => p.test(trimmed)) && state === 'EXPL') {
+    // Metadata & Noise Filter
+    if (NOISE_PATTERNS.some(p => p.test(trimmed)) && (state === 'EXPL' || state === 'ANSWER')) {
       finalize();
       currentQ = null;
       continue;
@@ -184,7 +179,7 @@ export function parseAssertionReason(fullText: string, metadata: any) {
 
     const optMarker = detectOptionMarker(line);
     
-    // State Transitions with Script Heuristics
+    // State Transitions
     if (assertEnRegex.test(trimmed)) { state = 'ASSERT_EN'; }
     else if (assertPaRegex.test(trimmed)) { state = 'ASSERT_PA'; }
     else if (reasonEnRegex.test(trimmed)) { state = 'REASON_EN'; }
@@ -193,32 +188,32 @@ export function parseAssertionReason(fullText: string, metadata: any) {
     else if (explRegex.test(trimmed)) { state = 'EXPL'; }
     else if (optMarker && (state === 'REASON_PA' || state === 'REASON_EN' || state === 'OPTIONS')) { state = 'OPTIONS'; }
     else {
-      // Continuation heuristic: If we see Gurmukhi in Assert EN mode, it's actually Assert PA
+      // Heuristic: Auto-transition to Punjabi if Gurmukhi detected in English states
       if (state === 'ASSERT_EN' && GURMUKHI_REGEX.test(trimmed)) state = 'ASSERT_PA';
       if (state === 'REASON_EN' && GURMUKHI_REGEX.test(trimmed)) state = 'REASON_PA';
     }
 
-    // Content Extraction
-    let content = trimmed;
-    if (assertEnRegex.test(trimmed)) content = trimmed.replace(assertEnRegex, '').trim();
-    else if (assertPaRegex.test(trimmed)) content = trimmed.replace(assertPaRegex, '').trim();
-    else if (reasonEnRegex.test(trimmed)) content = trimmed.replace(reasonEnRegex, '').trim();
-    else if (reasonPaRegex.test(trimmed)) content = trimmed.replace(reasonPaRegex, '').trim();
+    // Extraction Logic
+    let cleanContent = trimmed;
+    if (assertEnRegex.test(trimmed)) cleanContent = trimmed.replace(assertEnRegex, '').trim();
+    else if (assertPaRegex.test(trimmed)) cleanContent = trimmed.replace(assertPaRegex, '').trim();
+    else if (reasonEnRegex.test(trimmed)) cleanContent = trimmed.replace(reasonEnRegex, '').trim();
+    else if (reasonPaRegex.test(trimmed)) cleanContent = trimmed.replace(reasonPaRegex, '').trim();
 
-    if (!content && (assertEnRegex.test(trimmed) || assertPaRegex.test(trimmed) || reasonEnRegex.test(trimmed) || reasonPaRegex.test(trimmed))) continue;
+    if (!cleanContent && (assertEnRegex.test(trimmed) || assertPaRegex.test(trimmed) || reasonEnRegex.test(trimmed) || reasonPaRegex.test(trimmed))) continue;
 
     switch (state) {
       case 'ASSERT_EN':
-        currentQ.assertion.english += (currentQ.assertion.english ? '\n' : '') + content;
+        currentQ.assertion.english += (currentQ.assertion.english ? '\n' : '') + cleanContent;
         break;
       case 'ASSERT_PA':
-        currentQ.assertion.punjabi += (currentQ.assertion.punjabi ? '\n' : '') + content;
+        currentQ.assertion.punjabi += (currentQ.assertion.punjabi ? '\n' : '') + cleanContent;
         break;
       case 'REASON_EN':
-        currentQ.reason.english += (currentQ.reason.english ? '\n' : '') + content;
+        currentQ.reason.english += (currentQ.reason.english ? '\n' : '') + cleanContent;
         break;
       case 'REASON_PA':
-        currentQ.reason.punjabi += (currentQ.reason.punjabi ? '\n' : '') + content;
+        currentQ.reason.punjabi += (currentQ.reason.punjabi ? '\n' : '') + cleanContent;
         break;
       case 'OPTIONS':
         if (optMarker) {
@@ -230,12 +225,12 @@ export function parseAssertionReason(fullText: string, metadata: any) {
         if (ansMatch) currentQ.correctAnswer = ansMatch[0].toUpperCase();
         break;
       case 'EXPL':
-        const cleanExpl = trimmed.replace(explRegex, '').replace(ansRegex, '').trim();
-        if (cleanExpl) {
-          if (GURMUKHI_REGEX.test(cleanExpl)) {
-            currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + cleanExpl;
+        const explText = trimmed.replace(explRegex, '').replace(ansRegex, '').trim();
+        if (explText) {
+          if (GURMUKHI_REGEX.test(explText)) {
+            currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + explText;
           } else {
-            currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + cleanExpl;
+            currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + explText;
           }
         }
         break;
@@ -245,8 +240,6 @@ export function parseAssertionReason(fullText: string, metadata: any) {
   finalize();
   return { questions };
 }
-
-// --- REMAINDER OF PARSERS ---
 
 export function parseMatching(chunk: string, metadata: any) {
   const lines = chunk.split(/\r?\n/);
@@ -269,7 +262,6 @@ export function parseMatching(chunk: string, metadata: any) {
     if (!trimmed) continue;
     if (isQuestionStart(line) && line !== lines[0]) break;
     
-    // Metadata Terminate
     if (NOISE_PATTERNS.some(p => p.test(trimmed))) {
        if (state === 'EXPL') break;
        continue;
@@ -280,7 +272,6 @@ export function parseMatching(chunk: string, metadata: any) {
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isInstr = INSTR_KEYWORDS.some(k => trimmed.toLowerCase().includes(k.toLowerCase()));
 
-    // Layout Analysis for Header Detection
     const parts = trimmed.split(/\s{3,}/);
     const isHeaderRow = parts.length === 2 && (
       trimmed.toLowerCase().includes('list') || 
@@ -402,7 +393,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   const processedText = preprocessText(rawText);
   const fmt = metadata.parserFormat;
 
-  // Use Continuous Scanning Machine for Assertion/Reason
   if (fmt === 'ASSERTION') {
     return parseAssertionReason(processedText, metadata);
   }
@@ -410,9 +400,8 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   const chunks = segmentTextByQuestions(processedText);
   const allQuestions: any[] = [];
 
-  chunks.forEach((chunk, index) => {
+  chunks.forEach((chunk) => {
     let result: any = { questions: [] };
-
     if (fmt === 'MATCHING') result = parseMatching(chunk, metadata);
     else result = parseDeterministicBilingual(chunk, metadata);
 
