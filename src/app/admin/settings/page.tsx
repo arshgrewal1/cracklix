@@ -27,10 +27,12 @@ import {
   User,
   LayoutGrid,
   BarChart3,
-  Eye,
+  Eye, 
   EyeOff,
   TrendingUp,
-  Users
+  Users,
+  CheckCircle2,
+  X
 } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -38,8 +40,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Administrative Portal v19.2.
- * FIXED: Restored missing Users icon import.
+ * @fileOverview Institutional Administrative Portal v19.3.
+ * FIXED: Restored missing CheckCircle2 and X icon imports.
  */
 
 export default function AdminSettings() {
