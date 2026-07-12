@@ -48,8 +48,9 @@ const FORMATS: { label: string, value: ParserFormat }[] = [
 ];
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v43.1.
- * FIXED: Diagram parser bypasses noise filtering to preserve ASCII integrity.
+ * @fileOverview Modular Industrial Ingestion Hub v46.1.
+ * FIXED: Multi-line question text support in default parser.
+ * FIXED: High-fidelity debug logging for ingestion tracing.
  */
 export default function BulkIngestionPage() {
   const router = useRouter()
@@ -82,28 +83,34 @@ export default function BulkIngestionPage() {
 
     setIsProcessing(true)
     try {
-      console.log("[DEBUG_INGESTION] Start Parse Flow");
+      console.log("[DEBUG_INGESTION] Selected Question Type:", metadata.parserFormat);
       
-      // DIAGRAM FIX: Skip preprocessing to preserve boxes, arrows, and layouts
       const inputToParse = metadata.parserFormat === 'DIAGRAM' 
         ? rawText 
         : preprocessText(rawText);
       
       const lines = inputToParse.split('\n');
+      console.log("[DEBUG_INGESTION] Total lines to process:", lines.length);
+
       const hasAnyQuestion = lines.some(line => isQuestionStart(line.trim()));
+      console.log("[DEBUG_INGESTION] Any question marker found:", hasAnyQuestion);
       
       if (!hasAnyQuestion) {
          throw new Error("No questions detected. Please ensure your content uses supported markers like Q1, Q.1, or Question 1.");
       }
 
       const result = parseBulkQuestions(inputToParse, metadata);
+      console.log("[DEBUG_INGESTION] Parser returned questions:", result?.questions?.length || 0);
 
       if (!result?.questions || result.questions.length === 0) {
          throw new Error("Parser failed to extract questions. Please verify your document structure.");
       }
 
-      const validated = result.questions.map(q => {
+      const validated = result.questions.map((q, idx) => {
          const { errors, warnings } = validateMCQSchema(q);
+         if (errors.length > 0) {
+            console.warn(`[DEBUG_INGESTION] Question #${idx + 1} validation failed:`, errors);
+         }
          return {
             ...q,
             isValid: errors.length === 0,
@@ -116,7 +123,7 @@ export default function BulkIngestionPage() {
       setStagedQuestions(validated);
       toast({ title: "Extraction Complete", description: `${validated.length} nodes processed.` });
     } catch (e: any) {
-      console.error("[DEBUG_INGESTION] Validation Result: FAILED", e.message);
+      console.error("[DEBUG_INGESTION] FATAL ERROR:", e.message);
       toast({ variant: "destructive", title: "Parsing Error", description: e.message });
     } finally {
       setIsProcessing(false)
@@ -206,7 +213,7 @@ export default function BulkIngestionPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
         <div className="lg:col-span-5 space-y-8">
-           <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden sticky top-24">
+           <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-8">
                  <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
                     <Braces className="h-6 w-6 text-primary" />
@@ -313,7 +320,7 @@ export default function BulkIngestionPage() {
                     "border-none shadow-lg rounded-[2.5rem] bg-white overflow-hidden group border border-slate-100 relative transition-all duration-500",
                     !q.isValid && "ring-1 ring-rose-500/20"
                  )}>
-                    <div className={cn("absolute top-0 left-0 w-2 h-full transition-all duration-700", q.isValid ? "bg-emerald-500" : "bg-rose-500")} />
+                    <div className={cn("absolute top-0 left-0 w-2 h-full transition-all duration-700", q.isValid ? "bg-emerald-50" : "bg-rose-50")} />
                     
                     <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
                        <div className="flex items-center gap-4">
