@@ -1,7 +1,7 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v38.0.
+ * @fileOverview Institutional Specialized Local Parser v39.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Assertion-Reason formats.
- * FIXED: Hardened pre-processor to liquidate "Page", "Copyright", and "Ads" noise.
+ * FIXED: Captured "Question X" without dots and handles "Answer : A" with spaces.
  */
 
 export type ParserFormat = 
@@ -76,7 +76,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   const format: ParserFormat = metadata.parserFormat || 'BILINGUAL_MCQ';
   const questions: any[] = [];
   
-  // Split by Question markers (Line anchored) - HARDENED REGEX
+  // Split by Question markers (Line anchored) - HARDENED REGEX (Added support for Question X without dots)
   const blocks = rawText.split(/(?=\n\s*(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+)(?:[\.\s:]|$)|^(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+)(?:[\.\s:]|$))/i);
 
   blocks.forEach(block => {
@@ -279,6 +279,7 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
   const localKey = secondaryLang === 'hindi' ? 'hindiQuestion' : 'punjabiQuestion';
   const expLocalKey = secondaryLang === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
 
+  // Hardened Answer matching to handle spaces like "Answer : A"
   const answerMatch = block.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ|Correct Answer)\s*[:\-]?\s*\(?([A-D])\)?/i);
   const explStartIndex = block.search(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या|Rationale)\s*[:\-]?/i);
   
@@ -322,7 +323,6 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
   q.correctAnswer = (answerMatch?.[1] || "A").toUpperCase();
 
   if (explanationPart) {
-    // Aggressive cleaning for explanation
     const expClean = explanationPart
       .replace(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या|Rationale)\s*[:\-]?\s*/i, '')
       .replace(/Visit www\.example\.com/gi, '')

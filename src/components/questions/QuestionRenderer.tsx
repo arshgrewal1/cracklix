@@ -19,9 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v54.0.
+ * @fileOverview Precision Bilingual Question Hub v55.0.
  * FIXED: Unified Black font color (#0F172A) for both English and Local scripts.
- * FIXED: High-fidelity separation between Correct Answer and Explanation nodes.
+ * FIXED: High-fidelity "Testbook" style rationale separation.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -80,7 +80,7 @@ export default function QuestionRenderer({
         <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-5">
            <div className="flex items-center gap-3">
               <span className="font-black text-[11px] md:text-sm text-white bg-[#0F172A] px-4 py-1.5 rounded-full shadow-lg">Q {q.displayId || '1'}</span>
-              <div className="flex items-center gap-2 text-slate-400 font-bold text-[10px] md:text-xs tabular-nums bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
+              <div className="flex items-center gap-2 text-[#0F172A] font-bold text-[10px] md:text-xs tabular-nums bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100">
                  <Clock className="h-3.5 w-3.5 text-primary" />
                  <span>{formatTime(timeLeft)}</span>
               </div>
@@ -143,12 +143,12 @@ export default function QuestionRenderer({
                     </div>
                   )}
                   {showPa && pa && (
-                    <div className={cn("font-bold leading-tight break-words", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl", isSelected ? "text-primary/70" : "text-[#0F172A]")}>
+                    <div className={cn("font-bold leading-tight break-words text-[#0F172A]", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>
                       <MathText text={pa} />
                     </div>
                   )}
                   {showHi && hi && (
-                    <div className={cn("font-bold leading-tight break-words", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl", isSelected ? "text-primary/70" : "text-[#0F172A]")}>
+                    <div className={cn("font-bold leading-tight break-words text-[#0F172A]", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>
                       <MathText text={hi} />
                     </div>
                   )}
@@ -159,7 +159,7 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      {/* RATIONALE SECTION */}
+      {/* RATIONALE SECTION - TESTBOOK STYLE */}
       {showSolution && (
         <div className="mt-10 pt-10 border-t border-slate-100 space-y-8">
            {/* CORRECT ANSWER BOX */}
@@ -170,7 +170,7 @@ export default function QuestionRenderer({
               <div className="font-black text-sm md:text-xl text-[#0F172A] pl-8">
                  <MathText text={q[`option${q.correctAnswer}English`] || ""} />
                  {(q[`option${q.correctAnswer}Punjabi`] || q[`option${q.correctAnswer}Hindi`]) && (
-                    <div className="text-xs md:text-lg font-bold mt-1">
+                    <div className="text-xs md:text-lg font-bold mt-1 text-[#0F172A]">
                        <MathText text={q[`option${q.correctAnswer}Punjabi`] || q[`option${q.correctAnswer}Hindi`]} />
                     </div>
                  )}
@@ -188,7 +188,7 @@ export default function QuestionRenderer({
 
               <div className="space-y-6">
                 {showEn && q.englishExplanation && (
-                  <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-lg">
+                  <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-lg">
                     <MathText text={q.englishExplanation} className="text-inherit" />
                   </div>
                 )}
