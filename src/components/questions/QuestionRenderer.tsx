@@ -19,9 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v52.0.
- * FIXED: Updated solution label to "Correct Answer" as requested.
- * FIXED: Optimized rationale container for clean explanation display.
+ * @fileOverview Precision Bilingual Question Hub v53.0.
+ * FIXED: Priority layout for Correct Answer at the top of the rationale block.
+ * FIXED: Displays full text of the correct option in the rationale header.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -92,7 +92,7 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      {/* QUESTION STATEMENTS - STACKED HIERARCHY */}
+      {/* QUESTION STATEMENTS */}
       <div className={cn("space-y-4 px-1", showSolution ? "mb-6" : "mb-10")}>
          {showEn && englishQ && (
            <div className={cn("font-[800] text-[#0F172A] antialiased leading-snug md:leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
@@ -110,7 +110,7 @@ export default function QuestionRenderer({
          ) : null}
       </div>
 
-      {/* OPTIONS MATRIX - NO TOGGLES, BOTH SCRIPTS SHOWN */}
+      {/* OPTIONS MATRIX */}
       {!hideOptions && (
         <div className={cn("flex flex-col w-full", showSolution ? "space-y-3" : "space-y-3 md:space-y-5")}>
           {OPT_LABELS.map((key, idx) => {
@@ -161,19 +161,41 @@ export default function QuestionRenderer({
 
       {/* RATIONALE SECTION */}
       {showSolution && (
-        <div className="mt-8 pt-8 border-t border-slate-100 space-y-5">
-           <div className="flex items-center gap-3">
-              <Badge className="bg-[#0F172A] text-white border-none font-black text-[9px] md:text-[11px] px-5 py-1.5 rounded-full shadow-lg uppercase tracking-widest">Rationale</Badge>
-              <div className="h-px flex-1 bg-slate-50" />
-           </div>
-           <div className="bg-slate-50 p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] border border-slate-100 text-slate-500 leading-relaxed font-medium text-sm md:text-lg space-y-6 shadow-inner">
-              <p className="font-black text-[11px] md:text-sm text-[#0F172A] pb-3 border-b border-slate-200/50 flex items-center gap-3 uppercase tracking-tight">
-                 <ShieldCheck className="h-5 w-5 text-emerald-500" /> Correct Answer: Option {q.correctAnswer}
-              </p>
+        <div className="mt-8 pt-8 border-t border-slate-100 space-y-6">
+           <div className="bg-slate-50 p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] border border-slate-100 text-slate-500 leading-relaxed font-medium text-sm md:text-lg space-y-8 shadow-inner">
+              
+              {/* CORRECT ANSWER PRIORITY HEADER */}
+              <div className="pb-5 border-b border-slate-200/50 space-y-3">
+                 <div className="flex items-center gap-3 font-black text-[11px] md:text-sm text-emerald-600 uppercase tracking-widest">
+                    <ShieldCheck className="h-5 w-5" /> Correct Answer: Option {q.correctAnswer}
+                 </div>
+                 {/* FULL TEXT OF THE CORRECT OPTION */}
+                 <div className="font-black text-sm md:text-xl text-[#0F172A] pl-8">
+                    <MathText text={q[`option${q.correctAnswer}English`] || ""} />
+                    {(q[`option${q.correctAnswer}Punjabi`] || q[`option${q.correctAnswer}Hindi`]) && (
+                       <div className="text-xs md:text-base text-slate-400 font-bold mt-1">
+                          <MathText text={q[`option${q.correctAnswer}Punjabi`] || q[`option${q.correctAnswer}Hindi`]} />
+                       </div>
+                    )}
+                 </div>
+              </div>
+
+              {/* EXPLANATION CONTENT */}
               <div className="space-y-6">
-                {showEn && q.englishExplanation && <div className="font-bold text-slate-700"><MathText text={q.englishExplanation} className="text-inherit" /></div>}
-                {showPa && q.punjabiExplanation && <div className="font-medium text-slate-500"><MathText text={q.punjabiExplanation} className="text-inherit" /></div>}
-                {showHi && q.hindiExplanation && <div className="font-medium text-slate-500"><MathText text={q.hindiExplanation} className="text-inherit" /></div>}
+                {showEn && q.englishExplanation && (
+                  <div className="font-bold text-slate-700 leading-relaxed">
+                    <MathText text={q.englishExplanation} className="text-inherit" />
+                  </div>
+                )}
+                {(showPa && q.punjabiExplanation) ? (
+                   <div className="font-medium text-slate-500 leading-relaxed">
+                    <MathText text={q.punjabiExplanation} className="text-inherit" />
+                  </div>
+                ) : (showHi && q.hindiExplanation) ? (
+                   <div className="font-medium text-slate-500 leading-relaxed">
+                    <MathText text={q.hindiExplanation} className="text-inherit" />
+                  </div>
+                ) : null}
               </div>
            </div>
         </div>
@@ -181,4 +203,3 @@ export default function QuestionRenderer({
     </div>
   );
 }
-
