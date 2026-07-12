@@ -257,6 +257,10 @@ export interface Question {
   diagramContent?: string;
   graphContent?: string;
   matchingContent?: string;
+  matchingBlock?: {
+    leftColumn: string[];
+    rightColumn: string[];
+  };
   tableContent?: TableContent;
   optionAEnglish: string;
   optionAPunjabi?: string;

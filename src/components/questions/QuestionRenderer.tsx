@@ -20,8 +20,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v53.0.
- * FIXED: Added high-fidelity rendering sequence for Match the Following content.
+ * @fileOverview Institutional Question Renderer v54.0.
+ * FIXED: Implemented high-fidelity dual-column rendering for Match the Following blocks.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -101,7 +101,33 @@ export default function QuestionRenderer({
            </div>
          )}
 
-         {/* SECTION 3: VISUAL CONTENT (TABLE / DIAGRAM / GRAPH / MATCHING) */}
+         {/* SECTION 3: MATCHING BLOCK REDESIGN */}
+         {q.matchingBlock?.leftColumn?.length > 0 && (
+            <div className="my-6 p-6 md:p-10 bg-white border-2 border-slate-100 rounded-[1.5rem] md:rounded-[2.5rem] shadow-xl overflow-hidden relative group">
+               <div className="absolute top-2 right-4 opacity-10 pointer-events-none uppercase text-[8px] font-black tracking-widest">Match Hub</div>
+               <div className="grid grid-cols-2 gap-8 md:gap-14">
+                  <div className="space-y-4">
+                     {q.matchingBlock.leftColumn.map((item: string, i: number) => (
+                        <div key={i} className="font-mono text-[11px] md:text-lg text-[#0F172A] border-b border-slate-50 pb-2 last:border-0 min-h-[1.5em]">{item}</div>
+                     ))}
+                  </div>
+                  <div className="space-y-4 border-l border-slate-50 pl-8 md:pl-14">
+                     {q.matchingBlock.rightColumn.map((item: string, i: number) => (
+                        <div key={i} className="font-mono text-[11px] md:text-lg text-[#0F172A] border-b border-slate-50 pb-2 last:border-0 min-h-[1.5em]">{item}</div>
+                     ))}
+                  </div>
+               </div>
+            </div>
+         )}
+
+         {/* LEGACY MATCHING CONTENT FALLBACK */}
+         {!q.matchingBlock?.leftColumn?.length && q.matchingContent && (
+            <div className="my-6 p-6 md:p-10 bg-white border-2 border-slate-100 rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[11px] md:text-lg text-[#0F172A] overflow-x-auto whitespace-pre leading-loose shadow-xl">
+               {q.matchingContent}
+            </div>
+         )}
+
+         {/* TABLE/DIAGRAM CONTENT */}
          {q.tableContent?.rows?.length > 0 && (
            <div className="my-8 overflow-x-auto rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
              <Table className="w-full border-collapse">
@@ -132,30 +158,16 @@ export default function QuestionRenderer({
             </div>
          )}
 
-         {q.graphContent && (
-            <div className="my-6 p-6 md:p-10 bg-slate-50 text-[#0F172A] rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[10px] md:text-sm overflow-x-auto whitespace-pre leading-relaxed shadow-inner border border-slate-200 relative group">
-               <div className="absolute top-2 right-4 opacity-20 pointer-events-none uppercase text-[8px] font-black tracking-widest">Graph Registry</div>
-               {q.graphContent}
-            </div>
-         )}
-
-         {q.matchingContent && (
-            <div className="my-6 p-6 md:p-10 bg-white border-2 border-slate-100 rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[11px] md:text-lg text-[#0F172A] overflow-x-auto whitespace-pre leading-loose shadow-xl relative group">
-               <div className="absolute top-2 right-4 opacity-20 pointer-events-none uppercase text-[8px] font-black tracking-widest">Match List</div>
-               {q.matchingContent}
-            </div>
-         )}
-
          {/* SECTION 4: INSTRUCTIONS OR SUFFIX */}
-         {showEn && (q.englishDiagramQuestion || q.englishActualQuestion || q.englishInstruction) && (
+         {showEn && (q.englishInstruction || q.englishDiagramQuestion || q.englishActualQuestion) && (
             <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
-              <MathText text={q.englishDiagramQuestion || q.englishActualQuestion || q.englishInstruction} />
+              <MathText text={q.englishInstruction || q.englishDiagramQuestion || q.englishActualQuestion} />
             </div>
          )}
 
-         {showLocal && (q.punjabiDiagramQuestion || q.punjabiActualQuestion || q.punjabiInstruction) && (
+         {showLocal && (q.punjabiInstruction || q.punjabiDiagramQuestion || q.punjabiActualQuestion) && (
             <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
-              <MathText text={q.punjabiDiagramQuestion || q.punjabiActualQuestion || q.punjabiInstruction} />
+              <MathText text={q.punjabiInstruction || q.punjabiDiagramQuestion || q.punjabiActualQuestion} />
             </div>
          )}
       </div>

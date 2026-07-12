@@ -1,7 +1,8 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v53.0.
- * FIXED: Implemented dedicated Match the Following Parser with 8-state machine.
+ * @fileOverview Institutional Deterministic Ingestion Hub v54.0.
+ * FIXED: Redesigned Match the Following parser with dual-column structured block capture.
+ * FIXED: Hardened question sentinel regex to prevent skipping Variations like "QUESTION NO.1".
  */
 
 export type ParserFormat = 
@@ -21,7 +22,7 @@ export type ParserFormat =
 
 export type ParserMode = 'PRODUCTION' | 'STRICT';
 
-export const QUESTION_SENTINEL_REGEX = /^\s*(?:Q|Question|QUESTION|Q\.)\s?[-.]?\s?\d+(?:[\.\s:]|$)/i;
+export const QUESTION_SENTINEL_REGEX = /^\s*(?:Q|Question|QUESTION|Q\.)\s*(?:NO\.?\s*)?[-.:]?\s*\d+(?:[\.\s:]|$)/i;
 
 export function isQuestionStart(line: string): boolean {
   if (!line) return false;
@@ -102,19 +103,24 @@ function parseMatching(rawText: string, metadata: any) {
 
   const finalize = () => {
     if (!currentQ) return;
-    questions.push(currentQ);
+    if (currentQ.matchingBlock.leftColumn.length > 0) {
+      questions.push(currentQ);
+    }
     currentQ = null;
   };
 
   lines.forEach((line) => {
     const trimmed = line.trim();
+    
+    // PRIORITY: New Question Marker finalized the previous state immediately.
     if (isQuestionStart(line)) {
       finalize();
       currentQ = {
         ...metadata,
         id: `q-match-${Math.random().toString(36).substr(2, 9)}`,
         questionType: 'MATCH_FOLLOWING',
-        englishQuestion: "", punjabiQuestion: "", matchingContent: "",
+        englishQuestion: "", punjabiQuestion: "", 
+        matchingBlock: { leftColumn: [], rightColumn: [] },
         englishInstruction: "", punjabiInstruction: "",
         optionAEnglish: "", optionBEnglish: "", optionCEnglish: "", optionDEnglish: "",
         correctAnswer: "", englishExplanation: "", punjabiExplanation: "",
@@ -127,6 +133,8 @@ function parseMatching(rawText: string, metadata: any) {
     }
 
     if (!currentQ) return;
+    
+    // METADATA FILTER: Skip page headers, generated artifacts etc.
     if (NOISE_PATTERNS.some(p => p.test(trimmed))) return;
 
     const opt = detectOptionMarker(line);
@@ -134,13 +142,12 @@ function parseMatching(rawText: string, metadata: any) {
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isInstr = INSTR_KEYWORDS.some(k => trimmed.toLowerCase().includes(k.toLowerCase()));
 
-    if (opt) state = 'OPTIONS';
-    else if (isAns) state = 'ANSWER';
+    // Deterministic State Shifts
+    if (isAns) state = 'ANSWER';
     else if (isExpl) state = 'EXPL_EN';
+    else if (opt) state = 'OPTIONS';
     else if (isInstr) state = 'INSTR_EN';
-
-    // Transition to Matching if we see list patterns and not in instruction/options
-    if ((state === 'INTRO_EN' || state === 'INTRO_PA') && /^(List|Column|Group|A\.|1\.|I\.)/i.test(trimmed)) {
+    else if ((state === 'INTRO_EN' || state === 'INTRO_PA') && /^(List|Column|Group|A\.|1\.|I\.)/i.test(trimmed)) {
        state = 'MATCHING';
     }
 
@@ -149,33 +156,40 @@ function parseMatching(rawText: string, metadata: any) {
         if (GURMUKHI_REGEX.test(trimmed)) {
            state = 'INTRO_PA';
            currentQ.punjabiQuestion = trimmed;
-        } else {
+        } else if (trimmed) {
            currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
         }
         break;
       case 'INTRO_PA':
-        currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
+        if (trimmed) currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
         break;
       case 'MATCHING':
-        currentQ.matchingContent += line + '\n';
+        // RAW BLOCK SPLITTER: Identifies Column I vs Column II by whitespace density.
+        const colParts = line.split(/\s{3,}/); 
+        if (colParts.length >= 2) {
+           currentQ.matchingBlock.leftColumn.push(colParts[0].trim());
+           currentQ.matchingBlock.rightColumn.push(colParts.slice(1).join('   ').trim());
+        } else if (trimmed) {
+           currentQ.matchingBlock.leftColumn.push(trimmed);
+           currentQ.matchingBlock.rightColumn.push("");
+        }
         break;
       case 'INSTR_EN':
         if (GURMUKHI_REGEX.test(trimmed)) {
            state = 'INSTR_PA';
            currentQ.punjabiInstruction = trimmed;
-        } else {
+        } else if (trimmed) {
            currentQ.englishInstruction += (currentQ.englishInstruction ? '\n' : '') + trimmed;
         }
         break;
       case 'INSTR_PA':
-        currentQ.punjabiInstruction += (currentQ.punjabiInstruction ? '\n' : '') + trimmed;
+        if (trimmed) currentQ.punjabiInstruction += (currentQ.punjabiInstruction ? '\n' : '') + trimmed;
         break;
       case 'OPTIONS':
         if (opt) currentQ[`option${opt.opt}English`] = opt.text;
         break;
       case 'ANSWER':
-        const ansClean = trimmed.replace(/^(?:Answer|Official Key|Correct Answer|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ)\s*[:\-]?\s*/i, '').trim();
-        const match = ansClean.match(/[A-D]/i);
+        const match = trimmed.match(/[A-D]/i);
         if (match) currentQ.correctAnswer = match[0].toUpperCase();
         break;
       case 'EXPL_EN':
@@ -190,7 +204,7 @@ function parseMatching(rawText: string, metadata: any) {
         }
         break;
       case 'EXPL_PA':
-        currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
+        if (trimmed) currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + trimmed;
         break;
     }
   });
@@ -297,7 +311,7 @@ function parseGraph(rawText: string, metadata: any) {
         if (match) currentQ.correctAnswer = match[0].toUpperCase();
         break;
       case 'EXPL_EN':
-        const explClean = trimmed.replace(/^(?:Explanation|Solution|ਵਿਆਖਿਆ|ਵਿਆਖਿਆ|व्याख्या|Rationale|ENGLISH EXPLANATION|PUNJABI EXPLANATION)\s*[:\-]?\s*/i, '').trim();
+        const explClean = trimmed.replace(/^(?:Explanation|Solution|ਵਿਆਖਿਆ|ਵਿਆਖਿਆ|व्याख्या|Rationale|Answer|Correct Answer|Official Key)\s*[:\-]?\s*/i, '').trim();
         if (explClean) {
           if (GURMUKHI_REGEX.test(explClean)) {
              state = 'EXPL_PA';
@@ -681,7 +695,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
-  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion && !q.diagramContent && !q.graphContent && !q.matchingContent && !q.tableContent?.rows?.length) errors.push("Question content missing.");
+  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion && !q.diagramContent && !q.graphContent && !q.matchingContent && !q.matchingBlock?.leftColumn?.length && !q.tableContent?.rows?.length) errors.push("Question content missing.");
   const optCount = ['A', 'B', 'C', 'D'].filter(l => (q[`option${l}English`] || "").trim() || (q[`option${l}Punjabi`] || "").trim() || (q[`option${l}Hindi`] || "").trim()).length;
   if (optCount < 4) errors.push("Less than four options detected.");
   if (!q.correctAnswer) errors.push("Answer missing.");
