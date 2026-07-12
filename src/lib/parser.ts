@@ -1,7 +1,8 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v38.0.
- * FIXED: Consolidated Question Detection Sentinel to support multiformat markers across parser and validator.
+ * @fileOverview Institutional Deterministic Ingestion Hub v39.0.
+ * FIXED: Sentinel Regex supports EOL ($) to prevent rejection of simple "Q1" markers.
+ * FIXED: parseReasoning captures question text on the same line as the marker.
  */
 
 export type ParserFormat = 
@@ -24,8 +25,9 @@ export type ParserMode = 'PRODUCTION' | 'STRICT';
 /**
  * Shared Question Detection logic. 
  * Supports: Q1, Q.1, Question 1, Question-1, QUESTION 1, QUESTION-1
+ * FIXED: Added (?:[\.\s:]|$) to support markers at the end of a line/block.
  */
-export const QUESTION_SENTINEL_REGEX = /^\s*(?:Q|Question|QUESTION|Q\.)\s?[-.]?\s?\d+[\.\s:]/i;
+export const QUESTION_SENTINEL_REGEX = /^\s*(?:Q|Question|QUESTION|Q\.)\s?[-.]?\s?\d+(?:[\.\s:]|$)/i;
 
 export function isQuestionStart(line: string): boolean {
   return QUESTION_SENTINEL_REGEX.test(line);
@@ -138,6 +140,16 @@ function parseReasoning(rawText: string, metadata: any) {
         englishExplanation: "",
         [expLocalKey]: ""
       };
+      
+      // Captured text on the same line as marker
+      const contentOnMarkerLine = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      if (contentOnMarkerLine) {
+         if (punjabiRegex.test(contentOnMarkerLine)) {
+            currentQ[localKey] += (currentQ[localKey] ? '\n' : '') + contentOnMarkerLine;
+         } else {
+            currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + contentOnMarkerLine;
+         }
+      }
       return;
     }
 
@@ -193,31 +205,6 @@ function parseReasoning(rawText: string, metadata: any) {
   return { questions };
 }
 
-function parseDeterministicBilingual(rawText: string, metadata: any) {
-  const blocks = rawText.split(/\n\s*\n/).filter(b => b.trim().length > 0);
-  const questions: any[] = [];
-  const locSuffix = metadata.secondaryLanguage === 'hindi' ? 'Hindi' : 'Punjabi';
-  
-  blocks.forEach(block => {
-    const q: any = { ...metadata, id: `q-${Math.random().toString(36).substr(2, 9)}`, status: 'PUBLISHED' };
-    const lines = block.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    
-    lines.forEach(line => {
-      const optMatch = detectOptionMarker(line);
-      if (isQuestionStart(line)) q.englishQuestion = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
-      else if (optMatch) {
-         const engKey = `option${optMatch.opt}English`;
-         const locKey = `option${optMatch.opt}${locSuffix}`;
-         if (!q[engKey]) q[engKey] = optMatch.text;
-         else if (q[engKey].trim() !== optMatch.text.trim()) q[locKey] = optMatch.text;
-      }
-    });
-
-    questions.push(q);
-  });
-  return { questions };
-}
-
 export function parseBulkQuestions(rawText: string, metadata: any) {
   const cleanedText = preprocessText(rawText);
   if (!cleanedText) return { questions: [] };
@@ -252,4 +239,29 @@ export function validateMCQSchema(q: any): { errors: string[], warnings: string[
 export function sanitizePunjabi(text: string): string {
    if (!text) return "";
    return text.replace(/[\u0900-\u097F\u0980-\u09FF\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F]/g, '').trim();
+}
+
+function parseDeterministicBilingual(rawText: string, metadata: any) {
+  const blocks = rawText.split(/\n\s*\n/).filter(b => b.trim().length > 0);
+  const questions: any[] = [];
+  const locSuffix = metadata.secondaryLanguage === 'hindi' ? 'Hindi' : 'Punjabi';
+  
+  blocks.forEach(block => {
+    const q: any = { ...metadata, id: `q-${Math.random().toString(36).substr(2, 9)}`, status: 'PUBLISHED' };
+    const lines = block.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    
+    lines.forEach(line => {
+      const optMatch = detectOptionMarker(line);
+      if (isQuestionStart(line)) q.englishQuestion = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      else if (optMatch) {
+         const engKey = `option${optMatch.opt}English`;
+         const locKey = `option${optMatch.opt}${locSuffix}`;
+         if (!q[engKey]) q[engKey] = optMatch.text;
+         else if (q[engKey].trim() !== optMatch.text.trim()) q[locKey] = optMatch.text;
+      }
+    });
+
+    questions.push(q);
+  });
+  return { questions };
 }
