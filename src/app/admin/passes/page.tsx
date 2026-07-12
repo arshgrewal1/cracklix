@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo } from "react"
@@ -6,22 +7,24 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Plus, Trash2, Edit, Save, Gem, Zap, Lock, X, ChevronRight, Loader2, CheckCircle2, Search, Landmark, Clock } from "lucide-react"
-import { useCollection, useFirestore } from "@/firebase"
-import { collection, doc, setDoc, deleteDoc, serverTimestamp } from "firebase/firestore"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
+import { useCollection, useFirestore, useUser } from "@/firebase"
+import { collection, doc, setDoc, deleteDoc, serverTimestamp, addDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+import { AdminPageHeader, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
 
 /**
- * @fileOverview Institutional Pass Architect v5.6 (Mobile Scaling Fix).
- * FIXED: Footer buttons now stack on mobile to prevent clipping.
- * FIXED: Grid layouts optimized for small viewport ergonomics.
+ * @fileOverview Institutional Pass Architect v6.0 (High-Fidelity).
+ * FIXED: Visibility issues in dropdowns and rebalanced header spacing.
+ * UPDATED: Integrated live auditing for pass modifications.
  */
 export default function PassManagement() {
   const db = useFirestore()
+  const { user: admin, profile } = useUser()
   const { toast } = useToast()
   
   const { data: rawPasses, loading } = useCollection<any>(useMemo(() => (db ? collection(db, "passes") : null), [db]))
@@ -56,13 +59,36 @@ export default function PassManagement() {
 
     try {
       await setDoc(passRef, payload, { merge: true })
-      toast({ title: "Pass Hub Synced", description: `${payload.name} access nodes updated.` })
+      
+      // LOG AUDIT TRAIL
+      await addDoc(collection(db, "audit_logs"), {
+        user: profile?.name || "Administrator",
+        action: editingPass.id ? "PASS_UPDATE" : "PASS_CREATE",
+        details: `Pass Tier "${payload.name}" registry node synchronized.`,
+        timestamp: serverTimestamp()
+      });
+
+      toast({ title: "Registry Synced", description: `${payload.name} node updated.` })
       setEditingPass(null)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Sync Failed" })
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!db || !confirm(`Permanently purge "${name}" from registry?`)) return
+    await deleteDoc(doc(db, "passes", id))
+    
+    await addDoc(collection(db, "audit_logs"), {
+      user: profile?.name || "Administrator",
+      action: "PASS_PURGE",
+      details: `Pass Tier "${name}" removed from registry.`,
+      timestamp: serverTimestamp()
+    });
+
+    toast({ title: "Node Purged" })
   }
 
   const toggleMock = (mockId: string) => {
@@ -84,145 +110,145 @@ export default function PassManagement() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-12 text-[#0F172A] text-left animate-in fade-in duration-500 pb-24 px-1">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-1">
-           <div className="flex items-center gap-2 mb-1">
-              <Gem className="h-4 w-4 text-amber-500" />
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-slate-400">Security Access Governance</span>
-           </div>
-          <h1 className="text-2xl md:text-5xl font-black tracking-tight">Pass Architect</h1>
-          <p className="text-slate-500 text-[11px] md:text-lg font-medium">Configure tiered preparation nodes and mock access rules.</p>
-        </div>
-        <Button 
-          onClick={() => setEditingPass({ name: "", price: 299, durationDays: 30, features: [], allowedMocks: [], allowedCategories: [], active: true, displayOrder: (passes?.length || 0) + 1, tier: 1 })} 
-          className="h-11 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none active:scale-95 gap-2"
-        >
-          <Plus className="h-4 w-4" /> Create New Tier
-        </Button>
-      </div>
+    <div className="space-y-10 md:space-y-16 text-[#0F172A] text-left animate-in fade-in duration-700 pb-32 pt-2">
+      
+      {/* 1. HEADER HUB - REBALANCED */}
+      <AdminPageHeader
+        icon={Gem}
+        label="Security Access Governance"
+        title="Pass Architect"
+        subtitle="Configure tiered preparation nodes and mock access rules."
+        actionLabel="Create New Tier"
+        actionIcon={Plus}
+        onAction={() => setEditingPass({ name: "", price: 299, durationDays: 30, features: [], allowedMocks: [], allowedCategories: [], active: true, displayOrder: (passes?.length || 0) + 1, tier: 1 })}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+      {/* 2. DATA CARDS GRID */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 px-1">
         {loading ? (
-          Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-2xl md:rounded-[3rem] bg-white" />)
+          Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[2rem] md:rounded-[3rem] bg-white shadow-sm" />)
         ) : passes.map((p: any) => (
-          <Card key={p.id} className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white overflow-hidden flex flex-col group hover:translate-y-[-4px] transition-all border border-slate-100">
-             <CardHeader className="p-5 md:p-10 pb-3 md:pb-6 text-center space-y-4">
-                <div className={cn("h-12 w-12 md:h-16 rounded-xl flex items-center justify-center mx-auto shadow-inner", p.active ? "bg-amber-50 text-amber-500" : "bg-slate-50 text-slate-300")}>
-                   <Gem className="h-6 w-6 md:h-8 md:w-8" />
+          <Card key={p.id} className="border border-slate-100 shadow-xl rounded-[2.5rem] bg-white overflow-hidden flex flex-col group hover:translate-y-[-6px] transition-all duration-500">
+             <CardHeader className="p-6 md:p-10 pb-4 text-center space-y-4">
+                <div className={cn("h-12 w-12 md:h-20 md:w-20 rounded-2xl flex items-center justify-center mx-auto shadow-inner transition-transform group-hover:scale-110", p.active ? "bg-amber-50 text-amber-500" : "bg-slate-50 text-slate-300")}>
+                   <Gem className="h-6 w-6 md:h-10 md:w-10" />
                 </div>
                 <div>
-                   <CardTitle className="text-lg md:text-2xl font-black leading-none">{p.name}</CardTitle>
-                   <Badge className={cn("mt-2 border-none text-[8px] font-black uppercase tracking-widest px-2", p.active ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400")}>{p.active ? 'SYSTEM ONLINE' : 'OFFLINE'}</Badge>
+                   <CardTitle className="text-xl md:text-3xl font-black text-[#0F172A] leading-none">{p.name}</CardTitle>
+                   <div className="mt-3 flex justify-center">
+                      <Badge className={cn("border-none text-[8px] font-black uppercase tracking-widest px-3 py-1", p.active ? "bg-emerald-50 text-emerald-600" : "bg-slate-100 text-slate-400")}>{p.active ? 'System Online' : 'Node Offline'}</Badge>
+                   </div>
                 </div>
                 <div className="space-y-1">
-                   <p className="text-2xl md:text-4xl font-black text-[#0F172A]">₹{p.price}</p>
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{p.durationDays} Days Validity</p>
+                   <p className="text-2xl md:text-5xl font-black text-[#0F172A] tabular-nums tracking-tighter">₹{p.price}</p>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{p.durationDays} Days Duration</p>
                 </div>
              </CardHeader>
-             <CardContent className="px-5 md:px-10 flex-1 space-y-6">
-                <div className="space-y-2">
-                   <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Access Nodes</p>
-                   <div className="flex flex-wrap gap-1">
-                      <Badge variant="outline" className="text-[7px] font-bold uppercase">{p.allowedMocks?.length || 0} Mocks</Badge>
-                      <Badge variant="outline" className="text-[7px] font-bold uppercase">{p.allowedCategories?.length || 0} Hubs</Badge>
+             <CardContent className="px-6 md:px-10 flex-1 space-y-6">
+                <div className="h-px w-full bg-slate-50" />
+                <div className="space-y-3">
+                   <p className="text-[9px] font-black uppercase text-slate-300 tracking-widest">Authorized Access</p>
+                   <div className="flex flex-wrap gap-1.5">
+                      <Badge variant="outline" className="text-[8px] font-bold border-slate-100 text-slate-400">{p.allowedMocks?.length || 0} Mock Nodes</Badge>
+                      <Badge variant="outline" className="text-[8px] font-bold border-slate-100 text-slate-400">{p.allowedCategories?.length || 0} Hub Nodes</Badge>
                    </div>
                 </div>
              </CardContent>
-             <div className="p-5 md:p-10 pt-3 flex gap-2 md:gap-3 border-t border-slate-50">
-                <Button variant="outline" className="flex-1 rounded-full h-10 md:h-12 font-black uppercase text-[9px] tracking-widest border-slate-200" onClick={() => setEditingPass(p)}><Edit className="h-3.5 w-3.5 mr-1" /> Architect</Button>
-                <Button variant="ghost" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-full text-rose-500 hover:bg-rose-50 border border-slate-100" onClick={async () => { if(confirm("Purge pass node?")) await deleteDoc(doc(db!, "passes", p.id)) }}><Trash2 className="h-4 w-4" /></Button>
+             <div className="p-6 md:p-10 pt-4 flex gap-3 border-t border-slate-50">
+                <Button variant="outline" className="flex-1 rounded-xl h-11 md:h-14 font-black uppercase text-[10px] tracking-widest border-slate-200" onClick={() => setEditingPass(p)}><Edit className="h-4 w-4 mr-2" /> Architect</Button>
+                <Button variant="ghost" size="icon" className="h-11 w-11 md:h-14 md:w-14 rounded-xl text-rose-500 hover:bg-rose-50 border border-slate-100 shadow-sm" onClick={() => handleDelete(p.id, p.name)}><Trash2 className="h-4 w-4" /></Button>
              </div>
           </Card>
         ))}
       </div>
 
-      <Dialog open={!!editingPass} onOpenChange={o => !o && !isSaving && setEditingPass(null)}>
-        <DialogContent className="sm:max-w-4xl w-[95vw] max-h-[90vh] rounded-3xl md:rounded-[3rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
-          <div className="h-2 w-full bg-[#0F172A] shrink-0" />
-          <DialogHeader className="p-5 md:p-10 pb-2 md:pb-4 shrink-0">
-             <DialogTitle className="text-xl md:text-3xl font-black uppercase">Tier Configuration</DialogTitle>
-             <DialogDescription className="text-slate-400 font-bold uppercase text-[9px] tracking-widest mt-1">Map mock tests and boards to this subscription node.</DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex-1 overflow-y-auto custom-scrollbar px-5 md:px-10 pb-6 md:pb-10 space-y-8 md:space-y-10">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10">
-                <div className="space-y-6">
-                   <div className="space-y-4">
-                      <div className="space-y-1.5">
-                         <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Plan Name</Label>
-                         <Input value={editingPass?.name || ""} onChange={e => setEditingPass({...editingPass, name: e.target.value})} className="h-12 rounded-xl border-slate-200 bg-slate-50 font-bold" />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                           <Label className="text-[9px] font-black uppercase text-slate-400 ml-1">Price (₹)</Label>
-                           <Input type="number" value={editingPass?.price || 0} onChange={e => setEditingPass({...editingPass, price: parseFloat(e.target.value) || 0})} className="h-12 rounded-xl border-slate-200 bg-slate-50 font-black text-primary text-center" />
-                        </div>
-                        <div className="space-y-1.5">
-                           <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Clock className="h-3 w-3" /> Validity (Days)</Label>
-                           <Input type="number" value={editingPass?.durationDays || 30} onChange={e => setEditingPass({...editingPass, durationDays: parseInt(e.target.value) || 0})} className="h-12 rounded-xl border-slate-200 bg-slate-50 font-black text-center text-blue-600" />
-                        </div>
-                      </div>
-                   </div>
-
-                   <div className="space-y-4">
-                      <Label className="text-[9px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Zap className="h-3 w-3" /> Map Specific Mocks</Label>
-                      <div className="relative group">
-                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-300" />
-                         <Input value={mockSearch} onChange={e => setMockSearch(e.target.value)} className="pl-10 h-10 rounded-xl bg-slate-50 border-none text-[11px] font-bold" placeholder="Search mock bank..." />
-                      </div>
-                      <div className="max-h-60 overflow-y-auto pr-2 custom-scrollbar space-y-1">
-                         {mocks?.filter(m => m.title.toLowerCase().includes(mockSearch.toLowerCase())).map((m: any) => {
-                            const isAllowed = editingPass?.allowedMocks?.includes(m.id)
-                            return (
-                               <button key={m.id} onClick={() => toggleMock(m.id)} className={cn("w-full p-2.5 rounded-lg flex items-center justify-between text-left transition-all", isAllowed ? "bg-primary text-white shadow-lg" : "bg-slate-50 hover:bg-slate-100 text-slate-600")}>
-                                  <span className="text-[10px] font-bold uppercase truncate pr-4">{m.title}</span>
-                                  {isAllowed ? <CheckCircle2 className="h-3 w-3 shrink-0" /> : <div className="h-3 w-3 rounded-full border border-slate-200 shrink-0" />}
-                               </button>
-                            )
-                         })}
-                      </div>
-                   </div>
+      {/* 3. CONFIGURATION DIALOG */}
+      <AdminDialogShell
+        open={!!editingPass}
+        onOpenChange={(o) => !o && !isSaving && setEditingPass(null)}
+        title="Tier Architect"
+        description="Map preparation verticals and mock tests to this subscription node."
+        isSaving={isSaving}
+        onSave={handleSave}
+        onDiscard={() => setEditingPass(null)}
+        saveLabel="Commit Tier"
+        maxWidth="sm:max-w-4xl"
+      >
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+          <div className="space-y-8">
+             <div className="space-y-4">
+                <div className="space-y-1.5 text-left">
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Plan Headline</Label>
+                   <Input value={editingPass?.name || ""} onChange={e => setEditingPass({...editingPass, name: e.target.value})} className="h-12 md:h-16 rounded-xl md:rounded-2xl border-none bg-slate-50 font-black text-lg px-6 shadow-inner" placeholder="e.g. Elite Quarterly" />
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5 text-left">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Registry Price (₹)</Label>
+                     <Input type="number" value={editingPass?.price || 0} onChange={e => setEditingPass({...editingPass, price: e.target.value})} className="h-12 md:h-14 rounded-xl border-none bg-slate-50 font-black text-primary text-center text-xl shadow-inner" />
+                  </div>
+                  <div className="space-y-1.5 text-left">
+                     <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Validity Nodes (Days)</Label>
+                     <Input type="number" value={editingPass?.durationDays || 30} onChange={e => setEditingPass({...editingPass, durationDays: e.target.value})} className="h-12 md:h-14 rounded-xl border-none bg-slate-50 font-black text-blue-600 text-center text-xl shadow-inner" />
+                  </div>
+                </div>
+             </div>
 
-                <div className="space-y-6">
-                   <div className="space-y-4">
-                      <Label className="text-[9px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Landmark className="h-3 w-3" /> Grant Category Hubs</Label>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                         {boards?.map((b: any) => {
-                            const isAllowed = editingPass?.allowedCategories?.includes(b.id)
-                            return (
-                               <button key={b.id} onClick={() => toggleCategory(b.id)} className={cn("p-3 rounded-xl flex items-center justify-between text-left border-2 transition-all", isAllowed ? "border-primary bg-blue-50/50 text-primary shadow-sm" : "border-slate-100 bg-white text-slate-400 hover:border-slate-200")}>
-                                  <span className="text-[9px] font-black uppercase tracking-tight">{b.abbreviation} Hub</span>
-                                  {isAllowed && <CheckCircle2 className="h-3 w-3" />}
-                               </button>
-                            )
-                         })}
+             <div className="space-y-4 text-left">
+                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Zap className="h-3 w-3" /> Map Specific Mocks</Label>
+                <div className="relative group">
+                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                   <Input value={mockSearch} onChange={e => setMockSearch(e.target.value)} className="pl-10 h-11 rounded-xl bg-slate-50 border-none text-[11px] font-bold shadow-inner" placeholder="Search test bank..." />
+                </div>
+                <div className="max-h-52 overflow-y-auto pr-2 custom-scrollbar space-y-1.5">
+                   {mocks?.filter(m => m.title.toLowerCase().includes(mockSearch.toLowerCase())).map((m: any) => {
+                      const isAllowed = editingPass?.allowedMocks?.includes(m.id)
+                      return (
+                         <button key={m.id} onClick={() => toggleMock(m.id)} className={cn("w-full p-3 rounded-xl flex items-center justify-between text-left transition-all", isAllowed ? "bg-[#0F172A] text-white shadow-lg" : "bg-slate-50 hover:bg-slate-100 text-slate-600 border border-transparent hover:border-slate-200")}>
+                            <span className="text-[10px] font-bold uppercase truncate pr-4">{m.title}</span>
+                            {isAllowed ? <CheckCircle2 className="h-4 w-4 shrink-0 text-primary" /> : <div className="h-4 w-4 rounded-full border border-slate-200 shrink-0" />}
+                         </button>
+                      )
+                   })}
+                </div>
+             </div>
+          </div>
+
+          <div className="space-y-8">
+             <div className="space-y-4 text-left">
+                <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 flex items-center gap-2"><Landmark className="h-3 w-3" /> Grant Authority Hubs</Label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                   {boards?.map((b: any) => {
+                      const isAllowed = editingPass?.allowedCategories?.includes(b.id)
+                      return (
+                         <button key={b.id} onClick={() => toggleCategory(b.id)} className={cn("p-4 rounded-2xl flex items-center justify-between text-left border-2 transition-all", isAllowed ? "border-primary bg-primary/5 text-primary shadow-sm" : "border-slate-50 bg-slate-50/50 text-slate-400 hover:border-slate-200")}>
+                            <span className="text-[10px] font-black uppercase tracking-tight">{b.abbreviation} Hub</span>
+                            {isAllowed && <CheckCircle2 className="h-4 w-4" />}
+                         </button>
+                      )
+                   })}
+                </div>
+             </div>
+
+             <div className="space-y-4 pt-6 border-t border-slate-100 text-left">
+                <p className="text-[9px] font-black uppercase text-slate-300 tracking-[0.3em] mb-4">Institutional Registry Config</p>
+                <div className="space-y-3">
+                   <div className="flex items-center justify-between p-5 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
+                      <div className="space-y-1">
+                         <p className="text-[11px] font-black text-[#0F172A] uppercase">System Activation</p>
+                         <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">Enable purchase node for aspirants</p>
                       </div>
+                      <Switch checked={editingPass?.active || false} onCheckedChange={v => setEditingPass({...editingPass, active: v})} />
                    </div>
 
-                   <div className="space-y-4 pt-6 border-t border-slate-100">
-                      <p className="text-[9px] font-black uppercase text-slate-400 tracking-[0.3em]">Institutional Config</p>
-                      <div className="flex items-center justify-between p-4 md:p-5 bg-slate-50 rounded-2xl shadow-inner border border-slate-100">
-                         <div className="space-y-0.5">
-                            <p className="text-[10px] font-black text-[#0F172A]">System Activation</p>
-                            <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Enable purchase flow</p>
-                         </div>
-                         <Switch checked={editingPass?.active || false} onCheckedChange={v => setEditingPass({...editingPass, active: v})} />
-                      </div>
+                   <div className="space-y-2 pt-2">
+                      <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Tier Priority (Registry sorting)</Label>
+                      <Input type="number" value={editingPass?.displayOrder || ""} onChange={e => setEditingPass({...editingPass, displayOrder: e.target.value})} className="h-12 bg-slate-50 border-none rounded-xl font-black text-center" />
                    </div>
                 </div>
              </div>
           </div>
-          
-          <div className="p-5 md:p-10 pt-4 bg-slate-50 flex flex-col sm:flex-row gap-3 md:gap-4 border-t border-slate-100 shrink-0">
-             <Button variant="ghost" onClick={() => setEditingPass(null)} className="w-full sm:w-auto h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400">Discard Audit</Button>
-             <Button onClick={handleSave} disabled={isSaving} className="flex-1 h-11 md:h-12 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none active:scale-95 gap-2">
-                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit Access Rules
-             </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      </AdminDialogShell>
     </div>
   )
 }
