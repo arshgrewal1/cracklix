@@ -16,11 +16,10 @@ import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
-import { useFirestoreCrud } from "@/hooks/useFirestoreCrud"
 
 /**
- * @fileOverview Subject Registry Hub v18.3.
- * FIXED: Added missing Button, Dialog and Badge imports to resolve runtime crashes.
+ * @fileOverview Subject Registry Hub v18.4.
+ * FIXED: Mobile layout container overflow and element overlap.
  */
 
 export default function SubjectRegistryPage() {
@@ -91,7 +90,7 @@ export default function SubjectRegistryPage() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-12 pb-32 text-left animate-in fade-in duration-500">
+    <div className="space-y-6 md:space-y-12 pb-32 text-left animate-in fade-in duration-500 overflow-hidden">
       <AdminPageHeader
         icon={SearchCode}
         label="Canonical Mapping Registry"
@@ -102,22 +101,22 @@ export default function SubjectRegistryPage() {
         onAction={() => setEditingSubject({ name: "", boardId: boardFilter !== 'all' ? boardFilter : "", aliases: [], description: "" })}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-1">
-         <div className="relative group">
+      <div className="flex flex-col gap-4 px-1">
+         <div className="relative group w-full">
             <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
             <Input 
-              className="h-14 md:h-16 pl-14 rounded-2xl bg-white border-slate-50 shadow-inner font-bold" 
+              className="h-14 md:h-16 pl-14 rounded-2xl bg-white border-slate-50 shadow-inner font-bold w-full" 
               placeholder="Search subjects..." 
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
          </div>
-         <div className="flex gap-2">
-            <select value={boardFilter} onChange={e => setBoardFilter(e.target.value)} className="flex-1 h-14 md:h-16 px-6 rounded-2xl bg-white border-slate-50 shadow-inner font-bold outline-none text-sm appearance-none cursor-pointer">
+         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <select value={boardFilter} onChange={e => setBoardFilter(e.target.value)} className="h-14 md:h-16 px-6 rounded-2xl bg-white border-slate-50 shadow-inner font-bold outline-none text-sm appearance-none cursor-pointer w-full">
                <option value="all">Filter by Board Hub</option>
                {boards?.map(b => <option key={b.id} value={b.id}>{b.abbreviation} Hub</option>)}
             </select>
-            <Button onClick={() => setMergeDialogOpen(true)} variant="outline" className="h-14 md:h-16 px-6 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 border-slate-200 bg-white shadow-sm hover:bg-slate-50 shrink-0">
+            <Button onClick={() => setMergeDialogOpen(true)} variant="outline" className="h-14 md:h-16 px-6 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 border-slate-200 bg-white shadow-sm hover:bg-slate-50 w-full sm:w-auto">
                <GitMerge className="h-5 w-5 text-emerald-500" /> Normalize
             </Button>
          </div>
@@ -125,12 +124,12 @@ export default function SubjectRegistryPage() {
 
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
-          <Table className="min-w-[800px]">
+          <Table className="min-w-full">
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-slate-100 h-14 md:h-20">
-                <TableHead className="px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Canonical Identity</TableHead>
+                <TableHead className="px-6 md:px-10 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Canonical Identity</TableHead>
                 <TableHead className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Authority Board</TableHead>
-                <TableHead className="text-right px-6 md:px-12 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
+                <TableHead className="text-right px-6 md:px-10 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -138,7 +137,7 @@ export default function SubjectRegistryPage() {
                 <AdminTableSkeleton rows={5} columns={3} />
               ) : filteredSubjects.map((s: any) => (
                 <TableRow key={s.id} className="hover:bg-slate-50 border-slate-50 transition-colors group">
-                  <TableCell className="px-6 md:px-12 py-5 md:py-8">
+                  <TableCell className="px-6 md:px-10 py-5 md:py-8">
                     <div className="flex items-center gap-4 md:gap-6">
                        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0 shadow-inner transition-transform group-hover:scale-105">
                           <SearchCode className="h-5 w-5 md:h-6 md:w-6 text-slate-300" />
@@ -154,7 +153,7 @@ export default function SubjectRegistryPage() {
                         {boards?.find(b => b.id === s.boardId)?.abbreviation || 'Unassigned'} Hub
                      </Badge>
                   </TableCell>
-                  <TableCell className="text-right px-6 md:px-12">
+                  <TableCell className="text-right px-6 md:px-10">
                     <div className="flex justify-end gap-2 md:gap-3 opacity-20 group-hover:opacity-100 transition-all">
                        <button onClick={() => setEditingSubject(s)} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-4 w-4" /></button>
                        <button onClick={async () => { if(confirm("Permanently purge this subject node?")) await deleteDoc(doc(db!, "subjects", s.id)) }} className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-4 w-4 md:h-5 md:w-5" /></button>
