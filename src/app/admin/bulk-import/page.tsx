@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -78,16 +79,26 @@ export default function BulkIngestionPage() {
 
     setIsProcessing(true)
     try {
+      console.log("[DEBUG_INGESTION] Start Parse Flow");
+      console.log("[DEBUG_INGESTION] Selected Question Type:", metadata.parserFormat);
+      console.log("[DEBUG_INGESTION] Raw Input Length:", rawText.length);
+
       const sanitizedText = preprocessText(rawText);
+      console.log("[DEBUG_INGESTION] Input After Preprocessing (Snippet):", sanitizedText.slice(0, 100));
       
       // SHARED VALIDATION PROTOCOL: Verify if any question markers exist
-      const hasAnyQuestion = sanitizedText.split('\n').some(line => isQuestionStart(line));
+      // FIXED: Added trim() to each line to ensure line endings don't break regex matching
+      const lines = sanitizedText.split('\n');
+      const hasAnyQuestion = lines.some(line => isQuestionStart(line.trim()));
       
+      console.log("[DEBUG_INGESTION] Question Detection Result:", hasAnyQuestion);
+
       if (!hasAnyQuestion) {
          throw new Error("No questions detected. Please ensure your content uses supported markers like Q1, Q.1, or Question 1.");
       }
 
       const result = parseBulkQuestions(sanitizedText, metadata);
+      console.log("[DEBUG_INGESTION] Detected Question Count:", result?.questions?.length || 0);
 
       if (!result?.questions || result.questions.length === 0) {
          throw new Error("Parser failed to extract questions. Please verify your document structure.");
@@ -107,6 +118,7 @@ export default function BulkIngestionPage() {
       setStagedQuestions(validated);
       toast({ title: "Extraction Complete", description: `${validated.length} nodes processed.` });
     } catch (e: any) {
+      console.error("[DEBUG_INGESTION] Validation Result: FAILED", e.message);
       toast({ variant: "destructive", title: "Parsing Error", description: e.message });
     } finally {
       setIsProcessing(false)
@@ -171,6 +183,13 @@ export default function BulkIngestionPage() {
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <button onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50 transition-all">Reset Staging</button>
+           <Button 
+            onClick={handleLocalParse} 
+            disabled={isProcessing} 
+            className="flex-1 md:w-auto h-12 md:h-14 px-10 bg-[#0F172A] hover:bg-black text-white rounded-xl font-bold uppercase text-[11px] tracking-tight gap-3 shadow-xl border-none active:scale-95 transition-all"
+           >
+            {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5 text-primary fill-current" />} Initialize Ingestion
+           </Button>
            <Button 
             onClick={handleFinalCommit} 
             disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
@@ -264,15 +283,6 @@ export default function BulkIngestionPage() {
                         className="min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>
-
-                 <Button 
-                    onClick={handleLocalParse} 
-                    disabled={isProcessing} 
-                    className="w-full h-14 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[11px] rounded-xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-12"
-                 >
-                    {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5 text-primary fill-current" />} 
-                    Initialize Ingestion Pipeline
-                 </Button>
               </div>
            </Card>
         </div>

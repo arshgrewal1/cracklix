@@ -1,8 +1,9 @@
+
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v39.0.
- * FIXED: Sentinel Regex supports EOL ($) to prevent rejection of simple "Q1" markers.
- * FIXED: parseReasoning captures question text on the same line as the marker.
+ * @fileOverview Institutional Deterministic Ingestion Hub v40.0.
+ * FIXED: Sentinel Regex supports EOL ($) and is hardened against non-printable characters.
+ * FIXED: parseReasoning includes arrival-order script routing and whitespace preservation.
  */
 
 export type ParserFormat = 
@@ -25,11 +26,12 @@ export type ParserMode = 'PRODUCTION' | 'STRICT';
 /**
  * Shared Question Detection logic. 
  * Supports: Q1, Q.1, Question 1, Question-1, QUESTION 1, QUESTION-1
- * FIXED: Added (?:[\.\s:]|$) to support markers at the end of a line/block.
+ * FIXED: Updated to be more resilient to whitespace and end-of-line boundaries.
  */
 export const QUESTION_SENTINEL_REGEX = /^\s*(?:Q|Question|QUESTION|Q\.)\s?[-.]?\s?\d+(?:[\.\s:]|$)/i;
 
 export function isQuestionStart(line: string): boolean {
+  if (!line) return false;
   return QUESTION_SENTINEL_REGEX.test(line);
 }
 
@@ -122,7 +124,7 @@ function parseReasoning(rawText: string, metadata: any) {
 
   lines.forEach((line) => {
     const trimmed = line.trim();
-    const isQStart = isQuestionStart(line);
+    const isQStart = isQuestionStart(trimmed);
     const optMatch = detectOptionMarker(line);
     const isAnsMarker = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExplMarker = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
@@ -141,7 +143,7 @@ function parseReasoning(rawText: string, metadata: any) {
         [expLocalKey]: ""
       };
       
-      // Captured text on the same line as marker
+      // Capture text on the same line as marker
       const contentOnMarkerLine = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
       if (contentOnMarkerLine) {
          if (punjabiRegex.test(contentOnMarkerLine)) {
@@ -165,7 +167,10 @@ function parseReasoning(rawText: string, metadata: any) {
     }
 
     if (state === 'READ_QUESTION') {
-       if (punjabiRegex.test(line)) {
+       if (trimmed === "") {
+          currentQ.englishQuestion += '\n';
+          currentQ[localKey] += '\n';
+       } else if (punjabiRegex.test(line)) {
           currentQ[localKey] += (currentQ[localKey] ? '\n' : '') + line;
        } else {
           currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + line;
@@ -177,9 +182,15 @@ function parseReasoning(rawText: string, metadata: any) {
       const text = optMatch ? optMatch.text : line;
       
       if (punjabiRegex.test(text)) {
-        currentQ[locKeyField] = (currentQ[locKeyField] || "") + (currentQ[locKeyField] ? "\n" : "") + text.trim();
+        const existing = (currentQ[locKeyField] || "").trim();
+        if (existing !== text.trim()) {
+          currentQ[locKeyField] = (currentQ[locKeyField] || "") + (currentQ[locKeyField] ? "\n" : "") + text.trim();
+        }
       } else {
-        currentQ[engKey] = (currentQ[engKey] || "") + (currentQ[engKey] ? "\n" : "") + text.trim();
+        const existing = (currentQ[engKey] || "").trim();
+        if (existing !== text.trim()) {
+          currentQ[engKey] = (currentQ[engKey] || "") + (currentQ[engKey] ? "\n" : "") + text.trim();
+        }
       }
     }
     else if (state === 'READ_ANSWER') {
@@ -193,7 +204,10 @@ function parseReasoning(rawText: string, metadata: any) {
     else if (state === 'READ_EXPLANATION') {
        const markerRegex = new RegExp(`^(?:${EXPL_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i');
        const cleanText = line.replace(markerRegex, '');
-       if (punjabiRegex.test(cleanText)) {
+       if (trimmed === "") {
+          currentQ.englishExplanation += '\n';
+          currentQ[expLocalKey] += '\n';
+       } else if (punjabiRegex.test(cleanText)) {
           currentQ[expLocalKey] += (currentQ[expLocalKey] ? '\n' : '') + cleanText;
        } else {
           currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + cleanText;
@@ -252,7 +266,9 @@ function parseDeterministicBilingual(rawText: string, metadata: any) {
     
     lines.forEach(line => {
       const optMatch = detectOptionMarker(line);
-      if (isQuestionStart(line)) q.englishQuestion = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      if (isQuestionStart(line)) {
+        q.englishQuestion = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      }
       else if (optMatch) {
          const engKey = `option${optMatch.opt}English`;
          const locKey = `option${optMatch.opt}${locSuffix}`;
