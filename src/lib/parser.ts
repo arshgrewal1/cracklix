@@ -1,6 +1,7 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v48.0.
+ * @fileOverview Institutional Specialized Local Parser v49.0.
  * UPDATED: Simple Bilingual MCQ Parser hardened for A), A., (A), (A). formats.
+ * UPDATED: Question Detection expanded to support 15+ dynamic formats (Q1, Q.1, Question 1, 1., etc).
  * FIXED: Mandatory single-format selection per question node.
  * AUDIT: Explanation boundaries and noise liquidation enforced.
  */
@@ -42,7 +43,7 @@ const NOISE_PATTERNS = [
 
 const EXPLANATION_END_MARKERS = [
   /^[=\-\*\_]{3,}$/,
-  /^Q[\d\.\)]/i,
+  /^Q[\d\.\s\)]/i,
   /^Question/i,
   /^ਪ੍ਰਸ਼ਨ/i,
   /^प्रश्न/i,
@@ -89,13 +90,15 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
 
   const questions: any[] = [];
   
-  const questionStartRegex = /(?:^|\n)\s*(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i;
+  // SUPPORTED FORMATS: Q1, Q2, Q.1, Q 1, Question 1, Question-1, QUESTION 1, QUESTION-1, 1., 1)
+  const questionStartRegex = /(?:^|\n)\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i;
   const firstIndex = cleanedText.search(questionStartRegex);
   
   if (firstIndex === -1) return { questions: [] };
 
   const content = cleanedText.substring(firstIndex);
-  const blocks = content.split(/(?=\n\s*(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)|^(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$))/i);
+  // Split blocks exactly where any supported question marker begins
+  const blocks = content.split(/(?=\n\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)|^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$))/i);
 
   blocks.forEach(block => {
     const trimmedBlock = block.trim();
@@ -200,7 +203,8 @@ function parseSimpleBilingual(block: string, q: any, secondaryLang: string) {
   const restPart = block.substring(detected.index).trim();
 
   const qLines = questionPart.split('\n').map(l => l.trim()).filter(Boolean);
-  const qMarkerRegex = /^(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)\s*/i;
+  // HARDENED Q Marker Regex matching all supported start formats
+  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)\s*/i;
   q.englishQuestion = qLines.filter(l => !scriptRegex.test(l)).join('\n').replace(qMarkerRegex, '').trim();
   q[localKey] = qLines.filter(l => scriptRegex.test(l)).join('\n').replace(qMarkerRegex, '').trim();
 
@@ -296,7 +300,7 @@ function parseBilingual(block: string, q: any, secondaryLang: string) {
   }
 
   const qLines = questionPart.split('\n').map(l => l.trim()).filter(Boolean);
-  const qMarkerRegex = /^(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)\s*/i;
+  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)\s*/i;
   q.englishQuestion = qLines.filter(l => !scriptRegex.test(l)).join('\n').replace(qMarkerRegex, '').trim();
   q[localKey] = qLines.filter(l => scriptRegex.test(l)).join('\n').replace(qMarkerRegex, '').trim();
 
@@ -364,7 +368,7 @@ function parseMath(block: string, q: any) {
      questionPart = restOfBlock.substring(0, optAMatch.index);
      optionsPart = restOfBlock.substring(optAMatch.index);
   }
-  const qMarkerRegex = /^(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)\s*/i;
+  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)\s*/i;
   q.englishQuestion = questionPart.replace(qMarkerRegex, '').trim();
   const labels = ['A', 'B', 'C', 'D', 'E'];
   labels.forEach((label, i) => {
@@ -395,7 +399,7 @@ function parsePunjabiOnly(block: string, q: any) {
      questionPart = restOfBlock.substring(0, optAMatch.index);
      optionsPart = restOfBlock.substring(optAMatch.index);
   }
-  const qMarkerRegex = /^(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)\s*/i;
+  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)\s*/i;
   q.punjabiQuestion = questionPart.replace(qMarkerRegex, '').trim();
   const labels = ['A', 'B', 'C', 'D', 'E'];
   labels.forEach((label, i) => {
@@ -441,7 +445,7 @@ export function validateMCQSchema(q: any): string[] {
      errors.push("Structural Failure: Option contains explanation text.");
   }
 
-  const qMarkerRegex = /(?:^|\n)\s*(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i;
+  const qMarkerRegex = /(?:^|\n)\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+|\d+\.|\d+\))(?:[\.\s:]|$)/i;
   const explanation = (q.englishExplanation || "") + (q.punjabiExplanation || "") + (q.hindiExplanation || "");
   if (qMarkerRegex.test(explanation)) {
      errors.push("Structural Failure: Explanation contains next question marker.");
