@@ -4,7 +4,7 @@ import React from 'react';
 import { Question, LanguageDisplayMode } from '@/types';
 import { cn } from '@/lib/utils';
 import MathText from './MathText';
-import { Clock, AlertTriangle, Bookmark, ShieldCheck, Info, Zap } from 'lucide-react';
+import { Clock, AlertTriangle, Bookmark, ShieldCheck, Info, Zap, Link2 } from 'lucide-react';
 import { useExamStore } from '@/store/useExamStore';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -20,8 +20,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v54.0.
- * FIXED: Implemented high-fidelity dual-column rendering for Match the Following blocks.
+ * @fileOverview Institutional Question Renderer v56.0.
+ * FIXED: Implemented high-fidelity 2-column rendering for structured Matching blocks.
+ * FIXED: Balanced font scaling and padding for premium PWA experience.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -87,87 +88,64 @@ export default function QuestionRenderer({
       )}
 
       <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
-         {/* SECTION 1: INTRO EN */}
+         {/* INTRO HUB */}
          {showEn && q.englishQuestion && (
            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
              <MathText text={q.englishQuestion} />
            </div>
          )}
-         
-         {/* SECTION 2: INTRO LOCAL */}
          {showLocal && q.punjabiQuestion && (
            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
              <MathText text={q.punjabiQuestion} />
            </div>
          )}
 
-         {/* SECTION 3: MATCHING BLOCK REDESIGN */}
-         {q.matchingBlock?.leftColumn?.length > 0 && (
-            <div className="my-6 p-6 md:p-10 bg-white border-2 border-slate-100 rounded-[1.5rem] md:rounded-[2.5rem] shadow-xl overflow-hidden relative group">
-               <div className="absolute top-2 right-4 opacity-10 pointer-events-none uppercase text-[8px] font-black tracking-widest">Match Hub</div>
-               <div className="grid grid-cols-2 gap-8 md:gap-14">
-                  <div className="space-y-4">
-                     {q.matchingBlock.leftColumn.map((item: string, i: number) => (
-                        <div key={i} className="font-mono text-[11px] md:text-lg text-[#0F172A] border-b border-slate-50 pb-2 last:border-0 min-h-[1.5em]">{item}</div>
-                     ))}
-                  </div>
-                  <div className="space-y-4 border-l border-slate-50 pl-8 md:pl-14">
-                     {q.matchingBlock.rightColumn.map((item: string, i: number) => (
-                        <div key={i} className="font-mono text-[11px] md:text-lg text-[#0F172A] border-b border-slate-50 pb-2 last:border-0 min-h-[1.5em]">{item}</div>
-                     ))}
-                  </div>
+         {/* STRUCTURED MATCHING GRID v56.0 */}
+         {q.matchingData?.rows?.length > 0 && (
+            <div className="my-8 overflow-hidden rounded-[2rem] border-2 border-slate-100 bg-white shadow-2xl relative group">
+               <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
+                  <Link2 className="h-3 w-3" /> Relation Hub
                </div>
+               <Table className="w-full border-collapse">
+                  <TableHeader className="bg-slate-900">
+                     <TableRow className="border-none h-14 md:h-16">
+                        <TableHead className="px-6 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest border-r border-white/10">{q.matchingData.leftHeader || "List I"}</TableHead>
+                        <TableHead className="px-6 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest">{q.matchingData.rightHeader || "List II"}</TableHead>
+                     </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                     {q.matchingData.rows.map((row: any, ri: number) => (
+                        <TableRow key={ri} className="border-b border-slate-50 hover:bg-slate-50 transition-colors last:border-0 h-12 md:h-16">
+                           <TableCell className="px-6 md:px-10 font-bold text-xs md:text-lg text-[#0F172A] border-r border-slate-50">
+                              {row.left}
+                           </TableCell>
+                           <TableCell className="px-6 md:px-10 font-bold text-xs md:text-lg text-[#0F172A]">
+                              {row.right}
+                           </TableCell>
+                        </TableRow>
+                     ))}
+                  </TableBody>
+               </Table>
             </div>
          )}
 
-         {/* LEGACY MATCHING CONTENT FALLBACK */}
-         {!q.matchingBlock?.leftColumn?.length && q.matchingContent && (
-            <div className="my-6 p-6 md:p-10 bg-white border-2 border-slate-100 rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[11px] md:text-lg text-[#0F172A] overflow-x-auto whitespace-pre leading-loose shadow-xl">
-               {q.matchingContent}
-            </div>
-         )}
-
-         {/* TABLE/DIAGRAM CONTENT */}
-         {q.tableContent?.rows?.length > 0 && (
-           <div className="my-8 overflow-x-auto rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
-             <Table className="w-full border-collapse">
-               <TableHeader className="bg-slate-50/50">
-                 <TableRow className="border-b border-slate-200 h-14">
-                    {q.tableContent.headers.map((h: string, i: number) => (
-                      <TableHead key={i} className="px-6 py-4 font-black uppercase text-[10px] md:text-xs text-[#0F172A] border-r border-slate-100 last:border-0">{h}</TableHead>
-                    ))}
-                 </TableRow>
-               </TableHeader>
-               <TableBody>
-                  {q.tableContent.rows.map((row: string[], ri: number) => (
-                    <TableRow key={ri} className="border-b border-slate-50 hover:bg-slate-50/30 transition-colors last:border-0 h-12 md:h-16">
-                       {row.map((cell, ci) => (
-                         <TableCell key={ci} className="px-6 py-3 font-bold text-xs md:text-base text-slate-700 border-r border-slate-50 last:border-0">{cell}</TableCell>
-                       ))}
-                    </TableRow>
-                  ))}
-               </TableBody>
-             </Table>
-           </div>
-         )}
-
-         {q.diagramContent && (
-            <div className="my-6 p-6 md:p-10 bg-[#0F172A] text-emerald-400 rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[10px] md:text-sm overflow-x-auto whitespace-pre leading-relaxed shadow-inner border border-white/5 relative group">
-               <div className="absolute top-2 right-4 opacity-20 pointer-events-none uppercase text-[8px] font-black tracking-widest">Diagram Hub</div>
-               {q.diagramContent}
-            </div>
-         )}
-
-         {/* SECTION 4: INSTRUCTIONS OR SUFFIX */}
-         {showEn && (q.englishInstruction || q.englishDiagramQuestion || q.englishActualQuestion) && (
+         {/* SUFFIX / INSTRUCTION HUB */}
+         {(showEn && (q.englishInstruction || q.englishActualQuestion || q.englishDiagramQuestion)) && (
             <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
-              <MathText text={q.englishInstruction || q.englishDiagramQuestion || q.englishActualQuestion} />
+               <MathText text={q.englishInstruction || q.englishActualQuestion || q.englishDiagramQuestion} />
+            </div>
+         )}
+         {(showLocal && (q.punjabiInstruction || q.punjabiActualQuestion || q.punjabiDiagramQuestion)) && (
+            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
+               <MathText text={q.punjabiInstruction || q.punjabiActualQuestion || q.punjabiDiagramQuestion} />
             </div>
          )}
 
-         {showLocal && (q.punjabiInstruction || q.punjabiDiagramQuestion || q.punjabiActualQuestion) && (
-            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words mt-4", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
-              <MathText text={q.punjabiInstruction || q.punjabiDiagramQuestion || q.punjabiActualQuestion} />
+         {/* DIAGRAM HUB FALLBACK */}
+         {q.diagramContent && (
+            <div className="my-6 p-6 md:p-10 bg-[#0F172A] text-emerald-400 rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[10px] md:text-sm overflow-x-auto whitespace-pre leading-relaxed shadow-inner border border-white/5 relative">
+               <div className="absolute top-2 right-4 opacity-20 pointer-events-none uppercase text-[8px] font-black tracking-widest">Logic Box</div>
+               {q.diagramContent}
             </div>
          )}
       </div>

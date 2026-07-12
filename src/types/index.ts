@@ -24,6 +24,17 @@ export type AdPlacementType = 'HOMEPAGE_TOP' | 'HOMEPAGE_MIDDLE' | 'HOMEPAGE_BOT
 export type SubscriptionStatus = 'ACTIVE' | 'EXPIRED' | 'CANCELLED' | 'REFUNDED';
 export type PaymentStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'FAILED';
 
+export interface MatchingRow {
+  left: string;
+  right: string;
+}
+
+export interface MatchingData {
+  leftHeader: string;
+  rightHeader: string;
+  rows: MatchingRow[];
+}
+
 export interface Advertisement {
   id: string;
   title: string;
@@ -257,6 +268,7 @@ export interface Question {
   diagramContent?: string;
   graphContent?: string;
   matchingContent?: string;
+  matchingData?: MatchingData;
   matchingBlock?: {
     leftColumn: string[];
     rightColumn: string[];
