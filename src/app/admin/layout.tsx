@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from "react";
@@ -15,8 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v23.0.
- * FIXED: Hardened loading state to prevent "white screen" while user profile is being verified.
+ * @fileOverview Admin Layout v24.0.
+ * FIXED: Explicit Grid/Flex definition to prevent UI collapse seen in workstation environments.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -44,8 +43,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const userEmail = user?.email?.toLowerCase();
   const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
-  
-  // Guard against missing profile while authenticated
   const isAdmin = (profile && (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN')) || isFounder;
 
   const isAccessBlocked = !loading && mounted && (!user || (!isAdmin && !profileLoading));
@@ -71,12 +68,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.push('/login');
   };
 
-  // Wait for both Auth AND Profile (if user present)
   const isGlobalLoading = !mounted || loading || (user && !profile && profileLoading);
 
   if (isGlobalLoading) return (
-    <div className="h-screen w-full bg-[#0F172A] flex flex-col items-center justify-center space-y-6 text-center">
-       <ShieldCheck className="h-10 w-10 md:h-12 md:w-12 text-blue-600 animate-pulse" />
+    <div className="h-screen w-full bg-[#0F172A] flex flex-col items-center justify-center space-y-6">
+       <ShieldCheck className="h-10 w-10 text-blue-600 animate-pulse" />
        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-500">Securing Admin Panel...</p>
     </div>
   );
@@ -84,7 +80,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (!user || !isAdmin) return null;
 
   return (
-    <div className="min-h-screen w-full bg-white font-body relative flex overflow-hidden">
+    <div className="min-h-screen w-full bg-white font-body flex overflow-hidden">
       
       <AdminSidebar 
         isOpen={isSidebarOpen} 
@@ -96,44 +92,37 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       />
 
       <div className={cn(
-        "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full min-w-0 overflow-x-hidden",
+        "flex-1 flex flex-col min-h-screen transition-all duration-300 ease-in-out w-full",
         isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
       )}>
-        <header className="pt-safe border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 shrink-0">
-          <div className="h-[80px] md:h-[110px] flex items-center px-2 md:px-6 justify-between">
-            <div className="flex items-center h-full gap-0 md:gap-1">
-              <button 
-                onClick={toggleSidebar}
-                className="bg-white border border-slate-200 text-slate-700 h-10 w-10 md:h-11 md:w-11 rounded-xl shadow-sm flex items-center justify-center active:scale-95 transition-all hover:border-primary/30 z-10"
-              >
-                <Menu className="w-5 h-5 md:w-6 md:h-6" />
-              </button>
-
-              <Logo
-                variant="light"
-                className="shrink-0 -ml-5 md:-ml-7"
-                imgClassName="h-20 md:h-24"
-                align="left"
-              />
+        <header className="h-[80px] md:h-[110px] border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={toggleSidebar}
+              className="lg:hidden bg-white border border-slate-200 h-10 w-10 rounded-xl flex items-center justify-center"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+            <div className="lg:hidden">
+              <Logo variant="light" iconOnly className="h-10 w-10" />
             </div>
-            
-            <div className="flex items-center gap-4 md:gap-8">
-               <Button asChild variant="outline" className="hidden sm:flex h-11 px-6 rounded-full border-slate-200 font-bold text-xs tracking-tight gap-2 hover:bg-slate-50 transition-all active:scale-95 shadow-sm">
-                  <Link href="/">View Site</Link>
-               </Button>
-               <div className="flex items-center gap-4 md:gap-6 pl-4 md:pl-6 border-l border-slate-100 h-10 md:h-14">
-                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-lg md:text-xl shadow-lg">
-                    {profile?.name?.[0] || 'A'}
-                  </div>
-               </div>
-            </div>
+            <p className="hidden md:block text-[10px] font-black uppercase tracking-widest text-slate-400">
+               Registry Governance
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-4">
+             <Button asChild variant="outline" className="hidden sm:flex h-10 rounded-full text-[10px] font-black uppercase tracking-widest">
+                <Link href="/">View Site</Link>
+             </Button>
+             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black">
+                {profile?.name?.[0] || 'A'}
+             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-4 md:p-8 lg:p-12 w-full max-w-full overflow-x-hidden">
-           <div className="max-w-full mx-auto w-full">
-              {children}
-           </div>
+        <main className="flex-1 p-4 md:p-10 lg:p-12">
+          {children}
         </main>
       </div>
     </div>

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -7,18 +6,21 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v49.0.
- * FIXED: Reduced collapsed logo size for better spatial balance.
+ * Cracklix Admin Sidebar Header v50.0.
+ * FIXED: Structural cleanup for alignment during sidebar transition.
  */
 export default function SidebarHeader({
   isOpen,
   onToggle,
-}: SidebarHeaderProps) {
+}: {
+  isOpen: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div
       className={cn(
-        "h-[100px] md:h-[110px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300",
-        isOpen ? "justify-between gap-2" : "flex-col justify-center gap-4 py-4 px-0"
+        "h-[90px] md:h-[110px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300",
+        isOpen ? "justify-between gap-2" : "justify-center"
       )}
     >
       <Logo
@@ -27,20 +29,14 @@ export default function SidebarHeader({
         iconOnly={!isOpen}
         align={isOpen ? "left" : "center"}
         className="transition-all duration-300"
-        imgClassName={cn(
-          isOpen ? "h-20 md:h-20" : "h-12 md:h-12"
-        )}
       />
 
-      <SidebarToggle
-        isOpen={isOpen}
-        onToggle={onToggle}
-      />
+      {isOpen && (
+        <SidebarToggle
+          isOpen={isOpen}
+          onToggle={onToggle}
+        />
+      )}
     </div>
   );
-}
-
-interface SidebarHeaderProps {
-  isOpen: boolean;
-  onToggle: () => void;
 }

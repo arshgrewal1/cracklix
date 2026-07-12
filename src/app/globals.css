@@ -28,49 +28,17 @@
 }
 
 @layer base {
-  html {
-    font-size: 16px;
-    scroll-behavior: smooth;
-  }
-
   * {
     @apply border-border;
   }
   
   html, body {
-    width: 100%;
-    position: relative;
-    height: auto;
-    min-height: 100dvh;
-    @apply bg-background text-foreground antialiased;
-    -webkit-tap-highlight-color: transparent;
-    -webkit-text-size-adjust: 100%;
-    overflow-x: hidden;
+    @apply bg-white text-foreground antialiased min-h-screen;
+    font-family: var(--font-inter), sans-serif;
   }
   
-  h1 { 
-    @apply font-black tracking-tight leading-[1.1] text-[#0F172A]; 
-    font-size: clamp(1.5rem, 4vw, 2.25rem);
-  }
-
-  h2 { 
-    @apply font-bold tracking-tight leading-[1.2] text-[#0F172A]; 
-    font-size: clamp(1.25rem, 3vw, 1.75rem);
-  }
-
-  h3 { 
-    @apply font-semibold tracking-tight leading-tight text-[#0F172A]; 
-    font-size: clamp(1.125rem, 2vw, 1.375rem);
-  }
-  
-  p { 
-    @apply font-normal text-slate-500; 
-    font-size: 0.875rem;
-    line-height: 1.5;
-  }
-
-  input, textarea, select {
-    font-size: 16px !important;
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-black tracking-tight text-[#0F172A];
   }
 }
 
@@ -107,20 +75,4 @@
 
 .shadow-5xl {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.12);
-}
-
-@keyframes highlight-bg {
-  0% {
-    background-color: rgba(22, 119, 255, 0);
-  }
-  50% {
-    background-color: rgba(22, 119, 255, 0.1);
-  }
-  100% {
-    background-color: rgba(22, 119, 255, 0);
-  }
-}
-
-.highlight-on-scroll {
-  animation: highlight-bg 2s ease-in-out;
 }

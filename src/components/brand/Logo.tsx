@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -18,8 +17,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix High-Fidelity Brand Identity v124.0.
- * FIXED: Reduced desktop container scale for better integration.
+ * @fileOverview Cracklix High-Fidelity Brand Identity v125.0.
+ * FIXED: Replaced greedy 'fill' with explicit sizing for Sidebar/Header stability.
  */
 export default function Logo({
   className = "",
@@ -43,19 +42,19 @@ export default function Logo({
 
   const content = (
     <div className={cn(
-      "relative w-full h-full flex items-center",
+      "relative flex items-center h-full",
       align === 'center' ? "justify-center" : 
       align === 'right' ? "justify-end" : "justify-start"
     )}>
       <Image
         src={src}
         alt="Cracklix"
-        fill
+        width={isIcon ? 48 : 200}
+        height={isIcon ? 48 : 80}
         priority={priority}
-        sizes={isIcon ? "120px" : "800px"}
         className={cn(
-          "transition-all flex-shrink-0 object-contain",
-          align === 'left' && "object-left",
+          "h-auto transition-all flex-shrink-0 object-contain",
+          isIcon ? "w-10 md:w-12" : "w-36 md:w-48",
           imgClassName
         )}
       />
@@ -63,11 +62,7 @@ export default function Logo({
   );
 
   const baseClasses = cn(
-    "flex items-center select-none hover:opacity-95 transition-opacity flex-shrink-0 relative",
-    isIcon 
-      ? "h-10 w-10 md:h-12 md:w-12" 
-      : "h-20 w-44 md:h-24 md:w-56", 
-    align === 'center' && "mx-auto",
+    "flex items-center select-none hover:opacity-95 transition-opacity flex-shrink-0",
     className
   );
 
