@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -18,8 +19,8 @@ import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell
 import { useFirestoreCrud } from "@/hooks/useFirestoreCrud"
 
 /**
- * @fileOverview Subject Registry Hub v18.2.
- * FIXED: Added missing Dialog and Badge imports to resolve runtime crashes.
+ * @fileOverview Subject Registry Hub v18.3.
+ * FIXED: Added missing Button, Dialog and Badge imports to resolve runtime crashes.
  */
 
 export default function SubjectRegistryPage() {
