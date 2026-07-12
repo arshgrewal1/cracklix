@@ -12,13 +12,14 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
 import { useFirestoreCrud } from "@/hooks/useFirestoreCrud"
 
 /**
- * @fileOverview Subject Registry Hub v18.1.
- * FIXED: Standardized hook import for useFirestoreCrud.
- * FIXED: Added Board Hub association for cascading dropdown support in MCQ Bank.
+ * @fileOverview Subject Registry Hub v18.2.
+ * FIXED: Added missing Dialog and Badge imports to resolve runtime crashes.
  */
 
 export default function SubjectRegistryPage() {
@@ -110,10 +111,15 @@ export default function SubjectRegistryPage() {
               onChange={e => setSearchTerm(e.target.value)}
             />
          </div>
-         <select value={boardFilter} onChange={e => setBoardFilter(e.target.value)} className="h-14 md:h-16 px-6 rounded-2xl bg-white border-slate-50 shadow-inner font-bold outline-none text-sm">
-            <option value="all">Filter by Board Hub</option>
-            {boards?.map(b => <option key={b.id} value={b.id}>{b.abbreviation} Hub</option>)}
-         </select>
+         <div className="flex gap-2">
+            <select value={boardFilter} onChange={e => setBoardFilter(e.target.value)} className="flex-1 h-14 md:h-16 px-6 rounded-2xl bg-white border-slate-50 shadow-inner font-bold outline-none text-sm appearance-none cursor-pointer">
+               <option value="all">Filter by Board Hub</option>
+               {boards?.map(b => <option key={b.id} value={b.id}>{b.abbreviation} Hub</option>)}
+            </select>
+            <Button onClick={() => setMergeDialogOpen(true)} variant="outline" className="h-14 md:h-16 px-6 rounded-2xl font-black uppercase text-[10px] tracking-widest gap-3 border-slate-200 bg-white shadow-sm hover:bg-slate-50 shrink-0">
+               <GitMerge className="h-5 w-5 text-emerald-500" /> Normalize
+            </Button>
+         </div>
       </div>
 
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
@@ -128,9 +134,7 @@ export default function SubjectRegistryPage() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i} className="border-slate-50"><TableCell colSpan={3} className="px-6 py-6 md:px-12 md:py-8"><Skeleton className="h-10 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>
-                ))
+                <AdminTableSkeleton rows={5} columns={3} />
               ) : filteredSubjects.map((s: any) => (
                 <TableRow key={s.id} className="hover:bg-slate-50 border-slate-50 transition-colors group">
                   <TableCell className="px-6 md:px-12 py-5 md:py-8">
