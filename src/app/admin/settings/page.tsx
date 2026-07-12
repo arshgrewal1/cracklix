@@ -29,7 +29,8 @@ import {
   BarChart3,
   Eye,
   EyeOff,
-  TrendingUp
+  TrendingUp,
+  Users
 } from "lucide-react"
 import { useDoc, useFirestore } from '@/firebase';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
@@ -37,8 +38,8 @@ import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Administrative Portal v19.1.
- * FIXED: Standardized 24x7 support terminology.
+ * @fileOverview Institutional Administrative Portal v19.2.
+ * FIXED: Restored missing Users icon import.
  */
 
 export default function AdminSettings() {
