@@ -20,7 +20,7 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v71.0.
+ * @fileOverview Institutional Question Renderer v72.0.
  * FIXED: Assertion & Reason field-sequential interleaved order.
  */
 export default function QuestionRenderer({ 
@@ -93,38 +93,38 @@ export default function QuestionRenderer({
       )}>
          {/* ASSERTION & REASON INTERLEAVED HUB */}
          {q.questionType === 'ASSERTION_REASON' && (
-            <div className="space-y-8">
+            <div className="space-y-6">
                <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
                   <Zap className="h-3 w-3" /> Logic Hub
                </div>
                
-               <div className="space-y-4">
-                  <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Assertion Hub</p>
-                  {q.englishAssertion && (
-                     <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
-                        <MathText text={q.englishAssertion} />
-                     </div>
-                  )}
-                  {q.punjabiAssertion && (
-                     <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed mt-2 border-t border-slate-100/50 pt-2">
-                        <MathText text={q.punjabiAssertion} />
-                     </div>
-                  )}
-               </div>
+               {/* 1. English Assertion */}
+               {showEn && q.englishAssertion && (
+                  <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
+                     <MathText text={`Assertion: ${q.englishAssertion}`} />
+                  </div>
+               )}
 
-               <div className="space-y-4 border-t border-slate-200 pt-6">
-                  <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Reason Hub</p>
-                  {q.englishReason && (
-                     <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
-                        <MathText text={q.englishReason} />
-                     </div>
-                  )}
-                  {q.punjabiReason && (
-                     <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed mt-2 border-t border-slate-100/50 pt-2">
-                        <MathText text={q.punjabiReason} />
-                     </div>
-                  )}
-               </div>
+               {/* 2. Punjabi Assertion */}
+               {showLocal && q.punjabiAssertion && (
+                  <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
+                     <MathText text={`ਕਥਨ: ${q.punjabiAssertion}`} />
+                  </div>
+               )}
+
+               {/* 3. English Reason */}
+               {showEn && q.englishReason && (
+                  <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed pt-2 border-t border-slate-200/50">
+                     <MathText text={`Reason: ${q.englishReason}`} />
+                  </div>
+               )}
+
+               {/* 4. Punjabi Reason */}
+               {showLocal && q.punjabiReason && (
+                  <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
+                     <MathText text={`ਕਾਰਨ: ${q.punjabiReason}`} />
+                  </div>
+               )}
             </div>
          )}
 

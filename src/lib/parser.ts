@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v71.0.
- * FIXED: Assertion & Reason field-sequential ordering (Interleaved) to prevent block language reordering.
+ * @fileOverview Institutional Deterministic Ingestion Hub v72.0.
+ * FIXED: Assertion & Reason field-sequential interleaved order.
  */
 
 import { serverTimestamp } from 'firebase/firestore';
@@ -113,7 +113,7 @@ export function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', 
   return null;
 }
 
-// --- SEQUENTIAL ASSERTION & REASON SCANNER (FIELD MODE) ---
+// --- SEQUENTIAL ASSERTION & REASON SCANNER (FIELD-INTERLEAVED MODE) ---
 
 export function parseAssertionReason(fullText: string, metadata: any) {
   const lines = fullText.split(/\r?\n/);
@@ -132,9 +132,9 @@ export function parseAssertionReason(fullText: string, metadata: any) {
       currentQ.englishReason = enReason.trim();
       currentQ.punjabiReason = paReason.trim();
 
-      // Population of English question for bank previews
+      // Population for bank previews (Maintains backward compatibility)
       currentQ.englishQuestion = `Assertion: ${enAssert.trim()}\nReason: ${enReason.trim()}`;
-      currentQ.punjabiQuestion = `ਕਥਨ: ${paAssert.trim()}\nਕਾਰਨ: ${paReason.trim()}`;
+      currentQ.punjabiQuestion = paAssert.trim() ? `ਕਥਨ: ${paAssert.trim()}\nਕਾਰਨ: ${paReason.trim()}` : "";
 
       if (enAssert || paAssert) questions.push(currentQ);
     }
@@ -184,11 +184,6 @@ export function parseAssertionReason(fullText: string, metadata: any) {
     else if (isAns) state = 'ANSWER';
     else if (isExpl) state = 'EXPL';
     else if (optMarker && (enReason || paReason)) state = 'OPTIONS';
-    else {
-      // Script detection fallback
-      if (state === 'ASSERT_EN' && GURMUKHI_REGEX.test(trimmed)) state = 'ASSERT_PA';
-      if (state === 'REASON_EN' && GURMUKHI_REGEX.test(trimmed)) state = 'REASON_PA';
-    }
 
     let clean = trimmed;
     if (state === 'ASSERT_EN') clean = trimmed.replace(assertEnRegex, '').trim();
