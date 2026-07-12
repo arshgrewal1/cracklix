@@ -33,8 +33,8 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v72.0.
- * FIXED: Hydration error by replacing <p> with <div> in validation list.
+ * @fileOverview Modular Industrial Ingestion Hub v73.0.
+ * UPDATED: Added "English Only" node to the Language Hub.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
@@ -65,7 +65,7 @@ export default function BulkIngestionPage() {
   const [metadata, setMetadata] = useState({
     boardId: "",
     subjectId: "",
-    secondaryLanguage: "punjabi",
+    secondaryLanguage: "punjabi" as "punjabi" | "hindi" | "english",
     difficulty: "Medium" as any,
     parserFormat: "CURRENT_AFFAIRS" as ParserFormat
   })
@@ -212,15 +212,19 @@ export default function BulkIngestionPage() {
 
                  <div className="space-y-2">
                     <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Globe className="h-3 w-3" /> Language Hub</Label>
-                    <div className="flex gap-3">
+                    <div className="flex flex-wrap gap-3">
                        <button 
                          onClick={() => setMetadata({...metadata, secondaryLanguage: 'punjabi'})}
-                         className={cn("flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2", metadata.secondaryLanguage === 'punjabi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
+                         className={cn("flex-1 min-w-[120px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2", metadata.secondaryLanguage === 'punjabi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
                        >English + Punjabi</button>
                        <button 
                          onClick={() => setMetadata({...metadata, secondaryLanguage: 'hindi'})}
-                         className={cn("flex-1 h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2", metadata.secondaryLanguage === 'hindi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
+                         className={cn("flex-1 min-w-[120px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2", metadata.secondaryLanguage === 'hindi' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
                        >English + Hindi</button>
+                       <button 
+                         onClick={() => setMetadata({...metadata, secondaryLanguage: 'english'})}
+                         className={cn("flex-1 min-w-[120px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2", metadata.secondaryLanguage === 'english' ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20")}
+                       >English Only</button>
                     </div>
                  </div>
               </div>
@@ -299,7 +303,7 @@ export default function BulkIngestionPage() {
                              )}
                              <QuestionRenderer 
                                 question={q} 
-                                language={metadata.secondaryLanguage === 'punjabi' ? "ENGLISH_PUNJABI" : "ENGLISH_HINDI"} 
+                                language={metadata.secondaryLanguage === 'punjabi' ? "ENGLISH_PUNJABI" : metadata.secondaryLanguage === 'hindi' ? "ENGLISH_HINDI" : "ENGLISH"} 
                                 showSolution={true} 
                                 className="p-0 shadow-none border-none max-w-none"
                              />
