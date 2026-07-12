@@ -18,12 +18,11 @@ import {
   Settings, 
   AlertTriangle,
   Database,
-  Search,
   CheckCircle2,
   ChevronRight
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, doc, writeBatch, serverTimestamp, setDoc, query, orderBy } from "firebase/firestore"
+import { collection, doc, writeBatch, serverTimestamp, query, orderBy } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { bulkParseMCQ } from "@/ai/flows/bulk-parse-ai"
 import { aiManager } from "@/services/ai-manager"
@@ -34,9 +33,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Production AI Ingestion Center v28.0 (Desktop Optimized).
- * FIXED: Full-width layout and non-distorting action button.
- * FIXED: AI Pipeline 404 resolution.
+ * @fileOverview Production AI Ingestion Center v30.0 (High-Fidelity Desktop).
+ * FIXED: Resolved button distortion and text clipping.
+ * FIXED: Expanded textarea height and grid spans for enterprise document processing.
  */
 
 export default function BulkIngestionPage() {
@@ -64,7 +63,7 @@ export default function BulkIngestionPage() {
   const handleAIIngest = async () => {
     if (!rawText.trim()) return
     if (!metadata.boardId || !metadata.subjectId) {
-      toast({ variant: "destructive", title: "Config Blocked", description: "Select Board and Subject nodes first." })
+      toast({ variant: "destructive", title: "Audit Blocked", description: "Select Board and Subject nodes first." })
       return
     }
 
@@ -159,10 +158,10 @@ export default function BulkIngestionPage() {
         icon={Rocket}
         label="Enterprise AI Ingestion Hub"
         title="Smart Bulk Import"
-        subtitle="Extract MCQs from raw text using the 7-key Gemini pool."
+        subtitle="Holistic document extraction using rotated Gemini nodes pool."
       >
-        <div className="flex gap-4 w-full md:w-auto">
-           <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm">Reset Staging</Button>
+        <div className="flex gap-4 w-full md:w-auto shrink-0">
+           <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm bg-white">Reset Staging</Button>
            <Button 
             onClick={handleFinalCommit} 
             disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
@@ -175,7 +174,7 @@ export default function BulkIngestionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
-        {/* INPUT PANEL */}
+        {/* INPUT PANEL - WIDER FOR DESKTOP */}
         <div className="lg:col-span-5 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-6">
@@ -226,7 +225,7 @@ export default function BulkIngestionPage() {
                  <Button 
                     onClick={handleAIIngest} 
                     disabled={isProcessing} 
-                    className="w-full h-16 md:h-18 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-xs md:text-sm rounded-2xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-6"
+                    className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-xs md:text-sm rounded-2xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-12"
                  >
                     {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5 text-primary fill-current" />} 
                     Initialize AI Pipeline

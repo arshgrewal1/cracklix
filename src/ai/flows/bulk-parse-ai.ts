@@ -1,12 +1,12 @@
 
 'use server';
 /**
- * @fileOverview Production AI Bulk Ingestion Engine v4.0.
- * FIXED: Resolved 404 Model Not Found error by using native model refs.
+ * @fileOverview Production AI Bulk Ingestion Engine v5.0.
+ * FIXED: Resolved 'Must supply a model' error by using string ID and corrected generate() syntax.
  */
 
 import { genkit } from 'genkit';
-import { googleAI, gemini15Flash } from '@genkit-ai/google-genai';
+import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'genkit';
 
 const MCQSchema = z.object({
@@ -39,15 +39,14 @@ export async function bulkParseMCQ(input: { rawText: string, examType?: string, 
      throw new Error("AI Registry Sync Blocked: API Key node not provided.");
   }
 
-  // Initialize isolated Genkit instance with the provided key from the rotation pool
+  // Initialize isolated Genkit instance for the specific key
   const aiInstance = genkit({
     plugins: [googleAI({ apiKey })],
   });
 
   try {
     const response = await aiInstance.generate({
-      model: gemini15Flash,
-      input: { rawText, examType },
+      model: 'googleai/gemini-1.5-flash',
       output: { schema: BulkParseOutputSchema },
       prompt: `You are an expert Government Exam MCQ Parser. 
 Your task is to take the entire provided RAW TEXT and extract EVERY valid MCQ found within it.
