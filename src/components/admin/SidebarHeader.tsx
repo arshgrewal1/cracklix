@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -6,8 +7,8 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v48.0.
- * FIXED: Replaced non-standard h-18 with standard h-16 for collapsed logo.
+ * Cracklix Admin Sidebar Header v49.0.
+ * FIXED: Reduced collapsed logo size for better spatial balance.
  */
 export default function SidebarHeader({
   isOpen,
@@ -27,7 +28,7 @@ export default function SidebarHeader({
         align={isOpen ? "left" : "center"}
         className="transition-all duration-300"
         imgClassName={cn(
-          isOpen ? "h-24 md:h-24" : "h-16 md:h-16"
+          isOpen ? "h-20 md:h-20" : "h-12 md:h-12"
         )}
       />
 

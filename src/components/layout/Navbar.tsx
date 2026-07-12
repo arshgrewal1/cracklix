@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -36,8 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v68.0.
- * UPDATED: Refined desktop header height and reduced logo scale for better integration.
+ * @fileOverview Cracklix Navigation Hub v69.0.
+ * FIXED: Reduced desktop header height and logo scale for a refined professional look.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -119,7 +120,7 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0 -ml-5 md:-ml-7"
-                imgClassName="h-20 md:h-32 w-auto"
+                imgClassName="h-16 md:h-28 w-auto"
                 align="left"
               />
             </div>

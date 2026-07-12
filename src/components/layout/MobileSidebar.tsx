@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -30,8 +31,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Mobile Sidebar v67.0.
- * RESTORED: Fixed logo sizing and visibility in the header.
+ * @fileOverview Mobile Sidebar v68.0.
+ * FIXED: Reduced logo scale for a refined mobile layout.
  */
 export default function MobileSidebar({
   onClose,
@@ -76,12 +77,12 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
-      {/* HEADER - RESTORED LOGO VISIBILITY */}
+      {/* HEADER - REFINED LOGO SIZE */}
       <div className="h-[80px] md:h-[110px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
          <Logo
            variant="light"
            align="left"
-           className="h-16 md:h-20 w-44 md:w-56 -ml-2"
+           className="h-14 md:h-16 w-36 md:w-48 -ml-2"
            imgClassName="h-full w-auto"
            onClick={onClose}
          />

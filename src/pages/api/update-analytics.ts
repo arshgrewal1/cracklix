@@ -3,15 +3,28 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import * as admin from 'firebase-admin';
 import { StudySession, UserStudyAnalytics } from '@/lib/firebase-schema';
 
-// Initialize Firebase Admin SDK
+/**
+ * @fileOverview Institutional Analytics Update Node v2.0.
+ * FIXED: Hardened initialization to prevent server crashes if environment variables are missing.
+ */
+
 if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_ADMIN_SDK_JSON as string)),
-    databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
-  });
+  try {
+    const adminJson = process.env.FIREBASE_ADMIN_SDK_JSON;
+    if (adminJson) {
+      admin.initializeApp({
+        credential: admin.credential.cert(JSON.parse(adminJson)),
+        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+      });
+    } else {
+      console.warn('[ANALYTICS_SYNC] FIREBASE_ADMIN_SDK_JSON missing. Node in standby.');
+    }
+  } catch (e) {
+    console.error('[ANALYTICS_SYNC_CRITICAL] Admin SDK init failure:', e);
+  }
 }
 
-const db = admin.firestore();
+const db = admin.apps.length ? admin.firestore() : null;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -20,8 +33,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { userId } = req.body;
 
-  if (!userId) {
-    return res.status(400).json({ message: 'User ID is required' });
+  if (!userId || !db) {
+    return res.status(400).json({ message: 'User ID required or Database offline' });
   }
 
   try {
@@ -41,10 +54,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       thisMonth: 0,
       thisYear: 0,
       lifetime: 0,
-      currentStreak: 0, // This needs a more complex calculation
-      longestStreak: 0, // This needs a more complex calculation
-      dailyAverage: 0, // This needs a more complex calculation
-      mostStudiedSubject: null, // This needs a more complex calculation
+      currentStreak: 0,
+      longestStreak: 0,
+      dailyAverage: 0,
+      mostStudiedSubject: null,
       longestSession: 0,
     };
 
@@ -77,12 +90,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const mostStudied = Object.keys(activityCounts).reduce((a, b) => activityCounts[a] > activityCounts[b] ? a : b, '' as string | null);
     analytics.mostStudiedSubject = mostStudied;
 
-
     await db.collection('user-analytics').doc(userId).set(analytics, { merge: true });
 
-    res.status(200).json({ message: 'Analytics updated successfully' });
+    res.status(200).json({ message: 'Analytics synced' });
   } catch (error) {
-    console.error('Error updating analytics:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error('[ANALYTICS_SYNC_ERROR]:', error);
+    res.status(500).json({ message: 'Internal Sync Error' });
   }
 }
