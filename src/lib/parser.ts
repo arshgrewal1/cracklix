@@ -1,8 +1,8 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v57.0.
- * FIXED: Moved all constants to the top to prevent ReferenceErrors during runtime.
- * FIXED: Refactored parseMatching for continuous scanning and priority marker detection.
+ * @fileOverview Institutional Deterministic Ingestion Hub v58.0.
+ * FIXED: Support for Roman numeral rows and Generic Two-Column Headers.
+ * FIXED: Support for Unicode Circled Option Markers (①, ②, etc.).
  */
 
 export type ParserFormat = 
@@ -36,10 +36,22 @@ const NOISE_PATTERNS = [
   /^\s*[\.·,]{1,}\s*$/
 ];
 
-const ANS_MARKERS = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ"];
+const ANS_MARKERS = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ", "Sahi Uttar"];
 const EXPL_MARKERS = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale", "ENGLISH EXPLANATION", "PUNJABI EXPLANATION"];
-const INSTR_KEYWORDS = ["Choose the correct matching", "Select the correct answer", "Choose the correct option", "Match correctly", "Pick the correct combination", "ਸਹੀ ਮਿਲਾਨ ਦੀ ਚੋਣ ਕਰੋ", "ਸਹੀ ਉੱਤਰ ਚੁਣੋ"];
-const MATCHING_HEADER_KEYWORDS = ["List I", "List II", "Column I", "Column II", "Group A", "Group B", "Country", "Currency", "Scientist", "Discovery", "Animal", "Young One", "State", "Capital"];
+const INSTR_KEYWORDS = [
+  "Choose the correct matching", 
+  "Select the correct answer", 
+  "Choose the correct option", 
+  "Match correctly", 
+  "Pick the correct combination", 
+  "ਸਹੀ ਮਿਲਾਨ ਦੀ ਚੋਣ ਕਰੋ", 
+  "ਸਹੀ ਉੱਤਰ ਚੁਣੋ",
+  "Which option shows the correct matching?",
+  "Which of the following is correctly matched?",
+  "Identify the correct matching.",
+  "Find the correct matching.",
+  "Select the correctly matched option."
+];
 const ACTUAL_QUESTION_KEYWORDS = /^\s*(Which|What|Who|How|Where|When|Identify|Choose|Find|Observe|Count|Select|During\s?which|How\s?many|How\s?much)\s/i;
 
 const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
@@ -73,7 +85,12 @@ function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: s
     { regex: /^\s*[\(]?(1)[\)\.]\s*(.*)/, val: 'A' },
     { regex: /^\s*[\(]?(2)[\)\.]\s*(.*)/, val: 'B' },
     { regex: /^\s*[\(]?(3)[\)\.]\s*(.*)/, val: 'C' },
-    { regex: /^\s*[\(]?(4)[\)\.]\s*(.*)/, val: 'D' }
+    { regex: /^\s*[\(]?(4)[\)\.]\s*(.*)/, val: 'D' },
+    // Unicode circled numbers support
+    { regex: /^\s*([①❶])\s*(.*)/, val: 'A' },
+    { regex: /^\s*([②❷])\s*(.*)/, val: 'B' },
+    { regex: /^\s*([③❸])\s*(.*)/, val: 'C' },
+    { regex: /^\s*([④❹])\s*(.*)/, val: 'D' }
   ];
 
   for (const p of patterns) {
@@ -93,9 +110,8 @@ function parseMatching(rawText: string, metadata: any) {
 
   const finalize = () => {
     if (currentQ) {
-       if (currentQ.englishQuestion?.trim() || currentQ.matchingData?.rows?.length > 0) {
-         questions.push(currentQ);
-       }
+       const hasContent = (currentQ.englishQuestion?.trim() || currentQ.punjabiQuestion?.trim() || currentQ.matchingData?.rows?.length > 0);
+       if (hasContent) questions.push(currentQ);
     }
     currentQ = null;
     state = 'IDLE';
@@ -105,7 +121,6 @@ function parseMatching(rawText: string, metadata: any) {
     const trimmed = line.trim();
     if (!trimmed && state !== 'MATCHING_TABLE') return;
 
-    // 1. HIGHEST PRIORITY: NEW QUESTION MARKER
     if (isQuestionStart(line)) {
       finalize();
       currentQ = { 
@@ -119,43 +134,42 @@ function parseMatching(rawText: string, metadata: any) {
       };
       state = 'INTRO_EN';
       const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
-      if (content) currentQ.englishQuestion = content;
+      if (content) {
+        if (GURMUKHI_REGEX.test(content)) {
+          state = 'INTRO_PA';
+          currentQ.punjabiQuestion = content;
+        } else {
+          currentQ.englishQuestion = content;
+        }
+      }
       return;
     }
 
     if (!currentQ) return;
 
-    // 2. TERMINATION TRIGGERS (Noise/Metadata)
-    const isNoise = NOISE_PATTERNS.some(pattern => pattern.test(trimmed));
-    if (isNoise) {
-       if (state === 'EXPL') finalize();
-       return; 
-    }
-
-    // 3. STATE TRANSITION DETECTORS
     const opt = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isInstr = INSTR_KEYWORDS.some(k => trimmed.toLowerCase().includes(k.toLowerCase()));
-    
     const parts = trimmed.split(/\s{3,}/);
-    const hasHeaderKeywords = MATCHING_HEADER_KEYWORDS.filter(k => trimmed.toLowerCase().includes(k.toLowerCase())).length >= 2;
-    const isHeaderLine = hasHeaderKeywords || (parts.length === 2 && state === 'INTRO_PA');
+
+    // Heuristic for Generic Header Detection (Scientist Discovery, etc.)
+    const isHeaderCandidate = parts.length === 2 && !opt && !isAns && !isExpl && !isInstr && !isQuestionStart(line);
+    const isRomanRow = /^\s*(?:I|V|X)+\.\s+/i.test(line);
 
     if (isAns) state = 'ANSWER';
     else if (isExpl) state = 'EXPL';
     else if (isInstr) state = 'INSTR_EN';
-    else if (isHeaderLine && state !== 'MATCHING_TABLE' && state !== 'OPTIONS') {
+    else if (isHeaderCandidate && state !== 'MATCHING_TABLE' && state !== 'OPTIONS') {
        state = 'MATCHING_TABLE';
-       currentQ.matchingData.leftHeader = parts[0]?.trim() || "List I";
-       currentQ.matchingData.rightHeader = parts[1]?.trim() || "List II";
+       currentQ.matchingData.leftHeader = parts[0]?.trim();
+       currentQ.matchingData.rightHeader = parts[1]?.trim();
        return;
     }
-    else if (opt && state !== 'MATCHING_TABLE' && state !== 'INTRO_EN' && state !== 'INTRO_PA') {
+    else if (opt && state !== 'INTRO_EN' && state !== 'INTRO_PA' && state !== 'MATCHING_TABLE') {
        state = 'OPTIONS';
     }
 
-    // 4. DATA COLLECTION BASED ON STATE
     switch (state) {
       case 'INTRO_EN':
         if (GURMUKHI_REGEX.test(trimmed)) { state = 'INTRO_PA'; currentQ.punjabiQuestion = trimmed; }
@@ -178,7 +192,7 @@ function parseMatching(rawText: string, metadata: any) {
       case 'INSTR_EN':
         if (GURMUKHI_REGEX.test(trimmed)) { state = 'INSTR_PA'; currentQ.punjabiInstruction = trimmed; }
         else if (trimmed) {
-          const cleanInstr = trimmed.replace(new RegExp(`^(?:${INSTR_KEYWORDS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
+          const cleanInstr = trimmed.replace(new RegExp(`^(?:${INSTR_KEYWORDS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '').trim();
           currentQ.englishInstruction = (currentQ.englishInstruction || "") + (currentQ.englishInstruction ? '\n' : '') + (cleanInstr || trimmed);
         }
         break;
@@ -193,7 +207,7 @@ function parseMatching(rawText: string, metadata: any) {
         if (ansMatch) currentQ.correctAnswer = ansMatch[0].toUpperCase();
         break;
       case 'EXPL':
-        const explClean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
+        const explClean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '').trim();
         if (explClean) {
           if (GURMUKHI_REGEX.test(explClean)) {
             currentQ.punjabiExplanation = (currentQ.punjabiExplanation || "") + (currentQ.punjabiExplanation ? '\n' : '') + explClean;
