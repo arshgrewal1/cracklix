@@ -19,8 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v50.0.
- * FIXED: Stacked bilingual rendering (English Bold + Local Medium) as per official screenshots.
+ * @fileOverview Precision Bilingual Question Hub v51.0.
+ * FIXED: Strictly stacks English Bold on top of Local Medium for both Question and Options.
  * FIXED: Unified option pills to prevent "optioning" distortion.
  */
 export default function QuestionRenderer({ 

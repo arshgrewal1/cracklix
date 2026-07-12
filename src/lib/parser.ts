@@ -1,7 +1,7 @@
 /**
- * @fileOverview Institutional Text Sanitizer & Universal Local Regex Parser v16.0.
+ * @fileOverview Institutional Text Sanitizer & Universal Local Regex Parser v17.0.
  * FIXED: Line-anchored option detection to prevent splitting on letters within words (e.g. Find ∠ABC).
- * SUPPORTED: English + Punjabi and English + Hindi workflows.
+ * FIXED: Optimized for math symbols and bilingual block separation.
  */
 
 export function preprocessText(text: string): string {
@@ -26,7 +26,8 @@ export function preprocessText(text: string): string {
  * 1. Standard: Q1. Text... (A) Opt... Ans: B
  * 2. Visuals: [DIAGRAM], [MAP], [IMAGE], [BAR GRAPH]
  * 3. Data: Markdown Tables
- * 4. Bilingual: English / Local split on new lines or separators
+ * 4. Math: Equations and Integrals (∫ or J)
+ * 5. Bilingual: English / Local split on new lines or separators
  */
 export function parseBulkQuestions(rawText: string, metadata: any) {
   const questions: any[] = [];
@@ -41,8 +42,9 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   blocks.forEach(block => {
     if (!block.trim() || block.length < 10) return;
 
-    // Detect the first option marker at the start of a line to separate question text
-    const optionSplitRegex = /\n\s*(?:[\\(\\[]?A[\\)\\]\\.\\-])/i;
+    // HARDENED: Detect the first option marker STRICTLY at the start of a line to separate question text
+    // Looks for newline + (optional space) + A) or (A) or A. or A- followed by a space
+    const optionSplitRegex = /\n\s*(?:\(?A[\)\.\-]\s+)/i;
     const parts = block.split(optionSplitRegex);
     const questionTextPart = parts[0];
     const optionsAndRest = block.substring(questionTextPart.length);
