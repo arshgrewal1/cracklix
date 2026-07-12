@@ -1,5 +1,5 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v46.0.
+ * @fileOverview Institutional Specialized Local Parser v47.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Assertion-Reason formats.
  * FIXED: Simple Bilingual MCQ Parser with support for multiple option markers (Circles, Numbers, Letters).
  * HARDENED: Recursive noise liquidation and automatic field validation.
@@ -173,8 +173,8 @@ function sanitizeExplanation(text: string): string {
 }
 
 /**
- * STRATEGY: Simple Bilingual MCQ Parser
- * Support for circled numbers and multiple option formats.
+ * STRATEGY: Simple Bilingual MCQ Parser v2.0
+ * HARDENED boundary logic for circled numbers and multi-format numbering.
  */
 function parseSimpleBilingual(block: string, q: any, secondaryLang: string) {
   const charMap: Record<string, string> = {
@@ -189,22 +189,25 @@ function parseSimpleBilingual(block: string, q: any, secondaryLang: string) {
   const localKey = secondaryLang === 'hindi' ? 'hindiQuestion' : 'punjabiQuestion';
   const expLocalKey = secondaryLang === 'hindi' ? 'hindiExplanation' : 'punjabiExplanation';
 
-  // 1. Identification: Where do options start?
+  // 1. Structural Boundary Sentinel: Identify where options begin
+  // Supports: A), A., (A), ①, ❶, 1), 1.
   const markerPattern = /(\n\s*(?:\(?([A-D]|[1-4]|①|②|③|④|❶|❷|❸|❹)[\)\.\s:]+)|(?:^|\n)\s*([①-④]|[❶-❹]))/i;
   const firstMarkerMatch = block.match(markerPattern);
   
   if (!firstMarkerMatch) return parseBilingual(block, q, secondaryLang);
 
+  // RULE 1: Question ends immediately before first detected option
   const questionPart = block.substring(0, firstMarkerMatch.index).trim();
   const restPart = block.substring(firstMarkerMatch.index).trim();
 
-  // 2. Question Logic
+  // 2. Question Identity Node
   const qLines = questionPart.split('\n').map(l => l.trim()).filter(Boolean);
   const qMarkerRegex = /^(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+|\d+\.|\d+\))(?:[\.\s:]|$)\s*/i;
   q.englishQuestion = qLines.filter(l => !scriptRegex.test(l)).join('\n').replace(qMarkerRegex, '').trim();
   q[localKey] = qLines.filter(l => scriptRegex.test(l)).join('\n').replace(qMarkerRegex, '').trim();
 
-  // 3. Rationale Isolation
+  // 3. Rationale Isolation Node
+  // Stop parsing options at Answer markers
   const ansExpMarkers = ["Official Key", "Answer", "Ans", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ", "Correct Answer", "Explanation", "Solution", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
   const ansExpStart = restPart.search(new RegExp(`(?:${ansExpMarkers.join('|')})\\s*[:\\-]?`, 'i'));
   
@@ -215,12 +218,12 @@ function parseSimpleBilingual(block: string, q: any, secondaryLang: string) {
     rationalePart = restPart.substring(ansExpStart).trim();
   }
 
-  // 4. Answer Logic (Circles Supported)
+  // 4. Answer Logic (Circled conversion supported)
   const answerMatch = rationalePart.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ|Correct Answer)\s*[:\-]?\s*\(?([A-E]|①|②|③|④|❶|❷|❸|❹|[1-4])\)?/i);
   let rawAns = (answerMatch?.[1] || "A").toUpperCase();
   q.correctAnswer = charMap[rawAns] || rawAns;
 
-  // 5. Explanation Logic
+  // 5. Explanation Logic Node
   const explMarkers = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
   const explStart = rationalePart.search(new RegExp(`(?:${explMarkers.join('|')})\\s*[:\\-]?`, 'i'));
   if (explStart !== -1) {
@@ -230,7 +233,7 @@ function parseSimpleBilingual(block: string, q: any, secondaryLang: string) {
     q[expLocalKey] = expLines.filter(l => scriptRegex.test(l)).join('\n');
   }
 
-  // 6. Option Extraction
+  // 6. Option Extraction Node
   const markers: { char: string, index: number, length: number }[] = [];
   let m;
   const searchRegex = /(\n\s*(?:\(?([A-D]|[1-4]|①|②|③|④|❶|❷|❸|❹)[\)\.\s:]+)|(?:^|\n)\s*([①-④]|[❶-❹]))/gi;
@@ -411,17 +414,19 @@ function parsePunjabiOnly(block: string, q: any) {
 export function validateMCQSchema(q: any): string[] {
   const errors: string[] = [];
   if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion) errors.push("Statement node missing.");
-  if (!q.optionAEnglish && !q.optionAPunjabi && !q.optionAHindi) errors.push("Options node empty.");
-  if (!q.correctAnswer) errors.push("Answer key registry failed.");
-
-  const optMarkers = [/①/, /②/, /③/, /④/, /[A-D]\)/, /[A-D]\./, /\([A-D]\)/];
+  
+  // Rule 12: Question detection validation for option markers
+  const optMarkers = [/①/, /②/, /③/, /④/, /❶/, /❷/, /❸/, /❹/, /[A-D]\)/, /[A-D]\./, /\([A-D]\)/];
   const questionText = (q.englishQuestion || "") + (q.punjabiQuestion || "") + (q.hindiQuestion || "");
   if (optMarkers.some(m => m.test(questionText))) {
-    errors.push("Structural Failure: Question contains option markers.");
+    errors.push("Structural Failure: Question contains option markers. Reparsing required.");
   }
 
+  // Rule 11: Option count check
   const optCount = ['A', 'B', 'C', 'D'].filter(l => q[`option${l}English`] || q[`option${l}Punjabi`] || q[`option${l}Hindi`]).length;
   if (optCount < 4) errors.push(`Registry Violation: Only ${optCount} options detected (Min 4 required).`);
+
+  if (!q.correctAnswer) errors.push("Answer key registry failed.");
 
   const leakMarkers = ["Question", "Option A", "Option B", "Advertisement", "www.", "Page", "Copyright"];
   const explanation = (q.englishExplanation || "") + (q.punjabiExplanation || "") + (q.hindiExplanation || "");
