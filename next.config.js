@@ -15,10 +15,16 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   poweredByHeader: false,
   compress: true,
   staticPageGenerationTimeout: 300,
   trailingSlash: true,
+  devIndicators: {
+    appIsrStatus: false,
+  }
 };
 
 module.exports = withPWA(nextConfig);

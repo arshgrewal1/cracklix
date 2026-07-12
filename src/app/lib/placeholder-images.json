@@ -3,49 +3,49 @@
     {
       "id": "hero-student",
       "description": "Professional Student Preparation Hero",
-      "imageUrl": "/images/hero-student.png",
+      "imageUrl": "https://picsum.photos/seed/101/1200/800",
       "imageHint": "student studying"
     },
     {
       "id": "promo-psssb",
       "description": "PSSSB Official Institutional Promotion",
-      "imageUrl": "/images/promo-psssb.png",
-      "imageHint": "psssb official"
+      "imageUrl": "https://picsum.photos/seed/102/600/400",
+      "imageHint": "office building"
     },
     {
       "id": "hero-army",
       "description": "Indian Army Preparation Node",
-      "imageUrl": "/images/hero-army.png",
-      "imageHint": "indian army"
+      "imageUrl": "https://picsum.photos/seed/103/1200/800",
+      "imageHint": "soldiers marching"
     },
     {
       "id": "hero-punjab",
       "description": "Punjab Heritage Hero",
-      "imageUrl": "/images/hero-punjab.png",
+      "imageUrl": "https://picsum.photos/seed/104/1200/800",
       "imageHint": "punjab heritage"
     },
     {
       "id": "map-punjab",
       "description": "Punjab Geographic Node",
-      "imageUrl": "/images/map-punjab.png",
-      "imageHint": "punjab map"
+      "imageUrl": "https://picsum.photos/seed/105/600/800",
+      "imageHint": "map region"
     },
     {
       "id": "map-india",
       "description": "India National Registry Map",
-      "imageUrl": "/images/map-india.png",
+      "imageUrl": "https://picsum.photos/seed/106/1200/800",
       "imageHint": "india map"
     },
     {
       "id": "mock-police",
       "description": "Punjab Police Operational Readiness",
-      "imageUrl": "/images/mock-police.png",
-      "imageHint": "punjab police"
+      "imageUrl": "https://picsum.photos/seed/107/600/400",
+      "imageHint": "police officers"
     },
     {
       "id": "founder-arsh",
       "description": "Arsh Grewal - Founder & Lead Developer",
-      "imageUrl": "/founder.png",
+      "imageUrl": "https://picsum.photos/seed/108/400/400",
       "imageHint": "professional man"
     }
   ]
