@@ -19,9 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v62.0.
- * FIXED: Markers like "Q2" are now filtered out to prevent redundant rendering and misclassification as series lines.
- * FIXED: Number Line sequences strictly follow English/Punjabi text as per institutional standard.
+ * @fileOverview Precision Bilingual Question Hub v62.1.
+ * FIXED: Removed 'uppercase' from rationale micro-labels for a cleaner Title Case look.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -66,32 +65,21 @@ export default function QuestionRenderer({
   const punjabiQ = q.punjabiQuestion || q.questionPa || "";
   const hindiQ = q.hindiQuestion || q.questionHi || "";
 
-  // DETERMINISTIC SERIES DETECTION (Number Line Protocol)
   const isSeriesLine = (line: string) => {
     const trimmed = line.trim();
     if (!trimmed) return false;
-    
-    // EXCLUDE REDUNDANT MARKERS (Q1, Q2, etc.) from being treated as series
     if (/^Q\d+$/i.test(trimmed)) return false;
-    
-    // Numeric sequence: 2, 6, 12... or 121 : 11 :: 169 : ?
     const hasDigits = /\d/.test(trimmed);
     const hasSeriesSymbols = /[,\?::]/.test(trimmed);
     const wordMatch = trimmed.match(/[a-zA-Z]{2,}/g);
     const wordCount = wordMatch ? wordMatch.length : 0;
-    
-    // Alphabetic series: A, C, F, J, ?
     const alphabeticSeries = /^[A-Z](?:\s*,\s*[A-Z])+\s*,\s*\?$/i.test(trimmed);
-    
-    // Logic: Symbolic structure with very few "standard" dictionary words
     return (hasDigits && (wordCount <= 2 || hasSeriesSymbols)) || alphabeticSeries;
   };
 
   const splitQuestionContent = (text: string) => {
     const lines = text.split('\n');
-    // FILTER: Remove redundant "Q{number}" lines as they are handled by the top badge
     const filteredLines = lines.filter(l => !/^Q\d+$/i.test(l.trim()));
-    
     const textLines = filteredLines.filter(l => !isSeriesLine(l));
     const seriesLines = filteredLines.filter(l => isSeriesLine(l));
     return {
@@ -102,9 +90,7 @@ export default function QuestionRenderer({
 
   const enProc = splitQuestionContent(englishQ);
   const localProc = splitQuestionContent(showPa ? punjabiQ : showHi ? hindiQ : "");
-
   const combinedSeries = [enProc.series, localProc.series].filter(Boolean).join('\n').trim();
-  
   const OPT_LABELS = ['A', 'B', 'C', 'D'];
 
   return (
@@ -130,23 +116,17 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      {/* QUESTION STATEMENTS */}
       <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
-         {/* 1. English Instruction Text */}
          {showEn && enProc.text && (
            <div className={cn("font-[800] text-[#0F172A] antialiased leading-snug md:leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
              <MathText text={enProc.text} />
            </div>
          )}
-
-         {/* 2. Punjabi/Hindi Instruction Text */}
          {localProc.text && (
            <div className={cn("font-bold text-[#0F172A] antialiased leading-snug md:leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
              <MathText text={localProc.text} />
            </div>
          )}
-
-         {/* 3. Number Line / Reasoning Series (Always at Bottom) */}
          {combinedSeries && (
            <div className={cn(
              "font-black text-primary antialiased leading-snug md:leading-relaxed break-words py-5 border-l-4 border-primary/30 pl-6 bg-primary/5 rounded-r-[1.5rem] shadow-inner mt-4", 
@@ -157,7 +137,6 @@ export default function QuestionRenderer({
          )}
       </div>
 
-      {/* OPTIONS MATRIX */}
       {!hideOptions && (
         <div className={cn("flex flex-col w-full", showSolution ? "space-y-3" : "space-y-3 md:space-y-5")}>
           {OPT_LABELS.map((key, idx) => {
@@ -165,8 +144,6 @@ export default function QuestionRenderer({
             const pa = q[`option${key}Punjabi`];
             const hi = q[`option${key}Hindi`];
             const isSelected = selectedAnswer === idx;
-            
-            // DEDUPLICATION: Suppress local script if numeric/identical
             const showPaLine = showPa && pa && pa.trim() !== en?.trim();
             const showHiLine = showHi && hi && hi.trim() !== en?.trim();
 
@@ -210,7 +187,6 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      {/* UNIFIED SOLUTION HUB */}
       {showSolution && (
         <div className="mt-10 border border-slate-100 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-slate-50/50 shadow-2xl relative">
            <div className="absolute top-0 left-0 w-2 md:w-3 h-full bg-emerald-500" />
@@ -242,7 +218,7 @@ export default function QuestionRenderer({
                  <div className="pl-8 space-y-8">
                     {showEn && q.englishExplanation && (
                        <div className="space-y-2">
-                          <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">English Rationale</p>
+                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400">English Rationale</p>
                           <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl">
                              <MathText text={q.englishExplanation} className="text-inherit" />
                           </div>
@@ -250,7 +226,7 @@ export default function QuestionRenderer({
                     )}
                     {showPa && q.punjabiExplanation && (
                        <div className="space-y-2">
-                          <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">ਪੰਜਾਬੀ Rationale</p>
+                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400">ਪੰਜਾਬੀ Rationale</p>
                           <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
                              <MathText text={q.punjabiExplanation} className="text-inherit" />
                           </div>
@@ -258,7 +234,7 @@ export default function QuestionRenderer({
                     )}
                     {showHi && q.hindiExplanation && (
                        <div className="space-y-2">
-                          <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest">हिन्दी Rationale</p>
+                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400">हिन्दी Rationale</p>
                           <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
                              <MathText text={q.hindiExplanation} className="text-inherit" />
                           </div>

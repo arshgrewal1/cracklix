@@ -1,6 +1,6 @@
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v19.0.
- * FIXED: Reasoning and Bilingual extraction rules for stress test compliance.
+ * @fileOverview Institutional Deterministic Ingestion Hub v20.0.
+ * FIXED: Redundant "Explanation:" labels are now discarded from the content node.
  * RULES: English and Punjabi fields isolated; numbers stowed in English; multiline aware.
  * WHITESPACE: Block-level trim only; internal spacing and line breaks preserved.
  */
@@ -109,7 +109,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
     if (format === 'ENGLISH_ONLY' || format === 'MATHEMATICS') {
        q = parseDeterministicEnglish(trimmedBlock, q);
     } else {
-       // Logic for REASONING and BILINGUAL_MCQ is merged into a high-fidelity script isolation engine
        q = parseDeterministicBilingual(trimmedBlock, q, metadata.secondaryLanguage);
     }
 
@@ -119,10 +118,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   return { questions };
 }
 
-/**
- * DETERMINISTIC BILINGUAL ENGINE v6.0
- * FIXED: Deduplicates identical lines in options to prevent stacked repetitions (e.g. 38/38).
- */
 function parseDeterministicBilingual(block: string, q: any, secondaryLang: string) {
   const lines = block.split('\n');
   const punjabiRegex = /[\u0A00-\u0A7F]/;
@@ -150,7 +145,6 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
     const trimmedLine = line.trim();
     if (!trimmedLine && state !== 'QUESTION' && state !== 'EXPLANATION') return;
     
-    // 1. Identify numbering style at first marker
     const isNewOption = optMarkers.some(opt => {
        const regex = new RegExp(`^\\(?${opt}[\\)\\.\\s:]+`, 'i');
        return regex.test(trimmedLine);
@@ -158,10 +152,6 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
 
     if (isNewOption) {
       state = 'OPTIONS';
-      const circleMap: Record<string, string> = { '①': 'A', '②': 'B', '③': 'C', '④': 'D', '❶': 'A', '❷': 'B', '❸': 'C', '❹': 'D' };
-      for (const [char, label] of Object.entries(circleMap)) {
-         if (trimmedLine.startsWith(char)) { currentOption = label as any; break; }
-      }
       optMarkers.forEach(opt => {
         const regex = new RegExp(`^\\(?${opt}[\\)\\.\\s:]+`, 'i');
         if (regex.test(trimmedLine)) currentOption = opt as any;
@@ -172,7 +162,6 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
       state = 'EXPLANATION';
     }
 
-    // 2. Extract content based on current state
     if (state === 'QUESTION') {
       const text = idx === 0 ? line.replace(qMarkerRegex, '') : line;
       if (text.trim()) {
@@ -199,19 +188,18 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
          }
       }
     } else if (state === 'ANSWER') {
-      const circleToLabel: Record<string, string> = { '①': 'A', '②': 'B', '③': 'C', '④': 'D', '❶': 'A', '❷': 'B', '❸': 'C', '❹': 'D' };
-      Object.entries(circleToLabel).forEach(([char, label]) => {
-         if (trimmedLine.includes(char)) q.correctAnswer = label;
-      });
-
       const match = trimmedLine.match(/(?:Answer|Official Key|Correct Answer|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ)\s*[:\-]?\s*\(?([A-D])\)?/i);
       if (match) q.correctAnswer = match[1].toUpperCase();
     } else if (state === 'EXPLANATION') {
-      const text = line.replace(new RegExp(`^(?:${explMarkers.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
+      // STRIP EXPLANATION MARKER: If it's a pure label line, discard.
+      const markerRegex = new RegExp(`^(?:${explMarkers.join('|')})\\s*[:\\-]?\\s*`, 'i');
+      const text = line.replace(markerRegex, '');
+      
       if (text.trim()) {
          if (scriptRegex.test(text)) localExpLines.push(text);
          else englishExpLines.push(text);
-      } else {
+      } else if (line.trim() && !markerRegex.test(line.trim())) {
+         // Keep line if it wasn't a marker and wasn't empty (e.g. valid blank spacing)
          englishExpLines.push(line);
       }
     }
@@ -244,8 +232,6 @@ function parseDeterministicEnglish(block: string, q: any) {
     
     if (optMarkers.some(opt => trimmedLine.match(new RegExp(`^\\(?${opt}[\\)\\.\\s:]+`, 'i'))) || trimmedLine.match(/^[①②③④❶❷❸❹]/)) {
       section = 'OPTIONS';
-      const circleMap: Record<string, string> = { '①': 'A', '②': 'B', '③': 'C', '④': 'D', '❶': 'A', '❷': 'B', '❸': 'C', '❹': 'D' };
-      for (const [char, label] of Object.entries(circleMap)) { if (trimmedLine.startsWith(char)) currentOption = label as any; }
       optMarkers.forEach(opt => { if (trimmedLine.match(new RegExp(`^\\(?${opt}[\\)\\.\\s:]+`, 'i'))) currentOption = opt as any; });
     } else if (ansMarkers.some(m => trimmedLine.toLowerCase().startsWith(m.toLowerCase()))) {
       section = 'ANSWER';
@@ -269,8 +255,13 @@ function parseDeterministicEnglish(block: string, q: any) {
       const match = trimmedLine.match(/(?:Answer|Official Key|Correct Answer)\s*[:\-]?\s*\(?([A-D])\)?/i);
       if (match) q.correctAnswer = match[1].toUpperCase();
     } else if (section === 'EXPLANATION') {
-      const text = line.replace(new RegExp(`^(?:${explMarkers.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
-      explanationLines.push(text);
+      const markerRegex = new RegExp(`^(?:${explMarkers.join('|')})\\s*[:\\-]?\\s*`, 'i');
+      const text = line.replace(markerRegex, '');
+      if (text.trim()) {
+         explanationLines.push(text);
+      } else if (line.trim() && !markerRegex.test(line.trim())) {
+         explanationLines.push(line);
+      }
     }
   });
 
