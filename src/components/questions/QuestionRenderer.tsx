@@ -19,9 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v55.0.
- * FIXED: Unified Black font color (#0F172A) for both English and Local scripts.
- * FIXED: High-fidelity "Testbook" style rationale separation.
+ * @fileOverview Precision Bilingual Question Hub v56.0.
+ * FIXED: Unified Authority Black (#0F172A) for all scripts.
+ * FIXED: Optimized "Testbook" Rationale layout with Answer at top.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -44,7 +44,6 @@ export default function QuestionRenderer({
   
   let renderLang = normalizedLang;
   
-  // Script detection override based on subject context
   if (sectionName.includes("ENGLISH") || subjectId.includes("ENGLISH")) {
     renderLang = "ENGLISH";
   } else if (sectionName.includes("PUNJABI") || sectionName.includes("ਪੰਜਾਬੀ") || subjectId.includes("PUNJABI")) {
