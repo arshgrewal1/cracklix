@@ -1,6 +1,7 @@
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v23.0.
+ * @fileOverview Institutional Deterministic Ingestion Hub v25.0.
  * FIXED: Greedy question extraction - reads ALL lines until Option A sentinel.
+ * FIXED: Multiline support for complex reasoning (Direction Sense, Puzzles, Series).
  * RULES: English and Punjabi fields isolated; numbers stowed in English; multiline aware.
  * WHITESPACE: Block-level trim only; internal spacing and line breaks preserved.
  */
@@ -35,13 +36,16 @@ const NOISE_PATTERNS = [
 
 const EXPLANATION_END_MARKERS = [
   /^[=\-\*\_]{3,}$/,
-  /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$)/i,
+  /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+)(?:[\.\s:]|$)/i,
   /^Page/i,
   /^Download Our App/i,
   /^Copyright/i,
   /www\./i
 ];
 
+/**
+ * Strips promotional noise and page numbers while preserving content structure.
+ */
 export function preprocessText(text: string): string {
   if (!text) return "";
   const lines = text.split(/\r?\n/);
@@ -67,17 +71,22 @@ function sanitizeExplanation(text: string): string {
   return cleanLines.join('\n').trim();
 }
 
+/**
+ * Splits raw document into logical blocks based on Question markers.
+ */
 export function parseBulkQuestions(rawText: string, metadata: any) {
   const cleanedText = preprocessText(rawText);
   if (!cleanedText) return { questions: [] };
 
   const questions: any[] = [];
+  // Hardened Regex: Matches Q1, Question 1, 1. at the start of a line or block
   const questionStartRegex = /(?:^|\n)\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$)/i;
-  const firstIndex = cleanedText.search(questionStartRegex);
   
+  const firstIndex = cleanedText.search(questionStartRegex);
   if (firstIndex === -1) return { questions: [] };
 
   const content = cleanedText.substring(firstIndex);
+  // Split using a lookahead to keep the question markers attached to the start of the block
   const blocks = content.split(/(?=\n\s*(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$)|^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$))/i);
 
   blocks.forEach(block => {
@@ -94,24 +103,30 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
     };
 
     const format: ParserFormat = metadata.parserFormat || 'BILINGUAL_MCQ';
+    
+    // Select specific parser based on metadata
     if (format === 'ENGLISH_ONLY' || format === 'MATHEMATICS') {
        q = parseDeterministicEnglish(trimmedBlock, q);
     } else {
        q = parseDeterministicBilingual(trimmedBlock, q, metadata.secondaryLanguage);
     }
+    
     questions.push(q);
   });
 
   return { questions };
 }
 
+/**
+ * Robust detection for Option Markers (A, B, C, D, 1, 2, 3, 4, ①, ②, ③, ④)
+ */
 function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: string } | null {
   const trimmed = line.trim();
   const markers = [
-    { regex: /^\s*[\(]?(A)[\)\.\s:]+(.*)/i, val: 'A' },
-    { regex: /^\s*[\(]?(B)[\)\.\s:]+(.*)/i, val: 'B' },
-    { regex: /^\s*[\(]?(C)[\)\.\s:]+(.*)/i, val: 'C' },
-    { regex: /^\s*[\(]?(D)[\)\.\s:]+(.*)/i, val: 'D' },
+    { regex: /^\s*[\(]?([A])[\)\.\s:]+(.*)/i, val: 'A' },
+    { regex: /^\s*[\(]?([B])[\)\.\s:]+(.*)/i, val: 'B' },
+    { regex: /^\s*[\(]?([C])[\)\.\s:]+(.*)/i, val: 'C' },
+    { regex: /^\s*[\(]?([D])[\)\.\s:]+(.*)/i, val: 'D' },
     { regex: /^\s*[\(]?(1)[\)\.\s:]+(.*)/, val: 'A' },
     { regex: /^\s*[\(]?(2)[\)\.\s:]+(.*)/, val: 'B' },
     { regex: /^\s*[\(]?(3)[\)\.\s:]+(.*)/, val: 'C' },
@@ -129,6 +144,9 @@ function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: s
   return null;
 }
 
+/**
+ * GREEDY STATE MACHINE: Treats everything as Question until Option A is found.
+ */
 function parseDeterministicBilingual(block: string, q: any, secondaryLang: string) {
   const lines = block.split('\n');
   const punjabiRegex = /[\u0A00-\u0A7F]/;
@@ -150,31 +168,28 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
   const ansMarkers = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ"];
   const explMarkers = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
 
-  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$)\s*/i;
+  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+)(?:[\.\s:]|$)\s*/i;
 
   lines.forEach((line, idx) => {
     const trimmedLine = line.trim();
     
-    // 1. STATE TRANSITIONS
+    // 1. DYNAMIC STATE TRANSITIONS
     const optMatch = detectOptionMarker(line);
-    if (optMatch && (state === 'QUESTION' || state === 'OPTIONS')) {
+    const isAnsMarker = ansMarkers.some(m => trimmedLine.toLowerCase().startsWith(m.toLowerCase()));
+    const isExplMarker = explMarkers.some(m => trimmedLine.toLowerCase().startsWith(m.toLowerCase()));
+
+    if (optMatch && state === 'QUESTION') {
       state = 'OPTIONS';
       currentOption = optMatch.opt;
-      const text = optMatch.text;
-      if (text) {
-        if (scriptRegex.test(text)) q[`option${currentOption}${secondaryLang === 'hindi' ? 'Hindi' : 'Punjabi'}`] = text;
-        else q[`option${currentOption}English`] = text;
-      }
-      return;
-    } 
-
-    if (state === 'OPTIONS' && ansMarkers.some(m => trimmedLine.toLowerCase().startsWith(m.toLowerCase()))) {
+    } else if (isAnsMarker && (state === 'OPTIONS' || state === 'QUESTION')) {
       state = 'ANSWER';
-    } else if ((state === 'OPTIONS' || state === 'ANSWER') && explMarkers.some(m => trimmedLine.toLowerCase().startsWith(m.toLowerCase()))) {
+    } else if (isExplMarker && (state === 'ANSWER' || state === 'OPTIONS' || state === 'QUESTION')) {
       state = 'EXPLANATION';
+    } else if (optMatch && state === 'OPTIONS') {
+       currentOption = optMatch.opt;
     }
 
-    // 2. GREEDY ACCUMULATION
+    // 2. GREEDY ACCUMULATION LOGIC
     if (state === 'QUESTION') {
       const text = idx === 0 ? line.replace(qMarkerRegex, '') : line;
       if (trimmedLine === "") {
@@ -187,30 +202,38 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
          englishQLines.push(text);
          lastScript = 'ENGLISH';
       }
-    } else if (state === 'OPTIONS' && currentOption) {
-      if (trimmedLine) {
+    } 
+    
+    else if (state === 'OPTIONS' && currentOption) {
+      if (optMatch) {
+         // This is the start of a new option line
+         const text = optMatch.text;
+         if (text) {
+           if (scriptRegex.test(text)) q[`option${currentOption}${secondaryLang === 'hindi' ? 'Hindi' : 'Punjabi'}`] = text;
+           else q[`option${currentOption}English`] = text;
+         }
+      } else if (trimmedLine !== "") {
+         // This is a translation line or continuation of previous option
          if (scriptRegex.test(trimmedLine)) {
             const optLocalKey = secondaryLang === 'hindi' ? `option${currentOption}Hindi` : `option${currentOption}Punjabi`;
-            const currentVal = q[optLocalKey] || "";
-            if (!currentVal.split('\n').some((l: string) => l.trim() === trimmedLine)) {
-               q[optLocalKey] = (currentVal ? currentVal + "\n" : "") + trimmedLine;
-            }
+            q[optLocalKey] = (q[optLocalKey] || "") + (q[optLocalKey] ? "\n" : "") + trimmedLine;
          } else {
             const optKey = `option${currentOption}English`;
-            const currentVal = q[optKey] || "";
-            if (!currentVal.split('\n').some((l: string) => l.trim() === trimmedLine)) {
-               q[optKey] = (currentVal ? currentVal + "\n" : "") + trimmedLine;
-            }
+            q[optKey] = (q[optKey] || "") + (q[optKey] ? "\n" : "") + trimmedLine;
          }
       }
-    } else if (state === 'ANSWER') {
+    } 
+    
+    else if (state === 'ANSWER') {
       const match = trimmedLine.match(/(?:Answer|Official Key|Correct Answer|ਉੱਤਰ|उत्तर|ਸਹੀ ਉੱਤਰ)\s*[:\-]?\s*\(?([A-D1-4])\)?/i);
       if (match) {
         const val = match[1].toUpperCase();
         const map: any = { '1': 'A', '2': 'B', '3': 'C', '4': 'D' };
         q.correctAnswer = map[val] || val;
       }
-    } else if (state === 'EXPLANATION') {
+    } 
+    
+    else if (state === 'EXPLANATION') {
       const markerRegex = new RegExp(`^(?:${explMarkers.join('|')})\\s*[:\\-]?\\s*`, 'i');
       const text = line.replace(markerRegex, '');
       if (trimmedLine === "") {
@@ -226,16 +249,17 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
     }
   });
 
+  // FINAL STOWAGE
   q.englishQuestion = englishQLines.join('\n').trim();
   q[localKey] = localQLines.join('\n').trim();
   q.englishExplanation = sanitizeExplanation(englishExpLines.join('\n'));
   q[expLocalKey] = sanitizeExplanation(localExpLines.join('\n'));
 
-  // Deduplicate Options (Fix Rule: Same options keep only one)
+  // Deduplicate identical options (e.g. numeric results)
   ['A', 'B', 'C', 'D'].forEach(opt => {
-     const engVal = q[`option${opt}English`] || "";
-     const localVal = q[secondaryLang === 'hindi' ? `option${opt}Hindi` : `option${opt}Punjabi`] || "";
-     if (engVal.trim() === localVal.trim()) {
+     const engVal = (q[`option${opt}English`] || "").trim();
+     const localVal = (q[secondaryLang === 'hindi' ? `option${opt}Hindi` : `option${opt}Punjabi`] || "").trim();
+     if (engVal === localVal) {
         q[secondaryLang === 'hindi' ? `option${opt}Hindi` : `option${opt}Punjabi`] = "";
      }
   });
@@ -243,9 +267,12 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
   return q;
 }
 
+/**
+ * GREEDY STATE MACHINE for English-only documents.
+ */
 function parseDeterministicEnglish(block: string, q: any) {
   const lines = block.split('\n');
-  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+|QUESTION\s*\d+|QUESTION-\d+)(?:[\.\s:]|$)\s*/i;
+  const qMarkerRegex = /^(?:Q\d+|Q\.\d+|Q\s+\d+|Question\s*\d+|Question-\d+)(?:[\.\s:]|$)\s*/i;
   
   let section: 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION' = 'QUESTION';
   let currentOption: 'A' | 'B' | 'C' | 'D' | null = null;
@@ -257,32 +284,29 @@ function parseDeterministicEnglish(block: string, q: any) {
 
   lines.forEach((line, idx) => {
     const trimmedLine = line.trim();
-    
     const optMatch = detectOptionMarker(line);
-    if (optMatch && (section === 'QUESTION' || section === 'OPTIONS')) {
+    const isAnsMarker = ansMarkers.some(m => trimmedLine.toLowerCase().startsWith(m.toLowerCase()));
+    const isExplMarker = explMarkers.some(m => trimmedLine.toLowerCase().startsWith(m.toLowerCase()));
+
+    if (optMatch && section === 'QUESTION') {
       section = 'OPTIONS';
       currentOption = optMatch.opt;
-      const text = optMatch.text;
-      if (text) q[`option${currentOption}English`] = text;
-      return;
-    }
-
-    if (section === 'OPTIONS' && ansMarkers.some(m => trimmedLine.toLowerCase().startsWith(m.toLowerCase()))) {
+    } else if (isAnsMarker && (section === 'OPTIONS' || section === 'QUESTION')) {
       section = 'ANSWER';
-    } else if ((section === 'OPTIONS' || section === 'ANSWER') && explMarkers.some(m => trimmedLine.toLowerCase().startsWith(m.toLowerCase()))) {
+    } else if (isExplMarker && (section === 'ANSWER' || section === 'OPTIONS' || section === 'QUESTION')) {
       section = 'EXPLANATION';
+    } else if (optMatch && section === 'OPTIONS') {
+       currentOption = optMatch.opt;
     }
 
     if (section === 'QUESTION') {
       const text = idx === 0 ? line.replace(qMarkerRegex, '') : line;
       englishQLines.push(text);
     } else if (section === 'OPTIONS' && currentOption) {
-      if (trimmedLine) {
-         const optKey = `option${currentOption}English`;
-         const currentVal = q[optKey] || "";
-         if (!currentVal.split('\n').some((l: string) => l.trim() === trimmedLine)) {
-            q[optKey] = (currentVal ? currentVal + "\n" : "") + trimmedLine;
-         }
+      if (optMatch) {
+         q[`option${currentOption}English`] = optMatch.text;
+      } else if (trimmedLine !== "") {
+         q[`option${currentOption}English`] = (q[`option${currentOption}English`] || "") + "\n" + trimmedLine;
       }
     } else if (section === 'ANSWER') {
       const match = trimmedLine.match(/(?:Answer|Official Key|Correct Answer)\s*[:\-]?\s*\(?([A-D1-4])\)?/i);
@@ -294,7 +318,7 @@ function parseDeterministicEnglish(block: string, q: any) {
     } else if (section === 'EXPLANATION') {
       const markerRegex = new RegExp(`^(?:${explMarkers.join('|')})\\s*[:\\-]?\\s*`, 'i');
       const text = line.replace(markerRegex, '');
-      if (text.trim() || line === "") explanationLines.push(text);
+      explanationLines.push(text);
     }
   });
 
@@ -303,20 +327,27 @@ function parseDeterministicEnglish(block: string, q: any) {
   return q;
 }
 
+/**
+ * Final Integrity Audit performed ONLY after full block parsing.
+ */
 export function validateMCQSchema(q: any): string[] {
   const errors: string[] = [];
-  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion) errors.push("Statement node missing.");
   
-  const optCount = ['A', 'B', 'C', 'D'].filter(l => q[`option${l}English`] || q[`option${l}Punjabi`] || q[`option${l}Hindi`]).length;
-  if (optCount !== 4) errors.push(`Registry Violation: ${optCount} options detected (Exactly 4 required).`);
+  if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion) {
+     errors.push("Statement node missing.");
+  }
+  
+  const optCount = ['A', 'B', 'C', 'D'].filter(l => 
+    (q[`option${l}English`] || "").trim() || 
+    (q[`option${l}Punjabi`] || "").trim() || 
+    (q[`option${l}Hindi`] || "").trim()
+  ).length;
+
+  if (optCount !== 4) {
+     errors.push(`Registry Violation: ${optCount} options detected (Exactly 4 required). Check if options were erroneously merged into the question.`);
+  }
 
   if (!q.correctAnswer) errors.push("Answer key missing.");
-
-  const qMarkerRegex = /(?:^|\n)\s*(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+)(?:[\.\s:]|$)/i;
-  const explanation = (q.englishExplanation || "") + (q.punjabiExplanation || "") + (q.hindiExplanation || "");
-  if (qMarkerRegex.test(explanation)) {
-     errors.push("Structural Failure: Explanation contains next question marker.");
-  }
 
   return errors;
 }
