@@ -15,26 +15,24 @@ import {
   Zap, 
   Layers, 
   Settings, 
-  AlertTriangle,
   Database,
   CheckCircle2,
-  ChevronRight
+  ChevronRight,
+  ClipboardList
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
-import { bulkParseMCQ } from "@/ai/flows/bulk-parse-ai"
-import { aiManager } from "@/services/ai-manager"
 import { Board, Subject } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 import { AdminPageHeader } from "@/components/admin"
-import { preprocessText, validateMCQSchema } from "@/lib/parser"
+import { preprocessText, parseBulkQuestions, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Production AI Ingestion Center v32.0.
- * FIXED: Resolved modelSupply error in isolated Genkit calls.
- * FIXED: Optimized desktop grid scaling and button fidelity.
+ * @fileOverview Local Bulk Ingestion Hub v40.0.
+ * RESTORED: 100% Offline Regex Parser logic.
+ * FIXED: Desktop width optimized to 1600px and button distortion resolved.
  */
 
 export default function BulkIngestionPage() {
@@ -48,7 +46,6 @@ export default function BulkIngestionPage() {
 
   const [metadata, setMetadata] = useState({
     boardId: "",
-    examId: "",
     subjectId: "",
     difficulty: "Medium" as any,
   })
@@ -57,66 +54,39 @@ export default function BulkIngestionPage() {
   const [stagedQuestions, setStagedQuestions] = useState<any[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
-  const [aiStatus, setAiStatus] = useState<'IDLE' | 'PROCESSING' | 'OFFLINE'>('IDLE')
 
-  const handleAIIngest = async () => {
+  const handleLocalParse = () => {
     if (!rawText.trim()) return
     if (!metadata.boardId || !metadata.subjectId) {
-      toast({ variant: "destructive", title: "Audit Blocked", description: "Select Board and Subject nodes first." })
+      toast({ variant: "destructive", title: "Audit Blocked", description: "Select Board and Subject first." })
       return
     }
 
     setIsProcessing(true)
-    setAiStatus('PROCESSING')
-
     try {
       const sanitizedText = preprocessText(rawText);
-      
-      const result = await aiManager.execute('BULK_PARSE_AI', async (apiKey) => {
-         return await bulkParseMCQ({ 
-           rawText: sanitizedText,
-           examType: metadata.boardId,
-           apiKey 
-         });
-      });
+      const result = parseBulkQuestions(sanitizedText, metadata);
 
-      if (!result?.questions) throw new Error("AI extraction failed to return structured data.");
+      if (!result?.questions || result.questions.length === 0) {
+         throw new Error("No questions detected. Verify format: Q1. (A) ... Ans: A");
+      }
 
-      const mapped = result.questions.map((q: any, idx: number) => {
-        const validationErrors = validateMCQSchema(q);
-        return {
-          ...q,
-          englishQuestion: q.question_en,
-          punjabiQuestion: q.question_pa,
-          hindiQuestion: q.question_hi,
-          optionAEnglish: q.optionA,
-          optionBEnglish: q.optionB,
-          optionCEnglish: q.optionC,
-          optionDEnglish: q.optionD,
-          correctAnswer: q.answer,
-          englishExplanation: q.explanation_en,
-          punjabiExplanation: q.explanation_pa,
-          ...metadata,
-          id: `staged-${idx}-${Date.now()}`,
-          status: 'PENDING_REVIEW',
-          visibility: 'PUBLIC',
-          questionType: 'MCQ',
-          createdBy: profile?.name || "Admin",
-          marks: 1,
-          negativeMarks: 0.25,
-          isValid: validationErrors.length === 0,
-          validationErrors
-        }
+      const validated = result.questions.map(q => {
+         const validationErrors = validateMCQSchema(q);
+         return {
+            ...q,
+            isValid: validationErrors.length === 0,
+            validationErrors,
+            createdBy: profile?.name || "Administrator"
+         }
       });
       
-      setStagedQuestions(mapped);
-      toast({ title: "Extraction Success", description: `${mapped.length} nodes structured.` });
+      setStagedQuestions(validated);
+      toast({ title: "Parsing Success", description: `${validated.length} nodes identified.` });
     } catch (e: any) {
-      setAiStatus('OFFLINE');
-      toast({ variant: "destructive", title: "AI Pipeline Error", description: e.message });
+      toast({ variant: "destructive", title: "Parsing Error", description: e.message });
     } finally {
       setIsProcessing(false)
-      setAiStatus('IDLE')
     }
   }
 
@@ -130,7 +100,7 @@ export default function BulkIngestionPage() {
     try {
       valids.forEach(q => {
         const qRef = doc(collection(db, "questions"));
-        const { id, isValid, validationErrors, ...finalData } = q;
+        const { isValid, validationErrors, ...finalData } = q;
         
         batch.set(qRef, {
           ...finalData,
@@ -154,10 +124,10 @@ export default function BulkIngestionPage() {
     <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-8">
       
       <AdminPageHeader
-        icon={Rocket}
-        label="Enterprise AI Ingestion Hub"
-        title="Smart Bulk Import"
-        subtitle="Holistic document extraction using rotated Gemini nodes pool."
+        icon={ClipboardList}
+        label="High-Speed Ingestion Hub"
+        title="Bulk Import"
+        subtitle="Process documents locally using cracklix regex engine."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50">Reset Staging</Button>
@@ -173,18 +143,13 @@ export default function BulkIngestionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         
-        {/* INPUT PANEL */}
-        <div className="lg:col-span-5 space-y-8">
+        {/* INPUT PANEL - Widened for Desktop Stability */}
+        <div className="lg:col-span-6 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-6">
-                 <div className="flex items-center justify-between border-b border-slate-50 pb-6">
-                    <div className="flex items-center gap-4">
-                       <Settings className="h-6 w-6 text-primary" />
-                       <h3 className="font-bold text-xl uppercase text-[#0F172A]">Registry Target</h3>
-                    </div>
-                    {aiStatus === 'PROCESSING' && (
-                       <Badge className="animate-pulse gap-1.5 h-7 bg-blue-50 text-blue-600 border-none px-3"><Loader2 className="h-3.5 w-3.5 animate-spin" /> AI Pool Active</Badge>
-                    )}
+                 <div className="flex items-center gap-4 border-b border-slate-50 pb-6">
+                    <Settings className="h-6 w-6 text-primary" />
+                    <h3 className="font-bold text-xl uppercase text-[#0F172A]">Registry Target</h3>
                  </div>
                  
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -209,32 +174,32 @@ export default function BulkIngestionPage() {
 
               <div className="space-y-8 pt-8 border-t border-slate-50">
                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 flex items-center justify-between ml-1">
-                        Raw Document Stream
-                        <Badge variant="outline" className="text-[8px] border-blue-100 bg-blue-50 text-blue-600 font-black uppercase">Gemini Parser</Badge>
+                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">
+                        Raw Document Paste Area
                     </Label>
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
-                        placeholder="Paste document text here..."
-                        className="min-h-[600px] md:min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
+                        placeholder="Paste Q1. (A) ... Ans: B format here..."
+                        className="min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>
 
+                 {/* FINAL BUTTON FIX: No distortion, Fixed pill shape */}
                  <Button 
-                    onClick={handleAIIngest} 
+                    onClick={handleLocalParse} 
                     disabled={isProcessing} 
                     className="w-full h-14 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-[11px] rounded-xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-12"
                  >
                     {isProcessing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Zap className="h-5 w-5 text-primary fill-current" />} 
-                    Initialize AI Pipeline
+                    Initialize Ingestion
                  </Button>
               </div>
            </Card>
         </div>
 
         {/* STAGING AREA */}
-        <div className="lg:col-span-7 space-y-8">
+        <div className="lg:col-span-6 space-y-8">
            <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-5">
                  <Layers className="h-6 w-6 text-primary" />
@@ -253,7 +218,7 @@ export default function BulkIngestionPage() {
                     
                     <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
                        <div className="flex items-center gap-4">
-                          <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] uppercase tracking-widest px-4 py-1.5 rounded-lg">AI Node #{idx + 1}</Badge>
+                          <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] uppercase tracking-widest px-4 py-1.5 rounded-lg">Staged Node #{idx + 1}</Badge>
                        </div>
                        <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                     </CardHeader>
@@ -269,10 +234,7 @@ export default function BulkIngestionPage() {
                        ) : (
                           <div className="space-y-6">
                              <div className="p-8 bg-rose-50 rounded-[2rem] border border-rose-100 space-y-4 shadow-inner">
-                                <div className="flex items-center gap-3 text-rose-600">
-                                   <AlertTriangle className="h-6 w-6" />
-                                   <h4 className="font-bold text-base uppercase tracking-widest">Extraction Failure</h4>
-                                </div>
+                                <h4 className="font-bold text-base uppercase tracking-widest text-rose-600">Regex Logic Failure</h4>
                                 <div className="space-y-2">
                                    {q.validationErrors.map((err: string, i: number) => (
                                       <p key={i} className="text-sm font-bold text-rose-400 flex items-center gap-2">
@@ -290,7 +252,7 @@ export default function BulkIngestionPage() {
                     <Database className="h-24 w-24" />
                     <div className="space-y-2">
                        <p className="font-bold text-3xl uppercase tracking-[0.4em]">Staging Hub Empty</p>
-                       <p className="text-sm font-bold uppercase tracking-widest text-primary">Awaiting AI Pool Initiation</p>
+                       <p className="text-sm font-bold uppercase tracking-widest text-primary">Awaiting Document Entry</p>
                     </div>
                  </div>
               )}
