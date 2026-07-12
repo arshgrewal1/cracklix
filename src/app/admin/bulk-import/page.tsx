@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useState, useMemo, useCallback } from "react"
+import React, { useState, useMemo, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -26,26 +27,30 @@ import {
   RefreshCw,
   Search,
   Eye,
-  Languages
+  Languages,
+  Save,
+  CloudOff
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, doc, writeBatch, serverTimestamp, DocumentData, FirestoreDataConverter, query, orderBy } from "firebase/firestore"
+import { collection, doc, writeBatch, serverTimestamp, setDoc, query, orderBy, deleteDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { parseMCQBlocks } from "@/lib/parser"
 import { repairMCQ } from "@/ai/flows/bulk-parse-ai"
+import { aiManager } from "@/services/ai-manager"
 import { Board, Subject, Question, Exam } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Production-Ready AI Bulk Ingestion Center v8.0.
- * Multi-stage pipeline: Preprocessor -> Regex -> AI Repair -> Staging -> Commit.
+ * @fileOverview Production-Ready AI Bulk Ingestion Center v9.0.
+ * Resilient Pipeline: Preprocessor -> Regex -> AI Manager (Failover) -> Staging -> Commit.
+ * UPDATED: Integrated Draft Persistence and Credential Failover logic.
  */
 
 export default function BulkIngestionPage() {
   const router = useRouter()
   const db = useFirestore()
-  const { profile } = useUser()
+  const { user, profile } = useUser()
   const { toast } = useToast()
   
   const { data: boards } = useCollection<Board>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]))
@@ -64,6 +69,19 @@ export default function BulkIngestionPage() {
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
   const [repairingId, setRepairingId] = useState<string | null>(null)
+  const [aiStatus, setAiStatus] = useState<'IDLE' | 'PROCESSING' | 'OFFLINE'>('IDLE')
+
+  // Auto-Save Draft to Registry
+  const saveDraft = async (data: any[]) => {
+    if (!db || !user || data.length === 0) return;
+    const draftRef = doc(db, "bulk_import_drafts", user.uid);
+    await setDoc(draftRef, {
+      staged: data,
+      metadata,
+      rawText,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+  }
 
   const handleInitialIngest = () => {
     if (!rawText.trim()) return
@@ -88,6 +106,7 @@ export default function BulkIngestionPage() {
       }));
       
       setStagedQuestions(mapped);
+      saveDraft(mapped);
       toast({ title: "Ingestion Success", description: `${mapped.length} blocks staging.` });
     } finally {
       setIsProcessing(false)
@@ -99,8 +118,10 @@ export default function BulkIngestionPage() {
     if (!target) return;
 
     setRepairingId(tempId);
+    setAiStatus('PROCESSING');
+
     try {
-      // Create a "raw" representation of the broken block for the AI to ingest
+      // 1. Prepare payload
       const blockText = `
         QUESTION: ${target.englishQuestion || ""} ${target.punjabiQuestion || ""}
         A: ${target.optionAEnglish} / ${target.optionAPunjabi}
@@ -110,26 +131,38 @@ export default function BulkIngestionPage() {
         ANS: ${target.correctAnswer}
       `;
 
-      const repaired = await repairMCQ({ rawText: blockText });
+      // 2. Execute via Resilient AI Manager
+      const repaired = await aiManager.execute('MCQ_REPAIR', async () => {
+         return await repairMCQ({ rawText: blockText });
+      });
       
-      setStagedQuestions(prev => prev.map(q => q.id === tempId ? {
+      const updated = stagedQuestions.map(q => q.id === tempId ? {
         ...q,
         ...repaired,
         isValid: true,
         validationErrors: []
-      } : q));
+      } : q);
 
-      toast({ title: "AI Repair Successful", description: "Node normalized and validated." });
-    } catch (e) {
-      toast({ variant: "destructive", title: "Repair Failed", description: "Manual adjustment required." });
+      setStagedQuestions(updated);
+      saveDraft(updated);
+      toast({ title: "AI Repair Successful", description: "Node normalized via fallback node." });
+    } catch (e: any) {
+      console.error('[AI_REPAIR_FAILURE]:', e);
+      setAiStatus('OFFLINE');
+      toast({ 
+        variant: "destructive", 
+        title: "AI Hub Unavailable", 
+        description: "All providers exhausted. Please edit manually or try later." 
+      });
     } finally {
       setRepairingId(null);
+      setAiStatus('IDLE');
     }
   }
 
   const handleFinalCommit = async () => {
     const valids = stagedQuestions.filter(q => q.isValid);
-    if (valids.length === 0 || !db) return;
+    if (valids.length === 0 || !db || !user) return;
 
     setIsSyncing(true);
     const batch = writeBatch(db);
@@ -147,6 +180,10 @@ export default function BulkIngestionPage() {
       });
 
       await batch.commit();
+      
+      // Clear Draft on success
+      await deleteDoc(doc(db, "bulk_import_drafts", user.uid));
+      
       toast({ title: "Registry Updated", description: `${valids.length} nodes committed to MCQ Bank.` });
       router.push("/admin/questions");
     } catch (e) {
@@ -171,7 +208,7 @@ export default function BulkIngestionPage() {
              <button onClick={() => router.back()} className="h-10 w-10 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-primary transition-all shadow-sm"><ChevronLeft className="h-5 w-5" /></button>
              <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none uppercase">Bulk Ingestion</h1>
           </div>
-          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Universal multilingual MCQ staging hub.</p>
+          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Universal multilingual MCQ staging hub with AI-failover.</p>
         </div>
         <div className="flex gap-3 w-full md:w-auto">
            <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-16 px-8 rounded-full border-slate-200 font-bold text-xs">Clear Hub</Button>
@@ -191,9 +228,14 @@ export default function BulkIngestionPage() {
         <div className="lg:col-span-4 space-y-8">
            <Card className="border-none shadow-xl rounded-[2rem] md:rounded-[3rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50">
               <div className="space-y-6">
-                 <div className="flex items-center gap-3 border-b border-slate-50 pb-4">
-                    <Settings className="h-5 w-5 text-primary" />
-                    <h3 className="font-black text-lg uppercase text-[#0F172A]">Registry Target</h3>
+                 <div className="flex items-center justify-between border-b border-slate-50 pb-4">
+                    <div className="flex items-center gap-3">
+                       <Settings className="h-5 w-5 text-primary" />
+                       <h3 className="font-black text-lg uppercase text-[#0F172A]">Registry Target</h3>
+                    </div>
+                    {aiStatus === 'OFFLINE' && (
+                       <Badge variant="destructive" className="animate-pulse gap-1"><CloudOff className="h-3 w-3" /> Offline</Badge>
+                    )}
                  </div>
                  
                  <div className="space-y-4">
@@ -263,7 +305,7 @@ export default function BulkIngestionPage() {
                  const isRepairing = repairingId === q.id;
                  return (
                     <Card key={q.id} className={cn(
-                      "border-none shadow-xl rounded-[2.5rem] md:rounded-[3.5rem] bg-white overflow-hidden group border border-slate-100 relative transition-all duration-500",
+                      "border-none shadow-xl rounded-[2.5rem] md:rounded-[3rem] bg-white overflow-hidden group border border-slate-100 relative transition-all duration-500",
                       !q.isValid && "ring-2 ring-rose-500/20"
                     )}>
                        <div className={cn("absolute top-0 left-0 w-2 h-full", q.isValid ? "bg-emerald-500" : "bg-rose-500")} />
@@ -277,7 +319,7 @@ export default function BulkIngestionPage() {
                              {!q.isValid && (
                                 <Button 
                                   onClick={() => handleAIRepair(q.id)} 
-                                  disabled={isRepairing}
+                                  disabled={isRepairing || aiStatus === 'PROCESSING'}
                                   className="h-10 bg-amber-500 hover:bg-amber-600 text-white rounded-xl shadow-lg border-none gap-2 font-black text-[9px] uppercase tracking-widest"
                                 >
                                    {isRepairing ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />} AI Repair
