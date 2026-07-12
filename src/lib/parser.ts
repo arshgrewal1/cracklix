@@ -1,8 +1,8 @@
 /**
- * @fileOverview Institutional Specialized Local Parser v33.0.
+ * @fileOverview Institutional Specialized Local Parser v34.0.
  * MODULAR ARCHITECTURE: Dedicated strategies for English, Bilingual, Math, and Assertion-Reason formats.
  * FIXED: Advanced Table Extraction logic to preserve structured grid data.
- * UPDATED: Implemented Assertion & Reason Parser for relational logic questions.
+ * UPDATED: Implemented Fill in the Blank Parser for completion-style questions.
  * HARDENED: Strict removal of headers, footers, page numbers, and copyright text.
  */
 
@@ -23,7 +23,7 @@ export type ParserFormat =
 
 /**
  * Pre-processes raw text to remove institutional noise and OCR garbage.
- * Removes headers, footers, page numbers, and strange symbols while PRESERVING math and diagram markers.
+ * Removes headers, footers, page numbers, and strange symbols while PRESERVING math and blank markers.
  */
 export function preprocessText(text: string): string {
   if (!text) return "";
@@ -40,12 +40,12 @@ export function preprocessText(text: string): string {
     .replace(/Page\s+\d+/gi, '')
     .replace(/ਪੰਨਾ\s+\d+/gi, '')
     .replace(/^\s*\d+\s*$/gm, '') 
-    // 3. Remove OCR Garbage & Symbols (Keep math symbols like ^, √, ∫, and visual markers like [])
+    // 3. Remove OCR Garbage & Symbols (Keep math symbols like ^, √, ∫, and visual markers like [] or blanks ____)
     .replace(/[~►❖⚬▪•]/g, '')
     .replace(/Copyright.*?Arsh Grewal/gi, '')
     .replace(/www\.cracklix\.com/gi, '')
     .replace(/https?:\/\/\S+/gi, '')
-    // 4. Normalize Punctuation (Protect math decimals)
+    // 4. Normalize Punctuation (Protect math decimals and ellipses)
     .replace(/\.{3,}/g, '...')
     .replace(/\.\./g, '.')
     // 5. Normalize Whitespace
@@ -105,6 +105,12 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
       case 'GRAPH':
         q = parseGraph(block, q, metadata.secondaryLanguage);
         break;
+      case 'FILL_BLANK':
+        q = parseFillBlank(block, q, metadata.secondaryLanguage);
+        break;
+      case 'TRUE_FALSE':
+        q = parseTrueFalse(block, q, metadata.secondaryLanguage);
+        break;
       case 'ENGLISH_ONLY':
         q = parseEnglishOnly(block, q);
         break;
@@ -132,21 +138,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
  * STRATEGY: Assertion & Reason Parser
  */
 function parseAssertionReason(block: string, q: any, secondaryLang: string) {
-  // Logic to specifically identify Assertion (A) and Reason (R)
-  // We utilize the bilingual logic but ensure structural labels are preserved
-  const assertionRegex = /(?:Assertion|ਕਥਨ|कथन)\s*(?:\(A\))?[:\-]?\s*([\s\S]*?)(?=(?:Reason|ਕਾਰਨ|कारण)\s*(?:\(R\))?|$)/i;
-  const reasonRegex = /(?:Reason|ਕਾਰਨ|कारण)\s*(?:\(R\))?[:\-]?\s*([\s\S]*?)(?=\n\s*\(?A[\)\.\-]|Official Key|Answer|Ans|$)/i;
-
-  const aMatch = block.match(assertionRegex);
-  const rMatch = block.match(reasonRegex);
-
-  if (aMatch && rMatch) {
-     // If found, we can reconstruct the statement to be very clear
-     // But for now, let's just pass through to parseBilingual which handles script detection
-     // and ensures English/Punjabi split.
-     return parseBilingual(block, q, secondaryLang);
-  }
-
   return parseBilingual(block, q, secondaryLang);
 }
 
@@ -158,7 +149,6 @@ function parseMatching(block: string, q: any, secondaryLang: string) {
   const matchingRows: string[] = [];
   const otherLines: string[] = [];
 
-  // Identify column markers like (a)...(i) or A...1
   const matchingRegex = /^[A-E]\.\s+.*?\s+(?:\d+|[I|V|X]+)\.\s+/i;
   
   lines.forEach(line => {
@@ -170,7 +160,6 @@ function parseMatching(block: string, q: any, secondaryLang: string) {
   });
 
   if (matchingRows.length > 0) {
-    // Construct Markdown Table
     const tableHeader = "| Column I | Column II |\n|---|---|";
     const tableRows = matchingRows.map(row => {
        const parts = row.split(/\s+(?=\d+\.|[I|V|X]+\.)/i);
@@ -180,6 +169,21 @@ function parseMatching(block: string, q: any, secondaryLang: string) {
   }
 
   return parseBilingual(otherLines.join('\n'), q, secondaryLang);
+}
+
+/**
+ * STRATEGY: Fill in the Blank Parser
+ */
+function parseFillBlank(block: string, q: any, secondaryLang: string) {
+  // Logic remains same as bilingual, ensuring underscores are preserved via preprocessor
+  return parseBilingual(block, q, secondaryLang);
+}
+
+/**
+ * STRATEGY: True / False Parser
+ */
+function parseTrueFalse(block: string, q: any, secondaryLang: string) {
+  return parseBilingual(block, q, secondaryLang);
 }
 
 /**

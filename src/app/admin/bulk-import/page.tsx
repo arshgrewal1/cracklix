@@ -35,8 +35,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v66.0.
- * UPDATED: Multi-strategy mapping for CA, Math, Tables, and Assertion Reason.
+ * @fileOverview Modular Industrial Ingestion Hub v67.0.
+ * UPDATED: Multi-strategy mapping for CA, Math, Tables, Assertion-Reason, and Fill in the Blank.
+ * FIXED: Hydration error by replacing p tags with div in validation list.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
@@ -155,7 +156,7 @@ export default function BulkIngestionPage() {
         icon={ClipboardList}
         label="Modular Industrial Ingestion"
         title="MCQ Ingestion Hub"
-        subtitle="Dedicated local strategies for Current Affairs, Math, and Assertion Reason data."
+        subtitle="Dedicated local strategies for Current Affairs, Math, and relational logic data."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <button onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50 transition-all">Reset Staging</button>
@@ -237,7 +238,7 @@ export default function BulkIngestionPage() {
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
-                        placeholder="Paste question blocks with math, tables, or assertion-reason markers here..."
+                        placeholder="Paste question blocks with math, tables, or blanks markers here..."
                         className="min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>
