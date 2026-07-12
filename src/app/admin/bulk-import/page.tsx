@@ -29,7 +29,7 @@ import { Board, Subject } from "@/types"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 import { AdminPageHeader } from "@/components/admin"
-import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat, ParserMode } from "@/lib/parser"
+import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat, ParserMode, isQuestionStart } from "@/lib/parser"
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
   { label: "Current Affairs (English + Punjabi)", value: "CURRENT_AFFAIRS" },
@@ -79,10 +79,18 @@ export default function BulkIngestionPage() {
     setIsProcessing(true)
     try {
       const sanitizedText = preprocessText(rawText);
+      
+      // SHARED VALIDATION PROTOCOL: Verify if any question markers exist
+      const hasAnyQuestion = sanitizedText.split('\n').some(line => isQuestionStart(line));
+      
+      if (!hasAnyQuestion) {
+         throw new Error("No questions detected. Please ensure your content uses supported markers like Q1, Q.1, or Question 1.");
+      }
+
       const result = parseBulkQuestions(sanitizedText, metadata);
 
       if (!result?.questions || result.questions.length === 0) {
-         throw new Error("No questions detected. Ensure each question block starts with Q1, Q2, etc.");
+         throw new Error("Parser failed to extract questions. Please verify your document structure.");
       }
 
       const validated = result.questions.map(q => {

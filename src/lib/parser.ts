@@ -1,8 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v37.0.
- * FIXED: EOF finalization ensures the last question is always detected.
- * FIXED: Hardened Question and Option sentinels for Reasoning puzzles.
+ * @fileOverview Institutional Deterministic Ingestion Hub v38.0.
+ * FIXED: Consolidated Question Detection Sentinel to support multiformat markers across parser and validator.
  */
 
 export type ParserFormat = 
@@ -22,6 +21,16 @@ export type ParserFormat =
 
 export type ParserMode = 'PRODUCTION' | 'STRICT';
 
+/**
+ * Shared Question Detection logic. 
+ * Supports: Q1, Q.1, Question 1, Question-1, QUESTION 1, QUESTION-1
+ */
+export const QUESTION_SENTINEL_REGEX = /^\s*(?:Q|Question|QUESTION|Q\.)\s?[-.]?\s?\d+[\.\s:]/i;
+
+export function isQuestionStart(line: string): boolean {
+  return QUESTION_SENTINEL_REGEX.test(line);
+}
+
 const NOISE_PATTERNS = [
   /^Advertisement$/i, /^Advertisements$/i, /^Sponsored$/i, 
   /Download Our App/i, /Install App/i, /Get the App/i,
@@ -35,8 +44,6 @@ const NOISE_PATTERNS = [
   /^\s*[\.·,]{1,}\s*$/
 ];
 
-// Robust Question Marker: Q1, Q.1, Question 1, QUESTION-1
-const Q_MARKER_REGEX = /^\s*(?:Q|Question|QUESTION|Q\.)\s?[-.]?\s?\d+[\.\s:]/i;
 const ANS_MARKERS = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ"];
 const EXPL_MARKERS = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
 
@@ -52,10 +59,6 @@ export function preprocessText(text: string): string {
   return cleanLines.join('\n').trim();
 }
 
-/**
- * Universal Option Marker Detection
- * Supports: A) (A) A. 1) (1) 1. ①
- */
 function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: string } | null {
   const trimmed = line.trim();
   const patterns = [
@@ -80,10 +83,6 @@ function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: s
   return null;
 }
 
-/**
- * REASONING PARSER: Continuous EOF Stream Machine
- * FIXED: Handles Q5 and beyond by forcing finalization at end of stream.
- */
 function parseReasoning(rawText: string, metadata: any) {
   const lines = rawText.split('\n');
   const questions: any[] = [];
@@ -91,7 +90,6 @@ function parseReasoning(rawText: string, metadata: any) {
   let state: 'SEARCH_QUESTION' | 'READ_QUESTION' | 'READ_OPTIONS' | 'READ_ANSWER' | 'READ_EXPLANATION' = 'SEARCH_QUESTION';
   let currentQ: any = null;
   let currentOption: 'A' | 'B' | 'C' | 'D' | null = null;
-  let lastScript: 'EN' | 'LOCAL' = 'EN';
   
   const punjabiRegex = /[\u0A00-\u0A7F]/;
   const localKey = metadata.secondaryLanguage === 'hindi' ? 'hindiQuestion' : 'punjabiQuestion';
@@ -101,7 +99,6 @@ function parseReasoning(rawText: string, metadata: any) {
   const finalizeQuestion = () => {
     if (!currentQ) return;
     
-    // IDENTITY PURGE: Delete redundant local fields if they match English
     ['A', 'B', 'C', 'D'].forEach(opt => {
       const engKey = `option${opt}English`;
       const locKeyField = `option${opt}${locSuffix}`;
@@ -110,7 +107,6 @@ function parseReasoning(rawText: string, metadata: any) {
       if (engVal && locVal && engVal === locVal) delete currentQ[locKeyField];
     });
 
-    // Cleanup whitespace and remove empty strings
     Object.keys(currentQ).forEach(key => {
       if (typeof currentQ[key] === 'string') {
         currentQ[key] = currentQ[key].trim();
@@ -124,16 +120,14 @@ function parseReasoning(rawText: string, metadata: any) {
 
   lines.forEach((line) => {
     const trimmed = line.trim();
-    const isQStart = Q_MARKER_REGEX.test(line);
+    const isQStart = isQuestionStart(line);
     const optMatch = detectOptionMarker(line);
     const isAnsMarker = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     const isExplMarker = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
 
-    // GLOBAL BOUNDARY: New question always finalizes previous
     if (isQStart) {
       if (currentQ) finalizeQuestion();
       state = 'READ_QUESTION';
-      lastScript = 'EN';
       currentQ = {
         ...metadata,
         id: `q-${Math.random().toString(36).substr(2, 9)}`,
@@ -149,7 +143,6 @@ function parseReasoning(rawText: string, metadata: any) {
 
     if (!currentQ) return;
 
-    // STATE TRANSITIONS
     if (optMatch && (state === 'READ_QUESTION' || state === 'READ_OPTIONS')) {
       state = 'READ_OPTIONS';
       currentOption = optMatch.opt;
@@ -157,22 +150,13 @@ function parseReasoning(rawText: string, metadata: any) {
       state = 'READ_ANSWER';
     } else if (isExplMarker) {
       state = 'READ_EXPLANATION';
-      lastScript = 'EN';
     }
 
-    // DATA ACCUMULATION
     if (state === 'READ_QUESTION') {
-       if (!trimmed) {
-          if (lastScript === 'EN') currentQ.englishQuestion += '\n';
-          else currentQ[localKey] += '\n';
+       if (punjabiRegex.test(line)) {
+          currentQ[localKey] += (currentQ[localKey] ? '\n' : '') + line;
        } else {
-          if (punjabiRegex.test(line)) {
-             currentQ[localKey] += (currentQ[localKey] ? '\n' : '') + line;
-             lastScript = 'LOCAL';
-          } else {
-             currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + line;
-             lastScript = 'EN';
-          }
+          currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + line;
        }
     } 
     else if (state === 'READ_OPTIONS' && currentOption) {
@@ -181,11 +165,9 @@ function parseReasoning(rawText: string, metadata: any) {
       const text = optMatch ? optMatch.text : line;
       
       if (punjabiRegex.test(text)) {
-        const cur = (currentQ[locKeyField] || "").trim();
-        if (cur !== text.trim()) currentQ[locKeyField] = (currentQ[locKeyField] || "") + (currentQ[locKeyField] ? "\n" : "") + text.trim();
+        currentQ[locKeyField] = (currentQ[locKeyField] || "") + (currentQ[locKeyField] ? "\n" : "") + text.trim();
       } else {
-        const cur = (currentQ[engKey] || "").trim();
-        if (cur !== text.trim()) currentQ[engKey] = (currentQ[engKey] || "") + (currentQ[engKey] ? "\n" : "") + text.trim();
+        currentQ[engKey] = (currentQ[engKey] || "") + (currentQ[engKey] ? "\n" : "") + text.trim();
       }
     }
     else if (state === 'READ_ANSWER') {
@@ -197,19 +179,12 @@ function parseReasoning(rawText: string, metadata: any) {
       }
     }
     else if (state === 'READ_EXPLANATION') {
-       if (!trimmed) {
-          if (lastScript === 'EN') currentQ.englishExplanation += '\n';
-          else currentQ[expLocalKey] += '\n';
+       const markerRegex = new RegExp(`^(?:${EXPL_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i');
+       const cleanText = line.replace(markerRegex, '');
+       if (punjabiRegex.test(cleanText)) {
+          currentQ[expLocalKey] += (currentQ[expLocalKey] ? '\n' : '') + cleanText;
        } else {
-          const markerRegex = new RegExp(`^(?:${EXPL_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i');
-          const cleanText = line.replace(markerRegex, '');
-          if (punjabiRegex.test(cleanText)) {
-             currentQ[expLocalKey] += (currentQ[expLocalKey] ? '\n' : '') + cleanText;
-             lastScript = 'LOCAL';
-          } else {
-             currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + cleanText;
-             lastScript = 'EN';
-          }
+          currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + cleanText;
        }
     }
   });
@@ -218,9 +193,6 @@ function parseReasoning(rawText: string, metadata: any) {
   return { questions };
 }
 
-/**
- * PRODUCTION-STABLE BILINGUAL PARSER (LOCKED)
- */
 function parseDeterministicBilingual(rawText: string, metadata: any) {
   const blocks = rawText.split(/\n\s*\n/).filter(b => b.trim().length > 0);
   const questions: any[] = [];
@@ -232,18 +204,12 @@ function parseDeterministicBilingual(rawText: string, metadata: any) {
     
     lines.forEach(line => {
       const optMatch = detectOptionMarker(line);
-      if (Q_MARKER_REGEX.test(line)) q.englishQuestion = line.replace(Q_MARKER_REGEX, '').trim();
+      if (isQuestionStart(line)) q.englishQuestion = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
       else if (optMatch) {
          const engKey = `option${optMatch.opt}English`;
          const locKey = `option${optMatch.opt}${locSuffix}`;
-         
-         // Identity Purge for duplicates
-         if (q[engKey] && q[engKey].trim() === optMatch.text.trim()) {
-            return; 
-         }
-         
          if (!q[engKey]) q[engKey] = optMatch.text;
-         else q[locKey] = optMatch.text;
+         else if (q[engKey].trim() !== optMatch.text.trim()) q[locKey] = optMatch.text;
       }
     });
 
