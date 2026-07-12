@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
@@ -11,16 +11,16 @@ import { Badge } from "@/components/ui/badge"
 import { 
   Loader2, 
   Trash2, 
-  Database,
-  CheckCircle2,
-  ClipboardList,
-  Globe,
-  Braces,
-  Image as ImageIcon,
-  Table as TableIcon,
-  BarChart3,
-  Info,
-  Zap,
+  Database, 
+  CheckCircle2, 
+  ClipboardList, 
+  Globe, 
+  Braces, 
+  Image as ImageIcon, 
+  Table as TableIcon, 
+  BarChart3, 
+  Info, 
+  Zap, 
   Layers
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -33,8 +33,8 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v69.0.
- * FIXED: Imported missing Layers icon and corrected ImageIcon alias.
+ * @fileOverview Modular Industrial Ingestion Hub v70.0.
+ * FIXED: Added missing CardHeader and CardTitle imports to resolve runtime errors.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
