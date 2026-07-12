@@ -19,8 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v62.1.
- * FIXED: Removed 'uppercase' from rationale micro-labels for a cleaner Title Case look.
+ * @fileOverview Precision Bilingual Question Hub v63.0.
+ * FIXED: Aggressive series filtering for multiline paragraph logic.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -69,12 +69,16 @@ export default function QuestionRenderer({
     const trimmed = line.trim();
     if (!trimmed) return false;
     if (/^Q\d+$/i.test(trimmed)) return false;
-    const hasDigits = /\d/.test(trimmed);
+    
+    // Analogy or Sequence markers
     const hasSeriesSymbols = /[,\?::]/.test(trimmed);
+    const hasNumbers = /\d/.test(trimmed);
     const wordMatch = trimmed.match(/[a-zA-Z]{2,}/g);
     const wordCount = wordMatch ? wordMatch.length : 0;
-    const alphabeticSeries = /^[A-Z](?:\s*,\s*[A-Z])+\s*,\s*\?$/i.test(trimmed);
-    return (hasDigits && (wordCount <= 2 || hasSeriesSymbols)) || alphabeticSeries;
+
+    // A line is a series if it has numbers/symbols but very few standard words
+    return (hasNumbers && (wordCount <= 2 || hasSeriesSymbols)) || 
+           /^[A-Z](?:\s*,\s*[A-Z])+\s*,\s*\?$/i.test(trimmed);
   };
 
   const splitQuestionContent = (text: string) => {
@@ -118,18 +122,18 @@ export default function QuestionRenderer({
 
       <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
          {showEn && enProc.text && (
-           <div className={cn("font-[800] text-[#0F172A] antialiased leading-snug md:leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
+           <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
              <MathText text={enProc.text} />
            </div>
          )}
          {localProc.text && (
-           <div className={cn("font-bold text-[#0F172A] antialiased leading-snug md:leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
+           <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
              <MathText text={localProc.text} />
            </div>
          )}
          {combinedSeries && (
            <div className={cn(
-             "font-black text-primary antialiased leading-snug md:leading-relaxed break-words py-5 border-l-4 border-primary/30 pl-6 bg-primary/5 rounded-r-[1.5rem] shadow-inner mt-4", 
+             "font-black text-primary antialiased leading-relaxed break-words py-5 border-l-4 border-primary/30 pl-6 bg-primary/5 rounded-r-[1.5rem] shadow-inner mt-4", 
              showSolution ? "text-base md:text-xl" : "text-[22px] md:text-4xl"
            )}>
              <MathText text={combinedSeries} />
@@ -144,8 +148,11 @@ export default function QuestionRenderer({
             const pa = q[`option${key}Punjabi`];
             const hi = q[`option${key}Hindi`];
             const isSelected = selectedAnswer === idx;
-            const showPaLine = showPa && pa && pa.trim() !== en?.trim();
-            const showHiLine = showHi && hi && hi.trim() !== en?.trim();
+            
+            // Deduplicate same option text
+            const hasLocal = (showPa && pa) || (showHi && hi);
+            const localText = showPa ? pa : hi;
+            const hideLocal = localText?.trim() === en?.trim();
 
             return (
               <div 
@@ -170,14 +177,9 @@ export default function QuestionRenderer({
                       <MathText text={en} />
                     </div>
                   )}
-                  {showPaLine && (
+                  {hasLocal && !hideLocal && (
                     <div className={cn("font-bold leading-tight break-words text-[#0F172A]", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>
-                      <MathText text={pa} />
-                    </div>
-                  )}
-                  {showHiLine && (
-                    <div className={cn("font-bold leading-tight break-words text-[#0F172A]", showSolution ? "text-[11px] md:text-sm" : "text-[13px] md:text-xl")}>
-                      <MathText text={hi} />
+                      <MathText text={localText} />
                     </div>
                   )}
                 </div>
@@ -200,9 +202,9 @@ export default function QuestionRenderer({
                     <p className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight">
                        Option {q.correctAnswer}: {q[`option${q.correctAnswer}English`]}
                     </p>
-                    {(q[`option${q.correctAnswer}Punjabi`] || q[`option${q.correctAnswer}Hindi`]) && (
+                    {((showPa && q[`option${q.correctAnswer}Punjabi`]) || (showHi && q[`option${q.correctAnswer}Hindi`])) && (
                        <p className="text-lg md:text-2xl font-bold text-[#0F172A] opacity-80">
-                          {q[`option${q.correctAnswer}Punjabi`] || q[`option${q.correctAnswer}Hindi`]}
+                          {showPa ? q[`option${q.correctAnswer}Punjabi`] : q[`option${q.correctAnswer}Hindi`]}
                        </p>
                     )}
                  </div>

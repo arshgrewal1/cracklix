@@ -1,5 +1,5 @@
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v21.0.
+ * @fileOverview Institutional Deterministic Ingestion Hub v22.0.
  * FIXED: Greedy question extraction - reads until the first valid option marker.
  * RULES: English and Punjabi fields isolated; numbers stowed in English; multiline aware.
  * WHITESPACE: Block-level trim only; internal spacing and line breaks preserved.
@@ -105,10 +105,6 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   return { questions };
 }
 
-/**
- * Validates if a line starts a new option block.
- * Supported: A), B), C), D), (A), (B), (C), (D), A., 1., 1), ①, ②, ③, ④
- */
 function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: string } | null {
   const trimmed = line.trim();
   const markers = [
@@ -116,12 +112,10 @@ function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', text: s
     { regex: /^\s*[\(]?(B)[\)\.\s:]+(.*)/i, val: 'B' },
     { regex: /^\s*[\(]?(C)[\)\.\s:]+(.*)/i, val: 'C' },
     { regex: /^\s*[\(]?(D)[\)\.\s:]+(.*)/i, val: 'D' },
-    // Numeric Variants
     { regex: /^\s*[\(]?(1)[\)\.\s:]+(.*)/, val: 'A' },
     { regex: /^\s*[\(]?(2)[\)\.\s:]+(.*)/, val: 'B' },
     { regex: /^\s*[\(]?(3)[\)\.\s:]+(.*)/, val: 'C' },
     { regex: /^\s*[\(]?(4)[\)\.\s:]+(.*)/, val: 'D' },
-    // Circled Variants
     { regex: /^\s*[①❶]\s*(.*)/, val: 'A' },
     { regex: /^\s*[②❷]\s*(.*)/, val: 'B' },
     { regex: /^\s*[③❸]\s*(.*)/, val: 'C' },
@@ -146,6 +140,7 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
 
   let state: 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION' = 'QUESTION';
   let currentOption: 'A' | 'B' | 'C' | 'D' | null = null;
+  let lastScript: 'ENGLISH' | 'LOCAL' = 'ENGLISH';
   
   const englishQLines: string[] = [];
   const localQLines: string[] = [];
@@ -160,7 +155,7 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
   lines.forEach((line, idx) => {
     const trimmedLine = line.trim();
     
-    // STATE TRANSITIONS
+    // 1. STATE TRANSITIONS
     const optMatch = detectOptionMarker(line);
     if (optMatch && (state === 'QUESTION' || state === 'OPTIONS')) {
       state = 'OPTIONS';
@@ -179,12 +174,18 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
       state = 'EXPLANATION';
     }
 
-    // ACCUMULATION
+    // 2. GREEDY ACCUMULATION
     if (state === 'QUESTION') {
       const text = idx === 0 ? line.replace(qMarkerRegex, '') : line;
-      if (text.trim() || line === "") {
-         if (scriptRegex.test(text)) localQLines.push(text);
-         else englishQLines.push(text);
+      if (trimmedLine === "") {
+         if (lastScript === 'ENGLISH') englishQLines.push("");
+         else localQLines.push("");
+      } else if (scriptRegex.test(text)) {
+         localQLines.push(text);
+         lastScript = 'LOCAL';
+      } else {
+         englishQLines.push(text);
+         lastScript = 'ENGLISH';
       }
     } else if (state === 'OPTIONS' && currentOption) {
       if (trimmedLine) {
@@ -212,9 +213,15 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
     } else if (state === 'EXPLANATION') {
       const markerRegex = new RegExp(`^(?:${explMarkers.join('|')})\\s*[:\\-]?\\s*`, 'i');
       const text = line.replace(markerRegex, '');
-      if (text.trim() || line === "") {
-         if (scriptRegex.test(text)) localExpLines.push(text);
-         else englishExpLines.push(text);
+      if (trimmedLine === "") {
+         if (lastScript === 'ENGLISH') englishExpLines.push("");
+         else localExpLines.push("");
+      } else if (scriptRegex.test(text)) {
+         localExpLines.push(text);
+         lastScript = 'LOCAL';
+      } else {
+         englishExpLines.push(text);
+         lastScript = 'ENGLISH';
       }
     }
   });
@@ -223,6 +230,15 @@ function parseDeterministicBilingual(block: string, q: any, secondaryLang: strin
   q[localKey] = localQLines.join('\n').trim();
   q.englishExplanation = sanitizeExplanation(englishExpLines.join('\n'));
   q[expLocalKey] = sanitizeExplanation(localExpLines.join('\n'));
+
+  // Deduplicate Options (Fix Rule: Same options keep only one)
+  ['A', 'B', 'C', 'D'].forEach(opt => {
+     const engVal = q[`option${opt}English`] || "";
+     const localVal = q[secondaryLang === 'hindi' ? `option${opt}Hindi` : `option${opt}Punjabi`] || "";
+     if (engVal.trim() === localVal.trim()) {
+        q[secondaryLang === 'hindi' ? `option${opt}Hindi` : `option${opt}Punjabi`] = "";
+     }
+  });
 
   return q;
 }
@@ -291,15 +307,6 @@ export function validateMCQSchema(q: any): string[] {
   const errors: string[] = [];
   if (!q.englishQuestion && !q.punjabiQuestion && !q.hindiQuestion) errors.push("Statement node missing.");
   
-  const optMarkers = [
-    /①/, /②/, /③/, /④/, /❶/, /❷/, /❸/, /❹/, 
-    /[A-D]\)/, /[A-D]\./, /\([A-D]\)/, /\([A-D]\)\./
-  ];
-  const questionText = (q.englishQuestion || "") + (q.punjabiQuestion || "") + (q.hindiQuestion || "");
-  if (optMarkers.some(m => m.test(questionText))) {
-    // Note: We only flag this if the parser failed to transition to OPTIONS and left markers in the text
-  }
-
   const optCount = ['A', 'B', 'C', 'D'].filter(l => q[`option${l}English`] || q[`option${l}Punjabi`] || q[`option${l}Hindi`]).length;
   if (optCount !== 4) errors.push(`Registry Violation: ${optCount} options detected (Exactly 4 required).`);
 
