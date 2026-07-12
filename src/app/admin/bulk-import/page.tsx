@@ -230,18 +230,24 @@ export default function BulkIngestionPage() {
                  </div>
 
                  <div className="space-y-3">
-                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Globe className="h-3 w-3" /> Language Hub</Label>
+                    <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Globe className="h-3.5 w-3.5" /> Language Hub</Label>
                     <div className="flex overflow-x-auto no-scrollbar pb-2 gap-3 snap-x snap-mandatory">
-                       {['punjabi', 'hindi', 'english', 'punjabi_only', 'hindi_only'].map((lang) => (
+                       {[
+                         { id: 'punjabi', label: 'English + Punjabi' },
+                         { id: 'hindi', label: 'English + Hindi' },
+                         { id: 'english', label: 'English Only' },
+                         { id: 'punjabi_only', label: 'Punjabi Only' },
+                         { id: 'hindi_only', label: 'Hindi Only' }
+                       ].map((item) => (
                           <button 
-                            key={lang}
-                            onClick={() => setMetadata({...metadata, secondaryLanguage: lang as any})}
+                            key={item.id}
+                            onClick={() => setMetadata({...metadata, secondaryLanguage: item.id as any})}
                             className={cn(
-                               "flex-shrink-0 min-w-[140px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", 
-                               metadata.secondaryLanguage === lang ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20"
+                               "flex-shrink-0 min-w-[160px] h-12 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all border-2 snap-start", 
+                               metadata.secondaryLanguage === item.id ? "bg-[#0F172A] border-[#0F172A] text-white shadow-lg" : "bg-white border-slate-100 text-slate-400 hover:border-primary/20"
                             )}
                           >
-                             {lang.replace('_', ' ')}
+                             {item.label}
                           </button>
                        ))}
                     </div>
