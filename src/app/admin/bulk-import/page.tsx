@@ -32,9 +32,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Local Bulk Ingestion Hub v42.0.
- * UPDATED: Enhanced for multi-format support (Math, Diagrams, Tables).
- * FIXED: Full-width container and stable administrative button.
+ * @fileOverview Local Bulk Ingestion Hub v43.0.
+ * FIXED: Hydration error (div inside p).
+ * FIXED: Industrial scale desktop workspace and button fidelity.
  */
 
 export default function BulkIngestionPage() {
@@ -260,9 +260,9 @@ export default function BulkIngestionPage() {
                                 <h4 className="font-bold text-base uppercase tracking-widest text-rose-600">Regex Logic Failure</h4>
                                 <div className="space-y-2">
                                    {q.validationErrors.map((err: string, i: number) => (
-                                      <p key={i} className="text-sm font-bold text-rose-400 flex items-center gap-2">
+                                      <div key={i} className="text-sm font-bold text-rose-400 flex items-center gap-2">
                                         <div className="h-1.5 w-1.5 rounded-full bg-rose-300 shrink-0" /> {err}
-                                      </p>
+                                      </div>
                                    ))}
                                 </div>
                              </div>
