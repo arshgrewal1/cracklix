@@ -22,7 +22,8 @@ import {
   Globe,
   Info,
   Braces,
-  X
+  X,
+  Image as ImageIcon
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy, updateDoc, increment } from "firebase/firestore"
@@ -34,9 +35,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
 /**
- * @fileOverview Modular Industrial Ingestion Hub v58.0.
- * FIXED: Hydration error resolved by replacing p with div in staging list.
- * UPDATED: Mathematics strategy support with equation preservation.
+ * @fileOverview Modular Industrial Ingestion Hub v60.0.
+ * FIXED: Hydration error resolved by replacing p with div in error list.
+ * UPDATED: Optimized Diagram Question Parser with visual asset detection.
  */
 
 const FORMATS: { label: string, value: ParserFormat }[] = [
@@ -45,11 +46,11 @@ const FORMATS: { label: string, value: ParserFormat }[] = [
   { label: "English Only MCQ", value: "ENGLISH_ONLY" },
   { label: "Punjabi Only MCQ", value: "PUNJABI_ONLY" },
   { label: "Mathematics Hub", value: "MATHEMATICS" },
+  { label: "Diagram / Image Based", value: "DIAGRAM" },
   { label: "Reasoning & Logic", value: "REASONING" },
   { label: "Table Data Based", value: "TABLE" },
   { label: "Match the Following", value: "MATCHING" },
-  { label: "Assertion & Reason", value: "ASSERTION" },
-  { label: "True / False Node", value: "TRUE_FALSE" }
+  { label: "Assertion & Reason", value: "ASSERTION" }
 ];
 
 export default function BulkIngestionPage() {
@@ -152,7 +153,7 @@ export default function BulkIngestionPage() {
         icon={ClipboardList}
         label="Modular Industrial Ingestion"
         title="MCQ Ingestion Hub"
-        subtitle="Zero AI dependency. Predictable local script detection for high-fidelity bilingual MCQs."
+        subtitle="Zero AI dependency. Dedicated local strategies for Current Affairs, Math and Diagram questions."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50">Reset Staging</Button>
@@ -234,7 +235,7 @@ export default function BulkIngestionPage() {
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
-                        placeholder="Paste question blocks with math symbols here..."
+                        placeholder="Paste question blocks with math or diagram markers here..."
                         className="min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>
@@ -272,7 +273,11 @@ export default function BulkIngestionPage() {
                     <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
                        <div className="flex items-center gap-4">
                           <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] uppercase tracking-widest px-4 py-1.5 rounded-lg">Staged Node #{idx + 1}</Badge>
-                          {q.diagram_required && <Badge className="bg-primary/10 text-primary border-none text-[8px] font-bold uppercase">Asset Required</Badge>}
+                          {q.diagram_required && (
+                             <Badge className="bg-amber-50 text-amber-600 border-none text-[8px] font-black uppercase px-3 py-1 rounded shadow-sm flex items-center gap-2">
+                                <ImageIcon className="h-3 w-3" /> Asset Map Required
+                             </Badge>
+                          )}
                        </div>
                        <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                     </CardHeader>
@@ -280,6 +285,12 @@ export default function BulkIngestionPage() {
                     <CardContent className="p-6 md:p-12 lg:p-16 pt-4">
                        {q.isValid ? (
                           <div className="space-y-10">
+                             {q.diagram_required && (
+                                <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center gap-4">
+                                   <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center text-amber-500 shadow-sm"><ImageIcon className="h-5 w-5" /></div>
+                                   <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{q.diagram_caption}</p>
+                                </div>
+                             )}
                              <QuestionRenderer 
                                 question={q} 
                                 language={metadata.secondaryLanguage === 'punjabi' ? "ENGLISH_PUNJABI" : "ENGLISH_HINDI"} 
