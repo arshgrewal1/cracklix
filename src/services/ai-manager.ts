@@ -2,9 +2,8 @@
 'use client';
 
 /**
- * @fileOverview Institutional AI Service Manager v1.1.
- * Centralized hub for resilient AI requests with failover, retry logic, and health monitoring.
- * UPDATED: Enhanced diagnostic logging for missing credentials.
+ * @fileOverview Institutional AI Service Manager v1.2.
+ * FIXED: Error message now correctly matches the environment variable name for better diagnostics.
  */
 
 export type AIProviderStatus = 'HEALTHY' | 'DEGRADED' | 'FAILED';
@@ -46,7 +45,7 @@ class AIManager {
     }));
 
     if (this.providers.length === 0) {
-      console.warn('[AI_MANAGER] CRITICAL: No AI credentials detected in registry. Please add NEXT_PUBLIC_GOOGLE_GENAI_API_KEY to your environment.');
+      console.warn('[AI_MANAGER] CRITICAL: No AI credentials detected in registry.');
     }
   }
 
@@ -61,9 +60,9 @@ class AIManager {
     let attempt = 0;
     let lastError: any = null;
 
-    // DIAGNOSTIC GUARD: If no keys are set, provide a helpful error instead of a generic "unavailable"
+    // DIAGNOSTIC GUARD: Use the exact key name from the environment for the error message
     if (this.providers.length === 0) {
-       throw new Error('AI providers missing. Please set your GOOGLE_GENAI_API_KEY in the environment variables.');
+       throw new Error('AI providers missing. Please set your NEXT_PUBLIC_GOOGLE_GENAI_API_KEY in the environment variables.');
     }
 
     while (attempt <= this.MAX_RETRIES) {

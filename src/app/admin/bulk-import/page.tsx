@@ -33,10 +33,10 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Production AI Ingestion Center v18.0.
- * FIXED: Resolved button text clipping and distortion.
- * FIXED: Increased Parser (Textarea) size to 850px for desktop documents.
- * REBALANCED: Widened the configuration column for better spatial alignment.
+ * @fileOverview Production AI Ingestion Center v19.0.
+ * FIXED: Resolved button text clipping by optimizing padding and tracking.
+ * FIXED: Standardized button layout to prevent circular distortion.
+ * SCALED: Maintained 850px parser height for large documents.
  */
 
 export default function BulkIngestionPage() {
@@ -183,7 +183,7 @@ export default function BulkIngestionPage() {
            <Button 
             onClick={handleFinalCommit} 
             disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
-            className="flex-1 md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-xl font-black uppercase text-[11px] tracking-tight gap-3 shadow-xl border-none active:scale-95"
+            className="flex-1 md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-xl font-bold uppercase text-[11px] tracking-tight gap-3 shadow-xl border-none active:scale-95"
            >
             {isSyncing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Database className="h-5 w-5" />} Commit Bank
            </Button>
@@ -192,14 +192,14 @@ export default function BulkIngestionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-1">
         
-        {/* INPUT PANEL - INCREASED WIDTH & TEXTAREA SCALE */}
+        {/* INPUT PANEL */}
         <div className="lg:col-span-6 xl:col-span-5 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-6">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                     <div className="flex items-center gap-4">
                        <Settings className="h-6 w-6 text-primary" />
-                       <h3 className="font-black text-xl uppercase text-[#0F172A]">Target Context</h3>
+                       <h3 className="font-bold text-xl uppercase text-[#0F172A]">Target Context</h3>
                     </div>
                     {aiStatus === 'PROCESSING' && (
                        <Badge className="animate-pulse gap-1.5 h-7 bg-blue-50 text-blue-600 border-none px-3"><Loader2 className="h-3.5 w-3.5 animate-spin" /> AI Active</Badge>
@@ -208,7 +208,6 @@ export default function BulkIngestionPage() {
                  
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
-                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Authority Board</Label>
                        <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v})}>
                           <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner"><SelectValue placeholder="Select Board Hub" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white border-white/10">
@@ -217,7 +216,6 @@ export default function BulkIngestionPage() {
                        </Select>
                     </div>
                     <div className="space-y-2">
-                       <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">Subject Node</Label>
                        <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
                           <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner"><SelectValue placeholder="Select Subject Node" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white border-white/10 max-h-80">
@@ -231,8 +229,8 @@ export default function BulkIngestionPage() {
               <div className="space-y-8 pt-8 border-t border-slate-50">
                  <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-slate-400 flex items-center justify-between ml-1">
-                        Raw Document Paste (Parser)
-                        <Badge variant="outline" className="text-[8px] border-blue-100 bg-blue-50 text-blue-600 font-black">AI-HUB v2.0</Badge>
+                        Raw Document Paste
+                        <Badge variant="outline" className="text-[8px] border-blue-100 bg-blue-50 text-blue-600 font-black uppercase">Parser Hub</Badge>
                     </Label>
                     <Textarea 
                         value={rawText}
@@ -242,11 +240,10 @@ export default function BulkIngestionPage() {
                     />
                  </div>
 
-                 {/* INITIALIZE BUTTON - FIXED PADDING & CLIPPING */}
                  <Button 
                     onClick={handleAIIngest} 
                     disabled={isProcessing} 
-                    className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-xs md:text-sm rounded-2xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-12"
+                    className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-xs md:text-sm rounded-2xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-6"
                  >
                     {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Zap className="h-6 w-6 text-primary fill-current" />} 
                     Initialize Ingestion
@@ -255,14 +252,14 @@ export default function BulkIngestionPage() {
            </Card>
         </div>
 
-        {/* STAGING HUB - REBALANCED WIDTH */}
+        {/* STAGING HUB */}
         <div className="lg:col-span-6 xl:col-span-7 space-y-8">
            <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-5">
                  <Layers className="h-6 w-6 text-primary" />
                  <h3 className="text-xl md:text-3xl font-black text-[#0F172A] uppercase tracking-tight">Audit Staging</h3>
               </div>
-              <Badge className="bg-[#0F172A] text-white border-none font-black text-[10px] px-5 py-2 rounded-xl shadow-lg">{stagedQuestions.length} Staged Nodes</Badge>
+              <Badge className="bg-[#0F172A] text-white border-none font-bold text-[10px] px-5 py-2 rounded-xl shadow-lg">{stagedQuestions.length} Staged Nodes</Badge>
            </div>
 
            <div className="grid grid-cols-1 gap-6">
@@ -275,7 +272,7 @@ export default function BulkIngestionPage() {
                     
                     <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
                        <div className="flex items-center gap-4">
-                          <Badge className="bg-[#0B1228] text-white border-none font-black text-[9px] uppercase tracking-widest px-4 py-1.5 rounded-lg">AI Node #{idx + 1}</Badge>
+                          <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] uppercase tracking-widest px-4 py-1.5 rounded-lg">AI Node #{idx + 1}</Badge>
                        </div>
                        <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center active:scale-90 opacity-0 group-hover:opacity-100 transition-all"><Trash2 className="h-5 w-5" /></button>
                     </CardHeader>
@@ -293,7 +290,7 @@ export default function BulkIngestionPage() {
                              <div className="p-8 bg-rose-50 rounded-[2rem] border border-rose-100 space-y-4 shadow-inner">
                                 <div className="flex items-center gap-3 text-rose-600">
                                    <AlertTriangle className="h-6 w-6" />
-                                   <h4 className="font-black text-base uppercase tracking-widest">Extraction Failure</h4>
+                                   <h4 className="font-bold text-base uppercase tracking-widest">Extraction Failure</h4>
                                 </div>
                                 <div className="space-y-2">
                                    {q.validationErrors.map((err: string, i: number) => (
@@ -311,7 +308,7 @@ export default function BulkIngestionPage() {
                  <div className="py-60 flex flex-col items-center justify-center text-slate-300 opacity-20 space-y-10 text-center border-2 border-dashed border-slate-200 rounded-[3rem] mx-2">
                     <Database className="h-24 w-24" />
                     <div className="space-y-2">
-                       <p className="font-black text-3xl uppercase tracking-[0.4em]">Staging Empty</p>
+                       <p className="font-bold text-3xl uppercase tracking-[0.4em]">Staging Empty</p>
                        <p className="text-sm font-bold uppercase tracking-widest text-primary">Awaiting AI Pipeline Initiation</p>
                     </div>
                  </div>
