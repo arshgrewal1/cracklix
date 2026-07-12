@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useState } from "react"
@@ -7,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Search, MoreVertical, ShieldCheck, Trash2, Gem, User as UserIcon, Calendar, Unlock, Zap, Loader2, X, AlertCircle } from "lucide-react"
+import { Search, MoreVertical, ShieldCheck, Trash2, Gem, User as UserIcon, Calendar, Unlock, Zap, Loader2, X, AlertCircle, Clock } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, doc, updateDoc, serverTimestamp, deleteDoc, addDoc } from "firebase/firestore"
@@ -32,8 +31,8 @@ import StudentAvatar from "@/components/brand/StudentAvatar"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Student Hub v27.0 (High-Fidelity).
- * FIXED: Refined typography and increased layout breathing room for a premium SaaS look.
+ * @fileOverview Student Hub v27.1.
+ * FIXED: Imported missing Clock icon to resolve runtime ReferenceError.
  */
 
 export default function AspirantsManagement() {
@@ -108,7 +107,7 @@ export default function AspirantsManagement() {
   }
 
   return (
-    <div className="space-y-10 md:space-y-16 text-[#0F172A] text-left animate-in fade-in duration-500 pt-2">
+    <div className="space-y-10 md:space-y-16 text-[#0F172A] text-left animate-in fade-in duration-700 pt-2">
       <div className="flex justify-between items-center px-1">
         <div className="space-y-3">
            <div className="flex items-center gap-2">
