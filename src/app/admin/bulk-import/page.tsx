@@ -19,7 +19,8 @@ import {
   CheckCircle2,
   ChevronRight,
   ClipboardList,
-  Globe
+  Globe,
+  Info
 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, doc, writeBatch, serverTimestamp, query, orderBy } from "firebase/firestore"
@@ -31,9 +32,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Local Bulk Ingestion Hub v41.0.
- * RESTORED: 100% Offline Regex Parser logic with Dual-Language Hub.
- * FIXED: Desktop width optimized to 1600px and button fidelity preserved.
+ * @fileOverview Local Bulk Ingestion Hub v42.0.
+ * UPDATED: Enhanced for multi-format support (Math, Diagrams, Tables).
+ * FIXED: Full-width container and stable administrative button.
  */
 
 export default function BulkIngestionPage() {
@@ -123,13 +124,13 @@ export default function BulkIngestionPage() {
   }
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-8">
+    <div className="w-full max-w-full mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-12 lg:px-16">
       
       <AdminPageHeader
         icon={ClipboardList}
-        label="High-Speed Local Ingestion"
-        title="Bulk Import"
-        subtitle="Process bilingual documents locally using the cracklix regex engine."
+        label="Industrial Scale Ingestion"
+        title="Universal Bulk Import"
+        subtitle="Process Math, Diagrams, Tables and Bilingual text locally."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50">Reset Staging</Button>
@@ -192,9 +193,10 @@ export default function BulkIngestionPage() {
 
               <div className="space-y-8 pt-8 border-t border-slate-50">
                  <div className="space-y-2">
-                    <Label className="text-[10px] font-black uppercase text-slate-400 ml-1">
-                        Raw Document Paste Area
-                    </Label>
+                    <div className="flex items-center justify-between px-1">
+                       <Label className="text-[10px] font-black uppercase text-slate-400">Raw Document Stream</Label>
+                       <Badge variant="outline" className="bg-slate-50 text-[8px] border-slate-200">Supports Math & Visuals</Badge>
+                    </div>
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
@@ -236,18 +238,22 @@ export default function BulkIngestionPage() {
                     <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
                        <div className="flex items-center gap-4">
                           <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] uppercase tracking-widest px-4 py-1.5 rounded-lg">Staged Node #{idx + 1}</Badge>
+                          {q.diagram_required && <Badge className="bg-primary/10 text-primary border-none text-[8px] font-bold uppercase">Image Node</Badge>}
+                          {q.table_data && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold uppercase">Table Node</Badge>}
                        </div>
                        <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                     </CardHeader>
 
                     <CardContent className="p-6 md:p-12 lg:p-16 pt-4">
                        {q.isValid ? (
-                          <QuestionRenderer 
-                             question={q} 
-                             language={metadata.secondaryLanguage === 'punjabi' ? "ENGLISH_PUNJABI" : "ENGLISH_HINDI"} 
-                             showSolution={true} 
-                             className="p-0 shadow-none border-none max-w-none"
-                          />
+                          <div className="space-y-10">
+                             <QuestionRenderer 
+                                question={q} 
+                                language={metadata.secondaryLanguage === 'punjabi' ? "ENGLISH_PUNJABI" : "ENGLISH_HINDI"} 
+                                showSolution={true} 
+                                className="p-0 shadow-none border-none max-w-none"
+                             />
+                          </div>
                        ) : (
                           <div className="space-y-6">
                              <div className="p-8 bg-rose-50 rounded-[2rem] border border-rose-100 space-y-4 shadow-inner">

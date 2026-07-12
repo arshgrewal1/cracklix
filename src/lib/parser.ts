@@ -1,7 +1,8 @@
 /**
- * @fileOverview Institutional Text Sanitizer & Local Regex Parser v11.0.
+ * @fileOverview Institutional Text Sanitizer & Local Regex Parser v12.0.
  * RESTORED: Local parsing logic for high-speed offline ingestion.
  * SUPPORTED: English + Punjabi and English + Hindi workflows.
+ * UPDATED: Added support for Diagrams, Tables, Math, and Maps markers.
  */
 
 export function preprocessText(text: string): string {
@@ -9,6 +10,8 @@ export function preprocessText(text: string): string {
   
   return text
     .replace(/\r\n/g, '\n')
+    // Remove decorative separators and section headers
+    .replace(/^={3,}.*?={3,}$/gm, '')
     // Remove Page Numbering noise
     .replace(/Page\s+\d+\s+of\s+\d+/gi, '')
     .replace(/\d+\s*\/\s*\d+/g, '')
@@ -16,21 +19,22 @@ export function preprocessText(text: string): string {
     .replace(/Copyright\s+.*$/gim, '')
     // Normalize whitespace
     .replace(/ +/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
+    .replace(/\n{4,}/g, '\n\n')
     .trim();
 }
 
 /**
- * Local Regex Parser for MCQs.
- * Handles the standard Cracklix format:
- * Q1. Question text...
- * (A) Option EN / Local
- * ...
- * Answer: B
+ * Universal Local Regex Parser for MCQs.
+ * Handles:
+ * 1. Standard: Q1. Text... (A) Opt... Ans: B
+ * 2. Visuals: [DIAGRAM], [MAP], [IMAGE], [GRAPH]
+ * 3. Data: Markdown Tables
+ * 4. Bilingual: English / Local split
  */
 export function parseBulkQuestions(rawText: string, metadata: any) {
   const questions: any[] = [];
-  // Split by Question markers
+  
+  // Split by Question markers (Q1., Question 1., etc)
   const blocks = rawText.split(/(?=Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.)/i);
 
   const secondaryLang = metadata.secondaryLanguage || 'punjabi';
@@ -46,30 +50,51 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
       questionType: 'MCQ',
       marks: 1,
       negativeMarks: 0.25,
-      usedCount: 0
+      usedCount: 0,
+      diagram_required: false
     };
 
-    // 1. Extract Answer Key
-    const ansMatch = block.match(/(?:Answer|Ans|ਉੱਤਰ|उत्तर)\s*[:\-]?\s*\(?([A-D])\)?/i);
+    // 1. Detect Visual/Diagram markers
+    if (/\[(DIAGRAM|MAP|IMAGE|GRAPH|BAR GRAPH)\]/i.test(block)) {
+       q.diagram_required = true;
+       q.diagram_caption = "Visual asset reference detected";
+    }
+
+    // 2. Extract Table Data (Markdown format)
+    const tableMatch = block.match(/\|[\s\S]*?\|/);
+    if (tableMatch) {
+       q.table_data = tableMatch[0].trim();
+       q.questionType = 'TABLE_BASED';
+    }
+
+    // 3. Extract Answer Key (Support multiple labels)
+    const ansMatch = block.match(/(?:Official Key|Answer|Ans|ਉੱਤਰ|उत्तर)\s*[:\-]?\s*\(?([A-D])\)?/i);
     q.correctAnswer = ansMatch ? ansMatch[1].toUpperCase() : "A";
 
-    // 2. Extract Options (Handles Bilingual Splitting)
+    // 4. Extract Options (Handles Bilingual Splitting & English-Only)
     const extractOpt = (label: string, nextLabel: string) => {
-       const regex = new RegExp(`\\(${label}\\)\\s*([\\s\\S]*?)(?=\\(${nextLabel}\\)|Answer|Ans|ਉੱਤਰ|उत्तर|$)`, 'i');
+       const regex = new RegExp(`\\(${label}\\)\\s*([\\s\\S]*?)(?=\\(${nextLabel}\\)|Official Key|Answer|Ans|ਉੱਤਰ|उत्तर|$)`, 'i');
        const match = block.match(regex);
        if (!match) return { en: "", local: "" };
        
-       const parts = match[1].trim().split(/\s*\/\s*/);
-       return { 
-          en: parts[0]?.trim() || "", 
-          local: parts[1]?.trim() || parts[0]?.trim() || "" 
-       };
+       const content = match[1].trim();
+       const lines = content.split('\n').map(l => l.trim()).filter(Boolean);
+       
+       // Handle "Option / ਵਿਕਲਪ" or separate lines
+       if (content.includes(' / ')) {
+          const parts = content.split(' / ');
+          return { en: parts[0]?.trim() || "", local: parts[1]?.trim() || parts[0]?.trim() || "" };
+       } else if (lines.length > 1) {
+          return { en: lines[0], local: lines[1] };
+       }
+       
+       return { en: content, local: "" };
     };
 
     const optA = extractOpt('A', 'B');
     const optB = extractOpt('B', 'C');
     const optC = extractOpt('C', 'D');
-    const optD = extractOpt('D', 'X'); 
+    const optD = extractOpt('D', 'X'); // Use X as fake next to capture D fully
 
     q.optionAEnglish = optA.en;
     q.optionBEnglish = optB.en;
@@ -88,32 +113,43 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
        q.optionDHindi = optD.local;
     }
 
-    // 3. Extract Question Statements
+    // 5. Extract Question Statements
     const qTextPart = block.split(/\(A\)/i)[0];
-    const qLines = qTextPart.split('\n').map(l => l.trim()).filter(Boolean);
+    // Filter out visual markers and noise
+    const cleanQTextPart = qTextPart.replace(/\[.*?\]/g, '').trim();
+    const qLines = cleanQTextPart.split('\n').map(l => l.trim()).filter(Boolean);
     
-    // Script Detection
     const punjabiRegex = /[\u0A00-\u0A7F]/;
     const hindiRegex = /[\u0900-\u097F]/;
 
-    q.englishQuestion = qLines.find(l => !punjabiRegex.test(l) && !hindiRegex.test(l))?.replace(/^(?:Q\d+\.|Question\s*\d+\.)\s*/i, '') || "";
+    // Detect English lines (usually first)
+    const enLines = qLines.filter(l => !punjabiRegex.test(l) && !hindiRegex.test(l));
+    q.englishQuestion = enLines.join('\n').replace(/^(?:Q\d+\.|Question\s*\d+\.|ਪ੍ਰਸ਼ਨ\s*\d+\.|प्रश्न\s*\d+\.)\s*/i, '').trim();
     
+    // Detect Secondary Language lines
     if (secondaryLang === 'punjabi') {
-       q.punjabiQuestion = qLines.find(l => punjabiRegex.test(l))?.replace(/^(?:ਪ੍ਰਸ਼ਨ\s*\d+\.)\s*/i, '') || "";
+       const paLines = qLines.filter(l => punjabiRegex.test(l));
+       q.punjabiQuestion = paLines.join('\n').replace(/^(?:ਪ੍ਰਸ਼ਨ\s*\d+\.)\s*/i, '').trim();
     } else {
-       q.hindiQuestion = qLines.find(l => hindiRegex.test(l))?.replace(/^(?:प्रश्न\s*\d+\.)\s*/i, '') || "";
+       const hiLines = qLines.filter(l => hindiRegex.test(l));
+       q.hindiQuestion = hiLines.join('\n').replace(/^(?:प्रश्न\s*\d+\.)\s*/i, '').trim();
     }
 
-    // 4. Extract Explanation
-    const expMatch = block.match(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या)\s*[:\-]\s*([\s\S]*)$/i);
+    // 6. Extract Explanation
+    const expMatch = block.match(/(?:Explanation|Solution|ਵਿਆਖਿਆ|व्याख्या)\s*[:\-]?\s*([\s\S]*)$/i);
     if (expMatch) {
        const fullExp = expMatch[1].trim();
-       const expParts = fullExp.split(/\s*\/\s*/);
-       q.englishExplanation = expParts[0]?.trim() || "";
+       const punRegex = /[\u0A00-\u0A7F]/;
+       const hinRegex = /[\u0900-\u097F]/;
+
+       const expLines = fullExp.split('\n').map(l => l.trim()).filter(Boolean);
+       
+       q.englishExplanation = expLines.filter(l => !punRegex.test(l) && !hinRegex.test(l)).join('\n');
+       
        if (secondaryLang === 'punjabi') {
-          q.punjabiExplanation = expParts[1]?.trim() || expParts[0]?.trim() || "";
+          q.punjabiExplanation = expLines.filter(l => punRegex.test(l)).join('\n') || q.englishExplanation;
        } else {
-          q.hindiExplanation = expParts[1]?.trim() || expParts[0]?.trim() || "";
+          q.hindiExplanation = expLines.filter(l => hinRegex.test(l)).join('\n') || q.englishExplanation;
        }
     }
 
