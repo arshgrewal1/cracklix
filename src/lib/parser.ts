@@ -84,20 +84,12 @@ export function preprocessText(text: string): string {
  * Classifies questions based on structured markers for logical reasoning.
  */
 export function detectAssertionReason(text: string): { questionType: 'ASSERTION_REASON' | 'NORMAL', confidence: number } {
-  // English: Assertion (A):, Assertion:, Assertion -
-  // Punjabi: ਕਥਨ (A):, ਕਥਨ:
-  // OCR: Assertlon (A)
   const assertionRegex = /(?:Assertion|Assertlon|ਕਥਨ)\s*(?:\(A\))?\s*[:\-]/i;
-  
-  // English: Reason (R):, Reason:, Reason -
-  // Punjabi: ਕਾਰਨ (R):, ਕਾਰਨ:
-  // OCR: Reas0n (R), कारन (R)
   const reasonRegex = /(?:Reason|Reas0n|ਕਾਰਨ|कारन)\s*(?:\(R\))?\s*[:\-]/i;
   
   const hasA = assertionRegex.test(text);
   const hasR = reasonRegex.test(text);
   
-  // Verify MCQ options exist to differentiate from random text containing these words
   const hasOptA = /^\s*[\(]?A[\)\.]/m.test(text);
   const hasOptB = /^\s*[\(]?B[\)\.]/m.test(text);
   const hasOptC = /^\s*[\(]?C[\)\.]/m.test(text);
@@ -481,30 +473,78 @@ export function parseGraph(rawText: string, metadata: any) {
   finalize(); return { questions };
 }
 
+/**
+ * @fileOverview Institutional Assertion & Reason Parser v1.0.
+ */
+export function parseAssertionReason(rawText: string, metadata: any) {
+  const result = parseDeterministicBilingual(rawText, { ...metadata, questionType: 'ASSERTION_REASON' });
+  return result;
+}
+
+/**
+ * @fileOverview Institutional Fill in the Blank Parser v1.0.
+ */
+export function parseFillBlank(rawText: string, metadata: any) {
+  const result = parseDeterministicBilingual(rawText, { ...metadata, questionType: 'FILL_BLANK' });
+  return result;
+}
+
 function parseDeterministicBilingual(rawText: string, metadata: any) {
-  const blocks = rawText.split(/\n\s*\n/).filter(b => b.trim().length > 0);
+  const lines = rawText.split(/\r?\n/);
   const questions: any[] = [];
-  blocks.forEach(block => {
-    const q: any = { ...metadata, id: `q-det-${Math.random().toString(36).substr(2, 9)}`, status: 'PUBLISHED', englishQuestion: "", punjabiQuestion: "", hindiQuestion: "" };
-    const lines = block.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    let foundMarker = false; let foundOptions = false;
-    lines.forEach(line => {
-      const opt = detectOptionMarker(line); const isQ = isQuestionStart(line);
-      if (isQ) { foundMarker = true; const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim(); if (content) { if (GURMUKHI_REGEX.test(content)) q[`punjabiQuestion`] = content; else q.englishQuestion = content; } }
-      else if (opt) { foundOptions = true; q[`option${opt.opt}English`] = opt.text; }
-      else if (foundMarker && !foundOptions) { if (GURMUKHI_REGEX.test(line)) q[`punjabiQuestion`] += (q[`punjabiQuestion`] ? '\n' : '') + line; else q.englishQuestion += (q.englishQuestion ? '\n' : '') + line; }
-    });
-    if (q.englishQuestion) questions.push(q);
+  let currentQ: any = null;
+  let state: 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPL' = 'QUESTION';
+
+  const finalize = () => { if (currentQ) questions.push(currentQ); currentQ = null; };
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+
+    if (isQuestionStart(line)) {
+      finalize();
+      currentQ = { ...metadata, id: `q-det-${Math.random().toString(36).substr(2, 9)}`, status: 'PUBLISHED', englishQuestion: "", punjabiQuestion: "" };
+      state = 'QUESTION';
+      const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      if (content) { if (GURMUKHI_REGEX.test(content)) currentQ.punjabiQuestion = content; else currentQ.englishQuestion = content; }
+      return;
+    }
+
+    if (!currentQ) return;
+    const opt = detectOptionMarker(line);
+    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+
+    if (isAns) state = 'ANSWER'; else if (isExpl) state = 'EXPL'; else if (opt) state = 'OPTIONS';
+
+    switch (state) {
+      case 'QUESTION':
+        if (GURMUKHI_REGEX.test(trimmed)) currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
+        else currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
+        break;
+      case 'OPTIONS': if (opt) currentQ[`option${opt.opt}English`] = opt.text; break;
+      case 'ANSWER':
+        const ansMatch = trimmed.match(/[A-D]/i);
+        if (ansMatch) currentQ.correctAnswer = ansMatch[0].toUpperCase();
+        break;
+      case 'EXPL':
+        const clean = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
+        if (clean) { if (GURMUKHI_REGEX.test(clean)) currentQ.punjabiExplanation = (currentQ.punjabiExplanation || "") + (currentQ.punjabiExplanation ? '\n' : '') + clean; else currentQ.englishExplanation = (currentQ.englishExplanation || "") + (currentQ.englishExplanation ? '\n' : '') + clean; }
+        break;
+    }
   });
-  return { questions };
+  finalize(); return { questions };
 }
 
 export function parseBulkQuestions(rawText: string, metadata: any) {
   if (!rawText || !rawText.trim()) return { questions: [] };
-  if (metadata.parserFormat === 'DIAGRAM') return parseDiagram(rawText, metadata);
-  if (metadata.parserFormat === 'MATCHING') return parseMatching(rawText, metadata);
-  if (metadata.parserFormat === 'TABLE') return parseTable(rawText, metadata);
-  if (metadata.parserFormat === 'GRAPH') return parseGraph(rawText, metadata);
+  const fmt = metadata.parserFormat;
+  if (fmt === 'DIAGRAM') return parseDiagram(rawText, metadata);
+  if (fmt === 'MATCHING') return parseMatching(rawText, metadata);
+  if (fmt === 'TABLE') return parseTable(rawText, metadata);
+  if (fmt === 'GRAPH') return parseGraph(rawText, metadata);
+  if (fmt === 'ASSERTION') return parseAssertionReason(rawText, metadata);
+  if (fmt === 'FILL_BLANK') return parseFillBlank(rawText, metadata);
   return parseDeterministicBilingual(rawText, metadata);
 }
 
