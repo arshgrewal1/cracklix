@@ -12,8 +12,8 @@ import { useStudyTracker } from '@/hooks/useStudyTracker';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Official Study Analytics Center v2.3.
- * FIXED: Resilient multi-period tracking for accurate weekly/monthly display.
+ * @fileOverview Official Study Analytics Center v2.5.
+ * FIXED: Implemented Local Drift Correction to ensure long-term totals >= today's study.
  */
 
 const formatStudyTime = (seconds: number) => {
@@ -61,7 +61,9 @@ export default function AnalyticsPage() {
   useEffect(() => {
     if (!db || !user || !mounted) return;
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    
     const dailyRef = doc(db, 'users', user.uid, 'study_daily', todayStr);
     const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
 
@@ -89,6 +91,17 @@ export default function AnalyticsPage() {
     };
   }, [db, user, mounted]);
 
+  // DRIFT PROTECTION: Apply Math.max logic for UI consistency
+  const displayStats = useMemo(() => {
+    const today = baseStats.today + unSyncedSeconds;
+    const week = Math.max(baseStats.week + unSyncedSeconds, today);
+    const month = Math.max(baseStats.month + unSyncedSeconds, today);
+    const year = Math.max(baseStats.year + unSyncedSeconds, today);
+    const lifetime = Math.max(baseStats.lifetime + unSyncedSeconds, year);
+    
+    return { today, week, month, year, lifetime, sessions: baseStats.totalSessions };
+  }, [baseStats, unSyncedSeconds]);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 font-body text-left">
       <Navbar />
@@ -107,7 +120,7 @@ export default function AnalyticsPage() {
           <div className="lg:col-span-1">
             <StatCard 
               title="🔥 Lifetime study" 
-              value={formatFullDuration(baseStats.lifetime + unSyncedSeconds)}
+              value={formatFullDuration(displayStats.lifetime)}
               icon={Activity} 
               color="indigo" 
               loading={!mounted}
@@ -116,16 +129,16 @@ export default function AnalyticsPage() {
 
           <StatCard 
             title="Total sessions" 
-            value={baseStats.totalSessions}
+            value={displayStats.sessions}
             icon={TrendingUp} 
             color="amber"
             loading={!mounted}
           />
 
           <div className="col-span-full grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 mt-4">
-             <PeriodCard label="This Week" val={baseStats.week + unSyncedSeconds} icon={Calendar} color="blue" />
-             <PeriodCard label="This Month" val={baseStats.month + unSyncedSeconds} icon={Clock} color="emerald" />
-             <PeriodCard label="This Year" val={baseStats.year + unSyncedSeconds} icon={Zap} color="purple" />
+             <PeriodCard label="This Week" val={displayStats.week} icon={Calendar} color="blue" />
+             <PeriodCard label="This Month" val={displayStats.month} icon={Clock} color="emerald" />
+             <PeriodCard label="This Year" val={displayStats.year} icon={Zap} color="purple" />
           </div>
         </div>
       </main>

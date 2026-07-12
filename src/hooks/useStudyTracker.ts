@@ -16,14 +16,22 @@ const SYNC_INTERVAL = 30 * 1000; // 30 seconds
  */
 const getPeriodIds = (date: Date) => {
   const d = new Date(date);
-  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const today = [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, '0'),
+    String(d.getDate()).padStart(2, '0')
+  ].join('-');
   
   // Weekly reset (Monday)
   const day = d.getDay(); 
   const diff = day === 0 ? -6 : 1 - day;
   const monday = new Date(d);
   monday.setDate(d.getDate() + diff);
-  const week = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+  const week = [
+    monday.getFullYear(),
+    String(monday.getMonth() + 1).padStart(2, '0'),
+    String(monday.getDate()).padStart(2, '0')
+  ].join('-');
   
   const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
   const year = `${d.getFullYear()}`;
@@ -31,9 +39,10 @@ const getPeriodIds = (date: Date) => {
 };
 
 /**
- * @fileOverview Institutional Real-Time Study Tracker v5.0.
+ * @fileOverview Institutional Real-Time Study Tracker v5.2.
  * FIXED: isServerSynced guard prevents cache-induced resets.
  * FIXED: Local time period IDs align with user's clock.
+ * FIXED: Protective incrementing logic to prevent weekly < today drift.
  */
 export function useStudyTracker(contentId: string | null, contentType: StudyContentType, enabled: boolean = true) {
   const { user } = useUser();
@@ -66,7 +75,6 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
           isServerSynced.current = true;
           remoteStatsRef.current = snap.data();
         } else if (!remoteStatsRef.current) {
-          // Allow initial cache load for UI but don't mark as server synced
           remoteStatsRef.current = snap.data();
         }
       }
@@ -112,7 +120,8 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
       const statsUpdate: any = {
         totalStudyTime: increment(durationToSync),
         lastSessionDate: serverTimestamp(),
-        totalSessions: isFinal ? increment(1) : increment(0)
+        totalSessions: isFinal ? increment(1) : increment(0),
+        lastTodayId: periods.today
       };
 
       // PERIODIC RESET LOGIC - ONLY TRIGGER IF SERVER VERIFIED

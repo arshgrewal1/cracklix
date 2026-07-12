@@ -33,8 +33,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useStudyTracker } from "@/hooks/useStudyTracker"
 
 /**
- * @fileOverview Student Progress Portal v59.0.
- * FIXED: Aligned "Today" calculation with local period IDs to match StudyTracker.
+ * @fileOverview Student Progress Portal v60.0.
+ * FIXED: Implemented Drift Protection to ensure Week/Month/Year >= Today study time.
  */
 
 const formatStudyTime = (seconds: number) => {
@@ -130,6 +130,17 @@ export default function StudentDashboard() {
     };
   }, [db, user, mounted]);
 
+  // DRIFT PROTECTION: Week/Month/Year should always be >= Today
+  const displayStats = useMemo(() => {
+     const today = baseStats.today + unSyncedSeconds;
+     const week = Math.max(baseStats.week + unSyncedSeconds, today);
+     const month = Math.max(baseStats.month + unSyncedSeconds, today);
+     const year = Math.max(baseStats.year + unSyncedSeconds, today);
+     const lifetime = Math.max(baseStats.lifetime + unSyncedSeconds, year);
+     
+     return { today, week, month, year, lifetime };
+  }, [baseStats, unSyncedSeconds]);
+
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null
     return query(collection(db, "results"), where("userId", "==", user.uid), limit(8))
@@ -170,10 +181,10 @@ export default function StudentDashboard() {
               </section>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5">
-                 <MetricItem label="Today's study" val={formatStudyTime(baseStats.today + unSyncedSeconds)} icon={<Clock />} active={isActive} />
-                 <MetricItem label="This week" val={formatStudyTime(baseStats.week + unSyncedSeconds)} icon={<Calendar />} />
-                 <MetricItem label="This month" val={formatStudyTime(baseStats.month + unSyncedSeconds)} icon={<BarChart />} />
-                 <MetricItem label="Yearly goal" val={formatStudyTime(baseStats.year + unSyncedSeconds)} icon={<AreaChart />} />
+                 <MetricItem label="Today's study" val={formatStudyTime(displayStats.today)} icon={<Clock />} active={isActive} />
+                 <MetricItem label="This week" val={formatStudyTime(displayStats.week)} icon={<Calendar />} />
+                 <MetricItem label="This month" val={formatStudyTime(displayStats.month)} icon={<BarChart />} />
+                 <MetricItem label="Yearly goal" val={formatStudyTime(displayStats.year)} icon={<AreaChart />} />
               </div>
 
               <Card className="border-none shadow-lg rounded-2xl md:rounded-[2rem] bg-white overflow-hidden border border-slate-50">
@@ -212,19 +223,19 @@ export default function StudentDashboard() {
                         🔥 Lifetime Study
                       </p>
                       <div className="text-3xl md:text-4xl lg:text-5xl font-black leading-none mt-2 tracking-tighter tabular-nums">
-                        {formatFullDuration(baseStats.lifetime + unSyncedSeconds)}
+                        {formatFullDuration(displayStats.lifetime)}
                       </div>
                     </div>
 
                     <div className="flex gap-6 border-t border-white/10 pt-6">
                       <div className="flex-1">
                         <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Today</p>
-                        <p className="text-base font-black tabular-nums">{formatStudyTime(baseStats.today + unSyncedSeconds)}</p>
+                        <p className="text-base font-black tabular-nums">{formatStudyTime(displayStats.today)}</p>
                       </div>
                       <div className="w-px h-8 bg-white/10" />
                       <div className="flex-1">
                         <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Week</p>
-                        <p className="text-base font-black tabular-nums">{formatStudyTime(baseStats.week + unSyncedSeconds)}</p>
+                        <p className="text-base font-black tabular-nums">{formatStudyTime(displayStats.week)}</p>
                       </div>
                     </div>
                 </div>
