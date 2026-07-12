@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
@@ -40,21 +41,23 @@ import {
   Globe,
   Award,
   Briefcase,
-  Heart
+  Heart,
+  Loader2
 } from "lucide-react"
-import { useDoc, useFirestore } from '@/firebase';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useDoc, useFirestore, useUser } from '@/firebase';
+import { doc, setDoc, serverTimestamp, collection, addDoc } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview Institutional Administrative Portal v20.0.
- * FIXED: Full implementation of all tabs (Founder, Distribution, Social).
+ * @fileOverview Institutional Administrative Portal v21.0.
+ * UPDATED: Integrated live auditing for setting modifications.
  */
 
 export default function AdminSettings() {
   const db = useFirestore();
   const { toast } = useToast();
+  const { profile } = useUser();
   
   const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
   const statsRef = useMemo(() => (db ? doc(db, "settings", "stats") : null), [db]);
@@ -122,10 +125,28 @@ export default function AdminSettings() {
     }));
   }, [remoteSettings]);
 
-  const handleSave = () => {
-    if (!db) return;
-    setDoc(doc(db, 'settings', 'global'), { ...formData, updatedAt: serverTimestamp() }, { merge: true })
-      .then(() => toast({ title: "Registry Synced", description: "Global settings node updated successfully." }))
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleSave = async () => {
+    if (!db || isSaving) return;
+    setIsSaving(true);
+    try {
+      await setDoc(doc(db, 'settings', 'global'), { ...formData, updatedAt: serverTimestamp() }, { merge: true });
+      
+      // LOG AUDIT TRAIL
+      await addDoc(collection(db, "audit_logs"), {
+        user: profile?.name || "Administrator",
+        action: "SETTINGS_UPDATE",
+        details: `Global system configurations synchronized.`,
+        timestamp: serverTimestamp()
+      });
+
+      toast({ title: "Registry Synced", description: "Global settings node updated successfully." });
+    } catch (e) {
+      toast({ variant: "destructive", title: "Sync Failed" });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   if (loading) return <div className="h-screen flex items-center justify-center bg-white"><RefreshCw className="h-10 w-10 text-primary animate-spin" /></div>
@@ -140,8 +161,8 @@ export default function AdminSettings() {
            </div>
           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight">System Portal</h1>
         </div>
-        <Button onClick={handleSave} className="w-full md:w-auto h-11 md:h-12 px-10 rounded-full font-bold shadow-xl gap-2 transition-all active:scale-95 border-none">
-          <Save className="h-4 w-4" /> Commit Settings
+        <Button onClick={handleSave} disabled={isSaving} className="w-full md:w-auto h-11 md:h-12 px-10 rounded-full font-bold shadow-xl gap-2 transition-all active:scale-95 border-none">
+          {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Commit Settings
         </Button>
       </div>
 

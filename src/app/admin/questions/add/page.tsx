@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense } from "react"
@@ -12,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { ChevronLeft, Save, Languages, Layers, Database, Eye, BarChart3, Loader2, Info, Globe } from "lucide-react"
 import { useFirestore, useDoc, useCollection, useUser } from "@/firebase"
-import { doc, setDoc, serverTimestamp, collection, updateDoc, increment } from "firebase/firestore"
+import { doc, setDoc, serverTimestamp, collection, updateDoc, increment, addDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { errorEmitter } from "@/firebase/error-emitter"
 import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors"
@@ -20,8 +21,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Manual Question Ingestion Node v19.1.
- * FIXED: Removed uppercase from buttons.
+ * @fileOverview Manual Question Ingestion Node v19.2.
+ * UPDATED: Integrated live auditing for question bank modifications.
  */
 
 export default function QuestionEntryPage() {
@@ -124,6 +125,14 @@ function QuestionEntryContent() {
            updatedAt: serverTimestamp()
         }).catch(() => {});
       }
+
+      // LOG AUDIT TRAIL
+      await addDoc(collection(db, "audit_logs"), {
+        user: profile?.name || "Administrator",
+        action: isEditing ? "QUESTION_UPDATE" : "QUESTION_CREATE",
+        details: isEditing ? `Question Node ${finalId} modified.` : `New Question Node ${finalId} ingested manually.`,
+        timestamp: serverTimestamp()
+      });
 
       toast({ title: "Registry Synced" })
       router.push("/admin/questions")

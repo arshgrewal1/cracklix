@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useRef } from "react"
@@ -29,8 +30,8 @@ import {
   SearchCode,
   Save
 } from "lucide-react"
-import { useCollection, useFirestore, useStorage } from "@/firebase"
-import { collection, query, doc, deleteDoc, writeBatch, setDoc, serverTimestamp, getDocs, where, limit } from "firebase/firestore"
+import { useCollection, useFirestore, useStorage, useUser } from "@/firebase"
+import { collection, query, doc, deleteDoc, writeBatch, setDoc, serverTimestamp, getDocs, where, limit, addDoc } from "firebase/firestore"
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
@@ -39,13 +40,14 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Master Registry Hub v17.9.
- * FIXED: Removed 'uppercase' from Exam and Subject names while keeping Boards capitalized.
+ * @fileOverview Master Registry Hub v18.0.
+ * UPDATED: Integrated live auditing for registry changes.
  */
 
 export default function MasterRegistryPage() {
   const db = useFirestore()
   const storage = useStorage()
+  const { profile } = useUser()
   const { toast } = useToast()
   
   const [activeTab, setActiveTab] = useState("boards")
@@ -88,6 +90,14 @@ export default function MasterRegistryPage() {
     const id = editingBoard.id || `board-${Date.now()}`
     try {
       await setDoc(doc(db, "boards", id), { ...editingBoard, id, updatedAt: serverTimestamp() }, { merge: true })
+      
+      await addDoc(collection(db, "audit_logs"), {
+        user: profile?.name || "Administrator",
+        action: "BOARD_UPDATE",
+        details: `Authority Hub "${editingBoard.abbreviation}" registry node synchronized.`,
+        timestamp: serverTimestamp()
+      });
+
       toast({ title: "Authority Node Synced" })
       setEditingBoard(null)
     } finally { setIsSaving(false) }
@@ -112,6 +122,14 @@ export default function MasterRegistryPage() {
     const id = editingExam.id || editingExam.name.toLowerCase().replace(/\s+/g, '-')
     try {
       await setDoc(doc(db, "exams", id), { ...editingExam, id, updatedAt: serverTimestamp() }, { merge: true })
+      
+      await addDoc(collection(db, "audit_logs"), {
+        user: profile?.name || "Administrator",
+        action: "EXAM_UPDATE",
+        details: `Exam Vertical "${editingExam.name}" registry node synchronized.`,
+        timestamp: serverTimestamp()
+      });
+
       toast({ title: "Vertical Node Synced" })
       setEditingExam(null)
     } finally { setIsSaving(false) }
@@ -124,6 +142,14 @@ export default function MasterRegistryPage() {
     const aliases = typeof editingSubject.aliases === 'string' ? editingSubject.aliases.split(',').map((s: string) => s.trim()).filter(Boolean) : editingSubject.aliases || []
     try {
       await setDoc(doc(db, "subjects", id), { ...editingSubject, id, aliases, updatedAt: serverTimestamp() }, { merge: true })
+      
+      await addDoc(collection(db, "audit_logs"), {
+        user: profile?.name || "Administrator",
+        action: "SUBJECT_UPDATE",
+        details: `Subject Node "${editingSubject.name}" registry node synchronized.`,
+        timestamp: serverTimestamp()
+      });
+
       toast({ title: "Subject Node Synced" })
       setEditingSubject(null)
     } finally { setIsSaving(false) }
@@ -142,6 +168,14 @@ export default function MasterRegistryPage() {
 
        batch.delete(doc(db, coll, mergeSource))
        await batch.commit()
+
+       await addDoc(collection(db, "audit_logs"), {
+        user: profile?.name || "Administrator",
+        action: "REGISTRY_MERGE",
+        details: `Deep merge authorized: Consolidated ${mergeSource} into ${mergeTarget}. Updated ${qSnap.size} assets.`,
+        timestamp: serverTimestamp()
+      });
+
        toast({ title: "Normalization Complete", description: `Updated ${qSnap.size} MCQs in target hub.` })
        setMergeDialogOpen(false)
     } catch (e: any) { toast({ variant: "destructive", title: "Merge Failed" }) }

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState } from "react"
@@ -6,20 +7,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { ShieldCheck, CheckCircle2, XCircle, Zap, CreditCard, Loader2 } from "lucide-react"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, where, doc, updateDoc, serverTimestamp } from "firebase/firestore"
+import { collection, query, where, doc, updateDoc, serverTimestamp, addDoc } from "firebase/firestore"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { approvePaymentRequest } from "@/app/actions/payment"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Administrative Manual UPI Verification Hub v4.0.
- * PWA SYNC: Removed uppercase, reduced font scales to Title Case, and implemented pill button system.
+ * @fileOverview Administrative Manual UPI Verification Hub v4.1.
+ * UPDATED: Integrated live auditing for manual payment approvals.
  */
 
 export default function VerifyPaymentsPage() {
   const db = useFirestore()
-  const { user: admin } = useUser()
+  const { user: admin, profile } = useUser()
   const { toast } = useToast()
   const [processingId, setProcessingId] = useState<string | null>(null)
 
@@ -31,10 +32,19 @@ export default function VerifyPaymentsPage() {
   const { data: requests, loading } = useCollection<any>(requestsQuery)
 
   const handleApprove = async (requestId: string) => {
-    if (!admin) return
+    if (!admin || !db) return
     setProcessingId(requestId)
     try {
       await approvePaymentRequest(requestId, admin.uid)
+      
+      // LOG AUDIT TRAIL
+      await addDoc(collection(db, "audit_logs"), {
+        user: profile?.name || "Administrator",
+        action: "PAYMENT_APPROVE",
+        details: `Manual UPI Request ${requestId} verified and pass activated.`,
+        timestamp: serverTimestamp()
+      });
+
       toast({ title: "Pass Activated", description: "Aspirant upgraded successfully." })
     } catch (e: any) {
       toast({ variant: "destructive", title: "Approval Failed" })
@@ -52,6 +62,14 @@ export default function VerifyPaymentsPage() {
         status: 'REJECTED',
         updatedAt: serverTimestamp()
       });
+
+      await addDoc(collection(db, "audit_logs"), {
+        user: profile?.name || "Administrator",
+        action: "PAYMENT_REJECT",
+        details: `Manual UPI Request ${requestId} rejected.`,
+        timestamp: serverTimestamp()
+      });
+
       toast({ title: "Request Rejected" });
     } catch (e) {
       toast({ variant: "destructive", title: "Action Failed" });

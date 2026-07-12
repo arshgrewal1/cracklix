@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo } from "react"
@@ -18,18 +19,18 @@ const auditLogConverter: FirestoreDataConverter<AuditLog> = {
 };
 
 /**
- * @fileOverview Premium Audit Trail Hub v3.0.
- * Redesigned for high-fidelity administrative monitoring.
+ * @fileOverview Premium Audit Trail Hub v4.0.
+ * UPDATED: Integrated live tracking for all administrative modifications.
  */
 
 export default function AuditLogsPage() {
   const db = useFirestore()
   
   // Real-time audit listener
-  const logsQuery = useMemo(() => (db ? query(collection(db, "audit_logs").withConverter(auditLogConverter), limit(100)) : null), [db])
+  const logsQuery = useMemo(() => (db ? collection(db, "audit_logs").withConverter(auditLogConverter) : null), [db])
   const { data: allLogs, loading } = useCollection<AuditLog>(logsQuery)
 
-  // Sort logs by newest first client-side
+  // Sort logs by newest first client-side to ensure stability without index requirement
   const logs = useMemo(() => {
     if (!allLogs) return []
     return [...allLogs].sort((a, b) => {
@@ -50,7 +51,7 @@ export default function AuditLogsPage() {
               <span className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-400">Security Governance</span>
            </div>
           <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tighter antialiased">Audit Trail</h1>
-          <p className="text-slate-500 font-medium text-sm md:text-lg">Detailed ledger of all institutional modifications and extraction activities.</p>
+          <p className="text-slate-500 font-medium text-sm md:text-lg">Detailed ledger of all live modifications across the institutional registry.</p>
         </div>
         <Button variant="outline" className="h-11 md:h-14 px-8 rounded-full border-slate-200 bg-white font-bold text-xs tracking-tight gap-2 shadow-sm hover:bg-slate-50 active:scale-95 transition-all">
            <Download className="h-4 w-4" /> Export Ledger
@@ -66,7 +67,7 @@ export default function AuditLogsPage() {
                 <TableHead className="px-6 md:px-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Timestamp</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Administrator</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Action</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Resource context</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Context node</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -80,7 +81,7 @@ export default function AuditLogsPage() {
                 ))
               ) : logs && logs.length > 0 ? (
                 logs.map((log) => (
-                  <TableRow key={log.id} className="border-slate-50 hover:bg-slate-50/80 transition-all group">
+                  <TableRow key={log.id} className="border-slate-100 hover:bg-slate-50 transition-all group">
                     <TableCell className="px-6 md:px-12 py-5 md:py-8">
                        <div className="flex items-center gap-3 text-slate-500">
                           <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
@@ -88,17 +89,17 @@ export default function AuditLogsPage() {
                           </div>
                           <div className="flex flex-col">
                             <span className="text-[11px] md:text-[13px] font-black text-[#0F172A] tabular-nums leading-none">
-                              {log.timestamp ? new Date(log.timestamp.seconds * 1000).toLocaleDateString('en-GB') : "N/A"}
+                              {log.timestamp ? new Date(log.timestamp.seconds * 1000).toLocaleDateString('en-GB') : "Just now"}
                             </span>
                             <span className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-tight">
-                              {log.timestamp ? new Date(log.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : ""}
+                              {log.timestamp ? new Date(log.timestamp.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Active"}
                             </span>
                           </div>
                        </div>
                     </TableCell>
                     <TableCell>
                        <div className="flex items-center gap-4">
-                          <div className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 shadow-inner group-hover:scale-105 transition-transform">
+                          <div className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-blue-50 flex items-center justify-center text-primary shrink-0 shadow-inner group-hover:scale-105 transition-transform">
                              <User className="h-4 w-4 md:h-5 md:w-5" />
                           </div>
                           <div className="min-w-0">
@@ -116,8 +117,8 @@ export default function AuditLogsPage() {
                     </TableCell>
                     <TableCell className="max-w-md">
                        <div className="flex items-center justify-between gap-4">
-                          <p className="text-[11px] md:text-sm font-medium text-slate-500 line-clamp-1 leading-relaxed">
-                            {log.details || 'Registry modification event logged.'}
+                          <p className="text-[11px] md:text-[13px] font-semibold text-slate-500 line-clamp-1 leading-relaxed">
+                            {log.details || 'Sync event logged.'}
                           </p>
                           <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-primary transition-all group-hover:translate-x-1 shrink-0" />
                        </div>
@@ -131,7 +132,7 @@ export default function AuditLogsPage() {
                          <div className="h-20 w-20 rounded-3xl bg-slate-100 flex items-center justify-center">
                            <Activity className="h-10 w-10 text-slate-400" />
                          </div>
-                         <p className="font-black text-sm md:text-2xl uppercase tracking-[0.3em]">No Audit Entries</p>
+                         <p className="font-black text-sm md:text-2xl uppercase tracking-[0.3em]">Registry Empty</p>
                       </div>
                    </TableCell>
                 </TableRow>
@@ -143,7 +144,7 @@ export default function AuditLogsPage() {
 
       <div className="flex items-center justify-center gap-4 text-slate-300 py-6">
         <ShieldCheck className="h-4 w-4" />
-        <span className="text-[9px] font-black uppercase tracking-[0.5em]">Registry Locked & Audited</span>
+        <span className="text-[9px] font-black uppercase tracking-[0.5em]">Institutional Registry Audited</span>
       </div>
     </div>
   )

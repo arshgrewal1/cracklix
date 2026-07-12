@@ -31,8 +31,8 @@ import {
   GraduationCap,
   AlertCircle
 } from "lucide-react"
-import { useCollection, useFirestore, useDoc } from "@/firebase"
-import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch, where, documentId, orderBy, DocumentData, updateDoc, increment } from "firebase/firestore"
+import { useCollection, useFirestore, useDoc, useUser } from "@/firebase"
+import { collection, doc, setDoc, serverTimestamp, query, limit, getDocs, writeBatch, where, documentId, orderBy, DocumentData, updateDoc, increment, addDoc } from "firebase/firestore"
 import { useToast } from "@/hooks/use-toast"
 import { MockType, Difficulty, AccessLevel, LanguageDisplayMode, MockAssignmentMode, Question, ExamSection, Exam } from "@/types"
 import { cn } from "@/lib/utils"
@@ -40,8 +40,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v24.2.
- * UPDATED: Integrated incremental statistics update for mock test registry.
+ * @fileOverview Enterprise Mock Builder Hub v24.3.
+ * UPDATED: Integrated live auditing for mock test deployment.
  */
 
 export default function MockBuilderPage() {
@@ -56,6 +56,7 @@ function MockBuilderContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const db = useFirestore()
+  const { profile } = useUser()
   const { toast } = useToast()
 
   const mockId = searchParams?.get("id") ?? ""
@@ -243,6 +244,14 @@ function MockBuilderContent() {
         }).catch(() => {});
       }
 
+      // LOG AUDIT TRAIL
+      await addDoc(collection(db, "audit_logs"), {
+        user: profile?.name || "Administrator",
+        action: isEditing ? "MOCK_UPDATE" : "MOCK_CREATE",
+        details: isEditing ? `Mock Series "${payload.title}" modified.` : `New Mock Series "${payload.title}" deployed with ${payload.totalQuestions} nodes.`,
+        timestamp: serverTimestamp()
+      });
+
       toast({ title: "Series Deployed", description: "Registry synced." });
       router.push("/admin/mocks")
     } catch (e: any) {
@@ -354,7 +363,7 @@ function MockBuilderContent() {
                     <Label className="text-[10px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><GraduationCap className="h-3.5 w-3.5" /> Exam Vertical Hub</Label>
                     <div className="grid grid-cols-1 gap-1.5 max-h-40 overflow-y-auto custom-scrollbar pr-1">
                        {uniqueExams.map((e: any) => (
-                          <div key={e.id} onClick={() => toggleExamId(id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group">
+                          <div key={e.id} onClick={() => toggleExamId(e.id)} className="flex items-center space-x-3 p-3 bg-slate-50/50 rounded-xl hover:bg-slate-100 transition-all cursor-pointer group">
                              <div className={cn("h-4 w-4 rounded border-2 flex items-center justify-center shrink-0 transition-all", mockData.examIds?.includes(e.id) ? "border-primary bg-primary" : "border-slate-300 bg-white")}>
                                 {mockData.examIds?.includes(e.id) && <Check className="h-2.5 w-2.5 text-white stroke-[4px]" />}
                              </div>
@@ -485,7 +494,7 @@ function MockBuilderContent() {
                             <div className="flex gap-2">
                                <Button onClick={() => setActiveSectionId(sec.id)} variant={activeSectionId === sec.id ? "default" : "ghost"} className="h-9 rounded-full font-bold text-[10px]">
                                   {activeSectionId === sec.id ? "Active" : "Focus"}
-                               </Button>
+                                </Button>
                                <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10">
                                   <Trash2 className="h-5 w-5" />
                                </Button>
