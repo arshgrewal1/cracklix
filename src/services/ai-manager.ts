@@ -2,12 +2,10 @@
 'use client';
 
 /**
- * @fileOverview Institutional AI Service Manager v1.0.
+ * @fileOverview Institutional AI Service Manager v1.1.
  * Centralized hub for resilient AI requests with failover, retry logic, and health monitoring.
+ * UPDATED: Enhanced diagnostic logging for missing credentials.
  */
-
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 export type AIProviderStatus = 'HEALTHY' | 'DEGRADED' | 'FAILED';
 
@@ -30,9 +28,12 @@ class AIManager {
 
   /**
    * Reads multiple keys from environment variables.
-   * Expects AI_KEY_POOL="key1,key2,key3" or specific indexed keys.
+   * Standardized for production deployment.
    */
   private initializeProviders() {
+    if (typeof window === 'undefined') return;
+
+    // Check for pool or individual keys
     const keyPool = process.env.NEXT_PUBLIC_AI_KEY_POOL || process.env.NEXT_PUBLIC_GOOGLE_GENAI_API_KEY || "";
     const keys = keyPool.split(',').filter(Boolean);
 
@@ -45,7 +46,7 @@ class AIManager {
     }));
 
     if (this.providers.length === 0) {
-      console.warn('[AI_MANAGER] No AI credentials configured in master registry.');
+      console.warn('[AI_MANAGER] CRITICAL: No AI credentials detected in registry. Please add NEXT_PUBLIC_GOOGLE_GENAI_API_KEY to your environment.');
     }
   }
 
@@ -60,10 +61,15 @@ class AIManager {
     let attempt = 0;
     let lastError: any = null;
 
+    // DIAGNOSTIC GUARD: If no keys are set, provide a helpful error instead of a generic "unavailable"
+    if (this.providers.length === 0) {
+       throw new Error('AI providers missing. Please set your GOOGLE_GENAI_API_KEY in the environment variables.');
+    }
+
     while (attempt <= this.MAX_RETRIES) {
       const provider = this.getHealthyProvider();
       if (!provider) {
-        throw new Error('All AI providers are currently unavailable.');
+        throw new Error('All configured AI providers are currently exhausted or degraded.');
       }
 
       try {
@@ -90,7 +96,6 @@ class AIManager {
           await new Promise(r => setTimeout(r, backoff));
         } else {
           this.markFailure(provider.id);
-          // Try next provider immediately if this one failed non-transiently or we are out of retries
           if (this.providers.length > 1 && attempt <= this.MAX_RETRIES) {
             this.rotateProvider();
             continue;
