@@ -36,11 +36,12 @@ export function preprocessText(text: string): string {
     .replace(/ਪੰਨਾ\s+\d+\s+of\s+\d+/gi, '')
     .replace(/^\s*(?:Page|ਪੰਨਾ)\s*\d+\s*$/gim, '') 
     .replace(/^\s*\d+\s*$/gm, '') 
-    // 3. Remove OCR Garbage & Commercial Noise
+    // 3. Remove OCR Garbage & Commercial Noise (Hardened)
     .replace(/[~►❖⚬▪•]/g, '')
+    .replace(/Copyright.*?[\d]{4}/gi, '')
     .replace(/Copyright.*?Arsh Grewal/gi, '')
-    .replace(/www\.cracklix\.com/gi, '')
-    .replace(/Visit www\.example\.com/gi, '')
+    .replace(/(?:www\.)?[\w-]+\.(?:com|in|org|net|edu)(?:\/[\w\.-]*)*/gi, '') // Liquidate all URLs
+    .replace(/Visit.*?\.com/gi, '')
     // 4. Normalize Whitespace
     .replace(/[ \t]+/g, ' ')
     .replace(/\n{3,}/g, '\n\n')
@@ -231,7 +232,7 @@ function parseMath(block: string, q: any) {
      optionsPart = restOfBlock.substring(optAMatch.index);
   }
 
-  q.englishQuestion = questionPart.replace(/^(?:Q\d+|Question\s*\d+|ਪ੍ਰਸ਼ਨ\s*\d+|प्रश्न\s*\d+)(?:[\.\s:]|$)\s*/i, '').trim();
+  q.englishQuestion = questionPart.replace(/^(?:Q\d+|Question\s*\d+)(?:[\.\s:]|$)\s*/i, '').trim();
   
   const labels = ['A', 'B', 'C', 'D'];
   labels.forEach((label, i) => {

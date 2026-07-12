@@ -4,7 +4,7 @@ import React from 'react';
 import { Question, LanguageDisplayMode } from '@/types';
 import { cn } from '@/lib/utils';
 import MathText from './MathText';
-import { Clock, AlertTriangle, Bookmark, ShieldCheck } from 'lucide-react';
+import { Clock, AlertTriangle, Bookmark, ShieldCheck, Info } from 'lucide-react';
 import { useExamStore } from '@/store/useExamStore';
 import { Badge } from '@/components/ui/badge';
 
@@ -19,9 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Precision Bilingual Question Hub v56.0.
+ * @fileOverview Precision Bilingual Question Hub v57.0.
  * FIXED: Unified Authority Black (#0F172A) for all scripts.
- * FIXED: Optimized "Testbook" Rationale layout with Answer at top.
+ * FIXED: Unified Correct Answer & Explanation into a single solution container.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -158,48 +158,53 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      {/* RATIONALE SECTION - TESTBOOK STYLE */}
+      {/* UNIFIED SOLUTION HUB - INDUSTRIAL STANDARD */}
       {showSolution && (
-        <div className="mt-10 pt-10 border-t border-slate-100 space-y-8">
-           {/* CORRECT ANSWER BOX */}
-           <div className="bg-emerald-50 p-6 md:p-10 rounded-[2rem] border border-emerald-100 space-y-4 shadow-sm">
-              <div className="flex items-center gap-3 font-black text-[11px] md:text-sm text-emerald-600 uppercase tracking-widest">
-                 <ShieldCheck className="h-5 w-5" /> Correct Answer: Option {q.correctAnswer}
-              </div>
-              <div className="font-black text-sm md:text-xl text-[#0F172A] pl-8">
-                 <MathText text={q[`option${q.correctAnswer}English`] || ""} />
-                 {(q[`option${q.correctAnswer}Punjabi`] || q[`option${q.correctAnswer}Hindi`]) && (
-                    <div className="text-xs md:text-lg font-bold mt-1 text-[#0F172A]">
-                       <MathText text={q[`option${q.correctAnswer}Punjabi`] || q[`option${q.correctAnswer}Hindi`]} />
-                    </div>
-                 )}
-              </div>
-           </div>
-
-           {/* EXPLANATION BOX */}
-           <div className="bg-slate-50 p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] border border-slate-100 space-y-8 shadow-inner">
-              <div className="flex items-center gap-3">
-                 <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center text-primary shadow-sm">
-                    <AlertTriangle className="h-4 w-4" />
+        <div className="mt-10 border border-slate-100 rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-slate-50/50 shadow-2xl relative">
+           <div className="absolute top-0 left-0 w-2 md:w-3 h-full bg-emerald-500" />
+           
+           <div className="p-8 md:p-14 space-y-10">
+              {/* PART 1: CORRECT ANSWER NODE */}
+              <div className="space-y-4">
+                 <div className="flex items-center gap-3 font-[900] text-[11px] md:text-sm text-emerald-600 uppercase tracking-[0.2em]">
+                    <ShieldCheck className="h-5 w-5" /> Verified Answer
                  </div>
-                 <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em]">Institutional Explanation</p>
+                 <div className="pl-8 space-y-2">
+                    <p className="text-xl md:text-3xl font-black text-[#0F172A] leading-tight">
+                       Option {q.correctAnswer}: {q[`option${q.correctAnswer}English`]}
+                    </p>
+                    {(q[`option${q.correctAnswer}Punjabi`] || q[`option${q.correctAnswer}Hindi`]) && (
+                       <p className="text-lg md:text-2xl font-bold text-[#0F172A] opacity-80">
+                          {q[`option${q.correctAnswer}Punjabi`] || q[`option${q.correctAnswer}Hindi`]}
+                       </p>
+                    )}
+                 </div>
               </div>
 
+              <div className="h-px w-full bg-slate-200/50 ml-8" />
+
+              {/* PART 2: RATIONALE NODE */}
               <div className="space-y-6">
-                {showEn && q.englishExplanation && (
-                  <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-lg">
-                    <MathText text={q.englishExplanation} className="text-inherit" />
-                  </div>
-                )}
-                {(showPa && q.punjabiExplanation) ? (
-                   <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-lg">
-                    <MathText text={q.punjabiExplanation} className="text-inherit" />
-                  </div>
-                ) : (showHi && q.hindiExplanation) ? (
-                   <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-lg">
-                    <MathText text={q.hindiExplanation} className="text-inherit" />
-                  </div>
-                ) : null}
+                 <div className="flex items-center gap-3 font-[900] text-[11px] md:text-sm text-slate-400 uppercase tracking-[0.2em]">
+                    <Info className="h-5 w-5" /> Institutional Rationale
+                 </div>
+                 
+                 <div className="pl-8 space-y-8">
+                    {showEn && q.englishExplanation && (
+                       <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl">
+                          <MathText text={q.englishExplanation} className="text-inherit" />
+                       </div>
+                    )}
+                    {(showPa && q.punjabiExplanation) ? (
+                       <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
+                          <MathText text={q.punjabiExplanation} className="text-inherit" />
+                       </div>
+                    ) : (showHi && q.hindiExplanation) ? (
+                       <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
+                          <MathText text={q.hindiExplanation} className="text-inherit" />
+                       </div>
+                    ) : null}
+                 </div>
               </div>
            </div>
         </div>
