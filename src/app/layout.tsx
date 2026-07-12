@@ -4,12 +4,12 @@ import { Inter } from "next/font/google";
 import { FirebaseClientProvider } from "@/firebase/client-provider";
 import MobileNav from "@/components/layout/MobileNav";
 import PWAManager from "@/components/pwa/PWAManager";
+import PWAInstallHandler from "@/components/pwa/PWAInstallHandler";
 import NetworkStatus from "@/components/pwa/NetworkStatus";
 import CapacitorManager from "@/components/native/CapacitorManager";
 import { Toaster } from "@/components/ui/toaster";
 import { INSTITUTIONAL_PAYLOAD } from "@/lib/institutional-payload";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
-import Script from "next/script";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -17,8 +17,8 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v61.4 (Stability Optimized).
- * FIXED: Metadata and Viewport aligned with Next.js 15.1 standards.
+ * @fileOverview Root Layout v61.5 (Stability Optimized).
+ * FIXED: Replaced next/script with PWAInstallHandler client component to resolve ChunkLoadError.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -64,21 +64,12 @@ export default function RootLayout({
           overflow-x-hidden
         `}
       >
-        <Script id="pwa-install-handler" strategy="afterInteractive">
-          {`
-            window.addEventListener('beforeinstallprompt', (e) => {
-              e.preventDefault();
-              window.deferredPrompt = e;
-              console.log('[PWA_REGISTRY] beforeinstallprompt event captured.');
-            });
-          `}
-        </Script>
-
         <FirebaseClientProvider>
           <div className="min-h-screen flex flex-col">
             {children}
           </div>
 
+          <PWAInstallHandler />
           <MobileNav />
           <CapacitorManager />
           <PWAManager />
