@@ -32,11 +32,6 @@ import { cn } from "@/lib/utils"
 import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema, ParserFormat } from "@/lib/parser"
 
-/**
- * @fileOverview Modular Industrial Ingestion Hub v73.0.
- * UPDATED: Added "English Only" node to the Language Hub.
- */
-
 const FORMATS: { label: string, value: ParserFormat }[] = [
   { label: "Current Affairs (English + Punjabi)", value: "CURRENT_AFFAIRS" },
   { label: "Simple Bilingual MCQ (Eng + Pun/Hin)", value: "BILINGUAL_MCQ" },
@@ -67,7 +62,7 @@ export default function BulkIngestionPage() {
     subjectId: "",
     secondaryLanguage: "punjabi" as "punjabi" | "hindi" | "english",
     difficulty: "Medium" as any,
-    parserFormat: "CURRENT_AFFAIRS" as ParserFormat
+    parserFormat: "ENGLISH_ONLY" as ParserFormat
   })
 
   const [rawText, setRawText] = useState("")
@@ -153,7 +148,7 @@ export default function BulkIngestionPage() {
         icon={ClipboardList}
         label="Modular Industrial Ingestion"
         title="MCQ Ingestion Hub"
-        subtitle="Dedicated local strategies for Current Affairs, Math, and relational logic data."
+        subtitle="Deterministic extraction rules for English and Bilingual nodes."
       >
         <div className="flex gap-4 w-full md:w-auto shrink-0">
            <button onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border border-slate-200 font-bold text-xs shadow-sm bg-white hover:bg-slate-50 transition-all">Reset Staging</button>
@@ -238,7 +233,7 @@ export default function BulkIngestionPage() {
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
-                        placeholder="Paste question blocks with math, tables, or blanks markers here..."
+                        placeholder="Paste Q1 questions here..."
                         className="min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>
@@ -275,17 +270,6 @@ export default function BulkIngestionPage() {
                     <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
                        <div className="flex items-center gap-4">
                           <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] uppercase tracking-widest px-4 py-1.5 rounded-lg">Staged Node #{idx + 1}</Badge>
-                          {q.diagram_required && (
-                             <Badge className="bg-amber-50 text-amber-600 border-none text-[8px] font-black uppercase px-3 py-1 rounded shadow-sm flex items-center gap-2">
-                                {metadata.parserFormat === 'GRAPH' ? <BarChart3 className="h-3 w-3" /> : <ImageIcon className="h-3 w-3" />} 
-                                {metadata.parserFormat === 'GRAPH' ? 'Graph reference' : 'Asset Map Required'}
-                             </Badge>
-                          )}
-                          {q.table_data && (
-                             <Badge className="bg-blue-50 text-blue-600 border-none text-[8px] font-black uppercase px-3 py-1 rounded shadow-sm flex items-center gap-2">
-                                <TableIcon className="h-3 w-3" /> {metadata.parserFormat === 'MATCHING' ? 'Matching Hub' : 'Table Structure'}
-                             </Badge>
-                          )}
                        </div>
                        <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                     </CardHeader>
@@ -293,14 +277,6 @@ export default function BulkIngestionPage() {
                     <CardContent className="p-6 md:p-12 lg:p-16 pt-4">
                        {q.isValid ? (
                           <div className="space-y-10">
-                             {q.diagram_required && (
-                                <div className="p-4 bg-slate-50 border border-slate-100 rounded-2xl flex items-center gap-4">
-                                   <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center text-amber-500 shadow-sm">
-                                      {metadata.parserFormat === 'GRAPH' ? <BarChart3 className="h-5 w-5" /> : <ImageIcon className="h-5 w-5" />}
-                                   </div>
-                                   <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{q.diagram_caption}</p>
-                                </div>
-                             )}
                              <QuestionRenderer 
                                 question={q} 
                                 language={metadata.secondaryLanguage === 'punjabi' ? "ENGLISH_PUNJABI" : metadata.secondaryLanguage === 'hindi' ? "ENGLISH_HINDI" : "ENGLISH"} 
@@ -330,7 +306,7 @@ export default function BulkIngestionPage() {
                     <Database className="h-24 w-24" />
                     <div className="space-y-2">
                        <p className="font-bold text-3xl uppercase tracking-[0.4em]">Staging Hub Empty</p>
-                       <p className="text-sm font-bold uppercase tracking-widest text-primary">Awaiting specialized format parsing</p>
+                       <p className="text-sm font-bold uppercase tracking-widest text-primary">Awaiting deterministic format parsing</p>
                     </div>
                  </div>
               )}
