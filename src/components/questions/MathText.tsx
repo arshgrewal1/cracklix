@@ -11,9 +11,8 @@ interface MathTextProps {
 }
 
 /**
- * @fileOverview Hardened Math Renderer v2.6.
- * FIXED: Prevents KaTeX from merging English words (e.g. "9and4") by ensuring mixed text/math lines use standard text rendering.
- * RULES: Only render as math if it's a pure formula without English words or if explicitly wrapped in $...$.
+ * @fileOverview Hardened Math Renderer v2.7.
+ * FIXED: Whitespace Preservation Protocol - ensures empty lines render as actual spacing.
  */
 export default function MathText({ text, className }: MathTextProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -38,7 +37,11 @@ export default function MathText({ text, className }: MathTextProps) {
       
       const renderedHtml = lines.map(line => {
         const trimmed = line.trim();
-        if (!trimmed) return '<div class="h-2"></div>';
+        
+        // PRESERVE BLANK LINES EXACTLY
+        if (line === "" || (!trimmed && line.length === 0)) {
+           return '<div class="h-4 w-full"></div>'; 
+        }
 
         const processed = trimmed
           .replace(/×/g, '\\times')
@@ -48,22 +51,17 @@ export default function MathText({ text, className }: MathTextProps) {
           .replace(/√\[?([^\]\s]+)\]?/g, '\\sqrt{$1}')
           .replace(/√/g, '\\sqrt');
 
-        // REGISTRY PROTECTION: Detect Indic Scripts (Punjabi, Hindi, etc.)
         const hasIndicScript = /[\u0900-\u097F\u0A00-\u0A7F]/.test(trimmed);
         
-        // Detect standard English words (words with 2+ letters that aren't math variables)
         const hasWords = /[a-zA-Z]{2,}/.test(trimmed) && 
                          !/^(?:sin|cos|tan|log|ln|lim|sqrt|div|times)$/i.test(trimmed.replace(/[^a-zA-Z]/g, ''));
 
-        // Pure formula detection (Variables, numbers, symbols, NO words)
         const isPureFormula = /^[sabcxyz\d\s\+\-\*\/\=\(\)\\\^\sqrt{}]+$/i.test(trimmed) && 
                              trimmed.includes('=') && 
                              !hasWords;
 
         const isExplicitMath = processed.startsWith('$') && processed.endsWith('$');
 
-        // LOGIC: If it has Punjabi/Hindi OR contains English words, treat as high-fidelity text.
-        // This prevents "9and4" merging issues in KaTeX.
         if (!hasIndicScript && !hasWords && (isPureFormula || isExplicitMath)) {
           try {
             const mathContent = isExplicitMath ? processed.slice(1, -1) : processed;
@@ -78,7 +76,6 @@ export default function MathText({ text, className }: MathTextProps) {
           }
         }
 
-        // Standard Text Rendering (Character-for-character Space Preservation)
         return `<div class="py-0.5 text-inherit font-[700] leading-[1.4] md:leading-[1.5] antialiased text-[13px] md:text-base whitespace-pre-wrap">${line}</div>`;
       }).join('');
 

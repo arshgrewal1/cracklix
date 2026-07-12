@@ -19,9 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v65.0.
- * FIXED: Arrival Order Preservation - No line reordering or extraction.
- * FIXED: Multi-language parity check for clean numeric options.
+ * @fileOverview Institutional Question Renderer v66.0.
+ * FIXED: Standardized Explanation labels (English Explanation / Punjabi Explanation).
+ * FIXED: Pure whitespace preservation for multiline passives.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -113,7 +113,6 @@ export default function QuestionRenderer({
             const localText = pa || hi;
             const isSelected = selectedAnswer === idx;
             
-            // Deduplication: If local is identical to English, hide local
             const hideLocal = localText?.trim() === en?.trim();
 
             return (
@@ -176,13 +175,13 @@ export default function QuestionRenderer({
 
               <div className="space-y-6">
                  <div className="flex items-center gap-3 font-bold text-[11px] md:text-sm text-slate-400 tracking-[0.1em]">
-                    <Info className="h-5 w-5" /> Institutional Rationale
+                    <Info className="h-5 w-5" /> Explanation
                  </div>
                  
                  <div className="pl-8 space-y-8">
                     {showEn && q.englishExplanation && (
                        <div className="space-y-2">
-                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400">English Rationale</p>
+                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400">English Explanation</p>
                           <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl">
                              <MathText text={q.englishExplanation} className="text-inherit" />
                           </div>
@@ -190,7 +189,7 @@ export default function QuestionRenderer({
                     )}
                     {showLocal && (q.punjabiExplanation || q.hindiExplanation) && (
                        <div className="space-y-2">
-                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400">{renderLang.includes('HINDI') ? 'हिन्दी' : 'ਪੰਜਾਬੀ'} Rationale</p>
+                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400">{renderLang.includes('HINDI') ? 'Hindi' : 'Punjabi'} Explanation</p>
                           <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
                              <MathText text={q.punjabiExplanation || q.hindiExplanation} className="text-inherit" />
                           </div>

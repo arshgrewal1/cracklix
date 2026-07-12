@@ -1,7 +1,7 @@
 'use server';
 /**
- * @fileOverview Production AI Bulk Ingestion Engine v7.0.
- * FIXED: Supply model string to isolated generate calls.
+ * @fileOverview Production AI Bulk Ingestion Engine v8.0.
+ * FIXED: Added Gurmukhi script isolation and paragraph preservation rules.
  */
 
 import { genkit } from 'genkit';
@@ -9,22 +9,19 @@ import { googleAI } from '@genkit-ai/google-genai';
 import { z } from 'genkit';
 
 const MCQSchema = z.object({
-  question_en: z.string().describe('English question text'),
-  question_pa: z.string().optional().describe('Punjabi question text'),
-  question_hi: z.string().optional().describe('Hindi question text'),
+  question_en: z.string().describe('English question text. Preserve all blank lines and paragraphs exactly.'),
+  question_pa: z.string().optional().describe('Punjabi question text. MUST USE ONLY GURMUKHI UNICODE (U+0A00-U+0A7F). Preserve all paragraphs.'),
+  question_hi: z.string().optional().describe('Hindi question text. Preserve all paragraphs.'),
   optionA: z.string(),
   optionB: z.string(),
   optionC: z.string(),
   optionD: z.string(),
   answer: z.enum(['A', 'B', 'C', 'D']),
-  explanation_en: z.string().optional(),
-  explanation_pa: z.string().optional(),
+  explanation_en: z.string().optional().describe('English explanation. Preserve all line breaks.'),
+  explanation_pa: z.string().optional().describe('Punjabi explanation. GURMUKHI ONLY.'),
   difficulty: z.enum(['Easy', 'Medium', 'Hard', 'Expert']).optional(),
   subject: z.string().optional(),
   topic: z.string().optional(),
-  diagram_required: z.boolean().optional(),
-  diagram_caption: z.string().optional(),
-  table_data: z.string().optional().describe('Markdown representation of any table in the question'),
 });
 
 const BulkParseOutputSchema = z.object({
@@ -38,7 +35,6 @@ export async function bulkParseMCQ(input: { rawText: string, examType?: string, 
      throw new Error("AI Hub Offline: Target API key not provided.");
   }
 
-  // Initialize isolated Genkit instance with the provided key
   const aiInstance = genkit({
     plugins: [googleAI({ apiKey })],
   });
@@ -47,22 +43,21 @@ export async function bulkParseMCQ(input: { rawText: string, examType?: string, 
     const response = await aiInstance.generate({
       model: 'googleai/gemini-1.5-flash', 
       output: { schema: BulkParseOutputSchema },
-      prompt: `You are an expert Government Exam MCQ Parser. 
-Your task is to take the entire provided RAW TEXT and extract EVERY valid MCQ found within it.
+      prompt: `You are an expert Government Exam MCQ Parser and OCR Specialist. 
 
-TEXT TO PARSE:
+TEXT TO PROCESS:
 ---
 ${rawText}
 ---
 
-RULES:
-1. Extract ALL questions. Do not skip any.
-2. Detect languages automatically. Put English text in "question_en" and Punjabi in "question_pa".
-3. For options, extract exactly what belongs to A, B, C, and D. Do not merge them.
-4. Correct any OCR mistakes (broken symbols, wrong characters).
-5. Identify Math (LaTeX), Reasoning (Puzzles), and Tables.
-6. Set "diagram_required" to true if the text mentions Figure, Diagram, or Map.
-7. Return ONLY a valid JSON object containing an array of questions.
+STRICT FORMATTING RULES:
+1. PRESERVE WHITESPACE: Do not collapse empty lines or paragraphs. If a question has multiple paragraphs, keep them separated.
+2. SCRIPT ISOLATION: 
+   - Put English text in "question_en".
+   - Put Punjabi text in "question_pa". 
+   - CRITICAL: "question_pa" must contain ONLY Gurmukhi script. Re-OCR if you detect Hindi/Devanagari characters.
+3. NO LABELS: Do not insert words like "Number Series" or "Explanation" inside the content fields.
+4. PARAGRAPH GAP: If there is a final question sentence after a statement, ensure there is one blank line before it.
 
 TARGET EXAM CONTEXT: ${examType || 'General Punjab Exam'}`,
     });
