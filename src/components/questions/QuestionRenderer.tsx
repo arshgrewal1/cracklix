@@ -19,9 +19,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v37.0.
- * FIXED: Implemented Diagram content rendering node for high-fidelity ASCII/Symbol layouts.
- * FIXED: Series Isolation - moves logic sequences below bilingual instructions.
+ * @fileOverview Institutional Question Renderer v44.0.
+ * FIXED: Diagram questions now render with Middle-Diagram layout (Intro -> Diagram -> Suffix).
  */
 export default function QuestionRenderer({ 
   question, 
@@ -64,7 +63,6 @@ export default function QuestionRenderer({
   const rawEn = q.englishQuestion || q.questionEn || q.questionText || "";
   const rawLocal = q.punjabiQuestion || q.questionPa || q.hindiQuestion || q.questionHi || "";
 
-  // REASONING OPTIMIZATION: Extract Series/Numbering to common area
   const isSeriesLine = (line: string) => {
     const trimmed = line.trim();
     if (!trimmed) return false;
@@ -74,7 +72,6 @@ export default function QuestionRenderer({
     const digits = (trimmed.match(/[0-9]/g) || []).length;
     const separators = (trimmed.match(/[,\-\>\:\?]/g) || []).length;
     const words = trimmed.split(/\s+/).filter(w => w.length > 3).length;
-    // Detect typical series/patterns
     return (digits > 0 && words <= 2) || (separators >= 2 && words <= 2) || (letters > 0 && letters < 12 && digits > 3);
   };
 
@@ -124,6 +121,7 @@ export default function QuestionRenderer({
       )}
 
       <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
+         {/* INTRO TEXT (PHASE 1) */}
          {showEn && enNode.statement && (
            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
              <MathText text={enNode.statement} />
@@ -135,11 +133,23 @@ export default function QuestionRenderer({
            </div>
          )}
 
-         {/* HIGH-FIDELITY DIAGRAM NODE */}
+         {/* DIAGRAM NODE (PHASE 2) */}
          {q.diagramContent && (
             <div className="my-6 p-6 md:p-10 bg-[#0F172A] text-emerald-400 rounded-[1.5rem] md:rounded-[2.5rem] font-mono text-[10px] md:text-sm overflow-x-auto whitespace-pre leading-relaxed shadow-inner border border-white/5 relative group">
                <div className="absolute top-2 right-4 opacity-20 pointer-events-none uppercase text-[8px] font-black tracking-widest">ASCII HUB</div>
                {q.diagramContent}
+            </div>
+         )}
+
+         {/* SUFFIX QUESTION SENTENCE (PHASE 3) */}
+         {showEn && q.englishQuestionSuffix && (
+            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
+              <MathText text={q.englishQuestionSuffix} />
+            </div>
+         )}
+         {showLocal && (q.punjabiQuestionSuffix || q.hindiQuestionSuffix) && (
+            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
+              <MathText text={q.punjabiQuestionSuffix || q.hindiQuestionSuffix} />
             </div>
          )}
 

@@ -1,10 +1,9 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v43.0.
- * FIXED: Sentinel Regex supports EOL ($) and is hardened against non-printable characters.
- * FIXED: Metadata filter purges Page headers/footers, URLs, and Copyright artifacts.
- * FIXED: parseReasoning finalizes the last question in the stream.
- * ADDED: parseDiagram - Dedicated parser for ASCII/Symbol based questions.
+ * @fileOverview Institutional Deterministic Ingestion Hub v44.0.
+ * FIXED: Diagram parser implements explicit state transitions and middle-diagram separation.
+ * FIXED: Explanation termination hardened against metadata pollution.
+ * FIXED: Labels (Answer, Explanation, etc.) are stripped before registry commitment.
  */
 
 export type ParserFormat = 
@@ -24,15 +23,11 @@ export type ParserFormat =
 
 export type ParserMode = 'PRODUCTION' | 'STRICT';
 
-/**
- * Shared Question Detection logic. 
- * Supports: Q1, Q.2, Question 3, Question-4, QUESTION 5, QUESTION-6
- */
 export const QUESTION_SENTINEL_REGEX = /^\s*(?:Q|Question|QUESTION|Q\.)\s?[-.]?\s?\d+(?:[\.\s:]|$)/i;
 
 export function isQuestionStart(line: string): boolean {
   if (!line) return false;
-  return QUESTION_SENTINEL_REGEX.test(line);
+  return QUESTION_SENTINEL_REGEX.test(line.trim());
 }
 
 const NOISE_PATTERNS = [
@@ -92,59 +87,102 @@ function parseDiagram(rawText: string, metadata: any) {
   const lines = rawText.split('\n');
   const questions: any[] = [];
   let currentQ: any = null;
-  let subState: 'BODY' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION' = 'BODY';
+  let state: 'BODY' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION' | 'COMPLETE' = 'BODY';
+  let bodySubState: 'INTRO' | 'DIAGRAM' | 'SUFFIX' = 'INTRO';
   
-  const finalizeQuestion = () => {
+  const punjabiRegex = /[\u0A00-\u0A7F]/;
+
+  const finalize = () => {
     if (!currentQ) return;
+    ['englishQuestion', 'punjabiQuestion', 'englishQuestionSuffix', 'punjabiQuestionSuffix', 'diagramContent', 'englishExplanation', 'punjabiExplanation'].forEach(k => {
+      if (currentQ[k]) currentQ[k] = currentQ[k].trim();
+    });
     questions.push(currentQ);
     currentQ = null;
   };
 
   lines.forEach((line) => {
     const trimmed = line.trim();
-    const isQ = isQuestionStart(trimmed);
-    const opt = detectOptionMarker(line);
-    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
-    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
-
-    if (isQ) {
-      finalizeQuestion();
-      subState = 'BODY';
+    
+    // Termination node: New Question
+    if (isQuestionStart(trimmed)) {
+      finalize();
+      state = 'BODY';
+      bodySubState = 'INTRO';
       currentQ = {
         ...metadata,
         id: `q-diagram-${Math.random().toString(36).substr(2, 9)}`,
         questionType: 'IMAGE_BASED',
-        englishQuestion: line.replace(QUESTION_SENTINEL_REGEX, '').trim() || "Diagram Question",
-        punjabiQuestion: "",
+        englishQuestion: "", punjabiQuestion: "",
+        englishQuestionSuffix: "", punjabiQuestionSuffix: "",
         diagramContent: "",
         optionAEnglish: "", optionBEnglish: "", optionCEnglish: "", optionDEnglish: "",
         correctAnswer: "",
-        englishExplanation: "",
+        englishExplanation: "", punjabiExplanation: "",
         status: 'PUBLISHED'
       };
+      
+      const content = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      if (content) {
+         if (punjabiRegex.test(content)) currentQ.punjabiQuestion = content;
+         else currentQ.englishQuestion = content;
+      }
       return;
     }
 
-    if (!currentQ) return;
+    if (!currentQ || state === 'COMPLETE') return;
 
-    if (opt) subState = 'OPTIONS';
-    else if (isAns) subState = 'ANSWER';
-    else if (isExpl) subState = 'EXPLANATION';
+    // Termination node: Metadata Noise
+    if (NOISE_PATTERNS.some(p => p.test(trimmed))) {
+       if (state === 'EXPLANATION') state = 'COMPLETE';
+       return; 
+    }
 
-    if (subState === 'BODY') {
-       // Literal append for diagrams to preserve ASCII layout
-       currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line;
-    } else if (subState === 'OPTIONS' && opt) {
+    const opt = detectOptionMarker(line);
+    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+
+    if (opt) state = 'OPTIONS';
+    else if (isAns) state = 'ANSWER';
+    else if (isExpl) state = 'EXPLANATION';
+
+    if (state === 'BODY') {
+       // Transition within body based on ASCII patterns
+       const hasDiagramSymbols = /[\|\\\/│┌┐└┘→←↑↓★▲■●○\+\-\_\=]{2,}/.test(line) || /^[\+\-\|│]$/.test(trimmed);
+       
+       if (hasDiagramSymbols && bodySubState === 'INTRO') bodySubState = 'DIAGRAM';
+       else if (!hasDiagramSymbols && bodySubState === 'DIAGRAM' && trimmed.length > 0) {
+          if (trimmed.split(/\s+/).length > 2) bodySubState = 'SUFFIX';
+       }
+
+       if (!trimmed) {
+          if (bodySubState === 'DIAGRAM') currentQ.diagramContent += '\n';
+          return;
+       }
+
+       if (bodySubState === 'INTRO') {
+          if (punjabiRegex.test(line)) currentQ.punjabiQuestion += (currentQ.punjabiQuestion ? '\n' : '') + trimmed;
+          else currentQ.englishQuestion += (currentQ.englishQuestion ? '\n' : '') + trimmed;
+       } else if (bodySubState === 'DIAGRAM') {
+          currentQ.diagramContent += (currentQ.diagramContent ? '\n' : '') + line;
+       } else if (bodySubState === 'SUFFIX') {
+          if (punjabiRegex.test(line)) currentQ.punjabiQuestionSuffix += (currentQ.punjabiQuestionSuffix ? '\n' : '') + trimmed;
+          else currentQ.englishQuestionSuffix += (currentQ.englishQuestionSuffix ? '\n' : '') + trimmed;
+       }
+    } else if (state === 'OPTIONS' && opt) {
        currentQ[`option${opt.opt}English`] = opt.text;
-    } else if (subState === 'ANSWER') {
+    } else if (state === 'ANSWER') {
        const match = trimmed.match(/[A-D]/i);
        if (match) currentQ.correctAnswer = match[0].toUpperCase();
-    } else if (subState === 'EXPLANATION') {
-       currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + line;
+    } else if (state === 'EXPLANATION') {
+       const clean = line.replace(/^(?:Explanation|Solution|ਵਿਆਖਿਆ|ਵਿਆਖਿਆ|व्याख्या|Rationale|Answer|Correct Answer|Official Key)\s*[:\-]?\s*/i, '').trim();
+       if (!clean) return;
+       if (punjabiRegex.test(clean)) currentQ.punjabiExplanation += (currentQ.punjabiExplanation ? '\n' : '') + clean;
+       else currentQ.englishExplanation += (currentQ.englishExplanation ? '\n' : '') + clean;
     }
   });
 
-  finalizeQuestion();
+  finalize();
   return { questions };
 }
 
@@ -349,4 +387,3 @@ function parseDeterministicBilingual(rawText: string, metadata: any) {
   });
   return { questions };
 }
-
