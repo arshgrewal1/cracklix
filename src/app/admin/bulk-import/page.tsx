@@ -32,9 +32,10 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, parseBulkQuestions, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Local Bulk Ingestion Hub v43.0.
+ * @fileOverview Universal Ingestion Hub v45.0.
  * FIXED: Hydration error (div inside p).
- * FIXED: Industrial scale desktop workspace and button fidelity.
+ * FIXED: Support for [MAP], [DIAGRAM], [TABLE], [IMAGE] markers.
+ * FIXED: Massive 850px desktop workspace and stable action button.
  */
 
 export default function BulkIngestionPage() {
@@ -124,7 +125,7 @@ export default function BulkIngestionPage() {
   }
 
   return (
-    <div className="w-full max-w-full mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-12 lg:px-16">
+    <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4 md:px-12">
       
       <AdminPageHeader
         icon={ClipboardList}
@@ -238,8 +239,8 @@ export default function BulkIngestionPage() {
                     <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
                        <div className="flex items-center gap-4">
                           <Badge className="bg-[#0B1228] text-white border-none font-bold text-[9px] uppercase tracking-widest px-4 py-1.5 rounded-lg">Staged Node #{idx + 1}</Badge>
-                          {q.diagram_required && <Badge className="bg-primary/10 text-primary border-none text-[8px] font-bold uppercase">Image Node</Badge>}
-                          {q.table_data && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold uppercase">Table Node</Badge>}
+                          {q.diagram_required && <Badge className="bg-primary/10 text-primary border-none text-[8px] font-bold uppercase">Visual Node</Badge>}
+                          {q.questionType === 'TABLE_BASED' && <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-bold uppercase">Table Node</Badge>}
                        </div>
                        <button onClick={() => setStagedQuestions(prev => prev.filter(item => item.id !== q.id))} className="h-10 w-10 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                     </CardHeader>
@@ -261,7 +262,8 @@ export default function BulkIngestionPage() {
                                 <div className="space-y-2">
                                    {q.validationErrors.map((err: string, i: number) => (
                                       <div key={i} className="text-sm font-bold text-rose-400 flex items-center gap-2">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-rose-300 shrink-0" /> {err}
+                                        <div className="h-1.5 w-1.5 rounded-full bg-rose-300 shrink-0" /> 
+                                        <span>{err}</span>
                                       </div>
                                    ))}
                                 </div>
