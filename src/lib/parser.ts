@@ -1,9 +1,8 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v44.0.
- * FIXED: Diagram parser implements explicit state transitions and middle-diagram separation.
- * FIXED: Explanation termination hardened against metadata pollution.
- * FIXED: Labels (Answer, Explanation, etc.) are stripped before registry commitment.
+ * @fileOverview Institutional Deterministic Ingestion Hub v45.0.
+ * FIXED: Diagram parser implements greedy context-aware capture for ASCII flowcharts.
+ * FIXED: Metadata filter bypassed for drawing characters to ensure diagram integrity.
  */
 
 export type ParserFormat = 
@@ -45,7 +44,7 @@ const NOISE_PATTERNS = [
 ];
 
 const ANS_MARKERS = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ"];
-const EXPL_MARKERS = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
+const EXPL_MARKERS = ["Explanation", "Solution", "ਵਿਆਖਿਆ", "ਵਿਆਖਿਆ", "व्याख्या", "Rationale"];
 
 export function preprocessText(text: string): string {
   if (!text) return "";
@@ -101,6 +100,19 @@ function parseDiagram(rawText: string, metadata: any) {
     currentQ = null;
   };
 
+  const isDiagramLine = (line: string, trimmed: string) => {
+    if (trimmed === "") return true;
+    // Drawing characters
+    if (/[│┌┐└┘├┤┬┴┼━┃┏┓┗┛┣┫┳┻╋→←↑↓▲▼◀▶]/.test(line)) return true;
+    // ASCII art lines or sequences
+    if (/[\|\-\+\_\=\\\/]{2,}/.test(line)) return true;
+    // Common flowchart/diagram text nodes
+    if (/^(?:Yes|No|True|False|Start|End|Input|Output|Print|Read|Write|Step|Result)$/i.test(trimmed)) return true;
+    // Short labels (box content)
+    if (trimmed.length < 20) return true;
+    return false;
+  };
+
   lines.forEach((line) => {
     const trimmed = line.trim();
     
@@ -132,8 +144,9 @@ function parseDiagram(rawText: string, metadata: any) {
 
     if (!currentQ || state === 'COMPLETE') return;
 
-    // Termination node: Metadata Noise
-    if (NOISE_PATTERNS.some(p => p.test(trimmed))) {
+    // Termination node: Metadata Noise (Ignore horizontal lines as they are part of diagrams)
+    const isMetadataNoise = NOISE_PATTERNS.filter(p => !p.source.includes('[-\\s\\.\\*_=]')).some(pattern => pattern.test(trimmed));
+    if (isMetadataNoise) {
        if (state === 'EXPLANATION') state = 'COMPLETE';
        return; 
     }
@@ -147,17 +160,14 @@ function parseDiagram(rawText: string, metadata: any) {
     else if (isExpl) state = 'EXPLANATION';
 
     if (state === 'BODY') {
-       // Transition within body based on ASCII patterns
-       const hasDiagramSymbols = /[\|\\\/│┌┐└┘→←↑↓★▲■●○\+\-\_\=]{2,}/.test(line) || /^[\+\-\|│]$/.test(trimmed);
-       
-       if (hasDiagramSymbols && bodySubState === 'INTRO') bodySubState = 'DIAGRAM';
-       else if (!hasDiagramSymbols && bodySubState === 'DIAGRAM' && trimmed.length > 0) {
-          if (trimmed.split(/\s+/).length > 2) bodySubState = 'SUFFIX';
-       }
+       const isDiagLine = isDiagramLine(line, trimmed);
 
-       if (!trimmed) {
-          if (bodySubState === 'DIAGRAM') currentQ.diagramContent += '\n';
-          return;
+       if (isDiagLine && bodySubState === 'INTRO') bodySubState = 'DIAGRAM';
+       else if (!isDiagLine && bodySubState === 'DIAGRAM') {
+          // Diagram ends when a full sentence or question is encountered
+          if (trimmed.length > 25 || trimmed.endsWith('?')) {
+             bodySubState = 'SUFFIX';
+          }
        }
 
        if (bodySubState === 'INTRO') {
@@ -387,3 +397,4 @@ function parseDeterministicBilingual(rawText: string, metadata: any) {
   });
   return { questions };
 }
+
