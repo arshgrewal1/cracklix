@@ -2,8 +2,8 @@
 'use client';
 
 /**
- * @fileOverview Institutional AI Service Manager v1.2.
- * FIXED: Error message now correctly matches the environment variable name for better diagnostics.
+ * @fileOverview Institutional AI Service Manager v1.3.
+ * Supports Multi-Key Rotation (Failover Architecture).
  */
 
 export type AIProviderStatus = 'HEALTHY' | 'DEGRADED' | 'FAILED';
@@ -26,18 +26,18 @@ class AIManager {
   }
 
   /**
-   * Reads multiple keys from environment variables.
-   * Standardized for production deployment.
+   * Reads multiple keys from the environment pool.
+   * Format expected: "key1,key2,key3..."
    */
   private initializeProviders() {
     if (typeof window === 'undefined') return;
 
-    // Check for pool or individual keys
-    const keyPool = process.env.NEXT_PUBLIC_AI_KEY_POOL || process.env.NEXT_PUBLIC_GOOGLE_GENAI_API_KEY || "";
+    // Supports both direct keys and comma-separated pools
+    const keyPool = process.env.NEXT_PUBLIC_GOOGLE_GENAI_API_KEY || "";
     const keys = keyPool.split(',').filter(Boolean);
 
     this.providers = keys.map((key, idx) => ({
-      id: `google-ai-${idx}`,
+      id: `gemini-node-${idx + 1}`,
       apiKey: key.trim(),
       status: 'HEALTHY',
       lastUsedAt: 0,
@@ -45,12 +45,14 @@ class AIManager {
     }));
 
     if (this.providers.length === 0) {
-      console.warn('[AI_MANAGER] CRITICAL: No AI credentials detected in registry.');
+      console.warn('[AI_MANAGER] WARNING: No Gemini credentials detected in .env registry.');
+    } else {
+      console.log(`[AI_MANAGER] Registry Initialized with ${this.providers.length} provider nodes.`);
     }
   }
 
   /**
-   * Resilient wrapper for AI calls.
+   * Resilient execution engine with automatic rotation.
    */
   async execute<T>(
     operationName: string,
@@ -60,51 +62,45 @@ class AIManager {
     let attempt = 0;
     let lastError: any = null;
 
-    // DIAGNOSTIC GUARD: Use the exact key name from the environment for the error message
     if (this.providers.length === 0) {
-       throw new Error('AI providers missing. Please set your NEXT_PUBLIC_GOOGLE_GENAI_API_KEY in the environment variables.');
+       throw new Error('AI Provider Registry Empty. Please add NEXT_PUBLIC_GOOGLE_GENAI_API_KEY in your .env file. (Supports comma-separated keys for rotation)');
     }
 
     while (attempt <= this.MAX_RETRIES) {
       const provider = this.getHealthyProvider();
       if (!provider) {
-        throw new Error('All configured AI providers are currently exhausted or degraded.');
+        throw new Error('All configured AI nodes are currently exhausted or disconnected.');
       }
 
       try {
-        console.log(`[AI_MANAGER] [${operationName}] Request Started using ${provider.id}`);
+        console.log(`[AI_MANAGER] [${operationName}] Executing via ${provider.id}`);
         const result = await operation(provider.apiKey);
         
-        // Success: Mark healthy and return
         this.markSuccess(provider.id);
-        console.log(`[AI_MANAGER] [${operationName}] Request Success`);
         return result;
 
       } catch (error: any) {
         lastError = error;
         attempt++;
         
-        const isTransient = this.isTransientError(error);
-        console.warn(`[AI_MANAGER] [${operationName}] Attempt ${attempt} Failed: ${error.message}`);
+        const isRateLimit = error.status === 429 || error.message?.toLowerCase().includes('rate');
+        console.warn(`[AI_MANAGER] [${operationName}] Node ${provider.id} Failure: ${error.message}`);
 
-        if (isTransient && attempt <= this.MAX_RETRIES) {
+        if (isRateLimit || attempt <= this.MAX_RETRIES) {
           this.markFailure(provider.id);
-          const backoff = Math.pow(2, attempt) * 1000 + (Math.random() * 1000);
-          console.log(`[AI_MANAGER] Retrying in ${Math.round(backoff)}ms...`);
+          this.rotateProvider(); // Immediately move to next key on rate limit
+          
+          const backoff = Math.pow(2, attempt) * 1000 + (Math.random() * 500);
           onRetry?.(attempt);
           await new Promise(r => setTimeout(r, backoff));
         } else {
           this.markFailure(provider.id);
-          if (this.providers.length > 1 && attempt <= this.MAX_RETRIES) {
-            this.rotateProvider();
-            continue;
-          }
           break;
         }
       }
     }
 
-    throw lastError || new Error('AI Operation failed after maximum retries.');
+    throw lastError || new Error('AI Operation failed after full cycle of provider nodes.');
   }
 
   private getHealthyProvider(): ProviderConfig | null {
@@ -114,7 +110,7 @@ class AIManager {
   }
 
   private rotateProvider() {
-    this.currentProviderIdx++;
+    this.currentProviderIdx = (this.currentProviderIdx + 1) % this.providers.length;
   }
 
   private markFailure(id: string) {
@@ -136,20 +132,8 @@ class AIManager {
     }
   }
 
-  private isTransientError(error: any): boolean {
-    const msg = error.message?.toLowerCase() || "";
-    return (
-      msg.includes('rate limit') || 
-      msg.includes('timeout') || 
-      msg.includes('exhausted') || 
-      msg.includes('fetch') ||
-      error.status === 429 ||
-      error.status >= 500
-    );
-  }
-
-  getProviderHealth(): ProviderConfig[] {
-    return this.providers.map(p => ({ ...p }));
+  getPoolHealth() {
+    return this.providers.map(p => ({ id: p.id, status: p.status }));
   }
 }
 

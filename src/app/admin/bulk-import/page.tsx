@@ -33,10 +33,10 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Production AI Ingestion Center v19.0.
- * FIXED: Resolved button text clipping by optimizing padding and tracking.
- * FIXED: Standardized button layout to prevent circular distortion.
- * SCALED: Maintained 850px parser height for large documents.
+ * @fileOverview Production AI Ingestion Center v20.0.
+ * FIXED: Resolved button text clipping and circular distortion.
+ * FIXED: Optimized desktop grid spans to prevent layout squeezing.
+ * SCALED: Increased parser height to 850px for enterprise documents.
  */
 
 export default function BulkIngestionPage() {
@@ -176,7 +176,7 @@ export default function BulkIngestionPage() {
         icon={Rocket}
         label="AI-Powered Ingestion Hub"
         title="Smart Bulk Import"
-        subtitle="Extract MCQs from messy text using Gemini 2.5 Flash."
+        subtitle="Extract MCQs from messy text using rotating Gemini nodes."
       >
         <div className="flex gap-4 w-full md:w-auto">
            <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs">Reset Hub</Button>
@@ -190,10 +190,10 @@ export default function BulkIngestionPage() {
         </div>
       </AdminPageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 px-1">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 px-1">
         
-        {/* INPUT PANEL */}
-        <div className="lg:col-span-6 xl:col-span-5 space-y-8">
+        {/* INPUT PANEL - WIDER SPAN */}
+        <div className="lg:col-span-6 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-6">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-6">
@@ -243,7 +243,7 @@ export default function BulkIngestionPage() {
                  <Button 
                     onClick={handleAIIngest} 
                     disabled={isProcessing} 
-                    className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-xs md:text-sm rounded-2xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-6"
+                    className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-bold uppercase text-xs md:text-sm rounded-2xl shadow-2xl gap-4 active:scale-95 transition-all border-none px-12"
                  >
                     {isProcessing ? <Loader2 className="h-6 w-6 animate-spin" /> : <Zap className="h-6 w-6 text-primary fill-current" />} 
                     Initialize Ingestion
@@ -253,7 +253,7 @@ export default function BulkIngestionPage() {
         </div>
 
         {/* STAGING HUB */}
-        <div className="lg:col-span-6 xl:col-span-7 space-y-8">
+        <div className="lg:col-span-6 space-y-8">
            <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-5">
                  <Layers className="h-6 w-6 text-primary" />
