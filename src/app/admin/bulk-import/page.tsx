@@ -34,9 +34,9 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Production AI Ingestion Center v24.0.
+ * @fileOverview Production AI Ingestion Center v26.0 (Optimized for Multi-Key Rotation).
  * FIXED: Rebuilt "Initialize Ingestion" button to prevent distortion and clipping.
- * FIXED: Scaled Desktop Layout to 1600px width.
+ * FIXED: Scaled Desktop Layout to 1600px width for better multi-pane visibility.
  * SCALE: Increased parser height to 850px for massive document ingestion.
  */
 
@@ -75,10 +75,12 @@ export default function BulkIngestionPage() {
     try {
       const sanitizedText = preprocessText(rawText);
       
-      const result = await aiManager.execute('BULK_PARSE_AI', async () => {
+      // Execute through AIManager to handle Key Rotation & Failover
+      const result = await aiManager.execute('BULK_PARSE_AI', async (apiKey) => {
          return await bulkParseMCQ({ 
            rawText: sanitizedText,
-           examType: metadata.boardId 
+           examType: metadata.boardId,
+           apiKey // Pass the rotated key to the server action
          });
       });
 
@@ -112,7 +114,7 @@ export default function BulkIngestionPage() {
       });
       
       setStagedQuestions(mapped);
-      toast({ title: "Extraction Success", description: `${mapped.length} nodes structured via AI.` });
+      toast({ title: "Extraction Success", description: `${mapped.length} nodes structured via rotated AI pool.` });
     } catch (e: any) {
       setAiStatus('OFFLINE');
       toast({ variant: "destructive", title: "AI Pipeline Error", description: e.message });
@@ -135,16 +137,16 @@ export default function BulkIngestionPage() {
         const { id, isValid, validationErrors, ...finalData } = q;
         
         const firestorePayload = {
-          question_en: finalData.question_en || finalData.englishQuestion,
-          question_pa: finalData.question_pa || finalData.punjabiQuestion || "",
-          question_hi: finalData.question_hi || finalData.hindiQuestion || "",
-          optionA: finalData.optionA || finalData.optionAEnglish,
-          optionB: finalData.optionB || finalData.optionBEnglish,
-          optionC: finalData.optionC || finalData.optionCEnglish,
-          optionD: finalData.optionD || finalData.optionDEnglish,
-          answer: finalData.answer || finalData.correctAnswer,
-          explanation_en: finalData.explanation_en || finalData.englishExplanation || "",
-          explanation_pa: finalData.explanation_pa || finalData.punjabiExplanation || "",
+          englishQuestion: finalData.englishQuestion,
+          punjabiQuestion: finalData.punjabiQuestion || "",
+          hindiQuestion: finalData.hindiQuestion || "",
+          optionAEnglish: finalData.optionAEnglish,
+          optionBEnglish: finalData.optionBEnglish,
+          optionCEnglish: finalData.optionCEnglish,
+          optionDEnglish: finalData.optionDEnglish,
+          correctAnswer: finalData.correctAnswer,
+          englishExplanation: finalData.englishExplanation || "",
+          punjabiExplanation: finalData.punjabiExplanation || "",
           subjectId: finalData.subjectId,
           boardId: finalData.boardId,
           examId: finalData.examId,
@@ -161,7 +163,7 @@ export default function BulkIngestionPage() {
       });
 
       await batch.commit();
-      toast({ title: "Registry Updated", description: `${valids.length} AI-extracted nodes committed.` });
+      toast({ title: "Registry Updated", description: `${valids.length} nodes committed to MCQ Bank.` });
       router.push("/admin/questions");
     } catch (e) {
       toast({ variant: "destructive", title: "Commit Failed" });
@@ -171,16 +173,16 @@ export default function BulkIngestionPage() {
   }
 
   return (
-    <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2">
+    <div className="w-full max-w-[1600px] mx-auto space-y-8 pb-32 text-left animate-in fade-in duration-700 pt-2 px-4">
       
       <AdminPageHeader
         icon={Rocket}
-        label="AI-Powered Ingestion Hub"
+        label="Multi-Key AI Ingestion Hub"
         title="Smart Bulk Import"
-        subtitle="Extract MCQs from messy text using rotating Gemini nodes."
+        subtitle="Extract MCQs from messy text using your 7-key Gemini pool."
       >
         <div className="flex gap-4 w-full md:w-auto">
-           <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm">Reset Hub</Button>
+           <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm">Reset Staging</Button>
            <Button 
             onClick={handleFinalCommit} 
             disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
@@ -191,26 +193,26 @@ export default function BulkIngestionPage() {
         </div>
       </AdminPageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 px-1">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         
-        {/* INPUT PANEL - WIDENED ON DESKTOP */}
-        <div className="lg:col-span-6 space-y-8">
+        {/* INPUT PANEL - WIDENED FOR DESKTOP */}
+        <div className="lg:col-span-5 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-6">
                  <div className="flex items-center justify-between border-b border-slate-50 pb-6">
                     <div className="flex items-center gap-4">
                        <Settings className="h-6 w-6 text-primary" />
-                       <h3 className="font-bold text-xl uppercase text-[#0F172A]">Target Context</h3>
+                       <h3 className="font-bold text-xl uppercase text-[#0F172A]">Registry Target</h3>
                     </div>
                     {aiStatus === 'PROCESSING' && (
-                       <Badge className="animate-pulse gap-1.5 h-7 bg-blue-50 text-blue-600 border-none px-3"><Loader2 className="h-3.5 w-3.5 animate-spin" /> AI Active</Badge>
+                       <Badge className="animate-pulse gap-1.5 h-7 bg-blue-50 text-blue-600 border-none px-3"><Loader2 className="h-3.5 w-3.5 animate-spin" /> AI Pool Active</Badge>
                     )}
                  </div>
                  
                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div className="space-y-2">
                        <Select value={metadata.boardId} onValueChange={v => setMetadata({...metadata, boardId: v})}>
-                          <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner text-[#0F172A]"><SelectValue placeholder="Select Board Hub" /></SelectTrigger>
+                          <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner text-[#0F172A]"><SelectValue placeholder="Board Hub" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white border-white/10">
                              {boards?.map(b => <SelectItem key={b.id} value={b.id}>{b.abbreviation} Hub</SelectItem>)}
                           </SelectContent>
@@ -218,7 +220,7 @@ export default function BulkIngestionPage() {
                     </div>
                     <div className="space-y-2">
                        <Select value={metadata.subjectId} onValueChange={v => setMetadata({...metadata, subjectId: v})}>
-                          <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner text-[#0F172A]"><SelectValue placeholder="Select Subject Node" /></SelectTrigger>
+                          <SelectTrigger className="h-14 bg-slate-50 border-none rounded-xl font-bold px-5 shadow-inner text-[#0F172A]"><SelectValue placeholder="Subject Node" /></SelectTrigger>
                           <SelectContent className="bg-[#0B1528] text-white border-white/10 max-h-80">
                              {subjects?.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                           </SelectContent>
@@ -230,18 +232,18 @@ export default function BulkIngestionPage() {
               <div className="space-y-8 pt-8 border-t border-slate-50">
                  <div className="space-y-2">
                     <Label className="text-[10px] font-black uppercase text-slate-400 flex items-center justify-between ml-1">
-                        Raw Document Paste
-                        <Badge variant="outline" className="text-[8px] border-blue-100 bg-blue-50 text-blue-600 font-black uppercase">Parser Hub</Badge>
+                        Raw Document Stream
+                        <Badge variant="outline" className="text-[8px] border-blue-100 bg-blue-50 text-blue-600 font-black uppercase">OCR Parser</Badge>
                     </Label>
                     <Textarea 
                         value={rawText}
                         onChange={(e) => setRawText(e.target.value)}
-                        placeholder="Paste OCR text, PDF content, or WhatsApp MCQs here..."
-                        className="min-h-[550px] md:min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
+                        placeholder="Paste document text here (PDF content, OCR, WhatsApp MCQs)..."
+                        className="min-h-[600px] md:min-h-[850px] rounded-2xl bg-slate-50 border-none p-8 font-medium text-sm md:text-base leading-relaxed shadow-inner resize-none focus-visible:ring-primary/10 custom-scrollbar text-[#0F172A]"
                     />
                  </div>
 
-                 {/* HIGH-FIDELITY ACTION BUTTON - FIXED SHAPE */}
+                 {/* STABLE ACTION BUTTON - FIXED SCALE */}
                  <Button 
                     onClick={handleAIIngest} 
                     disabled={isProcessing} 
@@ -254,8 +256,8 @@ export default function BulkIngestionPage() {
            </Card>
         </div>
 
-        {/* STAGING HUB */}
-        <div className="lg:col-span-6 space-y-8">
+        {/* STAGING AREA */}
+        <div className="lg:col-span-7 space-y-8">
            <div className="flex items-center justify-between px-2">
               <div className="flex items-center gap-5">
                  <Layers className="h-6 w-6 text-primary" />
@@ -310,8 +312,8 @@ export default function BulkIngestionPage() {
                  <div className="py-60 flex flex-col items-center justify-center text-slate-300 opacity-20 space-y-10 text-center border-2 border-dashed border-slate-200 rounded-[3rem] mx-2">
                     <Database className="h-24 w-24" />
                     <div className="space-y-2">
-                       <p className="font-bold text-3xl uppercase tracking-[0.4em]">Staging Empty</p>
-                       <p className="text-sm font-bold uppercase tracking-widest text-primary">Awaiting AI Pipeline Initiation</p>
+                       <p className="font-bold text-3xl uppercase tracking-[0.4em]">Staging Hub Empty</p>
+                       <p className="text-sm font-bold uppercase tracking-widest text-primary">Awaiting AI Pool Initiation</p>
                     </div>
                  </div>
               )}

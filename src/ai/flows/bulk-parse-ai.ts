@@ -1,11 +1,13 @@
+
 'use server';
 /**
- * @fileOverview Production AI Bulk Ingestion Engine v2.0.
- * Handles holistic extraction of multiple MCQs from raw text using Gemini.
+ * @fileOverview Production AI Bulk Ingestion Engine v3.0.
+ * UPDATED: Supports dynamic API Key rotation from the high-fidelity key pool.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { genkit } from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
+import { z } from 'genkit';
 
 const MCQSchema = z.object({
   question_en: z.string().describe('English question text'),
@@ -26,24 +28,32 @@ const MCQSchema = z.object({
   table_data: z.string().optional().describe('Markdown representation of any table in the question'),
 });
 
-const BulkParseInputSchema = z.object({
-  rawText: z.string(),
-  examType: z.string().optional(),
-});
-
 const BulkParseOutputSchema = z.object({
   questions: z.array(MCQSchema),
 });
 
-export async function bulkParseMCQ(input: { rawText: string, examType?: string }): Promise<any> {
-  return bulkParseMCQFlow(input);
-}
+/**
+ * Bulk Parse Entry Point.
+ * Initialized Genkit dynamically per-request to support API key rotation from the pool.
+ */
+export async function bulkParseMCQ(input: { rawText: string, examType?: string, apiKey?: string }): Promise<any> {
+  const { rawText, examType, apiKey } = input;
 
-const prompt = ai.definePrompt({
-  name: 'bulkParseMCQPrompt',
-  input: {schema: BulkParseInputSchema},
-  output: {schema: BulkParseOutputSchema},
-  prompt: `You are an expert Government Exam MCQ Parser. 
+  if (!apiKey) {
+     throw new Error("AI Operation Blocked: API Key node not provided by manager.");
+  }
+
+  // Initialize isolated Genkit instance for this rotation node
+  const ai = genkit({
+    plugins: [googleAI({ apiKey })],
+    model: 'googleai/gemini-1.5-flash',
+  });
+
+  const prompt = ai.definePrompt({
+    name: 'bulkParseMCQPrompt',
+    input: z.object({ rawText: z.string(), examType: z.string().optional() }),
+    output: { schema: BulkParseOutputSchema },
+    prompt: `You are an expert Government Exam MCQ Parser. 
 Your task is to take the entire provided RAW TEXT and extract EVERY valid MCQ found within it.
 
 TEXT TO PARSE:
@@ -62,17 +72,14 @@ RULES:
 8. NEVER hallucinate or generate fake content. If a part is missing, leave it empty.
 
 TARGET EXAM CONTEXT: {{{examType}}}`,
-});
+  });
 
-const bulkParseMCQFlow = ai.defineFlow(
-  {
-    name: 'bulkParseMCQFlow',
-    inputSchema: BulkParseInputSchema,
-    outputSchema: BulkParseOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    if (!output) throw new Error("AI failed to generate structured data.");
+  try {
+    const { output } = await prompt({ rawText, examType });
+    if (!output) throw new Error("AI extraction node returned empty registry.");
     return output;
+  } catch (error: any) {
+    console.error("[AI_INGEST_NODE_FAILURE]:", error.message);
+    throw error;
   }
-);
+}
