@@ -12,12 +12,12 @@ import { useStudyTracker } from '@/hooks/useStudyTracker';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Official Study Analytics Center v2.2.
- * FIXED: Independent period tracking for Week, Month, and Year.
+ * @fileOverview Official Study Analytics Center v2.3.
+ * FIXED: Resilient multi-period tracking for accurate weekly/monthly display.
  */
 
 const formatStudyTime = (seconds: number) => {
-  if (isNaN(seconds) || seconds < 0) return "0m 00s";
+  if (isNaN(seconds) || seconds <= 0) return "0m 00s";
   
   const d = Math.floor(seconds / (3600 * 24));
   const h = Math.floor((seconds % (3600 * 24)) / 3600);
@@ -32,7 +32,7 @@ const formatStudyTime = (seconds: number) => {
 }
 
 const formatFullDuration = (seconds: number) => {
-  if (isNaN(seconds) || seconds < 0) return "00h 00m 00s";
+  if (isNaN(seconds) || seconds <= 0) return "00h 00m 00s";
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;
@@ -144,7 +144,7 @@ function PeriodCard({ label, val, icon: Icon, color }: any) {
       <div className={cn(
         "h-12 w-12 rounded-2xl flex items-center justify-center shadow-inner",
         color === 'blue' ? "bg-blue-50 text-blue-500" :
-        color === 'emerald' ? "bg-emerald-50 text-emerald-500" :
+        color === 'emerald' ? "bg-emerald-50 text-emerald-600" :
         "bg-purple-50 text-purple-500"
       )}>
           <Icon className="h-6 w-6" />

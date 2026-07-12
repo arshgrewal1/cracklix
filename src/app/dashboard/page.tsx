@@ -33,12 +33,12 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useStudyTracker } from "@/hooks/useStudyTracker"
 
 /**
- * @fileOverview Student Progress Portal v58.0.
- * FIXED: Independent multi-period tracking for Week, Month, Year and Lifetime.
+ * @fileOverview Student Progress Portal v58.1.
+ * FIXED: Accurate multi-period study time display using real-time sync values.
  */
 
 const formatStudyTime = (seconds: number) => {
-  if (isNaN(seconds) || seconds < 0) return "0m 00s";
+  if (isNaN(seconds) || seconds <= 0) return "0m 00s";
   
   const d = Math.floor(seconds / (3600 * 24));
   const h = Math.floor((seconds % (3600 * 24)) / 3600);
@@ -53,7 +53,7 @@ const formatStudyTime = (seconds: number) => {
 }
 
 const formatFullDuration = (seconds: number) => {
-  if (isNaN(seconds) || seconds < 0) return "00h 00m 00s";
+  if (isNaN(seconds) || seconds <= 0) return "00h 00m 00s";
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;

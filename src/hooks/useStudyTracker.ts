@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUser, useFirestore } from '@/firebase';
-import { doc, writeBatch, serverTimestamp, increment, getDoc } from 'firebase/firestore';
+import { doc, writeBatch, serverTimestamp, increment, onSnapshot } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
 
 export type StudyContentType = 'MOCK' | 'PRACTICE' | 'SUBJECT' | 'PDF' | 'VIDEO' | 'OTHER' | 'DASHBOARD' | 'CA' | 'PYQ';
@@ -35,8 +35,8 @@ const getPeriodIds = (date: Date) => {
 };
 
 /**
- * @fileOverview Institutional Real-Time Study Tracker v4.0.
- * FIXED: Implemented Multi-Period (Week/Month/Year) reset logic and sync.
+ * @fileOverview Institutional Real-Time Study Tracker v4.1.
+ * FIXED: Implemented resilient multi-period sync using real-time cache to prevent overwriting stats.
  */
 export function useStudyTracker(contentId: string | null, contentType: StudyContentType, enabled: boolean = true) {
   const { user } = useUser();
@@ -45,6 +45,7 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [unSyncedSeconds, setUnSyncedSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
+  const [remoteStats, setRemoteStats] = useState<any>(null);
   
   const sessionRef = useRef<{ sessionId: string | null; startTime: number | null; lastSyncTime: number; }>({
     sessionId: null,
@@ -54,7 +55,15 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
 
   const lastActivityRef = useRef<number>(Date.now());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const statsCache = useRef<any>(null);
+
+  // 1. Real-time stats listener to ensure we have the latest period markers before syncing
+  useEffect(() => {
+    if (!user || !db) return;
+    const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
+    return onSnapshot(statsRef, (snap) => {
+      if (snap.exists()) setRemoteStats(snap.data());
+    });
+  }, [user, db]);
 
   const saveProgress = useCallback(async (durationToSync: number, isFinal = false) => {
     if (!db || !user || !sessionRef.current.sessionId || durationToSync <= 0) return;
@@ -95,31 +104,31 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
         totalSessions: isFinal ? increment(1) : increment(0)
       };
 
-      // Week Logic
-      if (statsCache.current?.lastWeekId === periods.week) {
-        statsUpdate.thisWeekTime = increment(durationToSync);
-      } else {
+      // Week Logic - Only reset if we are CERTAIN we have loaded the existing state and it differs
+      if (remoteStats && remoteStats.lastWeekId && remoteStats.lastWeekId !== periods.week) {
         statsUpdate.thisWeekTime = durationToSync;
         statsUpdate.lastWeekId = periods.week;
-        if (statsCache.current) statsCache.current.lastWeekId = periods.week;
+      } else {
+        statsUpdate.thisWeekTime = increment(durationToSync);
+        if (!remoteStats?.lastWeekId) statsUpdate.lastWeekId = periods.week;
       }
 
       // Month Logic
-      if (statsCache.current?.lastMonthId === periods.month) {
-        statsUpdate.thisMonthTime = increment(durationToSync);
-      } else {
+      if (remoteStats && remoteStats.lastMonthId && remoteStats.lastMonthId !== periods.month) {
         statsUpdate.thisMonthTime = durationToSync;
         statsUpdate.lastMonthId = periods.month;
-        if (statsCache.current) statsCache.current.lastMonthId = periods.month;
+      } else {
+        statsUpdate.thisMonthTime = increment(durationToSync);
+        if (!remoteStats?.lastMonthId) statsUpdate.lastMonthId = periods.month;
       }
 
       // Year Logic
-      if (statsCache.current?.lastYearId === periods.year) {
-        statsUpdate.thisYearTime = increment(durationToSync);
-      } else {
+      if (remoteStats && remoteStats.lastYearId && remoteStats.lastYearId !== periods.year) {
         statsUpdate.thisYearTime = durationToSync;
         statsUpdate.lastYearId = periods.year;
-        if (statsCache.current) statsCache.current.lastYearId = periods.year;
+      } else {
+        statsUpdate.thisYearTime = increment(durationToSync);
+        if (!remoteStats?.lastYearId) statsUpdate.lastYearId = periods.year;
       }
 
       batch.set(userStatsRef, statsUpdate, { merge: true });
@@ -134,21 +143,10 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
     } catch (error) {
       console.error('[StudyTracker] Period sync failure:', error);
     }
-  }, [db, user, contentId, contentType]);
+  }, [db, user, contentId, contentType, remoteStats]);
 
   const startSession = useCallback(async () => {
     if (!user || sessionRef.current.sessionId || !enabled || !db) return;
-
-    // Capture period markers from registry to ensure correct reset logic
-    try {
-      const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
-      const snap = await getDoc(statsRef);
-      if (snap.exists()) {
-        statsCache.current = snap.data();
-      }
-    } catch (e) {
-      console.error('[StudyTracker] Stats anchor fetch failed:', e);
-    }
 
     const sid = nanoid();
     sessionRef.current = {
