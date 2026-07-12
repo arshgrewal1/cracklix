@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Question, LanguageDisplayMode } from '@/types';
 import { cn } from '@/lib/utils';
 import MathText from './MathText';
-import { Clock, AlertTriangle, Bookmark, ShieldCheck, Info } from 'lucide-react';
+import { Clock, AlertTriangle, Bookmark, ShieldCheck, Info, Zap } from 'lucide-react';
 import { useExamStore } from '@/store/useExamStore';
 import { Badge } from '@/components/ui/badge';
 
@@ -19,9 +19,9 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v66.0.
- * FIXED: Standardized Explanation labels (English Explanation / Punjabi Explanation).
- * FIXED: Pure whitespace preservation for multiline passives.
+ * @fileOverview Institutional Question Renderer v36.0.
+ * FIXED: Implemented Series Isolation - moves logic sequences below bilingual instructions.
+ * FIXED: Standardized Explanation labels.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -61,10 +61,42 @@ export default function QuestionRenderer({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const englishQ = q.englishQuestion || q.questionEn || q.questionText || "";
-  const punjabiQ = q.punjabiQuestion || q.questionPa || "";
-  const hindiQ = q.hindiQuestion || q.questionHi || "";
-  const localQ = punjabiQ || hindiQ;
+  const rawEn = q.englishQuestion || q.questionEn || q.questionText || "";
+  const rawLocal = q.punjabiQuestion || q.questionPa || q.hindiQuestion || q.questionHi || "";
+
+  // REASONING OPTIMIZATION: Extract Series/Numbering to common area
+  const isSeriesLine = (line: string) => {
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+    const alphanumeric = trimmed.replace(/[^a-zA-Z0-9]/g, '');
+    if (alphanumeric.length === 0) return false;
+    const letters = (trimmed.match(/[a-z]/gi) || []).length;
+    const digits = (trimmed.match(/[0-9]/g) || []).length;
+    const separators = (trimmed.match(/[,\-\>\:\?]/g) || []).length;
+    const words = trimmed.split(/\s+/).filter(w => w.length > 3).length;
+    // Detect typical series/patterns
+    return (digits > 0 && words <= 2) || (separators >= 2 && words <= 2) || (letters > 0 && letters < 12 && digits > 3);
+  };
+
+  const processText = (text: string) => {
+    const lines = text.split('\n');
+    const statementLines: string[] = [];
+    const seriesLines: string[] = [];
+
+    lines.forEach(l => {
+      if (isSeriesLine(l)) seriesLines.push(l);
+      else if (l.trim()) statementLines.push(l);
+    });
+
+    return {
+      statement: statementLines.join('\n'),
+      series: seriesLines.join('\n')
+    };
+  };
+
+  const enNode = processText(rawEn);
+  const localNode = processText(rawLocal);
+  const commonSeries = [enNode.series, localNode.series].filter(Boolean).join('\n');
 
   const OPT_LABELS = ['A', 'B', 'C', 'D'];
 
@@ -91,16 +123,31 @@ export default function QuestionRenderer({
         </div>
       )}
 
-      <div className={cn("space-y-8 px-1", showSolution ? "mb-6" : "mb-10")}>
-         {showEn && englishQ && (
+      <div className={cn("space-y-6 px-1", showSolution ? "mb-6" : "mb-10")}>
+         {showEn && enNode.statement && (
            <div className={cn("font-[800] text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-base md:text-xl" : "text-[18px] md:text-3xl")}>
-             <MathText text={englishQ} />
+             <MathText text={enNode.statement} />
            </div>
          )}
-         {showLocal && localQ && (
+         {showLocal && localNode.statement && (
            <div className={cn("font-bold text-[#0F172A] antialiased leading-relaxed break-words", showSolution ? "text-sm md:text-lg" : "text-base md:text-2xl")}>
-             <MathText text={localQ} />
+             <MathText text={localNode.statement} />
            </div>
+         )}
+
+         {commonSeries && (
+            <div className={cn(
+              "p-6 md:p-10 rounded-2xl md:rounded-[2rem] bg-blue-50/50 border border-blue-100/50 shadow-inner mt-4 animate-in zoom-in-95 duration-500",
+              showSolution ? "md:p-8" : ""
+            )}>
+               <div className="flex items-center gap-3 mb-4 opacity-30">
+                  <Zap className="h-4 w-4 text-primary fill-current" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">Logic Hub</span>
+               </div>
+               <div className={cn("font-black text-[#0F172A] antialiased leading-tight text-center", showSolution ? "text-lg md:text-3xl" : "text-2xl md:text-5xl")}>
+                  <MathText text={commonSeries} />
+               </div>
+            </div>
          )}
       </div>
 
@@ -181,7 +228,7 @@ export default function QuestionRenderer({
                  <div className="pl-8 space-y-8">
                     {showEn && q.englishExplanation && (
                        <div className="space-y-2">
-                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400">English Explanation</p>
+                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">English Explanation</p>
                           <div className="font-[800] text-[#0F172A] leading-relaxed text-sm md:text-xl">
                              <MathText text={q.englishExplanation} className="text-inherit" />
                           </div>
@@ -189,7 +236,7 @@ export default function QuestionRenderer({
                     )}
                     {showLocal && (q.punjabiExplanation || q.hindiExplanation) && (
                        <div className="space-y-2">
-                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400">{renderLang.includes('HINDI') ? 'Hindi' : 'Punjabi'} Explanation</p>
+                          <p className="text-[10px] md:text-[11px] font-bold text-slate-400 uppercase tracking-widest">{renderLang.includes('HINDI') ? 'Hindi' : 'Punjabi'} Explanation</p>
                           <div className="font-bold text-[#0F172A] leading-relaxed text-sm md:text-xl">
                              <MathText text={q.punjabiExplanation || q.hindiExplanation} className="text-inherit" />
                           </div>
