@@ -12,23 +12,28 @@ const SYNC_INTERVAL = 30 * 1000; // 30 seconds
 
 /**
  * Helper to calculate period identifiers for tracking resets.
+ * Uses local time components to align with user expectations.
  */
 const getPeriodIds = (date: Date) => {
   const d = new Date(date);
-  const today = d.toISOString().split('T')[0];
+  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  
+  // Weekly reset (Monday)
   const day = d.getDay(); 
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  const monday = new Date(d.setDate(diff));
-  const week = monday.toISOString().split('T')[0];
-  const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-  const year = `${date.getFullYear()}`;
+  const diff = day === 0 ? -6 : 1 - day;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diff);
+  const week = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+  
+  const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  const year = `${d.getFullYear()}`;
   return { today, week, month, year };
 };
 
 /**
- * @fileOverview Institutional Real-Time Study Tracker v4.5.
- * FIXED: Stale cache guard prevents false resets on app startup.
- * FIXED: favoured atomic increment to prevent "today > week" drift.
+ * @fileOverview Institutional Real-Time Study Tracker v5.0.
+ * FIXED: isServerSynced guard prevents cache-induced resets.
+ * FIXED: Local time period IDs align with user's clock.
  */
 export function useStudyTracker(contentId: string | null, contentType: StudyContentType, enabled: boolean = true) {
   const { user } = useUser();
@@ -38,6 +43,7 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
   const [unSyncedSeconds, setUnSyncedSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
   
+  const isServerSynced = useRef(false);
   const remoteStatsRef = useRef<any>(null);
   const sessionRef = useRef<{ sessionId: string | null; startTime: number | null; lastSyncTime: number; }>({
     sessionId: null,
@@ -48,16 +54,19 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
   const lastActivityRef = useRef<number>(Date.now());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 1. Real-time stats listener with Metadata Guard
+  // 1. Real-time stats listener with Cache Guard
   useEffect(() => {
     if (!user || !db) return;
     const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
     
     const unsub = onSnapshot(statsRef, { includeMetadataChanges: true }, (snap) => {
       if (snap.exists()) {
-        // CRITICAL: Only trust non-cache snapshots for reset logic 
-        // to prevent old week/month IDs in cache from zeroing current data.
-        if (!snap.metadata.fromCache || !remoteStatsRef.current) {
+        const fromCache = snap.metadata.fromCache;
+        if (!fromCache) {
+          isServerSynced.current = true;
+          remoteStatsRef.current = snap.data();
+        } else if (!remoteStatsRef.current) {
+          // Allow initial cache load for UI but don't mark as server synced
           remoteStatsRef.current = snap.data();
         }
       }
@@ -72,6 +81,7 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
     const now = new Date();
     const periods = getPeriodIds(now);
     const remote = remoteStatsRef.current;
+    const serverReady = isServerSynced.current;
 
     try {
       const batch = writeBatch(db);
@@ -98,36 +108,46 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
         lastUpdated: serverTimestamp(),
       }, { merge: true });
 
-      // 3. Statistical Hub -Favours increment over set to prevent data loss
+      // 3. Statistical Hub Updates
       const statsUpdate: any = {
         totalStudyTime: increment(durationToSync),
         lastSessionDate: serverTimestamp(),
         totalSessions: isFinal ? increment(1) : increment(0)
       };
 
-      // Resilience: Only reset if we are CERTAIN (not from stale cache) that a new period has started
-      if (remote && remote.lastWeekId && remote.lastWeekId !== periods.week) {
-        statsUpdate.thisWeekTime = durationToSync;
-        statsUpdate.lastWeekId = periods.week;
+      // PERIODIC RESET LOGIC - ONLY TRIGGER IF SERVER VERIFIED
+      if (serverReady && remote) {
+        // Week Check
+        if (remote.lastWeekId && remote.lastWeekId !== periods.week) {
+          statsUpdate.thisWeekTime = durationToSync;
+          statsUpdate.lastWeekId = periods.week;
+        } else {
+          statsUpdate.thisWeekTime = increment(durationToSync);
+          if (!remote.lastWeekId) statsUpdate.lastWeekId = periods.week;
+        }
+
+        // Month Check
+        if (remote.lastMonthId && remote.lastMonthId !== periods.month) {
+          statsUpdate.thisMonthTime = durationToSync;
+          statsUpdate.lastMonthId = periods.month;
+        } else {
+          statsUpdate.thisMonthTime = increment(durationToSync);
+          if (!remote.lastMonthId) statsUpdate.lastMonthId = periods.month;
+        }
+
+        // Year Check
+        if (remote.lastYearId && remote.lastYearId !== periods.year) {
+          statsUpdate.thisYearTime = durationToSync;
+          statsUpdate.lastYearId = periods.year;
+        } else {
+          statsUpdate.thisYearTime = increment(durationToSync);
+          if (!remote.lastYearId) statsUpdate.lastYearId = periods.year;
+        }
       } else {
+        // Fallback to safe incremental updates if server data is pending
         statsUpdate.thisWeekTime = increment(durationToSync);
-        if (!remote?.lastWeekId) statsUpdate.lastWeekId = periods.week;
-      }
-
-      if (remote && remote.lastMonthId && remote.lastMonthId !== periods.month) {
-        statsUpdate.thisMonthTime = durationToSync;
-        statsUpdate.lastMonthId = periods.month;
-      } else {
         statsUpdate.thisMonthTime = increment(durationToSync);
-        if (!remote?.lastMonthId) statsUpdate.lastMonthId = periods.month;
-      }
-
-      if (remote && remote.lastYearId && remote.lastYearId !== periods.year) {
-        statsUpdate.thisYearTime = durationToSync;
-        statsUpdate.lastYearId = periods.year;
-      } else {
         statsUpdate.thisYearTime = increment(durationToSync);
-        if (!remote?.lastYearId) statsUpdate.lastYearId = periods.year;
       }
 
       batch.set(userStatsRef, statsUpdate, { merge: true });

@@ -33,8 +33,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useStudyTracker } from "@/hooks/useStudyTracker"
 
 /**
- * @fileOverview Student Progress Portal v58.5.
- * FIXED: High-fidelity study duration calculations across all periods.
+ * @fileOverview Student Progress Portal v59.0.
+ * FIXED: Aligned "Today" calculation with local period IDs to match StudyTracker.
  */
 
 const formatStudyTime = (seconds: number) => {
@@ -101,7 +101,9 @@ export default function StudentDashboard() {
   useEffect(() => {
     if (!db || !user || !mounted) return;
 
-    const todayStr = new Date().toISOString().split('T')[0];
+    const d = new Date();
+    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    
     const dailyRef = doc(db, 'users', user.uid, 'study_daily', todayStr);
     const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
 
