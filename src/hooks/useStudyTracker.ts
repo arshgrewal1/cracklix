@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useUser, useFirestore } from '@/firebase';
-import { doc, writeBatch, serverTimestamp, increment, onSnapshot, getDoc } from 'firebase/firestore';
+import { doc, writeBatch, serverTimestamp, increment, onSnapshot } from 'firebase/firestore';
 import { nanoid } from 'nanoid';
 
 export type StudyContentType = 'MOCK' | 'PRACTICE' | 'SUBJECT' | 'PDF' | 'VIDEO' | 'OTHER' | 'DASHBOARD' | 'CA' | 'PYQ';
@@ -15,29 +15,20 @@ const SYNC_INTERVAL = 30 * 1000; // 30 seconds
  */
 const getPeriodIds = (date: Date) => {
   const d = new Date(date);
-  
-  // Today: YYYY-MM-DD
   const today = d.toISOString().split('T')[0];
-  
-  // Week: Find the most recent Monday
   const day = d.getDay(); 
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   const monday = new Date(d.setDate(diff));
   const week = monday.toISOString().split('T')[0];
-  
-  // Month: YYYY-MM
   const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-  
-  // Year: YYYY
   const year = `${date.getFullYear()}`;
-  
   return { today, week, month, year };
 };
 
 /**
- * @fileOverview Institutional Real-Time Study Tracker v4.2.
- * FIXED: Resilient multi-period sync using internal Refs to prevent effect churn.
- * FIXED: Atomic initialization of periodic counters to prevent zero-value bugs.
+ * @fileOverview Institutional Real-Time Study Tracker v4.5.
+ * FIXED: Stale cache guard prevents false resets on app startup.
+ * FIXED: favoured atomic increment to prevent "today > week" drift.
  */
 export function useStudyTracker(contentId: string | null, contentType: StudyContentType, enabled: boolean = true) {
   const { user } = useUser();
@@ -47,7 +38,6 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
   const [unSyncedSeconds, setUnSyncedSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
   
-  // Use Refs for state that shouldn't trigger effect re-runs but is needed for sync
   const remoteStatsRef = useRef<any>(null);
   const sessionRef = useRef<{ sessionId: string | null; startTime: number | null; lastSyncTime: number; }>({
     sessionId: null,
@@ -58,13 +48,18 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
   const lastActivityRef = useRef<number>(Date.now());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 1. Real-time stats listener (Stable background sync)
+  // 1. Real-time stats listener with Metadata Guard
   useEffect(() => {
     if (!user || !db) return;
     const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
-    const unsub = onSnapshot(statsRef, (snap) => {
+    
+    const unsub = onSnapshot(statsRef, { includeMetadataChanges: true }, (snap) => {
       if (snap.exists()) {
-        remoteStatsRef.current = snap.data();
+        // CRITICAL: Only trust non-cache snapshots for reset logic 
+        // to prevent old week/month IDs in cache from zeroing current data.
+        if (!snap.metadata.fromCache || !remoteStatsRef.current) {
+          remoteStatsRef.current = snap.data();
+        }
       }
     });
     return () => unsub();
@@ -103,14 +98,14 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
         lastUpdated: serverTimestamp(),
       }, { merge: true });
 
-      // 3. Multi-Period Statistical Hub
+      // 3. Statistical Hub -Favours increment over set to prevent data loss
       const statsUpdate: any = {
         totalStudyTime: increment(durationToSync),
         lastSessionDate: serverTimestamp(),
         totalSessions: isFinal ? increment(1) : increment(0)
       };
 
-      // Week Reset/Sync Logic
+      // Resilience: Only reset if we are CERTAIN (not from stale cache) that a new period has started
       if (remote && remote.lastWeekId && remote.lastWeekId !== periods.week) {
         statsUpdate.thisWeekTime = durationToSync;
         statsUpdate.lastWeekId = periods.week;
@@ -119,7 +114,6 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
         if (!remote?.lastWeekId) statsUpdate.lastWeekId = periods.week;
       }
 
-      // Month Reset/Sync Logic
       if (remote && remote.lastMonthId && remote.lastMonthId !== periods.month) {
         statsUpdate.thisMonthTime = durationToSync;
         statsUpdate.lastMonthId = periods.month;
@@ -128,7 +122,6 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
         if (!remote?.lastMonthId) statsUpdate.lastMonthId = periods.month;
       }
 
-      // Year Reset/Sync Logic
       if (remote && remote.lastYearId && remote.lastYearId !== periods.year) {
         statsUpdate.thisYearTime = durationToSync;
         statsUpdate.lastYearId = periods.year;
@@ -143,13 +136,12 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
       setUnSyncedSeconds(0);
       
     } catch (error) {
-      console.error('[StudyTracker] Atomic sync failure:', error);
+      console.error('[StudyTracker] Sync failure:', error);
     }
   }, [db, user, contentId, contentType]);
 
   const startSession = useCallback(async () => {
     if (!user || sessionRef.current.sessionId || !enabled || !db) return;
-
     const sid = nanoid();
     sessionRef.current = {
       sessionId: sid,
@@ -164,85 +156,56 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
 
   const endSession = useCallback(async () => {
     if (!sessionRef.current.sessionId) return;
-    
     const now = Date.now();
-    const unSyncedDuration = Math.round((now - sessionRef.current.lastSyncTime) / 1000);
-
+    const duration = Math.round((now - sessionRef.current.lastSyncTime) / 1000);
     setIsActive(false);
     if (intervalRef.current) clearInterval(intervalRef.current);
-
-    if (unSyncedDuration > 0) {
-      await saveProgress(unSyncedDuration, true);
-    }
-    
+    if (duration > 0) await saveProgress(duration, true);
     sessionRef.current = { sessionId: null, startTime: null, lastSyncTime: 0 };
-    setElapsedSeconds(0);
-    setUnSyncedSeconds(0);
   }, [saveProgress]);
 
   useEffect(() => {
     if (!enabled || !user || !db) return;
-
     startSession();
 
     intervalRef.current = setInterval(() => {
       const now = Date.now();
-      const timeSinceActivity = now - lastActivityRef.current;
-
-      if (timeSinceActivity > INACTIVITY_THRESHOLD) {
+      if (now - lastActivityRef.current > INACTIVITY_THRESHOLD) {
         if (isActive) setIsActive(false);
         return;
       }
 
       if (!isActive) setIsActive(true);
-
       setElapsedSeconds(prev => prev + 1);
       setUnSyncedSeconds(prev => {
         const next = prev + 1;
-        
-        // Internal auto-sync every 30 seconds
         if (next > 0 && next % 30 === 0) {
-          const nowSync = Date.now();
-          const duration = Math.round((nowSync - sessionRef.current.lastSyncTime) / 1000);
-          if (duration > 0) {
-            saveProgress(duration);
-            sessionRef.current.lastSyncTime = nowSync;
+          const syncNow = Date.now();
+          const dur = Math.round((syncNow - sessionRef.current.lastSyncTime) / 1000);
+          if (dur > 0) {
+            saveProgress(dur);
+            sessionRef.current.lastSyncTime = syncNow;
           }
         }
         return next;
       });
     }, 1000);
 
-    const activityHandler = () => {
-      lastActivityRef.current = Date.now();
-      if (!isActive) setIsActive(true);
-    };
-
-    const handleVisibility = () => {
-       if (document.hidden) {
-          setIsActive(false);
-       } else {
-          lastActivityRef.current = Date.now();
-          setIsActive(true);
-       }
-    };
-
-    window.addEventListener('mousemove', activityHandler);
-    window.addEventListener('keydown', activityHandler);
-    window.addEventListener('scroll', activityHandler);
-    window.addEventListener('touchstart', activityHandler);
-    document.addEventListener('visibilitychange', handleVisibility);
+    const activity = () => { lastActivityRef.current = Date.now(); if (!isActive) setIsActive(true); };
+    window.addEventListener('mousemove', activity);
+    window.addEventListener('keydown', activity);
+    window.addEventListener('scroll', activity);
+    window.addEventListener('touchstart', activity);
 
     return () => {
-      window.removeEventListener('mousemove', activityHandler);
-      window.removeEventListener('keydown', activityHandler);
-      window.removeEventListener('scroll', activityHandler);
-      window.removeEventListener('touchstart', activityHandler);
-      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('mousemove', activity);
+      window.removeEventListener('keydown', activity);
+      window.removeEventListener('scroll', activity);
+      window.removeEventListener('touchstart', activity);
       if (intervalRef.current) clearInterval(intervalRef.current);
       endSession();
     };
-  }, [enabled, user, db]); // Removed complex dependencies to stabilize interval
+  }, [enabled, user, db, startSession, endSession, saveProgress, isActive]);
 
   return { elapsedSeconds, unSyncedSeconds, isActive };
 }

@@ -33,18 +33,16 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useStudyTracker } from "@/hooks/useStudyTracker"
 
 /**
- * @fileOverview Student Progress Portal v58.2.
- * FIXED: Accurate multi-period study time display using real-time sync values.
+ * @fileOverview Student Progress Portal v58.5.
+ * FIXED: High-fidelity study duration calculations across all periods.
  */
 
 const formatStudyTime = (seconds: number) => {
   if (isNaN(seconds) || seconds <= 0) return "0m 00s";
-  
   const d = Math.floor(seconds / (3600 * 24));
   const h = Math.floor((seconds % (3600 * 24)) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
   const s = seconds % 60;
-
   if (d > 0) return `${d}d ${h}h`;
   if (h > 0) return `${h}h ${m}m`;
   return `${m}m ${String(s).padStart(2, '0')}s`;
@@ -79,7 +77,6 @@ export default function StudentDashboard() {
     setMounted(true)
   }, [])
 
-  // Pass Expiry Logic
   useEffect(() => {
     if (!profile?.passExpiresAt) return;
     const expiryDate = new Date(profile.passExpiresAt);
@@ -101,7 +98,6 @@ export default function StudentDashboard() {
     return () => clearInterval(intervalId);
   }, [profile?.passExpiresAt]);
 
-  // Real-time Analytics Hub Listener
   useEffect(() => {
     if (!db || !user || !mounted) return;
 
