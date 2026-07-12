@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { 
   DollarSign, 
   TrendingUp, 
@@ -24,7 +25,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Revenue Governance Dashboard v1.0.
+ * @fileOverview Official Revenue Governance Dashboard v1.1.
+ * FIXED: Missing Button import and removed uppercase styling.
  */
 
 export default function RevenueDashboard() {
@@ -136,7 +138,7 @@ export default function RevenueDashboard() {
                   <AuditPill label="System Errors" count="0" color="bg-blue-500" />
                </div>
                <div className="pt-10 border-t border-white/5">
-                  <Button className="w-full h-14 bg-primary hover:bg-blue-700 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none">
+                  <Button className="w-full h-14 bg-primary hover:bg-blue-700 text-white rounded-2xl font-black text-[10px] shadow-xl border-none">
                      Generate CSV Ledger <ChevronRight className="h-4 w-4 ml-2" />
                   </Button>
                </div>
