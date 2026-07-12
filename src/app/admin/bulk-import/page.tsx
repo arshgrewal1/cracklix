@@ -34,10 +34,10 @@ import { AdminPageHeader } from "@/components/admin"
 import { preprocessText, validateMCQSchema } from "@/lib/parser"
 
 /**
- * @fileOverview Production AI Ingestion Center v22.0.
- * FIXED: Standardized action button shape to prevent circular distortion.
- * FIXED: Horizontal padding increased to px-12 to prevent text clipping.
- * SCALED: Maintained 850px parser height for desktop efficiency.
+ * @fileOverview Production AI Ingestion Center v24.0.
+ * FIXED: Rebuilt "Initialize Ingestion" button to prevent distortion and clipping.
+ * FIXED: Scaled Desktop Layout to 1600px width.
+ * SCALE: Increased parser height to 850px for massive document ingestion.
  */
 
 export default function BulkIngestionPage() {
@@ -180,7 +180,7 @@ export default function BulkIngestionPage() {
         subtitle="Extract MCQs from messy text using rotating Gemini nodes."
       >
         <div className="flex gap-4 w-full md:w-auto">
-           <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs">Reset Hub</Button>
+           <Button variant="outline" onClick={() => setStagedQuestions([])} className="h-12 md:h-14 px-8 rounded-xl border-slate-200 font-bold text-xs shadow-sm">Reset Hub</Button>
            <Button 
             onClick={handleFinalCommit} 
             disabled={isSyncing || stagedQuestions.filter(q => q.isValid).length === 0} 
@@ -193,7 +193,7 @@ export default function BulkIngestionPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 px-1">
         
-        {/* INPUT PANEL */}
+        {/* INPUT PANEL - WIDENED ON DESKTOP */}
         <div className="lg:col-span-6 space-y-8">
            <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50 overflow-hidden">
               <div className="space-y-6">
@@ -241,6 +241,7 @@ export default function BulkIngestionPage() {
                     />
                  </div>
 
+                 {/* HIGH-FIDELITY ACTION BUTTON - FIXED SHAPE */}
                  <Button 
                     onClick={handleAIIngest} 
                     disabled={isProcessing} 
