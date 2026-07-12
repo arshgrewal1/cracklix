@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo } from "react"
@@ -69,7 +68,6 @@ export default function BulkIngestionPage() {
   const [stagedQuestions, setStagedQuestions] = useState<any[]>([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [isSyncing, setIsSyncing] = useState(false)
-  const [parserMode, setParserMode] = useState<ParserMode>("PRODUCTION")
 
   const handleLocalParse = () => {
     if (!rawText.trim()) return
@@ -81,14 +79,14 @@ export default function BulkIngestionPage() {
     setIsProcessing(true)
     try {
       const sanitizedText = preprocessText(rawText);
-      const result = parseBulkQuestions(sanitizedText, metadata, parserMode);
+      const result = parseBulkQuestions(sanitizedText, metadata);
 
       if (!result?.questions || result.questions.length === 0) {
          throw new Error("No questions detected. Ensure each question block starts with Q1, Q2, etc.");
       }
 
       const validated = result.questions.map(q => {
-         const { errors, warnings } = validateMCQSchema(q, parserMode);
+         const { errors, warnings } = validateMCQSchema(q);
          return {
             ...q,
             isValid: errors.length === 0,
@@ -218,17 +216,6 @@ export default function BulkIngestionPage() {
                     </div>
                  </div>
 
-                 <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <div className="space-y-0.5">
-                       <p className="text-[10px] font-black uppercase text-slate-500">Strict script validation</p>
-                       <p className="text-[8px] font-bold text-slate-400 uppercase">Reject on OCR noise</p>
-                    </div>
-                    <Switch 
-                       checked={parserMode === 'STRICT'} 
-                       onCheckedChange={checked => setParserMode(checked ? 'STRICT' : 'PRODUCTION')} 
-                    />
-                 </div>
-
                  <div className="space-y-3">
                     <Label className="text-[9px] font-black uppercase text-slate-400 ml-1 flex items-center gap-2"><Globe className="h-3.5 w-3.5" /> Language Hub</Label>
                     <div className="flex overflow-x-auto no-scrollbar pb-2 gap-3 snap-x snap-mandatory">
@@ -259,7 +246,7 @@ export default function BulkIngestionPage() {
                     <div className="flex items-center justify-between px-1">
                        <Label className="text-[10px] font-black uppercase text-slate-400">Raw Document Stream</Label>
                        <Badge variant="outline" className="bg-slate-50 text-[8px] border-slate-200">
-                          {parserMode === 'PRODUCTION' ? 'Production Mode Active' : 'Strict Audit Active'}
+                          Resilient Ingestion Active
                        </Badge>
                     </div>
                     <Textarea 
