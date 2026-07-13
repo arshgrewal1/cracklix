@@ -1,110 +1,106 @@
-"use client"
+
+'use client';
 
 import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
-import { Layers, ChevronRight } from 'lucide-react';
+import { useCollection, useFirestore } from '@/firebase';
+import { collection, query, orderBy } from 'firebase/firestore';
+import { Layers, ChevronRight, BookOpen, Zap } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useCollection, useFirestore } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
-import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Featured Categories Hub v33.1.
- * UPDATED: Reduced padding and normalized typography.
+ * @fileOverview Filtered Institutional Categories Hub v40.0.
  */
 
-const STRICT_WHITELIST = [
+const TARGET_IDS = [
   "punjab-government-exams",
   "punjab-teaching-exams",
-  "punjab-technical-exams",
-  "banking-exams",
-  "judiciary-exams",
-  "central-government-exams"
+  "punjab-police-exams",
+  "banking-exams"
 ];
 
 export default function FeaturedCategories() {
   const db = useFirestore();
   
-  const { data: rawCategories, loading: catLoading } = useCollection<any>(useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]));
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
+  const { data: rawCategories, loading } = useCollection<any>(
+    useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db])
+  );
 
   const categories = useMemo(() => {
-     if (!rawCategories) return [];
-     return rawCategories.filter(c => STRICT_WHITELIST.includes(c.id));
+    if (!rawCategories) return [];
+    // Show target IDs first, then sort by display order
+    return rawCategories.filter(c => TARGET_IDS.includes(c.id)).slice(0, 4);
   }, [rawCategories]);
 
   return (
-    <section className="py-6 md:py-10 bg-white border-t border-slate-50">
-      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto space-y-6 md:space-y-10">
+    <section className="py-10 md:py-16 bg-slate-50/50 border-t border-slate-100">
+      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
-        <div className="space-y-1 text-left px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-3 md:gap-4">
-             <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
-               <Layers className="h-4 w-4 md:h-5 md:w-5" />
+        <div className="flex items-center justify-between px-1">
+          <div className="flex items-center gap-4">
+             <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
+               <Layers className="h-5 w-5 md:h-6 md:w-6" />
              </div>
-             <h2 className="text-[22px] md:text-[28px] font-bold tracking-tight text-[#0F172A]">Choose exam</h2>
+             <div className="text-left">
+                <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Quick Categories</h2>
+                <p className="text-[11px] md:text-sm font-medium text-slate-500">Find tests by your target recruitment vertical.</p>
+             </div>
           </div>
-          <p className="max-w-2xl text-sm md:text-base font-medium text-slate-500">Select an exam category to start your journey.</p>
+          <Link href="/exams" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline">
+            View All <ChevronRight className="h-4 w-4" />
+          </Link>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 px-1.5 sm:px-6 lg:px-8">
-          {catLoading ? (
-            Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton 
-                key={i} 
-                className="h-[180px] md:h-[280px] w-full mx-auto rounded-[1.25rem] md:rounded-[2.5rem] bg-slate-50" 
-              />
-            ))
-          ) : categories.map((cat, idx) => {
-            const catBoards = boards?.filter(b => b.categoryId === cat.id) || [];
-            const boardLabel = catBoards.length > 0 ? catBoards[0].abbreviation : "Official";
-            
-            return (
-              <motion.div 
-                key={cat.id} 
-                initial={{ opacity: 0, y: 10 }} 
-                whileInView={{ opacity: 1, y: 0 }} 
-                viewport={{ once: true }} 
-                transition={{ duration: 0.3, delay: idx * 0.05 }}
-                className="flex flex-col h-full"
-              >
-                 <Link href={`/exams/category/${cat.id}`} className="h-full block">
-                    <Card className="w-full mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] md:rounded-[2.5rem] bg-white group overflow-hidden flex flex-col p-4 md:p-8 h-full text-center">
-                       
-                       <div className="flex justify-center mb-4 md:mb-8 shrink-0">
-                          <AuthorityLogo category={cat} size="md" className="shadow-md" />
-                       </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+          {loading ? (
+             Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-[2rem] bg-white border border-slate-100" />)
+          ) : categories.map((cat, idx) => (
+             <motion.div 
+               key={cat.id}
+               initial={{ opacity: 0, y: 15 }}
+               whileInView={{ opacity: 1, y: 0 }}
+               viewport={{ once: true }}
+               transition={{ delay: idx * 0.05 }}
+             >
+                <Link href={`/exams/category/${cat.id}`}>
+                  <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-10 flex flex-col group h-full relative overflow-hidden">
+                     <div className="flex justify-between items-start mb-8">
+                        <AuthorityLogo category={cat} size="md" className="shadow-inner bg-slate-50" />
+                        <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all">
+                           <ChevronRight className="h-5 w-5" />
+                        </div>
+                     </div>
 
-                       <div className="flex-1 flex flex-col justify-center min-w-0">
-                          <div className="space-y-1.5 md:space-y-3">
-                             <div className="flex justify-center h-4 md:h-5">
-                                <Badge className="bg-primary/5 text-primary border-none font-bold text-[9px] md:text-[10px] px-2 py-0.5 rounded-full shadow-sm w-fit tracking-tight">
-                                   {boardLabel} hub
-                                </Badge>
-                             </div>
-                             <h3 className="text-sm md:text-xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
-                                {cat.title}
-                             </h3>
-                          </div>
-                       </div>
-
-                       <div className="mt-auto shrink-0 pt-3 md:pt-8">
-                          <Button variant="ghost" className="w-full h-10 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-bold text-[11px] md:text-xs tracking-wide border-none active:scale-95 gap-2">
-                             Open
-                             <ChevronRight className="h-4 w-4" />
-                          </Button>
-                       </div>
-                    </Card>
-                 </Link>
-              </motion.div>
-            )
-          })}
+                     <div className="flex-1 space-y-4">
+                        <h3 className="text-lg md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight">
+                           {cat.title}
+                        </h3>
+                        
+                        <div className="flex flex-wrap gap-2">
+                           <MiniBadge icon={Zap} label="Tests" color="text-blue-600 bg-blue-50" />
+                           <MiniBadge icon={BookOpen} label="Notes" color="text-indigo-600 bg-indigo-50" />
+                        </div>
+                     </div>
+                  </Card>
+                </Link>
+             </motion.div>
+          ))}
         </div>
       </div>
     </section>
   );
+}
+
+function MiniBadge({ icon: Icon, label, color }: any) {
+   return (
+      <div className={cn("px-2.5 py-1 rounded-lg flex items-center gap-1.5 font-bold text-[9px] uppercase tracking-tight", color)}>
+         <Icon className="h-3 w-3" />
+         {label}
+      </div>
+   )
 }

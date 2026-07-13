@@ -14,8 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Production Mobile Bottom Navigation v1.8.
- * UPDATED: Optimized for safe-area insets to prevent overlap with gesture indicators.
+ * Premium Mobile Bottom Navigation v2.0.
  */
 
 export default function MobileNav() {
@@ -30,41 +29,20 @@ export default function MobileNav() {
   }
 
   const navItems = [
-    {
-      label: "Home",
-      href: "/",
-      icon: Home,
-    },
-    {
-      label: "My Exams",
-      href: "/my-exams",
-      icon: Target,
-    },
-    {
-      label: "Practice",
-      href: "/mocks",
-      icon: Zap,
-    },
-    {
-      label: "Progress",
-      href: "/dashboard",
-      icon: BarChart3,
-    },
-    {
-      label: "Pass",
-      href: "/pass",
-      icon: Gem,
-    },
+    { label: "Home", href: "/", icon: Home },
+    { label: "Exams", href: "/exams", icon: Target },
+    { label: "Practice", href: "/mocks", icon: Zap },
+    { label: "Dash", href: "/dashboard", icon: BarChart3 },
+    { label: "Pro", href: "/pass", icon: Gem },
   ];
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[1000] border-t border-slate-100 bg-white/95 backdrop-blur-md shadow-[0_-4px_25px_rgba(0,0,0,0.03)] md:hidden">
-      <div className="flex h-[64px] items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
+      <div className="flex h-[68px] items-center justify-around px-4 pb-[env(safe-area-inset-bottom)] relative">
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
-            (item.href !== "/" &&
-              pathname.startsWith(item.href));
+            (item.href !== "/" && pathname.startsWith(item.href));
 
           const Icon = item.icon;
 
@@ -72,38 +50,41 @@ export default function MobileNav() {
             <Link
               key={item.href}
               href={item.href}
-              className="flex flex-1 flex-col items-center justify-center h-full"
+              className="flex flex-1 flex-col items-center justify-center h-full relative"
             >
               <div
                 className={cn(
-                  "flex flex-col items-center justify-center rounded-2xl transition-all duration-300",
-                  isActive
-                    ? "h-[46px] w-[58px] bg-primary text-white shadow-md shadow-primary/10"
-                    : "h-[46px] w-[58px] text-slate-400"
+                  "flex flex-col items-center justify-center transition-all duration-300",
+                  isActive ? "text-primary" : "text-slate-400"
                 )}
               >
-                <Icon
-                  className="h-[18px] w-[18px]"
-                  fill={isActive ? "currentColor" : "none"}
-                />
+                <div className={cn(
+                   "p-2 rounded-xl transition-all duration-500",
+                   isActive ? "bg-primary/10 shadow-inner" : ""
+                )}>
+                   <Icon
+                     className={cn("h-[20px] w-[20px]", isActive ? "stroke-[3px]" : "stroke-[2px]")}
+                     fill={isActive ? "currentColor" : "none"}
+                   />
+                </div>
 
                 <span
                   className={cn(
-                    "mt-0.5 text-[9px] font-bold tracking-tight",
-                    isActive
-                      ? "text-white"
-                      : "text-slate-400"
+                    "mt-1 text-[9px] font-black tracking-widest uppercase",
+                    isActive ? "text-primary" : "text-slate-400"
                   )}
                 >
                   {item.label}
                 </span>
+
+                {isActive && (
+                   <div className="absolute -top-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
+                )}
               </div>
             </Link>
           );
         })}
       </div>
-      {/* Dynamic Spacer for iOS Gesture Bar */}
-      <div className="h-[env(safe-area-inset-bottom)] bg-white/95" />
     </nav>
   );
 }

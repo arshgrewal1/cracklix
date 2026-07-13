@@ -1,61 +1,79 @@
+'use client';
+
 import React from "react";
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/home/Hero";
+import QuickActions from "@/components/home/QuickActions";
 import FeaturedCategories from "@/components/home/FeaturedCategories";
 import PopularExams from "@/components/home/PopularExams";
 import LatestMocks from "@/components/home/LatestMocks";
 import ContinueLearning from "@/components/home/ContinueLearning";
 import CurrentAffairsPreview from "@/components/home/CurrentAffairsPreview";
 import MeritPreview from "@/components/home/MeritPreview";
-import MeetFounder from "@/components/home/MeetFounder";
 import Footer from "@/components/layout/Footer";
 import GlobalSearch from "@/components/home/GlobalSearch";
-import StatsBar from "@/components/home/StatsBar";
+import LatestVacancy from "@/components/home/LatestVacancy";
+import FAQPage from "@/app/faq/page";
+import { useUser } from "@/firebase";
+import { Zap } from "lucide-react";
 
 /**
- * @fileOverview Official Home Page v205.1.
- * RESPONSIVE: Optimized for ultra-widescreen while maintaining mobile integrity.
+ * @fileOverview Institutional Premium Hub v405.0.
+ * FIXED: Resolved Module Not Found for LatestVacancy.
  */
 export default function HomePage() {
+  const { user } = useUser();
+
   return (
     <main className="min-h-screen bg-white font-body pb-safe text-left overflow-x-hidden">
       <Navbar />
       
-      {/* 1. Hero Section */}
-      <div className="w-full">
-        <Hero />
-      </div>
+      {/* 1. COMPACT HERO */}
+      <Hero />
 
-      {/* 2. Live Metrics Hub */}
-      <div className="w-full">
-        <StatsBar />
-      </div>
-
-      {/* 3. Global Search Hook */}
-      <div className="relative z-40 py-10 md:py-24 bg-white">
+      {/* 2. STICKY SEARCH & ACTIONS */}
+      <div className="relative z-40 bg-white">
         <GlobalSearch />
+        <QuickActions />
       </div>
 
-      {/* 4. Choose Your Exam */}
+      {/* 3. DYNAMIC PROGRESS NODES */}
+      {user && <ContinueLearning />}
+
+      {/* 4. TODAY'S CHALLENGE HUB */}
+      <section className="py-6 md:py-10 bg-white">
+         <div className="max-w-7xl mx-auto px-4 md:px-8">
+            <div className="bg-[#0B1528] rounded-[2rem] md:rounded-[3rem] p-8 flex flex-col md:flex-row items-center justify-between gap-8 text-white relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-8 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000">
+                  <Zap className="h-48 w-48 text-primary" />
+               </div>
+               <div className="relative z-10 space-y-2 text-left">
+                  <h2 className="text-xl md:text-3xl font-black tracking-tight">Today&apos;s Challenge</h2>
+                  <p className="text-slate-400 font-medium text-sm md:text-lg">Quick 5-minute quiz to keep your streak active.</p>
+               </div>
+               <button className="relative z-10 h-14 px-10 bg-primary hover:bg-blue-700 text-white font-bold rounded-xl shadow-xl transition-all active:scale-95 border-none">
+                  Start Quiz
+               </button>
+            </div>
+         </div>
+      </section>
+
+      {/* 5. VACANCY HUB */}
+      <LatestVacancy />
+
+      {/* 6. REGISTRY DISCOVERY */}
       <FeaturedCategories />
-
-      {/* 5. Popular Exams */}
       <PopularExams />
-
-      {/* 6. Latest Mock Tests */}
       <LatestMocks />
 
-      {/* 7. Personal Progress */}
-      <ContinueLearning />
-
-      {/* 8. Study Material */}
+      {/* 7. ASSET PREVIEWS */}
       <CurrentAffairsPreview />
-
-      {/* 9. Merit Rankings */}
       <MeritPreview />
 
-      {/* 10. Founder Section */}
-      <MeetFounder />
+      {/* 8. FAQ HUB */}
+      <div className="bg-slate-50/50">
+        <FAQPage />
+      </div>
       
       <Footer />
     </main>

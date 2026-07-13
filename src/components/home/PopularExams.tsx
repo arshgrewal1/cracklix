@@ -1,97 +1,106 @@
+
 'use client';
 
-import React from "react"
-import { motion } from "framer-motion"
+import React, { useMemo } from "react";
+import { motion } from "framer-motion";
 import { 
   ChevronRight, 
-  Target
+  Target, 
+  BookOpen, 
+  Zap, 
+  Bookmark, 
+  Lock,
+  Star
 } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { AuthorityLogo } from "@/lib/exam-icons";
 import { Button } from "@/components/ui/button";
+import { useCollection, useFirestore, useUser } from "@/firebase";
+import { collection, query, where, limit } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Popular Exams Hub v27.2 (Typography Refined).
- * UPDATED: Removed uppercase from titles and buttons.
+ * @fileOverview Popular Exams Registry Hub v40.0.
  */
 
-const POPULAR_LIST = [
-  { name: "PCS Hub", id: "pcs", boardId: "PPSC", hasMocks: true },
-  { name: "Constable", id: "constable", boardId: "Punjab Police", hasMocks: true },
-  { name: "Patwari Hub", id: "patwari", boardId: "PSSSB", hasMocks: true },
-  { name: "Clerk Hub", id: "clerk", boardId: "PSSSB", hasMocks: true },
-  { name: "PSTET Paper 1", id: "pstet-paper-1", boardId: "PSTET", hasMocks: true },
-  { name: "ALM Tech", id: "alm", boardId: "PSPCL", hasMocks: true }
-];
-
 export default function PopularExams() {
+  const db = useFirestore();
+  const { profile } = useUser();
+  
+  const examsQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, "exams"), where("isTrending", "==", true), limit(4));
+  }, [db]);
+
+  const { data: exams, loading } = useCollection<any>(examsQuery);
+  const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]));
+
   return (
-    <section className="py-8 md:py-12 bg-slate-50/50 border-t border-slate-100 px-1">
-      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto space-y-8 md:space-y-12">
+    <section className="py-10 md:py-20 bg-white">
+      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
          
-         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 text-left px-4 sm:px-6 lg:px-8">
-            <div className="space-y-2">
-               <div className="flex items-center gap-3 md:gap-4">
-                  <div className="h-8 w-8 md:h-10 md:w-10 rounded-xl bg-blue-50 flex items-center justify-center text-primary shadow-inner shrink-0">
-                    <Target className="h-4 w-4 md:h-5 md:w-5" />
-                  </div>
-                  <h2 className="text-[clamp(24px,3vw,30px)] font-bold tracking-tight text-[#0F172A]">Popular Exams</h2>
+         <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-4">
+               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary shadow-inner shrink-0">
+                 <Target className="h-5 w-5 md:h-6 md:w-6" />
                </div>
-               <p className="max-w-2xl text-[clamp(13px,1.2vw,16px)] font-medium text-slate-500">Start your study with our most popular exam groups.</p>
+               <div className="text-left">
+                  <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Popular Exams</h2>
+                  <p className="text-[11px] md:text-sm font-medium text-slate-500">Official preparation hubs for the most competitive recruitments.</p>
+               </div>
             </div>
-            <Link href="/exams" className="text-primary font-bold text-[13px] md:text-base tracking-tight hover:underline flex items-center gap-2 group shrink-0">
-               View All <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+            <Link href="/exams" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline">
+              View All <ChevronRight className="h-4 w-4" />
             </Link>
          </div>
 
-         <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-6 px-0 sm:px-6 lg:px-8">
-            {POPULAR_LIST.slice(0, 4).map((p, idx) => (
-               <motion.div 
-                 key={p.id} 
-                 initial={{ opacity: 0, scale: 0.98 }} 
-                 whileInView={{ opacity: 1, scale: 1 }} 
-                 viewport={{ once: true }} 
-                 transition={{ duration: 0.4, delay: idx * 0.05 }} 
-                 className="flex flex-col h-full"
-               >
-                  <Link href={`/exams/view?id=${p.id}`} className="h-full block">
-                     <Card className="w-full mx-auto border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 rounded-[1.5rem] md:rounded-[3rem] bg-white p-4 pt-6 pb-4 md:p-10 h-full text-center flex flex-col group">
-                        
-                        <div className="flex justify-center mb-4 md:mb-10 shrink-0">
-                          <AuthorityLogo boardId={p.boardId} size="md" className="shadow-lg group-hover:scale-110 transition-transform" />
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {loading ? (
+               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[2rem] bg-slate-50" />)
+            ) : exams?.map((exam, idx) => {
+               const examMocks = mocks?.filter((m: any) => (m.examIds || []).includes(exam.id)) || [];
+               return (
+                  <motion.div 
+                    key={exam.id} 
+                    initial={{ opacity: 0, y: 15 }} 
+                    whileInView={{ opacity: 1, y: 0 }} 
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.05 }}
+                  >
+                     <Card className="border border-slate-100 shadow-lg hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] bg-white p-6 md:p-10 flex flex-col group h-full relative overflow-hidden">
+                        <div className="flex justify-between items-start mb-8">
+                           <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-md bg-slate-50" />
+                           <button className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-primary transition-all">
+                              <Bookmark className="h-5 w-5" />
+                           </button>
                         </div>
 
-                        <div className="flex-1 flex flex-col justify-center min-w-0">
-                           <div className="space-y-2 md:space-y-4">
-                              <h3 className="text-[14px] md:text-lg lg:text-xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
-                                 {p.name}
-                              </h3>
-                              <div className="flex justify-center">
-                                 <MiniChip emoji="📚" label="Tests" />
-                              </div>
+                        <div className="flex-1 space-y-4 text-left">
+                           <h3 className="text-lg md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight">
+                              {exam.name}
+                           </h3>
+                           
+                           <div className="flex flex-wrap gap-4 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
+                              <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-primary" /> {examMocks.length} Tests</span>
+                              <span className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" /> Notes</span>
                            </div>
                         </div>
 
-                        <div className="mt-auto shrink-0 pt-4 md:pt-10">
-                           <Button variant="ghost" className="w-full h-10 md:h-12 rounded-full bg-[#0F172A] text-white group-hover:bg-primary transition-all font-black text-[10px] md:text-xs tracking-widest border-none active:scale-95 gap-2">
-                              Open <ChevronRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
+                        <div className="mt-10">
+                           <Button asChild className="w-full h-12 md:h-14 rounded-xl md:rounded-2xl bg-[#0F172A] hover:bg-primary text-white font-bold text-[11px] tracking-widest uppercase border-none active:scale-95 gap-2">
+                              <Link href={`/exams/view?id=${exam.id}`}>
+                                 Attempt Hub <ChevronRight className="h-4 w-4" />
+                              </Link>
                            </Button>
                         </div>
                      </Card>
-                  </Link>
-               </motion.div>
-            ))}
+                  </motion.div>
+               )
+            })}
          </div>
       </div>
     </section>
   );
-}
-
-function MiniChip({ emoji, label }: { emoji: string, label: string }) {
-   return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 border border-slate-100 text-[9px] font-bold text-slate-400 tracking-tight uppercase">
-         <span>{emoji}</span> {label}
-      </span>
-   )
 }
