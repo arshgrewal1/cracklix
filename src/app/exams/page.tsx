@@ -41,7 +41,6 @@ import Logo from "@/components/brand/Logo"
 
 /**
  * @fileOverview Premium Exam Selection Hub v300.1.
- * UPDATED: Removed redundant logo in body and optimized header spacing.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -254,7 +253,7 @@ export default function ExamsEntryPage() {
               >
                 <Card className="border border-slate-100 shadow-xl rounded-[30px] bg-white p-6 md:p-8 flex flex-col group h-full relative overflow-hidden hover:-translate-y-2 transition-all duration-500">
                   <div className="flex justify-between items-start mb-6">
-                    <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-lg bg-slate-50" />
+                    <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-lg" />
                     <div className="flex flex-col items-end gap-1">
                       <div className="flex items-center gap-1 text-amber-400">
                         <Star className="h-4 w-4 fill-current" />
@@ -312,7 +311,7 @@ export default function ExamsEntryPage() {
                     <Link href={`/exams/category/${cat.id}`}>
                        <Card className="border border-[#E5E7EB] shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[24px] md:rounded-[32px] bg-white group overflow-hidden h-full flex flex-col p-6 md:p-10 relative">
                           <div className="flex justify-between items-start mb-8 md:mb-12">
-                             <div className="h-12 w-12 md:h-16 md:w-16 bg-gradient-to-br from-[#2563EB] to-[#60A5FA] rounded-2xl flex items-center justify-center text-white shadow-xl group-hover:rotate-6 transition-transform">
+                             <div className="h-12 w-12 md:h-16 md:w-16 bg-gradient-to-br from-[#2563EB] to-[#60A5FA] rounded-full flex items-center justify-center text-white shadow-xl group-hover:rotate-6 transition-transform">
                                 <AuthorityLogo category={cat} size="sm" className="bg-transparent shadow-none p-0" />
                              </div>
                              <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all">

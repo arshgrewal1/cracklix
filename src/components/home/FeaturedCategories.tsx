@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from 'react';
@@ -70,7 +69,7 @@ export default function FeaturedCategories() {
                 <Link href={`/exams/category/${cat.id}`}>
                   <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] bg-white p-6 md:p-10 flex flex-col group h-full relative overflow-hidden">
                      <div className="flex justify-between items-start mb-8">
-                        <AuthorityLogo category={cat} size="md" className="shadow-inner bg-slate-50" />
+                        <AuthorityLogo category={cat} size="md" className="shadow-xl" />
                         <div className="h-10 w-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-primary group-hover:text-white transition-all">
                            <ChevronRight className="h-5 w-5" />
                         </div>

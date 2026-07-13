@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -78,7 +77,7 @@ export default function LatestMocks() {
                 <Card className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-[2.5rem] bg-white p-8 flex flex-col group h-full relative overflow-hidden text-left">
                   
                   <div className="flex justify-between items-start mb-6">
-                    <AuthorityLogo boardId={boardId} size="md" className="shadow-sm bg-slate-50" />
+                    <AuthorityLogo boardId={boardId} size="md" className="shadow-xl" />
                     {isPremium && (
                        <Badge className="bg-amber-50 text-amber-600 border-none px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest shadow-sm flex items-center gap-1.5">
                           <Lock className="h-3 w-3" /> Premium
@@ -108,7 +107,7 @@ export default function LatestMocks() {
                       locked ? "bg-amber-500 hover:bg-amber-600" : "bg-[#0F172A] hover:bg-black"
                     )}>
                         <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`}>
-                          {locked ? 'Unlock Hub' : 'Continue'}
+                          {locked ? 'Unlock' : 'Continue'}
                           <ChevronRight className="h-4 w-4" />
                         </Link>
                     </Button>

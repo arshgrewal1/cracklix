@@ -64,10 +64,10 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     category?.logoUrl;
   
   const sizeClasses = {
-    sm: "h-10 w-10 md:h-12 md:w-12",
-    md: "h-14 w-14 md:h-20 md:w-20",
-    lg: "h-20 w-20 md:h-28 md:w-28",
-    xl: "h-24 w-24 md:h-36 md:w-32"
+    sm: "h-11 w-11 md:h-14 md:w-14",
+    md: "h-16 w-16 md:h-24 md:w-24",
+    lg: "h-24 w-24 md:h-32 md:w-32",
+    xl: "h-28 w-28 md:h-40 md:w-40"
   };
 
   const containerSize = sizeClasses[size];
@@ -76,8 +76,8 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   if (logoUrl) {
     return (
       <div className={cn(
-        "relative shrink-0 overflow-hidden flex items-center justify-center transition-all p-2",
-        !isTransparent && "bg-white rounded-full border border-slate-100 shadow-inner",
+        "relative shrink-0 overflow-hidden flex items-center justify-center transition-all",
+        !isTransparent && "bg-white rounded-full border border-slate-100 shadow-xl",
         containerSize, 
         className
       )}>
@@ -85,8 +85,8 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           src={logoUrl} 
           alt="Authority" 
           fill
-          sizes={size === 'sm' ? '48px' : size === 'md' ? '80px' : size === 'lg' ? '112px' : '144px'}
-          className="object-contain"
+          sizes={size === 'sm' ? '64px' : size === 'md' ? '120px' : size === 'lg' ? '160px' : '200px'}
+          className="object-contain p-0.5"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -113,7 +113,9 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
       containerSize, 
       className
     )}>
-      {getFallbackIcon()}
+      <div className="h-3/4 w-3/4">
+        {getFallbackIcon()}
+      </div>
     </div>
   );
 };
