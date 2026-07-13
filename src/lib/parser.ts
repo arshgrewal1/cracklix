@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v72.0.
- * FIXED: Assertion & Reason field-sequential interleaved order.
+ * @fileOverview Institutional Deterministic Ingestion Hub v73.0.
+ * FIXED: Assertion & Reason Option Boundary and Bilingual Duplication.
  */
 
 import { serverTimestamp } from 'firebase/firestore';
@@ -100,6 +100,10 @@ export function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', 
     { regex: /^\s*[\(]?([B])[\)\.]\s*(.*)/i, val: 'B' },
     { regex: /^\s*[\(]?([C])[\)\.]\s*(.*)/i, val: 'C' },
     { regex: /^\s*[\(]?([D])[\)\.]\s*(.*)/i, val: 'D' },
+    { regex: /^\s*([1])[\)\.]\s*(.*)/, val: 'A' },
+    { regex: /^\s*([2])[\)\.]\s*(.*)/, val: 'B' },
+    { regex: /^\s*([3])[\)\.]\s*(.*)/, val: 'C' },
+    { regex: /^\s*([4])[\)\.]\s*(.*)/, val: 'D' },
     { regex: /^\s*([①❶])\s*(.*)/, val: 'A' },
     { regex: /^\s*([②❷])\s*(.*)/, val: 'B' },
     { regex: /^\s*([③❸])\s*(.*)/, val: 'C' },
@@ -177,13 +181,13 @@ export function parseAssertionReason(fullText: string, metadata: any) {
     const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
     
     // SEQUENTIAL STATE TRANSITION LOGIC
-    if (assertEnRegex.test(trimmed)) state = 'ASSERT_EN';
+    if (isAns) state = 'ANSWER';
+    else if (isExpl) state = 'EXPL';
+    else if (optMarker && state !== 'ANSWER' && state !== 'EXPL') state = 'OPTIONS';
+    else if (assertEnRegex.test(trimmed)) state = 'ASSERT_EN';
     else if (assertPaRegex.test(trimmed)) state = 'ASSERT_PA';
     else if (reasonEnRegex.test(trimmed)) state = 'REASON_EN';
     else if (reasonPaRegex.test(trimmed)) state = 'REASON_PA';
-    else if (isAns) state = 'ANSWER';
-    else if (isExpl) state = 'EXPL';
-    else if (optMarker && (enReason || paReason)) state = 'OPTIONS';
 
     let clean = trimmed;
     if (state === 'ASSERT_EN') clean = trimmed.replace(assertEnRegex, '').trim();
@@ -191,14 +195,38 @@ export function parseAssertionReason(fullText: string, metadata: any) {
     else if (state === 'REASON_EN') clean = trimmed.replace(reasonEnRegex, '').trim();
     else if (state === 'REASON_PA') clean = trimmed.replace(reasonPaRegex, '').trim();
 
-    if (!clean && ['ASSERT_EN', 'ASSERT_PA', 'REASON_EN', 'REASON_PA'].includes(state)) continue;
-
     switch (state) {
-      case 'ASSERT_EN': enAssert += (enAssert ? '\n' : '') + clean; break;
-      case 'ASSERT_PA': paAssert += (paAssert ? '\n' : '') + clean; break;
-      case 'REASON_EN': enReason += (enReason ? '\n' : '') + clean; break;
-      case 'REASON_PA': paReason += (paReason ? '\n' : '') + clean; break;
-      case 'OPTIONS': if (optMarker) currentQ[`option${optMarker.opt}English`] = optMarker.text; break;
+      case 'ASSERT_EN': 
+        if (!optMarker) enAssert += (enAssert ? '\n' : '') + clean; 
+        break;
+      case 'ASSERT_PA': 
+        if (!optMarker) paAssert += (paAssert ? '\n' : '') + clean; 
+        break;
+      case 'REASON_EN': 
+        if (!optMarker) enReason += (enReason ? '\n' : '') + clean; 
+        break;
+      case 'REASON_PA': 
+        if (!optMarker) paReason += (paReason ? '\n' : '') + clean; 
+        break;
+      case 'OPTIONS': 
+        if (optMarker) {
+          const text = optMarker.text.trim();
+          if (!text) break;
+
+          const hasGurmukhi = GURMUKHI_REGEX.test(text);
+          const parts = text.split(/\s*[\/\u2022|]\s*/);
+
+          if (hasGurmukhi && parts.length > 1) {
+            currentQ[`option${optMarker.opt}English`] = parts[0].trim();
+            currentQ[`option${optMarker.opt}Punjabi`] = parts[1].trim();
+          } else if (hasGurmukhi) {
+            currentQ[`option${optMarker.opt}Punjabi`] = text;
+          } else {
+            currentQ[`option${optMarker.opt}English`] = text;
+            currentQ[`option${optMarker.opt}Punjabi`] = ""; // PREVENT DUPLICATION
+          }
+        } 
+        break;
       case 'ANSWER':
         const ansMatch = trimmed.match(/[A-D]/i);
         if (ansMatch) currentQ.correctAnswer = ansMatch[0].toUpperCase();
