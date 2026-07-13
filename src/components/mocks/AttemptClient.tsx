@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -29,7 +30,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v5.8 (Session Awareness Integrated).
+ * @fileOverview Official Mock Attempt Hub v5.9.
+ * UPDATED: Integrated mockType into the result payload for analytics precision.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -106,8 +108,12 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       if (!db || !mockId) return;
       try {
         const mockSnap = await getDoc(doc(db, "mocks", mockId));
-        if (!mockSnap.exists()) throw new Error("Test registry node not found.");
-        const mData = mockSnap.data();
+        const dailySnap = !mockSnap.exists() ? await getDoc(doc(db, "daily_quizzes", mockId)) : null;
+        
+        const targetSnap = mockSnap.exists() ? mockSnap : dailySnap;
+        if (!targetSnap || !targetSnap.exists()) throw new Error("Test registry node not found.");
+        
+        const mData = targetSnap.data();
         setMockData(mData);
         const tier = (mData.accessLevel || 'FREE').toUpperCase();
         if (tier === 'PREMIUM') {
@@ -137,7 +143,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
            if (attemptSnap.exists()) resumeData = attemptSnap.data();
         }
         initExam(mockId, mData.title || "Elite Series", user?.uid || null, sortedQs, mData.duration || 120, resumeData, mData.languageMode);
-        startSession(); // Start the immutable study session
+        startSession(); 
       } catch (err: any) { setInitError(err.message); } finally { setIsInitializing(false); }
     }
     loadExam();
@@ -165,7 +171,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
     const timeTaken = Math.round((Date.now() - startTime) / 1000);
     
-    // Stop and save study session
     await stopSession({
       completedQuestions: attemptedCount,
       correct: correctCount,
@@ -173,11 +178,19 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     });
 
     const resultPayload: any = {
-      mockId, mockTitle: mockData.title || mockTitle, score: parseFloat(rawScore.toFixed(2)),
-      correctCount, wrongCount, attemptedCount, totalQuestions: questions.length,
+      mockId, 
+      mockTitle: mockData.title || mockTitle, 
+      score: parseFloat(rawScore.toFixed(2)),
+      correctCount, 
+      wrongCount, 
+      attemptedCount, 
+      totalQuestions: questions.length,
       accuracy: attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0,
-      timeTaken, answers: answers || {}, timestamp: new Date().toISOString(),
-      accessLevel: (mockData.accessLevel || 'FREE').toUpperCase() 
+      timeTaken, 
+      answers: answers || {}, 
+      timestamp: new Date().toISOString(),
+      accessLevel: (mockData.accessLevel || 'FREE').toUpperCase(),
+      mockType: mockData.mockType || 'PRACTICE'
     };
     if (user) {
       resultPayload.userId = user.uid; resultPayload.userName = profile?.name || 'Aspirant';
