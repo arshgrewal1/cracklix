@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -24,7 +23,8 @@ import {
   Award,
   AlertCircle,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  ArrowRight
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -297,7 +297,7 @@ function MetricPill({ label, val, icon, color, bg, progress }: any) {
       
       <div className="space-y-0.5">
         <p className="text-xl md:text-3xl font-black text-[#0F172A] tabular-nums tracking-tighter">{val}</p>
-        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
+        <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
       </div>
 
       {progress !== undefined && (
