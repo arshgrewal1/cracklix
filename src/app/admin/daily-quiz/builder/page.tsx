@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Badge } from "@/components/ui/badge"
 import { 
   ChevronLeft, 
   ChevronRight,
@@ -106,7 +107,7 @@ function DailyQuizBuilderContent() {
   const [stagedQuestions, setStagedQuestions] = useState<Question[]>([])
 
   useEffect(() => {
-    if (!db || !isEditing || !existingQuiz || (rawBank && rawBank.length === 0)) {
+    if (!db || !isEditing || !existingMock || (rawBank && rawBank.length === 0)) {
        if (!isEditing) setIsInitializing(false);
        return;
     }
