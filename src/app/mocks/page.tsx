@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -46,7 +45,7 @@ import { motion, AnimatePresence } from "framer-motion"
 
 /**
  * @fileOverview Premium Practice Hub v2.2.
- * FIXED: Popular Categories redesigned into high-fidelity glassmorphic hub.
+ * FIXED: Search bar now fully functional and tied to state.
  */
 
 const QUICK_ACTIONS = [
@@ -93,7 +92,7 @@ export default function MockTestsPage() {
     if (!rawMocks) return []
     return rawMocks.filter(m => {
       const tier = (m.accessLevel || 'FREE').toUpperCase()
-      const matchesSearch = m.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchesSearch = !searchTerm || m.title?.toLowerCase().includes(searchTerm.toLowerCase().trim())
       const matchesBoard = selectedBoard === "all" || m.boardId === selectedBoard || (m.boardIds && m.boardIds.includes(selectedBoard))
       const matchesTier = selectedTier === "all" || tier === selectedTier
       return matchesSearch && matchesBoard && matchesTier
@@ -209,7 +208,7 @@ export default function MockTestsPage() {
            
            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-8 gap-4 md:gap-6">
               {CATEGORIES.map((cat, i) => {
-                const isMatch = searchTerm.length > 1 && cat.label.toLowerCase().includes(searchTerm.toLowerCase());
+                const isMatch = searchTerm.length >= 2 && cat.label.toLowerCase().includes(searchTerm.toLowerCase().trim());
                 const count = rawMocks?.filter((m:any) => m.title?.toLowerCase().includes(cat.label.toLowerCase())).length || 0;
                 
                 return (
@@ -224,9 +223,8 @@ export default function MockTestsPage() {
                     onClick={() => setSearchTerm(cat.label)}
                     className="relative group cursor-pointer"
                   >
-                    {/* Floating Animation Wrapper */}
                     <motion.div
-                      animate={{ y: [0, -4, 0] }}
+                      animate={isMatch ? { y: [0, -6, 0] } : { y: [0, -4, 0] }}
                       transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
                     >
                       <Card className={cn(
@@ -235,13 +233,11 @@ export default function MockTestsPage() {
                           ? "border-primary bg-primary/5 ring-4 ring-primary/10 shadow-xl" 
                           : "border-slate-100 bg-white/60 backdrop-blur-md hover:border-primary/30"
                       )}>
-                        {/* Internal Glow Node */}
                         <div className={cn(
                           "absolute -right-4 -bottom-4 w-12 h-12 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700",
                           cat.color.split(' ')[1].replace('to-', 'bg-')
                         )} />
 
-                        {/* High-Mass Gradient Icon */}
                         <div className={cn(
                           "h-10 w-10 md:h-12 md:w-12 rounded-2xl flex items-center justify-center transition-all duration-500 bg-gradient-to-br shadow-lg group-hover:rotate-6",
                           cat.color
@@ -249,7 +245,6 @@ export default function MockTestsPage() {
                           <cat.icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
                         </div>
 
-                        {/* Title & Count */}
                         <div className="text-center px-2 z-10">
                           <p className="text-[9px] md:text-[11px] font-black uppercase text-[#0F172A] tracking-tight truncate w-full">
                             {cat.label}
@@ -259,7 +254,6 @@ export default function MockTestsPage() {
                           </p>
                         </div>
 
-                        {/* Micro Progress Track */}
                         <div className="absolute bottom-0 left-0 h-1 bg-slate-50 w-full overflow-hidden">
                           <motion.div 
                             initial={{ width: 0 }}
@@ -267,13 +261,9 @@ export default function MockTestsPage() {
                             className={cn("h-full bg-gradient-to-r", cat.color)}
                           />
                         </div>
-
-                        {/* Ripple Overlay */}
-                        <div className="absolute inset-0 bg-primary/5 opacity-0 group-active:opacity-100 transition-opacity pointer-events-none" />
                       </Card>
                     </motion.div>
 
-                    {/* Active Match Pulsing Ring */}
                     {isMatch && (
                       <div className="absolute -inset-2 rounded-[28px] border-2 border-primary/20 animate-pulse pointer-events-none" />
                     )}

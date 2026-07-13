@@ -1,12 +1,12 @@
 "use client"
 
-import { useMemo, useEffect } from "react"
+import { useMemo, useEffect, useState } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, where, orderBy } from "firebase/firestore"
 import { Card, CardContent } from "@/components/ui/card"
-import { Bookmark, Search, Trash2, ChevronRight, BookOpen, ShieldCheck, Languages, Zap } from "lucide-react"
+import { Bookmark, Search, Trash2, ChevronRight, BookOpen, ShieldCheck, Languages, Zap, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -15,7 +15,7 @@ import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 
 /**
- * @fileOverview Official Bookmarks Hub (AI Cleaned).
+ * @fileOverview Official Bookmarks Hub (Search Functional).
  */
 
 export default function BookmarksPage() {
@@ -23,6 +23,7 @@ export default function BookmarksPage() {
   const router = useRouter()
   const pathname = usePathname()
   const { user, loading: authLoading } = useUser()
+  const [searchTerm, setSearchTerm] = useState("")
   
   useEffect(() => {
     if (!authLoading && !user) {
@@ -31,7 +32,17 @@ export default function BookmarksPage() {
   }, [user, authLoading, router, pathname]);
 
   const bookmarkQuery = useMemo(() => (db && user ? query(collection(db, "bookmarks"), where("userId", "==", user.uid)) : null), [db, user])
-  const { data: bookmarks, loading } = useCollection<any>(bookmarkQuery)
+  const { data: rawBookmarks, loading } = useCollection<any>(bookmarkQuery)
+
+  const bookmarks = useMemo(() => {
+    if (!rawBookmarks) return [];
+    const term = searchTerm.toLowerCase().trim();
+    return rawBookmarks.filter((b: any) => 
+       !term || 
+       b.questionText?.toLowerCase().includes(term) || 
+       b.subject?.toLowerCase().includes(term)
+    );
+  }, [rawBookmarks, searchTerm]);
 
   if (authLoading || !user) return (
     <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
@@ -59,9 +70,19 @@ export default function BookmarksPage() {
                 Review and master questions you&apos;ve bookmarked during your high-fidelity mock attempts.
               </p>
             </div>
-            <div className="relative w-full md:w-80">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-              <Input className="pl-12 h-14 rounded-2xl bg-white border-none shadow-xl shadow-slate-200/50" placeholder="Search saved questions..." />
+            <div className="relative w-full md:w-80 group">
+              <Search className={cn("absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors", searchTerm ? "text-primary" : "text-slate-400")} />
+              <Input 
+                className="pl-12 pr-10 h-14 rounded-2xl bg-white border-none shadow-xl shadow-slate-200/50 font-bold" 
+                placeholder="Search saved questions..." 
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+              />
+              {searchTerm && (
+                <button onClick={() => setSearchTerm('')} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-50 rounded-full">
+                  <X className="h-4 w-4 text-slate-400" />
+                </button>
+              )}
             </div>
           </div>
 
@@ -108,12 +129,17 @@ export default function BookmarksPage() {
               ))
             ) : (
               <div className="h-80 flex flex-col items-center justify-center text-slate-400 bg-white rounded-[3rem] border-2 border-dashed border-slate-100 shadow-inner">
-                <Bookmark className="h-16 w-16 mb-6 opacity-10" />
-                <p className="font-black font-headline text-xl text-[#0F172A]">No Bookmarks Yet</p>
-                <p className="text-sm font-bold opacity-50 mt-1 uppercase tracking-widest">Save questions during tests to revise them later.</p>
-                <Button asChild className="mt-8 bg-primary text-white rounded-xl h-11 px-8 font-black uppercase text-[10px]">
-                   <Link href="/mocks">Start Practice</Link>
-                </Button>
+                {searchTerm ? <Search className="h-16 w-16 mb-6 opacity-10" /> : <Bookmark className="h-16 w-16 mb-6 opacity-10" />}
+                <p className="font-black font-headline text-xl text-[#0F172A]">{searchTerm ? 'No Nodes Matched' : 'No Bookmarks Yet'}</p>
+                <p className="text-sm font-bold opacity-50 mt-1 uppercase tracking-widest">{searchTerm ? 'Try a different keyword' : 'Save questions during tests to revise them later.'}</p>
+                {searchTerm && (
+                   <Button onClick={() => setSearchTerm('')} variant="ghost" className="mt-4 text-primary font-black text-[10px] uppercase">Clear Search</Button>
+                )}
+                {!searchTerm && (
+                  <Button asChild className="mt-8 bg-primary text-white rounded-xl h-11 px-8 font-black uppercase text-[10px]">
+                     <Link href="/mocks">Start Practice</Link>
+                  </Button>
+                )}
               </div>
             )}
           </div>

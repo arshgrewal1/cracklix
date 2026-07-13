@@ -14,7 +14,8 @@ import {
   Loader2, 
   Calendar,
   Download,
-  Medal
+  Medal,
+  X
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,7 +27,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useActiveSession } from "@/hooks/useStudyAnalytics";
 
 /**
- * @fileOverview Official Current Affairs Center v23.3 (Session-Aware).
+ * @fileOverview Official Current Affairs Center v23.4.
+ * FIXED: Search bar state and memoized filtering restored.
  */
 
 const HUB_TYPES = [
@@ -73,9 +75,10 @@ export default function CurrentAffairsCenter() {
 
   const filteredItems = useMemo(() => {
     if (!hubItems) return []
+    const term = searchTerm.toLowerCase().trim();
     return hubItems
       .filter(item => {
-        const matchesSearch = item.title?.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesSearch = !term || item.title?.toLowerCase().includes(term)
         if (activeType === 'QUIZ') return matchesSearch && !!item.quizId
         if (activeType === 'PDF') return matchesSearch && !!item.pdfUrl
         return matchesSearch && item.type === activeType
@@ -126,14 +129,20 @@ export default function CurrentAffairsCenter() {
                         </p>
                     </div>
                     
-                    <div className="relative w-full md:w-[600px]">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-500" />
+                    <div className="relative w-full md:w-[600px] group">
+                        <div className="absolute -inset-1 bg-primary/10 rounded-[2rem] blur opacity-0 group-focus-within:opacity-100 transition-all duration-500"></div>
+                        <Search className={cn("absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 transition-colors", searchTerm ? "text-primary" : "text-slate-500")} />
                         <Input 
-                            className="h-16 md:h-20 pl-16 rounded-2xl md:rounded-[2rem] bg-white/10 border-white/10 text-white placeholder:text-slate-500 text-lg md:text-xl font-medium backdrop-blur-md shadow-2xl" 
+                            className="h-16 md:h-20 pl-16 pr-14 rounded-2xl md:rounded-[2rem] bg-white/10 border-white/10 text-white placeholder:text-slate-500 text-lg md:text-xl font-bold backdrop-blur-md shadow-2xl outline-none focus:bg-white/20" 
                             placeholder="Search archives..." 
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                         />
+                        {searchTerm && (
+                          <button onClick={() => setSearchTerm('')} className="absolute right-6 top-1/2 -translate-y-1/2 p-1.5 hover:bg-white/10 rounded-full transition-all">
+                             <X className="h-5 w-5 text-slate-400" />
+                          </button>
+                        )}
                     </div>
                   </div>
                </div>
@@ -195,8 +204,9 @@ export default function CurrentAffairsCenter() {
                            </div>
                         ) : (
                            <div className="py-32 text-center border-2 border-dashed border-slate-200 rounded-[4rem] opacity-20 flex flex-col items-center gap-6">
-                              <Zap className="h-16 w-16 text-slate-300" />
-                              <p className="font-bold text-2xl tracking-widest">Archive Empty</p>
+                              {searchTerm ? <Search className="h-16 w-16 text-slate-300" /> : <Zap className="h-16 w-16 text-slate-300" />}
+                              <p className="font-bold text-2xl tracking-widest uppercase">{searchTerm ? 'No results matched' : 'Archive Empty'}</p>
+                              {searchTerm && <Button onClick={() => setSearchTerm('')} variant="outline" className="rounded-full">Clear Search</Button>}
                            </div>
                         )}
                      </div>
@@ -245,8 +255,4 @@ export default function CurrentAffairsCenter() {
       {!authLoading && <Footer />}
     </div>
   )
-}
-
-function Skeleton({ className }: { className?: string }) {
-  return <div className={cn("animate-pulse bg-muted rounded", className)} />;
 }

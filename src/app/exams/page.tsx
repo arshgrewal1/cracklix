@@ -25,7 +25,8 @@ import {
   BarChart3,
   FileText,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  X
 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -41,6 +42,7 @@ import Logo from "@/components/brand/Logo"
 
 /**
  * @fileOverview Premium Exam Selection Hub v300.1.
+ * FIXED: Search input and dropdown functionality restored.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -75,8 +77,6 @@ export default function ExamsEntryPage() {
 
   const { data: rawCategories, loading: catLoading } = useCollection<any>(useMemo(() => (db ? query(collection(db, "categories"), orderBy("displayOrder", "asc")) : null), [db]));
   const { data: exams, loading: examsLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
-  const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]));
-  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
 
   const categories = useMemo(() => {
     if (!rawCategories) return [];
@@ -89,7 +89,7 @@ export default function ExamsEntryPage() {
   }, [exams]);
 
   const filteredExams = useMemo(() => {
-    if (!searchTerm || !exams) return [];
+    if (!searchTerm.trim() || !exams) return [];
     const term = searchTerm.toLowerCase().trim();
     return exams.filter(e => 
       e.name?.toLowerCase().includes(term) || 
@@ -169,6 +169,11 @@ export default function ExamsEntryPage() {
                 className="flex-1 bg-transparent border-none outline-none font-bold text-[#0F172A] placeholder:text-slate-300 text-sm md:text-xl"
               />
               <div className="flex items-center gap-2 border-l border-slate-100 pl-4">
+                {searchTerm && (
+                  <button onClick={() => setSearchTerm('')} className="h-10 w-10 rounded-full hover:bg-slate-100 flex items-center justify-center transition-all mr-2">
+                    <X className="h-5 w-5 text-slate-400" />
+                  </button>
+                )}
                 <button className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-primary transition-all">
                   <Mic className="h-5 w-5" />
                 </button>
@@ -189,17 +194,23 @@ export default function ExamsEntryPage() {
                 >
                   <div className="divide-y divide-slate-50">
                     {filteredExams.length > 0 ? filteredExams.map((e) => (
-                      <Link key={e.id} href={`/exams/view?id=${e.id}`} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-all group">
+                      <Link key={e.id} href={`/exams/view?id=${e.id}`} className="flex items-center justify-between p-5 hover:bg-slate-50 transition-all group">
                         <div className="flex items-center gap-4">
-                          <div className="h-10 w-10 bg-slate-100 rounded-lg flex items-center justify-center">
-                            <GraduationCap className="h-5 w-5 text-slate-400" />
+                          <div className="h-12 w-12 bg-slate-50 rounded-xl flex items-center justify-center border border-slate-100">
+                            <GraduationCap className="h-6 w-6 text-primary" />
                           </div>
-                          <span className="font-bold text-[#0F172A]">{e.name}</span>
+                          <div>
+                            <span className="font-bold text-[#0F172A] text-lg block">{e.name}</span>
+                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{e.boardId} Hub</span>
+                          </div>
                         </div>
-                        <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-all" />
+                        <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all" />
                       </Link>
                     )) : (
-                      <div className="p-8 text-center text-slate-400 font-medium italic">No matching vertical found.</div>
+                      <div className="p-10 text-center space-y-3">
+                        <AlertCircle className="h-10 w-10 mx-auto text-slate-200" />
+                        <p className="text-slate-400 font-medium italic">No matching vertical found.</p>
+                      </div>
                     )}
                   </div>
                 </motion.div>
@@ -232,11 +243,6 @@ export default function ExamsEntryPage() {
             <div className="flex items-center gap-3">
               <Star className="h-6 w-6 text-amber-500 fill-amber-500" />
               <h2 className="text-xl md:text-3xl font-[900] text-[#0F172A] tracking-tight">Featured Exams</h2>
-            </div>
-            <div className="flex gap-2">
-               <div className="h-1 w-8 rounded-full bg-primary" />
-               <div className="h-1 w-2 rounded-full bg-slate-200" />
-               <div className="h-1 w-2 rounded-full bg-slate-200" />
             </div>
           </div>
 
