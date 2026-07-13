@@ -1,4 +1,3 @@
-
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -11,6 +10,7 @@ import CapacitorManager from "@/components/native/CapacitorManager";
 import { Toaster } from "@/components/ui/toaster";
 import { INSTITUTIONAL_PAYLOAD } from "@/lib/institutional-payload";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import GlobalStudyTracker from "@/components/analytics/GlobalStudyTracker";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,8 +18,8 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v65.0 [PRODUCTION HARDENED].
- * UPDATED: Integrated Apple-specific meta tags and hardened viewport for gestural navigation.
+ * @fileOverview Root Layout v66.0 [PRODUCTION HARDENED].
+ * UPDATED: Integrated GlobalStudyTracker for universal time counting.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -78,6 +78,7 @@ export default function RootLayout({
             {children}
           </div>
 
+          <GlobalStudyTracker />
           <PWAInstallHandler />
           <MobileNav />
           <CapacitorManager />

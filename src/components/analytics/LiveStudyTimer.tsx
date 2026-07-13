@@ -1,15 +1,14 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { useUser, useFirestore } from '@/firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { useUser, useStudySessions } from '@/hooks/useStudyAnalytics';
 import { Clock, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useStudyTracker } from '@/hooks/useStudyTracker';
+import { Skeleton } from '@/components/ui/skeleton';
 
 /**
- * @fileOverview Real-Time Study Stopwatch v2.2 (Full Detail).
- * FIXED: Combined with useStudyTracker for consistent live updates.
+ * @fileOverview High-Fidelity Study Timer v3.0.
+ * Consumes data from the production Study Analytics Engine for absolute precision.
  */
 
 const formatFullDuration = (seconds: number) => {
@@ -22,32 +21,25 @@ const formatFullDuration = (seconds: number) => {
 
 export default function LiveStudyTimer() {
     const { user } = useUser();
-    const db = useFirestore();
-    const [todayBase, setTodayBase] = useState(0);
-    const [loading, setLoading] = useState(true);
+    const { stats, loading } = useStudySessions();
+    const [liveSeconds, setLiveSeconds] = useState(0);
 
-    const { unSyncedSeconds, isActive } = useStudyTracker('timer-hub', 'OTHER');
-
+    // Local tick to provide instant feedback between Firestore syncs
     useEffect(() => {
-        if (!db || !user) return;
+       if (loading) return;
+       setLiveSeconds(stats.today);
 
-        const todayStr = new Date().toISOString().split('T')[0];
-        const dailyRef = doc(db, 'users', user.uid, 'study_daily', todayStr);
+       const interval = setInterval(() => {
+          setLiveSeconds(prev => prev + 1);
+       }, 1000);
 
-        const unsub = onSnapshot(dailyRef, (snap) => {
-            if (snap.exists()) {
-                setTodayBase(snap.data().totalDuration || 0);
-            }
-            setLoading(false);
-        });
+       return () => clearInterval(interval);
+    }, [stats.today, loading]);
 
-        return () => unsub();
-    }, [db, user]);
-
-    const displayTotal = todayBase + unSyncedSeconds;
+    if (!user) return null;
 
     return (
-        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 md:p-8 rounded-[2rem] shadow-xl text-left relative overflow-hidden group h-full flex flex-col justify-center">
+        <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-6 md:p-8 rounded-[2rem] shadow-xl text-left relative overflow-hidden group h-full flex flex-col justify-center transition-all hover:shadow-2xl">
             <div className="absolute top-0 right-0 p-6 opacity-5 rotate-12 group-hover:scale-110 transition-transform">
                 <Clock className="h-24 w-24" />
             </div>
@@ -55,25 +47,22 @@ export default function LiveStudyTimer() {
             <div className="relative z-10 space-y-4">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className={cn(
-                            "h-10 w-10 rounded-xl flex items-center justify-center transition-all",
-                            isActive ? "bg-emerald-50 text-emerald-500 animate-pulse" : "bg-slate-50 text-slate-300"
-                        )}>
+                        <div className="h-10 w-10 rounded-xl bg-emerald-50 text-emerald-500 flex items-center justify-center shadow-inner animate-pulse">
                             <Zap className="h-5 w-5 fill-current" />
                         </div>
                         <div>
                             <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">Today's study</p>
-                            <p className="text-xs font-bold text-slate-500">{isActive ? 'Active Session' : 'Registry Standby'}</p>
+                            <p className="text-xs font-bold text-emerald-600">Active Registry Node</p>
                         </div>
                     </div>
                 </div>
 
                 <div className="pt-2">
-                    {loading && todayBase === 0 ? (
-                        <div className="h-12 w-48 bg-slate-50 animate-pulse rounded-xl" />
+                    {loading ? (
+                        <Skeleton className="h-12 w-48 bg-slate-50 rounded-xl" />
                     ) : (
                         <h2 className="text-4xl md:text-5xl font-black text-[#0F172A] dark:text-white tracking-tighter tabular-nums antialiased leading-none">
-                            {formatFullDuration(displayTotal)}
+                            {formatFullDuration(liveSeconds)}
                         </h2>
                     )}
                 </div>
