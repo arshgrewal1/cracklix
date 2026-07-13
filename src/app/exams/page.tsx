@@ -41,8 +41,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import Logo from "@/components/brand/Logo"
 
 /**
- * @fileOverview Premium Exam Selection Hub v300.1.
- * FIXED: Search input and dropdown functionality restored.
+ * @fileOverview Premium Exam Selection Hub v300.2 (Metrics Sync).
+ * UPDATED: Displays dynamic totalMocks and studentCount from registry.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -277,10 +277,10 @@ export default function ExamsEntryPage() {
                     
                     <div className="flex items-center gap-6 pt-2">
                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
-                          <Zap className="h-4 w-4 text-primary" /> {exam.totalMocks || 40}+ Mocks
+                          <Zap className="h-4 w-4 text-primary" /> {exam.totalMocks || "40+"} Mocks
                        </div>
                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
-                          <Users className="h-4 w-4 text-primary" /> 12K+ Students
+                          <Users className="h-4 w-4 text-primary" /> {exam.studentCount || "12K+"} Students
                        </div>
                     </div>
                   </div>
@@ -376,7 +376,7 @@ export default function ExamsEntryPage() {
 
               <div className="relative z-10 pt-4 flex justify-center">
                  <Button asChild className="h-16 md:h-24 px-12 md:px-24 bg-primary hover:bg-blue-700 text-white font-[900] uppercase text-[12px] md:text-sm tracking-[0.3em] rounded-2xl md:rounded-[32px] shadow-4xl border-none transition-all active:scale-95 group">
-                    <Link href="/mocks" className="flex items-center gap-4">
+                    <Link href="/mocks" className="flex items-center justify-center gap-4">
                        Start Practice <ArrowRight className="h-5 w-5 md:h-8 md:w-8 group-hover:translate-x-2 transition-transform" />
                     </Link>
                  </Button>

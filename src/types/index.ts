@@ -235,7 +235,8 @@ export interface Exam {
   createdAt?: any;
   iconUrl?: string;
   description?: string;
-  totalMocks?: number;
+  totalMocks?: number | string;
+  studentCount?: string;
   activeQuestions?: number;
 }
 

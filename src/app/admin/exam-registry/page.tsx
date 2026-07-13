@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Plus, Trash2, Edit, Search, Loader2, GraduationCap, Save, Star, Activity } from "lucide-react"
+import { Plus, Trash2, Edit, Search, Loader2, GraduationCap, Save, Star, Activity, Users, Zap } from "lucide-material"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, query, doc, deleteDoc, setDoc, serverTimestamp, orderBy, updateDoc } from "firebase/firestore"
 import { Label } from "@/components/ui/label"
@@ -17,10 +17,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
 
 /**
- * @fileOverview Exam Vertical Registry v15.1 (High-Fidelity).
- * FIXED: Standardized header and search architecture to resolve spatial tightness.
- * FIXED: Added missing Input component import.
- * VISIBILITY: Forced dark background on dropdowns for guaranteed visibility.
+ * @fileOverview Exam Vertical Registry v16.0 (Metrics Sync).
+ * UPDATED: Added fields for totalMocks and studentCount for original data sync.
  */
 
 export default function ExamRegistryPage() {
@@ -84,7 +82,6 @@ export default function ExamRegistryPage() {
   return (
     <div className="space-y-10 md:space-y-16 text-left pb-32 animate-in fade-in duration-700 pt-2">
       
-      {/* 1. HEADER HUB - STANDARDIZED */}
       <AdminPageHeader
         icon={GraduationCap}
         label="Recruitment Vertical Registry"
@@ -92,10 +89,9 @@ export default function ExamRegistryPage() {
         subtitle="Manage specific exam verticals and Home Page trending items."
         actionLabel="Register Vertical"
         actionIcon={Plus}
-        onAction={() => setEditingExam({ name: "", boardId: "", categoryId: "", displayOrder: 1, isTrending: false })}
+        onAction={() => setEditingExam({ name: "", boardId: "", categoryId: "", displayOrder: 1, isTrending: false, totalMocks: "40+", studentCount: "12K+" })}
       />
 
-      {/* 2. SEARCH HUB */}
       <div className="max-w-2xl">
         <AdminSearchInput
           value={searchTerm}
@@ -104,7 +100,6 @@ export default function ExamRegistryPage() {
         />
       </div>
 
-      {/* 3. DATA LEDGER */}
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[900px]">
@@ -112,7 +107,7 @@ export default function ExamRegistryPage() {
               <TableRow className="border-slate-100 h-16 md:h-20">
                 <TableHead className="px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Vertical Identity</TableHead>
                 <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Authority Board</TableHead>
-                <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-center text-slate-400">Trending</TableHead>
+                <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-center text-slate-400">Metrics</TableHead>
                 <TableHead className="text-right px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
               </TableRow>
             </TableHeader>
@@ -143,12 +138,16 @@ export default function ExamRegistryPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                       <button onClick={() => toggleTrending(e.id, !!e.isTrending)} className="focus:outline-none active:scale-90 transition-all">
-                          <Star className={cn("h-6 w-6 md:h-8 md:w-8 transition-all", e.isTrending ? "text-amber-500 fill-current" : "text-slate-200 hover:text-amber-200")} />
-                       </button>
+                       <div className="flex items-center justify-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-tighter">
+                          <span className="flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary" /> {e.totalMocks || "0"}</span>
+                          <span className="flex items-center gap-1.5"><Users className="h-3 w-3 text-blue-500" /> {e.studentCount || "0"}</span>
+                       </div>
                     </TableCell>
                     <TableCell className="text-right px-8 md:px-12">
                       <div className="flex justify-end gap-2 md:gap-4 opacity-20 group-hover:opacity-100 transition-all">
+                        <button onClick={() => toggleTrending(e.id, !!e.isTrending)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center transition-all">
+                          <Star className={cn("h-5 w-5", e.isTrending ? "text-amber-500 fill-current" : "text-slate-200")} />
+                        </button>
                         <button onClick={() => setEditingExam(e)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-5 w-5" /></button>
                         <button onClick={async () => { if (confirm("Permanently purge this vertical node?")) await deleteDoc(doc(db!, "exams", e.id)) }} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                       </div>
@@ -170,7 +169,6 @@ export default function ExamRegistryPage() {
         </CardContent>
       </Card>
 
-      {/* 4. DIALOG HUB - HIGH FIDELITY SELECTS */}
       <AdminDialogShell
         open={!!editingExam}
         onOpenChange={(o) => !o && setEditingExam(null)}
@@ -214,6 +212,27 @@ export default function ExamRegistryPage() {
                  className="h-14 md:h-18 rounded-xl md:rounded-2xl border-none bg-slate-50 font-bold text-base md:text-xl px-6 shadow-inner" 
                  placeholder="e.g. Constable District Cadre" 
                />
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+               <div className="space-y-1.5 text-left">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Total Mocks (Label)</Label>
+                  <Input 
+                    value={editingExam?.totalMocks ?? ""} 
+                    onChange={e => setEditingExam({...editingExam, totalMocks: e.target.value})} 
+                    className="h-12 rounded-xl border-none bg-slate-50 font-black text-center" 
+                    placeholder="40+" 
+                  />
+               </div>
+               <div className="space-y-1.5 text-left">
+                  <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Student Count (Label)</Label>
+                  <Input 
+                    value={editingExam?.studentCount ?? ""} 
+                    onChange={e => setEditingExam({...editingExam, studentCount: e.target.value})} 
+                    className="h-12 rounded-xl border-none bg-slate-50 font-black text-center" 
+                    placeholder="12K+" 
+                  />
+               </div>
             </div>
 
             <div className="flex items-center justify-between p-6 md:p-8 bg-slate-50 rounded-2xl md:rounded-[2.5rem] border border-slate-100 shadow-inner">

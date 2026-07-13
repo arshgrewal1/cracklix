@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from "react";
@@ -10,7 +9,8 @@ import {
   Zap, 
   Bookmark, 
   Lock,
-  Star
+  Star,
+  Users
 } from "lucide-react";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
@@ -22,8 +22,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Popular Exams Registry Hub v40.1.
- * UPDATED: Replaced "Attempt Hub" with "Open Test".
+ * @fileOverview Premium Popular Exams Slider v41.0 (High-Fidelity Match).
+ * UPDATED: Re-engineered UI to match institutional mock test card style with manual metric overrides.
  */
 
 export default function PopularExams() {
@@ -32,67 +32,87 @@ export default function PopularExams() {
   
   const examsQuery = useMemo(() => {
     if (!db) return null;
-    return query(collection(db, "exams"), where("isTrending", "==", true), limit(4));
+    return query(collection(db, "exams"), where("isTrending", "==", true), limit(6));
   }, [db]);
 
   const { data: exams, loading } = useCollection<any>(examsQuery);
-  const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]));
+  const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
 
   return (
-    <section className="py-10 md:py-20 bg-white">
-      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+    <section className="py-10 md:py-24 bg-white overflow-hidden">
+      <div className="max-w-[1440px] 2xl:max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 space-y-10 md:space-y-16">
          
-         <div className="flex items-center justify-between px-1">
-            <div className="flex items-center gap-4">
-               <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary shadow-inner shrink-0">
-                 <Target className="h-5 w-5 md:h-6 md:w-6" />
+         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 text-left px-1">
+            <div className="space-y-1">
+               <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-blue-50 flex items-center justify-center text-primary shadow-inner shrink-0">
+                    <Target className="h-5 w-5 md:h-6 md:w-6" />
+                  </div>
+                  <h2 className="text-[22px] md:text-[clamp(24px,4vw,36px)] font-bold tracking-tight text-[#0F172A]">Popular Exams</h2>
                </div>
-               <div className="text-left">
-                  <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Popular Exams</h2>
-                  <p className="text-[11px] md:text-sm font-medium text-slate-500">Official preparation hubs for the most competitive recruitments.</p>
-               </div>
+               <p className="max-w-2xl text-[14px] md:text-[clamp(13px,1.5vw,18px)] font-medium text-slate-500">Official preparation hubs for the most competitive recruitments.</p>
             </div>
-            <Link href="/exams" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline">
-              View All <ChevronRight className="h-4 w-4" />
+            <Link href="/exams" className="text-primary font-bold text-[13px] md:text-[15px] tracking-tight hover:underline flex items-center gap-2 group shrink-0">
+              View all <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Link>
          </div>
 
-         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+         <div className="flex gap-4 md:gap-8 overflow-x-auto no-scrollbar pb-8 -mx-4 px-4 md:mx-0 md:px-0">
             {loading ? (
-               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-64 w-full rounded-[2rem] bg-slate-50" />)
+               Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-[300px] md:w-[380px] rounded-[2.5rem] bg-slate-50 shrink-0" />)
             ) : exams?.map((exam, idx) => {
-               const examMocks = mocks?.filter((m: any) => (m.examIds || []).includes(exam.id)) || [];
+               const board = boards?.find((b: any) => b.id === exam.boardId || b.abbreviation === exam.boardId);
+               
                return (
                   <motion.div 
                     key={exam.id} 
-                    initial={{ opacity: 0, y: 15 }} 
-                    whileInView={{ opacity: 1, y: 0 }} 
+                    initial={{ opacity: 0, scale: 0.95 }} 
+                    whileInView={{ opacity: 1, scale: 1 }} 
                     viewport={{ once: true }}
                     transition={{ delay: idx * 0.05 }}
+                    className="shrink-0 w-[280px] md:w-[380px]"
                   >
-                     <Card className="border border-slate-100 shadow-lg hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] bg-white p-6 md:p-10 flex flex-col group h-full relative overflow-hidden">
-                        <div className="flex justify-between items-start mb-8">
-                           <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-md bg-slate-50" />
-                           <button className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-300 hover:text-primary transition-all">
-                              <Bookmark className="h-5 w-5" />
-                           </button>
+                     <Card className="border border-slate-100 shadow-xl hover:shadow-2xl transition-all duration-500 rounded-[2.5rem] md:rounded-[3rem] bg-white p-6 md:p-12 flex flex-col group h-full relative overflow-hidden text-left">
+                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000 pointer-events-none">
+                           <Target className="h-32 w-32" />
                         </div>
 
-                        <div className="flex-1 space-y-4 text-left">
-                           <h3 className="text-lg md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight">
+                        <div className="space-y-6 md:space-y-10 flex-1 relative z-10">
+                           {/* HEADER: NAME (UPPERCASE) */}
+                           <h3 className="text-xl md:text-3xl font-[900] text-[#0F172A] leading-[1.1] tracking-tight uppercase antialiased h-[2.2em] md:h-[2.4em] line-clamp-2">
                               {exam.name}
                            </h3>
-                           
-                           <div className="flex flex-wrap gap-4 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
-                              <span className="flex items-center gap-1.5"><Zap className="h-3.5 w-3.5 text-primary" /> {examMocks.length} Tests</span>
-                              <span className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-primary" /> Notes</span>
+
+                           <div className="space-y-4 md:space-y-6">
+                              {/* BOARD TAG */}
+                              <div className="text-[10px] md:text-xs font-black text-slate-300 uppercase tracking-[0.2em]">
+                                 Board: <span className="text-slate-400">{board?.abbreviation || exam.boardId}</span>
+                              </div>
+
+                              {/* METRICS HUB: DYNAMIC & SYNCED */}
+                              <div className="flex items-center gap-6 md:gap-10 border-t border-slate-50 pt-6">
+                                 <div className="flex items-center gap-3 text-slate-300">
+                                    <Zap className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                                    <span className="text-[11px] md:text-sm font-bold tracking-tight">
+                                       {exam.totalMocks || "40+"} Mocks
+                                    </span>
+                                 </div>
+                                 <div className="flex items-center gap-3 text-slate-300">
+                                    <Users className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                                    <span className="text-[11px] md:text-sm font-bold tracking-tight">
+                                       {exam.studentCount || "12K+"} Students
+                                    </span>
+                                 </div>
+                              </div>
                            </div>
                         </div>
 
-                        <div className="mt-10">
-                           <Button asChild className="w-full h-12 md:h-14 rounded-xl md:rounded-2xl bg-[#0F172A] hover:bg-primary text-white font-bold text-[11px] tracking-widest uppercase border-none active:scale-95 gap-2">
-                              <Link href={`/exams/view?id=${exam.id}`}>
-                                 Open Test <ChevronRight className="h-4 w-4" />
+                        {/* CTA ACTION */}
+                        <div className="mt-10 md:mt-14 relative z-10">
+                           <Button asChild className="w-full h-14 md:h-18 rounded-[20px] md:rounded-[24px] bg-[#0F172A] hover:bg-black text-white font-[900] text-[11px] md:text-sm tracking-[0.1em] uppercase shadow-2xl transition-all active:scale-95 group/btn border-none">
+                              <Link href={`/exams/view?id=${exam.id}`} className="flex items-center justify-center gap-4">
+                                 Start Preparation
+                                 <ChevronRight className="h-4 w-4 md:h-5 md:w-5 ml-auto opacity-30 transition-transform group-hover/btn:translate-x-1" />
                               </Link>
                            </Button>
                         </div>
