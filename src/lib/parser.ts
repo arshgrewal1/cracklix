@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Ingestion Hub v86.0.
- * REBUILD: Refined Question Sanitizer to preserve semantic punctuation.
+ * @fileOverview Institutional Ingestion Hub v87.0.
+ * REBUILD: Fresh State-Machine for Fill in the Blank extraction.
  */
 
 const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
@@ -12,18 +12,21 @@ const NOISE_PATTERNS = [
   /^Advertisement/i,
   /Download Our (Android |Mobile |iOS )?App/i,
   /Install Our (Android |Mobile |iOS )?App/i,
+  /Visit Website/i,
   /^Copyright/i,
   /^©/i,
   /^www\./i,
   /^https?:\/\//i,
   /^[-\s\.\*_=|+\/\\]{5,}$/,
-  /^\s*[\.·,]{2,}\s*$/
+  /^\s*[\.·,]{2,}\s*$/,
+  /^[|¦│]$/ // Standalone pipe noise
 ];
 
 const QUESTION_SENTINEL_REGEX = /^\s*(?:(?:Q|Question|QUESTION|QUESTION\s*NO\.?|Q\.)[\s\.\-:]*)?(\d+|[IVXlI]+)(?:[\.\s:)\-]|(?=\r?\n)|$)/i;
-const OPTION_MARKER_REGEX = /^\s*[\(]?([A-D]|[1-4]|①|②|③|④|I{1,3}V?|i{1,3}v?|Ⓐ|Ⓑ|Ⓒ|Ⓓ|[a-d])[\)\.\s:]\s*(.*)/i;
+const OPTION_MARKER_REGEX = /^\s*(?:[\(]?([A-D]|[1-4]|①|②|③|④|I{1,3}V?|i{1,3}v?|Ⓐ|Ⓑ|Ⓒ|Ⓓ|[a-d])[\)\.\s:]\s*)(.*)/i;
+const OPTION_SPACE_REGEX = /^\s*([A-D])\s+([A-Z0-9].*)/; // Matches "A Delhi" 
 const ANSWER_SENTINEL_REGEX = /^\s*(?:Answer|Correct Answer|Correct Ans|Official Key|Verified Answer|Key|Ans|ਸਹੀ ਉੱਤਰ|ਉੱਤਰ)\s*[:\-]?\s*([A-D1-4①-④])/i;
-const EXPL_SENTINEL_REGEX = /^\s*(?:Explanation|Rationale|Solution|ਵਿਆਖਿਆ|English Explanation|Punjabi Explanation|English Rationale|Punjabi Rationale)\s*[:\-]?\s*(.*)/i;
+const EXPL_SENTINEL_REGEX = /^\s*(?:Explanation|Rationale|Solution|ਵਿਆਖਿਆ|English Explanation|Punjabi Explanation|English Rationale|Punjabi Rationale|Reason)\s*[:\-]?\s*(.*)/i;
 
 const FIB_LABELS = /^(?:Fill in the blanks?|Complete the sentence|Complete the following|Choose the correct word|Choose the correct answer|Select the correct word|ਖਾਲੀ ਥਾਂ ਭਰੋ|ਸਹੀ ਸ਼ਬਦ ਚੁਣੋ|ਸਹੀ ਉੱਤਰ ਚੁਣੋ|ਵਾਕ ਪੂਰਾ ਕਰੋ)\s*[:\-]?/i;
 
@@ -50,27 +53,31 @@ function detectScript(line: string): 'EN' | 'PA' {
 }
 
 function isNoise(line: string): boolean {
-  return NOISE_PATTERNS.some(p => p.test(line.trim()));
+  const trimmed = line.trim();
+  if (!trimmed) return true;
+  return NOISE_PATTERNS.some(p => p.test(trimmed));
 }
 
-/**
- * Institutional Question Sanitizer Node v86.0
- * Purges pure OCR noise lines while preserving punctuation in valid sentences.
- */
 function sanitizeLine(line: string): string {
   if (!line) return "";
   const trimmed = line.trim();
   if (!trimmed) return "";
   
-  // Rule: Discard lines that contain ONLY punctuation/noise (OCR Garbage)
-  // This matches lines consisting solely of spaces and the specified noise chars.
-  if (/^[\s|•.:;,_=\-(){}\[\]]+$/.test(trimmed)) {
+  // OCR Correction Nodes
+  let corrected = trimmed
+    .replace(/Questlon/g, 'Question')
+    .replace(/Optlon/g, 'Option')
+    .replace(/Ansvver/g, 'Answer')
+    .replace(/ExpIanation/g, 'Explanation')
+    .replace(/FIII/g, 'Fill')
+    .replace(/BIank/g, 'Blank');
+
+  // Rule: Discard lines that contain ONLY punctuation noise or single pipes
+  if (/^[\s|¦│•.:;,_=\-(){}\[\]]+$/.test(corrected)) {
     return "";
   }
 
-  // Rule: For valid lines with actual text, only trim whitespace.
-  // We MUST keep periods, question marks, etc., that are attached to real text.
-  return trimmed;
+  return corrected;
 }
 
 export function preprocessText(text: string): string {
@@ -98,7 +105,8 @@ export function validateMCQSchema(q: any): { errors: string[], warnings: string[
 }
 
 /**
- * REBUILT: Fill in the Blank Engine v84.0 (Question-First Priority)
+ * REBUILT: Fill in the Blank Engine v87.0
+ * State Machine with Independent Buffer Isolation and Punctuation Preservation.
  */
 export function parseFillInTheBlank(rawText: string, metadata: any) {
   const questions: any[] = [];
@@ -124,9 +132,9 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
   const finalize = () => {
     const hasQuest = enQuest.trim() || paQuest.trim();
     if (hasQuest) {
-      questions.push({
+      const qObj = {
         ...metadata,
-        id: currentNum || `q-fib-${Math.random().toString(36).substr(2, 9)}`,
+        id: currentNum ? `q-${currentNum}` : `q-fib-${Math.random().toString(36).substr(2, 9)}`,
         questionType: 'FILL_BLANK',
         englishQuestion: enQuest.trim(),
         punjabiQuestion: paQuest.trim(),
@@ -138,25 +146,38 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
         englishExplanation: enExpl.trim(),
         punjabiExplanation: paExpl.trim(),
         status: 'PUBLISHED'
-      });
+      };
+
+      // Self-Cleaning Node: Final check for noise leakage
+      if (!isNoise(qObj.englishQuestion)) {
+        questions.push(qObj);
+      }
     }
     resetBuffers();
   };
 
   for (let line of lines) {
-    if (isNoise(line)) continue;
+    const cleanedLine = sanitizeLine(line);
+    if (!cleanedLine && line.trim()) continue; // Skip noise but not actual spacing
 
-    if (isQuestionStart(line)) {
+    // 1. New Question Interrupt (Highest Priority)
+    if (isQuestionStart(cleanedLine)) {
       if (state !== 'WAITING') finalize();
-      currentNum = line.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
+      currentNum = cleanedLine.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
       state = 'QUESTION';
-      line = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      const questBody = cleanedLine.replace(QUESTION_SENTINEL_REGEX, '').replace(FIB_LABELS, '').trim();
+      if (questBody) {
+        if (detectScript(questBody) === 'PA') paQuest = questBody;
+        else enQuest = questBody;
+      }
+      continue;
     }
 
-    const optMatch = line.match(OPTION_MARKER_REGEX);
-    const ansMatch = line.match(ANSWER_SENTINEL_REGEX);
-    const explMatch = line.match(EXPL_SENTINEL_REGEX);
+    const optMatch = cleanedLine.match(OPTION_MARKER_REGEX) || cleanedLine.match(OPTION_SPACE_REGEX);
+    const ansMatch = cleanedLine.match(ANSWER_SENTINEL_REGEX);
+    const explMatch = cleanedLine.match(EXPL_SENTINEL_REGEX);
 
+    // 2. State Transitions
     if (optMatch) {
       state = 'OPTIONS';
       const rawKey = optMatch[1].toUpperCase();
@@ -179,32 +200,22 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
     if (explMatch) {
       state = 'EXPLANATION';
       const text = explMatch[1].trim();
-      const cleaned = sanitizeLine(text);
-      if (cleaned) {
-        if (detectScript(cleaned) === 'PA') paExpl += (paExpl ? ' ' : '') + cleaned;
-        else enExpl += (enExpl ? ' ' : '') + cleaned;
+      if (text) {
+        if (detectScript(text) === 'PA') paExpl = text;
+        else enExpl = text;
       }
       continue;
     }
 
-    const cleanedLine = sanitizeLine(line);
+    // 3. Buffer Appending
     if (!cleanedLine) continue;
 
     if (state === 'QUESTION') {
-      const statement = cleanedLine.replace(FIB_LABELS, '').trim();
-      const finalStatement = sanitizeLine(statement);
-      if (!finalStatement) continue;
-      if (detectScript(finalStatement) === 'PA') {
-        paQuest += (paQuest ? '\n' : '') + finalStatement;
-      } else {
-        enQuest += (enQuest ? '\n' : '') + finalStatement;
-      }
+      if (detectScript(cleanedLine) === 'PA') paQuest += (paQuest ? ' ' : '') + cleanedLine;
+      else enQuest += (enQuest ? ' ' : '') + cleanedLine;
     } else if (state === 'EXPLANATION') {
-      if (detectScript(cleanedLine) === 'PA') {
-        paExpl += (paExpl ? '\n' : '') + cleanedLine;
-      } else {
-        enExpl += (enExpl ? '\n' : '') + cleanedLine;
-      }
+      if (detectScript(cleanedLine) === 'PA') paExpl += (paExpl ? ' ' : '') + cleanedLine;
+      else enExpl += (enExpl ? ' ' : '') + cleanedLine;
     } else if (state === 'OPTIONS') {
       const lastKey = ['D', 'C', 'B', 'A'].find(k => opts[k].en || opts[k].pa) || 'A';
       if (detectScript(cleanedLine) === 'PA') opts[lastKey].pa += ' ' + cleanedLine;
@@ -274,18 +285,24 @@ export function parseAssertionReason(rawText: string, metadata: any) {
   const reasonPaRegex = /^.*(?:ਕਾਰਨ)\s*\(?R\)?\s*[:\-]?\s*/;
 
   for (let line of lines) {
-    if (isNoise(line)) continue;
+    const cleanedLine = sanitizeLine(line);
+    if (!cleanedLine && line.trim()) continue;
 
-    if (isQuestionStart(line)) {
+    if (isQuestionStart(cleanedLine)) {
       if (state !== 'WAITING') finalize();
-      currentNum = line.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
+      currentNum = cleanedLine.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
       state = 'ASSERT_EN';
-      line = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      const body = cleanedLine.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      if (body) {
+        if (detectScript(body) === 'PA') paAssert = body;
+        else enAssert = body;
+      }
+      continue;
     }
 
-    const optMatch = line.match(OPTION_MARKER_REGEX);
-    const ansMatch = line.match(ANSWER_SENTINEL_REGEX);
-    const explMatch = line.match(EXPL_SENTINEL_REGEX);
+    const optMatch = cleanedLine.match(OPTION_MARKER_REGEX);
+    const ansMatch = cleanedLine.match(ANSWER_SENTINEL_REGEX);
+    const explMatch = cleanedLine.match(EXPL_SENTINEL_REGEX);
 
     if (ansMatch) {
       state = 'ANSWER';
@@ -297,11 +314,10 @@ export function parseAssertionReason(rawText: string, metadata: any) {
 
     if (explMatch) {
       const content = explMatch[1].trim();
-      const cleaned = sanitizeLine(content);
-      if (cleaned) {
-        state = detectScript(cleaned) === 'PA' ? 'EXPL_PA' : 'EXPL_EN';
-        if (state === 'EXPL_PA') paExpl += (paExpl ? ' ' : '') + cleaned;
-        else enExpl += (enExpl ? ' ' : '') + cleaned;
+      if (content) {
+        state = detectScript(content) === 'PA' ? 'EXPL_PA' : 'EXPL_EN';
+        if (state === 'EXPL_PA') paExpl = content;
+        else enExpl = content;
       }
       continue;
     }
@@ -317,19 +333,18 @@ export function parseAssertionReason(rawText: string, metadata: any) {
       continue;
     }
 
-    if (reasonPaRegex.test(line)) { state = 'REASON_PA'; line = line.replace(reasonPaRegex, ''); }
-    else if (reasonEnRegex.test(line)) { state = 'REASON_EN'; line = line.replace(reasonEnRegex, ''); }
-    else if (assertPaRegex.test(line)) { state = 'ASSERT_PA'; line = line.replace(assertPaRegex, ''); }
-    else if (assertEnRegex.test(line)) { state = 'ASSERT_EN'; line = line.replace(assertEnRegex, ''); }
+    if (reasonPaRegex.test(cleanedLine)) { state = 'REASON_PA'; }
+    else if (reasonEnRegex.test(cleanedLine)) { state = 'REASON_EN'; }
+    else if (assertPaRegex.test(cleanedLine)) { state = 'ASSERT_PA'; }
+    else if (assertEnRegex.test(cleanedLine)) { state = 'ASSERT_EN'; }
 
-    const cleanedLine = sanitizeLine(line);
     if (!cleanedLine) continue;
 
     switch (state) {
-      case 'ASSERT_EN': enAssert += (enAssert ? ' ' : '') + cleanedLine; break;
-      case 'ASSERT_PA': paAssert += (paAssert ? ' ' : '') + cleanedLine; break;
-      case 'REASON_EN': enReason += (enReason ? ' ' : '') + cleanedLine; break;
-      case 'REASON_PA': paReason += (paReason ? ' ' : '') + cleanedLine; break;
+      case 'ASSERT_EN': enAssert += (enAssert ? ' ' : '') + cleanedLine.replace(assertEnRegex, ''); break;
+      case 'ASSERT_PA': paAssert += (paAssert ? ' ' : '') + cleanedLine.replace(assertPaRegex, ''); break;
+      case 'REASON_EN': enReason += (enReason ? ' ' : '') + cleanedLine.replace(reasonEnRegex, ''); break;
+      case 'REASON_PA': paReason += (paReason ? ' ' : '') + cleanedLine.replace(reasonPaRegex, ''); break;
       case 'EXPL_EN': enExpl += (enExpl ? ' ' : '') + cleanedLine; break;
       case 'EXPL_PA': paExpl += (paExpl ? ' ' : '') + cleanedLine; break;
     }
