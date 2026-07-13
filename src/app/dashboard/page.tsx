@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -23,7 +22,8 @@ import {
   ShieldCheck,
   Award,
   AlertCircle,
-  Loader2
+  Loader2,
+  CheckCircle2
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
