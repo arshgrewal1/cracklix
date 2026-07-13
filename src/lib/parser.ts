@@ -1,8 +1,8 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v75.0.
- * FIXED: Global Question Boundary Engine.
- * Priority: Question Markers override all states to prevent cross-node data leakage.
+ * @fileOverview Institutional Deterministic Ingestion Hub v76.0.
+ * FIXED: Assertion & Reason Edge Cases (Q4, Q7, Q8).
+ * FIXED: Punjabi-only support, no-space labels, and whitespace resilience.
  */
 
 import { serverTimestamp } from 'firebase/firestore';
@@ -23,7 +23,6 @@ export type ParserFormat =
   | 'TRUE_FALSE';
 
 // --- CONSTANT REGISTRY ---
-// Unified Question Sentinel: Handles Q1, Q.1, Question 1, QUESTION-1, 1., 1)
 export const QUESTION_SENTINEL_REGEX = /(?:^|\r?\n)\s*(?:(?:Q|Question|QUESTION|QUESTION\s*NO\.?|Q\.)[\s\.\-:]*)?(\d+|[lI])(?:[\.\s:)\-]|(?=\r?\n)|$)/i;
 
 export const NOISE_PATTERNS = [
@@ -58,30 +57,10 @@ const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
 
 // --- UTILITIES ---
 
-/**
- * Global Question Boundary Detector
- * Anchored to start of line, checked on every line for highest priority interrupts.
- */
 export function isQuestionStart(line: string): boolean {
   if (!line) return false;
-  // derivate regex for line-by-line checking
   const anchoredRegex = /^\s*(?:(?:Q|Question|QUESTION|QUESTION\s*NO\.?|Q\.)[\s\.\-:]*)?(\d+|[lI])(?:[\.\s:)\-]|(?=\r?\n)|$)/i;
   return anchoredRegex.test(line);
-}
-
-function segmentTextByQuestions(text: string): string[] {
-  const markerRegex = new RegExp(QUESTION_SENTINEL_REGEX.source, 'gi');
-  const matches = Array.from(text.matchAll(markerRegex));
-  
-  if (matches.length === 0) return [text];
-
-  const chunks: string[] = [];
-  for (let i = 0; i < matches.length; i++) {
-    const start = matches[i].index!;
-    const end = i < matches.length - 1 ? matches[i + 1].index : text.length;
-    chunks.push(text.substring(start, end).trim());
-  }
-  return chunks.filter(c => c.length > 0);
 }
 
 export function preprocessText(text: string): string {
@@ -106,7 +85,11 @@ export function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', 
     { regex: /^\s*([1])[\)\.]\s*(.*)/, val: 'A' },
     { regex: /^\s*([2])[\)\.]\s*(.*)/, val: 'B' },
     { regex: /^\s*([3])[\)\.]\s*(.*)/, val: 'C' },
-    { regex: /^\s*([4])[\)\.]\s*(.*)/, val: 'D' }
+    { regex: /^\s*([4])[\)\.]\s*(.*)/, val: 'D' },
+    { regex: /^\s*①\s*(.*)/, val: 'A' },
+    { regex: /^\s*②\s*(.*)/, val: 'B' },
+    { regex: /^\s*③\s*(.*)/, val: 'C' },
+    { regex: /^\s*④\s*(.*)/, val: 'D' }
   ];
 
   for (const p of patterns) {
@@ -116,7 +99,7 @@ export function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', 
   return null;
 }
 
-// --- HARDENED CONTINUOUS SCANNER (BOUNDARY ENGINE) ---
+// --- HARDENED CONTINUOUS SCANNER ---
 
 export function parseAssertionReason(fullText: string, metadata: any) {
   const lines = fullText.split(/\r?\n/);
@@ -124,24 +107,20 @@ export function parseAssertionReason(fullText: string, metadata: any) {
   
   let currentQ: any = null;
   
-  // PRIMARY BUFFERS
   let enAssert = ""; let paAssert = "";
   let enReason = ""; let paReason = "";
   let enExpl = ""; let paExpl = "";
   let currentAns = "";
 
-  // OPTIONS BUFFERS
   let opts: Record<string, { en: string, pa: string }> = {
     A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" }
   };
 
   let state: 'IDLE' | 'ASSERT_EN' | 'ASSERT_PA' | 'REASON_EN' | 'REASON_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL' = 'IDLE';
 
-  /**
-   * Finalizes current question and explicitly purges all buffers to prevent leakage.
-   */
   const finalize = () => {
-    if (currentQ && (enAssert || paAssert)) {
+    // Q4 FIX: Support Punjabi-only (enAssert can be empty if paAssert exists)
+    if (currentQ && (enAssert.trim() || paAssert.trim())) {
       currentQ.englishAssertion = enAssert.trim();
       currentQ.punjabiAssertion = paAssert.trim();
       currentQ.englishReason = enReason.trim();
@@ -160,14 +139,14 @@ export function parseAssertionReason(fullText: string, metadata: any) {
       currentQ.englishExplanation = enExpl.trim();
       currentQ.punjabiExplanation = paExpl.trim();
 
-      currentQ.englishQuestion = `Assertion: ${enAssert.trim()}\nReason: ${enReason.trim()}`;
-      currentQ.punjabiQuestion = paAssert.trim() ? `ਕਥਨ: ${paAssert.trim()}\nਕਾਰਨ: ${paReason.trim()}` : "";
+      // CBT Rendering Format
+      currentQ.englishQuestion = (enAssert.trim() ? `Assertion: ${enAssert.trim()}\n` : "") + (enReason.trim() ? `Reason: ${enReason.trim()}` : "");
+      currentQ.punjabiQuestion = (paAssert.trim() ? `ਕਥਨ: ${paAssert.trim()}\n` : "") + (paReason.trim() ? `ਕਾਰਨ: ${paReason.trim()}` : "");
 
       questions.push(currentQ);
-      console.log(`[INGESTION] Validation Passed: Node synchronized.`);
     }
 
-    // MANDATORY ZERO-STATE RESET
+    // ABSOLUTE ZERO-STATE RESET
     currentQ = null;
     enAssert = ""; paAssert = "";
     enReason = ""; paReason = "";
@@ -179,12 +158,12 @@ export function parseAssertionReason(fullText: string, metadata: any) {
     state = 'IDLE';
   };
 
-  const assertEnRegex = /^\s*(?:Assertion|Assertlon|Assertion:|Assertion\s*\(A\)|Assertion\(A\)|A\)|Statement|Statement\s*\(A\)|Assertion\s*-)\s*[:\-]?/i;
-  const assertPaRegex = /^\s*(?:ਕਥਨ|ਕਥਨ:|ਕਥਨ\s*\(A\))\s*[:\-]?/;
-  const reasonEnRegex = /^\s*(?:Reason|Reas0n|Reason:|Reason\s*\(R\)|Reason\(R\)|R\)|Reason\s*-)\s*[:\-]?/i;
-  const reasonPaRegex = /^\s*(?:ਕਾਰਨ|ਕਾਰਨ:|ਕਾਰਨ\s*\(R\))\s*[:\-]?/;
+  // Q7 FIX: Space-resilient regexes
+  const assertEnRegex = /^\s*(?:Assertion|Assertlon|Assertion:|Assertion\s*\(A\)|Assertion\(A\):?|A\)|Statement|Statement\s*\(A\)|Assertion\s*-)\s*[:\-]?/i;
+  const assertPaRegex = /^\s*(?:ਕਥਨ|ਕਥਨ:|ਕਥਨ\s*\(A\)|ਕਥਨ\(A\):?)\s*[:\-]?/;
+  const reasonEnRegex = /^\s*(?:Reason|Reas0n|Reason:|Reason\s*\(R\)|Reason\(R\):?|R\)|Reason\s*-)\s*[:\-]?/i;
+  const reasonPaRegex = /^\s*(?:ਕਾਰਨ|ਕਾਰਨ:|ਕਾਰਨ\s*\(R\)|ਕਾਰਨ\(R\):?)\s*[:\-]?/;
 
-  // Pre-scan for debug logging
   const globalMarkerRegex = new RegExp(QUESTION_SENTINEL_REGEX.source, 'gi');
   const totalFound = (fullText.match(globalMarkerRegex) || []).length;
   console.log(`[INGESTION] TOTAL QUESTIONS FOUND: ${totalFound}`);
@@ -192,12 +171,14 @@ export function parseAssertionReason(fullText: string, metadata: any) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const trimmed = line.trim();
+    
+    // Q8 FIX: Skip blank lines but maintain state
     if (!trimmed) continue;
 
-    // GLOBAL BOUNDARY CHECK - HIGHEST PRIORITY INTERRUPT
+    // GLOBAL BOUNDARY CHECK - HIGHEST PRIORITY
     if (isQuestionStart(line)) {
       finalize();
-      console.log(`[INGESTION] PROCESSING QUESTION: ${trimmed.substring(0, 15)}...`);
+      console.log(`[INGESTION] PROCESSING QUESTION: ${trimmed}`);
       currentQ = {
         ...metadata,
         id: `q-ar-${Math.random().toString(36).substr(2, 9)}`,
@@ -212,10 +193,10 @@ export function parseAssertionReason(fullText: string, metadata: any) {
     if (!currentQ) continue;
 
     const optMarker = detectOptionMarker(line);
-    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
-    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().includes(m.toLowerCase()));
+    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().includes(m.toLowerCase()));
 
-    // STATE TRANSITION SWITCH
+    // State Transitions
     if (isAns) state = 'ANSWER';
     else if (isExpl) state = 'EXPL';
     else if (optMarker && state !== 'ANSWER' && state !== 'EXPL') state = 'OPTIONS';
@@ -234,20 +215,20 @@ export function parseAssertionReason(fullText: string, metadata: any) {
       case 'ASSERT_EN': 
         if (!optMarker) {
            if (GURMUKHI_REGEX.test(clean)) paAssert += (paAssert ? '\n' : '') + clean;
-           else enAssert += (enAssert ? '\n' : '') + clean;
+           else if (clean) enAssert += (enAssert ? '\n' : '') + clean;
         }
         break;
       case 'ASSERT_PA': 
-        if (!optMarker) paAssert += (paAssert ? '\n' : '') + clean; 
+        if (!optMarker && clean) paAssert += (paAssert ? '\n' : '') + clean; 
         break;
       case 'REASON_EN': 
         if (!optMarker) {
            if (GURMUKHI_REGEX.test(clean)) paReason += (paReason ? '\n' : '') + clean;
-           else enReason += (enReason ? '\n' : '') + clean;
+           else if (clean) enReason += (enReason ? '\n' : '') + clean;
         }
         break;
       case 'REASON_PA': 
-        if (!optMarker) paReason += (paReason ? '\n' : '') + clean; 
+        if (!optMarker && clean) paReason += (paReason ? '\n' : '') + clean; 
         break;
       case 'OPTIONS': 
         if (optMarker) {
@@ -255,7 +236,6 @@ export function parseAssertionReason(fullText: string, metadata: any) {
           if (!text) break;
           const hasGur = GURMUKHI_REGEX.test(text);
           const parts = text.split(/\s*[\/\u2022|]\s*/);
-
           if (hasGur && parts.length > 1) {
             opts[optMarker.opt].en = parts[0].trim();
             opts[optMarker.opt].pa = parts[1].trim();
@@ -281,7 +261,7 @@ export function parseAssertionReason(fullText: string, metadata: any) {
   }
 
   finalize();
-  console.log(`[INGESTION] SUCCESSFULLY PARSED: ${questions.length}/${totalFound} QUESTIONS`);
+  console.log(`[INGESTION] SUCCESSFULLY PARSED: ${questions.length}/${totalFound}`);
   return { questions };
 }
 
@@ -312,20 +292,15 @@ export function parseMatching(chunk: string, metadata: any) {
     }
 
     const opt = detectOptionMarker(line);
-    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
-    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().startsWith(m.toLowerCase()));
+    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().includes(m.toLowerCase()));
+    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().includes(m.toLowerCase()));
     const isInstr = INSTR_KEYWORDS.some(k => trimmed.toLowerCase().includes(k.toLowerCase()));
 
     const parts = trimmed.split(/\s{3,}/);
     const isHeaderRow = parts.length === 2 && (
       trimmed.toLowerCase().includes('list') || 
       trimmed.toLowerCase().includes('column') || 
-      trimmed.toLowerCase().includes('group') ||
-      trimmed.toLowerCase().includes('country') ||
-      trimmed.toLowerCase().includes('scientist') ||
-      trimmed.toLowerCase().includes('river') ||
-      trimmed.toLowerCase().includes('author') ||
-      trimmed.toLowerCase().includes('freedom fighter')
+      trimmed.toLowerCase().includes('group')
     );
 
     if (isHeaderRow && state === 'INTRO') {
@@ -395,7 +370,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
     let result: any = { questions: [] };
     if (fmt === 'MATCHING') result = parseMatching(chunk, metadata);
     else {
-      // Logic for standard MCQ parser...
+      // Logic for standard MCQ parser can be added here
     }
 
     if (result && result.questions && result.questions.length > 0) {
@@ -406,11 +381,26 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   return { questions: allQuestions };
 }
 
+function segmentTextByQuestions(text: string): string[] {
+  const markerRegex = new RegExp(QUESTION_SENTINEL_REGEX.source, 'gi');
+  const matches = Array.from(text.matchAll(markerRegex));
+  
+  if (matches.length === 0) return [text];
+
+  const chunks: string[] = [];
+  for (let i = 0; i < matches.length; i++) {
+    const start = matches[i].index!;
+    const end = i < matches.length - 1 ? matches[i + 1].index : text.length;
+    chunks.push(text.substring(start, end).trim());
+  }
+  return chunks.filter(c => c.length > 0);
+}
+
 export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];
   if (!q.englishQuestion && !q.punjabiQuestion) errors.push("Question content missing.");
-  const optCount = ['A', 'B', 'C', 'D'].filter(l => (q[`option${l}English`] || "").trim()).length;
+  const optCount = ['A', 'B', 'C', 'D'].filter(l => (q[`option${l}English`] || q[`option${l}Punjabi`] || "").trim()).length;
   if (optCount < 4) errors.push("Less than four options detected.");
   if (!q.correctAnswer) errors.push("Answer missing.");
   return { errors, warnings };
