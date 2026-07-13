@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from "next/link";
@@ -13,8 +14,8 @@ import {
 import { cn } from "@/lib/utils";
 
 /**
- * Production Mobile Bottom Navigation v1.6.
- * UPDATED: Refined label size and improved vertical spacing.
+ * Production Mobile Bottom Navigation v1.8.
+ * UPDATED: Optimized for safe-area insets to prevent overlap with gesture indicators.
  */
 
 export default function MobileNav() {
@@ -58,9 +59,7 @@ export default function MobileNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-[1000] border-t border-slate-100 bg-white/95 backdrop-blur-md shadow-[0_-4px_25px_rgba(0,0,0,0.03)] md:hidden">
-
       <div className="flex h-[64px] items-center justify-around px-2 pb-[env(safe-area-inset-bottom)]">
-
         {navItems.map((item) => {
           const isActive =
             pathname === item.href ||
@@ -78,7 +77,6 @@ export default function MobileNav() {
               <div
                 className={cn(
                   "flex flex-col items-center justify-center rounded-2xl transition-all duration-300",
-
                   isActive
                     ? "h-[46px] w-[58px] bg-primary text-white shadow-md shadow-primary/10"
                     : "h-[46px] w-[58px] text-slate-400"
@@ -92,7 +90,6 @@ export default function MobileNav() {
                 <span
                   className={cn(
                     "mt-0.5 text-[9px] font-bold tracking-tight",
-
                     isActive
                       ? "text-white"
                       : "text-slate-400"
@@ -104,8 +101,9 @@ export default function MobileNav() {
             </Link>
           );
         })}
-
       </div>
+      {/* Dynamic Spacer for iOS Gesture Bar */}
+      <div className="h-[env(safe-area-inset-bottom)] bg-white/95" />
     </nav>
   );
 }

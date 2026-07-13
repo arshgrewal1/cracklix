@@ -18,13 +18,21 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v62.0.
- * UPDATED: Viewport themeColor synchronized with brand blue.
+ * @fileOverview Root Layout v65.0 [PRODUCTION HARDENED].
+ * UPDATED: Integrated Apple-specific meta tags and hardened viewport for gestural navigation.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
   description: "Punjab's most trusted government exam preparation platform.",
   manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Cracklix",
+  },
+  formatDetection: {
+    telephone: false,
+  },
   icons: {
     icon: [
       { url: "/icons/icon-192x192.png", type: "image/png", sizes: "192x192" },
@@ -66,7 +74,7 @@ export default function RootLayout({
         `}
       >
         <FirebaseClientProvider>
-          <div className="min-h-screen flex flex-col">
+          <div className="min-h-screen flex flex-col pt-safe">
             {children}
           </div>
 

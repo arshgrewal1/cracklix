@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -35,6 +36,8 @@
   html, body {
     @apply bg-white text-foreground antialiased min-h-screen;
     font-family: var(--font-inter), sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -42,8 +45,9 @@
   }
 }
 
+/* Institutional Safe Area Classes */
 .pb-safe {
-  padding-bottom: calc(env(safe-area-inset-bottom) + 72px);
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .pt-safe {

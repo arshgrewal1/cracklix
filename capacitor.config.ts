@@ -2,8 +2,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 /**
- * @fileOverview Hardened Capacitor Configuration v4.0.
- * UPDATED: Splash screen background and duration synchronized with official branding.
+ * @fileOverview Hardened Capacitor Configuration v4.5 [PRODUCTION READY].
+ * UPDATED: Optimized splash screen behavior for Android 14/15 gestural navigation.
  */
 
 const config: CapacitorConfig = {
@@ -17,7 +17,9 @@ const config: CapacitorConfig = {
       showSpinner: false,
       androidScaleType: "CENTER_CROP",
       splashFullScreen: true,
-      splashImmersive: true
+      splashImmersive: true,
+      fadeShowDuration: 200,
+      fadeHideDuration: 200
     },
     Keyboard: {
       resize: 'body',

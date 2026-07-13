@@ -16,14 +16,33 @@ import {
 import { isAfter, subDays, isValid } from 'date-fns';
 
 /**
- * @fileOverview Production-grade Study Analytics Engine v7.0.
- * Statistics are computed on-the-fly from raw StudySession records to ensure absolute accuracy.
+ * @fileOverview Production-grade Study Analytics Engine v7.5.
+ * FIXED: Implemented midnight reset logic to ensure Today's stats are accurate in long-running sessions.
  * FIXED: Hardened date parsing to prevent RangeError: Invalid time value.
  */
 
 export function useStudySessions() {
   const { user } = useUser();
   const db = useFirestore();
+  const [midnightTrigger, setMidnightTrigger] = useState(Date.now());
+
+  // Handle midnight reset
+  useEffect(() => {
+    const now = new Date();
+    const night = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1, // Tomorrow
+      0, 0, 0
+    );
+    const msToMidnight = night.getTime() - now.getTime();
+
+    const timer = setTimeout(() => {
+      setMidnightTrigger(Date.now());
+    }, msToMidnight);
+
+    return () => clearTimeout(timer);
+  }, [midnightTrigger]);
 
   const sessionsQuery = useMemo(() => {
     if (!db || !user) return null;
@@ -59,7 +78,6 @@ export function useStudySessions() {
     const studyDates = new Set<string>();
 
     rawSessions.forEach((s) => {
-      // Robust date parsing to prevent Invalid Time Value error
       let startTime: Date;
       
       try {
@@ -72,7 +90,7 @@ export function useStudySessions() {
         } else if (s.startTime && typeof s.startTime.toDate === 'function') {
           startTime = s.startTime.toDate();
         } else {
-          return; // Skip records with missing or unrecognized date formats
+          return;
         }
 
         if (!isValid(startTime)) return;
@@ -140,7 +158,7 @@ export function useStudySessions() {
       longestStreak,
       totalSessions: rawSessions.length
     };
-  }, [rawSessions]);
+  }, [rawSessions, midnightTrigger]);
 
   return { stats, loading, sessions: rawSessions };
 }
