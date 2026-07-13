@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -18,8 +19,8 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v66.0 [PRODUCTION HARDENED].
- * UPDATED: Integrated GlobalStudyTracker for universal time counting.
+ * @fileOverview Root Layout v67.0 [PWA OPTIMIZED].
+ * UPDATED: Optimized body wrapper to ensure background consistency in PWA mode.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -62,7 +63,7 @@ export default function RootLayout({
   const registryVersion = INSTITUTIONAL_PAYLOAD.version;
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="bg-white">
       <body
         className={`
           ${inter.variable}
@@ -71,10 +72,11 @@ export default function RootLayout({
           bg-white
           text-[#0F172A]
           overflow-x-hidden
+          w-full
         `}
       >
         <FirebaseClientProvider>
-          <div className="min-h-screen flex flex-col pt-safe">
+          <div className="min-h-screen flex flex-col">
             {children}
           </div>
 

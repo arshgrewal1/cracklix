@@ -31,13 +31,31 @@
 @layer base {
   * {
     @apply border-border;
+    /* Global scrollbar removal for Native App feel */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  *::-webkit-scrollbar {
+    display: none;
   }
   
   html, body {
-    @apply bg-white text-foreground antialiased min-h-screen;
+    @apply bg-white text-foreground antialiased min-h-screen select-none;
     font-family: var(--font-inter), sans-serif;
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
     overscroll-behavior-y: none;
+    /* Handle safe area for notched devices */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* Re-enable selection for utility nodes */
+  input, textarea, [contenteditable="true"] {
+    @apply select-text;
   }
   
   h1, h2, h3, h4, h5, h6 {
@@ -45,7 +63,7 @@
   }
 }
 
-/* Institutional Safe Area Classes */
+/* Institutional Utilities */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -55,22 +73,15 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(22, 119, 255, 0.1);
-  border-radius: 10px;
-}
-
-.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .shadow-4xl {
