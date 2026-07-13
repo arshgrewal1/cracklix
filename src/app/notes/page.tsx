@@ -5,7 +5,7 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { FileText, Download, Search, BookOpen, Clock, Zap, Lock, FileArchive, Info } from "lucide-react"
+import { FileText, Download, Search, BookOpen, Clock, Zap, Lock, FileArchive, Info, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -19,7 +19,7 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useActiveSession } from "@/hooks/useStudyAnalytics";
 
 /**
- * @fileOverview Official Download Center v2.7 (Session-Aware).
+ * @fileOverview Official Download Center v2.8 (Fixed ShieldCheck import).
  */
 
 export default function NotesLibrary() {
