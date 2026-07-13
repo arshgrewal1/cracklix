@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -42,11 +41,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
-import Logo from "@/components/brand/Logo"
 
 /**
- * @fileOverview Premium Practice Hub v2.0.
- * Redesigned with Apple/Material 3 aesthetics, high-density metadata, and glassmorphic navigation.
+ * @fileOverview Premium Practice Hub v2.1.
+ * UPDATED: Removed redundant Logo in body as it exists in Navbar. Spacing optimized.
  */
 
 const QUICK_ACTIONS = [
@@ -113,8 +111,7 @@ export default function MockTestsPage() {
              animate={{ opacity: 1, x: 0 }}
              className="space-y-4"
            >
-              <Logo variant="light" align="left" className="h-10 md:h-12 -ml-2 mb-2" />
-              <div className="space-y-1">
+              <div className="space-y-2">
                  <div className="flex items-center gap-3">
                     <h1 className="text-3xl md:text-[42px] font-[900] tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-[#60A5FA]">
                        ⚡ Practice Hub
@@ -350,5 +347,4 @@ function StatNode({ icon: Icon, label }: any) {
          <Icon className="h-4 w-4 text-primary/40" />
          <span className="uppercase tracking-tight">{label}</span>
       </div>
-   )
 }

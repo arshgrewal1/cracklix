@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
@@ -41,8 +40,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import Logo from "@/components/brand/Logo"
 
 /**
- * @fileOverview Premium Exam Selection Hub v300.0.
- * Redesigned with Apple/Material 3 aesthetics, high-density metadata, and glassmorphic navigation.
+ * @fileOverview Premium Exam Selection Hub v300.1.
+ * UPDATED: Removed redundant logo in body and optimized header spacing.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -151,7 +150,6 @@ export default function ExamsEntryPage() {
               </p>
             </div>
           </motion.div>
-          <Logo variant="light" iconOnly className="hidden md:block h-16 w-16 opacity-10" />
         </section>
 
         {/* 2. PREMIUM SEARCH & CHIPS */}
