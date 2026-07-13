@@ -10,7 +10,8 @@ interface SidebarToggleProps {
 }
 
 /**
- * Cracklix Admin Sidebar Toggle v2.0
+ * Cracklix Admin Sidebar Toggle v2.1
+ * FIXED: Removed unconditional centering to allow side-by-side Logo alignment.
  */
 
 export default function SidebarToggle({
