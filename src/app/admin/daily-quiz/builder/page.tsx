@@ -54,8 +54,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Daily Challenge Architect v2.1.
- * OPTIMIZED: Reduced initial question fetch limit to 500 to stabilize memory usage.
+ * @fileOverview Daily Challenge Architect v2.2 (Full Logic).
  */
 
 export default function DailyQuizBuilder() {
@@ -76,7 +75,6 @@ function DailyQuizBuilderContent() {
   const quizId = searchParams?.get("id") ?? ""
   const isEditing = !!quizId
 
-  // OPTIMIZED: limit(500) prevents memory threshold restarts
   const { data: rawBank, loading: bankLoading } = useCollection<Question>(useMemo(() => (db ? query(collection(db, "questions"), limit(500)) : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]))
   const { data: existingQuiz, loading: quizLoading } = useDoc<any>(useMemo(() => (db && quizId ? doc(db, "daily_quizzes", quizId) : null), [db, quizId]))
@@ -113,7 +111,7 @@ function DailyQuizBuilderContent() {
     if (isEditing && existingQuiz) {
       setQuizData({ ...existingQuiz });
       if (existingQuiz.questionIds && rawBank) {
-         const hydrated = existingQuiz.questionIds.map((id: string) => rawBank.find(q => q.id === id)).filter(Boolean) as Question[];
+         const hydrated = (existingQuiz.questionIds as string[]).map(id => rawBank.find(q => q.id === id)).filter(Boolean) as Question[];
          setStagedQuestions(hydrated);
       }
       setIsInitializing(false);
@@ -158,11 +156,12 @@ function DailyQuizBuilderContent() {
     try {
        const batch = writeBatch(db);
 
+       // Rule: Only one quiz can be "isTodayQuiz"
        if (!isDraft && quizData.isTodayQuiz) {
           const prevActiveSnap = await getDocs(query(collection(db, "daily_quizzes"), where("isTodayQuiz", "==", true)));
           prevActiveSnap.docs.forEach(d => {
              if (d.id !== finalId) {
-                batch.update(doc(db, "daily_quizzes", d.id), { isTodayQuiz: false, status: 'ARCHIVED', updatedAt: serverTimestamp() });
+                batch.update(doc(db, "daily_quizzes", d.id), { isTodayQuiz: false, updatedAt: serverTimestamp() });
              }
           });
        }
@@ -176,7 +175,8 @@ function DailyQuizBuilderContent() {
           totalMarks: stagedQuestions.length * Number(quizData.positiveMarks),
           updatedAt: serverTimestamp(),
           createdAt: isEditing ? (existingQuiz?.createdAt || serverTimestamp()) : serverTimestamp(),
-          mockType: 'DAILY_CHALLENGE'
+          mockType: 'DAILY_CHALLENGE',
+          accessLevel: 'FREE'
        };
 
        batch.set(quizRef, payload, { merge: true });
@@ -185,12 +185,14 @@ function DailyQuizBuilderContent() {
        await addDoc(collection(db, "audit_logs"), {
           user: profile?.name || "Administrator",
           action: isEditing ? "QUIZ_UPDATE" : "QUIZ_CREATE",
-          details: `Daily Challenge "${payload.title}" ${isDraft ? 'saved as draft' : 'synchronized live'}.`,
+          details: `Daily Challenge "${payload.title}" ${isDraft ? 'saved as draft' : 'published live'}.`,
           timestamp: serverTimestamp()
        });
 
        toast({ title: "Registry Synced" });
        router.push("/admin/daily-quiz");
+    } catch (e) {
+       toast({ variant: "destructive", title: "Sync failed" });
     } finally { setIsPublishing(false); }
   };
 
@@ -308,7 +310,7 @@ function DailyQuizBuilderContent() {
 
                   <div className="grid grid-cols-1 gap-3">
                      {bankLoading ? (
-                        Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)
+                        Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white" />)
                      ) : filteredBank.length > 0 ? filteredBank.map((q) => {
                         const isSel = bankSelection.includes(q.id);
                         return (

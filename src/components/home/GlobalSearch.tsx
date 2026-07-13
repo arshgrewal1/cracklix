@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, Zap, BookOpen, Newspaper, Layers, GraduationCap, ChevronRight, Sparkles, X, Loader2, Trophy, AlertCircle } from 'lucide-react';
+import { Search, Zap, BookOpen, Newspaper, Layers, GraduationCap, ChevronRight, Sparkles, X, Loader2, Trophy, AlertCircle, FileText } from 'lucide-react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
@@ -9,8 +9,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview Institutional Sticky Search Hub v14.1.
- * FIXED: Results filtering and navigation functional.
+ * @fileOverview Institutional Sticky Search Hub v14.2.
  */
 
 const TRENDING = [
@@ -35,29 +34,28 @@ export default function GlobalSearch() {
   const { data: exams, loading: eLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "exams") : null), [db]));
   const { data: mocks, loading: mLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]));
   const { data: notes, loading: nLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "notes") : null), [db]));
-  const { data: caHub, loading: cLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "current_affairs_hub") : null), [db]));
+  const { data: pyqs, loading: pLoading } = useCollection<any>(useMemo(() => (db ? collection(db, "pyqs") : null), [db]));
 
-  const isLoading = eLoading || mLoading || nLoading || cLoading;
+  const isLoading = eLoading || mLoading || nLoading || pLoading;
 
   const results = useMemo(() => {
     if (!debouncedQuery.trim() || debouncedQuery.trim().length < 2) return null;
     const term = debouncedQuery.toLowerCase().trim();
 
-    const eMatches = (exams || []).filter(e => e.name?.toLowerCase().includes(term) || e.boardId?.toLowerCase().includes(term));
+    const eMatches = (exams || []).filter(e => e.name?.toLowerCase().includes(term));
     const mMatches = (mocks || []).filter(m => m.title?.toLowerCase().includes(term));
-    const nMatches = (notes || []).filter(n => n.title?.toLowerCase().includes(term) || n.subjectId?.toLowerCase().includes(term));
-    const cMatches = (caHub || []).filter(c => c.title?.toLowerCase().includes(term));
+    const nMatches = (notes || []).filter(n => n.title?.toLowerCase().includes(term));
+    const pMatches = (pyqs || []).filter(p => p.title?.toLowerCase().includes(term));
 
     return {
       exams: eMatches.slice(0, 3),
       mocks: mMatches.slice(0, 4),
-      notes: nMatches.slice(0, 3),
-      ca: cMatches.slice(0, 2)
+      notes: [...nMatches, ...pMatches].slice(0, 4)
     };
-  }, [debouncedQuery, exams, mocks, notes, caHub]);
+  }, [debouncedQuery, exams, mocks, notes, pyqs]);
 
   const hasResults = results && (
-    results.exams.length > 0 || results.mocks.length > 0 || results.notes.length > 0 || results.ca.length > 0
+    results.exams.length > 0 || results.mocks.length > 0 || results.notes.length > 0
   );
 
   useEffect(() => {
@@ -135,7 +133,7 @@ export default function GlobalSearch() {
                 {results.exams.length > 0 && (
                   <SearchGroup label="Exam Verticals">
                     {results.exams.map(e => (
-                      <SearchResult key={e.id} href={`/exams/view?id=${e.id}`} title={e.name} sub={`${e.boardId} Authority`} icon={<GraduationCap className="h-4 w-4" />} onClick={() => setIsOpen(false)} />
+                      <SearchResult key={e.id} href={`/exams/view?id=${e.id}`} title={e.name} sub={`${e.boardId} Hub`} icon={<GraduationCap className="h-4 w-4" />} onClick={() => setIsOpen(false)} />
                     ))}
                   </SearchGroup>
                 )}
@@ -143,7 +141,7 @@ export default function GlobalSearch() {
                 {results.mocks.length > 0 && (
                   <SearchGroup label="Practice Mocks">
                     {results.mocks.map(m => (
-                      <SearchResult key={m.id} href={`/mocks/view?id=${m.id}`} title={m.title} sub={`${m.totalQuestions} Questions`} icon={<Zap className="h-4 w-4 text-primary" />} onClick={() => setIsOpen(false)} />
+                      <SearchResult key={m.id} href={`/mocks/view?id=${m.id}`} title={m.title} sub={`${m.totalQuestions} Items`} icon={<Zap className="h-4 w-4 text-primary" />} onClick={() => setIsOpen(false)} />
                     ))}
                   </SearchGroup>
                 )}
@@ -151,21 +149,13 @@ export default function GlobalSearch() {
                 {results.notes.length > 0 && (
                   <SearchGroup label="Study Material">
                     {results.notes.map(n => (
-                      <SearchResult key={n.id} href="/notes" title={n.title} sub={n.category} icon={<BookOpen className="h-4 w-4 text-blue-500" />} onClick={() => setIsOpen(false)} />
-                    ))}
-                  </SearchGroup>
-                )}
-
-                {results.ca.length > 0 && (
-                  <SearchGroup label="Current Affairs">
-                    {results.ca.map(c => (
-                      <SearchResult key={c.id} href="/current-affairs" title={c.title} sub={c.month} icon={<Newspaper className="h-4 w-4 text-emerald-500" />} onClick={() => setIsOpen(false)} />
+                      <SearchResult key={n.id} href="/notes" title={n.title} sub={n.category || 'PDF'} icon={<FileText className="h-4 w-4 text-blue-500" />} onClick={() => setIsOpen(false)} />
                     ))}
                   </SearchGroup>
                 )}
 
                 <div className="p-3">
-                   <SearchResult href="/leaderboard" title="Global Merit Rankings" sub="View top aspirants" icon={<Trophy className="h-4 w-4 text-amber-500" />} onClick={() => setIsOpen(false)} />
+                   <SearchResult href="/leaderboard" title="Merit Rankings" sub="View top aspirants" icon={<Trophy className="h-4 w-4 text-amber-500" />} onClick={() => setIsOpen(false)} />
                 </div>
               </div>
             ) : (

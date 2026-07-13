@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from "next/link";
@@ -9,12 +8,15 @@ import {
   Zap,
   BarChart3,
   Gem,
+  Bookmark,
+  FileText
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 /**
- * Premium Mobile Bottom Navigation v2.0.
+ * Premium Mobile Bottom Navigation v2.1.
+ * FIXED: Optimized for Home Dashboard Module access.
  */
 
 export default function MobileNav() {
@@ -32,7 +34,7 @@ export default function MobileNav() {
     { label: "Home", href: "/", icon: Home },
     { label: "Exams", href: "/exams", icon: Target },
     { label: "Practice", href: "/mocks", icon: Zap },
-    { label: "Dash", href: "/dashboard", icon: BarChart3 },
+    { label: "Saved", href: "/bookmarks", icon: Bookmark },
     { label: "Pro", href: "/pass", icon: Gem },
   ];
 

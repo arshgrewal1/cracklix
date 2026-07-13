@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -24,8 +23,8 @@ interface QuestionRendererProps {
 }
 
 /**
- * @fileOverview Institutional Question Renderer v73.0.
- * FIXED: Wired bookmarking and reporting actions.
+ * @fileOverview Institutional Question Renderer v74.0.
+ * UPDATED: Integrated high-fidelity rendering for Matching and Assertion-Reason types.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -116,16 +115,16 @@ export default function QuestionRenderer({
                </div>
                
                {/* 1. English Assertion */}
-               {showEn && q.englishAssertion && (
+               {showEn && (q.englishAssertion || q.englishQuestion) && (
                   <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
-                     <MathText text={`Assertion: ${q.englishAssertion}`} />
+                     <MathText text={`Assertion: ${q.englishAssertion || q.englishQuestion}`} />
                   </div>
                )}
 
                {/* 2. Punjabi Assertion */}
-               {showLocal && q.punjabiAssertion && (
+               {showLocal && (q.punjabiAssertion || q.punjabiQuestion) && (
                   <div className="font-[800] text-[#0F172A] text-[16px] md:text-2xl leading-relaxed">
-                     <MathText text={`ਕਥਨ: ${q.punjabiAssertion}`} />
+                     <MathText text={`ਕਥਨ: ${q.punjabiAssertion || q.punjabiQuestion}`} />
                   </div>
                )}
 
@@ -146,7 +145,7 @@ export default function QuestionRenderer({
          )}
 
          {/* STRUCTURED MATCHING GRID */}
-         {q.questionType === 'MATCH_FOLLOWING' && q.matchingData?.rows?.length > 0 && (
+         {q.questionType === 'MATCH_FOLLOWING' && (q.matchingData?.rows?.length > 0 || q.tableContent?.rows?.length > 0) && (
             <div className="my-8 overflow-hidden rounded-[2rem] border-2 border-slate-100 bg-white shadow-2xl relative group">
                <div className="absolute top-2 right-4 opacity-5 pointer-events-none uppercase text-[8px] font-black tracking-widest flex items-center gap-2">
                   <Link2 className="h-3 w-3" /> Relation Hub
@@ -154,18 +153,22 @@ export default function QuestionRenderer({
                <Table className="w-full border-collapse">
                   <TableHeader className="bg-slate-900">
                      <TableRow className="border-none h-14 md:h-16">
-                        <TableHead className="px-6 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest border-r border-white/10">{q.matchingData.leftHeader || "List I"}</TableHead>
-                        <TableHead className="px-6 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest">{q.matchingData.rightHeader || "List II"}</TableHead>
+                        <TableHead className="px-6 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest border-r border-white/10">
+                          {q.matchingData?.leftHeader || q.tableContent?.headers?.[0] || "List I"}
+                        </TableHead>
+                        <TableHead className="px-6 md:px-10 font-black uppercase text-[10px] md:text-sm text-white tracking-widest">
+                          {q.matchingData?.rightHeader || q.tableContent?.headers?.[1] || "List II"}
+                        </TableHead>
                      </TableRow>
                   </TableHeader>
                   <TableBody>
-                     {q.matchingData.rows.map((row: any, ri: number) => (
+                     {(q.matchingData?.rows || q.tableContent?.rows || []).map((row: any, ri: number) => (
                         <TableRow key={ri} className="border-b border-slate-50 hover:bg-slate-50 transition-colors last:border-0 h-12 md:h-16">
                            <TableCell className="px-6 md:px-10 font-bold text-xs md:text-lg text-[#0F172A] border-r border-slate-50">
-                              {row.left}
+                              {Array.isArray(row) ? row[0] : row.left}
                            </TableCell>
                            <TableCell className="px-6 md:px-10 font-bold text-xs md:text-lg text-[#0F172A]">
-                              {row.right}
+                              {Array.isArray(row) ? row[1] : row.right}
                            </TableCell>
                         </TableRow>
                      ))}
