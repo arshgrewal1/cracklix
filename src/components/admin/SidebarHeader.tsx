@@ -6,7 +6,7 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v60.0.
+ * Cracklix Admin Sidebar Header v61.0.
  * UPDATED: Zero spacing between Toggle and Logo.
  */
 export default function SidebarHeader({
@@ -34,7 +34,7 @@ export default function SidebarHeader({
             href="/admin"
             variant="light"
             align="left"
-            className="transition-all duration-500 h-10 md:h-12 w-auto animate-in fade-in slide-in-from-left-2"
+            className="transition-all duration-500 h-10 md:h-12 w-auto animate-in fade-in slide-in-from-left-2 -ml-2"
           />
         ) : (
           <Logo

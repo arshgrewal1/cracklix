@@ -14,7 +14,7 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v33.0.
+ * @fileOverview Admin Layout v34.0.
  * UPDATED: Zero spacing between menu toggle and logo.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -104,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu className="w-5 h-5" />
             </button>
             <div className="lg:hidden shrink-0">
-              <Logo variant="light" className="h-12 md:h-14 w-auto" />
+              <Logo variant="light" className="h-12 md:h-14 w-auto -ml-2" />
             </div>
             <p className="hidden md:block text-[10px] font-black uppercase tracking-widest text-slate-400 ml-4">
                Registry Governance
