@@ -6,8 +6,8 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v55.0.
- * UPDATED: Positioned SidebarToggle to the immediate left of the Logo.
+ * Cracklix Admin Sidebar Header v56.0.
+ * UPDATED: Positioned Logo on the far left, with SidebarToggle to its right.
  */
 export default function SidebarHeader({
   isOpen,
@@ -20,14 +20,9 @@ export default function SidebarHeader({
     <div
       className={cn(
         "h-[90px] md:h-[110px] border-b border-slate-50 px-4 shrink-0 flex items-center transition-all duration-300",
-        isOpen ? "justify-start gap-3" : "flex-col justify-center py-4 gap-4"
+        isOpen ? "justify-between" : "flex-col justify-center py-4 gap-4"
       )}
     >
-      <SidebarToggle
-        isOpen={isOpen}
-        onToggle={onToggle}
-      />
-
       <div className="flex items-center overflow-hidden">
         {isOpen ? (
           <Logo
@@ -45,6 +40,11 @@ export default function SidebarHeader({
           />
         )}
       </div>
+
+      <SidebarToggle
+        isOpen={isOpen}
+        onToggle={onToggle}
+      />
     </div>
   );
 }
