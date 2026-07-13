@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from "react";
@@ -31,8 +30,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Mobile Sidebar v68.1.
- * FIXED: Synchronized logo height with admin portal for brand unity.
+ * @fileOverview Mobile Sidebar v69.0.
+ * FIXED: Synchronized logo height with high-mass student navbar standards.
  */
 export default function MobileSidebar({
   onClose,
@@ -83,7 +82,7 @@ export default function MobileSidebar({
            variant="light"
            align="left"
            className="flex-shrink-0 -ml-2"
-           imgClassName="h-12 md:h-14 w-auto"
+           imgClassName="h-14 md:h-18 w-auto"
            onClick={onClose}
          />
          <button

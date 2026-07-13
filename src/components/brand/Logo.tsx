@@ -17,8 +17,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix High-Fidelity Brand Identity v125.0.
- * FIXED: Replaced greedy 'fill' with explicit sizing for Sidebar/Header stability.
+ * @fileOverview Cracklix High-Fidelity Brand Identity v126.0.
+ * UPDATED: Increased width constraints to support larger logo heights in student/admin hubs.
  */
 export default function Logo({
   className = "",
@@ -49,12 +49,12 @@ export default function Logo({
       <Image
         src={src}
         alt="Cracklix"
-        width={isIcon ? 48 : 200}
-        height={isIcon ? 48 : 80}
+        width={isIcon ? 64 : 320}
+        height={isIcon ? 64 : 120}
         priority={priority}
         className={cn(
           "h-auto transition-all flex-shrink-0 object-contain",
-          isIcon ? "w-10 md:w-12" : "w-36 md:w-48",
+          isIcon ? "w-10 md:w-14" : "w-44 md:w-64",
           imgClassName
         )}
       />
