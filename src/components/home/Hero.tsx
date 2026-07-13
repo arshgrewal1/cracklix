@@ -1,25 +1,43 @@
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Zap, Play, ChevronRight, Star } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Zap, Play, ChevronRight, Star, Smartphone, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
+import { usePWAInstall } from "@/hooks/use-pwa-install";
+import { useToast } from "@/hooks/use-toast";
 
 /**
- * @fileOverview High-Mass Institutional Hero v43.1.
- * UPDATED: Replaced "Registry" with "Selection" in secondary CTA.
+ * @fileOverview High-Mass Institutional Hero v44.0.
+ * UPDATED: Integrated Smart PWA Install logic to replace Browse Selection with Install App if not installed.
  */
 export default function Hero() {
   const db = useFirestore();
+  const { toast } = useToast();
   const [mounted, setMounted] = useState(false);
+  const { isInstalled, canInstall, installApp, isReady } = usePWAInstall();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleInstallClick = async () => {
+    if (canInstall) {
+      await installApp();
+    } else {
+      toast({
+        title: "Installation Status",
+        description: "Direct installation is not supported on this browser. Try adding to home screen manually.",
+        variant: "default"
+      });
+      // Optionally redirect to manual guide
+      // window.location.href = '/install';
+    }
+  };
 
   if (!mounted) return null;
 
@@ -54,8 +72,9 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, ease: "easeOut" }}
-            className="flex flex-col sm:flex-row gap-[18px] w-full max-w-xl px-5 mx-auto items-center justify-center"
+            className="flex flex-col sm:flex-row gap-[18px] w-full max-w-2xl px-5 mx-auto items-center justify-center"
           >
+             {/* PRIMARY: START PREPARATION */}
              <Button 
                asChild 
                className="relative overflow-hidden w-full h-[58px] bg-gradient-to-r from-[#2563EB] via-[#3B82F6] to-[#60A5FA] hover:brightness-110 rounded-full shadow-[0_12px_35px_rgba(37,99,235,0.30)] hover:shadow-[0_15px_45px_rgba(37,99,235,0.40)] transition-all duration-300 active:scale-[0.98] border-none group cursor-pointer"
@@ -79,19 +98,61 @@ export default function Hero() {
                 </Link>
              </Button>
              
-             <Button 
-               asChild 
-               variant="outline" 
-               className="w-full h-[56px] rounded-full bg-white border-2 border-[#DCE8FF] hover:border-[#60A5FA] hover:bg-[#F8FBFF] text-[#1E3A8A] font-semibold text-[17px] shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300 active:scale-[0.98] hover:-translate-y-[2px] group"
-               aria-label="Browse Selection"
-             >
-                <Link href="/exams" className="flex items-center justify-center w-full px-1">
-                   <span className="flex-1 text-center pl-[34px]">Browse Selection</span> 
-                   <div className="w-[34px] h-[34px] rounded-full bg-[#EFF6FF] flex items-center justify-center shrink-0 group-hover:bg-[#E0F2FE] transition-colors">
-                      <ChevronRight className="h-4 w-4 text-[#1E3A8A] group-hover:translate-x-0.5 transition-transform" />
-                   </div>
-                </Link>
-             </Button>
+             {/* SECONDARY: SMART PWA INSTALL VS BROWSE SELECTION */}
+             <AnimatePresence mode="wait">
+               {isReady && !isInstalled ? (
+                 <motion.div
+                    key="install-btn"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="w-full"
+                 >
+                    <Button 
+                      onClick={handleInstallClick}
+                      className="relative overflow-hidden w-full h-[58px] bg-gradient-to-r from-[#2563EB] via-[#3B82F6] to-[#60A5FA] hover:brightness-110 rounded-full shadow-[0_12px_35px_rgba(37,99,235,0.30)] hover:shadow-[0_15px_45px_rgba(37,99,235,0.40)] transition-all duration-300 active:scale-[0.98] border-none group cursor-pointer"
+                      aria-label="Install Cracklix App"
+                    >
+                       <motion.div 
+                          animate={{ x: ['-100%', '250%'] }}
+                          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                          className="absolute inset-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] pointer-events-none"
+                       />
+                       <div className="flex items-center justify-start w-full relative z-10 px-1">
+                          <div className="w-[42px] h-[42px] rounded-full bg-white/18 backdrop-blur-[12px] flex items-center justify-center shrink-0 border border-white/10 group-hover:scale-105 transition-transform duration-300">
+                             <Smartphone className="h-5 w-5 text-white" />
+                          </div>
+                          <div className="flex-1 flex flex-col items-center pr-[42px]">
+                             <span className="font-bold text-[16px] text-white leading-none">Install Cracklix App</span>
+                             <span className="text-[8px] font-bold text-white/70 uppercase tracking-widest mt-1">Get faster app access</span>
+                          </div>
+                       </div>
+                    </Button>
+                 </motion.div>
+               ) : (
+                 <motion.div
+                    key="browse-btn"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="w-full"
+                 >
+                    <Button 
+                      asChild 
+                      variant="outline" 
+                      className="w-full h-[58px] rounded-full bg-white border-2 border-[#DCE8FF] hover:border-[#60A5FA] hover:bg-[#F8FBFF] text-[#1E3A8A] font-semibold text-[17px] shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300 active:scale-[0.98] hover:-translate-y-[2px] group"
+                      aria-label="Browse Selection"
+                    >
+                       <Link href="/exams" className="flex items-center justify-center w-full px-1">
+                          <div className="w-[42px] h-[42px] rounded-full bg-[#EFF6FF] flex items-center justify-center shrink-0 group-hover:bg-[#E0F2FE] transition-colors">
+                             <Landmark className="h-5 w-5 text-[#1E3A8A]" />
+                          </div>
+                          <span className="flex-1 text-center pr-[42px]">Browse Selection</span>
+                       </Link>
+                    </Button>
+                 </motion.div>
+               )}
+             </AnimatePresence>
           </motion.div>
           
           <div className="flex items-center gap-8 pt-4 md:pt-8 opacity-40 grayscale group hover:grayscale-0 transition-all duration-700">
