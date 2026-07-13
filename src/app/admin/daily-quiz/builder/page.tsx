@@ -50,6 +50,7 @@ import { cn } from "@/lib/utils"
 import { AdminPageHeader } from "@/components/admin"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
+import { Skeleton } from "@/components/ui/skeleton"
 
 /**
  * @fileOverview Daily Challenge Architect v1.0.
