@@ -17,7 +17,8 @@ import {
   Archive,
   AlertCircle,
   Database,
-  Plus
+  Plus,
+  ShieldCheck
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore } from "@/firebase"
@@ -28,8 +29,8 @@ import { cn } from "@/lib/utils"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/components/admin"
 
 /**
- * @fileOverview Institutional Current Affairs Bank Hub v2.0 (High-Fidelity).
- * FIXED: Standardized header and search architecture to match the Bulk Ingestion hub.
+ * @fileOverview Institutional Current Affairs Bank Hub v2.1.
+ * FIXED: Added missing ShieldCheck import.
  */
 
 export default function CABankPage() {
