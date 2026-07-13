@@ -1,7 +1,8 @@
+
 "use client"
 
 import React, { useMemo, useState } from "react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { 
@@ -14,20 +15,21 @@ import {
   Filter,
   ArrowRight,
   Archive,
-  AlertCircle
+  AlertCircle,
+  Database,
+  Plus
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
 import { useCollection, useFirestore } from "@/firebase"
 import { collection, deleteDoc, doc, query, limit, orderBy } from "firebase/firestore"
 import Link from "next/link"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
+import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/components/admin"
 
 /**
- * @fileOverview Institutional Current Affairs Bank Hub v1.0.
- * FIXED: Isolated collection 'ca_bank' for daily updates.
+ * @fileOverview Institutional Current Affairs Bank Hub v2.0 (High-Fidelity).
+ * FIXED: Standardized header and search architecture to match the Bulk Ingestion hub.
  */
 
 export default function CABankPage() {
@@ -64,86 +66,114 @@ export default function CABankPage() {
   }
 
   return (
-    <div className="space-y-6 md:space-y-12 text-left pb-32 animate-in fade-in duration-700 pt-4">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
-        <div className="space-y-1">
-           <div className="flex items-center gap-2 mb-1">
-              <FileJson className="h-4 w-4 text-primary" />
-              <span className="text-[9px] font-black tracking-[0.2em] text-slate-400 uppercase">Current Affairs Registry</span>
-           </div>
-          <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none uppercase">CA Bank</h1>
-          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Master repository for daily and monthly news nodes.</p>
-        </div>
-        <Button asChild className="w-full md:w-auto h-11 md:h-14 px-8 bg-[#0F172A] hover:bg-black text-white rounded-full font-black text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-3">
-          <Link href="/admin/current-affairs/bulk"><Zap className="h-4 w-4" /> Ingest CA Nodes</Link>
-        </Button>
+    <div className="space-y-10 md:space-y-16 text-left pb-32 animate-in fade-in duration-700 pt-2">
+      
+      {/* 1. HEADER HUB */}
+      <AdminPageHeader
+        icon={FileJson}
+        label="Current Affairs Registry"
+        title="CA Bank"
+        subtitle="Master repository for daily and monthly news nodes."
+        actionLabel="Ingest CA Nodes"
+        actionIcon={Zap}
+        actionHref="/admin/current-affairs/bulk"
+      />
+
+      {/* 2. SEARCH & FILTER HUB */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 px-1">
+         <div className="lg:col-span-8">
+            <AdminSearchInput
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Search CA bank for statements or IDs..."
+            />
+         </div>
+         <div className="lg:col-span-4 flex items-center gap-3">
+            <div className="flex-1 bg-white border border-slate-100 rounded-2xl md:rounded-full px-6 h-14 md:h-16 flex items-center justify-between shadow-sm">
+               <div className="flex items-center gap-2">
+                  <Database className="h-4 w-4 text-primary" />
+                  <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Bank Density</span>
+               </div>
+               <span className="font-black text-lg text-[#0F172A] tabular-nums">{caBank.length}</span>
+            </div>
+         </div>
       </div>
 
-      <div className="relative group px-1">
-         <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
-         <Input 
-           className="h-14 md:h-16 pl-14 rounded-2xl md:rounded-full bg-white border-slate-50 shadow-inner text-base md:text-lg font-bold" 
-           placeholder="Search CA bank..." 
-           value={searchTerm} 
-           onChange={e => setSearchTerm(e.target.value)} 
-         />
-      </div>
-
-      <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
-        <CardContent className="p-0 overflow-x-auto">
-          <Table className="min-w-[1000px]">
-            <TableHeader className="bg-slate-50/50">
-              <TableRow className="h-14 border-slate-100">
-                <TableHead className="px-6 md:px-10 text-[9px] md:text-[10px] font-black tracking-widest text-slate-400 uppercase">Node Identity</TableHead>
-                <TableHead className="text-[9px] md:text-[10px] font-black tracking-widest text-slate-400 uppercase">Language</TableHead>
-                <TableHead className="text-[9px] md:text-[10px] font-black tracking-widest text-slate-400 uppercase">Status</TableHead>
-                <TableHead className="text-right px-6 md:px-10 text-[9px] md:text-[10px] font-black tracking-widest text-slate-400 uppercase">Audit</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                Array.from({length: 5}).map((_, i) => <TableRow key={i}><TableCell colSpan={4} className="p-8 md:p-12"><Skeleton className="h-12 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>)
-              ) : caBank.length > 0 ? caBank.map((q: any) => (
-                <TableRow key={q.id} className="hover:bg-slate-50 border-slate-50 transition-all group">
-                  <TableCell className="px-6 md:px-10 py-5 md:py-10">
-                    <div className="max-w-md">
-                       <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-2">{q.englishQuestion}</p>
-                       <code className="text-[8px] font-mono text-slate-300 mt-2 block tracking-tighter uppercase">ID: {q.id.slice(-12)}</code>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                     <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-400 text-[8px] font-black uppercase px-2 rounded">
-                        {q.punjabiQuestion ? 'ENG/PUN' : q.hindiQuestion ? 'ENG/HIN' : 'ENGLISH'}
-                     </Badge>
-                  </TableCell>
-                  <TableCell>
-                     <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase px-2 shadow-sm">ISOLATED</Badge>
-                  </TableCell>
-                  <TableCell className="text-right px-6 md:px-10">
-                    <div className="flex justify-end gap-2 md:gap-3 opacity-20 group-hover:opacity-100 transition-all">
-                       <Button variant="ghost" size="icon" className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100" asChild>
-                          <Link href={`/admin/questions/add?id=${q.id}&type=ca`}><Edit className="h-4 w-4" /></Link>
-                       </Button>
-                       <button className="h-9 w-9 md:h-11 md:w-11 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={() => handleDelete(q.id)}>
-                          <Trash2 className="h-4 w-4" />
-                       </button>
-                    </div>
-                  </TableCell>
+      {/* 3. DATA LEDGER */}
+      <Card className="border-none shadow-3xl rounded-2xl md:rounded-[3rem] overflow-hidden bg-white mx-1 border border-slate-50">
+        <CardHeader className="p-6 md:p-10 pb-0 flex flex-row items-center justify-between">
+           <CardTitle className="text-sm md:text-xl font-black text-[#0F172A] uppercase tracking-tight flex items-center gap-3">
+              <Archive className="h-5 w-5 text-primary" /> Archive Ledger
+           </CardTitle>
+           <Badge variant="outline" className="text-[8px] font-black uppercase text-slate-400">Registry Snapshot</Badge>
+        </CardHeader>
+        <CardContent className="p-0 mt-6">
+          <div className="overflow-x-auto">
+            <Table className="min-w-[1000px]">
+              <TableHeader className="bg-slate-50/50">
+                <TableRow className="h-16 border-slate-100">
+                  <TableHead className="px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Node Identity & Statement</TableHead>
+                  <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Language Hub</TableHead>
+                  <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-center text-slate-400">Status</TableHead>
+                  <TableHead className="text-right px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
                 </TableRow>
-              )) : (
-                <TableRow>
-                   <TableCell colSpan={4} className="h-80 text-center">
-                      <div className="flex flex-col items-center justify-center opacity-10 space-y-4">
-                         <Archive className="h-16 w-16 text-slate-400" />
-                         <p className="font-black text-2xl uppercase tracking-widest">Isolated Bank Empty</p>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <AdminTableSkeleton rows={6} columns={4} />
+                ) : caBank.length > 0 ? caBank.map((q: any) => (
+                  <TableRow key={q.id} className="hover:bg-slate-50 border-slate-50 transition-all group">
+                    <TableCell className="px-8 md:px-12 py-6 md:py-10">
+                      <div className="max-w-md lg:max-w-xl">
+                         <p className="font-bold text-[#0F172A] text-sm md:text-base leading-snug line-clamp-2">{q.englishQuestion}</p>
+                         <div className="flex items-center gap-2 mt-2.5">
+                            <Badge className="bg-slate-100 text-slate-400 border-none text-[8px] font-black rounded uppercase">ID: {q.id.slice(-12)}</Badge>
+                            <span className="text-[9px] font-bold text-slate-300 uppercase tracking-widest">Isolated Node</span>
+                         </div>
                       </div>
-                   </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                    </TableCell>
+                    <TableCell>
+                       <Badge variant="outline" className="bg-primary/5 border-none text-primary text-[8px] md:text-[9px] font-black uppercase px-3 py-1 rounded shadow-sm tracking-tighter">
+                          {q.punjabiQuestion ? 'English & Punjabi' : q.hindiQuestion ? 'English & Hindi' : 'English Only'}
+                       </Badge>
+                    </TableCell>
+                    <TableCell className="text-center">
+                       <div className="inline-flex items-center gap-2 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100 shadow-sm">
+                          <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                          <span className="text-[8px] md:text-[10px] font-black text-emerald-600 uppercase">Live</span>
+                       </div>
+                    </TableCell>
+                    <TableCell className="text-right px-8 md:px-12">
+                      <div className="flex justify-end gap-2 md:gap-4 opacity-20 group-hover:opacity-100 transition-all">
+                         <Button variant="ghost" size="icon" className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border border-slate-100 text-slate-400 hover:text-primary active:scale-90" asChild>
+                            <Link href={`/admin/questions/add?id=${q.id}&type=ca`}><Edit className="h-5 w-5" /></Link>
+                         </Button>
+                         <button className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={() => handleDelete(q.id)}>
+                            <Trash2 className="h-5 w-5" />
+                         </button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )) : (
+                  <TableRow>
+                     <TableCell colSpan={4} className="h-80 md:h-[500px] text-center">
+                        <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
+                           <Database className="h-20 w-20 md:h-32 md:w-32 text-slate-400" />
+                           <p className="font-black text-xl md:text-3xl uppercase tracking-[0.4em]">Bank Vault Empty</p>
+                        </div>
+                     </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
+      
+      <div className="flex items-center justify-center gap-4 text-slate-300 py-10">
+        <ShieldCheck className="h-4 w-4" />
+        <span className="text-[9px] font-black uppercase tracking-[0.5em]">Institutional Ingestion Hub Synchronized</span>
+      </div>
     </div>
   )
 }
