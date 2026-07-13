@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Ingestion Hub v85.0.
- * REBUILD: Integrated Question Sanitizer for OCR Noise Removal.
+ * @fileOverview Institutional Ingestion Hub v86.0.
+ * REBUILD: Refined Question Sanitizer to preserve semantic punctuation.
  */
 
 const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
@@ -54,25 +54,23 @@ function isNoise(line: string): boolean {
 }
 
 /**
- * Institutional Question Sanitizer Node
- * Purges leading/trailing OCR artifacts and noise-only lines.
+ * Institutional Question Sanitizer Node v86.0
+ * Purges pure OCR noise lines while preserving punctuation in valid sentences.
  */
 function sanitizeLine(line: string): string {
   if (!line) return "";
   const trimmed = line.trim();
+  if (!trimmed) return "";
   
-  // Rule: Ignore lines that contain only punctuation/noise
+  // Rule: Discard lines that contain ONLY punctuation/noise (OCR Garbage)
+  // This matches lines consisting solely of spaces and the specified noise chars.
   if (/^[\s|•.:;,_=\-(){}\[\]]+$/.test(trimmed)) {
     return "";
   }
 
-  // Rule: Remove leading punctuation
-  let cleaned = trimmed.replace(/^[|•.:;,()\[\]{}]+/, '');
-  
-  // Rule: Remove trailing punctuation (non-semantic)
-  cleaned = cleaned.replace(/[|•.:;,()\[\]{}]+$/, '');
-  
-  return cleaned.trim();
+  // Rule: For valid lines with actual text, only trim whitespace.
+  // We MUST keep periods, question marks, etc., that are attached to real text.
+  return trimmed;
 }
 
 export function preprocessText(text: string): string {
@@ -100,7 +98,7 @@ export function validateMCQSchema(q: any): { errors: string[], warnings: string[
 }
 
 /**
- * REBUILT: Fill in the Blank Engine v85.0 (Sanitizer Integrated)
+ * REBUILT: Fill in the Blank Engine v84.0 (Question-First Priority)
  */
 export function parseFillInTheBlank(rawText: string, metadata: any) {
   const questions: any[] = [];
@@ -219,7 +217,7 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
 }
 
 /**
- * Rebuilt: Assertion & Reason state machine parser v85.0 (Sanitizer Integrated)
+ * Rebuilt: Assertion & Reason state machine parser v78.0 (Strict Isolation)
  */
 export function parseAssertionReason(rawText: string, metadata: any) {
   const questions: any[] = [];
