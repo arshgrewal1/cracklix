@@ -1,6 +1,7 @@
+
 "use client"
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { 
@@ -17,14 +18,12 @@ import { HelpArticle } from "@/types"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Official Institutional FAQ Hub v6.0 (High-Fidelity Update).
- * FIXED: Applied global responsive scaling headers with leading-[0.9].
- * FIXED: Shifted sorting to client-side to bypass missing composite index requirement.
+ * @fileOverview Official Institutional FAQ Hub v6.1.
+ * UPDATED: Extracted content to FAQContent for section re-use.
  */
 
-export default function FAQPage() {
+export function FAQContent() {
   const db = useFirestore()
-  const router = useRouter()
   
   const faqQuery = useMemo(() => (db ? query(
     collection(db, "help_articles"), 
@@ -38,6 +37,43 @@ export default function FAQPage() {
     if (!rawFaqs) return [];
     return [...rawFaqs].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
   }, [rawFaqs]);
+
+  return (
+    <div className="bg-white p-6 md:p-14 rounded-[2.5rem] md:rounded-[4rem] shadow-4xl border border-slate-100 space-y-8">
+       <Accordion type="single" collapsible className="w-full">
+          {loading ? (
+             Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl mb-4" />)
+          ) : faqs && faqs.length > 0 ? (
+             faqs.map((faq, idx) => (
+              <AccordionItem key={faq.id} value={`item-${idx}`} className="border-b border-slate-50 py-5 md:py-8 last:border-0">
+                <AccordionTrigger className="text-left font-headline font-black text-base md:text-2xl text-[#0F172A] hover:text-primary transition-all hover:no-underline px-4 uppercase tracking-tight antialiased">
+                  {faq.title}
+                </AccordionTrigger>
+                <AccordionContent className="text-[13px] md:text-lg text-slate-500 font-medium leading-relaxed px-4 pt-6 pb-4">
+                  {faq.content}
+                </AccordionContent>
+              </AccordionItem>
+            ))
+          ) : (
+             <div className="py-20 text-center opacity-30 italic font-black uppercase text-xl flex flex-col items-center gap-6">
+                <Zap className="h-12 w-12" />
+                Registry Empty
+             </div>
+          )}
+       </Accordion>
+    </div>
+  )
+}
+
+export default function FAQPage() {
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
 
   return (
     <div className="min-h-screen bg-slate-50/50 font-body text-left selection:bg-primary/10">
@@ -64,29 +100,7 @@ export default function FAQPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20">
            <div className="lg:col-span-8">
-              <div className="bg-white p-6 md:p-14 rounded-[2.5rem] md:rounded-[4rem] shadow-4xl border border-slate-100 space-y-8">
-                 <Accordion type="single" collapsible className="w-full">
-                    {loading ? (
-                       Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl mb-4" />)
-                    ) : faqs && faqs.length > 0 ? (
-                       faqs.map((faq, idx) => (
-                        <AccordionItem key={faq.id} value={`item-${idx}`} className="border-b border-slate-50 py-5 md:py-8 last:border-0">
-                          <AccordionTrigger className="text-left font-headline font-black text-base md:text-2xl text-[#0F172A] hover:text-primary transition-all hover:no-underline px-4 uppercase tracking-tight antialiased">
-                            {faq.title}
-                          </AccordionTrigger>
-                          <AccordionContent className="text-[13px] md:text-lg text-slate-500 font-medium leading-relaxed px-4 pt-6 pb-4">
-                            {faq.content}
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))
-                    ) : (
-                       <div className="py-20 text-center opacity-30 italic font-black uppercase text-xl flex flex-col items-center gap-6">
-                          <Zap className="h-12 w-12" />
-                          Registry Empty
-                       </div>
-                    )}
-                 </Accordion>
-              </div>
+              <FAQContent />
            </div>
 
            <div className="lg:col-span-4 space-y-8 md:space-y-12">
