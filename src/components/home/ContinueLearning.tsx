@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
@@ -28,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 
 /**
- * @fileOverview Institutional Performance Hub v6.0 (High-Fidelity Redesign).
- * FIXED: Implemented luxurious dark-gradient cards with glassmorphic nodes.
+ * @fileOverview Institutional Performance Hub v6.1.
+ * FIXED: Included daily_quizzes in the valid mock lookup for accurate attempt tracking.
  */
 
 export default function ContinueLearning() {
@@ -53,16 +52,19 @@ export default function ContinueLearning() {
     return collection(db, "exams");
   }, [db, mounted]);
 
-  const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]);
-
   const { data: rawResults, loading: resultsLoading } = useCollection<any>(resultsQuery);
   const { data: allExams, loading: examsLoading } = useCollection<any>(examsQuery);
-  const { data: validMocks, loading: mocksLoading } = useCollection<any>(mocksQuery);
+  const { data: validMocks, loading: mocksLoading } = useCollection<any>(useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]));
+  const { data: validQuizzes, loading: quizLoading } = useCollection<any>(useMemo(() => (db && mounted ? collection(db, "daily_quizzes") : null), [db, mounted]));
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
 
+  const combinedMocks = useMemo(() => {
+    return [...(validMocks || []), ...(validQuizzes || [])];
+  }, [validMocks, validQuizzes]);
+
   const recentAttempts = useMemo(() => {
-    if (!rawResults || rawResults.length === 0 || !validMocks) return []
-    const validMockIds = new Set(validMocks.map(m => m.id));
+    if (!rawResults || rawResults.length === 0 || combinedMocks.length === 0) return []
+    const validMockIds = new Set(combinedMocks.map(m => m.id));
     
     return [...rawResults]
       .filter(r => validMockIds.has(r.mockId))
@@ -71,7 +73,7 @@ export default function ContinueLearning() {
         const timeB = new Date(b.timestamp || 0).getTime();
         return timeB - timeA;
       }).slice(0, 2);
-  }, [rawResults, validMocks]);
+  }, [rawResults, combinedMocks]);
 
   const pinnedExams = useMemo(() => {
     if (!allExams || !profile?.pinnedExams) return [];
@@ -79,7 +81,7 @@ export default function ContinueLearning() {
   }, [allExams, profile]);
 
   const handleReviewAction = (mockId: string) => {
-     const isValid = validMocks?.some(m => m.id === mockId);
+     const isValid = combinedMocks?.some(m => m.id === mockId);
      if (!isValid) {
         toast({ variant: "destructive", title: "Record Audit", description: "Node archived silently." });
         return;
@@ -114,11 +116,11 @@ export default function ContinueLearning() {
                  <p className="text-[10px] md:text-xs font-black tracking-widest text-slate-400">Continue Learning</p>
               </div>
               <div className="grid grid-cols-1 gap-4 md:gap-6">
-                 {resultsLoading || mocksLoading ? (
+                 {resultsLoading || mocksLoading || quizLoading ? (
                     Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-[2.5rem] bg-slate-50" />)
                  ) : recentAttempts.length > 0 ? (
                     recentAttempts.map((res: any, idx: number) => {
-                       const mockMeta = validMocks?.find((m: any) => m.id === res.mockId);
+                       const mockMeta = combinedMocks?.find((m: any) => m.id === res.mockId);
                        return (
                         <motion.div
                           key={res.id}

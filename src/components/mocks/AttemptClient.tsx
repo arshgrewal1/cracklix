@@ -29,8 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v6.1.
- * FIXED: Re-wired handleSaveAndNext to ensure correct state transitions.
+ * @fileOverview Official Mock Attempt Hub v6.2.
+ * FIXED: Changed attempt update to setDoc for submission reliability.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -106,7 +106,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     async function loadExam() {
       if (!db || !mockId) return;
       try {
-        // Try both collections to ensure compatibility with Daily Quizzes
         const mockSnap = await getDoc(doc(db, "mocks", mockId));
         const dailySnap = !mockSnap.exists() ? await getDoc(doc(db, "daily_quizzes", mockId)) : null;
         
@@ -211,7 +210,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       resultPayload.createdAt = serverTimestamp();
       
       await setDoc(doc(db, "results", `${user.uid}_${mockId}`), resultPayload, { merge: true });
-      await updateDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { status: 'COMPLETED', updatedAt: serverTimestamp() });
+      // FIXED: Use setDoc instead of updateDoc to ensure creation if it doesn't exist
+      await setDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true });
       
       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
       router.replace(`/results/view?id=${mockId}`);

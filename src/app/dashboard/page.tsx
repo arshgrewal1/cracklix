@@ -36,9 +36,8 @@ import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Performance Hub v6.0.
- * FIXED: Precision calculation for Avg Time and Accuracy.
- * UI: Premium Apple + Linear aesthetic.
+ * @fileOverview Institutional Performance Hub v6.1.
+ * FIXED: Combined mocks and daily_quizzes for accurate valid attempt tracking.
  */
 
 // Formatting Utilities
@@ -53,13 +52,6 @@ const formatTime = (seconds: number) => {
   
   if (h > 0) return `${h}h ${m}m`;
   return s > 0 ? `${m}m ${s}s` : `${m}m`;
-};
-
-const formatNumber = (num: number) => {
-  if (num === undefined || num === null || isNaN(num)) return "--";
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
-  return num.toString();
 };
 
 export default function StudentDashboard() {
@@ -79,6 +71,12 @@ export default function StudentDashboard() {
   }, [db, user, mounted]);
 
   const { data: results, loading: resultsLoading } = useCollection<any>(resultsQuery);
+  const { data: validMocks } = useCollection<any>(useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]));
+  const { data: validQuizzes } = useCollection<any>(useMemo(() => (db && mounted ? collection(db, "daily_quizzes") : null), [db, mounted]));
+
+  const combinedMocks = useMemo(() => {
+    return [...(validMocks || []), ...(validQuizzes || [])];
+  }, [validMocks, validQuizzes]);
 
   const performance = useMemo(() => {
     if (!results || results.length === 0) {
@@ -95,7 +93,7 @@ export default function StudentDashboard() {
       totalAttempted += (r.attemptedCount || 0);
       
       const t = Number(r.timeTaken);
-      if (!isNaN(t) && t > 0 && t < 1000000) { // Safety guard against huge corrupted values
+      if (!isNaN(t) && t > 0 && t < 1000000) {
         totalTime += t;
         validTimeEntries++;
       }
