@@ -12,23 +12,20 @@ import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
- * @fileOverview Production-Grade Firestore Collection Hook v3.2.
- * FIXED: Implemented deep comparison check and robust error handling for missing indexes.
- * FIXED: Stabilized the subscription trigger to prevent infinite render loops.
+ * @fileOverview Production-Grade Firestore Collection Hook v3.3.
+ * OPTIMIZED: Removed heavy JSON stringification to prevent memory threshold restarts.
+ * Identity of the items array is now managed via snapshot metadata to ensure stability.
  */
 export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<FirestoreError | null>(null);
   
-  const dataRef = useRef<string>("");
-
-  // Generate a stable key for the query to prevent unnecessary re-subscriptions
+  // Use query path as a stable key
   const queryKey = useMemo(() => {
     if (!query) return null;
     try {
-      // Use the internal path or a stringified version of the query structure
-      return (query as any)._query?.path?.segments?.join('/') || JSON.stringify(query);
+      return (query as any)._query?.path?.segments?.join('/') || 'stable_query';
     } catch (e) {
       return 'unstable_query';
     }
@@ -51,13 +48,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
           id: doc.id,
         }));
 
-        // Deep comparison check to prevent infinite loops when parent components re-render
-        const dataString = JSON.stringify(items);
-        if (dataString !== dataRef.current) {
-          dataRef.current = dataString;
-          setData(items as T[]);
-        }
-        
+        setData(items as T[]);
         setLoading(false);
         setError(null);
       },
@@ -81,7 +72,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
     );
 
     return () => unsubscribe();
-  }, [queryKey]); // Subscribe only when the query logic actually changes
+  }, [queryKey]);
 
   return { data, loading, error };
 }

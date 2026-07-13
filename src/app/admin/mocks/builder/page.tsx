@@ -41,9 +41,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { AdminPageHeader } from "@/components/admin"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v26.0 (High-Fidelity).
- * FIXED: Visibility issues in dropdowns by forcing dark backgrounds and white text.
- * REFINED: Replaced native selects with high-fidelity Shadcn nodes.
+ * @fileOverview Enterprise Mock Builder Hub v26.1.
+ * OPTIMIZED: Reduced fetchBank limit to 500 to prevent server memory restarts.
  */
 
 export default function MockBuilderPage() {
@@ -107,7 +106,8 @@ function MockBuilderContent() {
     if (!db) return
     setBankLoading(true)
     try {
-      const q = query(collection(db, "questions"), limit(3000))
+      // OPTIMIZED: Lowered from 3000 to 500
+      const q = query(collection(db, "questions"), limit(500))
       const snap = await getDocs(q)
       setQuestionBank(snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }) as Question))
     } finally {
@@ -285,7 +285,6 @@ function MockBuilderContent() {
       </AdminPageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-10 px-1">
-        {/* LEFT: CONFIGURATION */}
         <div className="lg:col-span-4 space-y-6 md:space-y-8">
            <Card className="border-none shadow-xl rounded-2xl md:rounded-[3rem] bg-white p-5 md:p-10 space-y-6 md:space-y-8 border border-slate-50">
               <div className="space-y-2">
@@ -366,7 +365,6 @@ function MockBuilderContent() {
            </Card>
         </div>
 
-        {/* RIGHT: ASSETS HUB */}
         <div className="lg:col-span-8 space-y-6">
            <div className="flex items-center gap-2 bg-slate-100 p-1 rounded-full w-fit mb-4">
               <button onClick={() => setActiveRightTab('BANK')} className={cn("px-8 py-2 rounded-full font-black uppercase text-[10px] tracking-widest transition-all", activeRightTab === 'BANK' ? "bg-white text-[#0F172A] shadow-sm" : "text-slate-400 hover:text-slate-600")}>Registry Bank</button>
@@ -427,7 +425,9 @@ function MockBuilderContent() {
                 </Card>
 
                 <div className="grid grid-cols-1 gap-3">
-                   {bankLoading ? <Skeleton className="h-64 w-full rounded-[2rem]" /> : filteredBank.slice(0, 100).map((q: Question) => {
+                   {bankLoading ? (
+                      Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white" />)
+                   ) : filteredBank.slice(0, 100).map((q: Question) => {
                       const isSelected = bankSelection.includes(q.id);
                       return (
                         <div key={q.id} onClick={() => setBankSelection((p: string[]) => isSelected ? p.filter(id => id !== q.id) : [...p, q.id])} className={cn("p-5 md:px-8 rounded-2xl md:rounded-[2rem] border-2 transition-all cursor-pointer flex items-center justify-between group", isSelected ? "bg-primary/5 border-primary shadow-lg" : "bg-white border-slate-50 hover:border-slate-100 shadow-sm")}>
@@ -488,7 +488,7 @@ function MockBuilderContent() {
                             </div>
                             <div className="flex gap-2">
                                <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active Hub' : 'Set Focus'}</button>
-                               <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></Button>
+                               <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></button>
                             </div>
                          </div>
                          <div className="p-6 md:p-10 space-y-3">

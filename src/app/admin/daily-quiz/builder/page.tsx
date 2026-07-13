@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -55,10 +54,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Daily Challenge Architect v2.0.
- * FIXED: Collection synchronized with primary 'questions' node.
- * FIXED: Resolved reference errors for existingQuiz and missing UI components.
- * FIXED: Dropdown visibility and isTodayQuiz archiving logic.
+ * @fileOverview Daily Challenge Architect v2.1.
+ * OPTIMIZED: Reduced initial question fetch limit to 500 to stabilize memory usage.
  */
 
 export default function DailyQuizBuilder() {
@@ -79,8 +76,8 @@ function DailyQuizBuilderContent() {
   const quizId = searchParams?.get("id") ?? ""
   const isEditing = !!quizId
 
-  // SYNCED: Using 'questions' collection as the master bank
-  const { data: rawBank, loading: bankLoading } = useCollection<Question>(useMemo(() => (db ? query(collection(db, "questions"), limit(2000)) : null), [db]))
+  // OPTIMIZED: limit(500) prevents memory threshold restarts
+  const { data: rawBank, loading: bankLoading } = useCollection<Question>(useMemo(() => (db ? query(collection(db, "questions"), limit(500)) : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]))
   const { data: existingQuiz, loading: quizLoading } = useDoc<any>(useMemo(() => (db && quizId ? doc(db, "daily_quizzes", quizId) : null), [db, quizId]))
   
@@ -161,7 +158,6 @@ function DailyQuizBuilderContent() {
     try {
        const batch = writeBatch(db);
 
-       // RULE: ONLY ONE ACTIVE TODAY QUIZ
        if (!isDraft && quizData.isTodayQuiz) {
           const prevActiveSnap = await getDocs(query(collection(db, "daily_quizzes"), where("isTodayQuiz", "==", true)));
           prevActiveSnap.docs.forEach(d => {
@@ -218,7 +214,6 @@ function DailyQuizBuilderContent() {
       </AdminPageHeader>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
-         {/* CONFIG PANEL */}
          <div className="lg:col-span-4 space-y-8">
             <Card className="border-none shadow-xl rounded-[2.5rem] bg-white p-6 md:p-10 space-y-10 border border-slate-50">
                <div className="space-y-2 text-left">
@@ -260,7 +255,6 @@ function DailyQuizBuilderContent() {
             </Card>
          </div>
 
-         {/* ASSEMBLY HUB */}
          <div className="lg:col-span-8 space-y-6">
             <div className="flex bg-slate-100 p-1.5 rounded-2xl w-fit gap-2">
                <button onClick={() => setActiveTab('BANK')} className={cn("px-8 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all", activeTab === 'BANK' ? "bg-[#0F172A] text-white shadow-xl" : "text-slate-400 hover:text-slate-600")}>MCQ Bank Hub</button>
@@ -313,7 +307,9 @@ function DailyQuizBuilderContent() {
                   </Card>
 
                   <div className="grid grid-cols-1 gap-3">
-                     {bankLoading ? <Skeleton className="h-20 w-full rounded-2xl" /> : filteredBank.length > 0 ? filteredBank.slice(0, 50).map((q) => {
+                     {bankLoading ? (
+                        Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)
+                     ) : filteredBank.length > 0 ? filteredBank.map((q) => {
                         const isSel = bankSelection.includes(q.id);
                         return (
                            <div key={q.id} onClick={() => setBankSelection(prev => isSel ? prev.filter(id => id !== q.id) : [...prev, q.id])} className={cn("p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group", isSel ? "bg-primary/5 border-primary shadow-lg" : "bg-white border-slate-50 hover:border-slate-100 shadow-sm")}>
