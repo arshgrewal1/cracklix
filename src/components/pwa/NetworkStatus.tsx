@@ -5,8 +5,8 @@ import { WifiOff, Wifi, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Network Monitor v1.2.
- * Provides a sleek, high-priority banner when the aspirant loses connectivity.
+ * @fileOverview Institutional Network Monitor v1.3.
+ * UPDATED: Replaced "Registry" with "Database".
  */
 export default function NetworkStatus() {
   const [isOnline, setIsOnline] = useState(true);
@@ -70,7 +70,7 @@ export default function NetworkStatus() {
                   {isOnline ? 'Connection Restored' : 'Offline Mode'}
                 </p>
                 <p className="text-[9px] font-bold opacity-70 uppercase tracking-widest">
-                  {isOnline ? 'Registry Synced' : 'Check Connectivity'}
+                  {isOnline ? 'Database Synced' : 'Check Connectivity'}
                 </p>
               </div>
             </div>

@@ -16,9 +16,8 @@ import { SuccessStory } from "@/types"
 import { useRouter } from "next/navigation"
 
 /**
- * @fileOverview Official Hall of Rankers v10.0 (High-Fidelity Update).
- * FIXED: Applied global responsive scaling headers with leading-[0.9].
- * FIXED: Optimized layout for premium student experience.
+ * @fileOverview Official Hall of Rankers v10.1.
+ * UPDATED: Replaced "Registry" with "Portal".
  */
 
 export default function SuccessStoriesPage() {
@@ -65,7 +64,7 @@ export default function SuccessStoriesPage() {
                  Punjab&apos;s <span className="text-primary italic">Pride.</span>
               </h1>
               <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl leading-tight tracking-tight">
-                 Verified success stories from aspirants who cracked official recruitments using the Cracklix preparation node.
+                 Verified success stories from aspirants who cracked official recruitments using the Cracklix preparation portal.
               </p>
            </div>
         </div>
@@ -80,7 +79,6 @@ export default function SuccessStoriesPage() {
                    "flex flex-col md:flex-row items-center gap-10 md:gap-24 transition-all duration-700",
                    idx % 2 !== 0 ? 'md:flex-row-reverse' : ''
                 )}>
-                   {/* TOPPER ASSET */}
                    <div className="w-full md:w-2/5">
                       <div className="relative aspect-[4/5] rounded-[2.5rem] md:rounded-[4.5rem] overflow-hidden shadow-5xl group border border-slate-100 bg-[#0B1528] max-w-[320px] md:max-w-none mx-auto">
                          <Image 
@@ -99,7 +97,6 @@ export default function SuccessStoriesPage() {
                       </div>
                    </div>
 
-                   {/* TOPPER NARRATIVE */}
                    <div className="w-full md:w-3/5 space-y-6 md:space-y-12 text-center md:text-left px-2">
                       <div className="flex justify-center md:justify-start gap-1.5 text-amber-400">
                          {Array.from({ length: 5 }).map((_, i) => <Star key={i} className="fill-current h-4 w-4 md:h-10 md:w-10" />)}
@@ -140,7 +137,7 @@ export default function SuccessStoriesPage() {
                  Your Name <br/> <span className="text-primary">is next.</span>
               </h2>
               <p className="text-slate-400 text-sm md:text-2xl max-w-2xl mx-auto font-medium leading-tight">
-                 Join {liveAspirantCount} aspirants already preparing with the state&apos;s most advanced registry.
+                 Join {liveAspirantCount} aspirants already preparing with the state&apos;s most advanced portal.
               </p>
            </div>
 

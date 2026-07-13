@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useEffect, useState } from "react";
@@ -11,8 +10,8 @@ import { doc } from "firebase/firestore";
 import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Mass Institutional Hero v43.0.
- * UPDATED: Premium CTA Redesign featuring glassmorphism, glossy shine, and precise Apple-inspired geometry.
+ * @fileOverview High-Mass Institutional Hero v43.1.
+ * UPDATED: Replaced "Registry" with "Selection" in secondary CTA.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -47,11 +46,10 @@ export default function Hero() {
             </h1>
 
             <p className="text-[16px] md:text-2xl text-slate-500 font-medium leading-relaxed tracking-tight px-4 max-w-2xl mx-auto">
-              Master official patterns with verified Mock Tests, Notes, and Daily Registry Updates.
+              Master official patterns with verified Mock Tests, Notes, and Daily Portal Updates.
             </p>
           </div>
 
-          {/* PREMIUM HIGH-FIDELITY CTA HUB */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -64,7 +62,6 @@ export default function Hero() {
                aria-label="Start Preparation"
              >
                 <Link href="/mocks" className="flex items-center justify-center w-full px-1">
-                  {/* Glossy Shine Animation */}
                   <motion.div 
                     animate={{ x: ['-100%', '250%'] }}
                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
@@ -86,10 +83,10 @@ export default function Hero() {
                asChild 
                variant="outline" 
                className="w-full h-[56px] rounded-full bg-white border-2 border-[#DCE8FF] hover:border-[#60A5FA] hover:bg-[#F8FBFF] text-[#1E3A8A] font-semibold text-[17px] shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300 active:scale-[0.98] hover:-translate-y-[2px] group"
-               aria-label="Browse Registry"
+               aria-label="Browse Selection"
              >
                 <Link href="/exams" className="flex items-center justify-center w-full px-1">
-                   <span className="flex-1 text-center pl-[34px]">Browse Registry</span> 
+                   <span className="flex-1 text-center pl-[34px]">Browse Selection</span> 
                    <div className="w-[34px] h-[34px] rounded-full bg-[#EFF6FF] flex items-center justify-center shrink-0 group-hover:bg-[#E0F2FE] transition-colors">
                       <ChevronRight className="h-4 w-4 text-[#1E3A8A] group-hover:translate-x-0.5 transition-transform" />
                    </div>
@@ -98,7 +95,7 @@ export default function Hero() {
           </motion.div>
           
           <div className="flex items-center gap-8 pt-4 md:pt-8 opacity-40 grayscale group hover:grayscale-0 transition-all duration-700">
-             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Institutional Registry Verified</p>
+             <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Official Portal Verified</p>
           </div>
         </div>
       </div>

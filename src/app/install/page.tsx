@@ -18,8 +18,8 @@ import { usePWAInstall } from "@/hooks/use-pwa-install";
 import { PLATFORM_VERSION } from "@/lib/version";
 
 /**
- * @fileOverview Official Direct App Portal v15.0 (Size & Margin Optimized).
- * FIXED: Reduced text sizes and increased side margins for better mobile balance.
+ * @fileOverview Official Direct App Portal v15.1.
+ * UPDATED: Replaced "Registry" with "Portal".
  */
 
 export default function InstallPwaPage() {
@@ -31,7 +31,6 @@ export default function InstallPwaPage() {
       <Navbar />
       
       <main className="flex-1 flex flex-col items-center justify-center p-6 md:p-8 relative overflow-hidden">
-        {/* SUBTLE RADIAL GLOW */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-5xl aspect-square bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
         <section className="relative w-full max-w-4xl mx-auto py-10 md:py-20 text-[#0F172A] z-10">
@@ -41,13 +40,11 @@ export default function InstallPwaPage() {
                  animate={{ opacity: 1, y: 0 }}
                  className="space-y-8 md:space-y-10"
               >
-                 {/* VERSION BADGE */}
                  <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white border border-slate-200 shadow-sm mx-auto">
                     <Sparkles className="h-3 w-3 text-primary animate-pulse" />
                     <span className="text-[10px] md:text-[11px] font-black tracking-widest uppercase text-slate-400">V{version} Production Portal</span>
                  </div>
 
-                 {/* HERO GRAPHIC - OPTIMIZED SCALE */}
                  <div className="relative py-2 flex flex-col items-center">
                     <h1 className="flex flex-col items-center justify-center font-black tracking-tighter leading-[0.85] md:leading-[0.8] select-none antialiased italic">
                        <span className="text-[42px] md:text-[80px] lg:text-[100px] text-slate-200 uppercase">Direct</span>
@@ -55,10 +52,9 @@ export default function InstallPwaPage() {
                     </h1>
                  </div>
 
-                 {/* DESCRIPTION */}
                  <div className="max-w-xl mx-auto space-y-8 px-4">
                     <p className="text-slate-500 font-medium text-[13px] md:text-xl leading-relaxed tracking-tight">
-                       Synchronize the official preparation registry with your home screen. One-click setup for the smartest exam experience in Punjab.
+                       Synchronize the official preparation portal with your home screen. One-click setup for the smartest exam experience in Punjab.
                     </p>
 
                     <div className="flex flex-col items-center justify-center gap-6 pt-4">
@@ -87,7 +83,6 @@ export default function InstallPwaPage() {
                     </div>
                  </div>
 
-                 {/* FEATURE NODES */}
                  <div className="flex flex-wrap items-center justify-center gap-6 md:gap-10 text-slate-400 font-black text-[9px] md:text-[11px] tracking-widest pt-10 border-t border-slate-100 max-w-lg mx-auto uppercase">
                     <div className="flex items-center gap-2 hover:text-primary transition-colors"><ShieldCheck className="h-3.5 w-3.5 text-emerald-500" /> Secure</div>
                     <div className="flex items-center gap-2 hover:text-primary transition-colors"><Zap className="h-3.5 w-3.5 text-primary" /> Instant</div>

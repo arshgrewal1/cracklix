@@ -15,9 +15,8 @@ import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Official Punjab Exam Calendar Hub v3.0 (High-Fidelity Update).
- * FIXED: Applied global responsive scaling headers with leading-[0.9].
- * FIXED: Optimized card layouts for premium preparation experience.
+ * @fileOverview Official Punjab Exam Calendar Hub v3.1.
+ * UPDATED: Replaced "Registry" with "List".
  */
 
 export default function ExamCalendarPage() {
@@ -60,7 +59,7 @@ export default function ExamCalendarPage() {
                     <div className="h-10 w-10 md:h-12 md:w-12 bg-primary/10 rounded-xl md:rounded-2xl flex items-center justify-center text-primary shadow-inner shrink-0">
                        <CalendarIcon className="h-5 w-5 md:h-6 md:w-6" />
                     </div>
-                    <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-slate-400">Official Recruitment Registry</span>
+                    <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-slate-400">Official Recruitment List</span>
                  </div>
 
                  {nextExam && (
@@ -100,7 +99,7 @@ export default function ExamCalendarPage() {
                       <CardContent className="p-8 md:p-14 space-y-8">
                          <div className="flex items-center justify-between">
                             <Badge className={cn("border-none font-black text-[9px] md:text-[11px] uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg", r.color || 'bg-primary', "text-white")}>
-                               {r.board} HUB
+                               {r.board}
                             </Badge>
                             <span className="text-[10px] md:text-[11px] font-black text-slate-300 uppercase tracking-widest">{r.type}</span>
                          </div>
@@ -123,7 +122,7 @@ export default function ExamCalendarPage() {
                                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{r.status}</span>
                             </div>
                             <Button variant="ghost" className="text-primary font-black uppercase text-[10px] md:text-[11px] tracking-widest gap-2 p-0 hover:bg-transparent group-hover:gap-4 transition-all">
-                               Track Node <Bell className="h-3.5 w-3.5 fill-current" />
+                               Track Status <Bell className="h-3.5 w-3.5 fill-current" />
                             </Button>
                          </div>
                       </CardContent>
@@ -139,7 +138,7 @@ export default function ExamCalendarPage() {
              ))
           ) : (
              <div className="py-40 text-center opacity-10 italic font-black uppercase text-3xl md:text-6xl tracking-tighter">
-                Registry Empty
+                List Empty
              </div>
           )}
         </div>
@@ -162,7 +161,7 @@ export default function ExamCalendarPage() {
            <div className="relative z-10 pt-4">
               <Button asChild className="h-14 md:h-24 px-12 md:px-24 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-sm tracking-[0.2em] rounded-2xl md:rounded-[3rem] shadow-4xl border-none transition-all active:scale-95">
                  <a href="https://t.me/cracklixapp" target="_blank" className="flex items-center justify-center gap-3">
-                    Join Broadcast Hub <ArrowRight className="h-4 w-4 md:h-8 md:w-8" />
+                    Join Portal Hub <ArrowRight className="h-4 w-4 md:h-8 md:w-8" />
                  </a>
               </Button>
            </div>

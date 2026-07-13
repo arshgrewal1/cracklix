@@ -18,7 +18,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview High-Density Category Explorer v32.0.
+ * @fileOverview High-Density Category Explorer v32.1.
+ * UPDATED: Replaced "Registry" with "Selection".
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -68,10 +69,10 @@ export default function ExamsEntryPage() {
     try {
       if (isPinned) {
         await updateDoc(userRef, { pinnedExams: arrayRemove(examId), updatedAt: serverTimestamp() });
-        toast({ title: "Removed from my list" });
+        toast({ title: "Removed from list" });
       } else {
         await updateDoc(userRef, { pinnedExams: arrayUnion(examId), updatedAt: serverTimestamp() });
-        toast({ title: "Added to my list" });
+        toast({ title: "Added to list" });
       }
     } catch (err) {
       toast({ variant: "destructive", title: "Sync failed" });
@@ -89,7 +90,7 @@ export default function ExamsEntryPage() {
           <div className="space-y-3">
              <div className="flex items-center gap-2">
                 <div className="h-8 w-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-inner"><Landmark className="h-5 w-5" /></div>
-                <span className="text-[10px] font-black text-slate-400 tracking-wider">Official Registry</span>
+                <span className="text-[10px] font-black text-slate-400 tracking-wider">Official Selection</span>
              </div>
              <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-[#0F172A] leading-tight tracking-tight">Exam Selection</h1>
              <p className="text-slate-500 font-medium text-[12px] md:text-xl max-w-3xl">Find your specific exam vertical or browse by recruitment category below.</p>
