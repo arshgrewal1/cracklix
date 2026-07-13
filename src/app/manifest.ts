@@ -2,8 +2,8 @@
 import { MetadataRoute } from 'next';
 
 /**
- * @fileOverview Official PWA Manifest Registry v2.2.
- * FIXED: Standardized all icon paths to point to /public/icons/ for high-fidelity APK branding.
+ * @fileOverview Official PWA Manifest Registry v2.3.
+ * UPDATED: Synchronized theme and background colors with official Cracklix Blue (#2563EB).
  */
 
 export default function manifest(): MetadataRoute.Manifest {
@@ -13,8 +13,9 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Punjab's most trusted government exam preparation platform.",
     start_url: "/",
     display: "standalone",
+    display_override: ["standalone"],
     orientation: "portrait",
-    background_color: "#0B1528",
+    background_color: "#2563EB",
     theme_color: "#2563EB",
     icons: [
       {

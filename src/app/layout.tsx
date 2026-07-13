@@ -1,3 +1,4 @@
+
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Inter } from "next/font/google";
@@ -17,8 +18,8 @@ const inter = Inter({
 });
 
 /**
- * @fileOverview Root Layout v61.5 (Stability Optimized).
- * FIXED: Replaced next/script with PWAInstallHandler client component to resolve ChunkLoadError.
+ * @fileOverview Root Layout v62.0.
+ * UPDATED: Viewport themeColor synchronized with brand blue.
  */
 export const metadata: Metadata = {
   title: "Cracklix | Punjab's Smart Mock Test Platform",
@@ -42,7 +43,7 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
-  themeColor: "#0B1528",
+  themeColor: "#2563EB",
 };
 
 export default function RootLayout({

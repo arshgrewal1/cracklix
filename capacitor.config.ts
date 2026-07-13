@@ -2,8 +2,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 /**
- * @fileOverview Hardened Capacitor Configuration for Offline-First Android APK.
- * Optimized for local asset loading and high-fidelity production deployment.
+ * @fileOverview Hardened Capacitor Configuration v4.0.
+ * UPDATED: Splash screen background and duration synchronized with official branding.
  */
 
 const config: CapacitorConfig = {
@@ -12,8 +12,8 @@ const config: CapacitorConfig = {
   webDir: 'out',
   plugins: {
     SplashScreen: {
-      launchShowDuration: 3000,
-      backgroundColor: "#0B1528",
+      launchShowDuration: 800,
+      backgroundColor: "#2563EB",
       showSpinner: false,
       androidScaleType: "CENTER_CROP",
       splashFullScreen: true,
@@ -25,7 +25,7 @@ const config: CapacitorConfig = {
       resizeOnFullScreen: true
     },
     StatusBar: {
-      backgroundColor: '#0B1528',
+      backgroundColor: '#2563EB',
       style: 'DARK'
     }
   },

@@ -5,9 +5,9 @@
  */
 
 export const PLATFORM_VERSION = {
-  version: "1.0.8",
-  build: "108",
-  releaseDate: "Feb 26, 2026",
+  version: "1.0.9",
+  build: "109",
+  releaseDate: "Feb 27, 2026",
   isProduction: true
 };
 
