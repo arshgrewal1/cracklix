@@ -12,7 +12,7 @@ const SYNC_INTERVAL = 30 * 1000; // 30 seconds
 
 /**
  * Helper to calculate period identifiers for tracking resets.
- * Uses local time components to align with user expectations.
+ * Uses local time components to align with user expectations (Midnight reset).
  */
 const getPeriodIds = (date: Date) => {
   const d = new Date(date);
@@ -22,7 +22,6 @@ const getPeriodIds = (date: Date) => {
     String(d.getDate()).padStart(2, '0')
   ].join('-');
   
-  // Weekly reset (Monday)
   const day = d.getDay(); 
   const diff = day === 0 ? -6 : 1 - day;
   const monday = new Date(d);
@@ -39,10 +38,9 @@ const getPeriodIds = (date: Date) => {
 };
 
 /**
- * @fileOverview Institutional Real-Time Study Tracker v5.2.
- * FIXED: isServerSynced guard prevents cache-induced resets.
- * FIXED: Local time period IDs align with user's clock.
- * FIXED: Protective incrementing logic to prevent weekly < today drift.
+ * @fileOverview Institutional Real-Time Study Tracker v5.5.
+ * FIXED: Distinguished between "Active Study" and "Passive App Usage".
+ * DASHBOARD and OTHER types no longer increment the cumulative Study Time stats.
  */
 export function useStudyTracker(contentId: string | null, contentType: StudyContentType, enabled: boolean = true) {
   const { user } = useUser();
@@ -62,6 +60,9 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
 
   const lastActivityRef = useRef<number>(Date.now());
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Define what counts as "Active Study"
+  const isStudyContent = ['MOCK', 'PRACTICE', 'SUBJECT', 'PDF', 'VIDEO', 'CA', 'PYQ'].includes(contentType);
 
   // 1. Real-time stats listener with Cache Guard
   useEffect(() => {
@@ -97,69 +98,69 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
       const dailyAggRef = doc(db, 'users', user.uid, 'study_daily', periods.today);
       const userStatsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
 
-      // 1. Log Session Activity
+      // 1. Log Session Activity (Always log for audit, but mark if it's study)
       batch.set(sessionDocRef, {
         sessionId,
         userId: user.uid,
         contentId: contentId || 'portal',
         contentType,
+        isStudyContent,
         duration: increment(durationToSync),
         updatedAt: serverTimestamp(),
         ...(isFinal ? { endTime: Date.now(), status: 'COMPLETED' } : { status: 'ACTIVE' })
       }, { merge: true });
 
-      // 2. Log Daily Aggregate
-      batch.set(dailyAggRef, {
-        userId: user.uid,
-        date: periods.today,
-        totalDuration: increment(durationToSync),
-        lastUpdated: serverTimestamp(),
-      }, { merge: true });
+      // ONLY increment cumulative stats if this is actual STUDY content
+      if (isStudyContent) {
+        // 2. Log Daily Aggregate
+        batch.set(dailyAggRef, {
+          userId: user.uid,
+          date: periods.today,
+          totalDuration: increment(durationToSync),
+          lastUpdated: serverTimestamp(),
+        }, { merge: true });
 
-      // 3. Statistical Hub Updates
-      const statsUpdate: any = {
-        totalStudyTime: increment(durationToSync),
-        lastSessionDate: serverTimestamp(),
-        totalSessions: isFinal ? increment(1) : increment(0),
-        lastTodayId: periods.today
-      };
+        // 3. Statistical Hub Updates
+        const statsUpdate: any = {
+          totalStudyTime: increment(durationToSync),
+          lastSessionDate: serverTimestamp(),
+          totalSessions: isFinal ? increment(1) : increment(0),
+          lastTodayId: periods.today
+        };
 
-      // PERIODIC RESET LOGIC - ONLY TRIGGER IF SERVER VERIFIED
-      if (serverReady && remote) {
-        // Week Check
-        if (remote.lastWeekId && remote.lastWeekId !== periods.week) {
-          statsUpdate.thisWeekTime = durationToSync;
-          statsUpdate.lastWeekId = periods.week;
+        // PERIODIC RESET LOGIC - ONLY TRIGGER IF SERVER VERIFIED
+        if (serverReady && remote) {
+          if (remote.lastWeekId && remote.lastWeekId !== periods.week) {
+            statsUpdate.thisWeekTime = durationToSync;
+            statsUpdate.lastWeekId = periods.week;
+          } else {
+            statsUpdate.thisWeekTime = increment(durationToSync);
+            if (!remote.lastWeekId) statsUpdate.lastWeekId = periods.week;
+          }
+
+          if (remote.lastMonthId && remote.lastMonthId !== periods.month) {
+            statsUpdate.thisMonthTime = durationToSync;
+            statsUpdate.lastMonthId = periods.month;
+          } else {
+            statsUpdate.thisMonthTime = increment(durationToSync);
+            if (!remote.lastMonthId) statsUpdate.lastMonthId = periods.month;
+          }
+
+          if (remote.lastYearId && remote.lastYearId !== periods.year) {
+            statsUpdate.thisYearTime = durationToSync;
+            statsUpdate.lastYearId = periods.year;
+          } else {
+            statsUpdate.thisYearTime = increment(durationToSync);
+            if (!remote.lastYearId) statsUpdate.lastYearId = periods.year;
+          }
         } else {
           statsUpdate.thisWeekTime = increment(durationToSync);
-          if (!remote.lastWeekId) statsUpdate.lastWeekId = periods.week;
-        }
-
-        // Month Check
-        if (remote.lastMonthId && remote.lastMonthId !== periods.month) {
-          statsUpdate.thisMonthTime = durationToSync;
-          statsUpdate.lastMonthId = periods.month;
-        } else {
           statsUpdate.thisMonthTime = increment(durationToSync);
-          if (!remote.lastMonthId) statsUpdate.lastMonthId = periods.month;
-        }
-
-        // Year Check
-        if (remote.lastYearId && remote.lastYearId !== periods.year) {
-          statsUpdate.thisYearTime = durationToSync;
-          statsUpdate.lastYearId = periods.year;
-        } else {
           statsUpdate.thisYearTime = increment(durationToSync);
-          if (!remote.lastYearId) statsUpdate.lastYearId = periods.year;
         }
-      } else {
-        // Fallback to safe incremental updates if server data is pending
-        statsUpdate.thisWeekTime = increment(durationToSync);
-        statsUpdate.thisMonthTime = increment(durationToSync);
-        statsUpdate.thisYearTime = increment(durationToSync);
-      }
 
-      batch.set(userStatsRef, statsUpdate, { merge: true });
+        batch.set(userStatsRef, statsUpdate, { merge: true });
+      }
 
       await batch.commit();
       setUnSyncedSeconds(0);
@@ -167,7 +168,7 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
     } catch (error) {
       console.error('[StudyTracker] Sync failure:', error);
     }
-  }, [db, user, contentId, contentType]);
+  }, [db, user, contentId, contentType, isStudyContent]);
 
   const startSession = useCallback(async () => {
     if (!user || sessionRef.current.sessionId || !enabled || !db) return;
@@ -236,5 +237,5 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
     };
   }, [enabled, user, db, startSession, endSession, saveProgress, isActive]);
 
-  return { elapsedSeconds, unSyncedSeconds, isActive };
+  return { elapsedSeconds, unSyncedSeconds, isActive, isStudyContent };
 }

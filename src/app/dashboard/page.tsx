@@ -33,8 +33,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useStudyTracker } from "@/hooks/useStudyTracker"
 
 /**
- * @fileOverview Student Progress Portal v60.0.
- * FIXED: Implemented Drift Protection to ensure Week/Month/Year >= Today study time.
+ * @fileOverview Student Progress Portal v61.0.
+ * FIXED: Rollover logic and excluded Dashboard usage from Study Time stats.
  */
 
 const formatStudyTime = (seconds: number) => {
@@ -71,7 +71,8 @@ export default function StudentDashboard() {
     lifetime: 0 
   });
 
-  const { unSyncedSeconds, isActive } = useStudyTracker('dashboard', 'DASHBOARD');
+  // Track dashboard usage passively (don't increment study metrics)
+  const { unSyncedSeconds, isActive, isStudyContent } = useStudyTracker('dashboard', 'DASHBOARD');
 
   useEffect(() => {
     setMounted(true)
@@ -109,6 +110,7 @@ export default function StudentDashboard() {
 
     const unsubDaily = onSnapshot(dailyRef, (snap) => {
       if (snap.exists()) setBaseStats(prev => ({ ...prev, today: snap.data().totalDuration || 0 }));
+      else setBaseStats(prev => ({ ...prev, today: 0 }));
     });
 
     const unsubStats = onSnapshot(statsRef, (snap) => {
@@ -130,16 +132,17 @@ export default function StudentDashboard() {
     };
   }, [db, user, mounted]);
 
-  // DRIFT PROTECTION: Week/Month/Year should always be >= Today
+  // Display Logic: Only add unSyncedSeconds if we are on a "Study" page
   const displayStats = useMemo(() => {
-     const today = baseStats.today + unSyncedSeconds;
-     const week = Math.max(baseStats.week + unSyncedSeconds, today);
-     const month = Math.max(baseStats.month + unSyncedSeconds, today);
-     const year = Math.max(baseStats.year + unSyncedSeconds, today);
-     const lifetime = Math.max(baseStats.lifetime + unSyncedSeconds, year);
+     const currentBonus = isStudyContent ? unSyncedSeconds : 0;
+     const today = baseStats.today + currentBonus;
+     const week = Math.max(baseStats.week + currentBonus, today);
+     const month = Math.max(baseStats.month + currentBonus, today);
+     const year = Math.max(baseStats.year + currentBonus, today);
+     const lifetime = Math.max(baseStats.lifetime + currentBonus, year);
      
      return { today, week, month, year, lifetime };
-  }, [baseStats, unSyncedSeconds]);
+  }, [baseStats, unSyncedSeconds, isStudyContent]);
 
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null
@@ -181,7 +184,7 @@ export default function StudentDashboard() {
               </section>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5">
-                 <MetricItem label="Today's study" val={formatStudyTime(displayStats.today)} icon={<Clock />} active={isActive} />
+                 <MetricItem label="Today's study" val={formatStudyTime(displayStats.today)} icon={<Clock />} active={isActive && isStudyContent} />
                  <MetricItem label="This week" val={formatStudyTime(displayStats.week)} icon={<Calendar />} />
                  <MetricItem label="This month" val={formatStudyTime(displayStats.month)} icon={<BarChart />} />
                  <MetricItem label="Yearly goal" val={formatStudyTime(displayStats.year)} icon={<AreaChart />} />
