@@ -30,8 +30,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Mobile Sidebar v69.0.
- * FIXED: Synchronized logo height with high-mass student navbar standards.
+ * @fileOverview Mobile Sidebar v70.0.
+ * UPDATED: Doubled logo size to match navbar standards.
  */
 export default function MobileSidebar({
   onClose,
@@ -41,7 +41,7 @@ export default function MobileSidebar({
   const [mounted, setMounted] = useState(false);
 
   const { user, profile, profileLoading } = useUser();
-  const auth = useAuth();
+  const auth = auth;
 
   const router = useRouter();
   const pathname = usePathname();
@@ -76,13 +76,13 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
-      {/* HEADER - SYNCHRONIZED LOGO SIZE */}
+      {/* HEADER - DOUBLED LOGO SIZE */}
       <div className="h-[80px] md:h-[110px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
          <Logo
            variant="light"
            align="left"
-           className="flex-shrink-0 -ml-2"
-           imgClassName="h-14 md:h-18 w-auto"
+           className="flex-shrink-0 -ml-5 md:-ml-8"
+           imgClassName="h-24 md:h-32 w-auto"
            onClick={onClose}
          />
          <button
