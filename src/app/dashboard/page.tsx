@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, isValidElement, cloneElement, ReactElement } from "react"
@@ -33,8 +34,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useStudyTracker } from "@/hooks/useStudyTracker"
 
 /**
- * @fileOverview Student Progress Portal v61.0.
- * FIXED: Rollover logic and excluded Dashboard usage from Study Time stats.
+ * @fileOverview Student Progress Portal v62.0.
+ * FIXED: Dynamic Midnight Rollover logic.
  */
 
 const formatStudyTime = (seconds: number) => {
@@ -62,6 +63,7 @@ export default function StudentDashboard() {
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [passCountdown, setPassCountdown] = useState("");
+  const [currentDateId, setCurrentDateId] = useState("");
   
   const [baseStats, setBaseStats] = useState({ 
     today: 0, 
@@ -71,12 +73,21 @@ export default function StudentDashboard() {
     lifetime: 0 
   });
 
-  // Track dashboard usage passively (don't increment study metrics)
+  // Track dashboard usage passively (isStudyContent will be false)
   const { unSyncedSeconds, isActive, isStudyContent } = useStudyTracker('dashboard', 'DASHBOARD');
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+    // Dynamic Date Update logic
+    const updateDate = () => {
+      const d = new Date();
+      const id = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      setCurrentDateId(id);
+    };
+    updateDate();
+    const ticker = setInterval(updateDate, 60000); // Check every minute
+    return () => clearInterval(ticker);
+  }, []);
 
   useEffect(() => {
     if (!profile?.passExpiresAt) return;
@@ -100,12 +111,9 @@ export default function StudentDashboard() {
   }, [profile?.passExpiresAt]);
 
   useEffect(() => {
-    if (!db || !user || !mounted) return;
+    if (!db || !user || !mounted || !currentDateId) return;
 
-    const d = new Date();
-    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    
-    const dailyRef = doc(db, 'users', user.uid, 'study_daily', todayStr);
+    const dailyRef = doc(db, 'users', user.uid, 'study_daily', currentDateId);
     const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
 
     const unsubDaily = onSnapshot(dailyRef, (snap) => {
@@ -130,9 +138,9 @@ export default function StudentDashboard() {
       unsubDaily();
       unsubStats();
     };
-  }, [db, user, mounted]);
+  }, [db, user, mounted, currentDateId]);
 
-  // Display Logic: Only add unSyncedSeconds if we are on a "Study" page
+  // Display Logic: unSyncedSeconds only added if studying active content
   const displayStats = useMemo(() => {
      const currentBonus = isStudyContent ? unSyncedSeconds : 0;
      const today = baseStats.today + currentBonus;

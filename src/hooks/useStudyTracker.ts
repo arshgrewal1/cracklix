@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -12,35 +13,33 @@ const SYNC_INTERVAL = 30 * 1000; // 30 seconds
 
 /**
  * Helper to calculate period identifiers for tracking resets.
- * Uses local time components to align with user expectations (Midnight reset).
+ * Uses LOCAL time components to align with user expectations (Midnight reset).
  */
 const getPeriodIds = (date: Date) => {
   const d = new Date(date);
-  const today = [
-    d.getFullYear(),
-    String(d.getMonth() + 1).padStart(2, '0'),
-    String(d.getDate()).padStart(2, '0')
-  ].join('-');
+  const yearNum = d.getFullYear();
+  const monthNum = d.getMonth() + 1;
+  const dateNum = d.getDate();
+  
+  const today = `${yearNum}-${String(monthNum).padStart(2, '0')}-${String(dateNum).padStart(2, '0')}`;
   
   const day = d.getDay(); 
   const diff = day === 0 ? -6 : 1 - day;
   const monday = new Date(d);
   monday.setDate(d.getDate() + diff);
-  const week = [
-    monday.getFullYear(),
-    String(monday.getMonth() + 1).padStart(2, '0'),
-    String(monday.getDate()).padStart(2, '0')
-  ].join('-');
   
-  const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-  const year = `${d.getFullYear()}`;
+  const week = `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+  const month = `${yearNum}-${String(monthNum).padStart(2, '0')}`;
+  const year = `${yearNum}`;
+  
   return { today, week, month, year };
 };
 
 /**
- * @fileOverview Institutional Real-Time Study Tracker v5.5.
+ * @fileOverview Institutional Real-Time Study Tracker v6.0.
  * FIXED: Distinguished between "Active Study" and "Passive App Usage".
  * DASHBOARD and OTHER types no longer increment the cumulative Study Time stats.
+ * ADDED: Auto-rollover logic for sessions spanning midnight.
  */
 export function useStudyTracker(contentId: string | null, contentType: StudyContentType, enabled: boolean = true) {
   const { user } = useUser();
@@ -64,7 +63,7 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
   // Define what counts as "Active Study"
   const isStudyContent = ['MOCK', 'PRACTICE', 'SUBJECT', 'PDF', 'VIDEO', 'CA', 'PYQ'].includes(contentType);
 
-  // 1. Real-time stats listener with Cache Guard
+  // 1. Real-time stats listener
   useEffect(() => {
     if (!user || !db) return;
     const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
@@ -98,7 +97,7 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
       const dailyAggRef = doc(db, 'users', user.uid, 'study_daily', periods.today);
       const userStatsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
 
-      // 1. Log Session Activity (Always log for audit, but mark if it's study)
+      // 1. Log Session Activity (Always log for audit)
       batch.set(sessionDocRef, {
         sessionId,
         userId: user.uid,
@@ -112,7 +111,6 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
 
       // ONLY increment cumulative stats if this is actual STUDY content
       if (isStudyContent) {
-        // 2. Log Daily Aggregate
         batch.set(dailyAggRef, {
           userId: user.uid,
           date: periods.today,
@@ -120,7 +118,6 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
           lastUpdated: serverTimestamp(),
         }, { merge: true });
 
-        // 3. Statistical Hub Updates
         const statsUpdate: any = {
           totalStudyTime: increment(durationToSync),
           lastSessionDate: serverTimestamp(),
@@ -128,7 +125,6 @@ export function useStudyTracker(contentId: string | null, contentType: StudyCont
           lastTodayId: periods.today
         };
 
-        // PERIODIC RESET LOGIC - ONLY TRIGGER IF SERVER VERIFIED
         if (serverReady && remote) {
           if (remote.lastWeekId && remote.lastWeekId !== periods.week) {
             statsUpdate.thisWeekTime = durationToSync;

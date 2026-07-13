@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -27,8 +28,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { useStudyTracker } from "@/hooks/useStudyTracker";
 
 /**
- * @fileOverview Official Current Affairs Center v23.1.
- * FIXED: Standardized icons to circular "Hero" style nodes.
+ * @fileOverview Official Current Affairs Center v23.2.
+ * FIXED: Integrated Real-Time Study Tracking.
  */
 
 const HUB_TYPES = [
