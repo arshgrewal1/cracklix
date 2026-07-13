@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v72.0.
- * FIXED: Desktop Header alignment (80px height, 24-32px standardized gaps).
+ * @fileOverview Cracklix Navigation Hub v73.0.
+ * FIXED: Desktop Header alignment (80px height, anchored containers to prevent overlap).
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -108,7 +108,7 @@ export default function Navbar() {
           <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU | LOGO | NAVIGATION */}
-            <div className="flex items-center gap-4 md:gap-6 lg:gap-8 flex-1 min-w-0">
+            <div className="flex items-center gap-4 md:gap-6 lg:gap-8">
               <button
                 onClick={() => setisSidebarOpen(true)}
                 aria-label="Open menu"
@@ -119,7 +119,7 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 -ml-5 lg:ml-0"
+                className="flex-shrink-0"
                 imgClassName="h-16 md:h-16 w-auto"
                 align="left"
               />
@@ -134,9 +134,9 @@ export default function Navbar() {
             </div>
 
             {/* RIGHT BLOCK: ELITE ACCESS | SEARCH | PROFILE */}
-            <div className="flex items-center gap-4 md:gap-6 lg:gap-8 shrink-0">
+            <div className="flex items-center gap-4 md:gap-6 lg:gap-8">
               {profile?.passStatus === 'active' && timeLeft && (
-                 <div className="hidden md:flex flex-col items-end mr-1">
+                 <div className="hidden md:flex flex-col items-end mr-1 shrink-0">
                     <span className="text-[9px] font-black text-emerald-600 tracking-tight leading-none uppercase">Elite Access</span>
                     <span className="text-[11px] font-bold text-slate-400 mt-1.5 leading-none tabular-nums">{timeLeft}</span>
                  </div>
@@ -144,17 +144,17 @@ export default function Navbar() {
 
               <Link
                 href="/search"
-                className="w-10 h-10 md:h-11 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm"
+                className="w-10 h-10 md:h-11 rounded-xl flex items-center justify-center bg-slate-50 text-slate-600 hover:text-primary transition-all active:scale-95 shadow-sm shrink-0"
               >
                 <Search className="w-5 h-5" />
               </Link>
 
               {loading ? (
-                <Skeleton className="w-10 h-10 md:h-11 rounded-xl bg-slate-100" />
+                <Skeleton className="w-10 h-10 md:h-11 rounded-xl bg-slate-100 shrink-0" />
               ) : user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="w-10 h-10 md:h-11 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all shadow-sm">
+                    <button className="w-10 h-10 md:h-11 rounded-xl overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center active:scale-95 transition-all shadow-sm shrink-0">
                       <StudentAvatar
                         profile={profile}
                         className="w-full h-full border-none"
@@ -192,7 +192,7 @@ export default function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link href="/login" className="px-5 h-11 rounded-xl bg-primary text-white font-bold text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
+                <Link href="/login" className="px-5 h-11 rounded-xl bg-primary text-white font-bold text-xs flex items-center justify-center transition-all active:scale-95 shadow-md shrink-0">
                   Login
                 </Link>
               )}
