@@ -31,8 +31,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Mobile Sidebar v68.0.
- * FIXED: Reduced logo scale for a refined mobile layout.
+ * @fileOverview Mobile Sidebar v68.1.
+ * FIXED: Synchronized logo height with admin portal for brand unity.
  */
 export default function MobileSidebar({
   onClose,
@@ -77,13 +77,13 @@ export default function MobileSidebar({
   return (
     <div className="flex h-full flex-col bg-white font-body overflow-hidden text-left">
 
-      {/* HEADER - REFINED LOGO SIZE */}
+      {/* HEADER - SYNCHRONIZED LOGO SIZE */}
       <div className="h-[80px] md:h-[110px] px-6 shrink-0 bg-white border-b border-slate-50 flex items-center justify-between">
          <Logo
            variant="light"
            align="left"
-           className="h-14 md:h-16 w-36 md:w-48 -ml-2"
-           imgClassName="h-full w-auto"
+           className="flex-shrink-0 -ml-2"
+           imgClassName="h-12 md:h-14 w-auto"
            onClick={onClose}
          />
          <button
