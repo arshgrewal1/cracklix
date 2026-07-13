@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v24.0.
- * FIXED: Explicit Grid/Flex definition to prevent UI collapse seen in workstation environments.
+ * @fileOverview Admin Layout v25.0.
+ * FIXED: Restored full logo visibility in mobile header.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -104,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu className="w-5 h-5" />
             </button>
             <div className="lg:hidden">
-              <Logo variant="light" iconOnly className="h-10 w-10" />
+              <Logo variant="light" className="h-14 md:h-16 w-auto" />
             </div>
             <p className="hidden md:block text-[10px] font-black uppercase tracking-widest text-slate-400">
                Registry Governance

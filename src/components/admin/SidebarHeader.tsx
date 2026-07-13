@@ -6,8 +6,8 @@ import SidebarToggle from './SidebarToggle';
 import Logo from '@/components/brand/Logo';
 
 /**
- * Cracklix Admin Sidebar Header v51.0.
- * RESTORED: Toggle button visibility regardless of isOpen state to ensure expansion is possible.
+ * Cracklix Admin Sidebar Header v52.0.
+ * FIXED: Improved logo rendering logic for better visibility in collapsed state.
  */
 export default function SidebarHeader({
   isOpen,
@@ -25,10 +25,9 @@ export default function SidebarHeader({
     >
       <Logo
         href="/admin"
-        variant="light"
-        iconOnly={!isOpen}
+        variant={isOpen ? "light" : "icon"}
         align={isOpen ? "left" : "center"}
-        className="transition-all duration-300"
+        className="transition-all duration-300 h-10 md:h-12 w-auto"
       />
 
       <SidebarToggle

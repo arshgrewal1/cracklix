@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -30,8 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v6.0.
- * UPDATED: Handles both 'mocks' and 'daily_quizzes' registries.
+ * @fileOverview Official Mock Attempt Hub v6.1.
+ * FIXED: Re-wired handleSaveAndNext to ensure correct state transitions.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -228,9 +227,13 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   }, [timeLeft, isInitializing, initError, isSubmittingFinal, handleSubmitFinal]);
 
   const handleSaveAndNext = useCallback(() => {
-    if (currentIdx === questions.length - 1) setShowSubmitModal(true);
-    else saveAndNext(db);
-  }, [currentIdx, questions.length, saveAndNext, db]);
+    if (!questions || questions.length === 0) return;
+    if (currentIdx >= questions.length - 1) {
+      setShowSubmitModal(true);
+    } else {
+      saveAndNext(db);
+    }
+  }, [currentIdx, questions, saveAndNext, db]);
 
   const answeredCount = useMemo(() => Object.values(answers || {}).filter(a => a !== null && a !== undefined).length, [answers]);
   const notAnsweredCount = useMemo(() => questions.length - answeredCount, [questions.length, answeredCount]);

@@ -22,9 +22,8 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Official Test Rules Hub v4.0.
- * FIXED: Dual-registry lookup (mocks + daily_quizzes) to prevent blank screens.
- * FIXED: Added "Quiz Not Found" fallback and hardened loading states.
+ * @fileOverview Official Test Rules Hub v4.1.
+ * UPDATED: Changed "INITIALIZE ATTEMPT" to "START TEST" as requested.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -239,7 +238,7 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
                     onClick={() => router.push(`/mocks/attempt?id=${activeId}`)}
                     className="w-full h-16 md:h-24 bg-[#0F172A] hover:bg-black text-white font-black uppercase tracking-[0.2em] text-[11px] md:text-base rounded-2xl md:rounded-[3rem] shadow-5xl group transition-all active:scale-95 border-none"
                  >
-                    Initialize Attempt <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
+                    Start Test <ChevronRight className="ml-3 h-6 w-6 group-hover:translate-x-2 transition-transform" />
                  </Button>
               </CardContent>
            </Card>
