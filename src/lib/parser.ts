@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Ingestion Hub v84.0.
- * REBUILD: Fill in the Blank State Machine with Question-First Priority.
+ * @fileOverview Institutional Ingestion Hub v85.0.
+ * REBUILD: Integrated Question Sanitizer for OCR Noise Removal.
  */
 
 const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
@@ -53,6 +53,28 @@ function isNoise(line: string): boolean {
   return NOISE_PATTERNS.some(p => p.test(line.trim()));
 }
 
+/**
+ * Institutional Question Sanitizer Node
+ * Purges leading/trailing OCR artifacts and noise-only lines.
+ */
+function sanitizeLine(line: string): string {
+  if (!line) return "";
+  const trimmed = line.trim();
+  
+  // Rule: Ignore lines that contain only punctuation/noise
+  if (/^[\s|•.:;,_=\-(){}\[\]]+$/.test(trimmed)) {
+    return "";
+  }
+
+  // Rule: Remove leading punctuation
+  let cleaned = trimmed.replace(/^[|•.:;,()\[\]{}]+/, '');
+  
+  // Rule: Remove trailing punctuation (non-semantic)
+  cleaned = cleaned.replace(/[|•.:;,()\[\]{}]+$/, '');
+  
+  return cleaned.trim();
+}
+
 export function preprocessText(text: string): string {
   if (!text) return "";
   const lines = text.split(/\r?\n/).filter(l => !isNoise(l));
@@ -78,7 +100,7 @@ export function validateMCQSchema(q: any): { errors: string[], warnings: string[
 }
 
 /**
- * REBUILT: Fill in the Blank Engine v84.0 (Question-First Priority)
+ * REBUILT: Fill in the Blank Engine v85.0 (Sanitizer Integrated)
  */
 export function parseFillInTheBlank(rawText: string, metadata: any) {
   const questions: any[] = [];
@@ -104,14 +126,6 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
   const finalize = () => {
     const hasQuest = enQuest.trim() || paQuest.trim();
     if (hasQuest) {
-      // Self-Validation: Reject if question is contaminated
-      const qText = (enQuest + paQuest).toLowerCase();
-      if (qText.includes("correct answer:") || qText.includes("explanation:")) {
-        console.warn("[PARSER] Detected contamination in question buffer. Discarding node.");
-        resetBuffers();
-        return;
-      }
-
       questions.push({
         ...metadata,
         id: currentNum || `q-fib-${Math.random().toString(36).substr(2, 9)}`,
@@ -132,20 +146,15 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
   };
 
   for (let line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed && state !== 'QUESTION') continue;
     if (isNoise(line)) continue;
 
-    // 1. GLOBAL BOUNDARY CHECK (Highest Priority)
     if (isQuestionStart(line)) {
       if (state !== 'WAITING') finalize();
       currentNum = line.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
       state = 'QUESTION';
       line = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
-      if (!line) continue;
     }
 
-    // 2. STATE TRANSITION MARKERS
     const optMatch = line.match(OPTION_MARKER_REGEX);
     const ansMatch = line.match(ANSWER_SENTINEL_REGEX);
     const explMatch = line.match(EXPL_SENTINEL_REGEX);
@@ -153,10 +162,9 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
     if (optMatch) {
       state = 'OPTIONS';
       const rawKey = optMatch[1].toUpperCase();
-      const map: any = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '①': 'A', '②': 'B', '③': 'C', '④': 'D', 'I': 'A', 'II': 'B', 'III': 'C', 'IV': 'D', 'Ⓐ': 'A', 'Ⓑ': 'B', 'Ⓒ': 'C', 'Ⓓ': 'D', 'a': 'A', 'b': 'B', 'c': 'C', 'd': 'D' };
+      const map: any = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '①': 'A', '②': 'B', '③': 'C', '④': 'D', 'Ⓐ': 'A', 'Ⓑ': 'B', 'Ⓒ': 'C', 'Ⓓ': 'D', 'a': 'A', 'b': 'B', 'c': 'C', 'd': 'D' };
       const key = map[rawKey] || rawKey;
       const text = optMatch[2].trim();
-      
       if (detectScript(text) === 'PA') opts[key].pa = text;
       else opts[key].en = text;
       continue;
@@ -173,34 +181,36 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
     if (explMatch) {
       state = 'EXPLANATION';
       const text = explMatch[1].trim();
-      if (detectScript(text) === 'PA') paExpl += (paExpl ? ' ' : '') + text;
-      else enExpl += (enExpl ? ' ' : '') + text;
+      const cleaned = sanitizeLine(text);
+      if (cleaned) {
+        if (detectScript(cleaned) === 'PA') paExpl += (paExpl ? ' ' : '') + cleaned;
+        else enExpl += (enExpl ? ' ' : '') + cleaned;
+      }
       continue;
     }
 
-    // 3. BUFFER COLLECTION
-    if (!trimmed) continue;
+    const cleanedLine = sanitizeLine(line);
+    if (!cleanedLine) continue;
 
     if (state === 'QUESTION') {
-      const cleanLine = line.replace(FIB_LABELS, '').trim();
-      if (!cleanLine) continue;
-
-      if (detectScript(cleanLine) === 'PA') {
-        paQuest += (paQuest ? '\n' : '') + cleanLine;
+      const statement = cleanedLine.replace(FIB_LABELS, '').trim();
+      const finalStatement = sanitizeLine(statement);
+      if (!finalStatement) continue;
+      if (detectScript(finalStatement) === 'PA') {
+        paQuest += (paQuest ? '\n' : '') + finalStatement;
       } else {
-        enQuest += (enQuest ? '\n' : '') + cleanLine;
+        enQuest += (enQuest ? '\n' : '') + finalStatement;
       }
     } else if (state === 'EXPLANATION') {
-      if (detectScript(line) === 'PA') {
-        paExpl += (paExpl ? '\n' : '') + line.trim();
+      if (detectScript(cleanedLine) === 'PA') {
+        paExpl += (paExpl ? '\n' : '') + cleanedLine;
       } else {
-        enExpl += (enExpl ? '\n' : '') + line.trim();
+        enExpl += (enExpl ? '\n' : '') + cleanedLine;
       }
     } else if (state === 'OPTIONS') {
-      // Multi-line option support: append to last key found
       const lastKey = ['D', 'C', 'B', 'A'].find(k => opts[k].en || opts[k].pa) || 'A';
-      if (detectScript(line) === 'PA') opts[lastKey].pa += ' ' + line.trim();
-      else opts[lastKey].en += ' ' + line.trim();
+      if (detectScript(cleanedLine) === 'PA') opts[lastKey].pa += ' ' + cleanedLine;
+      else opts[lastKey].en += ' ' + cleanedLine;
     }
   }
 
@@ -209,7 +219,7 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
 }
 
 /**
- * Rebuilt: Assertion & Reason state machine parser
+ * Rebuilt: Assertion & Reason state machine parser v85.0 (Sanitizer Integrated)
  */
 export function parseAssertionReason(rawText: string, metadata: any) {
   const questions: any[] = [];
@@ -266,14 +276,13 @@ export function parseAssertionReason(rawText: string, metadata: any) {
   const reasonPaRegex = /^.*(?:ਕਾਰਨ)\s*\(?R\)?\s*[:\-]?\s*/;
 
   for (let line of lines) {
-    if (!line.trim() || isNoise(line)) continue;
+    if (isNoise(line)) continue;
 
     if (isQuestionStart(line)) {
       if (state !== 'WAITING') finalize();
       currentNum = line.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
       state = 'ASSERT_EN';
       line = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
-      if (!line) continue;
     }
 
     const optMatch = line.match(OPTION_MARKER_REGEX);
@@ -290,9 +299,12 @@ export function parseAssertionReason(rawText: string, metadata: any) {
 
     if (explMatch) {
       const content = explMatch[1].trim();
-      state = detectScript(content) === 'PA' ? 'EXPL_PA' : 'EXPL_EN';
-      if (state === 'EXPL_PA') paExpl += (paExpl ? ' ' : '') + content;
-      else enExpl += (enExpl ? ' ' : '') + content;
+      const cleaned = sanitizeLine(content);
+      if (cleaned) {
+        state = detectScript(cleaned) === 'PA' ? 'EXPL_PA' : 'EXPL_EN';
+        if (state === 'EXPL_PA') paExpl += (paExpl ? ' ' : '') + cleaned;
+        else enExpl += (enExpl ? ' ' : '') + cleaned;
+      }
       continue;
     }
 
@@ -312,16 +324,16 @@ export function parseAssertionReason(rawText: string, metadata: any) {
     else if (assertPaRegex.test(line)) { state = 'ASSERT_PA'; line = line.replace(assertPaRegex, ''); }
     else if (assertEnRegex.test(line)) { state = 'ASSERT_EN'; line = line.replace(assertEnRegex, ''); }
 
-    const content = line.trim();
-    if (!content) continue;
+    const cleanedLine = sanitizeLine(line);
+    if (!cleanedLine) continue;
 
     switch (state) {
-      case 'ASSERT_EN': enAssert += (enAssert ? ' ' : '') + content; break;
-      case 'ASSERT_PA': paAssert += (paAssert ? ' ' : '') + content; break;
-      case 'REASON_EN': enReason += (enReason ? ' ' : '') + content; break;
-      case 'REASON_PA': paReason += (paReason ? ' ' : '') + content; break;
-      case 'EXPL_EN': enExpl += (enExpl ? ' ' : '') + content; break;
-      case 'EXPL_PA': paExpl += (paExpl ? ' ' : '') + content; break;
+      case 'ASSERT_EN': enAssert += (enAssert ? ' ' : '') + cleanedLine; break;
+      case 'ASSERT_PA': paAssert += (paAssert ? ' ' : '') + cleanedLine; break;
+      case 'REASON_EN': enReason += (enReason ? ' ' : '') + cleanedLine; break;
+      case 'REASON_PA': paReason += (paReason ? ' ' : '') + cleanedLine; break;
+      case 'EXPL_EN': enExpl += (enExpl ? ' ' : '') + cleanedLine; break;
+      case 'EXPL_PA': paExpl += (paExpl ? ' ' : '') + cleanedLine; break;
     }
   }
 
