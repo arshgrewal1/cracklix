@@ -16,10 +16,10 @@ import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
-import { useStudyTracker } from "@/hooks/useStudyTracker";
+import { useActiveSession } from "@/hooks/useStudyAnalytics";
 
 /**
- * @fileOverview Official Download Center v2.6 (Real-Time Tracking).
+ * @fileOverview Official Download Center v2.7 (Session-Aware).
  */
 
 export default function NotesLibrary() {
@@ -29,14 +29,15 @@ export default function NotesLibrary() {
   const { user, profile, loading: authLoading } = useUser()
   const [searchTerm, setSearchTerm] = useState("")
   
-  // Real-time tracking
-  useStudyTracker('notes-library', 'PDF');
+  const { startSession } = useActiveSession('PDF');
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push(`/login?returnUrl=${encodeURIComponent(pathname)}`);
+    } else if (user) {
+      startSession();
     }
-  }, [user, authLoading, router, pathname]);
+  }, [user, authLoading, router, pathname, startSession]);
 
   const notesQuery = useMemo(() => (db ? query(collection(db, "notes"), orderBy("updatedAt", "desc")) : null), [db])
   const { data: notes, loading } = useCollection<any>(notesQuery)
@@ -215,4 +216,8 @@ function DownloadCard({ asset, profile }: { asset: any, profile: any }) {
          </CardContent>
       </Card>
    )
+}
+
+function Skeleton({ className }: { className?: string }) {
+   return <div className={cn("animate-pulse bg-muted rounded", className)} />;
 }

@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useUser, useAuth } from "@/firebase";
+import { useUser, useAuth, useFirestore } from "@/firebase";
 import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
-import { useStudyAnalytics } from "@/hooks/use-study-analytics"; 
 import ExamHeader from "@/components/exam/ExamHeader";
 import TacticalFooter from "@/components/exam/TacticalFooter";
 import AntiCheat from "@/components/exam/AntiCheat";
@@ -17,8 +16,7 @@ import { Loader2, Play, ShieldCheck, Zap, AlertCircle, Save, LogOut } from "luci
 import { useToast } from "@/hooks/use-toast";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { motion, AnimatePresence } from "framer-motion";
-import { errorEmitter } from "@/firebase/error-emitter";
-import { FirestorePermissionError, type SecurityRuleContext } from "@/firebase/errors";
+import { useActiveSession } from "@/hooks/useStudyAnalytics";
 import {
   Dialog,
   DialogContent,
@@ -31,8 +29,7 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v5.7 (UI & Navigation Hardened).
- * FIXED: Stacked buttons in exit modal to prevent horizontal clipping.
+ * @fileOverview Official Mock Attempt Hub v5.8 (Session Awareness Integrated).
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -42,7 +39,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const db = useFirestore();
   const { user, profile } = useUser();
   const { toast } = useToast();
-  const { startTracking, stopTracking } = useStudyAnalytics('mock');
 
   const mockId = useMemo(() => {
     if (propMockId) return propMockId;
@@ -53,6 +49,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     return lastSegment !== 'attempt' ? lastSegment : null;
   }, [pathname, searchParams, propMockId]);
 
+  const { startSession, stopSession } = useActiveSession('MOCK', mockId || undefined);
+
   const [isInitializing, setIsInitializing] = useState(true);
   const [initError, setInitError] = useState<string | null>(null);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
@@ -61,7 +59,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const [isSubmittingFinal, setIsSubmittingFinal] = useState(false);
   const [mockData, setMockData] = useState<any>(null);
 
-  // Swipe Navigation Refs
   const touchStart = useRef({ x: 0, y: 0 });
 
   const {
@@ -95,7 +92,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     const deltaX = touchStart.current.x - touchEndX;
     const deltaY = touchStart.current.y - touchEndY;
 
-    // Threshold check: 80px horizontal movement
     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 80) {
       if (deltaX > 0 && currentIdx < questions.length - 1) {
         setCurrentIdx(currentIdx + 1);
@@ -104,11 +100,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       }
     }
   };
-
-  useEffect(() => {
-    startTracking();
-    return () => { stopTracking(); };
-  }, [startTracking, stopTracking]);
 
   useEffect(() => {
     async function loadExam() {
@@ -146,10 +137,11 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
            if (attemptSnap.exists()) resumeData = attemptSnap.data();
         }
         initExam(mockId, mData.title || "Elite Series", user?.uid || null, sortedQs, mData.duration || 120, resumeData, mData.languageMode);
+        startSession(); // Start the immutable study session
       } catch (err: any) { setInitError(err.message); } finally { setIsInitializing(false); }
     }
     loadExam();
-  }, [db, user, profile, mockId, initExam, router, toast, pathname]);
+  }, [db, user, profile, mockId, initExam, router, toast, pathname, startSession]);
 
   useEffect(() => {
     if (isInitializing || initError) return;
@@ -157,7 +149,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     return () => clearInterval(interval);
   }, [isInitializing, initError, tick]);
 
-  const handleSubmitFinal = useCallback(() => {
+  const handleSubmitFinal = useCallback(async () => {
     if (!db || isSubmittingFinal || !mockData || !mockId) return;
     setIsSubmittingFinal(true);
     let correctCount = 0; let wrongCount = 0;
@@ -172,6 +164,14 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     });
     const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
     const timeTaken = Math.round((Date.now() - startTime) / 1000);
+    
+    // Stop and save study session
+    await stopSession({
+      completedQuestions: attemptedCount,
+      correct: correctCount,
+      wrong: wrongCount
+    });
+
     const resultPayload: any = {
       mockId, mockTitle: mockData.title || mockTitle, score: parseFloat(rawScore.toFixed(2)),
       correctCount, wrongCount, attemptedCount, totalQuestions: questions.length,
@@ -182,8 +182,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     if (user) {
       resultPayload.userId = user.uid; resultPayload.userName = profile?.name || 'Aspirant';
       resultPayload.userEmail = user.email || ""; resultPayload.createdAt = serverTimestamp();
-      setDoc(doc(db, "results", `${user.uid}_${mockId}`), resultPayload, { merge: true });
-      updateDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { status: 'COMPLETED', updatedAt: serverTimestamp() });
+      await setDoc(doc(db, "results", `${user.uid}_${mockId}`), resultPayload, { merge: true });
+      await updateDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { status: 'COMPLETED', updatedAt: serverTimestamp() });
       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
       router.replace(`/results/view?id=${mockId}`);
     } else {
@@ -191,7 +191,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
       router.replace(`/results/view?id=${mockId}&guest=true`);
     }
-  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime]);
+  }, [db, user, profile, isSubmittingFinal, questions, answers, router, mockId, mockTitle, mockData, startTime, stopSession]);
 
   useEffect(() => {
      if (!isInitializing && !initError && timeLeft === 0 && !isSubmittingFinal) handleSubmitFinal();

@@ -4,31 +4,22 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import { useUser, useFirestore } from '@/firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { Zap, Clock, Calendar, TrendingUp, BarChart2, Star, Activity } from 'lucide-react';
+import { Zap, Clock, Calendar, TrendingUp, BarChart2, Star, Activity, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
-import LiveStudyTimer from '@/components/analytics/LiveStudyTimer';
-import { useStudyTracker } from '@/hooks/useStudyTracker';
+import { useStudySessions } from '@/hooks/useStudyAnalytics';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Official Study Analytics Center v2.5.
- * FIXED: Implemented Local Drift Correction to ensure long-term totals >= today's study.
+ * @fileOverview Official Study Analytics Center v3.0.
+ * Rebuilt to use the session-based Study Analytics Engine.
  */
 
 const formatStudyTime = (seconds: number) => {
-  if (isNaN(seconds) || seconds <= 0) return "0m 00s";
-  
-  const d = Math.floor(seconds / (3600 * 24));
-  const h = Math.floor((seconds % (3600 * 24)) / 3600);
+  if (isNaN(seconds) || seconds <= 0) return "0m";
+  const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-
-  const pad = (n: number) => String(n).padStart(2, '0');
-
-  if (d > 0) return `${d}d ${h}h`;
   if (h > 0) return `${h}h ${m}m`;
-  return `${m}m ${pad(s)}s`;
+  return `${m}m`;
 }
 
 const formatFullDuration = (seconds: number) => {
@@ -41,66 +32,14 @@ const formatFullDuration = (seconds: number) => {
 
 export default function AnalyticsPage() {
   const { user } = useUser();
-  const db = useFirestore();
   const [mounted, setMounted] = useState(false);
-  const [baseStats, setBaseStats] = useState({ 
-    today: 0, 
-    week: 0,
-    month: 0,
-    year: 0,
-    lifetime: 0,
-    totalSessions: 0 
-  });
-
-  const { unSyncedSeconds, isActive } = useStudyTracker('analytics', 'OTHER');
+  const { stats, loading } = useStudySessions();
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!db || !user || !mounted) return;
-
-    const d = new Date();
-    const todayStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    
-    const dailyRef = doc(db, 'users', user.uid, 'study_daily', todayStr);
-    const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
-
-    const unsubDaily = onSnapshot(dailyRef, (snap) => {
-      if (snap.exists()) setBaseStats(prev => ({ ...prev, today: snap.data().totalDuration || 0 }));
-    });
-
-    const unsubStats = onSnapshot(statsRef, (snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        setBaseStats(prev => ({ 
-          ...prev, 
-          lifetime: data.totalStudyTime || 0,
-          week: data.thisWeekTime || 0,
-          month: data.thisMonthTime || 0,
-          year: data.thisYearTime || 0,
-          totalSessions: data.totalSessions || 0 
-        }));
-      }
-    });
-
-    return () => {
-      unsubDaily();
-      unsubStats();
-    };
-  }, [db, user, mounted]);
-
-  // DRIFT PROTECTION: Apply Math.max logic for UI consistency
-  const displayStats = useMemo(() => {
-    const today = baseStats.today + unSyncedSeconds;
-    const week = Math.max(baseStats.week + unSyncedSeconds, today);
-    const month = Math.max(baseStats.month + unSyncedSeconds, today);
-    const year = Math.max(baseStats.year + unSyncedSeconds, today);
-    const lifetime = Math.max(baseStats.lifetime + unSyncedSeconds, year);
-    
-    return { today, week, month, year, lifetime, sessions: baseStats.totalSessions };
-  }, [baseStats, unSyncedSeconds]);
+  if (!mounted) return null;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 font-body text-left">
@@ -113,32 +52,47 @@ export default function AnalyticsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-8">
           
-          <div className="lg:col-span-2 xl:col-span-2">
-            <LiveStudyTimer />
-          </div>
+          <Card className="lg:col-span-2 xl:col-span-2 p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl flex flex-col justify-center">
+             <div className="flex items-center gap-4 mb-6">
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                   <Clock className="h-6 w-6" />
+                </div>
+                <div>
+                   <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Today's study</p>
+                   <p className="text-xs font-bold text-slate-500 uppercase tracking-tight">Active Ingestion</p>
+                </div>
+             </div>
+             {loading ? (
+                <Skeleton className="h-12 w-48 bg-slate-50 rounded-xl" />
+             ) : (
+                <h2 className="text-4xl md:text-6xl font-black text-[#0F172A] tracking-tighter tabular-nums">
+                   {formatFullDuration(stats.today)}
+                </h2>
+             )}
+          </Card>
 
           <div className="lg:col-span-1">
             <StatCard 
               title="🔥 Lifetime study" 
-              value={formatFullDuration(displayStats.lifetime)}
+              value={`${Math.floor(stats.lifetime / 3600)}h ${Math.floor((stats.lifetime % 3600) / 60)}m`}
               icon={Activity} 
               color="indigo" 
-              loading={!mounted}
+              loading={loading}
             />
            </div>
 
           <StatCard 
             title="Total sessions" 
-            value={displayStats.sessions}
+            value={stats.totalSessions}
             icon={TrendingUp} 
             color="amber"
-            loading={!mounted}
+            loading={loading}
           />
 
           <div className="col-span-full grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 mt-4">
-             <PeriodCard label="This Week" val={displayStats.week} icon={Calendar} color="blue" />
-             <PeriodCard label="This Month" val={displayStats.month} icon={Clock} color="emerald" />
-             <PeriodCard label="This Year" val={displayStats.year} icon={Zap} color="purple" />
+             <PeriodCard label="This Week" val={stats.week} icon={Calendar} color="blue" loading={loading} />
+             <PeriodCard label="This Month" val={stats.month} icon={Clock} color="emerald" loading={loading} />
+             <PeriodCard label="This Year" val={stats.year} icon={Zap} color="purple" loading={loading} />
           </div>
         </div>
       </main>
@@ -147,12 +101,16 @@ export default function AnalyticsPage() {
   );
 }
 
-function PeriodCard({ label, val, icon: Icon, color }: any) {
+function PeriodCard({ label, val, icon: Icon, color, loading }: any) {
   return (
     <Card className="p-6 md:p-8 rounded-[2rem] bg-white border border-slate-100 shadow-xl flex items-center justify-between">
       <div>
           <p className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{label}</p>
-          <p className="text-2xl md:text-3xl font-black text-[#0F172A]">{formatStudyTime(val)}</p>
+          {loading ? (
+             <Skeleton className="h-8 w-24 bg-slate-50 mt-1" />
+          ) : (
+             <p className="text-2xl md:text-3xl font-black text-[#0F172A]">{formatStudyTime(val)}</p>
+          )}
       </div>
       <div className={cn(
         "h-12 w-12 rounded-2xl flex items-center justify-center shadow-inner",
@@ -186,4 +144,8 @@ function StatCard({ title, value, icon: Icon, color, loading }: any) {
       </div>
     </div>
   );
+}
+
+function Skeleton({ className }: { className?: string }) {
+  return <div className={cn("animate-pulse bg-muted rounded", className)} />;
 }

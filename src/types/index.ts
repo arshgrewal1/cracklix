@@ -435,6 +435,21 @@ export interface Subscription {
   updatedAt: any;
 }
 
+export interface StudySession {
+  id: string;
+  userId: string;
+  startTime: any;
+  endTime: any;
+  durationSeconds: number;
+  activityType: 'MOCK' | 'CA' | 'PYQ' | 'PDF' | 'PRACTICE' | 'DASHBOARD' | 'OTHER';
+  activityId?: string;
+  completedQuestions?: number;
+  correct?: number;
+  wrong?: number;
+  timezone: string;
+  createdAt: any;
+}
+
 export type Mock = MockTest;
 export type CurrentAffair = CurrentAffairHubItem;
 export type Notification = any;

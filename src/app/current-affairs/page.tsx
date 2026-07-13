@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useMemo, useEffect } from "react"
@@ -19,17 +18,15 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { AuthorityLogo } from "@/lib/exam-icons"
-import { useStudyTracker } from "@/hooks/useStudyTracker";
+import { useActiveSession } from "@/hooks/useStudyAnalytics";
 
 /**
- * @fileOverview Official Current Affairs Center v23.2.
- * FIXED: Integrated Real-Time Study Tracking.
+ * @fileOverview Official Current Affairs Center v23.3 (Session-Aware).
  */
 
 const HUB_TYPES = [
@@ -47,14 +44,15 @@ export default function CurrentAffairsCenter() {
   const [activeType, setActiveType] = useState("DAILY")
   const [searchTerm, setSearchTerm] = useState("")
   
-  // Real-time tracking
-  useStudyTracker('current-affairs', 'CA');
+  const { startSession } = useActiveSession('CA');
 
   useEffect(() => {
     if (!authLoading && !user) {
       router.push(`/login?returnUrl=${encodeURIComponent('/current-affairs')}`);
+    } else if (user) {
+      startSession();
     }
-  }, [user, authLoading, router]);
+  }, [user, authLoading, router, startSession]);
 
   const hubQuery = useMemo(() => (db ? query(collection(db, "current_affairs_hub"), where("status", "==", "PUBLISHED")) : null), [db])
   const { data: hubItems, loading } = useCollection<any>(hubQuery)
@@ -107,7 +105,7 @@ export default function CurrentAffairsCenter() {
             <p className="text-[10px] font-black uppercase text-slate-400">Syncing Center...</p>
          </div>
       ) : (
-         <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 max-w-[1600px] space-y-12 md:space-y-24">
+         <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-16 max-w-[1440px] space-y-12 md:space-y-24">
             
                <div className="bg-[#0B1528] p-8 md:p-20 rounded-[2.5rem] md:rounded-[4rem] text-white relative overflow-hidden shadow-4xl group border border-white/5">
                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><AuthorityLogo boardId="current-affairs" size="xl" className="h-96 w-96 opacity-5" /></div>
@@ -247,4 +245,8 @@ export default function CurrentAffairsCenter() {
       {!authLoading && <Footer />}
     </div>
   )
+}
+
+function Skeleton({ className }: { className?: string }) {
+  return <div className={cn("animate-pulse bg-muted rounded", className)} />;
 }

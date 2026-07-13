@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState, useEffect, isValidElement, cloneElement, ReactElement } from "react"
@@ -24,133 +23,40 @@ import {
   FileStack,
   ShieldAlert,
   BarChart,
-  AreaChart
+  AreaChart,
+  Loader2
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 import { Skeleton } from "@/components/ui/skeleton"
-import { useStudyTracker } from "@/hooks/useStudyTracker"
+import { useStudySessions } from "@/hooks/useStudyAnalytics"
 
 /**
- * @fileOverview Student Progress Portal v62.0.
- * FIXED: Dynamic Midnight Rollover logic.
+ * @fileOverview Student Progress Portal v63.0.
+ * Rebuilt using the session-based Study Analytics Engine for absolute accuracy.
  */
 
 const formatStudyTime = (seconds: number) => {
-  if (isNaN(seconds) || seconds <= 0) return "0m 00s";
-  const d = Math.floor(seconds / (3600 * 24));
-  const h = Math.floor((seconds % (3600 * 24)) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  if (d > 0) return `${d}d ${h}h`;
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m ${String(s).padStart(2, '0')}s`;
-}
-
-const formatFullDuration = (seconds: number) => {
-  if (isNaN(seconds) || seconds <= 0) return "00h 00m 00s";
+  if (isNaN(seconds) || seconds <= 0) return "0m";
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  return `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
 }
 
 export default function StudentDashboard() {
   const { user, profile, loading: authLoading } = useUser();
-  const db = useFirestore()
-  const router = useRouter()
-  const [mounted, setMounted] = useState(false)
-  const [passCountdown, setPassCountdown] = useState("");
-  const [currentDateId, setCurrentDateId] = useState("");
+  const db = useFirestore();
+  const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   
-  const [baseStats, setBaseStats] = useState({ 
-    today: 0, 
-    week: 0,
-    month: 0,
-    year: 0,
-    lifetime: 0 
-  });
-
-  // Track dashboard usage passively (isStudyContent will be false)
-  const { unSyncedSeconds, isActive, isStudyContent } = useStudyTracker('dashboard', 'DASHBOARD');
+  const { stats, loading: statsLoading } = useStudySessions();
 
   useEffect(() => {
     setMounted(true);
-    // Dynamic Date Update logic
-    const updateDate = () => {
-      const d = new Date();
-      const id = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-      setCurrentDateId(id);
-    };
-    updateDate();
-    const ticker = setInterval(updateDate, 60000); // Check every minute
-    return () => clearInterval(ticker);
   }, []);
-
-  useEffect(() => {
-    if (!profile?.passExpiresAt) return;
-    const expiryDate = new Date(profile.passExpiresAt);
-    const intervalId = setInterval(() => {
-      const now = new Date().getTime();
-      const diff = expiryDate.getTime() - now;
-      if (diff <= 0) {
-        setPassCountdown("Expired");
-        clearInterval(intervalId);
-        return;
-      }
-      const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const s = Math.floor((diff % (1000 * 60)) / 1000);
-      if (d > 0) setPassCountdown(`${d}d ${h}h left`);
-      else setPassCountdown(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`);
-    }, 1000);
-    return () => clearInterval(intervalId);
-  }, [profile?.passExpiresAt]);
-
-  useEffect(() => {
-    if (!db || !user || !mounted || !currentDateId) return;
-
-    const dailyRef = doc(db, 'users', user.uid, 'study_daily', currentDateId);
-    const statsRef = doc(db, 'users', user.uid, 'study_statistics', 'all_time');
-
-    const unsubDaily = onSnapshot(dailyRef, (snap) => {
-      if (snap.exists()) setBaseStats(prev => ({ ...prev, today: snap.data().totalDuration || 0 }));
-      else setBaseStats(prev => ({ ...prev, today: 0 }));
-    });
-
-    const unsubStats = onSnapshot(statsRef, (snap) => {
-      if (snap.exists()) {
-        const data = snap.data();
-        setBaseStats(prev => ({ 
-          ...prev, 
-          lifetime: data.totalStudyTime || 0,
-          week: data.thisWeekTime || 0,
-          month: data.thisMonthTime || 0,
-          year: data.thisYearTime || 0
-        }));
-      }
-    });
-
-    return () => {
-      unsubDaily();
-      unsubStats();
-    };
-  }, [db, user, mounted, currentDateId]);
-
-  // Display Logic: unSyncedSeconds only added if studying active content
-  const displayStats = useMemo(() => {
-     const currentBonus = isStudyContent ? unSyncedSeconds : 0;
-     const today = baseStats.today + currentBonus;
-     const week = Math.max(baseStats.week + currentBonus, today);
-     const month = Math.max(baseStats.month + currentBonus, today);
-     const year = Math.max(baseStats.year + currentBonus, today);
-     const lifetime = Math.max(baseStats.lifetime + currentBonus, year);
-     
-     return { today, week, month, year, lifetime };
-  }, [baseStats, unSyncedSeconds, isStudyContent]);
 
   const resultsQuery = useMemo(() => {
     if (!db || !user || !mounted) return null
@@ -159,10 +65,16 @@ export default function StudentDashboard() {
 
   const { data: recentResults, loading: resultsLoading } = useCollection<any>(resultsQuery)
 
-  if (!mounted || authLoading) return <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4"><Zap className="h-8 w-8 text-primary animate-pulse" /></div>;
+  if (!mounted || authLoading) return (
+    <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
+      <Loader2 className="h-8 w-8 text-primary animate-spin" />
+    </div>
+  );
 
   const isActivePass = profile?.passStatus === 'active';
   const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
+
+  const yearlyGoalPercent = Math.min(100, Math.round((stats.year / (365 * 3600)) * 100));
 
   return (
     <div className="min-h-[100dvh] bg-slate-50/50 font-body pb-safe text-left">
@@ -183,7 +95,7 @@ export default function StudentDashboard() {
                         </h1>
                         <div className="flex flex-wrap items-center gap-2 mt-1.5">
                           <div className={cn("flex items-center gap-1.5 px-3 py-1 rounded-full font-bold text-[11px] shadow-lg", isActivePass ? "bg-blue-500 text-white" : "bg-white/10 text-slate-300")}>
-                             <Gem className="h-3 w-3" /> {isActivePass ? (passCountdown || 'Elite Pass') : 'Free Pass'}
+                             <Gem className="h-3 w-3" /> {isActivePass ? (profile?.pass?.plan || 'Elite Pass') : 'Free Pass'}
                           </div>
                         </div>
                     </Link>
@@ -192,10 +104,10 @@ export default function StudentDashboard() {
               </section>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-5">
-                 <MetricItem label="Today's study" val={formatStudyTime(displayStats.today)} icon={<Clock />} active={isActive && isStudyContent} />
-                 <MetricItem label="This week" val={formatStudyTime(displayStats.week)} icon={<Calendar />} />
-                 <MetricItem label="This month" val={formatStudyTime(displayStats.month)} icon={<BarChart />} />
-                 <MetricItem label="Yearly goal" val={formatStudyTime(displayStats.year)} icon={<AreaChart />} />
+                 <MetricItem label="Today's study" val={formatStudyTime(stats.today)} icon={<Clock />} loading={statsLoading} />
+                 <MetricItem label="This week" val={formatStudyTime(stats.week)} icon={<Calendar />} loading={statsLoading} />
+                 <MetricItem label="This month" val={formatStudyTime(stats.month)} icon={<BarChart />} loading={statsLoading} />
+                 <MetricItem label="Yearly goal" val={`${yearlyGoalPercent}%`} icon={<Target />} loading={statsLoading} />
               </div>
 
               <Card className="border-none shadow-lg rounded-2xl md:rounded-[2rem] bg-white overflow-hidden border border-slate-50">
@@ -234,19 +146,19 @@ export default function StudentDashboard() {
                         🔥 Lifetime Study
                       </p>
                       <div className="text-3xl md:text-4xl lg:text-5xl font-black leading-none mt-2 tracking-tighter tabular-nums">
-                        {formatFullDuration(displayStats.lifetime)}
+                        {Math.floor(stats.lifetime / 3600)}h {Math.floor((stats.lifetime % 3600) / 60)}m
                       </div>
                     </div>
 
                     <div className="flex gap-6 border-t border-white/10 pt-6">
                       <div className="flex-1">
-                        <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Today</p>
-                        <p className="text-base font-black tabular-nums">{formatStudyTime(displayStats.today)}</p>
+                        <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Current Streak</p>
+                        <p className="text-base font-black tabular-nums">{stats.currentStreak} Days</p>
                       </div>
                       <div className="w-px h-8 bg-white/10" />
                       <div className="flex-1">
-                        <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Week</p>
-                        <p className="text-base font-black tabular-nums">{formatStudyTime(displayStats.week)}</p>
+                        <p className="text-[9px] font-bold text-white/50 uppercase tracking-widest">Best Streak</p>
+                        <p className="text-base font-black tabular-nums">{stats.longestStreak} Days</p>
                       </div>
                     </div>
                 </div>
@@ -270,16 +182,20 @@ export default function StudentDashboard() {
   )
 }
 
-function MetricItem({ label, val, icon, active }: { label: string, val: string | number, icon: React.ReactNode, active?: boolean }) {
+function MetricItem({ label, val, icon, loading }: { label: string, val: string | number, icon: React.ReactNode, loading?: boolean }) {
   return (
     <Card className="border-none shadow-md bg-white p-4 md:p-5 rounded-2xl text-left group border border-slate-50 min-w-0">
       <div className={cn(
         "h-9 w-9 rounded-xl flex items-center justify-center mb-3 shadow-inner shrink-0 transition-all",
-        active ? "bg-emerald-50 text-emerald-500 animate-pulse" : "bg-slate-50 text-primary"
+        "bg-slate-50 text-primary"
       )}>
         {isValidElement(icon) ? cloneElement(icon as ReactElement<{ className?: string }>, { className: "h-4 w-4" }) : icon}
       </div>
-      <div className="text-lg md:text-xl font-black text-[#0F172A] leading-none truncate tabular-nums">{val}</div>
+      {loading ? (
+        <Skeleton className="h-6 w-16 bg-slate-50 rounded" />
+      ) : (
+        <div className="text-lg md:text-xl font-black text-[#0F172A] leading-none truncate tabular-nums">{val}</div>
+      )}
       <p className="text-[10px] font-bold tracking-tight text-slate-400 mt-1.5">{label}</p>
     </Card>
   )
