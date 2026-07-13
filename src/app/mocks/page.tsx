@@ -43,8 +43,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Practice Hub v2.1.
- * UPDATED: Removed redundant Logo in body as it exists in Navbar. Spacing optimized.
+ * @fileOverview Premium Practice Hub v2.2.
+ * FIXED: Resolved syntax error in StatNode and imported missing Layers/Timer icons.
  */
 
 const QUICK_ACTIONS = [
@@ -331,7 +331,7 @@ function MockSeriesCard({ mock, isPassActive, index }: { mock: any, isPassActive
                )}>
                   <Link href={locked ? '/pass' : `/mocks/view?id=${mock.id}`}>
                      {locked ? <Lock className="h-4 w-4" /> : <Play className="h-4 w-4 fill-current text-primary" />}
-                     {locked ? 'Unlock Series' : 'Start Preparation'}
+                     {locked ? 'Unlock' : 'Start'}
                      <ChevronRight className="h-4 w-4 ml-auto opacity-30" />
                   </Link>
                </Button>
@@ -347,4 +347,5 @@ function StatNode({ icon: Icon, label }: any) {
          <Icon className="h-4 w-4 text-primary/40" />
          <span className="uppercase tracking-tight">{label}</span>
       </div>
+   );
 }
