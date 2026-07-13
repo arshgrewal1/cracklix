@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
@@ -12,11 +13,12 @@ import {
   getLocalDateString,
   getTimezone 
 } from '@/lib/date-utils';
-import { isAfter, subDays } from 'date-fns';
+import { isAfter, subDays, isValid } from 'date-fns';
 
 /**
  * @fileOverview Production-grade Study Analytics Engine v7.0.
  * Statistics are computed on-the-fly from raw StudySession records to ensure absolute accuracy.
+ * FIXED: Hardened date parsing to prevent RangeError: Invalid time value.
  */
 
 export function useStudySessions() {
@@ -57,20 +59,36 @@ export function useStudySessions() {
     const studyDates = new Set<string>();
 
     rawSessions.forEach((s) => {
-      // Safely handle Firestore Timestamps or ISO strings
-      const startTime = s.startTime?.seconds 
-        ? new Date(s.startTime.seconds * 1000) 
-        : new Date(s.startTime);
+      // Robust date parsing to prevent Invalid Time Value error
+      let startTime: Date;
       
-      const duration = s.durationSeconds || 0;
+      try {
+        if (s.startTime?.seconds) {
+          startTime = new Date(s.startTime.seconds * 1000);
+        } else if (s.startTime instanceof Date) {
+          startTime = s.startTime;
+        } else if (typeof s.startTime === 'string' || typeof s.startTime === 'number') {
+          startTime = new Date(s.startTime);
+        } else if (s.startTime && typeof s.startTime.toDate === 'function') {
+          startTime = s.startTime.toDate();
+        } else {
+          return; // Skip records with missing or unrecognized date formats
+        }
 
-      lifetime += duration;
-      studyDates.add(getLocalDateString(startTime));
+        if (!isValid(startTime)) return;
 
-      if (isAfter(startTime, startOfToday)) today += duration;
-      if (isAfter(startTime, startOfWeek)) week += duration;
-      if (isAfter(startTime, startOfMonth)) month += duration;
-      if (isAfter(startTime, startOfYear)) year += duration;
+        const duration = s.durationSeconds || 0;
+
+        lifetime += duration;
+        studyDates.add(getLocalDateString(startTime));
+
+        if (isAfter(startTime, startOfToday)) today += duration;
+        if (isAfter(startTime, startOfWeek)) week += duration;
+        if (isAfter(startTime, startOfMonth)) month += duration;
+        if (isAfter(startTime, startOfYear)) year += duration;
+      } catch (e) {
+        console.warn("[Analytics] Invalid session date ignored", s.id);
+      }
     });
 
     // Calculate Streaks
