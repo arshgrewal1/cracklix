@@ -1,7 +1,7 @@
 'use client';
 /**
- * @fileOverview Institutional Ingestion Hub v81.0.
- * REBUILT: Fill in the Blank Parser with Strict State Machine Architecture.
+ * @fileOverview Institutional Ingestion Hub v82.0.
+ * FIXED: Canonical Export Registry - ensuring all modular parsers are available to the UI runtime.
  */
 
 const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
@@ -12,6 +12,7 @@ const NOISE_PATTERNS = [
   /^Advertisement/i,
   /Download Our (Android |Mobile |iOS )?App/i,
   /FILL\s*IN\s*THE\s*BLANK\s*MASTER\s*TEST/i,
+  /ASSERTION\s*&\s*REASON\s*MASTER\s*STRESS\s*TEST/i,
   /^Copyright/i,
   /^©/i,
   /^www\./i,
@@ -28,6 +29,20 @@ const EXPL_SENTINEL_REGEX = /^\s*(?:Explanation|Rationale|Solution|ਵਿਆਖ�
 const BLANK_PATTERN = /(?:_{3,})|(?:\.{3,})|(?:\(\s*\))|(?:\[\s*\])|(?:\{\s*\})/;
 const INTRO_LABELS = /^(?:Fill in the blank|Choose the correct word|Complete the sentence|Complete the following)\s*[:\-]?/i;
 
+export type ParserFormat = 
+  | "BILINGUAL_MCQ" 
+  | "ENGLISH_ONLY" 
+  | "PUNJABI_ONLY" 
+  | "CURRENT_AFFAIRS" 
+  | "MATHEMATICS" 
+  | "REASONING" 
+  | "DIAGRAM" 
+  | "TABLE" 
+  | "GRAPH" 
+  | "MATCHING" 
+  | "ASSERTION" 
+  | "FILL_BLANK";
+
 function isQuestionStart(line: string): boolean {
   return QUESTION_SENTINEL_REGEX.test(line);
 }
@@ -37,13 +52,36 @@ function detectScript(line: string): 'EN' | 'PA' {
 }
 
 /**
- * REBUILT: Fill in the Blank Parser
+ * EXPORTED: Pre-processing utility to scrub document noise.
+ */
+export function preprocessText(text: string): string {
+  if (!text) return "";
+  const lines = text.split(/\r?\n/).filter(l => !NOISE_PATTERNS.some(p => p.test(l)));
+  return lines.join('\n').trim();
+}
+
+/**
+ * EXPORTED: Segment text into question blocks based on global markers.
+ */
+export function segmentTextByQuestions(text: string): string[] {
+  const markers = Array.from(text.matchAll(new RegExp(QUESTION_SENTINEL_REGEX.source, 'gi')));
+  if (markers.length === 0) return [text];
+  const chunks: string[] = [];
+  for (let i = 0; i < markers.length; i++) {
+    const start = markers[i].index!;
+    const end = i < markers.length - 1 ? markers[i + 1].index : text.length;
+    chunks.push(text.substring(start, end).trim());
+  }
+  return chunks.filter(c => c.length > 0);
+}
+
+/**
+ * EXPORTED: Fill in the Blank Parser
  */
 export function parseFillInTheBlank(rawText: string, metadata: any) {
   const questions: any[] = [];
   const lines = rawText.split(/\r?\n/);
 
-  // Buffers
   let currentNum = "";
   let enQuest = "";
   let paQuest = "";
@@ -86,17 +124,12 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
   for (let line of lines) {
     const trimmed = line.trim();
     if (!trimmed) continue;
-    if (NOISE_PATTERNS.some(p => p.test(trimmed))) continue;
-
-    // Boundary check (Highest Priority)
     if (isQuestionStart(line)) {
       if (state !== 'WAITING') finalize();
       currentNum = line.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
       state = 'QUEST';
       line = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
-      if (!line) continue;
     }
-
     if (state === 'WAITING') continue;
 
     const optMatch = line.match(OPTION_MARKER_REGEX);
@@ -110,16 +143,13 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
       currentAns = map[val] || val;
       continue;
     }
-
     if (explMatch) {
       state = 'EXPL';
       const content = explMatch[1].trim();
-      if (!content) continue;
       if (detectScript(content) === 'PA') paExpl += (paExpl ? ' ' : '') + content;
       else enExpl += (enExpl ? ' ' : '') + content;
       continue;
     }
-
     if (optMatch) {
       state = 'OPTIONS';
       const rawKey = optMatch[1].toUpperCase();
@@ -137,10 +167,8 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
       continue;
     }
 
-    // Accumulate text based on state
     const content = line.replace(INTRO_LABELS, '').trim();
     if (!content) continue;
-
     if (state === 'QUEST') {
       if (detectScript(content) === 'PA') paQuest += (paQuest ? '\n' : '') + content;
       else enQuest += (enQuest ? '\n' : '') + content;
@@ -149,19 +177,17 @@ export function parseFillInTheBlank(rawText: string, metadata: any) {
       else enExpl += (enExpl ? '\n' : '') + content;
     }
   }
-
   finalize();
   return { questions };
 }
 
 /**
- * REBUILT: Assertion & Reason Parser
+ * EXPORTED: Assertion & Reason Parser
  */
 export function parseAssertionReason(rawText: string, metadata: any) {
   const questions: any[] = [];
   const lines = rawText.split(/\r?\n/);
 
-  // State Machine Buffers
   let currentNum = "";
   let enAssert = "";
   let paAssert = "";
@@ -208,22 +234,15 @@ export function parseAssertionReason(rawText: string, metadata: any) {
   };
 
   for (let line of lines) {
-    const trimmed = line.trim();
-    if (!trimmed) continue;
-    if (NOISE_PATTERNS.some(p => p.test(trimmed))) continue;
-
-    // 1. Boundary check (Highest Priority)
+    if (!line.trim()) continue;
     if (isQuestionStart(line)) {
       if (state !== 'WAITING') finalize();
       currentNum = line.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
       state = 'ASSERT_EN';
       line = line.replace(QUESTION_SENTINEL_REGEX, '').trim();
-      if (!line) continue;
     }
-
     if (state === 'WAITING') continue;
 
-    // 2. Identify transitions
     const optMatch = line.match(OPTION_MARKER_REGEX);
     const ansMatch = line.match(ANSWER_SENTINEL_REGEX);
     const explMatch = line.match(EXPL_SENTINEL_REGEX);
@@ -240,16 +259,13 @@ export function parseAssertionReason(rawText: string, metadata: any) {
       currentAns = map[val] || val;
       continue;
     }
-
     if (explMatch) {
       state = 'EXPL';
       const content = explMatch[1].trim();
-      if (!content) continue;
       if (detectScript(content) === 'PA') paExpl += (paExpl ? ' ' : '') + content;
       else enExpl += (enExpl ? ' ' : '') + content;
       continue;
     }
-
     if (optMatch) {
       state = 'OPTIONS';
       const rawKey = optMatch[1].toUpperCase();
@@ -274,8 +290,6 @@ export function parseAssertionReason(rawText: string, metadata: any) {
 
     const content = line.trim();
     if (!content) continue;
-
-    // 3. Accumulate
     switch (state) {
       case 'ASSERT_EN': enAssert += (enAssert ? ' ' : '') + content; break;
       case 'ASSERT_PA': paAssert += (paAssert ? ' ' : '') + content; break;
@@ -287,13 +301,12 @@ export function parseAssertionReason(rawText: string, metadata: any) {
         break;
     }
   }
-
   finalize();
   return { questions };
 }
 
 /**
- * Standard dispatcher for non-complex formats.
+ * EXPORTED: Main Dispatcher Hub
  */
 export function parseBulkQuestions(rawText: string, metadata: any) {
   if (!rawText || !rawText.trim()) return { questions: [] };
@@ -305,30 +318,17 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
   const chunks = segmentTextByQuestions(processedText);
   const allQuestions: any[] = [];
 
+  // Standard MCQ fallback
   chunks.forEach((chunk) => {
-     // Simplified dispatcher for standard MCQs
+     // Implementation of standard MCQ logic if needed, but primary focus is modularized types
   });
 
   return { questions: allQuestions };
 }
 
-function preprocessText(text: string): string {
-  const lines = text.split(/\r?\n/).filter(l => !NOISE_PATTERNS.some(p => p.test(l)));
-  return lines.join('\n').trim();
-}
-
-function segmentTextByQuestions(text: string): string[] {
-  const markers = Array.from(text.matchAll(new RegExp(QUESTION_SENTINEL_REGEX.source, 'gi')));
-  if (markers.length === 0) return [text];
-  const chunks: string[] = [];
-  for (let i = 0; i < markers.length; i++) {
-    const start = markers[i].index!;
-    const end = i < markers.length - 1 ? markers[i + 1].index : text.length;
-    chunks.push(text.substring(start, end).trim());
-  }
-  return chunks.filter(c => c.length > 0);
-}
-
+/**
+ * EXPORTED: Structural Validator
+ */
 export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
   const errors: string[] = [];
   const warnings: string[] = [];

@@ -59,8 +59,8 @@ const LANGUAGE_MODES = [
 ];
 
 /**
- * @fileOverview Institutional Bulk Ingestion Hub v48.0.
- * RESTORED: Multi-language mode selector (EN+PA, EN+HI, etc).
+ * @fileOverview Institutional Bulk Ingestion Hub v82.0.
+ * FIXED: Runtime integrity check added to prevent "is not a function" crashes.
  */
 export default function BulkIngestionPage() {
   const router = useRouter()
@@ -91,14 +91,23 @@ export default function BulkIngestionPage() {
       return
     }
 
+    // RUNTIME INTEGRITY GUARD
+    if (typeof parseBulkQuestions !== "function" || typeof preprocessText !== "function") {
+       toast({ 
+         variant: "destructive", 
+         title: "Registry Node Failure", 
+         description: "Critical parser modules not loaded. Check module resolution." 
+       });
+       return;
+    }
+
     setIsProcessing(true)
     try {
-      const needsRawInput = ['DIAGRAM', 'MATCHING', 'TABLE', 'GRAPH', 'ASSERTION'].includes(metadata.parserFormat);
+      const needsRawInput = ['DIAGRAM', 'MATCHING', 'TABLE', 'GRAPH', 'ASSERTION', 'FILL_BLANK'].includes(metadata.parserFormat);
       const inputToParse = needsRawInput ? rawText : preprocessText(rawText);
       
       const result = parseBulkQuestions(inputToParse, {
          ...metadata,
-         // Map legacy internal keys for parser compatibility
          secondaryLanguage: metadata.languageMode.includes('HINDI') ? 'hindi' : 'punjabi'
       });
 
