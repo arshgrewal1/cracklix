@@ -8,10 +8,11 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
+import { cn } from "@/lib/utils";
 
 /**
- * @fileOverview High-Mass Institutional Hero v42.0.
- * UPDATED: Redesigned buttons for maximum stylistic impact and vertical density.
+ * @fileOverview High-Mass Institutional Hero v43.0.
+ * UPDATED: Premium CTA Redesign featuring glassmorphism, glossy shine, and precise Apple-inspired geometry.
  */
 export default function Hero() {
   const db = useFirestore();
@@ -50,24 +51,51 @@ export default function Hero() {
             </p>
           </div>
 
-          {/* STYLISH HIGH-MASS BUTTON HUB */}
-          <div className="flex flex-col sm:flex-row gap-5 w-full max-w-xl px-4">
-             <Button asChild className="flex-1 h-20 bg-primary hover:bg-blue-700 text-white font-[800] text-lg rounded-[24px] shadow-2xl shadow-primary/30 transition-all active:scale-95 border-none group relative overflow-hidden">
-                <Link href="/mocks" className="flex items-center justify-center gap-4">
-                  <div className="h-10 w-10 rounded-2xl bg-white/20 flex items-center justify-center backdrop-blur-md shadow-inner group-hover:scale-110 transition-transform">
-                    <Play className="h-5 w-5 fill-white" />
+          {/* PREMIUM HIGH-FIDELITY CTA HUB */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            className="flex flex-col sm:flex-row gap-[18px] w-full max-w-xl px-5 mx-auto items-center justify-center"
+          >
+             <Button 
+               asChild 
+               className="relative overflow-hidden w-full h-[58px] bg-gradient-to-r from-[#2563EB] via-[#3B82F6] to-[#60A5FA] hover:brightness-110 rounded-full shadow-[0_12px_35px_rgba(37,99,235,0.30)] hover:shadow-[0_15px_45px_rgba(37,99,235,0.40)] transition-all duration-300 active:scale-[0.98] border-none group cursor-pointer"
+               aria-label="Start Preparation"
+             >
+                <Link href="/mocks" className="flex items-center justify-center w-full px-1">
+                  {/* Glossy Shine Animation */}
+                  <motion.div 
+                    animate={{ x: ['-100%', '250%'] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute inset-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] pointer-events-none"
+                  />
+                  
+                  <div className="flex items-center justify-start w-full relative z-10">
+                    <div className="w-[42px] h-[42px] rounded-full bg-white/18 backdrop-blur-[12px] flex items-center justify-center shrink-0 shadow-[0_0_15px_rgba(255,255,255,0.2)] border border-white/10 group-hover:scale-105 transition-transform duration-300">
+                      <Play className="h-5 w-5 fill-white text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]" />
+                    </div>
+                    <span className="flex-1 text-center font-bold text-[18px] text-white tracking-[0.3px] pr-[42px]">
+                      Start Preparation
+                    </span>
                   </div>
-                  <span>Start Preparation</span>
                 </Link>
              </Button>
              
-             <Button asChild variant="outline" className="flex-1 h-20 rounded-[24px] border-2 border-slate-200 bg-white text-[#0F172A] font-[800] text-lg shadow-sm transition-all active:scale-95 hover:bg-slate-50 hover:border-slate-300">
-                <Link href="/exams" className="flex items-center justify-center gap-3">
-                   <span>Browse Registry</span> 
-                   <ChevronRight className="h-5 w-5 text-slate-300 group-hover:translate-x-1 transition-transform" />
+             <Button 
+               asChild 
+               variant="outline" 
+               className="w-full h-[56px] rounded-full bg-white border-2 border-[#DCE8FF] hover:border-[#60A5FA] hover:bg-[#F8FBFF] text-[#1E3A8A] font-semibold text-[17px] shadow-[0_8px_24px_rgba(0,0,0,0.06)] transition-all duration-300 active:scale-[0.98] hover:-translate-y-[2px] group"
+               aria-label="Browse Registry"
+             >
+                <Link href="/exams" className="flex items-center justify-center w-full px-1">
+                   <span className="flex-1 text-center pl-[34px]">Browse Registry</span> 
+                   <div className="w-[34px] h-[34px] rounded-full bg-[#EFF6FF] flex items-center justify-center shrink-0 group-hover:bg-[#E0F2FE] transition-colors">
+                      <ChevronRight className="h-4 w-4 text-[#1E3A8A] group-hover:translate-x-0.5 transition-transform" />
+                   </div>
                 </Link>
              </Button>
-          </div>
+          </motion.div>
           
           <div className="flex items-center gap-8 pt-4 md:pt-8 opacity-40 grayscale group hover:grayscale-0 transition-all duration-700">
              <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Institutional Registry Verified</p>
