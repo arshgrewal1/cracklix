@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v32.0 (Fidelity Refined).
- * UPDATED: Reduced padding to allow logos to fill the circular nodes more prominently.
+ * @fileOverview Institutional Branding Engine v33.0 (Maximization Overhaul).
+ * FIXED: Removed all internal padding and radius overrides to allow edge-to-edge icon fill.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -21,7 +21,7 @@ const CANONICAL_BOARD_LOGOS: Record<string, string> = {
   'judiciary-hub': '/logos/boards/high-court.png',
   'ssc': '/logos/boards/ssc.png',
   'rrb': '/logos/boards/rrb.png',
-  'ibps': '/logos/boards/ibps.png',
+  'idps': '/logos/boards/ibps.png',
   'defense': '/logos/boards/upsc.png',
   'pstet': '/logos/boards/pstet.png',
   'ctet': '/logos/boards/ctet.png',
@@ -64,20 +64,19 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     category?.logoUrl;
   
   const sizeClasses = {
-    sm: "h-11 w-11 md:h-14 md:w-14",
+    sm: "h-12 w-12 md:h-14 md:w-14",
     md: "h-16 w-16 md:h-24 md:w-24",
     lg: "h-24 w-24 md:h-32 md:w-32",
-    xl: "h-28 w-28 md:h-40 md:w-40"
+    xl: "h-32 w-32 md:h-48 md:w-48"
   };
 
   const containerSize = sizeClasses[size];
-  const isTransparent = className?.includes('bg-transparent') || className?.includes('bg-white/10') || className?.includes('p-0');
+  const isTransparent = className?.includes('bg-transparent') || className?.includes('bg-white/10');
 
   if (logoUrl) {
     return (
       <div className={cn(
-        "relative shrink-0 overflow-hidden flex items-center justify-center transition-all",
-        !isTransparent && "bg-white rounded-full border border-slate-100 shadow-xl",
+        "relative shrink-0 overflow-hidden transition-all bg-white rounded-full border border-slate-100 shadow-xl",
         containerSize, 
         className
       )}>
@@ -85,8 +84,8 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           src={logoUrl} 
           alt="Authority" 
           fill
-          sizes={size === 'sm' ? '64px' : size === 'md' ? '120px' : size === 'lg' ? '160px' : '200px'}
-          className="object-contain p-0.5"
+          sizes="256px"
+          className="object-cover"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -108,12 +107,11 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "flex items-center justify-center p-3 transition-all",
-      !isTransparent && "bg-white rounded-full border border-slate-100 shadow-inner",
+      "flex items-center justify-center transition-all bg-white rounded-full border border-slate-100 shadow-xl",
       containerSize, 
       className
     )}>
-      <div className="h-3/4 w-3/4">
+      <div className="h-full w-full p-2">
         {getFallbackIcon()}
       </div>
     </div>

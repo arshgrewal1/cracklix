@@ -4,9 +4,8 @@ import { cn } from "@/lib/utils"
 import Image from "next/image"
 
 /**
- * @fileOverview Institutional Branding Engine v31.0 (Fidelity Refined).
- * FIXED: Authority logos now respect transparency and external styling.
- * UPDATED: Removed current-affairs transparency exception to allow circular nodes.
+ * @fileOverview Institutional Branding Engine v33.0 (Maximization Overhaul).
+ * FIXED: Removed all internal padding and radius overrides to allow edge-to-edge icon fill.
  */
 
 const CANONICAL_BOARD_LOGOS: Record<string, string> = {
@@ -65,10 +64,10 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
     category?.logoUrl;
   
   const sizeClasses = {
-    sm: "h-10 w-10 md:h-12 md:w-12",
-    md: "h-14 w-14 md:h-20 md:w-20",
-    lg: "h-20 w-20 md:h-28 md:w-28",
-    xl: "h-24 w-24 md:h-36 md:w-32"
+    sm: "h-12 w-12 md:h-14 md:w-14",
+    md: "h-16 w-16 md:h-24 md:w-24",
+    lg: "h-24 w-24 md:h-32 md:w-32",
+    xl: "h-32 w-32 md:h-48 md:w-48"
   };
 
   const containerSize = sizeClasses[size];
@@ -77,8 +76,7 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
   if (logoUrl) {
     return (
       <div className={cn(
-        "relative shrink-0 overflow-hidden flex items-center justify-center p-2 transition-all",
-        !isTransparent && "bg-white rounded-full border border-slate-100 shadow-inner",
+        "relative shrink-0 overflow-hidden transition-all bg-white rounded-full border border-slate-100 shadow-xl",
         containerSize, 
         className
       )}>
@@ -86,8 +84,8 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
           src={logoUrl} 
           alt="Authority" 
           fill
-          sizes={size === 'sm' ? '48px' : size === 'md' ? '80px' : size === 'lg' ? '112px' : '144px'}
-          className="object-contain p-1"
+          sizes="256px"
+          className="object-cover"
           referrerPolicy="no-referrer"
         />
       </div>
@@ -109,12 +107,13 @@ export const AuthorityLogo = ({ board, category, boardId, categoryId, className,
 
   return (
     <div className={cn(
-      "flex items-center justify-center p-3 transition-all",
-      !isTransparent && "bg-white rounded-full border border-slate-100 shadow-inner",
+      "flex items-center justify-center transition-all bg-white rounded-full border border-slate-100 shadow-xl",
       containerSize, 
       className
     )}>
-      {getFallbackIcon()}
+      <div className="h-full w-full p-2">
+        {getFallbackIcon()}
+      </div>
     </div>
   );
 };

@@ -31,8 +31,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Shared Exam Center Client Hub v25.0.
- * OPTIMIZED: Compact Category selector for mobile/PWA (48px height).
+ * @fileOverview Shared Exam Center Client Hub v25.1.
+ * UPDATED: Optimized AuthorityLogo integration for maximized circular fill.
  */
 
 function EmptyStateCard({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) {
@@ -161,7 +161,7 @@ export default function ExamHubClient() {
                         </button>
                      </div>
                      <div className="flex items-center gap-4 md:gap-8">
-                        <AuthorityLogo board={activeBoard} category={activeCategory} size="md" className="w-12 h-12 md:w-28 md:h-28 rounded-xl md:rounded-[2.5rem] bg-slate-50 dark:bg-slate-800" />
+                        <AuthorityLogo board={activeBoard} category={activeCategory} size="md" className="shrink-0" />
                         <h1 className="text-xl md:text-5xl lg:text-6xl font-black text-[#0F172A] dark:text-white leading-tight tracking-tight">{exam.name}</h1>
                      </div>
                   </div>
@@ -172,7 +172,6 @@ export default function ExamHubClient() {
 
       <main className="container mx-auto px-2 md:px-4 py-8 md:py-12 max-w-7xl pb-40">
         <Tabs defaultValue="FULL" className="space-y-8 md:space-y-12">
-           {/* CATEGORY SELECTOR OPTIMIZATION - 48PX HEIGHT */}
            <div className="bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar flex items-center h-12">
               <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-start gap-1 snap-x snap-mandatory">
                  <DashboardTab value="FULL" label="Full Mock Tests" icon={Zap} />
@@ -240,7 +239,7 @@ function MockList({ data, isPassActive, loading, boards, type }: any) {
             const board = boards?.find((b: any) => b.id === (mock.boardIds?.[0] || mock.boardId));
             return (
                <Card key={mock.id} className="border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-500 rounded-2xl md:rounded-[3rem] bg-white dark:bg-slate-800/50 p-4 md:p-10 text-center flex flex-col group h-full">
-                  <div className="h-10 w-10 md:h-20 md:w-20 mx-auto mb-4 md:mb-8"><AuthorityLogo board={board} size="md" className="w-full h-full bg-slate-50 dark:bg-slate-800 rounded-lg md:rounded-xl" /></div>
+                  <div className="h-10 w-10 md:h-20 md:w-20 mx-auto mb-4 md:mb-8"><AuthorityLogo board={board} size="md" /></div>
                   <CardHeader className="p-0 flex-1 space-y-1 md:space-y-4">
                      <CardTitle className="font-bold text-xs md:text-xl text-[#0F172A] dark:text-white leading-tight line-clamp-2">{mock.title}</CardTitle>
                      <div className="flex items-center justify-center gap-2 md:gap-4 text-[8px] md:text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tight">

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -18,8 +17,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Institutional My Exams Hub v20.1.
- * UPDATED: Removed "Hub" from action buttons.
+ * @fileOverview Institutional My Exams Hub v20.2.
+ * UPDATED: Normalized AuthorityLogo integration for maximized circular fill.
  */
 
 export default function MyExamsPage() {
@@ -133,9 +132,7 @@ export default function MyExamsPage() {
                   </button>
 
                   <div className="mb-6 md:mb-10">
-                     <div className="shrink-0 group-hover:scale-105 transition-transform">
-                        <AuthorityLogo board={board} boardId={exam.boardId} size="md" className="h-16 w-16 md:h-20 md:w-20 bg-slate-50 shadow-inner" />
-                     </div>
+                     <AuthorityLogo board={board} size="md" className="shrink-0" />
                   </div>
 
                   <div className="flex-1 space-y-4">
@@ -157,7 +154,7 @@ export default function MyExamsPage() {
               <div className="col-span-full py-32 text-center border-2 border-dashed border-slate-200 bg-white/50 rounded-[3rem] opacity-30 flex flex-col items-center gap-6">
                  <GraduationCap className="h-12 w-12" />
                  <p className="font-black uppercase text-sm tracking-[0.2em]">Build your exam hub to start preparing</p>
-                 <Button asChild variant="outline" className="rounded-full px-8"><Link href="/exams">Browse Registry</Link></Button>
+                 <Button asChild variant="outline" className="rounded-full px-8"><Link href="/exams">Browse Selection</Link></Button>
               </div>
            )}
         </div>

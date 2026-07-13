@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState } from "react"
@@ -32,8 +31,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Exam Center v25.1.
- * UPDATED: Removed "Hub" from button labels.
+ * @fileOverview Exam Center v25.2.
+ * UPDATED: Optimized AuthorityLogo integration for maximized circular fill.
  */
 export default function ExamHubPage() {
   const params = useParams()
@@ -115,7 +114,7 @@ export default function ExamHubPage() {
                         </button>
                      </div>
                      <div className="flex items-center gap-6">
-                        <AuthorityLogo board={activeBoard} category={activeCategory} size="md" className="shadow-inner rounded-xl md:rounded-[2rem] bg-slate-50 p-3 md:p-4" />
+                        <AuthorityLogo board={activeBoard} category={activeCategory} size="md" className="shrink-0" />
                         <h1 className="text-2xl md:text-6xl font-black text-[#0F172A] leading-tight tracking-tight">
                            {exam.name}
                         </h1>
@@ -178,7 +177,7 @@ function MockList({ data, results, isPassActive, loading, boards }: any) {
             return (
                <Card key={mock.id} className="border border-slate-100 shadow-xl hover:shadow-4xl transition-all duration-500 rounded-2xl md:rounded-[2.5rem] bg-white p-4 md:p-10 text-center flex flex-col group relative overflow-hidden h-full">
                   <div className="h-10 w-10 md:h-16 md:w-16 mx-auto mb-4 md:mb-8">
-                     <AuthorityLogo board={board} size="md" className="w-full h-full shadow-inner rounded-lg bg-slate-50 p-1 md:p-2" />
+                     <AuthorityLogo board={board} size="md" />
                   </div>
                   <CardHeader className="p-0 flex-1 space-y-2 md:space-y-5">
                      <CardTitle className="font-black text-xs md:text-2xl text-[#0F172A] leading-tight line-clamp-2">
