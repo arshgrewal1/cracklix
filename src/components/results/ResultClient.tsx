@@ -27,7 +27,14 @@ import {
   Gem,
   ArrowRight,
   Lock,
-  UserPlus
+  UserPlus,
+  Share2,
+  Copy,
+  Mail,
+  MessageSquare,
+  Send,
+  Linkedin,
+  Facebook
 } from "lucide-react"
 import { useUser, useCollection, useFirestore, useDoc } from "@/firebase"
 import { collection, query, where, doc, getDoc, documentId, getDocs, limit } from "firebase/firestore"
@@ -36,24 +43,35 @@ import { useToast } from "@/hooks/use-toast"
 import { cn } from "@/lib/utils"
 import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
 
 /**
- * @fileOverview Official Performance Analysis Center v5.8.
- * FIXED: Meta-data fetching to check both mocks and daily_quizzes.
+ * @fileOverview Official Performance Analysis Center v6.0.
+ * UPDATED: Integrated Premium Result Sharing with Native Web Share and Desktop Fallback.
  */
 
 export default function ResultClient() {
   const db = useFirestore()
-  const { user } = useUser()
+  const { user, profile } = useUser()
   const searchParams = useSearchParams()
   const pathname = usePathname()
   const router = useRouter()
+  const { toast } = useToast()
+  
   const [mounted, setMounted] = useState(false)
   const [questions, setQuestions] = useState<any[]>([])
   const [mockData, setMockData] = useState<any>(null)
   const [loadingQuestions, setLoadingQuestions] = useState(true)
   const [activeReviewFilter, setActiveReviewFilter] = useState<'ALL' | 'CORRECT' | 'WRONG' | 'SKIPPED'>('ALL')
-  const [guestResult, setGuestResult] = useState<any>(null);
+  const [guestResult, setGuestResult] = useState<any>(null)
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false)
 
   useEffect(() => {
     setMounted(true)
@@ -159,6 +177,31 @@ export default function ResultClient() {
      return `${m}m ${s}s`;
   };
 
+  const shareSummary = useMemo(() => {
+     if (!sessionData) return "";
+     const rank = user ? `#${merit.rank}` : 'Guest';
+     const time = formatTime(sessionData.timeTaken || 0);
+     return `🎯 I scored ${sessionData.accuracy}% on Cracklix Mock Test!\n\n📊 Score: ${sessionData.score.toFixed(1)}\n🏆 Rank: ${rank}\n🎯 Accuracy: ${sessionData.accuracy}%\n⏱ Time: ${time}\n\nPractice Punjab Government Exams on Cracklix.\n\n👉 https://cracklix.com`;
+  }, [sessionData, merit, user]);
+
+  const handleShare = async () => {
+     const shareData = {
+        title: "Cracklix Test Result",
+        text: shareSummary,
+        url: window.location.href
+     };
+
+     if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        try {
+           await navigator.share(shareData);
+        } catch (err) {
+           setIsShareModalOpen(true);
+        }
+     } else {
+        setIsShareModalOpen(true);
+     }
+  };
+
   if (!mounted || (resultLoading && user) || (loadingQuestions && questions.length === 0)) return (
      <div className="h-screen w-full flex flex-col items-center justify-center bg-white space-y-4">
         <Loader2 className="h-8 w-8 text-primary animate-spin" />
@@ -171,9 +214,12 @@ export default function ResultClient() {
       <Navbar />
       <main className="container mx-auto px-4 md:px-8 py-6 md:py-10 max-w-7xl space-y-6 md:space-y-12">
         
-        <div className="bg-[#0B1528] rounded-[2rem] shadow-5xl overflow-hidden p-6 md:p-12 flex flex-col lg:grid lg:grid-cols-12 items-center gap-10 border border-white/5">
-           
-           <div className="flex items-center gap-5 md:gap-8 lg:col-span-5 w-full text-center lg:text-left">
+        <div className="bg-[#0B1528] rounded-[2rem] shadow-5xl overflow-hidden p-6 md:p-12 flex flex-col lg:grid lg:grid-cols-12 items-center gap-10 border border-white/5 relative">
+           {/* Decorative Elements */}
+           <div className="absolute -top-24 -left-24 w-64 h-64 bg-primary/5 blur-[100px] rounded-full" />
+           <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-blue-500/5 blur-[100px] rounded-full" />
+
+           <div className="flex items-center gap-5 md:gap-8 lg:col-span-5 w-full text-center lg:text-left relative z-10">
               <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl md:rounded-3xl bg-primary/10 flex items-center justify-center text-primary shrink-0 shadow-2xl border border-primary/20 transition-transform hover:rotate-6">
                  <Trophy className="h-6 w-6 md:h-8 md:w-8" />
               </div>
@@ -185,15 +231,18 @@ export default function ResultClient() {
               </div>
            </div>
 
-           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 lg:col-span-5 shrink-0 w-full lg:w-auto px-2 border-y lg:border-y-0 lg:border-x border-white/5 py-6 lg:py-0">
+           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 md:gap-8 lg:col-span-5 shrink-0 w-full lg:w-auto px-2 border-y lg:border-y-0 lg:border-x border-white/5 py-6 lg:py-0 relative z-10">
               <ResultPill label="Score" val={(sessionData?.score || 0).toFixed(1)} color={(sessionData?.score || 0) < 0 ? "text-rose-400" : "text-primary"} />
               <ResultPill label="Rank" val={user ? `#${merit.rank}` : 'Guest'} color="text-white" />
               <ResultPill label="Accuracy" val={`${sessionData?.accuracy || 0}%`} color="text-emerald-400" />
               <ResultPill label="Time" val={formatTime(sessionData?.timeTaken || 0)} color="text-amber-400" />
            </div>
 
-           <div className="lg:col-span-2 w-full flex justify-center lg:justify-end">
-              <Button asChild className="w-full md:w-auto h-12 md:h-14 px-8 bg-primary hover:bg-blue-700 text-white font-bold text-xs md:text-sm tracking-tight rounded-xl md:rounded-2xl shadow-xl transition-all border-none active:scale-95">
+           <div className="lg:col-span-2 w-full flex flex-col sm:flex-row lg:flex-col items-center gap-3 relative z-10">
+              <Button onClick={handleShare} className="w-full h-12 md:h-14 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold text-xs md:text-sm tracking-tight rounded-xl md:rounded-2xl shadow-xl transition-all active:scale-95 border-none gap-3 group">
+                 <Share2 className="h-4 w-4 transition-transform group-hover:rotate-12" /> Share Result
+              </Button>
+              <Button asChild variant="outline" className="w-full h-12 md:h-14 px-8 border-white/10 bg-white/5 text-white hover:bg-white/10 font-bold text-xs md:text-sm tracking-tight rounded-xl md:rounded-2xl transition-all border shadow-sm active:scale-95">
                  <Link href={`/mocks/instructions?id=${mockId}`} className="flex items-center justify-center gap-3">
                     <RefreshCw className="h-4 w-4" /> Re-Attempt
                  </Link>
@@ -350,6 +399,43 @@ export default function ResultClient() {
         </Tabs>
       </main>
       <Footer />
+
+      {/* SHARE MODAL FALLBACK */}
+      <Dialog open={isShareModalOpen} onOpenChange={setIsShareModalOpen}>
+        <DialogContent className="sm:max-w-md w-[92vw] rounded-[2.5rem] p-0 overflow-hidden border-none shadow-5xl bg-white text-left">
+           <div className="h-2 w-full bg-primary" />
+           <DialogHeader className="p-8 md:p-10 pb-0 text-center">
+              <div className="h-16 w-16 bg-blue-50 rounded-2xl flex items-center justify-center text-primary mx-auto mb-6 shadow-inner">
+                 <Share2 className="h-8 w-8" />
+              </div>
+              <DialogTitle className="text-2xl md:text-3xl font-black text-[#0F172A] uppercase tracking-tight">Share Result</DialogTitle>
+              <DialogDescription className="text-slate-400 font-bold text-[10px] md:text-xs uppercase tracking-widest mt-2">Select a platform to share your score</DialogDescription>
+           </DialogHeader>
+
+           <div className="p-6 md:p-10 grid grid-cols-2 gap-3 md:gap-4">
+              <ShareButtonIcon label="WhatsApp" icon={<MessageSquare className="h-5 w-5" />} color="bg-[#25D366]" onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(shareSummary)}`, '_blank')} />
+              <ShareButtonIcon label="Telegram" icon={<Send className="h-5 w-5" />} color="bg-[#0088cc]" onClick={() => window.open(`https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(shareSummary)}`, '_blank')} />
+              <ShareButtonIcon label="Facebook" icon={<Facebook className="h-5 w-5" />} color="bg-[#1877F2]" onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank')} />
+              <ShareButtonIcon label="LinkedIn" icon={<Linkedin className="h-5 w-5" />} color="bg-[#0A66C2]" onClick={() => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`, '_blank')} />
+              <ShareButtonIcon label="Gmail" icon={<Mail className="h-5 w-5" />} color="bg-slate-800" onClick={() => window.open(`mailto:?subject=${encodeURIComponent("My Cracklix Mock Test Result")}&body=${encodeURIComponent(shareSummary)}`, '_blank')} />
+              <button 
+                onClick={async () => {
+                   await navigator.clipboard.writeText(shareSummary);
+                   toast({ title: "Summary Copied" });
+                   setIsShareModalOpen(false);
+                }}
+                className="col-span-1 flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100 transition-all gap-2 group"
+              >
+                 <Copy className="h-5 w-5 text-slate-400 group-hover:text-primary" />
+                 <span className="text-[10px] font-black uppercase tracking-tight text-slate-500">Copy Text</span>
+              </button>
+           </div>
+           
+           <DialogFooter className="p-6 bg-slate-50 border-t border-slate-100 flex flex-col items-center">
+              <p className="text-[8px] font-black uppercase text-slate-300 tracking-[0.4em]">Official Cracklix Registry Node</p>
+           </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
@@ -367,6 +453,20 @@ function FilterBtn({ active, onClick, label, count, icon, activeColor }: any) {
    return (
       <button onClick={onClick} className={cn("px-5 py-3 rounded-xl md:rounded-2xl text-[10px] md:text-xs font-bold border transition-all flex items-center gap-3 whitespace-nowrap active:scale-[0.98] shadow-sm", active ? `${activeColor} text-white shadow-xl` : "bg-white border-slate-100 text-slate-500 hover:border-slate-300")}>
          {icon} {label} <span className="opacity-60 ml-0.5">({count})</span>
+      </button>
+   )
+}
+
+function ShareButtonIcon({ label, icon, color, onClick }: any) {
+   return (
+      <button 
+        onClick={onClick}
+        className="flex items-center gap-4 p-4 rounded-2xl bg-white border border-slate-100 hover:shadow-lg hover:border-slate-200 transition-all group active:scale-95"
+      >
+         <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center text-white shadow-md transition-transform group-hover:rotate-6", color)}>
+            {icon}
+         </div>
+         <span className="text-[11px] font-black uppercase text-[#0F172A] tracking-tight">{label}</span>
       </button>
    )
 }
