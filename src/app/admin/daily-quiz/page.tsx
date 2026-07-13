@@ -17,7 +17,9 @@ import {
   Calendar,
   Layers,
   ChevronRight,
-  ShieldCheck
+  ShieldCheck,
+  Activity,
+  Target
 } from "lucide-react"
 import Link from "next/link"
 import { useCollection, useFirestore } from "@/firebase"
