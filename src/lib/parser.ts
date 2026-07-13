@@ -1,8 +1,8 @@
 'use client';
 /**
- * @fileOverview Institutional Deterministic Ingestion Hub v76.0.
- * FIXED: Assertion & Reason Edge Cases (Q4, Q7, Q8).
- * FIXED: Punjabi-only support, no-space labels, and whitespace resilience.
+ * @fileOverview Institutional Deterministic Ingestion Hub v77.0.
+ * FIXED: Q1 First Question detection after document headers.
+ * FIXED: Q8 Blank line persistence (Don't terminate state on empty lines).
  */
 
 import { serverTimestamp } from 'firebase/firestore';
@@ -38,7 +38,9 @@ export const NOISE_PATTERNS = [
   /@/,
   /^\s*(?:Question|QUESTION|Q\.)\s*$/i,
   /^[-\s\.\*_=|+\/\\]{3,}$/,
-  /^\s*[\.·,]{1,}\s*$/
+  /^\s*[\.·,]{1,}\s*$/,
+  /ASSERTION\s*&\s*REASON\s*MASTER\s*STRESS\s*TEST/i,
+  /^Separators/i
 ];
 
 export const ANS_MARKERS = ["Answer", "Official Key", "Correct Answer", "ਉੱਤਰ", "उत्तर", "ਸਹੀ ਉੱਤਰ", "Sahi Uttar"];
@@ -59,8 +61,17 @@ const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
 
 export function isQuestionStart(line: string): boolean {
   if (!line) return false;
-  const anchoredRegex = /^\s*(?:(?:Q|Question|QUESTION|QUESTION\s*NO\.?|Q\.)[\s\.\-:]*)?(\d+|[lI])(?:[\.\s:)\-]|(?=\r?\n)|$)/i;
-  return anchoredRegex.test(line);
+  const trimmed = line.trim();
+  
+  // Strong Label Match (Question 1, Q1, Q.1)
+  const labelMatch = /^\s*(?:Question|QUESTION|Q\.|Q\s|Q-|Q\d+)[\s\.\-:]*(\d+|[IVXlI]+)/i;
+  if (labelMatch.test(trimmed)) return true;
+  
+  // Strong Number Match (1., 1), 1-) - require strong delimiter
+  const numberMatch = /^\s*(\d+|[IVXlI]+)[\.\)\-]\s*/i;
+  if (numberMatch.test(trimmed)) return true;
+  
+  return false;
 }
 
 export function preprocessText(text: string): string {
@@ -89,7 +100,11 @@ export function detectOptionMarker(line: string): { opt: 'A' | 'B' | 'C' | 'D', 
     { regex: /^\s*①\s*(.*)/, val: 'A' },
     { regex: /^\s*②\s*(.*)/, val: 'B' },
     { regex: /^\s*③\s*(.*)/, val: 'C' },
-    { regex: /^\s*④\s*(.*)/, val: 'D' }
+    { regex: /^\s*④\s*(.*)/, val: 'D' },
+    { regex: /^\s*([A])[\.]\s*(.*)/i, val: 'A' },
+    { regex: /^\s*([B])[\.]\s*(.*)/i, val: 'B' },
+    { regex: /^\s*([C])[\.]\s*(.*)/i, val: 'C' },
+    { regex: /^\s*([D])[\.]\s*(.*)/i, val: 'D' }
   ];
 
   for (const p of patterns) {
@@ -119,7 +134,6 @@ export function parseAssertionReason(fullText: string, metadata: any) {
   let state: 'IDLE' | 'ASSERT_EN' | 'ASSERT_PA' | 'REASON_EN' | 'REASON_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL' = 'IDLE';
 
   const finalize = () => {
-    // Q4 FIX: Support Punjabi-only (enAssert can be empty if paAssert exists)
     if (currentQ && (enAssert.trim() || paAssert.trim())) {
       currentQ.englishAssertion = enAssert.trim();
       currentQ.punjabiAssertion = paAssert.trim();
@@ -139,14 +153,12 @@ export function parseAssertionReason(fullText: string, metadata: any) {
       currentQ.englishExplanation = enExpl.trim();
       currentQ.punjabiExplanation = paExpl.trim();
 
-      // CBT Rendering Format
       currentQ.englishQuestion = (enAssert.trim() ? `Assertion: ${enAssert.trim()}\n` : "") + (enReason.trim() ? `Reason: ${enReason.trim()}` : "");
       currentQ.punjabiQuestion = (paAssert.trim() ? `ਕਥਨ: ${paAssert.trim()}\n` : "") + (paReason.trim() ? `ਕਾਰਨ: ${paReason.trim()}` : "");
 
       questions.push(currentQ);
     }
 
-    // ABSOLUTE ZERO-STATE RESET
     currentQ = null;
     enAssert = ""; paAssert = "";
     enReason = ""; paReason = "";
@@ -158,27 +170,21 @@ export function parseAssertionReason(fullText: string, metadata: any) {
     state = 'IDLE';
   };
 
-  // Q7 FIX: Space-resilient regexes
   const assertEnRegex = /^\s*(?:Assertion|Assertlon|Assertion:|Assertion\s*\(A\)|Assertion\(A\):?|A\)|Statement|Statement\s*\(A\)|Assertion\s*-)\s*[:\-]?/i;
   const assertPaRegex = /^\s*(?:ਕਥਨ|ਕਥਨ:|ਕਥਨ\s*\(A\)|ਕਥਨ\(A\):?)\s*[:\-]?/;
   const reasonEnRegex = /^\s*(?:Reason|Reas0n|Reason:|Reason\s*\(R\)|Reason\(R\):?|R\)|Reason\s*-)\s*[:\-]?/i;
   const reasonPaRegex = /^\s*(?:ਕਾਰਨ|ਕਾਰਨ:|ਕਾਰਨ\s*\(R\)|ਕਾਰਨ\(R\):?)\s*[:\-]?/;
 
-  const globalMarkerRegex = new RegExp(QUESTION_SENTINEL_REGEX.source, 'gi');
-  const totalFound = (fullText.match(globalMarkerRegex) || []).length;
-  console.log(`[INGESTION] TOTAL QUESTIONS FOUND: ${totalFound}`);
-
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    let line = lines[i];
     const trimmed = line.trim();
     
-    // Q8 FIX: Skip blank lines but maintain state
+    // Q8 FIX: Maintain state across blank lines. Continue reading until transition.
     if (!trimmed) continue;
 
     // GLOBAL BOUNDARY CHECK - HIGHEST PRIORITY
     if (isQuestionStart(line)) {
       finalize();
-      console.log(`[INGESTION] PROCESSING QUESTION: ${trimmed}`);
       currentQ = {
         ...metadata,
         id: `q-ar-${Math.random().toString(36).substr(2, 9)}`,
@@ -187,48 +193,51 @@ export function parseAssertionReason(fullText: string, metadata: any) {
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
-      continue;
+      
+      // FIX Q1: Strip question marker to process remainder of the line if it contains the label
+      line = line.replace(/^\s*(?:(?:Question|QUESTION|Q\.|Q\s|Q-|Q\d+)[\s\.\-:]*)?(\d+|[IVXlI]+)[\.\s:)\-]*\s*/i, '').trim();
+      if (!line) continue;
     }
 
     if (!currentQ) continue;
 
     const optMarker = detectOptionMarker(line);
-    const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().includes(m.toLowerCase()));
-    const isExpl = EXPL_MARKERS.some(m => trimmed.toLowerCase().includes(m.toLowerCase()));
+    const isAns = ANS_MARKERS.some(m => line.toLowerCase().includes(m.toLowerCase()));
+    const isExpl = EXPL_MARKERS.some(m => line.toLowerCase().includes(m.toLowerCase()));
 
     // State Transitions
     if (isAns) state = 'ANSWER';
     else if (isExpl) state = 'EXPL';
     else if (optMarker && state !== 'ANSWER' && state !== 'EXPL') state = 'OPTIONS';
-    else if (assertEnRegex.test(trimmed)) state = 'ASSERT_EN';
-    else if (assertPaRegex.test(trimmed)) state = 'ASSERT_PA';
-    else if (reasonEnRegex.test(trimmed)) state = 'REASON_EN';
-    else if (reasonPaRegex.test(trimmed)) state = 'REASON_PA';
+    else if (assertEnRegex.test(line)) state = 'ASSERT_EN';
+    else if (assertPaRegex.test(line)) state = 'ASSERT_PA';
+    else if (reasonEnRegex.test(line)) state = 'REASON_EN';
+    else if (reasonPaRegex.test(line)) state = 'REASON_PA';
 
-    let clean = trimmed;
-    if (state === 'ASSERT_EN') clean = trimmed.replace(assertEnRegex, '').trim();
-    else if (state === 'ASSERT_PA') clean = trimmed.replace(assertPaRegex, '').trim();
-    else if (state === 'REASON_EN') clean = trimmed.replace(reasonEnRegex, '').trim();
-    else if (state === 'REASON_PA') clean = trimmed.replace(reasonPaRegex, '').trim();
+    let cleanContent = line.trim();
+    if (state === 'ASSERT_EN') cleanContent = line.replace(assertEnRegex, '').trim();
+    else if (state === 'ASSERT_PA') cleanContent = line.replace(assertPaRegex, '').trim();
+    else if (state === 'REASON_EN') cleanContent = line.replace(reasonEnRegex, '').trim();
+    else if (state === 'REASON_PA') cleanContent = line.replace(reasonPaRegex, '').trim();
 
     switch (state) {
       case 'ASSERT_EN': 
         if (!optMarker) {
-           if (GURMUKHI_REGEX.test(clean)) paAssert += (paAssert ? '\n' : '') + clean;
-           else if (clean) enAssert += (enAssert ? '\n' : '') + clean;
+           if (GURMUKHI_REGEX.test(cleanContent)) paAssert += (paAssert ? '\n' : '') + cleanContent;
+           else if (cleanContent) enAssert += (enAssert ? '\n' : '') + cleanContent;
         }
         break;
       case 'ASSERT_PA': 
-        if (!optMarker && clean) paAssert += (paAssert ? '\n' : '') + clean; 
+        if (!optMarker && cleanContent) paAssert += (paAssert ? '\n' : '') + cleanContent; 
         break;
       case 'REASON_EN': 
         if (!optMarker) {
-           if (GURMUKHI_REGEX.test(clean)) paReason += (paReason ? '\n' : '') + clean;
-           else if (clean) enReason += (enReason ? '\n' : '') + clean;
+           if (GURMUKHI_REGEX.test(cleanContent)) paReason += (paReason ? '\n' : '') + cleanContent;
+           else if (cleanContent) enReason += (enReason ? '\n' : '') + cleanContent;
         }
         break;
       case 'REASON_PA': 
-        if (!optMarker && clean) paReason += (paReason ? '\n' : '') + clean; 
+        if (!optMarker && cleanContent) paReason += (paReason ? '\n' : '') + cleanContent; 
         break;
       case 'OPTIONS': 
         if (optMarker) {
@@ -247,21 +256,20 @@ export function parseAssertionReason(fullText: string, metadata: any) {
         } 
         break;
       case 'ANSWER':
-        const ansMatch = trimmed.match(/[A-D]/i);
+        const ansMatch = line.match(/[A-D]/i);
         if (ansMatch) currentAns = ansMatch[0].toUpperCase();
         break;
       case 'EXPL':
-        const explText = trimmed.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
+        const explText = line.replace(new RegExp(`^(?:${EXPL_MARKERS.join('|')}|${ANS_MARKERS.join('|')})\\s*[:\\-]?\\s*`, 'i'), '');
         if (explText) {
-          if (GURMUKHI_REGEX.test(explText)) paExpl += (paExpl ? '\n' : '') + explText;
-          else enExpl += (enExpl ? '\n' : '') + explText;
+          if (GURMUKHI_REGEX.test(explText)) paExpl += (paExpl ? '\n' : '') + explText.trim();
+          else enExpl += (enExpl ? '\n' : '') + explText.trim();
         }
         break;
     }
   }
 
   finalize();
-  console.log(`[INGESTION] SUCCESSFULLY PARSED: ${questions.length}/${totalFound}`);
   return { questions };
 }
 
@@ -286,10 +294,7 @@ export function parseMatching(chunk: string, metadata: any) {
     if (!trimmed) continue;
     if (isQuestionStart(line) && line !== lines[0]) break;
     
-    if (NOISE_PATTERNS.some(p => p.test(trimmed))) {
-       if (state === 'EXPL') break;
-       continue;
-    }
+    if (NOISE_PATTERNS.some(p => p.test(trimmed))) continue;
 
     const opt = detectOptionMarker(line);
     const isAns = ANS_MARKERS.some(m => trimmed.toLowerCase().includes(m.toLowerCase()));
@@ -370,7 +375,7 @@ export function parseBulkQuestions(rawText: string, metadata: any) {
     let result: any = { questions: [] };
     if (fmt === 'MATCHING') result = parseMatching(chunk, metadata);
     else {
-      // Logic for standard MCQ parser can be added here
+      // Standard MCQ logic could be added here
     }
 
     if (result && result.questions && result.questions.length > 0) {
