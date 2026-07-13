@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v71.0.
- * UPDATED: Aligned desktop nav links to the left for a high-density UI.
+ * @fileOverview Cracklix Navigation Hub v72.0.
+ * FIXED: Desktop Header alignment (80px height, 24-32px standardized gaps).
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -98,16 +98,17 @@ export default function Navbar() {
       SUPER_ADMIN_WHITELIST.includes(user.email.toLowerCase()));
 
   if (!mounted) {
-    return <nav className="w-full border-b border-slate-100 bg-white h-[80px] md:h-[110px]" />;
+    return <nav className="w-full border-b border-slate-100 bg-white h-20 lg:h-20" />;
   }
 
   return (
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
-        <nav className="w-full h-20 md:h-[110px]">
-          <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-2 md:px-6 h-full flex items-center justify-between gap-4">
+        <nav className="w-full h-20 lg:h-20">
+          <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
-            <div className="flex items-center shrink-0 gap-1 md:gap-2 flex-1 lg:flex-none">
+            {/* LEFT BLOCK: MENU | LOGO | NAVIGATION */}
+            <div className="flex items-center gap-4 md:gap-6 lg:gap-8 flex-1 min-w-0">
               <button
                 onClick={() => setisSidebarOpen(true)}
                 aria-label="Open menu"
@@ -118,26 +119,26 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0 -ml-5 md:-ml-8"
-                imgClassName="h-24 md:h-32 w-auto"
+                className="flex-shrink-0 -ml-5 lg:ml-0"
+                imgClassName="h-16 md:h-16 w-auto"
                 align="left"
               />
+
+              <div className="hidden lg:flex items-center gap-6 xl:gap-8 ml-2">
+                <NavLink href="/" label="Home" active={pathname === '/'} />
+                <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
+                <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
+                <NavLink href="/current-affairs" label="Current Affairs" active={pathname === '/current-affairs'} />
+                <NavLink href="/install" label="Install App" active={pathname === '/install'} />
+              </div>
             </div>
 
-            {/* DESKTOP NAV: MOVED TO LEFT */}
-            <div className="hidden lg:flex items-center justify-start gap-6 xl:gap-8 flex-1 ml-4">
-              <NavLink href="/" label="Home" active={pathname === '/'} />
-              <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
-              <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
-              <NavLink href="/current-affairs" label="Current Affairs" active={pathname === '/current-affairs'} />
-              <NavLink href="/install" label="Install App" active={pathname === '/install'} />
-            </div>
-
-            <div className="flex items-center justify-end gap-2 md:gap-4 shrink-0 flex-1 lg:flex-none">
+            {/* RIGHT BLOCK: ELITE ACCESS | SEARCH | PROFILE */}
+            <div className="flex items-center gap-4 md:gap-6 lg:gap-8 shrink-0">
               {profile?.passStatus === 'active' && timeLeft && (
-                 <div className="hidden sm:flex flex-col items-end mr-1">
-                    <span className="text-[8px] font-black text-emerald-600 tracking-tight leading-none">Elite Access</span>
-                    <span className="text-[10px] font-bold text-slate-400 mt-1 leading-none">{timeLeft}</span>
+                 <div className="hidden md:flex flex-col items-end mr-1">
+                    <span className="text-[9px] font-black text-emerald-600 tracking-tight leading-none uppercase">Elite Access</span>
+                    <span className="text-[11px] font-bold text-slate-400 mt-1.5 leading-none tabular-nums">{timeLeft}</span>
                  </div>
               )}
 
@@ -191,7 +192,7 @@ export default function Navbar() {
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <Link href="/login" className="px-3 md:px-4 h-10 md:h-11 rounded-xl bg-primary text-white font-bold text-[10px] md:text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
+                <Link href="/login" className="px-5 h-11 rounded-xl bg-primary text-white font-bold text-xs flex items-center justify-center transition-all active:scale-95 shadow-md">
                   Login
                 </Link>
               )}
