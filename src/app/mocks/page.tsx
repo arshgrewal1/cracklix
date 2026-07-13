@@ -30,7 +30,9 @@ import {
   Calculator,
   Languages,
   FlaskConical,
-  GraduationCap
+  GraduationCap,
+  Layers,
+  Timer
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -289,7 +291,7 @@ function MockSeriesCard({ mock, isPassActive, index }: { mock: any, isPassActive
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
       >
-         <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] md:rounded-[3.5rem] bg-white p-6 md:p-10 flex flex-col group h-full text-center relative overflow-hidden">
+         <Card className="border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 rounded-[2rem] md:rounded-[3rem] bg-white p-6 md:p-10 flex flex-col group h-full text-center relative overflow-hidden">
             <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000 pointer-events-none">
                <Trophy className="h-32 w-32" />
             </div>
