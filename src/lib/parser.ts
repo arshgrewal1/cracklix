@@ -1,7 +1,10 @@
 'use client';
 /**
- * @fileOverview Institutional Ingestion Hub v87.0.
- * REBUILD: Fresh State-Machine for Fill in the Blank extraction.
+ * @fileOverview Institutional Ingestion Hub v88.0 [PRODUCTION LOCK].
+ * - High-Fidelity State Machines for MCQ, Assertion/Reason, and Fill in the Blank.
+ * - OCR Noise Normalization (Pipes, Page Numbers, Ads).
+ * - Strict Punctuation Preservation Protocol.
+ * - Bilingual Script Isolation (Unicode-driven).
  */
 
 const GURMUKHI_REGEX = /[\u0A00-\u0A7F]/;
@@ -18,17 +21,13 @@ const NOISE_PATTERNS = [
   /^www\./i,
   /^https?:\/\//i,
   /^[-\s\.\*_=|+\/\\]{5,}$/,
-  /^\s*[\.·,]{2,}\s*$/,
-  /^[|¦│]$/ // Standalone pipe noise
+  /^\s*[\.·,]{2,}\s*$/
 ];
 
 const QUESTION_SENTINEL_REGEX = /^\s*(?:(?:Q|Question|QUESTION|QUESTION\s*NO\.?|Q\.)[\s\.\-:]*)?(\d+|[IVXlI]+)(?:[\.\s:)\-]|(?=\r?\n)|$)/i;
-const OPTION_MARKER_REGEX = /^\s*(?:[\(]?([A-D]|[1-4]|①|②|③|④|I{1,3}V?|i{1,3}v?|Ⓐ|Ⓑ|Ⓒ|Ⓓ|[a-d])[\)\.\s:]\s*)(.*)/i;
-const OPTION_SPACE_REGEX = /^\s*([A-D])\s+([A-Z0-9].*)/; // Matches "A Delhi" 
-const ANSWER_SENTINEL_REGEX = /^\s*(?:Answer|Correct Answer|Correct Ans|Official Key|Verified Answer|Key|Ans|ਸਹੀ ਉੱਤਰ|ਉੱਤਰ)\s*[:\-]?\s*([A-D1-4①-④])/i;
+const OPTION_MARKER_REGEX = /^\s*(?:[\(]?([A-E]|[1-5]|①|②|③|④|⑤|I{1,3}V?|i{1,3}v?|Ⓐ|Ⓑ|Ⓒ|Ⓓ|Ⓔ|[a-e])[\)\.\s:]\s*)(.*)/i;
+const ANSWER_SENTINEL_REGEX = /^\s*(?:Answer|Correct Answer|Correct Ans|Official Key|Verified Answer|Key|Ans|ਸਹੀ ਉੱਤਰ|ਉੱਤਰ)\s*[:\-]?\s*([A-E1-5①-⑤])/i;
 const EXPL_SENTINEL_REGEX = /^\s*(?:Explanation|Rationale|Solution|ਵਿਆਖਿਆ|English Explanation|Punjabi Explanation|English Rationale|Punjabi Rationale|Reason)\s*[:\-]?\s*(.*)/i;
-
-const FIB_LABELS = /^(?:Fill in the blanks?|Complete the sentence|Complete the following|Choose the correct word|Choose the correct answer|Select the correct word|ਖਾਲੀ ਥਾਂ ਭਰੋ|ਸਹੀ ਸ਼ਬਦ ਚੁਣੋ|ਸਹੀ ਉੱਤਰ ਚੁਣੋ|ਵਾਕ ਪੂਰਾ ਕਰੋ)\s*[:\-]?/i;
 
 export type ParserFormat = 
   | "BILINGUAL_MCQ" 
@@ -44,10 +43,6 @@ export type ParserFormat =
   | "ASSERTION" 
   | "FILL_BLANK";
 
-function isQuestionStart(line: string): boolean {
-  return QUESTION_SENTINEL_REGEX.test(line);
-}
-
 function detectScript(line: string): 'EN' | 'PA' {
   return GURMUKHI_REGEX.test(line) ? 'PA' : 'EN';
 }
@@ -55,6 +50,7 @@ function detectScript(line: string): 'EN' | 'PA' {
 function isNoise(line: string): boolean {
   const trimmed = line.trim();
   if (!trimmed) return true;
+  if (/^[|¦│]$/.test(trimmed)) return true; // Standalone pipe noise
   return NOISE_PATTERNS.some(p => p.test(trimmed));
 }
 
@@ -63,7 +59,7 @@ function sanitizeLine(line: string): string {
   const trimmed = line.trim();
   if (!trimmed) return "";
   
-  // OCR Correction Nodes
+  // OCR Correction Logic
   let corrected = trimmed
     .replace(/Questlon/g, 'Question')
     .replace(/Optlon/g, 'Option')
@@ -72,179 +68,36 @@ function sanitizeLine(line: string): string {
     .replace(/FIII/g, 'Fill')
     .replace(/BIank/g, 'Blank');
 
-  // Rule: Discard lines that contain ONLY punctuation noise or single pipes
-  if (/^[\s|¦│•.:;,_=\-(){}\[\]]+$/.test(corrected)) {
-    return "";
-  }
+  // Discard pure punctuation garbage lines
+  if (/^[\s|¦│•.:;,_=\-(){}\[\]]+$/.test(corrected)) return "";
 
   return corrected;
 }
 
 export function preprocessText(text: string): string {
   if (!text) return "";
-  const lines = text.split(/\r?\n/).filter(l => !isNoise(l));
-  return lines.join('\n').trim();
-}
-
-export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
-  const errors: string[] = [];
-  const warnings: string[] = [];
-  
-  if (!q.englishQuestion && !q.punjabiQuestion) errors.push("Statement content missing.");
-  
-  const optCount = ['A', 'B', 'C', 'D'].filter(l => (q[`option${l}English`] || q[`option${l}Punjabi`] || "").trim()).length;
-  
-  if (q.questionType === 'FILL_BLANK') {
-    if (optCount < 2) errors.push("FIB requires at least 2 options.");
-  } else {
-    if (optCount < 4) errors.push("MCQ requires at least 4 options.");
-  }
-
-  if (!q.correctAnswer) errors.push("Answer key missing.");
-  return { errors, warnings };
+  return text.split(/\r?\n/)
+    .map(l => l.trim())
+    .filter(l => !isNoise(l))
+    .join('\n')
+    .trim();
 }
 
 /**
- * REBUILT: Fill in the Blank Engine v87.0
- * State Machine with Independent Buffer Isolation and Punctuation Preservation.
- */
-export function parseFillInTheBlank(rawText: string, metadata: any) {
-  const questions: any[] = [];
-  const lines = rawText.split(/\r?\n/);
-
-  let currentNum = "";
-  let enQuest = "";
-  let paQuest = "";
-  let currentAns = "";
-  let enExpl = "";
-  let paExpl = "";
-  let opts: any = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
-
-  type ParserState = 'WAITING' | 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPLANATION';
-  let state: ParserState = 'WAITING';
-
-  const resetBuffers = () => {
-    currentNum = ""; enQuest = ""; paQuest = ""; currentAns = ""; enExpl = ""; paExpl = "";
-    opts = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
-    state = 'WAITING';
-  };
-
-  const finalize = () => {
-    const hasQuest = enQuest.trim() || paQuest.trim();
-    if (hasQuest) {
-      const qObj = {
-        ...metadata,
-        id: currentNum ? `q-${currentNum}` : `q-fib-${Math.random().toString(36).substr(2, 9)}`,
-        questionType: 'FILL_BLANK',
-        englishQuestion: enQuest.trim(),
-        punjabiQuestion: paQuest.trim(),
-        optionAEnglish: opts.A.en.trim(), optionAPunjabi: opts.A.pa.trim(),
-        optionBEnglish: opts.B.en.trim(), optionBPunjabi: opts.B.pa.trim(),
-        optionCEnglish: opts.C.en.trim(), optionCPunjabi: opts.C.pa.trim(),
-        optionDEnglish: opts.D.en.trim(), optionDPunjabi: opts.D.pa.trim(),
-        correctAnswer: currentAns || "A",
-        englishExplanation: enExpl.trim(),
-        punjabiExplanation: paExpl.trim(),
-        status: 'PUBLISHED'
-      };
-
-      // Self-Cleaning Node: Final check for noise leakage
-      if (!isNoise(qObj.englishQuestion)) {
-        questions.push(qObj);
-      }
-    }
-    resetBuffers();
-  };
-
-  for (let line of lines) {
-    const cleanedLine = sanitizeLine(line);
-    if (!cleanedLine && line.trim()) continue; // Skip noise but not actual spacing
-
-    // 1. New Question Interrupt (Highest Priority)
-    if (isQuestionStart(cleanedLine)) {
-      if (state !== 'WAITING') finalize();
-      currentNum = cleanedLine.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
-      state = 'QUESTION';
-      const questBody = cleanedLine.replace(QUESTION_SENTINEL_REGEX, '').replace(FIB_LABELS, '').trim();
-      if (questBody) {
-        if (detectScript(questBody) === 'PA') paQuest = questBody;
-        else enQuest = questBody;
-      }
-      continue;
-    }
-
-    const optMatch = cleanedLine.match(OPTION_MARKER_REGEX) || cleanedLine.match(OPTION_SPACE_REGEX);
-    const ansMatch = cleanedLine.match(ANSWER_SENTINEL_REGEX);
-    const explMatch = cleanedLine.match(EXPL_SENTINEL_REGEX);
-
-    // 2. State Transitions
-    if (optMatch) {
-      state = 'OPTIONS';
-      const rawKey = optMatch[1].toUpperCase();
-      const map: any = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '①': 'A', '②': 'B', '③': 'C', '④': 'D', 'Ⓐ': 'A', 'Ⓑ': 'B', 'Ⓒ': 'C', 'Ⓓ': 'D', 'a': 'A', 'b': 'B', 'c': 'C', 'd': 'D' };
-      const key = map[rawKey] || rawKey;
-      const text = optMatch[2].trim();
-      if (detectScript(text) === 'PA') opts[key].pa = text;
-      else opts[key].en = text;
-      continue;
-    }
-
-    if (ansMatch) {
-      state = 'ANSWER';
-      const val = ansMatch[1].toUpperCase();
-      const map: any = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '①': 'A', '②': 'B', '③': 'C', '④': 'D' };
-      currentAns = map[val] || val;
-      continue;
-    }
-
-    if (explMatch) {
-      state = 'EXPLANATION';
-      const text = explMatch[1].trim();
-      if (text) {
-        if (detectScript(text) === 'PA') paExpl = text;
-        else enExpl = text;
-      }
-      continue;
-    }
-
-    // 3. Buffer Appending
-    if (!cleanedLine) continue;
-
-    if (state === 'QUESTION') {
-      if (detectScript(cleanedLine) === 'PA') paQuest += (paQuest ? ' ' : '') + cleanedLine;
-      else enQuest += (enQuest ? ' ' : '') + cleanedLine;
-    } else if (state === 'EXPLANATION') {
-      if (detectScript(cleanedLine) === 'PA') paExpl += (paExpl ? ' ' : '') + cleanedLine;
-      else enExpl += (enExpl ? ' ' : '') + cleanedLine;
-    } else if (state === 'OPTIONS') {
-      const lastKey = ['D', 'C', 'B', 'A'].find(k => opts[k].en || opts[k].pa) || 'A';
-      if (detectScript(cleanedLine) === 'PA') opts[lastKey].pa += ' ' + cleanedLine;
-      else opts[lastKey].en += ' ' + cleanedLine;
-    }
-  }
-
-  finalize();
-  return { questions };
-}
-
-/**
- * Rebuilt: Assertion & Reason state machine parser v78.0 (Strict Isolation)
+ * Specialized Parser: Assertion & Reason
  */
 export function parseAssertionReason(rawText: string, metadata: any) {
   const questions: any[] = [];
   const lines = rawText.split(/\r?\n/);
-
+  
   let currentNum = "";
-  let enAssert = "";
-  let paAssert = "";
-  let enReason = "";
-  let paReason = "";
+  let enAssert = ""; let paAssert = "";
+  let enReason = ""; let paReason = "";
   let currentAns = "";
-  let enExpl = "";
-  let paExpl = "";
+  let enExpl = ""; let paExpl = "";
   let opts: any = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
 
-  type ARState = 'WAITING' | 'ASSERT_EN' | 'ASSERT_PA' | 'REASON_EN' | 'REASON_PA' | 'OPTIONS' | 'ANSWER' | 'EXPL_EN' | 'EXPL_PA';
+  type ARState = 'WAITING' | 'ASSERT' | 'REASON' | 'OPTIONS' | 'ANSWER' | 'EXPL';
   let state: ARState = 'WAITING';
 
   const resetBuffers = () => {
@@ -254,11 +107,10 @@ export function parseAssertionReason(rawText: string, metadata: any) {
   };
 
   const finalize = () => {
-    const hasAssertion = enAssert.trim() || paAssert.trim();
-    if (hasAssertion) {
+    if (enAssert.trim() || paAssert.trim()) {
       questions.push({
         ...metadata,
-        id: currentNum || `q-ar-${Math.random().toString(36).substr(2, 9)}`,
+        id: currentNum || `ar-${Date.now()}-${Math.random()}`,
         questionType: 'ASSERTION_REASON',
         englishAssertion: enAssert.trim(),
         punjabiAssertion: paAssert.trim(),
@@ -279,51 +131,38 @@ export function parseAssertionReason(rawText: string, metadata: any) {
     resetBuffers();
   };
 
-  const assertEnRegex = /^.*(?:Assertion|Statement|Assertlon)\s*\(?A\)?\s*[:\-]?\s*/i;
-  const assertPaRegex = /^.*(?:ਕਥਨ)\s*\(?A\)?\s*[:\-]?\s*/;
-  const reasonEnRegex = /^.*(?:Reason|Reas0n)\s*\(?R\)?\s*[:\-]?\s*/i;
-  const reasonPaRegex = /^.*(?:ਕਾਰਨ)\s*\(?R\)?\s*[:\-]?\s*/;
+  const assertLabel = /^(?:Assertion|Statement|ਕਥਨ)\s*\(?A\)?\s*[:\-]?/i;
+  const reasonLabel = /^(?:Reason|ਕਾਰਨ)\s*\(?R\)?\s*[:\-]?/i;
 
   for (let line of lines) {
-    const cleanedLine = sanitizeLine(line);
-    if (!cleanedLine && line.trim()) continue;
+    const cleaned = sanitizeLine(line);
+    if (!cleaned) continue;
 
-    if (isQuestionStart(cleanedLine)) {
+    if (QUESTION_SENTINEL_REGEX.test(cleaned)) {
       if (state !== 'WAITING') finalize();
-      currentNum = cleanedLine.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
-      state = 'ASSERT_EN';
-      const body = cleanedLine.replace(QUESTION_SENTINEL_REGEX, '').trim();
-      if (body) {
-        if (detectScript(body) === 'PA') paAssert = body;
-        else enAssert = body;
-      }
+      currentNum = cleaned.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
+      state = 'ASSERT';
       continue;
     }
 
-    const optMatch = cleanedLine.match(OPTION_MARKER_REGEX);
-    const ansMatch = cleanedLine.match(ANSWER_SENTINEL_REGEX);
-    const explMatch = cleanedLine.match(EXPL_SENTINEL_REGEX);
+    if (assertLabel.test(cleaned)) { state = 'ASSERT'; }
+    else if (reasonLabel.test(cleaned)) { state = 'REASON'; }
+    else if (OPTION_MARKER_REGEX.test(cleaned)) { state = 'OPTIONS'; }
+    else if (ANSWER_SENTINEL_REGEX.test(cleaned)) { state = 'ANSWER'; }
+    else if (EXPL_SENTINEL_REGEX.test(cleaned)) { state = 'EXPL'; }
+
+    const optMatch = cleaned.match(OPTION_MARKER_REGEX);
+    const ansMatch = cleaned.match(ANSWER_SENTINEL_REGEX);
+    const explMatch = cleaned.match(EXPL_SENTINEL_REGEX);
 
     if (ansMatch) {
-      state = 'ANSWER';
       const val = ansMatch[1].toUpperCase();
       const map: any = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '①': 'A', '②': 'B', '③': 'C', '④': 'D' };
       currentAns = map[val] || val;
       continue;
     }
 
-    if (explMatch) {
-      const content = explMatch[1].trim();
-      if (content) {
-        state = detectScript(content) === 'PA' ? 'EXPL_PA' : 'EXPL_EN';
-        if (state === 'EXPL_PA') paExpl = content;
-        else enExpl = content;
-      }
-      continue;
-    }
-
     if (optMatch) {
-      state = 'OPTIONS';
       const rawKey = optMatch[1].toUpperCase();
       const map: any = { '1': 'A', '2': 'B', '3': 'C', '4': 'D', '①': 'A', '②': 'B', '③': 'C', '④': 'D' };
       const key = map[rawKey] || rawKey;
@@ -333,20 +172,18 @@ export function parseAssertionReason(rawText: string, metadata: any) {
       continue;
     }
 
-    if (reasonPaRegex.test(cleanedLine)) { state = 'REASON_PA'; }
-    else if (reasonEnRegex.test(cleanedLine)) { state = 'REASON_EN'; }
-    else if (assertPaRegex.test(cleanedLine)) { state = 'ASSERT_PA'; }
-    else if (assertEnRegex.test(cleanedLine)) { state = 'ASSERT_EN'; }
-
-    if (!cleanedLine) continue;
-
-    switch (state) {
-      case 'ASSERT_EN': enAssert += (enAssert ? ' ' : '') + cleanedLine.replace(assertEnRegex, ''); break;
-      case 'ASSERT_PA': paAssert += (paAssert ? ' ' : '') + cleanedLine.replace(assertPaRegex, ''); break;
-      case 'REASON_EN': enReason += (enReason ? ' ' : '') + cleanedLine.replace(reasonEnRegex, ''); break;
-      case 'REASON_PA': paReason += (paReason ? ' ' : '') + cleanedLine.replace(reasonPaRegex, ''); break;
-      case 'EXPL_EN': enExpl += (enExpl ? ' ' : '') + cleanedLine; break;
-      case 'EXPL_PA': paExpl += (paExpl ? ' ' : '') + cleanedLine; break;
+    if (state === 'ASSERT') {
+      const body = cleaned.replace(assertLabel, '').trim();
+      if (detectScript(body) === 'PA') paAssert += (paAssert ? ' ' : '') + body;
+      else enAssert += (enAssert ? ' ' : '') + body;
+    } else if (state === 'REASON') {
+      const body = cleaned.replace(reasonLabel, '').trim();
+      if (detectScript(body) === 'PA') paReason += (paReason ? ' ' : '') + body;
+      else enReason += (enReason ? ' ' : '') + body;
+    } else if (state === 'EXPL') {
+      const body = cleaned.replace(EXPL_SENTINEL_REGEX, '').trim();
+      if (detectScript(body) === 'PA') paExpl += (paExpl ? ' ' : '') + body;
+      else enExpl += (enExpl ? ' ' : '') + body;
     }
   }
 
@@ -354,10 +191,229 @@ export function parseAssertionReason(rawText: string, metadata: any) {
   return { questions };
 }
 
+/**
+ * Specialized Parser: Fill in the Blank
+ */
+export function parseFillInTheBlank(rawText: string, metadata: any) {
+  const questions: any[] = [];
+  const lines = rawText.split(/\r?\n/);
+  
+  let currentNum = "";
+  let enQuest = ""; let paQuest = "";
+  let currentAns = "";
+  let enExpl = ""; let paExpl = "";
+  let opts: any = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
+
+  type FIBState = 'WAITING' | 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPL';
+  let state: FIBState = 'WAITING';
+
+  const resetBuffers = () => {
+    currentNum = ""; enQuest = ""; paQuest = ""; currentAns = ""; enExpl = ""; paExpl = "";
+    opts = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
+    state = 'WAITING';
+  };
+
+  const finalize = () => {
+    if (enQuest.trim() || paQuest.trim()) {
+      questions.push({
+        ...metadata,
+        id: currentNum || `fib-${Date.now()}`,
+        questionType: 'FILL_BLANK',
+        englishQuestion: enQuest.trim(),
+        punjabiQuestion: paQuest.trim(),
+        optionAEnglish: opts.A.en.trim(), optionAPunjabi: opts.A.pa.trim(),
+        optionBEnglish: opts.B.en.trim(), optionBPunjabi: opts.B.pa.trim(),
+        optionCEnglish: opts.C.en.trim(), optionCPunjabi: opts.C.pa.trim(),
+        optionDEnglish: opts.D.en.trim(), optionDPunjabi: opts.D.pa.trim(),
+        correctAnswer: currentAns || "A",
+        englishExplanation: enExpl.trim(),
+        punjabiExplanation: paExpl.trim(),
+        status: 'PUBLISHED'
+      });
+    }
+    resetBuffers();
+  };
+
+  for (let line of lines) {
+    const cleaned = sanitizeLine(line);
+    if (!cleaned) continue;
+
+    if (QUESTION_SENTINEL_REGEX.test(cleaned)) {
+      if (state !== 'WAITING') finalize();
+      currentNum = cleaned.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
+      state = 'QUESTION';
+      const body = cleaned.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      if (body) {
+        if (detectScript(body) === 'PA') paQuest = body;
+        else enQuest = body;
+      }
+      continue;
+    }
+
+    const optMatch = cleaned.match(OPTION_MARKER_REGEX);
+    const ansMatch = cleaned.match(ANSWER_SENTINEL_REGEX);
+    const explMatch = cleaned.match(EXPL_SENTINEL_REGEX);
+
+    if (optMatch) {
+      state = 'OPTIONS';
+      const key = optMatch[1].toUpperCase().replace(/[①Ⓐ]/,'A').replace(/[②Ⓑ]/,'B').replace(/[③Ⓒ]/,'C').replace(/[④Ⓓ]/,'D');
+      const text = optMatch[2].trim();
+      if (detectScript(text) === 'PA') opts[key].pa = text;
+      else opts[key].en = text;
+      continue;
+    }
+
+    if (ansMatch) {
+      state = 'ANSWER';
+      currentAns = ansMatch[1].toUpperCase().replace('①','A').replace('②','B').replace('③','C').replace('④','D');
+      continue;
+    }
+
+    if (explMatch) {
+      state = 'EXPL';
+      const text = explMatch[1].trim();
+      if (detectScript(text) === 'PA') paExpl = text;
+      else enExpl = text;
+      continue;
+    }
+
+    if (state === 'QUESTION') {
+      if (detectScript(cleaned) === 'PA') paQuest += (paQuest ? ' ' : '') + cleaned;
+      else enQuest += (enQuest ? ' ' : '') + cleaned;
+    } else if (state === 'EXPL') {
+      if (detectScript(cleaned) === 'PA') paExpl += (paExpl ? ' ' : '') + cleaned;
+      else enExpl += (enExpl ? ' ' : '') + cleaned;
+    }
+  }
+
+  finalize();
+  return { questions };
+}
+
+/**
+ * Specialized Parser: General MCQ (Bilingual/Standard)
+ */
+export function parseGeneralMCQ(rawText: string, metadata: any) {
+  const questions: any[] = [];
+  const lines = rawText.split(/\r?\n/);
+  
+  let currentNum = "";
+  let enQuest = ""; let paQuest = "";
+  let currentAns = "";
+  let enExpl = ""; let paExpl = "";
+  let opts: any = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
+
+  type MCQState = 'WAITING' | 'QUESTION' | 'OPTIONS' | 'ANSWER' | 'EXPL';
+  let state: MCQState = 'WAITING';
+
+  const finalize = () => {
+    if (enQuest.trim() || paQuest.trim()) {
+      questions.push({
+        ...metadata,
+        id: currentNum || `q-${Date.now()}`,
+        questionType: 'MCQ',
+        englishQuestion: enQuest.trim(),
+        punjabiQuestion: paQuest.trim(),
+        optionAEnglish: opts.A.en.trim(), optionAPunjabi: opts.A.pa.trim(),
+        optionBEnglish: opts.B.en.trim(), optionBPunjabi: opts.B.pa.trim(),
+        optionCEnglish: opts.C.en.trim(), optionCPunjabi: opts.C.pa.trim(),
+        optionDEnglish: opts.D.en.trim(), optionDPunjabi: opts.D.pa.trim(),
+        correctAnswer: currentAns || "A",
+        englishExplanation: enExpl.trim(),
+        punjabiExplanation: paExpl.trim(),
+        status: 'PUBLISHED'
+      });
+    }
+    currentNum = ""; enQuest = ""; paQuest = ""; currentAns = ""; enExpl = ""; paExpl = "";
+    opts = { A: { en: "", pa: "" }, B: { en: "", pa: "" }, C: { en: "", pa: "" }, D: { en: "", pa: "" } };
+  };
+
+  for (let line of lines) {
+    const cleaned = sanitizeLine(line);
+    if (!cleaned) continue;
+
+    if (QUESTION_SENTINEL_REGEX.test(cleaned)) {
+      if (state !== 'WAITING') finalize();
+      currentNum = cleaned.match(QUESTION_SENTINEL_REGEX)?.[1] || "";
+      state = 'QUESTION';
+      const body = cleaned.replace(QUESTION_SENTINEL_REGEX, '').trim();
+      if (body) {
+        if (detectScript(body) === 'PA') paQuest = body;
+        else enQuest = body;
+      }
+      continue;
+    }
+
+    const optMatch = cleaned.match(OPTION_MARKER_REGEX);
+    const ansMatch = cleaned.match(ANSWER_SENTINEL_REGEX);
+    const explMatch = cleaned.match(EXPL_SENTINEL_REGEX);
+
+    if (optMatch) {
+      state = 'OPTIONS';
+      const key = optMatch[1].toUpperCase().replace(/[①Ⓐ]/,'A').replace(/[②Ⓑ]/,'B').replace(/[③Ⓒ]/,'C').replace(/[④Ⓓ]/,'D');
+      const text = optMatch[2].trim();
+      if (detectScript(text) === 'PA') opts[key].pa = text;
+      else opts[key].en = text;
+      continue;
+    }
+
+    if (ansMatch) {
+      state = 'ANSWER';
+      currentAns = ansMatch[1].toUpperCase().replace('①','A').replace('②','B').replace('③','C').replace('④','D');
+      continue;
+    }
+
+    if (explMatch) {
+      state = 'EXPL';
+      const text = explMatch[1].trim();
+      if (detectScript(text) === 'PA') paExpl = text;
+      else enExpl = text;
+      continue;
+    }
+
+    if (state === 'QUESTION') {
+      if (detectScript(cleaned) === 'PA') paQuest += (paQuest ? ' ' : '') + cleaned;
+      else enQuest += (enQuest ? ' ' : '') + cleaned;
+    } else if (state === 'EXPL') {
+      if (detectScript(cleaned) === 'PA') paExpl += (paExpl ? ' ' : '') + cleaned;
+      else enExpl += (enExpl ? ' ' : '') + cleaned;
+    }
+  }
+
+  finalize();
+  return { questions };
+}
+
+/**
+ * MAIN DISPATCHER: Institutional Registry Node
+ */
 export function parseBulkQuestions(rawText: string, metadata: any) {
   if (!rawText || !rawText.trim()) return { questions: [] };
+  
   const cleanText = preprocessText(rawText);
-  if (metadata.parserFormat === 'ASSERTION') return parseAssertionReason(cleanText, metadata);
-  if (metadata.parserFormat === 'FILL_BLANK') return parseFillInTheBlank(cleanText, metadata);
-  return { questions: [] };
+  const format = metadata.parserFormat || "BILINGUAL_MCQ";
+
+  if (format === 'ASSERTION') return parseAssertionReason(cleanText, metadata);
+  if (format === 'FILL_BLANK') return parseFillInTheBlank(cleanText, metadata);
+  
+  return parseGeneralMCQ(cleanText, metadata);
+}
+
+export function validateMCQSchema(q: any): { errors: string[], warnings: string[] } {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  
+  if (!q.englishQuestion && !q.punjabiQuestion) errors.push("Statement content missing.");
+  
+  const optCount = ['A', 'B', 'C', 'D'].filter(l => (q[`option${l}English`] || q[`option${l}Punjabi`] || "").trim()).length;
+  
+  if (q.questionType === 'FILL_BLANK') {
+    if (optCount < 2) errors.push("FIB requires at least 2 options.");
+  } else {
+    if (optCount < 4) errors.push("MCQ requires at least 4 options.");
+  }
+
+  if (!q.correctAnswer) errors.push("Answer key missing.");
+  
+  return { errors, warnings };
 }
