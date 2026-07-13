@@ -1,16 +1,17 @@
+
 "use client"
 
 import React, { Suspense, useMemo, useEffect, useState } from "react"
 import ResultClient from "@/components/results/ResultClient"
 import { Loader2, Zap } from "lucide-react"
 import { useDoc, useFirestore, useUser } from "@/firebase"
-import { doc, deleteDoc } from "firebase/firestore"
+import { doc, deleteDoc, getDoc } from "firebase/firestore"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Universal Result Hub Viewer v3.1 (Naming Optimized).
- * FIXED: Removed 'Hub' from UI strings.
+ * @fileOverview Universal Result Hub Viewer v3.2.
+ * FIXED: Support for daily_quizzes in the Result Guard to prevent incorrect redirects.
  */
 
 export default function ResultViewPage() {
@@ -41,10 +42,35 @@ function ResultGuard() {
   const { toast } = useToast();
 
   const mockId = searchParams.get('id');
+  const [mock, setMock] = useState<any>(null);
+  const [mockLoading, setMockLoading] = useState(true);
 
-  // Verify the mock exists before allowing the result to render
-  const mockRef = useMemo(() => (db && mockId ? doc(db, "mocks", mockId) : null), [db, mockId]);
-  const { data: mock, loading: mockLoading } = useDoc<any>(mockRef);
+  useEffect(() => {
+    async function verifyMock() {
+      if (!db || !mockId) {
+        setMockLoading(false);
+        return;
+      }
+
+      try {
+        // Check standard mocks first
+        let snap = await getDoc(doc(db, "mocks", mockId));
+        if (!snap.exists()) {
+          // Check daily quizzes
+          snap = await getDoc(doc(db, "daily_quizzes", mockId));
+        }
+
+        if (snap.exists()) {
+          setMock(snap.data());
+        }
+      } catch (err) {
+        console.error("[RESULT_GUARD_ERROR]:", err);
+      } finally {
+        setMockLoading(false);
+      }
+    }
+    verifyMock();
+  }, [db, mockId]);
 
   useEffect(() => {
      if (!mockLoading && mockId && !mock && user && db) {

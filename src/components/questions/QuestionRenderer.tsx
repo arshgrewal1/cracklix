@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -16,12 +17,15 @@ interface QuestionRendererProps {
   hideOptions?: boolean;
   selectedAnswer?: number | null; 
   onSelect?: (index: number) => void;
+  onBookmark?: () => void;
+  onReport?: () => void;
+  isBookmarked?: boolean;
   className?: string;
 }
 
 /**
- * @fileOverview Institutional Question Renderer v72.0.
- * FIXED: Assertion & Reason field-sequential interleaved order.
+ * @fileOverview Institutional Question Renderer v73.0.
+ * FIXED: Wired bookmarking and reporting actions.
  */
 export default function QuestionRenderer({ 
   question, 
@@ -30,6 +34,9 @@ export default function QuestionRenderer({
   hideOptions = false,
   selectedAnswer,
   onSelect,
+  onBookmark,
+  onReport,
+  isBookmarked = false,
   className
 }: QuestionRendererProps) {
   const timeLeft = useExamStore(s => s.timeLeft);
@@ -80,8 +87,18 @@ export default function QuestionRenderer({
               </div>
            </div>
            <div className="flex items-center gap-2">
-              <button className="p-2 text-slate-300 hover:text-primary transition-all"><Bookmark className="h-5 w-5" /></button>
-              <button className="p-2 text-slate-300 hover:text-rose-50 transition-all"><AlertTriangle className="h-5 w-5" /></button>
+              <button 
+                onClick={onBookmark}
+                className={cn("p-2 transition-all active:scale-90", isBookmarked ? "text-primary" : "text-slate-300 hover:text-primary")}
+              >
+                <Bookmark className={cn("h-5 w-5", isBookmarked && "fill-current")} />
+              </button>
+              <button 
+                onClick={onReport}
+                className="p-2 text-slate-300 hover:text-rose-500 transition-all active:scale-90"
+              >
+                <AlertTriangle className="h-5 w-5" />
+              </button>
            </div>
         </div>
       )}

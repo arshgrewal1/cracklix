@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense } from "react"
@@ -37,10 +38,8 @@ import QuestionRenderer from "@/components/questions/QuestionRenderer"
 import StudentAvatar from "@/components/brand/StudentAvatar"
 
 /**
- * @fileOverview Official Performance Analysis Center v5.7.
- * FIXED: Syntax error resolved by removing orphaned div.
- * FIXED: UI Overlap fixed by adjusting grid span and pill spacing.
- * NORMALIZED: Removed forced uppercase from general labels.
+ * @fileOverview Official Performance Analysis Center v5.8.
+ * FIXED: Meta-data fetching to check both mocks and daily_quizzes.
  */
 
 export default function ResultClient() {
@@ -61,7 +60,7 @@ export default function ResultClient() {
   }, [])
 
   const mockId = useMemo(() => {
-    const queryId = searchParams?.get('id');
+    const queryId = searchParams.get('id');
     if (queryId) return queryId;
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSegment = pathSegments[pathSegments.length - 1];
@@ -115,7 +114,11 @@ export default function ResultClient() {
     async function loadQuestions() {
       if (!db || !mockId) return;
       try {
-        const mockSnap = await getDoc(doc(db, "mocks", mockId))
+        let mockSnap = await getDoc(doc(db, "mocks", mockId))
+        if (!mockSnap.exists()) {
+           mockSnap = await getDoc(doc(db, "daily_quizzes", mockId));
+        }
+
         if (mockSnap.exists()) {
           const mData = mockSnap.data();
           setMockData(mData);

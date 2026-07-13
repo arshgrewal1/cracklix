@@ -1,9 +1,10 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { useUser, useAuth, useFirestore } from "@/firebase";
-import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc } from "firebase/firestore";
+import { doc, getDoc, updateDoc, serverTimestamp, collection, query, where, documentId, getDocs, setDoc, deleteDoc, addDoc } from "firebase/firestore";
 import { useExamStore } from "@/store/useExamStore";
 import ExamHeader from "@/components/exam/ExamHeader";
 import TacticalFooter from "@/components/exam/TacticalFooter";
@@ -29,8 +30,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v6.2.
- * FIXED: Changed attempt update to setDoc for submission reliability.
+ * @fileOverview Official Mock Attempt Hub v6.3.
+ * FIXED: Wired bookmarking and report logic for live registry sync.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -210,7 +211,6 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       resultPayload.createdAt = serverTimestamp();
       
       await setDoc(doc(db, "results", `${user.uid}_${mockId}`), resultPayload, { merge: true });
-      // FIXED: Use setDoc instead of updateDoc to ensure creation if it doesn't exist
       await setDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { status: 'COMPLETED', updatedAt: serverTimestamp() }, { merge: true });
       
       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
@@ -234,6 +234,50 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       saveAndNext(db);
     }
   }, [currentIdx, questions, saveAndNext, db]);
+
+  const handleBookmark = async () => {
+    if (!user || !db || !questions[currentIdx]) return;
+    const q = questions[currentIdx];
+    const bookmarkId = `${user.uid}_${q.id}`;
+    const bookmarkRef = doc(db, "bookmarks", bookmarkId);
+
+    try {
+      const snap = await getDoc(bookmarkRef);
+      if (snap.exists()) {
+        await deleteDoc(bookmarkRef);
+        toast({ title: "Bookmark removed" });
+      } else {
+        await setDoc(bookmarkRef, {
+          userId: user.uid,
+          questionId: q.id,
+          questionText: q.englishQuestion,
+          subject: q.subjectId,
+          timestamp: new Date().toISOString()
+        });
+        toast({ title: "Question saved" });
+      }
+    } catch (e) {
+      toast({ variant: "destructive", title: "Action failed" });
+    }
+  };
+
+  const handleReportIssue = async () => {
+    if (!user || !db || !questions[currentIdx]) return;
+    const q = questions[currentIdx];
+    try {
+       await addDoc(collection(db, "reports"), {
+          userId: user.uid,
+          questionId: q.id,
+          mockId: mockId,
+          type: 'CONTENT_ISSUE',
+          status: 'PENDING',
+          timestamp: serverTimestamp()
+       });
+       toast({ title: "Issue flagged", description: "Auditing team notified." });
+    } catch (e) {
+       toast({ variant: "destructive", title: "Report failed" });
+    }
+  };
 
   const answeredCount = useMemo(() => Object.values(answers || {}).filter(a => a !== null && a !== undefined).length, [answers]);
   const notAnsweredCount = useMemo(() => questions.length - answeredCount, [questions.length, answeredCount]);
@@ -285,6 +329,8 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
                     question={{...questions[currentIdx], displayId: (currentIdx + 1).toString()}} 
                     selectedAnswer={answers?.[currentIdx] ?? null} 
                     onSelect={(idx: number) => setAnswer(currentIdx, idx, db)} 
+                    onBookmark={handleBookmark}
+                    onReport={handleReportIssue}
                     className="shadow-md border-none p-6 md:p-10 lg:p-12 rounded-2xl md:rounded-[3rem]" 
                   />
                 </motion.div>
@@ -341,3 +387,4 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     </div>
   );
 }
+
