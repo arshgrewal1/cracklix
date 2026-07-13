@@ -1,22 +1,35 @@
+
 'use client';
 
 import React, { useMemo, useState, useEffect } from 'react';
 import { useUser, useCollection, useFirestore } from '@/firebase';
-import { collection, query, where, limit, orderBy, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, limit, orderBy } from 'firebase/firestore';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Zap, Trophy, Target, Star, GraduationCap, ChevronRight } from 'lucide-react';
+import { 
+  Zap, 
+  Trophy, 
+  Target, 
+  Star, 
+  GraduationCap, 
+  ChevronRight,
+  BookOpen,
+  Clock,
+  Award,
+  ArrowRight
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AuthorityLogo } from '@/lib/exam-icons';
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 
 /**
- * @fileOverview "My Exams" Hub v12.6.
- * FIXED: Silent orphan cleanup for stale records.
+ * @fileOverview Institutional Performance Hub v6.0 (High-Fidelity Redesign).
+ * FIXED: Implemented luxurious dark-gradient cards with glassmorphic nodes.
  */
 
 export default function ContinueLearning() {
@@ -80,7 +93,7 @@ export default function ContinueLearning() {
   if (!hasData && !resultsLoading && !examsLoading) return null;
 
   return (
-    <section className="py-8 md:py-16 bg-white animate-in fade-in slide-in-from-bottom-4 duration-1000">
+    <section className="py-8 md:py-16 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 md:space-y-12 text-left">
         <div className="flex items-center justify-between px-1">
            <div className="flex items-center gap-3">
@@ -104,28 +117,71 @@ export default function ContinueLearning() {
                  {resultsLoading || mocksLoading ? (
                     Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-[2.5rem] bg-slate-50" />)
                  ) : recentAttempts.length > 0 ? (
-                    recentAttempts.map((res: any) => (
-                      <Card key={res.id} className="border-none shadow-xl rounded-[2.5rem] bg-[#0B1528] text-white p-6 md:p-10 overflow-hidden relative group text-left border border-white/5">
-                        <div className="absolute bottom-0 right-0 p-8 opacity-[0.03] rotate-12 group-hover:scale-110 transition-transform duration-1000">
-                            <Trophy className="h-32 w-32" />
-                        </div>
-                        <div className="relative z-10 flex flex-row items-center gap-6">
-                            <div className="h-12 w-12 md:h-16 md:w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform duration-500">
-                                <Zap className="h-6 w-6 md:h-8 md:w-8 text-primary fill-current" />
+                    recentAttempts.map((res: any, idx: number) => {
+                       const mockMeta = validMocks?.find((m: any) => m.id === res.mockId);
+                       return (
+                        <motion.div
+                          key={res.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.4, delay: idx * 0.1 }}
+                        >
+                          <Card className="border-none bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#1E293B] p-6 md:p-8 rounded-[28px] shadow-[0_20px_50px_rgba(0,0,0,0.28)] hover:shadow-[0_30px_60px_rgba(0,0,0,0.35)] transition-all duration-300 group relative overflow-hidden text-left hover:-translate-y-1.5 hover:scale-[1.01]">
+                            {/* Decorative Background Elements */}
+                            <div className="absolute top-0 right-0 p-8 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
+                                <Trophy className="h-24 w-24 text-white" />
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-primary font-black text-[9px] tracking-[0.4em] mb-1">Score: {res.score}</p>
-                                <h3 className="text-base md:text-xl font-black text-white truncate">{res.mockTitle}</h3>
-                                <Button onClick={() => handleReviewAction(res.mockId)} className="h-11 md:h-12 mt-6 px-8 bg-blue-600 hover:bg-blue-700 text-white font-black text-[10px] tracking-widest rounded-full transition-all active:scale-95 border-none shadow-lg">
-                                  Review Test
-                                </Button>
+                            <div className="absolute -top-10 -left-10 w-40 h-40 bg-primary/10 rounded-full blur-[80px] pointer-events-none" />
+                            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-blue-500/10 rounded-full blur-[80px] pointer-events-none" />
+
+                            <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-8">
+                                {/* Left Icon Node */}
+                                <div className="relative shrink-0">
+                                    <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full" />
+                                    <div className="h-16 w-16 md:h-[72px] md:w-[72px] rounded-full bg-primary/10 backdrop-blur-[18px] border border-white/10 flex items-center justify-center shadow-2xl relative transition-transform duration-500 group-hover:scale-105">
+                                        <Zap className="h-7 w-7 md:h-8 md:w-8 text-primary fill-primary" />
+                                    </div>
+                                </div>
+
+                                <div className="flex-1 space-y-4 md:space-y-5 min-w-0">
+                                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                                       <h3 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight line-clamp-2 pr-12">
+                                          {res.mockTitle}
+                                       </h3>
+                                       {/* Score Pill */}
+                                       <div className="absolute top-0 right-0 md:static flex shrink-0">
+                                          <Badge className="bg-primary/15 text-[#60A5FA] border-none px-4 py-1.5 rounded-full font-black text-[10px] md:text-xs shadow-sm">
+                                             ⭐ Score: {res.score}
+                                          </Badge>
+                                       </div>
+                                    </div>
+
+                                    {/* Info Chips */}
+                                    <div className="flex flex-wrap gap-2 md:gap-3">
+                                       <InfoChip icon={<BookOpen className="h-3 w-3" />} label={`${res.totalQuestions} Questions`} />
+                                       <InfoChip icon={<Clock className="h-3 w-3" />} label={`${mockMeta?.duration || 120}m Duration`} />
+                                       <InfoChip icon={<Award className="h-3 w-3" />} label={`${res.totalQuestions} Marks`} />
+                                    </div>
+
+                                    {/* Action Hub */}
+                                    <div className="pt-4 md:pt-6">
+                                       <Button 
+                                         onClick={() => handleReviewAction(res.mockId)} 
+                                         className="h-12 px-7 md:px-8 bg-gradient-to-r from-[#2563EB] to-[#3B82F6] hover:brightness-110 text-white font-black text-[11px] md:text-xs tracking-widest rounded-full shadow-[0_10px_24px_rgba(37,99,235,0.30)] transition-all hover:scale-[1.04] active:scale-[0.98] border-none flex items-center gap-2 group/btn"
+                                       >
+                                         Review Test
+                                         <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-1" />
+                                       </Button>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                      </Card>
-                    ))
+                          </Card>
+                        </motion.div>
+                       )
+                    })
                  ) : (
                     <div className="p-12 text-center bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200">
-                       <p className="text-[10px] font-black text-slate-400">No tests taken yet</p>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">No tests taken yet</p>
                     </div>
                  )}
               </div>
@@ -162,7 +218,7 @@ export default function ContinueLearning() {
                     })
                  ) : (
                     <div className="p-8 text-center bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200">
-                       <p className="text-[10px] font-black text-slate-400">Save an exam to see it here</p>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Save an exam to see it here</p>
                     </div>
                  )}
               </div>
@@ -171,4 +227,13 @@ export default function ContinueLearning() {
       </div>
     </section>
   );
+}
+
+function InfoChip({ icon, label }: { icon: React.ReactNode, label: string }) {
+   return (
+      <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl">
+         <span className="text-primary">{icon}</span>
+         <span className="text-[9px] md:text-[10px] font-bold text-slate-300 uppercase tracking-tight">{label}</span>
+      </div>
+   )
 }
