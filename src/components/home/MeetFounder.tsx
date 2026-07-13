@@ -1,18 +1,18 @@
+
 'use client';
 
-import React, { useState, useRef, useEffect, useMemo } from "react";
-import { motion, useInView, animate } from "framer-motion";
+import React, { useMemo } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check, User, Target, MapPin, Briefcase } from "lucide-react";
+import { ArrowRight, Check, Target, Star, ShieldCheck, Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Meet Founder section v6.0.
- * UPDATED: Normalized typography and reduced section spacing.
+ * @fileOverview Refined Meet Founder Section v7.0.
+ * UPDATED: Integrated with Global Design System (Royal Blue, 24px radius).
  */
 export default function MeetFounder() {
   const db = useFirestore();
@@ -23,110 +23,90 @@ export default function MeetFounder() {
     name: settings?.founderName || "Arsh Grewal",
     bio: settings?.founderBio || "I'm Arsh Grewal, a student from Punjab dedicated to building Punjab's smartest exam preparation platform.",
     quote: settings?.founderQuote || "Empowering every aspirant in Punjab with institutional-grade technology.",
-    buildingSince: settings?.founderBuildingSince || "19 July 2026",
-    mission: settings?.founderMission || "To build a trusted, student-first exam preparation platform."
   };
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
-
   return (
-    <section id="founder-section" className="relative py-12 md:py-24 bg-white overflow-hidden" ref={ref}>
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <div className="absolute top-[-10%] left-[-5%] w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px]" />
-      </div>
+    <section className="py-12 md:py-24 bg-slate-50/50 border-y border-slate-100 relative overflow-hidden">
+      {/* Decorative Glow */}
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-        >
-          <div className="text-center mb-10 md:mb-16">
-            <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50/50 border border-blue-100/50 text-xs font-bold text-slate-600">
-              🚀 Student • Founder • Developer
-            </span>
-            <h2 className="text-3xl md:text-[50px] font-black text-[#0F172A] tracking-tighter mt-4 leading-tight">
-              Meet the founder
-            </h2>
-          </div>
+      <div className="container mx-auto px-4 md:px-8 max-w-6xl relative z-10">
+        <div className="flex flex-col lg:flex-row items-center gap-12 md:gap-20">
+          
+          {/* Founder Visual Hub */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            className="relative shrink-0"
+          >
+            <div className="relative h-64 w-64 md:h-[420px] md:w-[420px] rounded-[3rem] overflow-hidden border-8 border-white shadow-5xl bg-[#0B1528]">
+              <Image
+                src="/founder.png"
+                alt={founder.name}
+                fill
+                className="object-cover grayscale group-hover:grayscale-0 transition-all duration-1000"
+                priority
+              />
+            </div>
+            <div className="absolute -bottom-4 -right-4 h-16 w-16 md:h-20 md:w-20 bg-primary rounded-3xl border-8 border-white shadow-2xl flex items-center justify-center text-white">
+              <Check className="h-8 w-8 md:h-10 md:w-10 stroke-[4px]" />
+            </div>
+          </motion.div>
 
-          <div className="flex flex-col lg:flex-row items-center gap-10 md:gap-16">
-            <motion.div 
-              className="relative shrink-0"
-              initial={{ scale: 0.95 }} 
-              animate={isInView ? { scale: 1 } : { scale: 0.95 }}
-              transition={{ duration: 0.8 }}
+          {/* Narrative Content */}
+          <div className="flex-1 space-y-8 text-center lg:text-left">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="space-y-6"
             >
-              <div className="relative h-48 w-48 md:h-80 md:w-80 rounded-full overflow-hidden border-4 md:border-8 border-white shadow-xl bg-slate-100">
-                <Image
-                  src="/founder.png"
-                  alt={founder.name}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 150px, 320px"
-                />
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-[10px] md:text-xs font-black uppercase tracking-widest text-primary">
+                 <Star className="h-3 w-3 fill-current" /> Verified Founder
               </div>
-              <div className="absolute bottom-1 right-1 h-12 w-12 md:h-16 md:w-16 bg-blue-500 rounded-full border-4 border-white flex items-center justify-center text-white shadow-lg">
-                <Check className="h-6 w-6 md:h-8 md:w-8" />
-              </div>
-            </motion.div>
-
-            <div className="flex-1 space-y-4 md:space-y-6 text-center lg:text-left">
-              <p className="text-base md:text-xl text-slate-600 leading-relaxed font-medium">
-                {founder.bio}
-              </p>
-              <p className="text-sm md:text-lg text-slate-400 font-medium italic">
+              
+              <h2 className="text-3xl md:text-6xl font-black text-[#0F172A] tracking-tighter leading-[0.95] uppercase">
+                Meet the <br/> <span className="text-primary italic">Founder.</span>
+              </h2>
+              
+              <p className="text-lg md:text-2xl text-slate-500 font-medium leading-relaxed italic max-w-2xl">
                 "{founder.quote}"
               </p>
+              
+              <p className="text-base md:text-lg text-slate-600 font-medium leading-relaxed line-clamp-3">
+                {founder.bio}
+              </p>
+
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-2">
+                 <FeatureChip icon={Target} label="Student First" />
+                 <FeatureChip icon={ShieldCheck} label="Official Patterns" />
+                 <FeatureChip icon={Heart} label="Made in Punjab" />
+              </div>
+            </motion.div>
+            
+            <div className="pt-4">
+              <Button
+                asChild
+                className="h-16 px-12 bg-[#0F172A] hover:bg-black text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl transition-all active:scale-95 border-none group"
+              >
+                <Link href="/meet-founder" className="flex items-center gap-3">
+                  Read My Full Story <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Link>
+              </Button>
             </div>
           </div>
-
-          <div className="text-center mt-12 md:mt-20">
-            <Button
-              asChild
-              className="h-[52px] md:h-16 px-10 bg-[#0B1528] hover:bg-black text-white font-bold text-sm md:text-base rounded-full shadow-xl transition-all active:scale-95 border-none"
-            >
-              <Link href="/meet-founder">
-                Read my story <ArrowRight className="h-4 w-4 ml-2" />
-              </Link>
-            </Button>
-          </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );
 }
 
-function StatCard({ icon, label, value, isInView, delay = 0 }: { icon: React.ReactNode; label: string; value?: string; isInView: boolean; delay?: number }) {
-  const [count, setCount] = useState(0);
-  
-  useEffect(() => {
-    if (isInView && value && /^\d+$/.test(value)) {
-      const controls = animate(0, parseInt(value), {
-        duration: 2,
-        delay,
-        onUpdate: (latest) => setCount(Math.round(latest)),
-      });
-      return () => controls.stop();
-    }
-  }, [isInView, value, delay]);
-
+function FeatureChip({ icon: Icon, label }: { icon: any, label: string }) {
   return (
-    <motion.div
-      className="bg-white/60 backdrop-blur-lg border border-blue-100/50 rounded-[2rem] p-5 text-center flex flex-col items-center justify-center space-y-2 h-full shadow-md"
-      initial={{ opacity: 0, y: 20 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-      transition={{ duration: 0.4, delay: delay + 0.1, ease: "easeOut" }}
-    >
-      <div className="text-primary scale-90">{icon}</div>
-      {value ? (
-        <p className="text-lg md:text-2xl font-black text-[#0F172A] tabular-nums leading-tight">
-          {value && /^\d+$/.test(value) ? count : value}
-        </p>
-      ) : null}
-      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-    </motion.div>
+    <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-100 rounded-xl shadow-sm">
+       <Icon className="h-4 w-4 text-primary" />
+       <span className="text-[10px] md:text-xs font-bold text-[#0F172A] uppercase tracking-tight">{label}</span>
+    </div>
   );
 }

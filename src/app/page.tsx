@@ -14,13 +14,13 @@ import MeritPreview from "@/components/home/MeritPreview";
 import Footer from "@/components/layout/Footer";
 import GlobalSearch from "@/components/home/GlobalSearch";
 import LatestVacancy from "@/components/home/LatestVacancy";
-import { FAQContent } from "@/app/faq/page";
+import MeetFounder from "@/components/home/MeetFounder";
 import { useUser } from "@/firebase";
-import { Zap, HelpCircle } from "lucide-react";
+import { Zap } from "lucide-react";
 
 /**
- * @fileOverview Institutional Premium Hub v406.0.
- * FIXED: Replaced FAQPage with FAQContent to resolve double Navbar/Footer issue.
+ * @fileOverview Institutional Premium Hub v408.0.
+ * UPDATED: Replaced FAQ section with Meet the Founder hub as requested.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -71,19 +71,8 @@ export default function HomePage() {
       <CurrentAffairsPreview />
       <MeritPreview />
 
-      {/* 8. FAQ CONTENT Hub */}
-      <section className="bg-slate-50/50 py-12 md:py-24 border-y border-slate-100">
-        <div className="container mx-auto px-4 md:px-8 max-w-7xl space-y-12">
-           <div className="text-left space-y-4">
-              <div className="flex items-center gap-3">
-                 <HelpCircle className="h-5 w-5 text-primary" />
-                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Institutional FAQ</span>
-              </div>
-              <h2 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tight uppercase leading-[0.9]">Common <span className="text-primary italic">Questions</span></h2>
-           </div>
-           <FAQContent />
-        </div>
-      </section>
+      {/* 8. FOUNDER HUB (Restored in place of FAQ) */}
+      <MeetFounder />
       
       <Footer />
     </main>
