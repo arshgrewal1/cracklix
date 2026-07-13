@@ -17,8 +17,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix High-Fidelity Brand Identity v127.0.
- * UPDATED: Doubled width and height constraints to support massive high-mass logos.
+ * @fileOverview Cracklix Brand Identity v128.0.
+ * FIXED: Removed forced width constraints that caused desktop header alignment overlaps.
  */
 export default function Logo({
   className = "",
@@ -53,8 +53,7 @@ export default function Logo({
         height={isIcon ? 128 : 240}
         priority={priority}
         className={cn(
-          "h-auto transition-all flex-shrink-0 object-contain",
-          isIcon ? "w-20 md:w-28" : "w-80 md:w-[512px]",
+          "h-auto transition-all flex-shrink-0 object-contain w-auto",
           imgClassName
         )}
       />

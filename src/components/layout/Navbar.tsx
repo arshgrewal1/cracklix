@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v73.0.
- * FIXED: Desktop Header alignment (80px height, anchored containers to prevent overlap).
+ * @fileOverview Cracklix Navigation Hub v74.0.
+ * FIXED: Desktop Alignment - Anchored Menu/Logo/Links to Left and Meta-Nodes to Right.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -120,11 +120,11 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0"
-                imgClassName="h-16 md:h-16 w-auto"
+                imgClassName="h-12 md:h-14 w-auto"
                 align="left"
               />
 
-              <div className="hidden lg:flex items-center gap-6 xl:gap-8 ml-2">
+              <div className="hidden lg:flex items-center gap-6 xl:gap-8">
                 <NavLink href="/" label="Home" active={pathname === '/'} />
                 <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
                 <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
@@ -136,7 +136,7 @@ export default function Navbar() {
             {/* RIGHT BLOCK: ELITE ACCESS | SEARCH | PROFILE */}
             <div className="flex items-center gap-4 md:gap-6 lg:gap-8">
               {profile?.passStatus === 'active' && timeLeft && (
-                 <div className="hidden md:flex flex-col items-end mr-1 shrink-0">
+                 <div className="hidden lg:flex flex-col items-end shrink-0">
                     <span className="text-[9px] font-black text-emerald-600 tracking-tight leading-none uppercase">Elite Access</span>
                     <span className="text-[11px] font-bold text-slate-400 mt-1.5 leading-none tabular-nums">{timeLeft}</span>
                  </div>
