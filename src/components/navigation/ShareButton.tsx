@@ -8,7 +8,6 @@ import {
   Send, 
   Copy, 
   ChevronRight, 
-  Download,
   ShieldCheck,
   X
 } from "lucide-react";
@@ -25,13 +24,11 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { toPng } from 'html-to-image';
-import AppShareCard from "./AppShareCard";
 
 /**
- * @fileOverview Premium Social Share Hub v3.0 [ULTIMATE].
- * Generates a high-fidelity Share Card PNG and shares it along with 
- * marketing text and install links via the Native Web Share API.
+ * @fileOverview Premium Social Share Hub v4.0.
+ * Optimized for text-only sharing with high-conversion marketing copy.
+ * Removed image generation to ensure instant execution of the share sheet.
  */
 export default function ShareButton({ 
   className = "", 
@@ -40,11 +37,8 @@ export default function ShareButton({
   const db = useFirestore();
   const { toast } = useToast();
   const [isDialogOpen, setIsShareDialogOpen] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   
-  const settingsRef = useMemo(() => (db ? doc(db, 'settings', 'global') : null), [db]);
-  const { data: settings } = useDoc<any>(settingsRef);
-
   const installUrl = "https://cracklix.vercel.app/install";
   const websiteUrl = "https://cracklix.vercel.app";
   
@@ -82,63 +76,28 @@ ${websiteUrl}
 
 Join thousands of Punjab aspirants preparing smarter every day.`;
 
-  const generateCardImage = async () => {
-    const node = document.getElementById('cracklix-app-share-card');
-    if (!node) return null;
-    try {
-       return await toPng(node, {
-          quality: 1,
-          pixelRatio: 2,
-          cacheBust: true,
-          style: { visibility: 'visible', position: 'static' }
-       });
-    } catch (err) {
-       console.error("[SHARE_GEN_ERROR]:", err);
-       return null;
-    }
-  };
-
   const handleShare = async () => {
-    if (isGenerating) return;
-    setIsGenerating(true);
+    if (isSharing) return;
+    setIsSharing(true);
 
     try {
-      const dataUrl = await generateCardImage();
-
-      if (!dataUrl) {
-         throw new Error("Card rendering failure.");
-      }
-
-      const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], `cracklix-invite.png`, { type: 'image/png' });
-
-      // MOBILE PROTOCOL: Web Share API (Bundling Image + Text + URL)
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      // MOBILE PROTOCOL: Web Share API (Text + URL)
+      if (navigator.share) {
         await navigator.share({
-          files: [file],
-          title: 'Cracklix Invite',
+          title: 'Cracklix | Punjab Exam Prep',
           text: shareMessage,
         });
+        toast({ title: "Shared Successfully" });
       } else {
         // DESKTOP FALLBACK: Show Premium Modal
         setIsShareDialogOpen(true);
       }
-    } catch (err) {
-      // Emergency Fallback: If file share fails, try text-only share, then modal
-      if (navigator.share) {
-         try {
-            await navigator.share({
-               title: 'Cracklix Invite',
-               text: shareMessage
-            });
-         } catch (e) {
-            setIsShareDialogOpen(true);
-         }
-      } else {
-         setIsShareDialogOpen(true);
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        setIsShareDialogOpen(true);
       }
     } finally {
-      setIsGenerating(false);
+      setIsSharing(false);
     }
   };
 
@@ -160,36 +119,18 @@ Join thousands of Punjab aspirants preparing smarter every day.`;
     }
   };
 
-  const handleDownload = async () => {
-     setIsGenerating(true);
-     const dataUrl = await generateCardImage();
-     if (dataUrl) {
-        const link = document.createElement('a');
-        link.download = `cracklix-invite-card.png`;
-        link.href = dataUrl;
-        link.click();
-        toast({ title: "Invite Card Saved" });
-     }
-     setIsGenerating(false);
-  };
-
   return (
     <>
-      {/* HIDDEN EXPORT NODE */}
-      <div className="fixed left-[-9999px] top-0 pointer-events-none opacity-0">
-         <AppShareCard />
-      </div>
-
       <div className="w-full space-y-4">
         <Button
           onClick={handleShare}
-          disabled={isGenerating}
+          disabled={isSharing}
           className={cn(
             "w-full h-[60px] rounded-[24px] bg-gradient-to-r from-[#2563EB] to-[#60A5FA] text-white font-[900] uppercase text-[12px] tracking-[0.1em] gap-4 shadow-[0_12px_24px_rgba(37,99,235,0.25)] hover:shadow-[0_15px_30px_rgba(37,99,235,0.35)] transition-all hover:scale-[1.02] active:scale-95 group relative overflow-hidden border-none",
             className
           )}
         >
-          {isGenerating ? (
+          {isSharing ? (
             <Loader2 className="h-6 w-6 animate-spin" />
           ) : (
             <Share2 className="h-6 w-6 transition-transform group-hover:rotate-12" />
@@ -217,10 +158,6 @@ Join thousands of Punjab aspirants preparing smarter every day.`;
              <div className="grid grid-cols-1 gap-3">
                 <button onClick={() => window.open(`https://wa.me/?text=${encodeURIComponent(shareMessage)}`, '_blank')} className="w-full h-14 md:h-16 bg-[#25D366] hover:bg-[#20bd5c] text-white rounded-2xl flex items-center px-6 gap-6 shadow-lg transition-all active:scale-95 border-none group">
                    <MessageSquare className="h-6 w-6" /> <span className="font-black uppercase text-[11px] md:text-sm tracking-widest flex-1 text-left">WhatsApp Hub</span>
-                   <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button onClick={handleDownload} className="w-full h-14 md:h-16 bg-slate-900 hover:bg-black text-white rounded-2xl flex items-center px-6 gap-6 shadow-lg transition-all active:scale-95 border-none group">
-                   <Download className="h-6 w-6 text-primary" /> <span className="font-black uppercase text-[11px] md:text-sm tracking-widest flex-1 text-left">Download Invite Card</span>
                    <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
                 </button>
                 <button onClick={copyMessageToClipboard} className="w-full h-14 md:h-16 bg-slate-50 hover:bg-slate-100 text-[#0F172A] rounded-2xl flex items-center px-6 gap-6 border border-slate-100 transition-all active:scale-95 group">
