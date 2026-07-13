@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useMemo, useEffect, Suspense, useCallback } from "react"
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import { 
   ChevronLeft, 
   ChevronRight,
@@ -51,11 +53,11 @@ import { cn } from "@/lib/utils"
 import { AdminPageHeader } from "@/components/admin"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { Skeleton } from "@/components/ui/skeleton"
 
 /**
- * @fileOverview Daily Challenge Architect v1.0.
- * Specialized builder for one-active-quiz daily challenge nodes.
+ * @fileOverview Daily Challenge Architect v1.1.
+ * FIXED: Collection synchronized with primary 'questions' node.
+ * FIXED: Resolved reference errors for existingQuiz and missing UI components.
  */
 
 export default function DailyQuizBuilder() {
@@ -76,7 +78,8 @@ function DailyQuizBuilderContent() {
   const quizId = searchParams?.get("id") ?? ""
   const isEditing = !!quizId
 
-  const { data: rawBank, loading: bankLoading } = useCollection<Question>(useMemo(() => (db ? query(collection(db, "mcqBank"), limit(2000)) : null), [db]))
+  // SYNCED: Using 'questions' collection as the master bank
+  const { data: rawBank, loading: bankLoading } = useCollection<Question>(useMemo(() => (db ? query(collection(db, "questions"), limit(2000)) : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]))
   const { data: existingQuiz } = useDoc<any>(useMemo(() => (db && quizId ? doc(db, "daily_quizzes", quizId) : null), [db, quizId]))
   
@@ -107,17 +110,20 @@ function DailyQuizBuilderContent() {
   const [stagedQuestions, setStagedQuestions] = useState<Question[]>([])
 
   useEffect(() => {
-    if (!db || !isEditing || !existingMock || (rawBank && rawBank.length === 0)) {
+    if (!db || (isEditing && !existingQuiz) || (rawBank && rawBank.length === 0 && !bankLoading)) {
        if (!isEditing) setIsInitializing(false);
        return;
     }
 
-    setQuizData({ ...existingQuiz });
-    if (existingQuiz.questionIds && rawBank) {
-       setStagedQuestions(existingQuiz.questionIds.map((id: string) => rawBank.find(q => q.id === id)).filter(Boolean) as Question[]);
+    if (isEditing && existingQuiz) {
+      setQuizData({ ...existingQuiz });
+      if (existingQuiz.questionIds && rawBank) {
+         setStagedQuestions(existingQuiz.questionIds.map((id: string) => rawBank.find(q => q.id === id)).filter(Boolean) as Question[]);
+      }
     }
-    setIsInitializing(false);
-  }, [db, existingQuiz, rawBank, isEditing]);
+    
+    if (!bankLoading) setIsInitializing(false);
+  }, [db, existingQuiz, rawBank, isEditing, bankLoading]);
 
   const filteredBank = useMemo(() => {
     if (!rawBank) return [];
@@ -203,8 +209,9 @@ function DailyQuizBuilderContent() {
         subtitle="Configure the official daily preparation node for the Punjab registry."
       >
         <div className="flex gap-3">
+           <button onClick={() => setStagedQuestions([])} className="h-14 px-8 rounded-2xl border border-slate-200 font-black uppercase text-[10px] bg-white hover:bg-slate-50 transition-all">Reset</button>
            <Button onClick={() => handlePublish(true)} variant="outline" className="h-14 px-8 rounded-2xl font-black uppercase text-[10px] tracking-widest border-slate-200">Save Draft</Button>
-           <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl gap-3">
+           <Button onClick={() => handlePublish(false)} disabled={isPublishing} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-black uppercase text-[10px] tracking-widest shadow-2xl gap-3 border-none">
               {isPublishing ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-5 w-5" />} Sync Live Now
            </Button>
         </div>
@@ -300,13 +307,13 @@ function DailyQuizBuilderContent() {
                               <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">STAGED</p>
                               <p className="text-3xl font-black text-primary tabular-nums tracking-tighter">{bankSelection.length}</p>
                            </div>
-                           <Button onClick={handleLinkSelected} disabled={bankSelection.length === 0} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full shadow-2xl border-none font-bold text-xs uppercase tracking-widest gap-2 active:scale-95">Link Assets <ChevronRight className="h-4 w-4" /></Button>
+                           <Button onClick={handleLinkSelected} disabled={bankSelection.length === 0} className="h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full shadow-2xl border-none font-bold text-xs uppercase tracking-widest gap-2 active:scale-95 transition-all">Link Assets <ChevronRight className="h-4 w-4" /></Button>
                         </div>
                      </div>
                   </Card>
 
                   <div className="grid grid-cols-1 gap-3">
-                     {bankLoading ? <Skeleton className="h-20 w-full rounded-2xl" /> : filteredBank.slice(0, 50).map((q) => {
+                     {bankLoading ? <Skeleton className="h-20 w-full rounded-2xl" /> : filteredBank.length > 0 ? filteredBank.slice(0, 50).map((q) => {
                         const isSel = bankSelection.includes(q.id);
                         return (
                            <div key={q.id} onClick={() => setBankSelection(prev => isSel ? prev.filter(id => id !== q.id) : [...prev, q.id])} className={cn("p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between group", isSel ? "bg-primary/5 border-primary shadow-lg" : "bg-white border-slate-50 hover:border-slate-100 shadow-sm")}>
@@ -321,7 +328,9 @@ function DailyQuizBuilderContent() {
                               </div>
                            </div>
                         )
-                     })}
+                     }) : (
+                        <div className="py-20 text-center opacity-30 italic font-black uppercase text-xs">No questions matched in registry.</div>
+                     )}
                   </div>
                </div>
             ) : (
