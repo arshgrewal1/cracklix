@@ -30,8 +30,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v5.9.
- * UPDATED: Integrated mockType into the result payload for analytics precision.
+ * @fileOverview Official Mock Attempt Hub v6.0.
+ * UPDATED: Handles both 'mocks' and 'daily_quizzes' registries.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -107,14 +107,16 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     async function loadExam() {
       if (!db || !mockId) return;
       try {
+        // Try both collections to ensure compatibility with Daily Quizzes
         const mockSnap = await getDoc(doc(db, "mocks", mockId));
         const dailySnap = !mockSnap.exists() ? await getDoc(doc(db, "daily_quizzes", mockId)) : null;
         
-        const targetSnap = mockSnap.exists() ? mockSnap : dailySnap;
+        const targetSnap = (mockSnap.exists() ? mockSnap : dailySnap);
         if (!targetSnap || !targetSnap.exists()) throw new Error("Test registry node not found.");
         
         const mData = targetSnap.data();
         setMockData(mData);
+
         const tier = (mData.accessLevel || 'FREE').toUpperCase();
         if (tier === 'PREMIUM') {
            if (!user || !profile) { router.replace(`/login?returnUrl=${encodeURIComponent(pathname)}`); return; }
@@ -126,22 +128,28 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
               router.replace('/pass'); return;
            }
         }
+
         const questionIds: string[] = mData.questionIds || [];
         if (questionIds.length === 0) throw new Error("Question bank is empty.");
+        
         const fetchedQuestions: any[] = [];
         const chunks = [];
         for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
+        
         for (const chunk of chunks) {
            const chunkSnap = await getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)));
            chunkSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
         }
+
         const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
         if (sortedQs.length === 0) throw new Error("Registry sync failure.");
+
         let resumeData = undefined;
         if (user) {
            const attemptSnap = await getDoc(doc(db, "attempts", `${user.uid}_${mockId}`));
            if (attemptSnap.exists()) resumeData = attemptSnap.data();
         }
+
         initExam(mockId, mData.title || "Elite Series", user?.uid || null, sortedQs, mData.duration || 120, resumeData, mData.languageMode);
         startSession(); 
       } catch (err: any) { setInitError(err.message); } finally { setIsInitializing(false); }
@@ -158,16 +166,20 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
   const handleSubmitFinal = useCallback(async () => {
     if (!db || isSubmittingFinal || !mockData || !mockId) return;
     setIsSubmittingFinal(true);
-    let correctCount = 0; let wrongCount = 0;
+    
+    let correctCount = 0; 
+    let wrongCount = 0;
     const attemptedCount = Object.keys(answers || {}).length;
     const posMarks = Number(mockData.positiveMarks) || 1;
     const negMarks = Number(mockData.negativeMarks) || 0.25;
+
     questions.forEach((q: any, idx: number) => {
       const studentAnsIdx = answers?.[idx];
       if (studentAnsIdx === undefined || studentAnsIdx === null) return;
       const correctOptIdx = ['A', 'B', 'C', 'D'].indexOf(q.correctAnswer);
       if (correctOptIdx === studentAnsIdx) correctCount++; else wrongCount++;
     });
+
     const rawScore = (correctCount * posMarks) - (wrongCount * negMarks);
     const timeTaken = Math.round((Date.now() - startTime) / 1000);
     
@@ -192,11 +204,16 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
       accessLevel: (mockData.accessLevel || 'FREE').toUpperCase(),
       mockType: mockData.mockType || 'PRACTICE'
     };
+
     if (user) {
-      resultPayload.userId = user.uid; resultPayload.userName = profile?.name || 'Aspirant';
-      resultPayload.userEmail = user.email || ""; resultPayload.createdAt = serverTimestamp();
+      resultPayload.userId = user.uid; 
+      resultPayload.userName = profile?.name || 'Aspirant';
+      resultPayload.userEmail = user.email || ""; 
+      resultPayload.createdAt = serverTimestamp();
+      
       await setDoc(doc(db, "results", `${user.uid}_${mockId}`), resultPayload, { merge: true });
       await updateDoc(doc(db, "attempts", `${user.uid}_${mockId}`), { status: 'COMPLETED', updatedAt: serverTimestamp() });
+      
       localStorage.removeItem(`cracklix_guest_attempt_${mockId}`);
       router.replace(`/results/view?id=${mockId}`);
     } else {

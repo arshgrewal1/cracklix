@@ -55,9 +55,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch"
 
 /**
- * @fileOverview Daily Challenge Architect v1.1.
+ * @fileOverview Daily Challenge Architect v2.0.
  * FIXED: Collection synchronized with primary 'questions' node.
  * FIXED: Resolved reference errors for existingQuiz and missing UI components.
+ * FIXED: Dropdown visibility and isTodayQuiz archiving logic.
  */
 
 export default function DailyQuizBuilder() {
@@ -81,7 +82,7 @@ function DailyQuizBuilderContent() {
   // SYNCED: Using 'questions' collection as the master bank
   const { data: rawBank, loading: bankLoading } = useCollection<Question>(useMemo(() => (db ? query(collection(db, "questions"), limit(2000)) : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]))
-  const { data: existingQuiz } = useDoc<any>(useMemo(() => (db && quizId ? doc(db, "daily_quizzes", quizId) : null), [db, quizId]))
+  const { data: existingQuiz, loading: quizLoading } = useDoc<any>(useMemo(() => (db && quizId ? doc(db, "daily_quizzes", quizId) : null), [db, quizId]))
   
   const [isInitializing, setIsInitializing] = useState(true)
   const [isPublishing, setIsPublishing] = useState(false)
@@ -110,19 +111,18 @@ function DailyQuizBuilderContent() {
   const [stagedQuestions, setStagedQuestions] = useState<Question[]>([])
 
   useEffect(() => {
-    if (!db || (isEditing && !existingQuiz) || (rawBank && rawBank.length === 0 && !bankLoading)) {
-       if (!isEditing) setIsInitializing(false);
-       return;
-    }
+    if (!db || bankLoading) return;
 
     if (isEditing && existingQuiz) {
       setQuizData({ ...existingQuiz });
       if (existingQuiz.questionIds && rawBank) {
-         setStagedQuestions(existingQuiz.questionIds.map((id: string) => rawBank.find(q => q.id === id)).filter(Boolean) as Question[]);
+         const hydrated = existingQuiz.questionIds.map((id: string) => rawBank.find(q => q.id === id)).filter(Boolean) as Question[];
+         setStagedQuestions(hydrated);
       }
+      setIsInitializing(false);
+    } else if (!isEditing) {
+       setIsInitializing(false);
     }
-    
-    if (!bankLoading) setIsInitializing(false);
   }, [db, existingQuiz, rawBank, isEditing, bankLoading]);
 
   const filteredBank = useMemo(() => {
@@ -163,7 +163,7 @@ function DailyQuizBuilderContent() {
 
        // RULE: ONLY ONE ACTIVE TODAY QUIZ
        if (!isDraft && quizData.isTodayQuiz) {
-          const prevActiveSnap = await getDocs(query(collection(db, "daily_quizzes"), where("isTodayQuiz", "==", true), where("status", "==", "PUBLISHED")));
+          const prevActiveSnap = await getDocs(query(collection(db, "daily_quizzes"), where("isTodayQuiz", "==", true)));
           prevActiveSnap.docs.forEach(d => {
              if (d.id !== finalId) {
                 batch.update(doc(db, "daily_quizzes", d.id), { isTodayQuiz: false, status: 'ARCHIVED', updatedAt: serverTimestamp() });
@@ -198,10 +198,10 @@ function DailyQuizBuilderContent() {
     } finally { setIsPublishing(false); }
   };
 
-  if (isInitializing) return <div className="h-screen flex items-center justify-center bg-white"><Zap className="animate-pulse text-primary" /></div>
+  if (isInitializing) return <div className="h-screen flex items-center justify-center bg-white"><Zap className="animate-pulse text-primary h-10 w-10" /></div>
 
   return (
-    <div className="max-w-[1600px] mx-auto space-y-10 pb-40 text-left pt-2 px-1">
+    <div className="max-w-[1600px] mx-auto space-y-10 pb-40 text-left pt-2 px-4 md:px-10">
       <AdminPageHeader
         icon={Flame}
         label="Challenge Architect"
@@ -272,7 +272,7 @@ function DailyQuizBuilderContent() {
                   <Card className="bg-[#0B1528] rounded-[2.5rem] p-8 md:p-12 text-white space-y-10 shadow-3xl border border-white/5 relative overflow-hidden">
                      <div className="absolute top-0 right-0 p-10 opacity-5 rotate-12"><Database className="h-64 w-64" /></div>
                      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-2">
+                        <div className="space-y-2 text-left">
                            <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Subject hub</Label>
                            <Select value={filterSubject} onValueChange={setSubjectFilter}>
                               <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12 text-white font-bold text-xs"><SelectValue placeholder="All Subjects" /></SelectTrigger>
@@ -282,7 +282,7 @@ function DailyQuizBuilderContent() {
                               </SelectContent>
                            </Select>
                         </div>
-                        <div className="space-y-2">
+                        <div className="space-y-2 text-left">
                            <Label className="text-[9px] font-black uppercase text-slate-500 ml-1">Level hub</Label>
                            <Select value={filterDifficulty} onValueChange={setDifficultyFilter}>
                               <SelectTrigger className="bg-white/5 border-white/10 rounded-xl h-12 text-white font-bold text-xs"><SelectValue placeholder="Mixed Levels" /></SelectTrigger>
@@ -329,7 +329,10 @@ function DailyQuizBuilderContent() {
                            </div>
                         )
                      }) : (
-                        <div className="py-20 text-center opacity-30 italic font-black uppercase text-xs">No questions matched in registry.</div>
+                        <div className="py-20 text-center opacity-30 italic font-black uppercase text-xs flex flex-col items-center gap-4">
+                           <AlertCircle className="h-10 w-10 text-slate-300" />
+                           No questions matched in registry.
+                        </div>
                      )}
                   </div>
                </div>
