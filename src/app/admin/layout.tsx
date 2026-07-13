@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v31.0.
- * UPDATED: Logo shifted 30px to the left in mobile header.
+ * @fileOverview Admin Layout v32.0.
+ * UPDATED: Sidebar menu anchored to left end, logo to its immediate right.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -96,16 +96,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         isSidebarOpen ? "lg:pl-[280px]" : "lg:pl-[88px]"
       )}>
         <header className="h-[80px] md:h-[110px] border-b border-slate-50 bg-white/80 backdrop-blur-xl sticky top-0 z-30 flex items-center px-4 md:px-8 justify-between shrink-0">
-          <div className="flex items-center gap-2">
-            <div className="lg:hidden shrink-0 -ml-[30px]">
-              <Logo variant="light" className="h-12 md:h-14 w-auto" />
-            </div>
+          <div className="flex items-center gap-3">
             <button 
               onClick={toggleSidebar}
               className="lg:hidden bg-white border border-slate-200 h-10 w-10 rounded-xl flex items-center justify-center shrink-0 active:scale-95"
             >
               <Menu className="w-5 h-5" />
             </button>
+            <div className="lg:hidden shrink-0">
+              <Logo variant="light" className="h-12 md:h-14 w-auto" />
+            </div>
             <p className="hidden md:block text-[10px] font-black uppercase tracking-widest text-slate-400">
                Registry Governance
             </p>
