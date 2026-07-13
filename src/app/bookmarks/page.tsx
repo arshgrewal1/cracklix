@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * @fileOverview Official Bookmarks Hub (Unified Persistence).
+ * FIXED: Removed 'manual' ID fallback to prevent 404 errors.
  */
 
 export default function BookmarksPage() {
@@ -108,9 +110,9 @@ export default function BookmarksPage() {
                           </Badge>
                           <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest tabular-nums">Saved: {new Date(b.timestamp).toLocaleDateString()}</span>
                        </div>
-                       <Button variant="ghost" size="icon" onClick={() => handleDelete(b.id)} className="h-10 w-10 rounded-xl text-rose-500 hover:bg-rose-50 active:scale-95">
+                       <button onClick={() => handleDelete(b.id)} className="h-10 w-10 rounded-xl text-rose-500 hover:bg-rose-50 active:scale-95 transition-all flex items-center justify-center">
                           <Trash2 className="h-5 w-5" />
-                       </Button>
+                       </button>
                     </div>
                     
                     <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-tight line-clamp-3">
@@ -123,11 +125,11 @@ export default function BookmarksPage() {
                              <Languages className="h-4 w-4" /> Bilingual
                           </Button>
                           <Button asChild variant="ghost" className="flex-1 sm:flex-none text-primary font-black uppercase text-[10px] gap-2">
-                             <Link href={`/mocks/instructions?id=${b.mockId || 'manual'}`}><BookOpen className="h-4 w-4" /> View Solution</Link>
+                             <Link href={b.mockId ? `/mocks/instructions?id=${b.mockId}` : "/mocks"}><BookOpen className="h-4 w-4" /> View Solution</Link>
                           </Button>
                        </div>
-                       <Button variant="ghost" className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all hidden sm:flex items-center justify-center">
-                          <ChevronRight className="h-5 w-5" />
+                       <Button asChild variant="ghost" className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all hidden sm:flex items-center justify-center">
+                          <Link href={b.mockId ? `/mocks/instructions?id=${b.mockId}` : "/mocks"}><ChevronRight className="h-5 w-5" /></Link>
                        </Button>
                     </div>
                   </CardContent>

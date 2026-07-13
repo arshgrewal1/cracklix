@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useState, useEffect } from "react"
@@ -30,7 +31,8 @@ import Link from "next/link"
 import { useRouter, usePathname } from "next/navigation"
 
 /**
- * @fileOverview Official Revision & Study Hub (AI Cleaned).
+ * @fileOverview Official Revision & Study Hub.
+ * FIXED: Removed 'manual' ID fallback and hardened navigation logic.
  */
 
 export default function RevisionHub() {
@@ -145,9 +147,9 @@ export default function RevisionHub() {
                               </Badge>
                               <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">Saved {new Date(b.timestamp).toLocaleDateString()}</span>
                            </div>
-                           <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl text-rose-500 hover:bg-rose-50 opacity-20 group-hover:opacity-100 transition-opacity">
+                           <button onClick={() => {}} className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all opacity-20 group-hover:opacity-100">
                               <Trash2 className="h-5 w-5" />
-                           </Button>
+                           </button>
                         </div>
                         
                         <h3 className="text-xl md:text-2xl font-bold text-[#0F172A] leading-tight">
@@ -159,12 +161,12 @@ export default function RevisionHub() {
                               <Button variant="outline" className="rounded-xl border-slate-100 text-[10px] font-black uppercase h-10 px-6 gap-2">
                                  <Languages className="h-4 w-4" /> Multi-Language
                               </Button>
-                              <Button variant="ghost" className="text-primary font-black uppercase text-[10px] gap-2">
-                                 <BookOpen className="h-4 w-4" /> View Solution
+                              <Button asChild variant="ghost" className="text-primary font-black uppercase text-[10px] gap-2">
+                                 <Link href={b.mockId ? `/mocks/instructions?id=${b.mockId}` : "/mocks"}><BookOpen className="h-4 w-4" /> View Solution</Link>
                               </Button>
                            </div>
-                           <Button variant="ghost" className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all shadow-sm">
-                              <ChevronRight className="h-5 w-5" />
+                           <Button asChild variant="ghost" className="h-12 w-12 rounded-2xl bg-slate-50 hover:bg-primary hover:text-white transition-all shadow-sm flex items-center justify-center">
+                              <Link href={b.mockId ? `/mocks/instructions?id=${b.mockId}` : "/mocks"}><ChevronRight className="h-5 w-5" /></Link>
                            </Button>
                         </div>
                       </CardContent>
@@ -192,7 +194,7 @@ export default function RevisionHub() {
                              </div>
                           </div>
                           <Button asChild className="bg-[#0F172A] hover:bg-black text-white h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] gap-3 shadow-xl shadow-slate-200">
-                             <Link href={`/results/${w.mockId}`}>Fix Errors <ChevronRight className="h-4 w-4" /></Link>
+                             <Link href={`/results/view?id=${w.mockId}`}>Fix Errors <ChevronRight className="h-4 w-4" /></Link>
                           </Button>
                        </CardContent>
                     </Card>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState, useMemo, isValidElement, cloneElement, ReactElement } from "react";
@@ -22,8 +23,8 @@ interface InstructionsClientProps {
 }
 
 /**
- * @fileOverview Official Test Rules Hub v4.1.
- * UPDATED: Changed "INITIALIZE ATTEMPT" to "START TEST" as requested.
+ * @fileOverview Official Test Rules Hub v4.2.
+ * FIXED: Enhanced handling for invalid or missing test IDs.
  */
 
 export default function InstructionsClient({ mockId: propMockId }: InstructionsClientProps) {
@@ -43,28 +44,24 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
   const activeId = useMemo(() => {
     if (propMockId) return propMockId;
     const queryId = searchParams?.get('id');
-    if (queryId) return queryId;
+    if (queryId && queryId !== 'manual') return queryId;
     
-    // Fallback path segment extraction
     const pathSegments = pathname.split('/').filter(Boolean);
     const lastSegment = pathSegments[pathSegments.length - 1];
-    return lastSegment !== 'instructions' ? lastSegment : null;
+    return (lastSegment !== 'instructions' && lastSegment !== 'manual') ? lastSegment : null;
   }, [pathname, searchParams, propMockId]);
 
   useEffect(() => {
     async function loadTestAndAuditAccess() {
-      if (!db || !activeId) {
-        if (!activeId) {
-          setIsLoading(false);
-          setNotFound(true);
-        }
+      if (!db || !activeId || activeId === 'manual') {
+        setIsLoading(false);
+        setNotFound(true);
         return;
       }
 
       try {
         setIsLoading(true);
         
-        // 1. DUAL-REGISTRY LOOKUP
         const mockRef = doc(db, "mocks", activeId);
         const dailyRef = doc(db, "daily_quizzes", activeId);
         
@@ -82,7 +79,6 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
         const mData = targetSnap.data();
         setMock(mData);
 
-        // 2. ACCESS AUDIT
         const tier = (mData.accessLevel || 'FREE').toUpperCase();
         if (tier === 'FREE') {
           setAccessChecked(true);
@@ -114,7 +110,6 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
           return;
         }
 
-        // Logic Check: Does current pass allow this specific mock or authority?
         const passId = profile?.status || 'free-pass';
         const passRef = doc(db, "passes", passId);
         const passSnap = await getDoc(passRef);
@@ -159,16 +154,16 @@ export default function InstructionsClient({ mockId: propMockId }: InstructionsC
 
   if (notFound) return (
      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6 text-center">
-        <Card className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-14 shadow-5xl border-none space-y-8">
+        <Card className="max-w-md w-full bg-white rounded-[3rem] p-10 md:p-14 shadow-5xl border-none space-y-8 animate-in fade-in zoom-in-95">
            <div className="h-20 w-20 bg-blue-50 rounded-[2rem] flex items-center justify-center mx-auto text-primary shadow-xl border border-blue-100">
               <AlertCircle className="h-10 w-10" />
            </div>
            <div className="space-y-3">
               <h2 className="text-2xl md:text-3xl font-headline font-black text-[#0F172A] uppercase tracking-tight">Test Not Found</h2>
-              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This preparation node has been archived or the ID provided is invalid.</p>
+              <p className="text-slate-500 font-medium text-sm md:text-base leading-relaxed">This test node is unavailable or the link has expired. Explore our latest mock series in the hub.</p>
            </div>
            <div className="pt-4">
-              <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none">
+              <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-black text-white rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-xl border-none active:scale-95">
                  <Link href="/mocks"><ChevronRight className="h-4 w-4 mr-2" /> Back to Practice Hub</Link>
               </Button>
            </div>
