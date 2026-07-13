@@ -35,7 +35,9 @@ import {
   CreditCard,
   ShieldCheck,
   FileJson,
-  Zap
+  Zap,
+  Flame,
+  BarChart3
 } from "lucide-react";
 
 import {
@@ -50,15 +52,25 @@ const NAV_GROUPS = [
     label: "Management",
     items: [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-      { label: "MCQ Bank", href: "/admin/questions", icon: Database },
+      { label: "MCQ Bank", href: "/admin/mcq-bank", icon: Database },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "Bulk Ingestion", href: "/admin/bulk-import", icon: UploadCloud },
       { label: "Review Center", href: "/admin/qa", icon: Activity },
     ],
   },
   {
-    label: "Question Structure",
+    label: "Today's Challenge",
     items: [
+      { label: "Quiz Manager", href: "/admin/daily-quiz", icon: Flame },
+      { label: "Leaderboard", href: "/admin/daily-quiz/leaderboard", icon: Trophy },
+      { label: "Quiz Results", href: "/admin/daily-quiz/results", icon: BarChart3 },
+    ],
+  },
+  {
+    label: "Mock Hierarchy",
+    items: [
+      { label: "Mock Builder", href: "/admin/mocks/builder", icon: PenSquare },
+      { label: "Mock Manager", href: "/admin/mocks", icon: ClipboardList },
       { label: "Exam Center", href: "/admin/exam-registry", icon: GraduationCap },
       { label: "Selection Boards", href: "/admin/exams", icon: Building2 },
       { label: "Subjects", href: "/admin/subjects", icon: BookOpen },
@@ -80,8 +92,6 @@ const NAV_GROUPS = [
   {
     label: "Content Portal",
     items: [
-      { label: "Mock Builder", href: "/admin/mocks/builder", icon: PenSquare },
-      { label: "Mock Manager", href: "/admin/mocks", icon: ClipboardList },
       { label: "CA Manager", href: "/admin/current-affairs", icon: Newspaper },
       { label: "Study Notes", href: "/admin/notes", icon: NotebookPen },
       { label: "PYQ Archive", href: "/admin/pyqs", icon: Archive },

@@ -1,8 +1,8 @@
 export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR' | 'REVIEWER' | 'CONTENT_MANAGER' | 'STUDENT';
-export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET';
+export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET' | 'DAILY_CHALLENGE';
 export type QuestionType = 'MCQ' | 'MULTIPLE_CORRECT' | 'TRUE_FALSE' | 'FILL_BLANK' | 'ASSERTION_REASON' | 'STATEMENT_BASED' | 'PARAGRAPH_BASED' | 'MATCH_FOLLOWING' | 'SEQUENCE' | 'IMAGE_BASED' | 'TABLE_BASED' | 'CASE_STUDY' | 'AUDIO_BASED' | 'VIDEO_BASED';
-export type ContentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_CHANGES' | 'PUBLISHED' | 'ARCHIVED' | 'LOCKED';
+export type ContentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_CHANGES' | 'PUBLISHED' | 'ARCHIVED' | 'LOCKED' | 'SCHEDULED';
 export type QuestionLifecycleStatus = 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
 export type Gender = 'Male' | 'Female' | 'Other';
 
@@ -305,6 +305,7 @@ export interface Question {
   referencePage?: string;
   isPreviousYear?: boolean;
   examYear?: number;
+  source?: string;
   shift?: string;
   session?: string;
   marks: number;
@@ -371,6 +372,16 @@ export interface MockTest {
   attemptLimit: number;
   createdAt: any;
   updatedAt: any;
+}
+
+export interface DailyQuiz extends MockTest {
+  isTodayQuiz: boolean;
+  rewardXP: number;
+  startDate?: any;
+  endDate?: any;
+  featured: boolean;
+  reviewModeEnabled: boolean;
+  explanationModeEnabled: boolean;
 }
 
 export interface AttemptResult {
@@ -441,7 +452,7 @@ export interface StudySession {
   startTime: any;
   endTime: any;
   durationSeconds: number;
-  activityType: 'MOCK' | 'CA' | 'PYQ' | 'PDF' | 'PRACTICE' | 'DASHBOARD' | 'OTHER';
+  activityType: 'MOCK' | 'CA' | 'PYQ' | 'PDF' | 'PRACTICE' | 'DASHBOARD' | 'OTHER' | 'DAILY_QUIZ';
   activityId?: string;
   completedQuestions?: number;
   correct?: number;

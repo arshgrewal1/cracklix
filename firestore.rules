@@ -19,7 +19,9 @@ service cloud.firestore {
     match /boards/{boardId} { allow read: if true; allow write: if isAdmin(); }
     match /exams/{examId} { allow read: if true; allow write: if isAdmin(); }
     match /questions/{qId} { allow read: if true; allow write: if isAdmin(); }
+    match /mcqBank/{qId} { allow read: if true; allow write: if isAdmin(); }
     match /mocks/{mockId} { allow read: if true; allow write: if isAdmin(); }
+    match /daily_quizzes/{quizId} { allow read: if true; allow write: if isAdmin(); }
     match /notes/{noteId} { allow read: if true; allow write: if isAdmin(); }
     match /pyqs/{pyqId} { allow read: if true; allow write: if isAdmin(); }
     match /help_articles/{articleId} { allow read: if true; allow write: if isAdmin(); }
@@ -33,11 +35,15 @@ service cloud.firestore {
       allow read: if isAuthenticated();
       allow create: if isOwner(userId);
       allow update: if isAdmin() || (isOwner(userId) && (
-        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'passStatus', 'planTier', 'passExpiresAt', 'status'])
+        !request.resource.data.diff(request.resource.data).affectedKeys().hasAny(['role', 'passStatus', 'planTier', 'passExpiresAt', 'status'])
       ));
+      
+      match /study_sessions/{sessionId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
-    // --- 3. Monetization Ledger (High Security) ---
+    // --- 3. Monetization Ledger ---
     match /payment_requests/{reqId} {
       allow create: if isAuthenticated();
       allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
@@ -63,6 +69,10 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow read: if isAuthenticated() && (resource.data.userId == request.auth.uid || isAdmin());
       allow update: if isAdmin();
+    }
+    
+    match /audit_logs/{logId} {
+      allow read, write: if isAdmin();
     }
   }
 }
