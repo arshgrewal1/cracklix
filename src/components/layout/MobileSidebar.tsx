@@ -41,7 +41,7 @@ export default function MobileSidebar({
   const [mounted, setMounted] = useState(false);
 
   const { user, profile, profileLoading } = useUser();
-  const auth = auth;
+  const auth = useAuth();
 
   const router = useRouter();
   const pathname = usePathname();
