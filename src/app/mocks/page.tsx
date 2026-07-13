@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect } from "react"
@@ -55,14 +56,14 @@ const QUICK_ACTIONS = [
 ];
 
 const CATEGORIES = [
-  { label: "Punjab GK", icon: Landmark, color: "from-amber-400 to-orange-500" },
-  { label: "Reasoning", icon: Binary, color: "from-blue-400 to-indigo-600" },
-  { label: "English", icon: Languages, color: "from-emerald-400 to-teal-600" },
-  { label: "Punjabi", icon: GraduationCap, color: "from-rose-400 to-pink-600" },
-  { label: "Math", icon: Calculator, color: "from-cyan-400 to-blue-600" },
-  { label: "Computer", icon: Cpu, color: "from-slate-400 to-slate-700" },
-  { label: "CA Hub", icon: Zap, color: "from-yellow-400 to-amber-600" },
-  { label: "Science", icon: FlaskConical, color: "from-violet-400 to-purple-600" },
+  { id: "punjab-gk", label: "Punjab GK", icon: Landmark, color: "from-amber-400 to-orange-500", glow: "rgba(245,158,11,0.2)" },
+  { id: "reasoning", label: "Reasoning", icon: Binary, color: "from-blue-400 to-indigo-600", glow: "rgba(37,99,235,0.2)" },
+  { id: "english", label: "English", icon: Languages, color: "from-emerald-400 to-teal-600", glow: "rgba(16,185,129,0.2)" },
+  { id: "punjabi", label: "Punjabi", icon: GraduationCap, color: "from-rose-400 to-pink-600", glow: "rgba(244,63,94,0.2)" },
+  { id: "math", label: "Math", icon: Calculator, color: "from-cyan-400 to-blue-600", glow: "rgba(6,182,212,0.2)" },
+  { id: "computer", label: "Computer", icon: Cpu, color: "from-slate-400 to-slate-700", glow: "rgba(71,85,105,0.2)" },
+  { id: "ca-hub", label: "CA Hub", icon: Zap, color: "from-yellow-400 to-amber-600", glow: "rgba(234,179,8,0.2)" },
+  { id: "science", label: "Science", icon: FlaskConical, color: "from-violet-400 to-purple-600", glow: "rgba(139,92,246,0.2)" },
 ];
 
 export default function MockTestsPage() {
@@ -229,29 +230,80 @@ export default function MockTestsPage() {
            </div>
         </div>
 
-        {/* 5. POPULAR CATEGORIES GRID */}
+        {/* 5. PREMIUM POPULAR CATEGORIES GRID */}
         <section className="space-y-10 pt-10">
            <div className="flex items-center gap-3 px-1">
               <Layers className="h-5 w-5 text-primary" />
-              <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Popular Categories</h2>
+              <h2 className="text-xl md:text-3xl font-[900] text-[#0F172A] tracking-tight">Popular Categories</h2>
            </div>
-           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 md:gap-6">
-              {CATEGORIES.map((cat, i) => (
-                <motion.div 
-                  key={cat.label}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="flex flex-col items-center gap-4 cursor-pointer group"
-                >
-                   <div className={cn(
-                     "h-16 w-16 md:h-20 md:w-20 rounded-[22px] md:rounded-[28px] bg-gradient-to-br flex items-center justify-center text-white shadow-xl transition-all duration-500 group-hover:rotate-6",
-                     cat.color
-                   )}>
-                      <cat.icon className="h-6 w-6 md:h-8 md:w-8" />
-                   </div>
-                   <span className="text-[10px] md:text-xs font-black uppercase tracking-widest text-slate-500 group-hover:text-primary transition-colors text-center">{cat.label}</span>
-                </motion.div>
-              ))}
+           
+           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-8 gap-4 md:gap-6">
+              {CATEGORIES.map((cat, i) => {
+                const isMatch = searchTerm.length > 1 && cat.label.toLowerCase().includes(searchTerm.toLowerCase());
+                const count = rawMocks?.filter(m => m.title?.toLowerCase().includes(cat.label.toLowerCase())).length || 0;
+                
+                return (
+                  <motion.div 
+                    key={cat.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.05 }}
+                    whileHover={{ scale: 1.05, y: -5 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSearchTerm(cat.label)}
+                    className="relative group cursor-pointer"
+                  >
+                    <Card className={cn(
+                      "relative w-[100px] h-[100px] md:w-[120px] md:h-[120px] rounded-[24px] flex flex-col items-center justify-center gap-2 transition-all duration-500 overflow-hidden border shadow-sm",
+                      isMatch 
+                        ? "border-primary bg-primary/5 ring-4 ring-primary/10 shadow-xl" 
+                        : "border-slate-100 bg-white/60 backdrop-blur-md hover:border-primary/30"
+                    )}>
+                      {/* Floating Background Glow */}
+                      <div className={cn(
+                        "absolute -right-4 -bottom-4 w-12 h-12 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700",
+                        cat.color.split(' ')[1].replace('to-', 'bg-')
+                      )} />
+
+                      {/* Icon Node */}
+                      <div className={cn(
+                        "h-10 w-10 md:h-12 md:w-12 rounded-2xl flex items-center justify-center transition-all duration-500 bg-gradient-to-br shadow-lg group-hover:rotate-6",
+                        cat.color
+                      )}>
+                        <cat.icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
+                      </div>
+
+                      {/* Text Nodes */}
+                      <div className="text-center px-2">
+                        <p className="text-[9px] md:text-[11px] font-black uppercase text-[#0F172A] tracking-tight truncate w-full">
+                          {cat.label}
+                        </p>
+                        <p className="text-[7px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                          {count} Tests
+                        </p>
+                      </div>
+
+                      {/* Micro Progress Indicator */}
+                      <div className="absolute bottom-0 left-0 h-1 bg-slate-100 w-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          whileInView={{ width: '40%' }}
+                          className={cn("h-full bg-gradient-to-r", cat.color)}
+                        />
+                      </div>
+
+                      {/* Click Ripple Overlay */}
+                      <div className="absolute inset-0 bg-primary/5 opacity-0 group-active:opacity-100 transition-opacity pointer-events-none" />
+                    </Card>
+
+                    {/* Search Highlight Glow */}
+                    {isMatch && (
+                      <div className="absolute -inset-2 rounded-[28px] border-2 border-primary/20 animate-pulse pointer-events-none" />
+                    )}
+                  </motion.div>
+                );
+              })}
            </div>
         </section>
 
