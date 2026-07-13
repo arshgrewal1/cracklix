@@ -37,7 +37,7 @@ const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
  * @fileOverview Cracklix Navigation Hub v71.0.
- * UPDATED: Doubled logo size for maximum brand impact.
+ * UPDATED: Aligned desktop nav links to the left for a high-density UI.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -124,7 +124,8 @@ export default function Navbar() {
               />
             </div>
 
-            <div className="hidden lg:flex items-center justify-center gap-6 xl:gap-8 flex-1">
+            {/* DESKTOP NAV: MOVED TO LEFT */}
+            <div className="hidden lg:flex items-center justify-start gap-6 xl:gap-8 flex-1 ml-4">
               <NavLink href="/" label="Home" active={pathname === '/'} />
               <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
               <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
