@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -17,6 +18,11 @@ interface SearchResultNode {
   href: string;
   icon: LucideIcon;
 }
+
+/**
+ * @fileOverview Search Results Hub v1.1.
+ * UPDATED: Simplified result type labels.
+ */
 
 export default function SearchPage() {
   return (
@@ -64,7 +70,7 @@ function SearchContent() {
       e.boardId?.toLowerCase().includes(term)
     ).map((e: any) => ({ 
        title: e.name, 
-       type: "Exam Hub", 
+       type: "Official Exam", 
        href: `/exams/view?id=${e.id}`, 
        icon: GraduationCap
     }))

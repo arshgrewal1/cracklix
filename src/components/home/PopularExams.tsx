@@ -22,7 +22,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 
 /**
- * @fileOverview Popular Exams Registry Hub v40.0.
+ * @fileOverview Popular Exams Registry Hub v40.1.
+ * UPDATED: Replaced "Attempt Hub" with "Open Test".
  */
 
 export default function PopularExams() {
@@ -91,7 +92,7 @@ export default function PopularExams() {
                         <div className="mt-10">
                            <Button asChild className="w-full h-12 md:h-14 rounded-xl md:rounded-2xl bg-[#0F172A] hover:bg-primary text-white font-bold text-[11px] tracking-widest uppercase border-none active:scale-95 gap-2">
                               <Link href={`/exams/view?id=${exam.id}`}>
-                                 Attempt Hub <ChevronRight className="h-4 w-4" />
+                                 Open Test <ChevronRight className="h-4 w-4" />
                               </Link>
                            </Button>
                         </div>

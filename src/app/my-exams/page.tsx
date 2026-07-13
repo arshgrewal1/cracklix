@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -17,8 +18,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Institutional My Exams Hub v20.0.
- * FIXED: Automatic cleanup of orphan pinned exams.
+ * @fileOverview Institutional My Exams Hub v20.1.
+ * UPDATED: Removed "Hub" from action buttons.
  */
 
 export default function MyExamsPage() {
@@ -148,7 +149,7 @@ export default function MyExamsPage() {
                   </div>
 
                   <Button className="w-full mt-10 h-12 md:h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg border-none font-black uppercase text-[10px] tracking-widest gap-2">
-                     Open Exam Hub <ChevronRight className="h-4 w-4" />
+                     Open Exam <ChevronRight className="h-4 w-4" />
                   </Button>
                </Card>
               )

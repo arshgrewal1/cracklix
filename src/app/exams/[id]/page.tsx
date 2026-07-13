@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo, useState } from "react"
@@ -31,8 +32,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Exam Center v25.0.
- * OPTIMIZED: Compact Category selector for mobile/PWA (48px height).
+ * @fileOverview Exam Center v25.1.
+ * UPDATED: Removed "Hub" from button labels.
  */
 export default function ExamHubPage() {
   const params = useParams()
@@ -127,7 +128,6 @@ export default function ExamHubPage() {
 
       <main className="container mx-auto px-4 py-8 md:py-12 max-w-7xl pb-40">
          <Tabs defaultValue="FULL" className="space-y-8 md:space-y-12">
-            {/* CATEGORY SELECTOR OPTIMIZATION - 48PX HEIGHT */}
             <div className="bg-white border border-slate-100 rounded-2xl p-1 shadow-md overflow-x-auto no-scrollbar flex items-center h-12">
                <TabsList className="bg-transparent border-none p-0 flex h-full w-full justify-start gap-1 snap-x snap-mandatory">
                   <DashboardTab value="FULL" label="Full Mock Tests" icon={Zap} />
