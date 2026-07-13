@@ -13,8 +13,8 @@ interface PWAInstallButtonProps {
 }
 
 /**
- * @fileOverview Institutional PWA Install Trigger v5.4.
- * REFINED: Label and icon behavior for a cleaner direct installation CTA.
+ * @fileOverview Institutional PWA Install Trigger v5.5.
+ * REFINED: Changed label from "Install Hub" to "Install App" for clarity.
  */
 export default function PWAInstallButton({ 
   className, 
@@ -52,7 +52,7 @@ export default function PWAInstallButton({
       )}
     >
       <Smartphone className="h-4 w-4 md:h-5 md:w-5 group-hover:rotate-12 transition-transform" />
-      {showLabel && <span>{canInstall ? 'Install App Now' : 'Install Hub'}</span>}
+      {showLabel && <span>{canInstall ? 'Install App Now' : 'Install App'}</span>}
       <ArrowRight className="h-4 w-4 opacity-40 ml-1 group-hover:translate-x-1 transition-transform" />
     </Button>
   );
