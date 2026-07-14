@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Metadata, Viewport } from "next";
@@ -13,6 +14,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { INSTITUTIONAL_PAYLOAD } from "@/lib/institutional-payload";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import GlobalStudyTracker from "@/components/analytics/GlobalStudyTracker";
+import AnnouncementBar from "@/components/layout/AnnouncementBar";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -21,8 +23,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v69.0 [Production Hardened].
- * FIXED: Standardized Viewport export for Next.js 15 compatibility.
+ * @fileOverview Root Layout v70.0 [Production Hardened].
+ * UPDATED: Integrated sitewide Announcement Bar synchronized with System Portal.
  */
 
 export default function RootLayout({
@@ -47,6 +49,7 @@ export default function RootLayout({
       >
         <FirebaseClientProvider>
           <div className="min-h-screen flex flex-col">
+            <AnnouncementBar />
             {children}
           </div>
 
