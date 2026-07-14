@@ -2,7 +2,7 @@ import InstructionsClient from "@/components/mocks/InstructionsClient";
 
 /**
  * @fileOverview Official Mock Instructions Entry.
- * Satisfies static export requirements with generateStaticParams.
+ * FIXED: params is a Promise in Next.js 15.
  */
 
 export const dynamicParams = false;
@@ -15,7 +15,7 @@ export async function generateStaticParams() {
   ];
 }
 
-export default async function InstructionsPage(props: { params: { id: string } }) {
-  const { id } = props.params;
+export default async function InstructionsPage(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params;
   return <InstructionsClient mockId={id} />;
 }

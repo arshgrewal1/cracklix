@@ -53,9 +53,8 @@ import { cn } from "@/lib/utils"
 import { AdminTableSkeleton } from "@/components/admin";
 
 /**
- * @fileOverview Enterprise MCQ Bank Management Hub v4.7.
- * FIXED: Optimized pagination and state handling for large registries.
- * FIXED: Resolved reference errors for icons.
+ * @fileOverview Enterprise MCQ Bank Management Hub v4.8.
+ * FIXED: Added missing GraduationCap import.
  */
 
 export default function QuestionBank() {
@@ -220,10 +219,10 @@ function QuestionBankContent() {
         </div>
         
         <div className="flex gap-3 w-full md:w-auto">
-           <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-8 bg-[#0F172A] hover:bg-black text-white rounded-full font-black text-[10px] tracking-widest gap-3 shadow-xl border-none">
+           <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-8 bg-[#0F172A] hover:bg-black text-white font-black text-[10px] tracking-widest gap-3 shadow-xl border-none">
               <Link href="/admin/bulk-import"><CloudUpload className="h-4 w-4" /> Bulk OCR</Link>
            </Button>
-           <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white rounded-full font-black text-[10px] tracking-widest shadow-xl border-none">
+           <Button asChild className="flex-1 md:w-auto h-12 md:h-14 px-10 bg-primary hover:bg-blue-700 text-white font-black text-[10px] tracking-widest shadow-xl border-none">
               <Link href="/admin/questions/add"><Plus className="h-5 w-5" /> New Question</Link>
            </Button>
         </div>

@@ -2,7 +2,7 @@ import AttemptClient from "@/components/mocks/AttemptClient";
 
 /**
  * @fileOverview Official Mock Attempt Server Entry.
- * FIXED: dynamicParams: true is incompatible with output: export.
+ * FIXED: params is a Promise in Next.js 15.
  */
 
 export const dynamicParams = false;
@@ -15,7 +15,7 @@ export async function generateStaticParams() {
   ];
 }
 
-export default async function Page(props: { params: { id: string } }) {
-  const { id } = props.params;
+export default async function Page(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params;
   return <AttemptClient mockId={id} />;
 }

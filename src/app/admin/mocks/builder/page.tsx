@@ -41,8 +41,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { AdminPageHeader } from "@/components/admin"
 
 /**
- * @fileOverview Enterprise Mock Builder Hub v26.1.
- * OPTIMIZED: Reduced fetchBank limit to 500 to prevent server memory restarts.
+ * @fileOverview Enterprise Mock Builder Hub v26.2.
+ * FIXED: Resolved JSX tag mismatch (Button vs button).
  */
 
 export default function MockBuilderPage() {
@@ -106,7 +106,6 @@ function MockBuilderContent() {
     if (!db) return
     setBankLoading(true)
     try {
-      // OPTIMIZED: Lowered from 3000 to 500
       const q = query(collection(db, "questions"), limit(500))
       const snap = await getDocs(q)
       setQuestionBank(snap.docs.map((d: DocumentData) => ({ ...d.data(), id: d.id }) as Question))
@@ -488,7 +487,7 @@ function MockBuilderContent() {
                             </div>
                             <div className="flex gap-2">
                                <button onClick={() => setActiveSectionId(sec.id)} className={cn("px-4 py-2 rounded-full font-black text-[9px] uppercase transition-all shadow-sm", activeSectionId === sec.id ? "bg-primary text-white" : "bg-white text-slate-400 hover:bg-slate-50")}>{activeSectionId === sec.id ? 'Active Hub' : 'Set Focus'}</button>
-                               <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></button>
+                               <Button variant="ghost" size="icon" onClick={() => setSections((p: any[]) => p.filter((s: any) => s.id !== sec.id))} className="text-rose-500 hover:bg-rose-50 rounded-xl h-10 w-10"><Trash2 className="h-5 w-5" /></Button>
                             </div>
                          </div>
                          <div className="p-6 md:p-10 space-y-3">
@@ -512,4 +511,13 @@ function MockBuilderContent() {
       </div>
     </div>
   )
+}
+
+function ConfigSwitch({ label, checked, onChange }: any) {
+   return (
+      <div className={cn("p-5 rounded-2xl border flex items-center justify-between transition-all", checked ? "bg-white border-slate-100 shadow-sm" : "bg-slate-50/50 border-transparent opacity-60")}>
+         <span className="text-[11px] font-black uppercase text-[#0F172A] tracking-tight">{label}</span>
+         <Switch checked={checked} onCheckedChange={onChange} />
+      </div>
+   )
 }

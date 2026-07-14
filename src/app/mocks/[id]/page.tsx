@@ -2,7 +2,7 @@ import MockOverviewClient from "@/components/mocks/MockOverviewClient";
 
 /**
  * @fileOverview Official Mock Overview Entry.
- * SSG enabled for static export.
+ * FIXED: params is a Promise in Next.js 15.
  */
 
 export const dynamicParams = false;
@@ -17,6 +17,7 @@ export async function generateStaticParams() {
   ];
 }
 
-export default function MockOverviewPage({ params }: { params: { id: string } }) {
-  return <MockOverviewClient mockId={params.id} />;
+export default async function MockOverviewPage(props: { params: Promise<{ id: string }> }) {
+  const { id } = await props.params;
+  return <MockOverviewClient mockId={id} />;
 }

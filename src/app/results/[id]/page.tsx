@@ -2,7 +2,7 @@ import ResultClient from "@/components/results/ResultClient";
 
 /**
  * @fileOverview Official Result Node Entry.
- * FIXED: dynamicParams: false for static export compatibility.
+ * FIXED: Updated prop signature for Next.js 15 compatibility.
  */
 
 export const dynamicParams = false;
@@ -18,6 +18,8 @@ export async function generateStaticParams() {
   ];
 }
 
-export default function ResultPage() {
+export default async function ResultPage(props: { params: Promise<{ id: string }> }) {
+  // We await params here even if ResultClient uses hooks internally for redundancy
+  await props.params;
   return <ResultClient />;
 }

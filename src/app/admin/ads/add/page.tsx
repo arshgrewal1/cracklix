@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -6,14 +5,16 @@ import AdEntryContent from './AdEntryContent';
 import { useFirestore } from '@/firebase';
 import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
 import { Loader2 } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
 /**
- * @fileOverview Ad Entry Page Node v3.0 (Static Export Optimized).
- * FIXED: Removed API route dependency. Uses direct Firestore Client SDK to load targeting data.
+ * @fileOverview Ad Entry Page Node v3.1 (Next.js 15 Hardened).
+ * FIXED: Uses useSearchParams hook for reliable query parameter access.
  */
-export default function AdEntryPage({ searchParams }: any) {
+export default function AdEntryPage() {
   const db = useFirestore();
-  const { id } = searchParams;
+  const searchParams = useSearchParams();
+  const id = searchParams.get('id');
   
   const [existingAd, setExistingAd] = useState<any>(null);
   const [exams, setExams] = useState<any[]>([]);

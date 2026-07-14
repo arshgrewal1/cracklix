@@ -30,8 +30,8 @@ import { Vacancy, ContentStatus } from "@/types"
 import FileUpload from "@/components/admin/FileUpload"
 
 /**
- * @fileOverview Modular Vacancy Ingestion Node v2.0.
- * UPDATED: Integrated Enterprise File Management Hub for all assets.
+ * @fileOverview Modular Vacancy Ingestion Node v2.1.
+ * FIXED: Added missing Zap import.
  */
 
 const BOARD_OPTIONS = [

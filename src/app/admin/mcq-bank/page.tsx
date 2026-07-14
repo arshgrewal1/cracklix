@@ -49,8 +49,8 @@ import { cn } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
 
 /**
- * @fileOverview Enterprise MCQ Bank Hub v1.0.
- * Centralized registry for institutional preparation nodes.
+ * @fileOverview Enterprise MCQ Bank Hub v1.1.
+ * FIXED: Added missing Button import.
  */
 
 export default function MCQBankPage() {

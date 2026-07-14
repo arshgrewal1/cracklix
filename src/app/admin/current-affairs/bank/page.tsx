@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState } from "react"
@@ -29,7 +28,7 @@ import { cn } from "@/lib/utils"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/components/admin"
 
 /**
- * @fileOverview Institutional Current Affairs Bank Hub v2.1.
+ * @fileOverview Institutional Current Affairs Bank Hub v2.2.
  * FIXED: Added missing ShieldCheck import.
  */
 
