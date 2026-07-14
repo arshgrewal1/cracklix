@@ -15,8 +15,8 @@ import { cn } from "@/lib/utils";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Admin Layout v35.0 [Typography Optimized].
- * UPDATED: Normalized typography and casing.
+ * @fileOverview Admin Layout v35.1 [Branding Synced].
+ * UPDATED: Logo height and scaling matched with student portal.
  */
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, profile, loading, profileLoading } = useUser();
@@ -105,7 +105,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu className="w-5 h-5" />
             </button>
             <div className="lg:hidden shrink-0">
-              <Logo variant="light" className="h-12 md:h-14 w-auto -ml-2" />
+              <Logo 
+                variant="light" 
+                className="flex-shrink-0 -ml-3 md:-ml-6" 
+                imgClassName="h-24 md:h-36 w-auto"
+                align="left"
+              />
             </div>
             <p className="hidden md:block text-[10px] font-semibold text-slate-400 ml-4">
                Registry Governance
