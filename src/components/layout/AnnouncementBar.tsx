@@ -9,8 +9,8 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Sitewide Announcement Bar v1.0.
- * Reflected from the System Portal Branding & Alerts configuration.
+ * @fileOverview Institutional Sitewide Announcement Bar v1.1.
+ * FIXED: Added unique key to motion.div for AnimatePresence compatibility.
  */
 export default function AnnouncementBar() {
   const db = useFirestore();
@@ -44,6 +44,7 @@ export default function AnnouncementBar() {
   return (
     <AnimatePresence>
       <motion.div 
+        key="global-announcement-bar"
         initial={{ height: 0, opacity: 0 }}
         animate={{ height: 'auto', opacity: 1 }}
         exit={{ height: 0, opacity: 0 }}

@@ -23,8 +23,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v70.0 [Production Hardened].
- * UPDATED: Integrated sitewide Announcement Bar synchronized with System Portal.
+ * @fileOverview Root Layout v70.1 [Production Hardened].
+ * FIXED: Added unique keys to global siblings to resolve React "key" prop warnings.
  */
 
 export default function RootLayout({
@@ -48,21 +48,21 @@ export default function RootLayout({
         `}
       >
         <FirebaseClientProvider>
-          <div className="min-h-screen flex flex-col">
+          <div key="main-app-container" className="min-h-screen flex flex-col">
             <AnnouncementBar />
             {children}
           </div>
 
-          <GlobalStudyTracker />
-          <PWAInstallHandler />
-          <MobileNav />
-          <CapacitorManager />
-          <PWAManager />
-          <NetworkStatus />
-          <Toaster />
-          <ServiceWorkerRegistration />
+          <GlobalStudyTracker key="global-tracker" />
+          <PWAInstallHandler key="pwa-handler" />
+          <MobileNav key="mobile-navigation" />
+          <CapacitorManager key="native-manager" />
+          <PWAManager key="pwa-manager-ui" />
+          <NetworkStatus key="connectivity-status" />
+          <Toaster key="global-toaster" />
+          <ServiceWorkerRegistration key="sw-reg" />
 
-          <div className="hidden" data-node-version={registryVersion}></div>
+          <div key="platform-version-node" className="hidden" data-node-version={registryVersion}></div>
         </FirebaseClientProvider>
       </body>
     </html>
