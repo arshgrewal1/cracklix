@@ -14,8 +14,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Vacancy Node v2.3.
- * UPDATED: Removed uppercase from heading.
+ * @fileOverview Institutional Vacancy Node v2.4.
+ * UPDATED: Standardized heading size to text-2xl md:text-4xl.
  */
 export default function LatestVacancy() {
   const db = useFirestore();
@@ -52,7 +52,7 @@ export default function LatestVacancy() {
                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                  <span className="text-[10px] md:text-xs font-semibold text-emerald-600 tracking-tight uppercase">Registry Live Sync</span>
               </div>
-              <h2 className="text-3xl md:text-6xl font-bold tracking-tighter text-[#0F172A] antialiased">
+              <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-[#0F172A] antialiased">
                 Latest Vacancies
               </h2>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">
@@ -66,7 +66,7 @@ export default function LatestVacancy() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
            {loading ? (
-              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 md:h-64 w-full rounded-[2.5rem] bg-slate-50" />)
+              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 w-full rounded-[2.5rem] bg-slate-50" />)
            ) : vacancies && vacancies.length > 0 ? (
               vacancies.map((v, idx) => (
                 <motion.div key={v.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.1 }}>

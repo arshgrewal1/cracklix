@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Latest Tests Hub v41.1.
- * UPDATED: Normalized casing for headings.
+ * @fileOverview Premium Latest Tests Hub v41.2.
+ * UPDATED: Standardized heading size to text-2xl md:text-4xl.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -50,7 +50,7 @@ export default function LatestMocks() {
                 <Zap className="h-5 w-5 md:h-6 md:w-6 fill-current" />
               </div>
               <div className="text-left">
-                 <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Latest Mock Tests</h2>
+                 <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Latest Mock Tests</h2>
                  <p className="text-[11px] md:text-sm font-medium text-slate-500">Newly added high-fidelity series with official patterns.</p>
               </div>
            </div>

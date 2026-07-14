@@ -13,8 +13,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Top Rankers Preview Hub v20.0.
- * UPDATED: Title Case normalization and ensured full name visibility.
+ * @fileOverview Top Rankers Preview Hub v20.1.
+ * UPDATED: Standardized heading size to text-2xl md:text-4xl.
  */
 export default function MeritPreview() {
   const db = useFirestore();
@@ -48,7 +48,7 @@ export default function MeritPreview() {
            <div className="space-y-2">
               <div className="flex items-center gap-3 md:gap-4">
                  <Trophy className="h-8 w-8 md:h-12 md:w-12 text-primary shrink-0" />
-                 <h2 className="text-[22px] md:text-[clamp(24px,4vw,36px)] font-bold tracking-tight text-[#0F172A]">Top Rankers</h2>
+                 <h2 className="text-2xl md:text-4xl font-black tracking-tight text-[#0F172A]">Top Rankers</h2>
               </div>
               <p className="text-[14px] md:text-[clamp(13px,1.5vw,18px)] font-medium text-slate-500 italic">See the top students preparing across Punjab.</p>
            </div>
@@ -61,7 +61,7 @@ export default function MeritPreview() {
            {resultsLoading ? (
               Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="flex-shrink-0 w-[45%] h-48 md:h-72 md:w-full rounded-2xl md:rounded-[3rem] bg-white" />)
            ) : topRankers.map((res, i) => {
-              const name = (res.userName && res.userName !== 'Aspirant' && !res.userName.includes('@')) ? res.userName : (res.userEmail?.split('@')[0] || "Student");
+              const name = (res.userName && res.userName !== 'Aspirant' && !res.userName.includes('@')) ? res.userName : (res.userEmail || "Student");
               const cleanName = name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
 
               return (

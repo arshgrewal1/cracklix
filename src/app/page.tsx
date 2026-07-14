@@ -25,8 +25,8 @@ import { Button } from "@/components/ui/button";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v500.1.
- * UPDATED: Normalized heading casing to Title Case.
+ * @fileOverview Institutional Premium Hub v500.2.
+ * UPDATED: Standardized section heading sizes to text-2xl md:text-4xl.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -49,7 +49,7 @@ export default function HomePage() {
 
       {user && <ContinueLearning />}
 
-      {/* TODAYS CHALLENGE - INSTITUTIONAL REBUILD */}
+      {/* TODAY'S CHALLENGE - INSTITUTIONAL REBUILD */}
       <section className="py-8 md:py-16 bg-white">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
@@ -68,7 +68,7 @@ export default function HomePage() {
                   <div className="space-y-4">
                      <div className="flex items-center justify-center gap-3">
                         <Flame className="h-8 w-8 text-orange-500 fill-current animate-pulse" />
-                        <h2 className="text-2xl md:text-[32px] font-black tracking-tight text-white antialiased">
+                        <h2 className="text-2xl md:text-4xl font-black tracking-tight text-white antialiased">
                            {activeQuiz ? "Today's Challenge" : "Challenge Pending"}
                         </h2>
                      </div>

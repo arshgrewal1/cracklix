@@ -26,8 +26,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v50.1.
- * UPDATED: Normalized casing for headings.
+ * @fileOverview Institutional Popular Exams Hub v50.2.
+ * UPDATED: Standardized heading size to text-2xl md:text-4xl.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -111,7 +111,7 @@ export default function PopularExams() {
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1">
            <div className="space-y-2 text-left">
-              <h2 className="text-[32px] md:text-5xl font-bold tracking-tighter text-[#0F172A] antialiased">
+              <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-[#0F172A] antialiased">
                 Trending Hubs
               </h2>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">

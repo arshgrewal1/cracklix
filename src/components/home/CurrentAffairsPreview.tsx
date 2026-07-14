@@ -13,8 +13,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Current Affairs Preview Hub v22.1.
- * UPDATED: Normalized casing for headings.
+ * @fileOverview Current Affairs Preview Hub v22.2.
+ * UPDATED: Standardized heading size to text-2xl md:text-4xl.
  */
 export default function CurrentAffairsPreview() {
   const db = useFirestore();
@@ -38,7 +38,7 @@ export default function CurrentAffairsPreview() {
            <div className="space-y-1">
               <div className="flex items-center gap-3 md:gap-5">
                  <AuthorityLogo boardId="current-affairs" size="md" className="p-0 shadow-none bg-transparent" />
-                 <h2 className="text-[22px] md:text-[clamp(24px,4vw,36px)] font-black tracking-tight text-[#0F172A]">Current Affairs</h2>
+                 <h2 className="text-2xl md:text-4xl font-black tracking-tight text-[#0F172A]">Current Affairs</h2>
               </div>
               <p className="max-w-2xl text-[14px] md:text-[clamp(13px,1.5vw,18px)] font-medium text-slate-500">Stay updated with daily verified news and tests.</p>
            </div>
