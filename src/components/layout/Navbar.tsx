@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v74.0.
- * FIXED: Desktop Alignment - Anchored Menu/Logo/Links to Left and Meta-Nodes to Right.
+ * @fileOverview Cracklix Navigation Hub v75.0.
+ * FIXED: Maximized Logo height and tightened left-side anchoring.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -108,7 +108,7 @@ export default function Navbar() {
           <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU | LOGO | NAVIGATION */}
-            <div className="flex items-center gap-4 md:gap-6 lg:gap-8">
+            <div className="flex items-center gap-2 md:gap-3">
               <button
                 onClick={() => setisSidebarOpen(true)}
                 aria-label="Open menu"
@@ -120,11 +120,11 @@ export default function Navbar() {
               <Logo
                 variant="light"
                 className="flex-shrink-0"
-                imgClassName="h-12 md:h-14 w-auto"
+                imgClassName="h-14 md:h-18 w-auto"
                 align="left"
               />
 
-              <div className="hidden lg:flex items-center gap-6 xl:gap-8">
+              <div className="hidden lg:flex items-center gap-6 xl:gap-8 ml-6">
                 <NavLink href="/" label="Home" active={pathname === '/'} />
                 <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
                 <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
