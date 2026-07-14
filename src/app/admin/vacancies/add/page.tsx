@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { Suspense, useEffect, useState, useMemo } from "react"
@@ -28,7 +27,8 @@ import {
   MapPin,
   CheckCircle2,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Zap
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { Badge } from "@/components/ui/badge"
