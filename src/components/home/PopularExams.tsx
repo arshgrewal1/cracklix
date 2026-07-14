@@ -11,7 +11,8 @@ import {
   Bookmark,
   Lock,
   ShieldCheck,
-  RefreshCw
+  RefreshCw,
+  Landmark
 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
@@ -26,8 +27,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v50.2.
- * UPDATED: Standardized heading size to text-2xl md:text-4xl.
+ * @fileOverview Institutional Popular Exams Hub v51.0.
+ * UPDATED: Standardized typography to sentence case.
  */
 export default function PopularExams() {
   const db = useFirestore();
@@ -46,7 +47,6 @@ export default function PopularExams() {
   const { data: boards } = useCollection<any>(useMemo(() => (db ? collection(db, "boards") : null), [db]));
   const { data: mocks } = useCollection<any>(useMemo(() => (db ? collection(db, "mocks") : null), [db]));
 
-  // Dynamic Stats Calculator
   const examStats = useMemo(() => {
     const stats: Record<string, { mocks: number, questions: number }> = {};
     if (!exams) return stats;
@@ -62,12 +62,6 @@ export default function PopularExams() {
     });
     return stats;
   }, [exams, mocks]);
-
-  const isPassActive = useMemo(() => {
-    if (!profile) return false;
-    if (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN') return true;
-    return profile.passStatus === 'active';
-  }, [profile]);
 
   const handleTogglePin = async (e: React.MouseEvent, examId: string) => {
     e.preventDefault(); 
@@ -112,14 +106,14 @@ export default function PopularExams() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1">
            <div className="space-y-2 text-left">
               <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-[#0F172A] antialiased">
-                Trending Hubs
+                Trending hubs
               </h2>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">
                 Popular recruitment verticals selected by the audit team.
               </p>
            </div>
            <Link href="/exams" className="text-primary font-bold text-xs md:text-sm tracking-tight hover:underline flex items-center gap-2 group shrink-0">
-              View All <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              View all <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
            </Link>
         </div>
 
@@ -167,7 +161,7 @@ export default function PopularExams() {
                           </div>
 
                           <div className="space-y-4 flex-1 text-left">
-                             <h3 className="text-lg md:text-xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2">
+                             <h3 className="text-lg md:text-xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 uppercase">
                                 {exam.name}
                              </h3>
                              
@@ -178,7 +172,7 @@ export default function PopularExams() {
                           </div>
 
                           <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between group-hover:text-primary">
-                             <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest group-hover:text-primary transition-colors">Start Prep</span>
+                             <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest group-hover:text-primary transition-colors">Start prep</span>
                              <ChevronRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1" />
                           </div>
                        </Card>
@@ -190,7 +184,7 @@ export default function PopularExams() {
 
         <div className="flex items-center justify-center gap-4 text-slate-300 py-4 opacity-50">
            <ShieldCheck className="h-5 w-5" />
-           <span className="text-[10px] font-semibold tracking-widest uppercase">Institutional Registry Verified</span>
+           <span className="text-[10px] font-semibold tracking-widest uppercase">Institutional registry verified</span>
         </div>
 
       </div>

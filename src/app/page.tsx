@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo } from "react";
@@ -23,8 +22,8 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v500.5.
- * REDESIGNED: Today's Challenge compact premium mobile layout (Duolingo/Apple style).
+ * @fileOverview Institutional Premium Hub v500.6.
+ * REDESIGNED: Home Hero and Search Hub for premium PWA experience.
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -39,15 +38,13 @@ export default function HomePage() {
       <Navbar />
       
       <Hero />
-
-      <div className="relative z-40 bg-white">
-        <GlobalSearch />
-        <QuickActions />
-      </div>
+      <GlobalSearch />
+      
+      <QuickActions />
 
       {user && <ContinueLearning />}
 
-      {/* TODAY'S CHALLENGE - PREMIUM COMPACT REDESIGN */}
+      {/* Today's Challenge - Compact Redesign */}
       <section className="py-6 md:py-16 bg-white">
          <div className="max-w-7xl mx-auto px-4 md:px-8">
             <motion.div 
@@ -57,20 +54,17 @@ export default function HomePage() {
                transition={{ duration: 0.5 }}
                className="bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#1E293B] rounded-[24px] p-[20px] border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.35)] relative overflow-hidden group transition-all duration-500 text-center min-h-[340px] flex flex-col justify-center"
             >
-               {/* Watermark - Reduced size (40%) and opacity (4%) */}
+               {/* Watermark */}
                <div className="absolute top-4 right-4 p-0 opacity-[0.04] pointer-events-none group-hover:scale-110 transition-transform duration-1000">
                   <Zap className="h-40 w-40 text-primary" />
                </div>
                
-               {/* Subtle Glow Node */}
-               <div className="absolute top-[-10%] left-[-5%] w-[30%] h-[40%] bg-primary/10 blur-[80px] rounded-full pointer-events-none" />
-
                <div className="relative z-10 w-full pt-[16px]">
                   <div className="space-y-0">
                      <div className="flex items-center justify-center gap-2">
                         <Flame className="h-6 w-6 text-orange-500 fill-current animate-pulse" />
                         <h2 className="text-[26px] font-[700] tracking-tight text-white antialiased whitespace-nowrap leading-tight">
-                           Today's Challenge
+                           Today's challenge
                         </h2>
                      </div>
                      <p className="text-[16px] text-slate-300 font-medium mt-[6px] max-w-lg mx-auto">
@@ -91,7 +85,7 @@ export default function HomePage() {
                             <button className="relative overflow-hidden w-full h-[52px] bg-gradient-to-r from-blue-600 to-blue-400 hover:brightness-110 text-white font-bold text-base tracking-tight rounded-[18px] shadow-[0_12px_24px_rgba(37,99,235,0.3)] transition-all duration-300 active:scale-95 border-none group/btn cursor-pointer">
                                <div className="flex items-center justify-center gap-2 relative z-10">
                                   <Zap className="h-4 w-4 fill-white text-white" />
-                                  <span>Start Challenge</span>
+                                  <span>Start challenge</span>
                                   <ChevronRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                                </div>
                                <motion.div 
@@ -104,7 +98,7 @@ export default function HomePage() {
                       </div>
                     </>
                   ) : (
-                    <div className="py-10 opacity-20"><p className="text-white font-bold uppercase tracking-[0.4em]">Vault Synchronizing...</p></div>
+                    <div className="py-10 opacity-20"><p className="text-white font-bold uppercase tracking-[0.4em]">Vault synchronizing...</p></div>
                   )}
                </div>
             </motion.div>

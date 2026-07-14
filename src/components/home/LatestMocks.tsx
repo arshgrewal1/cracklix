@@ -14,8 +14,8 @@ import { cn } from "@/lib/utils"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview Premium Latest Tests Hub v41.2.
- * UPDATED: Standardized heading size to text-2xl md:text-4xl.
+ * @fileOverview Premium Latest Tests Hub v42.0.
+ * UPDATED: Standardized typography to sentence case.
  */
 export default function LatestMocks() {
   const db = useFirestore()
@@ -26,7 +26,6 @@ export default function LatestMocks() {
 
   const mocks = useMemo(() => {
     if (!rawMocks) return []
-    // Client-side sort to avoid index requirement
     return [...rawMocks].sort((a, b) => {
       const tA = a.createdAt?.seconds || 0;
       const tB = b.createdAt?.seconds || 0;
@@ -50,12 +49,12 @@ export default function LatestMocks() {
                 <Zap className="h-5 w-5 md:h-6 md:w-6 fill-current" />
               </div>
               <div className="text-left">
-                 <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Latest Mock Tests</h2>
+                 <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Latest mock tests</h2>
                  <p className="text-[11px] md:text-sm font-medium text-slate-500">Newly added high-fidelity series with official patterns.</p>
               </div>
            </div>
            <Link href="/mocks" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline">
-              View All <ChevronRight className="h-4 w-4" />
+              View all <ChevronRight className="h-4 w-4" />
            </Link>
         </div>
         
@@ -89,7 +88,7 @@ export default function LatestMocks() {
 
                   <div className="flex-1 space-y-4">
                     <div className="space-y-1.5">
-                       <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">{mock.difficulty || 'Mixed'} Level</p>
+                       <p className="text-[9px] font-black text-primary uppercase tracking-[0.3em]">{mock.difficulty || 'Mixed'} level</p>
                        <h3 className="text-xl md:text-2xl font-bold leading-tight text-[#0F172A] group-hover:text-primary transition-colors line-clamp-2">
                            {mock.title}
                        </h3>

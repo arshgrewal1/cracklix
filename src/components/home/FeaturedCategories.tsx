@@ -13,8 +13,8 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Filtered Institutional Categories Hub v40.4.
- * UPDATED: Standardized heading size to text-2xl md:text-4xl.
+ * @fileOverview Filtered Institutional Categories Hub v41.0.
+ * UPDATED: Standardized typography to sentence case.
  */
 
 const TARGET_IDS = [
@@ -46,12 +46,12 @@ export default function FeaturedCategories() {
                <Layers className="h-5 w-5 md:h-6 md:w-6" />
              </div>
              <div className="text-left">
-                <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Quick Categories</h2>
+                <h2 className="text-2xl md:text-4xl font-black text-[#0F172A] tracking-tight">Quick categories</h2>
                 <p className="text-[11px] md:text-sm font-medium text-slate-500">Find tests by your target recruitment vertical.</p>
              </div>
           </div>
           <Link href="/exams" className="text-primary font-bold text-xs md:text-sm flex items-center gap-1 hover:underline">
-            View All <ChevronRight className="h-4 w-4" />
+            View all <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
 

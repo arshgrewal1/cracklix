@@ -14,8 +14,8 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Vacancy Node v2.4.
- * UPDATED: Standardized heading size to text-2xl md:text-4xl.
+ * @fileOverview Institutional Vacancy Node v2.5.
+ * UPDATED: Standardized typography to sentence case.
  */
 export default function LatestVacancy() {
   const db = useFirestore();
@@ -50,17 +50,17 @@ export default function LatestVacancy() {
            <div className="space-y-3 text-left">
               <div className="flex items-center gap-2">
                  <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                 <span className="text-[10px] md:text-xs font-semibold text-emerald-600 tracking-tight uppercase">Registry Live Sync</span>
+                 <span className="text-[10px] md:text-xs font-semibold text-emerald-600 tracking-tight uppercase">Registry live sync</span>
               </div>
               <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-[#0F172A] antialiased">
-                Latest Vacancies
+                Latest vacancies
               </h2>
               <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">
                 Official notifications and direct apply nodes for state recruitments.
               </p>
            </div>
            <Button asChild variant="ghost" className="text-primary font-bold text-xs md:text-sm tracking-tight hover:underline flex items-center gap-2 group shrink-0">
-              <Link href="/vacancies">Open Registry <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+              <Link href="/vacancies">Open registry <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
            </Button>
         </div>
 
@@ -71,14 +71,14 @@ export default function LatestVacancy() {
               vacancies.map((v, idx) => (
                 <motion.div key={v.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.1 }}>
                   <Link href={`/vacancies/${v.id}`}>
-                    <Card className="border-none shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col text-left border border-slate-100 p-6 md:p-12 relative">
+                    <Card className="border border-slate-100 shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col text-left p-6 md:p-12 relative">
                        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000"><Landmark className="h-44 w-44" /></div>
                        
                        <div className="flex justify-between items-start mb-8 w-full relative z-10">
                           <AuthorityLogo boardId={v.board} size="md" className="h-16 w-16 md:h-24 md:w-24 shadow-2xl border-4 border-white bg-slate-50" />
                           <div className="flex flex-col items-end gap-2">
                              {v.isBreaking && <Badge className="bg-rose-500 text-white border-none px-3 py-1 font-semibold text-[9px] uppercase animate-pulse">Breaking</Badge>}
-                             <span className="text-[10px] md:text-[11px] font-semibold text-slate-300 tabular-nums">LAST: {new Date(v.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                             <span className="text-[10px] md:text-[11px] font-semibold text-slate-300 tabular-nums">Last: {new Date(v.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
                           </div>
                        </div>
 
@@ -102,7 +102,7 @@ export default function LatestVacancy() {
            ) : (
               <div className="col-span-full py-20 text-center opacity-30 italic font-semibold text-xl md:text-3xl tracking-tighter flex flex-col items-center gap-6">
                  <ShieldCheck className="h-16 w-16 text-slate-200" />
-                 Registry Normalized
+                 Registry normalized
               </div>
            )}
         </div>

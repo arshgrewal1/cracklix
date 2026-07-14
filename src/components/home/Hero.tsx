@@ -2,7 +2,7 @@
 
 import React, { useMemo, useEffect, useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Play, ChevronRight, Star, Smartphone, Landmark, Download, Loader2 } from "lucide-react";
+import { Zap, Play, ChevronRight, Star, Smartphone, Landmark, Download, Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -10,29 +10,18 @@ import { useToast } from "@/hooks/use-toast";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview High-Mass Institutional Hero v50.0 [Responsive Hardened].
- * FIXED: Eliminated all width overflows on ultra-mobile screens.
+ * @fileOverview Premium Mobile-First PWA Hero v60.0.
+ * Redesigned for Apple + Linear aesthetic with reactive PWA states.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
   const { toast } = useToast();
   const { canInstall, installApp, isInstalled } = usePWAInstall();
   const [isInstalling, setIsInstalling] = useState(false);
-  const prevInstalled = useRef(isInstalled);
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (mounted && isInstalled && !prevInstalled.current) {
-      toast({
-        title: "Application Synchronized.",
-        description: "Cracklix is now ready on your home screen.",
-      });
-    }
-    prevInstalled.current = isInstalled;
-  }, [isInstalled, mounted, toast]);
 
   const handleInstallClick = async () => {
     setIsInstalling(true);
@@ -46,103 +35,108 @@ export default function Hero() {
   if (!mounted) return null;
 
   return (
-    <section className="relative overflow-hidden bg-white pt-10 pb-16 md:pt-20 md:pb-28 border-b border-slate-50 w-full max-w-full">
-      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="flex flex-col items-center text-center space-y-8 md:space-y-16 w-full">
+    <section className="relative overflow-hidden bg-white pt-6 pb-5 md:pt-16 md:pb-20 w-full">
+      {/* Subtle Background Glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg aspect-square bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
+
+      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="flex flex-col items-center text-center space-y-4 md:space-y-8 w-full">
           
+          {/* Trust Badge */}
           <motion.div 
              initial={{ opacity: 0, y: -10 }}
              animate={{ opacity: 1, y: 0 }}
-             className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-blue-50 border border-blue-100/50 shadow-sm"
+             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100/50 max-w-[240px]"
           >
-            <Star className="h-3.5 w-3.5 text-primary fill-primary animate-pulse" />
-            <span className="text-[10px] md:text-xs font-semibold text-primary antialiased">
-              Punjab's Smartest Platform
+            <Star className="h-3 w-3 text-primary fill-primary animate-pulse" />
+            <span className="text-[10px] md:text-xs font-bold text-primary tracking-tight">
+              Punjab's smartest exam platform
             </span>
           </motion.div>
 
-          <div className="space-y-6 w-full max-w-4xl px-1">
-            <h1 className="text-[32px] sm:text-7xl lg:text-[100px] font-bold tracking-tighter text-[#0F172A] leading-[1] antialiased">
-              Crack Punjab Exams <br className="hidden sm:block" />
+          {/* Heading */}
+          <div className="space-y-3 w-full max-w-[340px] md:max-w-4xl px-1">
+            <h1 className="text-[32px] sm:text-7xl lg:text-[100px] font-black tracking-tighter text-[#0F172A] leading-[1.05] antialiased">
+              Crack Punjab exams <br className="hidden sm:block" />
               <span className="text-primary italic">with confidence</span>
             </h1>
 
-            <p className="text-[14px] md:text-2xl text-slate-500 font-medium leading-relaxed tracking-tight max-w-2xl mx-auto">
-              Master official patterns with verified Mock Tests, Notes, and Daily Updates.
+            <p className="text-[14px] md:text-2xl text-slate-500 font-medium leading-relaxed tracking-tight max-w-md mx-auto">
+              Master official patterns with verified mock tests, notes, and daily updates.
             </p>
           </div>
 
+          {/* Action Hub */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, ease: "easeOut" }}
-            className="flex flex-col sm:flex-row gap-4 w-full max-w-2xl px-2 mx-auto items-center justify-center overflow-hidden"
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="flex flex-col gap-3 w-full max-w-sm px-2 mx-auto items-center justify-center"
           >
              <Button 
                asChild 
-               className="relative overflow-hidden w-full h-[54px] md:h-[68px] bg-gradient-to-r from-[#2563EB] via-[#3B82F6] to-[#60A5FA] hover:brightness-110 rounded-[20px] md:rounded-full shadow-xl transition-all duration-300 active:scale-[0.98] border-none group cursor-pointer"
+               className="relative overflow-hidden w-full h-[56px] bg-gradient-to-r from-[#2563EB] to-[#3B82F6] hover:brightness-110 rounded-[18px] shadow-[0_15px_30px_rgba(37,99,235,0.25)] transition-all duration-300 active:scale-[0.98] border-none group cursor-pointer"
              >
-                <Link href="/mocks" className="flex items-center justify-center w-full px-1">
-                  <motion.div 
-                    animate={{ x: ['-100%', '250%'] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                    className="absolute inset-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-[-25deg] pointer-events-none"
-                  />
-                  
-                  <div className="flex items-center justify-start w-full relative z-10 gap-2">
-                    <div className="w-[38px] h-[38px] md:w-[44px] md:h-[44px] rounded-full bg-white/18 backdrop-blur-[12px] flex items-center justify-center shrink-0 border border-white/10">
-                      <Play className="h-4 w-4 md:h-5 md:w-5 fill-white text-white" />
+                <Link href="/mocks" className="flex items-center justify-between w-full px-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-[32px] h-[32px] rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+                      <Play className="h-3.5 w-3.5 fill-white text-white" />
                     </div>
-                    <span className="flex-1 text-center font-bold text-sm md:text-xl text-white pr-[40px] uppercase tracking-tight">
-                      Start Preparation
+                    <span className="font-bold text-base text-white tracking-tight">
+                      Start preparation
                     </span>
                   </div>
+                  <ChevronRight className="h-4 w-4 text-white/50 group-hover:translate-x-1 transition-transform" />
+                  
+                  <motion.div 
+                    animate={{ x: ['-100%', '300%'] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute inset-0 w-1/3 h-full bg-gradient-to-r from-transparent via-white/10 to-transparent skew-x-[-25deg] pointer-events-none"
+                  />
                 </Link>
              </Button>
              
-             <div className="w-full sm:w-auto sm:flex-1">
-               <AnimatePresence mode="wait">
-                 {canInstall && !isInstalled ? (
-                   <motion.div key="install-node" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
-                     <Button 
-                        onClick={handleInstallClick}
-                        disabled={isInstalling}
-                        variant="outline" 
-                        className="w-full h-[54px] md:h-[68px] rounded-[20px] md:rounded-full bg-white border-2 border-primary text-[#1E3A8A] font-bold text-sm md:text-lg shadow-sm transition-all duration-300 active:scale-95 hover:bg-blue-50 group px-1"
-                      >
-                        <div className="flex items-center justify-center w-full px-1 gap-2">
-                            <div className="w-[38px] h-[38px] md:w-[44px] md:h-[44px] rounded-full bg-primary flex items-center justify-center shrink-0 shadow-lg">
-                                {isInstalling ? <Loader2 className="h-4 w-4 md:h-5 md:w-5 text-white animate-spin" /> : <Download className="h-4 w-4 md:h-5 md:w-5 text-white" />}
-                            </div>
-                            <span className="flex-1 text-center pr-[40px] uppercase tracking-tight">
-                              Install App
-                            </span>
-                        </div>
-                      </Button>
-                   </motion.div>
-                 ) : (
-                   <motion.div key="browse-node" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="w-full">
-                     <Button 
-                        asChild 
-                        variant="outline" 
-                        className="w-full h-[54px] md:h-[68px] rounded-[20px] md:rounded-full bg-white border-2 border-slate-100 hover:border-primary text-[#1E3A8A] font-bold text-sm md:text-lg shadow-sm transition-all duration-300 active:scale-[0.98] group px-1"
-                      >
-                        <Link href="/exams" className="flex items-center justify-center w-full px-1 gap-2">
-                            <div className="w-[38px] h-[38px] md:w-[44px] md:h-[44px] rounded-full bg-slate-50 flex items-center justify-center shrink-0 group-hover:bg-primary/5 transition-colors">
-                                <Landmark className="h-4 w-4 md:h-5 md:w-5 text-[#1E3A8A]" />
-                            </div>
-                            <span className="flex-1 text-center pr-[40px] uppercase tracking-tight">Browse All</span>
-                        </Link>
-                      </Button>
-                   </motion.div>
-                 )}
-               </AnimatePresence>
-             </div>
+             <AnimatePresence mode="wait">
+               {!isInstalled ? (
+                 <motion.div 
+                   key="install-node" 
+                   initial={{ opacity: 0, scale: 0.95 }} 
+                   animate={{ opacity: 1, scale: 1 }} 
+                   exit={{ opacity: 0, scale: 0.95 }}
+                   className="w-full"
+                 >
+                   <Button 
+                      onClick={handleInstallClick}
+                      disabled={isInstalling}
+                      variant="outline" 
+                      className="w-full h-[56px] rounded-[18px] bg-white border-2 border-primary text-primary font-bold text-base shadow-sm transition-all duration-300 active:scale-95 hover:bg-blue-50 group gap-3"
+                    >
+                      {isInstalling ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                      <span>Install app</span>
+                    </Button>
+                 </motion.div>
+               ) : (
+                 <motion.div 
+                   key="browse-node" 
+                   initial={{ opacity: 0, scale: 0.95 }} 
+                   animate={{ opacity: 1, scale: 1 }} 
+                   exit={{ opacity: 0, scale: 0.95 }}
+                   className="w-full"
+                 >
+                   <Button 
+                      asChild 
+                      variant="outline" 
+                      className="w-full h-[56px] rounded-[18px] bg-white border-2 border-slate-100 hover:border-primary text-[#1E3A8A] font-bold text-base shadow-sm transition-all duration-300 active:scale-[0.98] gap-3"
+                    >
+                      <Link href="/exams">
+                        <Landmark className="h-4 w-4" />
+                        <span>Browse selection</span>
+                      </Link>
+                    </Button>
+                 </motion.div>
+               )}
+             </AnimatePresence>
           </motion.div>
-          
-          <div className="flex items-center gap-6 md:gap-10 pt-4 opacity-40 grayscale group hover:grayscale-0 transition-all duration-700 overflow-hidden px-4">
-             <p className="text-[9px] md:text-[10px] font-black tracking-widest text-slate-400 uppercase whitespace-nowrap">Official Registry Node Verified</p>
-          </div>
         </div>
       </div>
     </section>
