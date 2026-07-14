@@ -18,8 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton, AdminDialogShell } from "@/components/admin"
 
 /**
- * @fileOverview Exam Vertical Registry v16.0 (Metrics Sync).
- * FIXED: Standardized Lucide imports to resolve build blockage.
+ * @fileOverview Exam Vertical Registry v17.0 (Trending Toggle Added).
  */
 
 export default function ExamRegistryPage() {
@@ -74,7 +73,7 @@ export default function ExamRegistryPage() {
     if (!db) return;
     try {
        await updateDoc(doc(db, "exams", id), { isTrending: !current, updatedAt: serverTimestamp() });
-       toast({ title: "Discovery Updated", description: current ? "Removed from Trending" : "Added to Trending Hub" });
+       toast({ title: "Homepage Sync", description: current ? "Removed from Trending" : "Promoted to Homepage" });
     } catch (e) {
        toast({ variant: "destructive", title: "Sync Failed" });
     }
@@ -87,7 +86,7 @@ export default function ExamRegistryPage() {
         icon={GraduationCap}
         label="Recruitment Vertical Registry"
         title="Exam Registry"
-        subtitle="Manage specific exam verticals and Home Page trending items."
+        subtitle="Manage specific exam verticals and Home Page promotion list."
         actionLabel="Register Vertical"
         actionIcon={Plus}
         onAction={() => setEditingExam({ name: "", boardId: "", categoryId: "", displayOrder: 1, isTrending: false, totalMocks: "40+", studentCount: "12K+" })}
@@ -108,7 +107,7 @@ export default function ExamRegistryPage() {
               <TableRow className="border-slate-100 h-16 md:h-20">
                 <TableHead className="px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Vertical Identity</TableHead>
                 <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Authority Board</TableHead>
-                <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-center text-slate-400">Metrics</TableHead>
+                <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-center text-slate-400">Trending</TableHead>
                 <TableHead className="text-right px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
               </TableRow>
             </TableHeader>
@@ -139,16 +138,19 @@ export default function ExamRegistryPage() {
                       </div>
                     </TableCell>
                     <TableCell className="text-center">
-                       <div className="flex items-center justify-center gap-4 text-[10px] font-black text-slate-400 uppercase tracking-tighter">
-                          <span className="flex items-center gap-1.5"><Zap className="h-3 w-3 text-primary" /> {e.totalMocks || "0"}</span>
-                          <span className="flex items-center gap-1.5"><Users className="h-3 w-3 text-blue-500" /> {e.studentCount || "0"}</span>
-                       </div>
+                       <button 
+                          onClick={() => toggleTrending(e.id, !!e.isTrending)} 
+                          className={cn(
+                            "h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl flex items-center justify-center transition-all shadow-sm border mx-auto active:scale-90",
+                            e.isTrending ? "bg-amber-50 border-amber-200 text-amber-500" : "bg-slate-50 border-slate-100 text-slate-300 hover:text-amber-500"
+                          )}
+                          title={e.isTrending ? "Remove from Homepage" : "Promote to Homepage"}
+                       >
+                          <Star className={cn("h-5 w-5", e.isTrending && "fill-current")} />
+                       </button>
                     </TableCell>
                     <TableCell className="text-right px-8 md:px-12">
                       <div className="flex justify-end gap-2 md:gap-4 opacity-20 group-hover:opacity-100 transition-all">
-                        <button onClick={() => toggleTrending(e.id, !!e.isTrending)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center transition-all">
-                          <Star className={cn("h-5 w-5", e.isTrending ? "text-amber-500 fill-current" : "text-slate-200")} />
-                        </button>
                         <button onClick={() => setEditingExam(e)} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-slate-400 hover:text-primary active:scale-90 transition-all"><Edit className="h-5 w-5" /></button>
                         <button onClick={async () => { if (confirm("Permanently purge this vertical node?")) await deleteDoc(doc(db!, "exams", e.id)) }} className="h-10 w-10 md:h-12 md:w-12 rounded-xl md:rounded-2xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all"><Trash2 className="h-5 w-5" /></button>
                       </div>
