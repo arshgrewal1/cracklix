@@ -2,9 +2,9 @@
 
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
-import { collection, query, where, limit, orderBy } from 'firebase/firestore';
-import { Calendar, ChevronRight, Bell, Landmark, Zap, ArrowRight, ShieldCheck, Target } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { collection, query, where, limit } from 'firebase/firestore';
+import { Calendar, ChevronRight, Landmark, Zap, ArrowRight, ShieldCheck, Target } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -14,24 +14,35 @@ import { AuthorityLogo } from '@/lib/exam-icons';
 import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Vacancy Node v2.0.
- * Refined homepage section for official Punjab recruitment discovery.
+ * @fileOverview Institutional Vacancy Node v2.1.
+ * FIXED: Removed server-side orderBy to bypass composite index requirement.
  */
 export default function LatestVacancy() {
   const db = useFirestore();
 
   const vacanciesQuery = useMemo(() => {
     if (!db) return null;
+    // Simple query to avoid composite index requirements for multiple where + orderBy
     return query(
       collection(db, "vacancies"),
       where("status", "==", "PUBLISHED"),
-      where("showOnHomepage", "==", true),
-      orderBy("publishedAt", "desc"),
-      limit(4)
+      limit(20)
     );
   }, [db]);
 
-  const { data: vacancies, loading } = useCollection<any>(vacanciesQuery);
+  const { data: rawVacancies, loading } = useCollection<any>(vacanciesQuery);
+
+  const vacancies = useMemo(() => {
+    if (!rawVacancies) return [];
+    return rawVacancies
+      .filter(v => v.showOnHomepage === true)
+      .sort((a, b) => {
+         const tA = a.publishedAt?.seconds || 0;
+         const tB = b.publishedAt?.seconds || 0;
+         return tB - tA;
+      })
+      .slice(0, 4);
+  }, [rawVacancies]);
 
   return (
     <section className="py-12 md:py-24 bg-white">

@@ -4,29 +4,25 @@ import React, { useMemo, useState, useEffect } from "react"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { useCollection, useFirestore, useUser } from "@/firebase"
-import { collection, query, where, orderBy, doc, getDoc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
+import { collection, query, where, limit, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore"
 import { 
   Megaphone, 
   Search, 
-  Filter, 
   ChevronRight, 
   Zap, 
   Clock, 
-  MapPin, 
   GraduationCap, 
   DollarSign, 
   ShieldCheck, 
   Bookmark, 
-  CheckCircle2, 
   X,
   FileText,
-  Loader2,
   AlertCircle,
   TrendingUp,
   Landmark,
   ArrowRight
 } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -34,13 +30,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { AuthorityLogo } from "@/lib/exam-icons"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { Vacancy } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Official Punjab Vacancy Registry v1.0.
- * Premium discovery portal for state government recruitments.
+ * @fileOverview Official Punjab Vacancy Registry v1.1.
+ * FIXED: Removed server-side orderBy to bypass composite index requirement.
  */
 
 const CATEGORY_CHIPS = [
@@ -67,19 +63,26 @@ export default function VacanciesPortal() {
 
   const vacancyQuery = useMemo(() => {
     if (!db) return null
-    return query(collection(db, "vacancies"), where("status", "==", "PUBLISHED"), orderBy("publishedAt", "desc"))
+    // Simple query to avoid composite index requirements
+    return query(collection(db, "vacancies"), where("status", "==", "PUBLISHED"), limit(100))
   }, [db])
 
-  const { data: vacancies, loading } = useCollection<Vacancy>(vacancyQuery as any)
+  const { data: rawVacancies, loading } = useCollection<Vacancy>(vacancyQuery as any)
 
   const filteredVacancies = useMemo(() => {
-    if (!vacancies) return []
-    return vacancies.filter(v => {
-       const matchesSearch = !searchTerm || v.title?.toLowerCase().includes(searchTerm.toLowerCase()) || v.department?.toLowerCase().includes(searchTerm.toLowerCase())
-       const matchesBoard = activeBoard === 'all' || v.board === activeBoard
-       return matchesSearch && matchesBoard
-    })
-  }, [vacancies, searchTerm, activeBoard])
+    if (!rawVacancies) return []
+    return rawVacancies
+      .filter(v => {
+        const matchesSearch = !searchTerm || v.title?.toLowerCase().includes(searchTerm.toLowerCase()) || v.department?.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesBoard = activeBoard === 'all' || v.board === activeBoard
+        return matchesSearch && matchesBoard
+      })
+      .sort((a, b) => {
+         const tA = a.publishedAt?.seconds || 0;
+         const tB = b.publishedAt?.seconds || 0;
+         return tB - tA;
+      })
+  }, [rawVacancies, searchTerm, activeBoard])
 
   const handleToggleBookmark = async (e: React.MouseEvent, id: string) => {
     e.preventDefault(); e.stopPropagation();
@@ -109,7 +112,6 @@ export default function VacanciesPortal() {
       
       <main className="container mx-auto px-4 md:px-8 py-10 md:py-20 max-w-[1440px] space-y-12 md:space-y-24 pb-40">
          
-         {/* 1. HERO HUB */}
          <section className="text-left space-y-10 md:space-y-16 max-w-5xl">
             <div className="space-y-6 md:space-y-10">
                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4">
@@ -118,7 +120,7 @@ export default function VacanciesPortal() {
                   </div>
                   <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[10px] md:text-xs tracking-widest uppercase">Official Recruitment Hub</Badge>
                </motion.div>
-               <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-[#0F172A] tracking-tighter leading-[0.9] antialiased">
+               <h1 className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black text-[#0F172A] tracking-tighter leading-[0.9] break-words antialiased">
                   Latest <br/> <span className="text-primary italic">Vacancies.</span>
                </h1>
                <p className="text-slate-500 font-medium text-sm md:text-2xl max-w-2xl leading-tight tracking-tight">
@@ -160,7 +162,6 @@ export default function VacanciesPortal() {
             </div>
          </section>
 
-         {/* 2. VACANCY LISTING */}
          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 md:gap-20">
             <div className="lg:col-span-8 space-y-8 md:space-y-12">
                {loading ? (
@@ -216,7 +217,6 @@ export default function VacanciesPortal() {
                )}
             </div>
 
-            {/* SIDEBAR ANALYTICS */}
             <div className="lg:col-span-4 space-y-12 md:space-y-16">
                <Card className="border-none shadow-5xl rounded-[2.5rem] bg-[#0F172A] text-white p-8 md:p-12 space-y-10 relative overflow-hidden group border border-white/5">
                   <div className="absolute top-0 right-0 p-12 opacity-5 rotate-12 group-hover:scale-110 transition-transform duration-1000"><TrendingUp className="h-64 w-64 text-primary" /></div>
@@ -226,7 +226,7 @@ export default function VacanciesPortal() {
                         <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Network Demand Index</p>
                      </div>
                      <div className="space-y-10">
-                        <MetricNode label="Active Vacancies" val={loading ? "..." : vacancies?.length} icon={<Megaphone className="text-primary" />} />
+                        <MetricNode label="Active Vacancies" val={loading ? "..." : rawVacancies?.length} icon={<Megaphone className="text-primary" />} />
                         <MetricNode label="Daily Aspirants" val="12.4K" icon={<Target className="text-emerald-500" />} />
                         <MetricNode label="Verified Boards" val="12" icon={<ShieldCheck className="text-blue-500" />} />
                      </div>
@@ -241,7 +241,7 @@ export default function VacanciesPortal() {
                <div className="p-10 bg-white rounded-[3rem] border border-slate-100 shadow-xl space-y-8 text-left group hover:translate-y-[-6px] transition-all duration-500">
                   <div className="flex items-center gap-4">
                      <ShieldCheck className="h-8 w-8 text-emerald-500" />
-                     <h4 className="text-[11px] font-black uppercase tracking-[0.3em] text-[#0F172A]">Security Protocol</h4>
+                     <h4 className="text-[11px] font-black uppercase tracking-0.3em text-[#0F172A]">Security Protocol</h4>
                   </div>
                   <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">All recruitment notifications are verified against official gazettes before being synchronized with the master registry. Instant push alerts for Last Date reminders are active for Elite Pass holders.</p>
                </div>
