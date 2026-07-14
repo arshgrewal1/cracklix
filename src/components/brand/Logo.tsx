@@ -17,8 +17,8 @@ interface LogoProps {
 }
 
 /**
- * @fileOverview Cracklix Brand Identity v128.0.
- * FIXED: Removed forced width constraints that caused desktop header alignment overlaps.
+ * @fileOverview Cracklix Brand Identity v129.0.
+ * UPDATED: Optimized for maximized scaling and left-anchoring.
  */
 export default function Logo({
   className = "",
@@ -49,8 +49,8 @@ export default function Logo({
       <Image
         src={src}
         alt="Cracklix"
-        width={isIcon ? 128 : 640}
-        height={isIcon ? 128 : 240}
+        width={isIcon ? 256 : 1000}
+        height={isIcon ? 256 : 400}
         priority={priority}
         className={cn(
           "h-auto transition-all flex-shrink-0 object-contain w-auto",

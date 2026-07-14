@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v75.0.
- * FIXED: Maximized Logo height and tightened left-side anchoring.
+ * @fileOverview Cracklix Navigation Hub v76.0.
+ * UPDATED: Doubled Logo size and pulled to extreme left.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -105,10 +105,10 @@ export default function Navbar() {
     <>
       <header className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md border-b border-slate-100 pt-safe">
         <nav className="w-full h-20 lg:h-20">
-          <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-4 md:px-8 h-full flex items-center justify-between">
+          <div className="w-full max-w-[1500px] 2xl:max-w-[1800px] mx-auto px-2 md:px-4 h-full flex items-center justify-between">
 
             {/* LEFT BLOCK: MENU | LOGO | NAVIGATION */}
-            <div className="flex items-center gap-2 md:gap-3">
+            <div className="flex items-center gap-0">
               <button
                 onClick={() => setisSidebarOpen(true)}
                 aria-label="Open menu"
@@ -119,12 +119,12 @@ export default function Navbar() {
 
               <Logo
                 variant="light"
-                className="flex-shrink-0"
-                imgClassName="h-14 md:h-18 w-auto"
+                className="flex-shrink-0 -ml-3 md:-ml-6"
+                imgClassName="h-24 md:h-36 w-auto"
                 align="left"
               />
 
-              <div className="hidden lg:flex items-center gap-6 xl:gap-8 ml-6">
+              <div className="hidden lg:flex items-center gap-4 xl:gap-6 ml-2">
                 <NavLink href="/" label="Home" active={pathname === '/'} />
                 <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
                 <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
@@ -134,7 +134,7 @@ export default function Navbar() {
             </div>
 
             {/* RIGHT BLOCK: ELITE ACCESS | SEARCH | PROFILE */}
-            <div className="flex items-center gap-4 md:gap-6 lg:gap-8">
+            <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden lg:flex flex-col items-end shrink-0">
                     <span className="text-[9px] font-black text-emerald-600 tracking-tight leading-none uppercase">Elite Access</span>
@@ -213,7 +213,7 @@ export default function Navbar() {
   function NavLink({ href, label, active }: { href: string; label: string; active?: boolean; }) {
     return (
       <Link href={href} className={cn(
-        "text-[15px] xl:text-[17px] font-bold transition-all whitespace-nowrap border-b-2 py-1", 
+        "text-[14px] xl:text-[15px] font-bold transition-all whitespace-nowrap border-b-2 py-1", 
         active ? "text-primary border-primary" : "text-slate-500 border-transparent hover:text-primary hover:text-primary/20"
       )}>
         {label}
