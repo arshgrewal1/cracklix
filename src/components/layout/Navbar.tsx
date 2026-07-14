@@ -37,7 +37,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v81.0 [Admin Switch Integrated].
+ * @fileOverview Cracklix Navigation Hub v82.0.
+ * UPDATED: Removed Return to Admin from Desktop as per user request.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -137,12 +138,6 @@ export default function Navbar() {
 
             {/* RIGHT BLOCK: ELITE ACCESS | SEARCH | PROFILE */}
             <div className="flex items-center gap-2 md:gap-4 lg:gap-6 z-10">
-              {isAdmin && (
-                <Button asChild variant="dark" className="hidden xl:flex h-10 px-6 rounded-xl gap-2 active:scale-95 transition-all text-[10px] font-black uppercase tracking-widest bg-[#0F172A] border-none shadow-lg">
-                  <Link href="/admin"><ShieldCheck className="h-4 w-4 text-primary" /> Return to Admin</Link>
-                </Button>
-              )}
-
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden lg:flex flex-col items-end shrink-0">
                     <span className="text-[9px] font-bold text-emerald-600 leading-none">Elite Access</span>
@@ -193,7 +188,6 @@ export default function Navbar() {
                          <ProfileMenuItem href="/dashboard" icon={ShieldCheck} label="My Progress" />
                          <ProfileMenuItem href="/pass" icon={Gem} label="Elite Pass Hub" />
                          <ProfileMenuItem href="/profile" icon={Settings} label="Portal Settings" />
-                         {isAdmin && <ProfileMenuItem href="/admin" icon={ShieldCheck} label="Admin Console" highlight />}
                       </div>
                       <Button onClick={handleLogout} variant="ghost" className="w-full h-11 bg-rose-50 hover:bg-rose-100 text-rose-500 font-bold text-[11px] rounded-xl transition-all border-none">Log Out</Button>
                     </div>
