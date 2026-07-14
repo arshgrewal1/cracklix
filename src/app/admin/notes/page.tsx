@@ -1,32 +1,29 @@
 "use client"
 
-import { useState, useMemo, useRef } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Trash2, Edit, Save, FileText, Search, Download, Landmark, GraduationCap, X, Loader2, Upload, CheckCircle2 } from "lucide-react"
-import { useCollection, useFirestore, useStorage, useUser } from "@/firebase"
+import { Plus, Trash2, Edit, Save, FileText, Search, Loader2, X } from "lucide-react"
+import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, doc, setDoc, deleteDoc, orderBy, serverTimestamp, addDoc } from "firebase/firestore"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
+import FileUpload from "@/components/admin/FileUpload"
 
 /**
- * @fileOverview Institutional Content Hub CMS v8.0.
- * FIXED: Implemented direct PDF upload hub with Firebase Storage sync.
- * REFINED: Rebalanced header spacing and typography for a professional look.
+ * @fileOverview Institutional Content Hub CMS v9.0.
+ * UPDATED: Integrated Enterprise File Upload Manager with optimized metadata storage.
  */
 
 export default function AdminNotesManagement() {
   const db = useFirestore()
-  const storage = useStorage()
   const { profile } = useUser()
   const { toast } = useToast()
   
@@ -39,33 +36,6 @@ export default function AdminNotesManagement() {
   const [editingNote, setEditingNote] = useState<any>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [isSaving, setIsSaving] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file || !storage) return
-
-    if (file.type !== 'application/pdf') {
-       toast({ variant: "destructive", title: "Invalid Node", description: "Only official PDF files are authorized for ingestion." })
-       return
-    }
-
-    setIsUploading(true)
-    const storagePath = `notes/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
-    const uploadRef = ref(storage, storagePath)
-
-    try {
-      const snapshot = await uploadBytes(uploadRef, file)
-      const url = await getDownloadURL(snapshot.ref)
-      setEditingNote((prev: any) => ({ ...prev, pdfUrl: url }))
-      toast({ title: "Asset Verified", description: "PDF synchronized with institutional storage." })
-    } catch (err) {
-      toast({ variant: "destructive", title: "Upload Failed" })
-    } finally {
-      setIsUploading(false)
-    }
-  }
 
   const handleSave = async () => {
     if (!db || !editingNote || isSaving) return
@@ -96,7 +66,7 @@ export default function AdminNotesManagement() {
         timestamp: serverTimestamp()
       });
 
-      toast({ title: "Asset Deployed", description: "Metadata synchronized with cloud storage hub." })
+      toast({ title: "Asset Deployed" })
       setEditingNote(null)
     } catch (e: any) {
       toast({ variant: "destructive", title: "Sync Failed" })
@@ -122,22 +92,20 @@ export default function AdminNotesManagement() {
   return (
     <div className="space-y-10 md:space-y-16 pb-20 text-left pt-2 md:pt-4">
       
-      {/* 1. HEADER HUB - REBALANCED SPACING */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 px-1">
         <div className="space-y-1">
            <div className="flex items-center gap-2 mb-1">
               <FileText className="h-4 w-4 text-primary" />
-              <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Institutional Study Base</span>
+              <span className="text-[9px] md:text-[10px] font-black uppercase text-slate-400">Preparation Hub Content</span>
            </div>
           <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none">Content Hub</h1>
-          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight max-w-xl">Manage verified study notes, PDFs, and official syllabus metadata.</p>
+          <p className="text-slate-500 text-[11px] md:text-lg font-medium leading-tight">Manage official PDFs, syllabus guides, and verified study material.</p>
         </div>
         <Button onClick={() => setEditingNote({ title: "", boardId: "", examId: "", subjectId: "", category: "NOTES", pdfUrl: "", isFree: true, description: "" })} className="w-full md:w-auto bg-primary hover:bg-blue-700 h-12 md:h-16 px-10 rounded-full font-black uppercase text-[10px] tracking-widest shadow-xl border-none transition-all active:scale-95 gap-3">
           <Plus className="h-5 w-5" /> Register New Asset
         </Button>
       </div>
 
-      {/* 2. SEARCH NODE */}
       <div className="relative group px-1 max-w-3xl">
          <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-300 group-focus-within:text-primary transition-colors" />
          <Input 
@@ -148,14 +116,13 @@ export default function AdminNotesManagement() {
          />
       </div>
 
-      {/* 3. ASSET LEDGER */}
       <Card className="border-none shadow-3xl bg-white rounded-2xl md:rounded-[3rem] overflow-hidden mx-1 border border-slate-50">
         <CardContent className="p-0 overflow-x-auto">
           <Table className="min-w-[900px]">
             <TableHeader className="bg-slate-50/50">
               <TableRow className="border-slate-100 h-16 md:h-24">
                 <TableHead className="px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Asset Identity</TableHead>
-                <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Relational Vertical</TableHead>
+                <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Vertical Node</TableHead>
                 <TableHead className="text-[10px] md:text-[11px] font-black uppercase tracking-widest text-center text-slate-400">Tier</TableHead>
                 <TableHead className="text-right px-8 md:px-12 text-[10px] md:text-[11px] font-black uppercase tracking-widest text-slate-400">Control</TableHead>
               </TableRow>
@@ -200,8 +167,7 @@ export default function AdminNotesManagement() {
         </CardContent>
       </Card>
 
-      {/* 4. MODAL HUB */}
-      <Dialog open={!!editingNote} onOpenChange={(open) => !open && !isSaving && !isUploading && setEditingNote(null)}>
+      <Dialog open={!!editingNote} onOpenChange={(open) => !open && !isSaving && setEditingNote(null)}>
         <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[95vh] rounded-3xl md:rounded-[3rem] bg-white border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
           <div className="h-2 w-full bg-[#0F172A] shrink-0" />
           <DialogHeader className="p-6 md:p-14 pb-4 shrink-0">
@@ -209,7 +175,7 @@ export default function AdminNotesManagement() {
                 <DialogTitle className="text-xl md:text-4xl font-black font-headline uppercase text-[#0F172A] tracking-tight">Asset Architect</DialogTitle>
                 <button onClick={() => setEditingNote(null)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer border-none bg-transparent"><X className="h-6 w-6 text-slate-400" /></button>
              </div>
-             <DialogDescription className="text-slate-400 font-bold uppercase text-[9px] md:text-[10px] tracking-widest mt-2">Modify or ingest verified study materials.</DialogDescription>
+             <DialogDescription className="text-slate-400 font-bold uppercase text-[9px] md:text-[10px] tracking-widest mt-2">Modify study material registry nodes.</DialogDescription>
           </DialogHeader>
           
           <div className="px-6 md:px-14 pb-8 space-y-6 md:space-y-10 overflow-y-auto custom-scrollbar flex-1">
@@ -220,7 +186,7 @@ export default function AdminNotesManagement() {
 
              <div className="grid grid-cols-2 gap-4 md:gap-8">
                 <div className="space-y-1.5">
-                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Assigned Board</Label>
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Board Hub</Label>
                    <select value={editingNote?.boardId || ""} onChange={e => setEditingNote({...editingNote, boardId: e.target.value})} className="w-full h-12 md:h-16 bg-slate-50 border-none rounded-2xl px-6 outline-none font-bold text-sm shadow-inner appearance-none cursor-pointer">
                       <option value="">Select Board</option>
                       {boards?.map((b: any) => <option key={b.id} value={b.id}>{b.abbreviation} Hub</option>)}
@@ -237,7 +203,7 @@ export default function AdminNotesManagement() {
 
              <div className="grid grid-cols-2 gap-4 md:gap-8">
                 <div className="space-y-1.5">
-                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Subject hub</Label>
+                   <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Subject Hub</Label>
                    <select value={editingNote?.subjectId || ""} onChange={e => setEditingNote({...editingNote, subjectId: e.target.value})} className="w-full h-12 md:h-16 bg-slate-50 border-none rounded-2xl px-6 outline-none font-bold text-sm shadow-inner appearance-none cursor-pointer">
                       <option value="">Select Subject</option>
                       {subjects?.map((s: any) => <option key={s.id} value={s.id}>{s.name}</option>)}
@@ -254,21 +220,13 @@ export default function AdminNotesManagement() {
              </div>
 
              <div className="space-y-4 pt-6 border-t border-slate-50">
-                <div className="flex flex-col md:flex-row items-end gap-4">
-                   <div className="flex-1 space-y-1.5 w-full">
-                      <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Verified PDF Node (URL)</Label>
-                      <Input value={editingNote?.pdfUrl || ""} onChange={e => setEditingNote({...editingNote, pdfUrl: e.target.value})} className="h-12 md:h-14 rounded-xl border-none bg-slate-50 font-mono text-[10px] text-primary px-6 shadow-inner" placeholder="https://..." />
-                   </div>
-                   <Button 
-                     onClick={() => fileInputRef.current?.click()}
-                     disabled={isUploading}
-                     className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#0F172A] hover:bg-black text-white rounded-xl shadow-xl gap-2 font-black uppercase text-[10px] tracking-widest border-none active:scale-95"
-                   >
-                      {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                      {isUploading ? 'Syncing...' : 'Upload PDF'}
-                   </Button>
-                   <input type="file" ref={fileInputRef} className="hidden" accept="application/pdf" onChange={handleFileUpload} />
-                </div>
+                <FileUpload 
+                   label="Upload Preparation PDF" 
+                   folder="notes" 
+                   accept="application/pdf"
+                   value={editingNote?.pdfUrl} 
+                   onChange={(meta) => setEditingNote({...editingNote, pdfUrl: meta?.url, fileMeta: meta})} 
+                />
              </div>
 
              <div className="flex items-center justify-between p-5 md:p-8 bg-slate-50 rounded-2xl border border-slate-100 shadow-inner">
@@ -282,7 +240,7 @@ export default function AdminNotesManagement() {
 
           <DialogFooter className="p-6 md:p-14 pt-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-4">
              <Button variant="ghost" onClick={() => setEditingNote(null)} className="w-full sm:w-auto h-12 md:h-14 px-8 font-black uppercase text-[10px] md:text-[11px] text-slate-400 tracking-widest">Discard</Button>
-             <Button onClick={handleSave} disabled={isSaving || isUploading} className="flex-1 h-12 md:h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] rounded-full shadow-2xl gap-3 active:scale-95 border-none">
+             <Button onClick={handleSave} disabled={isSaving} className="flex-1 h-12 md:h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] rounded-full shadow-2xl gap-3 active:scale-95 border-none">
                 {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />} Commit to Hub
              </Button>
           </DialogFooter>

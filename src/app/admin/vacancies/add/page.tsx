@@ -2,9 +2,8 @@
 
 import React, { Suspense, useEffect, useState, useMemo } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useFirestore, useDoc, useStorage, useCollection } from "@/firebase"
+import { useFirestore, useDoc, useCollection } from "@/firebase"
 import { doc, setDoc, serverTimestamp, collection, query, orderBy } from "firebase/firestore"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,50 +14,30 @@ import {
   ChevronLeft, 
   Save, 
   Loader2, 
-  Plus, 
   Megaphone, 
   ShieldCheck, 
   Globe, 
-  Upload, 
-  Eye, 
   Clock, 
   Layers, 
   FileText,
   MapPin,
-  CheckCircle2,
-  Trash2,
-  AlertCircle,
   Zap,
   Edit3
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Badge } from "@/components/ui/badge"
 import { Switch } from "@/components/ui/switch"
 import { Vacancy, ContentStatus } from "@/types"
-import { cn } from "@/lib/utils"
+import FileUpload from "@/components/admin/FileUpload"
 
 /**
- * @fileOverview Modular Vacancy Ingestion Node v1.2.
- * UPDATED: Expanded board list and implemented Manual Fill logic.
+ * @fileOverview Modular Vacancy Ingestion Node v2.0.
+ * UPDATED: Integrated Enterprise File Management Hub for all assets.
  */
 
 const BOARD_OPTIONS = [
-  "PSSSB",
-  "PPSC",
-  "Punjab Police",
-  "PSPCL",
-  "PSTCL",
-  "BFUHS",
-  "Education Board (ETT/Master Cadre)",
-  "High Court",
-  "SSC",
-  "RRB",
-  "IBPS",
-  "SBI",
-  "UPSC",
-  "NTA",
-  "National Hub",
-  "Manual Entry"
+  "PSSSB", "PPSC", "Punjab Police", "PSPCL", "PSTCL", "BFUHS",
+  "Education Board (ETT/Master Cadre)", "High Court", "SSC", "RRB", "IBPS",
+  "SBI", "UPSC", "NTA", "National Hub", "Manual Entry"
 ];
 
 export default function AddVacancyPage() {
@@ -73,24 +52,15 @@ function VacancyFormWrapper() {
   const searchParams = useSearchParams()
   const id = searchParams?.get("id")
   const db = useFirestore()
-  const storage = useStorage()
   const router = useRouter()
   const { toast } = useToast()
   
   const [activeTab, setActiveTab] = useState("basic")
   const [isSaving, setIsSaving] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
   const [customBoard, setCustomBoard] = useState("")
 
   const { data: existingData, loading: fetchLoading } = useDoc<any>(useMemo(() => (db && id ? doc(db, "vacancies", id) : null), [db, id]))
   
-  const { data: registryBoards } = useCollection<any>(useMemo(() => (db ? query(collection(db, "boards"), orderBy("abbreviation", "asc")) : null), [db]));
-
-  const combinedBoards = useMemo(() => {
-    const fromDb = registryBoards?.map(b => b.abbreviation) || [];
-    return Array.from(new Set([...BOARD_OPTIONS, ...fromDb]));
-  }, [registryBoards]);
-
   const [formData, setFormData] = useState<Partial<Vacancy>>({
     title: "",
     department: "",
@@ -133,35 +103,10 @@ function VacancyFormWrapper() {
     }
   }, [existingData])
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, field: 'logoUrl' | 'bannerUrl' | 'notificationPdfUrl') => {
-    const file = e.target.files?.[0]
-    if (!file || !storage) return
-    
-    setIsUploading(true)
-    const storagePath = `vacancies/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
-    const uploadRef = ref(storage, storagePath)
-    
-    try {
-      const snapshot = await uploadBytes(uploadRef, file)
-      const url = await getDownloadURL(snapshot.ref)
-      setFormData(prev => ({ ...prev, [field]: url }))
-      toast({ title: "Asset Synchronized" })
-    } catch (e) {
-      toast({ variant: "destructive", title: "Upload Failed" })
-    } finally {
-      setIsUploading(false)
-    }
-  }
-
   const handleSave = async (status: ContentStatus = formData.status || "DRAFT") => {
     if (!db || isSaving) return
     if (!formData.title || !formData.department || !formData.lastDate) {
        toast({ variant: "destructive", title: "Audit Blocked", description: "Job Title, Department, and Last Date are mandatory nodes." })
-       return
-    }
-
-    if (formData.board === 'Manual Entry' && !customBoard.trim()) {
-       toast({ variant: "destructive", title: "Audit Blocked", description: "Please enter the board name manually." })
        return
     }
 
@@ -181,7 +126,7 @@ function VacancyFormWrapper() {
 
     try {
       await setDoc(docRef, payload, { merge: true })
-      toast({ title: "Registry Synced", description: "Vacancy node committed to master hub." })
+      toast({ title: "Registry Synced" })
       router.push("/admin/vacancies")
     } catch (e) {
       toast({ variant: "destructive", title: "Sync Failed" })
@@ -200,13 +145,12 @@ function VacancyFormWrapper() {
            <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-2xl border bg-white h-12 w-12 shadow-sm shrink-0"><ChevronLeft className="h-6 w-6" /></Button>
            <div className="text-left">
               <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none uppercase">{id ? 'Modify Vacancy' : 'New Ingestion Node'}</h1>
-              <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Strategic Recruitment Governance</p>
+              <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Institutional Recruitment Portal</p>
            </div>
         </div>
         <div className="flex flex-wrap gap-3 w-full md:w-auto">
-           <Button onClick={() => handleSave('DRAFT')} disabled={isSaving} variant="outline" className="h-12 md:h-14 px-8 rounded-xl md:rounded-2xl font-black uppercase text-[10px] tracking-widest border-slate-200 shrink-0">Save Draft</Button>
-           <Button onClick={() => handleSave('PUBLISHED')} disabled={isSaving || isUploading} className="flex-1 md:flex-none h-12 md:h-14 px-10 md:px-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-full shadow-2xl gap-3 border-none transition-all active:scale-95">
-              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-5 w-5" />} Sync Live
+           <Button onClick={() => handleSave('PUBLISHED')} disabled={isSaving} className="flex-1 md:flex-none h-12 md:h-14 px-10 md:px-14 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] tracking-widest rounded-full shadow-2xl gap-3 border-none transition-all active:scale-95">
+              {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-5 w-5" />} Commit & Sync
            </Button>
         </div>
       </div>
@@ -225,70 +169,88 @@ function VacancyFormWrapper() {
               <Card className="border-none shadow-3xl rounded-[2.5rem] bg-white p-6 md:p-12 space-y-10 border border-slate-50">
                  <TabsContent value="basic" className="space-y-10 animate-in fade-in duration-300">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                       <FormInput label="Job Title" value={formData.title} onChange={v => setFormData({...formData, title: v})} placeholder="e.g. Punjab Police Constable Recruitment 2025" />
-                       <FormInput label="Department" value={formData.department} onChange={v => setFormData({...formData, department: v})} placeholder="e.g. Home Affairs & Justice" />
+                       <FormInput label="Job Title" value={formData.title} onChange={(v: string) => setFormData({...formData, title: v})} placeholder="e.g. Punjab Police Constable Recruitment 2025" />
+                       <FormInput label="Department" value={formData.department} onChange={(v: string) => setFormData({...formData, department: v})} placeholder="e.g. Home Affairs & Justice" />
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                        <div className="space-y-4">
-                          <FormSelect label="Recruitment Board" value={formData.board} onChange={v => setFormData({...formData, board: v})} options={combinedBoards} />
+                          <FormSelect label="Recruitment Board" value={formData.board} onChange={(v: string) => setFormData({...formData, board: v})} options={BOARD_OPTIONS} />
                           {formData.board === 'Manual Entry' && (
-                             <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+                             <div className="space-y-2 animate-in slide-in-from-top-2">
                                 <Label className="text-[9px] font-black uppercase text-primary ml-1 flex items-center gap-2">
                                    <Edit3 className="h-3 w-3" /> Type Board Name
                                 </Label>
                                 <Input value={customBoard} onChange={e => setCustomBoard(e.target.value)} className="h-11 rounded-xl bg-blue-50 border-none font-bold px-5 shadow-sm text-primary" placeholder="e.g. PU Chandigarh" />
-                             </motion.div>
+                             </div>
                           )}
                        </div>
-                       <FormSelect label="Category" value={formData.category} onChange={v => setFormData({...formData, category: v})} options={["Government", "Contract", "Semi-Govt", "Institutional"]} />
-                       <FormInput label="Ad Number" value={formData.adNumber} onChange={v => setFormData({...formData, adNumber: v})} placeholder="e.g. 01/2025" />
+                       <FormSelect label="Category" value={formData.category} onChange={(v: string) => setFormData({...formData, category: v})} options={["Government", "Contract", "Semi-Govt", "Institutional"]} />
+                       <FormInput label="Ad Number" value={formData.adNumber} onChange={(v: string) => setFormData({...formData, adNumber: v})} placeholder="e.g. 01/2025" />
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                       <FormInput label="Post Name" value={formData.postName} onChange={v => setFormData({...formData, postName: v})} placeholder="e.g. Sub Inspector (District Cadre)" />
-                       <FormInput label="Total Posts" value={formData.totalPosts} onChange={v => setFormData({...formData, totalPosts: v})} placeholder="e.g. 1746" />
+                       <FormInput label="Post Name" value={formData.postName} onChange={(v: string) => setFormData({...formData, postName: v})} placeholder="e.g. Sub Inspector (District Cadre)" />
+                       <FormInput label="Total Posts" value={formData.totalPosts} onChange={(v: string) => setFormData({...formData, totalPosts: v})} placeholder="e.g. 1746" />
                     </div>
-                    <FormInput label="Official Website" value={formData.officialWebsite} onChange={v => setFormData({...formData, officialWebsite: v})} placeholder="https://..." />
+                    <FormInput label="Official Website" value={formData.officialWebsite} onChange={(v: string) => setFormData({...formData, officialWebsite: v})} placeholder="https://..." />
                  </TabsContent>
 
                  <TabsContent value="eligibility" className="space-y-10 animate-in fade-in duration-300">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                       <FormTextarea label="Education Qualification" value={formData.education} onChange={v => setFormData({...formData, education: v})} placeholder="e.g. 10+2 (Intermediate) with Punjabi as a subject..." />
-                       <FormTextarea label="Selection Process" value={formData.selectionProcess} onChange={v => setFormData({...formData, selectionProcess: v})} placeholder="1. CBT Exam, 2. Physical Test, 3. Document Audit..." />
+                       <FormTextarea label="Education Qualification" value={formData.education} onChange={(v: string) => setFormData({...formData, education: v})} placeholder="e.g. 10+2 (Intermediate) with Punjabi as a subject..." />
+                       <FormTextarea label="Selection Process" value={formData.selectionProcess} onChange={(v: string) => setFormData({...formData, selectionProcess: v})} placeholder="1. CBT Exam, 2. Physical Test, 3. Document Audit..." />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                       <FormInput label="Age Limit" value={formData.ageLimit} onChange={v => setFormData({...formData, ageLimit: v})} placeholder="18 - 28 Years" />
-                       <FormInput label="Experience" value={formData.experience} onChange={v => setFormData({...formData, experience: v})} placeholder="No experience required" />
-                       <FormInput label="Salary Node" value={formData.salary} onChange={v => setFormData({...formData, salary: v})} placeholder="Pay Level 3 (₹19,900 - ₹63,200)" />
+                       <FormInput label="Age Limit" value={formData.ageLimit} onChange={(v: string) => setFormData({...formData, ageLimit: v})} placeholder="18 - 28 Years" />
+                       <FormInput label="Experience" value={formData.experience} onChange={(v: string) => setFormData({...formData, experience: v})} placeholder="No experience required" />
+                       <FormInput label="Salary Node" value={formData.salary} onChange={(v: string) => setFormData({...formData, salary: v})} placeholder="Pay Level 3 (₹19,900 - ₹63,200)" />
                     </div>
                  </TabsContent>
 
                  <TabsContent value="dates" className="space-y-10 animate-in fade-in duration-300">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                       <FormInput label="Start Date" type="date" value={formData.startDate} onChange={v => setFormData({...formData, startDate: v})} />
-                       <FormInput label="Last Date (Crucial)" type="date" value={formData.lastDate} onChange={v => setFormData({...formData, lastDate: v})} />
+                       <FormInput label="Start Date" type="date" value={formData.startDate} onChange={(v: string) => setFormData({...formData, startDate: v})} />
+                       <FormInput label="Last Date" type="date" value={formData.lastDate} onChange={(v: string) => setFormData({...formData, lastDate: v})} />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                       <FormInput label="Exam Date" type="date" value={formData.examDate} onChange={v => setFormData({...formData, examDate: v})} />
-                       <FormInput label="Admit Card Date" type="date" value={formData.admitCardDate} onChange={v => setFormData({...formData, admitCardDate: v})} />
-                       <FormInput label="Result Date" type="date" value={formData.resultDate} onChange={v => setFormData({...formData, resultDate: v})} />
+                       <FormInput label="Exam Date" type="date" value={formData.examDate} onChange={(v: string) => setFormData({...formData, examDate: v})} />
+                       <FormInput label="Admit Card Date" type="date" value={formData.admitCardDate} onChange={(v: string) => setFormData({...formData, admitCardDate: v})} />
+                       <FormInput label="Result Date" type="date" value={formData.resultDate} onChange={(v: string) => setFormData({...formData, resultDate: v})} />
                     </div>
-                    <FormTextarea label="Application Fee Node" value={formData.applicationFee} onChange={v => setFormData({...formData, applicationFee: v})} placeholder="GEN: ₹1000, SC/ST: ₹250, ESM: ₹200..." />
+                    <FormTextarea label="Application Fee Node" value={formData.applicationFee} onChange={(v: string) => setFormData({...formData, applicationFee: v})} placeholder="GEN: ₹1000, SC/ST: ₹250..." />
                  </TabsContent>
 
                  <TabsContent value="media" className="space-y-10 animate-in fade-in duration-300">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                       <FileUpload label="Department Logo" value={formData.logoUrl} onChange={e => handleFileUpload(e, 'logoUrl')} type="image/*" icon={<CheckCircle2 className="text-emerald-500" />} />
-                       <FileUpload label="Official Notification PDF" value={formData.notificationPdfUrl} onChange={e => handleFileUpload(e, 'notificationPdfUrl')} type="application/pdf" icon={<FileText className="text-rose-500" />} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                       <FileUpload 
+                          label="Department Logo" 
+                          folder="logos" 
+                          value={formData.logoUrl} 
+                          onChange={(meta) => setFormData({...formData, logoUrl: meta?.url})} 
+                          variant="compact"
+                       />
+                       <FileUpload 
+                          label="Vacancy Banner" 
+                          folder="vacancies" 
+                          value={formData.bannerUrl} 
+                          onChange={(meta) => setFormData({...formData, bannerUrl: meta?.url})} 
+                          variant="compact"
+                       />
                     </div>
-                    <FormInput label="Apply Online Link" value={formData.applyLink} onChange={v => setFormData({...formData, applyLink: v})} placeholder="https://..." />
+                    <FileUpload 
+                       label="Official Notification PDF" 
+                       folder="vacancies" 
+                       accept="application/pdf"
+                       value={formData.notificationPdfUrl} 
+                       onChange={(meta) => setFormData({...formData, notificationPdfUrl: meta?.url})} 
+                    />
+                    <FormInput label="Direct Apply Node (URL)" value={formData.applyLink} onChange={(v: string) => setFormData({...formData, applyLink: v})} placeholder="https://..." />
                  </TabsContent>
 
                  <TabsContent value="seo" className="space-y-10 animate-in fade-in duration-300">
-                    <FormInput label="SEO Page Title" value={formData.seoTitle} onChange={v => setFormData({...formData, seoTitle: v})} />
-                    <FormTextarea label="SEO Metadata Description" value={formData.seoDescription} onChange={v => setFormData({...formData, seoDescription: v})} />
-                    <FormInput label="Tags Node (Comma separated)" value={formData.tags?.join(',')} onChange={v => setFormData({...formData, tags: v.split(',').map(t => t.trim()).filter(Boolean)})} />
+                    <FormInput label="SEO Title" value={formData.seoTitle} onChange={(v: string) => setFormData({...formData, seoTitle: v})} />
+                    <FormTextarea label="SEO Meta Description" value={formData.seoDescription} onChange={(v: string) => setFormData({...formData, seoDescription: v})} />
                  </TabsContent>
               </Card>
            </Tabs>
@@ -309,7 +271,6 @@ function VacancyFormWrapper() {
                        <select value={formData.status} onChange={e => setFormData({...formData, status: e.target.value as ContentStatus})} className="w-full h-12 bg-white/5 border-white/10 text-white rounded-xl px-5 font-bold outline-none appearance-none cursor-pointer">
                           <option value="DRAFT" className="bg-[#0F172A]">Draft Hub</option>
                           <option value="PUBLISHED" className="bg-[#0F172A]">System Live</option>
-                          <option value="SCHEDULED" className="bg-[#0F172A]">Scheduled Node</option>
                           <option value="ARCHIVED" className="bg-[#0F172A]">Archived</option>
                        </select>
                     </div>
@@ -318,7 +279,6 @@ function VacancyFormWrapper() {
                        <ConfigSwitch label="Featured Listing" checked={formData.isFeatured || false} onChange={v => setFormData({...formData, isFeatured: v})} />
                        <ConfigSwitch label="Breaking News" checked={formData.isBreaking || false} onChange={v => setFormData({...formData, isBreaking: v})} />
                        <ConfigSwitch label="Homepage Active" checked={formData.showOnHomepage || false} onChange={v => setFormData({...formData, showOnHomepage: v})} />
-                       <ConfigSwitch label="Broadcast Ping" checked={formData.sendNotification || false} onChange={v => setFormData({...formData, sendNotification: v})} />
                     </div>
                  </div>
 
@@ -377,32 +337,6 @@ function ConfigSwitch({ label, checked, onChange }: any) {
       <div className="flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-all">
          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{label}</span>
          <Switch checked={checked} onCheckedChange={onChange} />
-      </div>
-   )
-}
-
-function FileUpload({ label, value, onChange, type, icon }: any) {
-   const inputRef = React.useRef<HTMLInputElement>(null)
-   return (
-      <div className="space-y-4 text-left">
-         <Label className="text-[10px] font-black uppercase text-slate-500 ml-1 tracking-widest">{label}</Label>
-         <div onClick={() => inputRef.current?.click()} className={cn(
-            "h-32 rounded-[2rem] border-2 border-dashed flex flex-col items-center justify-center gap-2 cursor-pointer transition-all hover:bg-slate-50",
-            value ? "bg-emerald-50/30 border-emerald-200" : "bg-slate-50/30 border-slate-200"
-         )}>
-            <input type="file" min-h-0 ref={inputRef} className="hidden" accept={type} onChange={onChange} />
-            {value ? (
-               <>
-                  {icon}
-                  <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Asset Uploaded</span>
-               </>
-            ) : (
-               <>
-                  <Upload className="h-6 w-6 text-slate-300" />
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Authorize Node</span>
-               </>
-            )}
-         </div>
       </div>
    )
 }

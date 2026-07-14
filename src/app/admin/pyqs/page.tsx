@@ -1,29 +1,28 @@
 "use client";
 
-import { useState, useMemo, useRef } from "react"
+import { useState, useMemo } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Plus, Trash2, Edit, FileText, Download, Save, Search, Layers, Loader2, Landmark, X, Upload, CheckCircle2 } from "lucide-react"
-import { useCollection, useFirestore, useStorage, useUser } from "@/firebase"
+import { Plus, Trash2, Edit, FileText, Save, Search, Layers, Loader2, Landmark, X } from "lucide-react"
+import { useCollection, useFirestore, useUser } from "@/firebase"
 import { collection, query, doc, setDoc, deleteDoc, orderBy, serverTimestamp, addDoc } from "firebase/firestore"
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import FileUpload from "@/components/admin/FileUpload"
 
 /**
- * @fileOverview Institutional PYQ Archive CMS v24.0.
- * FIXED: Implemented direct PDF upload hub with Firebase Storage sync.
+ * @fileOverview Institutional PYQ Archive CMS v25.0.
+ * UPDATED: Replaced raw file handlers with Enterprise File Management Hub.
  */
 
 export default function AdminPYQManagement() {
   const db = useFirestore()
-  const storage = useStorage()
   const { profile } = useUser()
   const { toast } = useToast()
   
@@ -35,33 +34,6 @@ export default function AdminPYQManagement() {
   const [editingPYQ, setEditingPYQ] = useState<any>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [isSaving, setIsSaving] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file || !storage) return
-
-    if (file.type !== 'application/pdf') {
-       toast({ variant: "destructive", title: "Invalid Node", description: "Only official PDF files are authorized for ingestion." })
-       return
-    }
-
-    setIsUploading(true)
-    const storagePath = `pyqs/${Date.now()}_${file.name.replace(/\s+/g, '_')}`
-    const uploadRef = ref(storage, storagePath)
-
-    try {
-      const snapshot = await uploadBytes(uploadRef, file)
-      const url = await getDownloadURL(snapshot.ref)
-      setEditingPYQ((prev: any) => ({ ...prev, pdfUrl: url }))
-      toast({ title: "Node Verified", description: "PDF uploaded to institutional storage." })
-    } catch (err) {
-      toast({ variant: "destructive", title: "Upload Failed" })
-    } finally {
-      setIsUploading(false)
-    }
-  }
 
   const handleSave = async () => {
     if (!db || !editingPYQ || isSaving) return
@@ -146,7 +118,7 @@ export default function AdminPYQManagement() {
             <TableBody>
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i} className="border-slate-50"><TableCell colSpan={4} className="px-8 py-8 md:py-12"><Skeleton className="h-12 w-full rounded-2xl bg-slate-50" /></TableCell></TableRow>
+                  <TableRow key={i} className="border-slate-50"><TableCell colSpan={4} className="px-8 py-8 md:py-12"><Skeleton className="h-10 w-full rounded-xl bg-slate-50" /></TableCell></TableRow>
                 ))
               ) : filteredPYQs.length > 0 ? filteredPYQs.map((p: any) => (
                 <TableRow key={p.id} className="hover:bg-slate-50 border-slate-50 transition-colors group">
@@ -190,7 +162,7 @@ export default function AdminPYQManagement() {
         </CardContent>
       </Card>
 
-      <Dialog open={!!editingPYQ} onOpenChange={o => !o && !isSaving && !isUploading && setEditingPYQ(null)}>
+      <Dialog open={!!editingPYQ} onOpenChange={o => !o && !isSaving && setEditingPYQ(null)}>
          <DialogContent className="sm:max-w-2xl w-[95vw] max-h-[95vh] bg-white rounded-3xl md:rounded-[3rem] border-none shadow-5xl p-0 overflow-hidden text-left flex flex-col">
             <div className="h-2 w-full bg-[#0F172A] shrink-0" />
             <DialogHeader className="p-6 md:p-14 pb-4 shrink-0">
@@ -198,7 +170,7 @@ export default function AdminPYQManagement() {
                   <DialogTitle className="text-xl md:text-4xl font-black font-headline uppercase text-[#0F172A] tracking-tight">Archive Architect</DialogTitle>
                   <button onClick={() => setEditingPYQ(null)} className="p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer border-none bg-transparent"><X className="h-6 w-6 text-slate-400" /></button>
                </div>
-               <DialogDescription className="text-slate-400 font-bold uppercase text-[9px] md:text-[10px] tracking-widest mt-2">Modify or ingest official recruitment papers.</DialogDescription>
+               <DialogDescription className="text-slate-400 font-bold uppercase text-[9px] md:text-[10px] tracking-widest mt-2">Ingest official recruitment papers.</DialogDescription>
             </DialogHeader>
 
             <div className="px-6 md:px-14 pb-8 space-y-6 md:space-y-10 overflow-y-auto custom-scrollbar flex-1">
@@ -230,31 +202,19 @@ export default function AdminPYQManagement() {
                </div>
 
                <div className="space-y-4 pt-6 border-t border-slate-50">
-                  <div className="flex flex-col md:flex-row items-end gap-4">
-                     <div className="flex-1 space-y-1.5 w-full">
-                        <Label className="text-[10px] font-black uppercase text-slate-500 ml-1">Verified PDF Node (URL)</Label>
-                        <Input value={editingPYQ?.pdfUrl || ""} onChange={e => setEditingPYQ({...editingPYQ, pdfUrl: e.target.value})} className="h-12 md:h-14 rounded-xl border-none bg-slate-50 font-mono text-[10px] text-primary px-6 shadow-inner" placeholder="https://..." />
-                     </div>
-                     <Button 
-                       onClick={() => fileInputRef.current?.click()}
-                       disabled={isUploading}
-                       className="w-full md:w-auto h-12 md:h-14 px-8 bg-[#0F172A] hover:bg-black text-white rounded-xl shadow-xl gap-2 font-black uppercase text-[10px] tracking-widest border-none active:scale-95"
-                     >
-                        {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                        {isUploading ? 'Syncing...' : 'Upload PDF'}
-                     </Button>
-                     <input type="file" ref={fileInputRef} className="hidden" accept="application/pdf" onChange={handleFileUpload} />
-                  </div>
-                  <div className="flex items-center gap-3 px-4 py-3 bg-blue-50/50 border border-blue-100 rounded-xl">
-                     <CheckCircle2 className="h-4 w-4 text-blue-500" />
-                     <p className="text-[9px] font-bold text-blue-600 uppercase tracking-tight">Direct institutional upload authorized</p>
-                  </div>
+                  <FileUpload 
+                     label="Verified Question Paper PDF" 
+                     folder="pyqs" 
+                     accept="application/pdf"
+                     value={editingPYQ?.pdfUrl} 
+                     onChange={(meta) => setEditingPYQ({...editingPYQ, pdfUrl: meta?.url, fileMeta: meta})} 
+                  />
                </div>
             </div>
 
             <DialogFooter className="p-6 md:p-14 pt-4 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row gap-4">
                <Button variant="ghost" onClick={() => setEditingPYQ(null)} className="w-full sm:w-auto h-12 md:h-14 px-8 font-black uppercase text-[10px] md:text-[11px] text-slate-400 tracking-widest">Discard</Button>
-               <Button onClick={handleSave} disabled={isSaving || isUploading} className="flex-1 h-12 md:h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] rounded-full shadow-2xl gap-3 active:scale-95 border-none">
+               <Button onClick={handleSave} disabled={isSaving} className="flex-1 h-12 md:h-16 bg-primary hover:bg-blue-700 text-white font-black uppercase text-[10px] md:text-[11px] tracking-[0.2em] rounded-full shadow-2xl gap-3 active:scale-95 border-none">
                   {isSaving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save className="h-5 w-5" />} Commit to Registry
                </Button>
             </DialogFooter>
