@@ -42,8 +42,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import Logo from "@/components/brand/Logo"
 
 /**
- * @fileOverview Premium Exam Selection Hub v301.0 [Fully Responsive].
- * FIXED: Removed horizontal scrolling and fixed search bar overflow.
+ * @fileOverview Premium Exam Selection Hub v302.0 [Reference Redesign].
+ * UPDATED: Re-engineered Featured Cards to match exactly with the provided image (Blue Title, Navy Pill Button).
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -126,7 +126,7 @@ export default function ExamsEntryPage() {
                   <ShieldCheck className="h-5 w-5 md:h-6 md:w-6 text-white" />
                 </div>
               </div>
-              <p className="text-slate-500 font-medium text-sm md:text-lg max-w-2xl">
+              <p className="text-slate-500 font-medium text-sm md:text-lg max-w-2xl leading-tight">
                 Find your official Punjab Government exam and begin practicing with verified mock tests.
               </p>
             </div>
@@ -219,7 +219,7 @@ export default function ExamsEntryPage() {
           </div>
         </section>
 
-        {/* 3. FEATURED EXAMS SLIDER */}
+        {/* 3. FEATURED EXAMS - REDESIGNED PER REFERENCE */}
         <section className="space-y-8 w-full overflow-hidden">
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-3">
@@ -228,49 +228,67 @@ export default function ExamsEntryPage() {
             </div>
           </div>
 
-          <div className="flex gap-4 md:gap-6 overflow-x-auto no-scrollbar pb-6 -mx-4 px-4 md:mx-0 md:px-0 w-full snap-x snap-mandatory">
+          <div className="flex gap-4 md:gap-8 overflow-x-auto no-scrollbar pb-6 -mx-4 px-4 md:mx-0 md:px-0 w-full snap-x snap-mandatory">
             {examsLoading ? (
-              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-80 w-[85%] sm:w-[48%] lg:w-80 rounded-[30px] shrink-0" />)
+              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-[450px] w-[85%] sm:w-[48%] lg:w-[320px] rounded-[40px] shrink-0" />)
             ) : featuredExams.map((exam, i) => (
               <motion.div 
                 key={exam.id}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: i * 0.1 }}
-                className="shrink-0 w-[85%] sm:w-[48%] lg:w-[320px] xl:w-[360px] snap-center"
+                className="shrink-0 w-[85%] sm:w-[48%] lg:w-[350px] xl:w-[400px] snap-center"
               >
-                <Card className="border border-slate-100 shadow-xl rounded-[30px] bg-white p-6 md:p-8 flex flex-col group h-full relative overflow-hidden hover:-translate-y-2 transition-all duration-500">
-                  <div className="flex justify-between items-start mb-6">
-                    <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-xl shrink-0" />
-                    <div className="flex flex-col items-end gap-1">
-                      <div className="flex items-center gap-1 text-amber-400">
-                        <Star className="h-4 w-4 fill-current" />
-                        <span className="text-xs font-black text-slate-400">4.9</span>
+                <Card className="border border-slate-100 shadow-[0_20px_50px_rgba(0,0,0,0.05)] rounded-[40px] bg-white p-8 md:p-10 flex flex-col group h-full relative overflow-hidden transition-all duration-500 hover:-translate-y-2">
+                  
+                  {/* TOP HEADER: Logo & Ratings */}
+                  <div className="flex justify-between items-start mb-10">
+                    <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-2xl border-4 border-white shrink-0 bg-slate-50" />
+                    <div className="flex flex-col items-end gap-2">
+                      <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-lg">
+                        <Star className="h-3 w-3 text-amber-400 fill-current" />
+                        <span className="text-[10px] font-black text-[#0F172A]">4.9</span>
                       </div>
-                      <Badge variant="outline" className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase">{exam.difficulty || 'Mixed'}</Badge>
+                      <Badge className="bg-emerald-50 text-emerald-600 border-none text-[8px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-sm">
+                        {exam.difficulty || 'MIXED'}
+                      </Badge>
                     </div>
                   </div>
 
-                  <div className="space-y-4 flex-1">
-                    <h3 className="text-lg md:text-2xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight line-clamp-2 uppercase">
-                      {exam.name}
-                    </h3>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Board: {exam.boardId}</p>
-                    
-                    <div className="flex flex-wrap items-center gap-4 md:gap-6 pt-2">
-                       <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 whitespace-nowrap">
-                          <Zap className="h-4 w-4 text-primary shrink-0" /> {exam.totalMocks || "40+"} Mocks
+                  {/* BODY: Institutional Identity */}
+                  <div className="space-y-6 flex-1 text-left">
+                    <div className="space-y-2">
+                      <h3 className="text-2xl md:text-[32px] font-black text-primary leading-[1.1] tracking-tight uppercase group-hover:brightness-90 transition-all">
+                        {exam.name}
+                      </h3>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em]">
+                        Board: {exam.boardId}
+                      </p>
+                    </div>
+
+                    {/* Stats Matrix: Institutional Style */}
+                    <div className="flex items-center gap-8 pt-4">
+                       <div className="flex items-center gap-2.5">
+                          <Zap className="h-5 w-5 text-primary" />
+                          <span className="text-[11px] md:text-sm font-bold text-slate-400 uppercase tracking-tight">
+                             {exam.totalMocks || "40+"} Mocks
+                          </span>
                        </div>
-                       <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 whitespace-nowrap">
-                          <Users className="h-4 w-4 text-primary shrink-0" /> {exam.studentCount || "12K+"} Students
+                       <div className="flex items-center gap-2.5">
+                          <Users className="h-5 w-5 text-primary" />
+                          <span className="text-[11px] md:text-sm font-bold text-slate-400 uppercase tracking-tight">
+                             {exam.studentCount || "12K+"} Students
+                          </span>
                        </div>
                     </div>
                   </div>
 
-                  <div className="mt-8">
-                    <Button asChild className="w-full h-14 bg-[#0F172A] hover:bg-primary text-white font-black uppercase text-[10px] tracking-widest rounded-2xl shadow-xl transition-all active:scale-95 gap-3 border-none group-hover:shadow-primary/20">
-                      <Link href={`/exams/view?id=${exam.id}`}>
-                        Start Preparation <ChevronRight className="h-4 w-4 ml-auto" />
+                  {/* FOOTER: Navy Pill Button */}
+                  <div className="mt-12">
+                    <Button asChild className="w-full h-16 md:h-20 bg-[#0F172A] hover:bg-black text-white font-[900] uppercase text-[11px] md:text-sm tracking-[0.15em] rounded-full shadow-2xl transition-all active:scale-95 border-none group/btn">
+                      <Link href={`/exams/view?id=${exam.id}`} className="flex items-center justify-between w-full px-8">
+                        <span>Start Preparation</span>
+                        <ChevronRight className="h-5 w-5 transition-transform group-hover/btn:translate-x-1" />
                       </Link>
                     </Button>
                   </div>
