@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
@@ -30,8 +29,8 @@ import {
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Official Mock Attempt Hub v6.3.
- * FIXED: Wired bookmarking and report logic for live registry sync.
+ * @fileOverview Official Mock Attempt Hub v7.0.
+ * FIXED: Implemented dual-collection scan (mcqBank + questions) to resolve data mismatch.
  */
 
 export default function AttemptClient({ mockId: propMockId }: { mockId?: string }) {
@@ -136,12 +135,22 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
         for (let i = 0; i < questionIds.length; i += 30) { chunks.push(questionIds.slice(i, i + 30)); }
         
         for (const chunk of chunks) {
-           const chunkSnap = await getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)));
-           chunkSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
+           // DUAL-SCAN PROTOCOL: Check both mcqBank and legacy questions collection
+           const [mcqSnap, legacySnap] = await Promise.all([
+             getDocs(query(collection(db, "mcqBank"), where(documentId(), "in", chunk))),
+             getDocs(query(collection(db, "questions"), where(documentId(), "in", chunk)))
+           ]);
+
+           mcqSnap.docs.forEach(d => fetchedQuestions.push({ ...d.data(), id: d.id }));
+           legacySnap.docs.forEach(d => {
+              if (!fetchedQuestions.find(f => f.id === d.id)) {
+                 fetchedQuestions.push({ ...d.data(), id: d.id });
+              }
+           });
         }
 
         const sortedQs = questionIds.map((id: string) => fetchedQuestions.find((q: any) => q.id === id)).filter(Boolean);
-        if (sortedQs.length === 0) throw new Error("Registry sync failure.");
+        if (sortedQs.length === 0) throw new Error("Registry sync failure. Assets missing.");
 
         let resumeData = undefined;
         if (user) {
@@ -151,7 +160,10 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
 
         initExam(mockId, mData.title || "Elite Series", user?.uid || null, sortedQs, mData.duration || 120, resumeData, mData.languageMode);
         startSession(); 
-      } catch (err: any) { setInitError(err.message); } finally { setIsInitializing(false); }
+      } catch (err: any) { 
+        console.error("[ATTEMPT_INIT_FAILURE]:", err);
+        setInitError(err.message); 
+      } finally { setIsInitializing(false); }
     }
     loadExam();
   }, [db, user, profile, mockId, initExam, router, toast, pathname, startSession]);
@@ -323,7 +335,7 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
           <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col items-center px-4 pt-4 pb-12">
             <div className="w-full max-w-4xl">
               {questions.length > 0 && questions[currentIdx] ? (
-                <motion.div key={currentIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25, ease: "easeOut" }} className="w-full">
+                <motion.div key={currentIdx} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.25, ease: "easeOut" }} className="w-full">
                   <QuestionRenderer 
                     language={language} 
                     question={{...questions[currentIdx], displayId: (currentIdx + 1).toString()}} 
@@ -387,4 +399,3 @@ export default function AttemptClient({ mockId: propMockId }: { mockId?: string 
     </div>
   );
 }
-

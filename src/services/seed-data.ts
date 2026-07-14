@@ -1,8 +1,8 @@
 import { Firestore, doc, serverTimestamp, writeBatch, collection, getDocs } from 'firebase/firestore';
 
 /**
- * @fileOverview Official Institutional Registry Blueprint v82.0.
- * UPDATED: Added Current Affairs dedicated authority board.
+ * @fileOverview Official Institutional Registry Blueprint v83.0.
+ * UPDATED: Synchronized seed data to write to mcqBank for engine compatibility.
  */
 
 export async function seedInitialData(db: Firestore) {
@@ -97,7 +97,12 @@ export async function seedInitialData(db: Firestore) {
   for (const b of boards) batch.set(doc(db, 'boards', b.id), { ...b, updatedAt: serverTimestamp() }, { merge: true });
   for (const e of exams) batch.set(doc(db, 'exams', e.id), { ...e, displayOrder: 1, updatedAt: serverTimestamp() }, { merge: true });
   for (const p of passes) batch.set(doc(db, 'passes', p.id), { ...p, updatedAt: serverTimestamp() }, { merge: true });
-  for (const q of questions) batch.set(doc(db, 'questions', q.id), q, { merge: true });
+  
+  // Write to both mcqBank (new) and questions (legacy) for full compatibility
+  for (const q of questions) {
+    batch.set(doc(db, 'mcqBank', q.id), q, { merge: true });
+    batch.set(doc(db, 'questions', q.id), q, { merge: true });
+  }
 
   await batch.commit();
   console.log('[SUCCESS] Institutional Registry Hardened.');
