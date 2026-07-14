@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { Search, Zap, BookOpen, Newspaper, Layers, GraduationCap, ChevronRight, Sparkles, X, Loader2, Trophy, AlertCircle, FileText } from 'lucide-react';
+import { Search, Zap, BookOpen, Newspaper, Layers, GraduationCap, ChevronRight, Sparkles, X, Loader2, Trophy, AlertCircle, FileText, Mic, Filter } from 'lucide-react';
 import { useCollection, useFirestore } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { cn } from '@/lib/utils';
@@ -9,7 +9,8 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 
 /**
- * @fileOverview Institutional Sticky Search Hub v14.2.
+ * @fileOverview Institutional Sticky Search Hub v14.3 [Responsive Hardened].
+ * FIXED: Re-engineered for perfect mobile fit on 320px screens.
  */
 
 const TRENDING = [
@@ -69,29 +70,29 @@ export default function GlobalSearch() {
   }, []);
 
   return (
-    <div className="relative w-full z-40 bg-white md:bg-transparent px-4 md:px-0 sticky top-[56px] md:static" ref={containerRef}>
-      <div className="max-w-[700px] mx-auto relative group">
+    <div className="relative w-full max-w-full z-40 bg-white md:bg-transparent px-4 md:px-0 sticky top-[56px] md:static" ref={containerRef}>
+      <div className="max-w-[700px] mx-auto relative group w-full">
         <div className="absolute -inset-1 bg-gradient-to-r from-primary/10 to-blue-600/10 rounded-2xl blur-md opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
         
-        <div className="relative">
+        <div className="relative flex items-center h-[52px] md:h-[68px] bg-white border border-slate-200 rounded-[20px] md:rounded-[24px] shadow-sm px-4 md:px-6 gap-2 md:gap-4 overflow-hidden">
           <Search className={cn(
-            "absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 transition-colors",
+            "h-5 w-5 shrink-0 transition-colors",
             isOpen ? "text-primary" : "text-slate-400"
           )} />
           
           <input
             type="text"
-            placeholder="Search exams, tests, notes..."
+            placeholder="Search exams, tests..."
             value={query}
             onFocus={() => setIsOpen(true)}
             onChange={(e) => {
               setQuery(e.target.value);
               setIsOpen(true);
             }}
-            className="w-full h-[50px] md:h-[52px] pl-11 pr-12 rounded-xl border border-slate-200 bg-white shadow-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary transition-all font-medium text-sm md:text-base text-[#0F172A]"
+            className="flex-1 min-w-0 bg-transparent border-none outline-none font-bold text-slate-700 placeholder:text-slate-300 text-sm md:text-xl"
           />
 
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+          <div className="flex items-center gap-1 md:gap-2 shrink-0">
              {query && (
                <button 
                  onClick={() => { setQuery(''); setDebouncedQuery(''); }}
@@ -101,13 +102,20 @@ export default function GlobalSearch() {
                </button>
              )}
              {isLoading && debouncedQuery && (
-               <Loader2 className="h-4 w-4 text-primary animate-spin" />
+               <Loader2 className="h-4 w-4 text-primary animate-spin mr-1" />
              )}
+             <div className="h-8 w-px bg-slate-100 mx-1 hidden sm:block" />
+             <button className="h-9 w-9 md:h-11 md:w-11 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-primary transition-all shrink-0">
+                <Mic className="h-4 w-4 md:h-5 md:w-5" />
+             </button>
+             <button className="h-9 w-9 md:h-11 md:w-11 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-50 hover:text-primary transition-all shrink-0">
+                <Filter className="h-4 w-4 md:h-5 md:w-5" />
+             </button>
           </div>
         </div>
 
         {isOpen && (
-          <div className="absolute top-full mt-2 w-full bg-white rounded-[1.5rem] shadow-5xl border border-slate-100 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200 max-h-[400px] overflow-y-auto custom-scrollbar">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-[1.5rem] shadow-5xl border border-slate-100 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200 max-h-[400px] overflow-y-auto custom-scrollbar z-50">
             
             {(!debouncedQuery || debouncedQuery.length < 2) ? (
               <div className="p-5 md:p-6 space-y-4">
@@ -162,8 +170,8 @@ export default function GlobalSearch() {
               <div className="p-12 text-center space-y-4 opacity-40">
                 <AlertCircle className="h-12 w-12 mx-auto text-slate-300" />
                 <div className="space-y-1">
-                   <p className="font-black text-sm uppercase tracking-widest text-[#0F172A]">No nodes matched</p>
-                   <p className="text-[10px] font-medium text-slate-400">Refine your query for Punjab exam verticals.</p>
+                   <p className="font-black text-sm uppercase tracking-widest text-[#0F172A]">No results matched</p>
+                   <p className="text-[10px] font-medium text-slate-400">Try searching for PSSSB or Police.</p>
                 </div>
               </div>
             )}
@@ -188,18 +196,18 @@ function SearchResult({ href, title, sub, icon, onClick }: any) {
     <Link 
       href={href} 
       onClick={onClick}
-      className="flex items-center justify-between p-3.5 rounded-xl hover:bg-slate-50 transition-all group active:scale-[0.99] border border-transparent hover:border-slate-100"
+      className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 transition-all group active:scale-[0.99] border border-transparent hover:border-slate-100"
     >
-      <div className="flex items-center gap-4 min-w-0">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="h-10 w-10 rounded-xl bg-slate-50 flex items-center justify-center shrink-0 shadow-inner group-hover:scale-105 transition-transform">
           {icon}
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="font-bold text-sm md:text-base text-[#0F172A] truncate leading-tight">{title}</p>
           <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{sub}</p>
         </div>
       </div>
-      <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-primary transition-all" />
+      <ChevronRight className="h-4 w-4 text-slate-200 group-hover:text-primary transition-all group-hover:translate-x-1 shrink-0" />
     </Link>
   );
 }
