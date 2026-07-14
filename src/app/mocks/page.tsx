@@ -32,7 +32,8 @@ import {
   GraduationCap,
   Layers,
   Timer,
-  BrainCircuit
+  BrainCircuit,
+  X
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore, useUser } from "@/firebase"
@@ -44,8 +45,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Practice Hub v2.2.
- * FIXED: Search bar now fully functional and tied to state.
+ * @fileOverview Premium Practice Hub v3.0 [PWA Optimized].
+ * UPDATED: Redesigned Popular Categories for compact 4-column mobile grid.
  */
 
 const QUICK_ACTIONS = [
@@ -56,14 +57,14 @@ const QUICK_ACTIONS = [
 ];
 
 const CATEGORIES = [
-  { id: "punjab-gk", label: "Punjab GK", icon: Landmark, color: "from-amber-400 to-orange-500", shadow: "shadow-amber-200" },
-  { id: "reasoning", label: "Reasoning", icon: BrainCircuit, color: "from-blue-400 to-indigo-600", shadow: "shadow-blue-200" },
-  { id: "english", label: "English", icon: Languages, color: "from-emerald-400 to-teal-600", shadow: "shadow-emerald-200" },
-  { id: "punjabi", label: "Punjabi", icon: GraduationCap, color: "from-rose-400 to-pink-600", shadow: "shadow-rose-200" },
-  { id: "math", label: "Math", icon: Calculator, color: "from-cyan-400 to-blue-600", shadow: "shadow-cyan-200" },
-  { id: "computer", label: "Computer", icon: Cpu, color: "from-slate-400 to-slate-700", shadow: "shadow-slate-200" },
-  { id: "current-affairs", label: "Current Affairs", icon: Zap, color: "from-yellow-400 to-amber-600", shadow: "shadow-yellow-200" },
-  { id: "science", label: "Science", icon: FlaskConical, color: "from-violet-400 to-purple-600", shadow: "shadow-purple-200" },
+  { id: "punjab-gk", label: "Punjab GK", icon: Landmark, color: "from-amber-400 to-orange-500" },
+  { id: "reasoning", label: "Reasoning", icon: BrainCircuit, color: "from-blue-400 to-indigo-600" },
+  { id: "english", label: "English", icon: Languages, color: "from-emerald-400 to-teal-600" },
+  { id: "punjabi", label: "Punjabi", icon: GraduationCap, color: "from-rose-400 to-pink-600" },
+  { id: "math", label: "Math", icon: Calculator, color: "from-cyan-400 to-blue-600" },
+  { id: "computer", label: "Computer", icon: Cpu, color: "from-slate-400 to-slate-700" },
+  { id: "current-affairs", label: "Current Affairs", icon: Zap, color: "from-yellow-400 to-amber-600" },
+  { id: "science", label: "Science", icon: FlaskConical, color: "from-violet-400 to-purple-600" },
 ];
 
 export default function MockTestsPage() {
@@ -71,6 +72,7 @@ export default function MockTestsPage() {
   const { profile, loading: userLoading } = useUser()
   
   const [searchTerm, setSearchTerm] = useState("")
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const [selectedBoard, setSelectedBoard] = useState("all")
   const [selectedTier, setSelectedTier] = useState("all")
 
@@ -92,12 +94,16 @@ export default function MockTestsPage() {
     if (!rawMocks) return []
     return rawMocks.filter(m => {
       const tier = (m.accessLevel || 'FREE').toUpperCase()
-      const matchesSearch = !searchTerm || m.title?.toLowerCase().includes(searchTerm.toLowerCase().trim())
+      const search = searchTerm.toLowerCase().trim()
+      
+      const matchesSearch = !search || m.title?.toLowerCase().includes(search)
+      const matchesCategory = !selectedCategory || m.title?.toLowerCase().includes(selectedCategory.toLowerCase())
       const matchesBoard = selectedBoard === "all" || m.boardId === selectedBoard || (m.boardIds && m.boardIds.includes(selectedBoard))
       const matchesTier = selectedTier === "all" || tier === selectedTier
-      return matchesSearch && matchesBoard && matchesTier
+      
+      return matchesSearch && matchesCategory && matchesBoard && matchesTier
     }).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0))
-  }, [rawMocks, searchTerm, selectedBoard, selectedTier])
+  }, [rawMocks, searchTerm, selectedCategory, selectedBoard, selectedTier])
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-body text-left pb-safe">
@@ -176,13 +182,86 @@ export default function MockTestsPage() {
            </div>
         </div>
 
-        {/* 3. MODERN FILTER CHIPS */}
-        <div className="space-y-6">
+        {/* 3. POPULAR CATEGORIES - COMPACT GRID REDESIGN */}
+        <section className="space-y-6">
+           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 px-1">
+              <div className="flex items-center gap-3">
+                 <Layers className="h-5 w-5 text-primary" />
+                 <h2 className="text-xl md:text-3xl font-black text-[#0F172A] tracking-tight">Popular Categories</h2>
+              </div>
+              
+              <AnimatePresence>
+                {selectedCategory && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary border border-primary/20 rounded-full font-bold text-[10px] uppercase tracking-widest"
+                  >
+                     <span>Filtering: {selectedCategory}</span>
+                     <button onClick={() => setSelectedCategory(null)} className="p-1 hover:bg-primary/20 rounded-full transition-colors">
+                        <X className="h-3 w-3" />
+                     </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+           </div>
+           
+           <div className="grid grid-cols-4 md:grid-cols-4 lg:grid-cols-8 gap-3 md:gap-6 justify-center">
+              {CATEGORIES.map((cat, i) => {
+                const isActive = selectedCategory === cat.label;
+                const count = rawMocks?.filter((m:any) => m.title?.toLowerCase().includes(cat.label.toLowerCase())).length || 0;
+                
+                return (
+                  <motion.div 
+                    key={cat.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.05 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setSelectedCategory(isActive ? null : cat.label)}
+                    className="flex flex-col h-full"
+                  >
+                    <Card className={cn(
+                      "relative aspect-square w-full rounded-[18px] flex flex-col items-center justify-center gap-1.5 transition-all duration-300 border-2 cursor-pointer shadow-sm group",
+                      isActive 
+                        ? "border-primary bg-primary/5 ring-4 ring-primary/5" 
+                        : "border-slate-100 bg-white hover:border-primary/20"
+                    )}>
+                      <div className={cn(
+                        "h-8 w-8 md:h-10 md:w-10 rounded-xl flex items-center justify-center transition-all duration-500 bg-gradient-to-br shadow-md group-hover:rotate-6",
+                        cat.color
+                      )}>
+                        <cat.icon className="h-4 w-4 md:h-5 md:w-5 text-white" />
+                      </div>
+
+                      <div className="text-center px-1">
+                        <p className={cn(
+                          "text-[9px] md:text-[13px] font-black uppercase tracking-tight leading-tight truncate w-full",
+                          isActive ? "text-primary" : "text-[#0F172A]"
+                        )}>
+                          {cat.label}
+                        </p>
+                        <p className="text-[7px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                          {count} Tests
+                        </p>
+                      </div>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+           </div>
+        </section>
+
+        {/* 4. BOARD FILTERS */}
+        <div className="space-y-6 pt-4">
            <div className="flex items-center justify-between px-1">
-              <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-slate-400">Punjab Boards</h3>
+              <h3 className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-slate-400">Board Filter</h3>
               <div className="h-px flex-1 bg-slate-100 mx-6 hidden md:block" />
            </div>
-           <div className="flex items-center gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 md:mx-0 md:px-0">
+           <div className="flex items-center gap-2 md:gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 md:mx-0 md:px-0">
               <FilterChip 
                 label="All Boards" 
                 active={selectedBoard === 'all'} 
@@ -198,80 +277,6 @@ export default function MockTestsPage() {
               ))}
            </div>
         </div>
-
-        {/* 4. PREMIUM POPULAR CATEGORIES GRID */}
-        <section className="space-y-10 pt-10">
-           <div className="flex items-center gap-3 px-1">
-              <Layers className="h-5 w-5 text-primary" />
-              <h2 className="text-xl md:text-3xl font-[900] text-[#0F172A] tracking-tight">Popular Categories</h2>
-           </div>
-           
-           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-8 gap-4 md:gap-6">
-              {CATEGORIES.map((cat, i) => {
-                const isMatch = searchTerm.length >= 2 && cat.label.toLowerCase().includes(searchTerm.toLowerCase().trim());
-                const count = rawMocks?.filter((m:any) => m.title?.toLowerCase().includes(cat.label.toLowerCase())).length || 0;
-                
-                return (
-                  <motion.div 
-                    key={cat.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.05 }}
-                    whileHover={{ scale: 1.05, y: -5 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSearchTerm(cat.label)}
-                    className="relative group cursor-pointer"
-                  >
-                    <motion.div
-                      animate={isMatch ? { y: [0, -6, 0] } : { y: [0, -4, 0] }}
-                      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
-                    >
-                      <Card className={cn(
-                        "relative w-[100px] h-[100px] md:w-[120px] md:h-[120px] rounded-[24px] flex flex-col items-center justify-center gap-2 transition-all duration-500 overflow-hidden border shadow-sm",
-                        isMatch 
-                          ? "border-primary bg-primary/5 ring-4 ring-primary/10 shadow-xl" 
-                          : "border-slate-100 bg-white/60 backdrop-blur-md hover:border-primary/30"
-                      )}>
-                        <div className={cn(
-                          "absolute -right-4 -bottom-4 w-12 h-12 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700",
-                          cat.color.split(' ')[1].replace('to-', 'bg-')
-                        )} />
-
-                        <div className={cn(
-                          "h-10 w-10 md:h-12 md:w-12 rounded-2xl flex items-center justify-center transition-all duration-500 bg-gradient-to-br shadow-lg group-hover:rotate-6",
-                          cat.color
-                        )}>
-                          <cat.icon className="h-5 w-5 md:h-6 md:w-6 text-white" />
-                        </div>
-
-                        <div className="text-center px-2 z-10">
-                          <p className="text-[9px] md:text-[11px] font-black uppercase text-[#0F172A] tracking-tight truncate w-full">
-                            {cat.label}
-                          </p>
-                          <p className="text-[7px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                            {count} Tests
-                          </p>
-                        </div>
-
-                        <div className="absolute bottom-0 left-0 h-1 bg-slate-50 w-full overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            whileInView={{ width: count > 10 ? '70%' : '30%' }}
-                            className={cn("h-full bg-gradient-to-r", cat.color)}
-                          />
-                        </div>
-                      </Card>
-                    </motion.div>
-
-                    {isMatch && (
-                      <div className="absolute -inset-2 rounded-[28px] border-2 border-primary/20 animate-pulse pointer-events-none" />
-                    )}
-                  </motion.div>
-                );
-              })}
-           </div>
-        </section>
 
         {/* 5. MAIN TEST GRID */}
         <div className="space-y-10">
@@ -295,10 +300,13 @@ export default function MockTestsPage() {
                     <MockSeriesCard key={mock.id} mock={mock} isPassActive={isPassActive} index={i} />
                  ))
               ) : (
-                 <div className="col-span-full py-40 text-center space-y-6 opacity-30">
-                    <RefreshCw className="h-16 w-16 mx-auto text-slate-300" />
-                    <p className="text-xl font-black uppercase tracking-widest text-slate-400">No matching tests in vault</p>
-                    <Button onClick={() => { setSearchTerm(""); setSelectedBoard("all"); setSelectedTier("all"); }} variant="outline" className="rounded-full px-8">Reset Filters</Button>
+                 <div className="col-span-full py-40 text-center space-y-6 bg-white rounded-[3rem] border-2 border-dashed border-slate-100">
+                    <RefreshCw className="h-16 w-16 mx-auto text-slate-300 opacity-20" />
+                    <div className="space-y-2">
+                       <p className="text-xl font-black uppercase tracking-widest text-slate-400">No matching tests in vault</p>
+                       <p className="text-sm font-medium text-slate-400">Try adjusting your filters or search keywords.</p>
+                    </div>
+                    <Button onClick={() => { setSearchTerm(""); setSelectedBoard("all"); setSelectedCategory(null); }} variant="outline" className="rounded-full px-8 h-12">Reset All Filters</Button>
                  </div>
               )}
            </div>
