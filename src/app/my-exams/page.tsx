@@ -55,8 +55,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview World-Class Personalized Dashboard v3.3.
- * FIXED: Included Landmark in lucide-react imports.
+ * @fileOverview World-Class Personalized Dashboard v3.4.
+ * FIXED: Missing key prop in Skeleton loading state.
  */
 
 const MODAL_CATEGORIES = [
@@ -92,10 +92,10 @@ export default function MyExamsPage() {
   }, [user, userLoading, router, mounted])
 
   // DATA FETCHING
-  const examsQuery = useMemo(() => (db && mounted ? collection(db, "exams") : null), [db, mounted])
-  const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted])
-  const pyqsQuery = useMemo(() => (db && mounted ? collection(db, "pyqs") : null), [db, mounted])
-  const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid)) : null), [db, user])
+  const examsQuery = useMemo(() => (db && mounted ? collection(db, "exams") : null), [db, mounted]);
+  const mocksQuery = useMemo(() => (db && mounted ? collection(db, "mocks") : null), [db, mounted]);
+  const pyqsQuery = useMemo(() => (db && mounted ? collection(db, "pyqs") : null), [db, mounted]);
+  const resultsQuery = useMemo(() => (db && user ? query(collection(db, "results"), where("userId", "==", user.uid)) : null), [db, user]);
   const boardsQuery = useMemo(() => (db ? collection(db, "boards") : null), [db]);
 
   const { data: allExams, loading: examsLoading } = useCollection<any>(examsQuery)
@@ -335,7 +335,7 @@ export default function MyExamsPage() {
         <section className="space-y-10 md:space-y-14">
            {examsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-                 {Array.from({ length: 3 }).map((_, i) => <Skeleton className="h-80 w-full rounded-[2.5rem] bg-white" />)}
+                 {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[2.5rem] bg-white" />)}
               </div>
            ) : pinnedExams.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
@@ -479,7 +479,7 @@ function ExamMiniStat({ icon: Icon, label, val }: any) {
     <div className="p-3 md:p-4 rounded-2xl bg-slate-50 border border-slate-100 text-left space-y-1.5 group hover:bg-primary/5 transition-all">
        <Icon className="h-3.5 w-3.5 text-primary opacity-40 group-hover:opacity-100 transition-all" />
        <div className="space-y-0.5">
-          <p className="text-[11px] md:text-sm font-bold text-[#0F172A] tabular-nums">{val}</p>
+          <p className="text-[11px] md:sm font-bold text-[#0F172A] tabular-nums">{val}</p>
           <p className="text-[7px] md:text-[8px] font-semibold text-slate-400 uppercase tracking-widest truncate">{label}</p>
        </div>
     </div>
