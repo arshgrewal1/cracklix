@@ -32,7 +32,11 @@ import {
   FileText,
   Bookmark,
   Layers,
-  Flame
+  Flame,
+  Trophy,
+  List,
+  FileStack,
+  Megaphone
 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -42,8 +46,8 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 import { motion, AnimatePresence } from "framer-motion"
 
 /**
- * @fileOverview Premium Exam Hub Client v30.0 [Mobile-First Redesign].
- * Redesigned for high-density navigation and Apple-grade aesthetics.
+ * @fileOverview Premium Exam Hub Client v30.1.
+ * FIXED: Imported missing Lucide icons (Trophy, List, FileStack, Megaphone).
  */
 
 export default function ExamHubClient() {
