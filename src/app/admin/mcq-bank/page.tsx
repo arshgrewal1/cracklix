@@ -4,6 +4,7 @@ import React, { useMemo, useState, useEffect, useCallback } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { 
   Plus, 
   Search, 
@@ -239,7 +240,7 @@ export default function MCQBankPage() {
                         <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white" asChild>
                            <Link href={`/admin/mcq-bank/add?id=${q.id}`}><Edit className="h-5 w-5" /></Link>
                         </Button>
-                        <button className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={async () => { if(confirm("Purge node?")) await deleteDoc(doc(db!, "mcqBank", q.id)); fetchQuestions(null); }}>
+                        <button className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={async () => { if(confirm("Purge node?")) { await deleteDoc(doc(db!, "mcqBank", q.id)); fetchQuestions(null); } }}>
                            <Trash2 className="h-5 w-5" />
                         </button>
                      </div>
