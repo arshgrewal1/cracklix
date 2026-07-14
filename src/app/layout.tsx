@@ -23,8 +23,8 @@ const poppins = Poppins({
 });
 
 /**
- * @fileOverview Root Layout v71.0 [Splash Hardened].
- * UPDATED: Integrated high-fidelity SplashScreen node.
+ * @fileOverview Root Layout v71.1 [Scroll Hardened].
+ * FIXED: Removed fixed overflow-x-hidden from body class to ensure native scroll container detection.
  */
 
 export default function RootLayout({
@@ -43,16 +43,17 @@ export default function RootLayout({
           antialiased
           bg-white
           text-[#0F172A]
-          overflow-x-hidden
           w-full
         `}
       >
         <FirebaseClientProvider>
           <SplashScreen key="app-splash-screen" />
           
-          <div key="main-app-container" className="min-h-screen flex flex-col">
+          <div key="main-app-container" className="min-h-screen flex flex-col relative">
             <AnnouncementBar />
-            {children}
+            <div className="flex-1">
+              {children}
+            </div>
           </div>
 
           <GlobalStudyTracker key="global-tracker" />

@@ -6,9 +6,8 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 /**
- * @fileOverview Official Premium Splash Screen v1.0.
- * DESIGN: Apple-inspired glass-morphism with optical masking.
- * FIX: Masks non-transparent logo corners using a rounded overflow-hidden container.
+ * @fileOverview Official Premium Splash Screen v1.1.
+ * FIXED: Removed touch-none to prevent interaction locking if unmount is delayed.
  */
 export default function SplashScreen() {
   const [isVisible, setIsVisible] = useState(true);
@@ -35,7 +34,7 @@ export default function SplashScreen() {
           initial={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
-          className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center overflow-hidden touch-none"
+          className="fixed inset-0 z-[9999] bg-black flex flex-col items-center justify-center overflow-hidden pointer-events-none"
         >
           {/* 1. AMBIENT GLOW NODE */}
           <motion.div 
