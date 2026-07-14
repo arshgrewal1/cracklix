@@ -6,6 +6,7 @@ import { collection, query, where, limit, orderBy } from 'firebase/firestore';
 import { Calendar, ChevronRight, Bell, Landmark, Zap, ArrowRight, ShieldCheck, Target } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
