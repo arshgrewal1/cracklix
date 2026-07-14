@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useMemo } from "react";
@@ -22,7 +23,7 @@ import Link from "next/link";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v500.4.
+ * @fileOverview Institutional Premium Hub v500.5.
  * REDESIGNED: Today's Challenge compact premium mobile layout (Duolingo/Apple style).
  */
 export default function HomePage() {
@@ -54,9 +55,9 @@ export default function HomePage() {
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
                transition={{ duration: 0.5 }}
-               className="bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#1E293B] rounded-[24px] p-5 border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.35)] relative overflow-hidden group transition-all duration-500 text-center min-h-[340px] flex flex-col justify-center"
+               className="bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#1E293B] rounded-[24px] p-[20px] border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.35)] relative overflow-hidden group transition-all duration-500 text-center min-h-[340px] flex flex-col justify-center"
             >
-               {/* Watermark - 40% smaller and 4% opacity */}
+               {/* Watermark - Reduced size (40%) and opacity (4%) */}
                <div className="absolute top-4 right-4 p-0 opacity-[0.04] pointer-events-none group-hover:scale-110 transition-transform duration-1000">
                   <Zap className="h-40 w-40 text-primary" />
                </div>
@@ -86,7 +87,7 @@ export default function HomePage() {
                       </div>
 
                       <div className="mt-[20px] pb-[18px]">
-                         <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="inline-block w-full max-w-[320px]">
+                         <Link href={`/mocks/instructions?id=${activeQuiz.id}`} className="inline-block w-full max-w-[320px] mx-auto">
                             <button className="relative overflow-hidden w-full h-[52px] bg-gradient-to-r from-blue-600 to-blue-400 hover:brightness-110 text-white font-bold text-base tracking-tight rounded-[18px] shadow-[0_12px_24px_rgba(37,99,235,0.3)] transition-all duration-300 active:scale-95 border-none group/btn cursor-pointer">
                                <div className="flex items-center justify-center gap-2 relative z-10">
                                   <Zap className="h-4 w-4 fill-white text-white" />
