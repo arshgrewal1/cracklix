@@ -9,12 +9,13 @@ import { Capacitor } from '@capacitor/core';
 import { usePWAInstall } from '@/hooks/use-pwa-install';
 
 /**
- * @fileOverview Institutional PWA Manager v1.4 [Hardened].
- * FIXED: Reliable standalone mode detection and improved mobile responsiveness.
+ * @fileOverview Institutional PWA Manager v1.5.
+ * FIXED: Removed redundant success toast logic to prevent repeated popups.
+ * The success toast is now managed exclusively by the appinstalled event in usePWAInstall.
  */
 export default function PWAManager() {
   const pathname = usePathname();
-  const { canInstall, installApp, isInstalled: hookIsInstalled } = usePWAInstall();
+  const { canInstall, installApp, isInstalled } = usePWAInstall();
   const [showPrompt, setShowPrompt] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -24,14 +25,10 @@ export default function PWAManager() {
     const checkStatus = () => {
       if (typeof window === 'undefined') return;
 
-      // 1. Check if running inside the Native Android APK
       const isNative = Capacitor.isNativePlatform();
-      
-      // 2. Check if running as an installed PWA (Standalone mode)
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
                           (window.navigator as any).standalone === true;
 
-      // 3. Other existing checks
       const isMobile = window.innerWidth < 1024; 
       const isExcluded = pathname?.includes('/attempt') || pathname?.startsWith('/admin');
       
@@ -40,23 +37,21 @@ export default function PWAManager() {
          isDismissed = localStorage.getItem('cracklix_app_prompt_dismissed') === 'true';
       } catch (e) {}
       
-      // LOGIC: Only show if NOT native, NOT standalone, is on mobile, NOT in exam, NOT installed and NOT dismissed
-      if (!isNative && !isStandalone && isMobile && !isExcluded && !isDismissed && !hookIsInstalled) {
+      // SHOW LOGIC: Only show mini-prompt if we CAN install but HAVEN'T yet.
+      if (!isNative && !isStandalone && isMobile && !isExcluded && !isDismissed && !isInstalled && canInstall) {
         setShowPrompt(true);
+      } else {
+        setShowPrompt(false);
       }
     };
 
-    // Show prompt after a short delay to ensure registry hydration
-    const timer = setTimeout(checkStatus, 4000);
+    const timer = setTimeout(checkStatus, 3000);
     return () => clearTimeout(timer);
-  }, [pathname, hookIsInstalled]);
+  }, [pathname, isInstalled, canInstall]);
 
   const handleInstallAction = () => {
-    if (canInstall) {
-      installApp();
-    } else {
-      window.location.href = '/install';
-    }
+    installApp();
+    setShowPrompt(false);
   };
 
   const handleDismiss = () => {

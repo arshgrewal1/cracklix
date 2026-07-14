@@ -1,21 +1,18 @@
 'use client';
 
-import React, { useMemo, useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Play, ChevronRight, Star, Smartphone, Landmark, Download, Loader2, ShieldCheck } from "lucide-react";
+import { Play, ChevronRight, Star, Download, Loader2, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v60.0.
- * Redesigned for Apple + Linear aesthetic with reactive PWA states.
+ * @fileOverview Premium Mobile-First PWA Hero v61.0.
+ * FIXED: Optimized reactive button logic to prevent re-installation prompts after success.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
-  const { toast } = useToast();
   const { canInstall, installApp, isInstalled } = usePWAInstall();
   const [isInstalling, setIsInstalling] = useState(false);
 
@@ -24,11 +21,13 @@ export default function Hero() {
   }, []);
 
   const handleInstallClick = async () => {
+    if (isInstalling) return;
     setIsInstalling(true);
     try {
       await installApp();
     } finally {
-      setIsInstalling(false);
+      // Small timeout to allow browser UI to catch up
+      setTimeout(() => setIsInstalling(false), 1000);
     }
   };
 
@@ -36,13 +35,11 @@ export default function Hero() {
 
   return (
     <section className="relative overflow-hidden bg-white pt-6 pb-5 md:pt-16 md:pb-20 w-full">
-      {/* Subtle Background Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-lg aspect-square bg-primary/5 blur-[100px] rounded-full pointer-events-none" />
 
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="flex flex-col items-center text-center space-y-4 md:space-y-8 w-full">
           
-          {/* Trust Badge */}
           <motion.div 
              initial={{ opacity: 0, y: -10 }}
              animate={{ opacity: 1, y: 0 }}
@@ -54,7 +51,6 @@ export default function Hero() {
             </span>
           </motion.div>
 
-          {/* Heading */}
           <div className="space-y-3 w-full max-w-[340px] md:max-w-4xl px-1">
             <h1 className="text-[32px] sm:text-7xl lg:text-[100px] font-black tracking-tighter text-[#0F172A] leading-[1.05] antialiased">
               Crack Punjab exams <br className="hidden sm:block" />
@@ -66,7 +62,6 @@ export default function Hero() {
             </p>
           </div>
 
-          {/* Action Hub */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -97,7 +92,7 @@ export default function Hero() {
              </Button>
              
              <AnimatePresence mode="wait">
-               {!isInstalled ? (
+               {(!isInstalled && canInstall) ? (
                  <motion.div 
                    key="install-node" 
                    initial={{ opacity: 0, scale: 0.95 }} 
