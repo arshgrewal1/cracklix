@@ -12,20 +12,19 @@ import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
- * @fileOverview Hardened Document Listener Hook v3.0.
- * FIXED: Implemented deep comparison check before state updates to prevent infinite render loops.
+ * @fileOverview Hardened Document Listener Hook v3.1.
+ * FIXED: Removed reliance on docRef.path as the primary dependency to avoid internal property access issues.
+ * Uses the reference itself (caller should memoize).
  */
 export function useDoc<T = DocumentData>(docRef: DocumentReference<T> | null) {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<FirestoreError | null>(null);
 
-  // Use the path as a stable key
-  const path = docRef?.path;
   const dataRef = useRef<string>("");
 
   useEffect(() => {
-    if (!docRef || !path) {
+    if (!docRef) {
       setData(null);
       setLoading(false);
       return;
@@ -51,7 +50,7 @@ export function useDoc<T = DocumentData>(docRef: DocumentReference<T> | null) {
       (err) => {
         if (err.code === 'permission-denied') {
           const permissionError = new FirestorePermissionError({
-            path: docRef.path,
+            path: docRef.path || 'document_node',
             operation: 'get',
           } satisfies SecurityRuleContext);
 
@@ -64,7 +63,7 @@ export function useDoc<T = DocumentData>(docRef: DocumentReference<T> | null) {
     );
 
     return () => unsubscribe();
-  }, [path]);
+  }, [docRef]);
 
   return { data, loading, error };
 }

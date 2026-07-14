@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Query, 
   onSnapshot, 
@@ -12,27 +12,17 @@ import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '../errors';
 
 /**
- * @fileOverview Production-Grade Firestore Collection Hook v3.3.
- * OPTIMIZED: Removed heavy JSON stringification to prevent memory threshold restarts.
- * Identity of the items array is now managed via snapshot metadata to ensure stability.
+ * @fileOverview Production-Grade Firestore Collection Hook v3.4.
+ * FIXED: Removed reliance on internal SDK properties (._query) which caused fatal crashes.
+ * Uses the query object itself as a dependency (caller is responsible for memoizing the query).
  */
 export function useCollection<T = DocumentData>(query: Query<T> | null) {
   const [data, setData] = useState<T[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<FirestoreError | null>(null);
   
-  // Use query path as a stable key
-  const queryKey = useMemo(() => {
-    if (!query) return null;
-    try {
-      return (query as any)._query?.path?.segments?.join('/') || 'stable_query';
-    } catch (e) {
-      return 'unstable_query';
-    }
-  }, [query]);
-
   useEffect(() => {
-    if (!query || !queryKey) {
+    if (!query) {
       setData(null);
       setLoading(false);
       return;
@@ -59,7 +49,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
         
         if (err.code === 'permission-denied') {
           const permissionError = new FirestorePermissionError({
-            path: (query as any)?._query?.path?.segments?.join('/') || 'registry_node',
+            path: 'collection_query',
             operation: 'list',
           } satisfies SecurityRuleContext);
 
@@ -72,7 +62,7 @@ export function useCollection<T = DocumentData>(query: Query<T> | null) {
     );
 
     return () => unsubscribe();
-  }, [queryKey]);
+  }, [query]); // Note: Caller MUST memoize this query using useMemo or useMemoFirebase
 
   return { data, loading, error };
 }
