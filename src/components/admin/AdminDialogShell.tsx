@@ -1,3 +1,4 @@
+
 "use client";
 
 import { ReactNode } from "react";
@@ -39,7 +40,7 @@ export function AdminDialogShell({
   isSaving,
   onSave,
   onDiscard,
-  saveLabel = "Commit",
+  saveLabel = "Save",
   saveIcon,
   accentColor = "bg-primary",
   maxWidth = "sm:max-w-xl",
@@ -70,7 +71,7 @@ export function AdminDialogShell({
             onClick={onDiscard}
             className="h-11 md:h-12 px-6 font-black uppercase text-[10px] text-slate-400"
           >
-            Discard
+            Cancel
           </Button>
           <Button
             onClick={onSave}

@@ -13,8 +13,8 @@ import { useToast } from "@/hooks/use-toast";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview High-Mass Institutional Hero v47.0.
- * UPDATED: Integrated Smart PWA Install Flow with dynamic secondary action.
+ * @fileOverview High-Mass Institutional Hero v48.0.
+ * SIMPLIFIED: Replaced "Portal" and "Registry" with easier words.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -26,12 +26,12 @@ export default function Hero() {
     setMounted(true);
   }, []);
 
-  // Registry Sync: Detect successful installation and notify aspirant
+  // Sync: Detect successful installation and notify student
   useEffect(() => {
     if (mounted && isInstalled && !prevInstalled.current) {
       toast({
         title: "Cracklix App installed successfully.",
-        description: "Experience the portal directly from your home screen.",
+        description: "Open the app directly from your home screen.",
       });
     }
     prevInstalled.current = isInstalled;
@@ -62,7 +62,7 @@ export default function Hero() {
             </h1>
 
             <p className="text-[16px] md:text-2xl text-slate-500 font-medium leading-relaxed tracking-tight px-4 max-w-2xl mx-auto">
-              Master official patterns with verified Mock Tests, Notes, and Daily Portal Updates.
+              Master official patterns with verified Mock Tests, Notes, and Daily Updates.
             </p>
           </div>
 
@@ -72,7 +72,7 @@ export default function Hero() {
             transition={{ duration: 0.45, ease: "easeOut" }}
             className="flex flex-col sm:flex-row gap-[18px] w-full max-w-2xl px-5 mx-auto items-center justify-center"
           >
-             {/* Primary Navigation Node */}
+             {/* Primary Navigation */}
              <Button 
                asChild 
                className="relative overflow-hidden w-full h-[58px] bg-gradient-to-r from-[#2563EB] via-[#3B82F6] to-[#60A5FA] hover:brightness-110 rounded-full shadow-[0_12px_35px_rgba(37,99,235,0.30)] hover:shadow-[0_15px_45px_rgba(37,99,235,0.40)] transition-all duration-300 active:scale-[0.98] border-none group cursor-pointer"
@@ -96,7 +96,7 @@ export default function Hero() {
                 </Link>
              </Button>
              
-             {/* Secondary Registry Hub: Smart PWA Toggle */}
+             {/* Secondary Center: Smart PWA Toggle */}
              <div className="w-full sm:w-auto sm:flex-1">
                <AnimatePresence mode="wait">
                  {(canInstall && !isInstalled) ? (
@@ -149,7 +149,7 @@ export default function Hero() {
           </motion.div>
           
           <div className="flex items-center gap-8 pt-4 md:pt-8 opacity-40 grayscale group hover:grayscale-0 transition-all duration-700">
-             <p className="text-[10px] font-semibold tracking-widest text-slate-400 uppercase">Official Portal Verified</p>
+             <p className="text-[10px] font-semibold tracking-widest text-slate-400 uppercase">Official System Verified</p>
           </div>
         </div>
       </div>

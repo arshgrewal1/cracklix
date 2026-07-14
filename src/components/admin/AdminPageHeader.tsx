@@ -22,7 +22,7 @@ interface AdminPageHeaderProps {
 /**
  * Shared admin page header with consistent layout:
  * icon label, title, subtitle, and an action button.
- * v1.2 [Navigation Optimized].
+ * v1.3 [Simplified Language].
  */
 export function AdminPageHeader({
   icon: Icon,

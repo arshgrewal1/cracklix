@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useMemo, useState, useEffect, useCallback } from "react"
@@ -49,8 +50,8 @@ import { cn } from "@/lib/utils"
 import { Checkbox } from "@/components/ui/checkbox"
 
 /**
- * @fileOverview Enterprise MCQ Bank Hub v1.1.
- * FIXED: Added missing Button import.
+ * @fileOverview Enterprise Question Bank Hub v1.2.
+ * SIMPLIFIED: Replaced "MCQ Bank" and "Registry" with easier words.
  */
 
 export default function MCQBankPage() {
@@ -98,7 +99,7 @@ export default function MCQBankPage() {
       setLastDoc(snap.docs[snap.docs.length - 1] || null)
       setHasMore(snap.docs.length === 50)
     } catch (e: any) {
-      toast({ variant: "destructive", title: "Sync Failed", description: e.message })
+      toast({ variant: "destructive", title: "Update Failed", description: e.message })
     } finally { setLoading(false) }
   }, [db, filters, toast])
 
@@ -127,7 +128,7 @@ export default function MCQBankPage() {
 
     try {
       await batch.commit();
-      toast({ title: "Bulk Sync Complete", description: `${selectedIds.length} nodes updated.` });
+      toast({ title: "Update Complete", description: `${selectedIds.length} items updated.` });
       fetchQuestions(null);
       setSelectedIds([]);
     } finally { setIsBulkProcessing(false); }
@@ -138,16 +139,16 @@ export default function MCQBankPage() {
       
       <AdminPageHeader
         icon={Database}
-        label="Single Source of Truth"
-        title="MCQ Bank"
-        subtitle="Manage the institutional master question database with high-density metadata."
-        actionLabel="New Question"
+        label="Central Question Database"
+        title="Question Bank"
+        subtitle="Manage all your practice questions and metadata in one place."
+        actionLabel="Add Question"
         actionIcon={Plus}
         actionHref="/admin/mcq-bank/add"
       >
         <div className="flex gap-3">
            <Button asChild variant="outline" className="h-12 md:h-14 rounded-full font-bold px-8 shadow-sm">
-              <Link href="/admin/bulk-import"><UploadCloud className="h-4 w-4 mr-2" /> Bulk Ingest</Link>
+              <Link href="/admin/bulk-import"><UploadCloud className="h-4 w-4 mr-2" /> Bulk Upload</Link>
            </Button>
         </div>
       </AdminPageHeader>
@@ -155,16 +156,16 @@ export default function MCQBankPage() {
       <Card className="border-none shadow-xl rounded-2xl md:rounded-[2.5rem] bg-white mx-1 border border-slate-50 p-6 md:p-8 space-y-6">
          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-1.5">
-               <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Subject hub</label>
+               <label className="text-[9px] font-black uppercase text-slate-400 ml-1">By Subject</label>
                <select value={filters.subjectId} onChange={e => setFilters({...filters, subjectId: e.target.value})} className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none">
                   <option value="all">All Subjects</option>
                   {subjects?.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                </select>
             </div>
             <div className="space-y-1.5">
-               <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Difficulty</label>
+               <label className="text-[9px] font-black uppercase text-slate-400 ml-1">By Difficulty</label>
                <select value={filters.difficulty} onChange={e => setFilters({...filters, difficulty: e.target.value})} className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none">
-                  <option value="all">Mixed Level</option>
+                  <option value="all">All Levels</option>
                   <option value="Easy">Easy</option>
                   <option value="Medium">Medium</option>
                   <option value="Hard">Hard</option>
@@ -172,22 +173,22 @@ export default function MCQBankPage() {
                </select>
             </div>
             <div className="space-y-1.5">
-               <label className="text-[9px] font-black uppercase text-slate-400 ml-1">Visibility</label>
+               <label className="text-[9px] font-black uppercase text-slate-400 ml-1">By Status</label>
                <select value={filters.status} onChange={e => setFilters({...filters, status: e.target.value})} className="w-full h-11 bg-slate-50 border-none rounded-xl px-4 font-bold text-xs outline-none">
-                  <option value="all">All Status</option>
+                  <option value="all">All Items</option>
                   <option value="PUBLISHED">Published</option>
-                  <option value="DRAFT">Draft Hub</option>
+                  <option value="DRAFT">Draft</option>
                   <option value="ARCHIVED">Archived</option>
                </select>
             </div>
             <div className="flex items-end">
-               <Button onClick={() => setFilters({subjectId: 'all', difficulty: 'all', status: 'all', year: 'all'})} variant="ghost" className="h-11 w-full rounded-xl text-slate-400 font-bold uppercase text-[9px]">Reset Filter</Button>
+               <Button onClick={() => setFilters({subjectId: 'all', difficulty: 'all', status: 'all', year: 'all'})} variant="ghost" className="h-11 w-full rounded-xl text-slate-400 font-bold uppercase text-[9px]">Clear Filters</Button>
             </div>
          </div>
          <AdminSearchInput
            value={searchTerm}
            onChange={setSearchTerm}
-           placeholder="Search by statement, tags, or ID..."
+           placeholder="Search questions by text or ID..."
          />
       </Card>
 
@@ -202,10 +203,10 @@ export default function MCQBankPage() {
                     onCheckedChange={(checked) => setSelectedIds(checked ? filteredQuestions.map(q => q.id) : [])} 
                   />
                 </TableHead>
-                <TableHead className="px-6 text-[9px] font-black uppercase tracking-widest text-slate-400">Node Identity</TableHead>
+                <TableHead className="px-6 text-[9px] font-black uppercase tracking-widest text-slate-400">Question ID</TableHead>
                 <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-400">Statement</TableHead>
                 <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-400 text-center">Status</TableHead>
-                <TableHead className="text-right px-10 text-[9px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
+                <TableHead className="text-right px-10 text-[9px] font-black uppercase tracking-widest text-slate-400">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -220,7 +221,7 @@ export default function MCQBankPage() {
                      <div className="space-y-1.5">
                         <code className="text-[10px] font-mono text-primary font-bold">ID: {q.id.slice(-8)}</code>
                         <div className="flex gap-2">
-                           <Badge variant="outline" className="border-slate-100 text-slate-400 text-[7px] px-1.5">{q.subjectId || 'GENERAL'}</Badge>
+                           <Badge variant="outline" className="border-slate-100 text-slate-400 text-[7px] px-1.5">{q.subjectId || 'General'}</Badge>
                         </div>
                      </div>
                   </TableCell>
@@ -240,7 +241,7 @@ export default function MCQBankPage() {
                         <Button variant="ghost" size="icon" className="h-10 w-10 rounded-xl hover:bg-white" asChild>
                            <Link href={`/admin/mcq-bank/add?id=${q.id}`}><Edit className="h-5 w-5" /></Link>
                         </Button>
-                        <button className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={async () => { if(confirm("Purge node?")) { await deleteDoc(doc(db!, "mcqBank", q.id)); fetchQuestions(null); } }}>
+                        <button className="h-10 w-10 rounded-xl bg-white shadow-sm border border-slate-100 flex items-center justify-center text-rose-500 hover:bg-rose-50 active:scale-90 transition-all" onClick={async () => { if(confirm("Delete this question?")) { await deleteDoc(doc(db!, "mcqBank", q.id)); fetchQuestions(null); } }}>
                            <Trash2 className="h-5 w-5" />
                         </button>
                      </div>
@@ -248,7 +249,7 @@ export default function MCQBankPage() {
                 </TableRow>
               )) : (
                 <TableRow>
-                   <TableCell colSpan={5} className="h-60 text-center opacity-10 italic font-black uppercase text-xl tracking-[0.4em]">Bank Empty</TableCell>
+                   <TableCell colSpan={5} className="h-60 text-center opacity-10 italic font-black uppercase text-xl tracking-[0.4em]">Database Empty</TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -258,7 +259,7 @@ export default function MCQBankPage() {
       
       {hasMore && (
         <div className="flex justify-center mt-8">
-           <Button variant="outline" onClick={() => fetchQuestions(lastDoc)} className="rounded-full px-10 h-12 font-black uppercase text-[10px] tracking-widest border-slate-200">Sync next 50 nodes</Button>
+           <Button variant="outline" onClick={() => fetchQuestions(lastDoc)} className="rounded-full px-10 h-12 font-black uppercase text-[10px] tracking-widest border-slate-200">Load More Questions</Button>
         </div>
       )}
 
@@ -268,8 +269,8 @@ export default function MCQBankPage() {
                <div className="flex items-center gap-5">
                   <div className="h-12 w-12 bg-primary/20 rounded-2xl flex items-center justify-center text-primary font-black text-lg">{selectedIds.length}</div>
                   <div>
-                    <p className="text-[11px] font-black uppercase tracking-widest leading-none">Nodes Selected</p>
-                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">Master Registry Normalization</p>
+                    <p className="text-[11px] font-black uppercase tracking-widest leading-none">Items Selected</p>
+                    <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mt-1.5">Batch Management Active</p>
                   </div>
                </div>
                <div className="flex items-center gap-3">

@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useMemo, useEffect, useState } from "react"
@@ -42,8 +43,8 @@ import { motion, AnimatePresence } from "framer-motion"
 import Logo from "@/components/brand/Logo"
 
 /**
- * @fileOverview Premium Exam Selection Hub v300.2 (Metrics Sync).
- * UPDATED: Displays dynamic totalMocks and studentCount from registry.
+ * @fileOverview Premium Exam Selection Hub v300.3 (Simplified Language).
+ * SIMPLIFIED: Replaced "Registry", "Vertical", and "Node" with easier words.
  */
 
 const AUTHORIZED_CATEGORY_IDS = [
@@ -113,7 +114,7 @@ export default function ExamsEntryPage() {
         toast({ title: "Added to list" });
       }
     } catch (err) {
-      toast({ variant: "destructive", title: "Sync failed" });
+      toast({ variant: "destructive", title: "Update failed" });
     } finally { setPinningId(null); }
   };
 
@@ -133,16 +134,16 @@ export default function ExamsEntryPage() {
           >
             <div className="flex items-center gap-2">
               <Badge className="bg-primary/10 text-primary border-none px-4 py-1.5 rounded-full font-black text-[10px] md:text-xs tracking-widest flex items-center gap-2 uppercase">
-                <Landmark className="h-3.5 w-3.5" /> Official Selection
+                <Landmark className="h-3.5 w-3.5" /> Official Choice
               </Badge>
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-4">
                 <h1 className="text-[32px] md:text-5xl lg:text-[56px] font-[900] tracking-tighter leading-none text-transparent bg-clip-text bg-gradient-to-r from-[#2563EB] to-[#60A5FA]">
-                  Exam Selection
+                  Select Your Exam
                 </h1>
                 <div className="h-8 w-8 md:h-10 md:w-10 bg-blue-600 rounded-full flex items-center justify-center shadow-lg shadow-blue-600/20 shrink-0">
-                  <ShieldCheck className="h-5 w-5 md:h-6 md:w-6 text-white" />
+                  <ShieldCheck className="h-5 w-5 md:h-6 md:w-6" />
                 </div>
               </div>
               <p className="text-slate-500 font-medium text-sm md:text-lg max-w-2xl">
@@ -202,7 +203,7 @@ export default function ExamsEntryPage() {
                           </div>
                           <div>
                             <span className="font-bold text-[#0F172A] text-lg block">{e.name}</span>
-                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{e.boardId} Hub</span>
+                            <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest">{e.boardId} Center</span>
                           </div>
                         </div>
                         <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-primary transition-all" />
@@ -210,7 +211,7 @@ export default function ExamsEntryPage() {
                     )) : (
                       <div className="p-10 text-center space-y-3">
                         <AlertCircle className="h-10 w-10 mx-auto text-slate-200" />
-                        <p className="text-slate-400 font-medium italic">No matching vertical found.</p>
+                        <p className="text-slate-400 font-medium italic">No matching exam found.</p>
                       </div>
                     )}
                   </div>
@@ -260,7 +261,7 @@ export default function ExamsEntryPage() {
               >
                 <Card className="border border-slate-100 shadow-xl rounded-[30px] bg-white p-6 md:p-8 flex flex-col group h-full relative overflow-hidden hover:-translate-y-2 transition-all duration-500">
                   <div className="flex justify-between items-start mb-6">
-                    <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-lg" />
+                    <AuthorityLogo boardId={exam.boardId} size="md" className="shadow-xl" />
                     <div className="flex flex-col items-end gap-1">
                       <div className="flex items-center gap-1 text-amber-400">
                         <Star className="h-4 w-4 fill-current" />
@@ -329,7 +330,7 @@ export default function ExamsEntryPage() {
                           <div className="space-y-4 flex-1">
                              <h3 className="text-sm md:text-xl font-black text-[#0F172A] group-hover:text-primary transition-colors leading-tight uppercase">{cat.title}</h3>
                              <div className="flex items-center gap-2 text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                                <BookOpen className="h-3 w-3" /> 12+ Verticals
+                                <BookOpen className="h-3 w-3" /> 12+ Sections
                              </div>
                           </div>
 
@@ -346,10 +347,10 @@ export default function ExamsEntryPage() {
         {/* 5. WHY CRACKLIX */}
         <section className="py-16 bg-white rounded-[40px] shadow-sm border border-slate-100">
            <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12 px-8">
-              <FeatureCard icon={CheckCircle2} title="Verified Nodes" desc="100% official pattern MCQs" color="text-emerald-500" bg="bg-emerald-50" />
+              <FeatureCard icon={CheckCircle2} title="Verified Content" desc="100% official pattern MCQs" color="text-emerald-500" bg="bg-emerald-50" />
               <FeatureCard icon={Zap} title="Daily Practice" desc="Fresh challenge every 24h" color="text-blue-500" bg="bg-blue-50" />
-              <FeatureCard icon={FileText} title="PYQ Archive" desc="10 years of solved papers" color="text-purple-500" bg="bg-purple-50" />
-              <FeatureCard icon={BarChart3} title="Deep Analytics" desc="Detailed performance index" color="text-orange-500" bg="bg-orange-50" />
+              <FeatureCard icon={FileText} title="Old Papers" desc="10 years of solved papers" color="text-purple-500" bg="bg-purple-50" />
+              <FeatureCard icon={BarChart3} title="Deep Analytics" desc="Detailed performance stats" color="text-orange-500" bg="bg-orange-50" />
            </div>
         </section>
 
@@ -371,7 +372,7 @@ export default function ExamsEntryPage() {
                     Ready to Crack <br/> <span className="text-primary italic">Your Dream Exam?</span>
                  </h2>
                  <p className="text-slate-400 font-medium text-sm md:text-2xl max-w-2xl mx-auto leading-relaxed">
-                    Start practicing with Punjab&apos;s most trusted mock test platform. Join 100K+ successful aspirants.
+                    Start practicing with Punjab&apos;s most trusted mock test platform. Join 100K+ successful students.
                  </p>
               </div>
 

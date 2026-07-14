@@ -28,8 +28,8 @@ import { cn } from "@/lib/utils"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/components/admin"
 
 /**
- * @fileOverview Institutional Vacancy Registry v2.0.
- * FIXED: Balanced JSX tags and refined ternary logic for stable rendering.
+ * @fileOverview Official Vacancy Database Manager v2.1.
+ * SIMPLIFIED: Replaced "Hub", "Node", and "Registry" with easier words.
  */
 
 export default function VacancyDashboard() {
@@ -62,12 +62,12 @@ export default function VacancyDashboard() {
 
   const handleDelete = async (id: string) => {
     if (!db) return
-    if (!confirm("Permanently purge this vacancy node from the registry?")) return
+    if (!confirm("Permanently delete this vacancy entry?")) return
     try {
       await deleteDoc(doc(db, "vacancies", id))
-      toast({ title: "Vacancy Purged" })
+      toast({ title: "Entry Deleted" })
     } catch (e) {
-      toast({ variant: "destructive", title: "Deletion Failed" })
+      toast({ variant: "destructive", title: "Delete Failed" })
     }
   }
 
@@ -76,8 +76,8 @@ export default function VacancyDashboard() {
       
       <AdminPageHeader
         icon={Megaphone}
-        label="Recruitment Registry Hub"
-        title="Vacancy Hub"
+        label="Recruitment Portal Manager"
+        title="Vacancy List"
         subtitle="Manage official recruitment notifications and job postings."
         actionLabel="Add Vacancy"
         actionIcon={Plus}
@@ -86,9 +86,9 @@ export default function VacancyDashboard() {
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 px-1">
          <StatNode label="Total" val={stats.total} color="text-[#0F172A]" bg="bg-slate-50" />
-         <StatNode label="Published" val={stats.published} color="text-emerald-600" bg="bg-emerald-50" />
+         <StatNode label="Live" val={stats.published} color="text-emerald-600" bg="bg-emerald-50" />
          <StatNode label="Draft" val={stats.draft} color="text-slate-400" bg="bg-slate-50" />
-         <StatNode label="Scheduled" val={stats.scheduled} color="text-blue-600" bg="bg-blue-50" />
+         <StatNode label="Upcoming" val={stats.scheduled} color="text-blue-600" bg="bg-blue-50" />
          <StatNode label="Expired" val={stats.expired} color="text-rose-600" bg="bg-rose-50" />
       </div>
 
@@ -96,7 +96,7 @@ export default function VacancyDashboard() {
         <AdminSearchInput
           value={searchTerm}
           onChange={setSearchTerm}
-          placeholder="Search by title or department..."
+          placeholder="Search by job title or department..."
         />
       </div>
 
@@ -105,10 +105,10 @@ export default function VacancyDashboard() {
           <Table className="min-w-[1000px]">
             <TableHeader className="bg-slate-50/50">
               <TableRow className="h-16 border-slate-100">
-                <TableHead className="px-8 md:px-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Position & Identity</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Department Hub</TableHead>
+                <TableHead className="px-8 md:px-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Position Details</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Department</TableHead>
                 <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Status</TableHead>
-                <TableHead className="text-right px-8 md:px-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
+                <TableHead className="text-right px-8 md:px-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -125,7 +125,7 @@ export default function VacancyDashboard() {
                           <div className="min-w-0">
                              <p className="font-bold text-[#0F172A] text-sm md:text-base leading-tight truncate max-w-[250px]">{v.title}</p>
                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1.5 flex items-center gap-2">
-                                <Zap className="h-2.5 w-2.5" /> ID: {v.id.slice(-8)}
+                                <Zap className="h-2.5 w-2.5" /> Entry ID: {v.id.slice(-8)}
                              </p>
                           </div>
                        </div>
@@ -164,7 +164,7 @@ export default function VacancyDashboard() {
                    <TableCell colSpan={4} className="h-80 md:h-[400px] text-center">
                       <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
                          <Megaphone className="h-20 w-20 md:h-32 md:w-32 text-slate-400" />
-                         <p className="font-black text-xl md:text-3xl uppercase tracking-[0.4em]">Registry Empty</p>
+                         <p className="font-black text-xl md:text-3xl uppercase tracking-[0.4em]">Database Empty</p>
                       </div>
                    </TableCell>
                 </TableRow>

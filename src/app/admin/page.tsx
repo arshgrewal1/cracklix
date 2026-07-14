@@ -28,8 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
 
 /**
- * Admin Panel Dashboard v30.0
- * FIXED: Added Vacancy ingestion to quick tools.
+ * Admin Panel Dashboard v31.0
+ * SIMPLIFIED: Replaced "Registry", "Node", and "Governance" with easier words.
  */
 
 export default function AdminDashboard() {
@@ -92,14 +92,14 @@ export default function AdminDashboard() {
            lastFullSyncAt: serverTimestamp()
         }, { merge: true });
 
-        toast({ title: "Registry Synced", description: "All performance nodes updated." });
+        toast({ title: "Stats Updated", description: "All performance numbers refreshed." });
      } catch (err: any) {
         console.error("[SYNC_ERROR]", err);
         const isQuota = err.message?.includes('quota') || err.code === 'resource-exhausted';
         toast({ 
           variant: "destructive", 
-          title: isQuota ? "Quota Exceeded" : "Sync Failed", 
-          description: isQuota ? "Firebase free tier limit reached. Counters will update incrementally." : err.message 
+          title: isQuota ? "Limit Reached" : "Sync Failed", 
+          description: isQuota ? "Database limit reached. Stats will update slowly." : err.message 
         });
      } finally {
         setIsStatsSyncing(false);
@@ -111,7 +111,7 @@ export default function AdminDashboard() {
     setIsSyncing(true)
     try {
       await seedInitialData(db)
-      toast({ title: "Registry Rebuilt", description: "Default nodes pushed successfully." })
+      toast({ title: "Data Reset", description: "Default setup items added successfully." })
       await handleSyncLiveStats()
     } finally {
       setIsSyncing(false)
@@ -127,32 +127,32 @@ export default function AdminDashboard() {
            <div className="flex items-center gap-2">
               <div className="px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center gap-1.5 shadow-sm">
                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                 <span className="text-[9px] font-black text-emerald-600 tracking-tight">Governance Active</span>
+                 <span className="text-[9px] font-black text-emerald-600 tracking-tight">System Online</span>
               </div>
            </div>
           <h1 className="text-2xl md:text-5xl font-black text-[#0F172A] tracking-tight leading-none">Admin Panel</h1>
-          <p className="text-slate-500 text-[11px] md:text-lg font-medium">Coordinate preparation nodes and session integrity.</p>
+          <p className="text-slate-500 text-[11px] md:text-lg font-medium">Manage your tests, study material, and student accounts.</p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto shrink-0">
            <button onClick={handleSyncLiveStats} disabled={isStatsSyncing} className="flex-1 sm:flex-none h-11 px-6 rounded-full border border-slate-200 font-bold text-[13px] text-[#0F172A] hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
-              {isStatsSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Sync
+              {isStatsSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />} Refresh
            </button>
            <Button onClick={handlePushToRegistry} disabled={isSyncing} className="flex-1 sm:flex-none h-11 px-8 bg-primary hover:bg-blue-700 text-white shadow-xl rounded-full border-none font-bold text-sm">
-              {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />} Seed Registry
+              {isSyncing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Database className="h-4 w-4" />} Reset Data
            </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-         <AdminMetricCard label="Gross Revenue" value={`₹${(stats?.totalRevenue || 0).toLocaleString()}`} sub="Verified Flow" icon={<DollarSign className="text-emerald-500" />} href="/admin/payments" />
-         <AdminMetricCard label="Active Passes" value={statsLoading ? "..." : (stats?.activePasses || 0)} sub="Elite Aspirants" icon={<Gem className="text-primary" />} href="/admin/users" />
-         <AdminMetricCard label="Audit Queue" value={pendingNodes?.length || 0} sub="Pending UPI" icon={<AlertCircle className={cn(hasPending ? "text-rose-500 animate-pulse" : "text-slate-300")} />} href="/admin/payments/verify" highlight={hasPending} />
+         <AdminMetricCard label="Total Revenue" value={`₹${(stats?.totalRevenue || 0).toLocaleString()}`} sub="Verified Sales" icon={<DollarSign className="text-emerald-500" />} href="/admin/payments" />
+         <AdminMetricCard label="Active Passes" value={statsLoading ? "..." : (stats?.activePasses || 0)} sub="Elite Students" icon={<Gem className="text-primary" />} href="/admin/users" />
+         <AdminMetricCard label="Approvals Needed" value={pendingNodes?.length || 0} sub="Pending UPI" icon={<AlertCircle className={cn(hasPending ? "text-rose-500 animate-pulse" : "text-slate-300")} />} href="/admin/payments/verify" highlight={hasPending} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
          <Card className="lg:col-span-8 border-none shadow-xl bg-white rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-slate-100">
             <CardHeader className="p-5 md:p-8 border-b border-slate-50 bg-slate-50/30">
-               <CardTitle className="text-sm md:text-xl font-black text-[#0F172A] tracking-tight">Recent Registrations</CardTitle>
+               <CardTitle className="text-sm md:text-xl font-black text-[#0F172A] tracking-tight">Recent Signups</CardTitle>
             </CardHeader>
             <CardContent className="p-4 md:p-8 space-y-3">
                {recentUsers?.map((u: any) => (
@@ -165,12 +165,12 @@ export default function AdminDashboard() {
                         </div>
                      </div>
                      <Badge variant="outline" className="text-[7px] md:text-[8px] font-black uppercase border-slate-200 px-2 py-0.5 rounded shadow-sm">
-                        {u.passStatus === 'active' ? (u.pass?.plan || 'Elite') : 'Free Portal'}
+                        {u.passStatus === 'active' ? (u.pass?.plan || 'Elite') : 'Free Student'}
                      </Badge>
                   </div>
                ))}
                <Button asChild variant="ghost" className="w-full h-11 text-[11px] font-bold text-slate-400 hover:text-primary">
-                  <Link href="/admin/users">Open Student Portal <ChevronRight className="h-3 w-3 md:h-4 md:w-4 ml-1" /></Link>
+                  <Link href="/admin/users">View All Students <ChevronRight className="h-3 w-3 md:h-4 md:w-4 ml-1" /></Link>
                </Button>
             </CardContent>
          </Card>
@@ -181,7 +181,7 @@ export default function AdminDashboard() {
                <div className="relative z-10 space-y-6 md:space-y-8 text-left">
                   <div className="space-y-1">
                      <h3 className="text-xl md:text-2xl font-black tracking-tight">Quick Tools</h3>
-                     <p className="text-[8px] md:text-[9px] font-black text-slate-500 tracking-widest">Operational Shortcuts</p>
+                     <p className="text-[8px] md:text-[9px] font-black text-slate-500 tracking-widest">Shortcuts</p>
                   </div>
                   <div className="grid grid-cols-1 gap-2 md:gap-3">
                      <AdminQuickLink label="Add Vacancy" href="/admin/vacancies/add" highlight />

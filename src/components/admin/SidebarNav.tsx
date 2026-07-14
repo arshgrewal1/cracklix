@@ -51,22 +51,22 @@ import {
 } from "@/components/ui/tooltip";
 
 /**
- * Admin Sidebar Navigation v3.6 [Typography Optimized].
+ * Admin Sidebar Navigation v3.7 [Simplified Language].
  */
 
 const NAV_GROUPS = [
   {
-    label: "Management",
+    label: "Main",
     items: [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-      { label: "MCQ Bank", href: "/admin/mcq-bank", icon: Database },
+      { label: "Question Bank", href: "/admin/mcq-bank", icon: Database },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
-      { label: "Bulk Ingestion", href: "/admin/bulk-import", icon: UploadCloud },
-      { label: "Review Center", href: "/admin/qa", icon: Activity },
+      { label: "Bulk Upload", href: "/admin/bulk-import", icon: UploadCloud },
+      { label: "Audit Review", href: "/admin/qa", icon: Activity },
     ],
   },
   {
-    label: "Recruitment Node",
+    label: "Job Portal",
     items: [
       { label: "Vacancy Hub", href: "/admin/vacancies", icon: Megaphone },
       { label: "Add Vacancy", href: "/admin/vacancies/add", icon: Plus },
@@ -81,7 +81,7 @@ const NAV_GROUPS = [
     ],
   },
   {
-    label: "Mock Hierarchy",
+    label: "Tests & Structure",
     items: [
       { label: "Mock Builder", href: "/admin/mocks/builder", icon: PenSquare },
       { label: "Mock Manager", href: "/admin/mocks", icon: ClipboardList },
@@ -90,39 +90,39 @@ const NAV_GROUPS = [
       { label: "Subjects", href: "/admin/subjects", icon: BookOpen },
       { label: "Chapters", href: "/admin/chapters", icon: NotebookTabs },
       { label: "Topics", href: "/admin/topics", icon: Library },
-      { label: "Folders", href: "/admin/categories", icon: FolderTree },
+      { label: "Categories", href: "/admin/categories", icon: FolderTree },
     ],
   },
   {
-    label: "Revenue Hub",
+    label: "Payments",
     items: [
       { label: "Revenue Portal", href: "/admin/revenue", icon: DollarSign },
       { label: "Active Passes", href: "/admin/subscriptions", icon: CreditCard },
       { label: "Verify Payments", href: "/admin/payments/verify", icon: ShieldCheck },
       { label: "Pass Manager", href: "/admin/passes", icon: Gem },
-      { label: "Coupon Codes", href: "/admin/coupons", icon: Tag },
+      { label: "Discount Codes", href: "/admin/coupons", icon: Tag },
     ],
   },
   {
-    label: "Content Portal",
+    label: "Content Library",
     items: [
       { label: "CA Manager", href: "/admin/current-affairs", icon: Newspaper },
       { label: "Study Notes", href: "/admin/notes", icon: NotebookPen },
-      { label: "PYQ Archive", href: "/admin/pyqs", icon: Archive },
+      { label: "Old Papers", href: "/admin/pyqs", icon: Archive },
       { label: "Exam Calendar", href: "/admin/calendar", icon: Calendar },
       { label: "Success Stories", href: "/admin/success-stories", icon: Trophy },
       { label: "Help Center", href: "/admin/help-center", icon: HelpCircle },
     ],
   },
   {
-    label: "Governance",
+    label: "System",
     items: [
       { label: "Students", href: "/admin/users", icon: Users },
-      { label: "Devices", href: "/admin/devices", icon: Smartphone },
+      { label: "Active Logins", href: "/admin/devices", icon: Smartphone },
       { label: "Support Desk", href: "/admin/support", icon: MessageCircle },
-      { label: "Audit Trail", href: "/admin/audit-logs", icon: History },
+      { label: "Audit Logs", href: "/admin/audit-logs", icon: History },
       { label: "System Health", href: "/admin/health", icon: HeartPulse },
-      { label: "Global Settings", href: "/admin/settings", icon: Settings },
+      { label: "Settings", href: "/admin/settings", icon: Settings },
     ],
   },
 ];
