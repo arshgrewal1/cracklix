@@ -75,7 +75,7 @@ function DailyQuizBuilderContent() {
   const quizId = searchParams?.get("id") ?? ""
   const isEditing = !!quizId
 
-  const { data: rawBank, loading: bankLoading } = useCollection<Question>(useMemo(() => (db ? query(collection(db, "questions"), limit(500)) : null), [db]))
+  const { data: rawBank, loading: bankLoading } = useCollection<Question>(useMemo(() => (db ? query(collection(db, "mcqBank"), limit(500)) : null), [db]))
   const { data: subjects } = useCollection<any>(useMemo(() => (db ? query(collection(db, "subjects"), orderBy("name", "asc")) : null), [db]))
   const { data: existingQuiz, loading: quizLoading } = useDoc<any>(useMemo(() => (db && quizId ? doc(db, "daily_quizzes", quizId) : null), [db, quizId]))
   

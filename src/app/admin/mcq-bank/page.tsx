@@ -22,7 +22,8 @@ import {
   ArrowUpDown,
   Download,
   UploadCloud,
-  Tag
+  Tag,
+  X
 } from "lucide-react"
 import { useCollection, useFirestore } from "@/firebase"
 import { 
@@ -283,5 +284,3 @@ export default function MCQBankPage() {
     </div>
   )
 }
-
-function X({ className }: any) { return <AlertCircle className={className} /> }

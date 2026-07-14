@@ -38,7 +38,8 @@ import {
   Zap,
   Flame,
   BarChart3,
-  Megaphone
+  Megaphone,
+  Plus
 } from "lucide-react";
 
 import {
