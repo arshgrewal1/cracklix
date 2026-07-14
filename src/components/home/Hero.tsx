@@ -8,8 +8,8 @@ import Link from "next/link";
 import { usePWAInstall } from "@/hooks/use-pwa-install";
 
 /**
- * @fileOverview Premium Mobile-First PWA Hero v61.0.
- * FIXED: Optimized reactive button logic to prevent re-installation prompts after success.
+ * @fileOverview Premium Mobile-First PWA Hero v61.2.
+ * FIXED: Standardized alignment for primary and secondary action nodes.
  */
 export default function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -26,7 +26,6 @@ export default function Hero() {
     try {
       await installApp();
     } finally {
-      // Small timeout to allow browser UI to catch up
       setTimeout(() => setIsInstalling(false), 1000);
     }
   };
@@ -66,14 +65,14 @@ export default function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.1 }}
-            className="flex flex-col gap-3 w-full max-w-sm px-2 mx-auto items-center justify-center"
+            className="flex flex-col gap-3 w-full max-w-sm px-2 mx-auto"
           >
              <Button 
                asChild 
-               className="relative overflow-hidden w-full h-[56px] bg-gradient-to-r from-[#2563EB] to-[#3B82F6] hover:brightness-110 rounded-[18px] shadow-[0_15px_30px_rgba(37,99,235,0.25)] transition-all duration-300 active:scale-[0.98] border-none group cursor-pointer"
+               className="relative overflow-hidden w-full h-[58px] bg-gradient-to-r from-[#2563EB] to-[#3B82F6] hover:brightness-110 rounded-[20px] shadow-[0_15px_30px_rgba(37,99,235,0.25)] transition-all duration-300 active:scale-[0.98] border-none group cursor-pointer"
              >
-                <Link href="/mocks" className="flex items-center justify-between w-full px-4">
-                  <div className="flex items-center gap-3">
+                <Link href="/mocks" className="flex items-center justify-between w-full px-5">
+                  <div className="flex items-center gap-4">
                     <div className="w-[32px] h-[32px] rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.3)]">
                       <Play className="h-3.5 w-3.5 fill-white text-white" />
                     </div>
@@ -104,10 +103,15 @@ export default function Hero() {
                       onClick={handleInstallClick}
                       disabled={isInstalling}
                       variant="outline" 
-                      className="w-full h-[56px] rounded-[18px] bg-white border-2 border-primary text-primary font-bold text-base shadow-sm transition-all duration-300 active:scale-95 hover:bg-blue-50 group gap-3"
+                      className="w-full h-[58px] rounded-[20px] bg-white border-2 border-primary text-primary font-bold text-base shadow-sm transition-all duration-300 active:scale-95 hover:bg-blue-50 group flex items-center justify-between px-5"
                     >
-                      {isInstalling ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-                      <span>Install app</span>
+                      <div className="flex items-center gap-4">
+                        <div className="w-[32px] h-[32px] rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                           {isInstalling ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                        </div>
+                        <span className="tracking-tight">Install app</span>
+                      </div>
+                      <ChevronRight className="h-4 w-4 opacity-30 group-hover:translate-x-1 transition-transform" />
                     </Button>
                  </motion.div>
                ) : (
@@ -121,11 +125,16 @@ export default function Hero() {
                    <Button 
                       asChild 
                       variant="outline" 
-                      className="w-full h-[56px] rounded-[18px] bg-white border-2 border-slate-100 hover:border-primary text-[#1E3A8A] font-bold text-base shadow-sm transition-all duration-300 active:scale-[0.98] gap-3"
+                      className="w-full h-[58px] rounded-[20px] bg-white border-2 border-slate-100 hover:border-primary text-[#0F172A] hover:text-primary font-bold text-base shadow-sm transition-all duration-300 active:scale-[0.98] flex items-center justify-between px-5"
                     >
                       <Link href="/exams">
-                        <Landmark className="h-4 w-4" />
-                        <span>Browse selection</span>
+                        <div className="flex items-center gap-4">
+                           <div className="w-[32px] h-[32px] rounded-xl bg-slate-50 flex items-center justify-center shrink-0 border border-slate-100 group-hover:bg-primary/10 transition-colors">
+                              <Landmark className="h-4 w-4 text-slate-400 group-hover:text-primary transition-colors" />
+                           </div>
+                           <span className="tracking-tight">Browse selection</span>
+                        </div>
+                        <ChevronRight className="h-4 w-4 text-slate-300 group-hover:text-primary transition-all group-hover:translate-x-1" />
                       </Link>
                     </Button>
                  </motion.div>
