@@ -37,8 +37,8 @@ import { Vacancy } from "@/types"
 import { useToast } from "@/hooks/use-toast"
 
 /**
- * @fileOverview Official Punjab Vacancy Registry v1.2.
- * FIXED: Replaced Admin Header with Student Hero section.
+ * @fileOverview Official Punjab Vacancy Registry v1.3.
+ * FIXED: Removed misplaced AdminHeader and restored high-fidelity student layout.
  */
 
 const CATEGORY_CHIPS = [
@@ -113,7 +113,6 @@ export default function VacanciesPortal() {
       
       <main className="container mx-auto px-4 md:px-8 py-10 md:py-20 max-w-[1440px] space-y-12 md:space-y-24 pb-40">
          
-         {/* STUDENT HERO SECTION */}
          <section className="text-left space-y-10 md:space-y-16 max-w-5xl px-1">
             <div className="space-y-6 md:space-y-10">
                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="flex items-center gap-4">
@@ -243,7 +242,7 @@ export default function VacanciesPortal() {
                <div className="p-10 bg-white rounded-[3rem] border border-slate-100 shadow-xl space-y-8 text-left group hover:translate-y-[-6px] transition-all duration-500">
                   <div className="flex items-center gap-4">
                      <ShieldCheck className="h-8 w-8 text-emerald-500" />
-                     <h4 className="text-[11px] font-black uppercase tracking-0.3em text-[#0F172A]">Security Protocol</h4>
+                     <h4 className="text-[11px] font-black uppercase tracking-widest text-[#0F172A]">Security Protocol</h4>
                   </div>
                   <p className="text-xs md:text-sm text-slate-500 leading-relaxed font-medium">All recruitment notifications are verified against official gazettes before being synchronized with the master registry. Instant push alerts for Last Date reminders are active for Elite Pass holders.</p>
                </div>

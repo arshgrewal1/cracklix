@@ -1,8 +1,8 @@
+
 "use client"
 
 import React, { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { 
   Megaphone, 
@@ -10,29 +10,26 @@ import {
   Search, 
   Edit, 
   Trash2, 
-  Eye, 
   Zap, 
-  Calendar, 
   Loader2, 
   CheckCircle2, 
   AlertCircle,
   Archive,
-  BarChart3,
-  Globe
+  Activity,
+  Clock
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useCollection, useFirestore } from "@/firebase"
-import { collection, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp, where } from "firebase/firestore"
+import { collection, query, orderBy, deleteDoc, doc } from "firebase/firestore"
 import Link from "next/link"
-import { Skeleton } from "@/components/ui/skeleton"
 import { useToast } from "@/hooks/use-toast"
 import { Vacancy } from "@/types"
 import { cn } from "@/lib/utils"
 import { AdminPageHeader, AdminSearchInput, AdminTableSkeleton } from "@/components/admin"
 
 /**
- * @fileOverview Vacancy Hub Dashboard v1.2.
- * FIXED: Corrected syntax error in table closing tags.
+ * @fileOverview Institutional Vacancy Registry v2.0.
+ * FIXED: Balanced JSX tags and refined ternary logic for stable rendering.
  */
 
 export default function VacancyDashboard() {
@@ -66,12 +63,16 @@ export default function VacancyDashboard() {
   const handleDelete = async (id: string) => {
     if (!db) return
     if (!confirm("Permanently purge this vacancy node from the registry?")) return
-    await deleteDoc(doc(db, "vacancies", id))
-    toast({ title: "Vacancy Purged" })
+    try {
+      await deleteDoc(doc(db, "vacancies", id))
+      toast({ title: "Vacancy Purged" })
+    } catch (e) {
+      toast({ variant: "destructive", title: "Deletion Failed" })
+    }
   }
 
   return (
-    <div className="space-y-6 md:space-y-12 text-left pb-32 animate-in fade-in duration-700 pt-2">
+    <div className="space-y-10 md:space-y-16 text-left pb-32 animate-in fade-in duration-700 pt-2">
       
       <AdminPageHeader
         icon={Megaphone}
@@ -105,8 +106,8 @@ export default function VacancyDashboard() {
             <TableHeader className="bg-slate-50/50">
               <TableRow className="h-16 border-slate-100">
                 <TableHead className="px-8 md:px-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Position & Identity</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Department hub</TableHead>
-                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Registry Status</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Department Hub</TableHead>
+                <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Status</TableHead>
                 <TableHead className="text-right px-8 md:px-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Audit</TableHead>
               </TableRow>
             </TableHeader>
@@ -135,7 +136,7 @@ export default function VacancyDashboard() {
                           <Badge variant="outline" className="bg-slate-50 border-slate-100 text-slate-400 text-[8px] font-black uppercase px-2 py-0.5 tracking-tighter">{v.type}</Badge>
                        </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">
                        <Badge className={cn(
                          "border-none text-[8px] font-black uppercase tracking-widest px-3 py-1 rounded-lg shadow-sm",
                          v.status === 'PUBLISHED' ? "bg-emerald-50 text-emerald-600" :
@@ -160,7 +161,7 @@ export default function VacancyDashboard() {
                 ))
               ) : (
                 <TableRow>
-                   <TableCell colSpan={4} className="h-80 md:h-[500px] text-center">
+                   <TableCell colSpan={4} className="h-80 md:h-[400px] text-center">
                       <div className="flex flex-col items-center justify-center opacity-10 space-y-6">
                          <Megaphone className="h-20 w-20 md:h-32 md:w-32 text-slate-400" />
                          <p className="font-black text-xl md:text-3xl uppercase tracking-[0.4em]">Registry Empty</p>

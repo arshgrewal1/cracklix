@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { Suspense, useEffect, useState, useMemo } from "react"
@@ -36,8 +37,8 @@ import { Vacancy, ContentStatus } from "@/types"
 import { cn } from "@/lib/utils"
 
 /**
- * @fileOverview Modular Vacancy Ingestion Node v1.0.
- * Complex form with multi-tab layout and file upload synchronization.
+ * @fileOverview Modular Vacancy Ingestion Node v1.1.
+ * FIXED: Refined fetch logic to prevent infinite loading on new node creation.
  */
 
 export default function AddVacancyPage() {
@@ -113,6 +114,8 @@ function VacancyFormWrapper() {
       const url = await getDownloadURL(snapshot.ref)
       setFormData(prev => ({ ...prev, [field]: url }))
       toast({ title: "Asset Synchronized" })
+    } catch (e) {
+      toast({ variant: "destructive", title: "Upload Failed" })
     } finally {
       setIsUploading(false)
     }
@@ -121,7 +124,7 @@ function VacancyFormWrapper() {
   const handleSave = async (status: ContentStatus = formData.status || "DRAFT") => {
     if (!db || isSaving) return
     if (!formData.title || !formData.department || !formData.lastDate) {
-       toast({ variant: "destructive", title: "Audit Blocked", description: "Mandatory nodes missing." })
+       toast({ variant: "destructive", title: "Audit Blocked", description: "Job Title, Department, and Last Date are mandatory nodes." })
        return
     }
 
@@ -149,7 +152,7 @@ function VacancyFormWrapper() {
     }
   }
 
-  if (fetchLoading) return <div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>
+  if (id && fetchLoading) return <div className="h-screen flex items-center justify-center bg-white"><Loader2 className="animate-spin text-primary" /></div>
 
   return (
     <div className="max-w-[1600px] mx-auto space-y-10 pb-40 text-left pt-2 px-1">
@@ -158,7 +161,7 @@ function VacancyFormWrapper() {
         <div className="flex items-center gap-6">
            <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-2xl border bg-white h-12 w-12 shadow-sm shrink-0"><ChevronLeft className="h-6 w-6" /></Button>
            <div className="text-left">
-              <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tighter antialiased leading-none uppercase">{id ? 'Modify Vacancy' : 'New Ingestion Node'}</h1>
+              <h1 className="text-3xl md:text-5xl font-black text-[#0F172A] tracking-tighter leading-none uppercase">{id ? 'Modify Vacancy' : 'New Ingestion Node'}</h1>
               <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-widest mt-2">Strategic Recruitment Governance</p>
            </div>
         </div>
