@@ -195,11 +195,10 @@ export default function SidebarNav({
                     <TooltipTrigger asChild>{navItem}</TooltipTrigger>
                     <TooltipContent
                       side="right"
-                      sideOffset={16}
-                      className="rounded-xl border border-slate-100 bg-white px-3 py-2 text-[11px] font-black text-[#0F172A] shadow-2xl tracking-widest"
-                    >
-                      {item.label}
-                    </TooltipContent>
+                      align="center"
+                      hidden={state !== "collapsed" || isMobile}
+                      {...tooltip}
+                    />
                   </Tooltip>
                 );
               })}

@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useState } from "react"
@@ -41,7 +40,7 @@ export default function DailyQuizResultsAudit() {
       })
       .sort((a, b) => {
          const tA = new Date(a.timestamp || 0).getTime();
-         const tB = new Date(b.timestamp || 0).getTime();
+         const tB = b.updatedAt?.seconds ? b.updatedAt.seconds * 1000 : new Date(b.timestamp || 0).getTime();
          return tB - tA;
       });
   }, [rawResults, searchTerm]);
