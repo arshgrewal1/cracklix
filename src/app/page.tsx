@@ -19,12 +19,11 @@ import { Zap, Clock, Trophy, ChevronRight, Flame, ShieldCheck } from "lucide-rea
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { collection, query, where, limit } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Premium Hub v500.3.
- * UPDATED: Today's Challenge redesigned for compact mobile premium UX.
+ * @fileOverview Institutional Premium Hub v500.4.
+ * REDESIGNED: Today's Challenge compact premium mobile layout (Duolingo/Apple style).
  */
 export default function HomePage() {
   const { user } = useUser();
@@ -55,7 +54,7 @@ export default function HomePage() {
                whileInView={{ opacity: 1, y: 0 }}
                viewport={{ once: true }}
                transition={{ duration: 0.5 }}
-               className="bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#1E293B] rounded-[24px] p-5 md:p-12 border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.35)] relative overflow-hidden group transition-all duration-500 text-center min-h-[340px] flex flex-col justify-center"
+               className="bg-gradient-to-br from-[#0F172A] via-[#111827] to-[#1E293B] rounded-[24px] p-5 border border-white/10 shadow-[0_24px_60px_rgba(0,0,0,0.35)] relative overflow-hidden group transition-all duration-500 text-center min-h-[340px] flex flex-col justify-center"
             >
                {/* Watermark - 40% smaller and 4% opacity */}
                <div className="absolute top-4 right-4 p-0 opacity-[0.04] pointer-events-none group-hover:scale-110 transition-transform duration-1000">
@@ -69,7 +68,7 @@ export default function HomePage() {
                   <div className="space-y-0">
                      <div className="flex items-center justify-center gap-2">
                         <Flame className="h-6 w-6 text-orange-500 fill-current animate-pulse" />
-                        <h2 className="text-[26px] font-[700] tracking-tight text-white antialiased whitespace-nowrap">
+                        <h2 className="text-[26px] font-[700] tracking-tight text-white antialiased whitespace-nowrap leading-tight">
                            Today's Challenge
                         </h2>
                      </div>
