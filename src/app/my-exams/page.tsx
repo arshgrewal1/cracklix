@@ -31,7 +31,8 @@ import {
   FileStack,
   Layers,
   Settings,
-  Loader2
+  Loader2,
+  Landmark
 } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -54,8 +55,8 @@ import { useToast } from "@/hooks/use-toast"
 import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
- * @fileOverview World-Class Personalized Dashboard v3.2.
- * FIXED: Added missing DialogFooter to imports to resolve ReferenceError.
+ * @fileOverview World-Class Personalized Dashboard v3.3.
+ * FIXED: Included Landmark in lucide-react imports.
  */
 
 const MODAL_CATEGORIES = [

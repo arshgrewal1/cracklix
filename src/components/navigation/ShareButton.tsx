@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useMemo, useState } from "react";
@@ -27,8 +26,8 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * @fileOverview Premium Social Share Hub v4.1 [Hardened].
- * FIXED: Implemented safety check for Clipboard API to prevent DOMException in restricted frames.
+ * @fileOverview Premium Social Share Hub v4.2 [Security Hardened].
+ * FIXED: Implemented resilient clipboard fallback for permission-restricted environments.
  */
 export default function ShareButton({ 
   className = "", 
@@ -81,7 +80,6 @@ Join thousands of Punjab aspirants preparing smarter every day.`;
     setIsSharing(true);
 
     try {
-      // MOBILE PROTOCOL: Web Share API (Text + URL)
       if (navigator.share) {
         await navigator.share({
           title: 'Cracklix | Punjab Exam Prep',
@@ -89,7 +87,6 @@ Join thousands of Punjab aspirants preparing smarter every day.`;
         });
         toast({ title: "Shared successfully" });
       } else {
-        // DESKTOP FALLBACK: Show Premium Modal
         setIsShareDialogOpen(true);
       }
     } catch (err: any) {
@@ -102,30 +99,74 @@ Join thousands of Punjab aspirants preparing smarter every day.`;
   };
 
   const copyToClipboard = async () => {
-    if (!navigator.clipboard) {
-       toast({ variant: "destructive", title: "Security barrier", description: "Clipboard access is restricted by your browser." });
-       return;
-    }
-
     try {
+      if (!navigator.clipboard) {
+         throw new Error('NOT_SUPPORTED');
+      }
       await navigator.clipboard.writeText(installUrl);
       toast({ title: "Link copied!", description: "Invitation link saved to registry." });
     } catch (e) {
-      toast({ variant: "destructive", title: "Copy failed" });
+      console.warn('[Clipboard] Native API failed, attempting fallback.', e);
+      // Fallback method for restricted environments (iframes/WebView without explicit policy)
+      const textArea = document.createElement("textarea");
+      textArea.value = installUrl;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      textArea.style.top = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+           toast({ title: "Link copied!", description: "Invitation link saved to registry." });
+        } else {
+           throw new Error('EXEC_COMMAND_FAIL');
+        }
+      } catch (err) {
+        toast({ 
+           variant: "destructive", 
+           title: "Action blocked", 
+           description: "Browser policy prevents automated copying. Please share directly via WhatsApp." 
+        });
+      }
+      document.body.removeChild(textArea);
     }
   };
   
   const copyMessageToClipboard = async () => {
-    if (!navigator.clipboard) {
-       toast({ variant: "destructive", title: "Security barrier", description: "Clipboard access is restricted by your browser." });
-       return;
-    }
-
     try {
+      if (!navigator.clipboard) {
+         throw new Error('NOT_SUPPORTED');
+      }
       await navigator.clipboard.writeText(shareMessage);
       toast({ title: "Message copied!", description: "Invitation text saved to registry." });
     } catch (e) {
-      toast({ variant: "destructive", title: "Copy failed" });
+      const textArea = document.createElement("textarea");
+      textArea.value = shareMessage;
+      textArea.style.position = "fixed";
+      textArea.style.left = "-9999px";
+      textArea.style.top = "0";
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+           toast({ title: "Message copied!", description: "Invitation text saved to registry." });
+        } else {
+           throw new Error('EXEC_COMMAND_FAIL');
+        }
+      } catch (err) {
+        toast({ 
+           variant: "destructive", 
+           title: "Action blocked", 
+           description: "Security policy denied clipboard access. Try WhatsApp share." 
+        });
+      }
+      document.body.removeChild(textArea);
     }
   };
 
