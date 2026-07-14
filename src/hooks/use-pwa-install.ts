@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 /**
- * @fileOverview Universal PWA Hook v3.4 [PRODUCTION READY].
- * FIXED: Optimized state polling and event capturing for maximum reliability.
+ * @fileOverview Universal PWA Hook v4.0 [PRODUCTION HARDENED].
+ * FIXED: Implemented high-frequency polling and handshake protocol for One-Click install.
  */
 export function usePWAInstall() {
   const [isInstalled, setIsInstalled] = useState(false);
@@ -14,11 +14,13 @@ export function usePWAInstall() {
   const checkStatus = useCallback(() => {
     if (typeof window === 'undefined') return;
     
+    // Check if app is running in standalone mode
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
                         (window.navigator as any).standalone === true;
     
     setIsInstalled(isStandalone);
     
+    // Check if the prompt is already stashed in global window
     if ((window as any).deferredPrompt) {
       setCanInstall(true);
     }
@@ -29,14 +31,15 @@ export function usePWAInstall() {
     checkStatus();
 
     const handlePrompt = (e: any) => {
-      console.log('[PWA] Capture: beforeinstallprompt');
+      console.log('[PWA_SYNC] Installation prompt captured.');
       e.preventDefault();
+      // Stash event for one-click trigger
       (window as any).deferredPrompt = e;
       setCanInstall(true);
     };
 
     const handleAppInstalled = () => {
-      console.log('[PWA] Registry: App Installed');
+      console.log('[PWA_SYNC] Registry Update: App Installed.');
       setIsInstalled(true);
       setCanInstall(false);
       (window as any).deferredPrompt = null;
@@ -45,38 +48,46 @@ export function usePWAInstall() {
     window.addEventListener('beforeinstallprompt', handlePrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
     
-    // Interval check for browsers that might trigger event before hook mount
+    // HEALER: Poll every 500ms to catch the event if listener missed it
     const poll = setInterval(() => {
       if ((window as any).deferredPrompt && !canInstall) {
+        console.log('[PWA_SYNC] Handshake: Prompt found in global memory.');
         setCanInstall(true);
       }
-    }, 1000);
+      
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                          (window.navigator as any).standalone === true;
+      if (isStandalone !== isInstalled) setIsInstalled(isStandalone);
+    }, 500);
 
     return () => {
        window.removeEventListener('beforeinstallprompt', handlePrompt);
        window.removeEventListener('appinstalled', handleAppInstalled);
        clearInterval(poll);
     };
-  }, [checkStatus, canInstall]);
+  }, [checkStatus, canInstall, isInstalled]);
 
   const installApp = async () => {
     const prompt = (window as any).deferredPrompt;
     
     if (!prompt) {
-      // Fallback: If prompt lost but user wants to install, redirect to guide
+      console.warn('[PWA_SYNC] Installation prompt not found. Redirecting to setup guide.');
       window.location.href = '/install';
       return;
     }
 
     try {
+      console.log('[PWA_SYNC] Initializing One-Click Install...');
       await prompt.prompt();
       const { outcome } = await prompt.userChoice;
+      console.log(`[PWA_SYNC] Outcome: ${outcome}`);
+      
       if (outcome === 'accepted') {
         (window as any).deferredPrompt = null;
         setCanInstall(false);
       }
     } catch (err) {
-      console.error('[PWA_INSTALL_ERROR]:', err);
+      console.error('[PWA_SYNC] Critical install failure:', err);
     }
   };
 
