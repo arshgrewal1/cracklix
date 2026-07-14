@@ -29,6 +29,8 @@ service cloud.firestore {
     match /success_stories/{storyId} { allow read: if true; allow write: if isAdmin(); }
     match /settings/{sId} { allow read: if true; allow write: if isAdmin(); }
     match /passes/{pId} { allow read: if true; allow write: if isAdmin(); }
+    match /vacancies/{vId} { allow read: if true; allow write: if isAdmin(); }
+    match /vacancy_categories/{vId} { allow read: if true; allow write: if isAdmin(); }
 
     // --- 2. Aspirant Profiles ---
     match /users/{userId} {
@@ -73,6 +75,10 @@ service cloud.firestore {
     
     match /audit_logs/{logId} {
       allow read, write: if isAdmin();
+    }
+    
+    match /vacancy_analytics/{id} {
+      allow read, create, update: if true;
     }
   }
 }

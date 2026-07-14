@@ -37,7 +37,8 @@ import {
   FileJson,
   Zap,
   Flame,
-  BarChart3
+  BarChart3,
+  Megaphone
 } from "lucide-react";
 
 import {
@@ -56,6 +57,13 @@ const NAV_GROUPS = [
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "Bulk Ingestion", href: "/admin/bulk-import", icon: UploadCloud },
       { label: "Review Center", href: "/admin/qa", icon: Activity },
+    ],
+  },
+  {
+    label: "Recruitment Node",
+    items: [
+      { label: "Vacancy Hub", href: "/admin/vacancies", icon: Megaphone },
+      { label: "Add Vacancy", href: "/admin/vacancies/add", icon: Plus },
     ],
   },
   {

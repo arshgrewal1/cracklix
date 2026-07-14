@@ -2,89 +2,99 @@
 
 import React, { useMemo } from 'react';
 import { useCollection, useFirestore } from '@/firebase';
-import { collection, query, where, limit } from 'firebase/firestore';
-import { Calendar, ChevronRight, Bell, Landmark } from 'lucide-react';
+import { collection, query, where, limit, orderBy } from 'firebase/firestore';
+import { Calendar, ChevronRight, Bell, Landmark, Zap, ArrowRight, ShieldCheck, Target } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { AuthorityLogo } from '@/lib/exam-icons';
+import { motion } from 'framer-motion';
 
 /**
- * @fileOverview Institutional Vacancy Node v1.0.
- * Fetches latest recruitment dates from the exam calendar registry.
+ * @fileOverview Institutional Vacancy Node v2.0.
+ * Refined homepage section for official Punjab recruitment discovery.
  */
 export default function LatestVacancy() {
   const db = useFirestore();
 
-  // Fetch latest 4 published vacancies from the calendar
   const vacanciesQuery = useMemo(() => {
     if (!db) return null;
     return query(
-      collection(db, "exam_calendar"),
-      where("published", "==", true),
+      collection(db, "vacancies"),
+      where("status", "==", "PUBLISHED"),
+      where("showOnHomepage", "==", true),
+      orderBy("publishedAt", "desc"),
       limit(4)
     );
   }, [db]);
 
-  const { data: rawVacancies, loading } = useCollection<any>(vacanciesQuery);
-
-  // Client-side sort to ensure stability without composite index
-  const vacancies = useMemo(() => {
-    if (!rawVacancies) return [];
-    return [...rawVacancies].sort((a, b) => {
-      const timeA = a.createdAt?.seconds || 0;
-      const timeB = b.createdAt?.seconds || 0;
-      return timeB - timeA;
-    });
-  }, [rawVacancies]);
+  const { data: vacancies, loading } = useCollection<any>(vacanciesQuery);
 
   return (
-    <section className="py-10 md:py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <Card className="border-none shadow-2xl rounded-[2.5rem] bg-white overflow-hidden border border-slate-100">
-           <CardHeader className="p-6 md:p-10 border-b border-slate-50 bg-slate-50/30 flex flex-row items-center justify-between">
-              <div className="flex items-center gap-4">
-                 <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center text-primary shadow-inner">
-                    <Bell className="h-5 w-5" />
-                 </div>
-                 <div className="text-left">
-                    <CardTitle className="text-xl md:text-2xl font-black text-[#0F172A]">Latest Vacancies</CardTitle>
-                    <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">Punjab Government Job Alerts</p>
-                 </div>
+    <section className="py-12 md:py-24 bg-white">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 space-y-12">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1">
+           <div className="space-y-3 text-left">
+              <div className="flex items-center gap-2">
+                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                 <span className="text-[10px] md:text-xs font-black text-emerald-600 tracking-[0.3em] uppercase">Registry Live Sync</span>
               </div>
-              <Link href="/exam-calendar" className="text-[10px] font-black uppercase text-primary hover:underline">View All</Link>
-           </CardHeader>
-           <CardContent className="p-4 md:p-6 space-y-4">
-              {loading ? (
-                 Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl bg-slate-50" />)
-              ) : vacancies && vacancies.length > 0 ? (
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                   {vacancies.map((v) => (
-                      <Link key={v.id} href="/exam-calendar">
-                         <div className="p-5 rounded-2xl border border-slate-50 bg-slate-50/50 hover:bg-white hover:shadow-lg transition-all group flex items-center justify-between">
-                            <div className="flex items-center gap-4 min-w-0 flex-1">
-                               <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shrink-0 shadow-inner", v.color || "bg-primary")}>
-                                  <Landmark className="h-6 w-6 text-white" />
-                               </div>
-                               <div className="min-w-0 text-left">
-                                  <h4 className="font-bold text-[#0F172A] truncate text-sm md:text-base">{v.post}</h4>
-                                  <div className="flex flex-wrap items-center gap-3 mt-1">
-                                     <Badge variant="outline" className="bg-white border-slate-200 text-[8px] font-bold text-slate-400 px-2 rounded-lg">{v.board}</Badge>
-                                     <span className="text-[10px] font-bold text-primary flex items-center gap-1"><Calendar className="h-3 w-3" /> {v.date}</span>
-                                  </div>
-                                </div>
-                            </div>
-                            <ChevronRight className="h-5 w-5 text-slate-200 group-hover:text-primary transition-all" />
-                         </div>
-                      </Link>
-                   ))}
-                 </div>
-              ) : (
-                 <div className="py-10 text-center opacity-30 italic font-medium">No active vacancies in registry.</div>
-              )}
-           </CardContent>
-        </Card>
+              <h2 className="text-3xl md:text-6xl font-black tracking-tighter text-[#0F172A] antialiased">
+                Latest Vacancies
+              </h2>
+              <p className="text-slate-500 font-medium text-sm md:text-xl max-w-xl leading-snug">
+                Official notifications and direct apply nodes for state recruitments.
+              </p>
+           </div>
+           <Button asChild variant="ghost" className="text-primary font-black text-xs md:text-sm tracking-widest uppercase hover:underline flex items-center gap-2 group shrink-0">
+              <Link href="/vacancies">Open Registry <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" /></Link>
+           </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
+           {loading ? (
+              Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-48 md:h-64 w-full rounded-[2.5rem] bg-slate-50" />)
+           ) : vacancies && vacancies.length > 0 ? (
+              vacancies.map((v, idx) => (
+                <motion.div key={v.id} initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: idx * 0.1 }}>
+                  <Link href={`/vacancies/${v.id}`}>
+                    <Card className="border-none shadow-xl hover:shadow-5xl transition-all duration-500 rounded-[2.5rem] bg-white group overflow-hidden flex flex-col text-left border border-slate-100 p-6 md:p-12 relative">
+                       <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:rotate-12 transition-transform duration-1000"><Landmark className="h-44 w-44" /></div>
+                       
+                       <div className="flex justify-between items-start mb-8 w-full relative z-10">
+                          <AuthorityLogo boardId={v.board} size="md" className="h-16 w-16 md:h-24 md:w-24 shadow-2xl border-4 border-white bg-slate-50" />
+                          <div className="flex flex-col items-end gap-2">
+                             {v.isBreaking && <Badge className="bg-rose-500 text-white border-none px-3 py-1 font-black text-[9px] uppercase animate-pulse">Breaking</Badge>}
+                             <span className="text-[10px] md:text-[11px] font-black text-slate-300 uppercase tracking-widest tabular-nums">LAST: {new Date(v.lastDate).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}</span>
+                          </div>
+                       </div>
+
+                       <div className="space-y-4 flex-1 relative z-10">
+                          <h3 className="text-xl md:text-3xl font-black text-[#0F172A] group-hover:text-primary transition-colors tracking-tight leading-tight line-clamp-2 uppercase">{v.title}</h3>
+                          <p className="text-[9px] md:text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">{v.department}</p>
+                          
+                          <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-50">
+                             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                                <Zap className="h-4 w-4 text-primary" /> {v.totalPosts} Posts
+                             </div>
+                             <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                                <Target className="h-4 w-4 text-emerald-500" /> {v.education?.split(' ')[0]}
+                             </div>
+                          </div>
+                       </div>
+                    </Card>
+                  </Link>
+                </motion.div>
+              ))
+           ) : (
+              <div className="col-span-full py-20 text-center opacity-30 italic font-black uppercase text-xl md:text-3xl tracking-tighter flex flex-col items-center gap-6">
+                 <ShieldCheck className="h-16 w-16 text-slate-200" />
+                 Registry Normalized
+              </div>
+           )}
+        </div>
       </div>
     </section>
   );

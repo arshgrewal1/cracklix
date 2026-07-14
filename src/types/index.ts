@@ -2,7 +2,7 @@ export type Difficulty = 'Easy' | 'Medium' | 'Hard' | 'Expert' | 'Mixed';
 export type UserRole = 'SUPER_ADMIN' | 'ADMIN' | 'EDITOR' | 'REVIEWER' | 'CONTENT_MANAGER' | 'STUDENT';
 export type MockType = 'FULL' | 'SUBJECT' | 'SECTIONAL' | 'PYQ' | 'CA_QUIZ' | 'PRACTICE_SET' | 'DAILY_CHALLENGE';
 export type QuestionType = 'MCQ' | 'MULTIPLE_CORRECT' | 'TRUE_FALSE' | 'FILL_BLANK' | 'ASSERTION_REASON' | 'STATEMENT_BASED' | 'PARAGRAPH_BASED' | 'MATCH_FOLLOWING' | 'SEQUENCE' | 'IMAGE_BASED' | 'TABLE_BASED' | 'CASE_STUDY' | 'AUDIO_BASED' | 'VIDEO_BASED';
-export type ContentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_CHANGES' | 'PUBLISHED' | 'ARCHIVED' | 'LOCKED' | 'SCHEDULED';
+export type ContentStatus = 'DRAFT' | 'PENDING_REVIEW' | 'APPROVED' | 'REJECTED' | 'NEEDS_CHANGES' | 'PUBLISHED' | 'ARCHIVED' | 'LOCKED' | 'SCHEDULED' | 'EXPIRED';
 export type QuestionLifecycleStatus = 'UNUSED' | 'USED' | 'LOCKED' | 'DUPLICATE' | 'REPEATED';
 export type Gender = 'Male' | 'Female' | 'Other';
 
@@ -131,6 +131,7 @@ export interface UserProfile {
   subscriptions?: string[];
   pinnedExams?: string[];
   unlockedMocks?: string[];
+  savedVacancies?: string[];
   deviceLock?: DeviceLock;
   deviceCount?: number;
   activeDeviceId?: string;
@@ -346,6 +347,51 @@ export interface CurrentAffairHubItem {
   quizId?: string;
   updatedAt?: any;
   createdAt?: any;
+}
+
+export interface Vacancy {
+  id: string;
+  title: string;
+  department: string;
+  board: string;
+  category: string;
+  adNumber: string;
+  type: 'Government' | 'Contract' | 'Private';
+  postName: string;
+  totalPosts: string;
+  salary: string;
+  ageLimit: string;
+  education: string;
+  experience: string;
+  selectionProcess: string;
+  applicationFee: string;
+  officialWebsite: string;
+  notificationPdfUrl?: string;
+  applyLink: string;
+  logoUrl?: string;
+  bannerUrl?: string;
+  state: string;
+  district: string;
+  startDate: string;
+  lastDate: string;
+  examDate?: string;
+  resultDate?: string;
+  admitCardDate?: string;
+  status: ContentStatus;
+  isFeatured: boolean;
+  isBreaking: boolean;
+  showOnHomepage: boolean;
+  sendNotification: boolean;
+  priority: number;
+  tags: string[];
+  seoTitle?: string;
+  seoDescription?: string;
+  views: number;
+  clicks: number;
+  publishedAt?: any;
+  createdAt: any;
+  updatedAt: any;
+  faq?: { q: string, a: string }[];
 }
 
 export interface ExamSection {

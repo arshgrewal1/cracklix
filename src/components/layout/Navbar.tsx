@@ -36,8 +36,8 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v77.0.
- * UPDATED: Implemented exact centering for navigation links using absolute positioning.
+ * @fileOverview Cracklix Navigation Hub v78.0.
+ * UPDATED: Integrated Vacancies node to centered desktop navigation.
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -129,9 +129,9 @@ export default function Navbar() {
             <div className="absolute left-1/2 -translate-x-1/2 hidden lg:flex items-center gap-6 xl:gap-8 h-full">
               <NavLink href="/" label="Home" active={pathname === '/'} />
               <NavLink href="/exams" label="Mock Tests" active={pathname === '/exams'} />
+              <NavLink href="/vacancies" label="Vacancies" active={pathname === '/vacancies'} />
               <NavLink href="/pyqs" label="Old Papers" active={pathname === '/pyqs'} />
-              <NavLink href="/current-affairs" label="Current Affairs" active={pathname === '/current-affairs'} />
-              <NavLink href="/install" label="Install App" active={pathname === '/install'} />
+              <NavLink href="/current-affairs" label="CA Center" active={pathname === '/current-affairs'} />
             </div>
 
             {/* RIGHT BLOCK: ELITE ACCESS | SEARCH | PROFILE */}
