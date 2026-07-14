@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { 
   ChevronRight, 
@@ -10,27 +10,33 @@ import {
   BookOpen,
   Bookmark,
   Lock,
-  ShieldCheck
+  ShieldCheck,
+  RefreshCw
 } from "lucide-react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useCollection, useFirestore, useUser } from "@/firebase";
-import { collection, query, where, limit } from "firebase/firestore";
+import { collection, query, where, limit, doc, updateDoc, arrayUnion, arrayRemove, serverTimestamp } from "firebase/firestore";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AuthorityLogo } from "@/lib/exam-icons";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 /**
- * @fileOverview Institutional Popular Exams Hub v45.0.
- * UPDATED: Redesigned to match high-fidelity screenshot with 2-column grid and large logos.
- * UPDATED: Removed all uppercase styling as per user request.
+ * @fileOverview Institutional Popular Exams Hub v46.0.
+ * FIXED: Wired bookmark (save) button with live Firestore registry sync.
  */
 export default function PopularExams() {
   const db = useFirestore();
-  const { profile } = useUser();
+  const { user, profile } = useUser();
+  const { toast } = useToast();
+  const router = useRouter();
   
+  const [pinningId, setPinningId] = useState<string | null>(null);
+
   const examsQuery = useMemo(() => {
     if (!db) return null;
     return query(collection(db, "exams"), where("isTrending", "==", true), limit(4));
@@ -44,6 +50,42 @@ export default function PopularExams() {
     if (profile.role === 'ADMIN' || profile.role === 'SUPER_ADMIN') return true;
     return profile.passStatus === 'active';
   }, [profile]);
+
+  const handleTogglePin = async (e: React.MouseEvent, examId: string) => {
+    e.preventDefault(); 
+    e.stopPropagation();
+    
+    if (!user) {
+      router.push('/login');
+      return;
+    }
+
+    if (!db || pinningId) return;
+    
+    setPinningId(examId);
+    const isPinned = profile?.pinnedExams?.includes(examId);
+    const userRef = doc(db, "users", user.uid);
+    
+    try {
+      if (isPinned) {
+        await updateDoc(userRef, { 
+          pinnedExams: arrayRemove(examId), 
+          updatedAt: serverTimestamp() 
+        });
+        toast({ title: "Removed from list" });
+      } else {
+        await updateDoc(userRef, { 
+          pinnedExams: arrayUnion(examId), 
+          updatedAt: serverTimestamp() 
+        });
+        toast({ title: "Added to list" });
+      }
+    } catch (err) {
+      toast({ variant: "destructive", title: "Sync failed" });
+    } finally {
+      setPinningId(null);
+    }
+  };
 
   return (
     <section className="py-12 md:py-24 bg-white">
@@ -74,6 +116,7 @@ export default function PopularExams() {
               const board = boards?.find((b: any) => b.id === exam.boardId || b.abbreviation === exam.boardId);
               const isPremium = exam.accessLevel === 'PREMIUM';
               const locked = isPremium && !isPassActive;
+              const isPinned = profile?.pinnedExams?.includes(exam.id);
 
               return (
                  <motion.div 
@@ -140,8 +183,21 @@ export default function PopularExams() {
                              </Link>
                           </Button>
                           
-                          <button className="h-14 w-14 md:h-20 md:w-20 rounded-[1.5rem] md:rounded-[2.5rem] border-2 border-slate-100 bg-white flex items-center justify-center text-slate-300 hover:text-primary hover:border-primary transition-all active:scale-90 shadow-sm">
-                             <Bookmark className="h-6 w-6 md:h-8 md:w-8" />
+                          <button 
+                            onClick={(e) => handleTogglePin(e, exam.id)}
+                            disabled={pinningId === exam.id}
+                            className={cn(
+                              "h-14 w-14 md:h-20 md:w-20 rounded-[1.5rem] md:rounded-[2.5rem] border-2 transition-all active:scale-90 shadow-sm flex items-center justify-center",
+                              isPinned 
+                                ? "bg-primary border-primary text-white shadow-lg" 
+                                : "bg-white border-slate-100 text-slate-300 hover:text-primary hover:border-primary"
+                            )}
+                          >
+                             {pinningId === exam.id ? (
+                               <RefreshCw className="h-6 w-6 md:h-8 md:w-8 animate-spin" />
+                             ) : (
+                               <Bookmark className={cn("h-6 w-6 md:h-8 md:w-8", isPinned && "fill-current")} />
+                             )}
                           </button>
                        </div>
                     </Card>
