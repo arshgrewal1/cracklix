@@ -24,8 +24,8 @@ import { useDoc, useFirestore } from "@/firebase";
 import { doc } from "firebase/firestore";
 
 /**
- * @fileOverview Institutional Footer Hub v22.0.
- * UPDATED: Synchronized with dynamic system settings.
+ * @fileOverview Institutional Footer Hub v23.0.
+ * FIXED: Added significant bottom padding on mobile to prevent overlap with fixed MobileNav.
  */
 export default function Footer() {
   const db = useFirestore();
@@ -110,8 +110,8 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-white/5 bg-black/20 py-6">
-        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div className="border-t border-white/5 bg-black/20 pt-8 pb-28 md:py-8">
+        <div className="mx-auto max-w-[1440px] px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-6">
           <div className="flex items-center gap-4">
              <p className="text-[12px] text-slate-500 font-bold">© {currentYear} Cracklix</p>
              <Badge variant="outline" className="border-white/10 text-slate-500 text-[10px] font-bold">V{PLATFORM_VERSION.version}</Badge>
