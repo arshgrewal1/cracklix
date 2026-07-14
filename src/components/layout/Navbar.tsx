@@ -9,6 +9,7 @@ import {
   ShieldCheck,
   Gem,
   Settings,
+  ChevronLeft
 } from "lucide-react";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -36,8 +37,7 @@ import { Button } from "@/components/ui/button";
 const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
 
 /**
- * @fileOverview Cracklix Navigation Hub v80.0 [Hardened].
- * FIXED: Standardized Title Case and refined mobile responsiveness.
+ * @fileOverview Cracklix Navigation Hub v81.0 [Admin Switch Integrated].
  */
 export default function Navbar() {
   const [mounted, setMounted] = useState(false);
@@ -137,6 +137,12 @@ export default function Navbar() {
 
             {/* RIGHT BLOCK: ELITE ACCESS | SEARCH | PROFILE */}
             <div className="flex items-center gap-2 md:gap-4 lg:gap-6 z-10">
+              {isAdmin && (
+                <Button asChild variant="dark" className="hidden xl:flex h-10 px-6 rounded-xl gap-2 active:scale-95 transition-all text-[10px] font-black uppercase tracking-widest bg-[#0F172A] border-none shadow-lg">
+                  <Link href="/admin"><ShieldCheck className="h-4 w-4 text-primary" /> Return to Admin</Link>
+                </Button>
+              )}
+
               {profile?.passStatus === 'active' && timeLeft && (
                  <div className="hidden lg:flex flex-col items-end shrink-0">
                     <span className="text-[9px] font-bold text-emerald-600 leading-none">Elite Access</span>

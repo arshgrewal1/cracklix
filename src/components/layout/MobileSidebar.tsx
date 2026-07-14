@@ -13,7 +13,8 @@ import {
   BookOpen,
   X,
   Award,
-  CreditCard
+  CreditCard,
+  ShieldCheck
 } from "lucide-react";
 
 import Link from "next/link";
@@ -29,9 +30,10 @@ import ShareButton from "@/components/navigation/ShareButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
+const SUPER_ADMIN_WHITELIST = ['arshdeepgrewal1122@gmail.com'];
+
 /**
- * @fileOverview Mobile Sidebar v72.0.
- * UPDATED: Centered Logo and increased scale for improved brand prominence.
+ * @fileOverview Mobile Sidebar v73.0 [Admin Access Integrated].
  */
 export default function MobileSidebar({
   onClose,
@@ -59,6 +61,13 @@ export default function MobileSidebar({
       console.error('[MOBILE_SIDEBAR_LOGOUT_FAILURE]:', error);
     }
   };
+
+  const isAdmin = React.useMemo(() => {
+    if (!user || !profile) return false;
+    const userEmail = user?.email?.toLowerCase();
+    const isFounder = userEmail && SUPER_ADMIN_WHITELIST.includes(userEmail);
+    return profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN' || isFounder;
+  }, [user, profile]);
 
   const mainItems = [
     { label: "Home", href: "/", icon: Home },
@@ -137,6 +146,17 @@ export default function MobileSidebar({
           </p>
 
           <div className="space-y-0.5">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                onClick={onClose}
+                className="flex h-12 items-center gap-4 rounded-xl px-4 transition-all active:scale-[0.98] bg-[#0F172A] text-white shadow-lg mb-2"
+              >
+                <ShieldCheck className="h-5 w-5 shrink-0 text-primary" />
+                <span className="font-bold text-[14px] tracking-tight">Admin Console</span>
+              </Link>
+            )}
+
             {mainItems.map((item) => {
               const isActive = pathname === item.href;
 

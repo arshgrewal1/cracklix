@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -51,7 +50,7 @@ import {
 } from "@/components/ui/tooltip";
 
 /**
- * Admin Sidebar Navigation v3.7 [Simplified Language].
+ * Admin Sidebar Navigation v3.8 [Student View Integrated].
  */
 
 const NAV_GROUPS = [
@@ -59,6 +58,7 @@ const NAV_GROUPS = [
     label: "Main",
     items: [
       { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+      { label: "Student View", href: "/", icon: GraduationCap },
       { label: "Question Bank", href: "/admin/mcq-bank", icon: Database },
       { label: "CA Bank", href: "/admin/current-affairs/bank", icon: FileJson },
       { label: "Bulk Upload", href: "/admin/bulk-import", icon: UploadCloud },
