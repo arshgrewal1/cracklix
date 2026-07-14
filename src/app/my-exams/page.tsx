@@ -1,4 +1,3 @@
-
 "use client"
 
 import React, { useMemo, useEffect, useState } from "react"
@@ -45,7 +44,8 @@ import {
   DialogHeader, 
   DialogTitle, 
   DialogDescription,
-  DialogTrigger
+  DialogTrigger,
+  DialogFooter
 } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 import { motion, AnimatePresence } from "framer-motion"
@@ -55,7 +55,7 @@ import { AuthorityLogo } from "@/lib/exam-icons"
 
 /**
  * @fileOverview World-Class Personalized Dashboard v3.2.
- * FIXED: Imported missing Loader2 to resolve runtime ReferenceError.
+ * FIXED: Added missing DialogFooter to imports to resolve ReferenceError.
  */
 
 const MODAL_CATEGORIES = [
@@ -333,7 +333,7 @@ export default function MyExamsPage() {
         <section className="space-y-10 md:space-y-14">
            {examsLoading ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
-                 {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-80 w-full rounded-[2.5rem] bg-white" />)}
+                 {Array.from({ length: 3 }).map((_, i) => <Skeleton className="h-80 w-full rounded-[2.5rem] bg-white" />)}
               </div>
            ) : pinnedExams.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10">
